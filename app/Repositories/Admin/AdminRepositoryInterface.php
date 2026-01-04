@@ -1,0 +1,22 @@
+<?php
+namespace App\Repositories\Admin;
+
+use App\Models\Job;
+use App\Models\Treatment;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
+use App\Lib\StrUtil;
+use App\Lib\FileUtil;
+use App\Http\Requests\Shop\JobRequest;
+use Illuminate\Http\Request;
+use App\Consts\ShopConsts;
+use Illuminate\Support\Facades\Auth;
+
+interface AdminRepositoryInterface
+{
+
+    public function store(Request $request,$id);
+
+}
+
+

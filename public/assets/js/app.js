@@ -1,0 +1,86 @@
+document.addEventListener('DOMContentLoaded', function() {
+    // --- 1. 要素の取得 ---
+    const sideMenu = document.getElementById('side-menu');
+    const menuOverlay = document.getElementById('menu-overlay');
+    const menuBtn = document.getElementById('btn-header-menu');
+    
+    // ポップアップ要素
+    const taskPopup = document.getElementById('header-task-popup');
+    const notiPopup = document.getElementById('header-notification-popup');
+
+    // --- 2. サイドバー開閉ロジック ---
+    const openSidebar = () => {
+        if (sideMenu) sideMenu.classList.add('open');
+        if (menuOverlay) menuOverlay.classList.add('show');
+        document.body.style.overflow = 'hidden'; 
+    };
+
+    const closeSidebar = () => {
+        if (sideMenu) sideMenu.classList.remove('open');
+        if (menuOverlay) menuOverlay.classList.remove('show');
+        document.body.style.overflow = ''; 
+    };
+
+    if (menuBtn) {
+        menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openSidebar();
+        });
+    }
+
+    if (menuOverlay) {
+        menuOverlay.addEventListener('click', closeSidebar);
+    }
+
+    // --- 3. ポップアップトグル関数 ---
+    function togglePopup(targetPopup, otherPopup) {
+        if (!targetPopup) return;
+        
+        const isVisible = targetPopup.style.display === 'block';
+        
+        // 他のポップアップを閉じる
+        if (otherPopup) otherPopup.style.display = 'none';
+        
+        // ターゲットの表示を切り替え
+        targetPopup.style.display = isVisible ? 'none' : 'block';
+    }
+
+    // タスクボタン
+    const taskBtn = document.getElementById('btn-header-task');
+    if (taskBtn) {
+        taskBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            togglePopup(taskPopup, notiPopup);
+        });
+    }
+
+    // 通知ボタン
+    const notiBtn = document.getElementById('btn-header-notification');
+    if (notiBtn) {
+        notiBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            togglePopup(notiPopup, taskPopup);
+        });
+    }
+
+    // --- 4. 画面外クリックですべて閉じる ---
+    window.addEventListener('click', function(e) {
+        // ポップアップの中身自体をクリックした場合は閉じない
+        if (e.target.closest('.stop-propagation')) return;
+
+        // すべてのポップアップを非表示
+        if (taskPopup) taskPopup.style.display = 'none';
+        if (notiPopup) notiPopup.style.display = 'none';
+        
+        // サイドバーを閉じる (サイドバーの外側クリックなら閉じない)
+        if (sideMenu && sideMenu.classList.contains('open') && !e.target.closest('#side-menu')) {
+            closeSidebar();
+        }
+
+        // FABを閉じる
+        const fabContainer = document.getElementById('fab-container');
+        if (fabContainer && !e.target.closest('#fab-container')) {
+            fabContainer.classList.remove('active');
+        }
+    });
+});

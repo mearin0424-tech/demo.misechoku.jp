@@ -1,0 +1,7 @@
+.profile-hero { position: relative; height: 250px; }
+.hero-img { width: 100%; height: 100%; object-fit: cover; }
+.hero-overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 20px; background: linear-gradient(to top, #120505, transparent); }
+.shop-name { color: #fff; font-size: 1.5rem; }
+.edit-fab { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #D4AF37; border: 1px solid #D4AF37; }
+.shop-word-bubble::after { content: ''; position: absolute; top: 50%; left: -10px; transform: translateY(-50%); border-width: 10px 10px 10px 0; border-style: solid; border-color: transparent var(--color-sub) transparent transparent; }
+.btn-gold { background: #D4AF37; color: #000; text-decoration: none; }

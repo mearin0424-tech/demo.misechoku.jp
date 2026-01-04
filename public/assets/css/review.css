@@ -1,0 +1,59 @@
+/* prj/resources/css/review.css */
+
+.review-list-area { padding-bottom: 80px; }
+
+/* 総合評価サマリー */
+.review-summary-container {
+    background: var(--color-sub);
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid var(--color-border);
+    margin: 15px;
+    text-align: center;
+}
+.summary-label { font-size: 0.8rem; color: var(--color-gold); margin-bottom: 10px; }
+.summary-main { display: flex; align-items: center; justify-content: center; gap: 15px; }
+.avg-score-big { font-size: 3rem; font-weight: bold; color: #fff; font-family: var(--font-sans); }
+.stars-gold-big { color: var(--color-gold); font-size: 1.2rem; }
+.total-count-text { font-size: 0.75rem; color: #888; margin-top: 5px; }
+
+/* レビューカード */
+.review-card {
+    margin: 15px;
+    padding: 20px;
+    background: var(--color-card);
+    border-radius: 15px;
+    border: 1px solid var(--color-border);
+    transition: 0.3s;
+}
+.review-card.is-hidden { opacity: 0.6; background: #1a1a1a; }
+
+.rev-main-row { display: flex; gap: 15px; }
+.rev-user-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 1px solid var(--color-border); }
+
+.rev-bubble { flex: 1; position: relative; }
+.badge-hidden {
+    display: inline-block; background: #444; color: #eee;
+    font-size: 0.65rem; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px;
+}
+
+.rev-bubble-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.rev-name { font-weight: bold; color: #fff; font-size: 0.95rem; }
+.rev-score-small { color: var(--color-gold); font-size: 0.85rem; font-weight: bold; }
+
+.rev-comment { font-size: 0.9rem; color: var(--color-text); line-height: 1.6; margin-bottom: 15px; }
+
+/* 詳細項目 */
+.toggle-btn { font-size: 0.75rem; color: var(--color-gold); cursor: pointer; }
+.rev-details-list {
+    margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--color-border);
+}
+.detail-row { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 5px; color: #aaa; }
+
+/* 管理アクション */
+.rev-admin-actions { margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--color-border); }
+.btn-hide, .btn-show-again {
+    width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #444;
+    background: transparent; color: #ccc; font-size: 0.8rem; cursor: pointer;
+}
+.plan-label { display: block; font-size: 0.6rem; color: var(--color-gold); margin-top: 2px; }

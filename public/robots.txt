@@ -1,0 +1,16 @@
+robots.txt for Portal Site
+
+User-agent: *
+
+全体へのアクセスを許可
+
+Allow: /
+
+システムディレクトリはクロール対象外
+
+Disallow: /storage/mock/
+Disallow: /config/
+Disallow: /includes/
+Disallow: /views/
+
+Sitemap: https://www.google.com/search?q=https://example.com/sitemap.xml

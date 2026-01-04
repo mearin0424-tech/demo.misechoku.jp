@@ -1,0 +1,87 @@
+/* prj/resources/css/search.css */
+
+/* タイムラインカード */
+.timeline-card {
+    background: rgba(255,255,255,0.05);
+    margin: 15px;
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid var(--color-border);
+}
+
+.tl-header { display: flex; align-items: center; margin-bottom: 12px; }
+.tl-icon { 
+    width: 45px; height: 45px; 
+    border-radius: 50%; 
+    object-fit: cover; 
+    margin-right: 12px; 
+    border: 1px solid var(--color-gold); 
+}
+.tl-info h3 { margin: 0; font-size: 1rem; color: var(--color-text-header); }
+.tl-info span { font-size: 0.75rem; color: #888; }
+
+.tl-body { 
+    font-size: 0.9rem; 
+    line-height: 1.6; 
+    color: var(--color-text); 
+    margin-bottom: 12px; 
+    white-space: pre-wrap; 
+}
+.tl-tags span { 
+    background: var(--color-sub); 
+    color: var(--color-gold); 
+    font-size: 0.75rem; 
+    padding: 3px 8px; 
+    border-radius: 4px; 
+    margin-right: 6px; 
+    border: 1px solid var(--color-border);
+}
+
+/* 一覧・接続リスト */
+.connection-list { list-style: none; padding: 0; margin: 0; }
+.connection-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-card);
+}
+.conn-thumb {
+    width: 55px; height: 55px;
+    border-radius: 10px;
+    object-fit: cover;
+    margin-right: 15px;
+}
+.conn-info { flex: 1; }
+.conn-name { font-weight: bold; color: #fff; font-size: 1rem; }
+.conn-date { font-size: 0.75rem; color: var(--color-gold); margin-top: 4px; }
+.conn-action {
+    background: transparent;
+    border: 1px solid var(--color-gold);
+    color: var(--color-gold);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+/* タブコンテンツ制御 */
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* 検索フィルタエリア */
+.search-filter-box {
+    background: var(--color-sub);
+    padding: 15px;
+    border-bottom: 1px solid var(--color-border);
+}
+.search-filter-box input, .search-filter-box select {
+    background: var(--color-main);
+    color: #fff;
+    border: 1px solid var(--color-border);
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}

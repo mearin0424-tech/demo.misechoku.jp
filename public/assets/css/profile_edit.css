@@ -1,0 +1,46 @@
+/* 編集画面共通の装飾 */
+.edit-container {
+    background-color: var(--color-main);
+    min-height: 100vh;
+    padding-bottom: 120px;
+}
+
+.form-section {
+    background: rgba(255, 255, 255, 0.02);
+    padding: 15px;
+    border-radius: 12px;
+}
+
+.edit-label {
+    display: block;
+    color: var(--color-gold);
+    font-size: 0.7rem;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.edit-input {
+    width: 100%;
+    background: #000;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.edit-input:focus {
+    border-color: var(--color-gold);
+    outline: none;
+}
+
+.accent-gold {
+    accent-color: var(--color-gold);
+}
+
+.btn-gold-submit {
+    background: var(--color-gold);
+    color: #000;
+    border: none;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+}

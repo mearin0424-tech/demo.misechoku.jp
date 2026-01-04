@@ -1,0 +1,184 @@
+/* [CAUTION] このファイル(public/build/assets/css)は稼働時はvite有効化後に移動（resources/css/）
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap');
+
+:root {
+    /* ラグジュアリー・パレット */
+    --color-main: #120505;
+    --color-sub: #2d0b0b;
+    --color-accent: #b91c1c;
+    --color-gold: #d4af37;
+    --color-text: #d1c1c1;
+    --color-text-header: #f5ecec;
+    --color-card: #220a0a;
+    --color-border: #4d1a1a;
+    
+    --primary-color: #d4af37; 
+    --bg-dark: #120505;
+    --card-glass: rgba(255, 255, 255, 0.1);
+
+    --font-serif: 'Shippori Mincho', serif;
+    --font-sans: 'Lato', 'Noto Sans JP', sans-serif;
+
+    --glass-bg: rgba(34, 10, 10, 0.8);
+    --glass-blur: blur(10px);
+    --glass-border: rgba(212, 175, 55, 0.2);
+
+	/* ヘッダー・フッターの高さを変数化（計算用） */
+    --header-height: 75px;
+    --footer-height: 70px;
+	
+    /* [重要] 600px制限を1200pxに拡大し、全ページを広くします */
+    --max-content-width: 600px;
+}
+
+/* 構造：ベース設定 */
+body {
+    background: var(--bg-dark); 
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    font-family: var(--font-sans);
+    color: #fff;
+	overflow-x: hidden;
+}
+
+/* アプリ全体のコンテナ */
+#app {
+    display: flex;
+    flex-direction: row; /* サイドバーとの並び */
+    min-height: 100vh;
+    width: 100%;
+    max-width: var(--max-content-width);
+    margin: 0 auto; /* 中央寄せを担保 */
+    background: var(--color-main);
+    position: relative;
+    box-shadow: 0 0 50px rgba(0,0,0,1);
+}
+
+/* メインコンテンツエリア */
+main {
+    flex: 1;
+    width: 100%;
+    padding-top: 75px;    /* ヘッダー分 */
+    padding-bottom: 70px; /* ボトムナビ分 */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 各ページのコンテンツラッパー */
+.content-wrapper {
+    width: 100%;
+    max-width: 100%; 
+    padding: 0 15px;
+    box-sizing: border-box;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 1023px) {
+	#app { flex-direction: column; }  /* スマホ時は縦並び */
+    main { padding-right: 0 !important; } /* PC用サイドバーの余白を強制リセット */
+}
+
+@media (min-width: 1024px) {
+    main {
+        /* [重要] 領域を狭めていた padding-right: 260px を削除 */
+        padding-right: 0; 
+        padding-left: 0;
+        padding-bottom: 0;
+    }
+}
+
+/* ホーム画面専用：スクロールを禁止し、1枚のみ表示する領域設定 */
+.no-scroll {
+    overflow: hidden;
+    height: 100vh;
+}
+
+
+/* タイポグラフィ */
+.serif-font { font-family: var(--font-serif); }
+
+h1, h2, h3, .luxury-title {
+    color: var(--color-text-header);
+    font-family: var(--font-serif);
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+}
+
+/* 共通コンポーネント：グラスカード */
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+/* 共通コンポーネント：ゴールドボタン */
+.btn-gold {
+    background: linear-gradient(135deg, var(--color-accent), #800000);
+    color: #fff;
+    border: 1px solid var(--color-gold);
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    display: inline-block;
+    text-decoration: none;
+}
+
+.btn-gold:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+}
+
+/* 通知バッジ */
+.badge-notify {
+    background: var(--color-accent);
+    color: #fff;
+    border-radius: 10px;
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    font-weight: bold;
+    position: absolute;
+}
+
+/* サイドバー内のネストメニュー用スタイル */
+.sidebar-nested-menu {
+    list-style: none;
+    padding-left: 25px;
+    margin-top: 10px;
+    border-left: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.sidebar-nested-menu li {
+    margin-bottom: 12px;
+}
+
+.sidebar-nested-menu a {
+    font-size: 0.85rem !important;
+    opacity: 0.8;
+}
+
+.sidebar-nested-menu a:hover {
+    opacity: 1;
+    color: var(--color-gold);
+}
+
+.text-danger {
+    color: #ff4d4d !important;
+}
+
+/* ユーティリティ */
+.opacity-70 { opacity: 0.7; }
+.mt-20 { margin-top: 20px; }
+.text-accent { color: var(--color-accent); }
+.text-gold { color: var(--color-gold); }

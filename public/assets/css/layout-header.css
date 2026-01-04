@@ -1,0 +1,128 @@
+/* ヘッダー全体のグラスモーフィズム */
+#global-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+    padding: 0 15px;
+    background: rgba(30, 5, 5, 0.85);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.4);
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: var(--max-content-width); 
+    box-sizing: border-box;
+    z-index: 1500;
+}
+
+/* 左右・中央のレイアウトを安定させる */
+.header-left {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+/* ロゴのサイズ調整：大きすぎるのを修正 */
+.header-logo-img {
+    height: 28px; /* 高さを抑えてスマートに */
+    width: auto;
+    display: block;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.header-center-title {
+    flex: 2;
+    text-align: center;
+    font-weight: bold;
+    color: #fff;
+    font-size: 1rem;
+    letter-spacing: 1px;
+}
+
+.header-right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ポップオーバーの強制固定位置 */
+.header-popup {
+    position: absolute !important;
+    top: 60px !important; /* ヘッダーの高さに合わせる */
+    
+    /* 中央寄せのロジックを解除し、右端に固定 */
+    left: auto !important;
+    right: 0 !important;
+    transform: none !important; 
+    
+    /* 幅を右側半分にする設定 */
+    width: 80% !important;
+    max-width: calc(var(--max-content-width) / 2) !important;
+    
+    background: #1a0505;
+    border: 1px solid rgba(212, 175, 55, 0.6);
+    /* 右端に付くため、左側の角だけを丸める */
+    border-radius: 0 0 0 15px; 
+    box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+    z-index: 2500;
+    padding: 0;
+    overflow: hidden;
+    display: none; /* JSで制御 */
+    
+    /* 必要に応じて高さを画面いっぱいに近づける場合 */
+    height: auto;
+    max-height: calc(100vh - var(--header-height) - 20px);
+    overflow-y: auto;
+}
+/* ポップオーバー内のヘッダー */
+.task-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.task-popup-header h4 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #d4af37;
+    letter-spacing: 1px;
+}
+
+.btn-close-popup {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    opacity: 0.6;
+}
+
+/* コンテンツエリア */
+.notification-popup-content, .task-popup-content {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+/* アイコンボタン自体のスタイル */
+.header-icon-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    cursor: pointer;
+    position: relative;
+}

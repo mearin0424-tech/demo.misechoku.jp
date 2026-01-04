@@ -1,0 +1,368 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Playfair+Display:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap');
+
+/* --- 基本設定 --- */
+body {
+    font-family: 'Noto Sans JP', sans-serif;
+    margin: 0;
+    background: linear-gradient(135deg, #fce0f3 0%, #e0d6ff 100%);
+    color: #4B415C;
+    line-height: 1.7;
+}
+
+/* --- メインコンテナ --- */
+#shindan-app {
+    position: relative; 
+    max-width: 700px;
+    margin: 40px auto;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    padding: 30px 40px;
+    border-radius: 20px;
+    box-shadow: 0 12px 30px rgba(75, 65, 92, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* --- スタート画面 --- */
+#start-screen {
+    text-align: center;
+    padding: 20px 0;
+    display: block; 
+}
+#start-screen h1 {
+    font-family: 'Playfair Display', serif;
+    color: #6A4C9C;
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-size: 3em;
+    font-weight: 700;
+}
+#start-screen .subtitle {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 1.1em;
+    font-weight: 500;
+    color: #9279b8;
+    margin-top: 0;
+    margin-bottom: 35px;
+    letter-spacing: 1px;
+}
+#start-screen p.description {
+    font-size: 1.1em;
+    color: #4B415C;
+    line-height: 1.8;
+    margin-bottom: 40px;
+}
+
+/* --- タイトルのスライドアニメーション --- */
+.title { overflow: hidden; transform: translateX(-100%); transition: transform 0.8s ease-out; }
+.title span { display: block; transform: translateX(100%); transition: transform 0.8s ease-out; }
+.title.visible { transform: translateX(0); }
+.title.visible span { transform: translateX(0); }
+
+
+/* --- トップ画像スタイル --- */
+#top-image {
+    max-width: 80%;
+    height: auto;
+    margin-bottom: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+#start-btn {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #f78bb8 0%, #9f85ff 100%);
+    color: #fff;
+    padding: 14px 40px;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.3em;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 5px 20px rgba(106, 76, 156, 0.3);
+    transition: all 0.3s ease-in-out;
+}
+#start-btn:hover:not(:disabled) {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 10px 25px rgba(106, 76, 156, 0.5);
+}
+#start-btn:active:not(:disabled) {
+    transform: translateY(-2px) scale(0.98);
+}
+#start-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* --- トップに戻るボタン --- */
+.btn-back-to-top {
+    position: absolute;
+    top: 25px; 
+    right: 30px;
+    background: #f7f3ff;
+    color: #6A4C9C;
+    border: 1px solid #c5b5e6;
+    border-radius: 20px;
+    padding: 5px 15px;
+    font-size: 0.85em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+    display: none; 
+}
+.btn-back-to-top:hover {
+    background: #e0d6ff;
+    color: #4B415C;
+}
+
+/* --- 診断フォーム (初期非表示) --- */
+#shindan-form {
+    display: none;
+}
+
+/* --- 診断フォームのタイトル --- */
+.form-title {
+    font-family: 'Playfair Display', serif;
+    color: #6A4C9C;
+    text-align: center;
+    font-size: 1.8em;
+    font-weight: 700;
+    margin-top: 10px;
+    margin-bottom: 30px;
+}
+
+
+/* --- 質問エリア --- */
+.question {
+    margin-bottom: 35px;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0,0, 0.05);
+    transition: all 0.5s ease; 
+}
+.question p {
+    font-weight: 700;
+    font-size: 1.15em;
+    color: #3f364f;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+/* --- 回答済み質問のスタイル --- */
+.question.answered {
+    background-color: #f4f4f5; 
+    opacity: 0.8; 
+}
+.question.answered p {
+    color: #71717a; 
+}
+
+/* --- 5段階評価 (Likert Scale)  --- */
+.likert-scale {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 0;
+}
+.likert-scale label { cursor: pointer; text-align: center; transition: all 0.2s ease-in-out; }
+.likert-scale label:hover { transform: scale(1.1); }
+.likert-scale input { display: none; }
+
+/* 共通の丸スタイル（白丸 + 色の枠） */
+.likert-scale span {
+    display: block;
+    line-height: 35px; 
+    border-radius: 50%;
+    font-weight: 500;
+    font-size: 0.9em;
+    transition: all 0.2s ease-in-out;
+    border-width: 3px;
+    border-style: solid;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.likert-scale span::after { content: attr(data-label); }
+
+/* サイズ調整 */
+.likert-scale label:nth-child(1) span,
+.likert-scale label:nth-child(5) span { width: 42px; height: 42px; line-height: 42px; }
+.likert-scale label:nth-child(2) span,
+.likert-scale label:nth-child(4) span { width: 35px; height: 35px; line-height: 35px; }
+.likert-scale label:nth-child(3) span { width: 30px; height: 30px; line-height: 30px; }
+
+/* 枠の色と文字色 (未選択時) */
+.likert-scale span[data-label="1"] { border-color: #a1a1aa; color: #a1a1aa; }
+.likert-scale span[data-label="2"] { border-color: #b4b4bd; color: #b4b4bd; }
+.likert-scale span[data-label="3"] { border-color: #C77DFF; color: #C77DFF; }
+.likert-scale span[data-label="4"] { border-color: #f472b6; color: #f472b6; }
+.likert-scale span[data-label="5"] { border-color: #ec4899; color: #ec4899; }
+
+/* 選択時のスタイル (背景を塗りつぶし、文字を白に) */
+.likert-scale input[value="1"]:checked + span { background: #a1a1aa; color: #fff; border-color: #a1a1aa; transform: scale(1.1); box-shadow: 0 4px 10px rgba(161,161,170, 0.4);}
+.likert-scale input[value="2"]:checked + span { background: #b4b4bd; color: #fff; border-color: #b4b4bd; transform: scale(1.1); box-shadow: 0 4px 10px rgba(180,180,189, 0.4);}
+.likert-scale input[value="3"]:checked + span { background: #C77DFF; color: #fff; border-color: #C77DFF; transform: scale(1.1); box-shadow: 0 4px 10px rgba(199,125,255, 0.4);}
+.likert-scale input[value="4"]:checked + span { background: #f472b6; color: #fff; border-color: #f472b6; transform: scale(1.1); box-shadow: 0 4px 10px rgba(244,114,182, 0.4);}
+.likert-scale input[value="5"]:checked + span { background: #ec4899; color: #fff; border-color: #ec4899; transform: scale(1.1); box-shadow: 0 4px 10px rgba(236,72,153, 0.4);}
+
+.likert-labels { display: flex; justify-content: space-between; font-size: 0.85em; color: #796c8c; padding: 0 10px; }
+
+/* --- 送信ボタン (診断画面) --- */
+#submit-btn {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #FF69B4, #6A4C9C);
+    color: #fff;
+    padding: 14px 25px;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.2em;
+    font-weight: 600;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    box-shadow: 0 5px 20px rgba(106, 76, 156, 0.3);
+    transition: all 0.3s ease-in-out;
+}
+#submit-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(106, 76, 156, 0.4); }
+
+/* --- 結果表示エリア --- */
+#result {
+    margin-top: 40px;
+    padding: 30px;
+    background: #fff;
+    border: 2px solid #e0d6ff;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    display: none;
+}
+/* タイトル */
+#result h2 { 
+    margin-top: 0; 
+    color: #6A4C9C; 
+    font-size: 1.8em; 
+    text-align: center; 
+    font-family: 'Noto Sans JP', sans-serif; 
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+/* タイプコード＋タイトル */
+#result-type-title { 
+    font-family: 'Playfair Display', serif; 
+    color: #FF69B4; 
+    font-size: 1.8em; 
+    text-align: center; 
+    margin-top: 0; 
+    margin-bottom: 25px; 
+    line-height: 1.2;
+    font-weight: 700;
+}
+
+#result-image { display: block; max-width: 80%; height: auto; margin: 0 auto 25px auto; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
+/* 強み・ニガテのセクション */
+.result-section {
+    padding: 15px 0;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 25px;
+}
+.result-section .section-title {
+    font-size: 1.1em;
+    font-weight: 700;
+    color: #6A4C9C;
+    margin-top: 15px;
+    margin-bottom: 5px; 
+    text-align: center;
+    border-bottom: 2px dashed #e0d6ff;
+    padding-bottom: 5px;
+}
+.result-section .result-content {
+    text-align: center; 
+    font-size: 1.05em;
+    font-weight: 500;
+    color: #4B415C;
+    line-height: 1.6;
+    padding: 5px 0 15px;
+}
+
+#result-strength, #result-weakness {
+    background-color: transparent;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+}
+
+/* 詳細説明 */
+#result-description {
+    font-size: 0.95em; 
+    color: #796c8c;
+    padding: 15px 20px;
+    background-color: #f7f3ff;
+    border-radius: 8px;
+    line-height: 1.7;
+    margin-bottom: 30px;
+    text-align: left;
+    border: 1px solid #e0d6ff;
+}
+
+#result-breakdown { margin-top: 30px; margin-bottom: 20px; padding-top: 25px; border-top: 1px dashed #d6c9e0; }
+.breakdown-item { display: flex; align-items: center; margin-bottom: 15px; background: #fdfcff; border: 1px solid #ede7f9; border-radius: 8px; padding: 12px 15px; }
+.breakdown-item span:first-child { font-family: 'Poppins', sans-serif; font-size: 1.5em; font-weight: 700; color: #fff; background: linear-gradient(135deg, #FF69B4, #C77DFF); border-radius: 50%; width: 40px; height: 40px; line-height: 40px; text-align: center; margin-right: 15px; }
+.breakdown-item p { margin: 0; font-size: 0.95em; color: #4B415C; line-height: 1.5; }
+.breakdown-item p strong { font-size: 1.1em; color: #6A4C9C; display: block; }
+#share-buttons { margin-top: 30px; padding-top: 20px; border-top: 1px dashed #d6c9e0; text-align: center; }
+.share-btn { font-family: 'Poppins', sans-serif; text-decoration: none; padding: 10px 20px; margin: 8px; border-radius: 50px; color: #fff; font-weight: 600; display: inline-block; font-size: 0.95em; transition: all 0.2s ease-in-out; min-width: 120px; text-align: center; }
+.share-btn:hover { transform: translateY(-2px); opacity: 0.9; }
+#share-x { background-color: #000000; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3); }
+#share-line { background-color: #00B900; box-shadow: 0 3px 10px rgba(0, 185, 0, 0.3); }
+#loading { text-align: center; font-size: 1.2em; padding: 30px; color: #6A4C9C; background-color: #f7f3ff; border-radius: 8px; border: 1px dashed #c5b5e6; }
+
+@media (max-width: 768px) {
+    #shindan-app { margin: 20px auto; padding: 20px 25px; }
+    #start-screen h1 { font-size: 2.2em; }
+    #start-screen .subtitle { font-size: 1em; }
+    #start-screen p.description { font-size: 1em; }
+    #top-image { max-width: 90%; margin-bottom: 25px; }
+    #start-btn { font-size: 1.1em; }
+    .btn-back-to-top { top: 15px; right: 15px; padding: 4px 12px; font-size: 0.8em; }
+    .form-title { font-size: 1.5em; margin-bottom: 25px; }
+    .question p { font-size: 1.05em; }
+    .likert-scale label:nth-child(1) span, .likert-scale label:nth-child(5) span { width: 38px; height: 38px; line-height: 38px; }
+    .likert-scale label:nth-child(2) span, .likert-scale label:nth-child(4) span { width: 32px; height: 32px; line-height: 32px; }
+    .likert-scale label:nth-child(3) span { width: 28px; height: 28px; line-height: 28px; }
+    .likert-labels { font-size: 0.8em; }
+    #result-image { max-width: 90%; }
+    .result-section .result-content { font-size: 1em; }
+    #result-description { font-size: 0.9em; }
+    .breakdown-item span:first-child { width: 35px; height: 35px; line-height: 35px; font-size: 1.3em; margin-right: 12px; }
+    .breakdown-item p { font-size: 0.9em; }
+    .breakdown-item p strong { font-size: 1em; }
+    .share-btn { display: block; width: calc(100% - 40px); margin: 10px auto; }
+}
+
+/* ミセチョクモックサイトに戻るボタン */
+#misechoku-btn {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #fff7b0 0%, #ffee88 100%);
+    color: #5d491a;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(150, 130, 0, 0.2);
+    transition: all 0.3s ease-in-out;
+    position: static; 
+    display: block; 
+    margin: 15px auto 0 auto; 
+    width: 100%; 
+    max-width: 300px; 
+    box-sizing: border-box;
+}
+#misechoku-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(150, 130, 0, 0.3); }
+#misechoku-btn:active { transform: translateY(-1px); }

@@ -1,0 +1,57 @@
+/* prj/resources/css/mypage.css */
+
+.mypage-area { padding-bottom: 80px; text-align: left; }
+
+.mypage-shop-name {
+    font-size: 1.5rem; color: #fff; margin: 0;
+    padding: 20px 15px 5px; font-weight: bold;
+    font-family: var(--font-serif);
+}
+
+/* アイコン＋吹き出し */
+.shop-header-top { display: flex; align-items: center; padding: 10px 15px 20px; }
+.shop-icon-wrapper { position: relative; width: 90px; height: 90px; margin-right: 15px; flex-shrink: 0; }
+.shop-icon-main {
+    width: 100%; height: 100%; border-radius: 50%;
+    border: 2px solid var(--color-gold); object-fit: cover;
+}
+.btn-add-icon {
+    position: absolute; bottom: 0; right: 0;
+    width: 28px; height: 28px; background: var(--color-gold); border: none; border-radius: 50%;
+    color: #000; display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.shop-word-bubble {
+    background: var(--color-sub); color: var(--color-text); padding: 12px 15px;
+    border-radius: 15px; position: relative; font-size: 0.85rem; flex: 1;
+    min-height: 60px; display: flex; align-items: center; border: 1px solid var(--color-border);
+}
+.shop-word-bubble::after {
+    content: ''; position: absolute; top: 50%; left: -10px; transform: translateY(-50%);
+    border-width: 10px 10px 10px 0; border-style: solid; border-color: transparent var(--color-sub) transparent transparent;
+}
+
+/* ギャラリー */
+.gallery-sortable { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0; list-style: none; }
+.gallery-item { aspect-ratio: 1 / 1; position: relative; border-radius: 8px; overflow: hidden; border: 1px solid var(--color-border); }
+.gallery-item img { width: 100%; height: 100%; object-fit: cover; }
+.gallery-item.placeholder { border: 1px dashed var(--color-gold); background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; color: var(--color-gold); }
+
+/* ボタン系 */
+.btn-action {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; padding: 12px; border-radius: 8px; font-weight: bold;
+    text-decoration: none; font-size: 0.95rem; margin-top: 10px;
+}
+.btn-action.job { background: var(--color-gold); color: #000; }
+.btn-action.manage { background: var(--color-sub); color: #fff; border: 1px solid var(--color-border); }
+
+/* 書類リスト */
+.doc-item { display: flex; align-items: center; background: var(--color-card); padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--color-border); }
+.doc-status.done { color: #4caf50; font-size: 0.8rem; }
+.doc-status.pending { color: var(--color-accent); font-size: 0.8rem; }
+
+/* モーダル */
+.modal-profile-custom {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000;
+    display: none; flex-direction: column;
+}
