@@ -13,36 +13,32 @@ class TalkController extends Controller
      */
     public function index()
     {
-        // テストデータ
-        $talks = [
-            [
-                'partner_id' => 1,
-                'name' => 'アンナ',
-                'avatar' => 'storage/mock/casts/1.png',
-                'last_message' => '本日はありがとうございました！またお待ちしております。',
-                'last_time' => '10:25',
-                'unread_count' => 2,
-            ],
-            [
-                'partner_id' => 2,
-                'name' => 'リナ',
-                'avatar' => 'storage/mock/casts/2.png',
-                'last_message' => '了解いたしました！調整してみますね。',
-                'last_time' => '昨日',
-                'unread_count' => 0,
-            ],
-            [
-                'partner_id' => 3,
-                'name' => '店長 田中',
-                'avatar' => 'storage/mock/shops/1.png',
-                'last_message' => '明日のシフトの件ですが、19時からで大丈夫でしょうか？',
-                'last_time' => '火曜',
-                'unread_count' => 0,
-            ],
-        ];
+    // 「やり取り中」のデータ（既に応答があるもの）
+    $ongoingTalks = [
+        [
+            'partner_id' => 1,
+            'name' => 'アンナ',
+            'avatar' => 'storage/mock/casts/1.png',
+            'last_message' => '本日はありがとうございました！またお待ちしております。',
+            'last_time' => '10:25',
+            'unread_count' => 0,
+        ],
+    ];
 
-        return view('common.talk.index', compact('talks'));
-    }
+    // 「リクエスト / オファー」のデータ（相手からの初回の未返信メッセージ）
+    $requestTalks = [
+        [
+            'partner_id' => 4,
+            'name' => 'サキ',
+            'avatar' => 'storage/mock/casts/4.png',
+            'last_message' => '初めまして！今夜空いていますか？',
+            'last_time' => '1時間前',
+            'unread_count' => 1,
+        ],
+    ];
+
+    return view('common.talk.index', compact('ongoingTalks', 'requestTalks'));
+}
 
     /**
      * トークルーム

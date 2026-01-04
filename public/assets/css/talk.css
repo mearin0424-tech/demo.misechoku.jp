@@ -201,3 +201,54 @@
     scroll-behavior: smooth; /* スクリプト側で制御するので予備として */
     -webkit-overflow-scrolling: touch; /* iOSでのスクロールを滑らかに */
 }
+
+/* --- Talk Tabs (一覧画面専用) --- */
+.talk-tabs {
+    display: flex;
+    background: #1a0808;
+    border-bottom: 1px solid #4d1a1a;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.tab-item {
+    flex: 1;
+    text-align: center;
+    padding: 15px 0;
+    color: #888;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-item.active {
+    color: var(--color-gold, #d4af37);
+    border-bottom: 2px solid var(--color-gold, #d4af37);
+    background: rgba(212, 175, 55, 0.05);
+}
+
+/* 表示パネルの切り替え制御 */
+.talk-content-pane {
+    display: none;
+}
+
+.talk-content-pane.active {
+    display: block;
+}
+
+/* --- Empty State (空の状態) --- */
+.no-messages {
+    text-align: center;
+    padding: 100px 20px;
+    color: #666;
+}
+
+.no-messages i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    display: block;
+    opacity: 0.3;
+}

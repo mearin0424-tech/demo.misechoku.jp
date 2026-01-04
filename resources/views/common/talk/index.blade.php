@@ -7,32 +7,44 @@
 @endpush
 
 @section('content')
+@php
+    $isCast = request()->is('cast/*');
+    $requestTabText = $isCast ? 'オファー' : 'リクエスト';
+@endphp
+
+{{-- タブメニュー --}}
+<div class="talk-tabs">
+    <div class="tab-item active" data-target="ongoing">やり取り中</div>
+    <div class="tab-item" data-target="requests">{{ $requestTabText }}</div>
+</div>
+
 <div class="talk-list-container">
-    @forelse($talks as $talk)
-        @php
-            // ルート名を動的に判定（アクセスしているURLに/cast/が含まれるかどうか）
-            $isCast = request()->is('cast/*');
-            $targetRoute = $isCast ? 'cast.talk.room' : 'shop.talk.room';
-        @endphp
-        <a href="{{ route($targetRoute, $talk['partner_id']) }}" class="talk-item">
-            <img src="{{ asset($talk['avatar']) }}" class="talk-avatar" onerror="this.src='/assets/images/common/placeholder.png'">
-            <div class="talk-info">
-                <div class="talk-header">
-                    <span class="talk-name">{{ $talk['name'] }}</span>
-                    <span class="talk-time">{{ $talk['last_time'] }}</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <p class="talk-last-msg">{{ $talk['last_message'] }}</p>
-                    @if($talk['unread_count'] > 0)
-                        <span class="unread-badge">{{ $talk['unread_count'] }}</span>
-                    @endif
-                </div>
+    {{-- やり取り中パネル --}}
+    <div id="pane-ongoing" class="talk-content-pane active">
+        @forelse($ongoingTalks as $talk)
+            @include('common.talk.partials.list-item', ['talk' => $talk])
+        @empty
+            <div class="no-messages">
+                <i class="fas fa-comments"></i>
+                <p>やり取り中のメッセージはありません</p>
             </div>
-        </a>
-    @empty
-        <div class="text-center py-20 text-gray-500">
-            メッセージはありません
-        </div>
-    @endforelse
+        @endforelse
+    </div>
+
+    {{-- リクエスト / オファー パネル --}}
+    <div id="pane-requests" class="talk-content-pane">
+        @forelse($requestTalks as $talk)
+            @include('common.talk.partials.list-item', ['talk' => $talk])
+        @empty
+            <div class="no-messages">
+                <i class="fas fa-paper-plane"></i>
+                <p>{{ $requestTabText }}はありません</p>
+            </div>
+        @endforelse
+    </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="{{ asset('assets/js/talk-list.js') }}"></script>
+@endpush
