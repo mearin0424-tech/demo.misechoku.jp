@@ -90,12 +90,14 @@
                 </div>
 
                 <div class="request-actions">
-                    <button class="btn-action btn-approve">
-                        <i class="fas fa-check"></i> 承認
-                    </button>
-                    <button class="btn-action btn-reject">
-                        <i class="fas fa-times"></i> 拒否
-                    </button>
+                {{-- 承認ボタン：トークルームへのリンクにする --}}
+                <a href="{{ route($targetRoute, $talk['partner_id']) }}" class="btn-action btn-approve">
+                    <i class="fas fa-check"></i> 承認
+                </a>
+                {{-- 拒否ボタン：JSで制御するクラスを付与 --}}
+                <button type="button" class="btn-action btn-reject js-reject-request">
+                    <i class="fas fa-times"></i> 拒否
+                </button>
                 </div>
             </div>
         @empty
