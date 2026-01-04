@@ -37,10 +37,15 @@
 </div>
 
     {{-- 入力エリア --}}
-    <div class="chat-input-area p-4 bg-[#220a0a] border-t border-[#4d1a1a]">
-        <form class="flex gap-2" id="chat-form" onsubmit="return false;">
-            <input type="text" class="flex-1 bg-[#120505] border border-[#4d1a1a] rounded-full px-4 py-2 text-white outline-none focus:border-[#d4af37]" placeholder="メッセージを入力...">
-            <button type="submit" class="w-12 h-12 bg-[#b91c1c] rounded-full flex items-center justify-center text-white active:scale-90 transition-transform">
+   <div class="chat-input-area p-4 bg-[#220a0a] border-t border-[#4d1a1a]">
+        <form class="flex gap-2" id="chat-form" 
+            data-url="{{ route(request()->is('cast/*') ? 'cast.talk.send' : 'shop.talk.send') }}" 
+            data-partner-id="{{ $partnerId }}">
+            @csrf {{-- CSRFトークンを追加 --}}
+            <div class="chat-input-wrapper flex-1">
+                <input type="text" name="message" class="w-full bg-transparent text-white outline-none" placeholder="メッセージを入力...">
+            </div>
+            <button type="submit" class="btn-send">
                 <i class="fas fa-paper-plane"></i>
             </button>
         </form>

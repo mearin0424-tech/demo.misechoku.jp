@@ -76,7 +76,9 @@ Route::prefix('shop')->name('shop.')->group(function () {
     Route::prefix('talk')->name('talk.')->group(function () {
         Route::get('/', [TalkController::class, 'index'])->name('index');
         Route::get('/room/{id}', [TalkController::class, 'room'])->name('room');
+        // Route::post('/send', [App\Http\Controllers\Common\TalkController::class, 'store'])->name('send');
     });
+    
 
     // つながり (Interaction)
     Route::prefix('interaction')->name('interaction.')->group(function () {
