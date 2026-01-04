@@ -9,12 +9,9 @@
 @section('content')
 @php
     $isCast = request()->is('cast/*');
-    // タブ名と言語の切り替え
     $requestTabText = $isCast ? 'オファー' : 'リクエスト';
-    // 遷移先ルートの切り替え
     $targetRoute = $isCast ? 'cast.talk.room' : 'shop.talk.room';
-    // プロフィール詳細へのルート切り替え
-    $profileRoute = $isCast ? 'cast.user.show' : 'shop.cast.show';
+    $profileRoute = $isCast ? 'cast.users.show' : 'profile.show';
 @endphp
 
 {{-- タブメニュー --}}
@@ -65,7 +62,7 @@
             </a>
         @empty
             <div class="no-messages">
-                <i class="fas fa-comments"></i>
+                <i class="fas fa-comments text-3xl opacity-20 mb-2 block"></i>
                 <p>やり取り中のメッセージはありません</p>
             </div>
         @endforelse
@@ -75,8 +72,14 @@
     <div id="pane-requests" class="talk-content-pane">
         @forelse($requestTalks as $talk)
             <div class="request-card" data-id="{{ $talk['partner_id'] }}">
-                {{-- 画像とプロフィール情報をリンクにする --}}
-                <a href="{{ route($profileRoute, $talk['partner_id']) }}" class="request-upper-link no-underline">
+                
+                {{-- プロフィール詳細へのリンク（画像と情報を包む） --}}
+                @if(Route::has($profileRoute))
+                    <a href="{{ route($profileRoute, $talk['partner_id']) }}" class="request-upper-link no-underline">
+                @else
+                    {{-- ルートが存在しない場合はリンクにせず、コンソールに警告を出す用 --}}
+                    <div class="request-upper-link">
+                @endif
                     <div class="request-main">
                         <img src="{{ asset($talk['avatar']) }}" 
                              class="request-img" 
@@ -96,9 +99,13 @@
                             </div>
                         </div>
                     </div>
-                </a>
+                @if(Route::has($profileRoute))
+                    </a>
+                @else
+                    </div>
+                @endif
 
-                {{-- アクションボタン（承認・拒否） --}}
+                {{-- ボタンエリア --}}
                 <div class="request-actions">
                     <a href="{{ route($targetRoute, $talk['partner_id']) }}" class="btn-action btn-approve">
                         <i class="fas fa-check"></i> 承認
@@ -110,7 +117,7 @@
             </div>
         @empty
             <div class="no-messages">
-                <i class="fas fa-paper-plane"></i>
+                <i class="fas fa-paper-plane text-3xl opacity-20 mb-2 block"></i>
                 <p>{{ $requestTabText }}はありません</p>
             </div>
         @endforelse

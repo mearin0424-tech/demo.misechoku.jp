@@ -3,7 +3,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 60px;
+    height: 60px; /* ここが60pxなら、ロゴ20pxは非常にスマートに見えます */
     padding: 0 15px;
     background: rgba(30, 5, 5, 0.85);
     backdrop-filter: blur(15px);
@@ -19,36 +19,52 @@
     z-index: 1500;
 }
 
-/* 左右・中央のレイアウトを安定させる */
+/* 左右・中央のレイアウト固定 */
 .header-left {
-    flex: 1;
+    flex: 1; /* 左側スロット */
     display: flex;
     align-items: center;
+    min-width: 80px; /* ボタンやロゴの場所を確保 */
 }
 
-/* ロゴのサイズ調整：大きすぎるのを修正 */
+/* 【修正】ロゴのサイズ調整：28pxから20pxへ */
 .header-logo-img {
-    height: 28px; /* 高さを抑えてスマートに */
+    height: 20px !important; /* 高さを20pxに抑えて高級感を出す */
     width: auto;
     display: block;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
 
+/* 【修正】中央タイトルのサイズ調整：1remから0.85remへ */
 .header-center-title {
-    flex: 2;
+    flex: 2; /* 中央スロット */
     text-align: center;
     font-weight: bold;
     color: #fff;
-    font-size: 1rem;
-    letter-spacing: 1px;
+    font-size: 0.85rem; /* 小さくして他と統一 */
+    letter-spacing: 2px; /* 文字間を空けて上品に */
+    font-family: var(--font-serif);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .header-right {
-    flex: 1;
+    flex: 1; /* 右側スロット */
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    min-width: 120px; /* アイコン3つ分を確保 */
+}
+
+/* 戻るボタンのホワイトカラーとサイズ */
+.btn-back {
+    color: #fff;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
 }
 
 /* ポップオーバーの強制固定位置 */
