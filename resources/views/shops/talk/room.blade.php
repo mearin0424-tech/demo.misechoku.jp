@@ -6,6 +6,15 @@
     $backRoute = $isCast ? 'cast.talk.index' : 'shop.talk.index';
 @endphp
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}">
+@endpush
+
+@push('scripts')
+{{-- 切り出した外部JSを読み込む --}}
+<script src="{{ asset('assets/js/talk-room.js') }}"></script>
+@endpush
+
 <div id="talk-room-container" class="flex flex-col h-full bg-[#120505]">
     {{-- ヘッダー --}}
     <div class="talk-header p-4 border-b border-[#4d1a1a] flex items-center bg-[#220a0a]">
@@ -16,18 +25,16 @@
     </div>
 
     {{-- メッセージ表示エリア --}}
-    <div class="chat-messages flex-1 overflow-y-auto p-4 space-y-4" id="chat-messages">
-        @foreach($messages as $msg)
-            <div class="flex {{ $msg->is_mine ? 'justify-end' : 'justify-start' }}">
-                <div class="max-w-[75%] p-3 rounded-2xl {{ $msg->is_mine ? 'bg-[#d4af37] text-black rounded-tr-none' : 'bg-[#2d0b0b] text-white border border-[#4d1a1a] rounded-tl-none' }}">
-                    <p class="text-sm">{{ $msg->content }}</p>
-                    <span class="block text-[10px] mt-1 opacity-60 text-right">
-                        {{ $msg->created_at->format('H:i') }}
-                    </span>
-                </div>
+    <div class="chat-messages" id="chat-messages">
+    @foreach($messages as $msg)
+        <div class="flex {{ $msg->is_mine ? 'justify-end msg-right' : 'justify-start msg-left' }}">
+            <div class="message-bubble">
+                <p>{{ $msg->content }}</p>
+                <span class="msg-time">{{ $msg->created_at->format('H:i') }}</span>
             </div>
-        @endforeach
-    </div>
+        </div>
+    @endforeach
+</div>
 
     {{-- 入力エリア --}}
     <div class="chat-input-area p-4 bg-[#220a0a] border-t border-[#4d1a1a]">
