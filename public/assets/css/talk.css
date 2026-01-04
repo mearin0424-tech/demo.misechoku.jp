@@ -161,6 +161,15 @@
 .msg-left { justify-content: flex-start; } /* 左端へ */
 .msg-right { justify-content: flex-end; }  /* 右端へ */
 
+/* 時刻とステータスの親要素 */
+.msg-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    margin-top: 4px;
+}
+
 /* 吹き出し共通 */
 .message-bubble {
     display: inline-block;
@@ -199,12 +208,28 @@
 }
 
 .msg-time {
-    display: block;
     font-size: 0.65rem;
-    margin-top: 4px;
-    opacity: 0.5;
-    text-align: right;
+    opacity: 0.6;
     line-height: 1;
+}
+
+.msg-status {
+    font-size: 0.65rem;
+    color: #000; /* ゴールド背景の吹き出し内なので黒、または濃い茶色 */
+    opacity: 0.6;
+    display: flex;
+    align-items: center;
+}
+
+/* 送信中（JSで動的に制御する場合）のスタイル */
+.msg-status.sending {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+    100% { opacity: 0.3; }
 }
 
 /* 入力エリアの固定 */

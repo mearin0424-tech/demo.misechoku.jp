@@ -24,14 +24,19 @@
     {{-- メッセージ表示エリア --}}
     <div class="chat-messages" id="chat-messages">
         @forelse($messages as $msg)
-            <div class="message-row {{ $msg->is_mine ? 'msg-right' : 'msg-left' }}">
-                <div class="message-bubble">
-                    {{ $msg->content }}
-                    <span class="block text-right text-[10px] opacity-50 mt-1">
-                        {{ $msg->created_at->format('H:i') }}
-                    </span>
+        <div class="message-row {{ $msg->is_mine ? 'msg-right' : 'msg-left' }}">
+            <div class="message-bubble">
+                {{ $msg->content }}
+                
+                <div class="msg-footer">
+                    <span class="msg-time">{{ $msg->created_at->format('H:i') }}</span>
+                    {{-- 自分が送ったメッセージかつ送信済みの場合はチェックマークを表示 --}}
+                    @if($msg->is_mine)
+                        <span class="msg-status"><i class="fas fa-check"></i></span>
+                    @endif
                 </div>
             </div>
+        </div>
         @empty
             <div class="text-center text-gray-500 mt-20">
                 <i class="fas fa-comments opacity-10 text-6xl mb-4 block"></i>
