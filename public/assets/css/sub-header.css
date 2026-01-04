@@ -49,14 +49,17 @@
 /* --- メインコンテンツの開始位置 --- */
 .has-sub-header {
     padding-top: 98px !important; /* 60px + 38px */
+    margin: 0 !important;
 }
 
 /* 各画面の独自コンテナの余白をリセットして統一する */
+.has-sub-header > div:not(.sub-header-wrapper),
 .has-sub-header .contents,
 .has-sub-header .talk-list-container,
 .has-sub-header .tab-content-container {
     padding-top: 0 !important;
     margin-top: 0 !important;
+    border-top: none !important;
 }
 
 /* タブパネルの表示制御 */
