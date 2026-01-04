@@ -24,7 +24,13 @@
     <div id="pane-ongoing" class="talk-content-pane active">
         @forelse($ongoingTalks as $talk)
             <a href="{{ route($targetRoute, $talk['partner_id']) }}" class="talk-item">
-                <img src="{{ asset($talk['avatar']) }}" class="talk-avatar" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=No+Image&background=4d1a1a&color=fff';">
+                @if(!empty($talk['avatar']) && file_exists(public_path($talk['avatar'])))
+    <               img src="{{ asset($talk['avatar']) }}" class="talk-avatar">
+                @else
+                    <div class="talk-avatar flex items-center justify-center bg-[#4d1a1a]">
+                        <i class="fas fa-user text-[#d4af37]"></i>
+                    </div>
+                @endif
                 <div class="talk-info">
                     <div class="talk-header">
                         <span class="talk-name">{{ $talk['name'] }}</span>
@@ -50,7 +56,13 @@
     <div id="pane-requests" class="talk-content-pane">
         @forelse($requestTalks as $talk)
             <a href="{{ route($targetRoute, $talk['partner_id']) }}" class="talk-item">
-                <img src="{{ asset($talk['avatar']) }}" class="talk-avatar" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=No+Image&background=4d1a1a&color=fff';">
+                @if(!empty($talk['avatar']) && file_exists(public_path($talk['avatar'])))
+    <               img src="{{ asset($talk['avatar']) }}" class="talk-avatar">
+                @else
+                    <div class="talk-avatar flex items-center justify-center bg-[#4d1a1a]">
+                        <i class="fas fa-user text-[#d4af37]"></i>
+                    </div>
+                @endif
                 <div class="talk-info">
                     <div class="talk-header">
                         <span class="talk-name">{{ $talk['name'] }}</span>
