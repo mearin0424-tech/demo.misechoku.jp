@@ -19,31 +19,32 @@
 
 <header id="global-header" class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[var(--max-content-width)] h-[var(--header-height)] bg-[#220a0a] border-b border-[#4d1a1a] z-[1000] flex items-center px-4">
     
-    {{-- 【左側スロット】(幅 80px 固定で左右のバランスを取る) --}}
+    {{-- 【左側スロット】(幅 80px 固定) --}}
     <div class="w-[80px] flex items-center justify-start">
         @if($showBackButton)
-            {{-- 戻るボタン：ホワイト、太めのアイコン、クリックエリアを広く --}}
+            {{-- 戻るボタン：サイズを少し抑えつつホワイトを維持 --}}
             <a href="javascript:history.back()" class="flex items-center text-white no-underline hover:opacity-70 transition-opacity py-2">
-                <i class="fas fa-chevron-left text-2xl"></i>
+                <i class="fas fa-chevron-left text-xl"></i>
             </a>
         @else
-            {{-- ロゴ：高さを h-7 (約28px) に制限して元のサイズ感へ --}}
+            {{-- ロゴ：高さを h-5 (20px) に縮小してスマートに --}}
             <a href="{{ route(request()->is('cast/*') ? 'cast.home' : 'shop.home') }}" class="flex items-center">
-                <img src="{{ asset('assets/images/common/logo-yoko.png') }}" alt="ミセチョク" class="h-7 w-auto object-contain">
+                <img src="{{ asset('assets/images/common/logo-yoko.png') }}" alt="ミセチョク" class="h-5 w-auto object-contain">
             </a>
         @endif
     </div>
 
-    {{-- 【中央スロット】(ロゴ表示画面では空、戻る画面ではタイトル表示) --}}
+    {{-- 【中央スロット】 --}}
     <div class="flex-1 text-center">
         @if($showBackButton)
-            <h1 class="text-white text-base font-bold tracking-wider serif-font mb-0">
+            {{-- タイトル：text-sm (14px) に落として他と統一 --}}
+            <h1 class="text-white text-sm font-bold tracking-widest serif-font mb-0 opacity-90">
                 @yield('header_title', $currentEngTitle)
             </h1>
         @endif
     </div>
 
-    {{-- 【右側スロット】(幅 120px 固定：通知・タスク・メニューを常に同じ位置に) --}}
+    {{-- 【右側スロット】(幅 120px 固定) --}}
     <div class="w-[120px] flex items-center justify-end gap-2">
         {{-- タスク --}}
         <button class="w-8 h-8 rounded-full bg-[#3d2a2a] flex items-center justify-center text-white border border-[#4d1a1a] relative">

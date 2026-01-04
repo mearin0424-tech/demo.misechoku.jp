@@ -411,3 +411,23 @@
 
 .btn-approve:active { background: rgba(255,255,255,0.1); }
 .btn-reject:active { background: rgba(255,255,255,0.05); }
+
+/* リクエストカード内のリンクエリア */
+.request-upper-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.2s;
+    border-radius: 15px 15px 0 0; /* 上部だけ角丸 */
+}
+
+/* タップした時に少し暗くしてフィードバックを出す */
+.request-upper-link:active {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.request-main {
+    padding: 5px; /* リンク内の余白 */
+    display: flex;
+    gap: 15px;
+}

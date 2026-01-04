@@ -9,8 +9,12 @@
 @section('content')
 @php
     $isCast = request()->is('cast/*');
+    // タブ名と言語の切り替え
     $requestTabText = $isCast ? 'オファー' : 'リクエスト';
+    // 遷移先ルートの切り替え
     $targetRoute = $isCast ? 'cast.talk.room' : 'shop.talk.room';
+    // プロフィール詳細へのルート切り替え
+    $profileRoute = $isCast ? 'cast.user.show' : 'shop.cast.show';
 @endphp
 
 {{-- タブメニュー --}}
@@ -26,26 +30,26 @@
     <div id="pane-ongoing" class="talk-content-pane active">
         @forelse($ongoingTalks as $talk)
             <a href="{{ route($targetRoute, $talk['partner_id']) }}" class="talk-item">
-                @if(!empty($talk['avatar']) && file_exists(public_path($talk['avatar'])))
-    <               img src="{{ asset($talk['avatar']) }}" class="talk-avatar">
+                @if(!empty($talk['avatar']))
+                    <img src="{{ asset($talk['avatar']) }}" class="talk-avatar" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($talk['name']) }}&background=4d1a1a&color=fff';">
                 @else
                     <div class="talk-avatar flex items-center justify-center bg-[#4d1a1a]">
                         <i class="fas fa-user text-[#d4af37]"></i>
                     </div>
                 @endif
+                
                 <div class="talk-info">
                     <div class="talk-header">
                         <span class="talk-name">{{ $talk['name'] }}</span>
                         <span class="talk-time">{{ $talk['last_time'] }}</span>
                     </div>
-                    {{-- 前略：ループの中身を以下のように調整 --}}
+                    
                     <div class="flex justify-between items-center">
                         <div class="flex items-center min-width-0">
                             <p class="talk-last-msg">{{ $talk['last_message'] }}</p>
                             
-                            {{-- 自分が最後に送った場合のみ既読状態を表示 --}}
-                            @if($talk['last_message_by_me'])
-                                @if($talk['is_read'])
+                            @if(isset($talk['last_message_by_me']) && $talk['last_message_by_me'])
+                                @if(isset($talk['is_read']) && $talk['is_read'])
                                     <span class="talk-status">既読</span>
                                 @else
                                     <span class="talk-status unread">送付済</span>
@@ -53,7 +57,7 @@
                             @endif
                         </div>
 
-                        @if($talk['unread_count'] > 0)
+                        @if(isset($talk['unread_count']) && $talk['unread_count'] > 0)
                             <span class="unread-badge">{{ $talk['unread_count'] }}</span>
                         @endif
                     </div>
@@ -67,37 +71,41 @@
         @endforelse
     </div>
 
-    {{-- リクエスト / オファー パネル --}}
+    {{-- 2. リクエスト / オファー パネル --}}
     <div id="pane-requests" class="talk-content-pane">
         @forelse($requestTalks as $talk)
-            <div class="request-card">
-                <div class="request-main">
-                    <img src="{{ asset($talk['avatar']) }}" class="request-img" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ $talk['name'] }}&background=4d1a1a&color=fff';">
-                    
-                    <div class="request-content">
-                        <div class="request-top-row">
-                            <div class="request-user-info">
-                                <div class="name">{{ $talk['name'] }} ({{ $talk['age'] }})</div>
-                                <div class="location"><i class="fas fa-map-marker-alt"></i>{{ $talk['location'] }}</div>
-                            </div>
-                            <span class="talk-time">{{ $talk['last_time'] }}</span>
-                        </div>
+            <div class="request-card" data-id="{{ $talk['partner_id'] }}">
+                {{-- 画像とプロフィール情報をリンクにする --}}
+                <a href="{{ route($profileRoute, $talk['partner_id']) }}" class="request-upper-link no-underline">
+                    <div class="request-main">
+                        <img src="{{ asset($talk['avatar']) }}" 
+                             class="request-img" 
+                             onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($talk['name']) }}&background=4d1a1a&color=fff';">
                         
-                        <div class="request-msg-preview">
-                            {{ $talk['last_message'] }}
+                        <div class="request-content">
+                            <div class="request-top-row">
+                                <div class="request-user-info">
+                                    <div class="name">{{ $talk['name'] }} ({{ $talk['age'] }})</div>
+                                    <div class="location"><i class="fas fa-map-marker-alt"></i>{{ $talk['location'] }}</div>
+                                </div>
+                                <span class="talk-time">{{ $talk['last_time'] }}</span>
+                            </div>
+                            
+                            <div class="request-msg-preview">
+                                {{ $talk['last_message'] }}
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="request-actions">
-                {{-- 承認ボタン：トークルームへのリンクにする --}}
-                <a href="{{ route($targetRoute, $talk['partner_id']) }}" class="btn-action btn-approve">
-                    <i class="fas fa-check"></i> 承認
                 </a>
-                {{-- 拒否ボタン：JSで制御するクラスを付与 --}}
-                <button type="button" class="btn-action btn-reject js-reject-request">
-                    <i class="fas fa-times"></i> 拒否
-                </button>
+
+                {{-- アクションボタン（承認・拒否） --}}
+                <div class="request-actions">
+                    <a href="{{ route($targetRoute, $talk['partner_id']) }}" class="btn-action btn-approve">
+                        <i class="fas fa-check"></i> 承認
+                    </a>
+                    <button type="button" class="btn-action btn-reject js-reject-request">
+                        <i class="fas fa-times"></i> 拒否
+                    </button>
                 </div>
             </div>
         @empty

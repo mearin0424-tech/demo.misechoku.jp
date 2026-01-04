@@ -13,6 +13,12 @@ class TalkController extends Controller
      */
     public function index()
     {
+        $isCast = request()->is('cast/*');
+    
+        // 相手のプロフィールを表示するためのルート名
+        // キャストがログイン中ならユーザー詳細へ、店舗/ユーザーならキャスト詳細へ
+        $profileRoute = $isCast ? 'cast.user.show' : 'shop.cast.show';
+        
         // 「やり取り中」のテストデータ
         $ongoingTalks = [
         [
@@ -46,7 +52,7 @@ class TalkController extends Controller
             'name' => 'Saki',
             'age' => 30,
             'location' => '六本木',
-            'avatar' => 'storage/mock/casts/1.png',
+            'avatar' => 'storage/mock/casts/1-1.png',
             'last_message' => '初めまして！今夜空いていますか？',
             'last_time' => '1時間前',
             'unread_count' => 1,
@@ -56,7 +62,7 @@ class TalkController extends Controller
             'name' => 'Tanaka',
             'age' => 30,
             'location' => '渋谷',
-            'avatar' => 'storage/mock/users/2.png',
+            'avatar' => 'storage/mock/users/2-1.png',
             'last_message' => '初めまして！今夜空いていますか？',
             'last_time' => '1時間前',
             'unread_count' => 1,
@@ -66,7 +72,7 @@ class TalkController extends Controller
             'name' => 'Sato',
             'age' => 30,
             'location' => '新宿',
-            'avatar' => 'storage/mock/users/3.png',
+            'avatar' => 'storage/mock/users/3-1.png',
             'last_message' => '初めまして！今夜空いていますか？',
             'last_time' => '1時間前',
             'unread_count' => 1,
@@ -76,7 +82,7 @@ class TalkController extends Controller
             'name' => 'Yumi',
             'age' => 28,
             'location' => '恵比寿',
-            'avatar' => 'storage/mock/casts/4.png',
+            'avatar' => 'storage/mock/casts/4-1.png',
             'last_message' => '初めまして！今夜空いていますか？',
             'last_time' => '2時間前',
             'unread_count' => 1,
@@ -86,9 +92,8 @@ class TalkController extends Controller
     $ongoingTalks = collect($ongoingTalks)->sortByDesc('sort_key')->values()->all();
     $requestTalks = collect($requestTalks)->sortByDesc('sort_key')->values()->all();
 
-    return view('common.talk.index', compact('ongoingTalks', 'requestTalks'));
+    return view('common.talk.index', compact('ongoingTalks', 'requestTalks', 'profileRoute'));
     }
-
     /**
      * トークルーム
      */
@@ -109,7 +114,7 @@ class TalkController extends Controller
                 'created_at' => Carbon::now()->subHour(),
             ],
             (object)[
-                'content' => 'またのご来店をお待ちしておりますね！',
+                'content' => 'またよろしくお願いいたします！',
                 'is_mine' => false,
                 'created_at' => Carbon::now()->subMinutes(10),
             ],
