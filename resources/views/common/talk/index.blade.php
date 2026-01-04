@@ -24,7 +24,7 @@
     <div id="pane-ongoing" class="talk-content-pane active">
         @forelse($ongoingTalks as $talk)
             <a href="{{ route($targetRoute, $talk['partner_id']) }}" class="talk-item">
-                <img src="{{ asset($talk['avatar']) }}" class="talk-avatar" onerror="this.src='{{ asset('assets/images/common/placeholder.png') }}'">
+                <img src="{{ asset($talk['avatar']) }}" class="talk-avatar" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=No+Image&background=4d1a1a&color=fff';">
                 <div class="talk-info">
                     <div class="talk-header">
                         <span class="talk-name">{{ $talk['name'] }}</span>
@@ -50,7 +50,7 @@
     <div id="pane-requests" class="talk-content-pane">
         @forelse($requestTalks as $talk)
             <a href="{{ route($targetRoute, $talk['partner_id']) }}" class="talk-item">
-                <img src="{{ asset($talk['avatar']) }}" class="talk-avatar" onerror="this.src='{{ asset('assets/images/common/placeholder.png') }}'">
+                <img src="{{ asset($talk['avatar']) }}" class="talk-avatar" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=No+Image&background=4d1a1a&color=fff';">
                 <div class="talk-info">
                     <div class="talk-header">
                         <span class="talk-name">{{ $talk['name'] }}</span>
