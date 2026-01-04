@@ -30,8 +30,8 @@
         {{-- ヘッダー --}}
         @include('layouts.parts.header')
 
-        {{-- オコジョガイド：サブヘッダーとして表示 --}}
-        @include('layouts.parts.character-guide')
+        {{-- @yield('guide_message') で各ページの設定内容を注入する --}}
+        @include('layouts.parts.character-guide', ['guideMessage' => $__env->yieldContent('guide_message')])
 
         {{-- メインコンテンツ --}}
         <main id="main-content">

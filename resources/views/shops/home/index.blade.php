@@ -4,14 +4,13 @@
 @section('body-class', 'no-scroll')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/character-guide.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/home.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/character-guide.css') }}">
 @endpush
 
-@section('content')
-{{-- 共通ガイドをここで読み込み (メッセージをセット) --}}
-@include('layouts.parts.character-guide', ['guideMessage' => '上下でキャストを変更、左右で写真をチェックできるよ！'])
+@section('guide_message', '上下でキャストを変更、左右で写真をチェックできるよ！')
 
+@section('content')
 <div id="home-screen">
     {{-- メインスワイパー（上下） --}}
     <div class="main-swiper swiper">
