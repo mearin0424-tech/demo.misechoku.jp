@@ -9,10 +9,12 @@ use App\Http\Controllers\Common\SettingController;
 use App\Http\Controllers\Auth\Cast\LoginController as CastLogin;
 use App\Http\Controllers\Auth\Shop\LoginController as ShopLogin;
 
+// 共通機能コントローラー
+use App\Http\Controllers\Common\TalkController;
+
 // 店舗側コントローラー
 use App\Http\Controllers\Shops\HomeController as ShopHome;
 use App\Http\Controllers\Shops\SearchController as ShopSearch;
-use App\Http\Controllers\Shops\TalkController as ShopTalk;
 use App\Http\Controllers\Shops\MypageController as ShopMypage;
 use App\Http\Controllers\Shops\ProfileController as ShopProfile;
 use App\Http\Controllers\Shops\RecruitmentController as ShopRecruit;
@@ -72,9 +74,8 @@ Route::prefix('shop')->name('shop.')->group(function () {
 
     // トーク・メッセージ
     Route::prefix('talk')->name('talk.')->group(function () {
-        Route::get('/', [ShopTalk::class, 'index'])->name('index');
-        Route::get('/room/{cast_id}', [ShopTalk::class, 'room'])->name('room');
-        Route::post('/send', [ShopTalk::class, 'store'])->name('send'); // メッセージ送信API
+        Route::get('/', [TalkController::class, 'index'])->name('index');
+        Route::get('/room/{id}', [TalkController::class, 'room'])->name('room');
     });
 
     // つながり (Interaction)
@@ -127,6 +128,13 @@ Route::prefix('cast')->name('cast.')->group(function () {
     Route::get('/profile/{id}', [CastProfile::class, 'show'])->name('profile.show');
 });
 
+Route::prefix('cast')->name('cast.')->group(function () {
+    // ... 他のルート
+    Route::prefix('talk')->name('talk.')->group(function () {
+        Route::get('/', [TalkController::class, 'index'])->name('index');
+        Route::get('/room/{id}', [TalkController::class, 'room'])->name('room');
+    });
+});
 /*
 |--------------------------------------------------------------------------
 | 3. Common Protected Settings (共通設定)

@@ -6,42 +6,27 @@
 <style>
     .talk-list-container { padding: 10px; }
     .talk-item {
-        display: flex;
-        align-items: center;
-        padding: 15px;
-        background: #220a0a;
-        border: 1px solid #4d1a1a;
-        border-radius: 15px;
-        margin-bottom: 10px;
-        text-decoration: none;
-        transition: 0.3s;
+        display: flex; align-items: center; padding: 15px;
+        background: #220a0a; border: 1px solid #4d1a1a;
+        border-radius: 15px; margin-bottom: 10px;
+        text-decoration: none; transition: 0.3s;
     }
     .talk-item:active { transform: scale(0.98); background: #3d1414; }
     .talk-avatar {
-        width: 60px; height: 60px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 1px solid #d4af37;
-        margin-right: 15px;
+        width: 60px; height: 60px; border-radius: 50%;
+        object-fit: cover; border: 1px solid #d4af37; margin-right: 15px;
     }
     .talk-info { flex: 1; min-width: 0; }
     .talk-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
     .talk-name { font-weight: bold; color: #f5ecec; font-size: 1.1rem; }
     .talk-time { font-size: 0.75rem; color: #888; }
     .talk-last-msg {
-        font-size: 0.85rem;
-        color: #d1c1c1;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        font-size: 0.85rem; color: #d1c1c1;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
     .unread-badge {
-        background: #b91c1c;
-        color: #fff;
-        font-size: 0.7rem;
-        padding: 2px 8px;
-        border-radius: 10px;
-        margin-left: 10px;
+        background: #b91c1c; color: #fff; font-size: 0.7rem;
+        padding: 2px 8px; border-radius: 10px; margin-left: 10px;
     }
 </style>
 @endpush
@@ -50,11 +35,11 @@
 <div class="talk-list-container">
     @forelse($talks as $talk)
         @php
-            // ルート名を動的に判定（cast.talk.room か shop.talk.room）
-            $targetRoute = str_contains(Route::currentRouteName(), 'cast') ? 'cast.talk.room' : 'shop.talk.room';
-            $partnerId = $talk['partner_id'];
+            // ルート名を動的に判定（アクセスしているURLに/cast/が含まれるかどうか）
+            $isCast = request()->is('cast/*');
+            $targetRoute = $isCast ? 'cast.talk.room' : 'shop.talk.room';
         @endphp
-        <a href="{{ route($targetRoute, $partnerId) }}" class="talk-item">
+        <a href="{{ route($targetRoute, $talk['partner_id']) }}" class="talk-item">
             <img src="{{ asset($talk['avatar']) }}" class="talk-avatar" onerror="this.src='/assets/images/common/placeholder.png'">
             <div class="talk-info">
                 <div class="talk-header">
