@@ -31,7 +31,7 @@
                     @for($i=1; $i<=3; $i++)
                     <div class="swiper-slide photo-item" 
                             style="background-image: url('{{ asset("storage/mock/casts/{$cast['id']}-{$i}.png") }}');">
-                            <a href="{{ route('shop.cast.show', $cast['id']) }}" class="card-detail-link"></a>
+                            <a href="{{ route('cast.profile.show', $cast['id']) }}
                     </div>
                     @endfor
                  </div>

@@ -19,7 +19,7 @@ use App\Http\Controllers\Shops\RecruitmentController as ShopRecruit;
 use App\Http\Controllers\Shops\ReviewController as ShopReview;
 use App\Http\Controllers\Shops\InteractionController as ShopInteraction;
 
-
+use App\Http\Controllers\Casts\ProfileController as CastProfile;
 /*
 |--------------------------------------------------------------------------
 | リダイレクト
@@ -30,7 +30,7 @@ use App\Http\Controllers\Shops\InteractionController as ShopInteraction;
 Route::redirect('/shop', '/shop/home');
 
 // /cast にアクセスしたら /cast/home (または指定のパス) へリダイレクト
-Route::redirect('/cast', '/shop/home'); // 現在は店側モックのみなので暫定的にこちらへ
+Route::redirect('/cast', '/cast/home'); // 現在は店側モックのみなので暫定的にこちらへ
 
 /*
 |--------------------------------------------------------------------------
@@ -69,7 +69,8 @@ Route::prefix('shop')->name('shop.')->group(function () {
     // ホーム・検索
     Route::get('/home', [ShopHome::class, 'index'])->name('home');
     Route::get('/search', [ShopSearch::class, 'index'])->name('search.index');
-    Route::get('/search/cast/{id}', [ShopSearch::class, 'show'])->name('cast.show');
+    // キャスト詳細ページ
+    Route::get('/cast/profile/{id}', [CastProfile::class, 'show'])->name('cast.profile.show');
 
     // トーク・メッセージ
     Route::prefix('talk')->name('talk.')->group(function () {
