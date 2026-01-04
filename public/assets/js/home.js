@@ -14,32 +14,20 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         speed: 400,
         resistanceRatio: 0,
-        touchStartPreventDefault: false,
+        preventClicks: false, // クリックを許可
+        preventClicksPropagation: false
     });
 
-    // 2. メインの上下スワイプ (Modern Creative Effect)
+    // 2. メインの上下スワイプ (安定の中央配置)
     const mainSwiper = new Swiper('.main-swiper', {
         direction: 'vertical',
         slidesPerView: 1,
-        centeredSlides: true,
+        centeredSlides: true, // これによりカードが中央に固定されます
         loop: true,
-        speed: 700,
+        speed: 500,
         mousewheel: true,
-        
-        // 立体的なスワイプエフェクト
-        effect: 'creative',
-        creativeEffect: {
-            prev: {
-                shadow: true,
-                translate: [0, "-120%", -500],
-                rotate: [0, 0, -15],
-            },
-            next: {
-                shadow: true,
-                translate: [0, "120%", -500],
-                rotate: [0, 0, 15],
-            },
-        },
+        // ★★★ モダンモーションはあとで検討
+        effect: 'slide', 
         on: {
             init: function () {
                 this.update();
@@ -48,10 +36,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // 3. クリックイベントの伝播停止 (ボタン類)
-    const stopProps = document.querySelectorAll('.stop-propagation');
-    stopProps.forEach(el => {
-        el.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
-        el.addEventListener('mousedown', (e) => e.stopPropagation());
+    const actionOverlays = document.querySelectorAll('.card-actions-overlay');
+    actionOverlays.forEach(el => {
+    el.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+    el.addEventListener('mousedown', (e) => e.stopPropagation());
+    el.addEventListener('click', (e) => e.stopPropagation()); // ボタンクリック時に詳細へ飛ばないように
     });
 
     // 4. アクションボタンの簡易動作

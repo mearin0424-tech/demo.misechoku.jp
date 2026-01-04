@@ -1,2 +1,146 @@
-.badge-approved { position: absolute; bottom: 0; right: 0; background: #D4AF37; color: #000; font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
-.specs-grid { color: #fff; }
+/* プロフィール全体 */
+.cast-profile-wrapper {
+    padding-bottom: 100px;
+    background: var(--color-main);
+}
+
+/* ヒーロー写真 */
+.profile-hero {
+    position: relative;
+    width: 100%;
+    height: 60vh;
+    background: #000;
+}
+.profile-hero .profile-swiper {
+    width: 100%;
+    height: 100%;
+}
+.profile-hero-img {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+}
+
+/* 戻るボタン（ヒーロー画像上） */
+.btn-hero-back {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    width: 40px;
+    height: 40px;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(5px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-decoration: none;
+}
+
+/* メインコンテンツ */
+.profile-main-contents {
+    margin-top: -30px; /* 画像に少し被せる */
+    position: relative;
+    z-index: 10;
+}
+
+.profile-basic-info {
+    margin-bottom: 25px;
+    border-radius: 20px !important;
+}
+
+.cast-spec-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(212, 175, 55, 0.2);
+}
+.spec-item .label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--color-gold);
+    margin-bottom: 3px;
+}
+.spec-item .value {
+    font-size: 0.95rem;
+    color: #fff;
+}
+
+/* セクションタイトル */
+.section-title-luxury {
+    font-family: var(--font-serif);
+    color: var(--color-gold);
+    font-size: 1.2rem;
+    margin: 30px 0 15px;
+    padding-left: 10px;
+    border-left: 3px solid var(--color-gold);
+}
+
+/* 自己紹介・インタビュー */
+.intro-text p {
+    line-height: 1.8;
+    font-size: 0.95rem;
+    color: var(--color-text);
+}
+.interview-item {
+    margin-bottom: 15px;
+}
+.interview-item .question {
+    color: var(--color-gold);
+    font-weight: bold;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+.interview-item .answer {
+    font-size: 0.9rem;
+}
+
+/* 下部固定アクション */
+.profile-actions-sticky {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: var(--max-content-width);
+    padding: 15px 20px calc(15px + env(safe-area-inset-bottom));
+    background: linear-gradient(to top, var(--color-main), transparent);
+    display: flex;
+    gap: 12px;
+    z-index: 1000;
+}
+.action-btn {
+    height: 50px;
+    border-radius: 25px;
+    border: 1px solid var(--color-gold);
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+.action-btn.like {
+    flex: 2;
+    background: var(--color-accent);
+    color: #fff;
+    border: none;
+}
+.action-btn.message {
+    flex: 2;
+    background: #fff;
+    color: #000;
+    border: none;
+}
+.action-btn.keep {
+    width: 50px;
+    background: rgba(255,255,255,0.1);
+    color: var(--color-gold);
+    backdrop-filter: blur(10px);
+}

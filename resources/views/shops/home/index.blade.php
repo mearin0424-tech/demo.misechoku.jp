@@ -25,18 +25,18 @@
             @foreach($casts as $cast)
             <div class="swiper-slide cast-card glass-card">
                 
-                {{-- 写真スワイパー（左右） --}}
-                <div class="swiper photo-swiper stop-propagation">
-                    <div class="swiper-wrapper">
-                        @for($i=1; $i<=3; $i++)
-                        <div class="swiper-slide photo-item" 
-                             style="background-image: url('{{ asset("storage/mock/casts/{$cast['id']}-{$i}.png") }}');">
-                             <a href="{{ route('shop.cast.show', $cast['id']) }}" class="card-detail-link"></a>
-                        </div>
-                        @endfor
+            {{-- 写真スワイパー（左右） --}}
+            <div class="swiper photo-swiper stop-propagation">
+                <div class="swiper-wrapper">
+                    @for($i=1; $i<=3; $i++)
+                    <div class="swiper-slide photo-item" 
+                            style="background-image: url('{{ asset("storage/mock/casts/{$cast['id']}-{$i}.png") }}');">
+                            <a href="{{ route('shop.cast.show', $cast['id']) }}" class="card-detail-link"></a>
                     </div>
-                    <div class="swiper-pagination photo-pagination"></div>
-                </div>
+                    @endfor
+                 </div>
+                <div class="swiper-pagination photo-pagination"></div>
+            </div>
 
                 {{-- アクションボタン（CSSで位置を上に調整済み） --}}
                 <div class="card-actions-overlay stop-propagation">
@@ -64,17 +64,17 @@
 
 
 
-    {{-- ガイドキャラクター（左右の順序を入れ替え） --}}
+    {{-- ガイドキャラクター --}}
     <div id="discovery-guide">
-
-        <div id="guide-speech-bubble">
-            <p>上下でキャストを変更、左右で写真をチェック！</p>
-        </div>
+        {{-- row-reverse を使うため、HTML上はこの順序でOK --}}
         <div id="guide-character-wrap">
             <img src="{{ asset('assets/images/guide/okojyo.png') }}" id="guide-character" alt="ガイド">
         </div>
-
+        <div id="guide-speech-bubble">
+            <p>上下でキャストを変更、左右で写真をチェックできるよ！</p>
+        </div>
     </div>
+
 </div>
 @endsection
 

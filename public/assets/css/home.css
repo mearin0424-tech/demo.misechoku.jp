@@ -23,23 +23,21 @@
 /* --- Centered Cast Card --- */
 .cast-card {
     position: relative;
-	
-	/* カード1枚のみを表示するため、幅・高さをコンテナに合わせる */
+    /* 横幅を画面に合わせつつ、中央配置を優先 */
     width: 94% !important;
-	/* 縦幅：細長さを解消し、上下のヘッダー・フッター・オコジョ領域を確保 (100% - 180px) */
-    height: calc(100% - 180px);
     max-width: 500px;
-    max-height: 700px; 
-    margin: auto; /* スライド内中央配置 */
+    height: calc(100dvh - 200px) !important;
+    max-height: 750px;
+    margin: 0 auto !important; /* 強制的に中央へ */
     border-radius: 24px;
     overflow: hidden;
+    background: #1a1a1a;
+    /* 立体感の演出 */
+    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+    padding: 0 !important;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 1px 2px rgba(255,255,255,0.1) inset;
-    background: #1a1a1a;
-    /* app.cssの.glass-cardのpaddingが干渉している場合、中身を端まで広げるためリセット */
-    padding: 0 !important; 
 }
 
 /* --- Photo Swiper (Nested) --- */
@@ -61,14 +59,71 @@
 
 .card-detail-link {
     display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
+    z-index: 5; /* 写真より上で、右側のボタン(20)より下 */
 }
 
 .photo-pagination.swiper-pagination-bullets {
-    bottom: auto;
-    top: 15px;
-    z-index: 15;
+    bottom: auto !important;
+    top: 15px !important; /* カードの上端から15px */
+    z-index: 50 !important; /* 最前面に */
+}
+
+.photo-pagination .swiper-pagination-bullet {
+    background: #fff !important;
+    opacity: 0.5;
+}
+
+ご要望に合わせて、カードの配置（中央寄せ）、ガイド（オコジョ）の左右反転、および写真ナビゲーション（●）の再表示と位置調整を行いました。
+
+モダンな動き（Creative Effect）は、スライド時の座標計算が複雑で中央からズレやすいため、より安定して中央に配置される標準的なスワイプに戻しつつ、カード自体の立体感をCSSで強調しています。
+
+1. public/assets/css/home.css の修正
+カードの配置とオコジョの位置、およびドット（●）のスタイルを調整しました。
+
+CSS
+
+/* --- Centered Cast Card (中央寄せの再徹底) --- */
+.cast-card {
+    position: relative;
+    /* 横幅を画面に合わせつつ、中央配置を優先 */
+    width: 94% !important;
+    max-width: 500px;
+    height: calc(100dvh - 200px) !important;
+    max-height: 750px;
+    margin: 0 auto !important; /* 強制的に中央へ */
+    border-radius: 24px;
+    overflow: hidden;
+    background: #1a1a1a;
+    /* 立体感の演出 */
+    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+/* --- Photo Pagination (●をカード上部に表示) --- */
+.photo-pagination.swiper-pagination-bullets {
+    bottom: auto !important;
+    top: 15px !important; /* カードの上端から15px */
+    z-index: 50 !important; /* 最前面に */
+}
+
+.photo-pagination .swiper-pagination-bullet {
+    background: #fff !important;
+    opacity: 0.5;
+}
+
+.photo-pagination .swiper-pagination-bullet-active {
+    background: var(--color-gold) !important;
+    opacity: 1;
+    width: 20px; /* アクティブなドットを少し長くしてモダンに */
+    border-radius: 4px;
 }
 
 /* --- Info Overlay (下部15%を濃いグラデーションに) --- */
@@ -130,7 +185,7 @@
     z-index: 20;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 15x;
 }
 
 .action-circle-btn {
@@ -158,16 +213,13 @@
 .action-circle-btn.keep:hover { background: rgba(255, 204, 0, 0.9); }
 .action-circle-btn.message:hover { background: rgba(0, 122, 255, 0.9); }
 
-/* --- Swipe Guide --- */
+/* --- Swipe Guide (中央下部) --- */
 .swipe-guide-overlay {
     position: absolute;
-    bottom: 85px; /* カードとフッターの間 */
+    bottom: 80px; 
     left: 50%;
     transform: translateX(-50%);
-    width: auto;
     z-index: 100;
-    text-align: center;
-    pointer-events: none;
 }
 
 .swipe-arrow-anim {
@@ -194,41 +246,34 @@
     right: 15px;
     z-index: 200;
     display: flex;
-    flex-direction: row;
+    /* row-reverse でオコジョを右、吹き出しを左に */
+    flex-direction: row-reverse; 
     align-items: flex-end;
     pointer-events: none;
 }
 
 #guide-speech-bubble {
     background: #fff;
-    padding: 6px 15px; /* 高さを低く、横を広く */
-    border-radius: 12px;
-    margin-bottom: 35px;
-    margin-left: 8px; /* キャラとの間隔 */
+    padding: 8px 15px;
+    border-radius: 15px 15px 0 15px; /* 右下の角だけ尖らせる（しっぽ代わり） */
+    margin-bottom: 40px;
+    margin-right: 8px; /* オコジョとの間隔 */
     position: relative;
-    max-width: 220px; /* 横長に */
+    max-width: 240px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.4);
     font-size: 0.75rem;
     color: #333;
-    line-height: 1.2;
+    line-height: 1.3;
 }
 
-/* 吹き出しの尻尾の位置を左側に調整 */
+/* 吹き出しの尻尾 いったんなくす */
 #guide-speech-bubble::after {
-    content: '';
-    position: absolute;
-    bottom: -8px;
-    left: 15px; /* キャラ側に寄せる */
-    right: auto;
-    border-width: 8px 8px 0;
-    border-style: solid;
-    border-color: #fff transparent transparent;
+    display: none; 
 }
 
 #guide-character-wrap img {
-    width: 65px;
+    width: 70px;
     height: auto;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
 }
 
 /* --- Responsive Adjustments --- */
