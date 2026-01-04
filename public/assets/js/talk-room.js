@@ -19,6 +19,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // 初期表示で最下部へ
     scrollToBottom();
 
+    // テキストエリアの自動リサイズ
+    messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+
     // 送信処理
     chatForm.addEventListener('submit', async function(e) {
         e.preventDefault();

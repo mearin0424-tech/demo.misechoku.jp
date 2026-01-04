@@ -23,15 +23,15 @@
 
     {{-- メッセージ表示エリア --}}
     <div class="chat-messages" id="chat-messages">
-        @foreach($messages as $msg)
-            {{-- 自分が送ったメッセージ (is_mine) は msg-right クラスで右寄せ --}}
-            <div class="message-row {{ $msg->is_mine ? 'msg-right' : 'msg-left' }}">
-                <div class="message-bubble">
-                    <p>{{ $msg->content }}</p>
-                    <span class="msg-time">{{ $msg->created_at->format('H:i') }}</span>
-                </div>
+    @foreach($messages as $msg)
+        <div class="flex {{ $msg->is_mine ? 'justify-end msg-right' : 'justify-start msg-left' }} w-full mb-4">
+            <div class="message-bubble">
+                <span class="msg-time block text-right text-[10px] opacity-60 mt-1">
+                    {{ $msg->created_at->format('H:i') }}
+                </span>
             </div>
-        @endforeach
+        </div>
+    @endforeach
     </div>
 
     {{-- 入力エリア --}}

@@ -39,17 +39,47 @@ class TalkController extends Controller
         ],
         ];
 
-        // 「リクエスト / オファー」のテストデータ
-        $requestTalks = [
+        // 「リクエスト / オファー」のデータ (ID 1〜4)
+    $requestTalks = [
         [
-            'partner_id' => 4,
-            'name' => 'サキ',
-            'avatar' => 'storage/mock/casts/4.png',
+            'partner_id' => 1,
+            'name' => 'Saki',
+            'age' => 30,
+            'location' => '六本木',
+            'avatar' => 'storage/mock/casts/1.png',
             'last_message' => '初めまして！今夜空いていますか？',
             'last_time' => '1時間前',
-            'sort_key' => Carbon::now()->subHour(),
             'unread_count' => 1,
-            'last_message_by_me' => false,
+        ],
+        [
+            'partner_id' => 2,
+            'name' => 'Tanaka',
+            'age' => 30,
+            'location' => '渋谷',
+            'avatar' => 'storage/mock/users/2.png',
+            'last_message' => '初めまして！今夜空いていますか？',
+            'last_time' => '1時間前',
+            'unread_count' => 1,
+        ],
+        [
+            'partner_id' => 3,
+            'name' => 'Sato',
+            'age' => 30,
+            'location' => '新宿',
+            'avatar' => 'storage/mock/users/3.png',
+            'last_message' => '初めまして！今夜空いていますか？',
+            'last_time' => '1時間前',
+            'unread_count' => 1,
+        ],
+        [
+            'partner_id' => 4,
+            'name' => 'Yumi',
+            'age' => 28,
+            'location' => '恵比寿',
+            'avatar' => 'storage/mock/casts/4.png',
+            'last_message' => '初めまして！今夜空いていますか？',
+            'last_time' => '2時間前',
+            'unread_count' => 1,
         ],
     ];
 
@@ -65,7 +95,7 @@ class TalkController extends Controller
     public function room($id)
     {
         // 本来はIDから相手の名前を取得（モックでは仮定）
-        $partnerName = ($id == 1) ? "アンナ" : "ゲスト"; 
+        $partnerName = ($id == 1) ? "愛華" : "ゲスト"; 
 
         $messages = [
             (object)[
