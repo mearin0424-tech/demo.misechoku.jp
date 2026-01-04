@@ -194,7 +194,7 @@
     right: 15px;
     z-index: 200;
     display: flex;
-    flex-direction: row; /* 画像が左、吹き出しが右 */
+    flex-direction: row;
     align-items: flex-end;
     pointer-events: none;
 }

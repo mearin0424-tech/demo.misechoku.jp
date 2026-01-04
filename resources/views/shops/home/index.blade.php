@@ -10,6 +10,15 @@
 
 @section('content')
 <div id="home-screen">
+
+    {{-- スワイプガイド --}}
+    <div class="swipe-guide-overlay">
+        <div class="swipe-arrow-anim">
+            <i class="fas fa-chevron-up"></i>
+            <span>SWIPE</span>
+        </div>
+    </div>
+
     {{-- メインスワイパー（上下） --}}
     <div class="main-swiper-container swiper main-swiper">
         <div class="swiper-wrapper">
@@ -38,7 +47,7 @@
                     </a>
                 </div>
 
-                {{-- プロフィール情報（CSSで下部15%のグラデーションを強化済み） --}}
+                {{-- プロフィール情報） --}}
                 <div class="card-bottom-info">
                     <h2 class="cast-name serif-font">{{ $cast['name'] }} <span class="age">{{ $cast['age'] }}</span></h2>
                     <div class="card-location"><i class="fas fa-map-marker-alt"></i> 六本木</div>
@@ -53,24 +62,18 @@
         </div>
     </div>
 
-    {{-- 中央下部のスワイプガイド（HTML上の位置を移動） --}}
-    <div class="swipe-guide-overlay">
-        <div class="swipe-arrow-anim">
-            <i class="fas fa-chevron-up"></i>
-            <span>SWIPE</span>
-        </div>
-    </div>
+
 
     {{-- ガイドキャラクター（左右の順序を入れ替え） --}}
     <div id="discovery-guide">
-        {{-- 画像を先に記述することで、左側に配置 --}}
-        <div id="guide-character-wrap">
-            <img src="{{ asset('assets/images/guide/okojyo.png') }}" id="guide-character" alt="ガイド">
-        </div>
-        {{-- 吹き出しを後に記述することで、右側に配置 --}}
+
         <div id="guide-speech-bubble">
             <p>上下でキャストを変更、左右で写真をチェック！</p>
         </div>
+        <div id="guide-character-wrap">
+            <img src="{{ asset('assets/images/guide/okojyo.png') }}" id="guide-character" alt="ガイド">
+        </div>
+
     </div>
 </div>
 @endsection
