@@ -19,7 +19,7 @@
 
     <div class="contents">
         {{-- パネル1：タイムライン --}}
-        <div id="pane-timeline" class="tab-pane active" style="display: block;">
+        <div id="pane-timeline" class="tab-pane active">
             @foreach($timelineData as $post)
             <div class="timeline-card">
                 <div class="tl-header">
@@ -35,7 +35,7 @@
         </div>
 
         {{-- パネル2：一覧・検索 --}}
-        <div id="pane-list" class="tab-pane" style="display: none;">
+        <div id="pane-list" class="tab-pane">
             <div class="search-filter-box">
                 <input type="text" placeholder="キーワード・エリア検索" class="w-full p-2 bg-[#2a1a1a] border border-[#4d1a1a] text-white">
             </div>
@@ -57,7 +57,7 @@
         </div>
 
         {{-- パネル3：AI --}}
-        <div id="pane-ai" class="tab-pane" style="display: none;">
+        <div id="pane-ai" class="tab-pane">
             <div class="text-center py-20">
                 <i class="fas fa-robot text-4xl text-[#d4af37] mb-4"></i>
                 <h3 class="text-white">AIマッチング</h3>

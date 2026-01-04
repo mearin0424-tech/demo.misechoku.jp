@@ -25,7 +25,7 @@
 
     <div class="talk-list-container">
         {{-- パネル1：やり取り中 --}}
-        <div id="pane-ongoing" class="tab-pane active" style="display: block;">
+        <div id="pane-ongoing" class="tab-pane active">
             @forelse($ongoingTalks as $talk)
                 <a href="{{ route($targetRoute, $talk['partner_id']) }}" class="talk-item">
                     <img src="{{ asset($talk['avatar']) }}" class="talk-avatar" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($talk['name']) }}&background=4d1a1a&color=fff';">
@@ -48,7 +48,7 @@
         </div>
 
         {{-- パネル2：リクエスト / オファー --}}
-        <div id="pane-requests" class="tab-pane" style="display: none;">
+        <div id="pane-requests" class="tab-pane">
             @forelse($requestTalks as $talk)
                 <div class="request-card">
                     @if(Route::has($profileRoute))

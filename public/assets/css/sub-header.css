@@ -1,7 +1,7 @@
 /* --- サブヘッダー（タブ）共通スタイル --- */
 .sub-header-wrapper {
     position: fixed;
-    top: 60px; /* ヘッダーの高さに密着 */
+    top: 60px; /* ヘッダーの高さ */
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
@@ -46,9 +46,23 @@
     box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
 }
 
-/* --- メインコンテンツの開始位置を修正 --- */
+/* --- メインコンテンツの開始位置 --- */
 .has-sub-header {
-    /* ヘッダー(60px) + サブヘッダー(38px) = 98px
-    */
-    padding-top: 98px !important;
+    padding-top: 98px !important; /* 60px + 38px */
+}
+
+/* 各画面の独自コンテナの余白をリセットして統一する */
+.has-sub-header .contents,
+.has-sub-header .talk-list-container,
+.has-sub-header .tab-content-container {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+/* タブパネルの表示制御 */
+.tab-pane {
+    display: none;
+}
+.tab-pane.active {
+    display: block;
 }
