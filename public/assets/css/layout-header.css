@@ -3,7 +3,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 60px; /* ここが60pxなら、ロゴ20pxは非常にスマートに見えます */
+    height: 60px;
     padding: 0 15px;
     background: rgba(30, 5, 5, 0.85);
     backdrop-filter: blur(15px);
@@ -14,9 +14,40 @@
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
-    max-width: var(--max-content-width); 
+    max-width: var(--max-content-width);
     box-sizing: border-box;
     z-index: 1500;
+}
+
+/* --- 左側：BACKボタン --- */
+.header-left {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    min-width: 80px;
+}
+
+.btn-back-container {
+    display: flex;
+    align-items: center;
+    gap: 6px; /* アイコンと文字の間隔 */
+    color: #fff; /* ホワイトに固定 */
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.btn-back-container:hover {
+    opacity: 0.7;
+}
+
+.btn-back-container i {
+    font-size: 1.1rem;
+}
+
+.btn-back-text {
+    font-size: 0.75rem; /* BACKの文字サイズ */
+    font-weight: bold;
+    letter-spacing: 0.5px;
 }
 
 /* 左右・中央のレイアウト固定 */
@@ -27,35 +58,54 @@
     min-width: 80px; /* ボタンやロゴの場所を確保 */
 }
 
-/* 【修正】ロゴのサイズ調整：28pxから20pxへ */
+/* ミセチョクロゴ */
 .header-logo-img {
-    height: 20px !important; /* 高さを20pxに抑えて高級感を出す */
+    height: 20px !important;
     width: auto;
     display: block;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
 
-/* 【修正】中央タイトルのサイズ調整：1remから0.85remへ */
 .header-center-title {
     flex: 2; /* 中央スロット */
     text-align: center;
     font-weight: bold;
-    color: #fff;
+    color: #d4af37;
     font-size: 0.85rem; /* 小さくして他と統一 */
-    letter-spacing: 2px; /* 文字間を空けて上品に */
+    letter-spacing: 2px; /* 文字間を空ける */
     font-family: var(--font-serif);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+ 
+    white-space: nowrap;     /* 改行禁止 */
+    overflow: hidden;        /* はみ出しを隠す */
+    text-overflow: ellipsis; /* 「...」を出す */
 }
 
 .header-right {
-    flex: 1; /* 右側スロット */
+    flex: 1;
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 8px;
-    min-width: 120px; /* アイコン3つ分を確保 */
+    gap: 15px; 
+    min-width: 120px;
+}
+
+.header-icon-btn {
+    background: none !important; /* 円形背景を削除 */
+    border: none !important;       /* 枠線を削除 */
+    padding: 0;
+    margin: 0;
+    width: auto;
+    height: auto;
+    color: #d4af37;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-icon-btn i {
+    font-size: 1.2rem; /* アイコン自体のサイズ感 */
 }
 
 /* 戻るボタンのホワイトカラーとサイズ */
@@ -128,17 +178,14 @@
     overflow-y: auto;
 }
 
-/* アイコンボタン自体のスタイル */
-.header-icon-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* 通知バッジの調整 */
+.badge-notify {
+    top: -5px;
+    right: -8px;
+    background: var(--color-accent);
     color: #fff;
-    cursor: pointer;
-    position: relative;
+    border-radius: 10px;
+    font-size: 0.6rem;
+    padding: 1px 4px;
+    position: absolute;
 }
