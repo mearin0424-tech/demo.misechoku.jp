@@ -31,7 +31,7 @@
                         <div class="swiper-slide photo-item" 
                              style="background-image: url('{{ asset("storage/mock/casts/{$cast['id']}-{$i}.png") }}');">
                              {{-- 【修正】閉じタグの不備を修正し、詳細リンクを配置 --}}
-                             <a href="{{ route('profile.show', $cast['id']) }}" class="card-detail-link"></a>
+                             <a href="{{ route('cast.profile.show', $cast['id']) }}" class="card-detail-link"></a>
                         </div>
                         @endfor
                     </div>
