@@ -2,7 +2,7 @@
 #home-screen {
     position: relative;
     width: 100%;
-    height: calc(100dvh - 60px - 75px);
+    height: 100%;
 
     /* ヘッダー・フッター・オコジョガイドを除いた残りの全領域 */
     flex: 1; /*親要素（#app）の中で、余っているスペースをすべて埋める*/
@@ -26,7 +26,6 @@
     position: relative;
     width: 94% !important;
     max-width: 500px;
-    /* 上下のマージンを考慮し、画面内に収まる高さに設定 */
     height: 94% !important;
     margin: auto !important;
     border-radius: 24px;
@@ -34,10 +33,10 @@
     background: #1a1a1a;
     box-shadow: 0 15px 35px rgba(0,0,0,0.6);
     padding: 0 !important;
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     justify-content: flex-end;
-    display: flex !important;
+    
 }
 
 /* --- Photo Swiper (左右スワイプ) --- */
@@ -95,11 +94,7 @@
     width: 100%;
     z-index: 30;
     padding: 100px 20px 25px;
-    background: linear-gradient(to top, 
-        rgba(0,0,0,0.95) 0%, 
-        rgba(0,0,0,0.7) 40%, 
-        transparent 100%
-    );
+    background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
     color: #fff;
     pointer-events: none; 
 }
@@ -145,7 +140,7 @@
 .card-actions-overlay {
     position: absolute;
     right: 15px;
-    bottom: 200px; /* 位置を調整 */
+    bottom: 200px; /* ガイドとかぶらない高さ */
     z-index: 40;
     display: flex;
     flex-direction: column;
