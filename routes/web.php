@@ -130,7 +130,7 @@ Route::prefix('shop')->name('shop.')->group(function () {
 Route::prefix('cast')->name('cast.')->group(function () {
     // ホーム・プロフィール
     Route::get('/home', [ShopHome::class, 'index'])->name('home'); 
-    Route::get('/profile/{id}', [CastProfile::class, 'show'])->name('profile.show');
+    Route::get('/profile/{id}', [CastProfile::class, 'show'])->name('cast.profile.show');
 
     // トーク・メッセージ
     Route::prefix('talk')->name('talk.')->group(function () {

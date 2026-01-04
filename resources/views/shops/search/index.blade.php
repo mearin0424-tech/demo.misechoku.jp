@@ -47,7 +47,7 @@
                         <div class="conn-name">{{ $cast['name'] }} ({{ $cast['age'] }})</div>
                     </div>
                     @if(Route::has('profile.show'))
-                        <a href="{{ route('profile.show', ['id' => $cast['id']]) }}" class="conn-action-btn">詳細</a>
+                        <a href="{{ route('cast.profile.show', ['id' => $cast['id']]) }}" class="conn-action-btn">詳細</a>
                     @else
                         <span class="text-xs opacity-30">詳細準備中</span>
                     @endif
