@@ -14,6 +14,8 @@ class HomeController extends Controller
         $casts = [
             ['id' => 1, 'name' => '美咲', 'age' => 23, 'tags' => ['モデル系', 'お酒強い']],
             ['id' => 2, 'name' => '愛華', 'age' => 21, 'tags' => ['癒やし系', '聞き上手']],
+            ['id' => 3, 'name' => 'さくら', 'age' => 25, 'tags' => ['元気系', 'トーク上手']],
+            ['id' => 4, 'name' => 'ナナ', 'age' => 22, 'tags' => ['清楚系', 'お酒弱い']],
         ];
 
         return view('shops.home.index', [
