@@ -16,7 +16,6 @@
 @endphp
 
 <div class="has-sub-header">
-    {{-- サブヘッダー：data-target と 下のIDを一致させています --}}
     @include('layouts.parts.sub-header', [
         'tabs' => [
             ['id' => 'pane-ongoing', 'label' => 'やり取り中', 'active' => true],

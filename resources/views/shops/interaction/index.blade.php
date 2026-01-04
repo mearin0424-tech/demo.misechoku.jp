@@ -10,12 +10,6 @@
 
 @section('content')
 <div class="has-sub-header">
-    {{-- 
-        共通サブヘッダーの導入
-        文字サイズ：0.75rem (CSS共通)
-        配置：top 60px 固定 (CSS共通)
-        ラベル：キープ / ライク / 足あと
-    --}}
     @include('layouts.parts.sub-header', [
         'tabs' => [
             ['id' => 'pane-keep', 'label' => 'キープ', 'active' => true],

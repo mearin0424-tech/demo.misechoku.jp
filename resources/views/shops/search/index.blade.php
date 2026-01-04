@@ -8,7 +8,7 @@
 @endpush
 
 @section('content')
-<div class="has-sub-header">
+
     @include('layouts.parts.sub-header', [
         'tabs' => [
             ['id' => 'pane-timeline', 'label' => 'タイムライン', 'active' => true],

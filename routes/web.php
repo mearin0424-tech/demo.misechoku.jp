@@ -28,9 +28,6 @@ use App\Http\Controllers\Casts\ProfileController as CastProfile;
 |--------------------------------------------------------------------------
 */
 
-// ドメイン にアクセスしたら /shop/home へリダイレクト
-Route::redirect('/', '/shop/home');
-
 // /shop にアクセスしたら /shop/home へリダイレクト
 Route::redirect('/shop', '/shop/home');
 
@@ -43,7 +40,9 @@ Route::redirect('/cast', '/cast/home'); // 現在は店側モックのみなの�
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', [PageController::class, 'welcome'])->name('welcome');
+//TODO: 実装していないのでいったんホームへ
+Route::redirect('/', '/shop/home');
+//Route::get('/', [PageController::class, 'welcome'])->name('welcome');
 
 // LP・サポート系
 Route::name('pages.')->group(function () {
