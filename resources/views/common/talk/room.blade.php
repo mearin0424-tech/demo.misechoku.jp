@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title', 'Talk')
 @section('content')
 @php
     $isCast = request()->is('cast/*');
@@ -11,43 +11,39 @@
 @endpush
 
 @push('scripts')
-{{-- 切り出した外部JSを読み込む --}}
 <script src="{{ asset('assets/js/talk-room.js') }}"></script>
 @endpush
 
 <div id="talk-room-container" class="flex flex-col h-full bg-[#120505]">
     {{-- ヘッダー --}}
-    <div class="talk-header p-4 border-b border-[#4d1a1a] flex items-center bg-[#220a0a]">
-        <a href="{{ route($backRoute) }}" class="mr-4 text-[#d4af37] text-xl">
-            <i class="fas fa-chevron-left"></i>
-        </a>
-        <h2 class="text-lg font-bold text-white">{{ $partnerName }} 様</h2>
+    <div class="talk-header">
+        <a href="{{ route($backRoute) }}" class="back-link"><i class="fas fa-chevron-left"></i></a>
+        <h2 class="partner-name">{{ $partnerName }} 様</h2>
     </div>
 
     {{-- メッセージ表示エリア --}}
     <div class="chat-messages" id="chat-messages">
-    @foreach($messages as $msg)
-        <div class="flex {{ $msg->is_mine ? 'justify-end msg-right' : 'justify-start msg-left' }}">
-            <div class="message-bubble">
-                <p>{{ $msg->content }}</p>
-                <span class="msg-time">{{ $msg->created_at->format('H:i') }}</span>
+        @foreach($messages as $msg)
+            {{-- 自分が送ったメッセージ (is_mine) は msg-right クラスで右寄せ --}}
+            <div class="message-row {{ $msg->is_mine ? 'msg-right' : 'msg-left' }}">
+                <div class="message-bubble">
+                    <p>{{ $msg->content }}</p>
+                    <span class="msg-time">{{ $msg->created_at->format('H:i') }}</span>
+                </div>
             </div>
-        </div>
-    @endforeach
-</div>
+        @endforeach
+    </div>
 
     {{-- 入力エリア --}}
-   <div class="chat-input-area p-4 bg-[#220a0a] border-t border-[#4d1a1a]">
-        <form class="flex gap-2" id="chat-form" 
-            data-url="{{ route(request()->is('cast/*') ? 'cast.talk.send' : 'shop.talk.send') }}" 
-            data-partner-id="{{ $partnerId }}">
-            @csrf {{-- CSRFトークンを追加 --}}
-            <div class="chat-input-wrapper flex-1">
-                <input type="text" name="message" class="w-full bg-transparent text-white outline-none" placeholder="メッセージを入力...">
+   <div class="chat-input-area">
+        <form id="chat-form" data-url="{{ route($isCast ? 'cast.talk.send' : 'shop.talk.send') }}" data-partner-id="{{ $partnerId }}">
+            @csrf
+            <div class="chat-input-wrapper">
+                <input type="text" name="message" autocomplete="off" placeholder="メッセージを入力...">
+                <button type="submit" class="btn-send">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
             </div>
-            <button type="submit" class="btn-send">
-                <i class="fas fa-paper-plane"></i>
-            </button>
         </form>
     </div>
 </div>

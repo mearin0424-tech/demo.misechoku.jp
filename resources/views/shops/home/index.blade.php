@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Discovery')
+@section('title', 'DISCOVERY')
 {{-- app.blade.php の body class に適用して縦スクロールを禁止する --}}
 @section('body-class', 'no-scroll')
 

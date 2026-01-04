@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'メッセージ一覧')
+@section('title', 'TALK')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}">
@@ -14,9 +14,11 @@
 @endphp
 
 {{-- タブメニュー --}}
-<div class="talk-tabs">
-    <div class="tab-item active" data-target="ongoing">やり取り中</div>
-    <div class="tab-item" data-target="requests">{{ $requestTabText }}</div>
+<div class="talk-tabs-wrapper"> 
+    <div class="talk-tabs">
+        <div class="tab-item active" data-target="ongoing">やり取り中</div>
+        <div class="tab-item" data-target="requests">{{ $requestTabText }}</div>
+    </div>
 </div>
 
 <div class="talk-list-container">

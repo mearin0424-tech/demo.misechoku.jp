@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'ミセチョク | ナイトレジャー直契約プラットフォーム')
+@section('title', 'ミセチョク')
 
 @section('content')
 <div class="welcome-container" style="text-align: center; padding: 100px 20px;">
