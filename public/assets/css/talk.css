@@ -152,22 +152,35 @@
 /* 行全体を横いっぱいに広げる */
 .message-row {
     display: flex;
-    width: 100%; 
+    width: 100%;
+    margin-bottom: 8px; /* 行間の調整 */
+    align-items: flex-start; /* 【重要】中身を引き伸ばさず、上揃えにする */
 }
 
 /* メッセージの左右寄せロジック */
 .msg-left { justify-content: flex-start; } /* 左端へ */
 .msg-right { justify-content: flex-end; }  /* 右端へ */
 
-/* 吹き出し共通：改行を反映させる */
+/* 吹き出し共通 */
 .message-bubble {
-    max-width: 80%; 
-    padding: 12px 16px;
+    display: inline-block;
+    max-width: 75%;
+    min-height: auto; 
+    height: auto;    
+    padding: 10px 14px; 
+    border-radius: 18px;
     font-size: 0.95rem;
-    line-height: 1.5;
-    white-space: pre-wrap; /* 改行を有効化 */
+    line-height: 1.4; /* 行間を少し詰めて高さを抑える */
+    white-space: pre-wrap;
     word-break: break-all;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* 吹き出し内のテキスト調整 */
+.message-bubble p {
+    margin: 0; 
+    padding: 0;
 }
 
 /* 相手のメッセージ */
@@ -186,11 +199,12 @@
 }
 
 .msg-time {
+    display: block;
     font-size: 0.65rem;
     margin-top: 4px;
-    opacity: 0.6;
-    display: block;
+    opacity: 0.5;
     text-align: right;
+    line-height: 1;
 }
 
 /* 入力エリアの固定 */
