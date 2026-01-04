@@ -1,4 +1,4 @@
-#okojo-guide {
+#character-guide {
     width: 100%;
     background-color: #ffffff;
     border-bottom: 1px solid #f0f0f0;
@@ -7,11 +7,11 @@
     display: block;
 }
 
-#okojo-guide.is-hidden {
+#character-guide.is-hidden {
     display: none;
 }
 
-.okojo-guide-inner {
+.character-guide-inner {
     display: flex;
     align-items: center;
     max-width: 1200px;
@@ -19,7 +19,7 @@
     gap: 10px;
 }
 
-.okojo-avatar img {
+.character-avatar img {
     width: 36px;
     height: 36px;
     border-radius: 50%;
@@ -27,11 +27,11 @@
     flex-shrink: 0;
 }
 
-.okojo-balloon {
+.character-balloon {
     flex-grow: 1;
 }
 
-.okojo-balloon p {
+.character-balloon p {
     font-size: 12px;
     font-weight: 600;
     color: #333;
@@ -39,7 +39,7 @@
     line-height: 1.4;
 }
 
-.okojo-close-btn {
+.character-close-btn {
     background: none;
     border: none;
     color: #ccc;

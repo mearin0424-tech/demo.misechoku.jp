@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/layout-header.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/layout-footer.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/layout-sidebar.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/okojo-guide.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/character-guide.css') }}">
 
     <script src="{{ asset('assets/js/app.js') }}" defer></script>
 
@@ -31,7 +31,7 @@
         @include('layouts.parts.header')
 
         {{-- オコジョガイド：サブヘッダーとして表示 --}}
-        @include('layouts.parts.okojo-guide')
+        @include('layouts.parts.character-guide')
 
         {{-- メインコンテンツ --}}
         <main id="main-content">
@@ -46,7 +46,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script src="{{ asset('assets/js/okojo-guide.js') }}"></script>
+    <script src="{{ asset('assets/js/character-guide.js') }}"></script>
     @stack('scripts')
 </body>
 </html>

@@ -4,13 +4,13 @@
 @section('body-class', 'no-scroll')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/okojo-guide.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/character-guide.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/home.css') }}">
 @endpush
 
 @section('content')
 {{-- 共通ガイドをここで読み込み (メッセージをセット) --}}
-@include('layouts.parts.okojo-guide', ['guideMessage' => '上下でキャストを変更、左右で写真をチェックできるよ！'])
+@include('layouts.parts.character-guide', ['guideMessage' => '上下でキャストを変更、左右で写真をチェックできるよ！'])
 
 <div id="home-screen">
     {{-- メインスワイパー（上下） --}}
@@ -59,6 +59,6 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/okojo-guide.js') }}"></script>
+<script src="{{ asset('assets/js/character-guide.js') }}"></script>
 <script src="{{ asset('assets/js/home.js') }}"></script>
 @endpush

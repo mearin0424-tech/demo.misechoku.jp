@@ -42,8 +42,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const currentMsg = messages[this.activeIndex] || "素敵な出会いがありますように！";
             
             // ここで共通JSの関数を呼ぶ
-            if (typeof window.updateOkojoMessage === 'function') {
-                window.updateOkojoMessage(currentMsg);
+            if (typeof window.updateCharacterMessage === 'function') {
+                window.updateCharacterMessage(currentMsg);
             }
         }
         }
