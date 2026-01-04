@@ -24,7 +24,7 @@ class TalkController extends Controller
         [
             'partner_id' => 1,
             'name' => 'アンナ',
-            'avatar' => 'storage/mock/casts/1.png',
+            'avatar' => 'storage/mock/casts/1-1.png',
             'last_message' => '本日はありがとうございました！またお待ちしております。',
             'last_time' => '10:25',
             'sort_key' => Carbon::today()->setHour(10)->setMinute(25),
@@ -35,7 +35,7 @@ class TalkController extends Controller
         [
             'partner_id' => 2,
             'name' => 'リナ',
-            'avatar' => 'storage/mock/casts/2.png',
+            'avatar' => 'storage/mock/casts/2-1.png',
             'last_message' => '了解いたしました！調整してみますね。',
             'last_time' => '昨日',
             'sort_key' => Carbon::yesterday(),
