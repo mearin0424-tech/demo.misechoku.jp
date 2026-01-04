@@ -69,8 +69,6 @@ Route::prefix('shop')->name('shop.')->group(function () {
     // ホーム・検索
     Route::get('/home', [ShopHome::class, 'index'])->name('home');
     Route::get('/search', [ShopSearch::class, 'index'])->name('search.index');
-    // キャスト詳細ページ
-    Route::get('/cast/profile/{id}', [CastProfile::class, 'show'])->name('cast.profile.show');
 
     // トーク・メッセージ
     Route::prefix('talk')->name('talk.')->group(function () {
@@ -124,14 +122,10 @@ Route::prefix('shop')->name('shop.')->group(function () {
 | Cast Portal (キャスト専用)
 |--------------------------------------------------------------------------
 */
-// キャスト側（旧メンバー）のルート定義
 Route::prefix('cast')->name('cast.')->group(function () {
-    // とりあえずショップのホームに飛ばすか、空のページを指定
     Route::get('/home', [ShopHome::class, 'index'])->name('home'); 
+    Route::get('/profile/{id}', [CastProfile::class, 'show'])->name('profile.show');
 });
-
-// 先ほどのリダイレクト設定もこれに合わせておくと親切です
-Route::redirect('/cast', '/cast/home');
 
 /*
 |--------------------------------------------------------------------------
