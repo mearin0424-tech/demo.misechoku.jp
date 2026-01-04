@@ -23,7 +23,7 @@ class TalkController extends Controller
         $ongoingTalks = [
         [
             'partner_id' => 1,
-            'name' => 'アンナ',
+            'name' => 'みさき',
             'avatar' => 'storage/mock/casts/1-1.png',
             'last_message' => '本日はありがとうございました！またお待ちしております。',
             'last_time' => '10:25',
@@ -34,7 +34,7 @@ class TalkController extends Controller
         ],
         [
             'partner_id' => 2,
-            'name' => 'リナ',
+            'name' => '愛華',
             'avatar' => 'storage/mock/casts/2-1.png',
             'last_message' => '了解いたしました！調整してみますね。',
             'last_time' => '昨日',
@@ -49,7 +49,7 @@ class TalkController extends Controller
     $requestTalks = [
         [
             'partner_id' => 1,
-            'name' => 'Saki',
+            'name' => 'みさき',
             'age' => 30,
             'location' => '六本木',
             'avatar' => 'storage/mock/casts/1-1.png',
@@ -59,7 +59,7 @@ class TalkController extends Controller
         ],
         [
             'partner_id' => 2,
-            'name' => 'Tanaka',
+            'name' => '愛華',
             'age' => 30,
             'location' => '渋谷',
             'avatar' => 'storage/mock/casts/2-1.png',
@@ -69,7 +69,7 @@ class TalkController extends Controller
         ],
         [
             'partner_id' => 3,
-            'name' => 'Sato',
+            'name' => 'Rena',
             'age' => 30,
             'location' => '新宿',
             'avatar' => 'storage/mock/casts/3-1.png',

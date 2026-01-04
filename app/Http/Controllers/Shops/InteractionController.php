@@ -13,7 +13,7 @@ class InteractionController extends Controller
         // 旧ロジックの変数を再現（実運用では各Modelから取得）
         $keepCasts = [
             [
-                'id' => 1, 'name' => '美咲', 'age' => 23, 'img' => '', 'profession' => 'モデル', 
+                'id' => 1, 'name' => 'みさき', 'age' => 23, 'img' => '', 'profession' => 'モデル', 
                 'pref' => '東京都', 'city' => '港区', 'height' => 165, 'b' => 85, 'w' => 58, 'h' => 86
             ]
         ];

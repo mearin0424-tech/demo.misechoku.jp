@@ -8,7 +8,7 @@ class ProfileController extends Controller
     public function show($id = null) {
         // 旧cast_detail.phpのロジックをここに完全統合
         $cast = [
-            'name'         => 'アンナ',
+            'name'         => '愛華',
             'age'          => 24,
             'img'          => asset('storage/mock/casts/1.png'),
             'is_applied'   => true,
