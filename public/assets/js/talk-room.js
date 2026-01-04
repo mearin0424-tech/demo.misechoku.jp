@@ -1,20 +1,17 @@
 /**
- * Talk Room Logic (Optimistic UI & Real-time Update)
+ * Talk Room Logic (Real-time update with Server)
  */
 document.addEventListener('DOMContentLoaded', function() {
     const chatMessages = document.getElementById('chat-messages');
     const chatForm = document.getElementById('chat-form');
     
-    // エラー防止用のガード
+    // ガード：要素がない画面では実行しない
     if (!chatMessages || !chatForm) return;
 
-    // textarea[name="message"] を取得（inputから修正）
+    // 重要：input から textarea に修正
     const messageInput = chatForm.querySelector('textarea[name="message"]');
     if (!messageInput) return;
 
-    /**
-     * 最下部へスクロール
-     */
     const scrollToBottom = (behavior = 'auto') => {
         chatMessages.scrollTo({
             top: chatMessages.scrollHeight,
@@ -22,9 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
 
-    /**
-     * テキストエリアの自動リサイズ
-     */
+    // テキストエリアの自動リサイズ
     const autoResize = () => {
         messageInput.style.height = 'auto';
         messageInput.style.height = (messageInput.scrollHeight) + 'px';
@@ -33,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 初期表示で最下部へ
     scrollToBottom();
 
-    // 入力イベントでリサイズ実行
+    // 入力イベント
     messageInput.addEventListener('input', autoResize);
 
     // 送信処理
@@ -43,7 +38,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const content = messageInput.value.trim();
         if (!content) return;
 
-        // 設定情報の取得
         const url = chatForm.getAttribute('data-url');
         const partnerId = chatForm.getAttribute('data-partner-id');
         const token = chatForm.querySelector('input[name="_token"]').value;
@@ -52,19 +46,16 @@ document.addEventListener('DOMContentLoaded', function() {
         // 二重送信防止
         submitBtn.disabled = true;
 
-        // 一時的なIDを生成（送信完了時に要素を特定するため）
+        // 一時的なIDと時刻の生成
         const tempId = 'msg-' + Date.now();
         const now = new Date();
         const timeStr = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
 
-        /**
-         * 1. サーバー送信前に画面にメッセージを追加（Optimistic UI）
-         * 送信中はチェックマークを .msg-status.sending で点滅させる
-         */
+        // 1. サーバー送信前に画面に「送信中」状態で追加
         const messageHtml = `
             <div class="message-row msg-right" id="${tempId}">
                 <div class="message-bubble">
-                    <p class="whitespace-pre-wrap m-0">${content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, '<br>')}</p>
+                    <p class="m-0">${content.replace(/\n/g, '<br>')}</p>
                     <div class="msg-footer">
                         <span class="msg-time">${timeStr}</span>
                         <span class="msg-status sending"><i class="fas fa-check"></i></span>
@@ -74,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         chatMessages.insertAdjacentHTML('beforeend', messageHtml);
         
-        // 入力欄をクリアしてリサイズをリセット
+        // 入力欄リセット
         messageInput.value = '';
         autoResize();
         scrollToBottom('smooth');
@@ -87,36 +78,26 @@ document.addEventListener('DOMContentLoaded', function() {
                     'X-CSRF-TOKEN': token,
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({
-                    partner_id: partnerId,
-                    message: content
-                })
+                body: JSON.stringify({ partner_id: partnerId, message: content })
             });
 
             const result = await response.json();
 
             if (result.success) {
-                /**
-                 * 2. 送信成功時の処理
-                 * 「送信中」アニメーションクラスを取り除き、確定状態にする
-                 */
-                const sentElement = document.getElementById(tempId);
-                if (sentElement) {
-                    const statusIcon = sentElement.querySelector('.msg-status');
-                    statusIcon.classList.remove('sending'); // 点滅解除
-                    statusIcon.style.opacity = '1';         // はっきり表示
+                // 2. 成功：点滅を止めて確定
+                const sentMsg = document.getElementById(tempId);
+                if (sentMsg) {
+                    sentMsg.querySelector('.msg-status').classList.remove('sending');
                 }
             } else {
-                throw new Error('Send failed');
+                throw new Error('Failed');
             }
         } catch (error) {
-            console.error('Error:', error);
-            // エラー時はチェックマークを警告アイコンに変更
-            const errorElement = document.getElementById(tempId);
-            if (errorElement) {
-                const statusIcon = errorElement.querySelector('.msg-status');
-                statusIcon.innerHTML = '<i class="fas fa-exclamation-circle text-red-500"></i>';
-                statusIcon.classList.remove('sending');
+            // 3. 失敗：エラー表示
+            const errorMsg = document.getElementById(tempId);
+            if (errorMsg) {
+                errorMsg.querySelector('.msg-status').innerHTML = '<i class="fas fa-exclamation-circle text-red-500"></i>';
+                errorMsg.querySelector('.msg-status').classList.remove('sending');
             }
         } finally {
             submitBtn.disabled = false;
@@ -124,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // キーボード表示時のスクロール補正
+    // キーボード補正
     messageInput.addEventListener('focus', () => {
         setTimeout(() => scrollToBottom('smooth'), 300);
     });
