@@ -1,7 +1,7 @@
 <div id="character-guide" class="character-guide-container {{ isset($guideMessage) ? '' : 'is-hidden' }}">
     <div class="character-guide-inner">
         <div class="character-avatar">
-            <img src="{{ asset('assets/images/character.png') }}" alt="オコジョ">
+            <img src="{{ asset('assets/images/guide-character.png') }}" alt="オコジョ">
         </div>
         
         <div class="character-balloon">

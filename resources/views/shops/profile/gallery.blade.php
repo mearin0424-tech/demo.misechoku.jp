@@ -14,7 +14,7 @@
     
     {{-- おこじょガイド --}}
     <div class="flex flex-col items-center mb-8 bg-[#2d0b0b] p-4 rounded-2xl border border-gold/20">
-        <img src="{{ asset('assets/images/guide/character.png') }}" class="w-16 mb-2 animate-bounce-slow" alt="ガイド">
+        <img src="{{ asset('assets/images/guide/guide-character.png') }}" class="w-16 mb-2 animate-bounce-slow" alt="ガイド">
         <p class="text-sm text-gray-300 text-center leading-relaxed">
             最大5枚まで登録できるよ！<br>
             <span class="text-gold font-bold">長押しドラッグ</span>で並び替えができるよ。
