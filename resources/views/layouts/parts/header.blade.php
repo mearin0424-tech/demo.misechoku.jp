@@ -33,9 +33,7 @@
 
     {{-- 中央：ページタイトル（戻るボタンがある時のみ表示） --}}
     <div class="header-center-title">
-        @if($showBackButton)
-            @yield('header_title', $currentEngTitle)
-        @endif
+        @yield('header_title', $currentEngTitle)
     </div>
 
     {{-- 右側：タスク / 通知 / ハンバーガーメニュー --}}

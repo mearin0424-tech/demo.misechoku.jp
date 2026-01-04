@@ -1,0 +1,52 @@
+/* --- サブヘッダー（タブ）共通スタイル --- */
+.sub-header-wrapper {
+    position: fixed;
+    top: 60px; /* ヘッダーの高さ(60px)に密着 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: var(--max-content-width);
+    z-index: 1400; /* ヘッダーのすぐ後ろ */
+    background: #1e0505;
+}
+
+.sub-header-tabs {
+    display: flex;
+    height: 45px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.sub-header-tabs .tab-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    font-size: 0.75rem; /* 小さめで上品なサイズ */
+    font-weight: bold;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+/* アクティブ状態：シャンパンゴールド */
+.sub-header-tabs .tab-item.active {
+    color: #d4af37;
+}
+
+.sub-header-tabs .tab-item.active::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 20%;
+    right: 20%;
+    height: 2px;
+    background: #d4af37;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+/* --- コンテンツエリアの開始位置を統一 --- */
+.has-sub-header {
+    padding-top: 105px !important; /* 60px + 45px */
+}

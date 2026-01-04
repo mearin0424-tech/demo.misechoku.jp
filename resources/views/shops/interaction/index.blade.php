@@ -1,36 +1,38 @@
 @extends('layouts.app')
 
-@section('title', 'Connections')
+@section('title', 'INTERACTION')
 
 @push('styles')
+{{-- 共通サブヘッダーおよび画面専用CSSの読み込み --}}
+<link rel="stylesheet" href="{{ asset('assets/css/sub-header.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/interaction.css') }}">
-
 @endpush
 
 @section('content')
-<div id="connection-screen">
-    {{-- セグメントナビ（旧 Connection.php のロジックを完全再現） --}}
-    <nav class="segment-nav">
-        <div class="segment-btn active" data-tab="keep">
-            <span class="tab-label">KEEP</span>
-            <span class="tab-count numeric-font">{{ count($keepCasts) }}</span>
-        </div>
-        <div class="segment-btn" data-tab="like">
-            <span class="tab-label">MATCH</span>
-            <span class="tab-count numeric-font">{{ count($likeCasts) }}</span>
-        </div>
-        <div class="segment-btn" data-tab="footprint">
-            <span class="tab-label">FOOTPRINT</span>
-            <span class="tab-count numeric-font">{{ count($footprintCasts) }}</span>
-        </div>
-    </nav>
+<div class="has-sub-header">
+    {{-- 
+        共通サブヘッダーの導入
+        文字サイズ：0.75rem (CSS共通)
+        配置：top 60px 固定 (CSS共通)
+        ラベル：キープ / ライク / 足あと
+    --}}
+    @include('layouts.parts.sub-header', [
+        'tabs' => [
+            ['id' => 'pane-keep', 'label' => 'キープ', 'active' => true],
+            ['id' => 'pane-like', 'label' => 'ライク', 'active' => false],
+            ['id' => 'pane-footprint', 'label' => '足あと', 'active' => false]
+        ]
+    ])
 
     <div class="tab-content-container contents inner">
         
-        {{-- タブ１：KEEP --}}
-        <div id="tab-keep" class="tab-pane active">
+        {{-- タブ１：キープ (KEEP) --}}
+        <div id="pane-keep" class="tab-pane active">
             @if (empty($keepCasts))
-                <p class="no-data-msg opacity-70">お気に入り登録したキャストはいません。</p>
+                <div class="no-data-wrapper">
+                    <i class="fas fa-star opacity-10 text-5xl mb-3 block"></i>
+                    <p class="no-data-msg">お気に入り登録したキャストはいません。</p>
+                </div>
             @else
                 @foreach($keepCasts as $c)
                     @include('shops.interaction.keep', ['c' => $c])
@@ -38,15 +40,20 @@
             @endif
         </div>
 
-        {{-- タブ２：LIKE --}}
-        <div id="tab-like" class="tab-pane">
-            <div class="sub-nav">
+        {{-- タブ２：ライク (LIKE/MATCH) --}}
+        <div id="pane-like" class="tab-pane">
+            {{-- ライク内専用の切り替え（ここは既存ロジックを維持） --}}
+            <div class="sub-nav-mini">
                 <button class="sub-nav-btn active" onclick="filterLikes('to-me')">RECEIVED</button>
                 <button class="sub-nav-btn" onclick="filterLikes('from-me')">SENT</button>
             </div>
+            
             <div id="like-list-container">
                 @if (empty($likeCasts))
-                    <p class="no-data-msg opacity-70">いいねはまだ届いていません。</p>
+                    <div class="no-data-wrapper">
+                        <i class="fas fa-heart opacity-10 text-5xl mb-3 block"></i>
+                        <p class="no-data-msg">いいねはまだ届いていません。</p>
+                    </div>
                 @else
                     @foreach($likeCasts as $c)
                         @include('shops.interaction.like', ['c' => $c])
@@ -55,10 +62,13 @@
             </div>
         </div>
 
-        {{-- タブ３：FOOTPRINT --}}
-        <div id="tab-footprint" class="tab-pane">
+        {{-- タブ３：足あと (FOOTPRINT) --}}
+        <div id="pane-footprint" class="tab-pane">
             @if (empty($footprintCasts))
-                <p class="no-data-msg opacity-70">まだ足あと（訪問履歴）はありません。</p>
+                <div class="no-data-wrapper">
+                    <i class="fas fa-shoe-prints opacity-10 text-5xl mb-3 block"></i>
+                    <p class="no-data-msg">まだ足あと（訪問履歴）はありません。</p>
+                </div>
             @else
                 @foreach($footprintCasts as $c)
                     @include('shops.interaction.footprint', ['c' => $c])
@@ -67,29 +77,21 @@
         </div>
     </div>
 </div>
-
 @endsection
 
 @push('scripts')
-    <script>
-        {{-- 旧 js ロジックをそのまま移植 --}}
-        document.addEventListener('DOMContentLoaded', function() {
-            const tabs = document.querySelectorAll('.segment-btn');
-            const panes = document.querySelectorAll('.tab-pane');
-
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    tabs.forEach(t => t.classList.remove('active'));
-                    panes.forEach(p => p.classList.remove('active'));
-                    this.classList.add('active');
-                    const tabId = this.getAttribute('data-tab');
-                    document.getElementById('tab-' + tabId).classList.add('active');
-                });
-            });
-        });
-
-        function filterLikes(type) {
-            console.log('Filter:', type);
-        }
-    </script>
+{{-- 共通タブ切り替えJSの読み込み --}}
+<script src="{{ asset('assets/js/sub-header.js') }}"></script>
+<script>
+    /**
+     * ライクパネル内専用のフィルタリングロジック
+     */
+    function filterLikes(type) {
+        console.log('Filter Like Type:', type);
+        // 必要に応じてタブ内の active クラス切り替えや Ajax 通信をここに記述
+        const btns = document.querySelectorAll('.sub-nav-btn');
+        btns.forEach(btn => btn.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+</script>
 @endpush
