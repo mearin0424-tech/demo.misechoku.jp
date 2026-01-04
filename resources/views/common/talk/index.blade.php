@@ -10,6 +10,7 @@
 @php
     $isCast = request()->is('cast/*');
     $requestTabText = $isCast ? 'オファー' : 'リクエスト';
+    $targetRoute = $isCast ? 'cast.talk.room' : 'shop.talk.room';
 @endphp
 
 {{-- タブメニュー --}}
@@ -19,10 +20,24 @@
 </div>
 
 <div class="talk-list-container">
-    {{-- やり取り中パネル --}}
+    {{-- 1. やり取り中パネル --}}
     <div id="pane-ongoing" class="talk-content-pane active">
         @forelse($ongoingTalks as $talk)
-            @include('common.talk.partials.list-item', ['talk' => $talk])
+            <a href="{{ route($targetRoute, $talk['partner_id']) }}" class="talk-item">
+                <img src="{{ asset($talk['avatar']) }}" class="talk-avatar" onerror="this.src='{{ asset('assets/images/common/placeholder.png') }}'">
+                <div class="talk-info">
+                    <div class="talk-header">
+                        <span class="talk-name">{{ $talk['name'] }}</span>
+                        <span class="talk-time">{{ $talk['last_time'] }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <p class="talk-last-msg">{{ $talk['last_message'] }}</p>
+                        @if($talk['unread_count'] > 0)
+                            <span class="unread-badge">{{ $talk['unread_count'] }}</span>
+                        @endif
+                    </div>
+                </div>
+            </a>
         @empty
             <div class="no-messages">
                 <i class="fas fa-comments"></i>
@@ -31,10 +46,24 @@
         @endforelse
     </div>
 
-    {{-- リクエスト / オファー パネル --}}
+    {{-- 2. リクエスト / オファー パネル --}}
     <div id="pane-requests" class="talk-content-pane">
         @forelse($requestTalks as $talk)
-            @include('common.talk.partials.list-item', ['talk' => $talk])
+            <a href="{{ route($targetRoute, $talk['partner_id']) }}" class="talk-item">
+                <img src="{{ asset($talk['avatar']) }}" class="talk-avatar" onerror="this.src='{{ asset('assets/images/common/placeholder.png') }}'">
+                <div class="talk-info">
+                    <div class="talk-header">
+                        <span class="talk-name">{{ $talk['name'] }}</span>
+                        <span class="talk-time">{{ $talk['last_time'] }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <p class="talk-last-msg">{{ $talk['last_message'] }}</p>
+                        @if($talk['unread_count'] > 0)
+                            <span class="unread-badge">{{ $talk['unread_count'] }}</span>
+                        @endif
+                    </div>
+                </div>
+            </a>
         @empty
             <div class="no-messages">
                 <i class="fas fa-paper-plane"></i>
