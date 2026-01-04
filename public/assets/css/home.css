@@ -2,37 +2,35 @@
 #home-screen {
     position: relative;
     width: 100%;
-    height: calc(100vh - var(--header-height) - var(--footer-height));　/* 画面全体の高さからヘッダーとフッター分を引く */
-    overflow: hidden; /* 縦スクロール禁止 */
-    background-color: #0a0a0a; /* 暗めの背景でカードを際立たせる */
+    /* ヘッダーとフッターを除いた高さに固定 */
+    height: calc(100vh - var(--header-height) - var(--footer-height));
+    overflow: hidden; 
+    background-color: #0a0a0a;
     display: flex;
     align-items: center;
     justify-content: center;
-    touch-action: none; /* ブラウザのデフォルトスクロールを禁止 */
+    /* スワイプを阻害しないよう auto に設定 */
+    touch-action: auto; 
 }
 
 /* --- Swiper Container --- */
 .main-swiper {
     width: 100%;
     height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 /* --- Centered Cast Card --- */
 .cast-card {
     position: relative;
-    /* 横幅を画面に合わせつつ、中央配置を優先 */
     width: 94% !important;
     max-width: 500px;
-    height: calc(100dvh - 200px) !important;
+    /* 動的なビューポート高さに基づき、上下に余白を確保 */
+    height: calc(100dvh - 180px) !important;
     max-height: 750px;
-    margin: 0 auto !important; /* 強制的に中央へ */
+    margin: 0 auto !important;
     border-radius: 24px;
     overflow: hidden;
     background: #1a1a1a;
-    /* 立体感の演出 */
     box-shadow: 0 15px 35px rgba(0,0,0,0.6);
     padding: 0 !important;
     display: flex;
@@ -40,7 +38,7 @@
     justify-content: flex-end;
 }
 
-/* --- Photo Swiper (Nested) --- */
+/* --- Photo Swiper (左右スワイプ) --- */
 .photo-swiper {
     position: absolute;
     top: 0;
@@ -57,6 +55,7 @@
     height: 100%;
 }
 
+/* 写真部分をタップしてプロフィール詳細へ飛ぶリンク */
 .card-detail-link {
     display: block;
     position: absolute;
@@ -64,46 +63,14 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 5; /* 写真より上で、右側のボタン(20)より下 */
+    z-index: 5; /* ボタン(20)や情報(30)より下に配置 */
 }
 
+/* --- Photo Pagination (上部のドット) --- */
 .photo-pagination.swiper-pagination-bullets {
     bottom: auto !important;
-    top: 15px !important; /* カードの上端から15px */
-    z-index: 50 !important; /* 最前面に */
-}
-
-.photo-pagination .swiper-pagination-bullet {
-    background: #fff !important;
-    opacity: 0.5;
-}
-
-
-/* --- Centered Cast Card (中央寄せの再徹底) --- */
-.cast-card {
-    position: relative;
-    /* 横幅を画面に合わせつつ、中央配置を優先 */
-    width: 94% !important;
-    max-width: 500px;
-    height: calc(100dvh - 200px) !important;
-    max-height: 750px;
-    margin: 0 auto !important; /* 強制的に中央へ */
-    border-radius: 24px;
-    overflow: hidden;
-    background: #1a1a1a;
-    /* 立体感の演出 */
-    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-    padding: 0 !important;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-}
-
-/* --- Photo Pagination (●をカード上部に表示) --- */
-.photo-pagination.swiper-pagination-bullets {
-    bottom: auto !important;
-    top: 15px !important; /* カードの上端から15px */
-    z-index: 50 !important; /* 最前面に */
+    top: 15px !important;
+    z-index: 50 !important;
 }
 
 .photo-pagination .swiper-pagination-bullet {
@@ -112,25 +79,29 @@
 }
 
 .photo-pagination .swiper-pagination-bullet-active {
-    background: var(--color-gold) !important;
+    background: #d4af37 !important; /* シャンパンゴールド */
     opacity: 1;
-    width: 20px; /* アクティブなドットを少し長くしてモダンに */
+    width: 20px;
     border-radius: 4px;
 }
 
-/* --- Info Overlay (下部15%を濃いグラデーションに) --- */
+/* --- Info Overlay (プロフィール文字情報) --- */
 .card-bottom-info {
-    position: relative;
-    z-index: 10;
+    position: absolute; /* 確実に写真の上に重ねる */
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 30; /* アクションボタンより前面 */
     padding: 100px 20px 25px;
-    /* 下部15%（25px〜）付近から黒を濃くして文字を浮かせる */
+    /* 下から上へのグラデーションで文字の視認性を確保 */
     background: linear-gradient(to top, 
         rgba(0,0,0,0.95) 0%, 
-        rgba(0,0,0,0.7) 30%, 
+        rgba(0,0,0,0.7) 40%, 
         transparent 100%
     );
     color: #fff;
-    pointer-events: none;
+    /* 文字エリアがスワイプを邪魔しないようにする */
+    pointer-events: none; 
 }
 
 .cast-name {
@@ -158,6 +129,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
+    pointer-events: auto; /* タグをクリックさせたい場合はここを有効に */
 }
 
 .tag-pill {
@@ -169,15 +141,15 @@
     border: 1px solid rgba(255,255,255,0.1);
 }
 
-/* --- Action Buttons (位置を上に移動) --- */
+/* --- Action Buttons (右側のボタン) --- */
 .card-actions-overlay {
     position: absolute;
     right: 15px;
-    bottom: 220px; /* オコジョと被らないよう高く配置 */
-    z-index: 20;
+    bottom: 220px; /* オコジョと被らない高さ */
+    z-index: 40; /* 情報オーバーレイより前面 */
     display: flex;
     flex-direction: column;
-    gap: 15x;
+    gap: 15px;
 }
 
 .action-circle-btn {
@@ -195,23 +167,27 @@
     cursor: pointer;
     transition: transform 0.2s, background 0.3s;
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    /* 【修正】下線を完全に消去 */
+    text-decoration: none !important;
 }
 
 .action-circle-btn:active {
     transform: scale(0.9);
 }
 
+/* ホバー時の配色 */
 .action-circle-btn.like:hover { background: rgba(255, 59, 48, 0.9); }
 .action-circle-btn.keep:hover { background: rgba(255, 204, 0, 0.9); }
 .action-circle-btn.message:hover { background: rgba(0, 122, 255, 0.9); }
 
-/* --- Swipe Guide (中央下部) --- */
+/* --- Swipe Guide --- */
 .swipe-guide-overlay {
     position: absolute;
     bottom: 80px; 
     left: 50%;
     transform: translateX(-50%);
     z-index: 100;
+    pointer-events: none;
 }
 
 .swipe-arrow-anim {
@@ -231,14 +207,13 @@
     60% { transform: translateY(-4px); }
 }
 
-/* --- Discovery Guide (Okojyo) - Fixed to Right Bottom --- */
+/* --- Discovery Guide (Okojyo) --- */
 #discovery-guide {
     position: absolute;
     bottom: 15px;
     right: 15px;
     z-index: 200;
     display: flex;
-    /* row-reverse でオコジョを右、吹き出しを左に */
     flex-direction: row-reverse; 
     align-items: flex-end;
     pointer-events: none;
@@ -247,20 +222,15 @@
 #guide-speech-bubble {
     background: #fff;
     padding: 8px 15px;
-    border-radius: 15px 15px 0 15px; /* 右下の角だけ尖らせる（しっぽ代わり） */
+    border-radius: 15px 15px 0 15px;
     margin-bottom: 20px;
-    margin-right: 8px; /* オコジョとの間隔 */
+    margin-right: 8px;
     position: relative;
     max-width: 240px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.4);
     font-size: 0.75rem;
     color: #333;
     line-height: 1.3;
-}
-
-/* 吹き出しの尻尾 いったんなくす */
-#guide-speech-bubble::after {
-    display: none; 
 }
 
 #guide-character-wrap img {
@@ -271,17 +241,23 @@
 /* --- Responsive Adjustments --- */
 @media (max-width: 480px) {
     .cast-card {
-        width: 100%; /* 横幅を目いっぱい */
-        /* 上下90pxずつのマージンを確保し、ヘッダー・フッター・オコジョとの干渉を避ける */
-        height: calc(100% - 180px); 
+        width: 100%;
+        /* 上下の余白を調整して画面内に収める */
+        height: calc(100% - 160px) !important; 
         max-height: none; 
         border-radius: 20px;
     }
-    .cast-name { font-size: 1.6rem; }
-    #guide-speech-bubble { max-width: 180px; font-size: 0.75rem; }
+    .cast-name { font-size: 1.4rem; }
+    #guide-speech-bubble { max-width: 180px; }
 }
 
-/* ヘッダーやフッターの干渉を防ぐための調整 */
+/* --- Helper Classes --- */
+.no-scroll {
+    overflow: hidden !important;
+    position: fixed;
+    width: 100%;
+}
+
 .glass-card {
     background: rgba(255, 255, 255, 0.03);
 }

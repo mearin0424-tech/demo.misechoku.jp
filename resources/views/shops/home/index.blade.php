@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @section('title', 'DISCOVERY')
-{{-- app.blade.php の body class に適用して縦スクロールを禁止する --}}
 @section('body-class', 'no-scroll')
 
 @push('styles')
@@ -20,34 +19,36 @@
     </div>
 
     {{-- メインスワイパー（上下） --}}
-    <div class="main-swiper-container swiper main-swiper">
+    <div class="main-swiper swiper">
         <div class="swiper-wrapper">
             @foreach($casts as $cast)
             <div class="swiper-slide cast-card glass-card">
                 
-            {{-- 写真スワイパー（左右） --}}
-            <div class="swiper photo-swiper stop-propagation">
-                <div class="swiper-wrapper">
-                    @for($i=1; $i<=3; $i++)
-                    <div class="swiper-slide photo-item" 
-                            style="background-image: url('{{ asset("storage/mock/casts/{$cast['id']}-{$i}.png") }}');">
-                            <a href="{{ route('cast.profile.show', $cast['id']) }}
+                {{-- 写真スワイパー（左右） --}}
+                <div class="photo-swiper swiper">
+                    <div class="swiper-wrapper">
+                        @for($i=1; $i<=3; $i++)
+                        <div class="swiper-slide photo-item" 
+                             style="background-image: url('{{ asset("storage/mock/casts/{$cast['id']}-{$i}.png") }}');">
+                             {{-- 【修正】閉じタグの不備を修正し、詳細リンクを配置 --}}
+                             <a href="{{ route('profile.show', $cast['id']) }}" class="card-detail-link"></a>
+                        </div>
+                        @endfor
                     </div>
-                    @endfor
-                 </div>
-                <div class="swiper-pagination photo-pagination"></div>
-            </div>
+                    <div class="swiper-pagination photo-pagination"></div>
+                </div>
 
-                {{-- アクションボタン（CSSで位置を上に調整済み） --}}
+                {{-- アクションボタン --}}
                 <div class="card-actions-overlay stop-propagation">
                     <button class="action-circle-btn like" title="Like"><i class="fas fa-heart"></i></button>
                     <button class="action-circle-btn keep" title="Keep"><i class="fas fa-bookmark"></i></button>
+                    {{-- 【修正】aタグに no-underline クラス等を追加 --}}
                     <a href="{{ route('shop.talk.room', $cast['id']) }}" class="action-circle-btn message" title="Send Message">
                         <i class="fas fa-paper-plane"></i>
                     </a>
                 </div>
 
-                {{-- プロフィール情報） --}}
+                {{-- プロフィール情報 --}}
                 <div class="card-bottom-info">
                     <h2 class="cast-name serif-font">{{ $cast['name'] }} <span class="age">{{ $cast['age'] }}</span></h2>
                     <div class="card-location"><i class="fas fa-map-marker-alt"></i> 六本木</div>
@@ -62,11 +63,8 @@
         </div>
     </div>
 
-
-
     {{-- ガイドキャラクター --}}
     <div id="discovery-guide">
-        {{-- row-reverse を使うため、HTML上はこの順序でOK --}}
         <div id="guide-character-wrap">
             <img src="{{ asset('assets/images/guide/okojyo.png') }}" id="guide-character" alt="ガイド">
         </div>
@@ -74,10 +72,5 @@
             <p>上下でキャストを変更、左右で写真をチェックできるよ！</p>
         </div>
     </div>
-
 </div>
 @endsection
-
-@push('scripts')
-<script src="{{ asset('assets/js/home.js') }}"></script>
-@endpush

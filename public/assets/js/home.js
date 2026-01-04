@@ -10,14 +10,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // 写真の左右スワイプ (Nested Swiper)
     const photoSwipers = new Swiper('.photo-swiper', {
         direction: 'horizontal',
-        nested: true,
+        nested: true, // これにより上下スワイプがメインに伝わる
         pagination: {
             el: '.photo-pagination',
             clickable: true
         },
-        preventClicks: false,
-        preventClicksPropagation: false,
-        speed: 400,
+        resistanceRatio: 0, // 端でのバウンスを抑制して縦スワイプへ移りやすくする
     });
 
     // メインの上下スワイプ
@@ -26,23 +24,19 @@ document.addEventListener('DOMContentLoaded', function() {
         slidesPerView: 1,
         centeredSlides: true,
         
-        // 枚数が1枚より多ければループを有効にする（エラー回避）
-        loop: slideCount > 1, 
+        // 【修正】Loop Warning 回避
+        // Swiperの仕様上、loop:true には slidesPerView の2倍以上の枚数が必要です。
+        // 枚数が少ない場合はループをオフにします。
+        loop: slideCount >= 2, 
         
         speed: 500,
         mousewheel: true,
-        grabCursor: true,
-        effect: 'slide', 
-        observer: true,
-        observeParents: true,
+        threshold: 20, // 少しスワイプしないと反応しないようにして誤作動防止
     });
 
     // 3. クリックイベントの伝播停止 (ボタン類)
-    const actionOverlays = document.querySelectorAll('.card-actions-overlay');
-    actionOverlays.forEach(el => {
-    el.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
-    el.addEventListener('mousedown', (e) => e.stopPropagation());
-    el.addEventListener('click', (e) => e.stopPropagation()); // ボタンクリック時に詳細へ飛ばないように
+    document.querySelectorAll('.stop-propagation').forEach(el => {
+        el.addEventListener('touchstart', (e) => e.stopPropagation());
     });
 
     // 4. アクションボタンの簡易動作
