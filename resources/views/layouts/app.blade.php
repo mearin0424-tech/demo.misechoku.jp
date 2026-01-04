@@ -15,37 +15,38 @@
     <link rel="stylesheet" href="{{ asset('assets/css/layout-header.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/layout-footer.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/layout-sidebar.css') }}">
-    
+    <link rel="stylesheet" href="{{ asset('assets/css/okojo-guide.css') }}">
+
     <script src="{{ asset('assets/js/app.js') }}" defer></script>
 
     @stack('styles')
 </head>
-	
+    
 <body>
     <div id="bg-layer"></div>
-
     <div id="menu-overlay" class="menu-overlay"></div>
 
     <div id="app">
-        <div class="flex-1 flex flex-col w-full">
-            {{-- ヘッダー：ハンバーガーボタンを含むこと --}}
-            @include('layouts.parts.header')
+        {{-- ヘッダー --}}
+        @include('layouts.parts.header')
 
-            {{-- メインコンテンツ --}}
-            <main id="main-content">
-                @yield('content')
-            </main>
+        {{-- オコジョガイド：サブヘッダーとして表示 --}}
+        @include('layouts.parts.okojo-guide')
 
-            {{-- ボトムナビ（モバイル用固定） --}}
-            @include('layouts.parts.footer')
-        </div>
+        {{-- メインコンテンツ --}}
+        <main id="main-content">
+            @yield('content')
+        </main>
 
-        {{-- サイドバー：スマホ時は右からスライド、PC時は右固定 --}}
+        {{-- ボトムナビ（モバイル用固定） --}}
+        @include('layouts.parts.footer')
+
+        {{-- サイドバー --}}
         @include('layouts.parts.sidebar')
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    
+    <script src="{{ asset('assets/js/okojo-guide.js') }}"></script>
     @stack('scripts')
 </body>
 </html>

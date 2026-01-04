@@ -2,15 +2,14 @@
 #home-screen {
     position: relative;
     width: 100%;
-    /* ヘッダーとフッターを除いた高さに固定 */
-    height: calc(100vh - var(--header-height) - var(--footer-height));
+    /* ヘッダー・フッター・オコジョガイドを除いた残りの全領域 */
+    flex: 1;
     overflow: hidden; 
     background-color: #0a0a0a;
     display: flex;
     align-items: center;
     justify-content: center;
-    /* スワイプを阻害しないよう auto に設定 */
-    touch-action: auto; 
+    touch-action: none; /* スワイプ専用画面のためブラウザのデフォルト挙動を抑制 */
 }
 
 /* --- Swiper Container --- */
@@ -24,10 +23,9 @@
     position: relative;
     width: 94% !important;
     max-width: 500px;
-    /* 動的なビューポート高さに基づき、上下に余白を確保 */
-    height: calc(100dvh - 180px) !important;
-    max-height: 750px;
-    margin: 0 auto !important;
+    /* 上下のマージンを考慮し、画面内に収まる高さに設定 */
+    height: 94% !important;
+    margin: auto !important;
     border-radius: 24px;
     overflow: hidden;
     background: #1a1a1a;
@@ -63,7 +61,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 5; /* ボタン(20)や情報(30)より下に配置 */
+    z-index: 5;
 }
 
 /* --- Photo Pagination (上部のドット) --- */
@@ -79,7 +77,7 @@
 }
 
 .photo-pagination .swiper-pagination-bullet-active {
-    background: #d4af37 !important; /* シャンパンゴールド */
+    background: #d4af37 !important;
     opacity: 1;
     width: 20px;
     border-radius: 4px;
@@ -87,20 +85,18 @@
 
 /* --- Info Overlay (プロフィール文字情報) --- */
 .card-bottom-info {
-    position: absolute; /* 確実に写真の上に重ねる */
+    position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    z-index: 30; /* アクションボタンより前面 */
+    z-index: 30;
     padding: 100px 20px 25px;
-    /* 下から上へのグラデーションで文字の視認性を確保 */
     background: linear-gradient(to top, 
         rgba(0,0,0,0.95) 0%, 
         rgba(0,0,0,0.7) 40%, 
         transparent 100%
     );
     color: #fff;
-    /* 文字エリアがスワイプを邪魔しないようにする */
     pointer-events: none; 
 }
 
@@ -129,7 +125,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    pointer-events: auto; /* タグをクリックさせたい場合はここを有効に */
+    pointer-events: auto;
 }
 
 .tag-pill {
@@ -145,8 +141,8 @@
 .card-actions-overlay {
     position: absolute;
     right: 15px;
-    bottom: 220px; /* オコジョと被らない高さ */
-    z-index: 40; /* 情報オーバーレイより前面 */
+    bottom: 200px; /* 位置を調整 */
+    z-index: 40;
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -167,7 +163,6 @@
     cursor: pointer;
     transition: transform 0.2s, background 0.3s;
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    /* 【修正】下線を完全に消去 */
     text-decoration: none !important;
 }
 
@@ -175,7 +170,6 @@
     transform: scale(0.9);
 }
 
-/* ホバー時の配色 */
 .action-circle-btn.like:hover { background: rgba(255, 59, 48, 0.9); }
 .action-circle-btn.keep:hover { background: rgba(255, 204, 0, 0.9); }
 .action-circle-btn.message:hover { background: rgba(0, 122, 255, 0.9); }
@@ -183,7 +177,7 @@
 /* --- Swipe Guide --- */
 .swipe-guide-overlay {
     position: absolute;
-    bottom: 80px; 
+    bottom: 40px; 
     left: 50%;
     transform: translateX(-50%);
     z-index: 100;
@@ -207,48 +201,14 @@
     60% { transform: translateY(-4px); }
 }
 
-/* --- Discovery Guide (Okojyo) --- */
-#discovery-guide {
-    position: absolute;
-    bottom: 15px;
-    right: 15px;
-    z-index: 200;
-    display: flex;
-    flex-direction: row-reverse; 
-    align-items: flex-end;
-    pointer-events: none;
-}
-
-#guide-speech-bubble {
-    background: #fff;
-    padding: 8px 15px;
-    border-radius: 15px 15px 0 15px;
-    margin-bottom: 20px;
-    margin-right: 8px;
-    position: relative;
-    max-width: 240px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-    font-size: 0.75rem;
-    color: #333;
-    line-height: 1.3;
-}
-
-#guide-character-wrap img {
-    width: 70px;
-    height: auto;
-}
-
 /* --- Responsive Adjustments --- */
 @media (max-width: 480px) {
     .cast-card {
         width: 100%;
-        /* 上下の余白を調整して画面内に収める */
-        height: calc(100% - 160px) !important; 
-        max-height: none; 
+        height: 98% !important; 
         border-radius: 20px;
     }
     .cast-name { font-size: 1.4rem; }
-    #guide-speech-bubble { max-width: 180px; }
 }
 
 /* --- Helper Classes --- */
@@ -256,6 +216,7 @@
     overflow: hidden !important;
     position: fixed;
     width: 100%;
+    height: 100%;
 }
 
 .glass-card {

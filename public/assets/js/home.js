@@ -28,15 +28,31 @@ document.addEventListener('DOMContentLoaded', function() {
         // Swiperの仕様上、loop:true には slidesPerView の2倍以上の枚数が必要です。
         // 枚数が少ない場合はループをオフにします。
         loop: slideCount >= 2, 
-        
         speed: 500,
         mousewheel: true,
         threshold: 20, // 少しスワイプしないと反応しないようにして誤作動防止
+        on: {
+        slideChange: function () {
+            // スライドのインデックスに応じてメッセージを変える
+            const messages = [
+                "上下でキャストを変更できるよ！",
+                "このキャストの写真は左右にスワイプしてね。",
+                "気になる人がいたら右のボタンでアクションしよう！"
+            ];
+            const currentMsg = messages[this.activeIndex] || "素敵な出会いがありますように！";
+            
+            // ここで共通JSの関数を呼ぶ
+            if (typeof window.updateOkojoMessage === 'function') {
+                window.updateOkojoMessage(currentMsg);
+            }
+        }
+        }
     });
 
     // 3. クリックイベントの伝播停止 (ボタン類)
     document.querySelectorAll('.stop-propagation').forEach(el => {
-        el.addEventListener('touchstart', (e) => e.stopPropagation());
+        el.addEventListener('touchstart', (e) => e.stopPropagation(), {passive: true});
+        el.addEventListener('mousedown', (e) => e.stopPropagation());
     });
 
     // 4. アクションボタンの簡易動作

@@ -1,0 +1,49 @@
+#okojo-guide {
+    width: 100%;
+    background-color: #ffffff;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 8px 15px;
+    z-index: 1000;
+    display: block;
+}
+
+#okojo-guide.is-hidden {
+    display: none;
+}
+
+.okojo-guide-inner {
+    display: flex;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 10px;
+}
+
+.okojo-avatar img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid #eee;
+    flex-shrink: 0;
+}
+
+.okojo-balloon {
+    flex-grow: 1;
+}
+
+.okojo-balloon p {
+    font-size: 12px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.okojo-close-btn {
+    background: none;
+    border: none;
+    color: #ccc;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 2px 8px;
+}
