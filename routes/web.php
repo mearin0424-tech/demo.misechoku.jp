@@ -28,6 +28,9 @@ use App\Http\Controllers\Casts\ProfileController as CastProfile;
 |--------------------------------------------------------------------------
 */
 
+// ドメイン にアクセスしたら /shop/home へリダイレクト
+Route::redirect('/', '/shop/home');
+
 // /shop にアクセスしたら /shop/home へリダイレクト
 Route::redirect('/shop', '/shop/home');
 
