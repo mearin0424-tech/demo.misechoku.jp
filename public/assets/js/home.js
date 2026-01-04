@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
         direction: 'vertical',
         slidesPerView: 1,
         centeredSlides: true, // これによりカードが中央に固定されます
-        loop: true,
+        loop: slideCount > 3, // スライド数が3以下の場合はループしない
         speed: 500,
         mousewheel: true,
         // ★★★ モダンモーションはあとで検討

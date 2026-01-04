@@ -78,14 +78,6 @@
     opacity: 0.5;
 }
 
-ご要望に合わせて、カードの配置（中央寄せ）、ガイド（オコジョ）の左右反転、および写真ナビゲーション（●）の再表示と位置調整を行いました。
-
-モダンな動き（Creative Effect）は、スライド時の座標計算が複雑で中央からズレやすいため、より安定して中央に配置される標準的なスワイプに戻しつつ、カード自体の立体感をCSSで強調しています。
-
-1. public/assets/css/home.css の修正
-カードの配置とオコジョの位置、およびドット（●）のスタイルを調整しました。
-
-CSS
 
 /* --- Centered Cast Card (中央寄せの再徹底) --- */
 .cast-card {
@@ -256,7 +248,7 @@ CSS
     background: #fff;
     padding: 8px 15px;
     border-radius: 15px 15px 0 15px; /* 右下の角だけ尖らせる（しっぽ代わり） */
-    margin-bottom: 40px;
+    margin-bottom: 20px;
     margin-right: 8px; /* オコジョとの間隔 */
     position: relative;
     max-width: 240px;
@@ -286,7 +278,7 @@ CSS
         border-radius: 20px;
     }
     .cast-name { font-size: 1.6rem; }
-    #guide-speech-bubble { max-width: 140px; font-size: 0.75rem; }
+    #guide-speech-bubble { max-width: 180px; font-size: 0.75rem; }
 }
 
 /* ヘッダーやフッターの干渉を防ぐための調整 */

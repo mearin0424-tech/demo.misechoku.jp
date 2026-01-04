@@ -68,7 +68,7 @@
                         <div class="conn-name">{{ $cast['name'] }} ({{ $cast['age'] }})</div>
                         <div class="conn-date">#{{ implode(' #', $cast['tags']) }}</div>
                     </div>
-                    <a href="{{ route('shop.cast.show', $cast['id']) }}" class="conn-action">詳細</a>
+                    <a href="{{ route('cast.profile.show', ['id' => $cast['id']]) }}" class="conn-action">詳細</a>
                 </li>
                 @endforeach
             </ul>
