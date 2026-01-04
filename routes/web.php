@@ -10,7 +10,7 @@ use App\Http\Controllers\Auth\Cast\LoginController as CastLogin;
 use App\Http\Controllers\Auth\Shop\LoginController as ShopLogin;
 
 // 共通機能コントローラー
-use App\Http\Controllers\Common\TalkController;
+use App\Http\Controllers\Common\TalkController as TalkController;
 
 // 店舗側コントローラー
 use App\Http\Controllers\Shops\HomeController as ShopHome;
@@ -76,7 +76,7 @@ Route::prefix('shop')->name('shop.')->group(function () {
     Route::prefix('talk')->name('talk.')->group(function () {
         Route::get('/', [TalkController::class, 'index'])->name('index');
         Route::get('/room/{id}', [TalkController::class, 'room'])->name('room');
-        // Route::post('/send', [App\Http\Controllers\Common\TalkController::class, 'store'])->name('send');
+        Route::post('/send', [TalkController::class, 'store'])->name('send');
     });
     
 
@@ -126,17 +126,18 @@ Route::prefix('shop')->name('shop.')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('cast')->name('cast.')->group(function () {
+    // ホーム・プロフィール
     Route::get('/home', [ShopHome::class, 'index'])->name('home'); 
     Route::get('/profile/{id}', [CastProfile::class, 'show'])->name('profile.show');
-});
 
-Route::prefix('cast')->name('cast.')->group(function () {
-    // ... 他のルート
+    // トーク・メッセージ
     Route::prefix('talk')->name('talk.')->group(function () {
         Route::get('/', [TalkController::class, 'index'])->name('index');
         Route::get('/room/{id}', [TalkController::class, 'room'])->name('room');
+        Route::post('/send', [TalkController::class, 'store'])->name('send'); // 追加
     });
 });
+
 /*
 |--------------------------------------------------------------------------
 | 3. Common Protected Settings (共通設定)
@@ -147,4 +148,10 @@ Route::prefix('cast')->name('cast.')->group(function () {
 Route::group([], function () {
     Route::get('/setting/notification', [SettingController::class, 'notification'])->name('common.setting.notification');
     Route::get('/setting/account', [SettingController::class, 'account'])->name('common.settings.account');
+});
+
+/* 内部キャッシュクリア用 (コマンドが打てない環境用) */
+Route::get('/clear-route', function() {
+    \Artisan::call('route:clear');
+    return "Route cache cleared!";
 });
