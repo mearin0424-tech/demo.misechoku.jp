@@ -4,7 +4,10 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     
-    // 1. 写真の左右スワイプ (Nested Swiper)
+    const slides = document.querySelectorAll('.main-swiper .swiper-slide');
+    const slideCount = slides.length;
+    
+    // 写真の左右スワイプ (Nested Swiper)
     const photoSwipers = new Swiper('.photo-swiper', {
         direction: 'horizontal',
         nested: true,
@@ -12,27 +15,26 @@ document.addEventListener('DOMContentLoaded', function() {
             el: '.photo-pagination',
             clickable: true
         },
+        preventClicks: false,
+        preventClicksPropagation: false,
         speed: 400,
-        resistanceRatio: 0,
-        preventClicks: false, // クリックを許可
-        preventClicksPropagation: false
     });
 
-    // 2. メインの上下スワイプ (安定の中央配置)
+    // メインの上下スワイプ
     const mainSwiper = new Swiper('.main-swiper', {
         direction: 'vertical',
         slidesPerView: 1,
-        centeredSlides: true, // これによりカードが中央に固定されます
-        loop: slideCount > 3, // スライド数が3以下の場合はループしない
+        centeredSlides: true,
+        
+        // 枚数が1枚より多ければループを有効にする（エラー回避）
+        loop: slideCount > 1, 
+        
         speed: 500,
         mousewheel: true,
-        // ★★★ モダンモーションはあとで検討
+        grabCursor: true,
         effect: 'slide', 
-        on: {
-            init: function () {
-                this.update();
-            }
-        }
+        observer: true,
+        observeParents: true,
     });
 
     // 3. クリックイベントの伝播停止 (ボタン類)
