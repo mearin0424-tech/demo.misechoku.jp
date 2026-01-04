@@ -15,53 +15,48 @@ class TalkController extends Controller
     {
         // 「やり取り中」のテストデータ
         $ongoingTalks = [
-            [
-                'partner_id' => 1,
-                'name' => 'アンナ',
-                'avatar' => 'storage/mock/casts/1.png',
-                'last_message' => '本日はありがとうございました！またお待ちしております。',
-                'last_time' => '10:25',
-                'sort_key' => Carbon::today()->setHour(10)->setMinute(25),
-                'unread_count' => 0,
-            ],
-            [
-                'partner_id' => 2,
-                'name' => 'リナ',
-                'avatar' => 'storage/mock/casts/2.png',
-                'last_message' => '了解いたしました！調整してみますね。',
-                'last_time' => '昨日',
-                'sort_key' => Carbon::yesterday(),
-                'unread_count' => 0,
-            ],
+        [
+            'partner_id' => 1,
+            'name' => 'アンナ',
+            'avatar' => 'storage/mock/casts/1.png',
+            'last_message' => '本日はありがとうございました！またお待ちしております。',
+            'last_time' => '10:25',
+            'sort_key' => Carbon::today()->setHour(10)->setMinute(25),
+            'unread_count' => 0,
+            'last_message_by_me' => true, // 自分が送った
+            'is_read' => true,           // 既読
+        ],
+        [
+            'partner_id' => 2,
+            'name' => 'リナ',
+            'avatar' => 'storage/mock/casts/2.png',
+            'last_message' => '了解いたしました！調整してみますね。',
+            'last_time' => '昨日',
+            'sort_key' => Carbon::yesterday(),
+            'unread_count' => 0,
+            'last_message_by_me' => true, // 自分が送った
+            'is_read' => false,          // まだ未読
+        ],
         ];
 
         // 「リクエスト / オファー」のテストデータ
         $requestTalks = [
-            [
-                'partner_id' => 4,
-                'name' => 'サキ',
-                'avatar' => 'storage/mock/casts/4.png',
-                'last_message' => '初めまして！今夜空いていますか？',
-                'last_time' => '1時間前',
-                'sort_key' => Carbon::now()->subHour(),
-                'unread_count' => 1,
-            ],
-            [
-                'partner_id' => 5,
-                'name' => 'エミ',
-                'avatar' => 'storage/mock/casts/5.png',
-                'last_message' => 'プロフィール拝見しました！',
-                'last_time' => '10分前',
-                'sort_key' => Carbon::now()->subMinutes(10),
-                'unread_count' => 1,
-            ],
-        ];
+        [
+            'partner_id' => 4,
+            'name' => 'サキ',
+            'avatar' => 'storage/mock/casts/4.png',
+            'last_message' => '初めまして！今夜空いていますか？',
+            'last_time' => '1時間前',
+            'sort_key' => Carbon::now()->subHour(),
+            'unread_count' => 1,
+            'last_message_by_me' => false,
+        ],
+    ];
 
-        // 最新のメッセージが届いた順に並び替え (sortByDesc)
-        $ongoingTalks = collect($ongoingTalks)->sortByDesc('sort_key')->values()->all();
-        $requestTalks = collect($requestTalks)->sortByDesc('sort_key')->values()->all();
+    $ongoingTalks = collect($ongoingTalks)->sortByDesc('sort_key')->values()->all();
+    $requestTalks = collect($requestTalks)->sortByDesc('sort_key')->values()->all();
 
-        return view('common.talk.index', compact('ongoingTalks', 'requestTalks'));
+    return view('common.talk.index', compact('ongoingTalks', 'requestTalks'));
     }
 
     /**

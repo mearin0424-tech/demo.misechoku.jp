@@ -36,8 +36,21 @@
                         <span class="talk-name">{{ $talk['name'] }}</span>
                         <span class="talk-time">{{ $talk['last_time'] }}</span>
                     </div>
+                    {{-- 前略：ループの中身を以下のように調整 --}}
                     <div class="flex justify-between items-center">
-                        <p class="talk-last-msg">{{ $talk['last_message'] }}</p>
+                        <div class="flex items-center min-width-0">
+                            <p class="talk-last-msg">{{ $talk['last_message'] }}</p>
+                            
+                            {{-- 自分が最後に送った場合のみ既読状態を表示 --}}
+                            @if($talk['last_message_by_me'])
+                                @if($talk['is_read'])
+                                    <span class="talk-status">既読</span>
+                                @else
+                                    <span class="talk-status unread">送付済</span>
+                                @endif
+                            @endif
+                        </div>
+
                         @if($talk['unread_count'] > 0)
                             <span class="unread-badge">{{ $talk['unread_count'] }}</span>
                         @endif

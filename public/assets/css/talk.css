@@ -252,3 +252,14 @@
     display: block;
     opacity: 0.3;
 }
+
+.talk-status {
+    font-size: 0.7rem;
+    color: var(--color-gold, #d4af37);
+    margin-left: 5px;
+    font-weight: bold;
+}
+
+.talk-status.unread {
+    color: #666; /* 未読時は目立たない色に */
+}
