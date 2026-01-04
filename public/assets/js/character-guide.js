@@ -1,46 +1,29 @@
-/**
- * オコジョガイド共通ロジック
- * 閉じる処理および外部からのメッセージ更新を管理します。
- */
 document.addEventListener('DOMContentLoaded', function() {
-    // 要素の取得
     const characterGuide = document.getElementById('character-guide');
     const closeBtn = document.getElementById('character-close-trigger');
     const messageContent = document.getElementById('character-message-content');
 
-    // 1. 「×」ボタン押下でガイドを非表示にする
+    // ×ボタンで非表示
     if (closeBtn && characterGuide) {
         closeBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            // スタイルで非表示にする（is-hiddenクラスの付与）
-            characterGuide.classList.add('is-hidden');
-            
-            // オプション：一度閉じたらセッション中は出さない場合はここでlocalStorage等に保存可能
-            // localStorage.setItem('character_guide_closed', 'true');
+            characterGuide.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            characterGuide.style.opacity = '0';
+            characterGuide.style.transform = 'translateY(10px)';
+            setTimeout(() => characterGuide.classList.add('is-hidden'), 300);
         });
     }
 
-    /**
-     * オコジョのセリフを動的に変更するグローバル関数
-     * Swiperのイベント（slideChange）や、特定の操作時に呼び出してください。
-     * * @param {string} newMessage - 表示したい新しいメッセージ
-     * * 使用例: window.updateCharacterMessage("新しいメッセージだよ！");
-     */
+    // 外部（Swiperなど）からメッセージを更新する関数
     window.updateCharacterMessage = function(newMessage) {
-        if (!messageContent || !characterGuide) {
-            console.warn('Character Guide elements not found.');
-            return;
-        }
+        if (!messageContent || !characterGuide) return;
 
         if (newMessage && newMessage.trim() !== "") {
-            // 改行コードを<br>に変換して反映
-            const formattedMessage = newMessage.replace(/\n/g, '<br>');
-            messageContent.innerHTML = formattedMessage;
-            
-            // メッセージがある場合は表示する
+            messageContent.innerHTML = newMessage.replace(/\n/g, '<br>');
             characterGuide.classList.remove('is-hidden');
+            characterGuide.style.opacity = '1';
+            characterGuide.style.transform = 'translateY(0)';
         } else {
-            // メッセージが空の場合はガイド自体を隠す
             characterGuide.classList.add('is-hidden');
         }
     };

@@ -1,49 +1,79 @@
-#character-guide {
-    width: 100%;
-    background-color: #ffffff;
-    border-bottom: 1px solid #f0f0f0;
-    padding: 8px 15px;
-    z-index: 1000;
-    display: block;
+/* ガイド全体の浮遊コンテナ */
+.discovery-guide {
+    position: fixed;
+    bottom: calc(var(--footer-height) + 15px); /* フッターの直上 */
+    right: 15px;
+    z-index: 2000;
+    display: flex;
+    align-items: flex-end;
+    pointer-events: none; /* 背後のスワイプを邪魔しない */
 }
 
-#character-guide.is-hidden {
+.discovery-guide.is-hidden {
     display: none;
 }
 
-.character-guide-inner {
-    display: flex;
-    align-items: center;
-    max-width: 1200px;
-    margin: 0 auto;
-    gap: 10px;
+/* キャラクター画像：囲みなし */
+.guide-character-wrap {
+    position: relative;
+    pointer-events: auto; /* ここだけクリック可能に */
 }
 
-.character-avatar img {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 1px solid #eee;
-    flex-shrink: 0;
+.guide-character-wrap img {
+    width: 85px; /* サイズ調整 */
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); /* 影をつけて視認性確保 */
 }
 
-.character-balloon {
-    flex-grow: 1;
+/* 吹き出し：左側に配置 */
+.guide-speech-bubble {
+    background: #ffffff;
+    padding: 10px 15px;
+    border-radius: 15px 15px 2px 15px;
+    margin-right: 8px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    max-width: 180px;
+    pointer-events: auto;
+    position: relative;
 }
 
-.character-balloon p {
-    font-size: 12px;
-    font-weight: 600;
+/* 吹き出しの三角（しっぽ） */
+.guide-speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: -8px;
+    border-width: 8px 0 8px 10px;
+    border-style: solid;
+    border-color: transparent transparent transparent #ffffff;
+}
+
+.guide-speech-bubble p {
+    font-size: 11px;
+    font-weight: bold;
     color: #333;
     margin: 0;
     line-height: 1.4;
 }
 
-.character-close-btn {
-    background: none;
+/* 閉じるボタン（×） */
+.guide-close-x {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #444;
+    color: #fff;
     border: none;
-    color: #ccc;
-    font-size: 18px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 14px;
+    line-height: 1;
     cursor: pointer;
-    padding: 2px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
 }

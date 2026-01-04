@@ -2,11 +2,14 @@
 #home-screen {
     position: relative;
     width: 100%;
+    height: calc(100dvh - 60px - 75px);
+
     /* ヘッダー・フッター・オコジョガイドを除いた残りの全領域 */
-    flex: 1;
+    flex: 1; /*親要素（#app）の中で、余っているスペースをすべて埋める*/
     overflow: hidden; 
     background-color: #0a0a0a;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     touch-action: none; /* スワイプ専用画面のためブラウザのデフォルト挙動を抑制 */
@@ -34,6 +37,7 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+    display: flex !important;
 }
 
 /* --- Photo Swiper (左右スワイプ) --- */
