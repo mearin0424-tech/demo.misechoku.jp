@@ -4,7 +4,7 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     
-    // 1. 写真の左右スワイプ初期化 (Nested Swiper)
+    // 1. 写真の左右スワイプ (Nested Swiper)
     const photoSwipers = new Swiper('.photo-swiper', {
         direction: 'horizontal',
         nested: true,
@@ -14,19 +14,32 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         speed: 400,
         resistanceRatio: 0,
-        // スワイプイベントが親に伝播しないよう設定
         touchStartPreventDefault: false,
     });
 
-    // 2. メインの上下スワイプ初期化
+    // 2. メインの上下スワイプ (Modern Creative Effect)
     const mainSwiper = new Swiper('.main-swiper', {
         direction: 'vertical',
         slidesPerView: 1,
-        mousewheel: true,
-        speed: 600,
-        spaceBetween: 0,
+        centeredSlides: true,
         loop: true,
-        // 画面リサイズに対応
+        speed: 700,
+        mousewheel: true,
+        
+        // 立体的なスワイプエフェクト
+        effect: 'creative',
+        creativeEffect: {
+            prev: {
+                shadow: true,
+                translate: [0, "-120%", -500],
+                rotate: [0, 0, -15],
+            },
+            next: {
+                shadow: true,
+                translate: [0, "120%", -500],
+                rotate: [0, 0, 15],
+            },
+        },
         on: {
             init: function () {
                 this.update();
