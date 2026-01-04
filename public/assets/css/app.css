@@ -14,7 +14,7 @@
     --color-card: #220a0a;
     --color-border: #4d1a1a;
     
-    --primary-color: #d4af37; 
+    --primary-color: #585751; 
     --bg-dark: #120505;
     --card-glass: rgba(255, 255, 255, 0.1);
 
@@ -76,20 +76,13 @@ main {
     box-sizing: border-box;
 }
 
+
 /* レスポンシブ対応 */
 @media (max-width: 1023px) {
 	#app { flex-direction: column; }  /* スマホ時は縦並び */
     main { padding-right: 0 !important; } /* PC用サイドバーの余白を強制リセット */
 }
 
-@media (min-width: 1024px) {
-    main {
-        /* [重要] 領域を狭めていた padding-right: 260px を削除 */
-        padding-right: 0; 
-        padding-left: 0;
-        padding-bottom: 0;
-    }
-}
 
 /* ホーム画面専用：スクロールを禁止し、1枚のみ表示する領域設定 */
 .no-scroll {
