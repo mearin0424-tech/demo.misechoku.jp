@@ -14,25 +14,25 @@ use App\Http\Controllers\Common\TalkController as TalkController;
 
 // 店舗側コントローラー
 use App\Http\Controllers\Shops\HomeController as ShopHome;
-use App\Http\Controllers\Shops\SearchController as ShopSearch;
+use App\Http\Controllers\Shops\SearchController as ShopSearch; // 新しい共通化ベース
 use App\Http\Controllers\Shops\MypageController as ShopMypage;
 use App\Http\Controllers\Shops\ProfileController as ShopProfile;
 use App\Http\Controllers\Shops\RecruitmentController as ShopRecruit;
 use App\Http\Controllers\Shops\ReviewController as ShopReview;
 use App\Http\Controllers\Shops\InteractionController as ShopInteraction;
 
+// キャスト側コントローラー
 use App\Http\Controllers\Casts\ProfileController as CastProfile;
+use App\Http\Controllers\Casts\SearchController as CastSearch; // 追加：共通化ベース
+
 /*
 |--------------------------------------------------------------------------
 | リダイレクト
 |--------------------------------------------------------------------------
 */
 
-// /shop にアクセスしたら /shop/home へリダイレクト
 Route::redirect('/shop', '/shop/home');
-
-// /cast にアクセスしたら /cast/home (または指定のパス) へリダイレクト
-Route::redirect('/cast', '/cast/home'); // 現在は店側モックのみなので暫定的にこちらへ
+Route::redirect('/cast', '/cast/home'); 
 
 /*
 |--------------------------------------------------------------------------
@@ -40,9 +40,7 @@ Route::redirect('/cast', '/cast/home'); // 現在は店側モックのみなの�
 |--------------------------------------------------------------------------
 */
 
-//TODO: 実装していないのでいったんホームへ
 Route::redirect('/', '/shop/home');
-//Route::get('/', [PageController::class, 'welcome'])->name('welcome');
 
 // LP・サポート系
 Route::name('pages.')->group(function () {
@@ -67,7 +65,6 @@ Route::prefix('shop')->name('shop.')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-// 本番運用時は middleware(['auth:shop', 'ensure.shop']) を適用
 Route::prefix('shop')->name('shop.')->group(function () {
     
     // ホーム・検索
@@ -80,7 +77,6 @@ Route::prefix('shop')->name('shop.')->group(function () {
         Route::get('/room/{id}', [TalkController::class, 'room'])->name('room');
         Route::post('/send', [TalkController::class, 'store'])->name('send');
     });
-    
 
     // つながり (Interaction)
     Route::prefix('interaction')->name('interaction.')->group(function () {
@@ -107,7 +103,7 @@ Route::prefix('shop')->name('shop.')->group(function () {
         Route::get('/', [ShopRecruit::class, 'show'])->name('show');
         Route::get('/edit', [ShopRecruit::class, 'edit'])->name('edit');
         Route::put('/update', [ShopRecruit::class, 'update'])->name('update');
-        Route::get('/status', [ShopRecruit::class, 'status'])->name('status'); // 採用ステータス管理
+        Route::get('/status', [ShopRecruit::class, 'status'])->name('status'); 
     });
 
     // マイページ・管理系
@@ -132,11 +128,14 @@ Route::prefix('cast')->name('cast.')->group(function () {
     Route::get('/home', [ShopHome::class, 'index'])->name('home'); 
     Route::get('/profile/{id}', [CastProfile::class, 'show'])->name('profile.show');
 
+    // 検索（追加：これで cast.search.index が有効になります）
+    Route::get('/search', [CastSearch::class, 'index'])->name('search.index');
+
     // トーク・メッセージ
     Route::prefix('talk')->name('talk.')->group(function () {
         Route::get('/', [TalkController::class, 'index'])->name('index');
         Route::get('/room/{id}', [TalkController::class, 'room'])->name('room');
-        Route::post('/send', [TalkController::class, 'store'])->name('send'); // 追加
+        Route::post('/send', [TalkController::class, 'store'])->name('send');
     });
 });
 
@@ -146,13 +145,12 @@ Route::prefix('cast')->name('cast.')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-// 本番運用時は middleware(['auth:cast,shop']) を適用
 Route::group([], function () {
     Route::get('/setting/notification', [SettingController::class, 'notification'])->name('common.setting.notification');
     Route::get('/setting/account', [SettingController::class, 'account'])->name('common.settings.account');
 });
 
-/* 内部キャッシュクリア用 (コマンドが打てない環境用) */
+/* 内部キャッシュクリア用 */
 Route::get('/clear-route', function() {
     \Artisan::call('route:clear');
     return "Route cache cleared!";
