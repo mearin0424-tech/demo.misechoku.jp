@@ -1,0 +1,1 @@
+<input type="text" placeholder="キーワード・エリア検索" class="w-full p-2 bg-[#2a1a1a] border border-[#4d1a1a] text-white">
