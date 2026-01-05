@@ -130,6 +130,13 @@ Route::prefix('cast')->name('cast.')->group(function () {
 
     // 検索（追加：これで cast.search.index が有効になります）
     Route::get('/search', [CastSearch::class, 'index'])->name('search.index');
+    
+    // つながり (Interaction)
+    Route::prefix('interaction')->name('interaction.')->group(function () {
+        
+        // TODO: ★★★現時点では ShopInteraction コントローラーを流用★★
+        Route::get('/', [ShopInteraction::class, 'index'])->name('index');
+    });
 
     // トーク・メッセージ
     Route::prefix('talk')->name('talk.')->group(function () {
