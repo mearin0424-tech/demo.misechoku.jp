@@ -27,20 +27,23 @@
     <div id="menu-overlay" class="menu-overlay"></div>
 
     <div id="app">
-        {{-- ヘッダー --}}
-        @include('layouts.parts.header')
+        {{-- メインレイアウト部分を縦並びのFlexコンテナとして包む --}}
+        <div class="main-layout-container flex-1 flex flex-col min-w-0">
 
-        {{-- @yield('guide_message') で各ページの設定内容を注入する --}}
-        @include('layouts.parts.character-guide', ['guideMessage' => $__env->yieldContent('guide_message')])
+            {{-- ヘッダー --}}
+            @include('layouts.parts.header')
 
-        {{-- メインコンテンツ --}}
-        <main id="main-content">
-            @yield('content')
-        </main>
+            {{-- @yield('guide_message') で各ページの設定内容を注入する --}}
+            @include('layouts.parts.character-guide', ['guideMessage' => $__env->yieldContent('guide_message')])
 
-        {{-- ボトムナビ（モバイル用固定） --}}
-        @include('layouts.parts.footer')
+            {{-- メインコンテンツ --}}
+            <main id="main-content">
+                @yield('content')
+            </main>
 
+            {{-- ボトムナビ（モバイル用固定） --}}
+            @include('layouts.parts.footer')
+        </div>
         {{-- サイドバー --}}
         @include('layouts.parts.sidebar')
     </div>
