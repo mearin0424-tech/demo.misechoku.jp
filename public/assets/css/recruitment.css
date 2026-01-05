@@ -1,0 +1,97 @@
+/* 求人管理・編集共通スタイル */
+
+/* ステータスバッジ */
+.status-badge {
+    font-size: 0.65rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-block;
+}
+.status-active {
+    background: rgba(0, 255, 128, 0.1);
+    color: #00ff80;
+    border: 1px solid rgba(0, 255, 128, 0.2);
+}
+.status-inactive {
+    background: rgba(255, 255, 255, 0.05);
+    color: #666;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* トグルスイッチ */
+.toggle-btn {
+    width: 46px;
+    height: 24px;
+    background: #333;
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.toggle-btn.active {
+    background: var(--gold);
+}
+.toggle-circle {
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+.toggle-btn.active .toggle-circle {
+    left: 25px;
+}
+
+/* フォーム要素 */
+.recruit-form-group {
+    margin-bottom: 24px;
+}
+.recruit-label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+.recruit-input, .recruit-textarea {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #fff;
+    padding: 12px 15px;
+    font-size: 0.9rem;
+    transition: border-color 0.3s;
+}
+.recruit-input:focus, .recruit-textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+}
+
+/* ベネフィット（待遇）チップ */
+.benefit-tag {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #aaa;
+    font-size: 0.75rem;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.benefit-tag.selected {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: var(--gold);
+    color: var(--gold);
+}
