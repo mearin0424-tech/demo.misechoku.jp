@@ -40,6 +40,30 @@
     list-style: none;
 }
 
+/* レスポンシブなフォトグリッド */
+.responsive-photo-grid {
+    display: grid;
+    /* デフォルト：スマホなどの小画面は2列 */
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 12px;
+    padding: 0;
+    list-style: none;
+}
+
+/* 480px以上（少し大きいスマホ・タブレット）は3列 */
+@media (min-width: 480px) {
+    .responsive-photo-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* 768px以上（PCや横向きタブレット）は4列 */
+@media (min-width: 768px) {
+    .responsive-photo-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
 /* フォトスロットデザイン（Luxe Lounge Style） */
 .photo-slot {
     aspect-ratio: 3/4;
@@ -53,6 +77,11 @@
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+}
+
+.photo-slot.has-img {
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 .photo-slot:active {

@@ -14,7 +14,7 @@
             <span class="text-sm">Back</span>
         </a>
         <h2 class="text-lg serif-font gold-gradient m-0">Media Library</h2>
-        <button type="submit" form="gallery-form" class="text-gold text-sm font-semibold bg-transparent border-none">Done</button>
+        <button type="submit" form="gallery-form" class="text-gold text-sm font-semibold bg-transparent border-none cursor-pointer">Done</button>
     </div>
 
     <div class="flex-1 overflow-y-auto p-6 pb-32">
@@ -39,41 +39,41 @@
             ];
             @endphp
 
-            <div class="grid grid-cols-3 gap-3">
+            {{-- レスポンシブなグリッド (2~4列) --}}
+            <div class="responsive-photo-grid">
                 @for($i=0; $i<8; $i++)
                     @php $imgSrc = $subImages[$i] ?? null; @endphp
-                    <div class="photo-slot group" onclick="document.getElementById('file_{{ $i }}').click()">
+                    <div class="photo-slot {{ $imgSrc ? 'has-img' : '' }}" onclick="document.getElementById('file_{{ $i }}').click()">
                         <input type="file" id="file_{{ $i }}" name="images[]" class="hidden" onchange="previewImage(this, {{ $i }})">
                         
-                        {{-- 画像がある場合 --}}
+                        {{-- プレビュー画像 --}}
                         <img id="preview_{{ $i }}" src="{{ $imgSrc }}" class="w-full h-full object-cover {{ $imgSrc ? '' : 'hidden' }}">
                         
-                        @if($imgSrc)
-                            <button type="button" class="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white border-none" onclick="event.stopPropagation(); removeImage(this, {{ $i }})">
-                                <i class="fas fa-times text-[10px]"></i>
-                            </button>
-                        @endif
+                        {{-- 削除ボタン --}}
+                        <button type="button" id="delete_{{ $i }}" class="delete-btn {{ $imgSrc ? '' : 'hidden' }}" onclick="event.stopPropagation(); removeImage(this, {{ $i }})">
+                            <i class="fas fa-times"></i>
+                        </button>
 
-                        {{-- 画像がない場合（ガイド表示） --}}
-                        <div id="guide_{{ $i }}" class="flex flex-col items-center p-2 text-center pointer-events-none {{ $imgSrc ? 'hidden' : '' }}">
+                        {{-- ガイド表示 (画像がない時のみ) --}}
+                        <div id="guide_{{ $i }}" class="slot-guide {{ $imgSrc ? 'hidden' : '' }}">
                             <div class="w-10 h-10 flex items-center justify-center mb-1">
-                                <i class="fas {{ $photoGuides[$i]['icon'] }} text-gold opacity-30 text-2xl"></i>
+                                <i class="fas {{ $photoGuides[$i]['icon'] }} text-gold opacity-30 text-xl"></i>
                             </div>
-                            <span class="text-[9px] text-gray-400 font-semibold mb-0.5">{{ $photoGuides[$i]['label'] }}</span>
-                            <span class="text-[7px] text-gray-600 uppercase tracking-tighter">{{ $photoGuides[$i]['desc'] }}</span>
-                            <div class="absolute bottom-1 right-1 w-5 h-5 gold-bg rounded-full flex items-center justify-center text-black">
-                                <i class="fas fa-plus text-[10px]"></i>
+                            <span class="guide-label text-gray-400 font-bold" style="font-size: 9px; display: block;">{{ $photoGuides[$i]['label'] }}</span>
+                            <span class="guide-desc text-gray-600 uppercase" style="font-size: 7px;">{{ $photoGuides[$i]['desc'] }}</span>
+                            <div class="plus-badge">
+                                <i class="fas fa-plus"></i>
                             </div>
                         </div>
                     </div>
                 @endfor
             </div>
 
-            {{-- ヒントセクション --}}
+            {{-- Tips Section --}}
             <div class="mt-8 glass-panel p-5 rounded-2xl border-gold/10">
                 <div class="flex items-start gap-4">
                     <div class="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-magic text-gold"></i>
+                        <i class="fas fa-sparkles text-gold"></i>
                     </div>
                     <div>
                         <h4 class="text-sm text-white font-semibold italic m-0">Luxe Tips</h4>
@@ -90,45 +90,44 @@
 
 @push('scripts')
 <script>
+/**
+ * 画像プレビュー
+ */
 function previewImage(input, index) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
         reader.onload = function(e) {
             const preview = document.getElementById('preview_' + index);
             const guide = document.getElementById('guide_' + index);
+            const deleteBtn = document.getElementById('delete_' + index);
             const slot = preview.parentElement;
 
             preview.src = e.target.result;
             preview.classList.remove('hidden');
             guide.classList.add('hidden');
-
-            // 削除ボタンがない場合のみ生成
-            if (!slot.querySelector('.delete-btn-dynamic')) {
-                const btn = document.createElement('button');
-                btn.className = 'absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white border-none delete-btn-dynamic';
-                btn.innerHTML = '<i class="fas fa-times text-[10px]"></i>';
-                btn.onclick = function(e) {
-                    e.stopPropagation();
-                    removeImage(btn, index);
-                };
-                slot.appendChild(btn);
-            }
+            deleteBtn.classList.remove('hidden');
+            slot.classList.add('has-img');
         }
         reader.readAsDataURL(input.files[0]);
     }
 }
 
+/**
+ * 画像削除
+ */
 function removeImage(btn, index) {
-    if(confirm('写真を削除しますか？')) {
+    if(confirm('この写真を削除しますか？')) {
         const preview = document.getElementById('preview_' + index);
         const guide = document.getElementById('guide_' + index);
         const input = document.getElementById('file_' + index);
+        const slot = preview.parentElement;
 
         preview.src = '';
         preview.classList.add('hidden');
         guide.classList.remove('hidden');
+        btn.classList.add('hidden');
+        slot.classList.remove('has-img');
         input.value = '';
-        btn.remove();
     }
 }
 </script>
