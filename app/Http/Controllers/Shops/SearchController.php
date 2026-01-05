@@ -33,7 +33,7 @@ class SearchController extends Controller
             ['id' => 3, 'name' => 'Rena', 'age' => 25, 'img' => asset('storage/mock/casts/3-1.png'), 'tags' => ['フリーランス', 'ハーフ系']],
         ];
 
-        return view('shops.search.index', [
+        return view('common.search.index', [
             'pageId' => 'search',
             'timelineData' => $timelineData,
             'casts' => $casts,
@@ -43,7 +43,6 @@ class SearchController extends Controller
 
     public function show($id)
     {
-        // キャスト詳細画面（旧 cast_detail.php 相当）
-        return view('shops.search.show', ['id' => $id]);
+        return view('cast.profile.show', ['id' => $id]);
     }
 }
