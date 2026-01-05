@@ -61,7 +61,7 @@ body {
     box-shadow: 0 0 50px rgba(0,0,0,1);
 }
 
-/* メインレイアウトのラッパー (真っ暗問題の解消) */
+/* メインレイアウトのラッパー*/
 .main-layout-container {
     flex: 1;
     height: 100vh;

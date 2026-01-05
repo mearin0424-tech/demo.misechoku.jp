@@ -3,115 +3,146 @@
 @section('title', 'マイページ')
 
 @push('styles')
+{{-- 既存のCSSとLuxeデザインの共存 --}}
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
-{{-- ギャラリーのデザインとアニメーションを共有 --}}
 <link rel="stylesheet" href="{{ asset('assets/css/gallery.css') }}">
+<style>
+    /* 追加の個別修正スタイル */
+    /* 1. ひとこと編集ボタン：スタイリッシュに */
+    .btn-word-edit {
+        background: none !important;
+        border: none !important;
+        color: var(--gold) !important;
+        transition: opacity 0.2s;
+        padding: 5px;
+    }
+    .btn-word-edit:hover { opacity: 0.7; }
+
+    /* 2. レビュー：下線なし・遷移先変更 */
+    .shop-review-link {
+        text-decoration: none !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* 4. ギャラリー：レスポンシブグリッド */
+    .responsive-gallery {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* デフォルト2枚 */
+        gap: 10px;
+    }
+    @media (min-width: 480px) { .responsive-gallery { grid-template-columns: repeat(3, 1fr); } }
+    @media (min-width: 768px) { .responsive-gallery { grid-template-columns: repeat(4, 1fr); } }
+
+    /* プレビュー用簡易モーダル */
+    #image-preview-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: rgba(0,0,0,0.9);
+        justify-content: center;
+        align-items: center;
+    }
+</style>
 @endpush
 
 @section('content')
 <div class="contents inner animate-fadeIn">
-    <section class="mypage-area p-4">
-        {{-- ショップ名：ゴールドグラデーション --}}
-        <h1 class="mypage-shop-name serif-font gold-gradient text-3xl mb-6">{{ $shopData['shop_name'] }}</h1>
+    <section class="mypage-area">
+        <h1 class="mypage-shop-name serif-font gold-gradient">{{ $shopData['shop_name'] }}</h1>
 
-        {{-- ヘッダー：アイコン ＋ 吹き出し --}}
-        <div class="shop-header-top flex items-center mb-8">
-            <div class="shop-icon-wrapper relative w-24 h-24 mr-4 flex-shrink-0">
-                <img src="{{ $subImages[0] ?? asset('assets/images/common/no-image.png') }}" class="shop-icon-main w-full h-full rounded-full border-2 border-gold object-cover" id="main-icon-display">
-                <button class="btn-add-icon absolute bottom-0 right-0 w-8 h-8 bg-gold rounded-full flex items-center justify-center text-black shadow-lg" onclick="document.getElementById('gallery-upload').click()">
-                    <i class="fas fa-plus text-xs"></i>
-                </button>
+        <div class="shop-header-top">
+            <div class="shop-icon-wrapper">
+                <img src="{{ $subImages[0] ?? asset('assets/images/common/no-image.png') }}" class="shop-icon-main" id="main-icon-display">
+                <button class="btn-add-icon" onclick="document.getElementById('gallery-upload').click()"><i class="fas fa-plus"></i></button>
             </div>
-            <div class="shop-word-bubble flex-1 glass-panel p-4 rounded-2xl relative min-h-[70px] flex items-center cursor-pointer" onclick="openWordEdit()">
-                <p id="display-word" class="text-sm text-gray-200 leading-relaxed">{{ $shopData['word'] }}</p>
-                <button class="btn-word-edit absolute bottom-2 right-3 text-gold opacity-50"><i class="fas fa-pen text-xs"></i></button>
+            <div class="shop-word-bubble glass-panel" onclick="openWordEdit()">
+                <p id="display-word">{{ $shopData['word'] }}</p>
+                {{-- ペンアイコンをスタイリッシュに配置 --}}
+                <button class="btn-word-edit" style="position:absolute; right:10px; bottom:5px;">
+                    <i class="fas fa-pen"></i>
+                </button>
             </div>
         </div>
 
-        {{-- レビュー概要 --}}
-        <div class="review-area-top px-2 mb-8">
-            <a href="{{ route('pages.support.column') }}" class="flex items-center gap-2 text-gold no-underline">
-                <div class="flex text-xs">
-                    @for($i=1; $i<=5; $i++)
-                        <i class="{{ $i <= $shopData['review_avg'] ? 'fas' : 'far' }} fa-star"></i>
-                    @endfor
-                </div>
-                <span class="text-sm font-bold">{{ number_format($shopData['review_avg'], 1) }}</span>
-                <span class="text-xs text-gray-500">({{ $shopData['review_count'] }}件のレビュー)</span>
-                <i class="fas fa-chevron-right text-[10px] ml-auto opacity-30"></i>
+        <div class="review-area-top" style="padding: 0 15px; margin-bottom: 15px;">
+            {{-- 遷移先を reviews.blade.php (review.index) に変更 --}}
+            <a href="{{ route('shop.mypage.review.index') }}" class="shop-review-link">
+                <span class="stars text-gold"><i class="fas fa-star"></i> {{ $shopData['review_avg'] }}</span>
+                <span class="count" style="color:#888;">({{ $shopData['review_count'] }}件)</span>
+                <i class="fas fa-chevron-right" style="color:#444; font-size: 0.8rem;"></i>
             </a>
         </div>
 
-        <div class="detail-box space-y-8">
-            {{-- プロフィール情報セクション --}}
-            <div class="profile-info-section glass-panel p-5 rounded-2xl">
-                <div class="flex justify-between items-center mb-4 border-b border-white/5 pb-2">
-                    <h3 class="text-xs uppercase tracking-widest text-gold font-bold">Profile Info</h3>
-                    <button class="text-[10px] text-gray-400 border border-white/10 px-3 py-1 rounded-full" onclick="openProfileEdit()">編集</button>
+        <div class="detail-box" style="padding: 0 15px;">
+            <div class="profile-info-section">
+                <div class="section-title-row">
+                    <h3 style="font-size:1rem; color:#aaa; margin:0;">プロフィール情報</h3>
+                    <button class="btn-outline-gold" onclick="openProfileEdit()">編集</button>
                 </div>
-                <p class="text-xs text-gray-400 mb-3 flex items-center gap-2">
-                    <i class="fas fa-map-marker-alt text-gold"></i> {{ $shopData['pref'] }}{{ $shopData['city'] }}{{ $shopData['addr1'] }}
+                <p class="shop-access-text">
+                    <i class="fas fa-map-marker-alt"></i> {{ $shopData['pref'] }}{{ $shopData['city'] }}{{ $shopData['addr1'] }}
                 </p>
-                <div class="shop-overview-text text-sm text-gray-300 leading-relaxed" id="display-overview">
+                <div class="shop-overview-text" id="display-overview">
                     {!! nl2br(e($shopData['overview'])) !!}
                 </div>
             </div>
 
-            {{-- 管理アクションボタン --}}
-            <div class="mypage-actions grid grid-cols-1 gap-3">
-                <a href="{{ route('shop.recruits.status') }}" class="btn-gold-luxe flex items-center justify-center gap-2 text-decoration-none">
-                    <i class="fas fa-edit text-xs"></i> 求人情報の確認・編集
+            {{-- 3. ボタンデザイン：元のデザイン(btn-action)に戻す --}}
+            <div class="mypage-actions">
+                <a href="{{ route('shop.recruits.status') }}" class="btn-action job">
+                    <i class="fas fa-edit"></i> 求人情報の確認・編集
                 </a>
-                <a href="{{ route('shop.mypage.payment.index') }}" class="glass-panel py-4 rounded-xl flex items-center justify-center gap-2 text-white font-bold no-underline border-white/10 hover:bg-white/5 transition-all">
-                    <i class="fas fa-tasks text-gold text-xs"></i> 採用・請求管理
+                <a href="{{ route('shop.mypage.payment.index') }}" class="btn-action manage">
+                    <i class="fas fa-tasks"></i> 採用・請求管理
                 </a>
             </div>
 
-            {{-- 書類管理 --}}
+            {{-- 3. 書類管理：元のデザインに戻す --}}
             <div class="document-section">
-                <h3 class="text-xs uppercase tracking-widest text-gray-500 font-bold mb-4 px-2">Documents</h3>
-                <div class="space-y-2">
+                <h3 class="section-title-original">書類管理</h3>
+                <ul class="doc-list">
                     @foreach($documents as $doc)
-                    <div class="doc-item glass-panel p-4 rounded-xl flex items-center gap-4">
-                        <i class="fas fa-file-alt text-gray-500"></i>
-                        <div class="flex-1">
-                            <span class="block font-bold text-sm">{{ $doc['name'] }}</span>
-                            <span class="text-[10px] {{ $doc['status'] == 'submitted' ? 'text-green-500' : 'text-accent' }}">
+                    <li class="doc-item">
+                        <div class="doc-icon"><i class="fas fa-file-alt"></i></div>
+                        <div class="doc-info">
+                            <span class="doc-name">{{ $doc['name'] }}</span>
+                            <span class="doc-status {{ $doc['status'] == 'submitted' ? 'done' : 'pending' }}">
                                 {{ $doc['status'] == 'submitted' ? '提出済' : '未提出' }}
                             </span>
                         </div>
-                        <i class="fas fa-chevron-right text-xs opacity-20"></i>
-                    </div>
+                        <i class="fas fa-chevron-right arrow"></i>
+                    </li>
                     @endforeach
-                </div>
+                </ul>
             </div>
 
-            {{-- ギャラリー編集：フォトスロット形式 --}}
+            {{-- 4. ギャラリー：レスポンシブ ＋ プレビュー/削除機能 --}}
             <div class="gallery-edit-section">
-                <div class="flex justify-between items-center mb-4 px-2">
-                    <h3 class="text-xs uppercase tracking-widest text-gold font-bold">Media Gallery</h3>
-                    <a href="{{ route('shop.profile.gallery.edit') }}" class="text-[10px] text-gray-400 underline">管理画面へ</a>
+                <div class="section-guide">
+                    <h3 style="font-size:1rem; color:#aaa; margin:0;">Media Gallery</h3>
+                    <a href="{{ route('shop.profile.gallery.edit') }}" class="text-gold text-xs">編集ページへ</a>
                 </div>
                 
-                <ul class="grid grid-cols-3 gap-3 list-none p-0" id="gallery-list">
-                    @for($i=0; $i<6; $i++)
-                        <li class="relative">
-                            @if(isset($subImages[$i]))
-                                <div class="photo-slot has-img h-full" draggable="true">
-                                    <img src="{{ $subImages[$i] }}" class="w-full h-full object-cover">
-                                    @if($i === 0)
-                                        <span class="absolute top-0 left-0 bg-gold text-black text-[8px] px-2 py-0.5 font-bold rounded-br-lg">MAIN</span>
-                                    @endif
-                                    <button class="delete-btn" onclick="event.preventDefault(); alert('管理画面で削除してください')">×</button>
+                <ul class="responsive-gallery" id="gallery-list">
+                    @for($i=0; $i<8; $i++)
+                        @if(isset($subImages[$i]))
+                            <li class="relative">
+                                <div class="photo-slot has-img">
+                                    <img src="{{ $subImages[$i] }}" onclick="previewFullImage(this.src)" class="cursor-pointer">
+                                    @if($i === 0)<span class="main-badge">MAIN</span>@endif
+                                    <button class="delete-btn" onclick="removeGalleryItem(this)">×</button>
                                 </div>
-                            @else
-                                <div class="photo-slot h-full" onclick="location.href='{{ route('shop.profile.gallery.edit') }}'">
-                                    <div class="plus-badge">
-                                        <i class="fas fa-plus"></i>
-                                    </div>
+                            </li>
+                        @else
+                            <li>
+                                <div class="photo-slot placeholder" onclick="location.href='{{ route('shop.profile.gallery.edit') }}'">
+                                    <i class="fas fa-plus"></i>
                                 </div>
-                            @endif
-                        </li>
+                            </li>
+                        @endif
                     @endfor
                 </ul>
             </div>
@@ -119,14 +150,19 @@
     </section>
 </div>
 
-{{-- 編集モーダル：グラスモーフィズムデザイン --}}
-<div id="modal-word" class="modal-profile-custom fixed inset-0 z-[3000] hidden bg-black/90 flex justify-center align-items-center p-6 backdrop-blur-sm">
-    <div class="glass-panel w-full max-w-sm p-6 rounded-2xl border-white/10 shadow-2xl">
-        <h3 class="serif-font text-gold text-xl mb-4">ひとこと編集</h3>
-        <textarea id="word-input" rows="3" class="w-full bg-black/40 text-white border border-white/10 rounded-xl p-4 text-sm focus:outline-none focus:border-gold transition-colors"></textarea>
-        <div class="grid grid-cols-2 gap-3 mt-6">
-            <button class="py-3 rounded-xl border border-white/10 text-gray-400 font-bold" onclick="closeWordEdit()">戻る</button>
-            <button class="btn-gold-luxe py-3" onclick="saveWord()">保存</button>
+{{-- 簡易プレビューモーダル --}}
+<div id="image-preview-modal" onclick="this.style.display='none'">
+    <img id="modal-img" src="" style="max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+</div>
+
+{{-- 編集モーダル --}}
+<div id="modal-word" class="modal-profile-custom" style="display:none; justify-content:center; align-items:center; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:3000;">
+    <div class="glass-panel" style="width:90%; max-width:400px; padding:20px; border-radius:15px;">
+        <h3 class="serif-font text-gold">ひとこと編集</h3>
+        <textarea id="word-input" rows="3" style="width:100%; background:#111; color:#fff; border:1px solid #444; border-radius:8px; padding:10px; margin:15px 0;"></textarea>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-action manage" onclick="closeWordEdit()" style="flex:1;">戻る</button>
+            <button class="btn-action job" onclick="saveWord()" style="flex:1;">保存</button>
         </div>
     </div>
 </div>
@@ -136,14 +172,25 @@
 
 @push('scripts')
 <script>
+    // プレビュー表示
+    function previewFullImage(src) {
+        document.getElementById('modal-img').src = src;
+        document.getElementById('image-preview-modal').style.display = 'flex';
+    }
+
+    // 簡易削除（見た目上の削除）
+    function removeGalleryItem(btn) {
+        if(confirm('この写真をマイページから非表示にしますか？')) {
+            btn.closest('li').remove();
+            // 実際にはAPI通信などでサーバー側も更新する必要があります
+        }
+    }
+
     function openWordEdit() {
         document.getElementById('modal-word').style.display = 'flex';
         document.getElementById('word-input').value = document.getElementById('display-word').innerText;
     }
     function closeWordEdit() { document.getElementById('modal-word').style.display = 'none'; }
-    
-    function openProfileEdit() { 
-        location.href = "{{ route('shop.profile.edit') }}"; 
-    }
+    function openProfileEdit() { location.href = "{{ route('shop.profile.edit') }}"; }
 </script>
 @endpush
