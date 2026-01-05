@@ -38,7 +38,9 @@
 
             {{-- メインコンテンツ --}}
             <main id="main-content">
+                <div class="content-wrapper animate-fadeIn">
                 @yield('content')
+                </div>
             </main>
 
             {{-- ボトムナビ（モバイル用固定） --}}

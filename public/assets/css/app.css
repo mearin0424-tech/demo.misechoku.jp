@@ -1,47 +1,51 @@
-/* [CAUTION] このファイル(public/build/assets/css)は稼働時はvite有効化後に移動（resources/css/）
-*/
+/* [CAUTION] このファイル(public/build/assets/css)は稼働時はvite有効化後に移動（resources/css/） */
 
-@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap');
+/* Inter と Playfair Display を追加 */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@700&family=Lato:wght@400;700&family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap');
 
 :root {
-    /* ラグジュアリー・パレット */
+    /* --- Luxe Lounge Palette --- */
+    --gold: #D4AF37;
+    --gold-light: #FCF6BA;
+    --dark-bg: #0a0a0a;
+    --surface: #1a1a1a;
+    --glass: rgba(255, 255, 255, 0.05);
+
+    /* UI Colors */
     --color-main: #120505;
     --color-sub: #2d0b0b;
     --color-accent: #b91c1c;
-    --color-gold: #d4af37;
     --color-text: #d1c1c1;
     --color-text-header: #f5ecec;
     --color-card: #220a0a;
     --color-border: #4d1a1a;
     
-    --primary-color: #585751; 
-    --bg-dark: #120505;
-    --card-glass: rgba(255, 255, 255, 0.1);
+    /* Typography */
+    --font-serif: 'Playfair Display', 'Shippori Mincho', serif;
+    --font-sans: 'Inter', 'Noto Sans JP', sans-serif;
 
-    --font-serif: 'Shippori Mincho', serif;
-    --font-sans: 'Lato', 'Noto Sans JP', sans-serif;
-
+    /* Glassmorphism */
     --glass-bg: rgba(34, 10, 10, 0.8);
     --glass-blur: blur(10px);
-    --glass-border: rgba(212, 175, 55, 0.2);
+    --glass-border: rgba(255, 255, 255, 0.1);
 
-	/* ヘッダー・フッターの高さを変数化（計算用） */
+    /* Layout (計算用) */
     --header-height: 75px;
     --footer-height: 70px;
-	
-    /* [重要] 600px制限を1200pxに拡大し、全ページを広くします */
-    --max-content-width: 600px;
+    
+    /* [重要] 1200pxに修正 */
+    --max-content-width: 1200px;
 }
 
 /* 構造：ベース設定 */
 body {
-    background: var(--bg-dark); 
+    background: var(--dark-bg); 
     margin: 0;
     padding: 0;
     -webkit-tap-highlight-color: transparent;
     font-family: var(--font-sans);
-    color: #fff;
-	overflow-x: hidden;
+    color: #e0e0e0;
+    overflow-x: hidden;
 }
 
 /* アプリ全体のコンテナ */
@@ -51,69 +55,62 @@ body {
     min-height: 100vh;
     width: 100%;
     max-width: var(--max-content-width);
-    margin: 0 auto; /* 中央寄せを担保 */
+    margin: 0 auto;
     background: var(--color-main);
     position: relative;
     box-shadow: 0 0 50px rgba(0,0,0,1);
-    /* overflow: hidden;  スクロールを防止 -> これはhomeのみ*/
+}
+
+/* メインレイアウトのラッパー (真っ暗問題の解消) */
+.main-layout-container {
+    flex: 1;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    min-width: 0; /* flex内のつぶれ防止 */
 }
 
 /* メインコンテンツエリア */
 main {
     flex: 1;
     width: 100%;
-    padding-top: 75px;    /* ヘッダー分 */
-    padding-bottom: 70px; /* ボトムナビ分 */
+    /* 変数を使用して余白を確保 */
+    padding-top: var(--header-height);
+    padding-bottom: var(--footer-height);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-}
-
-/* メインレイアウトのラッパー */
-.main-layout-container {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    position: relative;
 }
 
 /* 各ページのコンテンツラッパー */
 .content-wrapper {
     width: 100%;
-    max-width: 100%; 
     padding: 0 15px;
     box-sizing: border-box;
 }
 
-
 /* レスポンシブ対応 */
 @media (max-width: 1023px) {
-	#app { flex-direction: column; }  /* スマホ時は縦並び */
-    main { padding-right: 0 !important; } /* PC用サイドバーの余白を強制リセット */
+    #app { flex-direction: column; }
+    main { padding-right: 0 !important; }
 }
 
 @media (min-width: 1024px) {
-    /* サイドバーのせいで狭くなるのを防ぐため、サイドバーの幅を固定 */
     #sidebar {
-        width: 240px; /* 必要最低限の幅に絞る */
-        flex-shrink: 0; /* サイドバーが潰れないように固定 */
-    }
-
-    /* メインエリアを最大限広げる */
-    #main-content {
-        flex-grow: 1;
+        width: 240px;
+        flex-shrink: 0;
     }
 }
 
-/* ホーム画面専用：スクロールを禁止し、1枚のみ表示する領域設定 */
+/* ホーム画面専用 */
 .no-scroll {
     overflow: hidden;
     height: 100vh;
 }
 
-
 /* タイポグラフィ */
-.serif-font { font-family: var(--font-serif); }
+.serif-font, .font-serif { font-family: var(--font-serif); }
 
 h1, h2, h3, .luxury-title {
     color: var(--color-text-header);
@@ -122,77 +119,58 @@ h1, h2, h3, .luxury-title {
     margin-bottom: 1rem;
 }
 
-/* 共通コンポーネント：グラスカード */
-.glass-card {
-    background: var(--glass-bg);
+/* --- Luxe Components --- */
+
+/* ゴールドグラデーション */
+.gold-gradient {
+    background: linear-gradient(135deg, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* グラスカード */
+.glass-card, .glass-panel {
+    background: var(--glass);
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     border: 1px solid var(--glass-border);
     border-radius: 15px;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    padding: 15px;
-    margin-bottom: 15px;
 }
 
-/* 共通コンポーネント：ゴールドボタン */
+/* ゴールドボタン (Luxe Loungeデザイン) */
 .btn-gold {
-    background: linear-gradient(135deg, var(--color-accent), #800000);
-    color: #fff;
-    border: 1px solid var(--color-gold);
+    background: linear-gradient(135deg, #BF953F, #AA771C) !important;
+    color: #000 !important;
     padding: 12px 24px;
-    border-radius: 30px;
-    font-weight: bold;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.2s ease;
     cursor: pointer;
-    transition: all 0.3s ease;
     text-align: center;
     display: inline-block;
     text-decoration: none;
+    border: none;
 }
 
 .btn-gold:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+    opacity: 0.9;
 }
 
-/* 通知バッジ */
-.badge-notify {
-    background: var(--color-accent);
-    color: #fff;
-    border-radius: 10px;
-    font-size: 0.65rem;
-    padding: 2px 6px;
-    font-weight: bold;
-    position: absolute;
+/* ページ遷移モーション */
+.animate-fadeIn {
+    animation: fadeIn 0.4s ease-out forwards;
 }
 
-/* サイドバー内のネストメニュー用スタイル */
-.sidebar-nested-menu {
-    list-style: none;
-    padding-left: 25px;
-    margin-top: 10px;
-    border-left: 1px solid rgba(212, 175, 55, 0.2);
-}
-
-.sidebar-nested-menu li {
-    margin-bottom: 12px;
-}
-
-.sidebar-nested-menu a {
-    font-size: 0.85rem !important;
-    opacity: 0.8;
-}
-
-.sidebar-nested-menu a:hover {
-    opacity: 1;
-    color: var(--color-gold);
-}
-
-.text-danger {
-    color: #ff4d4d !important;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* ユーティリティ */
 .opacity-70 { opacity: 0.7; }
 .mt-20 { margin-top: 20px; }
+.text-gold { color: var(--gold); }
 .text-accent { color: var(--color-accent); }
-.text-gold { color: var(--color-gold); }

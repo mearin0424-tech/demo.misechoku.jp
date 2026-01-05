@@ -8,15 +8,15 @@
     max-width: 600px; /* モバイルでの表示幅制限 */
     height: 75px;
     /* 上部を丸くするデザイン */
-    background: #1a0505;
-    border-radius: 25px 25px 0 0;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     justify-content: space-around;
-    align-items: flex-start;
-    padding: 12px 10px 0 10px;
-    box-sizing: border-box;
-    z-index: 1400;
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.6);
+    align-items: center;
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 2000;
 }
 
 .nav-item {
@@ -35,14 +35,15 @@
 }
 
 .nav-item span {
-    font-size: 9px;
+    font-size: 10px;
     font-weight: bold;
     text-transform: uppercase;
+    letter-spacing: 0.1em;
 }
 
 /* アクティブ時のゴールドカラー */
 .nav-item.active {
-    color: #d4af37;
+    color: var(--gold);
 }
 
 .nav-item.active i {
