@@ -119,30 +119,30 @@
                 </ul>
             </div>
 
-            {{-- 4. ギャラリー：レスポンシブ ＋ プレビュー/削除機能 --}}
-            <div class="gallery-edit-section">
-                <div class="section-guide">
-                    <h3 style="font-size:1rem; color:#aaa; margin:0;">Media Gallery</h3>
-                    <a href="{{ route('shop.profile.gallery.edit') }}" class="text-gold text-xs">編集ページへ</a>
+            {{-- ギャラリー：閲覧専用（編集画面への入り口） --}}
+            <div class="gallery-edit-section animate-fadeIn" style="margin-top:35px;">
+                <div class="flex justify-between items-center mb-4 px-2">
+                    <h3 class="text-xs uppercase tracking-widest text-gold font-bold">Media Gallery</h3>
+                    <a href="{{ route('shop.profile.gallery.edit') }}" class="text-[10px] text-gray-400 underline">編集する</a>
                 </div>
                 
-                <ul class="responsive-gallery" id="gallery-list">
-                    @for($i=0; $i<8; $i++)
-                        @if(isset($subImages[$i]))
-                            <li class="relative">
-                                <div class="photo-slot has-img">
-                                    <img src="{{ $subImages[$i] }}" onclick="previewFullImage(this.src)" class="cursor-pointer">
-                                    @if($i === 0)<span class="main-badge">MAIN</span>@endif
-                                    <button class="delete-btn" onclick="removeGalleryItem(this)">×</button>
-                                </div>
-                            </li>
-                        @else
-                            <li>
-                                <div class="photo-slot placeholder" onclick="location.href='{{ route('shop.profile.gallery.edit') }}'">
-                                    <i class="fas fa-plus"></i>
-                                </div>
-                            </li>
-                        @endif
+                <ul class="responsive-gallery" id="gallery-list" onclick="location.href='{{ route('shop.profile.gallery.edit') }}'" style="cursor:pointer;">
+                    @for($i=0; $i<8; $i++) {{-- 8枚表示に変更 --}}
+                        <li>
+                            <div class="photo-slot {{ isset($subImages[$i]) ? 'has-img' : '' }}">
+                                @if(isset($subImages[$i]))
+                                    <img src="{{ $subImages[$i] }}" class="w-full h-full object-cover">
+                                    @if($i === 0)
+                                        <span class="absolute top-0 left-0 bg-gold text-black text-[8px] px-2 py-0.5 font-bold rounded-br-lg">MAIN</span>
+                                    @endif
+                                @else
+                                    {{-- 空スロットはシンプルに --}}
+                                    <div class="flex items-center justify-center opacity-20">
+                                        <i class="fas fa-image"></i>
+                                    </div>
+                                @endif
+                            </div>
+                        </li>
                     @endfor
                 </ul>
             </div>

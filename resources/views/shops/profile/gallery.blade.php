@@ -1,116 +1,115 @@
 @extends('layouts.app')
 
-@section('title', '写真登録・編集')
+@section('title', 'Media Library')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/gallery.css') }}">
 @endpush
 
 @section('content')
-<div class="contents inner p-4 animate-fadeIn gallery-container">
-    {{-- ヘッダーエリア --}}
-    <div class="flex justify-between items-center mb-8">
-        <div class="title-area">
-            <h2 class="serif-font text-2xl gold-gradient tracking-tight">Media Library</h2>
-            <p class="text-[10px] text-gray-500 uppercase tracking-[0.2em] mt-1">Photo Registration</p>
-        </div>
-        <button type="submit" form="gallery-form" class="text-gold text-sm font-semibold hover:opacity-70 transition-opacity">Done</button>
-    </div>
-    
-    {{-- オコジョガイド：グラスモーフィズムデザイン --}}
-    <div class="flex flex-col items-center mb-10 glass-panel p-5 rounded-2xl border-gold/10">
-        <img src="{{ asset('assets/images/guide/guide-character.png') }}" class="w-16 mb-3 animate-bounce-slow" alt="ガイド">
-        <p class="text-xs text-gray-300 text-center leading-relaxed font-light">
-            最大5枚まで登録できるよ！<br>
-            <span class="text-gold font-bold">長押しドラッグ</span>で並び替えができるよ。
-        </p>
+<div class="animate-fadeIn flex flex-col h-full bg-[#0a0a0a]">
+    <div class="p-6 flex items-center justify-between border-b border-white/5 bg-[#0a0a0a]">
+        <a href="{{ route('shop.mypage.index') }}" class="text-gray-400 flex items-center gap-1 no-underline">
+            <i class="fas fa-chevron-left"></i>
+            <span class="text-sm">Back</span>
+        </a>
+        <h2 class="text-lg serif-font gold-gradient m-0">Media Library</h2>
+        <button type="submit" form="gallery-form" class="text-gold text-sm font-semibold bg-transparent border-none">Done</button>
     </div>
 
-    <section class="box_form">
-        <form id="gallery-form" action="{{ route('shop.gallery.update') }}" method="POST" enctype="multipart/form-data">
+    <div class="flex-1 overflow-y-auto p-6 pb-32">
+        <div class="mb-6">
+            <h3 class="text-sm text-white font-semibold m-0">Edit Photos</h3>
+            <p class="text-xs text-gray-500 mt-1">最大8枚。ガイドに沿って設定してください。</p>
+        </div>
+
+        <form id="gallery-form" action="{{ route('shop.profile.update') }}" method="POST" enctype="multipart/form-data">
             @csrf
+            {{-- photoGuidesの忠実な定義 --}}
             @php
-                $guides = [
-                    ['label' => '外観・看板', 'icon' => 'fa-store', 'desc' => 'お店の顔'],
-                    ['label' => '内装・ラウンジ', 'icon' => 'fa-couch', 'desc' => '雰囲気'],
-                    ['label' => 'VIPルーム', 'icon' => 'fa-crown', 'desc' => '高級感'],
-                    ['label' => 'キャスト集合', 'icon' => 'fa-users', 'desc' => '賑やかさ'],
-                    ['label' => '自由な一枚', 'icon' => 'fa-image', 'desc' => 'お気に入りを'],
-                ];
+            $photoGuides = [
+                ['label' => '顔のアップ', 'icon' => 'fa-expand-arrows-alt', 'desc' => '表情がわかる'],
+                ['label' => '胸上のショット', 'icon' => 'fa-user-tie', 'desc' => '清潔感のある'],
+                ['label' => '全身の姿', 'icon' => 'fa-street-view', 'desc' => 'スタイルがわかる'],
+                ['label' => '最高の笑顔', 'icon' => 'fa-smile-beam', 'desc' => '親しみやすさ'],
+                ['label' => '趣味のひと時', 'icon' => 'fa-camera-retro', 'desc' => '自分らしさ'],
+                ['label' => 'ライフスタイル', 'icon' => 'fa-mug-hot', 'desc' => '日常の風景'],
+                ['label' => '自由な一枚', 'icon' => 'fa-images', 'desc' => 'お気に入りを'],
+                ['label' => '自由な一枚', 'icon' => 'fa-images', 'desc' => 'お気に入りを']
+            ];
             @endphp
 
-            <ul id="sortable-images2">
-                @for($i=0; $i<5; $i++)
+            <div class="grid grid-cols-3 gap-3">
+                @for($i=0; $i<8; $i++)
                     @php $imgSrc = $subImages[$i] ?? null; @endphp
-                    <li data-index="{{ $i }}">
-                        <label for="file_{{ $i }}" class="block w-full h-full">
-                            <input type="file" id="file_{{ $i }}" name="images[]" class="hidden" onchange="previewImage(this, 'preview_{{ $i }}')">
-                            
-                            <div class="photo-slot">
-                                <img id="preview_{{ $i }}" src="{{ $imgSrc }}" class="w-full h-full object-cover {{ $imgSrc ? '' : 'hidden' }}">
-                                
-                                {{-- 画像がない時のガイド表示 --}}
-                                <div class="slot-guide {{ $imgSrc ? 'hidden' : '' }}">
-                                    <i class="fas {{ $guides[$i]['icon'] }}"></i>
-                                    <span class="guide-label">{{ $guides[$i]['label'] }}</span>
-                                    <span class="guide-desc">{{ $guides[$i]['desc'] }}</span>
-                                </div>
-                                
-                                {{-- プラスボタン --}}
-                                <div class="plus-badge {{ $imgSrc ? 'hidden' : '' }}">
-                                    <i class="fas fa-plus"></i>
-                                </div>
+                    <div class="photo-slot group" onclick="document.getElementById('file_{{ $i }}').click()">
+                        <input type="file" id="file_{{ $i }}" name="images[]" class="hidden" onchange="previewImage(this, {{ $i }})">
+                        
+                        {{-- 画像がある場合 --}}
+                        <img id="preview_{{ $i }}" src="{{ $imgSrc }}" class="w-full h-full object-cover {{ $imgSrc ? '' : 'hidden' }}">
+                        
+                        @if($imgSrc)
+                            <button type="button" class="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white border-none" onclick="event.stopPropagation(); removeImage(this, {{ $i }})">
+                                <i class="fas fa-times text-[10px]"></i>
+                            </button>
+                        @endif
 
-                                {{-- 画像がある時の削除ボタン --}}
-                                @if($imgSrc)
-                                    <button type="button" class="delete-btn" onclick="removeImage(this)">×</button>
-                                @endif
+                        {{-- 画像がない場合（ガイド表示） --}}
+                        <div id="guide_{{ $i }}" class="flex flex-col items-center p-2 text-center pointer-events-none {{ $imgSrc ? 'hidden' : '' }}">
+                            <div class="w-10 h-10 flex items-center justify-center mb-1">
+                                <i class="fas {{ $photoGuides[$i]['icon'] }} text-gold opacity-30 text-2xl"></i>
                             </div>
-                        </label>
-                    </li>
+                            <span class="text-[9px] text-gray-400 font-semibold mb-0.5">{{ $photoGuides[$i]['label'] }}</span>
+                            <span class="text-[7px] text-gray-600 uppercase tracking-tighter">{{ $photoGuides[$i]['desc'] }}</span>
+                            <div class="absolute bottom-1 right-1 w-5 h-5 gold-bg rounded-full flex items-center justify-center text-black">
+                                <i class="fas fa-plus text-[10px]"></i>
+                            </div>
+                        </div>
+                    </div>
                 @endfor
-            </ul>
-            
-            <div class="mt-12 pb-20">
-                <button type="submit" class="btn-gold-luxe">
-                    この内容で保存する
-                </button>
-                <p class="text-center text-[10px] text-gray-600 uppercase tracking-widest mt-4">Safe & Secure Upload</p>
+            </div>
+
+            {{-- ヒントセクション --}}
+            <div class="mt-8 glass-panel p-5 rounded-2xl border-gold/10">
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-magic text-gold"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm text-white font-semibold italic m-0">Luxe Tips</h4>
+                        <p class="text-xs text-gray-400 leading-relaxed mt-1 mb-0">
+                            高品質な写真は出会いの質を高めます。ガイドに沿った写真を揃えることで、より魅力的なプロフィールになります。
+                        </p>
+                    </div>
+                </div>
             </div>
         </form>
-    </section>
+    </div>
 </div>
 @endsection
 
 @push('scripts')
 <script>
-/**
- * 1. 画像プレビュー機能
- */
-function previewImage(input, previewId) {
+function previewImage(input, index) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            const slot = input.closest('.photo-slot');
-            const img = document.getElementById(previewId);
-            const guide = slot.querySelector('.slot-guide');
-            const badge = slot.querySelector('.plus-badge');
+            const preview = document.getElementById('preview_' + index);
+            const guide = document.getElementById('guide_' + index);
+            const slot = preview.parentElement;
 
-            img.src = e.target.result;
-            img.classList.remove('hidden');
-            
-            if(guide) guide.classList.add('hidden');
-            if(badge) badge.classList.add('hidden');
+            preview.src = e.target.result;
+            preview.classList.remove('hidden');
+            guide.classList.add('hidden');
 
-            if(!slot.querySelector('.delete-btn')){
+            // 削除ボタンがない場合のみ生成
+            if (!slot.querySelector('.delete-btn-dynamic')) {
                 const btn = document.createElement('button');
-                btn.className = 'delete-btn';
-                btn.innerHTML = '×';
-                btn.type = 'button';
-                btn.onclick = function(e){ 
-                    e.preventDefault(); 
+                btn.className = 'absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white border-none delete-btn-dynamic';
+                btn.innerHTML = '<i class="fas fa-times text-[10px]"></i>';
+                btn.onclick = function(e) {
                     e.stopPropagation();
-                    removeImage(this); 
+                    removeImage(btn, index);
                 };
                 slot.appendChild(btn);
             }
@@ -119,80 +118,18 @@ function previewImage(input, previewId) {
     }
 }
 
-/**
- * 2. 画像削除機能
- */
-function removeImage(btn) {
-    if(confirm('この写真を削除しますか？')) {
-        const slot = btn.closest('.photo-slot');
-        const img = slot.querySelector('img');
-        const input = slot.closest('li').querySelector('input[type="file"]');
-        const guide = slot.querySelector('.slot-guide');
-        const badge = slot.querySelector('.plus-badge');
-        
-        img.src = '';
-        img.classList.add('hidden');
+function removeImage(btn, index) {
+    if(confirm('写真を削除しますか？')) {
+        const preview = document.getElementById('preview_' + index);
+        const guide = document.getElementById('guide_' + index);
+        const input = document.getElementById('file_' + index);
+
+        preview.src = '';
+        preview.classList.add('hidden');
+        guide.classList.remove('hidden');
         input.value = '';
-        
-        if(guide) guide.classList.remove('hidden');
-        if(badge) badge.classList.remove('hidden');
-        
         btn.remove();
     }
 }
-
-/**
- * 3. ドラッグ＆ドロップロジック
- */
-document.addEventListener("DOMContentLoaded", () => {
-    const sortableList = document.getElementById("sortable-images2");
-    let draggedItem = null;
-    let longPressTimer;
-    let isDragging = false;
-
-    sortableList.addEventListener("touchstart", (e) => {
-        const target = e.target.closest("li");
-        if (!target || e.target.classList.contains('delete-btn')) return;
-
-        draggedItem = target;
-        longPressTimer = setTimeout(() => {
-            isDragging = true;
-            draggedItem.querySelector('.photo-slot').classList.add("dragging");
-            if (window.navigator.vibrate) window.navigator.vibrate(50);
-        }, 500); 
-    }, { passive: true });
-
-    sortableList.addEventListener("touchmove", (e) => {
-        if (!isDragging || !draggedItem) return;
-        e.preventDefault();
-
-        const touch = e.touches[0];
-        const overElement = document.elementFromPoint(touch.clientX, touch.clientY);
-        const targetLi = overElement ? overElement.closest("li") : null;
-
-        if (targetLi && targetLi !== draggedItem) {
-            const rect = targetLi.getBoundingClientRect();
-            const midpoint = rect.top + rect.height / 2;
-            
-            if (touch.clientY < midpoint) {
-                sortableList.insertBefore(draggedItem, targetLi);
-            } else {
-                sortableList.insertBefore(draggedItem, targetLi.nextSibling);
-            }
-        }
-    }, { passive: false });
-
-    const endDrag = () => {
-        clearTimeout(longPressTimer);
-        if (draggedItem) {
-            draggedItem.querySelector('.photo-slot').classList.remove("dragging");
-            draggedItem = null;
-        }
-        isDragging = false;
-    };
-
-    sortableList.addEventListener("touchend", endDrag);
-    sortableList.addEventListener("touchcancel", endDrag);
-});
 </script>
 @endpush
