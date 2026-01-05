@@ -55,7 +55,7 @@ body {
     background: var(--color-main);
     position: relative;
     box-shadow: 0 0 50px rgba(0,0,0,1);
-    overflow: hidden; /* 全体の余計なスクロールを防止 */
+    /* overflow: hidden;  スクロールを防止 -> これはhomeのみ*/
 }
 
 /* メインコンテンツエリア */
