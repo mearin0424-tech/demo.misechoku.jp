@@ -22,7 +22,7 @@
     @stack('styles')
 </head>
     
-<body>
+<body class="@yield('body-class')">
     <div id="bg-layer"></div>
     <div id="menu-overlay" class="menu-overlay"></div>
 

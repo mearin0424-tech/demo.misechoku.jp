@@ -1,18 +1,28 @@
+/* ホーム画面時：メイン〜コンテンツラッパーが残り高さいっぱいになるようにする */
+body.no-scroll .main-layout-container main#main-content {
+    min-height: 0; /* flex で高さが子に正しく渡るようにする */
+}
+body.no-scroll main#main-content .content-wrapper {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
 /* --- Home Screen Layout --- */
 #home-screen {
     position: relative;
     width: 100%;
     height: 100%;
-
-    /* ヘッダー・フッター・オコジョガイドを除いた残りの全領域 */
-    flex: 1; /*親要素（#app）の中で、余っているスペースをすべて埋める*/
-    overflow: hidden; 
+    min-height: 0; /* flex で高さが正しく配分されるようにする */
+    flex: 1;
+    overflow: hidden;
     background-color: #0a0a0a;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    touch-action: none; /* スワイプ専用画面のためブラウザのデフォルト挙動を抑制 */
+    touch-action: none;
 }
 
 /* --- Swiper Container --- */
