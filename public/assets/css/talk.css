@@ -12,19 +12,23 @@
 .talk-item {
     display: flex;
     align-items: center;
-    padding: 15px;
-    background: #220a0a;
-    border: 1px solid var(--talk-borde-color);
-    border-radius: 16px;
+    padding: 14px 16px;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 18px;
     margin-bottom: 12px;
     text-decoration: none;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+}
+
+.talk-item:hover {
+    background: rgba(255,255,255,0.03);
 }
 
 .talk-item:active {
     transform: scale(0.97);
-    background: #3d1414;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
 }
 
 .talk-avatar {

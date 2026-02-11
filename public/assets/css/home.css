@@ -23,15 +23,13 @@ body.no-scroll main#main-content .content-wrapper {
     touch-action: none;
 }
 
-/* --- Swiper Container --- */
+/* --- Swiper Container（縦スワイプ全体） --- */
 .main-swiper {
     width: 100%;
-    height: 100%;
-    min-height: 0;
 }
 .main-swiper .swiper-wrapper,
 .main-swiper .swiper-slide {
-    height: 100%;
+    height: auto;
 }
 
 /* --- Centered Cast Card --- */
@@ -39,8 +37,7 @@ body.no-scroll main#main-content .content-wrapper {
     position: relative;
     width: 94% !important;
     max-width: var(--max-content-width);
-    height: 94% !important;
-    margin: auto !important;
+    margin: 16px auto !important;
     border-radius: 24px;
     overflow: hidden;
     background: #1a1a1a;
@@ -48,36 +45,34 @@ body.no-scroll main#main-content .content-wrapper {
     padding: 0 !important;
     display: flex !important;
     flex-direction: column;
-    justify-content: flex-end;
-    
 }
 
-/* --- Photo Swiper (左右スワイプ) --- */
+/* --- Photo Swiper (左右スワイプ・カード上部) --- */
 .photo-swiper {
-    position: absolute;
-    top: 0;
-    left: 0;
+    position: relative;
     width: 100%;
-    height: 100%;
-    min-height: 200px; /* スマホで高さが0にならないように */
+    aspect-ratio: 3 / 4; /* カード型の縦長比率 */
+    overflow: hidden;
+    border-radius: 24px 24px 0 0;
     z-index: 1;
 }
 
-/* Swiper内部の高さを確実に（スマホで画像表示するため） */
-.photo-swiper .swiper-wrapper {
-    height: 100% !important;
-}
+.photo-swiper .swiper-wrapper,
 .photo-swiper .swiper-slide {
-    height: 100% !important;
-    min-height: 200px;
+    height: 100%;
 }
 
 .photo-item {
-    background-size: cover;
-    background-position: center;
     width: 100%;
     height: 100%;
-    min-height: 200px;
+    position: relative;
+}
+
+.photo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 /* 写真部分をタップしてプロフィール詳細へ飛ぶリンク */
@@ -110,17 +105,14 @@ body.no-scroll main#main-content .content-wrapper {
     border-radius: 4px;
 }
 
-/* --- Info Overlay (プロフィール文字情報) --- */
+/* --- Info Area (プロフィール文字情報) --- */
 .card-bottom-info {
-    position: absolute;
-    bottom: 0;
-    left: 0;
+    position: relative;
     width: 100%;
     z-index: 30;
-    padding: 100px 20px 25px;
-    background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
+    padding: 16px 20px 20px;
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent 120%);
     color: #fff;
-    pointer-events: none; 
 }
 
 .cast-name {

@@ -4,21 +4,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@700&family=Lato:wght@400;700&family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap');
 
 :root {
-    /* --- Luxe Lounge Palette --- */
+    /* --- Luxe Lounge Palette（少し明るめのワインレッド基調） --- */
     --gold: #D4AF37;
     --gold-light: #FCF6BA;
-    --dark-bg: #0a0a0a;
-    --surface: #1a1a1a;
+    --dark-bg: #1a1016;
+    --surface: #24101a;
     --glass: rgba(255, 255, 255, 0.05);
 
     /* UI Colors */
-    --color-main: #120505;
-    --color-sub: #2d0b0b;
-    --color-accent: #b91c1c;
-    --color-text: #d1c1c1;
-    --color-text-header: #f5ecec;
-    --color-card: #220a0a;
-    --color-border: #4d1a1a;
+    --color-main: #2b0f1d;        /* ベース背景：ワインレッド寄り */
+    --color-sub: #3b1627;         /* サブ背景 */
+    --color-accent: #e0466d;      /* アクション用アクセント */
+    --color-text: #e7d8dd;
+    --color-text-header: #fbeff4;
+    --color-card: #341421;        /* カード系コンポーネント */
+    --color-border: #6b2340;
     
     /* Typography */
     --font-serif: 'Playfair Display', 'Shippori Mincho', serif;
