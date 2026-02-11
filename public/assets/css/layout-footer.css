@@ -5,7 +5,7 @@
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
-    max-width: 600px; /* モバイルでの表示幅制限 */
+    max-width: var(--max-content-width); /* ヘッダー・コンテンツと統一 */
     height: 75px;
     /* 上部を丸くするデザイン */
     background: rgba(255, 255, 255, 0.03);

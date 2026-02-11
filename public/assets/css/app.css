@@ -32,9 +32,9 @@
     /* Layout（実ヘッダー60pxに統一＝TALK等の隙間防止） */
     --header-height: 60px;
     --footer-height: 70px;
-    
-    /* スマホ専用：最大幅を一般的なスマホに合わせる */
+    /* 全レイアウト共通：この2つを変えるだけでヘッダー・フッター・コンテンツ幅がそろう */
     --max-content-width: 430px;
+    --content-padding-x: 15px;
 }
 
 /* 構造：ベース設定 */
@@ -48,10 +48,10 @@ body {
     overflow-x: hidden;
 }
 
-/* アプリ全体のコンテナ */
+/* アプリ全体のコンテナ（ヘッダー・フッター・コンテンツと同じ幅に統一） */
 #app {
     display: flex;
-    flex-direction: row; 
+    flex-direction: row;
     min-height: 100vh;
     width: 100%;
     max-width: var(--max-content-width);
@@ -59,23 +59,26 @@ body {
     background: var(--color-main);
     position: relative;
     box-shadow: 0 0 50px rgba(0,0,0,1);
+    box-sizing: border-box;
 }
 
-/* メインレイアウトのラッパー*/
+/* メインレイアウトのラッパー */
 .main-layout-container {
     flex: 1;
+    min-width: 0;
+    max-width: 100%;
     height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
-    min-width: 0; /* flex内のつぶれ防止 */
 }
 
 /* メインコンテンツエリア */
 main {
     flex: 1;
     width: 100%;
-    /* 変数を使用して余白を確保 */
+    min-width: 0;
+    max-width: 100%;
     padding-top: var(--header-height);
     padding-bottom: var(--footer-height);
     box-sizing: border-box;
@@ -83,10 +86,11 @@ main {
     flex-direction: column;
 }
 
-/* 各ページのコンテンツラッパー */
+/* 各ページのコンテンツラッパー（アプリ幅に収め、余白は変数で統一） */
 .content-wrapper {
     width: 100%;
-    padding: 0 15px;
+    max-width: 100%;
+    padding: 0 var(--content-padding-x);
     box-sizing: border-box;
 }
 
@@ -96,10 +100,11 @@ main {
     main { padding-right: 0 !important; }
 }
 
-/* スマホ専用：全幅利用 */
-#app {
-    max-width: 100%;
-    width: 100%;
+/* ビューポートが --max-content-width より狭いときはアプリを100%幅に */
+@media (max-width: 430px) {
+    #app {
+        max-width: 100%;
+    }
 }
 
 @media (min-width: 1024px) {
