@@ -78,9 +78,9 @@
         @endforelse
     </div>
 
-    {{-- 銀行口座設定リンク --}}
+    {{-- 銀行口座設定リンク（未実装のため準備中へ） --}}
     <div style="margin-top:40px;">
-        <a href="{{ route('common.settings.account') }}" class="btn-action manage">
+        <a href="{{ route('maintenance') }}" class="btn-action manage">
             <i class="fas fa-university"></i> お支払い情報の変更
         </a>
     </div>

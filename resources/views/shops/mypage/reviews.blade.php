@@ -3,7 +3,7 @@
 @section('title', 'レビュー一覧')
 
 @push('styles')
-    @vite(['resources/css/review.css'])
+    <link rel="stylesheet" href="{{ asset('assets/css/review.css') }}">
 @endpush
 
 @section('content')

@@ -102,6 +102,9 @@ Route::prefix('shop')->name('shop.')->group(function () {
         Route::get('/payment', [ShopMypage::class, 'payment'])->name('payment.index');
         Route::get('/reviews', [ShopReview::class, 'index'])->name('review.index');
     });
+
+    // レビュー公開・非表示の切り替え（reviews 画面の JS から使用）
+    Route::post('/mypage/review/update', [ShopReview::class, 'updateStatus'])->name('review.update');
 });
 
 /*
