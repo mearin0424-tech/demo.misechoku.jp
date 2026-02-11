@@ -30,7 +30,7 @@ class RecruitmentController extends Controller
             ]
         ];
 
-        return view('shops.recruits.status', [
+        return view('shops.recruit.status', [
             'pageId' => 'job_status',
             'recruits' => $recruits
         ]);
@@ -43,7 +43,7 @@ class RecruitmentController extends Controller
     {
         // editと同じモックデータを使用して詳細を表示
         $recruitData = $this->getMockData();
-        return view('shops.recruits.show', [
+        return view('shops.recruit.show', [
             'pageId' => 'job_info', 
             'recruit' => $recruitData
         ]);
@@ -55,7 +55,7 @@ class RecruitmentController extends Controller
     public function edit()
     {
         $recruitData = $this->getMockData();
-        return view('shops.recruits.edit', [
+        return view('shops.recruit.edit', [
             'pageId' => 'job_edit', 
             'recruit' => $recruitData
         ]);
