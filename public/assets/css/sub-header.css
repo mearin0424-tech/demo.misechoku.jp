@@ -48,8 +48,21 @@
 
 /* --- メインコンテンツの開始位置 --- */
 .has-sub-header {
-    padding-top: 98px !important; /* 60px + 38px */
+    padding-top: 98px !important; /* ヘッダー60px + タブ38px（隙間なし） */
     margin: 0 !important;
+}
+
+/* スマホ：ヘッダーとタブの隙間を完全に削除 */
+@media (max-width: 480px) {
+    .sub-header-wrapper {
+        top: 60px; /* グローバルヘッダー高さとぴったり */
+        margin: 0;
+        padding: 0;
+    }
+    .has-sub-header {
+        padding-top: 98px !important; /* 60 + 38 */
+        margin: 0 !important;
+    }
 }
 
 /* 各画面の独自コンテナの余白をリセットして統一する */

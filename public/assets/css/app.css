@@ -96,6 +96,17 @@ main {
     main { padding-right: 0 !important; }
 }
 
+/* 一般的なスマホ幅に特化（タブレット・PCはこの幅で中央表示も可） */
+@media (max-width: 480px) {
+    :root {
+        --header-height: 60px; /* 実ヘッダー高さと一致させて隙間を防ぐ */
+    }
+    #app {
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
 @media (min-width: 1024px) {
     #sidebar {
         width: 240px;

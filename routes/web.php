@@ -44,6 +44,11 @@ Route::name('pages.')->group(function () {
     Route::get('/support/column', [PageController::class, 'column'])->name('support.column');
 });
 
+// 未実装画面・機能用（maintenance-screen.png を表示）
+Route::get('/maintenance', function () {
+    return view('common.maintenance');
+})->name('maintenance');
+
 Route::get('/logout', [CastLogin::class, 'logout'])->name('auth.logout');
 
 Route::prefix('shop')->name('shop.')->group(function () {
