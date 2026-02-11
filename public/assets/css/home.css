@@ -29,6 +29,11 @@ body.no-scroll main#main-content .content-wrapper {
 .main-swiper {
     width: 100%;
     height: 100%;
+    min-height: 0;
+}
+.main-swiper .swiper-wrapper,
+.main-swiper .swiper-slide {
+    height: 100%;
 }
 
 /* --- Centered Cast Card --- */
@@ -56,7 +61,17 @@ body.no-scroll main#main-content .content-wrapper {
     left: 0;
     width: 100%;
     height: 100%;
+    min-height: 200px; /* スマホで高さが0にならないように */
     z-index: 1;
+}
+
+/* Swiper内部の高さを確実に（スマホで画像表示するため） */
+.photo-swiper .swiper-wrapper {
+    height: 100% !important;
+}
+.photo-swiper .swiper-slide {
+    height: 100% !important;
+    min-height: 200px;
 }
 
 .photo-item {
@@ -64,6 +79,7 @@ body.no-scroll main#main-content .content-wrapper {
     background-position: center;
     width: 100%;
     height: 100%;
+    min-height: 200px;
 }
 
 /* 写真部分をタップしてプロフィール詳細へ飛ぶリンク */
@@ -210,22 +226,30 @@ body.no-scroll main#main-content .content-wrapper {
     60% { transform: translateY(-4px); }
 }
 
-/* --- Responsive Adjustments --- */
-@media (max-width: 480px) {
-    .cast-card {
-        width: 100%;
-        height: 98% !important; 
-        border-radius: 20px;
-    }
-    .cast-name { font-size: 1.4rem; }
+/* --- スマホ専用：画面全体を利用し画像が必ず表示されるように --- */
+#home-screen {
+    min-height: 100dvh; /* モバイルのアドレスバー考慮 */
 }
+.main-swiper,
+.main-swiper .swiper-slide .cast-card,
+.photo-swiper {
+    min-height: 250px;
+}
+.cast-card {
+    width: 100%;
+    height: 98% !important;
+    max-width: 100%;
+    border-radius: 20px;
+}
+.cast-name { font-size: 1.4rem; }
 
-/* --- Helper Classes --- */
-.no-scroll {
+/* --- Helper Classes（ホーム用） --- */
+body.no-scroll {
     overflow: hidden !important;
     position: fixed;
     width: 100%;
     height: 100%;
+    min-height: 100dvh; /* スマホのアドレスバー考慮 */
 }
 
 .glass-card {

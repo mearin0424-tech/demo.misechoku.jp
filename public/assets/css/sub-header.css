@@ -1,13 +1,15 @@
 /* --- サブヘッダー（タブ）共通スタイル --- */
 .sub-header-wrapper {
     position: fixed;
-    top: 60px; /* ヘッダーの高さ */
+    top: var(--header-height, 60px) !important; /* ヘッダー直下（隙間なし） */
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
     max-width: var(--max-content-width);
     z-index: 1400;
     background: #1e0505;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 .sub-header-tabs {
@@ -46,23 +48,10 @@
     box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
 }
 
-/* --- メインコンテンツの開始位置 --- */
+/* --- メインコンテンツの開始位置（ヘッダー+タブ分） --- */
 .has-sub-header {
-    padding-top: 98px !important; /* ヘッダー60px + タブ38px（隙間なし） */
+    padding-top: calc(var(--header-height, 60px) + 38px) !important; /* 隙間なし */
     margin: 0 !important;
-}
-
-/* スマホ：ヘッダーとタブの隙間を完全に削除 */
-@media (max-width: 480px) {
-    .sub-header-wrapper {
-        top: 60px; /* グローバルヘッダー高さとぴったり */
-        margin: 0;
-        padding: 0;
-    }
-    .has-sub-header {
-        padding-top: 98px !important; /* 60 + 38 */
-        margin: 0 !important;
-    }
 }
 
 /* 各画面の独自コンテナの余白をリセットして統一する */

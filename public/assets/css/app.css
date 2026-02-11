@@ -29,12 +29,12 @@
     --glass-blur: blur(10px);
     --glass-border: rgba(255, 255, 255, 0.1);
 
-    /* Layout (計算用) */
-    --header-height: 75px;
+    /* Layout（実ヘッダー60pxに統一＝TALK等の隙間防止） */
+    --header-height: 60px;
     --footer-height: 70px;
     
-    /* [重要] 1200pxに修正 */
-    --max-content-width: 1200px;
+    /* スマホ専用：最大幅を一般的なスマホに合わせる */
+    --max-content-width: 430px;
 }
 
 /* 構造：ベース設定 */
@@ -96,15 +96,10 @@ main {
     main { padding-right: 0 !important; }
 }
 
-/* 一般的なスマホ幅に特化（タブレット・PCはこの幅で中央表示も可） */
-@media (max-width: 480px) {
-    :root {
-        --header-height: 60px; /* 実ヘッダー高さと一致させて隙間を防ぐ */
-    }
-    #app {
-        max-width: 100%;
-        width: 100%;
-    }
+/* スマホ専用：全幅利用 */
+#app {
+    max-width: 100%;
+    width: 100%;
 }
 
 @media (min-width: 1024px) {
