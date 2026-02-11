@@ -6,19 +6,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const slides = document.querySelectorAll('.main-swiper .swiper-slide');
     const slideCount = slides.length;
-    
-    // 写真の左右スワイプ (Nested Swiper)
-    const photoSwipers = new Swiper('.photo-swiper', {
-        direction: 'horizontal',
-        nested: true, // これにより上下スワイプがメインに伝わる
-        pagination: {
-            el: '.photo-pagination',
-            clickable: true
-        },
-        resistanceRatio: 0, // 端でのバウンスを抑制して縦スワイプへ移りやすくする
-    });
 
-    // メインの上下スワイプ
+    // メインの上下スワイプ（先に初期化して loop で DOM を確定させる）
     const mainSwiper = new Swiper('.main-swiper', {
         direction: 'vertical',
         slidesPerView: 1,
@@ -30,23 +19,34 @@ document.addEventListener('DOMContentLoaded', function() {
         loop: slideCount >= 2, 
         speed: 500,
         mousewheel: true,
-        threshold: 20, // 少しスワイプしないと反応しないようにして誤作動防止
+        threshold: 20,
         on: {
-        slideChange: function () {
-            // スライドのインデックスに応じてメッセージを変える
-            const messages = [
-                "上下でキャストを変更できるよ！",
-                "このキャストの写真は左右にスワイプしてね。",
-                "気になる人がいたら右のボタンでアクションしよう！"
-            ];
-            const currentMsg = messages[this.activeIndex] || "素敵な出会いがありますように！";
-            
-            // ここで共通JSの関数を呼ぶ
-            if (typeof window.updateCharacterMessage === 'function') {
-                window.updateCharacterMessage(currentMsg);
+            slideChange: function () {
+                const messages = [
+                    "上下でキャストを変更できるよ！",
+                    "このキャストの写真は左右にスワイプしてね。",
+                    "気になる人がいたら右のボタンでアクションしよう！"
+                ];
+                const currentMsg = messages[this.activeIndex] || "素敵な出会いがありますように！";
+                if (typeof window.updateCharacterMessage === 'function') {
+                    window.updateCharacterMessage(currentMsg);
+                }
             }
         }
-        }
+    });
+
+    // 写真の左右スワイプ（各 .photo-swiper を個別に初期化）
+    document.querySelectorAll('.photo-swiper').forEach(function (el) {
+        var paginationEl = el.querySelector('.photo-pagination');
+        new Swiper(el, {
+            direction: 'horizontal',
+            nested: true,
+            pagination: paginationEl ? {
+                el: paginationEl,
+                clickable: true
+            } : false,
+            resistanceRatio: 0
+        });
     });
 
     // 3. クリックイベントの伝播停止 (ボタン類)
