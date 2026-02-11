@@ -4,21 +4,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@700&family=Lato:wght@400;700&family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap');
 
 :root {
-    /* --- Luxe Lounge Palette（少し明るめのワインレッド基調） --- */
+    /* --- Luxe Lounge Palette（元より少し明るめのボルドー） --- */
     --gold: #D4AF37;
     --gold-light: #FCF6BA;
-    --dark-bg: #1a1016;
-    --surface: #24101a;
+    --dark-bg: #12080a;
+    --surface: #1e090e;
     --glass: rgba(255, 255, 255, 0.05);
 
-    /* UI Colors */
-    --color-main: #2b0f1d;        /* ベース背景：ワインレッド寄り */
-    --color-sub: #3b1627;         /* サブ背景 */
-    --color-accent: #e0466d;      /* アクション用アクセント */
-    --color-text: #e7d8dd;
-    --color-text-header: #fbeff4;
-    --color-card: #341421;        /* カード系コンポーネント */
-    --color-border: #6b2340;
+    /* UI Colors（ボルドー基調） */
+    --color-main: #190509;        /* ベース背景：やや明るめのボルドー */
+    --color-sub: #2a0a11;         /* サブ背景 */
+    --color-accent: #b91c1c;      /* 既存のアクセントカラーを維持 */
+    --color-text: #d1c1c1;
+    --color-text-header: #f5ecec;
+    --color-card: #22070d;        /* カード系コンポーネント */
+    --color-border: #5a1625;
     
     /* Typography */
     --font-serif: 'Playfair Display', 'Shippori Mincho', serif;

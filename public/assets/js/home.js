@@ -35,20 +35,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 写真の左右スワイプ（各 .photo-swiper を個別に初期化）
-    document.querySelectorAll('.photo-swiper').forEach(function (el) {
-        var paginationEl = el.querySelector('.photo-pagination');
-        new Swiper(el, {
-            direction: 'horizontal',
-            nested: true,
-            pagination: paginationEl ? {
-                el: paginationEl,
-                clickable: true
-            } : false,
-            resistanceRatio: 0
-        });
-    });
-
     // 3. クリックイベントの伝播停止 (ボタン類)
     document.querySelectorAll('.stop-propagation').forEach(el => {
         el.addEventListener('touchstart', (e) => e.stopPropagation(), {passive: true});

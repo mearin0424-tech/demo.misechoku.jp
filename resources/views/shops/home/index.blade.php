@@ -18,22 +18,15 @@
             @foreach($casts as $cast)
             <div class="swiper-slide cast-card glass-card">
                 
-                {{-- 写真スワイパー（左右・入れ子） --}}
-                <div class="photo-swiper swiper">
-                    <div class="swiper-wrapper">
-                        @for($i=1; $i<=3; $i++)
-                        <div class="swiper-slide photo-item">
-                            <img
-                                src="{{ asset("storage/mock/casts/{$cast['id']}-{$i}.png") }}"
-                                alt="{{ $cast['name'] }}の写真 {{ $i }}"
-                                class="photo-img"
-                                loading="lazy"
-                            >
-                            <a href="{{ route('cast.profile.show', $cast['id']) }}" class="card-detail-link"></a>
-                        </div>
-                        @endfor
-                    </div>
-                    <div class="swiper-pagination photo-pagination"></div>
+                {{-- メイン写真（カード型にせず画面いっぱいに表示） --}}
+                <div class="home-photo-wrap">
+                    <img
+                        src="{{ asset("storage/mock/casts/{$cast['id']}-1.png") }}"
+                        alt="{{ $cast['name'] }}の写真"
+                        class="home-photo"
+                        loading="lazy"
+                    >
+                    <a href="{{ route('cast.profile.show', $cast['id']) }}" class="card-detail-link"></a>
                 </div>
 
                 {{-- アクションボタン --}}
