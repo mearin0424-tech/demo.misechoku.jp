@@ -13,8 +13,6 @@ body.no-scroll main#main-content .content-wrapper {
 #home-screen {
     position: relative;
     width: 100%;
-    height: 100%;
-    min-height: 0; /* flex で高さが正しく配分されるようにする */
     flex: 1;
     overflow: hidden;
     background-color: #0a0a0a;
@@ -226,31 +224,8 @@ body.no-scroll main#main-content .content-wrapper {
     60% { transform: translateY(-4px); }
 }
 
-/* --- スマホ専用：画面全体を利用し画像が必ず表示されるように --- */
-#home-screen {
-    min-height: 100dvh; /* モバイルのアドレスバー考慮 */
-}
-.main-swiper,
-.main-swiper .swiper-slide .cast-card,
-.photo-swiper {
-    min-height: 250px;
-}
-.cast-card {
-    width: 100%;
-    height: 98% !important;
-    max-width: 100%;
-    border-radius: 20px;
-}
+/* --- ホーム用の微調整（フォントなど） --- */
 .cast-name { font-size: 1.4rem; }
-
-/* --- Helper Classes（ホーム用） --- */
-body.no-scroll {
-    overflow: hidden !important;
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    min-height: 100dvh; /* スマホのアドレスバー考慮 */
-}
 
 .glass-card {
     background: rgba(255, 255, 255, 0.03);
