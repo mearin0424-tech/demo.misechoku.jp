@@ -21,29 +21,44 @@ body.no-scroll main#main-content .content-wrapper {
     align-items: center;
     justify-content: center;
     touch-action: none;
+    /* 上下に30pxの余白を持たせる */
+    padding: 30px 0;
+    box-sizing: border-box;
 }
 
-/* --- Swiper Container（縦フルスクリーン） --- */
+/* --- Swiper Container --- */
 .main-swiper {
     width: 100%;
     height: 100%;
 }
-.main-swiper .swiper-wrapper,
-.main-swiper .swiper-slide {
+.main-swiper .swiper-wrapper {
     height: 100%;
 }
+.main-swiper .swiper-slide {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* スライド自体の幅を自動（中身のカード幅）に任せる */
+    width: auto !important; 
+}
 
-/* --- 1キャスト＝1画面レイアウト --- */
+/* --- 1キャスト＝1画面レイアウト (カードスタイル適用) --- */
 .cast-card {
     position: relative;
-    width: 100% !important;
-    max-width: 100%;
-    height: 100%;
-    margin: 0 !important;
-    border-radius: 0;
+    /* 横幅400px指定（画面が狭い場合は90vw） */
+    width: 400px !important;
+    max-width: 90vw !important;
+    /* 高さは親コンテナ（上下余白を除いたエリア）いっぱい */
+    height: 100% !important;
+    margin: 0 auto !important;
+    
+    /* カードらしい見た目に戻す */
+    border-radius: 20px !important;
     overflow: hidden;
     background: #000;
-    box-shadow: none;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important;
+    
     padding: 0 !important;
     display: flex !important;
     flex-direction: column;
@@ -54,6 +69,7 @@ body.no-scroll main#main-content .content-wrapper {
     flex: 1;
     width: 100%;
     overflow: hidden;
+    border-radius: 20px; /* 画像も角丸に追従 */
 }
 
 .home-photo {
@@ -61,6 +77,7 @@ body.no-scroll main#main-content .content-wrapper {
     height: 100%;
     object-fit: cover;
     display: block;
+    border-radius: 20px;
 }
 
 /* 写真部分をタップしてプロフィール詳細へ飛ぶリンク */
@@ -103,6 +120,8 @@ body.no-scroll main#main-content .content-wrapper {
     padding: 48px 20px 24px;
     background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
     color: #fff;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
 }
 
 .cast-name {
@@ -146,7 +165,7 @@ body.no-scroll main#main-content .content-wrapper {
 .card-actions-overlay {
     position: absolute;
     right: 15px;
-    bottom: 200px; /* ガイドとかぶらない高さ */
+    bottom: 160px; /* カードサイズ変更に伴い位置調整 */
     z-index: 40;
     display: flex;
     flex-direction: column;

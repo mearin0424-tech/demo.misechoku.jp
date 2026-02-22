@@ -22,8 +22,9 @@
             ['id' => 'pane-requests', 'label' => $requestTabText, 'active' => false]
         ]
     ])
+</div>
 
-    <div class="talk-list-container">
+<div class="talk-list-container">
         {{-- パネル1：やり取り中 --}}
         <div id="pane-ongoing" class="tab-pane active">
             @forelse($ongoingTalks as $talk)

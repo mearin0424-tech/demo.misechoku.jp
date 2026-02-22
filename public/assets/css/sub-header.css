@@ -48,20 +48,17 @@
     box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
 }
 
-/* --- メインコンテンツの開始位置（ヘッダー+タブ分） --- */
+/* --- has-sub-header 自体はラッパーだけ（高さは持たない） --- */
 .has-sub-header {
-    padding-top: calc(var(--header-height, 60px) + 38px) !important; /* 隙間なし */
-    margin: 0 !important;
+    margin: 0;
+    padding: 0;
 }
 
-/* 各画面の独自コンテナの余白をリセットして統一する */
-.has-sub-header > div:not(.sub-header-wrapper),
-.has-sub-header .contents,
-.has-sub-header .talk-list-container,
-.has-sub-header .tab-content-container {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-    border-top: none !important;
+/* --- メインコンテンツ開始位置（ヘッダー60px + タブ38px 分だけ下げる） --- */
+.has-sub-header + .contents,
+.has-sub-header + .tab-content-container,
+.has-sub-header + .talk-list-container {
+    margin-top: calc(var(--header-height, 60px) + 38px);
 }
 
 /* タブパネルの表示制御 */

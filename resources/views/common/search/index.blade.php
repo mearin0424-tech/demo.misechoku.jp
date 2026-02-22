@@ -26,10 +26,11 @@
             ['id' => 'pane-ai', 'label' => 'AIレコメンド', 'active' => false]
         ]
     ])
+</div>
 
-    <div class="contents">
-        {{-- パネル1：タイムライン --}}
-        <div id="pane-timeline" class="tab-pane active">
+<div class="contents">
+    {{-- パネル1：タイムライン --}}
+    <div id="pane-timeline" class="tab-pane active">
             @forelse($timelineData as $post)
                 {{-- 役割に応じたタイムラインカードを読み込む --}}
                 @include($viewDir . '.search.parts.timeline-card', ['post' => $post])

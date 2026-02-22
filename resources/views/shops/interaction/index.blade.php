@@ -17,11 +17,12 @@
             ['id' => 'pane-footprint', 'label' => '足あと', 'active' => false]
         ]
     ])
+</div>
 
-    <div class="tab-content-container contents inner">
-        
-        {{-- タブ１：キープ (KEEP) --}}
-        <div id="pane-keep" class="tab-pane active">
+<div class="tab-content-container contents inner">
+    
+    {{-- タブ１：キープ (KEEP) --}}
+    <div id="pane-keep" class="tab-pane active">
             @if (empty($keepCasts))
                 <div class="no-data-wrapper">
                     <i class="fas fa-star opacity-10 text-5xl mb-3 block"></i>
