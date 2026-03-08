@@ -22,10 +22,18 @@
     $castUrl = '/cast/home';
     $shopUrl = '/shop/home';
     if (request()->is('cast/*')) {
-        $shopUrl = '/' . preg_replace('#^cast/#', 'shop/', $path);
+        // キャスト→お店に切り替え: cast/shopprofileview/{id} は shop/castprofileview/{id} へ、それ以外は cast/ → shop/
+        if (preg_match('#^cast/shopprofileview/(\d+)$#', $path, $m)) {
+            $shopUrl = '/shop/castprofileview/' . $m[1];
+        } else {
+            $shopUrl = '/' . preg_replace('#^cast/#', 'shop/', $path);
+        }
     } elseif (request()->is('shop/*')) {
         if (preg_match('#^shop/(recruits|profile/store)#', $path)) {
             $castUrl = '/cast/home';
+        } elseif (preg_match('#^shop/castprofileview/(\d+)$#', $path, $m)) {
+            // お店→キャストに切り替え: shop/castprofileview/{id} は cast/shopprofileview/{id} へ
+            $castUrl = '/cast/shopprofileview/' . $m[1];
         } else {
             $castUrl = '/' . preg_replace('#^shop/#', 'cast/', $path);
         }

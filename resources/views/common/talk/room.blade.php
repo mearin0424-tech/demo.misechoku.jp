@@ -14,13 +14,27 @@
 @php
     $isCast = request()->is('cast/*');
     $sendUrl = $isCast ? route('cast.talk.send') : route('shop.talk.send');
+    $partnerAvatar = $partnerAvatar ?? asset('assets/images/common/no-image.png');
 @endphp
 
 <div id="talk-room-container" class="flex flex-col h-full bg-[#120505]">
+    {{-- LINE風：相手のアイコンと名前（上部バー） --}}
+    <div class="talk-room-header">
+        <div class="talk-room-header-inner">
+            <img src="{{ $partnerAvatar }}" alt="" class="talk-room-header-avatar">
+            <span class="talk-room-header-name">{{ $partnerName }}</span>
+        </div>
+    </div>
+
     {{-- メッセージ表示エリア --}}
     <div class="chat-messages" id="chat-messages">
         @forelse($messages as $msg)
             <div class="message-row {{ $msg->is_mine ? 'msg-right' : 'msg-left' }}">
+                @if(!$msg->is_mine)
+                    <div class="msg-avatar-wrap">
+                        <img src="{{ $partnerAvatar }}" alt="" class="msg-avatar">
+                    </div>
+                @endif
                 <div class="message-block">
                     <div class="message-bubble">
                         <p class="m-0">{{ trim($msg->content) }}</p>

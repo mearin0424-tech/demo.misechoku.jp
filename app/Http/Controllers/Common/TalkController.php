@@ -54,11 +54,14 @@ class TalkController extends Controller
         $isCastPortal = request()->is('cast/*');
         if ($isCastPortal) {
             $names = [1 => 'CLUB ETERNITY', 2 => 'THE GOLDSTONE', 3 => 'Club Luxurious', 4 => 'BAR STELLA'];
+            $avatars = [1 => asset('storage/mock/shops/out-1.png'), 2 => asset('storage/mock/shops/out-2.png'), 3 => asset('storage/mock/shops/out-1.png'), 4 => asset('storage/mock/shops/out-2.png')];
             $partnerName = $names[$id] ?? 'お店';
         } else {
             $names = [1 => '愛華', 2 => 'みさき', 3 => 'Rena', 4 => 'Yumi'];
+            $avatars = [1 => asset('storage/mock/casts/1-1.png'), 2 => asset('storage/mock/casts/2-1.png'), 3 => asset('storage/mock/casts/3-1.png'), 4 => asset('storage/mock/casts/4-1.png')];
             $partnerName = $names[$id] ?? 'ゲスト';
         }
+        $partnerAvatar = $avatars[$id] ?? asset('assets/images/common/no-image.png');
 
         $messages = [
             (object)[
@@ -80,6 +83,7 @@ class TalkController extends Controller
 
         return view('common.talk.room', [
             'partnerName' => $partnerName,
+            'partnerAvatar' => $partnerAvatar,
             'messages' => $messages,
             'partnerId' => $id
         ]);

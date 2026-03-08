@@ -151,13 +151,32 @@
     box-sizing: border-box;
 }
 
-/* ルーム画面上部ヘッダー用（一覧の .talk-header と区別） */
+/* ルーム画面上部ヘッダー（LINE風：相手のアイコンと名前） */
 .talk-room-header {
     flex-shrink: 0;
-    padding: env(safe-area-inset-top) 15px 12px;
+    padding: 10px 15px 12px;
+    padding-top: max(10px, env(safe-area-inset-top));
     background: #220a0a;
     border-bottom: 1px solid #4d1a1a;
     z-index: 100;
+}
+.talk-room-header-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.talk-room-header-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid var(--gold);
+    flex-shrink: 0;
+}
+.talk-room-header-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #f5ecec;
 }
 
 /* メッセージ表示エリア（最後の吹き出し・日時が入力欄に被らないよう下余白を確保） */
@@ -177,22 +196,37 @@
     display: flex;
     width: 100%;
     margin-bottom: 10px;
-    align-items: flex-start;
+    align-items: flex-end;
 }
 
-/* メッセージの左右寄せロジック */
+/* メッセージの左右寄せロジック（左＝相手はアイコン＋吹き出し） */
 .msg-left { justify-content: flex-start; }
 .msg-right { justify-content: flex-end; }
+
+/* 相手メッセージ用：吹き出し左端のアイコン */
+.msg-avatar-wrap {
+    flex-shrink: 0;
+    margin-right: 8px;
+    align-self: flex-end;
+}
+.msg-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(90, 22, 37, 0.5);
+    display: block;
+}
 
 /* 吹き出し＋フッターをまとめるブロック（footer は bubble の外・被らないように余白） */
 .message-block {
     display: inline-flex;
     flex-direction: column;
     align-items: flex-end;
-    max-width: 85%;
+    max-width: 78%;
     gap: 2px;
 }
-.msg-left .message-block { align-items: flex-start; }
+.msg-left .message-block { align-items: flex-start; max-width: calc(100% - 50px); }
 
 /* 時刻・既読（bubble の外・直下に表示・吹き出しと被らない余白） */
 .msg-footer {
