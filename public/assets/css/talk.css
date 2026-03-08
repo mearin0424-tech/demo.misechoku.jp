@@ -8,12 +8,17 @@
     box-sizing: border-box;
 }
 .talk-list-container.tab-page-body {
-    padding: 12px 0 calc(var(--footer-height) + 16px);
+    padding: 0 0 calc(var(--footer-height) + 16px);
     padding-left: 0;
     padding-right: 0;
 }
 .talk-list-container .tab-pane {
-    padding-top: 4px;
+    padding-top: 0;
+}
+.talk-list-container .tab-pane .talk-item:first-child,
+.talk-list-container .tab-pane .request-card:first-child,
+.talk-list-container .tab-pane .no-messages:first-child {
+    margin-top: 0;
 }
 
 .talk-item {

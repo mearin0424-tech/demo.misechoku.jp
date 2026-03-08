@@ -1,16 +1,17 @@
-/* --- サブヘッダー（タブ）共通スタイル --- */
+/* --- サブヘッダー（タブ）：グローバルヘッダー直下・main最上部にぴったり --- */
 .sub-header-wrapper {
     position: fixed;
-    top: var(--header-height) !important;
+    top: var(--header-height);
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
     max-width: var(--max-content-width);
     z-index: 1400;
     background: var(--color-main);
-    margin: 0 !important;
-    padding: 0 !important;
+    margin: 0;
+    padding: 0;
     border-bottom: 1px solid var(--color-border);
+    box-sizing: border-box;
 }
 
 .sub-header-tabs {
@@ -54,16 +55,17 @@
     box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
 }
 
-/* --- has-sub-header はラッパーのみ --- */
+/* --- has-sub-header：高さを持たせずサブヘッダー直下にコンテンツが来るように --- */
 .has-sub-header {
     margin: 0;
     padding: 0;
 }
 
-/* --- タブ下コンテンツ共通：サブヘッダー直下から表示（上余白なし） --- */
+/* --- タブ下コンテンツ：サブヘッダー直下にぴったり（上余白なし） --- */
 .tab-page-body {
     margin-top: calc(var(--header-height) + var(--sub-header-height));
     padding: 0 0 calc(var(--footer-height) + 16px);
+    padding-top: 0;
     box-sizing: border-box;
     min-height: 200px;
     width: 100%;
