@@ -50,6 +50,44 @@
     z-index: 5;
 }
 
+/* プロフィール画像ストリップ（メインとは別に2〜6枚目を表示・最大6枚） */
+.profile-photo-strip {
+    display: flex;
+    gap: 8px;
+    padding: 10px var(--content-padding-x) 14px;
+    background: rgba(0, 0, 0, 0.4);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.profile-photo-strip::-webkit-scrollbar {
+    height: 4px;
+}
+.profile-photo-thumb {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid transparent;
+    padding: 0;
+    background: #222;
+    cursor: pointer;
+    transition: border-color 0.2s, opacity 0.2s;
+}
+.profile-photo-thumb:hover {
+    opacity: 0.95;
+}
+.profile-photo-thumb.active {
+    border-color: var(--gold);
+    opacity: 1;
+}
+.profile-photo-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
 /* 戻るボタン */
 .btn-hero-back {
     position: absolute;
@@ -192,6 +230,18 @@
 .detail-action-like i {
     color: var(--color-accent);
     font-size: 0.85rem;
+}
+.detail-action-btn.like {
+    color: var(--color-text);
+}
+.detail-action-btn.like i {
+    color: var(--color-accent);
+}
+.detail-action-btn.like:hover {
+    border-color: rgba(185, 28, 28, 0.5);
+}
+.detail-action-btn.like:active .num {
+    transition: transform 0.15s;
 }
 
 /* 詳細行（生年月日・その他情報） */

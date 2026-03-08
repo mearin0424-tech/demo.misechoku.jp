@@ -82,15 +82,23 @@ class ProfileController extends Controller
     }
 
     public function show($id = null) {
+        $castId = $id ?? 1;
+        // ホームのスワイプと同じ画像パス（1枚目〜6枚目まで。最大6枚登録）
+        $images = [];
+        for ($i = 1; $i <= 6; $i++) {
+            $images[] = asset("storage/mock/casts/{$castId}-{$i}.png");
+        }
         // 店舗側から見るキャスト詳細（編集フォームと同じ項目をモックで表示）
         $cast = [
+            'id'             => $castId,
             'nickname'       => '愛華',
             'name'           => 'かめわりゆい',
             'age'            => 24,
             'birth_year'     => '1994',
             'birth_month'    => '4',
             'birth_day'      => '24',
-            'img'            => asset('storage/mock/casts/1.png'),
+            'images'         => $images,
+            'img'            => $images[0],
             'is_applied'     => true,
             'is_kept'        => true,
             'like_cnt'       => 12,

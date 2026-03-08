@@ -8,13 +8,13 @@
 
 @section('content')
 <div class="cast-profile-wrapper">
-    {{-- ヒーロー写真エリア --}}
+    {{-- ヒーロー写真エリア（ホームのスワイプと同じ画像。メイン＋最大6枚） --}}
     <section class="profile-hero" aria-label="プロフィール写真">
         <a href="{{ url()->previous() }}" class="btn-hero-back" aria-label="戻る">
             <i class="fas fa-arrow-left"></i>
         </a>
         <div class="profile-hero-inner">
-            <img src="{{ $cast['img'] }}" alt="{{ $cast['nickname'] ?? $cast['name'] }}" class="profile-hero-img">
+            <img id="profile-main-img" src="{{ $cast['img'] }}" alt="{{ $cast['nickname'] ?? $cast['name'] }}" class="profile-hero-img">
             <div class="profile-hero-gradient"></div>
             <div class="profile-hero-badge">
                 @if($cast['is_applied'] ?? false)
@@ -22,6 +22,16 @@
                 @endif
             </div>
         </div>
+        {{-- メイン画像とは別に、登録画像2〜6枚目を表示（最大6枚まで） --}}
+        @if(!empty($cast['images']) && count($cast['images']) > 1)
+            <div class="profile-photo-strip">
+                @foreach($cast['images'] as $index => $imgUrl)
+                    <button type="button" class="profile-photo-thumb {{ $index === 0 ? 'active' : '' }}" data-index="{{ $index }}" onclick="setProfileMainImage({{ $index }})" aria-label="写真{{ $index + 1 }}を表示">
+                        <img src="{{ $imgUrl }}" alt="">
+                    </button>
+                @endforeach
+            </div>
+        @endif
     </section>
 
     {{-- メインコンテンツ --}}
@@ -36,16 +46,16 @@
                 </p>
             </header>
 
-            {{-- KEEP・LIKE：スペックの上に控えめに（KEEPは件数なし、LIKEは件数表示） --}}
+            {{-- KEEP・LIKE：スペックの上。押せるボタン（KEEPは件数なし、LIKEは件数表示） --}}
             <div class="profile-detail-actions">
-                <button type="button" class="detail-action-btn keep {{ ($cast['is_kept'] ?? false) ? 'active' : '' }}" aria-pressed="{{ ($cast['is_kept'] ?? false) ? 'true' : 'false' }}">
+                <button type="button" id="btn-profile-keep" class="detail-action-btn keep {{ ($cast['is_kept'] ?? false) ? 'active' : '' }}" aria-pressed="{{ ($cast['is_kept'] ?? false) ? 'true' : 'false' }}">
                     <i class="fas fa-bookmark"></i>
                     <span>KEEP</span>
                 </button>
-                <span class="detail-action-like">
+                <button type="button" id="btn-profile-like" class="detail-action-btn like" data-count="{{ $cast['like_cnt'] ?? 0 }}">
                     <i class="fas fa-heart"></i>
-                    <span>LIKE：{{ $cast['like_cnt'] ?? 0 }}件</span>
-                </span>
+                    <span class="like-count-text">LIKE：<span class="num">{{ $cast['like_cnt'] ?? 0 }}</span>件</span>
+                </button>
             </div>
 
             {{-- 生年月日（あれば表示） --}}
@@ -140,28 +150,22 @@
                 @endif
             </section>
 
-            <div class="profile-spacer"></div>
         </div>
-    </div>
-
-    {{-- 下部固定アクション --}}
-    <div class="profile-actions-sticky">
-        @php $talkIndex = request()->is('cast/*') ? route('cast.talk.index') : route('shop.talk.index'); @endphp
-        <a href="{{ $talkIndex }}" class="action-btn like">
-            <i class="fas fa-heart"></i>
-            <span>LIKE</span>
-        </a>
-        <a href="{{ $talkIndex }}" class="action-btn message">
-            <i class="fas fa-comment"></i>
-            <span>メッセージ</span>
-        </a>
-        <button type="button" class="action-btn keep" aria-label="キープ">
-            <i class="fas fa-bookmark"></i>
-        </button>
     </div>
 </div>
 
 <script>
+var profileImages = @json($cast['images'] ?? [$cast['img']]);
+function setProfileMainImage(index) {
+    var mainImg = document.getElementById('profile-main-img');
+    var thumbs = document.querySelectorAll('.profile-photo-thumb');
+    if (mainImg && profileImages[index]) {
+        mainImg.src = profileImages[index];
+    }
+    thumbs.forEach(function(t, i) {
+        t.classList.toggle('active', i === index);
+    });
+}
 function toggleAccordion(btn) {
     var body = document.getElementById('intro-body');
     var icon = btn.querySelector('.accordion-icon');
@@ -170,5 +174,25 @@ function toggleAccordion(btn) {
     btn.setAttribute('aria-expanded', !expanded);
     icon.classList.toggle('is-open', !expanded);
 }
+document.addEventListener('DOMContentLoaded', function() {
+    var btnKeep = document.getElementById('btn-profile-keep');
+    if (btnKeep) {
+        btnKeep.addEventListener('click', function() {
+            var active = this.getAttribute('aria-pressed') === 'true';
+            this.classList.toggle('active', !active);
+            this.setAttribute('aria-pressed', !active);
+        });
+    }
+    var btnLike = document.getElementById('btn-profile-like');
+    if (btnLike) {
+        btnLike.addEventListener('click', function() {
+            var numEl = this.querySelector('.num');
+            if (numEl) {
+                var n = parseInt(numEl.textContent, 10) || 0;
+                numEl.textContent = n + 1;
+            }
+        });
+    }
+});
 </script>
 @endsection
