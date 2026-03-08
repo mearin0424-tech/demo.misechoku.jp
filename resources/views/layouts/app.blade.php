@@ -32,7 +32,7 @@
     @stack('styles')
 </head>
     
-<body class="@yield('body-class')">
+<body class="@yield('body-class')" data-notification-badge="{{ isset($unreadNewsCount) ? (int) $unreadNewsCount : 0 }}">
     <div id="bg-layer"></div>
     <div id="menu-overlay" class="menu-overlay"></div>
 
@@ -66,6 +66,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="{{ asset('assets/js/character-guide.js') }}"></script>
+    <script src="{{ asset('assets/js/push-notification.js') }}"></script>
     @stack('scripts')
     {{-- PWA: Service Worker 登録 --}}
     <script>

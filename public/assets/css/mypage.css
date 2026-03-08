@@ -246,6 +246,46 @@ a.btn-outline-gold {
     border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.mypage-profile-block {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.mypage-profile-block:first-of-type {
+    margin-top: 12px;
+    padding-top: 0;
+    border-top: none;
+}
+.mypage-profile-block .section-title-gold {
+    margin-bottom: 10px;
+}
+
+/* 接客タイプ診断ボタン（ピンク系・背景と調和） */
+.btn-personality-test {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 10px 18px;
+    border-radius: 12px;
+    border: 1px solid rgba(180, 130, 145, 0.5);
+    background: rgba(160, 110, 125, 0.18);
+    color: #e0c0c8;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+.btn-personality-test:hover {
+    border-color: rgba(200, 150, 165, 0.55);
+    background: rgba(170, 120, 135, 0.25);
+    color: #e8d0d6;
+}
+.btn-personality-test i {
+    font-size: 0.95rem;
+    opacity: 0.95;
+}
+
 /* プロフィール情報 */
 .profile-info-section {
     padding: 20px 0;

@@ -19,12 +19,18 @@ class MypageController extends Controller
         // プロフィール画面にはレビュー本文を出さず、★カードから一覧へ遷移
         $castForProfile = $cast;
         $castForProfile['reviews'] = [];
+        // ギャラリー用：id + url（お店マイページと同じ形式）
+        $subImages = [];
+        foreach (array_values($cast['images']) as $i => $url) {
+            $subImages[] = ['id' => $i + 1, 'url' => is_array($url) ? ($url['url'] ?? '') : $url];
+        }
         return view('casts.mypage.index', [
             'pageId'       => 'mypage',
             'cast'         => $castForProfile,
             'isOwn'        => true,
             'review_avg'   => $reviewAvg,
             'review_count' => $reviewCount,
+            'subImages'    => $subImages,
         ]);
     }
 
@@ -95,11 +101,13 @@ class MypageController extends Controller
             'bust'             => 85,
             'waist'            => 58,
             'hip'              => 86,
+            'word'             => 'はじめまして！楽しくお話しするのが大好きです。',
             'pr'               => "はじめまして！楽しくお話しするのが大好きです。\nお酒も少し飲めます！よろしくお願いします。",
             'intro'            => "はじめまして！楽しくお話しするのが大好きです。\nお酒も少し飲めます！よろしくお願いします。",
             'desired_job'      => '',
-            'my_field'         => '',
-            'my_inner_skills'  => '',
+            'my_field'         => 'ナチュラル',
+            'my_inner_skills'  => '聞き役・気配り',
+            'personality_type' => 'ナチュラル（接客タイプ診断）',
             'shift_hope'       => '週1回出勤',
             'work_time'        => 'morning',
             'work_time_label'  => '朝',

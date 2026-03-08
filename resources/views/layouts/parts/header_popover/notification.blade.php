@@ -4,6 +4,11 @@
         <button class="btn-close-popup" onclick="togglePopup('header-notification-popup')">&times;</button>
     </div>
     <div class="notification-popup-content">
+        {{-- Push 通知テスト（PWA） --}}
+        <div class="push-actions" style="padding:10px 12px; border-bottom:1px solid #333;">
+            <button type="button" id="push-enable-btn" class="push-action-btn" style="display:block; width:100%; padding:8px 12px; margin-bottom:6px; background:#2a1a1a; color:#D4AF37; border:1px solid #444; border-radius:6px; font-size:0.8rem; cursor:pointer;">通知を有効にする</button>
+            <button type="button" id="push-test-btn" class="push-action-btn" style="display:block; width:100%; padding:8px 12px; background:#1a2a1a; color:#8bc34a; border:1px solid #444; border-radius:6px; font-size:0.8rem; cursor:pointer;">テスト通知を送る</button>
+        </div>
         @if(isset($notifications) && count($notifications) > 0)
             @foreach($notifications as $item)
                 <div style="padding:10px; border-bottom:1px solid #333; font-size:0.85rem; color:#fff;">

@@ -40,16 +40,25 @@ class PushController extends Controller
         $keys = $request->input('keys');
 
         try {
-            DB::table('push_subscriptions')->updateOrInsert(
-                ['endpoint' => $endpoint],
-                [
+            $now = now();
+            $exists = DB::table('push_subscriptions')->where('endpoint', $endpoint)->exists();
+            if ($exists) {
+                DB::table('push_subscriptions')->where('endpoint', $endpoint)->update([
                     'public_key' => $keys['p256dh'] ?? null,
                     'auth_token' => $keys['auth'] ?? null,
                     'user_agent' => $request->userAgent(),
-                    'updated_at' => now(),
-                    'created_at' => now(),
-                ]
-            );
+                    'updated_at' => $now,
+                ]);
+            } else {
+                DB::table('push_subscriptions')->insert([
+                    'endpoint' => $endpoint,
+                    'public_key' => $keys['p256dh'] ?? null,
+                    'auth_token' => $keys['auth'] ?? null,
+                    'user_agent' => $request->userAgent(),
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+            }
             return response()->json(['ok' => true], 201);
         } catch (\Throwable $e) {
             Log::warning('Push subscribe error: ' . $e->getMessage());
@@ -109,11 +118,11 @@ class PushController extends Controller
                     ],
                 ]);
                 $result = $webPush->sendOneNotification($subscription, $payload);
-                if ($result->isSuccess()) {
+                if (method_exists($result, 'isSuccess') && $result->isSuccess()) {
                     $sent++;
                 } else {
                     $failed++;
-                    if ($result->isSubscriptionExpired()) {
+                    if (method_exists($result, 'isSubscriptionExpired') && $result->isSubscriptionExpired()) {
                         DB::table('push_subscriptions')->where('id', $row->id)->delete();
                     }
                 }
