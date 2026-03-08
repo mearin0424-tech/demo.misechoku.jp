@@ -11,7 +11,8 @@
 @php
     $itemType = $itemType ?? 'cast';
     $isShop = ($itemType === 'shop');
-    $detailRoute = $isShop ? 'shop.castprofileview.show' : 'cast.shopprofileview.show';
+    // キャスト側でお店一覧 → お店詳細は cast/shopprofileview/{id}、お店側でキャスト一覧 → キャスト詳細は shop/castprofileview/{id}
+    $detailRoute = $isShop ? 'cast.shopprofileview.show' : 'shop.castprofileview.show';
     $talkRoute = $isShop ? 'cast.talk.room' : 'shop.talk.room';
 @endphp
 @section('content')
