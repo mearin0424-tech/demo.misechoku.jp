@@ -8,6 +8,14 @@
     padding: 15px;
     border: 1px solid var(--color-border);
 }
+/* サブヘッダー直下の先頭カードは上余白なし */
+.tab-pane > .timeline-card:first-child,
+.tab-pane > .text-center:first-child {
+    margin-top: 0;
+}
+.tab-pane {
+    padding-top: 0;
+}
 
 .tl-header { display: flex; align-items: center; margin-bottom: 12px; }
 .tl-icon { 
