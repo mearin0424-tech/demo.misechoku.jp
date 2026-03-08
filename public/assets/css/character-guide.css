@@ -13,6 +13,14 @@
     display: none;
 }
 
+/* 吹き出しのみ非表示（キャラクターは残す） */
+.discovery-guide.bubble-hidden .guide-speech-bubble {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
 /* キャラクター画像：囲みなし */
 .guide-character-wrap {
     position: relative;
