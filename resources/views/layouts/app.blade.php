@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    {{-- PWA --}}
+    <meta name="theme-color" content="#190509">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ミセチョク">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/images/pwa/icon-192.svg') }}">
     {{-- ファビコン（データURIで404防止。色はアプリのゴールド・ダーク） --}}
     <link rel="icon" href="data:image/svg+xml,{{ rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#190509"/><text x="16" y="22" font-size="18" text-anchor="middle" fill="#D4AF37">店</text></svg>') }}" type="image/svg+xml">
     <title>@yield('title'){{ isset($title) ? ' | ' . config('app.name', 'ミセチョク') : config('app.name', 'ミセチョク') }}</title>
@@ -60,5 +67,15 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="{{ asset('assets/js/character-guide.js') }}"></script>
     @stack('scripts')
+    {{-- PWA: Service Worker 登録 --}}
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('{{ asset("sw.js") }}', { scope: '/' })
+            .then(function (reg) { /* 登録完了 */ })
+            .catch(function () { /* 登録失敗時は無視 */ });
+        });
+      }
+    </script>
 </body>
 </html>
