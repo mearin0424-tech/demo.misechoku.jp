@@ -39,11 +39,15 @@
             {{-- @yield('guide_message') で各ページの設定内容を注入する --}}
             @include('layouts.parts.character-guide', ['guideMessage' => $__env->yieldContent('guide_message')])
 
-            {{-- メインコンテンツ --}}
+            {{-- メインコンテンツ（プロフィール詳細は content-wrapper を使わず幅をアプリ全体に統一） --}}
             <main id="main-content">
-                <div class="content-wrapper animate-fadeIn">
-                @yield('content')
-                </div>
+                @if(request()->routeIs('cast.shopprofileview.show') || request()->routeIs('shop.castprofileview.show'))
+                    @yield('content')
+                @else
+                    <div class="content-wrapper animate-fadeIn">
+                        @yield('content')
+                    </div>
+                @endif
             </main>
 
             {{-- ボトムナビ（モバイル用固定） --}}

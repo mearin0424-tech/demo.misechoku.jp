@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', ($cast['nickname'] ?? $cast['name']) . ' - プロフィール')
+@section('body-class', 'page-cast-profile')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/cast_profile.css') }}">
