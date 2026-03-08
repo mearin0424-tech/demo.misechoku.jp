@@ -1,7 +1,189 @@
-.profile-hero { position: relative; height: 250px; }
-.hero-img { width: 100%; height: 100%; object-fit: cover; }
-.hero-overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 20px; background: linear-gradient(to top, #120505, transparent); }
-.shop-name { color: #fff; font-size: 1.5rem; }
-.edit-fab { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #D4AF37; border: 1px solid #D4AF37; }
-.shop-word-bubble::after { content: ''; position: absolute; top: 50%; left: -10px; transform: translateY(-50%); border-width: 10px 10px 10px 0; border-style: solid; border-color: transparent var(--color-sub) transparent transparent; }
-.btn-gold { background: #D4AF37; color: #000; text-decoration: none; }
+/* ========================================
+   Shop Profile - お店プロフィール詳細（shopprofileview 用）
+   content-wrapper なしで表示するため、ここで幅・レイアウトを完結させる
+   ======================================== */
+
+.profile-view-container {
+    width: 100%;
+    max-width: var(--max-content-width);
+    margin: 0 auto;
+    min-height: 100%;
+    background: var(--color-main);
+    box-sizing: border-box;
+    padding-bottom: calc(var(--footer-height) + 16px);
+}
+
+/* --- ヒーロー --- */
+.profile-view-container .profile-hero {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    min-height: 200px;
+    max-height: 320px;
+    background: #000;
+    overflow: hidden;
+}
+
+.profile-view-container .hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+.profile-view-container .hero-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    background: linear-gradient(to top, var(--color-main) 40%, transparent);
+}
+
+.profile-view-container .shop-name {
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    font-family: var(--font-serif);
+}
+
+.profile-view-container .edit-fab {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.6);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    text-decoration: none;
+    z-index: 5;
+}
+
+/* --- 店舗ヘッダー（アイコン＋ひとこと） --- */
+.shop-header-top {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px var(--content-padding-x);
+    background: var(--color-main);
+}
+
+.shop-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+}
+
+.shop-icon-wrapper img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--gold);
+}
+
+.shop-word-bubble {
+    flex: 1;
+    min-width: 0;
+    min-height: 60px;
+    padding: 14px 16px;
+    background: var(--color-sub);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    color: var(--color-text-header);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+}
+
+.shop-word-bubble p {
+    margin: 0;
+}
+
+/* --- アクションボタン --- */
+.profile-actions {
+    display: flex;
+    gap: 12px;
+    padding: 0 var(--content-padding-x) 20px;
+}
+
+.profile-actions .btn-gold,
+.profile-actions .btn-outline-gold {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    transition: opacity 0.2s, transform 0.15s;
+}
+
+.profile-actions .btn-gold {
+    background: var(--gold);
+    color: #000;
+    border: none;
+}
+
+.profile-actions .btn-gold:hover {
+    opacity: 0.95;
+}
+
+.profile-actions .btn-outline-gold {
+    background: transparent;
+    color: var(--gold);
+    border: 2px solid var(--gold);
+}
+
+.profile-actions .btn-outline-gold:hover {
+    opacity: 0.9;
+}
+
+/* --- セクション（Concept / Gallery） --- */
+.profile-view-container .shop-profile-section {
+    padding: 0 var(--content-padding-x) 24px;
+}
+
+.profile-view-container .shop-profile-section h3 {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 0 0 12px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.profile-view-container .shop-profile-section .concept-text {
+    font-size: 0.875rem;
+    color: var(--color-text);
+    opacity: 0.9;
+    line-height: 1.7;
+    margin: 0;
+}
+
+.profile-view-container .shop-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.profile-view-container .shop-gallery-grid img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}

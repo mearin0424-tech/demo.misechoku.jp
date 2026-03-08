@@ -1,25 +1,33 @@
 @php
     $current = $current ?? 'profile';
+    $fullWidth = $fullWidth ?? false;
 @endphp
-<nav class="cast-mypage-menu" aria-label="マイページメニュー">
-    <ul class="cast-mypage-menu-list">
-        <li>
-            <a href="{{ route('cast.mypage.index') }}" class="cast-mypage-menu-item {{ $current === 'profile' ? 'is-current' : '' }}">
-                <i class="fas fa-user" aria-hidden="true"></i>
-                <span>プロフィール確認</span>
-            </a>
-        </li>
-        <li>
-            <a href="{{ route('cast.mypage.employment') }}" class="cast-mypage-menu-item {{ $current === 'employment' ? 'is-current' : '' }}">
-                <i class="fas fa-briefcase" aria-hidden="true"></i>
-                <span>採用状況</span>
-            </a>
-        </li>
-        <li>
-            <a href="{{ route('cast.mypage.payment') }}" class="cast-mypage-menu-item {{ $current === 'payment' ? 'is-current' : '' }}">
-                <i class="fas fa-yen-sign" aria-hidden="true"></i>
-                <span>請求・入金管理</span>
-            </a>
-        </li>
-    </ul>
-</nav>
+<div class="cast-mypage-menu-section {{ $fullWidth ? 'cast-mypage-menu-section--full-width' : '' }}">
+    <div class="mypage-section mypage-quick-actions">
+        <h2 class="mypage-actions-title">メニュー</h2>
+        <a href="{{ route('cast.mypage.index') }}" class="btn-action-card profile {{ $current === 'profile' ? 'is-current' : '' }}">
+            <span class="btn-action-icon-wrap"><i class="fas fa-user"></i></span>
+            <span class="btn-action-body">
+                <span class="btn-action-label">PROFILE</span>
+                <span class="btn-action-text">プロフィール確認</span>
+            </span>
+            <i class="fas fa-chevron-right btn-action-arrow"></i>
+        </a>
+        <a href="{{ route('cast.mypage.employment') }}" class="btn-action-card job {{ $current === 'employment' ? 'is-current' : '' }}">
+            <span class="btn-action-icon-wrap"><i class="fas fa-briefcase"></i></span>
+            <span class="btn-action-body">
+                <span class="btn-action-label">EMPLOYMENT</span>
+                <span class="btn-action-text">採用状況</span>
+            </span>
+            <i class="fas fa-chevron-right btn-action-arrow"></i>
+        </a>
+        <a href="{{ route('cast.mypage.payment') }}" class="btn-action-card manage {{ $current === 'payment' ? 'is-current' : '' }}">
+            <span class="btn-action-icon-wrap"><i class="fas fa-file-invoice-dollar"></i></span>
+            <span class="btn-action-body">
+                <span class="btn-action-label">PAYMENT</span>
+                <span class="btn-action-text">請求・入金管理</span>
+            </span>
+            <i class="fas fa-chevron-right btn-action-arrow"></i>
+        </a>
+    </div>
+</div>

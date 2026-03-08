@@ -10,7 +10,7 @@
 
 @section('content')
 <div class="cast-profile-wrapper animate-fadeIn">
-    @include('casts.mypage.parts.menu', ['current' => 'profile'])
+    @include('casts.mypage.parts.menu', ['current' => 'profile', 'fullWidth' => true])
 
     @include('casts.profile.parts.show-content', ['cast' => $cast, 'isOwn' => true])
 </div>

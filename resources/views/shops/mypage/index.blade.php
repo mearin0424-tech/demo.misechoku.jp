@@ -50,14 +50,14 @@
                 </div>
             </div>
 
-            {{-- クイックアクション --}}
+            {{-- メニュー --}}
             <div class="mypage-section mypage-quick-actions">
-                <h2 class="mypage-actions-title">クイックアクション</h2>
+                <h2 class="mypage-actions-title">メニュー</h2>
                 <a href="{{ route('shop.recruits.status') }}" class="btn-action-card job">
                     <span class="btn-action-icon-wrap"><i class="fas fa-briefcase"></i></span>
                     <span class="btn-action-body">
-                        <span class="btn-action-label">Recruit Status</span>
-                        <span class="btn-action-text">求人情報の確認・編集</span>
+                        <span class="btn-action-label">Recruit</span>
+                        <span class="btn-action-text">求人の掲載</span>
                     </span>
                     <i class="fas fa-chevron-right btn-action-arrow"></i>
                 </a>

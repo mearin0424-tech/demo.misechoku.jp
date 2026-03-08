@@ -249,7 +249,7 @@
     margin: 0;
 }
 
-/* --- クイックアクション（求人情報・採用請求管理） --- */
+/* --- メニュー（求人の掲載・採用請求管理 / キャストはプロフィール・採用状況・請求入金） --- */
 .mypage-actions-title {
     font-size: 0.7rem;
     color: var(--color-text);
@@ -307,12 +307,24 @@
     font-size: 1.25rem;
 }
 
-.mypage-quick-actions .btn-action-card.job .btn-action-icon-wrap {
+.mypage-quick-actions .btn-action-card.job .btn-action-icon-wrap,
+.mypage-quick-actions .btn-action-card.profile .btn-action-icon-wrap {
     background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(182, 122, 43, 0.15));
 }
 
 .mypage-quick-actions .btn-action-card.manage .btn-action-icon-wrap {
     background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(182, 122, 43, 0.1));
+}
+
+/* キャストマイページ：メニューが full-bleed 内にあるときの左右余白 */
+.cast-mypage-menu-section--full-width {
+    padding: 0 var(--content-padding-x);
+}
+
+/* キャストマイページ：現在のメニュー項目を強調 */
+.mypage-quick-actions .btn-action-card.is-current {
+    border-color: var(--gold);
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.18), rgba(182, 122, 43, 0.08));
 }
 
 /* テキストエリア */
@@ -728,10 +740,6 @@
     color: var(--gold);
 }
 
-.cast-mypage-sub-page .cast-mypage-menu {
-    margin: 0 calc(-1 * var(--content-padding-x));
-    width: calc(100% + 2 * var(--content-padding-x));
-}
 .mypage-page-title {
     font-size: 1.5rem;
     color: var(--color-text-header);
