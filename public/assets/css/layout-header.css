@@ -50,6 +50,35 @@
     letter-spacing: 0.5px;
 }
 
+/* デモ用：キャスト／お店切り替え */
+.header-demo-toggle {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+.demo-toggle-btn {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: color 0.2s, background 0.2s;
+}
+.demo-toggle-btn:hover {
+    color: rgba(255, 255, 255, 0.9);
+}
+.demo-toggle-btn.active {
+    color: #d4af37;
+    font-weight: bold;
+}
+.demo-toggle-divider {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 0.65rem;
+    user-select: none;
+}
+
 /* 左右・中央のレイアウト固定 */
 .header-left {
     flex: 1; /* 左側スロット */

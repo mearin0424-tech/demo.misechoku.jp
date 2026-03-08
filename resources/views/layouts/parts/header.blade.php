@@ -15,9 +15,31 @@
         'manage'     => 'MANAGEMENT'
     ];
     $currentEngTitle = $engTitles[$pageId] ?? '-';
+
+    // デモ用：キャスト／お店の切り替え用URL（現在のパスを他方のプレフィックスに変換）
+    $path = request()->path();
+    $isCast = request()->is('cast/*');
+    $castUrl = '/cast/home';
+    $shopUrl = '/shop/home';
+    if (request()->is('cast/*')) {
+        $shopUrl = '/' . preg_replace('#^cast/#', 'shop/', $path);
+    } elseif (request()->is('shop/*')) {
+        if (preg_match('#^shop/(recruits|profile/store)#', $path)) {
+            $castUrl = '/cast/home';
+        } else {
+            $castUrl = '/' . preg_replace('#^shop/#', 'cast/', $path);
+        }
+    }
 @endphp
 
 <header id="global-header">
+    {{-- デモ用：キャスト／お店切り替え（左端） --}}
+    <div class="header-demo-toggle">
+        <a href="{{ $castUrl }}" class="demo-toggle-btn {{ $isCast ? 'active' : '' }}" data-mode="cast">キャスト</a>
+        <span class="demo-toggle-divider">/</span>
+        <a href="{{ $shopUrl }}" class="demo-toggle-btn {{ !$isCast ? 'active' : '' }}" data-mode="shop">お店</a>
+    </div>
+
     {{-- 左側：戻るボタン または ロゴ --}}
     <div class="header-left">
         @if($showBackButton)
