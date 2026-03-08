@@ -8,11 +8,8 @@
 
 @section('content')
 <div class="cast-profile-wrapper">
-    {{-- ヒーロー写真エリア（ホームのスワイプと同じ画像。メイン＋最大6枚） --}}
+    {{-- ヒーロー写真エリア（ホームのスワイプと同じ画像） --}}
     <section class="profile-hero" aria-label="プロフィール写真">
-        <a href="{{ url()->previous() }}" class="btn-hero-back" aria-label="戻る">
-            <i class="fas fa-arrow-left"></i>
-        </a>
         <div class="profile-hero-inner">
             <img id="profile-main-img" src="{{ $cast['img'] }}" alt="{{ $cast['nickname'] ?? $cast['name'] }}" class="profile-hero-img">
             <div class="profile-hero-gradient"></div>
@@ -22,17 +19,18 @@
                 @endif
             </div>
         </div>
-        {{-- メイン画像とは別に、登録画像2〜6枚目を表示（最大6枚まで） --}}
-        @if(!empty($cast['images']) && count($cast['images']) > 1)
-            <div class="profile-photo-strip">
-                @foreach($cast['images'] as $index => $imgUrl)
-                    <button type="button" class="profile-photo-thumb {{ $index === 0 ? 'active' : '' }}" data-index="{{ $index }}" onclick="setProfileMainImage({{ $index }})" aria-label="写真{{ $index + 1 }}を表示">
-                        <img src="{{ $imgUrl }}" alt="">
-                    </button>
-                @endforeach
-            </div>
-        @endif
     </section>
+
+    {{-- メイン画像とは別に、登録画像2〜6枚目を表示（最大6枚まで）ヒーロー外で常に表示 --}}
+    @if(!empty($cast['images']) && count($cast['images']) > 0)
+        <div class="profile-photo-strip">
+            @foreach($cast['images'] as $index => $imgUrl)
+                <button type="button" class="profile-photo-thumb {{ $index === 0 ? 'active' : '' }}" data-index="{{ $index }}" onclick="setProfileMainImage({{ $index }})" aria-label="写真{{ $index + 1 }}を表示">
+                    <img src="{{ $imgUrl }}" alt="">
+                </button>
+            @endforeach
+        </div>
+    @endif
 
     {{-- メインコンテンツ --}}
     <div class="profile-main-contents">

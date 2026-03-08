@@ -200,71 +200,74 @@
 .msg-left .msg-footer { justify-content: flex-start; }
 
 /* ==========================================================================
-   吹き出し：画像のようにテキストにぴったり（最小パディング）
+   吹き出し：テキストにぴったり・尻尾で吹き出し形に
    ========================================================================== */
 .message-bubble {
     display: inline-block;
     max-width: 100%;
-    min-height: auto;
-    height: auto;
-    padding: 4px 9px;
-    border-radius: 12px;
+    padding: 2px 8px 3px;
+    border-radius: 10px;
     font-size: 0.8rem;
-    line-height: 1.32;
+    line-height: 1.3;
     letter-spacing: 0;
     white-space: pre-wrap;
     word-break: break-word;
     position: relative;
+    box-sizing: border-box;
 }
 
 .message-bubble p {
     margin: 0;
     padding: 0;
+    line-height: 1.3;
+    display: block;
 }
 
-/* 相手のメッセージ：左寄せ・左に尻尾 */
+/* 相手のメッセージ：左下に尻尾が出る吹き出し形 */
 .msg-left .message-bubble {
     background: linear-gradient(160deg, #2d1218 0%, #251018 100%);
     color: #f0e8e8;
-    border-radius: 12px 12px 12px 3px;
+    border-radius: 10px 10px 10px 2px;
     border: 1px solid rgba(90, 22, 37, 0.4);
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* 相手用尻尾（左側に突き出し、吹き出しに接続） */
 .msg-left .message-bubble::after {
     content: "";
     position: absolute;
-    left: -3px;
-    bottom: 5px;
+    left: -8px;
+    bottom: 4px;
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 0 0 5px 5px;
-    border-color: transparent transparent #251018 transparent;
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.12));
+    border-width: 5px 8px 5px 0;
+    border-color: transparent #251018 transparent transparent;
+    z-index: 0;
 }
 
-/* 自分のメッセージ：右寄せ・右に尻尾 */
+/* 自分のメッセージ：右下に尻尾が出る吹き出し形 */
 .msg-right .message-bubble {
     background: linear-gradient(145deg, #e8d48a 0%, #d4af37 35%, #c9a227 100%);
     color: #1a0f0a;
     font-weight: 500;
-    border-radius: 12px 12px 3px 12px;
+    border-radius: 10px 10px 2px 10px;
     border: 1px solid rgba(212, 175, 55, 0.35);
     box-shadow: 0 1px 6px rgba(212, 175, 55, 0.2), 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
+/* 自分用尻尾（右側に突き出し、吹き出しに接続） */
 .msg-right .message-bubble::after {
     content: "";
     position: absolute;
-    right: -3px;
-    bottom: 5px;
+    right: -8px;
+    bottom: 4px;
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 0 5px 5px 0;
-    border-color: transparent #c9a227 transparent transparent;
-    filter: drop-shadow(1px 0 1px rgba(0, 0, 0, 0.06));
+    border-width: 5px 0 5px 8px;
+    border-color: transparent transparent transparent #c9a227;
+    z-index: 0;
 }
 
 /* 時刻・既読（bubble 外・画像のように小さく） */
