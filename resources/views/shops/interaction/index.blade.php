@@ -19,7 +19,7 @@
     ])
 </div>
 
-<div class="tab-content-container contents inner">
+<div class="tab-content-container contents tab-page-body">
     
     {{-- タブ１：キープ (KEEP) --}}
     <div id="pane-keep" class="tab-pane active">
@@ -70,7 +70,6 @@
                 @endforeach
             @endif
         </div>
-    </div>
 </div>
 @endsection
 

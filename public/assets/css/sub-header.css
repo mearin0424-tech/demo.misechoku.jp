@@ -1,21 +1,22 @@
 /* --- サブヘッダー（タブ）共通スタイル --- */
 .sub-header-wrapper {
     position: fixed;
-    top: var(--header-height, 60px) !important; /* ヘッダー直下（隙間なし） */
+    top: var(--header-height) !important;
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
     max-width: var(--max-content-width);
     z-index: 1400;
-    background: #1e0505;
+    background: var(--color-main);
     margin: 0 !important;
     padding: 0 !important;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .sub-header-tabs {
     display: flex;
-    height: 38px;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    height: var(--sub-header-height);
+    align-items: stretch;
 }
 
 .sub-header-tabs .tab-item {
@@ -23,42 +24,48 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #888;
-    font-size: 0.75rem; /* 小さめで上品なサイズ */
-    font-weight: bold;
-    letter-spacing: 1px;
+    color: var(--color-text);
+    opacity: 0.7;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: color 0.2s ease, opacity 0.2s ease;
     position: relative;
 }
 
-/* アクティブ状態：シャンパンゴールド */
+.sub-header-tabs .tab-item:hover {
+    opacity: 0.9;
+}
+
 .sub-header-tabs .tab-item.active {
-    color: #d4af37;
+    color: var(--gold);
+    opacity: 1;
 }
 
 .sub-header-tabs .tab-item.active::after {
     content: "";
     position: absolute;
     bottom: 0;
-    left: 20%;
-    right: 20%;
+    left: 15%;
+    right: 15%;
     height: 2px;
-    background: #d4af37;
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+    background: var(--gold);
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
 }
 
-/* --- has-sub-header 自体はラッパーだけ（高さは持たない） --- */
+/* --- has-sub-header はラッパーのみ --- */
 .has-sub-header {
     margin: 0;
     padding: 0;
 }
 
-/* --- メインコンテンツ開始位置（ヘッダー60px + タブ38px 分だけ下げる） --- */
-.has-sub-header + .contents,
-.has-sub-header + .tab-content-container,
-.has-sub-header + .talk-list-container {
-    margin-top: calc(var(--header-height, 60px) + 38px);
+/* --- タブ下コンテンツ共通：開始位置・余白を統一（親の content-wrapper が横余白を持つ） --- */
+.tab-page-body {
+    margin-top: calc(var(--header-height) + var(--sub-header-height));
+    padding: 12px 0 calc(var(--footer-height) + 16px);
+    box-sizing: border-box;
+    min-height: 200px;
 }
 
 /* タブパネルの表示制御 */

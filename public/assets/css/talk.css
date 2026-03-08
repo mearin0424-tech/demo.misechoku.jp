@@ -5,8 +5,11 @@
 /* --- Talk List (一覧画面) --- */
 .talk-list-container {
     width: 100%;
-    padding: 15px;
     box-sizing: border-box;
+}
+.talk-list-container.tab-page-body {
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .talk-item {

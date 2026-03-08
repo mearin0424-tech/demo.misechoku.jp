@@ -14,8 +14,8 @@
 @php
     // 現在のプレフィックス（shop または cast）を取得
     $prefix = request()->is('cast/*') ? 'cast' : 'shop';
-    // 読み込む部品のディレクトリパス
-    $viewDir = $prefix === 'cast' ? 'casts' : 'shops';
+    // 読み込む部品のビュー名プレフィックス（cast は casts.parts、shop は shops.search.parts）
+    $partsView = $prefix === 'cast' ? 'casts.parts' : 'shops.search.parts';
 @endphp
 
 <div class="has-sub-header">
@@ -28,12 +28,12 @@
     ])
 </div>
 
-<div class="contents">
+<div class="contents tab-page-body">
     {{-- パネル1：タイムライン --}}
     <div id="pane-timeline" class="tab-pane active">
             @forelse($timelineData as $post)
                 {{-- 役割に応じたタイムラインカードを読み込む --}}
-                @include($viewDir . '.search.parts.timeline-card', ['post' => $post])
+                @include($partsView . '.timeline-card', ['post' => $post])
             @empty
                 <div class="text-center py-20 text-sm opacity-40">投稿はありません。</div>
             @endforelse
@@ -43,13 +43,13 @@
         <div id="pane-list" class="tab-pane">
             <div class="search-filter-box">
                 {{-- 役割に応じたフィルター（検索窓）を読み込む --}}
-                @include($viewDir . '.search.parts.filter')
+                @include($partsView . '.filter')
             </div>
             
             <ul class="connection-list">
                 @forelse($items as $item)
                     {{-- 役割に応じたリストアイテム（キャスト用/店舗用）を読み込む --}}
-                    @include($viewDir . '.search.parts.list-item', ['item' => $item])
+                    @include($partsView . '.list-item', ['item' => $item])
                 @empty
                     <div class="text-center py-20 text-sm opacity-40">該当する相手は見つかりませんでした。</div>
                 @endforelse
@@ -64,7 +64,6 @@
                 <p class="text-gray-400 text-sm mt-2">あなたにおすすめの{{ $prefix === 'shop' ? 'キャスト' : 'お店' }}を表示します。</p>
             </div>
         </div>
-    </div>
 </div>
 @endsection
 

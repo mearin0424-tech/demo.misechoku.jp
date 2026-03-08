@@ -32,6 +32,7 @@
     /* Layout（実ヘッダー60pxに統一＝TALK等の隙間防止） */
     --header-height: 60px;
     --footer-height: 70px;
+    --sub-header-height: 38px;
     /* 全レイアウト共通：この2つを変えるだけでヘッダー・フッター・コンテンツ幅がそろう */
     --max-content-width: 430px;
     --content-padding-x: 15px;

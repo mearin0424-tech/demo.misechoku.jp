@@ -24,7 +24,7 @@
     ])
 </div>
 
-<div class="talk-list-container">
+<div class="talk-list-container tab-page-body">
         {{-- パネル1：やり取り中 --}}
         <div id="pane-ongoing" class="tab-pane active">
             @forelse($ongoingTalks as $talk)
@@ -78,7 +78,6 @@
                 <div class="no-messages text-center py-10 opacity-50">{{ $requestTabText }}はありません</div>
             @endforelse
         </div>
-    </div>
 </div>
 @endsection
 
