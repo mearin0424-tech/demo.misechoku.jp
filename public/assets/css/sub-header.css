@@ -1,9 +1,7 @@
-/* --- サブヘッダー（タブ）：グローバルヘッダー直下にぴったり ---
-   ※ content-wrapper に transform（animate-fadeIn）があるため fixed の基準はその親。
-   top: 0 で親（= ヘッダー直下のコンテンツ先頭）に合わせる --- */
+/* --- サブヘッダー（タブ）：グローバルヘッダー直下に固定（ビューポート基準） --- */
 .sub-header-wrapper {
     position: fixed;
-    top: 0;
+    top: var(--header-height);
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
