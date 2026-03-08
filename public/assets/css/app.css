@@ -97,8 +97,13 @@ main {
 
 /* レスポンシブ対応 */
 @media (max-width: 1023px) {
-    #app { flex-direction: column; }
+    #app { flex-direction: column; min-height: 100vh; }
     main { padding-right: 0 !important; }
+    /* カラム時もメインレイアウトを 100vh で確保（ホームスワイプ等で画像が真っ黒にならないように） */
+    .main-layout-container {
+        min-height: 100vh;
+        height: 100vh;
+    }
 }
 
 /* ビューポートが --max-content-width より狭いときはアプリを100%幅に */

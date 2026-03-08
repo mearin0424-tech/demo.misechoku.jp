@@ -40,6 +40,32 @@ body.no-scroll main#main-content .content-wrapper {
     }
 }
 
+/* 1023px 以下（タブレット・スマホ幅）で高さが崩れないように固定 */
+@media (max-width: 1023px) {
+    body.no-scroll .main-layout-container {
+        height: 100vh;
+        min-height: 100vh;
+    }
+    body.no-scroll .main-layout-container main#main-content {
+        flex: 1;
+        min-height: 0;
+        height: 100%;
+    }
+    body.no-scroll main#main-content .content-wrapper {
+        height: 100%;
+        min-height: 0;
+    }
+    #home-screen {
+        height: calc(100vh - var(--header-height) - var(--footer-height) - 60px) !important;
+        min-height: 400px;
+    }
+    @supports (height: 100dvh) {
+        #home-screen {
+            height: calc(100dvh - var(--header-height) - var(--footer-height) - 60px) !important;
+        }
+    }
+}
+
 /* --- Swiper Container --- */
 .main-swiper {
     width: 100%;
