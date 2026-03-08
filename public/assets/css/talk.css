@@ -172,11 +172,11 @@
     background: var(--color-main);
 }
 
-/* 行全体を横いっぱいに広げる（画像参考：詰めた間隔） */
+/* 行全体を横いっぱいに（吹き出し＋日時が収まるよう行間を確保） */
 .message-row {
     display: flex;
     width: 100%;
-    margin-bottom: 2px;
+    margin-bottom: 10px;
     align-items: flex-start;
 }
 
@@ -184,23 +184,25 @@
 .msg-left { justify-content: flex-start; }
 .msg-right { justify-content: flex-end; }
 
-/* 吹き出し＋フッターをまとめるブロック（footer は bubble の外） */
+/* 吹き出し＋フッターをまとめるブロック（footer は bubble の外・被らないように余白） */
 .message-block {
     display: inline-flex;
     flex-direction: column;
     align-items: flex-end;
     max-width: 85%;
+    gap: 2px;
 }
 .msg-left .message-block { align-items: flex-start; }
 
-/* 時刻・既読（bubble の外・直下に表示） */
+/* 時刻・既読（bubble の外・直下に表示・吹き出しと被らない余白） */
 .msg-footer {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 2px;
-    margin-top: 0;
+    margin-top: 3px;
     padding: 0 1px;
+    flex-shrink: 0;
 }
 .msg-left .msg-footer { justify-content: flex-start; }
 

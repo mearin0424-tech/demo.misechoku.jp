@@ -50,35 +50,6 @@
     letter-spacing: 0.5px;
 }
 
-/* デモ用：キャスト／お店切り替え */
-.header-demo-toggle {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    margin-right: 10px;
-    flex-shrink: 0;
-}
-.demo-toggle-btn {
-    font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.5);
-    text-decoration: none;
-    padding: 2px 6px;
-    border-radius: 4px;
-    transition: color 0.2s, background 0.2s;
-}
-.demo-toggle-btn:hover {
-    color: rgba(255, 255, 255, 0.9);
-}
-.demo-toggle-btn.active {
-    color: #d4af37;
-    font-weight: bold;
-}
-.demo-toggle-divider {
-    color: rgba(255, 255, 255, 0.35);
-    font-size: 0.65rem;
-    user-select: none;
-}
-
 /* 左右・中央のレイアウト固定 */
 .header-left {
     flex: 1; /* 左側スロット */
@@ -97,16 +68,43 @@
 
 .header-center-title {
     flex: 2; /* 中央スロット */
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
+}
+
+/* デモ用：キャスト／お店スイッチ（セグメント風） */
+.demo-mode-switch {
+    display: inline-flex;
+    align-items: stretch;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(212, 175, 55, 0.5);
+    border-radius: 999px;
+    padding: 3px;
+    gap: 0;
+}
+.demo-mode-switch__btn {
+    font-size: 0.8rem;
     font-weight: bold;
-    color: #d4af37;
-    font-size: 0.85rem; /* 小さくして他と統一 */
-    letter-spacing: 2px; /* 文字間を空ける */
-    font-family: var(--font-serif);
- 
-    white-space: nowrap;     /* 改行禁止 */
-    overflow: hidden;        /* はみ出しを隠す */
-    text-overflow: ellipsis; /* 「...」を出す */
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    padding: 6px 18px;
+    border-radius: 999px;
+    transition: color 0.2s, background 0.2s;
+    min-width: 72px;
+    text-align: center;
+}
+.demo-mode-switch__btn:hover {
+    color: rgba(255, 255, 255, 0.9);
+}
+.demo-mode-switch__btn.is-active {
+    background: #d4af37;
+    color: #1a0505;
+}
+.demo-mode-switch__btn.is-active:hover {
+    color: #1a0505;
+    background: #e0c04a;
 }
 
 .header-right {

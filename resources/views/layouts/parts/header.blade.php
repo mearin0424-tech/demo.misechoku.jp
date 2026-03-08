@@ -33,13 +33,6 @@
 @endphp
 
 <header id="global-header">
-    {{-- デモ用：キャスト／お店切り替え（左端） --}}
-    <div class="header-demo-toggle">
-        <a href="{{ $castUrl }}" class="demo-toggle-btn {{ $isCast ? 'active' : '' }}" data-mode="cast">キャスト</a>
-        <span class="demo-toggle-divider">/</span>
-        <a href="{{ $shopUrl }}" class="demo-toggle-btn {{ !$isCast ? 'active' : '' }}" data-mode="shop">お店</a>
-    </div>
-
     {{-- 左側：戻るボタン または ロゴ --}}
     <div class="header-left">
         @if($showBackButton)
@@ -53,9 +46,12 @@
         @endif
     </div>
 
-    {{-- 中央：ページタイトル（戻るボタンがある時のみ表示） --}}
+    {{-- 中央：デモ用キャスト／お店スイッチ（タイトルは一時非表示） --}}
     <div class="header-center-title">
-        @yield('header_title', $currentEngTitle)
+        <nav class="demo-mode-switch" role="tablist" aria-label="デモモード切り替え">
+            <a href="{{ $castUrl }}" class="demo-mode-switch__btn {{ $isCast ? 'is-active' : '' }}" role="tab" aria-selected="{{ $isCast ? 'true' : 'false' }}">キャスト</a>
+            <a href="{{ $shopUrl }}" class="demo-mode-switch__btn {{ !$isCast ? 'is-active' : '' }}" role="tab" aria-selected="{{ !$isCast ? 'true' : 'false' }}">お店</a>
+        </nav>
     </div>
 
     {{-- 右側：タスク / 通知 / ハンバーガーメニュー --}}
