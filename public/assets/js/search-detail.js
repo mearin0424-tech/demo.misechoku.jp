@@ -109,7 +109,7 @@
     });
 
     function buildSearchParams() {
-        var params = ['tab=pane-list'];
+        var params = [];
         if (keywordInput && keywordInput.value.trim()) {
             params.push('keyword=' + encodeURIComponent(keywordInput.value.trim()));
         }
@@ -124,9 +124,21 @@
         return params;
     }
 
+    function getListUrl() {
+        var pathname = window.location.pathname;
+        if (/\/search\/(timeline|list|ai)$/.test(pathname)) {
+            return pathname.replace(/\/[^/]+$/, '') + '/list';
+        }
+        if (pathname.endsWith('/search')) {
+            return pathname + '/list';
+        }
+        return pathname.replace(/\/$/, '') + '/list';
+    }
+
     function doSearch(params) {
-        var base = window.location.pathname;
-        window.location.href = base + (params.length ? '?' + params.join('&') : '');
+        var listUrl = getListUrl();
+        var query = params.length ? '?' + params.join('&') : '';
+        window.location.href = listUrl + query;
     }
 
     // 簡単キーワード検索ボタン（入力欄横の「検索」）

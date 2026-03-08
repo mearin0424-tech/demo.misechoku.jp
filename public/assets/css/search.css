@@ -1,5 +1,15 @@
 /* prj/resources/css/search.css */
 
+/* SEARCH：サブヘッダーと横幅を揃える（content-wrapper の padding を打ち消して幅いっぱいに） */
+.contents.tab-page-body {
+    margin-left: calc(-1 * var(--content-padding-x));
+    margin-right: calc(-1 * var(--content-padding-x));
+    width: calc(100% + 2 * var(--content-padding-x));
+    box-sizing: border-box;
+    padding-left: var(--content-padding-x);
+    padding-right: var(--content-padding-x);
+}
+
 /* タイムラインカード（他タブのカードと統一） */
 .timeline-card {
     background: var(--color-card);

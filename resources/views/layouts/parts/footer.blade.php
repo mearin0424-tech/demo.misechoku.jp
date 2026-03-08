@@ -19,8 +19,8 @@
         <span>HOME</span>
     </a>
 
-    {{-- さがす --}}
-    <a href="{{ route($prefix .'.search.index') }}" class="nav-item {{ $isSearch ? 'active' : '' }}">
+    {{-- さがす（タイムラインタブへ） --}}
+    <a href="{{ route($prefix . '.search.index', ['tab' => 'timeline']) }}" class="nav-item {{ $isSearch ? 'active' : '' }}">
         <i class="fas fa-search"></i>
         <span>SEARCH</span>
     </a>

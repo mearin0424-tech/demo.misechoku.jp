@@ -36,6 +36,40 @@ Route::get('/favicon.ico', function () {
 
 /*
 |--------------------------------------------------------------------------
+| PWA Manifest（スマホのインストール判定用：MIME と絶対URL）
+|--------------------------------------------------------------------------
+*/
+Route::get('/manifest.json', function () {
+    $base = rtrim(request()->getSchemeAndHttpHost(), '/');
+    $manifest = [
+        'name' => 'ミセチョク',
+        'short_name' => 'ミセチョク',
+        'description' => 'ミセチョク - デモ',
+        'start_url' => $base . '/shop/home',
+        'scope' => $base . '/',
+        'id' => $base . '/',
+        'display' => 'standalone',
+        'display_override' => ['standalone', 'minimal-ui', 'browser'],
+        'orientation' => 'portrait-primary',
+        'theme_color' => '#190509',
+        'background_color' => '#190509',
+        'lang' => 'ja',
+        'prefer_related_applications' => false,
+        'icons' => [
+            ['src' => $base . '/assets/images/pwa/icon-192.png', 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any'],
+            ['src' => $base . '/assets/images/pwa/icon-192.png', 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'maskable'],
+            ['src' => $base . '/assets/images/pwa/icon-512.png', 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any'],
+            ['src' => $base . '/assets/images/pwa/icon-512.png', 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'maskable'],
+        ],
+    ];
+    return response()->json($manifest, 200, [
+        'Content-Type' => 'application/manifest+json',
+        'Cache-Control' => 'public, max-age=3600',
+    ]);
+})->name('manifest');
+
+/*
+|--------------------------------------------------------------------------
 | リダイレクト設定
 |--------------------------------------------------------------------------
 */
@@ -86,7 +120,8 @@ Route::prefix('shop')->name('shop.')->group(function () {
 Route::prefix('shop')->name('shop.')->group(function () {
     
     Route::get('/home', [ShopHome::class, 'index'])->name('home');
-    Route::get('/search', [ShopSearch::class, 'index'])->name('search.index');
+    Route::get('/search', fn () => redirect()->route('shop.search.index', ['tab' => 'timeline']));
+    Route::get('/search/{tab}', [ShopSearch::class, 'index'])->name('search.index')->where('tab', 'timeline|list|ai');
 
     // トーク
     Route::prefix('talk')->name('talk.')->group(function () {
@@ -146,7 +181,8 @@ Route::prefix('cast')->name('cast.')->group(function () {
     Route::post('/profile/update', [CastProfile::class, 'update'])->name('profile.update');
     Route::get('/shopprofileview/{id}', [CastProfile::class, 'show'])->name('shopprofileview.show');
     Route::redirect('/profile/{id}', '/cast/shopprofileview/{id}')->name('profile.show.redirect');
-    Route::get('/search', [CastSearch::class, 'index'])->name('search.index');
+    Route::get('/search', fn () => redirect()->route('cast.search.index', ['tab' => 'timeline']));
+    Route::get('/search/{tab}', [CastSearch::class, 'index'])->name('search.index')->where('tab', 'timeline|list|ai');
     Route::get('/recruit/{id}', [CastRecruit::class, 'show'])->name('recruit.show');
     
     Route::get('/interaction', [ShopInteraction::class, 'index'])->name('interaction.index');

@@ -98,11 +98,11 @@ body.no-scroll main#main-content .content-wrapper {
 
 /* --- 1キャスト＝1画面レイアウト (カードスタイル適用) --- */
 /* 画面サイズに合わせたカード：長細くならないようアスペクト比と最大高さで制限 */
+/* 幅は控えめにして左右に余白を確保し、LIKE等のボタンが必ず見えるようにする */
 .cast-card {
     position: relative;
-    /* 幅：通常は90vwまで、高さ制限で収める場合は 85vh*3/4 以下に */
-    width: min(400px, 90vw, calc(min(85vh, 90dvh) * 3 / 4)) !important;
-    max-width: 90vw !important;
+    width: min(360px, 82vw) !important;
+    max-width: 82vw !important;
     aspect-ratio: 3 / 4;
     max-height: min(85vh, 90dvh) !important;
     height: auto !important;

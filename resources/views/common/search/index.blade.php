@@ -14,24 +14,25 @@
 @php
     // 現在のプレフィックス（shop または cast）を取得
     $prefix = request()->is('cast/*') ? 'cast' : 'shop';
-    // 読み込む部品のビュー名プレフィックス（cast は casts.parts、shop は shops.search.parts）
+    $routeName = $prefix . '.search.index';
     $partsView = $prefix === 'cast' ? 'casts.parts' : 'shops.search.parts';
     $listTabLabel = $prefix === 'cast' ? '求人検索' : '一覧・検索';
+    $activeTab = $activeTab ?? 'pane-timeline';
+    $searchTab = $searchTab ?? 'timeline';
+    $tabsForHeader = [
+        ['id' => 'pane-timeline', 'label' => 'タイムライン', 'url' => route($routeName, ['tab' => 'timeline']), 'active' => $activeTab === 'pane-timeline'],
+        ['id' => 'pane-list', 'label' => $listTabLabel, 'url' => route($routeName, ['tab' => 'list']), 'active' => $activeTab === 'pane-list'],
+        ['id' => 'pane-ai', 'label' => 'AIレコメンド', 'url' => route($routeName, ['tab' => 'ai']), 'active' => $activeTab === 'pane-ai'],
+    ];
 @endphp
 
 <div class="has-sub-header">
-    @include('layouts.parts.sub-header', [
-        'tabs' => [
-            ['id' => 'pane-timeline', 'label' => 'タイムライン', 'active' => true],
-            ['id' => 'pane-list', 'label' => $listTabLabel, 'active' => false],
-            ['id' => 'pane-ai', 'label' => 'AIレコメンド', 'active' => false]
-        ]
-    ])
+    @include('layouts.parts.sub-header', ['tabs' => $tabsForHeader])
 </div>
 
 <div class="contents tab-page-body">
     {{-- パネル1：タイムライン --}}
-    <div id="pane-timeline" class="tab-pane active">
+    <div id="pane-timeline" class="tab-pane {{ $activeTab === 'pane-timeline' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-timeline' ? 'display:none' : '' }}">
             @forelse($timelineData as $post)
                 {{-- 役割に応じたタイムラインカードを読み込む --}}
                 @include($partsView . '.timeline-card', ['post' => $post])
@@ -41,7 +42,7 @@
         </div>
 
         {{-- パネル2：一覧・検索 / 求人検索（cast時） --}}
-        <div id="pane-list" class="tab-pane">
+        <div id="pane-list" class="tab-pane {{ $activeTab === 'pane-list' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-list' ? 'display:none' : '' }}">
             <div class="search-filter-box">
                 {{-- 役割に応じたフィルター（検索窓）を読み込む --}}
                 @include($partsView . '.filter')
@@ -58,7 +59,7 @@
         </div>
 
         {{-- パネル3：AI --}}
-        <div id="pane-ai" class="tab-pane">
+        <div id="pane-ai" class="tab-pane {{ $activeTab === 'pane-ai' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-ai' ? 'display:none' : '' }}">
             <div class="text-center py-20">
                 <i class="fas fa-robot text-4xl text-[#d4af37] mb-4"></i>
                 <h3 class="text-white">AIマッチング</h3>

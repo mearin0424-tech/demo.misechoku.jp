@@ -15,6 +15,14 @@
     </div>
 
     <div class="sidebar-content">
+        {{-- PWA: アプリをインストール（beforeinstallprompt 時のみ表示） --}}
+        <div class="sidebar-section" id="pwa-install-section" style="display: none;">
+            <div class="menu-label-header">APP</div>
+            <button type="button" id="pwa-install-btn" class="pwa-install-btn">
+                <i class="fas fa-download"></i> アプリをインストール
+            </button>
+        </div>
+
         {{-- SETTING セクション --}}
         <div class="sidebar-section">
             <div class="menu-label-header">SETTING</div>
@@ -140,4 +148,12 @@
     background: #b91c1c;
     color: #fff;
 }
+
+.pwa-install-btn {
+    width: 100%; padding: 12px 16px; background: linear-gradient(135deg, #2a1f0a 0%, #1a0f05 100%);
+    border: 1px solid #D4AF37; color: #D4AF37; border-radius: 8px;
+    cursor: pointer; font-size: 0.95rem; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: 0.3s;
+}
+.pwa-install-btn:hover { background: rgba(212,175,55,0.15); color: #e5c84a; }
 </style>

@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class SearchController extends BaseSearchController
 {
-    public function index(Request $request)
+    public function index(Request $request, ?string $tab = 'timeline')
     {
         // タイムラインデータ（キャストの投稿）
         $timelineData = [
@@ -27,18 +27,57 @@ class SearchController extends BaseSearchController
             ]
         ];
 
-        // キャスト一覧（$itemsに改名）
-        $items = [
+        // キャスト一覧（名前・タグで検索用）
+        $allItems = [
             ['id' => 1, 'name' => 'みさき', 'age' => 23, 'img' => asset('storage/mock/casts/1-1.png'), 'tags' => ['モデル系', 'お酒強い']],
             ['id' => 2, 'name' => '愛華', 'age' => 21, 'img' => asset('storage/mock/casts/2-1.png'), 'tags' => ['癒やし系', '女子大生']],
             ['id' => 3, 'name' => 'Rena', 'age' => 25, 'img' => asset('storage/mock/casts/3-1.png'), 'tags' => ['フリーランス', 'ハーフ系']],
         ];
 
+        $items = $this->filterShopSearchItems($allItems, $request);
+
+        $activeTab = 'pane-' . (in_array($tab, ['timeline', 'list', 'ai'], true) ? $tab : 'timeline');
+
         return $this->renderIndex([
             'guideMessage' => "ここでは気になるキャストを検索できるよ！\nスワイプして探してみてね。",
             'timelineData' => $timelineData,
-            'items'        => $items, // $items という名前で渡す
-            'activeTab'    => $request->query('tab', 'pane-timeline')
+            'items'        => $items,
+            'activeTab'    => $activeTab,
+            'searchTab'    => $tab,
         ]);
+    }
+
+    /**
+     * 一覧・検索：キーワード・業種などでフィルタ（モック用）
+     */
+    private function filterShopSearchItems(array $items, Request $request): array
+    {
+        $keyword = $request->query('keyword');
+        $keyword = is_string($keyword) ? trim($keyword) : '';
+        $industries = $request->query('industry', []);
+        $industries = is_array($industries) ? $industries : (is_string($industries) ? [$industries] : []);
+
+        return array_values(array_filter($items, function ($item) use ($keyword, $industries) {
+            if ($keyword !== '') {
+                $haystack = ($item['name'] ?? '') . ' ' . implode(' ', $item['tags'] ?? []);
+                if (mb_stripos($haystack, $keyword) === false) {
+                    return false;
+                }
+            }
+            if (!empty($industries)) {
+                $itemTags = $item['tags'] ?? [];
+                $match = false;
+                foreach ($industries as $ind) {
+                    if (in_array($ind, $itemTags, true)) {
+                        $match = true;
+                        break;
+                    }
+                }
+                if (!$match) {
+                    return false;
+                }
+            }
+            return true;
+        }));
     }
 }
