@@ -1,10 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Media Library')
+@section('title', 'Image Library')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/gallery.css') }}">
 @endpush
+
+@section('guide_message', '最大8枚。ガイドに沿って設定してください。')
 
 @section('content')
 <div class="animate-fadeIn flex flex-col h-full bg-[#0a0a0a]">
@@ -13,14 +15,13 @@
             <i class="fas fa-chevron-left"></i>
             <span class="text-sm">Back</span>
         </a>
-        <h2 class="text-lg serif-font gold-gradient m-0">Media Library</h2>
+        <h2 class="text-lg serif-font gold-gradient m-0">Image Library</h2>
         <button type="submit" form="gallery-form" class="text-gold text-sm font-semibold bg-transparent border-none cursor-pointer">Done</button>
     </div>
 
     <div class="flex-1 overflow-y-auto p-6 pb-32">
         <div class="mb-6">
             <h3 class="text-sm text-white font-semibold m-0">Edit Photos</h3>
-            <p class="text-xs text-gray-500 mt-1">最大8枚。ガイドに沿って設定してください。</p>
         </div>
 
         <form id="gallery-form" action="{{ route('shop.profile.update') }}" method="POST" enctype="multipart/form-data">
@@ -67,21 +68,6 @@
                         </div>
                     </div>
                 @endfor
-            </div>
-
-            {{-- Tips Section --}}
-            <div class="mt-8 glass-panel p-5 rounded-2xl border-gold/10">
-                <div class="flex items-start gap-4">
-                    <div class="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-sparkles text-gold"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm text-white font-semibold italic m-0">Luxe Tips</h4>
-                        <p class="text-xs text-gray-400 leading-relaxed mt-1 mb-0">
-                            高品質な写真は出会いの質を高めます。ガイドに沿った写真を揃えることで、より魅力的なプロフィールになります。
-                        </p>
-                    </div>
-                </div>
             </div>
         </form>
     </div>

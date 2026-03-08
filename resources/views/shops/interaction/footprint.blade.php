@@ -1,16 +1,18 @@
-<div class="section-label mb-4 text-xs font-bold opacity-50 uppercase tracking-widest">Visitor History</div>
-
-@forelse($footprints ?? [] as $fp)
-    <div class="interaction-card">
-        <img src="{{ asset('storage/mock/casts/'.$fp['id'].'-1.png') }}" class="avatar-sm">
-        <div class="info-sm">
-            <div class="name">{{ $fp['name'] }} ({{ $fp['age'] }})</div>
-            <div class="meta">{{ $fp['viewed_at'] }} に閲覧</div>
-        </div>
-        <a href="{{ route('shop.cast.show', $fp['id']) }}" class="btn-action-sm">
-            <i class="fas fa-chevron-right"></i>
-        </a>
+<a href="{{ route('cast.profile.show', $c['id']) }}" class="cast-list-card">
+    <div class="card-thumb">
+        <img src="{{ $c['img'] ?? asset('storage/mock/casts/'.$c['id'].'-1.png') }}" alt="{{ $c['name'] }}">
     </div>
-@empty
-    <div class="text-center py-20 text-sm opacity-40">足あとはありません。</div>
-@endforelse
+    <div class="card-info">
+        <div class="info-header">
+            <span class="name serif-font">{{ $c['name'] }}</span>
+            <span class="age numeric-font opacity-70">({{ $c['age'] }})</span>
+        </div>
+        <div class="info-sub opacity-70">
+            {{ $c['visited_at'] ?? '' }} に閲覧
+        </div>
+        <div class="info-specs numeric-font opacity-70">
+            {{ $c['pref'] ?? '' }}{{ $c['city'] ?? '' }}
+        </div>
+    </div>
+    <div class="card-arrow"><i class="fas fa-chevron-right"></i></div>
+</a>

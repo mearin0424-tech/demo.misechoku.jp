@@ -90,7 +90,7 @@
     justify-content: center;
 }
 
-/* --- Talk Tabs (一覧画面専用) --- */
+/* --- Talk Tabs（一覧画面で .talk-tabs を使う場合のみ。TALK は共通 sub-header を使用） --- */
 .talk-tabs {
     display: flex;
     width: 100%;
@@ -101,8 +101,8 @@
     z-index: 50;
 }
 
-.tab-item {
-    flex: 1; /* 各タブが均等に広がる */
+.talk-tabs .tab-item {
+    flex: 1;
     text-align: center;
     padding: 15px 0;
     color: #888;
@@ -113,13 +113,13 @@
     border-bottom: 2px solid transparent;
 }
 
-.tab-item.active {
-    color: var(--color-gold);
-    border-bottom: 2px solid var(--color-gold);
+.talk-tabs .tab-item.active {
+    color: var(--gold);
+    border-bottom: 2px solid var(--gold);
     background: rgba(212, 175, 55, 0.05);
 }
 
-/* 表示パネルの切り替え制御 */
+/* 表示パネルの切り替え制御（.talk-tabs 利用時用） */
 .talk-content-pane {
     display: none;
 }

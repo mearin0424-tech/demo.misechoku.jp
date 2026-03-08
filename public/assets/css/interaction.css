@@ -178,4 +178,30 @@
     margin-top: 8px;
 }
 
+/* --- キープ・足あとタブのリストと空状態 --- */
+#pane-keep .cast-list-card,
+#pane-footprint .cast-list-card {
+    margin-bottom: 12px;
+}
+
+#pane-keep .cast-list-card:last-child,
+#pane-footprint .cast-list-card:last-child {
+    margin-bottom: 0;
+}
+
+#pane-keep .no-data-wrapper,
+#pane-footprint .no-data-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 20px;
+    text-align: center;
+}
+
+#pane-keep .no-data-wrapper .no-data-msg,
+#pane-footprint .no-data-wrapper .no-data-msg {
+    margin-top: 8px;
+}
+
 .no-data-msg { text-align: center; padding: 50px 0; color: #888; }

@@ -84,11 +84,11 @@
 .btn-action-card.job .btn-action-label { color: var(--gold); }
 .btn-action-card.job .btn-action-text { color: var(--color-text-header); }
 .btn-action-card.manage {
-    background: linear-gradient(145deg, rgba(224, 70, 109, 0.12), rgba(184, 36, 74, 0.06));
-    border-color: rgba(224, 70, 109, 0.35);
-    color: #fff;
+    background: linear-gradient(145deg, rgba(212, 175, 55, 0.12), rgba(182, 122, 43, 0.06));
+    border-color: rgba(212, 175, 55, 0.35);
+    color: var(--color-text-header);
 }
-.btn-action-card.manage .btn-action-label { color: #e8a4b5; }
+.btn-action-card.manage .btn-action-label { color: var(--gold); }
 .btn-action-card.manage .btn-action-text { color: var(--color-text-header); }
 .btn-action-card .btn-action-text {
     font-size: 0.95rem;
@@ -103,7 +103,7 @@
     box-shadow: 0 8px 24px rgba(0,0,0,0.35);
 }
 .btn-action-card.job:hover { border-color: rgba(212, 175, 55, 0.55); }
-.btn-action-card.manage:hover { border-color: rgba(224, 70, 109, 0.55); }
+.btn-action-card.manage:hover { border-color: rgba(212, 175, 55, 0.55); }
 .btn-action-card:active { transform: translateY(0); }
 
 /* 汎用ボタン（モーダル・他ページ用） */
@@ -123,13 +123,13 @@
 }
 .btn-action i { font-size: 1rem; }
 .btn-action.job {
-    background: linear-gradient(135deg, var(--color-gold), #b67a2b);
+    background: linear-gradient(135deg, var(--gold), #b67a2b);
     color: #120505;
     border: none;
 }
 .btn-action.manage {
-    background: linear-gradient(135deg, #e0466d, #b8244a);
-    color: #fff;
+    background: linear-gradient(135deg, var(--gold), #b67a2b);
+    color: #120505;
     border: none;
 }
 .btn-action:hover {
@@ -142,11 +142,21 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
-/* 書類管理の復元 */
+/* ギャラリー編集リンク（ゴールドで統一） */
+.gallery-edit-section a[href] {
+    color: var(--gold);
+    text-decoration: none;
+}
+.gallery-edit-section a[href]:hover {
+    opacity: 0.85;
+    text-decoration: underline;
+}
+
+/* 書類管理（ゴールドで調和） */
 .section-title-original {
     font-size: 1rem;
-    color: #aaa;
-    border-bottom: 1px solid #333;
+    color: var(--gold);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.3);
     padding-bottom: 5px;
     margin-bottom: 15px;
     font-family: var(--font-sans);
@@ -157,14 +167,16 @@
     align-items: center;
     padding: 12px 0;
     border-bottom: 1px solid #222;
+    transition: opacity 0.2s ease;
 }
-.doc-icon { font-size: 1.2rem; color: #666; margin-right: 15px; }
+.doc-item:hover { opacity: 0.9; }
+.doc-icon { font-size: 1.2rem; color: var(--gold); margin-right: 15px; opacity: 0.9; }
 .doc-info { flex: 1; }
 .doc-name { display: block; font-weight: bold; font-size: 0.9rem; color: #eee; }
 .doc-status { font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; }
 .doc-status.done { background: rgba(0, 255, 0, 0.1); color: #00ff00; }
 .doc-status.pending { background: rgba(255, 0, 0, 0.1); color: #ff4d4d; }
-.doc-item .arrow { color: #444; font-size: 0.8rem; }
+.doc-item .arrow { color: var(--gold); font-size: 0.8rem; opacity: 0.8; }
 
 /* モーダル */
 .modal-profile-custom {

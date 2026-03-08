@@ -125,7 +125,7 @@
             {{-- ギャラリー：閲覧専用（編集画面への入り口） --}}
             <div class="gallery-edit-section animate-fadeIn" style="margin-top:35px;">
                 <div class="flex justify-between items-center mb-4 px-2">
-                    <h3 class="text-xs uppercase tracking-widest text-gold font-bold">Media Gallery</h3>
+                    <h3 class="text-xs uppercase tracking-widest text-gold font-bold">Image Library</h3>
                     <a href="{{ route('shop.profile.gallery.edit') }}" class="text-[10px] text-gray-400 underline">編集する</a>
                 </div>
                 
