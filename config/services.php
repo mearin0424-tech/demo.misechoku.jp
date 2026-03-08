@@ -57,4 +57,16 @@ return [
         'apikey_ip' => env('GOOGLE_MAP_API_IP'),
 
      ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Web Push (PWA 通知)
+    |--------------------------------------------------------------------------
+    | VAPID キーは php artisan push:vapid で生成し .env に設定してください。
+    */
+    'push' => [
+        'vapid_public' => env('VAPID_PUBLIC_KEY'),
+        'vapid_private' => env('VAPID_PRIVATE_KEY'),
+        'subject' => env('VAPID_SUBJECT', 'mailto:admin@' . (parse_url(env('APP_URL', 'http://localhost'), PHP_URL_HOST) ?: 'localhost')),
+    ],
 ];

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>接客タイプ診断</title>
+    
+    <meta property="og:title" content="接客タイプ診断" />
+    <meta property="og:description" content="あなたにピッタリな接客スタイルは？12の質問であなたの強みを診断します！" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="images/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+    <div id="shindan-app">
+
+        <button class="btn-back-to-top">トップに戻る</button> 
+
+        <div id="start-screen">
+            <h1 class="title"><span>接客タイプ診断</span></h1>
+            <p class="subtitle">What is Your Hospitality Style</p>
+            <p class="description">
+                あなたにピッタリな接客スタイルは？<br>
+                12の質問であなたの強みを診断します！<br>
+                ぴよぴよぴよ～
+            </p>
+            
+            <img src="images/top_image.png" alt="トップ画像" id="top-image">
+            <br><br>
+            <button id="start-btn" disabled>読み込み中...</button>
+
+            <button type="button" id="misechoku-btn" onclick="location.href='../index.php'">
+                ミセチョクモックサイトに戻る
+            </button>
+
+            <button id="notification-test-btn" style="position: static; display: none; margin: 15px auto 0 auto; width: 100%; max-width: 300px;">
+                通知テスト
+            </button>
+            <textarea id="token-display-area" style="display: none; width: 100%; margin-top: 20px; box-sizing: border-box; font-size: 12px; border: 1px solid #c5b5e6; border-radius: 8px; padding: 10px;" rows="4" readonly></textarea>
+            <p id="token-info" style="display: none; font-size: 0.9em; color: #6A4C9C; text-align: center; margin-top: 10px; line-height: 1.6;">
+                表示されたトークンを開発者に連携してください。<br>アプリを閉じて、通知を待ってね。
+            </p>
+        </div>
+
+        <form id="shindan-form">
+            <h2 class="form-title">接客タイプ診断</h2>
+            <div id="loading">診断データを読み込んでいます...</div>
+            <button type="submit" id="submit-btn" style="display:none;">診断する</button>
+        </form>
+
+        <div id="result">
+            <h2>あなたの接客タイプは...</h2>
+            <h3 id="result-type-title"></h3> 
+            
+            <img id="result-image" src="" alt="診断結果イラスト" style="display: none;">
+            
+            <div class="result-section">
+                <p class="section-title">あなたの強み</p>
+                <div id="result-strength" class="result-content"></div>
+
+                <p class="section-title">ニガテかも</p>
+                <div id="result-weakness" class="result-content"></div> 
+            </div>
+            
+            <p id="result-description" class="detail-description"></p>
+
+            <div id="result-breakdown"></div>
+            <div id="share-buttons">
+                <a href="#" id="share-x" class="share-btn" target="_blank">Xでシェア</a>
+                <a href="#" id="share-line" class="share-btn" target="_blank">LINEでシェア</a>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
+
+    <script src="pwa-loader.js"></script>
+
+</body>
+</html>

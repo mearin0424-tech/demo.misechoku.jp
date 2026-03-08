@@ -72,3 +72,51 @@ function isCacheable(url) {
   const path = url.pathname;
   return path.startsWith('/assets/') || path === '/manifest.json' || path === '/';
 }
+
+// --- Push 通知: サーバーから届いたメッセージをデスクトップ通知で表示 ---
+self.addEventListener('push', function (event) {
+  if (!event.data) return;
+  let data = { title: 'ミセチョク', body: '', url: '/' };
+  try {
+    data = { ...data, ...event.data.json() };
+  } catch (_) {
+    data.body = event.data.text();
+  }
+
+  const options = {
+    body: data.body,
+    icon: self.location.origin + '/assets/images/pwa/icon-192.svg',
+    badge: self.location.origin + '/assets/images/pwa/icon-192.svg',
+    data: { url: data.url || '/' },
+    tag: 'misechoku-notification',
+    renotify: true,
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options).then(function () {
+      const badge = typeof data.badge === 'number' ? data.badge : 1;
+      if (self.navigator && self.navigator.setAppBadge) {
+        return self.navigator.setAppBadge(badge).catch(function () {});
+      }
+    })
+  );
+});
+
+// 通知クリックでアプリを開く
+self.addEventListener('notificationclick', function (event) {
+  event.notification.close();
+  const url = event.notification.data && event.notification.data.url ? event.notification.data.url : '/';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clientList) {
+      for (let i = 0; i < clientList.length; i++) {
+        if (clientList[i].url.indexOf(self.location.origin) === 0 && 'focus' in clientList[i]) {
+          clientList[i].navigate(url);
+          return clientList[i].focus();
+        }
+      }
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(self.location.origin + url);
+      }
+    })
+  );
+});

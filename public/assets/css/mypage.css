@@ -222,6 +222,30 @@
     color: var(--gold-light);
 }
 
+a.btn-outline-gold {
+    text-decoration: none;
+    display: inline-block;
+}
+
+/* キャストマイページ：プロフィール本文（お店の overview と同位置） */
+.mypage-cast-specs {
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+    color: var(--color-text);
+    opacity: 0.95;
+}
+.mypage-cast-specs .spec-inline {
+    display: block;
+}
+.mypage-cast-intro {
+    margin-bottom: 16px;
+}
+.mypage-cast-other {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 /* プロフィール情報 */
 .profile-info-section {
     padding: 20px 0;
@@ -742,6 +766,22 @@
     color: var(--gold);
 }
 .cast-mypage-menu-item.is-current i {
+    color: var(--gold);
+}
+
+.cast-mypage-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--gold);
+    font-size: 0.9rem;
+    text-decoration: none;
+    margin-bottom: 16px;
+    padding: 4px 0;
+    transition: opacity 0.2s ease;
+}
+.cast-mypage-back-link:hover {
+    opacity: 0.9;
     color: var(--gold);
 }
 

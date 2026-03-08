@@ -5,14 +5,6 @@
 <div class="cast-mypage-menu-section {{ $fullWidth ? 'cast-mypage-menu-section--full-width' : '' }}">
     <div class="mypage-section mypage-quick-actions">
         <h2 class="mypage-actions-title">メニュー</h2>
-        <a href="{{ route('cast.mypage.index') }}" class="btn-action-card profile {{ $current === 'profile' ? 'is-current' : '' }}">
-            <span class="btn-action-icon-wrap"><i class="fas fa-user"></i></span>
-            <span class="btn-action-body">
-                <span class="btn-action-label">PROFILE</span>
-                <span class="btn-action-text">プロフィール確認</span>
-            </span>
-            <i class="fas fa-chevron-right btn-action-arrow"></i>
-        </a>
         <a href="{{ route('cast.mypage.employment') }}" class="btn-action-card job {{ $current === 'employment' ? 'is-current' : '' }}">
             <span class="btn-action-icon-wrap"><i class="fas fa-briefcase"></i></span>
             <span class="btn-action-body">
@@ -29,15 +21,7 @@
             </span>
             <i class="fas fa-chevron-right btn-action-arrow"></i>
         </a>
-        <a href="{{ route('cast.mypage.reviews') }}" class="btn-action-card review {{ $current === 'reviews' ? 'is-current' : '' }}">
-            <span class="btn-action-icon-wrap"><i class="fas fa-star"></i></span>
-            <span class="btn-action-body">
-                <span class="btn-action-label">REVIEWS</span>
-                <span class="btn-action-text">レビュー一覧</span>
-            </span>
-            <i class="fas fa-chevron-right btn-action-arrow"></i>
-        </a>
-        <a href="https://mearin0424-tech.github.io/personality-test/personality-test.html" class="btn-action-card personality-test" target="_blank" rel="noopener noreferrer">
+        <a href="{{ url('personality-test/personality-test.html') }}" class="btn-action-card personality-test">
             <span class="btn-action-icon-wrap"><i class="fas fa-clipboard-list"></i></span>
             <span class="btn-action-body">
                 <span class="btn-action-label">PERSONALITY</span>

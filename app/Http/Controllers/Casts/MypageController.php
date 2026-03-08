@@ -12,13 +12,19 @@ class MypageController extends Controller
     public function index()
     {
         $cast = $this->getCastMockData();
-        // プロフィール画面にはレビューを出さず、mypage/reviews で表示する
+        $reviewCount = count($cast['reviews']);
+        $reviewAvg = $reviewCount > 0
+            ? round(array_sum(array_column($cast['reviews'], 'score')) / $reviewCount, 1)
+            : 0;
+        // プロフィール画面にはレビュー本文を出さず、★カードから一覧へ遷移
         $castForProfile = $cast;
         $castForProfile['reviews'] = [];
         return view('casts.mypage.index', [
-            'pageId' => 'mypage',
-            'cast'   => $castForProfile,
-            'isOwn'  => true,
+            'pageId'       => 'mypage',
+            'cast'         => $castForProfile,
+            'isOwn'        => true,
+            'review_avg'   => $reviewAvg,
+            'review_count' => $reviewCount,
         ]);
     }
 

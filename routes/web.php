@@ -62,6 +62,17 @@ Route::get('/maintenance', function () {
 
 Route::get('/logout', [CastLogin::class, 'logout'])->name('auth.logout');
 
+/*
+|--------------------------------------------------------------------------
+| PWA Push 通知 API（同一オリジン・CSRF あり）
+|--------------------------------------------------------------------------
+*/
+Route::prefix('api/push')->name('push.')->group(function () {
+    Route::get('vapid-public-key', [\App\Http\Controllers\Api\PushController::class, 'vapidPublicKey'])->name('vapid');
+    Route::post('subscribe', [\App\Http\Controllers\Api\PushController::class, 'subscribe'])->name('subscribe');
+    Route::post('send-test', [\App\Http\Controllers\Api\PushController::class, 'sendTest'])->name('send-test');
+});
+
 Route::prefix('shop')->name('shop.')->group(function () {
     Route::get('/login', [ShopLogin::class, 'showLoginForm'])->name('login');
     Route::post('/login', [ShopLogin::class, 'login']);

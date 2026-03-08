@@ -10,9 +10,10 @@
 @section('content')
 <div class="content-wrapper animate-fadeIn">
     <div class="cast-mypage-sub-page">
-        @include('casts.mypage.parts.menu', ['current' => 'employment'])
-
         <section class="mypage-area">
+            <a href="{{ route('cast.mypage.index') }}" class="cast-mypage-back-link">
+                <i class="fas fa-chevron-left"></i> マイページへ戻る
+            </a>
             <h1 class="mypage-page-title serif-font">採用状況</h1>
             <div class="mypage-detail-box">
                 <div class="mypage-section">
