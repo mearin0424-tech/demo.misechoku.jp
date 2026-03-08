@@ -532,6 +532,12 @@
     box-sizing: border-box;
 }
 
+/* ひとこと編集モーダル：画面上部に表示 */
+.modal-word-edit.mypage-modal-overlay {
+    align-items: flex-start;
+    padding-top: min(18vh, 120px);
+}
+
 .mypage-modal-preview-img {
     max-width: 90%;
     max-height: 90%;

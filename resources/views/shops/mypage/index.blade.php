@@ -127,7 +127,7 @@
 <div id="modal-word" class="mypage-modal-overlay modal-word-edit" style="display:none;">
     <div class="mypage-modal-panel glass-panel">
         <h3 class="mypage-modal-title serif-font">ひとこと編集</h3>
-        <textarea id="word-input" rows="3" class="mypage-modal-textarea" placeholder="ひとことを入力..."></textarea>
+        <textarea id="word-input" rows="3" class="mypage-modal-textarea" placeholder="新人大歓迎！"></textarea>
         <div class="mypage-modal-actions">
             <button type="button" class="btn-action btn-action-secondary" onclick="closeWordEdit()">戻る</button>
             <button type="button" class="btn-action btn-action-primary" onclick="saveWord()">保存</button>
