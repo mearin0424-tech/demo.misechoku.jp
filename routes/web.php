@@ -21,6 +21,7 @@ use App\Http\Controllers\Shops\InteractionController as ShopInteraction;
 
 // キャスト側
 use App\Http\Controllers\Casts\ProfileController as CastProfile;
+use App\Http\Controllers\Casts\MypageController as CastMypage;
 use App\Http\Controllers\Casts\SearchController as CastSearch;
 
 /*
@@ -92,6 +93,7 @@ Route::prefix('shop')->name('shop.')->group(function () {
     // プロフィール（キャスト用編集＝shop/profile/edit、店舗用は store サブパス）
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [ShopProfile::class, 'show'])->name('show');
+        Route::get('/cast/{id}', [CastProfile::class, 'show'])->name('cast.show');
         Route::get('/edit', [CastProfile::class, 'edit'])->name('edit');
         Route::post('/update', [CastProfile::class, 'update'])->name('update');
         Route::get('/store/edit', [ShopProfile::class, 'edit'])->name('store.edit');
@@ -131,9 +133,8 @@ Route::prefix('cast')->name('cast.')->group(function () {
     Route::get('/profile/{id}', [CastProfile::class, 'show'])->name('profile.show');
     Route::get('/search', [CastSearch::class, 'index'])->name('search.index');
     
-    // フッターエラー回避用の暫定ルート
     Route::get('/interaction', [ShopInteraction::class, 'index'])->name('interaction.index');
-    Route::get('/mypage', [ShopMypage::class, 'index'])->name('mypage.index');
+    Route::get('/mypage', [CastMypage::class, 'index'])->name('mypage.index');
 
     Route::prefix('talk')->name('talk.')->group(function () {
         Route::get('/', [TalkController::class, 'index'])->name('index');

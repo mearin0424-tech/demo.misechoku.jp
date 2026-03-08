@@ -12,7 +12,7 @@
     $isCast = request()->is('cast/*');
     $requestTabText = $isCast ? 'オファー' : 'リクエスト';
     $targetRoute = $isCast ? 'cast.talk.room' : 'shop.talk.room';
-    $profileRoute = $isCast ? 'cast.users.show' : 'profile.show';
+    // $profileRoute はコントローラーから渡される（キャスト→お店詳細、お店→キャスト詳細）
 @endphp
 
 <div class="has-sub-header">
@@ -60,7 +60,7 @@
                         <div class="request-main">
                             <img src="{{ asset($talk['avatar']) }}" class="request-img">
                             <div class="request-content">
-                                <div class="name">{{ $talk['name'] }} ({{ $talk['age'] }})</div>
+                                <div class="name">{{ $talk['name'] }}@if(isset($talk['age']) && $talk['age'] !== null) ({{ $talk['age'] }})@endif</div>
                                 <div class="request-msg-preview">{{ $talk['last_message'] }}</div>
                             </div>
                         </div>

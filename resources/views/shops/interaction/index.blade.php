@@ -30,7 +30,7 @@
                 </div>
             @else
                 @foreach($keepCasts as $c)
-                    @include('shops.interaction.keep', ['c' => $c])
+                    @include('shops.interaction.keep', ['c' => $c, 'profileRoute' => $profileRoute ?? 'cast.profile.show'])
                 @endforeach
             @endif
         </div>
@@ -51,7 +51,7 @@
                     </div>
                 @else
                     @foreach($likeCasts as $c)
-                        @include('shops.interaction.like', ['c' => $c])
+                        @include('shops.interaction.like', ['c' => $c, 'profileRoute' => $profileRoute ?? 'cast.profile.show'])
                     @endforeach
                 @endif
             </div>
@@ -66,7 +66,7 @@
                 </div>
             @else
                 @foreach($footprintCasts as $c)
-                    @include('shops.interaction.footprint', ['c' => $c])
+                    @include('shops.interaction.footprint', ['c' => $c, 'profileRoute' => $profileRoute ?? 'cast.profile.show'])
                 @endforeach
             @endif
         </div>

@@ -85,14 +85,30 @@ class ProfileController extends Controller
             ->withInput();
     }
 
+    /**
+     * プロフィール詳細表示
+     * - cast/* から呼ばれた場合: お店のプロフィール（キャストがお店を閲覧）
+     * - shop/* から呼ばれた場合: キャストのプロフィール（お店がキャストを閲覧）
+     */
     public function show($id = null) {
-        $castId = $id ?? 1;
-        // ホームのスワイプと同じ画像パス（1枚目〜6枚目まで。最大6枚登録）
+        $id = $id ?? 1;
+
+        if (request()->is('cast/*')) {
+            // キャスト側 → お店の情報を表示
+            $shop = $this->getShopMock($id);
+            return view('shops.profile.show', [
+                'pageId' => 'shop_info',
+                'shop'   => $shop,
+                'isOwn'  => false,
+            ]);
+        }
+
+        // お店側 → キャストの情報を表示
+        $castId = $id;
         $images = [];
         for ($i = 1; $i <= 6; $i++) {
             $images[] = asset("storage/mock/casts/{$castId}-{$i}.png");
         }
-        // 店舗側から見るキャスト詳細（編集フォームと同じ項目をモックで表示）
         $cast = [
             'id'             => $castId,
             'nickname'       => '愛華',
@@ -134,5 +150,17 @@ class ProfileController extends Controller
             'pageId' => 'cast_detail',
             'cast'   => $cast
         ]);
+    }
+
+    /** お店モック（キャストがお店を閲覧する用） */
+    private function getShopMock(int $id): array
+    {
+        $shops = [
+            1 => ['name' => 'CLUB ETERNITY', 'word' => '最高の一夜を。', 'main_img' => asset('storage/mock/shops/out-1.png'), 'area' => '東京都港区六本木', 'concept' => "六本木駅から徒歩3分。\n急募・即日払い対応です。", 'review_avg' => 4.5, 'review_cnt' => 80, 'sub_images' => [asset('storage/mock/shops/inside-1.png'), asset('storage/mock/shops/inside-2.png'), asset('storage/mock/shops/inside-3.png')]],
+            2 => ['name' => 'THE GOLDSTONE', 'word' => '週末イベント大募集！', 'main_img' => asset('storage/mock/shops/out-2.png'), 'area' => '東京都中央区', 'concept' => "ノルマなし・送りあり。\n働きやすい環境です。", 'review_avg' => 4.8, 'review_cnt' => 124, 'sub_images' => [asset('storage/mock/shops/inside-1.png'), asset('storage/mock/shops/inside-2.png'), asset('storage/mock/shops/inside-3.png')]],
+            3 => ['name' => 'Club Luxurious', 'word' => '最高級の空間で、最高の出会いを。', 'main_img' => asset('storage/mock/shops/out-1.png'), 'area' => '東京都港区六本木', 'concept' => "六本木駅から徒歩3分。落ち着いた雰囲気の高級ラウンジです。\n選び抜かれたキャストと共に、至福のひとときを提供いたします。", 'review_avg' => 4.8, 'review_cnt' => 124, 'sub_images' => [asset('storage/mock/shops/inside-1.png'), asset('storage/mock/shops/inside-2.png'), asset('storage/mock/shops/inside-3.png')]],
+            4 => ['name' => 'BAR STELLA', 'word' => '落ち着いた大人の空間', 'main_img' => asset('storage/mock/shops/out-2.png'), 'area' => '東京都渋谷区', 'concept' => "カジュアルな雰囲気でリラックスして働けます。", 'review_avg' => 4.3, 'review_cnt' => 56, 'sub_images' => [asset('storage/mock/shops/inside-1.png'), asset('storage/mock/shops/inside-2.png'), asset('storage/mock/shops/inside-3.png')]],
+        ];
+        return $shops[$id] ?? $shops[1];
     }
 }

@@ -39,10 +39,6 @@
             <a href="javascript:history.back()" class="btn-back">
                 <i class="fas fa-chevron-left"></i>
             </a>
-        @else
-            <a href="{{ route(request()->is('cast/*') ? 'cast.home' : 'shop.home') }}" class="header-demo-btn" aria-label="デモトップへ">
-                <span class="header-demo-btn__text">DEMO</span>
-            </a>
         @endif
     </div>
 

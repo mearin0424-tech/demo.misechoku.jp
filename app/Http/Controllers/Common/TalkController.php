@@ -13,94 +13,52 @@ class TalkController extends Controller
      */
     public function index()
     {
-        $isCast = request()->is('cast/*');
-    
-        // 相手のプロフィールを表示するためのルート名
-        // キャストがログイン中ならユーザー詳細へ、店舗/ユーザーならキャスト詳細へ
-        $profileRoute = $isCast ? 'cast.user.show' : 'shop.cast.show';
-        
-        // 「やり取り中」のテストデータ
-        $ongoingTalks = [
-        [
-            'partner_id' => 1,
-            'name' => 'みさき',
-            'avatar' => 'storage/mock/casts/1-1.png',
-            'last_message' => '本日はありがとうございました！またお待ちしております。',
-            'last_time' => '10:25',
-            'sort_key' => Carbon::today()->setHour(10)->setMinute(25),
-            'unread_count' => 0,
-            'last_message_by_me' => true, // 自分が送った
-            'is_read' => true,           // 既読
-        ],
-        [
-            'partner_id' => 2,
-            'name' => '愛華',
-            'avatar' => 'storage/mock/casts/2-1.png',
-            'last_message' => '了解いたしました！調整してみますね。',
-            'last_time' => '昨日',
-            'sort_key' => Carbon::yesterday(),
-            'unread_count' => 0,
-            'last_message_by_me' => true, // 自分が送った
-            'is_read' => false,          // まだ未読
-        ],
-        ];
+        $isCastPortal = request()->is('cast/*');
 
-        // 「リクエスト / オファー」のデータ (ID 1〜4)
-    $requestTalks = [
-        [
-            'partner_id' => 1,
-            'name' => 'みさき',
-            'age' => 30,
-            'location' => '六本木',
-            'avatar' => 'storage/mock/casts/1-1.png',
-            'last_message' => '初めまして！今夜空いていますか？',
-            'last_time' => '1時間前',
-            'unread_count' => 1,
-        ],
-        [
-            'partner_id' => 2,
-            'name' => '愛華',
-            'age' => 30,
-            'location' => '渋谷',
-            'avatar' => 'storage/mock/casts/2-1.png',
-            'last_message' => '初めまして！今夜空いていますか？',
-            'last_time' => '1時間前',
-            'unread_count' => 1,
-        ],
-        [
-            'partner_id' => 3,
-            'name' => 'Rena',
-            'age' => 30,
-            'location' => '新宿',
-            'avatar' => 'storage/mock/casts/3-1.png',
-            'last_message' => '初めまして！今夜空いていますか？',
-            'last_time' => '1時間前',
-            'unread_count' => 1,
-        ],
-        [
-            'partner_id' => 4,
-            'name' => 'Yumi',
-            'age' => 28,
-            'location' => '恵比寿',
-            'avatar' => 'storage/mock/casts/4-1.png',
-            'last_message' => '初めまして！今夜空いていますか？',
-            'last_time' => '2時間前',
-            'unread_count' => 1,
-        ],
-    ];
+        if ($isCastPortal) {
+            // キャスト側：相手はお店 → お店のプロフィールへ
+            $profileRoute = 'cast.profile.show';
+            $ongoingTalks = [
+                ['partner_id' => 1, 'name' => 'CLUB ETERNITY', 'avatar' => 'storage/mock/shops/out-1.png', 'last_message' => '本日はありがとうございました！またお待ちしております。', 'last_time' => '10:25', 'sort_key' => Carbon::today()->setHour(10)->setMinute(25), 'unread_count' => 0, 'last_message_by_me' => true, 'is_read' => true],
+                ['partner_id' => 2, 'name' => 'THE GOLDSTONE', 'avatar' => 'storage/mock/shops/out-2.png', 'last_message' => '了解いたしました！調整してみますね。', 'last_time' => '昨日', 'sort_key' => Carbon::yesterday(), 'unread_count' => 0, 'last_message_by_me' => true, 'is_read' => false],
+            ];
+            $requestTalks = [
+                ['partner_id' => 1, 'name' => 'CLUB ETERNITY', 'age' => null, 'location' => '六本木', 'avatar' => 'storage/mock/shops/out-1.png', 'last_message' => 'オファーが届きました。週末の出勤いかがですか？', 'last_time' => '1時間前', 'unread_count' => 1],
+                ['partner_id' => 2, 'name' => 'THE GOLDSTONE', 'age' => null, 'location' => '中央区', 'avatar' => 'storage/mock/shops/out-2.png', 'last_message' => '急募です。本日21時から可能な方いらっしゃいますか？', 'last_time' => '1時間前', 'unread_count' => 1],
+            ];
+        } else {
+            // お店側：相手はキャスト → キャストのプロフィールへ
+            $profileRoute = 'shop.profile.cast.show';
+            $ongoingTalks = [
+                ['partner_id' => 1, 'name' => 'みさき', 'avatar' => 'storage/mock/casts/1-1.png', 'last_message' => '本日はありがとうございました！またお待ちしております。', 'last_time' => '10:25', 'sort_key' => Carbon::today()->setHour(10)->setMinute(25), 'unread_count' => 0, 'last_message_by_me' => true, 'is_read' => true],
+                ['partner_id' => 2, 'name' => '愛華', 'avatar' => 'storage/mock/casts/2-1.png', 'last_message' => '了解いたしました！調整してみますね。', 'last_time' => '昨日', 'sort_key' => Carbon::yesterday(), 'unread_count' => 0, 'last_message_by_me' => true, 'is_read' => false],
+            ];
+            $requestTalks = [
+                ['partner_id' => 1, 'name' => 'みさき', 'age' => 30, 'location' => '六本木', 'avatar' => 'storage/mock/casts/1-1.png', 'last_message' => '初めまして！今夜空いていますか？', 'last_time' => '1時間前', 'unread_count' => 1],
+                ['partner_id' => 2, 'name' => '愛華', 'age' => 30, 'location' => '渋谷', 'avatar' => 'storage/mock/casts/2-1.png', 'last_message' => '初めまして！今夜空いていますか？', 'last_time' => '1時間前', 'unread_count' => 1],
+                ['partner_id' => 3, 'name' => 'Rena', 'age' => 30, 'location' => '新宿', 'avatar' => 'storage/mock/casts/3-1.png', 'last_message' => '初めまして！今夜空いていますか？', 'last_time' => '1時間前', 'unread_count' => 1],
+                ['partner_id' => 4, 'name' => 'Yumi', 'age' => 28, 'location' => '恵比寿', 'avatar' => 'storage/mock/casts/4-1.png', 'last_message' => '初めまして！今夜空いていますか？', 'last_time' => '2時間前', 'unread_count' => 1],
+            ];
+        }
 
-    $ongoingTalks = collect($ongoingTalks)->sortByDesc('sort_key')->values()->all();
-    $requestTalks = collect($requestTalks)->sortByDesc('sort_key')->values()->all();
+        $ongoingTalks = collect($ongoingTalks)->sortByDesc('sort_key')->values()->all();
+        $requestTalks = collect($requestTalks)->sortByDesc('sort_key')->values()->all();
 
-    return view('common.talk.index', compact('ongoingTalks', 'requestTalks', 'profileRoute'));
+        return view('common.talk.index', compact('ongoingTalks', 'requestTalks', 'profileRoute'));
     }
     /**
      * トークルーム
      */
     public function room($id)
     {
-        // 本来はIDから相手の名前を取得（モックでは仮定）
-        $partnerName = ($id == 1) ? "愛華" : "ゲスト"; 
+        $isCastPortal = request()->is('cast/*');
+        if ($isCastPortal) {
+            $names = [1 => 'CLUB ETERNITY', 2 => 'THE GOLDSTONE', 3 => 'Club Luxurious', 4 => 'BAR STELLA'];
+            $partnerName = $names[$id] ?? 'お店';
+        } else {
+            $names = [1 => '愛華', 2 => 'みさき', 3 => 'Rena', 4 => 'Yumi'];
+            $partnerName = $names[$id] ?? 'ゲスト';
+        }
 
         $messages = [
             (object)[

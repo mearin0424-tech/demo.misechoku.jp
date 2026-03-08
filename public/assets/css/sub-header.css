@@ -1,7 +1,9 @@
-/* --- サブヘッダー（タブ）：グローバルヘッダー直下・main最上部にぴったり --- */
+/* --- サブヘッダー（タブ）：グローバルヘッダー直下にぴったり ---
+   ※ content-wrapper に transform があるため fixed の基準はその親。
+   top: 0 で親（= main 直下＝ヘッダー直下）の先頭に合わせる --- */
 .sub-header-wrapper {
     position: fixed;
-    top: var(--header-height);
+    top: 0;
     left: 50%;
     transform: translateX(-50%);
     width: 100%;

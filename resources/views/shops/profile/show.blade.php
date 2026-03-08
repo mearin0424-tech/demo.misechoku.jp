@@ -26,7 +26,9 @@
     </div>
 
     <div class="profile-actions p-4 flex gap-3">
+        @if($isOwn)
         <a href="{{ route('shop.recruits.show') }}" class="btn-gold flex-1 justify-center py-3 rounded-lg font-bold text-center decoration-none">求人票を見る</a>
+        @endif
         <a href="#" class="btn-outline-gold flex-1 justify-center py-3 rounded-lg border border-gold text-gold text-center decoration-none">お問合せ</a>
     </div>
 
