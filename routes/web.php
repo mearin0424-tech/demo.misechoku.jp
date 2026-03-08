@@ -90,10 +90,12 @@ Route::prefix('shop')->name('shop.')->group(function () {
         Route::get('/like', [ShopInteraction::class, 'like'])->name('like');
     });
 
+    // キャストのプロフィール閲覧（店舗から見る）
+    Route::get('/castprofileview/{id}', [CastProfile::class, 'show'])->name('castprofileview.show');
+
     // プロフィール（キャスト用編集＝shop/profile/edit、店舗用は store サブパス）
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [ShopProfile::class, 'show'])->name('show');
-        Route::get('/cast/{id}', [CastProfile::class, 'show'])->name('cast.show');
         Route::get('/edit', [CastProfile::class, 'edit'])->name('edit');
         Route::post('/update', [CastProfile::class, 'update'])->name('update');
         Route::get('/store/edit', [ShopProfile::class, 'edit'])->name('store.edit');
@@ -130,7 +132,8 @@ Route::prefix('cast')->name('cast.')->group(function () {
     Route::get('/home', [ShopHome::class, 'index'])->name('home');
     Route::get('/profile/edit', [CastProfile::class, 'edit'])->name('profile.edit');
     Route::post('/profile/update', [CastProfile::class, 'update'])->name('profile.update');
-    Route::get('/profile/{id}', [CastProfile::class, 'show'])->name('profile.show');
+    Route::get('/shopprofileview/{id}', [CastProfile::class, 'show'])->name('shopprofileview.show');
+    Route::redirect('/profile/{id}', '/cast/shopprofileview/{id}')->name('profile.show.redirect');
     Route::get('/search', [CastSearch::class, 'index'])->name('search.index');
     
     Route::get('/interaction', [ShopInteraction::class, 'index'])->name('interaction.index');

@@ -1,4 +1,4 @@
-@php $profileRoute = $profileRoute ?? 'cast.profile.show'; @endphp
+@php $profileRoute = $profileRoute ?? 'shop.castprofileview.show'; @endphp
 <a href="{{ route($profileRoute, $c['id']) }}" class="cast-list-card">
     <div class="card-thumb">
         <img src="{{ $c['img'] ?? asset('storage/mock/casts/'.$c['id'].'-1.png') }}" alt="{{ $c['name'] }}">

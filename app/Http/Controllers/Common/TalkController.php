@@ -17,7 +17,7 @@ class TalkController extends Controller
 
         if ($isCastPortal) {
             // キャスト側：相手はお店 → お店のプロフィールへ
-            $profileRoute = 'cast.profile.show';
+            $profileRoute = 'cast.shopprofileview.show';
             $ongoingTalks = [
                 ['partner_id' => 1, 'name' => 'CLUB ETERNITY', 'avatar' => 'storage/mock/shops/out-1.png', 'last_message' => '本日はありがとうございました！またお待ちしております。', 'last_time' => '10:25', 'sort_key' => Carbon::today()->setHour(10)->setMinute(25), 'unread_count' => 0, 'last_message_by_me' => true, 'is_read' => true],
                 ['partner_id' => 2, 'name' => 'THE GOLDSTONE', 'avatar' => 'storage/mock/shops/out-2.png', 'last_message' => '了解いたしました！調整してみますね。', 'last_time' => '昨日', 'sort_key' => Carbon::yesterday(), 'unread_count' => 0, 'last_message_by_me' => true, 'is_read' => false],
@@ -28,7 +28,7 @@ class TalkController extends Controller
             ];
         } else {
             // お店側：相手はキャスト → キャストのプロフィールへ
-            $profileRoute = 'shop.profile.cast.show';
+            $profileRoute = 'shop.castprofileview.show';
             $ongoingTalks = [
                 ['partner_id' => 1, 'name' => 'みさき', 'avatar' => 'storage/mock/casts/1-1.png', 'last_message' => '本日はありがとうございました！またお待ちしております。', 'last_time' => '10:25', 'sort_key' => Carbon::today()->setHour(10)->setMinute(25), 'unread_count' => 0, 'last_message_by_me' => true, 'is_read' => true],
                 ['partner_id' => 2, 'name' => '愛華', 'avatar' => 'storage/mock/casts/2-1.png', 'last_message' => '了解いたしました！調整してみますね。', 'last_time' => '昨日', 'sort_key' => Carbon::yesterday(), 'unread_count' => 0, 'last_message_by_me' => true, 'is_read' => false],

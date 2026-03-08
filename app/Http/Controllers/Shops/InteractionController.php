@@ -23,7 +23,7 @@ class InteractionController extends Controller
             $footprintCasts = [
                 ['id' => 3, 'name' => 'Club Luxurious', 'pref' => '東京都', 'city' => '港区', 'img' => asset('storage/mock/shops/out-1.png'), 'visited_at' => '2026-01-02 18:00:00'],
             ];
-            $profileRoute = 'cast.profile.show';
+            $profileRoute = 'cast.shopprofileview.show';
         } else {
             // お店側：キャストのキープ・ライク・足あと
             $keepCasts = [
@@ -35,7 +35,7 @@ class InteractionController extends Controller
             $footprintCasts = [
                 ['id' => 3, 'name' => 'Rena', 'age' => 25, 'img' => '', 'profession' => 'フリーランス', 'pref' => '神奈川県', 'city' => '横浜市', 'visited_at' => '2026-01-02 18:00:00'],
             ];
-            $profileRoute = 'shop.profile.cast.show';
+            $profileRoute = 'shop.castprofileview.show';
         }
 
         return view('shops.interaction.index', [

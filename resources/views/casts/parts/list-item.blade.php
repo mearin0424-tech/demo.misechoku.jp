@@ -4,8 +4,8 @@
         <div class="conn-name">{{ $item['shop_name'] }}</div>
         <div class="text-xs text-gray-500">{{ $item['pref'] }}{{ $item['city'] }}</div>
     </div>
-    @if(Route::has('cast.profile.show'))
-        <a href="{{ route('cast.profile.show', $item['id']) }}" class="conn-action-btn">詳細</a>
+    @if(Route::has('cast.shopprofileview.show'))
+        <a href="{{ route('cast.shopprofileview.show', $item['id']) }}" class="conn-action-btn">詳細</a>
     @else
         <span class="text-xs opacity-30">詳細準備中</span>
     @endif
