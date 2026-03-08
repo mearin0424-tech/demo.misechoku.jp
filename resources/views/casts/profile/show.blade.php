@@ -1,91 +1,129 @@
 @extends('layouts.app')
 
-@section('title', $cast['name'])
+@section('title', $cast['name'] . ' - プロフィール')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/cast_profile.css') }}">
 @endpush
 
 @section('content')
-<div class="profile-view-container inner pt-10">
-    {{-- ヘッダー：アイコンと基本名 --}}
-    <div class="cast-header text-center mb-8">
-        <div class="relative inline-block">
-            <img src="{{ $cast['img'] }}" class="w-32 h-32 rounded-full border-2 border-gold object-cover">
-            @if($cast['is_applied'])
-                <span class="badge-approved">入金承認済</span>
-            @endif
-        </div>
-        <h1 class="mt-4 text-2xl font-bold serif-font text-white">{{ $cast['name'] }} ({{ $cast['age'] }})</h1>
-        <div class="card-location text-xs text-gray-400 mt-1">
-            <i class="fas fa-map-marker-alt"></i> 六本木 / キャスト
-        </div>
-    </div>
-
-    {{-- アクション：キープボタン --}}
-    <div class="interaction-bar flex justify-center gap-10 my-6">
-        <button class="icon-btn {{ $cast['is_kept'] ? 'active' : '' }}">
-            <i class="fas fa-bookmark"></i>
-            <span class="label">KEEP ({{ $cast['keep_cnt'] }})</span>
-        </button>
-    </div>
-
-    <div class="p-4 space-y-6">
-        {{-- スペック情報：グリッド配置 --}}
-        <div class="specs-grid grid grid-cols-2 gap-4 p-4 bg-white/5 rounded-xl border border-white/10 text-center">
-            <div>
-                <span class="text-gold text-[10px] block uppercase tracking-tighter">Height / Weight</span>
-                <span class="text-sm font-bold">{{ $cast['height'] }}cm / {{ $cast['weight'] ?? '--' }}kg</span>
-            </div>
-            <div>
-                <span class="text-gold text-[10px] block uppercase tracking-tighter">B / W / H</span>
-                <span class="text-sm font-bold">{{ $cast['b'] }} / {{ $cast['w'] }} / {{ $cast['h'] }}</span>
+<div class="cast-profile-wrapper">
+    {{-- ヒーロー写真エリア --}}
+    <section class="profile-hero" aria-label="プロフィール写真">
+        <a href="{{ url()->previous() }}" class="btn-hero-back" aria-label="戻る">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div class="profile-hero-inner">
+            <img src="{{ $cast['img'] }}" alt="{{ $cast['name'] }}" class="profile-hero-img">
+            <div class="profile-hero-gradient"></div>
+            <div class="profile-hero-badge">
+                @if($cast['is_applied'] ?? false)
+                    <span class="badge-approved">入金承認済</span>
+                @endif
             </div>
         </div>
+    </section>
 
-        {{-- 自己紹介：アコーディオン形式 --}}
-        <div class="detail-accordion border border-white/10 rounded-xl overflow-hidden bg-white/5">
-            <div class="p-4 text-sm font-bold border-b border-white/10 flex justify-between cursor-pointer" onclick="toggleAccordion(this)">
-                <span>自己紹介 / PR</span>
-                <i class="fas fa-minus"></i>
-            </div>
-            <div class="p-4 text-xs opacity-80 leading-relaxed accordion-body">
-                {!! nl2br(e($cast['pr'])) !!}
-            </div>
-        </div>
+    {{-- メインコンテンツ（ヒーローに少し重ねる） --}}
+    <div class="profile-main-contents">
+        <div class="profile-view-inner">
+            {{-- 基本情報 --}}
+            <header class="cast-header">
+                <h1 class="cast-name serif-font">{{ $cast['name'] }}<span class="cast-age">({{ $cast['age'] }})</span></h1>
+                <p class="cast-location">
+                    <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                    <span>六本木 / キャスト</span>
+                </p>
+            </header>
 
-        {{-- レビューエリア --}}
-        <div class="reviews-area">
-            <h3 class="text-gold text-center text-xs font-bold uppercase mb-4 tracking-widest">Reviews</h3>
-            @if(isset($cast['reviews']) && count($cast['reviews']) > 0)
-                @foreach($cast['reviews'] as $rev)
-                    <div class="rev-bubble-yellow p-3 rounded-2xl mb-3 text-gray-800">
-                        <div class="text-xs font-bold mb-1">
-                            @for($i=1; $i<=5; $i++)
-                                <i class="{{ $i <= $rev['score'] ? 'fas' : 'far' }} fa-star"></i>
-                            @endfor
-                        </div>
-                        <p class="text-xs leading-relaxed">{{ $rev['text'] }}</p>
+            {{-- アクション：KEEP --}}
+            <div class="interaction-bar">
+                <button type="button" class="icon-btn icon-btn-keep {{ ($cast['is_kept'] ?? false) ? 'active' : '' }}" aria-pressed="{{ ($cast['is_kept'] ?? false) ? 'true' : 'false' }}">
+                    <i class="fas fa-bookmark"></i>
+                    <span class="label">KEEP</span>
+                    <span class="count">({{ $cast['keep_cnt'] ?? 0 }})</span>
+                </button>
+            </div>
+
+            {{-- スペック --}}
+            <section class="specs-section" aria-labelledby="specs-heading">
+                <h2 id="specs-heading" class="section-heading">スペック</h2>
+                <div class="specs-grid">
+                    <div class="spec-item">
+                        <span class="spec-label">Height / Weight</span>
+                        <span class="spec-value">{{ $cast['height'] ?? '--' }}cm / {{ $cast['weight'] ?? '--' }}kg</span>
                     </div>
-                @endforeach
-            @else
-                <p class="text-center text-xs opacity-50">まだレビューはありません</p>
-            @endif
+                    <div class="spec-item">
+                        <span class="spec-label">B / W / H</span>
+                        <span class="spec-value">{{ $cast['b'] ?? '--' }} / {{ $cast['w'] ?? '--' }} / {{ $cast['h'] ?? '--' }}</span>
+                    </div>
+                </div>
+            </section>
+
+            {{-- 自己紹介（アコーディオン） --}}
+            <section class="intro-section" aria-labelledby="intro-heading">
+                <button type="button" class="accordion-trigger" id="intro-heading" aria-expanded="true" aria-controls="intro-body" onclick="toggleAccordion(this)">
+                    <span>自己紹介 / PR</span>
+                    <i class="fas fa-chevron-down accordion-icon is-open" aria-hidden="true"></i>
+                </button>
+                <div class="accordion-body" id="intro-body" role="region">
+                    <div class="intro-text">
+                        {!! nl2br(e($cast['pr'] ?? '')) !!}
+                    </div>
+                </div>
+            </section>
+
+            {{-- レビュー --}}
+            <section class="reviews-section" aria-labelledby="reviews-heading">
+                <h2 id="reviews-heading" class="section-heading">Reviews</h2>
+                @if(!empty($cast['reviews']) && count($cast['reviews']) > 0)
+                    <ul class="reviews-list">
+                        @foreach($cast['reviews'] as $rev)
+                            <li class="review-item">
+                                <div class="review-stars" aria-label="{{ $rev['score'] }}点">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <i class="{{ $i <= ($rev['score'] ?? 0) ? 'fas' : 'far' }} fa-star"></i>
+                                    @endfor
+                                </div>
+                                <p class="review-text">{{ $rev['text'] ?? '' }}</p>
+                            </li>
+                        @endforeach
+                    </ul>
+                @else
+                    <p class="reviews-empty">まだレビューはありません</p>
+                @endif
+            </section>
+
+            {{-- 下部余白（固定バー分） --}}
+            <div class="profile-spacer"></div>
         </div>
+    </div>
+
+    {{-- 下部固定アクション --}}
+    <div class="profile-actions-sticky">
+        @php $talkIndex = request()->is('cast/*') ? route('cast.talk.index') : route('shop.talk.index'); @endphp
+        <a href="{{ $talkIndex }}" class="action-btn like">
+            <i class="fas fa-heart"></i>
+            <span>いいね</span>
+        </a>
+        <a href="{{ $talkIndex }}" class="action-btn message">
+            <i class="fas fa-comment"></i>
+            <span>メッセージ</span>
+        </a>
+        <button type="button" class="action-btn keep" aria-label="キープ">
+            <i class="fas fa-bookmark"></i>
+        </button>
     </div>
 </div>
 
 <script>
-function toggleAccordion(el) {
-    const body = el.nextElementSibling;
-    const icon = el.querySelector('i');
-    if (body.style.display === 'none') {
-        body.style.display = 'block';
-        icon.className = 'fas fa-minus';
-    } else {
-        body.style.display = 'none';
-        icon.className = 'fas fa-plus';
-    }
+function toggleAccordion(btn) {
+    var body = document.getElementById('intro-body');
+    var icon = btn.querySelector('.accordion-icon');
+    var expanded = btn.getAttribute('aria-expanded') === 'true';
+    body.classList.toggle('is-closed', expanded);
+    btn.setAttribute('aria-expanded', !expanded);
+    icon.classList.toggle('is-open', !expanded);
 }
 </script>
 @endsection

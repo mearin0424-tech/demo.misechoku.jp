@@ -8,8 +8,12 @@
     box-sizing: border-box;
 }
 .talk-list-container.tab-page-body {
+    padding: 12px 0 calc(var(--footer-height) + 16px);
     padding-left: 0;
     padding-right: 0;
+}
+.talk-list-container .tab-pane {
+    padding-top: 4px;
 }
 
 .talk-item {
@@ -132,12 +136,18 @@
 #talk-room-container {
     display: flex;
     flex-direction: column;
-    height: 100dvh; /* 動的ビューポート単位 */
+    min-height: calc(100vh - var(--header-height) - var(--footer-height));
+    height: calc(100vh - var(--header-height) - var(--footer-height));
     background: #120505;
-    position: relative; /* 入力エリア固定の基準 */
+    position: relative;
+    margin: 0 calc(-1 * var(--content-padding-x)); /* コンテンツ幅いっぱいに広げる */
+    width: calc(100% + 2 * var(--content-padding-x));
+    max-width: none;
+    box-sizing: border-box;
 }
 
-.talk-header {
+/* ルーム画面上部ヘッダー用（一覧の .talk-header と区別） */
+.talk-room-header {
     flex-shrink: 0;
     padding: env(safe-area-inset-top) 15px 12px;
     background: #220a0a;
@@ -148,6 +158,7 @@
 /* メッセージ表示エリア */
 .chat-messages {
     flex: 1;
+    min-height: 0; /* flex子要素のスクロールのために必要 */
     overflow-y: auto;
     padding: 20px 15px calc(var(--footer-height) + 80px); /* フッター+入力欄分 */
     display: flex;
@@ -356,7 +367,8 @@
     align-items: flex-start;
 }
 
-.request-user-info .name {
+.request-user-info .name,
+.request-content .name {
     font-size: 1.2rem;
     font-weight: bold;
     color: #fff;
