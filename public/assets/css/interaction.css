@@ -134,11 +134,25 @@
     overflow: hidden;
 }
 
-#pane-like .sub-nav-mini {
-    flex-shrink: 0;
+/* 送ったLIKE / 受け取ったLIKE エリア */
+.like-area {
+    margin-bottom: 28px;
+}
+.like-area:last-child {
+    margin-bottom: 0;
+}
+.like-area-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+    margin: 0 0 12px 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--color-border);
 }
 
-/* --- ライクタブ内リスト --- */
+/* --- ライクタブ内リスト（エリアごと） --- */
+.like-list-container,
 #like-list-container {
     display: flex;
     flex-direction: column;
@@ -149,16 +163,19 @@
     min-width: 0;
 }
 
+.like-list-container .cast-list-card,
 #like-list-container .cast-list-card {
     margin-bottom: 0;
     min-width: 0;
 }
 
+.like-list-container .card-info,
 #like-list-container .card-info {
     min-width: 0;
     overflow: hidden;
 }
 
+.like-list-container .info-header .name,
 #like-list-container .info-header .name {
     overflow: hidden;
     text-overflow: ellipsis;

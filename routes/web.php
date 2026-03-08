@@ -138,6 +138,8 @@ Route::prefix('cast')->name('cast.')->group(function () {
     
     Route::get('/interaction', [ShopInteraction::class, 'index'])->name('interaction.index');
     Route::get('/mypage', [CastMypage::class, 'index'])->name('mypage.index');
+    Route::get('/mypage/employment', [CastMypage::class, 'employment'])->name('mypage.employment');
+    Route::get('/mypage/payment', [CastMypage::class, 'payment'])->name('mypage.payment');
 
     Route::prefix('talk')->name('talk.')->group(function () {
         Route::get('/', [TalkController::class, 'index'])->name('index');

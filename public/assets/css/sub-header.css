@@ -1,8 +1,9 @@
 /* --- サブヘッダー（タブ）：グローバルヘッダー直下にぴったり ---
-   position:fixed はビューポート基準のため、top にヘッダー高さを指定して重ならないようにする --- */
+   ※ content-wrapper に transform（animate-fadeIn）があるため fixed の基準はその親。
+   top: 0 で親（= ヘッダー直下のコンテンツ先頭）に合わせる --- */
 .sub-header-wrapper {
     position: fixed;
-    top: var(--header-height);
+    top: 0;
     left: 50%;
     transform: translateX(-50%);
     width: 100%;

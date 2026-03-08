@@ -226,6 +226,17 @@
 .detail-action-btn.like:active .num {
     transition: transform 0.15s;
 }
+.detail-action-btn.edit-btn {
+    text-decoration: none;
+    color: var(--color-text);
+}
+.detail-action-btn.edit-btn:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+.detail-action-btn.edit-btn i {
+    color: var(--gold);
+}
 
 /* 詳細行（生年月日・その他情報） */
 .detail-row {

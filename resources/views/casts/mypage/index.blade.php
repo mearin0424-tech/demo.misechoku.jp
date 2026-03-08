@@ -1,47 +1,39 @@
 @extends('layouts.app')
 
-@section('title', 'マイページ')
+@section('title', 'マイページ - プロフィール確認')
+@section('body-class', 'page-cast-mypage')
 
 @push('styles')
+<link rel="stylesheet" href="{{ asset('assets/css/cast_profile.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 @endpush
 
 @section('content')
-<div class="mypage-page contents inner animate-fadeIn">
-    <section class="mypage-area">
-        <h1 class="mypage-shop-name serif-font gold-gradient">マイページ</h1>
+<div class="cast-profile-wrapper animate-fadeIn">
+    @include('casts.mypage.parts.menu', ['current' => 'profile'])
 
-        <div class="mypage-detail-box">
-            {{-- プロフィール --}}
-            <div class="mypage-section profile-info-section">
-                <div class="section-title-row">
-                    <h2 class="section-title">プロフィール</h2>
-                    <a href="{{ route('cast.profile.edit') }}" class="btn-outline-gold">プロフィール確認・編集</a>
-                </div>
-                <p class="shop-access-text text-sm opacity-80">
-                    ニックネーム、スペック、その他情報を編集できます。
-                </p>
-            </div>
-
-            {{-- 書類管理 --}}
-            <div class="mypage-section document-section">
-                <h2 class="section-title section-title-gold">書類管理</h2>
-                <ul class="doc-list">
-                    @foreach($documents as $doc)
-                    <li class="doc-item">
-                        <div class="doc-icon"><i class="fas fa-file-alt"></i></div>
-                        <div class="doc-info">
-                            <span class="doc-name">{{ $doc['name'] }}</span>
-                            <span class="doc-status {{ $doc['status'] == 'submitted' ? 'done' : 'pending' }}">
-                                {{ $doc['status'] == 'submitted' ? '提出済' : '未提出' }}
-                            </span>
-                        </div>
-                        <i class="fas fa-chevron-right doc-arrow"></i>
-                    </li>
-                    @endforeach
-                </ul>
-            </div>
-        </div>
-    </section>
+    @include('casts.profile.parts.show-content', ['cast' => $cast, 'isOwn' => true])
 </div>
+
+<script>
+var profileImages = @json($cast['images'] ?? [$cast['img']]);
+function setProfileMainImage(index) {
+    var mainImg = document.getElementById('profile-main-img');
+    var thumbs = document.querySelectorAll('.profile-photo-thumb');
+    if (mainImg && profileImages[index]) {
+        mainImg.src = profileImages[index];
+    }
+    thumbs.forEach(function(t, i) {
+        t.classList.toggle('active', i === index);
+    });
+}
+function toggleAccordion(btn) {
+    var body = document.getElementById('intro-body');
+    var icon = btn.querySelector('.accordion-icon');
+    var expanded = btn.getAttribute('aria-expanded') === 'true';
+    body.classList.toggle('is-closed', expanded);
+    btn.setAttribute('aria-expanded', !expanded);
+    icon.classList.toggle('is-open', !expanded);
+}
+</script>
 @endsection

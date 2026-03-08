@@ -35,26 +35,41 @@
             @endif
         </div>
 
-        {{-- タブ２：ライク (LIKE/MATCH) --}}
+        {{-- タブ２：ライク (LIKE/MATCH) — 送ったLIKE / 受け取ったLIKE の2エリア表示 --}}
         <div id="pane-like" class="tab-pane">
-            {{-- ライク内専用の切り替え（ここは既存ロジックを維持） --}}
-            <div class="sub-nav-mini">
-                <button class="sub-nav-btn active" onclick="filterLikes('to-me')">RECEIVED</button>
-                <button class="sub-nav-btn" onclick="filterLikes('from-me')">SENT</button>
-            </div>
-            
-            <div id="like-list-container">
-                @if (empty($likeCasts))
-                    <div class="no-data-wrapper">
-                        <i class="fas fa-heart opacity-10 text-5xl mb-3 block"></i>
-                        <p class="no-data-msg">いいねはまだ届いていません。</p>
-                    </div>
-                @else
-                    @foreach($likeCasts as $c)
-                        @include('shops.interaction.like', ['c' => $c, 'profileRoute' => $profileRoute ?? 'shop.castprofileview.show'])
-                    @endforeach
-                @endif
-            </div>
+            {{-- 受け取ったLIKE --}}
+            <section class="like-area">
+                <h3 class="like-area-title">受け取ったLIKE</h3>
+                <div class="like-list-container">
+                    @if (empty($receivedLikeCasts))
+                        <div class="no-data-wrapper">
+                            <i class="fas fa-heart opacity-10 text-5xl mb-3 block"></i>
+                            <p class="no-data-msg">受け取ったいいねはまだありません。</p>
+                        </div>
+                    @else
+                        @foreach($receivedLikeCasts as $c)
+                            @include('shops.interaction.like', ['c' => $c, 'profileRoute' => $profileRoute ?? 'shop.castprofileview.show'])
+                        @endforeach
+                    @endif
+                </div>
+            </section>
+
+            {{-- 送ったLIKE --}}
+            <section class="like-area">
+                <h3 class="like-area-title">送ったLIKE</h3>
+                <div class="like-list-container">
+                    @if (empty($sentLikeCasts))
+                        <div class="no-data-wrapper">
+                            <i class="fas fa-heart opacity-10 text-5xl mb-3 block"></i>
+                            <p class="no-data-msg">送ったいいねはまだありません。</p>
+                        </div>
+                    @else
+                        @foreach($sentLikeCasts as $c)
+                            @include('shops.interaction.like', ['c' => $c, 'profileRoute' => $profileRoute ?? 'shop.castprofileview.show'])
+                        @endforeach
+                    @endif
+                </div>
+            </section>
         </div>
 
         {{-- タブ３：足あと (FOOTPRINT) --}}
@@ -76,17 +91,4 @@
 @push('scripts')
 {{-- 共通タブ切り替えJSの読み込み --}}
 <script src="{{ asset('assets/js/sub-header.js') }}"></script>
-<script>
-    /**
-     * ライクパネル内専用のフィルタリングロジック
-     */
-    function filterLikes(type) {
-        // ライクタブ内のサブボタンのみ切り替え
-        const container = document.getElementById('pane-like');
-        if (!container) return;
-        const btns = container.querySelectorAll('.sub-nav-btn');
-        btns.forEach(btn => btn.classList.remove('active'));
-        if (event && event.currentTarget) event.currentTarget.classList.add('active');
-    }
-</script>
 @endpush
