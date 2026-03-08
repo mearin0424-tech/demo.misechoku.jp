@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const messageHtml = `
             <div class="message-row msg-right" id="${tempId}">
                 <div class="message-bubble">
-                    <p class="msg-text">${content.replace(/\n/g, '<br>')}</p>
+                    <p class="m-0">${content.replace(/\n/g, '<br>')}</p>
                     <div class="msg-footer">
                         <span class="msg-time">${timeStr}</span>
                         <span class="msg-status sending"><i class="fas fa-check"></i></span>
