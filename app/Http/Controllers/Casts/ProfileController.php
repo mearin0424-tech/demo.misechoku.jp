@@ -82,22 +82,40 @@ class ProfileController extends Controller
     }
 
     public function show($id = null) {
-        // 旧cast_detail.phpのロジックをここに完全統合
+        // 店舗側から見るキャスト詳細（編集フォームと同じ項目をモックで表示）
         $cast = [
-            'name'         => '愛華',
-            'age'          => 24,
-            'img'          => asset('storage/mock/casts/1.png'),
-            'is_applied'   => true,
-            'is_kept'      => true,
-            'keep_cnt'     => 128,
-            'height'       => 165,
-            'weight'       => 48,
-            'b' => 85, 'w' => 58, 'h' => 86,
-            'pr'           => "はじめまして！楽しくお話しするのが大好きです。\nお酒も少し飲めます！よろしくお願いします。",
-            'reviews'      => [
+            'nickname'       => '愛華',
+            'name'           => 'かめわりゆい',
+            'age'            => 24,
+            'birth_year'     => '1994',
+            'birth_month'    => '4',
+            'birth_day'      => '24',
+            'img'            => asset('storage/mock/casts/1.png'),
+            'is_applied'     => true,
+            'is_kept'        => true,
+            'like_cnt'       => 12,
+            'pref'           => '東京都',
+            'city'           => '中央区',
+            'height'         => 165,
+            'weight'         => 48,
+            'bust'           => 85,
+            'waist'          => 58,
+            'hip'            => 86,
+            'pr'             => "はじめまして！楽しくお話しするのが大好きです。\nお酒も少し飲めます！よろしくお願いします。",
+            'intro'          => "はじめまして！楽しくお話しするのが大好きです。\nお酒も少し飲めます！よろしくお願いします。",
+            'desired_job'    => '',
+            'my_field'       => '',
+            'my_inner_skills'=> '',
+            'shift_hope'     => '週1回出勤',
+            'work_time'      => 'morning',
+            'work_time_label'=> '朝',
+            'current_job'    => "都内でITコンサルタントに従事しております。\nこちらは副業で勤務したいと考えています。",
+            'night_work_exp' => 'none',
+            'night_work_label' => '無し',
+            'reviews'        => [
                 ['score' => 5, 'text' => '大変礼儀正しく、お酒の作り方も完璧でした。'],
                 ['score' => 4, 'text' => '笑顔が素敵で、お客様からも好評でした。'],
-            ]
+            ],
         ];
 
         return view('casts.profile.show', [
