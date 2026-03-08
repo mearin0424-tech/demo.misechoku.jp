@@ -20,8 +20,8 @@ class InteractionController extends Controller
         
         $likeCasts = [
             [
-                'id' => 2, 'name' => '愛華', 'age' => 21, 'img' => '', 'profession' => '女子大生', 
-                'pref' => '東京都', 'city' => '渋谷区', 'created_at' => '2026-01-02 10:00:00'
+                'id' => 2, 'name' => '愛華', 'age' => 21, 'img' => '', 'profession' => '女子大生',
+                'pref' => '東京都', 'city' => '渋谷区', 'created_at' => '2026-01-02 10:00:00', 'is_match' => false
             ]
         ];
         

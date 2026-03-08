@@ -1,5 +1,131 @@
 /* 求人管理・編集共通スタイル */
 
+/* --- Recruit Status ページ --- */
+.recruit-status-page {
+    padding: 0 var(--content-padding-x);
+    padding-bottom: calc(var(--footer-height) + 24px);
+    max-width: var(--max-content-width);
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+.recruit-status-header {
+    margin-bottom: 24px;
+}
+.recruit-status-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-text);
+    font-size: 0.8rem;
+    text-decoration: none;
+    margin-bottom: 16px;
+    opacity: 0.9;
+    transition: color 0.2s, opacity 0.2s;
+}
+.recruit-status-back:hover { color: var(--gold); opacity: 1; }
+.recruit-status-back i { font-size: 0.7rem; }
+.recruit-status-title-block { margin-bottom: 0; }
+.recruit-status-title {
+    font-size: 1.6rem;
+    color: var(--color-text-header);
+    margin: 0;
+    letter-spacing: 0.02em;
+    background: linear-gradient(135deg, var(--gold), #e8c547);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.recruit-status-sub {
+    font-size: 0.7rem;
+    color: var(--color-text);
+    opacity: 0.7;
+    margin: 4px 0 0 0;
+    letter-spacing: 0.05em;
+}
+.recruit-status-summary {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+}
+.recruit-status-summary-label {
+    font-size: 0.65rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin: 0 0 6px 0;
+    font-weight: 700;
+}
+.recruit-status-summary-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    font-family: var(--font-serif);
+}
+.recruit-status-summary-value .unit { font-size: 0.85rem; opacity: 0.6; font-weight: 400; }
+.recruit-status-list { display: flex; flex-direction: column; gap: 16px; }
+.recruit-status-card {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 20px;
+    overflow: hidden;
+}
+.recruit-status-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+.recruit-status-card-info { flex: 1; min-width: 0; }
+.recruit-status-card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-text-header);
+    margin: 8px 0 4px 0;
+}
+.recruit-status-card-meta {
+    font-size: 0.75rem;
+    color: var(--color-text);
+    opacity: 0.8;
+    margin: 0;
+}
+.recruit-status-card-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-border);
+}
+.recruit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+.recruit-btn-edit {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-header);
+}
+.recruit-btn-edit:hover { background: rgba(255, 255, 255, 0.1); }
+.recruit-btn-preview {
+    background: transparent;
+    border: 1px solid rgba(212, 175, 55, 0.5);
+    color: var(--gold);
+}
+.recruit-btn-preview:hover { border-color: var(--gold); background: rgba(212, 175, 55, 0.08); }
+.recruit-btn:active { transform: scale(0.98); }
+
 /* ステータスバッジ */
 .status-badge {
     font-size: 0.65rem;

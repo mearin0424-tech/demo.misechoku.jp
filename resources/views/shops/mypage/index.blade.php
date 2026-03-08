@@ -90,13 +90,16 @@
                 </div>
             </div>
 
-            {{-- 3. ボタンデザイン：元のデザイン(btn-action)に戻す --}}
-            <div class="mypage-actions">
-                <a href="{{ route('shop.recruits.status') }}" class="btn-action job">
-                    <i class="fas fa-edit"></i> 求人情報の確認・編集
+            {{-- Recruit Status / MANAGEMENT クイックアクション --}}
+            <div class="mypage-quick-actions">
+                <h3 class="mypage-actions-title">クイックアクション</h3>
+                <a href="{{ route('shop.recruits.status') }}" class="btn-action btn-action-card job">
+                    <span class="btn-action-label">Recruit Status</span>
+                    <span class="btn-action-text"><i class="fas fa-briefcase"></i> 求人情報の確認・編集</span>
                 </a>
-                <a href="{{ route('shop.mypage.payment.index') }}" class="btn-action manage">
-                    <i class="fas fa-tasks"></i> 採用・請求管理
+                <a href="{{ route('shop.mypage.payment.index') }}" class="btn-action btn-action-card manage">
+                    <span class="btn-action-label">MANAGEMENT</span>
+                    <span class="btn-action-text"><i class="fas fa-file-invoice-dollar"></i> 採用・請求管理</span>
                 </a>
             </div>
 

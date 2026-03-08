@@ -66,6 +66,13 @@
     padding: 12px 0 calc(var(--footer-height) + 16px);
     box-sizing: border-box;
     min-height: 200px;
+    width: 100%;
+    min-width: 0;
+}
+
+.tab-content-container {
+    width: 100%;
+    min-width: 0;
 }
 
 /* タブパネルの表示制御 */

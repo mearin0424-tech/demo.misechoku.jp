@@ -22,8 +22,8 @@
 
 .segment-btn.active {
     opacity: 1;
-    color: var(--color-gold);
-    border-bottom: 2px solid var(--color-gold);
+    color: var(--gold);
+    border-bottom: 2px solid var(--gold);
 }
 
 .tab-count {
@@ -32,7 +32,7 @@
     font-weight: bold;
 }
 
-.tab-pane { display: none; }
+.tab-pane { display: none; width: 100%; box-sizing: border-box; }
 .tab-pane.active { display: block; animation: fadeIn 0.3s ease; }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -56,7 +56,8 @@
     border-radius: 50%;
     overflow: hidden;
     margin-right: 15px;
-    border: 1px solid var(--color-gold);
+    flex-shrink: 0;
+    border: 1px solid var(--gold);
 }
 
 .card-thumb img { width: 100%; height: 100%; object-fit: cover; }
@@ -66,7 +67,7 @@
 .info-sub { font-size: 0.8rem; margin: 4px 0; color: #d1c1c1; }
 .info-specs { font-size: 0.75rem; color: #d1c1c1; letter-spacing: 0.05em; }
 
-.card-arrow { margin-left: auto; color: var(--color-gold); }
+.card-arrow { margin-left: auto; color: var(--gold); flex-shrink: 0; }
 
 /* サブナビ（いいね送受信切り替え用） */
 .sub-nav { display: flex; gap: 10px; margin-bottom: 15px; }
@@ -79,7 +80,7 @@
     font-size: 0.7rem;
     cursor: pointer;
 }
-.sub-nav-btn.active { background: var(--color-gold); color: #000; border-color: var(--color-gold); }
+.sub-nav-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
 
 /* ライク内サブタブ（メインタブとデザイン統一） */
 .sub-nav-mini {
@@ -124,6 +125,57 @@
     height: 2px;
     background: var(--gold);
     box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+}
+
+/* --- ライクタブ全体のレイアウト --- */
+#pane-like {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+}
+
+#pane-like .sub-nav-mini {
+    flex-shrink: 0;
+}
+
+/* --- ライクタブ内リスト --- */
+#like-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0;
+    margin-top: 0;
+    width: 100%;
+    min-width: 0;
+}
+
+#like-list-container .cast-list-card {
+    margin-bottom: 0;
+    min-width: 0;
+}
+
+#like-list-container .card-info {
+    min-width: 0;
+    overflow: hidden;
+}
+
+#like-list-container .info-header .name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#pane-like .no-data-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 20px;
+    text-align: center;
+}
+
+#pane-like .no-data-wrapper .no-data-msg {
+    margin-top: 8px;
 }
 
 .no-data-msg { text-align: center; padding: 50px 0; color: #888; }

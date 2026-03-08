@@ -1,22 +1,22 @@
-<div class="section-label mb-4 text-xs font-bold opacity-50 uppercase tracking-widest">Like Interactions</div>
-
-@forelse($likes ?? [] as $like)
-    <div class="interaction-card">
-        <img src="{{ asset('storage/mock/casts/'.$like['id'].'-1.png') }}" class="avatar-sm">
-        <div class="info-sm">
-            <div class="name">{{ $like['name'] }} ({{ $like['age'] }})</div>
-            <div class="meta">
-                @if($like['is_match'])
-                    <span class="text-gold font-bold"><i class="fas fa-heart"></i> マッチング中</span>
-                @else
-                    {{ $like['created_at'] }} にライク
-                @endif
-            </div>
+<a href="{{ route('cast.profile.show', $c['id']) }}" class="cast-list-card">
+    <div class="card-thumb">
+        <img src="{{ $c['img'] ?? asset('storage/mock/casts/'.$c['id'].'-1.png') }}" alt="{{ $c['name'] }}">
+    </div>
+    <div class="card-info">
+        <div class="info-header">
+            <span class="name serif-font">{{ $c['name'] }}</span>
+            <span class="age numeric-font opacity-70">({{ $c['age'] }})</span>
         </div>
-        <div class="btn-action-sm">
-            <i class="fas fa-heart {{ $like['is_match'] ? 'text-red-500' : '' }}"></i>
+        <div class="info-sub opacity-70">
+            @if(!empty($c['is_match']))
+                <span class="text-gold font-bold"><i class="fas fa-heart"></i> マッチング中</span>
+            @else
+                {{ $c['created_at'] ?? '' }} にライク
+            @endif
+        </div>
+        <div class="info-specs numeric-font opacity-70">
+            {{ $c['pref'] ?? '' }}{{ $c['city'] ?? '' }}
         </div>
     </div>
-@empty
-    <div class="text-center py-20 text-sm opacity-40">ライクの履歴はありません。</div>
-@endforelse
+    <div class="card-arrow"><i class="fas fa-chevron-right"></i></div>
+</a>

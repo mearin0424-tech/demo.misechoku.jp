@@ -1,0 +1,7 @@
+- Framework: Laravel 11 (latest)
+- Language: PHP 8.3
+- Coding Style: 
+  - Use constructor injection instead of facades where possible.
+  - Follow PSR-12 coding standards.
+  - Use Service classes for business logic.
+- Testing: Use Pest or PHPUnit for feature tests.

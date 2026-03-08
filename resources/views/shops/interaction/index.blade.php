@@ -81,11 +81,12 @@
      * ライクパネル内専用のフィルタリングロジック
      */
     function filterLikes(type) {
-        console.log('Filter Like Type:', type);
-        // 必要に応じてタブ内の active クラス切り替えや Ajax 通信をここに記述
-        const btns = document.querySelectorAll('.sub-nav-btn');
+        // ライクタブ内のサブボタンのみ切り替え
+        const container = document.getElementById('pane-like');
+        if (!container) return;
+        const btns = container.querySelectorAll('.sub-nav-btn');
         btns.forEach(btn => btn.classList.remove('active'));
-        event.currentTarget.classList.add('active');
+        if (event && event.currentTarget) event.currentTarget.classList.add('active');
     }
 </script>
 @endpush
