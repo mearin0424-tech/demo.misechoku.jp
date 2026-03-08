@@ -13,9 +13,6 @@
         <div class="info-sub opacity-70">
             {{ $c['visited_at'] ?? '' }} に閲覧
         </div>
-        <div class="info-specs numeric-font opacity-70">
-            {{ $c['pref'] ?? '' }}{{ $c['city'] ?? '' }}
-        </div>
     </div>
     <div class="card-arrow"><i class="fas fa-chevron-right"></i></div>
 </a>

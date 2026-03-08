@@ -1,4 +1,83 @@
-/* 求人管理・編集共通スタイル */
+/* 求人管理・編集共通スタイル（抜本UI改善：カード・アイコン・視覚階層） */
+
+/* ========== 共通：セクションカード・アイコン付きブロック ========== */
+.recruit-section {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+}
+.recruit-section:last-child { margin-bottom: 0; }
+.recruit-section-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+.recruit-section-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(212, 175, 55, 0.12);
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+.recruit-section-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-text-header);
+    margin: 0;
+    letter-spacing: 0.02em;
+}
+.recruit-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+.recruit-info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+.recruit-info-item-icon {
+    color: var(--gold);
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+.recruit-info-item-label {
+    font-size: 0.65rem;
+    color: var(--color-text);
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 2px;
+}
+.recruit-info-item-value {
+    font-size: 0.85rem;
+    color: #fff;
+    line-height: 1.4;
+}
+.recruit-hero-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gold);
+    font-family: var(--font-serif);
+    letter-spacing: 0.02em;
+}
+.recruit-tag-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
 
 /* --- Recruit Status ページ --- */
 .recruit-status-page {
@@ -43,28 +122,43 @@
     letter-spacing: 0.05em;
 }
 .recruit-status-summary {
-    background: var(--color-card);
-    border: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: linear-gradient(135deg, rgba(212,175,55,0.08) 0%, rgba(212,175,55,0.02) 100%);
+    border: 1px solid rgba(212,175,55,0.2);
     border-radius: 16px;
-    padding: 20px 24px;
+    padding: 18px 20px;
     margin-bottom: 24px;
 }
+.recruit-status-summary-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(212,175,55,0.15);
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+.recruit-status-summary-text { flex: 1; }
 .recruit-status-summary-label {
-    font-size: 0.65rem;
+    font-size: 0.68rem;
     color: var(--gold);
     text-transform: uppercase;
-    letter-spacing: 0.12em;
-    margin: 0 0 6px 0;
+    letter-spacing: 0.1em;
+    margin: 0 0 4px 0;
     font-weight: 700;
 }
 .recruit-status-summary-value {
-    font-size: 1.75rem;
+    font-size: 1.6rem;
     font-weight: 700;
     color: #fff;
     margin: 0;
     font-family: var(--font-serif);
 }
-.recruit-status-summary-value .unit { font-size: 0.85rem; opacity: 0.6; font-weight: 400; }
+.recruit-status-summary-value .unit { font-size: 0.8rem; opacity: 0.6; font-weight: 400; }
 .recruit-status-list { display: flex; flex-direction: column; gap: 16px; }
 .recruit-status-card {
     background: var(--color-card);
@@ -152,11 +246,11 @@
     z-index: 1;
 }
 
-/* 本入店・体験入店・ヘルプ採用 カード */
+/* 本入店・体験入店・ヘルプ採用 カード（視覚優先：時給を大きく） */
 .recruit-job-types {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
     margin-bottom: 20px;
 }
 .recruit-type-card {
@@ -164,6 +258,10 @@
     padding: 14px 16px;
     position: relative;
     overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: start;
 }
 .recruit-type-card::before {
     content: '';
@@ -172,33 +270,45 @@
     right: 0;
     top: 0;
     bottom: 0;
-    opacity: 0.4;
+    opacity: 0.35;
     pointer-events: none;
 }
+.recruit-type-main { position: relative; z-index: 1; }
 .recruit-type-label {
     display: inline-block;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 700;
-    padding: 5px 12px;
-    border-radius: 8px;
-    margin-bottom: 10px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+}
+.recruit-type-wage {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin: 0;
     position: relative;
     z-index: 1;
+    line-height: 1.2;
 }
-.recruit-type-wage,
+.recruit-type-wage .unit { font-size: 0.7rem; font-weight: 600; opacity: 0.85; }
+.recruit-type-sub { position: relative; z-index: 1; text-align: right; }
+.recruit-type-meta {
+    font-size: 0.7rem;
+    line-height: 1.4;
+    margin: 0;
+    opacity: 0.95;
+}
 .recruit-type-bonus,
 .recruit-type-reward,
 .recruit-type-daily,
 .recruit-type-notes {
-    margin: 0 0 4px 0;
-    font-size: 0.8rem;
-    line-height: 1.45;
-    position: relative;
-    z-index: 1;
+    margin: 0 0 2px 0;
+    font-size: 0.7rem;
+    line-height: 1.35;
 }
-.recruit-type-wage { font-weight: 700; }
-.recruit-type-daily { font-size: 0.72rem; opacity: 0.9; }
-.recruit-type-notes { margin-top: 6px; font-size: 0.75rem; opacity: 0.95; }
+.recruit-type-daily { font-size: 0.65rem; opacity: 0.9; }
+.recruit-type-notes { margin-top: 4px; font-size: 0.65rem; opacity: 0.9; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
 .recruit-type-regular {
     background: linear-gradient(135deg, #f5efe6 0%, #ebe2d5 100%);
@@ -349,17 +459,16 @@
 /* ベネフィット（待遇）チップ */
 .benefit-tag {
     display: inline-block;
-    padding: 6px 14px;
-    border-radius: 8px;
+    padding: 8px 14px;
+    border-radius: 20px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: #aaa;
     font-size: 0.75rem;
-    margin-right: 8px;
-    margin-bottom: 8px;
     cursor: pointer;
     transition: all 0.2s;
 }
+.benefit-tag:hover { border-color: rgba(255,255,255,0.2); color: #ccc; }
 .benefit-tag.selected {
     background: rgba(212, 175, 55, 0.15);
     border-color: var(--gold);

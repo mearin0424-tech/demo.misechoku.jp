@@ -4,22 +4,20 @@
         <img src="{{ $c['img'] ?? asset('storage/mock/casts/'.$c['id'].'-1.png') }}" alt="{{ $c['name'] }}" onerror="this.onerror=null; this.src='{{ asset('assets/images/common/user-default.svg') }}'">
     </div>
     <div class="card-info">
-        <div class="info-header">
+        <div class="info-header info-header-one-line">
             <span class="name serif-font">{{ $c['name'] }}</span>
             @if(isset($c['age']))
             <span class="age numeric-font opacity-70">({{ $c['age'] }})</span>
             @endif
-        </div>
-        <div class="info-sub opacity-70">
             @if(!empty($c['is_match']))
-                <span class="text-gold font-bold"><i class="fas fa-heart"></i> マッチング中</span>
-            @else
-                {{ $c['created_at'] ?? '' }} にライク
+                <span class="match-badge text-gold font-bold"><i class="fas fa-heart"></i> マッチング中</span>
             @endif
         </div>
-        <div class="info-specs numeric-font opacity-70">
-            {{ $c['pref'] ?? '' }}{{ $c['city'] ?? '' }}
+        @if(empty($c['is_match']))
+        <div class="info-sub opacity-70">
+            {{ $c['created_at'] ?? '' }} にライク
         </div>
+        @endif
     </div>
     <div class="card-arrow"><i class="fas fa-chevron-right"></i></div>
 </a>

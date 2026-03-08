@@ -8,69 +8,69 @@
 
 @section('content')
 <div class="contents inner animate-fadeIn p-4 pb-24">
-    <div class="flex justify-between items-center mb-8">
-        <div class="title-area">
-            <h2 class="serif-font text-2xl gold-gradient tracking-tight">Edit Recruit</h2>
-            <p class="text-[10px] text-gray-500 uppercase tracking-[0.2em] mt-1">Job Details</p>
+    <header class="recruit-status-header" style="margin-bottom: 24px;">
+        <a href="{{ route('shop.recruits.status') }}" class="recruit-status-back"><i class="fas fa-chevron-left"></i> キャンセル</a>
+        <div class="recruit-status-title-block">
+            <h1 class="recruit-status-title serif-font" style="font-size: 1.4rem;">Edit Recruit</h1>
+            <p class="recruit-status-sub">求人情報の編集</p>
         </div>
-        <a href="{{ route('shop.recruits.status') }}" class="text-gray-400 text-xs no-underline">キャンセル</a>
-    </div>
+    </header>
 
     <form id="recruit-form">
-        {{-- 給与セクション --}}
-        <div class="glass-panel p-6 rounded-2xl mb-6">
-            <h3 class="text-xs text-gray-500 uppercase tracking-widest mb-6 border-b border-white/5 pb-2">Salary Information</h3>
-            
-            <div class="grid grid-cols-2 gap-4 mb-4">
-                <div class="recruit-form-group">
+        {{-- 給与 --}}
+        <div class="recruit-section">
+            <div class="recruit-section-head">
+                <div class="recruit-section-icon"><i class="fas fa-yen-sign"></i></div>
+                <h3 class="recruit-section-title">給与</h3>
+            </div>
+            <div class="recruit-info-grid" style="margin-bottom: 16px;">
+                <div class="recruit-form-group" style="margin-bottom: 0;">
                     <label class="recruit-label">通常時給</label>
-                    <input type="number" name="hourly_wage_regular" class="recruit-input" value="{{ $recruit['hourly_wage_regular'] }}">
+                    <input type="number" name="hourly_wage_regular" class="recruit-input" value="{{ $recruit['hourly_wage_regular'] }}" placeholder="5000">
                 </div>
-                <div class="recruit-form-group">
+                <div class="recruit-form-group" style="margin-bottom: 0;">
                     <label class="recruit-label">体験時給</label>
-                    <input type="number" name="trial_hourly_wage" class="recruit-input" value="{{ $recruit['trial_hourly_wage'] }}">
+                    <input type="number" name="trial_hourly_wage" class="recruit-input" value="{{ $recruit['trial_hourly_wage'] }}" placeholder="4000">
                 </div>
             </div>
-
             <div class="recruit-form-group">
                 <label class="recruit-label">給与備考</label>
-                <textarea name="salary_text" rows="2" class="recruit-textarea">{{ $recruit['salary_text'] }}</textarea>
+                <textarea name="salary_text" rows="2" class="recruit-textarea" placeholder="指名手当・日払いなど">{{ $recruit['salary_text'] }}</textarea>
             </div>
         </div>
 
-        {{-- 勤務条件セクション --}}
-        <div class="glass-panel p-6 rounded-2xl mb-6">
-            <h3 class="text-xs text-gray-500 uppercase tracking-widest mb-6 border-b border-white/5 pb-2">Conditions</h3>
-            
+        {{-- 勤務条件 --}}
+        <div class="recruit-section">
+            <div class="recruit-section-head">
+                <div class="recruit-section-icon"><i class="fas fa-calendar-clock"></i></div>
+                <h3 class="recruit-section-title">勤務条件</h3>
+            </div>
             <div class="recruit-form-group">
                 <label class="recruit-label">勤務時間</label>
-                <input type="text" name="working_hours" class="recruit-input" value="{{ $recruit['working_hours'] }}">
+                <input type="text" name="working_hours" class="recruit-input" value="{{ $recruit['working_hours'] }}" placeholder="20:00〜翌1:00">
             </div>
-
             <div class="recruit-form-group">
                 <label class="recruit-label">勤務日数</label>
-                <input type="text" name="working_days" class="recruit-input" value="{{ $recruit['working_days'] }}">
+                <input type="text" name="working_days" class="recruit-input" value="{{ $recruit['working_days'] }}" placeholder="週1日からOK">
             </div>
         </div>
 
-        {{-- 待遇セクション --}}
-        <div class="glass-panel p-6 rounded-2xl mb-6">
-            <h3 class="text-xs text-gray-500 uppercase tracking-widest mb-6 border-b border-white/5 pb-2">Benefits</h3>
-            <div class="flex flex-wrap">
+        {{-- 待遇 --}}
+        <div class="recruit-section">
+            <div class="recruit-section-head">
+                <div class="recruit-section-icon"><i class="fas fa-gift"></i></div>
+                <h3 class="recruit-section-title">Benefits（タップで選択）</h3>
+            </div>
+            <div class="recruit-tag-wrap">
                 @foreach($recruit['benefits'] as $benefit)
-                    <div class="benefit-tag {{ in_array($benefit, $recruit['selected_benefits']) ? 'selected' : '' }}" onclick="this.classList.toggle('selected')">
-                        {{ $benefit }}
-                    </div>
+                <span class="benefit-tag {{ in_array($benefit, $recruit['selected_benefits']) ? 'selected' : '' }}" onclick="this.classList.toggle('selected')" role="button" tabindex="0">{{ $benefit }}</span>
                 @endforeach
             </div>
         </div>
 
-        {{-- 送信ボタン --}}
-        <div class="mt-8">
-            <button type="button" onclick="saveRecruit()" class="btn-gold w-full py-4 shadow-2xl">
-                求人情報を保存する
-            </button>
-        </div>
+        <button type="button" onclick="saveRecruit()" class="btn-gold w-full py-4 shadow-2xl mt-6">
+            求人情報を保存する
+        </button>
     </form>
 </div>
 @endsection
@@ -78,7 +78,6 @@
 @push('scripts')
 <script>
     function saveRecruit() {
-        // ここで非同期通信（axios等）を行い、updateメソッドへ送信
         alert('求人情報を保存しました');
         location.href = "{{ route('shop.recruits.status') }}";
     }

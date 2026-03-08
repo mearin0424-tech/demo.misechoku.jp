@@ -62,10 +62,16 @@
 
 .card-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
-.card-info { flex: 1; }
-.info-header .name { font-size: 1.1rem; color: #fff; font-weight: bold; margin-right: 5px; }
+.card-info { flex: 1; min-width: 0; }
+.info-header { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; }
+.info-header .name { font-size: 1.1rem; color: #fff; font-weight: bold; margin-right: 2px; }
 .info-sub { font-size: 0.8rem; margin: 4px 0; color: #d1c1c1; }
 .info-specs { font-size: 0.75rem; color: #d1c1c1; letter-spacing: 0.05em; }
+
+/* ライク：名前とマッチング中を1行に */
+.info-header-one-line { flex-wrap: nowrap; }
+.info-header-one-line .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.info-header-one-line .match-badge { flex-shrink: 0; margin-left: 6px; font-size: 0.75rem; white-space: nowrap; }
 
 .card-arrow { margin-left: auto; color: var(--gold); flex-shrink: 0; }
 

@@ -24,8 +24,13 @@
     </header>
 
     <section class="recruit-status-summary">
-        <p class="recruit-status-summary-label">公開中の求人</p>
-        <p class="recruit-status-summary-value">{{ count($recruits) }} <span class="unit">件</span></p>
+        <div class="recruit-status-summary-icon" aria-hidden="true">
+            <i class="fas fa-briefcase"></i>
+        </div>
+        <div class="recruit-status-summary-text">
+            <p class="recruit-status-summary-label">公開中の求人</p>
+            <p class="recruit-status-summary-value">{{ count($recruits) }} <span class="unit">件</span></p>
+        </div>
     </section>
 
     <section class="recruit-status-list">
@@ -60,12 +65,15 @@
                     @if(!empty($jobTypes[$key]))
                     @php $type = $jobTypes[$key]; @endphp
                     <div class="recruit-type-card {{ $typeClass }}">
-                        <span class="recruit-type-label">{{ $type['label'] }}</span>
-                        <p class="recruit-type-wage">時給 {{ number_format($type['hourly_wage']) }}円〜</p>
-                        <p class="recruit-type-bonus">{{ $type['bonus'] }}</p>
-                        <p class="recruit-type-reward">{{ $type['work_reward'] }}</p>
-                        <p class="recruit-type-daily">（1日の勤務時間: {{ $type['daily_hours'] }}時間）</p>
-                        <p class="recruit-type-notes">{{ $type['notes'] }}</p>
+                        <div class="recruit-type-main">
+                            <span class="recruit-type-label">{{ $type['label'] }}</span>
+                            <p class="recruit-type-wage">{{ number_format($type['hourly_wage']) }}<span class="unit">円〜/h</span></p>
+                        </div>
+                        <div class="recruit-type-sub">
+                            <p class="recruit-type-meta">{{ $type['work_reward'] }}</p>
+                            <p class="recruit-type-daily">{{ $type['daily_hours'] }}h/日</p>
+                            <p class="recruit-type-notes">{{ $type['notes'] }}</p>
+                        </div>
                     </div>
                     @endif
                 @endforeach
