@@ -4,7 +4,6 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/css/gallery.css') }}">
 @endpush
 
 @section('content')
@@ -16,7 +15,7 @@
         {{-- アイコン＋ひとこと --}}
         <div class="mypage-hero">
             <div class="shop-icon-wrapper">
-                <img src="{{ $subImages[0] ?? asset('assets/images/common/no-image.png') }}" class="shop-icon-main" id="main-icon-display" alt="">
+                <img src="{{ (isset($subImages[0]) ? $subImages[0]['url'] : null) ?? asset('assets/images/common/no-image.png') }}" class="shop-icon-main" id="main-icon-display" alt="">
                 <button type="button" class="btn-add-icon" onclick="document.getElementById('gallery-upload').click()" aria-label="写真を追加">
                     <i class="fas fa-plus"></i>
                 </button>
@@ -95,18 +94,21 @@
                 </ul>
             </div>
 
-            {{-- Image Library --}}
+            {{-- Image Library（マイページ上で編集：タップで大表示・✖で削除・空きタップで登録） --}}
             <div class="mypage-section gallery-edit-section">
                 <div class="gallery-section-header">
                     <h2 class="section-title section-title-gold">Image Library</h2>
-                    <a href="{{ route('shop.profile.gallery.edit') }}" class="gallery-edit-link">編集する</a>
                 </div>
-                <ul class="responsive-gallery gallery-grid" id="gallery-list" onclick="location.href='{{ route('shop.profile.gallery.edit') }}';">
+                <ul class="responsive-gallery gallery-grid" id="gallery-list">
                     @for($i = 0; $i < 8; $i++)
-                    <li class="gallery-grid-item">
-                        <div class="photo-slot {{ isset($subImages[$i]) ? 'has-img' : '' }}">
-                            @if(isset($subImages[$i]))
-                                <img src="{{ $subImages[$i] }}" alt="" loading="lazy">
+                    @php $img = $subImages[$i] ?? null; @endphp
+                    <li class="gallery-grid-item" data-slot-index="{{ $i }}">
+                        <div class="photo-slot {{ $img ? 'has-img' : '' }}"
+                             data-image-id="{{ $img['id'] ?? '' }}"
+                             data-image-url="{{ $img['url'] ?? '' }}"
+                             onclick="handleGallerySlotClick(event, this, {{ $i }})">
+                            @if($img)
+                                <img src="{{ $img['url'] }}" alt="" loading="lazy">
                                 @if($i === 0)
                                     <span class="photo-slot-badge">MAIN</span>
                                 @endif
@@ -122,9 +124,10 @@
     </section>
 </div>
 
-{{-- 画像プレビューモーダル --}}
-<div id="image-preview-modal" class="mypage-modal-overlay" onclick="this.style.display='none'" role="button" tabindex="0" aria-label="閉じる">
-    <img id="modal-img" src="" alt="" class="mypage-modal-preview-img">
+{{-- 画像大表示モーダル（✖で削除） --}}
+<div id="image-preview-modal" class="mypage-modal-overlay gallery-preview-overlay" onclick="closeGalleryPreview(event)" role="dialog" aria-label="画像プレビュー">
+    <button type="button" class="gallery-preview-close" onclick="deleteGalleryImageFromModal(event)" aria-label="削除">✕</button>
+    <img id="modal-img" src="" alt="" class="mypage-modal-preview-img" onclick="event.stopPropagation()">
 </div>
 
 {{-- ひとこと編集モーダル --}}
@@ -144,15 +147,91 @@
 
 @push('scripts')
 <script>
-function previewFullImage(src) {
-    document.getElementById('modal-img').src = src;
-    document.getElementById('image-preview-modal').style.display = 'flex';
-}
-function removeGalleryItem(btn) {
-    if (confirm('この写真をマイページから非表示にしますか？')) {
-        btn.closest('li').remove();
+var _galleryPreviewImageId = null;
+var _galleryPreviewLi = null;
+var _galleryUploadSlotIndex = null;
+
+function handleGallerySlotClick(ev, slotEl, slotIndex) {
+    var li = slotEl.closest('li');
+    var hasImg = slotEl.classList.contains('has-img');
+    var imageId = slotEl.getAttribute('data-image-id');
+    var imageUrl = slotEl.getAttribute('data-image-url');
+    if (hasImg && imageUrl) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        _galleryPreviewImageId = imageId;
+        _galleryPreviewLi = li;
+        document.getElementById('modal-img').src = imageUrl;
+        document.getElementById('image-preview-modal').style.display = 'flex';
+    } else {
+        _galleryUploadSlotIndex = slotIndex;
+        document.getElementById('gallery-upload').click();
     }
 }
+
+function closeGalleryPreview(ev) {
+    if (ev && ev.target !== ev.currentTarget) return;
+    document.getElementById('image-preview-modal').style.display = 'none';
+    _galleryPreviewImageId = null;
+    _galleryPreviewLi = null;
+}
+
+function deleteGalleryImageFromModal(ev) {
+    ev.preventDefault();
+    ev.stopPropagation();
+    if (!_galleryPreviewImageId || !_galleryPreviewLi) return;
+    if (!confirm('この画像を削除しますか？')) return;
+    var id = _galleryPreviewImageId;
+    var li = _galleryPreviewLi;
+    fetch('{{ route("shop.profile.image.delete", ["id" => "__ID__"]) }}'.replace('__ID__', id), {
+        method: 'DELETE',
+        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
+    }).then(function(r) { return r.json(); }).then(function(res) {
+        if (res.success) {
+            var slot = li.querySelector('.photo-slot');
+            slot.classList.remove('has-img');
+            slot.removeAttribute('data-image-id');
+            slot.removeAttribute('data-image-url');
+            slot.innerHTML = '<span class="photo-slot-empty"><i class="fas fa-image"></i></span>';
+            closeGalleryPreview();
+        }
+    }).catch(function() { alert('削除に失敗しました'); });
+}
+
+(function() {
+    document.getElementById('gallery-upload').addEventListener('change', function() {
+        var file = this.files && this.files[0];
+        if (!file) return;
+        var slotIndex = _galleryUploadSlotIndex;
+        if (slotIndex == null) {
+            var firstEmpty = document.querySelector('#gallery-list .gallery-grid-item .photo-slot:not(.has-img)');
+            slotIndex = firstEmpty ? Array.prototype.indexOf.call(document.querySelectorAll('#gallery-list .gallery-grid-item'), firstEmpty.closest('.gallery-grid-item')) : 0;
+        }
+        var formData = new FormData();
+        formData.append('image', file);
+        formData.append('_token', '{{ csrf_token() }}');
+        fetch('{{ route("shop.profile.upload.image") }}', { method: 'POST', body: formData })
+            .then(function(r) { return r.json(); })
+            .then(function(res) {
+                if (res.success && res.path) {
+                    var list = document.getElementById('gallery-list');
+                    var items = list.querySelectorAll('.gallery-grid-item');
+                    var li = items[slotIndex];
+                    if (li) {
+                        var slot = li.querySelector('.photo-slot');
+                        slot.classList.add('has-img');
+                        slot.setAttribute('data-image-id', res.id);
+                        slot.setAttribute('data-image-url', res.path);
+                        slot.innerHTML = '<img src="' + res.path + '" alt="" loading="lazy">' + (slotIndex === 0 ? '<span class="photo-slot-badge">MAIN</span>' : '');
+                    }
+                }
+            })
+            .catch(function() { alert('アップロードに失敗しました'); });
+        this.value = '';
+        _galleryUploadSlotIndex = null;
+    });
+})();
+
 function openWordEdit() {
     document.getElementById('modal-word').style.display = 'flex';
     document.getElementById('word-input').value = document.getElementById('display-word').innerText;

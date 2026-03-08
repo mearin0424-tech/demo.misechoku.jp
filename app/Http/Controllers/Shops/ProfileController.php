@@ -57,21 +57,6 @@ class ProfileController extends Controller
     }
 
     /**
-     * ギャラリー管理画面表示
-     */
-    public function gallery() {
-        $subImages = [
-            asset('storage/mock/shops/inside-1.png'),
-            asset('storage/mock/shops/inside-2.png'),
-            asset('storage/mock/shops/inside-3.png'),
-        ];
-        return view('shops.profile.gallery', [
-            'pageId' => 'photo', 
-            'subImages' => $subImages
-        ]);
-    }
-
-    /**
      * 画像アップロード
      * (旧 api/upload_image.php の機能を統合)
      */

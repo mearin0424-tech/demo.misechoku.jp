@@ -22,13 +22,13 @@ class MypageController extends Controller
             'approval'     => 1 // 承認済みフラグ
         ];
 
-        // 2. ギャラリー画像（モック：storage/mock/配下を想定）
+        // 2. ギャラリー画像（モック：id + url で削除API用）
         $subImages = [
-            asset('storage/mock/shops/inside-1.png'),
-            asset('storage/mock/shops/inside-2.png'),
-            asset('storage/mock/shops/inside-3.png'),
-            asset('storage/mock/shops/out-1.png'),
-            asset('storage/mock/shops/out-2.png'),
+            ['id' => 1, 'url' => asset('storage/mock/shops/inside-1.png')],
+            ['id' => 2, 'url' => asset('storage/mock/shops/inside-2.png')],
+            ['id' => 3, 'url' => asset('storage/mock/shops/inside-3.png')],
+            ['id' => 4, 'url' => asset('storage/mock/shops/out-1.png')],
+            ['id' => 5, 'url' => asset('storage/mock/shops/out-2.png')],
         ];
 
         // 3. 書類管理（旧data.phpのロジックをモック化）
