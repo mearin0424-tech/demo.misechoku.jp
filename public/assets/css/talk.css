@@ -160,7 +160,7 @@
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    padding: 16px 15px calc(var(--footer-height) + 72px); /* フッター＋入力欄分 */
+    padding: 16px 15px 12px;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -176,30 +176,41 @@
 }
 
 /* メッセージの左右寄せロジック */
-.msg-left { justify-content: flex-start; } /* 左端へ */
-.msg-right { justify-content: flex-end; }  /* 右端へ */
+.msg-left { justify-content: flex-start; }
+.msg-right { justify-content: flex-end; }
 
-/* 時刻とステータスの親要素 */
+/* 吹き出し＋フッターをまとめるブロック（footer は bubble の外） */
+.message-block {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-end;
+    max-width: 85%;
+}
+.msg-left .message-block { align-items: flex-start; }
+
+/* 時刻・既読（bubble の外・下に表示） */
 .msg-footer {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 3px;
-    margin-top: 2px;
+    margin-top: 1px;
+    padding: 0 2px;
 }
+.msg-left .msg-footer { justify-content: flex-start; }
 
 /* ==========================================================================
-   吹き出し：LINE風コンパクト + 高級感（尻尾・グラデーション・シャドウ）
+   吹き出し：さらにコンパクト + 高級感（尻尾・グラデーション・シャドウ）
    ========================================================================== */
 .message-bubble {
     display: inline-block;
-    max-width: 80%;
+    max-width: 100%;
     min-height: auto;
     height: auto;
-    padding: 8px 12px;
-    border-radius: 16px;
-    font-size: 0.875rem;
-    line-height: 1.38;
+    padding: 6px 10px;
+    border-radius: 14px;
+    font-size: 0.8125rem;
+    line-height: 1.35;
     letter-spacing: 0.01em;
     white-space: pre-wrap;
     word-break: break-word;
@@ -216,23 +227,23 @@
 .msg-left .message-bubble {
     background: linear-gradient(160deg, #2d1218 0%, #251018 100%);
     color: #f0e8e8;
-    border-radius: 16px 16px 16px 4px;
+    border-radius: 14px 14px 14px 4px;
     border: 1px solid rgba(90, 22, 37, 0.4);
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* 相手メッセージの尻尾（左下） */
 .msg-left .message-bubble::after {
     content: "";
     position: absolute;
-    left: -5px;
-    bottom: 8px;
+    left: -4px;
+    bottom: 6px;
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 0 0 8px 8px;
+    border-width: 0 0 6px 6px;
     border-color: transparent transparent #251018 transparent;
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.15));
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.12));
 }
 
 /* 自分のメッセージ：右寄せ・ゴールドグラデ・右に尻尾 */
@@ -240,39 +251,38 @@
     background: linear-gradient(145deg, #e8d48a 0%, #d4af37 35%, #c9a227 100%);
     color: #1a0f0a;
     font-weight: 500;
-    border-radius: 16px 16px 4px 16px;
+    border-radius: 14px 14px 4px 14px;
     border: 1px solid rgba(212, 175, 55, 0.35);
-    box-shadow: 0 1px 8px rgba(212, 175, 55, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 6px rgba(212, 175, 55, 0.2), 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 /* 自分メッセージの尻尾（右下） */
 .msg-right .message-bubble::after {
     content: "";
     position: absolute;
-    right: -5px;
-    bottom: 8px;
+    right: -4px;
+    bottom: 6px;
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 0 8px 8px 0;
+    border-width: 0 6px 6px 0;
     border-color: transparent #c9a227 transparent transparent;
-    filter: drop-shadow(1px 0 1px rgba(0, 0, 0, 0.08));
+    filter: drop-shadow(1px 0 1px rgba(0, 0, 0, 0.06));
 }
 
+/* 時刻・既読（bubble 外なので背景色に合わせる） */
 .msg-time {
-    font-size: 0.65rem;
-    opacity: 0.75;
+    font-size: 0.6rem;
+    opacity: 0.8;
     line-height: 1;
 }
-
-/* 自分の吹き出し内は濃い色で */
-.msg-right .msg-time { color: #2a1a0a; }
-.msg-left .msg-time { color: rgba(255,255,255,0.6); }
+.msg-right .msg-time { color: rgba(212, 175, 55, 0.85); }
+.msg-left .msg-time { color: rgba(255, 255, 255, 0.5); }
 
 .msg-status {
-    font-size: 0.65rem;
-    color: #1a0f0a;
-    opacity: 0.7;
+    font-size: 0.6rem;
+    color: rgba(212, 175, 55, 0.85);
+    opacity: 0.9;
     display: flex;
     align-items: center;
 }
@@ -289,19 +299,15 @@
 }
 
 /* ==========================================================================
-   トークルーム：入力エリア（bottom-nav にぴったり接して固定）
+   トークルーム：入力エリア（main コンテンツ最下部に配置・フロー内）
    ========================================================================== */
 .chat-input-area {
-    position: fixed;
-    bottom: var(--footer-height);
-    left: 50%;
-    transform: translateX(-50%);
+    flex-shrink: 0;
     width: 100%;
-    max-width: var(--max-content-width);
+    max-width: 100%;
     background: rgba(22, 5, 5, 0.98);
     border-top: 1px solid rgba(90, 22, 37, 0.5);
-    padding: 8px var(--content-padding-x, 15px) 0;
-    z-index: 1000;
+    padding: 8px var(--content-padding-x, 15px) 10px;
     box-sizing: border-box;
 }
 

@@ -122,7 +122,9 @@ Route::prefix('shop')->name('shop.')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('cast')->name('cast.')->group(function () {
-    Route::get('/home', [ShopHome::class, 'index'])->name('home'); 
+    Route::get('/home', [ShopHome::class, 'index'])->name('home');
+    Route::get('/profile/edit', [CastProfile::class, 'edit'])->name('profile.edit');
+    Route::post('/profile/update', [CastProfile::class, 'update'])->name('profile.update');
     Route::get('/profile/{id}', [CastProfile::class, 'show'])->name('profile.show');
     Route::get('/search', [CastSearch::class, 'index'])->name('search.index');
     

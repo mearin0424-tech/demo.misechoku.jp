@@ -21,8 +21,10 @@
     <div class="chat-messages" id="chat-messages">
         @forelse($messages as $msg)
             <div class="message-row {{ $msg->is_mine ? 'msg-right' : 'msg-left' }}">
-                <div class="message-bubble">
-                    <p class="m-0">{{ $msg->content }}</p>
+                <div class="message-block">
+                    <div class="message-bubble">
+                        <p class="m-0">{{ $msg->content }}</p>
+                    </div>
                     <div class="msg-footer">
                         <span class="msg-time">{{ $msg->created_at->format('H:i') }}</span>
                         @if($msg->is_mine)

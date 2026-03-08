@@ -41,7 +41,11 @@
             <div class="mypage-section profile-info-section">
                 <div class="section-title-row">
                     <h2 class="section-title">プロフィール情報</h2>
-                    <button type="button" class="btn-outline-gold" onclick="openProfileEdit()">編集</button>
+                    @if(request()->is('cast/*'))
+                        <a href="{{ route('cast.profile.edit') }}" class="btn-outline-gold">プロフィール確認・編集</a>
+                    @else
+                        <button type="button" class="btn-outline-gold" onclick="openProfileEdit()">編集</button>
+                    @endif
                 </div>
                 <p class="shop-access-text">
                     <i class="fas fa-map-marker-alt"></i> {{ $shopData['pref'] }}{{ $shopData['city'] }}{{ $shopData['addr1'] }}
