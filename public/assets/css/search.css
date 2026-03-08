@@ -331,7 +331,7 @@
     color: #fff;
 }
 .detail-search-modal__btn--submit {
-    background: var(--color-gold);
+    background: var(--gold);
     color: var(--color-main);
 }
 .detail-search-modal__btn--submit:hover {

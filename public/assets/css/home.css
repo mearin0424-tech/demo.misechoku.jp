@@ -1,6 +1,17 @@
+/* ========== ホーム・カードスワイプ UI（モダン・レスポンシブ） ========== */
+:root {
+    --home-card-radius: 24px;
+    --home-card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
+    --home-card-shadow-active: 0 32px 64px -16px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    --home-action-size: 56px;
+    --home-action-gap: 14px;
+    --home-info-padding-x: 20px;
+    --home-info-padding-bottom: 24px;
+}
+
 /* ホーム画面時：メイン〜コンテンツラッパーが残り高さいっぱいになるようにする */
 body.no-scroll .main-layout-container main#main-content {
-    min-height: 0; /* flex で高さが子に正しく渡るようにする */
+    min-height: 0;
 }
 body.no-scroll main#main-content .content-wrapper {
     flex: 1;
@@ -10,7 +21,6 @@ body.no-scroll main#main-content .content-wrapper {
 }
 
 /* --- Home Screen Layout --- */
-/* 高さを明示指定してモバイルで0になるのを防止（flex だけに頼らない） */
 #home-screen {
     position: relative;
     width: 100%;
@@ -18,35 +28,34 @@ body.no-scroll main#main-content .content-wrapper {
     height: calc(100vh - var(--header-height) - var(--footer-height) - 60px);
     min-height: 400px;
     overflow: hidden;
-    background-color: #0a0a0a;
+    background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(30, 25, 20, 0.6) 0%, transparent 50%),
+                linear-gradient(180deg, #0c0c0c 0%, #0a0a0a 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    touch-action: none;
-    padding: 30px 0;
+    touch-action: pan-y;
+    padding: 24px 0;
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
     box-sizing: border-box;
 }
-/* 動的ビューポート対応（モバイルのアドレスバー考慮） */
 @supports (height: 100dvh) {
     #home-screen {
         height: calc(100dvh - var(--header-height) - var(--footer-height) - 60px);
     }
 }
-/* Safari などで 100vh が崩れる場合のフォールバック */
 @supports (height: -webkit-fill-available) {
     .main-layout-container {
         min-height: -webkit-fill-available;
     }
 }
 
-/* 1023px 以下：高さを明示して画像が真っ黒にならないようにする（ホーム画面用） */
+/* 1023px 以下：フルビューポート利用 */
 @media (max-width: 1023px) {
     body.no-scroll .main-layout-container {
         height: 100vh;
         min-height: 100vh;
     }
-    /* ホームは body.no-scroll なので main に高さを直接指定 */
     body.no-scroll .main-layout-container main#main-content {
         flex: 1 1 0%;
         min-height: 0;
@@ -59,7 +68,6 @@ body.no-scroll main#main-content .content-wrapper {
         display: flex;
         flex-direction: column;
     }
-    /* #home-screen を絶対配置でコンテンツエリア全体に貼る（flex の伝播に依存しない） */
     body.no-scroll main#main-content .content-wrapper #home-screen {
         position: absolute !important;
         top: 0 !important;
@@ -69,7 +77,7 @@ body.no-scroll main#main-content .content-wrapper {
         width: 100% !important;
         height: 100% !important;
         min-height: 0 !important;
-        padding: 30px var(--content-padding-x) 30px !important;
+        padding: 16px var(--content-padding-x) max(16px, env(safe-area-inset-bottom)) !important;
         box-sizing: border-box;
     }
     body.no-scroll .main-swiper,
@@ -82,11 +90,13 @@ body.no-scroll main#main-content .content-wrapper {
 /* --- Swiper Container --- */
 .main-swiper {
     width: 100%;
-    height: 100% !important; /* Swiper の JS で上書きされないよう念のため */
+    height: 100% !important;
     min-height: 300px;
+    padding: 0 4px;
 }
 .main-swiper .swiper-wrapper {
     height: 100% !important;
+    align-items: center;
 }
 .main-swiper .swiper-slide {
     height: 100% !important;
@@ -94,35 +104,41 @@ body.no-scroll main#main-content .content-wrapper {
     justify-content: center;
     align-items: center;
     width: auto !important;
+    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.35s ease;
+}
+.main-swiper .swiper-slide-active .cast-card {
+    transform: scale(1);
+    box-shadow: var(--home-card-shadow-active);
+    opacity: 1;
+}
+.main-swiper .swiper-slide:not(.swiper-slide-active) .cast-card {
+    opacity: 0.85;
 }
 
-/* --- 1キャスト＝1画面レイアウト (カードスタイル適用) --- */
-/* 画面サイズに合わせたカード：長細くならないようアスペクト比と最大高さで制限 */
-/* 幅は控えめにして左右に余白を確保し、LIKE等のボタンが必ず見えるようにする */
+/* --- カード（1枚＝1スライド） --- */
 .cast-card {
     position: relative;
-    width: min(360px, 82vw) !important;
-    max-width: 82vw !important;
+    width: min(380px, 88vw) !important;
+    max-width: 88vw !important;
     aspect-ratio: 3 / 4;
-    max-height: min(85vh, 90dvh) !important;
+    max-height: min(82vh, 88dvh) !important;
     height: auto !important;
     min-height: 280px;
     margin: 0 auto !important;
-    
-    border-radius: 20px !important;
+    border-radius: var(--home-card-radius) !important;
     overflow: hidden;
-    background: #000;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important;
-    
+    background: #0d0d0d;
+    box-shadow: var(--home-card-shadow);
     padding: 0 !important;
     display: flex !important;
     flex-direction: column;
+    transform: scale(0.98);
+    opacity: 0.95;
+    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.35s ease, opacity 0.35s ease;
 }
-
-/* ビューポートが低いときは高さ優先で幅を算出 */
 @supports (height: 100dvh) {
     .cast-card {
-        max-height: min(85dvh, 90dvh) !important;
+        max-height: min(82dvh, 88dvh) !important;
     }
 }
 
@@ -132,7 +148,7 @@ body.no-scroll main#main-content .content-wrapper {
     width: 100%;
     min-height: 0;
     overflow: hidden;
-    border-radius: 20px;
+    border-radius: var(--home-card-radius);
 }
 
 .home-photo {
@@ -141,7 +157,7 @@ body.no-scroll main#main-content .content-wrapper {
     min-height: 180px;
     object-fit: cover;
     display: block;
-    border-radius: 20px;
+    border-radius: var(--home-card-radius);
     background-color: #1a1a1a;
 }
 .home-photo[src=""],
@@ -150,7 +166,6 @@ body.no-scroll main#main-content .content-wrapper {
     background-color: #2a2a2a;
 }
 
-/* 写真部分をタップしてプロフィール詳細へ飛ぶリンク */
 .card-detail-link {
     display: block;
     position: absolute;
@@ -161,37 +176,63 @@ body.no-scroll main#main-content .content-wrapper {
     z-index: 5;
 }
 
-/* --- Photo Pagination (上部のドット) --- */
+/* --- カード用ページネーション（ドット） --- */
+.home-swiper-pagination.swiper-pagination-bullets {
+    bottom: auto !important;
+    top: 12px !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 50 !important;
+    display: flex !important;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 0;
+}
+
+.home-swiper-pagination .swiper-pagination-bullet {
+    width: 8px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.4) !important;
+    opacity: 1;
+    transition: width 0.25s ease, background 0.25s ease;
+}
+
+.home-swiper-pagination .swiper-pagination-bullet-active {
+    width: 24px;
+    border-radius: 4px;
+    background: rgba(212, 175, 55, 0.95) !important;
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
+}
+
+/* 従来の photo-pagination を同じスタイルに統一 */
 .photo-pagination.swiper-pagination-bullets {
     bottom: auto !important;
-    top: 15px !important;
+    top: 12px !important;
     z-index: 50 !important;
 }
-
 .photo-pagination .swiper-pagination-bullet {
-    background: #fff !important;
-    opacity: 0.5;
-}
-
-.photo-pagination .swiper-pagination-bullet-active {
-    background: #d4af37 !important;
+    background: rgba(255, 255, 255, 0.4) !important;
     opacity: 1;
-    width: 20px;
+}
+.photo-pagination .swiper-pagination-bullet-active {
+    background: rgba(212, 175, 55, 0.95) !important;
+    opacity: 1;
+    width: 24px;
     border-radius: 4px;
 }
 
-/* --- Info Area (プロフィール文字情報・写真の上にオーバーレイ) --- */
+/* --- プロフィール情報オーバーレイ --- */
 .card-bottom-info {
     position: absolute;
     left: 0;
     bottom: 0;
     width: 100%;
     z-index: 30;
-    padding: 40px 16px 20px;
-    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 40%, transparent);
+    padding: 48px var(--home-info-padding-x) var(--home-info-padding-bottom);
+    background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.6) 45%, transparent);
     color: #fff;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: var(--home-card-radius);
+    border-bottom-right-radius: var(--home-card-radius);
     overflow: visible;
     min-height: 100px;
     box-sizing: border-box;
@@ -264,12 +305,11 @@ body.no-scroll main#main-content .content-wrapper {
     border: 1px solid rgba(255,255,255,0.1);
 }
 
-/* 求人（キャスト側・メッセージ・LIKEと同幅の円形） */
 .card-recruit-btn {
-    width: 50px;
-    height: 50px;
-    min-width: 50px;
-    min-height: 50px;
+    width: var(--home-action-size);
+    height: var(--home-action-size);
+    min-width: var(--home-action-size);
+    min-height: var(--home-action-size);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -298,47 +338,53 @@ body.no-scroll main#main-content .content-wrapper {
     transform: scale(0.96);
 }
 
-/* --- Action Buttons (右側のボタン) --- */
+/* --- アクションボタン（右側・タッチしやすいサイズ） --- */
 .card-actions-overlay {
     position: absolute;
-    right: 12px;
-    bottom: 28%; /* カード高さに合わせて下部情報エリアの上に配置 */
+    right: 10px;
+    bottom: 26%;
     z-index: 40;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: var(--home-action-gap);
 }
 
 .action-circle-btn {
-    width: 50px;
-    height: 50px;
+    width: var(--home-action-size);
+    height: var(--home-action-size);
+    min-width: var(--home-action-size);
+    min-height: var(--home-action-size);
     border-radius: 50%;
     border: none;
-    background: rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     color: #fff;
-    font-size: 1.3rem;
+    font-size: 1.35rem;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: transform 0.2s, background 0.3s;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: transform 0.2s ease, background 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
     text-decoration: none !important;
+    -webkit-tap-highlight-color: transparent;
 }
-
+.action-circle-btn:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: scale(1.05);
+}
 .action-circle-btn:active {
-    transform: scale(0.9);
+    transform: scale(0.92);
 }
 
-/* LIKE：アイコン＋件数表示 */
 .action-circle-btn.like {
     flex-direction: column;
     gap: 2px;
-    padding-top: 6px;
-    padding-bottom: 4px;
+    padding-top: 8px;
+    padding-bottom: 6px;
     height: auto;
-    min-height: 50px;
+    min-height: var(--home-action-size);
 }
 .action-circle-btn.like .action-btn-count {
     font-size: 0.7rem;
@@ -347,39 +393,41 @@ body.no-scroll main#main-content .content-wrapper {
     opacity: 0.95;
 }
 .action-circle-btn.like:hover { background: rgba(255, 59, 48, 0.9); }
-.action-circle-btn.keep:hover { background: rgba(255, 204, 0, 0.9); }
+.action-circle-btn.keep:hover { background: rgba(255, 204, 0, 0.85); }
 
-/* メッセージ送付：LIKE・KEEPと別UI（アウトラインのみ・押下で色反転なし） */
 .action-btn-message {
-    width: 50px;
-    height: 50px;
+    width: var(--home-action-size);
+    height: var(--home-action-size);
+    min-width: var(--home-action-size);
+    min-height: var(--home-action-size);
     border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.6);
-    background: transparent;
-    backdrop-filter: blur(8px);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
     color: #fff;
     font-size: 1.25rem;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: border-color 0.2s, transform 0.2s;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    transition: border-color 0.2s, transform 0.2s, background 0.2s;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
     text-decoration: none !important;
+    -webkit-tap-highlight-color: transparent;
 }
 .action-btn-message:hover {
     border-color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.1);
     color: #fff;
 }
 .action-btn-message:active {
-    transform: scale(0.96);
-    /* 色反転なし・背景変更なし */
+    transform: scale(0.94);
 }
 
-/* --- Swipe Guide --- */
+/* --- スワイプガイド --- */
 .swipe-guide-overlay {
     position: absolute;
-    bottom: 40px; 
+    bottom: 24px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 100;
@@ -387,23 +435,113 @@ body.no-scroll main#main-content .content-wrapper {
 }
 
 .swipe-arrow-anim {
-    color: rgba(255,255,255,0.8);
-    animation: bounce 2s infinite;
+    color: rgba(255, 255, 255, 0.75);
+    animation: swipe-bounce 2.2s ease-in-out infinite;
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-size: 0.75rem;
-    font-weight: bold;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    gap: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+.swipe-arrow-anim i {
+    font-size: 1rem;
+    opacity: 0.9;
 }
 
-@keyframes bounce {
-    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-    40% { transform: translateY(-8px); }
-    60% { transform: translateY(-4px); }
+@keyframes swipe-bounce {
+    0%, 100% { transform: translateY(0); opacity: 0.9; }
+    50% { transform: translateY(-6px); opacity: 1; }
 }
 
-/* --- ホーム用の微調整 --- */
 .glass-card {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* ========== レスポンシブ（モバイル → タブレット → デスクトップ） ========== */
+
+/* 小型スマホ（〜380px） */
+@media (max-width: 380px) {
+    :root {
+        --home-action-size: 48px;
+        --home-action-gap: 10px;
+        --home-info-padding-x: 14px;
+        --home-info-padding-bottom: 18px;
+    }
+    .cast-card {
+        width: min(340px, 92vw) !important;
+        max-width: 92vw !important;
+        min-height: 260px;
+        border-radius: 18px !important;
+    }
+    .home-photo-wrap,
+    .home-photo,
+    .card-bottom-info {
+        border-radius: 18px;
+    }
+    .card-bottom-info {
+        padding-top: 40px;
+    }
+    .cast-name { font-size: 1.05rem; }
+    .card-location { font-size: 0.75rem; }
+    .tag-pill { font-size: 0.65rem; padding: 2px 6px; }
+    .card-actions-overlay {
+        right: 8px;
+        bottom: 24%;
+    }
+    .home-swiper-pagination .swiper-pagination-bullet { width: 6px; height: 6px; }
+    .home-swiper-pagination .swiper-pagination-bullet-active { width: 18px; }
+}
+
+/* タブレット（768px〜1024px） */
+@media (min-width: 768px) and (max-width: 1024px) {
+    :root {
+        --home-card-radius: 28px;
+        --home-action-size: 52px;
+        --home-action-gap: 14px;
+    }
+    #home-screen {
+        padding: 28px 0;
+    }
+    .cast-card {
+        width: min(400px, 75vw) !important;
+        max-width: 75vw !important;
+        min-height: 320px;
+    }
+    .card-actions-overlay {
+        right: 16px;
+        bottom: 28%;
+    }
+}
+
+/* デスクトップ（1025px〜） */
+@media (min-width: 1025px) {
+    :root {
+        --home-card-radius: 28px;
+        --home-action-size: 56px;
+        --home-action-gap: 16px;
+        --home-info-padding-x: 24px;
+        --home-info-padding-bottom: 28px;
+    }
+    #home-screen {
+        padding: 32px 0;
+        touch-action: pan-y;
+    }
+    .cast-card {
+        width: min(420px, 45vw) !important;
+        max-width: 45vw !important;
+        max-height: min(85vh, 88dvh) !important;
+        min-height: 320px;
+    }
+    .card-actions-overlay {
+        right: 20px;
+        bottom: 30%;
+    }
+    .action-circle-btn:hover { transform: scale(1.08); }
+    .action-btn-message:hover { transform: scale(1.05); }
+    .swipe-guide-overlay {
+        bottom: 32px;
+    }
 }

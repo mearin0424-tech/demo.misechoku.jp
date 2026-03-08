@@ -7,20 +7,38 @@ document.addEventListener('DOMContentLoaded', function() {
     const slides = document.querySelectorAll('.main-swiper .swiper-slide');
     const slideCount = slides.length;
 
-    // メインの上下スワイプ（先に初期化して loop で DOM を確定させる）
+    // メインの上下スワイプ（モダン・操作性重視）
     const mainSwiper = new Swiper('.main-swiper', {
         direction: 'vertical',
         slidesPerView: 1,
         centeredSlides: true,
         loop: slideCount >= 2,
-        speed: 500,
-        mousewheel: true,
-        threshold: 20,
-        observer: true,           // DOM 変更を監視
-        observeParents: true,     // 親のサイズ変化も監視
+        speed: 400,
+        mousewheel: {
+            enabled: true,
+            sensitivity: 0.8,
+            thresholdDelta: 20
+        },
+        touchRatio: 1,
+        touchAngle: 45,
+        threshold: 15,
+        resistance: true,
+        resistanceRatio: 0.7,
+        grabCursor: true,
+        pagination: {
+            el: '.home-swiper-pagination',
+            clickable: true,
+            dynamicBullets: slideCount > 5,
+            dynamicMainBullets: 3
+        },
+        keyboard: {
+            enabled: true,
+            onlyInViewport: true
+        },
+        observer: true,
+        observeParents: true,
         on: {
             init: function () {
-                // 初期化直後に高さを再計算（モバイルでレイアウト遅延対策）
                 var self = this;
                 setTimeout(function () { self.update(); }, 100);
             },
@@ -30,7 +48,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     "このキャストの写真は左右にスワイプしてね。",
                     "気になる人がいたら右のボタンでアクションしよう！"
                 ];
-                var currentMsg = messages[this.activeIndex] || "素敵な出会いがありますように！";
+                var realIndex = this.realIndex != null ? this.realIndex : this.activeIndex;
+                var currentMsg = messages[realIndex % messages.length] || "素敵な出会いがありますように！";
                 if (typeof window.updateCharacterMessage === 'function') {
                     window.updateCharacterMessage(currentMsg);
                 }

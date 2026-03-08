@@ -74,6 +74,8 @@
             </div>
             @endforeach
         </div>
+        {{-- ページネーション（ドット） --}}
+        <div class="home-swiper-pagination swiper-pagination"></div>
     </div>
 </div>
 @endsection
