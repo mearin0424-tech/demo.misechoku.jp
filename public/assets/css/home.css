@@ -10,11 +10,13 @@ body.no-scroll main#main-content .content-wrapper {
 }
 
 /* --- Home Screen Layout --- */
+/* 高さを明示指定してモバイルで0になるのを防止（flex だけに頼らない） */
 #home-screen {
     position: relative;
     width: 100%;
     flex: 1;
-    min-height: calc(100vh - var(--header-height) - var(--footer-height) - 60px); /* スマホで高さが0になるのを防止 */
+    height: calc(100vh - var(--header-height) - var(--footer-height) - 60px);
+    min-height: 400px;
     overflow: hidden;
     background-color: #0a0a0a;
     display: flex;
@@ -22,32 +24,36 @@ body.no-scroll main#main-content .content-wrapper {
     align-items: center;
     justify-content: center;
     touch-action: none;
-    /* 上下に30pxの余白を持たせる */
     padding: 30px 0;
     box-sizing: border-box;
 }
-/* モバイル・タブレット：動的ビューポートで高さを確保 */
+/* 動的ビューポート対応（モバイルのアドレスバー考慮） */
 @supports (height: 100dvh) {
     #home-screen {
-        min-height: calc(100dvh - var(--header-height) - var(--footer-height) - 60px);
+        height: calc(100dvh - var(--header-height) - var(--footer-height) - 60px);
+    }
+}
+/* Safari などで 100vh が崩れる場合のフォールバック */
+@supports (height: -webkit-fill-available) {
+    .main-layout-container {
+        min-height: -webkit-fill-available;
     }
 }
 
 /* --- Swiper Container --- */
 .main-swiper {
     width: 100%;
-    height: 100%;
-    min-height: 0; /* flex 子が縮小できるように */
+    height: 100% !important; /* Swiper の JS で上書きされないよう念のため */
+    min-height: 300px;
 }
 .main-swiper .swiper-wrapper {
-    height: 100%;
+    height: 100% !important;
 }
 .main-swiper .swiper-slide {
-    height: 100%;
+    height: 100% !important;
     display: flex;
     justify-content: center;
     align-items: center;
-    /* スライド自体の幅を自動（中身のカード幅）に任せる */
     width: auto !important;
 }
 
@@ -85,10 +91,17 @@ body.no-scroll main#main-content .content-wrapper {
 .home-photo {
     width: 100%;
     height: 100%;
-    min-height: 280px; /* 画像自体にも最小高さを指定 */
+    min-height: 280px;
     object-fit: cover;
     display: block;
     border-radius: 20px;
+    background-color: #1a1a1a; /* 画像未読み込み時も領域を確保 */
+}
+/* 画像読み込み失敗時も枠を表示 */
+.home-photo[src=""],
+.home-photo:not([src]) {
+    min-height: 280px;
+    background-color: #2a2a2a;
 }
 
 /* 写真部分をタップしてプロフィール詳細へ飛ぶリンク */
