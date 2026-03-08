@@ -124,10 +124,15 @@
     </section>
 </div>
 
-{{-- 画像大表示モーダル（✖で削除） --}}
+{{-- 画像大表示モーダル（削除ボタンで削除） --}}
 <div id="image-preview-modal" class="mypage-modal-overlay gallery-preview-overlay" onclick="closeGalleryPreview(event)" role="dialog" aria-label="画像プレビュー">
-    <button type="button" class="gallery-preview-close" onclick="deleteGalleryImageFromModal(event)" aria-label="削除">✕</button>
-    <img id="modal-img" src="" alt="" class="mypage-modal-preview-img" onclick="event.stopPropagation()">
+    <div class="gallery-preview-inner" onclick="event.stopPropagation()">
+        <img id="modal-img" src="" alt="" class="mypage-modal-preview-img">
+        <div class="gallery-preview-actions">
+            <button type="button" class="btn-action btn-action-secondary gallery-preview-btn-close" onclick="closeGalleryPreview()">閉じる</button>
+            <button type="button" class="btn-action gallery-preview-btn-delete" onclick="deleteGalleryImageFromModal(event)">削除</button>
+        </div>
+    </div>
 </div>
 
 {{-- ひとこと編集モーダル --}}

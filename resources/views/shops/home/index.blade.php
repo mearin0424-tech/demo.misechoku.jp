@@ -8,8 +8,6 @@
 <link rel="stylesheet" href="{{ asset('assets/css/character-guide.css') }}">
 @endpush
 
-@section('guide_message', '上下でキャストを変更、左右で写真をチェックできるよ！')
-
 @section('content')
 <div id="home-screen">
     {{-- メインスワイパー（上下） --}}
