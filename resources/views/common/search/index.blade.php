@@ -16,13 +16,14 @@
     $prefix = request()->is('cast/*') ? 'cast' : 'shop';
     // 読み込む部品のビュー名プレフィックス（cast は casts.parts、shop は shops.search.parts）
     $partsView = $prefix === 'cast' ? 'casts.parts' : 'shops.search.parts';
+    $listTabLabel = $prefix === 'cast' ? '求人検索' : '一覧・検索';
 @endphp
 
 <div class="has-sub-header">
     @include('layouts.parts.sub-header', [
         'tabs' => [
             ['id' => 'pane-timeline', 'label' => 'タイムライン', 'active' => true],
-            ['id' => 'pane-list', 'label' => '一覧・検索', 'active' => false],
+            ['id' => 'pane-list', 'label' => $listTabLabel, 'active' => false],
             ['id' => 'pane-ai', 'label' => 'AIレコメンド', 'active' => false]
         ]
     ])
@@ -39,7 +40,7 @@
             @endforelse
         </div>
 
-        {{-- パネル2：一覧・検索 --}}
+        {{-- パネル2：一覧・検索 / 求人検索（cast時） --}}
         <div id="pane-list" class="tab-pane">
             <div class="search-filter-box">
                 {{-- 役割に応じたフィルター（検索窓）を読み込む --}}

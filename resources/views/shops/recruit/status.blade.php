@@ -23,21 +23,11 @@
         </div>
     </header>
 
-    <section class="recruit-status-summary">
-        <div class="recruit-status-summary-icon" aria-hidden="true">
-            <i class="fas fa-briefcase"></i>
-        </div>
-        <div class="recruit-status-summary-text">
-            <p class="recruit-status-summary-label">公開中の求人</p>
-            <p class="recruit-status-summary-value">{{ count($recruits) }} <span class="unit">件</span></p>
-        </div>
-    </section>
-
     <section class="recruit-status-list">
         <article class="recruit-status-card">
             <div class="recruit-status-card-head">
                 <div class="recruit-status-card-info">
-                    <span class="status-badge status-active">ON AIR</span>
+                    <span class="status-badge status-active">求人公開中</span>
                     <h2 class="recruit-status-card-title">レギュラーキャスト募集</h2>
                     <p class="recruit-status-card-meta">時給: ¥5,000〜</p>
                 </div>
@@ -49,12 +39,13 @@
             {{-- お店からのひとこと --}}
             @if($detail && !empty($detail['store_message']))
             <div class="recruit-store-message">
-                <span class="recruit-store-message-label">お店からのひとこと</span>
+                <div class="recruit-store-message-head">
+                    <div class="recruit-store-message-icon" aria-hidden="true"><i class="fas fa-quote-left"></i></div>
+                    <span class="recruit-store-message-label">お店からのひとこと</span>
+                </div>
                 <div class="recruit-store-message-inner">
                     <p class="recruit-store-message-text">{{ $detail['store_message'] }}</p>
-                    <div class="recruit-store-message-character" aria-hidden="true">
-                        <i class="fas fa-dove"></i>
-                    </div>
+                    <div class="recruit-store-message-character" aria-hidden="true"><i class="fas fa-dove"></i></div>
                 </div>
             </div>
             @endif
@@ -100,10 +91,10 @@
         const badge = card ? card.querySelector('.status-badge') : null;
         if (badge) {
             if (el.classList.contains('active')) {
-                badge.innerText = 'ON AIR';
+                badge.innerText = '求人公開中';
                 badge.className = 'status-badge status-active';
             } else {
-                badge.innerText = 'PAUSED';
+                badge.innerText = '公開停止中';
                 badge.className = 'status-badge status-inactive';
             }
         }

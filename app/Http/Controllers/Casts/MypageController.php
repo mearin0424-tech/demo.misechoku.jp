@@ -12,9 +12,12 @@ class MypageController extends Controller
     public function index()
     {
         $cast = $this->getCastMockData();
+        // プロフィール画面にはレビューを出さず、mypage/reviews で表示する
+        $castForProfile = $cast;
+        $castForProfile['reviews'] = [];
         return view('casts.mypage.index', [
             'pageId' => 'mypage',
-            'cast'   => $cast,
+            'cast'   => $castForProfile,
             'isOwn'  => true,
         ]);
     }
@@ -36,6 +39,23 @@ class MypageController extends Controller
     {
         return view('casts.mypage.payment', [
             'pageId' => 'mypage',
+        ]);
+    }
+
+    /**
+     * レビュー一覧（お店の mypage/reviews と同様）
+     */
+    public function reviews()
+    {
+        $cast = $this->getCastMockData();
+        $castData = [
+            'review_avg'   => 4.5,
+            'review_count' => count($cast['reviews']),
+        ];
+        return view('casts.mypage.reviews', [
+            'pageId'    => 'mypage',
+            'castData'  => $castData,
+            'reviews'   => $cast['reviews'],
         ]);
     }
 

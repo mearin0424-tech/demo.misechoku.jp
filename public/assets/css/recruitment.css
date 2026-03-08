@@ -121,44 +121,6 @@
     margin: 4px 0 0 0;
     letter-spacing: 0.05em;
 }
-.recruit-status-summary {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    background: linear-gradient(135deg, rgba(212,175,55,0.08) 0%, rgba(212,175,55,0.02) 100%);
-    border: 1px solid rgba(212,175,55,0.2);
-    border-radius: 16px;
-    padding: 18px 20px;
-    margin-bottom: 24px;
-}
-.recruit-status-summary-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    background: rgba(212,175,55,0.15);
-    color: var(--gold);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.25rem;
-}
-.recruit-status-summary-text { flex: 1; }
-.recruit-status-summary-label {
-    font-size: 0.68rem;
-    color: var(--gold);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin: 0 0 4px 0;
-    font-weight: 700;
-}
-.recruit-status-summary-value {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: #fff;
-    margin: 0;
-    font-family: var(--font-serif);
-}
-.recruit-status-summary-value .unit { font-size: 0.8rem; opacity: 0.6; font-weight: 400; }
 .recruit-status-list { display: flex; flex-direction: column; gap: 16px; }
 .recruit-status-card {
     background: var(--color-card);
@@ -186,64 +148,61 @@
     opacity: 0.8;
     margin: 0;
 }
-/* お店からのひとこと */
+/* お店からのひとこと（他セクションと統一：ダーク基調・ゴールドアクセント） */
 .recruit-store-message {
     margin-top: 20px;
     margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 16px;
+}
+.recruit-store-message-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.recruit-store-message-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(212, 175, 55, 0.12);
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
 }
 .recruit-store-message-label {
-    display: inline-block;
-    background: linear-gradient(135deg, #f5e6a0, #e8d45c);
-    color: #6b5a2e;
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     font-weight: 700;
-    padding: 6px 12px;
-    border-radius: 8px 8px 0 0;
-    margin-bottom: 0;
+    color: var(--gold);
+    letter-spacing: 0.04em;
+    margin: 0;
 }
 .recruit-store-message-inner {
     display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
+    align-items: flex-start;
     gap: 12px;
-    background: linear-gradient(180deg, #fef9e0 0%, #f9f0c5 100%);
-    border: 1px solid rgba(212, 175, 55, 0.25);
-    border-radius: 0 12px 12px 12px;
-    padding: 14px 16px;
-    position: relative;
-    min-height: 72px;
-}
-.recruit-store-message-inner::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20' viewBox='0 0 40 20'%3E%3Cpath fill='none' stroke='rgba(212,175,55,0.12)' stroke-width='0.5' d='M0 10 Q10 5 20 10 T40 10'/%3E%3C/svg%3E") repeat;
-    pointer-events: none;
-    border-radius: inherit;
 }
 .recruit-store-message-text {
     flex: 1;
     margin: 0;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     line-height: 1.55;
-    color: #4a4a4a;
-    position: relative;
-    z-index: 1;
+    color: var(--color-text);
 }
 .recruit-store-message-character {
     flex-shrink: 0;
-    width: 44px;
-    height: 44px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #e8a0b0;
-    font-size: 1.5rem;
-    position: relative;
-    z-index: 1;
+    color: var(--gold);
+    opacity: 0.7;
+    font-size: 1.1rem;
 }
 
 /* 本入店・体験入店・ヘルプ採用 カード（視覚優先：時給を大きく） */
@@ -292,12 +251,12 @@
     line-height: 1.2;
 }
 .recruit-type-wage .unit { font-size: 0.7rem; font-weight: 600; opacity: 0.85; }
-.recruit-type-sub { position: relative; z-index: 1; text-align: right; }
+.recruit-type-sub { position: relative; z-index: 1; text-align: right; color: var(--color-text); }
 .recruit-type-meta {
     font-size: 0.7rem;
     line-height: 1.4;
     margin: 0;
-    opacity: 0.95;
+    color: var(--color-text);
 }
 .recruit-type-bonus,
 .recruit-type-reward,
@@ -306,44 +265,32 @@
     margin: 0 0 2px 0;
     font-size: 0.7rem;
     line-height: 1.35;
+    color: var(--color-text);
 }
 .recruit-type-daily { font-size: 0.65rem; opacity: 0.9; }
 .recruit-type-notes { margin-top: 4px; font-size: 0.65rem; opacity: 0.9; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-.recruit-type-regular {
-    background: linear-gradient(135deg, #f5efe6 0%, #ebe2d5 100%);
-    border: 1px solid rgba(180, 150, 110, 0.25);
-}
-.recruit-type-regular::before {
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='30' viewBox='0 0 60 30'%3E%3Cpath fill='none' stroke='rgba(140,110,70,0.08)' stroke-width='0.6' d='M0 15 Q15 8 30 15 T60 15'/%3E%3C/svg%3E") repeat;
-}
-.recruit-type-regular .recruit-type-label {
-    background: linear-gradient(135deg, #c4a574, #a68b5b);
-    color: #fff;
-}
-
-.recruit-type-trial {
-    background: linear-gradient(135deg, #fce8ec 0%, #f5d8e0 100%);
-    border: 1px solid rgba(200, 140, 160, 0.25);
-}
-.recruit-type-trial::before {
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='30' viewBox='0 0 60 30'%3E%3Cpath fill='none' stroke='rgba(200,120,140,0.08)' stroke-width='0.6' d='M0 15 Q15 8 30 15 T60 15'/%3E%3C/svg%3E") repeat;
-}
-.recruit-type-trial .recruit-type-label {
-    background: linear-gradient(135deg, #e8a0b8, #d080a0);
-    color: #fff;
-}
-
+/* 入店種別カード共通（他UIと統一：ダーク基調・ゴールドアクセント） */
+.recruit-type-regular,
+.recruit-type-trial,
 .recruit-type-help {
-    background: linear-gradient(135deg, #e8f5e8 0%, #d8ead8 100%);
-    border: 1px solid rgba(100, 140, 100, 0.25);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--color-border);
 }
+.recruit-type-regular::before,
+.recruit-type-trial::before,
 .recruit-type-help::before {
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='30' viewBox='0 0 60 30'%3E%3Cpath fill='none' stroke='rgba(80,120,80,0.08)' stroke-width='0.6' d='M0 15 Q15 8 30 15 T60 15'/%3E%3C/svg%3E") repeat;
+    display: none;
 }
+.recruit-type-regular .recruit-type-label,
+.recruit-type-trial .recruit-type-label,
 .recruit-type-help .recruit-type-label {
-    background: linear-gradient(135deg, #6ba86b, #5a9a5a);
-    color: #fff;
+    background: rgba(212, 175, 55, 0.15);
+    color: var(--gold);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+}
+.recruit-type-wage {
+    color: var(--color-text-header);
 }
 
 .recruit-status-card-actions {
@@ -380,25 +327,24 @@
 .recruit-btn-preview:hover { border-color: var(--gold); background: rgba(212, 175, 55, 0.08); }
 .recruit-btn:active { transform: scale(0.98); }
 
-/* ステータスバッジ */
+/* ステータスバッジ（求人公開中 / 公開停止中） */
 .status-badge {
-    font-size: 0.65rem;
-    padding: 4px 10px;
+    font-size: 0.7rem;
+    padding: 5px 12px;
     border-radius: 20px;
     font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.02em;
     display: inline-block;
 }
 .status-active {
-    background: rgba(0, 255, 128, 0.1);
-    color: #00ff80;
-    border: 1px solid rgba(0, 255, 128, 0.2);
+    background: rgba(212, 175, 55, 0.12);
+    color: var(--gold);
+    border: 1px solid rgba(212, 175, 55, 0.3);
 }
 .status-inactive {
     background: rgba(255, 255, 255, 0.05);
-    color: #666;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
 }
 
 /* トグルスイッチ */

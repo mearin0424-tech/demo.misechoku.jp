@@ -23,6 +23,7 @@ use App\Http\Controllers\Shops\InteractionController as ShopInteraction;
 use App\Http\Controllers\Casts\ProfileController as CastProfile;
 use App\Http\Controllers\Casts\MypageController as CastMypage;
 use App\Http\Controllers\Casts\SearchController as CastSearch;
+use App\Http\Controllers\Casts\RecruitmentController as CastRecruit;
 
 /*
 |--------------------------------------------------------------------------
@@ -135,11 +136,13 @@ Route::prefix('cast')->name('cast.')->group(function () {
     Route::get('/shopprofileview/{id}', [CastProfile::class, 'show'])->name('shopprofileview.show');
     Route::redirect('/profile/{id}', '/cast/shopprofileview/{id}')->name('profile.show.redirect');
     Route::get('/search', [CastSearch::class, 'index'])->name('search.index');
+    Route::get('/recruit/{id}', [CastRecruit::class, 'show'])->name('recruit.show');
     
     Route::get('/interaction', [ShopInteraction::class, 'index'])->name('interaction.index');
     Route::get('/mypage', [CastMypage::class, 'index'])->name('mypage.index');
     Route::get('/mypage/employment', [CastMypage::class, 'employment'])->name('mypage.employment');
     Route::get('/mypage/payment', [CastMypage::class, 'payment'])->name('mypage.payment');
+    Route::get('/mypage/reviews', [CastMypage::class, 'reviews'])->name('mypage.reviews');
 
     Route::prefix('talk')->name('talk.')->group(function () {
         Route::get('/', [TalkController::class, 'index'])->name('index');

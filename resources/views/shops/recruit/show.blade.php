@@ -73,9 +73,11 @@
             <h2 class="serif-font text-2xl gold-gradient tracking-tight">Job Preview</h2>
             <p class="text-[10px] text-gray-500 uppercase tracking-[0.2em] mt-1">求人情報のプレビュー</p>
         </div>
+        @if(empty($forCast))
         <a href="{{ route('shop.recruits.edit') }}" class="recruit-btn recruit-btn-preview" style="padding: 8px 14px; font-size: 0.75rem;">
             <i class="fas fa-pen"></i> 編集
         </a>
+        @endif
     </div>
 
     {{-- ヒーロー：キャッチ＋店舗名 --}}

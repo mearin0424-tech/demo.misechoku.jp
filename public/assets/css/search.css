@@ -73,6 +73,27 @@
     cursor: pointer;
 }
 
+/* 求人検索一覧：行全体クリックで求人情報へ */
+.connection-item--clickable {
+    padding: 0;
+}
+.connection-item__link {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 15px;
+    text-decoration: none;
+    color: inherit;
+}
+.connection-item__link:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+.connection-item__arrow {
+    color: var(--color-gold);
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
 /* タブコンテンツ制御 */
 .tab-content { display: none; }
 .tab-content.active { display: block; animation: fadeIn 0.3s ease; }

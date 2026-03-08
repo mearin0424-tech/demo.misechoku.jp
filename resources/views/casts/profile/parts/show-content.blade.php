@@ -123,7 +123,13 @@
 
         <section class="reviews-section" aria-labelledby="reviews-heading">
             <h2 id="reviews-heading" class="section-heading">Reviews</h2>
-            @if(!empty($cast['reviews']) && count($cast['reviews']) > 0)
+            @if($isOwn)
+                <p class="reviews-empty">レビューはマイページの「レビュー一覧」で確認できます。</p>
+                <a href="{{ route('cast.mypage.reviews') }}" class="detail-action-btn edit-btn" style="margin-top: 0.5rem;">
+                    <i class="fas fa-star"></i>
+                    <span>レビュー一覧を見る</span>
+                </a>
+            @elseif(!empty($cast['reviews']) && count($cast['reviews']) > 0)
                 <ul class="reviews-list">
                     @foreach($cast['reviews'] as $rev)
                         <li class="review-item">
