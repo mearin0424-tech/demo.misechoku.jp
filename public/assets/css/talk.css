@@ -517,3 +517,60 @@
     display: flex;
     gap: 15px;
 }
+
+/* ==========================================================================
+   オファー拒否確認ポップアップ
+   ========================================================================== */
+.reject-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.reject-confirm-overlay.is-open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.reject-confirm-modal {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 320px;
+    width: 100%;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+.reject-confirm-text {
+    margin: 0 0 20px;
+    color: var(--color-text-header, #f5ecec);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.reject-confirm-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.reject-confirm-actions .btn-action {
+    min-width: 100px;
+    padding: 10px 20px;
+}
+
+.reject-confirm-actions .btn-reject-confirm-ok {
+    background: var(--color-accent);
+    color: #fff;
+    border-color: var(--color-accent);
+}

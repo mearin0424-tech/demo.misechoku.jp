@@ -141,10 +141,10 @@ class TalkController extends Controller
         // 相手への通知処理(ServiceWorker等)もここに集約可能
 
         return response()->json([
-            'success' => true, 
+            'success' => true,
             'message' => '送信しました',
             'data' => [
-                'content' => $request->message,
+                'content' => trim($request->message),
                 'time' => Carbon::now()->format('H:i')
             ]
         ]);

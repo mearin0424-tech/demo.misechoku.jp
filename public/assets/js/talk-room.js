@@ -51,11 +51,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const now = new Date();
         const timeStr = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
 
-        // 1. サーバー送信前に画面に「送信中」状態で追加
+        // 1. サーバー送信前に画面に「送信中」状態で追加（吹き出しと footer は別ブロック）
         const messageHtml = `
             <div class="message-row msg-right" id="${tempId}">
-                <div class="message-bubble">
-                    <p class="m-0">${content.replace(/\n/g, '<br>')}</p>
+                <div class="message-block">
+                    <div class="message-bubble">
+                        <p class="m-0">${content.replace(/\n/g, '<br>')}</p>
+                    </div>
                     <div class="msg-footer">
                         <span class="msg-time">${timeStr}</span>
                         <span class="msg-status sending"><i class="fas fa-check"></i></span>
