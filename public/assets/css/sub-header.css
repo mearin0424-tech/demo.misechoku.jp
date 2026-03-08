@@ -61,9 +61,9 @@
     padding: 0;
 }
 
-/* --- タブ下コンテンツ：サブヘッダー直下にぴったり（main が既に header 分 padding を持つため sub-header 分のみ） --- */
+/* --- タブ下コンテンツ：サブヘッダー直下にわずか隙間（5px）（main が既に header 分 padding を持つため sub-header 分のみ） --- */
 .tab-page-body {
-    margin-top: var(--sub-header-height);
+    margin-top: calc(var(--sub-header-height) + 5px);
     padding: 0 0 calc(var(--footer-height) + 16px);
     padding-top: 0;
     box-sizing: border-box;

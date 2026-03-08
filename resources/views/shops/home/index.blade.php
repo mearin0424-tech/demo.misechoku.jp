@@ -46,20 +46,30 @@
                     <a href="{{ route($talkRoute, $item['id']) }}" class="action-btn-message" aria-label="メッセージを送る">
                         <i class="fas fa-paper-plane"></i>
                     </a>
+                    @if($isShop)
+                    <a href="{{ route('cast.recruit.show', $item['id']) }}" class="card-recruit-btn">求人情報へ</a>
+                    @endif
                 </div>
 
                 {{-- プロフィール情報 --}}
                 <div class="card-bottom-info">
                     <h2 class="cast-name serif-font">{{ $item['name'] }}@if(!$isShop && isset($item['age'])) <span class="age">{{ $item['age'] }}</span>@endif</h2>
                     <div class="card-location"><i class="fas fa-map-marker-alt"></i> {{ $isShop ? '六本木' : '六本木' }}</div>
+                    @if($isShop && isset($item['rating']))
+                    <div class="card-rating">
+                        <span class="card-rating-stars" aria-label="評価 {{ $item['rating'] }}">
+                            @for($i = 1; $i <= 5; $i++)
+                                <span class="star {{ $i <= floor($item['rating']) ? 'filled' : 'empty' }}">{{ $i <= floor($item['rating']) ? '★' : '☆' }}</span>
+                            @endfor
+                        </span>
+                        <span class="card-rating-num">{{ number_format($item['rating'], 1) }}</span>
+                    </div>
+                    @endif
                     <div class="card-tags-row">
                         @foreach($item['tags'] as $tag)
                             <span class="tag-pill">#{{ $tag }}</span>
                         @endforeach
                     </div>
-                    @if($isShop)
-                    <a href="{{ route('cast.recruit.show', $item['id']) }}" class="card-recruit-btn">求人情報へ</a>
-                    @endif
                 </div>
             </div>
             @endforeach

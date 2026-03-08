@@ -8,11 +8,6 @@
         </div>
         <div class="detail-search-modal__body">
             <form id="detail-search-form" class="detail-search-form">
-                <div class="detail-search-row">
-                    <label class="detail-search-label">簡単キーワード検索</label>
-                    <input type="text" name="keyword" placeholder="名前・エリア・キーワードなど" class="detail-search-input">
-                </div>
-
                 {{-- 経験業種 --}}
                 <div class="detail-search-accordion" data-accordion>
                     <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="false">

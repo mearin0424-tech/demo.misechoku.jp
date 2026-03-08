@@ -97,17 +97,18 @@ body.no-scroll main#main-content .content-wrapper {
 }
 
 /* --- 1キャスト＝1画面レイアウト (カードスタイル適用) --- */
+/* 画面サイズに合わせたカード：長細くならないようアスペクト比と最大高さで制限 */
 .cast-card {
     position: relative;
-    /* 横幅400px指定（画面が狭い場合は90vw） */
-    width: 400px !important;
+    /* 幅：通常は90vwまで、高さ制限で収める場合は 85vh*3/4 以下に */
+    width: min(400px, 90vw, calc(min(85vh, 90dvh) * 3 / 4)) !important;
     max-width: 90vw !important;
-    /* 高さは親コンテナ（上下余白を除いたエリア）いっぱい */
-    height: 100% !important;
-    min-height: 380px; /* スマホ・タブレットでカードがつぶれないように */
+    aspect-ratio: 3 / 4;
+    max-height: min(85vh, 90dvh) !important;
+    height: auto !important;
+    min-height: 280px;
     margin: 0 auto !important;
     
-    /* カードらしい見た目に戻す */
     border-radius: 20px !important;
     overflow: hidden;
     background: #000;
@@ -118,28 +119,34 @@ body.no-scroll main#main-content .content-wrapper {
     flex-direction: column;
 }
 
+/* ビューポートが低いときは高さ優先で幅を算出 */
+@supports (height: 100dvh) {
+    .cast-card {
+        max-height: min(85dvh, 90dvh) !important;
+    }
+}
+
 .home-photo-wrap {
     position: relative;
     flex: 1;
     width: 100%;
-    min-height: 280px; /* スマホ・タブレットで画像エリアが0にならないように */
+    min-height: 0;
     overflow: hidden;
-    border-radius: 20px; /* 画像も角丸に追従 */
+    border-radius: 20px;
 }
 
 .home-photo {
     width: 100%;
     height: 100%;
-    min-height: 280px;
+    min-height: 180px;
     object-fit: cover;
     display: block;
     border-radius: 20px;
-    background-color: #1a1a1a; /* 画像未読み込み時も領域を確保 */
+    background-color: #1a1a1a;
 }
-/* 画像読み込み失敗時も枠を表示 */
 .home-photo[src=""],
 .home-photo:not([src]) {
-    min-height: 280px;
+    min-height: 180px;
     background-color: #2a2a2a;
 }
 
@@ -180,85 +187,124 @@ body.no-scroll main#main-content .content-wrapper {
     bottom: 0;
     width: 100%;
     z-index: 30;
-    padding: 48px 20px 24px;
-    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    padding: 40px 16px 20px;
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 40%, transparent);
     color: #fff;
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
+    overflow: visible;
+    min-height: 100px;
+    box-sizing: border-box;
 }
 
 .cast-name {
-    font-size: 1.6rem;
-    margin-bottom: 4px;
+    font-size: clamp(1.1rem, 4.5vw, 1.6rem);
+    margin-bottom: 2px;
     font-weight: 600;
+    line-height: 1.3;
+    word-break: break-word;
 }
 
 .cast-name .age {
-    font-size: 1.1rem;
+    font-size: 0.95em;
     opacity: 0.8;
-    margin-left: 8px;
+    margin-left: 6px;
 }
 
 .card-location {
-    font-size: 0.85rem;
-    margin-bottom: 12px;
+    font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+    margin-bottom: 8px;
     color: #ccc;
     display: flex;
     align-items: center;
     gap: 5px;
 }
 
+/* 評価★（店舗カード用） */
+.card-rating {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    pointer-events: auto;
+}
+.card-rating-stars {
+    display: inline-flex;
+    gap: 1px;
+    font-size: clamp(0.85rem, 2.8vw, 1rem);
+    line-height: 1;
+}
+.card-rating-stars .star.filled {
+    color: #f5c542;
+    text-shadow: 0 0 6px rgba(245,197,66,0.6);
+}
+.card-rating-stars .star.empty {
+    color: rgba(255,255,255,0.25);
+}
+.card-rating-num {
+    font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+    font-weight: 700;
+    color: #f5c542;
+}
+
 .card-tags-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 5px;
     pointer-events: auto;
+    line-height: 1.2;
 }
 
 .tag-pill {
     background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(8px);
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: clamp(0.65rem, 2vw, 0.75rem);
     border: 1px solid rgba(255,255,255,0.1);
 }
 
-/* 求人情報へ（キャスト側・店舗カード内） */
+/* 求人情報へ（キャスト側・メッセージアイコン付近・目立たせる） */
 .card-recruit-btn {
-    display: inline-block;
-    margin-top: 12px;
-    padding: 10px 20px;
-    background: linear-gradient(145deg, rgba(212,175,55,0.9), rgba(180,140,45,0.9));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 4px;
+    padding: 12px 16px;
+    min-width: 50px;
+    background: linear-gradient(145deg, #d4af37, #b48c2d);
     color: #0a0a0a;
-    font-size: 0.9rem;
-    font-weight: 600;
+    font-size: 0.8rem;
+    font-weight: 700;
     text-align: center;
     text-decoration: none;
-    border-radius: 12px;
-    border: 1px solid rgba(212,175,55,0.5);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-    transition: transform 0.2s, box-shadow 0.2s;
+    border-radius: 25px;
+    border: 2px solid rgba(255,255,255,0.6);
+    box-shadow: 0 4px 16px rgba(212,175,55,0.5), 0 0 0 1px rgba(0,0,0,0.2);
+    transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
     pointer-events: auto;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
 }
 .card-recruit-btn:hover {
-    transform: scale(1.02);
-    box-shadow: 0 4px 14px rgba(212,175,55,0.35);
+    transform: scale(1.08);
+    box-shadow: 0 6px 20px rgba(212,175,55,0.6), 0 0 0 1px rgba(0,0,0,0.2);
+    filter: brightness(1.1);
     color: #0a0a0a;
 }
 .card-recruit-btn:active {
-    transform: scale(0.98);
+    transform: scale(0.96);
 }
 
 /* --- Action Buttons (右側のボタン) --- */
 .card-actions-overlay {
     position: absolute;
-    right: 15px;
-    bottom: 160px; /* カードサイズ変更に伴い位置調整 */
+    right: 12px;
+    bottom: 28%; /* カード高さに合わせて下部情報エリアの上に配置 */
     z-index: 40;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
 }
 
 .action-circle-btn {
@@ -355,9 +401,7 @@ body.no-scroll main#main-content .content-wrapper {
     60% { transform: translateY(-4px); }
 }
 
-/* --- ホーム用の微調整（フォントなど） --- */
-.cast-name { font-size: 1.4rem; }
-
+/* --- ホーム用の微調整 --- */
 .glass-card {
     background: rgba(255, 255, 255, 0.03);
 }

@@ -108,30 +108,46 @@
         updateBadgeAndSummary();
     });
 
-    // この条件で検索（同一ページをGETで再読み込みし、tabと条件をクエリで渡す）
-    modal.querySelector('[data-detail-search-submit]').addEventListener('click', function () {
-        if (form && keywordInput) {
-            var modalKeyword = form.querySelector('input[name="keyword"]');
-            if (modalKeyword) keywordInput.value = modalKeyword.value;
-        }
-        closeModal();
+    function buildSearchParams() {
         var params = ['tab=pane-list'];
-        form.querySelectorAll('input[name="keyword"]').forEach(function (i) {
-            if (i.value.trim()) params.push('keyword=' + encodeURIComponent(i.value.trim()));
-        });
-        form.querySelectorAll('input[type="radio"]:checked').forEach(function (r) {
-            params.push(r.name + '=' + encodeURIComponent(r.value));
-        });
-        form.querySelectorAll('input[type="checkbox"]:checked').forEach(function (c) {
-            if (c.name && c.value) params.push(c.name + '=' + encodeURIComponent(c.value));
-        });
+        if (keywordInput && keywordInput.value.trim()) {
+            params.push('keyword=' + encodeURIComponent(keywordInput.value.trim()));
+        }
+        if (form) {
+            form.querySelectorAll('input[type="radio"]:checked').forEach(function (r) {
+                params.push(r.name + '=' + encodeURIComponent(r.value));
+            });
+            form.querySelectorAll('input[type="checkbox"]:checked').forEach(function (c) {
+                if (c.name && c.value) params.push(c.name + '=' + encodeURIComponent(c.value));
+            });
+        }
+        return params;
+    }
+
+    function doSearch(params) {
         var base = window.location.pathname;
         window.location.href = base + (params.length ? '?' + params.join('&') : '');
-    });
+    }
 
-    // モーダル内キーワードと外のキーワードを同期（モーダルを開いたとき）
-    openBtn.addEventListener('click', function () {
-        var modalKeyword = form && form.querySelector('input[name="keyword"]');
-        if (modalKeyword && keywordInput) modalKeyword.value = keywordInput.value;
+    // 簡単キーワード検索ボタン（入力欄横の「検索」）
+    var simpleSubmitBtn = document.getElementById('search-keyword-submit');
+    if (simpleSubmitBtn && keywordInput) {
+        simpleSubmitBtn.addEventListener('click', function () {
+            doSearch(buildSearchParams());
+        });
+    }
+    if (keywordInput) {
+        keywordInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                doSearch(buildSearchParams());
+            }
+        });
+    }
+
+    // この条件で検索（詳細検索モーダル内の「この条件で検索」）
+    modal.querySelector('[data-detail-search-submit]').addEventListener('click', function () {
+        closeModal();
+        doSearch(buildSearchParams());
     });
 })();
