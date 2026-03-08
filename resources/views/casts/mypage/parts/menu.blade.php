@@ -29,5 +29,13 @@
             </span>
             <i class="fas fa-chevron-right btn-action-arrow"></i>
         </a>
+        <a href="https://mearin0424-tech.github.io/personality-test/personality-test.html" class="btn-action-card personality-test" target="_blank" rel="noopener noreferrer">
+            <span class="btn-action-icon-wrap"><i class="fas fa-clipboard-list"></i></span>
+            <span class="btn-action-body">
+                <span class="btn-action-label">PERSONALITY</span>
+                <span class="btn-action-text">接客タイプ診断</span>
+            </span>
+            <i class="fas fa-chevron-right btn-action-arrow"></i>
+        </a>
     </div>
 </div>
