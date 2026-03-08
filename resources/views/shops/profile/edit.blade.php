@@ -52,7 +52,7 @@
         <a href="{{ route('shop.mypage.index') }}" class="text-gray-400 text-sm">キャンセル</a>
     </div>
 
-    <form action="{{ route('shop.profile.update') }}" method="POST">
+    <form action="{{ route('shop.profile.store.update') }}" method="POST">
         @csrf
         <div class="space-y-6">
 

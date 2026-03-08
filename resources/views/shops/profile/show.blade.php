@@ -11,7 +11,7 @@
         <div class="hero-overlay">
             <h1 class="shop-name serif-font">{{ $shop['name'] }}</h1>
             @if($isOwn)
-                <a href="{{ route('shop.profile.edit') }}" class="edit-fab"><i class="fas fa-pen"></i></a>
+                <a href="{{ route('shop.profile.store.edit') }}" class="edit-fab"><i class="fas fa-pen"></i></a>
             @endif
         </div>
     </div>

@@ -37,14 +37,17 @@ class ProfileController extends Controller
     }
 
     /**
-     * プロフィール編集画面表示
+     * プロフィール編集画面表示（cast/profile/edit または shop/profile/edit から呼ばれる）
      */
     public function edit()
     {
         $data = $this->getEditMockData();
+        $isShop = request()->is('shop/*');
         return view('casts.profile.edit', [
-            'pageId'   => 'mypage',
-            'profile'  => $data,
+            'pageId'      => 'mypage',
+            'profile'     => $data,
+            'updateRoute' => $isShop ? 'shop.profile.update' : 'cast.profile.update',
+            'editRoute'   => $isShop ? 'shop.profile.edit' : 'cast.profile.edit',
         ]);
     }
 
@@ -75,8 +78,9 @@ class ProfileController extends Controller
             'current_job'  => 'nullable|string',
             'night_work_exp' => 'nullable|string|max:20',
         ]);
-        // モックのため保存処理は行わず、リダイレクト後も入力値を表示
-        return redirect()->route('cast.profile.edit')
+        // モックのため保存処理は行わず、リダイレクト先は呼び元（shop/cast）に合わせる
+        $editRoute = request()->routeIs('shop.profile.update') ? 'shop.profile.edit' : 'cast.profile.edit';
+        return redirect()->route($editRoute)
             ->with('message', 'プロフィールを更新しました')
             ->withInput();
     }

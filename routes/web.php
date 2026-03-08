@@ -89,11 +89,13 @@ Route::prefix('shop')->name('shop.')->group(function () {
         Route::get('/like', [ShopInteraction::class, 'like'])->name('like');
     });
 
-    // プロフィール（ギャラリーはマイページで編集）
+    // プロフィール（キャスト用編集＝shop/profile/edit、店舗用は store サブパス）
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [ShopProfile::class, 'show'])->name('show');
-        Route::get('/edit', [ShopProfile::class, 'edit'])->name('edit');
-        Route::post('/update', [ShopProfile::class, 'update'])->name('update');
+        Route::get('/edit', [CastProfile::class, 'edit'])->name('edit');
+        Route::post('/update', [CastProfile::class, 'update'])->name('update');
+        Route::get('/store/edit', [ShopProfile::class, 'edit'])->name('store.edit');
+        Route::post('/store/update', [ShopProfile::class, 'update'])->name('store.update');
         Route::post('/upload-image', [ShopProfile::class, 'uploadImage'])->name('upload.image');
         Route::delete('/image/{id}', [ShopProfile::class, 'deleteImage'])->name('image.delete');
     });

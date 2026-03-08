@@ -2,6 +2,7 @@
 
 @section('title', 'プロフィール確認・編集')
 @section('header_title', 'プロフィール確認・編集')
+@section('guide_message', 'プロフィールを充実させるとマッチしやすいよ！見られたくないことは書かなくてOK！')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/profile_edit.css') }}">
@@ -9,21 +10,11 @@
 
 @section('content')
 <div class="edit-container cast-profile-edit">
-    {{-- 情報バナー --}}
-    <div class="profile-edit-banner">
-        <p class="profile-edit-banner-text">プロフィールを充実させるとマッチしやすいよ！見られたくないことは書かなくてOK！</p>
-        <a href="{{ route('pages.official.privacy') }}" class="profile-edit-banner-link">
-            <i class="fas fa-chevron-right"></i>
-            安全な個人情報の取り扱いについて
-        </a>
-        <div class="profile-edit-banner-character" aria-hidden="true"></div>
-    </div>
-
     @if(session('message'))
         <p class="profile-edit-flash">{{ session('message') }}</p>
     @endif
 
-    <form action="{{ route('cast.profile.update') }}" method="POST" class="profile-edit-form">
+    <form action="{{ route($updateRoute ?? 'cast.profile.update') }}" method="POST" class="profile-edit-form">
         @csrf
 
         {{-- ニックネーム --}}

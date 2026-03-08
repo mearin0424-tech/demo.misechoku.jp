@@ -58,6 +58,7 @@
                 <li><a href="{{ url('/about') }}"><i class="fas fa-building"></i> 運営協会</a></li>
                 <li><a href="{{ url('/terms') }}"><i class="fas fa-file-contract"></i> 利用規約</a></li>
                 <li><a href="{{ url('/privacy') }}"><i class="fas fa-shield-alt"></i> プライバシーポリシー</a></li>
+                <li><a href="{{ route('pages.official.privacy') }}"><i class="fas fa-lock"></i> 安全な個人情報の取り扱いについて</a></li>
             </ul>
         </div>
     </div>
