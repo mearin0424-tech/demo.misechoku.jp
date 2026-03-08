@@ -11,7 +11,7 @@
 @php
     $itemType = $itemType ?? 'cast';
     $isShop = ($itemType === 'shop');
-    $detailRoute = $isShop ? 'cast.profile.show' : 'shop.profile.cast.show';
+    $detailRoute = $isShop ? 'shop.castprofileview.show' : 'cast.shopprofileview.show';
     $talkRoute = $isShop ? 'cast.talk.room' : 'shop.talk.room';
 @endphp
 @section('content')
