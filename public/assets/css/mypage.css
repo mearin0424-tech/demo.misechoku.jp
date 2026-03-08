@@ -321,6 +321,11 @@
     padding: 0 var(--content-padding-x);
 }
 
+/* キャストマイページ：名前・プロフィール編集の下にメニューを配置したときの余白 */
+.profile-view-inner .cast-mypage-menu-section {
+    margin-top: 24px;
+}
+
 /* キャストマイページ：現在のメニュー項目を強調 */
 .mypage-quick-actions .btn-action-card.is-current {
     border-color: var(--gold);

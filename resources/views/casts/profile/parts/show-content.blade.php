@@ -39,6 +39,9 @@
                     <span>プロフィール編集</span>
                 </a>
             </div>
+            @if(!empty($mypageMenu))
+                @include('casts.mypage.parts.menu', ['current' => $mypageMenu, 'fullWidth' => false])
+            @endif
         @else
             <div class="profile-detail-actions">
                 <button type="button" id="btn-profile-keep" class="detail-action-btn keep {{ ($cast['is_kept'] ?? false) ? 'active' : '' }}" aria-pressed="{{ ($cast['is_kept'] ?? false) ? 'true' : 'false' }}">
@@ -49,13 +52,6 @@
                     <i class="fas fa-heart"></i>
                     <span class="like-count-text">LIKE：<span class="num">{{ $cast['like_cnt'] ?? 0 }}</span>件</span>
                 </button>
-            </div>
-        @endif
-
-        @if(!empty($cast['birth_year']) && !empty($cast['birth_month']) && !empty($cast['birth_day']))
-            <div class="detail-row">
-                <span class="detail-label">生年月日</span>
-                <span class="detail-value">{{ $cast['birth_year'] }}年{{ $cast['birth_month'] }}月{{ $cast['birth_day'] }}日</span>
             </div>
         @endif
 
@@ -88,6 +84,12 @@
         <section class="other-info-detail-section" aria-labelledby="other-info-heading">
             <h2 id="other-info-heading" class="section-heading">その他情報</h2>
             <div class="other-info-detail-body">
+                @if(!empty($cast['birth_year']) && !empty($cast['birth_month']) && !empty($cast['birth_day']))
+                    <div class="detail-row">
+                        <span class="detail-label">生年月日</span>
+                        <span class="detail-value">{{ $cast['birth_year'] }}年{{ $cast['birth_month'] }}月{{ $cast['birth_day'] }}日</span>
+                    </div>
+                @endif
                 <div class="detail-row">
                     <span class="detail-label">希望職種</span>
                     <span class="detail-value">{{ $cast['desired_job'] ?? '--' }}</span>
