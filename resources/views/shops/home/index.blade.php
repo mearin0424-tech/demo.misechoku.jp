@@ -47,7 +47,7 @@
                         <i class="fas fa-paper-plane"></i>
                     </a>
                     @if($isShop)
-                    <a href="{{ route('cast.recruit.show', $item['id']) }}" class="card-recruit-btn">求人情報へ</a>
+                    <a href="{{ route('cast.recruit.show', $item['id']) }}" class="card-recruit-btn">求人</a>
                     @endif
                 </div>
 

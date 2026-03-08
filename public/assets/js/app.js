@@ -32,18 +32,23 @@ document.addEventListener('DOMContentLoaded', function() {
         menuOverlay.addEventListener('click', closeSidebar);
     }
 
-    // --- 3. ポップアップトグル関数 ---
-    function togglePopup(targetPopup, otherPopup) {
+    // --- 3. ポップアップトグル関数（インライン onclick からも呼べるよう window に公開） ---
+    function togglePopup(targetPopupIdOrEl, otherPopupIdOrEl) {
+        const targetPopup = typeof targetPopupIdOrEl === 'string'
+            ? document.getElementById(targetPopupIdOrEl)
+            : targetPopupIdOrEl;
         if (!targetPopup) return;
-        
+
+        const otherPopup = otherPopupIdOrEl != null
+            ? (typeof otherPopupIdOrEl === 'string' ? document.getElementById(otherPopupIdOrEl) : otherPopupIdOrEl)
+            : null;
+
         const isVisible = targetPopup.style.display === 'block';
-        
-        // 他のポップアップを閉じる
+
         if (otherPopup) otherPopup.style.display = 'none';
-        
-        // ターゲットの表示を切り替え
         targetPopup.style.display = isVisible ? 'none' : 'block';
     }
+    window.togglePopup = togglePopup;
 
     // タスクボタン
     const taskBtn = document.getElementById('btn-header-task');

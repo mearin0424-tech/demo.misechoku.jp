@@ -166,13 +166,13 @@
     justify-content: flex-end;
     flex-shrink: 0;
 }
-/* 検索ボタン（入力欄横） */
+/* 検索ボタン（入力欄横）：黄色ボタンで文字をはっきり表示 */
 .search-filter-submit-btn {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     padding: 12px 16px;
-    background: var(--color-gold);
+    background: var(--gold);
     color: var(--color-main);
     border: none;
     border-radius: 8px;
