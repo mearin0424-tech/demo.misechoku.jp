@@ -249,7 +249,7 @@
     margin: 0;
 }
 
-/* --- クイックアクション --- */
+/* --- クイックアクション（求人情報・採用請求管理） --- */
 .mypage-actions-title {
     font-size: 0.7rem;
     color: var(--color-text);
@@ -260,58 +260,99 @@
     font-weight: 600;
 }
 
-.btn-action-card {
+.mypage-quick-actions .btn-action-card {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 6px;
-    padding: 18px 20px;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    padding: 0;
     border-radius: 16px;
     text-decoration: none;
     margin-bottom: 12px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
     border: 1px solid var(--mypage-gold-border);
-    background: linear-gradient(145deg, var(--mypage-gold-soft), rgba(182, 122, 43, 0.06));
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(182, 122, 43, 0.03));
     box-sizing: border-box;
     width: 100%;
     text-align: left;
+    overflow: hidden;
 }
 
-.btn-action-card:last-child {
+.mypage-quick-actions .btn-action-card:last-child {
     margin-bottom: 0;
 }
 
-.btn-action-card:hover {
+.mypage-quick-actions .btn-action-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    border-color: rgba(212, 175, 55, 0.55);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(212, 175, 55, 0.2);
+    border-color: rgba(212, 175, 55, 0.6);
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(182, 122, 43, 0.06));
 }
 
-.btn-action-card:active {
+.mypage-quick-actions .btn-action-card:active {
     transform: translateY(0);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
 }
 
-.btn-action-label {
+/* 左側アイコンエリア */
+.mypage-quick-actions .btn-action-card .btn-action-icon-wrap {
+    width: 56px;
+    min-width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(212, 175, 55, 0.2);
+    color: var(--mypage-gold);
+    font-size: 1.25rem;
+}
+
+.mypage-quick-actions .btn-action-card.job .btn-action-icon-wrap {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(182, 122, 43, 0.15));
+}
+
+.mypage-quick-actions .btn-action-card.manage .btn-action-icon-wrap {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(182, 122, 43, 0.1));
+}
+
+/* テキストエリア */
+.mypage-quick-actions .btn-action-card .btn-action-body {
+    flex: 1;
+    padding: 16px 16px 16px 0;
+    min-width: 0;
+}
+
+.mypage-quick-actions .btn-action-label {
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.12em;
     font-weight: 700;
     color: var(--mypage-gold);
+    margin-bottom: 4px;
+    display: block;
 }
 
-.btn-action-text {
+.mypage-quick-actions .btn-action-text {
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--color-text-header);
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
-.btn-action-text i {
-    font-size: 1rem;
-    opacity: 0.9;
+.mypage-quick-actions .btn-action-text i {
+    font-size: 0.9rem;
+    opacity: 0.85;
+}
+
+/* 右矢印 */
+.mypage-quick-actions .btn-action-card .btn-action-arrow {
+    padding-right: 16px;
+    color: var(--mypage-gold);
+    font-size: 0.85rem;
+    opacity: 0.8;
+    flex-shrink: 0;
 }
 
 /* --- 書類管理 --- */

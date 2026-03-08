@@ -55,12 +55,20 @@
             <div class="mypage-section mypage-quick-actions">
                 <h2 class="mypage-actions-title">クイックアクション</h2>
                 <a href="{{ route('shop.recruits.status') }}" class="btn-action-card job">
-                    <span class="btn-action-label">Recruit Status</span>
-                    <span class="btn-action-text"><i class="fas fa-briefcase"></i> 求人情報の確認・編集</span>
+                    <span class="btn-action-icon-wrap"><i class="fas fa-briefcase"></i></span>
+                    <span class="btn-action-body">
+                        <span class="btn-action-label">Recruit Status</span>
+                        <span class="btn-action-text">求人情報の確認・編集</span>
+                    </span>
+                    <i class="fas fa-chevron-right btn-action-arrow"></i>
                 </a>
                 <a href="{{ route('shop.mypage.payment.index') }}" class="btn-action-card manage">
-                    <span class="btn-action-label">MANAGEMENT</span>
-                    <span class="btn-action-text"><i class="fas fa-file-invoice-dollar"></i> 採用・請求管理</span>
+                    <span class="btn-action-icon-wrap"><i class="fas fa-file-invoice-dollar"></i></span>
+                    <span class="btn-action-body">
+                        <span class="btn-action-label">MANAGEMENT</span>
+                        <span class="btn-action-text">採用・請求管理</span>
+                    </span>
+                    <i class="fas fa-chevron-right btn-action-arrow"></i>
                 </a>
             </div>
 
