@@ -8,6 +8,10 @@
 @endpush
 
 @section('content')
+@php
+    $detail = $recruitDetail ?? null;
+    $jobTypes = $detail['job_types'] ?? [];
+@endphp
 <div class="recruit-status-page contents animate-fadeIn">
     <header class="recruit-status-header">
         <a href="{{ route('shop.mypage.index') }}" class="recruit-status-back">
@@ -21,7 +25,7 @@
 
     <section class="recruit-status-summary">
         <p class="recruit-status-summary-label">公開中の求人</p>
-        <p class="recruit-status-summary-value">1 <span class="unit">件</span></p>
+        <p class="recruit-status-summary-value">{{ count($recruits) }} <span class="unit">件</span></p>
     </section>
 
     <section class="recruit-status-list">
@@ -36,6 +40,37 @@
                     <div class="toggle-circle"></div>
                 </div>
             </div>
+
+            {{-- お店からのひとこと --}}
+            @if($detail && !empty($detail['store_message']))
+            <div class="recruit-store-message">
+                <span class="recruit-store-message-label">お店からのひとこと</span>
+                <div class="recruit-store-message-inner">
+                    <p class="recruit-store-message-text">{{ $detail['store_message'] }}</p>
+                    <div class="recruit-store-message-character" aria-hidden="true">
+                        <i class="fas fa-dove"></i>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            {{-- 本入店・体験入店・ヘルプ採用 カード --}}
+            <div class="recruit-job-types">
+                @foreach(['regular' => 'recruit-type-regular', 'trial' => 'recruit-type-trial', 'help' => 'recruit-type-help'] as $key => $typeClass)
+                    @if(!empty($jobTypes[$key]))
+                    @php $type = $jobTypes[$key]; @endphp
+                    <div class="recruit-type-card {{ $typeClass }}">
+                        <span class="recruit-type-label">{{ $type['label'] }}</span>
+                        <p class="recruit-type-wage">時給 {{ number_format($type['hourly_wage']) }}円〜</p>
+                        <p class="recruit-type-bonus">{{ $type['bonus'] }}</p>
+                        <p class="recruit-type-reward">{{ $type['work_reward'] }}</p>
+                        <p class="recruit-type-daily">（1日の勤務時間: {{ $type['daily_hours'] }}時間）</p>
+                        <p class="recruit-type-notes">{{ $type['notes'] }}</p>
+                    </div>
+                    @endif
+                @endforeach
+            </div>
+
             <div class="recruit-status-card-actions">
                 <a href="{{ route('shop.recruits.edit') }}" class="recruit-btn recruit-btn-edit">
                     <i class="fas fa-pen"></i> 編集する

@@ -182,6 +182,81 @@
     white-space: nowrap;
 }
 
+/* --- ライク：1行を細くしたコンパクト表示 --- */
+#pane-like .like-list-compact .cast-list-card {
+    padding: 8px 12px;
+    margin-bottom: 0;
+    border-radius: 10px;
+    min-height: 0;
+}
+#pane-like .like-list-compact .card-thumb {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+}
+#pane-like .like-list-compact .card-info .info-header .name {
+    font-size: 0.95rem;
+}
+#pane-like .like-list-compact .info-sub,
+#pane-like .like-list-compact .info-specs {
+    font-size: 0.7rem;
+    margin: 2px 0;
+}
+#pane-like .like-list-compact .card-arrow {
+    font-size: 0.8rem;
+}
+#pane-like .like-list-compact {
+    gap: 6px;
+}
+
+/* 3件以上：初期は折りたたみ（約2行分の高さ）、広げて閲覧で全表示 */
+#pane-like .like-list-container.like-list-compact.like-list-collapsed {
+    max-height: 120px;
+    overflow: hidden;
+    position: relative;
+}
+#pane-like .like-list-container.like-list-compact.like-list-collapsed::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 32px;
+    background: linear-gradient(transparent, var(--color-main));
+    pointer-events: none;
+}
+#pane-like .like-area.expanded .like-list-collapsed,
+#pane-like .like-area.expanded .like-list-collapsed::after {
+    max-height: none;
+    overflow: visible;
+    background: none;
+}
+#pane-like .like-area.expanded .like-list-collapsed::after {
+    display: none;
+}
+
+/* 広げて閲覧するボタン */
+.like-expand-btn {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    font-size: 0.85rem;
+    color: var(--gold);
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.like-expand-btn:hover {
+    background: rgba(212, 175, 55, 0.1);
+    border-color: var(--gold);
+}
+#pane-like .like-area.expanded .like-expand-btn {
+    border-color: var(--color-border);
+}
+
 #pane-like .no-data-wrapper {
     display: flex;
     flex-direction: column;

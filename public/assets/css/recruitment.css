@@ -92,6 +92,150 @@
     opacity: 0.8;
     margin: 0;
 }
+/* お店からのひとこと */
+.recruit-store-message {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+.recruit-store-message-label {
+    display: inline-block;
+    background: linear-gradient(135deg, #f5e6a0, #e8d45c);
+    color: #6b5a2e;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 8px 8px 0 0;
+    margin-bottom: 0;
+}
+.recruit-store-message-inner {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    background: linear-gradient(180deg, #fef9e0 0%, #f9f0c5 100%);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 0 12px 12px 12px;
+    padding: 14px 16px;
+    position: relative;
+    min-height: 72px;
+}
+.recruit-store-message-inner::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20' viewBox='0 0 40 20'%3E%3Cpath fill='none' stroke='rgba(212,175,55,0.12)' stroke-width='0.5' d='M0 10 Q10 5 20 10 T40 10'/%3E%3C/svg%3E") repeat;
+    pointer-events: none;
+    border-radius: inherit;
+}
+.recruit-store-message-text {
+    flex: 1;
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    color: #4a4a4a;
+    position: relative;
+    z-index: 1;
+}
+.recruit-store-message-character {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #e8a0b0;
+    font-size: 1.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* 本入店・体験入店・ヘルプ採用 カード */
+.recruit-job-types {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+.recruit-type-card {
+    border-radius: 14px;
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+}
+.recruit-type-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    opacity: 0.4;
+    pointer-events: none;
+}
+.recruit-type-label {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+}
+.recruit-type-wage,
+.recruit-type-bonus,
+.recruit-type-reward,
+.recruit-type-daily,
+.recruit-type-notes {
+    margin: 0 0 4px 0;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    position: relative;
+    z-index: 1;
+}
+.recruit-type-wage { font-weight: 700; }
+.recruit-type-daily { font-size: 0.72rem; opacity: 0.9; }
+.recruit-type-notes { margin-top: 6px; font-size: 0.75rem; opacity: 0.95; }
+
+.recruit-type-regular {
+    background: linear-gradient(135deg, #f5efe6 0%, #ebe2d5 100%);
+    border: 1px solid rgba(180, 150, 110, 0.25);
+}
+.recruit-type-regular::before {
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='30' viewBox='0 0 60 30'%3E%3Cpath fill='none' stroke='rgba(140,110,70,0.08)' stroke-width='0.6' d='M0 15 Q15 8 30 15 T60 15'/%3E%3C/svg%3E") repeat;
+}
+.recruit-type-regular .recruit-type-label {
+    background: linear-gradient(135deg, #c4a574, #a68b5b);
+    color: #fff;
+}
+
+.recruit-type-trial {
+    background: linear-gradient(135deg, #fce8ec 0%, #f5d8e0 100%);
+    border: 1px solid rgba(200, 140, 160, 0.25);
+}
+.recruit-type-trial::before {
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='30' viewBox='0 0 60 30'%3E%3Cpath fill='none' stroke='rgba(200,120,140,0.08)' stroke-width='0.6' d='M0 15 Q15 8 30 15 T60 15'/%3E%3C/svg%3E") repeat;
+}
+.recruit-type-trial .recruit-type-label {
+    background: linear-gradient(135deg, #e8a0b8, #d080a0);
+    color: #fff;
+}
+
+.recruit-type-help {
+    background: linear-gradient(135deg, #e8f5e8 0%, #d8ead8 100%);
+    border: 1px solid rgba(100, 140, 100, 0.25);
+}
+.recruit-type-help::before {
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='30' viewBox='0 0 60 30'%3E%3Cpath fill='none' stroke='rgba(80,120,80,0.08)' stroke-width='0.6' d='M0 15 Q15 8 30 15 T60 15'/%3E%3C/svg%3E") repeat;
+}
+.recruit-type-help .recruit-type-label {
+    background: linear-gradient(135deg, #6ba86b, #5a9a5a);
+    color: #fff;
+}
+
 .recruit-status-card-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;

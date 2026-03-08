@@ -69,4 +69,7 @@
 
 @push('scripts')
 <script src="{{ asset('assets/js/sub-header.js') }}"></script>
+@if($prefix === 'cast')
+<script src="{{ asset('assets/js/search-detail.js') }}"></script>
+@endif
 @endpush

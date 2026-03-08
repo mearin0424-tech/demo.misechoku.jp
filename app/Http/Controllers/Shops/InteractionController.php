@@ -26,18 +26,18 @@ class InteractionController extends Controller
             ];
             $profileRoute = 'cast.shopprofileview.show';
         } else {
-            // お店側：キャストのキープ・ライク・足あと
+            // お店側：キャストのキープ・ライク・足あと（キャスト画像は storage/mock/casts/{id}-1.png、存在しない場合はビュー側でデフォルト表示）
             $keepCasts = [
-                ['id' => 1, 'name' => 'みさき', 'age' => 23, 'img' => '', 'profession' => 'モデル', 'pref' => '東京都', 'city' => '港区', 'height' => 165, 'b' => 85, 'w' => 58, 'h' => 86, 'updated_at' => '2026-01-01 12:00:00'],
+                ['id' => 1, 'name' => 'みさき', 'age' => 23, 'img' => asset('storage/mock/casts/1-1.png'), 'profession' => 'モデル', 'pref' => '東京都', 'city' => '港区', 'height' => 165, 'b' => 85, 'w' => 58, 'h' => 86, 'updated_at' => '2026-01-01 12:00:00'],
             ];
             $receivedLikeCasts = [
-                ['id' => 2, 'name' => '愛華', 'age' => 21, 'img' => '', 'profession' => '女子大生', 'pref' => '東京都', 'city' => '渋谷区', 'created_at' => '2026-01-02 10:00:00', 'is_match' => false],
+                ['id' => 2, 'name' => '愛華', 'age' => 21, 'img' => asset('storage/mock/casts/2-1.png'), 'profession' => '女子大生', 'pref' => '東京都', 'city' => '渋谷区', 'created_at' => '2026-01-02 10:00:00', 'is_match' => false],
             ];
             $sentLikeCasts = [
-                ['id' => 4, 'name' => '美咲', 'age' => 22, 'img' => '', 'profession' => 'モデル', 'pref' => '東京都', 'city' => '新宿区', 'created_at' => '2026-01-03 14:00:00', 'is_match' => true],
+                ['id' => 4, 'name' => '美咲', 'age' => 22, 'img' => asset('storage/mock/casts/4-1.png'), 'profession' => 'モデル', 'pref' => '東京都', 'city' => '新宿区', 'created_at' => '2026-01-03 14:00:00', 'is_match' => true],
             ];
             $footprintCasts = [
-                ['id' => 3, 'name' => 'Rena', 'age' => 25, 'img' => '', 'profession' => 'フリーランス', 'pref' => '神奈川県', 'city' => '横浜市', 'visited_at' => '2026-01-02 18:00:00'],
+                ['id' => 3, 'name' => 'Rena', 'age' => 25, 'img' => asset('storage/mock/casts/3-1.png'), 'profession' => 'フリーランス', 'pref' => '神奈川県', 'city' => '横浜市', 'visited_at' => '2026-01-02 18:00:00'],
             ];
             $profileRoute = 'shop.castprofileview.show';
         }

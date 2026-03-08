@@ -1,7 +1,7 @@
 @php $profileRoute = $profileRoute ?? 'shop.castprofileview.show'; @endphp
 <a href="{{ route($profileRoute, $c['id']) }}" class="cast-list-card">
     <div class="card-thumb">
-        <img src="{{ $c['img'] ?? asset('storage/mock/casts/'.$c['id'].'-1.png') }}" alt="{{ $c['name'] }}">
+        <img src="{{ $c['img'] ?? asset('storage/mock/casts/'.$c['id'].'-1.png') }}" alt="{{ $c['name'] }}" onerror="this.onerror=null; this.src='{{ asset('assets/images/common/user-default.svg') }}'">
     </div>
     <div class="card-info">
         <div class="info-header">
