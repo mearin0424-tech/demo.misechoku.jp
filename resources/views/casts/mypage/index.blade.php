@@ -31,14 +31,31 @@
             </div>
         </div>
 
-        {{-- レビューカード（★評価からレビュー一覧へ・お店同様の位置） --}}
-        <a href="{{ route('cast.mypage.reviews') }}" class="mypage-review-card shop-review-link">
-            <span class="review-stars"><i class="fas fa-star"></i> {{ $review_avg ?? 0 }}</span>
-            <span class="review-count">({{ $review_count ?? 0 }}件)</span>
-            <i class="fas fa-chevron-right review-arrow"></i>
+        {{-- レビュー表示（枠なし・星＋数値で画像のようなイメージ） --}}
+        @php
+            $avg = (float)($review_avg ?? 0);
+            $avgRounded = round($avg * 2) / 2;
+        @endphp
+        <a href="{{ route('cast.mypage.reviews') }}" class="mypage-review-link-frameless">
+            <span class="mypage-review-stars-inline" aria-label="{{ $avg }}点">
+                @for($i = 1; $i <= 5; $i++)
+                    @if($i <= $avgRounded)
+                        <i class="fas fa-star"></i>
+                    @elseif($i - 0.5 <= $avgRounded)
+                        <i class="fas fa-star-half-alt"></i>
+                    @else
+                        <i class="far fa-star"></i>
+                    @endif
+                @endfor
+            </span>
+            <span class="mypage-review-num">{{ number_format($avg, 1) }}</span>
+            <span class="mypage-review-count-text">({{ $review_count ?? 0 }}件)</span>
         </a>
 
         <div class="mypage-detail-box">
+            {{-- メニュー（プロフィール情報より上） --}}
+            @include('casts.mypage.parts.menu', ['current' => 'profile', 'fullWidth' => false])
+
             {{-- プロフィール情報：編集ボタン＋5カテゴリ --}}
             <div class="mypage-section profile-info-section">
                 <div class="section-title-row">
@@ -106,13 +123,11 @@
                 </div>
             </div>
 
-            {{-- メニュー（お店同様の位置） --}}
-            @include('casts.mypage.parts.menu', ['current' => 'profile', 'fullWidth' => false])
-
-            {{-- Image Library（お店同様） --}}
+            {{-- Image Library（ドラッグで並び替え・お店同様） --}}
             <div class="mypage-section gallery-edit-section">
                 <div class="gallery-section-header">
                     <h2 class="section-title section-title-gold">Image Library</h2>
+                    <p class="gallery-section-hint">ドラッグで並び替え（スマホは長押し）</p>
                 </div>
                 <ul class="responsive-gallery gallery-grid" id="gallery-list">
                     @for($i = 0; $i < 8; $i++)
@@ -166,6 +181,8 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="{{ asset('assets/js/gallery-sortable.js') }}"></script>
 <script>
 var _galleryPreviewImageId = null;
 var _galleryPreviewLi = null;

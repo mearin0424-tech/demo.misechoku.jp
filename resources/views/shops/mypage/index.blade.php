@@ -90,10 +90,11 @@
                 </ul>
             </div>
 
-            {{-- Image Library（マイページ上で編集：タップで大表示・✖で削除・空きタップで登録） --}}
+            {{-- Image Library（ドラッグで並び替え・タップで大表示・削除・空きタップで登録） --}}
             <div class="mypage-section gallery-edit-section">
                 <div class="gallery-section-header">
                     <h2 class="section-title section-title-gold">Image Library</h2>
+                    <p class="gallery-section-hint">ドラッグで並び替え（スマホは長押し）</p>
                 </div>
                 <ul class="responsive-gallery gallery-grid" id="gallery-list">
                     @for($i = 0; $i < 8; $i++)
@@ -147,6 +148,8 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="{{ asset('assets/js/gallery-sortable.js') }}"></script>
 <script>
 var _galleryPreviewImageId = null;
 var _galleryPreviewLi = null;

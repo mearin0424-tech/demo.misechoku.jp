@@ -63,6 +63,14 @@
         color: var(--color-text);
         line-height: 1.6;
     }
+    .recruit-pr-catch {
+        font-size: 1.05rem;
+        color: var(--color-text-header);
+        font-style: italic;
+        margin: 0 0 12px 0;
+        line-height: 1.5;
+    }
+    .recruit-pr-message { margin: 0; }
 </style>
 @endpush
 
@@ -70,8 +78,8 @@
 <div class="contents inner animate-fadeIn p-4 pb-24">
     <div class="flex justify-between items-center mb-6">
         <div class="title-area">
-            <h2 class="serif-font text-2xl gold-gradient tracking-tight">Job Preview</h2>
-            <p class="text-[10px] text-gray-500 uppercase tracking-[0.2em] mt-1">求人情報のプレビュー</p>
+            <h2 class="serif-font text-2xl gold-gradient tracking-tight">{{ $recruit['store_name'] ?? '—' }}</h2>
+            <p class="text-[10px] text-gray-500 uppercase tracking-[0.2em] mt-1">求人情報</p>
         </div>
         @if(empty($forCast))
         <a href="{{ route('shop.recruits.edit') }}" class="recruit-btn recruit-btn-preview" style="padding: 8px 14px; font-size: 0.75rem;">
@@ -80,14 +88,12 @@
         @endif
     </div>
 
-    {{-- ヒーロー：キャッチ＋店舗名 --}}
+    {{-- ヒーロー：オープン日など --}}
+    @if(!empty($recruit['open_date']))
     <div class="recruit-preview-hero">
-        <p class="catch">"{{ $recruit['catch_copy'] }}"</p>
-        <p class="store">{{ $recruit['store_name'] ?? '—' }}</p>
-        @if(!empty($recruit['open_date']))
-        <p class="text-[10px] text-gray-500 mt-1">オープン {{ $recruit['open_date'] }}</p>
-        @endif
+        <p class="text-[10px] text-gray-500">オープン {{ $recruit['open_date'] }}</p>
     </div>
+    @endif
 
     {{-- 給与（目立たせる） --}}
     <div class="recruit-section">
@@ -204,20 +210,29 @@
         </div>
     </div>
 
-    {{-- メッセージ（引用風） --}}
-    @if(!empty($recruit['message']))
+    {{-- PRコメント（キャッチコピー＋メッセージ） --}}
+    @if(!empty($recruit['catch_copy']) || !empty($recruit['message']))
     <div class="recruit-section">
         <div class="recruit-section-head">
             <div class="recruit-section-icon"><i class="fas fa-quote-left"></i></div>
-            <h3 class="recruit-section-title">Message</h3>
+            <h3 class="recruit-section-title">PRコメント</h3>
         </div>
-        <blockquote class="recruit-message-block">{!! nl2br(e($recruit['message'])) !!}</blockquote>
+        <div class="recruit-message-block">
+            @if(!empty($recruit['catch_copy']))
+            <p class="recruit-pr-catch">"{{ $recruit['catch_copy'] }}"</p>
+            @endif
+            @if(!empty($recruit['message']))
+            <div class="recruit-pr-message">{!! nl2br(e($recruit['message'])) !!}</div>
+            @endif
+        </div>
     </div>
     @endif
 
+    @if(empty($forCast))
     <div class="mt-10 flex flex-col gap-4">
         <a href="{{ route('shop.recruits.status') }}" class="btn-gold w-full py-4 text-center no-underline">ステータス管理に戻る</a>
         <p class="text-center text-[10px] text-gray-600 uppercase tracking-widest">Luxe Lounge Premium Recruit</p>
     </div>
+    @endif
 </div>
 @endsection

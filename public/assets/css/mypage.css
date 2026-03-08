@@ -131,7 +131,7 @@
     color: var(--gold-light);
 }
 
-/* --- レビューカード --- */
+/* --- レビューカード（枠あり・店舗マイページ等で使用） --- */
 .mypage-review-card {
     display: flex;
     align-items: center;
@@ -168,6 +168,47 @@
     font-size: 0.8rem;
     color: var(--mypage-gold);
     opacity: 0.8;
+}
+
+/* --- レビュー表示（枠なし・星＋数値のみ・キャストマイページ用） --- */
+.mypage-review-link-frameless {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 20px;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+.mypage-review-link-frameless:hover {
+    opacity: 0.9;
+}
+
+.mypage-review-stars-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 1rem;
+    color: var(--mypage-gold);
+}
+.mypage-review-stars-inline .fa-star-half-alt {
+    color: var(--mypage-gold);
+}
+.mypage-review-stars-inline .far.fa-star {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.mypage-review-num {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-left: 2px;
+}
+
+.mypage-review-count-text {
+    font-size: 0.85rem;
+    color: var(--color-text);
+    opacity: 0.8;
+    margin-left: 2px;
 }
 
 /* --- 詳細ボックス（セクション共通） --- */
@@ -513,9 +554,15 @@ a.btn-outline-gold {
 /* --- Image Library --- */
 .gallery-section-header {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: flex-start;
     margin-bottom: 14px;
+}
+.gallery-section-hint {
+    font-size: 0.75rem;
+    color: var(--color-text);
+    opacity: 0.7;
+    margin: 4px 0 0 0;
 }
 
 .gallery-edit-link {
@@ -554,6 +601,10 @@ a.btn-outline-gold {
 
 .gallery-grid-item {
     aspect-ratio: 1;
+    cursor: grab;
+}
+.gallery-grid-item:active {
+    cursor: grabbing;
 }
 
 .gallery-edit-section .photo-slot {
@@ -598,6 +649,21 @@ a.btn-outline-gold {
     color: var(--color-text);
     opacity: 0.25;
     font-size: 1.5rem;
+}
+
+/* Image Library 並び替え（ドラッグ・長押し） */
+.gallery-sortable-ghost {
+    opacity: 0.4;
+    background: rgba(212, 175, 55, 0.15);
+    border-radius: 12px;
+}
+.gallery-sortable-chosen {
+    opacity: 0.9;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.gallery-sortable-drag {
+    opacity: 1;
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.25);
 }
 
 /* --- モーダル --- */
