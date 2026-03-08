@@ -1,16 +1,15 @@
 /* ========================================
    Cast Profile - キャストプロフィール詳細
+   shopprofileview / castprofileview 共通（レイアウトは app で content-wrapper 未使用に統一）
    ======================================== */
 
-/* 親の .content-wrapper の padding を打ち消し、cast/shop どちらでもアプリ幅いっぱいに統一 */
 .cast-profile-wrapper {
-    padding-bottom: 0;
-    min-height: 100%;
-    background: var(--color-main);
-    width: calc(100% + 2 * var(--content-padding-x));
+    width: 100%;
     max-width: var(--max-content-width);
-    margin-left: calc(-1 * var(--content-padding-x));
-    margin-right: calc(-1 * var(--content-padding-x));
+    margin: 0 auto;
+    min-height: 100%;
+    padding-bottom: 0;
+    background: var(--color-main);
     box-sizing: border-box;
 }
 

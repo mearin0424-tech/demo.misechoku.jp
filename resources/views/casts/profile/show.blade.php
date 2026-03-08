@@ -8,7 +8,7 @@
 @endpush
 
 @section('content')
-<div class="cast-profile-wrapper">
+<div class="cast-profile-wrapper animate-fadeIn">
     {{-- ヒーロー写真エリア（ホームのスワイプと同じ画像） --}}
     <section class="profile-hero" aria-label="プロフィール写真">
         <div class="profile-hero-inner">
