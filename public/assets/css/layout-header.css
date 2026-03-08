@@ -58,12 +58,28 @@
     min-width: 80px; /* ボタンやロゴの場所を確保 */
 }
 
-/* ミセチョクロゴ */
-.header-logo-img {
-    height: 20px !important;
-    width: auto;
-    display: block;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+/* デモ用：左端「demo」バッジ（ロゴの代わり） */
+.header-demo-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    padding: 6px 12px;
+    border: 1px solid rgba(212, 175, 55, 0.6);
+    border-radius: 6px;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.05) 100%);
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+.header-demo-badge:hover {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.25) 0%, rgba(212, 175, 55, 0.1) 100%);
+    border-color: rgba(212, 175, 55, 0.9);
+}
+.header-demo-badge__text {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: #d4af37;
+    text-transform: lowercase;
 }
 
 .header-center-title {
@@ -74,37 +90,65 @@
     text-align: center;
 }
 
-/* デモ用：キャスト／お店スイッチ（セグメント風） */
+/* デモ用：キャスト／お店スイッチ（分かりやすいUI） */
 .demo-mode-switch {
     display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.demo-mode-switch__label {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.05em;
+}
+.demo-mode-switch__track {
+    display: inline-flex;
     align-items: stretch;
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(212, 175, 55, 0.5);
-    border-radius: 999px;
-    padding: 3px;
-    gap: 0;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    border-radius: 10px;
+    padding: 4px;
+    gap: 4px;
 }
 .demo-mode-switch__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     font-size: 0.8rem;
-    font-weight: bold;
-    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.55);
     text-decoration: none;
-    padding: 6px 18px;
-    border-radius: 999px;
-    transition: color 0.2s, background 0.2s;
-    min-width: 72px;
-    text-align: center;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: color 0.2s, background 0.2s, box-shadow 0.2s;
+    min-width: 88px;
 }
 .demo-mode-switch__btn:hover {
     color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.06);
 }
 .demo-mode-switch__btn.is-active {
     background: #d4af37;
     color: #1a0505;
+    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.35);
 }
 .demo-mode-switch__btn.is-active:hover {
     color: #1a0505;
     background: #e0c04a;
+    box-shadow: 0 2px 12px rgba(212, 175, 55, 0.45);
+}
+.demo-mode-switch__btn-icon {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+.demo-mode-switch__btn.is-active .demo-mode-switch__btn-icon {
+    opacity: 1;
+}
+.demo-mode-switch__btn-text {
+    letter-spacing: 0.02em;
 }
 
 .header-right {

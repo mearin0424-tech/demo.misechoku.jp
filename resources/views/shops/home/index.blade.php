@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'DISCOVERY')
-@section('body-class', 'no-scroll')
+@section('body-class', 'no-scroll page-home')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/home.css') }}">
