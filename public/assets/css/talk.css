@@ -160,18 +160,18 @@
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    padding: 16px 15px 12px;
+    padding: 12px 15px 10px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     background: var(--color-main);
 }
 
-/* 行全体を横いっぱいに広げる（LINE風：詰めた間隔） */
+/* 行全体を横いっぱいに広げる（画像参考：詰めた間隔） */
 .message-row {
     display: flex;
     width: 100%;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     align-items: flex-start;
 }
 
@@ -188,99 +188,96 @@
 }
 .msg-left .message-block { align-items: flex-start; }
 
-/* 時刻・既読（bubble の外・下に表示） */
+/* 時刻・既読（bubble の外・直下に表示） */
 .msg-footer {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 3px;
-    margin-top: 1px;
-    padding: 0 2px;
+    gap: 2px;
+    margin-top: 0;
+    padding: 0 1px;
 }
 .msg-left .msg-footer { justify-content: flex-start; }
 
 /* ==========================================================================
-   吹き出し：さらにコンパクト + 高級感（尻尾・グラデーション・シャドウ）
+   吹き出し：画像のようにテキストにぴったり（最小パディング）
    ========================================================================== */
 .message-bubble {
     display: inline-block;
     max-width: 100%;
     min-height: auto;
     height: auto;
-    padding: 6px 10px;
-    border-radius: 14px;
-    font-size: 0.8125rem;
-    line-height: 1.35;
-    letter-spacing: 0.01em;
+    padding: 4px 9px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    line-height: 1.32;
+    letter-spacing: 0;
     white-space: pre-wrap;
     word-break: break-word;
     position: relative;
 }
 
-/* 吹き出し内のテキスト調整 */
 .message-bubble p {
     margin: 0;
     padding: 0;
 }
 
-/* 相手のメッセージ：左寄せ・左に尻尾（LINE風） */
+/* 相手のメッセージ：左寄せ・左に尻尾 */
 .msg-left .message-bubble {
     background: linear-gradient(160deg, #2d1218 0%, #251018 100%);
     color: #f0e8e8;
-    border-radius: 14px 14px 14px 4px;
+    border-radius: 12px 12px 12px 3px;
     border: 1px solid rgba(90, 22, 37, 0.4);
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* 相手メッセージの尻尾（左下） */
 .msg-left .message-bubble::after {
     content: "";
     position: absolute;
-    left: -4px;
-    bottom: 6px;
+    left: -3px;
+    bottom: 5px;
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 0 0 6px 6px;
+    border-width: 0 0 5px 5px;
     border-color: transparent transparent #251018 transparent;
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.12));
 }
 
-/* 自分のメッセージ：右寄せ・ゴールドグラデ・右に尻尾 */
+/* 自分のメッセージ：右寄せ・右に尻尾 */
 .msg-right .message-bubble {
     background: linear-gradient(145deg, #e8d48a 0%, #d4af37 35%, #c9a227 100%);
     color: #1a0f0a;
     font-weight: 500;
-    border-radius: 14px 14px 4px 14px;
+    border-radius: 12px 12px 3px 12px;
     border: 1px solid rgba(212, 175, 55, 0.35);
     box-shadow: 0 1px 6px rgba(212, 175, 55, 0.2), 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
-/* 自分メッセージの尻尾（右下） */
 .msg-right .message-bubble::after {
     content: "";
     position: absolute;
-    right: -4px;
-    bottom: 6px;
+    right: -3px;
+    bottom: 5px;
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 0 6px 6px 0;
+    border-width: 0 5px 5px 0;
     border-color: transparent #c9a227 transparent transparent;
     filter: drop-shadow(1px 0 1px rgba(0, 0, 0, 0.06));
 }
 
-/* 時刻・既読（bubble 外なので背景色に合わせる） */
+/* 時刻・既読（bubble 外・画像のように小さく） */
 .msg-time {
-    font-size: 0.6rem;
-    opacity: 0.8;
+    font-size: 0.55rem;
+    opacity: 0.85;
     line-height: 1;
 }
 .msg-right .msg-time { color: rgba(212, 175, 55, 0.85); }
 .msg-left .msg-time { color: rgba(255, 255, 255, 0.5); }
 
 .msg-status {
-    font-size: 0.6rem;
+    font-size: 0.55rem;
     color: rgba(212, 175, 55, 0.85);
     opacity: 0.9;
     display: flex;
