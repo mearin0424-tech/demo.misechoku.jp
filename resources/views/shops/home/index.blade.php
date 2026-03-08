@@ -29,9 +29,12 @@
 
                 {{-- アクションボタン --}}
                 <div class="card-actions-overlay stop-propagation">
-                    <button class="action-circle-btn like"><i class="fas fa-heart"></i></button>
-                    <button class="action-circle-btn keep"><i class="fas fa-bookmark"></i></button>
-                    <a href="{{ route('shop.talk.room', $cast['id']) }}" class="action-circle-btn message">
+                    <button type="button" class="action-circle-btn like">
+                        <i class="fas fa-heart"></i>
+                        <span class="action-btn-count">{{ $cast['like_count'] ?? 0 }}</span>
+                    </button>
+                    <button type="button" class="action-circle-btn keep"><i class="fas fa-bookmark"></i></button>
+                    <a href="{{ route('shop.talk.room', $cast['id']) }}" class="action-btn-message" aria-label="メッセージを送る">
                         <i class="fas fa-paper-plane"></i>
                     </a>
                 </div>

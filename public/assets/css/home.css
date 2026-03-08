@@ -257,9 +257,50 @@ body.no-scroll main#main-content .content-wrapper {
     transform: scale(0.9);
 }
 
+/* LIKE：アイコン＋件数表示 */
+.action-circle-btn.like {
+    flex-direction: column;
+    gap: 2px;
+    padding-top: 6px;
+    padding-bottom: 4px;
+    height: auto;
+    min-height: 50px;
+}
+.action-circle-btn.like .action-btn-count {
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1;
+    opacity: 0.95;
+}
 .action-circle-btn.like:hover { background: rgba(255, 59, 48, 0.9); }
 .action-circle-btn.keep:hover { background: rgba(255, 204, 0, 0.9); }
-.action-circle-btn.message:hover { background: rgba(0, 122, 255, 0.9); }
+
+/* メッセージ送付：LIKE・KEEPと別UI（アウトラインのみ・押下で色反転なし） */
+.action-btn-message {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    background: transparent;
+    backdrop-filter: blur(8px);
+    color: #fff;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    text-decoration: none !important;
+}
+.action-btn-message:hover {
+    border-color: rgba(255, 255, 255, 0.9);
+    color: #fff;
+}
+.action-btn-message:active {
+    transform: scale(0.96);
+    /* 色反転なし・背景変更なし */
+}
 
 /* --- Swipe Guide --- */
 .swipe-guide-overlay {
