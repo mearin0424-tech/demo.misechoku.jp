@@ -57,6 +57,9 @@
                             <span class="tag-pill">#{{ $tag }}</span>
                         @endforeach
                     </div>
+                    @if($isShop)
+                    <a href="{{ route('cast.recruit.show', $item['id']) }}" class="card-recruit-btn">求人情報へ</a>
+                    @endif
                 </div>
             </div>
             @endforeach
