@@ -58,28 +58,36 @@
     min-width: 80px; /* ボタンやロゴの場所を確保 */
 }
 
-/* デモ用：左端「demo」バッジ（ロゴの代わり） */
-.header-demo-badge {
+/* デモ用：左端「DEMO」ボタン */
+.header-demo-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     text-decoration: none;
-    padding: 6px 12px;
-    border: 1px solid rgba(212, 175, 55, 0.6);
-    border-radius: 6px;
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.05) 100%);
-    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    padding: 8px 16px;
+    border: 1px solid #d4af37;
+    border-radius: 8px;
+    background: linear-gradient(180deg, rgba(212, 175, 55, 0.35) 0%, rgba(212, 175, 55, 0.15) 100%);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: background 0.2s, box-shadow 0.15s, transform 0.15s;
 }
-.header-demo-badge:hover {
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.25) 0%, rgba(212, 175, 55, 0.1) 100%);
-    border-color: rgba(212, 175, 55, 0.9);
+.header-demo-btn:hover {
+    background: linear-gradient(180deg, rgba(212, 175, 55, 0.5) 0%, rgba(212, 175, 55, 0.25) 100%);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transform: translateY(1px);
 }
-.header-demo-badge__text {
-    font-size: 0.7rem;
+.header-demo-btn:active {
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    transform: translateY(2px);
+}
+.header-demo-btn__text {
+    font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.15em;
     color: #d4af37;
-    text-transform: lowercase;
+}
+.header-demo-btn:hover .header-demo-btn__text {
+    color: #e8c858;
 }
 
 .header-center-title {
@@ -90,65 +98,42 @@
     text-align: center;
 }
 
-/* デモ用：キャスト／お店スイッチ（分かりやすいUI） */
-.demo-mode-switch {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-.demo-mode-switch__label {
-    font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.5);
-    letter-spacing: 0.05em;
-}
-.demo-mode-switch__track {
+/* デモ用：キャスト／お店ピル型トグルスイッチ（画像参考） */
+.demo-pill-switch {
     display: inline-flex;
     align-items: stretch;
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(212, 175, 55, 0.4);
-    border-radius: 10px;
-    padding: 4px;
-    gap: 4px;
+    border: 1px solid #d4af37;
+    border-radius: 999px;
+    padding: 3px;
+    background: transparent;
+    overflow: hidden;
 }
-.demo-mode-switch__btn {
+.demo-pill-switch__segment {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
     font-size: 0.8rem;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.55);
     text-decoration: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    transition: color 0.2s, background 0.2s, box-shadow 0.2s;
-    min-width: 88px;
+    padding: 8px 24px;
+    min-width: 80px;
+    border: none;
+    border-radius: 999px;
+    transition: color 0.2s, background 0.2s;
+    color: #d4af37;
+    background: transparent;
 }
-.demo-mode-switch__btn:hover {
-    color: rgba(255, 255, 255, 0.9);
-    background: rgba(255, 255, 255, 0.06);
+.demo-pill-switch__segment:hover {
+    color: #e8c858;
+    background: rgba(212, 175, 55, 0.12);
 }
-.demo-mode-switch__btn.is-active {
+.demo-pill-switch__segment.is-active {
     background: #d4af37;
     color: #1a0505;
-    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.35);
 }
-.demo-mode-switch__btn.is-active:hover {
-    color: #1a0505;
+.demo-pill-switch__segment.is-active:hover {
     background: #e0c04a;
-    box-shadow: 0 2px 12px rgba(212, 175, 55, 0.45);
-}
-.demo-mode-switch__btn-icon {
-    font-size: 0.9rem;
-    opacity: 0.9;
-}
-.demo-mode-switch__btn.is-active .demo-mode-switch__btn-icon {
-    opacity: 1;
-}
-.demo-mode-switch__btn-text {
-    letter-spacing: 0.02em;
+    color: #1a0505;
 }
 
 .header-right {

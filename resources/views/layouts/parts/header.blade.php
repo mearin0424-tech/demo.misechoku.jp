@@ -40,26 +40,17 @@
                 <i class="fas fa-chevron-left"></i>
             </a>
         @else
-            <a href="{{ route(request()->is('cast/*') ? 'cast.home' : 'shop.home') }}" class="header-demo-badge" aria-label="デモトップへ">
-                <span class="header-demo-badge__text">demo</span>
+            <a href="{{ route(request()->is('cast/*') ? 'cast.home' : 'shop.home') }}" class="header-demo-btn" aria-label="デモトップへ">
+                <span class="header-demo-btn__text">DEMO</span>
             </a>
         @endif
     </div>
 
-    {{-- 中央：デモ用キャスト／お店スイッチ（タイトルは一時非表示） --}}
+    {{-- 中央：デモ用キャスト／お店スイッチ（ピル型トグル） --}}
     <div class="header-center-title">
-        <nav class="demo-mode-switch" role="tablist" aria-label="デモモード切り替え">
-            <span class="demo-mode-switch__label">表示中</span>
-            <div class="demo-mode-switch__track">
-                <a href="{{ $castUrl }}" class="demo-mode-switch__btn {{ $isCast ? 'is-active' : '' }}" role="tab" aria-selected="{{ $isCast ? 'true' : 'false' }}">
-                    <span class="demo-mode-switch__btn-icon" aria-hidden="true"><i class="fas fa-user"></i></span>
-                    <span class="demo-mode-switch__btn-text">キャスト</span>
-                </a>
-                <a href="{{ $shopUrl }}" class="demo-mode-switch__btn {{ !$isCast ? 'is-active' : '' }}" role="tab" aria-selected="{{ !$isCast ? 'true' : 'false' }}">
-                    <span class="demo-mode-switch__btn-icon" aria-hidden="true"><i class="fas fa-store"></i></span>
-                    <span class="demo-mode-switch__btn-text">お店</span>
-                </a>
-            </div>
+        <nav class="demo-pill-switch" role="tablist" aria-label="デモモード切り替え">
+            <a href="{{ $castUrl }}" class="demo-pill-switch__segment {{ $isCast ? 'is-active' : '' }}" role="tab" aria-selected="{{ $isCast ? 'true' : 'false' }}">キャスト</a>
+            <a href="{{ $shopUrl }}" class="demo-pill-switch__segment {{ !$isCast ? 'is-active' : '' }}" role="tab" aria-selected="{{ !$isCast ? 'true' : 'false' }}">お店</a>
         </nav>
     </div>
 
