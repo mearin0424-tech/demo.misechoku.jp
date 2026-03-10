@@ -7,7 +7,7 @@
     --mypage-gold-soft: rgba(212, 175, 55, 0.15);
     --mypage-gold-border: rgba(212, 175, 55, 0.4);
     --mypage-card-bg: var(--color-card);
-    --mypage-section-spacing: 24px;
+    --mypage-section-spacing: 20px;
 }
 
 .mypage-page {
@@ -24,10 +24,10 @@
 
 /* --- 店舗名（ヒーロー） --- */
 .mypage-shop-name {
-    font-size: 1.75rem;
+    font-size: 1.7rem;
     color: #fff;
     margin: 0;
-    padding: 24px 0 8px;
+    padding: 18px 0 6px;
     font-weight: 700;
     font-family: var(--font-serif);
     letter-spacing: 0.02em;
@@ -39,7 +39,7 @@
     display: flex;
     align-items: stretch;
     gap: 16px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .shop-icon-wrapper {
@@ -55,7 +55,7 @@
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid var(--mypage-gold);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.35);
 }
 
 .btn-add-icon {
@@ -89,7 +89,7 @@
     flex: 1;
     min-height: 72px;
     padding: 14px 44px 14px 16px;
-    border-radius: 16px;
+    border-radius: 14px;
     border: 1px solid var(--mypage-gold-border);
     background: var(--mypage-card-bg);
     position: relative;
@@ -98,8 +98,8 @@
 }
 
 .shop-word-bubble:hover {
-    border-color: rgba(212, 175, 55, 0.6);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    border-color: rgba(212, 175, 55, 0.55);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.25);
 }
 
 .shop-word-text {
@@ -136,8 +136,8 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 14px 18px;
-    margin-bottom: 20px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
     border-radius: 14px;
     border: 1px solid var(--mypage-gold-border);
     background: var(--mypage-card-bg);
@@ -146,8 +146,8 @@
 }
 
 .mypage-review-card:hover {
-    border-color: rgba(212, 175, 55, 0.6);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    border-color: rgba(212, 175, 55, 0.55);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
     transform: translateY(-1px);
 }
 
@@ -369,14 +369,14 @@ a.btn-outline-gold {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
     padding: 0;
     border-radius: 16px;
     text-decoration: none;
     margin-bottom: 12px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
     border: 1px solid var(--mypage-gold-border);
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(182, 122, 43, 0.03));
+    background: rgba(20, 5, 7, 0.9);
     box-sizing: border-box;
     width: 100%;
     text-align: left;
@@ -388,10 +388,10 @@ a.btn-outline-gold {
 }
 
 .mypage-quick-actions .btn-action-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(212, 175, 55, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
     border-color: rgba(212, 175, 55, 0.6);
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(182, 122, 43, 0.06));
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.10), rgba(182, 122, 43, 0.05));
 }
 
 .mypage-quick-actions .btn-action-card:active {

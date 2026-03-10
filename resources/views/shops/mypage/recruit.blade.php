@@ -4,17 +4,22 @@
 
 @push('styles')
 <style>
-    .recruit-container { padding: 15px; }
+    .recruit-container {
+        max-width: var(--max-content-width);
+        margin: 0 auto;
+        padding: 12px var(--content-padding-x) 24px;
+        box-sizing: border-box;
+    }
     .status-card {
         background: var(--color-card);
         border: 1px solid var(--color-border);
         border-radius: 15px;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
         overflow: hidden;
     }
     .status-item {
         display: flex;
-        padding: 15px;
+        padding: 12px 14px;
         align-items: center;
         text-decoration: none;
         color: inherit;
