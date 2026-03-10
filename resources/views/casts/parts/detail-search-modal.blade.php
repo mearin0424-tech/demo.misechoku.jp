@@ -23,7 +23,7 @@
                     </div>
                 </div>
 
-                {{-- エリア --}}
+                {{-- エリア（賃貸検索風） --}}
                 <div class="detail-search-row">
                     <label class="detail-search-label">エリア</label>
                     <button type="button" class="detail-search-select-btn" data-area-trigger>
@@ -31,10 +31,32 @@
                         <span class="detail-search-select-btn__arrow">&gt;</span>
                     </button>
                 </div>
-                <div class="detail-search-row detail-search-row--radio">
+                <div class="detail-search-row detail-search-row--location">
                     <span class="detail-search-label">現在地・位置情報から探す</span>
-                    <label class="detail-search-radio"><input type="radio" name="location_type" value="current" checked> 現在地から探す</label>
-                    <label class="detail-search-radio"><input type="radio" name="location_type" value="geo"> 位置情報から探す</label>
+                    <div class="detail-search-location-segment" role="group" aria-label="検索方法">
+                        <label class="detail-search-location-option {{ request('location_type', 'current') === 'current' ? 'is-selected' : '' }}">
+                            <input type="radio" name="location_type" value="current" {{ request('location_type', 'current') === 'current' ? 'checked' : '' }} class="sr-only">
+                            <span class="detail-search-location-option__icon" aria-hidden="true"><i class="fas fa-check"></i></span>
+                            <span class="detail-search-location-option__text">現在地から探す</span>
+                        </label>
+                        <label class="detail-search-location-option {{ request('location_type') === 'geo' ? 'is-selected' : '' }}">
+                            <input type="radio" name="location_type" value="geo" {{ request('location_type') === 'geo' ? 'checked' : '' }} class="sr-only">
+                            <span class="detail-search-location-option__icon" aria-hidden="true"><i class="fas fa-check"></i></span>
+                            <span class="detail-search-location-option__text">位置情報から探す</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="detail-search-row detail-search-row--distance">
+                    <div class="detail-search-distance">
+                        <div class="detail-search-distance__marks">
+                            <span>5km以内</span>
+                            <span>20km</span>
+                            <span>30km</span>
+                            <span>40km以上</span>
+                        </div>
+                        <input type="range" id="search-distance-km" name="distance_km" class="detail-search-distance-slider" min="5" max="40" step="5" value="{{ request('distance_km', 20) }}" aria-label="距離">
+                        <output for="search-distance-km" class="detail-search-distance__value" id="search-distance-value">{{ request('distance_km', 20) }}km</output>
+                    </div>
                 </div>
 
                 {{-- 給与(時給) --}}

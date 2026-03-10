@@ -40,6 +40,31 @@
         if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
     });
 
+    // 現在地・位置情報セグメント：選択状態の見た目を同期
+    var locationOptions = modal.querySelectorAll('.detail-search-location-option');
+    locationOptions.forEach(function (label) {
+        var radio = label.querySelector('input[type="radio"]');
+        if (!radio) return;
+        function syncSelected() {
+            locationOptions.forEach(function (l) { l.classList.remove('is-selected'); });
+            if (radio.checked) label.classList.add('is-selected');
+        }
+        radio.addEventListener('change', syncSelected);
+        syncSelected();
+    });
+
+    // 距離スライダー：表示値を更新
+    var distanceSlider = modal.querySelector('#search-distance-km');
+    var distanceValueEl = modal.querySelector('#search-distance-value');
+    if (distanceSlider && distanceValueEl) {
+        function updateDistanceOutput() {
+            var v = distanceSlider.value;
+            distanceValueEl.textContent = v === '40' ? '40km以上' : v + 'km';
+        }
+        distanceSlider.addEventListener('input', updateDistanceOutput);
+        updateDistanceOutput();
+    }
+
     // アコーディオン
     modal.querySelectorAll('[data-accordion]').forEach(function (block) {
         var head = block.querySelector('[data-accordion-trigger]');
@@ -104,6 +129,14 @@
         form.querySelectorAll('input[type="radio"]').forEach(function (r) {
             r.checked = r.value === 'current';
         });
+        var distanceInput = form.querySelector('input[name="distance_km"]');
+        if (distanceInput) {
+            distanceInput.value = 20;
+            if (distanceValueEl) distanceValueEl.textContent = '20km';
+        }
+        locationOptions.forEach(function (l) { l.classList.remove('is-selected'); });
+        var firstLocation = modal.querySelector('.detail-search-location-option input[value="current"]');
+        if (firstLocation) firstLocation.closest('.detail-search-location-option').classList.add('is-selected');
         if (keywordInput) keywordInput.value = '';
         updateBadgeAndSummary();
     });
@@ -117,6 +150,10 @@
             form.querySelectorAll('input[type="radio"]:checked').forEach(function (r) {
                 params.push(r.name + '=' + encodeURIComponent(r.value));
             });
+            var distanceInput = form.querySelector('input[name="distance_km"]');
+            if (distanceInput && distanceInput.value) {
+                params.push('distance_km=' + encodeURIComponent(distanceInput.value));
+            }
             form.querySelectorAll('input[type="checkbox"]:checked').forEach(function (c) {
                 if (c.name && c.value) params.push(c.name + '=' + encodeURIComponent(c.value));
             });
