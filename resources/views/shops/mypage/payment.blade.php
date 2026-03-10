@@ -21,8 +21,18 @@
 
     <section class="management-summary">
         <p class="management-summary-label">未払い合計</p>
-        <p class="management-summary-amount"><span class="currency">¥</span>120,000</p>
-        <p class="management-summary-note">次回の決済予定日: 2025年2月5日</p>
+        <p class="management-summary-amount">
+            <span class="currency">¥</span>{{ number_format($summary['unpaid_total'] ?? 0) }}
+        </p>
+        @if(!empty($summary['next_settlement']))
+            <p class="management-summary-note">
+                次回の決済予定日: {{ $summary['next_settlement'] }}
+            </p>
+        @else
+            <p class="management-summary-note">
+                次回決済予定日は未定です。
+            </p>
+        @endif
     </section>
 
     <section class="management-invoices">
@@ -38,8 +48,10 @@
                 <span class="management-invoice-status {{ $inv['status'] === 'paid' ? 'status-paid' : 'status-pending' }}">
                     {{ $inv['status'] === 'paid' ? '支払い済み' : '未決済' }}
                 </span>
-                @if($inv['status'] === 'paid')
-                    <a href="#" class="management-invoice-pdf"><i class="fas fa-file-pdf"></i> 領収書</a>
+                @if(!empty($inv['receipt_url']))
+                    <a href="{{ $inv['receipt_url'] }}" class="management-invoice-pdf" target="_blank" rel="noopener">
+                        <i class="fas fa-file-pdf"></i> 領収書
+                    </a>
                 @endif
             </div>
         </div>

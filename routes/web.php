@@ -87,7 +87,19 @@ Route::name('pages.')->group(function () {
     Route::get('/terms', [PageController::class, 'terms'])->name('official.terms');
     Route::get('/privacy', [PageController::class, 'privacy'])->name('official.privacy');
     Route::get('/support/column', [PageController::class, 'column'])->name('support.column');
+    Route::get('/support/form', [PageController::class, 'supportForm'])->name('support.form');
 });
+
+// 設定系（共通）
+Route::prefix('setting')->name('setting.')->group(function () {
+    Route::get('/notification', [SettingController::class, 'notification'])->name('notification');
+    Route::get('/account/email', [SettingController::class, 'accountEmail'])->name('account.email');
+    Route::get('/account/password', [SettingController::class, 'accountPassword'])->name('account.password');
+    Route::get('/account/withdraw', [SettingController::class, 'accountWithdraw'])->name('account.withdraw');
+});
+
+// プラン設定（店舗専用・デモ用）
+Route::get('/subscription', [SettingController::class, 'subscription'])->name('subscription');
 
 // 未実装画面・機能用（maintenance-screen.png を表示）
 Route::get('/maintenance', function () {
@@ -118,7 +130,7 @@ Route::prefix('shop')->name('shop.')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('shop')->name('shop.')->group(function () {
-    
+
     Route::get('/home', [ShopHome::class, 'index'])->name('home');
     Route::get('/search', fn () => redirect()->route('shop.search.index', ['tab' => 'timeline']));
     Route::get('/search/{tab}', [ShopSearch::class, 'index'])->name('search.index')->where('tab', 'timeline|list|ai');
@@ -168,6 +180,11 @@ Route::prefix('shop')->name('shop.')->group(function () {
 
     // レビュー公開・非表示の切り替え（reviews 画面の JS から使用）
     Route::post('/mypage/review/update', [ShopReview::class, 'updateStatus'])->name('review.update');
+
+    // SUPPORT ページ（店舗向け）
+    Route::get('/feature', [PageController::class, 'feature'])->name('feature');
+    Route::get('/htu', [PageController::class, 'htu'])->name('htu');
+    Route::get('/faq', [PageController::class, 'faq'])->name('faq');
 });
 
 /*
@@ -196,6 +213,11 @@ Route::prefix('cast')->name('cast.')->group(function () {
         Route::get('/room/{id}', [TalkController::class, 'room'])->name('room');
         Route::post('/send', [TalkController::class, 'store'])->name('send');
     });
+
+    // SUPPORT ページ（キャスト向け）
+    Route::get('/feature', [PageController::class, 'feature'])->name('feature');
+    Route::get('/htu', [PageController::class, 'htu'])->name('htu');
+    Route::get('/faq', [PageController::class, 'faq'])->name('faq');
 });
 
 /* 内部キャッシュクリア用 */

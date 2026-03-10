@@ -34,9 +34,9 @@
                             <i class="fas fa-chevron-down arrow"></i>
                         </summary>
                         <ul class="sidebar-nested-menu">
-                            <li><a href="#"><i class="fas fa-envelope"></i> メールアドレス変更</a></li>
-                            <li><a href="#"><i class="fas fa-key"></i> パスワード変更</a></li>
-                            <li><a href="#" class="text-danger"><i class="fas fa-user-slash"></i> 退会手続き</a></li>
+                            <li><a href="{{ url('/setting/account/email') }}"><i class="fas fa-envelope"></i> メールアドレス変更</a></li>
+                            <li><a href="{{ url('/setting/account/password') }}"><i class="fas fa-key"></i> パスワード変更</a></li>
+                            <li><a href="{{ url('/setting/account/withdraw') }}" class="text-danger"><i class="fas fa-user-slash"></i> 退会手続き</a></li>
                         </ul>
                     </details>
                 </li>
