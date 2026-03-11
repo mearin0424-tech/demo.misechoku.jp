@@ -113,16 +113,16 @@
 
 /* 検索フィルタエリア */
 .search-filter-box {
-    background: var(--color-sub);
-    padding: 15px;
-    border-bottom: 1px solid var(--color-border);
+    background: rgba(26, 11, 14, 0.95);
+    padding: 14px;
+    border-bottom: 1px solid rgba(230, 208, 128, 0.2);
 }
 .search-filter-box input, .search-filter-box select {
-    background: var(--color-main);
-    color: #fff;
-    border: 1px solid var(--color-border);
+    background: var(--surface);
+    color: var(--color-text-header);
+    border: 1px solid rgba(230, 208, 128, 0.35);
     padding: 10px;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 0.9rem;
 }
 
@@ -153,10 +153,10 @@
     flex: 1;
     min-width: 0;
     padding: 12px 14px;
-    background: var(--color-main);
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    color: #fff;
+    background: var(--surface);
+    border: 1px solid rgba(230, 208, 128, 0.3);
+    border-radius: 10px;
+    color: var(--color-text-header);
     font-size: 0.95rem;
 }
 .search-filter-simple__input::placeholder {
@@ -172,18 +172,18 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 12px 16px;
-    background: var(--gold);
-    color: var(--color-main);
+    padding: 12px 18px;
+    background: linear-gradient(135deg, #E5C158, #B38A22);
+    color: #190509;
     border: none;
-    border-radius: 8px;
+    border-radius: 999px;
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     flex-shrink: 0;
 }
 .search-filter-submit-btn:hover {
-    filter: brightness(1.1);
+    filter: brightness(1.06);
 }
 /* 詳細検索ボタン（その下に並べる） */
 .search-filter-detail-row {
@@ -195,9 +195,9 @@
     gap: 8px;
     padding: 10px 18px;
     background: transparent;
-    border: 1px solid var(--color-gold);
-    color: var(--color-gold);
-    border-radius: 8px;
+    border: 1px solid rgba(230, 208, 128, 0.5);
+    color: var(--gold);
+    border-radius: 999px;
     font-size: 0.9rem;
     cursor: pointer;
     position: relative;

@@ -264,13 +264,12 @@
     display: block;
 }
 
-/* 相手のメッセージ：左下に尻尾が出る吹き出し形 */
 .msg-left .message-bubble {
-    background: linear-gradient(160deg, #2d1218 0%, #251018 100%);
-    color: #f0e8e8;
+    background: linear-gradient(160deg, #1E0D11 0%, #1A0B0E 100%);
+    color: #F5E6E6;
     border-radius: 10px 10px 10px 2px;
-    border: 1px solid rgba(90, 22, 37, 0.4);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(230, 208, 128, 0.28);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
 }
 
 /* 相手用尻尾（左側に突き出し、吹き出しに接続） */
@@ -283,18 +282,17 @@
     height: 0;
     border-style: solid;
     border-width: 5px 8px 5px 0;
-    border-color: transparent #251018 transparent transparent;
+    border-color: transparent #1A0B0E transparent transparent;
     z-index: 0;
 }
 
-/* 自分のメッセージ：右下に尻尾が出る吹き出し形 */
 .msg-right .message-bubble {
-    background: linear-gradient(145deg, #e8d48a 0%, #d4af37 35%, #c9a227 100%);
-    color: #1a0f0a;
+    background: #E8E1D5;
+    color: #2C1A1D;
     font-weight: 500;
     border-radius: 10px 10px 2px 10px;
-    border: 1px solid rgba(212, 175, 55, 0.35);
-    box-shadow: 0 1px 6px rgba(212, 175, 55, 0.2), 0 1px 2px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(232, 225, 213, 0.7);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
 }
 
 /* 自分用尻尾（右側に突き出し、吹き出しに接続） */
@@ -307,7 +305,7 @@
     height: 0;
     border-style: solid;
     border-width: 5px 0 5px 8px;
-    border-color: transparent transparent transparent #c9a227;
+    border-color: transparent transparent transparent #E8E1D5;
     z-index: 0;
 }
 
@@ -317,8 +315,8 @@
     opacity: 0.85;
     line-height: 1;
 }
-.msg-right .msg-time { color: rgba(212, 175, 55, 0.85); }
-.msg-left .msg-time { color: rgba(255, 255, 255, 0.5); }
+.msg-right .msg-time { color: #A89090; }
+.msg-left .msg-time { color: #A89090; }
 
 .msg-status {
     font-size: 0.55rem;

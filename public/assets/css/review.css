@@ -9,18 +9,18 @@
 
 /* 総合評価サマリー */
 .review-summary-container {
-    background: var(--color-sub);
+    background: linear-gradient(145deg, rgba(26, 11, 14, 0.95), rgba(18, 4, 5, 0.95));
     padding: 16px 14px;
-    border-radius: 12px;
-    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    border: 1px solid rgba(230, 208, 128, 0.35);
     margin: 0 0 16px;
     text-align: center;
 }
 .summary-label { font-size: 0.8rem; color: var(--color-gold); margin-bottom: 10px; }
 .summary-main { display: flex; align-items: center; justify-content: center; gap: 15px; }
-.avg-score-big { font-size: 3rem; font-weight: bold; color: #fff; font-family: var(--font-sans); }
+.avg-score-big { font-size: 3rem; font-weight: 600; color: #F5E6E6; font-family: var(--font-serif); letter-spacing: 0.06em; }
 .stars-gold-big { color: var(--color-gold); font-size: 1.2rem; }
-.total-count-text { font-size: 0.75rem; color: #888; margin-top: 5px; }
+.total-count-text { font-size: 0.75rem; color: #A89090; margin-top: 5px; }
 
 /* レビューカード */
 .review-card {

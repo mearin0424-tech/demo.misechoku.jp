@@ -1,28 +1,29 @@
 /* [CAUTION] このファイル(public/build/assets/css)は稼働時はvite有効化後に移動（resources/css/） */
 
-/* Inter と Playfair Display を追加 */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@700&family=Lato:wght@400;700&family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap');
+/* フォント：Montserrat / Noto Sans JP / Noto Serif JP */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Noto+Sans+JP:wght@300;400;500&family=Noto+Serif+JP:wght@400;500;600&display=swap');
 
 :root {
-    /* --- Luxe Lounge Palette（元より少し明るめのボルドー） --- */
-    --gold: #D4AF37;
-    --gold-light: #FCF6BA;
-    --dark-bg: #12080a;
-    --surface: #1e090e;
-    --glass: rgba(255, 255, 255, 0.05);
+    /* --- Gold & Bordeaux Palette（高級感のあるグラデーション） --- */
+    --gold: #E5C158;
+    --gold-light: #FDF0B2;
+    --gold-deep: #B38A22;
+    --dark-bg: #120405;
+    --surface: #1A0B0E;
+    --glass: rgba(255, 255, 255, 0.04);
 
     /* UI Colors（ボルドー基調） */
-    --color-main: #190509;        /* ベース背景：やや明るめのボルドー */
-    --color-sub: #2a0a11;         /* サブ背景 */
+    --color-main: #190509;        /* ベース背景 */
+    --color-sub: #22070d;         /* サブ背景 */
     --color-accent: #b91c1c;      /* 既存のアクセントカラーを維持 */
-    --color-text: #d1c1c1;
-    --color-text-header: #f5ecec;
-    --color-card: #22070d;        /* カード系コンポーネント */
-    --color-border: #5a1625;
+    --color-text: #D6C6C6;
+    --color-text-header: #F5E6E6;
+    --color-card: #1E0D11;        /* カード系コンポーネント */
+    --color-border: #5A1625;
     
     /* Typography */
-    --font-serif: 'Playfair Display', 'Shippori Mincho', serif;
-    --font-sans: 'Inter', 'Noto Sans JP', sans-serif;
+    --font-serif: 'Noto Serif JP', serif;
+    --font-sans: 'Noto Sans JP', 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 
     /* Glassmorphism */
     --glass-bg: rgba(34, 10, 10, 0.8);
@@ -45,7 +46,7 @@ body {
     padding: 0;
     -webkit-tap-highlight-color: transparent;
     font-family: var(--font-sans);
-    color: #e0e0e0;
+    color: var(--color-text);
     overflow-x: hidden;
 }
 
@@ -151,14 +152,14 @@ h1, h2, h3, .luxury-title {
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     border: 1px solid var(--glass-border);
-    border-radius: 15px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    border-radius: 16px;
+    box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.45);
 }
 
 /* ゴールドボタン (Luxe Loungeデザイン) */
 .btn-gold {
-    background: linear-gradient(135deg, #BF953F, #AA771C) !important;
-    color: #000 !important;
+    background: linear-gradient(135deg, #E5C158, #B38A22) !important;
+    color: #190509 !important;
     padding: 12px 24px;
     border-radius: 12px;
     font-weight: 600;
@@ -172,8 +173,8 @@ h1, h2, h3, .luxury-title {
 
 .btn-gold:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
-    opacity: 0.9;
+    box-shadow: 0 4px 18px rgba(212, 175, 55, 0.45);
+    opacity: 0.95;
 }
 
 /* ページ遷移モーション（opacity のみで transform を使わない＝サブヘッダーの fixed がビューポート基準で安定） */
@@ -191,3 +192,24 @@ h1, h2, h3, .luxury-title {
 .mt-20 { margin-top: 20px; }
 .text-gold { color: var(--gold); }
 .text-accent { color: var(--color-accent); }
+
+/* リンクのトーン & ホバー */
+a {
+    color: var(--gold);
+    text-decoration: none;
+    transition: color 0.15s ease, opacity 0.15s ease;
+}
+a:hover {
+    color: var(--gold-light);
+    opacity: 0.9;
+}
+
+/* スクロールバー（没入感のため極力目立たせない） */
+::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+* {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
