@@ -1,14 +1,17 @@
-/* ヘッダー全体のグラスモーフィズム */
+/* ヘッダー全体のグラスモーフィズム（高級感のあるグラデ＋グロー） */
 #global-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     height: 60px;
     padding: 0 var(--content-padding-x, 15px);
-    background: rgba(30, 5, 5, 0.85);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border-bottom: 1px solid rgba(212, 175, 55, 0.4);
+    background:
+        radial-gradient(circle at 0% 0%, rgba(229, 193, 88, 0.20), transparent 55%),
+        radial-gradient(circle at 100% 0%, rgba(179, 138, 34, 0.30), transparent 60%),
+        rgba(18, 4, 5, 0.94);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgba(229, 193, 88, 0.45);
     position: fixed;
     top: 0;
     left: 50%;
@@ -17,6 +20,9 @@
     max-width: var(--max-content-width);
     box-sizing: border-box;
     z-index: 1500;
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.65),
+        0 0 18px rgba(229, 193, 88, 0.26);
 }
 
 /* --- 左側：BACKボタン --- */
@@ -66,14 +72,16 @@
     text-align: center;
 }
 
-/* デモ用：キャスト／お店ピル型トグルスイッチ */
+/* デモ用：キャスト／お店ピル型トグルスイッチ（センター） */
 .demo-pill-switch {
     display: inline-flex;
     align-items: stretch;
-    border: 1px solid #d4af37;
+    border: 1px solid rgba(229, 193, 88, 0.6);
     border-radius: 999px;
     padding: 2px;
-    background: transparent;
+    background:
+        radial-gradient(circle at 0% 0%, rgba(253, 240, 178, 0.08), transparent 60%),
+        rgba(26, 11, 14, 0.9);
     overflow: hidden;
 }
 .demo-pill-switch__segment {
@@ -88,20 +96,23 @@
     border: none;
     border-radius: 999px;
     transition: color 0.2s, background 0.2s;
-    color: #d4af37;
+    color: #E6D080;
     background: transparent;
 }
 .demo-pill-switch__segment:hover {
-    color: #e8c858;
-    background: rgba(212, 175, 55, 0.12);
+    color: #FDF0B2;
+    background: rgba(229, 193, 88, 0.18);
 }
 .demo-pill-switch__segment.is-active {
-    background: #d4af37;
-    color: #1a0505;
+    background: linear-gradient(135deg, #E5C158, #B38A22);
+    color: #190509;
+    box-shadow:
+        0 0 14px rgba(253, 240, 178, 0.65),
+        0 4px 14px rgba(0, 0, 0, 0.4);
 }
 .demo-pill-switch__segment.is-active:hover {
-    background: #e0c04a;
-    color: #1a0505;
+    background: linear-gradient(135deg, #FDF0B2, #B38A22);
+    color: #190509;
 }
 
 .header-right {
@@ -114,13 +125,14 @@
 }
 
 .header-icon-btn {
-    background: none !important; /* 円形背景を削除 */
-    border: none !important;       /* 枠線を削除 */
-    padding: 0;
+    background: radial-gradient(circle at 30% 0%, rgba(253, 240, 178, 0.22), transparent 60%) !important;
+    border: 1px solid rgba(229, 193, 88, 0.4) !important;
+    padding: 6px;
     margin: 0;
-    width: auto;
-    height: auto;
-    color: #d4af37;
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    color: #E6D080;
     cursor: pointer;
     position: relative;
     display: flex;
@@ -129,7 +141,12 @@
 }
 
 .header-icon-btn i {
-    font-size: 1.2rem; /* アイコン自体のサイズ感 */
+    font-size: 1.1rem;
+}
+
+.header-icon-btn:hover {
+    box-shadow: 0 0 12px rgba(253, 240, 178, 0.55);
+    transform: translateY(-1px);
 }
 
 /* 戻るボタンのホワイトカラーとサイズ */

@@ -79,35 +79,32 @@
 </aside>
 
 <style>
-#side-menu {
-    background: #1a0505;
-    color: #fff;
-}
 .sidebar-header { 
     padding: 20px; 
-    border-bottom: 1px solid rgba(255,255,255,0.05); 
+    border-bottom: 1px solid rgba(230,208,128,0.16); 
     display: flex; 
     justify-content: space-between; 
     align-items: center; 
 }
-.btn-sidebar-close { background: none; border: none; color: #fff; font-size: 1.2rem; cursor: pointer; }
+.btn-sidebar-close { background: none; border: none; color: #F5E6E6; font-size: 1.2rem; cursor: pointer; border-radius: 999px; padding: 4px; transition: background 0.2s ease, color 0.2s ease; }
+.btn-sidebar-close:hover { background: rgba(230,208,128,0.15); color: #FDF0B2; }
 .sidebar-logo { height: 30px; }
 .sidebar-content { flex: 1; overflow-y: auto; padding: 20px; }
 .sidebar-section { margin-bottom: 30px; }
 
 .menu-label-header { 
     font-size: 10px; 
-    color: #d4af37; 
+    color: rgba(230,208,128,0.7); 
     margin-bottom: 15px; 
     letter-spacing: 2px; 
-    font-weight: bold;
-    opacity: 0.6;
+    font-weight: 600;
+    opacity: 0.7;
 }
 
 .sidebar-sub-menu { list-style: none; padding: 0; margin: 0; }
 .sidebar-sub-menu li { margin-bottom: 15px; }
 .sidebar-sub-menu a, .menu-summary { 
-    color: #d1c1c1; 
+    color: #D6C6C6; 
     text-decoration: none; 
     font-size: 0.95rem; 
     display: flex; 
@@ -115,8 +112,19 @@
     gap: 12px; 
     cursor: pointer;
 }
+.sidebar-sub-menu a {
+    padding: 8px 10px;
+    border-radius: 12px;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.12s ease, box-shadow 0.12s ease;
+}
+.sidebar-sub-menu a:hover {
+    background: rgba(230,208,128,0.12);
+    color: #F5E6E6;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.45);
+}
 .sidebar-sub-menu a i, .menu-summary i:first-child { 
-    color: #d4af37; 
+    color: #E6D080; 
     width: 20px; 
     text-align: center; 
 }
@@ -137,21 +145,27 @@
     opacity: 0.5;
 }
 
-.sidebar-footer { padding: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+.sidebar-footer { padding: 20px; border-top: 1px solid rgba(230,208,128,0.16); }
 .btn-logout {
-    width: 100%; padding: 12px; background: transparent;
-    border: 1px solid #b91c1c; color: #b91c1c;
-    border-radius: 8px; cursor: pointer; font-weight: bold;
-    transition: 0.3s;
+    width: 100%; padding: 12px; background: rgba(32, 7, 10, 0.9);
+    border: 1px solid rgba(248, 113, 113, 0.7); color: #fecaca;
+    border-radius: 999px; cursor: pointer; font-weight: 600;
+    letter-spacing: 0.12em;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    transition: background 0.25s ease, border-color 0.25s ease, transform 0.12s ease, box-shadow 0.12s ease;
 }
 .btn-logout:hover {
-    background: #b91c1c;
+    background: rgba(185, 28, 28, 0.9);
     color: #fff;
+    border-color: rgba(252, 165, 165, 0.9);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+    transform: translateY(-1px);
 }
 
 .pwa-install-btn {
-    width: 100%; padding: 12px 16px; background: linear-gradient(135deg, #2a1f0a 0%, #1a0f05 100%);
-    border: 1px solid #D4AF37; color: #D4AF37; border-radius: 8px;
+    width: 100%; padding: 12px 16px; background: radial-gradient(circle at 0% 0%, rgba(253,240,178,0.25), rgba(18,4,5,0.98));
+    border: 1px solid rgba(229,193,88,0.7); color: #FDF0B2; border-radius: 999px;
     cursor: pointer; font-size: 0.95rem; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px;
     transition: 0.3s;
 }
