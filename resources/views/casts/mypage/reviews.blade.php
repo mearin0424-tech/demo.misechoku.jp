@@ -60,6 +60,21 @@
                             <div class="rev-comment">
                                 {!! nl2br(e($rev['text'] ?? '')) !!}
                             </div>
+                            @if(!empty($rev['details']))
+                                <div class="rev-toggle-row">
+                                    <span class="toggle-btn" onclick="toggleDetails(this)">
+                                        詳細 <i class="fas fa-caret-down"></i>
+                                    </span>
+                                </div>
+                                <div class="rev-details-list" style="display:none;">
+                                    @foreach($rev['details'] as $det)
+                                        <div class="detail-row">
+                                            <span class="detail-label">{{ $det['content'] }}</span>
+                                            <span class="detail-val">★ {{ number_format($det['score'], 1) }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -71,3 +86,20 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    function toggleDetails(btn) {
+        const list = btn.parentElement.nextElementSibling;
+        const isOpen = list && list.style.display !== 'none';
+        if (!list) return;
+        if (isOpen) {
+            list.style.display = 'none';
+            btn.innerHTML = '詳細 <i class="fas fa-caret-down"></i>';
+        } else {
+            list.style.display = 'block';
+            btn.innerHTML = '閉じる <i class="fas fa-caret-up"></i>';
+        }
+    }
+</script>
+@endpush
