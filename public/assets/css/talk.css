@@ -24,14 +24,22 @@
 .talk-item {
     display: flex;
     align-items: center;
-    padding: 12px 14px;
+    padding: 8px 12px;
     background: var(--color-card);
     border: 1px solid var(--color-border);
     border-radius: 18px;
     margin-bottom: 10px;
     text-decoration: none;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+}
+
+.talk-item-main {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    text-decoration: none;
+    color: inherit;
 }
 
 .talk-item:hover {
@@ -41,6 +49,12 @@
 .talk-item:active {
     transform: scale(0.97);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.talk-item.is-pinned {
+    border-color: var(--talk-accent-gold, #d4af37);
+    box-shadow: 0 8px 18px rgba(212, 175, 55, 0.35);
+    background: radial-gradient(circle at 0 0, rgba(212, 175, 55, 0.16), transparent 55%), var(--color-card);
 }
 
 .talk-avatar {
@@ -154,7 +168,7 @@
 /* ルーム画面上部ヘッダー（LINE風：相手のアイコンと名前） */
 .talk-room-header {
     flex-shrink: 0;
-    padding: 10px 15px 12px;
+    padding: 10px 15px 8px;
     padding-top: max(10px, env(safe-area-inset-top));
     background: #220a0a;
     border-bottom: 1px solid #4d1a1a;
@@ -164,6 +178,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    margin-bottom: 4px;
 }
 .talk-room-header-avatar {
     width: 40px;
@@ -177,6 +192,39 @@
     font-weight: 700;
     font-size: 1rem;
     color: #f5ecec;
+}
+
+.talk-room-header-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 4px;
+}
+
+.btn-interview {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    border-radius: 999px;
+    border: 1px solid rgba(212, 175, 55, 0.7);
+    background: radial-gradient(circle at 0 0, rgba(212, 175, 55, 0.3), rgba(34, 10, 10, 0.95));
+    color: #fef9c3;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.btn-interview i {
+    font-size: 0.85rem;
+}
+
+.btn-interview:hover {
+    background: radial-gradient(circle at 0 0, rgba(212, 175, 55, 0.4), rgba(34, 10, 10, 1));
+}
+
+.btn-interview:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
 }
 
 /* メッセージ表示エリア（最後の吹き出し・日時が入力欄に被らないよう下余白を確保） */
@@ -555,6 +603,228 @@
     padding: 5px; /* リンク内の余白 */
     display: flex;
     gap: 15px;
+}
+
+/* ==========================================================================
+   面談日候補モーダル
+   ========================================================================== */
+.interview-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.interview-modal-overlay[aria-hidden="false"] {
+    opacity: 1;
+    visibility: visible;
+}
+
+.interview-modal {
+    background: #1b0a0a;
+    border-radius: 18px;
+    border: 1px solid rgba(212, 175, 55, 0.5);
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.7);
+    padding: 18px 18px 16px;
+    width: 100%;
+    max-width: 360px;
+    color: #f5ecec;
+}
+
+.interview-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.interview-modal-header h2 {
+    font-size: 0.98rem;
+    margin: 0;
+}
+
+.interview-modal-close {
+    border: none;
+    background: transparent;
+    color: #f5ecec;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.interview-modal-desc {
+    font-size: 0.78rem;
+    line-height: 1.5;
+    opacity: 0.85;
+    margin: 0 0 10px;
+}
+
+.interview-option-group {
+    margin-bottom: 10px;
+}
+
+.interview-option-group label {
+    display: block;
+    font-size: 0.78rem;
+    margin-bottom: 4px;
+}
+
+.interview-option-group input[type="datetime-local"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(148, 121, 79, 0.7);
+    background: #120505;
+    color: #f5ecec;
+    font-size: 0.8rem;
+}
+
+.interview-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.btn-interview-cancel,
+.btn-interview-submit {
+    min-width: 90px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    border: 1px solid #555;
+}
+
+.btn-interview-cancel {
+    background: transparent;
+    color: #ddd;
+}
+
+.btn-interview-submit {
+    background: linear-gradient(135deg, #c9a227, #d4af37);
+    color: #1a0a0a;
+    border-color: #d4af37;
+    font-weight: 600;
+}
+
+.btn-interview-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ==========================================================================
+   面談日候補メッセージ
+   ========================================================================== */
+.message-bubble-interview {
+    padding: 8px 10px 8px;
+}
+
+.interview-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.interview-title i {
+    font-size: 0.85rem;
+}
+
+.interview-option-list {
+    list-style: none;
+    padding: 0;
+    margin: 4px 0 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.interview-option-btn {
+    width: 100%;
+    text-align: left;
+    border-radius: 999px;
+    border: 1px solid rgba(212, 175, 55, 0.65);
+    background: rgba(0, 0, 0, 0.2);
+    color: #fef3c7;
+    font-size: 0.76rem;
+    padding: 4px 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.interview-option-btn span {
+    flex: 1;
+}
+
+.interview-option-btn i {
+    font-size: 0.75rem;
+    opacity: 0.9;
+}
+
+.interview-option-btn:hover {
+    background: rgba(212, 175, 55, 0.18);
+}
+
+.interview-option-btn.is-selected {
+    background: rgba(212, 175, 55, 0.25);
+    color: #1a0a0a;
+}
+
+.interview-note {
+    font-size: 0.7rem;
+    opacity: 0.8;
+    margin: 2px 0 0;
+}
+
+/* --- ピン留めボタン --- */
+.talk-pin-btn {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    margin-left: 8px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.35);
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.talk-pin-btn i {
+    font-size: 0.8rem;
+}
+
+.talk-pin-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.talk-pin-btn[aria-pressed="true"] {
+    background: rgba(212, 175, 55, 0.18);
+    color: #fcd34d;
+}
+
+.talk-pin-btn[aria-pressed="true"] i {
+    transform: rotate(-25deg);
 }
 
 /* ==========================================================================
