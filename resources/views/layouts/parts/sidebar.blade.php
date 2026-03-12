@@ -72,7 +72,7 @@
     </div>
 
     <div class="sidebar-footer">
-        <button class="btn-logout" onclick="if(confirm('ログアウトしますか？')) location.href='{{ url('/logout') }}'">
+        <button class="btn-logout" onclick="if(confirm('ログアウトしますか？')) location.href='{{ route('login.demo') }}'">
             <i class="fas fa-sign-out-alt"></i> <span>ログアウト</span>
         </button>
     </div>
