@@ -44,9 +44,9 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             slideChange: function () {
                 var messages = [
-                    "上下でキャストを変更できるよ！",
-                    "このキャストの写真は左右にスワイプしてね。",
-                    "気になる人がいたら右のボタンでアクションしよう！"
+                    "上下スワイプで次 / 前のアカウントに移動できるよ！\n左右スワイプでこの人の別の写真が見られるよ。",
+                    "左右にスワイプしてこのキャストの他の写真をチェックしてみてね。\n上下スワイプで別のキャストに切り替わるよ。",
+                    "気になる人がいたら右側のボタンから「いいね」「キープ」「メッセージ」を使ってみよう！"
                 ];
                 var realIndex = this.realIndex != null ? this.realIndex : this.activeIndex;
                 var currentMsg = messages[realIndex % messages.length] || "素敵な出会いがありますように！";
@@ -57,14 +57,36 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // 各カード内の左右スワイプ（同一アカウントの複数写真）
+    const photoSwipers = [];
+    document.querySelectorAll('.photo-swiper').forEach((el) => {
+        const paginationEl = el.querySelector('.photo-pagination');
+        const options = {
+            direction: 'horizontal',
+            slidesPerView: 1,
+            loop: false,
+            nested: true,
+            touchAngle: 45,
+            threshold: 10
+        };
+        if (paginationEl) {
+            options.pagination = {
+                el: paginationEl,
+                clickable: true
+            };
+        }
+        const swiper = new Swiper(el, options);
+        photoSwipers.push(swiper);
+    });
+
     // リサイズ・ビューポート変化時に Swiper を更新（モバイルのアドレスバー表示切替など）
     window.addEventListener('resize', function () {
         if (mainSwiper) mainSwiper.update();
     });
     if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', function () {
-            if (mainSwiper) mainSwiper.update();
-        });
+        if (mainSwiper) mainSwiper.update();
+    });
     }
 
     // 3. クリックイベントの伝播停止 (ボタン類)
@@ -82,6 +104,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (guide) {
             guide.style.transition = 'opacity 1s ease';
             guide.style.opacity = '0.5';
+        }
+        const swipeGuide = document.getElementById('home-swipe-guide');
+        if (swipeGuide) {
+            swipeGuide.style.transition = 'opacity 1s ease';
+            swipeGuide.style.opacity = '0';
         }
     }, 8000);
 });

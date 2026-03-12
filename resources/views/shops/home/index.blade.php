@@ -2,6 +2,7 @@
 
 @section('title', 'DISCOVERY')
 @section('body-class', 'no-scroll page-home')
+@section('guide_message', "上下スワイプ：次 / 前のアカウントに移動\n左右スワイプ：同じアカウントの別写真を表示\nタップ：詳細プロフィールを開く\n右側のボタン：いいね・キープ・メッセージ")
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/home.css') }}">
@@ -23,16 +24,35 @@
             @foreach($items as $item)
             <div class="swiper-slide cast-card glass-card">
                 @php
-                    $imgPath = $isShop ? "storage/mock/shops/out-{$item['id']}.png" : "storage/mock/casts/{$item['id']}-1.png";
+                    $baseImgPath = $isShop
+                        ? "storage/mock/shops/out-{$item['id']}.png"
+                        : "storage/mock/casts/{$item['id']}";
+                    $imageCount = $isShop ? 1 : 3;
                 @endphp
-                {{-- メイン写真（カード型にせず画面いっぱいに表示） --}}
+                {{-- メイン写真（左右スワイプで同一アカウントの別写真を表示） --}}
                 <div class="home-photo-wrap">
-                    <img
-                        src="{{ asset($imgPath) }}"
-                        alt="{{ $item['name'] }}の写真"
-                        class="home-photo"
-                        loading="lazy"
-                    >
+                    <div class="photo-swiper swiper">
+                        <div class="swiper-wrapper">
+                            @for($i = 1; $i <= $imageCount; $i++)
+                                @php
+                                    $imgPath = $isShop
+                                        ? $baseImgPath
+                                        : "{$baseImgPath}-{$i}.png";
+                                @endphp
+                                <div class="swiper-slide">
+                                    <img
+                                        src="{{ asset($imgPath) }}"
+                                        alt="{{ $item['name'] }}の写真{{ $imageCount > 1 ? '（' . $i . '枚目）' : '' }}"
+                                        class="home-photo"
+                                        loading="lazy"
+                                    >
+                                </div>
+                            @endfor
+                        </div>
+                        @if($imageCount > 1)
+                        <div class="photo-pagination swiper-pagination"></div>
+                        @endif
+                    </div>
                     <a href="{{ route($detailRoute, $item['id']) }}" class="card-detail-link"></a>
                 </div>
 
@@ -76,6 +96,41 @@
         </div>
         {{-- ページネーション（ドット） --}}
         <div class="home-swiper-pagination swiper-pagination"></div>
+    </div>
+
+    {{-- スワイプ方向ガイド --}}
+    <div class="swipe-guide-overlay" id="home-swipe-guide">
+        <div class="swipe-guide-grid">
+            <div class="swipe-guide-row">
+                <div class="swipe-guide-cell"></div>
+                <div class="swipe-guide-cell swipe-guide-up">
+                    <i class="fas fa-chevron-up"></i>
+                    <span>次のアカウント</span>
+                </div>
+                <div class="swipe-guide-cell"></div>
+            </div>
+            <div class="swipe-guide-row">
+                <div class="swipe-guide-cell swipe-guide-left">
+                    <i class="fas fa-chevron-left"></i>
+                    <span>前の写真</span>
+                </div>
+                <div class="swipe-guide-cell swipe-guide-center">
+                    <span>タップで詳細</span>
+                </div>
+                <div class="swipe-guide-cell swipe-guide-right">
+                    <i class="fas fa-chevron-right"></i>
+                    <span>次の写真</span>
+                </div>
+            </div>
+            <div class="swipe-guide-row">
+                <div class="swipe-guide-cell"></div>
+                <div class="swipe-guide-cell swipe-guide-down">
+                    <i class="fas fa-chevron-down"></i>
+                    <span>前のアカウント</span>
+                </div>
+                <div class="swipe-guide-cell"></div>
+            </div>
+        </div>
     </div>
 </div>
 @endsection

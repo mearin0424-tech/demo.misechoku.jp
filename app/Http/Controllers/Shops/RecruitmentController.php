@@ -46,9 +46,13 @@ class RecruitmentController extends Controller
     {
         // editと同じモックデータを使用して詳細を表示
         $recruitData = $this->getMockData();
+        // プロファイル画面と同等の店舗情報もあわせて渡し、求人票側でお店の写真・情報を連携表示する
+        $shop = $this->getMockShopProfile();
+
         return view('shops.recruit.show', [
             'pageId' => 'job_info', 
-            'recruit' => $recruitData
+            'recruit' => $recruitData,
+            'shop'   => $shop,
         ]);
     }
 
@@ -140,6 +144,28 @@ class RecruitmentController extends Controller
                 'メリット' => ['レンタル衣装有り', 'ヘアメイク有り', 'ヘアメイク不要'],
                 '特徴' => ['未経験', 'シングルマザーOK', '経験者優遇'],
                 '設備' => ['駐車場有り', '車通勤OK', '寮有り'],
+            ],
+        ];
+    }
+
+    /**
+     * 店舗プロフィール画面と同等のモック店舗情報
+     * プロファイルと求人票の見た目・内容を揃えるために使用
+     */
+    private function getMockShopProfile()
+    {
+        return [
+            'name'       => 'Club Luxurious',
+            'word'       => '最高級の空間で、最高の出会いを。',
+            'main_img'   => asset('storage/mock/shops/out-1.png'),
+            'area'       => '東京都港区六本木',
+            'concept'    => "六本木駅から徒歩3分。落ち着いた雰囲気の高級ラウンジです。\n選び抜かれたキャストと共に、至福のひとときを提供いたします。",
+            'review_avg' => 4.8,
+            'review_cnt' => 124,
+            'sub_images' => [
+                asset('storage/mock/shops/inside-1.png'),
+                asset('storage/mock/shops/inside-2.png'),
+                asset('storage/mock/shops/inside-3.png'),
             ],
         ];
     }
