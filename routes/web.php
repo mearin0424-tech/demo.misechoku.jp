@@ -115,6 +115,8 @@ Route::prefix('bk')->name('bk.')->group(function () {
 
         // 入金・振込管理
         Route::get('/deposits', [AdminDeposit::class, 'index'])->name('deposits.index');
+        Route::post('/deposits/approve', [AdminDeposit::class, 'approve'])->name('deposits.approve');
+        Route::post('/deposits/pay-cast', [AdminDeposit::class, 'payCast'])->name('deposits.paycast');
 
         // 売上管理
         Route::get('/sales', [AdminSales::class, 'index'])->name('sales.index');
@@ -253,6 +255,8 @@ Route::prefix('shop')->name('shop.')->group(function () {
         Route::get('/reviews', [ShopReview::class, 'index'])->name('review.index');
         Route::post('/documents/upload', [ShopMypage::class, 'uploadDocument'])->name('documents.upload');
         Route::post('/payment/bank', [ShopMypage::class, 'updateBank'])->name('payment.bank.update');
+        Route::post('/deposit/approve', [ShopMypage::class, 'approveDeposit'])->name('deposit.approve');
+        Route::post('/deposit/pay', [ShopMypage::class, 'payToPlatform'])->name('deposit.pay');
     });
 
     // レビュー公開・非表示の切り替え（reviews 画面の JS から使用）
@@ -287,6 +291,8 @@ Route::prefix('cast')->name('cast.')->group(function () {
     Route::post('/mypage/payment/bank', [CastMypage::class, 'updateBank'])->name('mypage.payment.bank.update');
     Route::get('/mypage/identity', [CastMypage::class, 'identity'])->name('mypage.identity');
     Route::post('/mypage/identity/upload', [CastMypage::class, 'uploadIdentity'])->name('mypage.identity.upload');
+    Route::post('/mypage/deposit/request', [CastMypage::class, 'requestDeposit'])->name('mypage.deposit.request');
+    Route::post('/mypage/deposit/confirm', [CastMypage::class, 'confirmDeposit'])->name('mypage.deposit.confirm');
 
     Route::prefix('talk')->name('talk.')->group(function () {
         Route::get('/', [TalkController::class, 'index'])->name('index');

@@ -85,8 +85,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', function () {
-        if (mainSwiper) mainSwiper.update();
-    });
+            if (mainSwiper) mainSwiper.update();
+        });
     }
 
     // 3. クリックイベントの伝播停止 (ボタン類)

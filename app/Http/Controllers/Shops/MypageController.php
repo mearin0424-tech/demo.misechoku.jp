@@ -69,15 +69,107 @@ class MypageController extends Controller
 
     public function payment()
     {
-        // 開発用モックデータ
+        // 開発用モックデータ（請求サマリー）
+        $summary = [
+            'unpaid_total'   => 120000,
+            'next_settlement'=> '2025/02/05',
+        ];
+
+        // 開発用モックデータ（請求履歴）
         $invoices = [
             ['id' => 101, 'title' => '2024年12月分 請求', 'amount' => 85000, 'status' => 'paid', 'date' => '2025/01/01'],
             ['id' => 102, 'title' => '2025年1月分 概算', 'amount' => 120000, 'status' => 'pending', 'date' => '2025/02/01'],
         ];
 
+        // やり取り中のキャストの採用ステータス（モック）
+        $candidates = [
+            [
+                'id'            => 1,
+                'name'          => '愛華',
+                'age'           => 24,
+                'job_type'      => '本入店',
+                'status_label'  => '面談日調整中',
+                'status_tag'    => 'interview_pending',
+                'next_step'     => '候補日の返信待ち',
+                'interview_at'  => '2025-02-03 20:00',
+                'deadline_at'   => '2025-02-10',
+                'last_message'  => '来週の水曜か金曜でお願いできますか？',
+            ],
+            [
+                'id'            => 2,
+                'name'          => 'みさき',
+                'age'           => 22,
+                'job_type'      => '体験入店',
+                'status_label'  => '面談日確定',
+                'status_tag'    => 'interview_fixed',
+                'next_step'     => '当日の来店フォロー',
+                'interview_at'  => '2025-02-01 21:00',
+                'deadline_at'   => '2025-02-15',
+                'last_message'  => '当日は19時ごろに一度お電話いたします。',
+            ],
+            [
+                'id'            => 3,
+                'name'          => 'Rena',
+                'age'           => 26,
+                'job_type'      => 'ヘルプ',
+                'status_label'  => '入店決定・入金待ち',
+                'status_tag'    => 'deposit_pending',
+                'next_step'     => '店舗から運営へ入金',
+                'interview_at'  => '2025-01-28 20:30',
+                'deadline_at'   => '2025-02-07',
+                'last_message'  => '本採用ありがとうございます。初出勤楽しみにしています。',
+            ],
+        ];
+
+        // 面談日・振込期限・入金フローなどを 1 本のカレンダーデータにまとめる（モック）
+        $calendarEvents = [
+            [
+                'date'  => '2025-02-01',
+                'time'  => '21:00',
+                'type'  => 'interview',
+                'actor' => 'shop',
+                'label' => 'みさき さん面談（体験入店）',
+            ],
+            [
+                'date'  => '2025-02-03',
+                'time'  => '20:00',
+                'type'  => 'interview',
+                'actor' => 'shop',
+                'label' => '愛華 さん面談候補（本入店）',
+            ],
+            [
+                'date'  => '2025-02-05',
+                'time'  => null,
+                'type'  => 'deadline',
+                'actor' => 'shop',
+                'label' => 'ミセチョク利用料の決済予定日',
+            ],
+            [
+                'date'  => '2025-02-07',
+                'time'  => null,
+                'type'  => 'deadline',
+                'actor' => 'shop',
+                'label' => 'Rena さん入金締切（ヘルプ）',
+            ],
+            [
+                'date'  => '2025-02-08',
+                'time'  => null,
+                'type'  => 'deposit',
+                'actor' => 'admin',
+                'label' => '運営 → キャスト振込予定',
+            ],
+        ];
+
+        $step = (int) session('deposit_flow_step', 0);
+        $flow = $this->buildDepositFlowState($step);
+
         return view('shops.mypage.payment', [
             'pageId' => 'manage',
-            'invoices' => $invoices
+            'invoices' => $invoices,
+             'summary'  => $summary,
+             'candidates' => $candidates,
+             'calendarEvents' => $calendarEvents,
+            'depositFlow' => $flow,
         ]);
     }
 
@@ -139,5 +231,49 @@ class MypageController extends Controller
             'success' => false,
             'message' => 'ファイルが選択されていません。',
         ], 400);
+    }
+
+    /**
+     * 店舗側：ノルマ達成・店舗審査完了
+     */
+    public function approveDeposit(Request $request)
+    {
+        $step = (int) session('deposit_flow_step', 0);
+        if ($step >= 1 && $step < 2) {
+            session(['deposit_flow_step' => 2]);
+        }
+
+        return redirect()->route('shop.mypage.payment.index')->with('status', 'ノルマ達成・店舗審査を完了しました。運営の確認をお待ちください。');
+    }
+
+    /**
+     * 店舗側：運営へ入金完了
+     */
+    public function payToPlatform(Request $request)
+    {
+        $step = (int) session('deposit_flow_step', 0);
+        if ($step >= 3 && $step < 4) {
+            session(['deposit_flow_step' => 4]);
+        }
+
+        return redirect()->route('shop.mypage.payment.index')->with('status', '運営へのお振込が完了しました。運営の入金確認をお待ちください。');
+    }
+
+    /**
+     * 入金フローの現在ステータス（3者分）を組み立てる
+     */
+    private function buildDepositFlowState(int $step): array
+    {
+        $map = [
+            0 => ['cast' => '未申請',       'shop' => '未稼働',           'admin' => '未稼働'],
+            1 => ['cast' => '申請中',       'shop' => '未稼働',           'admin' => '未稼働'],
+            2 => ['cast' => '店舗審査中',   'shop' => '店舗審査中',       'admin' => '店舗審査待ち'],
+            3 => ['cast' => 'お振込準備中', 'shop' => 'お支払い準備中',   'admin' => '店舗入金依頼中'],
+            4 => ['cast' => 'お振込準備中', 'shop' => 'お支払い済み',     'admin' => '店舗入金確認中'],
+            5 => ['cast' => 'お振込手続き中', 'shop' => 'お支払い完了', 'admin' => 'キャスト振込済'],
+            6 => ['cast' => '完了',         'shop' => '完了',             'admin' => '完了'],
+        ];
+
+        return $map[$step] ?? $map[0];
     }
 }

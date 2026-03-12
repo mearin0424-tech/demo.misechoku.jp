@@ -180,3 +180,168 @@
     width: 100%;
     margin-bottom: 0;
 }
+
+/* 採用ステータス（やり取り中のキャスト） */
+.management-hire-card {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+}
+.management-hire-main {
+    flex: 1;
+    min-width: 0;
+}
+.management-hire-name-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+.management-hire-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--color-text-header);
+}
+.management-hire-age {
+    font-size: 0.8rem;
+    color: var(--color-text);
+    opacity: 0.8;
+}
+.management-hire-pill {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(212, 175, 55, 0.5);
+    color: var(--gold);
+    background: rgba(212, 175, 55, 0.12);
+}
+.management-hire-status {
+    margin: 0 0 4px 0;
+}
+.management-hire-status-badge {
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 6px;
+    margin-right: 6px;
+}
+.management-hire-status-interview_pending {
+    background: rgba(59, 130, 246, 0.18);
+    color: #93c5fd;
+}
+.management-hire-status-interview_fixed {
+    background: rgba(16, 185, 129, 0.18);
+    color: #6ee7b7;
+}
+.management-hire-status-deposit_pending,
+.management-hire-status-other {
+    background: rgba(212, 175, 55, 0.18);
+    color: var(--gold);
+}
+.management-hire-next {
+    font-size: 0.7rem;
+    color: var(--color-text);
+    opacity: 0.8;
+}
+.management-hire-message {
+    font-size: 0.8rem;
+    color: var(--color-text);
+    opacity: 0.85;
+    margin: 2px 0 0 0;
+}
+.management-hire-meta {
+    min-width: 130px;
+    font-size: 0.75rem;
+    color: var(--color-text);
+    opacity: 0.9;
+}
+.management-hire-meta-row {
+    margin: 0 0 4px 0;
+}
+.management-hire-meta-row .label {
+    display: block;
+    opacity: 0.7;
+}
+.management-hire-meta-row .value {
+    font-weight: 600;
+}
+
+/* 採用・入金カレンダー */
+.management-calendar-day {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+.management-calendar-date {
+    width: 64px;
+    min-width: 64px;
+    text-align: center;
+    padding: 8px 4px;
+    border-radius: 12px;
+    background: rgba(17, 24, 39, 0.9);
+    border: 1px solid rgba(55, 65, 81, 0.9);
+    box-sizing: border-box;
+}
+.management-calendar-date .date-main {
+    display: block;
+    font-weight: 700;
+    color: #e5e7eb;
+    font-size: 0.9rem;
+}
+.management-calendar-date .date-sub {
+    display: block;
+    font-size: 0.7rem;
+    color: #9ca3af;
+}
+.management-calendar-events {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.management-calendar-event {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(55, 65, 81, 0.9);
+}
+.management-calendar-event-interview {
+    border-color: rgba(59, 130, 246, 0.6);
+}
+.management-calendar-event-deadline {
+    border-color: rgba(249, 115, 22, 0.6);
+}
+.management-calendar-event-deposit {
+    border-color: rgba(212, 175, 55, 0.7);
+}
+.management-calendar-event .event-icon {
+    width: 20px;
+    text-align: center;
+    color: var(--gold);
+    font-size: 0.85rem;
+    margin-top: 2px;
+}
+.management-calendar-event .event-body {
+    flex: 1;
+    min-width: 0;
+}
+.management-calendar-event .event-label {
+    display: block;
+    font-size: 0.85rem;
+    color: #e5e7eb;
+}
+.management-calendar-event .event-meta {
+    display: block;
+    font-size: 0.7rem;
+    color: #9ca3af;
+    margin-top: 2px;
+}

@@ -98,38 +98,11 @@
         <div class="home-swiper-pagination swiper-pagination"></div>
     </div>
 
-    {{-- スワイプ方向ガイド --}}
+    {{-- スワイプガイド（画面上部に小さく表示） --}}
     <div class="swipe-guide-overlay" id="home-swipe-guide">
-        <div class="swipe-guide-grid">
-            <div class="swipe-guide-row">
-                <div class="swipe-guide-cell"></div>
-                <div class="swipe-guide-cell swipe-guide-up">
-                    <i class="fas fa-chevron-up"></i>
-                    <span>次のアカウント</span>
-                </div>
-                <div class="swipe-guide-cell"></div>
-            </div>
-            <div class="swipe-guide-row">
-                <div class="swipe-guide-cell swipe-guide-left">
-                    <i class="fas fa-chevron-left"></i>
-                    <span>前の写真</span>
-                </div>
-                <div class="swipe-guide-cell swipe-guide-center">
-                    <span>タップで詳細</span>
-                </div>
-                <div class="swipe-guide-cell swipe-guide-right">
-                    <i class="fas fa-chevron-right"></i>
-                    <span>次の写真</span>
-                </div>
-            </div>
-            <div class="swipe-guide-row">
-                <div class="swipe-guide-cell"></div>
-                <div class="swipe-guide-cell swipe-guide-down">
-                    <i class="fas fa-chevron-down"></i>
-                    <span>前のアカウント</span>
-                </div>
-                <div class="swipe-guide-cell"></div>
-            </div>
+        <div class="swipe-guide-pill">
+            <span class="swipe-guide-caret">＾</span>
+            <span class="swipe-guide-text">上下：アカウント / 左右：写真</span>
         </div>
     </div>
 </div>

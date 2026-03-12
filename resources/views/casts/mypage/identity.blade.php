@@ -18,6 +18,7 @@
 
             <div class="mypage-detail-box">
                 <div class="mypage-section">
+                    <h2 class="section-title section-title-gold">本人確認書類の提出状況</h2>
                     <p class="text-xs" style="color:#C9B8B8; margin-bottom:8px;">
                         パスポート / 運転免許証 / マイナンバーカードのいずれかをアップロードしてください。
                     </p>
@@ -34,22 +35,17 @@
                             'approved'      => '承認済み',
                         ][$status] ?? '提出待ち';
                     @endphp
-                    <table class="admin-table" style="margin-bottom:12px;">
-                        <thead>
-                            <tr>
-                                <th>アクター</th>
-                                <th>ステータス（キャスト側）</th>
-                                <th>ステータス（運営側）</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>キャスト</td>
-                                <td>{{ $labelCast }}</td>
-                                <td>{{ $labelAdmin }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <ul class="doc-list" style="margin-bottom:16px;">
+                        <li class="doc-item">
+                            <div class="doc-icon"><i class="fas fa-id-card"></i></div>
+                            <div class="doc-info">
+                                <span class="doc-name">本人確認書類</span>
+                                <span class="doc-status {{ $status === 'approved' ? 'done' : 'pending' }}">
+                                    {{ $labelCast }}（運営: {{ $labelAdmin }}）
+                                </span>
+                            </div>
+                        </li>
+                    </ul>
 
                     <form id="cast-identity-form" class="management-bank-form">
                         @csrf
@@ -57,12 +53,12 @@
                             <label class="bank-label">本人確認書類（画像 or PDF）</label>
                             <input type="file" name="file" class="bank-input" accept=".pdf,image/*" required>
                         </div>
-                        <div class="text-right mt-3">
+                        <div class="text-right" style="margin-top:12px;">
                             <button type="submit" class="btn-action manage">
                                 <i class="fas fa-upload"></i> アップロード
                             </button>
                         </div>
-                        <p id="cast-identity-message" class="management-summary-note" style="display:none;"></p>
+                        <p id="cast-identity-message" class="management-summary-note" style="display:none; margin-top:8px;"></p>
                     </form>
                 </div>
             </div>

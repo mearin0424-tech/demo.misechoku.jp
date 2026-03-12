@@ -49,8 +49,12 @@ class MypageController extends Controller
      */
     public function payment()
     {
+        $step = (int) session('deposit_flow_step', 0);
+        $flow = $this->buildDepositFlowState($step);
+
         return view('casts.mypage.payment', [
             'pageId' => 'mypage',
+            'depositFlow' => $flow,
         ]);
     }
 
@@ -83,6 +87,50 @@ class MypageController extends Controller
             'success' => true,
             'message' => '本人確認書類をアップロードしました。運営による確認・承認をお待ちください。',
         ]);
+    }
+
+    /**
+     * キャスト側：入金申請（ボーナス条件達成後に押す想定）
+     */
+    public function requestDeposit(\Illuminate\Http\Request $request)
+    {
+        $step = (int) session('deposit_flow_step', 0);
+        if ($step < 1) {
+            session(['deposit_flow_step' => 1]);
+        }
+
+        return redirect()->route('cast.mypage.payment')->with('status', '入金申請を受け付けました。店舗・運営の確認をお待ちください。');
+    }
+
+    /**
+     * キャスト側：入金完了確認（最終確認）
+     */
+    public function confirmDeposit(\Illuminate\Http\Request $request)
+    {
+        $step = (int) session('deposit_flow_step', 0);
+        if ($step >= 5) {
+            session(['deposit_flow_step' => 6]);
+        }
+
+        return redirect()->route('cast.mypage.payment')->with('status', '入金を確認しました。ありがとうございました。');
+    }
+
+    /**
+     * 入金フローの現在ステータス（3者分）を組み立てる
+     */
+    private function buildDepositFlowState(int $step): array
+    {
+        $map = [
+            0 => ['cast' => '未申請',       'shop' => '未稼働',           'admin' => '未稼働'],
+            1 => ['cast' => '申請中',       'shop' => '未稼働',           'admin' => '未稼働'],
+            2 => ['cast' => '店舗審査中',   'shop' => '店舗審査中',       'admin' => '店舗審査待ち'],
+            3 => ['cast' => 'お振込準備中', 'shop' => 'お支払い準備中',   'admin' => '店舗入金依頼中'],
+            4 => ['cast' => 'お振込準備中', 'shop' => 'お支払い済み',     'admin' => '店舗入金確認中'],
+            5 => ['cast' => 'お振込手続き中', 'shop' => 'お支払い完了', 'admin' => 'キャスト振込済'],
+            6 => ['cast' => '完了',         'shop' => '完了',             'admin' => '完了'],
+        ];
+
+        return $map[$step] ?? $map[0];
     }
 
     /**

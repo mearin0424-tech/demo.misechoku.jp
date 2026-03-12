@@ -13,14 +13,6 @@
             </span>
             <i class="fas fa-chevron-right btn-action-arrow"></i>
         </a>
-        <a href="{{ route('cast.mypage.identity') }}" class="btn-action-card manage {{ $current === 'identity' ? 'is-current' : '' }}">
-            <span class="btn-action-icon-wrap"><i class="fas fa-id-card"></i></span>
-            <span class="btn-action-body">
-                <span class="btn-action-label">KYC</span>
-                <span class="btn-action-text">本人確認</span>
-            </span>
-            <i class="fas fa-chevron-right btn-action-arrow"></i>
-        </a>
         <a href="{{ route('cast.mypage.payment') }}" class="btn-action-card manage {{ $current === 'payment' ? 'is-current' : '' }}">
             <span class="btn-action-icon-wrap"><i class="fas fa-file-invoice-dollar"></i></span>
             <span class="btn-action-body">

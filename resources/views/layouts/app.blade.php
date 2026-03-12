@@ -57,10 +57,10 @@
                 @endif
             </main>
 
-            {{-- ボトムナビ（モバイル用固定）※管理画面（/bk/*）では非表示 --}}
-            @unless (request()->is('bk/*'))
+            {{-- ボトムナビ（モバイル用固定）※店舗 / キャスト画面のみ表示 --}}
+            @if (request()->is('shop/*') || request()->is('cast/*'))
                 @include('layouts.parts.footer')
-            @endunless
+            @endif
         </div>
         {{-- サイドバー --}}
         @include('layouts.parts.sidebar')
