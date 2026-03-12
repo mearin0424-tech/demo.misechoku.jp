@@ -11,15 +11,16 @@
 @php
     $detail = $recruitDetail ?? null;
     $jobTypes = $detail['job_types'] ?? [];
+    $mainKey = 'regular';
 @endphp
-<div class="recruit-status-page contents animate-fadeIn">
+<div class="recruit-status-page recruit-detail-page animate-fadeIn">
     <header class="recruit-status-header">
         <a href="{{ route('shop.mypage.index') }}" class="recruit-status-back">
             <i class="fas fa-chevron-left"></i> マイページへ
         </a>
         <div class="recruit-status-title-block">
             <h1 class="recruit-status-title serif-font">Recruit Status</h1>
-            <p class="recruit-status-sub">求人情報の確認・公開管理</p>
+            <p class="recruit-status-sub">求人情報の確認・公開管理（プレビュー風）</p>
         </div>
     </header>
 
@@ -50,20 +51,29 @@
             </div>
             @endif
 
-            {{-- 本入店・体験入店・ヘルプ採用 カード --}}
+            {{-- 採用形態・ボーナス（求人票と同じメリハリ） --}}
+            <h3 class="recruit-block-title" style="margin-top:24px;"><i class="fas fa-coins"></i> 採用形態・ボーナス</h3>
             <div class="recruit-job-types">
-                @foreach(['regular' => 'recruit-type-regular', 'trial' => 'recruit-type-trial', 'help' => 'recruit-type-help'] as $key => $typeClass)
+                @foreach(['regular' => ['recruit-type-regular', true], 'trial' => ['recruit-type-trial', false], 'help' => ['recruit-type-help', false]] as $key => $arr)
                     @if(!empty($jobTypes[$key]))
-                    @php $type = $jobTypes[$key]; @endphp
-                    <div class="recruit-type-card {{ $typeClass }}">
+                    @php
+                        $type = $jobTypes[$key];
+                        list($typeClass, $isMain) = $arr;
+                    @endphp
+                    <div class="recruit-type-card {{ $typeClass }} {{ $isMain ? 'recruit-type-card-new is-main' : 'recruit-type-card-new' }}">
                         <div class="recruit-type-main">
-                            <span class="recruit-type-label">{{ $type['label'] }}</span>
-                            <p class="recruit-type-wage">{{ number_format($type['hourly_wage']) }}<span class="unit">円〜/h</span></p>
+                            <span class="recruit-type-label recruit-type-badge-new">{{ $type['label'] }}</span>
+                            <div class="recruit-type-wage-row">
+                                <span class="label">時給</span>
+                                <span class="value">{{ number_format($type['hourly_wage']) }}</span>
+                                <span class="unit">円〜</span>
+                            </div>
                         </div>
-                        <div class="recruit-type-sub">
-                            <p class="recruit-type-meta">{{ $type['work_reward'] }}</p>
-                            <p class="recruit-type-daily">{{ $type['daily_hours'] }}h/日</p>
-                            <p class="recruit-type-notes">{{ $type['notes'] }}</p>
+                        <div class="recruit-type-bonus-box">
+                            <p class="bonus-label">ノルマ達成ボーナス報酬</p>
+                            <p class="bonus-amount">{{ $type['work_reward'] ?? '—' }}</p>
+                            <p class="bonus-meta">（1日の勤務時間：{{ $type['daily_hours'] ?? '—' }}h）</p>
+                            <p class="bonus-note">{{ $type['notes'] ?? '' }}</p>
                         </div>
                     </div>
                     @endif
