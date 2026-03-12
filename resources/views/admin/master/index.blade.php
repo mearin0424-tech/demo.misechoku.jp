@@ -7,26 +7,26 @@
         <h1 class="admin-title">マスタ設定管理</h1>
         <p class="admin-description">
             レビュー項目や検索で利用するタグなど、全体で共通利用するマスタデータを管理します。<br>
-            ここから各マスタ編集画面へ遷移できるようにします（詳細画面は今後拡張）。
+            編集画面は今後拡張予定です。
         </p>
 
         <div class="admin-grid">
             <div class="admin-card">
                 <h2>レビュー項目マスタ</h2>
-                <p>レビューの評価項目（接客、雰囲気など）を追加・編集・無効化します。</p>
-                <p class="admin-badge">今後実装予定</p>
+                <p>レビューの評価項目（接客、雰囲気など）の一覧・追加・無効化。</p>
+                <p class="admin-note">※ 実装予定</p>
             </div>
 
             <div class="admin-card">
                 <h2>検索タグマスタ</h2>
-                <p>検索条件で利用するタグ（エリア、業態、こだわり条件など）を管理します。</p>
-                <p class="admin-badge">今後実装予定</p>
+                <p>検索条件で利用するタグ（エリア、業態、こだわり条件など）の管理。</p>
+                <p class="admin-note">※ 実装予定</p>
             </div>
 
             <div class="admin-card">
                 <h2>コラムカテゴリ／タグ</h2>
-                <p>お役立ちコラムで利用するカテゴリ・タグを管理します。</p>
-                <p class="admin-badge">ColumnRepository と連携予定</p>
+                <p>お役立ちコラムで利用するカテゴリ・タグの管理。</p>
+                <p class="admin-note">※ ColumnRepository と連携予定</p>
             </div>
         </div>
     </div>
@@ -36,46 +36,42 @@
             padding: 24px 0;
         }
         .admin-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: #FDF0B2;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #e5e7eb;
         }
         .admin-description {
             font-size: 0.9rem;
-            color: #e5d4d4;
-            margin-bottom: 18px;
+            color: #cbd5f5;
+            margin-bottom: 16px;
             line-height: 1.6;
         }
         .admin-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
+            gap: 10px;
         }
         .admin-card {
-            padding: 16px;
-            border-radius: 14px;
-            background: radial-gradient(circle at 0% 0%, rgba(251, 191, 36, 0.1), rgba(24, 16, 4, 0.96));
-            border: 1px solid rgba(251, 191, 36, 0.5);
-            color: #fef9c3;
+            padding: 12px 14px;
+            border-radius: 8px;
+            background: rgba(17, 24, 39, 0.95);
+            border: 1px solid rgba(55, 65, 81, 0.9);
+            color: #e5e7eb;
         }
         .admin-card h2 {
-            font-size: 1rem;
-            margin-bottom: 6px;
-            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+            font-weight: 600;
         }
         .admin-card p {
             font-size: 0.85rem;
-            line-height: 1.6;
+            line-height: 1.5;
         }
-        .admin-badge {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 4px 10px;
-            border-radius: 999px;
-            background: rgba(30, 64, 175, 0.85);
-            font-size: 0.75rem;
-            color: #e5e7eb;
+        .admin-note {
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: #9ca3af;
         }
     </style>
 @endsection

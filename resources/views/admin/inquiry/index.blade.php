@@ -47,22 +47,22 @@
             padding: 24px 0;
         }
         .admin-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: #FDF0B2;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #e5e7eb;
         }
         .admin-description {
             font-size: 0.9rem;
-            color: #e5d4d4;
-            margin-bottom: 18px;
+            color: #cbd5f5;
+            margin-bottom: 16px;
             line-height: 1.6;
         }
         .table-wrapper {
             overflow-x: auto;
-            border-radius: 12px;
-            border: 1px solid rgba(148, 163, 184, 0.4);
-            background: rgba(15, 23, 42, 0.7);
+            border-radius: 10px;
+            border: 1px solid rgba(55, 65, 81, 0.9);
+            background: rgba(15, 23, 42, 0.95);
         }
         .admin-table {
             width: 100%;
@@ -70,11 +70,11 @@
             font-size: 0.85rem;
         }
         .admin-table thead {
-            background: rgba(30, 64, 175, 0.7);
+            background: rgba(31, 41, 55, 1);
         }
         .admin-table th,
         .admin-table td {
-            padding: 10px 12px;
+            padding: 8px 10px;
             white-space: nowrap;
         }
         .admin-table th {
@@ -83,10 +83,10 @@
             color: #e5e7eb;
         }
         .admin-table tbody tr:nth-child(even) {
-            background: rgba(15, 23, 42, 0.9);
+            background: rgba(17, 24, 39, 1);
         }
         .admin-table tbody tr:nth-child(odd) {
-            background: rgba(30, 41, 59, 0.9);
+            background: rgba(15, 23, 42, 1);
         }
         .admin-table tbody td {
             color: #e5e7eb;

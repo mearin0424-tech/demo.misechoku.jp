@@ -57,8 +57,10 @@
                 @endif
             </main>
 
-            {{-- ボトムナビ（モバイル用固定） --}}
-            @include('layouts.parts.footer')
+            {{-- ボトムナビ（モバイル用固定）※管理画面（/bk/*）では非表示 --}}
+            @unless (request()->is('bk/*'))
+                @include('layouts.parts.footer')
+            @endunless
         </div>
         {{-- サイドバー --}}
         @include('layouts.parts.sidebar')

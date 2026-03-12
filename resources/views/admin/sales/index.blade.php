@@ -39,40 +39,40 @@
             padding: 24px 0;
         }
         .admin-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: #FDF0B2;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #e5e7eb;
         }
         .admin-description {
             font-size: 0.9rem;
-            color: #e5d4d4;
-            margin-bottom: 18px;
+            color: #cbd5f5;
+            margin-bottom: 16px;
             line-height: 1.6;
         }
         .sales-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 14px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
         }
         .sales-card {
-            padding: 14px 16px;
-            border-radius: 14px;
-            background: radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.08), rgba(15, 23, 42, 0.95));
-            border: 1px solid rgba(56, 189, 248, 0.5);
+            padding: 12px 14px;
+            border-radius: 8px;
+            background: rgba(17, 24, 39, 0.95);
+            border: 1px solid rgba(55, 65, 81, 0.9);
         }
         .sales-card h2 {
-            font-size: 0.9rem;
-            color: #e0f2fe;
-            margin-bottom: 6px;
+            font-size: 0.85rem;
+            color: #e5e7eb;
+            margin-bottom: 4px;
         }
         .sales-amount {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: 700;
-            color: #7dd3fc;
+            color: #bfdbfe;
         }
         .admin-note {
-            margin-top: 16px;
+            margin-top: 14px;
             font-size: 0.8rem;
             color: #9ca3af;
         }

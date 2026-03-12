@@ -12,32 +12,39 @@
             </div>
         @endif
 
-        <div class="admin-grid">
-            <a href="{{ route('bk.deposits.index') }}" class="admin-card">
-                <h2>入金・振込管理</h2>
-                <p>店舗からの入金状況とキャストへの振込ステータスを一覧で確認します。</p>
-            </a>
+        <section class="admin-kpi-row">
+            <div class="admin-kpi-card">
+                <div class="admin-kpi-label">本日の新規入金依頼</div>
+                <div class="admin-kpi-value">-</div>
+            </div>
+            <div class="admin-kpi-card">
+                <div class="admin-kpi-label">今月の売上（サブスク）</div>
+                <div class="admin-kpi-value">-</div>
+            </div>
+            <div class="admin-kpi-card">
+                <div class="admin-kpi-label">未対応問い合わせ</div>
+                <div class="admin-kpi-value">-</div>
+            </div>
+        </section>
 
-            <a href="{{ route('bk.sales.index') }}" class="admin-card">
-                <h2>売上管理</h2>
-                <p>サブスクリプションと仲介料の売上状況を集計・確認します。</p>
-            </a>
+        <section class="admin-layout-grid">
+            <div class="admin-panel">
+                <h2 class="admin-panel-title">主要オペレーション</h2>
+                <ul class="admin-link-list">
+                    <li><a href="{{ route('bk.deposits.index') }}">入金・振込管理</a></li>
+                    <li><a href="{{ route('bk.sales.index') }}">売上管理</a></li>
+                    <li><a href="{{ route('bk.inquiries.index') }}">問合せ管理</a></li>
+                </ul>
+            </div>
 
-            <a href="{{ route('bk.masters.index') }}" class="admin-card">
-                <h2>マスタ設定管理</h2>
-                <p>レビュー項目や検索タグなどのマスタデータを設定します。</p>
-            </a>
-
-            <a href="{{ route('bk.columns.index') }}" class="admin-card">
-                <h2>コラム管理</h2>
-                <p>お役立ちコラムの作成・編集・公開設定を行います。</p>
-            </a>
-
-            <a href="{{ route('bk.inquiries.index') }}" class="admin-card">
-                <h2>問合せ管理</h2>
-                <p>運営への問い合わせ内容を確認し、対応状況を管理します。</p>
-            </a>
-        </div>
+            <div class="admin-panel">
+                <h2 class="admin-panel-title">マスタ・コンテンツ</h2>
+                <ul class="admin-link-list">
+                    <li><a href="{{ route('bk.masters.index') }}">マスタ設定管理</a></li>
+                    <li><a href="{{ route('bk.columns.index') }}">コラム管理</a></li>
+                </ul>
+            </div>
+        </section>
     </div>
 
     <style>
@@ -45,49 +52,74 @@
             padding: 24px 0;
         }
         .admin-title {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             font-weight: 700;
-            margin-bottom: 16px;
-            color: #FDF0B2;
+            margin-bottom: 12px;
+            color: #e5e7eb;
         }
         .admin-alert {
-            background: rgba(56, 189, 248, 0.12);
-            border: 1px solid rgba(56, 189, 248, 0.7);
-            color: #e0f2fe;
-            padding: 10px 14px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 0.9rem;
+            background: rgba(55, 65, 81, 0.6);
+            border: 1px solid rgba(156, 163, 175, 0.9);
+            color: #e5e7eb;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 14px;
+            font-size: 0.85rem;
         }
-        .admin-grid {
+        .admin-kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .admin-kpi-card {
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: rgba(31, 41, 55, 0.9);
+            border: 1px solid rgba(55, 65, 81, 0.9);
+        }
+        .admin-kpi-label {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin-bottom: 4px;
+        }
+        .admin-kpi-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #f9fafb;
+        }
+        .admin-layout-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
+            gap: 12px;
         }
-        .admin-card {
-            display: block;
-            padding: 16px;
-            border-radius: 14px;
-            background: radial-gradient(circle at 0% 0%, rgba(253, 240, 178, 0.08), rgba(12, 4, 6, 0.9));
-            border: 1px solid rgba(230, 208, 128, 0.3);
-            text-decoration: none;
-            color: #F5E6E6;
-            transition: transform 0.12s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+        .admin-panel {
+            padding: 12px 14px;
+            border-radius: 8px;
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid rgba(55, 65, 81, 0.9);
         }
-        .admin-card h2 {
-            font-size: 1rem;
+        .admin-panel-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #e5e7eb;
             margin-bottom: 8px;
-            font-weight: 700;
         }
-        .admin-card p {
+        .admin-link-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .admin-link-list a {
             font-size: 0.85rem;
-            opacity: 0.85;
-            line-height: 1.5;
+            color: #bfdbfe;
+            text-decoration: none;
         }
-        .admin-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
-            border-color: rgba(252, 211, 77, 0.85);
+        .admin-link-list a:hover {
+            text-decoration: underline;
         }
     </style>
 @endsection
