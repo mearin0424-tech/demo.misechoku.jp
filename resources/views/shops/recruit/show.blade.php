@@ -10,8 +10,10 @@
 <div class="recruit-detail-page animate-fadeIn">
     {{-- ヒーロー（画像 or グラデ＋店名・所在地） --}}
     <div class="recruit-hero-wrap">
-        @if(!empty($recruit['hero_image']))
-            <img src="{{ $recruit['hero_image'] }}" alt="">
+        @if(!empty($shop['main_img'] ?? null))
+            <img src="{{ $shop['main_img'] }}" alt="{{ $recruit['store_name'] ?? ($shop['name'] ?? '') }}">
+        @elseif(!empty($recruit['hero_image']))
+            <img src="{{ $recruit['hero_image'] }}" alt="{{ $recruit['store_name'] ?? '' }}">
         @else
             <div style="width:100%;height:100%;background:linear-gradient(135deg, #1a0c0e 0%, #2d1518 50%, #120405 100%);"></div>
         @endif
@@ -29,6 +31,31 @@
             </p>
         </div>
     </div>
+
+    {{-- お店のギャラリー（プロフィールと連携） --}}
+    @if(!empty($shop ?? null))
+        <section class="recruit-shop-gallery-section">
+            <div class="recruit-shop-gallery-head">
+                <span class="label">SHOP GALLERY</span>
+                <h2 class="title serif-font">{{ $shop['name'] ?? ($recruit['store_name'] ?? '') }}</h2>
+                @if(!empty($shop['area'] ?? null))
+                    <p class="area">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>{{ $shop['area'] }}</span>
+                    </p>
+                @endif
+            </div>
+            @if(!empty($shop['sub_images'] ?? []))
+                <div class="recruit-shop-gallery-scroll">
+                    @foreach($shop['sub_images'] as $img)
+                        <div class="recruit-shop-gallery-item">
+                            <img src="{{ $img }}" alt="{{ $shop['name'] ?? '' }}" loading="lazy">
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </section>
+    @endif
 
     <div class="px-0">
         {{-- 給与ハイライト --}}
@@ -145,6 +172,39 @@
                 </div>
             @endif
         </section>
+
+        {{-- お店の情報（プロフィールと連携） --}}
+        @if(!empty($shop ?? null))
+            <section class="recruit-shop-info-section">
+                <h3 class="recruit-block-title"><i class="fas fa-store"></i> お店の情報</h3>
+                <div class="recruit-shop-info-grid">
+                    @if(!empty($shop['area'] ?? null))
+                        <div class="recruit-shop-info-item">
+                            <div class="label">エリア</div>
+                            <div class="value">{{ $shop['area'] }}</div>
+                        </div>
+                    @endif
+                    @if(!empty($recruit['working_hours'] ?? null))
+                        <div class="recruit-shop-info-item">
+                            <div class="label">営業時間</div>
+                            <div class="value">{{ $recruit['working_hours'] }}</div>
+                        </div>
+                    @endif
+                    @if(!empty($recruit['nearest_station'] ?? null))
+                        <div class="recruit-shop-info-item">
+                            <div class="label">最寄り駅</div>
+                            <div class="value">{{ $recruit['nearest_station'] }}</div>
+                        </div>
+                    @endif
+                    @if(!empty($shop['concept'] ?? null))
+                        <div class="recruit-shop-info-item recruit-shop-info-wide">
+                            <div class="label">コンセプト</div>
+                            <div class="value">{!! nl2br(e($shop['concept'])) !!}</div>
+                        </div>
+                    @endif
+                </div>
+            </section>
+        @endif
 
         @if(empty($forCast))
             <div class="mt-8 text-center">
