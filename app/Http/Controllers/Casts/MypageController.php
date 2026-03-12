@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Casts;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class MypageController extends Controller
 {
@@ -11,7 +13,8 @@ class MypageController extends Controller
      */
     public function index()
     {
-        $cast = $this->getCastMockData();
+        // TODO: 将来的にはログイン中キャストIDを利用する
+        $cast = $this->getCastFromDatabase('c00000001');
         $reviewCount = count($cast['reviews']);
         $reviewAvg = $reviewCount > 0
             ? round(array_sum(array_column($cast['reviews'], 'score')) / $reviewCount, 1)
@@ -157,7 +160,7 @@ class MypageController extends Controller
      */
     public function reviews()
     {
-        $cast = $this->getCastMockData();
+        $cast = $this->getCastFromDatabase('c00000001');
         $castData = [
             'review_avg'   => 4.5,
             'review_count' => count($cast['reviews']),
@@ -170,52 +173,146 @@ class MypageController extends Controller
     }
 
     /**
-     * プロフィール表示用モック（shop/castprofileview と同一構造）
+     * キャスト・プロフィール・レビューをDBから取得し、画面用配列に整形
      */
-    private function getCastMockData(): array
+    private function getCastFromDatabase(string $castId): array
     {
-        $castId = 1;
-        $images = [];
-        for ($i = 1; $i <= 6; $i++) {
-            $images[] = asset("storage/mock/casts/{$castId}-{$i}.png");
+        $castRow = DB::table('casts')
+            ->leftJoin('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id')
+            ->where('casts.id', $castId)
+            ->select(
+                'casts.id',
+                'casts.email',
+                'casts.status',
+                'casts.identity_status',
+                'casts.last_login_at',
+                'cast_profiles.nickname',
+                'cast_profiles.name',
+                'cast_profiles.birthday',
+                'cast_profiles.pref',
+                'cast_profiles.city',
+                'cast_profiles.height',
+                'cast_profiles.weight',
+                'cast_profiles.bust',
+                'cast_profiles.waist',
+                'cast_profiles.hip',
+                'cast_profiles.pr'
+            )
+            ->first();
+
+        if (!$castRow) {
+            // データ不在時は空のモック相当を返す
+            return $this->buildEmptyCast();
         }
+
+        $birthday = $castRow->birthday ? Carbon::parse($castRow->birthday) : null;
+        $age = $birthday ? $birthday->age : null;
+
+        // 画像は当面モックのストレージを利用
+        $images = [];
+        $numericId = 1;
+        for ($i = 1; $i <= 6; $i++) {
+            $images[] = asset("storage/mock/casts/{$numericId}-{$i}.png");
+        }
+
+        // レビュー（レビュー本文＋平均スコア）
+        $reviewRows = DB::table('reviews')
+            ->leftJoin('review_details', 'reviews.id', '=', 'review_details.review_id')
+            ->where('reviews.cast_id', $castId)
+            ->groupBy('reviews.id', 'reviews.contents', 'reviews.created_at')
+            ->select(
+                'reviews.id',
+                'reviews.contents',
+                'reviews.created_at',
+                DB::raw('AVG(review_details.score) as avg_score')
+            )
+            ->get();
+
+        $reviews = [];
+        foreach ($reviewRows as $r) {
+            $reviews[] = [
+                'score' => $r->avg_score !== null ? (float) $r->avg_score : 0.0,
+                'text'  => $r->contents ?? '',
+            ];
+        }
+
         return [
-            'id'               => $castId,
-            'nickname'         => '愛華',
-            'name'             => 'かめわりゆい',
-            'age'              => 24,
-            'birth_year'       => '1994',
-            'birth_month'      => '4',
-            'birth_day'        => '24',
+            'id'               => $castRow->id,
+            'nickname'         => $castRow->nickname ?? '',
+            'name'             => $castRow->name ?? '',
+            'age'              => $age,
+            'birth_year'       => $birthday ? (string) $birthday->year : null,
+            'birth_month'      => $birthday ? (string) $birthday->month : null,
+            'birth_day'        => $birthday ? (string) $birthday->day : null,
             'images'           => $images,
-            'img'              => $images[0],
+            'img'              => $images[0] ?? null,
             'is_applied'       => true,
             'is_kept'          => true,
-            'like_cnt'         => 12,
-            'pref'             => '東京都',
-            'city'             => '中央区',
-            'height'           => 165,
-            'weight'           => 48,
-            'bust'             => 85,
-            'waist'            => 58,
-            'hip'              => 86,
-            'word'             => 'はじめまして！楽しくお話しするのが大好きです。',
-            'pr'               => "はじめまして！楽しくお話しするのが大好きです。\nお酒も少し飲めます！よろしくお願いします。",
-            'intro'            => "はじめまして！楽しくお話しするのが大好きです。\nお酒も少し飲めます！よろしくお願いします。",
+            'like_cnt'         => 0,
+            'pref'             => $castRow->pref ?? '',
+            'city'             => $castRow->city ?? '',
+            'height'           => $castRow->height,
+            'weight'           => $castRow->weight,
+            'bust'             => $castRow->bust,
+            'waist'            => $castRow->waist,
+            'hip'              => $castRow->hip,
+            'word'             => $castRow->pr ? mb_strimwidth($castRow->pr, 0, 80, '...') : '',
+            'pr'               => $castRow->pr ?? '',
+            'intro'            => $castRow->pr ?? '',
             'desired_job'      => '',
-            'my_field'         => 'ナチュラル',
-            'my_inner_skills'  => '聞き役・気配り',
-            'personality_type' => 'ナチュラル（接客タイプ診断）',
-            'shift_hope'       => '週1回出勤',
-            'work_time'        => 'morning',
-            'work_time_label'  => '朝',
-            'current_job'      => "都内でITコンサルタントに従事しております。\nこちらは副業で勤務したいと考えています。",
-            'night_work_exp'   => 'none',
-            'night_work_label' => '無し',
-            'reviews'          => [
-                ['score' => 5, 'text' => '大変礼儀正しく、お酒の作り方も完璧でした。'],
-                ['score' => 4, 'text' => '笑顔が素敵で、お客様からも好評でした。'],
-            ],
+            'my_field'         => '',
+            'my_inner_skills'  => '',
+            'personality_type' => '',
+            'shift_hope'       => '',
+            'work_time'        => '',
+            'work_time_label'  => '',
+            'current_job'      => '',
+            'night_work_exp'   => '',
+            'night_work_label' => '',
+            'reviews'          => $reviews,
+        ];
+    }
+
+    private function buildEmptyCast(): array
+    {
+        $images = [];
+        for ($i = 1; $i <= 6; $i++) {
+            $images[] = asset("storage/mock/casts/1-{$i}.png");
+        }
+        return [
+            'id'               => null,
+            'nickname'         => '',
+            'name'             => '',
+            'age'              => null,
+            'birth_year'       => null,
+            'birth_month'      => null,
+            'birth_day'        => null,
+            'images'           => $images,
+            'img'              => $images[0] ?? null,
+            'is_applied'       => false,
+            'is_kept'          => false,
+            'like_cnt'         => 0,
+            'pref'             => '',
+            'city'             => '',
+            'height'           => null,
+            'weight'           => null,
+            'bust'             => null,
+            'waist'            => null,
+            'hip'              => null,
+            'word'             => '',
+            'pr'               => '',
+            'intro'            => '',
+            'desired_job'      => '',
+            'my_field'         => '',
+            'my_inner_skills'  => '',
+            'personality_type' => '',
+            'shift_hope'       => '',
+            'work_time'        => '',
+            'work_time_label'  => '',
+            'current_job'      => '',
+            'night_work_exp'   => '',
+            'night_work_label' => '',
+            'reviews'          => [],
         ];
     }
 }

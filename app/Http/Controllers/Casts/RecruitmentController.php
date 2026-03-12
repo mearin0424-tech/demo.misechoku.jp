@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Casts;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 
 /**
  * キャスト向け：店舗の求人情報表示
@@ -14,46 +15,101 @@ class RecruitmentController extends Controller
      */
     public function show(int $id)
     {
-        $recruitData = $this->getMockData($id);
+        $data = $this->getRecruitDataFromDatabase($id);
         return view('shops.recruit.show', [
             'pageId' => 'job_info',
-            'recruit' => $recruitData,
+            'recruit' => $data['recruit'],
+            'shop'    => $data['shop'],
             'forCast' => true,
         ]);
     }
 
     /**
-     * 求人表示用モックデータ（店舗IDに応じて将来はDB取得に差し替え）
+     * 求人情報＋店舗情報をDBから取得して画面用に整形
+     * ルートの {id} は内部の shop_id を 1,2.. とした表示用として扱い、
+     * 実テーブルID (s00000001 形式) に変換する。
      */
-    private function getMockData(int $shopId): array
+    private function getRecruitDataFromDatabase(int $shopNumericId): array
     {
-        return [
-            'store_name' => 'KKK',
-            'open_date' => '1979年11月11日',
-            'address' => '東京都豊島区東池袋1-18-1 Hareza池袋20F',
-            'map_embed_src' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3238.388244628906!2d139.7106!3d35.7295!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzXCsDQzJzQ2LjIiTiAxMznCsDQyJzM4LjIiRQ!5e0!3m2!1sja!2sjp!4v1640000000000!5m2!1sja!2sjp',
-            'nearest_station' => '池袋駅徒歩5分',
-            'hourly_wage_regular' => 5000,
-            'trial_hourly_wage' => 4000,
-            'salary_text' => "各種バック完備。指名・同伴手当あり。ノルマ達成ボーナスあり。",
-            'working_hours' => "20:00 〜 翌1:00",
-            'working_days' => "週1日からOK / シフト制",
-            'regular_holiday' => "不定休（要相談）",
-            'job_content' => "接客・ドリンク提供・お客様との会話が主なお仕事です。未経験者も研修でサポートします。",
-            'store_atmosphere' => "落ち着いた雰囲気で、初めての方でも働きやすいお店です。スタッフ同士の仲も良く、アットホームです。",
-            'qualification' => "18歳以上（高校生不可）",
-            'catch_copy' => "六本木で一番稼げるお店です！",
-            'message' => "未経験の方でも安心の研修制度があります。まずは体験入店からお気軽にどうぞ。",
-            'benefits' => ['送迎あり', '日払いOK', '衣装貸出あり', '寮完備'],
-            'selected_benefits' => ['送迎あり', '日払いOK'],
-            'store_features' => [
-                '報酬' => ['1ヶ月払い', '15日払い', '10日払い', '1週間払い', '翌日払い'],
-                '働き方' => ['週1からOK', '短期OK', '1日1h以内'],
-                'お店の雰囲気' => ['アットホーム', '少人数', '未経験歓迎'],
-                'メリット' => ['レンタル衣装有り', 'ヘアメイク有り', 'ヘアメイク不要'],
-                '特徴' => ['未経験', 'シングルマザーOK', '経験者優遇'],
-                '設備' => ['駐車場有り', '車通勤OK', '寮有り'],
+        $shopId = 's' . str_pad((string) $shopNumericId, 8, '0', STR_PAD_LEFT);
+
+        $row = DB::table('shops')
+            ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
+            ->leftJoin('shop_jobs', 'shops.id', '=', 'shop_jobs.shop_id')
+            ->where('shops.id', $shopId)
+            ->select(
+                'shops.id',
+                'shops.status',
+                'shops.license_status',
+                'shop_profiles.shop_name',
+                'shop_profiles.opened_on',
+                'shop_profiles.pref',
+                'shop_profiles.city',
+                'shop_profiles.addr2',
+                'shop_profiles.addr3',
+                'shop_profiles.station1',
+                'shop_profiles.catch',
+                'shop_profiles.overview',
+                'shop_profiles.message',
+                'shop_jobs.hourly_wage_regular',
+                'shop_jobs.has_trial',
+                'shop_jobs.trial_hourly_wage',
+                'shop_jobs.job_description',
+                'shop_jobs.atmosphere'
+            )
+            ->first();
+
+        if (!$row) {
+            // データ不在時は空配列を返しておき、Blade側で「—」表示されるようにする
+            return [
+                'recruit' => [],
+                'shop'    => null,
+            ];
+        }
+
+        $address = trim(($row->pref ?? '') . ($row->city ?? '') . ($row->addr2 ?? '') . ' ' . ($row->addr3 ?? ''));
+
+        $recruit = [
+            'store_name'         => $row->shop_name,
+            'open_date'          => $row->opened_on ? date('Y年n月j日', strtotime($row->opened_on)) : null,
+            'address'            => $address,
+            'map_embed_src'      => null,
+            'nearest_station'    => $row->station1,
+            'hourly_wage_regular'=> $row->hourly_wage_regular ? (int) $row->hourly_wage_regular : 0,
+            'trial_hourly_wage'  => $row->has_trial ? (int) $row->trial_hourly_wage : null,
+            'salary_text'        => $row->atmosphere ?? '',
+            'working_hours'      => null,
+            'working_days'       => null,
+            'regular_holiday'    => null,
+            'job_content'        => $row->job_description ?? '',
+            'store_atmosphere'   => $row->atmosphere ?? '',
+            'qualification'      => "18歳以上（高校生不可）",
+            'catch_copy'         => $row->catch ?? '',
+            'message'            => $row->message ?? '',
+            'benefits'           => [],
+            'selected_benefits'  => [],
+            'store_features'     => [],
+        ];
+
+        // 店舗プロフィール（ギャラリー・コンセプトなど）
+        $shop = [
+            'name'       => $row->shop_name,
+            'word'       => $row->catch ?? '',
+            'main_img'   => asset('storage/mock/shops/out-1.png'),
+            'area'       => trim(($row->pref ?? '') . ' ' . ($row->city ?? '')),
+            'concept'    => $row->overview ?? '',
+            'review_avg' => 0,
+            'review_cnt' => 0,
+            'sub_images' => [
+                asset('storage/mock/shops/inside-1.png'),
+                asset('storage/mock/shops/inside-2.png'),
+                asset('storage/mock/shops/inside-3.png'),
             ],
+        ];
+
+        return [
+            'recruit' => $recruit,
+            'shop'    => $shop,
         ];
     }
 }
