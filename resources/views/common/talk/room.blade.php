@@ -24,6 +24,22 @@
             <img src="{{ $partnerAvatar }}" alt="" class="talk-room-header-avatar">
             <span class="talk-room-header-name">{{ $partnerName }}</span>
         </div>
+        @if(!$isCast)
+        <div class="talk-room-header-actions">
+            <button type="button" id="open-interview-modal" class="btn-interview">
+                <i class="far fa-calendar-alt"></i>
+                <span>面談日を提案</span>
+            </button>
+            <button type="button" id="send-hire-message" class="btn-interview btn-interview-result">
+                <i class="fas fa-circle-check"></i>
+                <span>採用</span>
+            </button>
+            <button type="button" id="send-reject-message" class="btn-interview btn-interview-result btn-interview-result--negative">
+                <i class="fas fa-circle-xmark"></i>
+                <span>不採用</span>
+            </button>
+        </div>
+        @endif
     </div>
 
     {{-- メッセージ表示エリア --}}
@@ -67,4 +83,44 @@
         </form>
     </div>
 </div>
+
+{{-- 面談日候補 送信モーダル（店舗側のみ利用） --}}
+@if(!$isCast)
+<div id="interview-modal-overlay" class="interview-modal-overlay" aria-hidden="true">
+    <div class="interview-modal">
+        <div class="interview-modal-header">
+            <h2>面談候補日を送信</h2>
+            <button type="button" class="interview-modal-close" aria-label="閉じる">&times;</button>
+        </div>
+        <p class="interview-modal-desc">
+            候補日を2〜3件入力してください。<br>
+            キャスト側の画面では、ここで入力した候補から1つ選べるUIを想定しています。
+        </p>
+        <form id="interview-form">
+            <div class="interview-option-group">
+                <label>候補1</label>
+                <input type="datetime-local" name="option1">
+            </div>
+            <div class="interview-option-group">
+                <label>候補2（任意）</label>
+                <input type="datetime-local" name="option2">
+            </div>
+            <div class="interview-option-group">
+                <label>候補3（任意）</label>
+                <input type="datetime-local" name="option3">
+            </div>
+            <div class="interview-modal-footer">
+                <button type="button" class="btn-interview-cancel">キャンセル</button>
+                <button type="submit" class="btn-interview-submit">面談候補を送信</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endif
+
+@push('scripts')
+<script>
+    window.isCastTalkRoom = {!! $isCast ? 'true' : 'false' !!};
+</script>
+@endpush
 @endsection

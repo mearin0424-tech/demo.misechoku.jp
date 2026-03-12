@@ -55,6 +55,56 @@ class MypageController extends Controller
     }
 
     /**
+     * 本人確認画面
+     */
+    public function identity()
+    {
+        $status = session('cast_identity_status', 'not_submitted');
+
+        return view('casts.mypage.identity', [
+            'pageId' => 'mypage',
+            'identityStatus' => $status,
+        ]);
+    }
+
+    /**
+     * 本人確認書類アップロード（デモ用）
+     */
+    public function uploadIdentity(\Illuminate\Http\Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:8192',
+        ]);
+
+        // 実装ではストレージとDBに保存する想定。デモではステータスのみ更新。
+        session(['cast_identity_status' => 'pending']);
+
+        return response()->json([
+            'success' => true,
+            'message' => '本人確認書類をアップロードしました。運営による確認・承認をお待ちください。',
+        ]);
+    }
+
+    /**
+     * キャスト側の振込先口座情報登録（デモ用）
+     */
+    public function updateBank(\Illuminate\Http\Request $request)
+    {
+        $request->validate([
+            'bank_name'      => 'required|string|max:100',
+            'branch_name'    => 'nullable|string|max:100',
+            'account_type'   => 'required|string|max:20',
+            'account_number' => 'required|string|max:30',
+            'account_name'   => 'required|string|max:100',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => '口座情報を保存しました。（デモ環境ではDB保存は行っていません）',
+        ]);
+    }
+
+    /**
      * レビュー一覧（お店の mypage/reviews と同様）
      */
     public function reviews()

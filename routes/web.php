@@ -19,6 +19,12 @@ use App\Http\Controllers\Admin\MasterController as AdminMaster;
 use App\Http\Controllers\Admin\ColumnController as AdminColumn;
 use App\Http\Controllers\Admin\InquiryController as AdminInquiry;
 use App\Http\Controllers\Admin\AuthController as AdminAuth;
+use App\Http\Controllers\Admin\ShopController as AdminShop;
+use App\Http\Controllers\Admin\CastController as AdminCast;
+use App\Http\Controllers\Admin\NgWordController as AdminNgWord;
+use App\Http\Controllers\Admin\NoticeController as AdminNotice;
+use App\Http\Controllers\Admin\TaskController as AdminTask;
+use App\Http\Controllers\Admin\AdminAccountController as AdminAccount;
 
 // 店舗側
 use App\Http\Controllers\Shops\HomeController as ShopHome;
@@ -116,11 +122,29 @@ Route::prefix('bk')->name('bk.')->group(function () {
         // マスタ設定管理
         Route::get('/masters', [AdminMaster::class, 'index'])->name('masters.index');
 
+        // 店舗管理
+        Route::get('/shops', [AdminShop::class, 'index'])->name('shops.index');
+
+        // キャスト管理
+        Route::get('/casts', [AdminCast::class, 'index'])->name('casts.index');
+
+        // NGワード管理
+        Route::get('/ngwords', [AdminNgWord::class, 'index'])->name('ngwords.index');
+
+        // お知らせ管理
+        Route::get('/notices', [AdminNotice::class, 'index'])->name('notices.index');
+
         // コラム管理
         Route::get('/columns', [AdminColumn::class, 'index'])->name('columns.index');
 
+        // 請求・振込タスク管理
+        Route::get('/tasks', [AdminTask::class, 'index'])->name('tasks.index');
+
         // 問い合わせ管理
         Route::get('/inquiries', [AdminInquiry::class, 'index'])->name('inquiries.index');
+
+        // アカウント管理（運営）
+        Route::get('/admin-accounts', [AdminAccount::class, 'index'])->name('admin-accounts.index');
     });
 });
 
@@ -227,6 +251,8 @@ Route::prefix('shop')->name('shop.')->group(function () {
         Route::get('/', [ShopMypage::class, 'index'])->name('index');
         Route::get('/payment', [ShopMypage::class, 'payment'])->name('payment.index');
         Route::get('/reviews', [ShopReview::class, 'index'])->name('review.index');
+        Route::post('/documents/upload', [ShopMypage::class, 'uploadDocument'])->name('documents.upload');
+        Route::post('/payment/bank', [ShopMypage::class, 'updateBank'])->name('payment.bank.update');
     });
 
     // レビュー公開・非表示の切り替え（reviews 画面の JS から使用）
@@ -258,6 +284,9 @@ Route::prefix('cast')->name('cast.')->group(function () {
     Route::get('/mypage/employment', [CastMypage::class, 'employment'])->name('mypage.employment');
     Route::get('/mypage/payment', [CastMypage::class, 'payment'])->name('mypage.payment');
     Route::get('/mypage/reviews', [CastMypage::class, 'reviews'])->name('mypage.reviews');
+    Route::post('/mypage/payment/bank', [CastMypage::class, 'updateBank'])->name('mypage.payment.bank.update');
+    Route::get('/mypage/identity', [CastMypage::class, 'identity'])->name('mypage.identity');
+    Route::post('/mypage/identity/upload', [CastMypage::class, 'uploadIdentity'])->name('mypage.identity.upload');
 
     Route::prefix('talk')->name('talk.')->group(function () {
         Route::get('/', [TalkController::class, 'index'])->name('index');

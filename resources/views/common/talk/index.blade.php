@@ -27,22 +27,30 @@
 <div class="talk-list-container tab-page-body">
         {{-- パネル1：やり取り中 --}}
         <div id="pane-ongoing" class="tab-pane active">
-            @forelse($ongoingTalks as $talk)
-                <a href="{{ route($targetRoute, $talk['partner_id']) }}" class="talk-item">
-                    <img src="{{ asset($talk['avatar']) }}" class="talk-avatar" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($talk['name']) }}&background=4d1a1a&color=fff';">
-                    <div class="talk-info">
-                        <div class="talk-header">
-                            <span class="talk-name">{{ $talk['name'] }}</span>
-                            <span class="talk-time">{{ $talk['last_time'] }}</span>
+            @forelse($ongoingTalks as $index => $talk)
+                <div class="talk-item" data-partner-id="{{ $talk['partner_id'] }}" data-original-index="{{ $index }}">
+                    <a href="{{ route($targetRoute, $talk['partner_id']) }}" class="talk-item-main">
+                        <img src="{{ asset($talk['avatar']) }}" class="talk-avatar" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($talk['name']) }}&background=4d1a1a&color=fff';">
+                        <div class="talk-info">
+                            <div class="talk-header">
+                                <span class="talk-name">{{ $talk['name'] }}</span>
+                                <span class="talk-time">{{ $talk['last_time'] }}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <p class="talk-last-msg">{{ $talk['last_message'] }}</p>
+                                @if(isset($talk['unread_count']) && $talk['unread_count'] > 0)
+                                    <span class="unread-badge">{{ $talk['unread_count'] }}</span>
+                                @endif
+                            </div>
+                            <div class="flex justify-between items-center mt-1">
+                                <span class="talk-status" data-partner-id="{{ $talk['partner_id'] }}"></span>
+                            </div>
                         </div>
-                        <div class="flex justify-between items-center">
-                            <p class="talk-last-msg">{{ $talk['last_message'] }}</p>
-                            @if(isset($talk['unread_count']) && $talk['unread_count'] > 0)
-                                <span class="unread-badge">{{ $talk['unread_count'] }}</span>
-                            @endif
-                        </div>
-                    </div>
-                </a>
+                    </a>
+                    <button type="button" class="talk-pin-btn" aria-label="トークをピン留め" aria-pressed="false">
+                        <i class="fas fa-thumbtack"></i>
+                    </button>
+                </div>
             @empty
                 <div class="no-messages text-center py-10 opacity-50">やり取り中のメッセージはありません</div>
             @endforelse
@@ -146,6 +154,143 @@ document.addEventListener('DOMContentLoaded', function() {
         overlay.addEventListener('click', function(e) {
             if (e.target === overlay) closeRejectConfirm();
         });
+    }
+
+    // ===== トークピン留め（LINEのように上部固定）＋採用ステータス管理 =====
+    const isCastPortal = {!! $isCast ? 'true' : 'false' !!};
+    const pinStorageKey = isCastPortal ? 'talk_pins_cast' : 'talk_pins_shop';
+    const statusStorageKey = isCastPortal ? 'talk_recruit_status_cast' : 'talk_recruit_status_shop';
+    const ongoingPane = document.getElementById('pane-ongoing');
+
+    function loadPinnedIds() {
+        try {
+            const raw = localStorage.getItem(pinStorageKey);
+            if (!raw) return [];
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function savePinnedIds(ids) {
+        try {
+            localStorage.setItem(pinStorageKey, JSON.stringify(ids));
+        } catch (e) {
+            // ignore
+        }
+    }
+
+    function loadStatusMap() {
+        try {
+            const raw = localStorage.getItem(statusStorageKey);
+            if (!raw) return {};
+            const parsed = JSON.parse(raw);
+            return parsed && typeof parsed === 'object' ? parsed : {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function getStatusLabel(code) {
+        switch (code) {
+            case 'interview_pending':
+                return '面談調整中';
+            case 'interview_fixed':
+                return '面談日決定';
+            case 'hired':
+                return '採用';
+            case 'rejected':
+                return '不採用';
+            case 'chatting':
+            default:
+                return 'やり取り中';
+        }
+    }
+
+    function applyRecruitStatus() {
+        if (!ongoingPane) return;
+        const map = loadStatusMap();
+        ongoingPane.querySelectorAll('.talk-status').forEach(function(el) {
+            const id = el.getAttribute('data-partner-id');
+            const code = map && id != null ? map[String(id)] : null;
+            const label = getStatusLabel(code || 'chatting');
+            el.textContent = label;
+        });
+    }
+
+    function applyPinState() {
+        if (!ongoingPane) return;
+        const pinnedIds = loadPinnedIds();
+        const items = ongoingPane.querySelectorAll('.talk-item');
+        items.forEach(function(item) {
+            const id = item.getAttribute('data-partner-id');
+            const pinBtn = item.querySelector('.talk-pin-btn');
+            const isPinned = pinnedIds.includes(String(id));
+            if (isPinned) {
+                item.classList.add('is-pinned');
+                if (pinBtn) {
+                    pinBtn.setAttribute('aria-pressed', 'true');
+                }
+            } else {
+                item.classList.remove('is-pinned');
+                if (pinBtn) {
+                    pinBtn.setAttribute('aria-pressed', 'false');
+                }
+            }
+        });
+    }
+
+    function applyPinnedOrder() {
+        if (!ongoingPane) return;
+        const items = Array.from(ongoingPane.querySelectorAll('.talk-item'));
+        if (items.length === 0) return;
+
+        items.sort(function(a, b) {
+            const aPinned = a.classList.contains('is-pinned');
+            const bPinned = b.classList.contains('is-pinned');
+            if (aPinned && !bPinned) return -1;
+            if (!aPinned && bPinned) return 1;
+            const aIndex = parseInt(a.getAttribute('data-original-index') || '0', 10);
+            const bIndex = parseInt(b.getAttribute('data-original-index') || '0', 10);
+            return aIndex - bIndex;
+        });
+
+        items.forEach(function(item) {
+            ongoingPane.appendChild(item);
+        });
+    }
+
+    function togglePin(item) {
+        const id = item.getAttribute('data-partner-id');
+        if (!id) return;
+        let pinnedIds = loadPinnedIds();
+        const strId = String(id);
+        if (pinnedIds.includes(strId)) {
+            pinnedIds = pinnedIds.filter(function(v) { return v !== strId; });
+        } else {
+            pinnedIds.push(strId);
+        }
+        savePinnedIds(pinnedIds);
+        applyPinState();
+        applyPinnedOrder();
+    }
+
+    if (ongoingPane) {
+        ongoingPane.querySelectorAll('.talk-pin-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const item = this.closest('.talk-item');
+                if (!item) return;
+                togglePin(item);
+            });
+        });
+
+        // 初期状態の反映
+        applyPinState();
+        applyPinnedOrder();
+        applyRecruitStatus();
     }
 });
 </script>

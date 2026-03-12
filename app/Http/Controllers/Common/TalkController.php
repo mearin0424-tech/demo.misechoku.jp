@@ -19,8 +19,8 @@ class TalkController extends Controller
             // キャスト側：相手はお店 → お店のプロフィールへ
             $profileRoute = 'cast.shopprofileview.show';
             $ongoingTalks = [
-                ['partner_id' => 1, 'name' => 'CLUB ETERNITY', 'avatar' => 'storage/mock/shops/out-1.png', 'last_message' => '本日はありがとうございました！またお待ちしております。', 'last_time' => '10:25', 'sort_key' => Carbon::today()->setHour(10)->setMinute(25), 'unread_count' => 0, 'last_message_by_me' => true, 'is_read' => true],
-                ['partner_id' => 2, 'name' => 'THE GOLDSTONE', 'avatar' => 'storage/mock/shops/out-2.png', 'last_message' => '了解いたしました！調整してみますね。', 'last_time' => '昨日', 'sort_key' => Carbon::yesterday(), 'unread_count' => 0, 'last_message_by_me' => true, 'is_read' => false],
+                ['partner_id' => 1, 'name' => 'CLUB ETERNITY', 'avatar' => 'storage/mock/shops/out-1.png', 'last_message' => '本日はありがとうございました！またお待ちしております。', 'last_time' => '10:25', 'sort_key' => Carbon::today()->setHour(10)->setMinute(25), 'unread_count' => 0, 'last_message_by_me' => true, 'is_read' => true, 'pinned' => false],
+                ['partner_id' => 2, 'name' => 'THE GOLDSTONE', 'avatar' => 'storage/mock/shops/out-2.png', 'last_message' => '了解いたしました！調整してみますね。', 'last_time' => '昨日', 'sort_key' => Carbon::yesterday(), 'unread_count' => 0, 'last_message_by_me' => true, 'is_read' => false, 'pinned' => false],
             ];
             $requestTalks = [
                 ['partner_id' => 1, 'name' => 'CLUB ETERNITY', 'age' => null, 'location' => '六本木', 'avatar' => 'storage/mock/shops/out-1.png', 'last_message' => 'オファーが届きました。週末の出勤いかがですか？', 'last_time' => '1時間前', 'unread_count' => 1],
@@ -30,8 +30,8 @@ class TalkController extends Controller
             // お店側：相手はキャスト → キャストのプロフィールへ
             $profileRoute = 'shop.castprofileview.show';
             $ongoingTalks = [
-                ['partner_id' => 1, 'name' => 'みさき', 'avatar' => 'storage/mock/casts/1-1.png', 'last_message' => '本日はありがとうございました！またお待ちしております。', 'last_time' => '10:25', 'sort_key' => Carbon::today()->setHour(10)->setMinute(25), 'unread_count' => 0, 'last_message_by_me' => true, 'is_read' => true],
-                ['partner_id' => 2, 'name' => '愛華', 'avatar' => 'storage/mock/casts/2-1.png', 'last_message' => '了解いたしました！調整してみますね。', 'last_time' => '昨日', 'sort_key' => Carbon::yesterday(), 'unread_count' => 0, 'last_message_by_me' => true, 'is_read' => false],
+                ['partner_id' => 1, 'name' => 'みさき', 'avatar' => 'storage/mock/casts/1-1.png', 'last_message' => '本日はありがとうございました！またお待ちしております。', 'last_time' => '10:25', 'sort_key' => Carbon::today()->setHour(10)->setMinute(25), 'unread_count' => 0, 'last_message_by_me' => true, 'is_read' => true, 'pinned' => false],
+                ['partner_id' => 2, 'name' => '愛華', 'avatar' => 'storage/mock/casts/2-1.png', 'last_message' => '了解いたしました！調整してみますね。', 'last_time' => '昨日', 'sort_key' => Carbon::yesterday(), 'unread_count' => 0, 'last_message_by_me' => true, 'is_read' => false, 'pinned' => false],
             ];
             $requestTalks = [
                 ['partner_id' => 1, 'name' => 'みさき', 'age' => 30, 'location' => '六本木', 'avatar' => 'storage/mock/casts/1-1.png', 'last_message' => '初めまして！今夜空いていますか？', 'last_time' => '1時間前', 'unread_count' => 1],

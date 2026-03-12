@@ -74,17 +74,31 @@
             {{-- 書類管理 --}}
             <div class="mypage-section document-section">
                 <h2 class="section-title section-title-gold">書類管理</h2>
+                <p class="text-xs" style="color:#C9B8B8; margin-bottom:8px;">
+                    営業許可証と風営許可証の<span style="color:var(--color-gold);">両方が運営に承認されるまで</span>、メッセージ後の面談日設定など一部機能はご利用いただけません。
+                </p>
                 <ul class="doc-list">
                     @foreach($documents as $doc)
                     <li class="doc-item">
                         <div class="doc-icon"><i class="fas fa-file-alt"></i></div>
                         <div class="doc-info">
                             <span class="doc-name">{{ $doc['name'] }}</span>
-                            <span class="doc-status {{ $doc['status'] == 'submitted' ? 'done' : 'pending' }}">
-                                {{ $doc['status'] == 'submitted' ? '提出済' : '未提出' }}
+                            @php $s = $doc['status']; @endphp
+                            <span class="doc-status {{ $s === 'approved' ? 'done' : 'pending' }}" data-doc-key="{{ $doc['key'] }}">
+                                @if($s === 'approved')
+                                    承認済
+                                @elseif($s === 'pending')
+                                    提出済み（未承認）
+                                @else
+                                    未提出
+                                @endif
                             </span>
                         </div>
-                        <i class="fas fa-chevron-right doc-arrow"></i>
+                        <button type="button"
+                                class="btn-action-small"
+                                onclick="openDocumentUpload('{{ $doc['key'] }}')">
+                            アップロード
+                        </button>
                     </li>
                     @endforeach
                 </ul>
@@ -145,6 +159,7 @@
 </div>
 
 <input type="file" id="gallery-upload" class="sr-only" accept="image/*">
+<input type="file" id="document-upload" class="sr-only" accept=".pdf,image/*">
 @endsection
 
 @push('scripts')
@@ -154,6 +169,7 @@
 var _galleryPreviewImageId = null;
 var _galleryPreviewLi = null;
 var _galleryUploadSlotIndex = null;
+var _currentDocumentKey = null;
 
 function handleGallerySlotClick(ev, slotEl, slotIndex) {
     var li = slotEl.closest('li');
@@ -252,5 +268,51 @@ function saveWord() {
     closeWordEdit();
     // TODO: API で保存する場合はここで送信
 }
+
+function openDocumentUpload(docKey) {
+    _currentDocumentKey = docKey;
+    document.getElementById('document-upload').click();
+}
+
+(function() {
+    var docInput = document.getElementById('document-upload');
+    if (!docInput) return;
+    docInput.addEventListener('change', function() {
+        var file = this.files && this.files[0];
+        if (!file || !_currentDocumentKey) {
+            this.value = '';
+            return;
+        }
+        var formData = new FormData();
+        formData.append('file', file);
+        formData.append('type', _currentDocumentKey);
+        formData.append('_token', '{{ csrf_token() }}');
+
+        fetch('{{ route("shop.mypage.documents.upload") }}', {
+            method: 'POST',
+            body: formData
+        }).then(function(r) { return r.json(); })
+          .then(function(res) {
+              if (res && res.success) {
+                  var statusEls = document.querySelectorAll('.doc-status[data-doc-key="' + _currentDocumentKey + '"]');
+                  statusEls.forEach(function(el) {
+                      el.classList.remove('pending');
+                      el.classList.add('pending'); // アップロード直後は「提出済み（未承認）」扱い
+                      el.textContent = '提出済み（未承認）';
+                  });
+                  alert('書類をアップロードしました。運営による確認・承認をお待ちください。');
+              } else {
+                  alert(res && res.message ? res.message : 'アップロードに失敗しました。');
+              }
+          })
+          .catch(function() {
+              alert('アップロードに失敗しました。');
+          })
+          .finally(function() {
+              docInput.value = '';
+              _currentDocumentKey = null;
+          });
+    });
+})();
 </script>
 @endpush

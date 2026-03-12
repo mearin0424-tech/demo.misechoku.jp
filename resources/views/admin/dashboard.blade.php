@@ -29,9 +29,19 @@
 
         <section class="admin-layout-grid">
             <div class="admin-panel">
-                <h2 class="admin-panel-title">主要オペレーション</h2>
+                <h2 class="admin-panel-title">アカウント・店舗/キャスト</h2>
+                <ul class="admin-link-list">
+                    <li><a href="{{ route('bk.shops.index') }}">店舗管理</a></li>
+                    <li><a href="{{ route('bk.casts.index') }}">キャスト管理</a></li>
+                    <li><a href="{{ route('bk.admin-accounts.index') }}">運営アカウント管理</a></li>
+                </ul>
+            </div>
+
+            <div class="admin-panel">
+                <h2 class="admin-panel-title">オペレーション</h2>
                 <ul class="admin-link-list">
                     <li><a href="{{ route('bk.deposits.index') }}">入金・振込管理</a></li>
+                    <li><a href="{{ route('bk.tasks.index') }}">請求・振込タスク管理</a></li>
                     <li><a href="{{ route('bk.sales.index') }}">売上管理</a></li>
                     <li><a href="{{ route('bk.inquiries.index') }}">問合せ管理</a></li>
                 </ul>
@@ -41,6 +51,8 @@
                 <h2 class="admin-panel-title">マスタ・コンテンツ</h2>
                 <ul class="admin-link-list">
                     <li><a href="{{ route('bk.masters.index') }}">マスタ設定管理</a></li>
+                    <li><a href="{{ route('bk.ngwords.index') }}">NGワード管理</a></li>
+                    <li><a href="{{ route('bk.notices.index') }}">お知らせ管理</a></li>
                     <li><a href="{{ route('bk.columns.index') }}">コラム管理</a></li>
                 </ul>
             </div>
