@@ -60,10 +60,71 @@
         @endforelse
     </section>
 
-    <div class="management-actions">
-        <a href="{{ route('maintenance') }}" class="btn-action manage">
-            <i class="fas fa-university"></i> お支払い情報の変更
-        </a>
-    </div>
+    <section class="management-bank-section">
+        <h2 class="management-invoices-title">店舗の振込先口座</h2>
+        <p class="management-summary-note">
+            売上の振込先となる口座情報を登録してください。
+        </p>
+        <form id="shop-bank-form" class="management-bank-form">
+            @csrf
+            <div class="bank-form-row">
+                <label class="bank-label">金融機関名</label>
+                <input type="text" name="bank_name" class="bank-input" placeholder="〇〇銀行" required>
+            </div>
+            <div class="bank-form-row">
+                <label class="bank-label">支店名</label>
+                <input type="text" name="branch_name" class="bank-input" placeholder="△△支店">
+            </div>
+            <div class="bank-form-row">
+                <label class="bank-label">口座種別</label>
+                <select name="account_type" class="bank-input" required>
+                    <option value="ordinary">普通</option>
+                    <option value="checking">当座</option>
+                </select>
+            </div>
+            <div class="bank-form-row">
+                <label class="bank-label">口座番号</label>
+                <input type="text" name="account_number" class="bank-input" placeholder="1234567" required>
+            </div>
+            <div class="bank-form-row">
+                <label class="bank-label">口座名義（カナ）</label>
+                <input type="text" name="account_name" class="bank-input" placeholder="ミセチョク タロウ" required>
+            </div>
+            <div class="management-actions">
+                <button type="submit" class="btn-action manage">
+                    <i class="fas fa-save"></i> 口座情報を保存
+                </button>
+            </div>
+            <p id="shop-bank-message" class="management-summary-note" style="display:none;"></p>
+        </form>
+    </section>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var form = document.getElementById('shop-bank-form');
+    if (!form) return;
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var formData = new FormData(form);
+        fetch('{{ route("shop.mypage.payment.bank.update") }}', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json'
+            },
+            body: formData
+        }).then(function (r) { return r.json(); })
+        .then(function (res) {
+            var msgEl = document.getElementById('shop-bank-message');
+            if (!msgEl) return;
+            msgEl.style.display = 'block';
+            msgEl.textContent = res && res.message ? res.message : '保存しました。';
+        }).catch(function () {
+            alert('保存に失敗しました。時間をおいて再度お試しください。');
+        });
+    });
+});
+</script>
+@endpush

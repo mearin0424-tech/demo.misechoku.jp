@@ -49,8 +49,75 @@
                         </ul>
                     @endif
                 </div>
+
+                <div class="mypage-section">
+                    <h2 class="mypage-actions-title">キャストの振込先口座</h2>
+                    <p class="text-xs" style="color:#C9B8B8; margin-bottom:8px;">
+                        報酬をお受け取りいただくための銀行口座情報を登録してください。
+                    </p>
+                    <form id="cast-bank-form" class="management-bank-form">
+                        @csrf
+                        <div class="bank-form-row">
+                            <label class="bank-label">金融機関名</label>
+                            <input type="text" name="bank_name" class="bank-input" placeholder="〇〇銀行" required>
+                        </div>
+                        <div class="bank-form-row">
+                            <label class="bank-label">支店名</label>
+                            <input type="text" name="branch_name" class="bank-input" placeholder="△△支店">
+                        </div>
+                        <div class="bank-form-row">
+                            <label class="bank-label">口座種別</label>
+                            <select name="account_type" class="bank-input" required>
+                                <option value="ordinary">普通</option>
+                                <option value="checking">当座</option>
+                            </select>
+                        </div>
+                        <div class="bank-form-row">
+                            <label class="bank-label">口座番号</label>
+                            <input type="text" name="account_number" class="bank-input" placeholder="1234567" required>
+                        </div>
+                        <div class="bank-form-row">
+                            <label class="bank-label">口座名義（カナ）</label>
+                            <input type="text" name="account_name" class="bank-input" placeholder="ミセチョク ハナコ" required>
+                        </div>
+                        <div class="text-right mt-3">
+                            <button type="submit" class="btn-action manage">
+                                <i class="fas fa-save"></i> 口座情報を保存
+                            </button>
+                        </div>
+                        <p id="cast-bank-message" class="management-summary-note" style="display:none;"></p>
+                    </form>
+                </div>
             </div>
         </section>
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var form = document.getElementById('cast-bank-form');
+    if (!form) return;
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var formData = new FormData(form);
+        fetch('{{ route("cast.mypage.payment.bank.update") }}', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json'
+            },
+            body: formData
+        }).then(function (r) { return r.json(); })
+        .then(function (res) {
+            var msgEl = document.getElementById('cast-bank-message');
+            if (!msgEl) return;
+            msgEl.style.display = 'block';
+            msgEl.textContent = res && res.message ? res.message : '保存しました。';
+        }).catch(function () {
+            alert('保存に失敗しました。時間をおいて再度お試しください。');
+        });
+    });
+});
+</script>
+@endpush
