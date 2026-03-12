@@ -22,7 +22,7 @@
     <section class="management-summary">
         <p class="management-summary-label">未払い合計</p>
         <p class="management-summary-amount">
-            <span class="currency">¥</span>{{ number_format($summary['unpaid_total'] ?? 0) }}
+            <span class="currency">¥</span>{{ number_format(($summary['unpaid_total'] ?? 0)) }}
         </p>
         @if(!empty($summary['next_settlement']))
             <p class="management-summary-note">
@@ -33,6 +33,140 @@
                 次回決済予定日は未定です。
             </p>
         @endif
+    </section>
+
+    {{-- 採用ステータス（やり取り中のキャスト） --}}
+    <section class="management-invoices">
+        <h2 class="management-invoices-title">採用ステータス（やり取り中のキャスト）</h2>
+        @php $cList = $candidates ?? []; @endphp
+        @forelse($cList as $c)
+            <div class="management-hire-card">
+                <div class="management-hire-main">
+                    <div class="management-hire-name-row">
+                        <span class="management-hire-name">{{ $c['name'] }}</span>
+                        @if(!empty($c['age']))
+                            <span class="management-hire-age">({{ $c['age'] }}歳)</span>
+                        @endif
+                        @if(!empty($c['job_type']))
+                            <span class="management-hire-pill">{{ $c['job_type'] }}</span>
+                        @endif
+                    </div>
+                    <p class="management-hire-status">
+                        <span class="management-hire-status-badge management-hire-status-{{ $c['status_tag'] ?? 'other' }}">
+                            {{ $c['status_label'] }}
+                        </span>
+                        @if(!empty($c['next_step']))
+                            <span class="management-hire-next">次のアクション：{{ $c['next_step'] }}</span>
+                        @endif
+                    </p>
+                    @if(!empty($c['last_message']))
+                        <p class="management-hire-message">「{{ $c['last_message'] }}」</p>
+                    @endif
+                </div>
+                <div class="management-hire-meta">
+                    @if(!empty($c['interview_at']))
+                        <p class="management-hire-meta-row">
+                            <span class="label"><i class="fas fa-calendar-alt"></i> 面談日</span>
+                            <span class="value">{{ \Carbon\Carbon::parse($c['interview_at'])->format('m/d H:i') }}</span>
+                        </p>
+                    @endif
+                    @if(!empty($c['deadline_at']))
+                        <p class="management-hire-meta-row">
+                            <span class="label"><i class="fas fa-clock"></i> 振込期限</span>
+                            <span class="value">{{ \Carbon\Carbon::parse($c['deadline_at'])->format('m/d') }}</span>
+                        </p>
+                    @endif
+                </div>
+            </div>
+        @empty
+            <p class="management-invoices-empty">現在、やり取り中のキャストはありません。</p>
+        @endforelse
+    </section>
+
+    {{-- 採用・入金カレンダー --}}
+    <section class="management-invoices">
+        <h2 class="management-invoices-title">採用・入金カレンダー</h2>
+        @php
+            $events = collect($calendarEvents ?? [])->sortBy('date')->groupBy('date');
+        @endphp
+        @forelse($events as $date => $rows)
+            <div class="management-calendar-day">
+                <div class="management-calendar-date">
+                    <span class="date-main">{{ \Carbon\Carbon::parse($date)->format('m/d') }}</span>
+                    <span class="date-sub">{{ \Carbon\Carbon::parse($date)->isoFormat('ddd') }}</span>
+                </div>
+                <div class="management-calendar-events">
+                    @foreach($rows as $e)
+                        @php
+                            $type = $e['type'] ?? 'other';
+                        @endphp
+                        <div class="management-calendar-event management-calendar-event-{{ $type }}">
+                            <span class="event-icon">
+                                @if($type === 'interview')
+                                    <i class="fas fa-user-clock"></i>
+                                @elseif($type === 'deadline')
+                                    <i class="fas fa-hourglass-half"></i>
+                                @elseif($type === 'deposit')
+                                    <i class="fas fa-coins"></i>
+                                @else
+                                    <i class="fas fa-dot-circle"></i>
+                                @endif
+                            </span>
+                            <div class="event-body">
+                                <span class="event-label">{{ $e['label'] }}</span>
+                                <span class="event-meta">
+                                    @if(!empty($e['time']))
+                                        {{ $e['time'] }} / 
+                                    @endif
+                                    {{ $e['actor'] === 'admin' ? '運営' : ($e['actor'] === 'shop' ? '店舗' : 'キャスト') }}
+                                </span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @empty
+            <p class="management-invoices-empty">直近の予定は登録されていません。</p>
+        @endforelse
+    </section>
+
+    <section class="management-invoices">
+        <h2 class="management-invoices-title">現在の入金ステータス</h2>
+        @if(session('status'))
+            <p class="management-summary-note">{{ session('status') }}</p>
+        @endif
+        @php $flow = $depositFlow ?? ['cast' => '未申請','shop' => '未稼働','admin' => '未稼働']; @endphp
+        <table class="admin-table" style="margin-bottom:8px;">
+            <thead>
+                <tr>
+                    <th>アクター</th>
+                    <th>ステータス</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>キャスト</td><td>{{ $flow['cast'] }}</td></tr>
+                <tr><td>店舗</td><td>{{ $flow['shop'] }}</td></tr>
+                <tr><td>運営</td><td>{{ $flow['admin'] }}</td></tr>
+            </tbody>
+        </table>
+        @php $step = session('deposit_flow_step', 0); @endphp
+        <div class="management-actions">
+            @if($step == 1)
+                <form method="POST" action="{{ route('shop.mypage.deposit.approve') }}">
+                    @csrf
+                    <button type="submit" class="btn-action manage">
+                        ノルマ達成を確認し、店舗審査を完了する
+                    </button>
+                </form>
+            @elseif($step == 3)
+                <form method="POST" action="{{ route('shop.mypage.deposit.pay') }}">
+                    @csrf
+                    <button type="submit" class="btn-action manage">
+                        運営への入金が完了した
+                    </button>
+                </form>
+            @endif
+        </div>
     </section>
 
     <section class="management-invoices">

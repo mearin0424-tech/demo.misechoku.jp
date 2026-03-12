@@ -51,6 +51,45 @@
                 </div>
 
                 <div class="mypage-section">
+                    <h2 class="mypage-actions-title">現在の入金ステータス</h2>
+                    @if(session('status'))
+                        <p class="management-summary-note">{{ session('status') }}</p>
+                    @endif
+                    @php $flow = $depositFlow ?? ['cast' => '未申請','shop' => '未稼働','admin' => '未稼働']; @endphp
+                    <table class="admin-table" style="margin-bottom:8px;">
+                        <thead>
+                            <tr>
+                                <th>アクター</th>
+                                <th>ステータス</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>キャスト</td><td>{{ $flow['cast'] }}</td></tr>
+                            <tr><td>店舗</td><td>{{ $flow['shop'] }}</td></tr>
+                            <tr><td>運営</td><td>{{ $flow['admin'] }}</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="text-right">
+                        @php $step = session('deposit_flow_step', 0); @endphp
+                        @if($step == 0)
+                            <form method="POST" action="{{ route('cast.mypage.deposit.request') }}">
+                                @csrf
+                                <button type="submit" class="btn-action manage">
+                                    ボーナス達成・入金を申請する
+                                </button>
+                            </form>
+                        @elseif($step == 5)
+                            <form method="POST" action="{{ route('cast.mypage.deposit.confirm') }}">
+                                @csrf
+                                <button type="submit" class="btn-action manage">
+                                    入金を確認しました
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="mypage-section">
                     <h2 class="mypage-actions-title">キャストの振込先口座</h2>
                     <p class="text-xs" style="color:#C9B8B8; margin-bottom:8px;">
                         報酬をお受け取りいただくための銀行口座情報を登録してください。
