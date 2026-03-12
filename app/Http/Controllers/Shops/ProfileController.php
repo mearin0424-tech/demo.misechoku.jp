@@ -3,11 +3,14 @@ namespace App\Http\Controllers\Shops;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Http\Requests\Shops\UploadImageRequest; 
+use App\Http\Requests\Shops\UploadImageRequest;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class ProfileController extends Controller
 {
+    /** デモ用固定店舗ID */
+    private const DEMO_SHOP_ID = 's00000001';
     /**
      * プロフィール表示（閲覧・プレビュー）
      */
@@ -57,32 +60,79 @@ class ProfileController extends Controller
     }
 
     /**
-     * 画像アップロード
-     * (旧 api/upload_image.php の機能を統合)
+     * 画像アップロード（DB: shop_images に保存）
      */
-    public function uploadImage(UploadImageRequest $request) {
-        // UploadImageRequest で拡張子チェック(jpg,png等)とサイズチェックは完了済み
-        if ($request->hasFile('image')) {
-            // ストレージへ保存
-            $path = $request->file('image')->store('public/shops/gallery');
-            
-            // 本来はここでDB(shop_sub_images)にレコード作成
-            return response()->json([
-                'success' => true, 
-                'path' => Storage::url($path),
-                'id' => rand(100, 999) // モック用ID
+    public function uploadImage(UploadImageRequest $request)
+    {
+        if (!$request->hasFile('image')) {
+            return response()->json(['success' => false, 'message' => 'ファイルが見つかりません'], 400);
+        }
+
+        $path = $request->file('image')->store('public/shops/gallery');
+        $slotIndex = (int) $request->input('slot_index', -1);
+
+        $maxOrder = DB::table('shop_images')->where('shop_id', self::DEMO_SHOP_ID)->max('main_order');
+        $mainOrder = $maxOrder !== null ? $maxOrder + 1 : 0;
+        $isMain = $slotIndex === 0 ? 1 : 0;
+
+        $id = DB::table('shop_images')->insertGetId([
+            'shop_id'    => self::DEMO_SHOP_ID,
+            'image_path' => $path,
+            'type'       => null,
+            'is_main'    => $isMain,
+            'main_order' => $mainOrder,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        if ($isMain) {
+            DB::table('shop_profiles')->where('shop_id', self::DEMO_SHOP_ID)->update([
+                'main_image_path' => $path,
+                'updated_at'      => now(),
             ]);
         }
-        return response()->json(['success' => false, 'message' => 'ファイルが見つかりません'], 400);
+
+        $url = asset(ltrim(Storage::url($path), '/'));
+        return response()->json([
+            'success' => true,
+            'path'    => $url,
+            'id'      => $id,
+        ]);
     }
 
     /**
-     * 画像削除
-     * (旧 api/delete_image.php の機能を統合)
+     * 画像削除（DB: shop_images から削除しストレージも削除）
      */
-    public function deleteImage(Request $request, $id) {
-        // 本来はここでDBからパスを取得し Storage::delete($path) を実行
-        // その後 DB レコードを削除
+    public function deleteImage(Request $request, $id)
+    {
+        $row = DB::table('shop_images')
+            ->where('id', $id)
+            ->where('shop_id', self::DEMO_SHOP_ID)
+            ->first();
+
+        if (!$row) {
+            return response()->json(['success' => false, 'message' => '画像が見つかりません'], 404);
+        }
+
+        Storage::delete($row->image_path);
+        DB::table('shop_images')->where('id', $id)->delete();
+
+        if (!empty($row->is_main)) {
+            $next = DB::table('shop_images')
+                ->where('shop_id', self::DEMO_SHOP_ID)
+                ->orderBy('main_order')
+                ->orderBy('id')
+                ->first();
+            $mainPath = $next ? $next->image_path : null;
+            DB::table('shop_profiles')->where('shop_id', self::DEMO_SHOP_ID)->update([
+                'main_image_path' => $mainPath,
+                'updated_at'      => now(),
+            ]);
+            if ($next) {
+                DB::table('shop_images')->where('id', $next->id)->update(['is_main' => 1, 'updated_at' => now()]);
+            }
+        }
+
         return response()->json(['success' => true, 'message' => '画像を削除しました']);
     }
 

@@ -218,18 +218,42 @@ function deleteGalleryImageFromModal(ev) {
     ev.stopPropagation();
     if (!_galleryPreviewImageId || !_galleryPreviewLi) return;
     if (!confirm('この画像を削除しますか？')) return;
+    var id = _galleryPreviewImageId;
     var li = _galleryPreviewLi;
-    var slot = li.querySelector('.photo-slot');
-    slot.classList.remove('has-img');
-    slot.removeAttribute('data-image-id');
-    slot.removeAttribute('data-image-url');
-    slot.innerHTML = '<span class="photo-slot-empty"><i class="fas fa-image"></i></span>';
-    var mainIcon = document.getElementById('main-icon-display');
-    if (mainIcon && li.getAttribute('data-slot-index') === '0') {
-        var firstWithImg = document.querySelector('#gallery-list .photo-slot.has-img');
-        mainIcon.src = firstWithImg ? firstWithImg.getAttribute('data-image-url') : '';
+    if (!id || id === '' || String(id).startsWith('local-')) {
+        var slot = li.querySelector('.photo-slot');
+        slot.classList.remove('has-img');
+        slot.removeAttribute('data-image-id');
+        slot.removeAttribute('data-image-url');
+        slot.innerHTML = '<span class="photo-slot-empty"><i class="fas fa-image"></i></span>';
+        var mainIcon = document.getElementById('main-icon-display');
+        if (mainIcon && li.getAttribute('data-slot-index') === '0') {
+            var firstWithImg = document.querySelector('#gallery-list .photo-slot.has-img');
+            mainIcon.src = firstWithImg ? firstWithImg.getAttribute('data-image-url') : '';
+        }
+        closeGalleryPreview();
+        return;
     }
-    closeGalleryPreview();
+    fetch('{{ route("cast.mypage.images.delete", ["id" => "__ID__"]) }}'.replace('__ID__', id), {
+        method: 'DELETE',
+        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
+    }).then(function(r) { return r.json(); }).then(function(res) {
+        if (res.success) {
+            var slot = li.querySelector('.photo-slot');
+            slot.classList.remove('has-img');
+            slot.removeAttribute('data-image-id');
+            slot.removeAttribute('data-image-url');
+            slot.innerHTML = '<span class="photo-slot-empty"><i class="fas fa-image"></i></span>';
+            var mainIcon = document.getElementById('main-icon-display');
+            if (mainIcon && li.getAttribute('data-slot-index') === '0') {
+                var firstWithImg = document.querySelector('#gallery-list .photo-slot.has-img');
+                mainIcon.src = firstWithImg ? firstWithImg.getAttribute('data-image-url') : '';
+            }
+            closeGalleryPreview();
+        } else {
+            alert(res.message || '削除に失敗しました');
+        }
+    }).catch(function() { alert('削除に失敗しました'); });
 }
 
 document.getElementById('gallery-upload').addEventListener('change', function() {
@@ -240,20 +264,33 @@ document.getElementById('gallery-upload').addEventListener('change', function() 
         var firstEmpty = document.querySelector('#gallery-list .gallery-grid-item .photo-slot:not(.has-img)');
         slotIndex = firstEmpty ? Array.prototype.indexOf.call(document.querySelectorAll('#gallery-list .gallery-grid-item'), firstEmpty.closest('.gallery-grid-item')) : 0;
     }
-    var list = document.getElementById('gallery-list');
-    var items = list.querySelectorAll('.gallery-grid-item');
-    var li = items[slotIndex];
-    if (li) {
-        var slot = li.querySelector('.photo-slot');
-        var url = URL.createObjectURL(file);
-        slot.classList.add('has-img');
-        slot.setAttribute('data-image-id', 'local-' + Date.now());
-        slot.setAttribute('data-image-url', url);
-        slot.innerHTML = '<img src="' + url + '" alt="" loading="lazy">' + (slotIndex === 0 ? '<span class="photo-slot-badge">MAIN</span>' : '');
-        var mainIcon = document.getElementById('main-icon-display');
-        if (mainIcon && slotIndex === 0) mainIcon.src = url;
-    }
-    this.value = '';
+    var formData = new FormData();
+    formData.append('image', file);
+    formData.append('slot_index', slotIndex);
+    formData.append('_token', '{{ csrf_token() }}');
+    var self = this;
+    fetch('{{ route("cast.mypage.images.upload") }}', { method: 'POST', body: formData })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+            if (res.success && res.path && res.id) {
+                var list = document.getElementById('gallery-list');
+                var items = list.querySelectorAll('.gallery-grid-item');
+                var li = items[slotIndex];
+                if (li) {
+                    var slot = li.querySelector('.photo-slot');
+                    slot.classList.add('has-img');
+                    slot.setAttribute('data-image-id', res.id);
+                    slot.setAttribute('data-image-url', res.path);
+                    slot.innerHTML = '<img src="' + res.path + '" alt="" loading="lazy">' + (slotIndex === 0 ? '<span class="photo-slot-badge">MAIN</span>' : '');
+                    var mainIcon = document.getElementById('main-icon-display');
+                    if (mainIcon && slotIndex === 0) mainIcon.src = res.path;
+                }
+            } else {
+                alert(res.message || 'アップロードに失敗しました');
+            }
+        })
+        .catch(function() { alert('アップロードに失敗しました'); });
+    self.value = '';
     _galleryUploadSlotIndex = null;
 });
 

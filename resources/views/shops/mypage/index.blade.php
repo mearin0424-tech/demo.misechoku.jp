@@ -213,7 +213,14 @@ function deleteGalleryImageFromModal(ev) {
             slot.removeAttribute('data-image-id');
             slot.removeAttribute('data-image-url');
             slot.innerHTML = '<span class="photo-slot-empty"><i class="fas fa-image"></i></span>';
+            var mainIcon = document.getElementById('main-icon-display');
+            if (mainIcon && li.getAttribute('data-slot-index') === '0') {
+                var firstWithImg = document.querySelector('#gallery-list .photo-slot.has-img');
+                mainIcon.src = firstWithImg ? firstWithImg.getAttribute('data-image-url') : '{{ asset("assets/images/common/no-image.png") }}';
+            }
             closeGalleryPreview();
+        } else {
+            alert(res.message || '削除に失敗しました');
         }
     }).catch(function() { alert('削除に失敗しました'); });
 }
@@ -229,6 +236,7 @@ function deleteGalleryImageFromModal(ev) {
         }
         var formData = new FormData();
         formData.append('image', file);
+        formData.append('slot_index', slotIndex);
         formData.append('_token', '{{ csrf_token() }}');
         fetch('{{ route("shop.profile.upload.image") }}', { method: 'POST', body: formData })
             .then(function(r) { return r.json(); })
@@ -243,6 +251,8 @@ function deleteGalleryImageFromModal(ev) {
                         slot.setAttribute('data-image-id', res.id);
                         slot.setAttribute('data-image-url', res.path);
                         slot.innerHTML = '<img src="' + res.path + '" alt="" loading="lazy">' + (slotIndex === 0 ? '<span class="photo-slot-badge">MAIN</span>' : '');
+                        var mainIcon = document.getElementById('main-icon-display');
+                        if (mainIcon && slotIndex === 0) mainIcon.src = res.path;
                     }
                 }
             })

@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Casts;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class MypageController extends Controller
 {
@@ -22,10 +24,13 @@ class MypageController extends Controller
         // プロフィール画面にはレビュー本文を出さず、★カードから一覧へ遷移
         $castForProfile = $cast;
         $castForProfile['reviews'] = [];
-        // ギャラリー用：id + url（お店マイページと同じ形式）
+        // ギャラリー用：id + url（削除APIで id を使用）
         $subImages = [];
-        foreach (array_values($cast['images']) as $i => $url) {
-            $subImages[] = ['id' => $i + 1, 'url' => is_array($url) ? ($url['url'] ?? '') : $url];
+        foreach (array_values($cast['images']) as $i => $img) {
+            $subImages[] = [
+                'id'  => is_array($img) ? ($img['id'] ?? $i + 1) : $i + 1,
+                'url' => is_array($img) ? ($img['url'] ?? '') : $img,
+            ];
         }
         return view('casts.mypage.index', [
             'pageId'       => 'mypage',
@@ -52,11 +57,50 @@ class MypageController extends Controller
      */
     public function payment()
     {
-        $step = (int) session('deposit_flow_step', 0);
-        $flow = $this->buildDepositFlowState($step);
+        $castId = 'c00000001';
+
+        $deposit = DB::table('application_deposits')
+            ->join('shop_job_applications', 'application_deposits.shop_job_application_id', '=', 'shop_job_applications.id')
+            ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
+            ->join('shops', 'shop_jobs.shop_id', '=', 'shops.id')
+            ->where('shop_job_applications.cast_id', $castId)
+            ->select(
+                'application_deposits.*',
+                'shop_job_applications.result_date',
+                'shop_jobs.hourly_wage_regular',
+                'shops.id as shop_id'
+            )
+            ->orderByDesc('application_deposits.id')
+            ->first();
+
+        $payments = [];
+        $flow = $this->buildDepositFlowStateFromDb($deposit);
+
+        if ($deposit) {
+            $statusLabel = match ((int)$deposit->status) {
+                1 => '申請中',
+                2 => '店舗確認中',
+                3 => '運営請求中',
+                4 => '店舗入金報告済',
+                5 => '店舗入金確認済',
+                6 => 'キャスト振込済',
+                7 => '完了',
+                default => '不明',
+            };
+            $statusClass = in_array((int)$deposit->status, [6, 7], true) ? 'status-paid' : 'status-pending';
+
+            $payments[] = [
+                'title'        => 'ボーナス入金申請',
+                'status_label' => $statusLabel,
+                'status_class' => $statusClass,
+                'date'         => $deposit->created_at ? Carbon::parse($deposit->created_at)->format('Y/m/d H:i') : null,
+                'link'         => null,
+            ];
+        }
 
         return view('casts.mypage.payment', [
-            'pageId' => 'mypage',
+            'pageId'       => 'mypage',
+            'payments'     => $payments,
             'depositFlow' => $flow,
         ]);
     }
@@ -66,7 +110,16 @@ class MypageController extends Controller
      */
     public function identity()
     {
-        $status = session('cast_identity_status', 'not_submitted');
+        $castId = 'c00000001';
+        $raw = DB::table('casts')->where('id', $castId)->value('identity_status');
+
+        // 1:未提出, 2:未承認, 3:承認済み
+        $status = match ((int)($raw ?? 1)) {
+            1 => 'not_submitted',
+            2 => 'pending',
+            3 => 'approved',
+            default => 'not_submitted',
+        };
 
         return view('casts.mypage.identity', [
             'pageId' => 'mypage',
@@ -77,19 +130,106 @@ class MypageController extends Controller
     /**
      * 本人確認書類アップロード（デモ用）
      */
-    public function uploadIdentity(\Illuminate\Http\Request $request)
+    public function uploadIdentity(Request $request)
     {
         $request->validate([
             'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:8192',
         ]);
 
-        // 実装ではストレージとDBに保存する想定。デモではステータスのみ更新。
-        session(['cast_identity_status' => 'pending']);
+        // 実装ではストレージとDBに保存する想定。
+        // デモでは casts.identity_status を「提出済み（未承認）」に更新。
+        $castId = 'c00000001';
+        DB::table('casts')
+            ->where('id', $castId)
+            ->update(['identity_status' => 2, 'updated_at' => now()]);
 
         return response()->json([
             'success' => true,
             'message' => '本人確認書類をアップロードしました。運営による確認・承認をお待ちください。',
         ]);
+    }
+
+    /** デモ用固定キャストID */
+    private const DEMO_CAST_ID = 'c00000001';
+
+    /**
+     * キャスト画像アップロード（DB: cast_images type=1 に保存）
+     */
+    public function uploadImage(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
+        ]);
+
+        $path = $request->file('image')->store('public/casts/gallery');
+        $slotIndex = (int) $request->input('slot_index', -1);
+
+        $maxOrder = DB::table('cast_images')
+            ->where('cast_id', self::DEMO_CAST_ID)
+            ->where('type', 1)
+            ->max('main_order');
+        $mainOrder = $maxOrder !== null ? $maxOrder + 1 : 0;
+        $isMain = $slotIndex === 0 ? 1 : 0;
+
+        $id = DB::table('cast_images')->insertGetId([
+            'cast_id'       => self::DEMO_CAST_ID,
+            'image_path'    => $path,
+            'type'          => 1,
+            'front_and_back'=> 0,
+            'status'        => 0,
+            'is_main'       => $isMain,
+            'main_order'    => $mainOrder,
+            'created_at'    => now(),
+            'updated_at'    => now(),
+        ]);
+
+        if ($isMain) {
+            DB::table('cast_profiles')->where('cast_id', self::DEMO_CAST_ID)->update([
+                'main_image_path' => $path,
+                'updated_at'      => now(),
+            ]);
+        }
+
+        $url = asset(ltrim(Storage::url($path), '/'));
+        return response()->json(['success' => true, 'path' => $url, 'id' => $id]);
+    }
+
+    /**
+     * キャスト画像削除（DB: cast_images から削除）
+     */
+    public function deleteImage(Request $request, $id)
+    {
+        $row = DB::table('cast_images')
+            ->where('id', $id)
+            ->where('cast_id', self::DEMO_CAST_ID)
+            ->where('type', 1)
+            ->first();
+
+        if (!$row) {
+            return response()->json(['success' => false, 'message' => '画像が見つかりません'], 404);
+        }
+
+        Storage::delete($row->image_path);
+        DB::table('cast_images')->where('id', $id)->delete();
+
+        if (!empty($row->is_main)) {
+            $next = DB::table('cast_images')
+                ->where('cast_id', self::DEMO_CAST_ID)
+                ->where('type', 1)
+                ->orderBy('main_order')
+                ->orderBy('id')
+                ->first();
+            $mainPath = $next ? $next->image_path : null;
+            DB::table('cast_profiles')->where('cast_id', self::DEMO_CAST_ID)->update([
+                'main_image_path' => $mainPath,
+                'updated_at'      => now(),
+            ]);
+            if ($next) {
+                DB::table('cast_images')->where('id', $next->id)->update(['is_main' => 1, 'updated_at' => now()]);
+            }
+        }
+
+        return response()->json(['success' => true, 'message' => '画像を削除しました']);
     }
 
     /**
@@ -134,6 +274,30 @@ class MypageController extends Controller
         ];
 
         return $map[$step] ?? $map[0];
+    }
+
+    /**
+     * application_deposits.status から3者分のステータスを構成
+     */
+    private function buildDepositFlowStateFromDb($deposit): array
+    {
+        if (!$deposit) {
+            return $this->buildDepositFlowState(0);
+        }
+
+        $status = (int)$deposit->status;
+
+        // 4.Transaction の表をベースに簡易マッピング
+        return match ($status) {
+            1 => ['cast' => '申請中', 'shop' => '承認待ち', 'admin' => '提出待ち'],
+            2 => ['cast' => '申請中', 'shop' => '店舗確認中', 'admin' => '請求待ち'],
+            3 => ['cast' => 'お振込準備中', 'shop' => 'お支払い待ち', 'admin' => '店舗へ請求中'],
+            4 => ['cast' => 'お振込準備中', 'shop' => '入金報告済', 'admin' => '店舗入金確認中'],
+            5 => ['cast' => 'お振込準備中', 'shop' => 'お支払い完了', 'admin' => '店舗入金確認済'],
+            6 => ['cast' => 'お振込手続き中', 'shop' => 'お支払い完了', 'admin' => 'キャスト振込済'],
+            7 => ['cast' => '完了', 'shop' => '完了', 'admin' => '完了'],
+            default => $this->buildDepositFlowState(0),
+        };
     }
 
     /**
@@ -196,7 +360,8 @@ class MypageController extends Controller
                 'cast_profiles.bust',
                 'cast_profiles.waist',
                 'cast_profiles.hip',
-                'cast_profiles.pr'
+                'cast_profiles.pr',
+                'cast_profiles.main_image_path'
             )
             ->first();
 
@@ -208,11 +373,27 @@ class MypageController extends Controller
         $birthday = $castRow->birthday ? Carbon::parse($castRow->birthday) : null;
         $age = $birthday ? $birthday->age : null;
 
-        // 画像は当面モックのストレージを利用
+        // 画像: cast_images (type=1) を id + url で取得（is_main を先に）
         $images = [];
-        $numericId = 1;
-        for ($i = 1; $i <= 6; $i++) {
-            $images[] = asset("storage/mock/casts/{$numericId}-{$i}.png");
+        $castImages = DB::table('cast_images')
+            ->where('cast_id', $castId)
+            ->where('type', 1)
+            ->orderByRaw('is_main DESC')
+            ->orderByRaw('main_order IS NULL')
+            ->orderBy('main_order')
+            ->orderBy('id')
+            ->get();
+        foreach ($castImages as $img) {
+            $images[] = [
+                'id'  => $img->id,
+                'url' => $this->assetPathForStored($img->image_path),
+            ];
+        }
+        if (empty($images) && !empty($castRow->main_image_path)) {
+            $images[] = ['id' => null, 'url' => $this->assetPathForStored($castRow->main_image_path)];
+        }
+        if (empty($images)) {
+            $images[] = ['id' => null, 'url' => asset('storage/mock/casts/1-1.png')];
         }
 
         // レビュー（レビュー本文＋平均スコア）
@@ -245,7 +426,7 @@ class MypageController extends Controller
             'birth_month'      => $birthday ? (string) $birthday->month : null,
             'birth_day'        => $birthday ? (string) $birthday->day : null,
             'images'           => $images,
-            'img'              => $images[0] ?? null,
+            'img'              => $images[0]['url'] ?? null,
             'is_applied'       => true,
             'is_kept'          => true,
             'like_cnt'         => 0,
@@ -273,12 +454,31 @@ class MypageController extends Controller
         ];
     }
 
+    /** パスが / 始まりなら public 相対にし asset() で URL 化 */
+    private function assetPath(?string $path): string
+    {
+        if (empty($path)) {
+            return asset('assets/images/common/no-image.png');
+        }
+        $path = ltrim($path, '/');
+        return asset($path);
+    }
+
+    /** ストレージパス(public/...)の場合は Storage::url で URL 化 */
+    private function assetPathForStored(?string $path): string
+    {
+        if (empty($path)) {
+            return asset('assets/images/common/no-image.png');
+        }
+        if (str_starts_with($path, 'public/')) {
+            return asset(ltrim(\Illuminate\Support\Facades\Storage::url($path), '/'));
+        }
+        return $this->assetPath($path);
+    }
+
     private function buildEmptyCast(): array
     {
-        $images = [];
-        for ($i = 1; $i <= 6; $i++) {
-            $images[] = asset("storage/mock/casts/1-{$i}.png");
-        }
+        $images = [['id' => null, 'url' => asset('storage/mock/casts/1-1.png')]];
         return [
             'id'               => null,
             'nickname'         => '',
@@ -288,7 +488,7 @@ class MypageController extends Controller
             'birth_month'      => null,
             'birth_day'        => null,
             'images'           => $images,
-            'img'              => $images[0] ?? null,
+            'img'              => $images[0]['url'] ?? null,
             'is_applied'       => false,
             'is_kept'          => false,
             'like_cnt'         => 0,

@@ -5,58 +5,108 @@ namespace App\Http\Controllers\Shops;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class MypageController extends Controller
 {
+    /** デモ用固定店舗ID（将来はログイン中店舗ID） */
+    private const DEMO_SHOP_ID = 's00000001';
+
     public function index()
     {
-        // 書類提出ステータス（セッションベースの簡易フロー）
-        $docStatus = session('shop_documents_status', [
-            'business_license' => 'not_submitted',
-            'adult_entertainment_license' => 'not_submitted',
-        ]);
+        $shopId = self::DEMO_SHOP_ID;
 
-        // 1. 店舗基本データ（モック）
+        $row = DB::table('shops')
+            ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
+            ->leftJoin('reviews', 'shops.id', '=', 'reviews.shop_id')
+            ->where('shops.id', $shopId)
+            ->select(
+                'shops.id',
+                'shops.status',
+                'shops.business_license_status',
+                'shops.entertainment_license_status',
+                'shop_profiles.shop_name',
+                'shop_profiles.pref',
+                'shop_profiles.city',
+                'shop_profiles.addr2',
+                'shop_profiles.addr3',
+                'shop_profiles.overview',
+                'shop_profiles.message',
+                'shop_profiles.main_image_path',
+                DB::raw('AVG(reviews.eva) as avg_eva'),
+                DB::raw('COUNT(reviews.id) as review_count')
+            )
+            ->groupBy(
+                'shops.id',
+                'shops.status',
+                'shops.business_license_status',
+                'shops.entertainment_license_status',
+                'shop_profiles.shop_name',
+                'shop_profiles.pref',
+                'shop_profiles.city',
+                'shop_profiles.addr2',
+                'shop_profiles.addr3',
+                'shop_profiles.overview',
+                'shop_profiles.message',
+                'shop_profiles.main_image_path'
+            )
+            ->first();
+
+        $statusKey = fn (int $v) => match ($v) {
+            1 => 'not_submitted',
+            2 => 'pending',
+            3 => 'approved',
+            default => 'not_submitted',
+        };
+        $businessStatus = $row ? $statusKey((int)$row->business_license_status) : 'not_submitted';
+        $entertainmentStatus = $row ? $statusKey((int)$row->entertainment_license_status) : 'not_submitted';
+
         $shopData = [
-            'shop_name'    => 'Club Luxurious',
-            'word'         => '最高級の空間で、最高の出会いを。',
-            'review_avg'   => 4.8,
-            'review_count' => 124,
-            'pref'         => '東京都',
-            'city'         => '港区',
-            'addr1'        => '六本木 1-2-3',
-            'overview'     => "六本木駅から徒歩3分。\n落ち着いた雰囲気の高級ラウンジです。",
-            // 承認フラグ（営業許可証・風営許可証が双方とも承認済みの場合に 1）
-            'approval'     => collect($docStatus)->every(fn ($s) => $s === 'approved') ? 1 : 0,
+            'shop_name'    => $row->shop_name ?? 'ショップ',
+            'word'         => $row->message ?? '最高級の空間で、最高の出会いを。',
+            'review_avg'   => $row && $row->avg_eva ? round((float)$row->avg_eva, 1) : 0.0,
+            'review_count' => $row ? (int)$row->review_count : 0,
+            'pref'         => $row->pref ?? '',
+            'city'         => $row->city ?? '',
+            'addr1'        => trim(($row->addr2 ?? '') . ' ' . ($row->addr3 ?? '')),
+            'overview'     => $row->overview ?? '',
+            'approval'     => ($businessStatus === 'approved' && $entertainmentStatus === 'approved') ? 1 : 0,
         ];
 
-        // 2. ギャラリー画像（モック：id + url で削除API用）
-        $subImages = [
-            ['id' => 1, 'url' => asset('storage/mock/shops/inside-1.png')],
-            ['id' => 2, 'url' => asset('storage/mock/shops/inside-2.png')],
-            ['id' => 3, 'url' => asset('storage/mock/shops/inside-3.png')],
-            ['id' => 4, 'url' => asset('storage/mock/shops/out-1.png')],
-            ['id' => 5, 'url' => asset('storage/mock/shops/out-2.png')],
-        ];
+        $subImages = [];
+        $shopImages = DB::table('shop_images')
+            ->where('shop_id', $shopId)
+            ->orderByRaw('main_order IS NULL')
+            ->orderBy('main_order')
+            ->orderBy('id')
+            ->get();
+        foreach ($shopImages as $i => $img) {
+            $url = str_starts_with($img->image_path ?? '', 'public/')
+                ? asset(ltrim(Storage::url($img->image_path), '/'))
+                : asset(ltrim($img->image_path, '/'));
+            $subImages[] = ['id' => $img->id, 'url' => $url];
+        }
+        if (empty($subImages) && $row && $row->main_image_path) {
+            $url = str_starts_with($row->main_image_path ?? '', 'public/')
+                ? asset(ltrim(Storage::url($row->main_image_path), '/'))
+                : asset(ltrim($row->main_image_path, '/'));
+            $subImages[] = ['id' => 1, 'url' => $url];
+        }
+        if (empty($subImages)) {
+            $subImages = [
+                ['id' => 1, 'url' => asset('storage/mock/shops/inside-1.png')],
+                ['id' => 2, 'url' => asset('storage/mock/shops/inside-2.png')],
+                ['id' => 3, 'url' => asset('storage/mock/shops/inside-3.png')],
+            ];
+        }
 
-        // 3. 書類管理（営業許可証／風営許可証）
-        //    セッションに保存されたステータスから現在の状態を表示する
         $documents = [
-            [
-                'key'    => 'business_license',
-                'name'   => '営業許可証',
-                'status' => $docStatus['business_license'] ?? 'not_submitted',
-            ],
-            [
-                'key'    => 'adult_entertainment_license',
-                'name'   => '風営許可証',
-                'status' => $docStatus['adult_entertainment_license'] ?? 'not_submitted',
-            ],
+            ['key' => 'business_license', 'name' => '営業許可証', 'status' => $businessStatus],
+            ['key' => 'adult_entertainment_license', 'name' => '風営許可証', 'status' => $entertainmentStatus],
         ];
 
-        $allDocumentsApproved = collect($documents)->every(function ($doc) {
-            return $doc['status'] === 'approved';
-        });
+        $allDocumentsApproved = collect($documents)->every(fn ($doc) => $doc['status'] === 'approved');
 
         return view('shops.mypage.index', [
             'pageId'    => 'mypage',
@@ -69,107 +119,104 @@ class MypageController extends Controller
 
     public function payment()
     {
-        // 開発用モックデータ（請求サマリー）
+        $shopId = self::DEMO_SHOP_ID;
+
+        $deposit = DB::table('application_deposits')
+            ->join('shop_job_applications', 'application_deposits.shop_job_application_id', '=', 'shop_job_applications.id')
+            ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
+            ->join('shops', 'shop_jobs.shop_id', '=', 'shops.id')
+            ->where('shops.id', $shopId)
+            ->select(
+                'application_deposits.*',
+                'shop_job_applications.cast_id',
+                'shop_job_applications.result_date',
+                'shop_jobs.hourly_wage_regular'
+            )
+            ->orderByDesc('application_deposits.id')
+            ->first();
+
         $summary = [
-            'unpaid_total'   => 120000,
-            'next_settlement'=> '2025/02/05',
+            'unpaid_total'    => $deposit ? (int)($deposit->hourly_wage_regular ?? 0) : 0,
+            'next_settlement' => $deposit && $deposit->created_at
+                ? Carbon::parse($deposit->created_at)->addDays(7)->format('Y/m/d')
+                : null,
         ];
 
-        // 開発用モックデータ（請求履歴）
-        $invoices = [
-            ['id' => 101, 'title' => '2024年12月分 請求', 'amount' => 85000, 'status' => 'paid', 'date' => '2025/01/01'],
-            ['id' => 102, 'title' => '2025年1月分 概算', 'amount' => 120000, 'status' => 'pending', 'date' => '2025/02/01'],
-        ];
+        $invoices = [];
+        if ($deposit) {
+            $invoices[] = [
+                'id'     => $deposit->id,
+                'title'  => 'ボーナス入金申請',
+                'amount' => (int)($deposit->hourly_wage_regular ?? 0),
+                'status' => in_array((int)$deposit->status, [6, 7], true) ? 'paid' : 'pending',
+                'date'   => $deposit->created_at ? Carbon::parse($deposit->created_at)->format('Y/m/d') : null,
+            ];
+        }
 
-        // やり取り中のキャストの採用ステータス（モック）
-        $candidates = [
-            [
-                'id'            => 1,
-                'name'          => '愛華',
-                'age'           => 24,
+        $jobIds = DB::table('shop_jobs')->where('shop_id', $shopId)->pluck('id');
+        $applications = collect();
+        if ($jobIds->isNotEmpty()) {
+            $applications = DB::table('shop_job_applications')
+                ->join('casts', 'shop_job_applications.cast_id', '=', 'casts.id')
+                ->leftJoin('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id')
+                ->whereIn('shop_job_applications.shop_job_id', $jobIds)
+                ->select(
+                    'shop_job_applications.*',
+                    'cast_profiles.nickname',
+                    'cast_profiles.birthday'
+                )
+                ->get();
+        }
+
+        $candidates = [];
+        foreach ($applications as $app) {
+            $statusInfo = $this->mapApplicationStatus((int)$app->status);
+            $birthday = $app->birthday ? Carbon::parse($app->birthday) : null;
+            $candidates[] = [
+                'id'            => $app->id,
+                'name'          => $app->nickname ?? $app->cast_id,
+                'age'           => $birthday ? $birthday->age : null,
                 'job_type'      => '本入店',
-                'status_label'  => '面談日調整中',
-                'status_tag'    => 'interview_pending',
-                'next_step'     => '候補日の返信待ち',
-                'interview_at'  => '2025-02-03 20:00',
-                'deadline_at'   => '2025-02-10',
-                'last_message'  => '来週の水曜か金曜でお願いできますか？',
-            ],
-            [
-                'id'            => 2,
-                'name'          => 'みさき',
-                'age'           => 22,
-                'job_type'      => '体験入店',
-                'status_label'  => '面談日確定',
-                'status_tag'    => 'interview_fixed',
-                'next_step'     => '当日の来店フォロー',
-                'interview_at'  => '2025-02-01 21:00',
-                'deadline_at'   => '2025-02-15',
-                'last_message'  => '当日は19時ごろに一度お電話いたします。',
-            ],
-            [
-                'id'            => 3,
-                'name'          => 'Rena',
-                'age'           => 26,
-                'job_type'      => 'ヘルプ',
-                'status_label'  => '入店決定・入金待ち',
-                'status_tag'    => 'deposit_pending',
-                'next_step'     => '店舗から運営へ入金',
-                'interview_at'  => '2025-01-28 20:30',
-                'deadline_at'   => '2025-02-07',
-                'last_message'  => '本採用ありがとうございます。初出勤楽しみにしています。',
-            ],
-        ];
+                'status_label'  => $statusInfo['label'],
+                'status_tag'    => $statusInfo['tag'],
+                'next_step'     => $statusInfo['next'],
+                'interview_at'  => $app->result_date,
+                'deadline_at'   => null,
+                'last_message'  => null,
+            ];
+        }
 
-        // 面談日・振込期限・入金フローなどを 1 本のカレンダーデータにまとめる（モック）
-        $calendarEvents = [
-            [
-                'date'  => '2025-02-01',
-                'time'  => '21:00',
-                'type'  => 'interview',
-                'actor' => 'shop',
-                'label' => 'みさき さん面談（体験入店）',
-            ],
-            [
-                'date'  => '2025-02-03',
-                'time'  => '20:00',
-                'type'  => 'interview',
-                'actor' => 'shop',
-                'label' => '愛華 さん面談候補（本入店）',
-            ],
-            [
-                'date'  => '2025-02-05',
-                'time'  => null,
-                'type'  => 'deadline',
-                'actor' => 'shop',
-                'label' => 'ミセチョク利用料の決済予定日',
-            ],
-            [
-                'date'  => '2025-02-07',
-                'time'  => null,
-                'type'  => 'deadline',
-                'actor' => 'shop',
-                'label' => 'Rena さん入金締切（ヘルプ）',
-            ],
-            [
-                'date'  => '2025-02-08',
-                'time'  => null,
+        $calendarEvents = [];
+        foreach ($applications as $app) {
+            if ($app->result_date) {
+                $calendarEvents[] = [
+                    'date'  => $app->result_date,
+                    'time'  => null,
+                    'type'  => 'interview',
+                    'actor' => 'shop',
+                    'label' => ($this->mapApplicationStatus((int)$app->status)['label'] ?? 'やり取り中') . '（' . ($app->nickname ?? $app->cast_id) . '）',
+                ];
+            }
+        }
+        if ($deposit && $deposit->created_at) {
+            $calendarEvents[] = [
+                'date'  => Carbon::parse($deposit->created_at)->toDateString(),
+                'time'  => Carbon::parse($deposit->created_at)->format('H:i'),
                 'type'  => 'deposit',
                 'actor' => 'admin',
-                'label' => '運営 → キャスト振込予定',
-            ],
-        ];
+                'label' => '運営 → キャスト振込フロー',
+            ];
+        }
 
-        $step = (int) session('deposit_flow_step', 0);
-        $flow = $this->buildDepositFlowState($step);
+        $flow = $this->buildDepositFlowStateFromDb($deposit);
 
         return view('shops.mypage.payment', [
-            'pageId' => 'manage',
-            'invoices' => $invoices,
-             'summary'  => $summary,
-             'candidates' => $candidates,
-             'calendarEvents' => $calendarEvents,
-            'depositFlow' => $flow,
+            'pageId'         => 'manage',
+            'invoices'       => $invoices,
+            'summary'        => $summary,
+            'candidates'     => $candidates,
+            'calendarEvents' => $calendarEvents,
+            'depositFlow'    => $flow,
         ]);
     }
 
@@ -208,16 +255,9 @@ class MypageController extends Controller
         if ($request->hasFile('file')) {
             $path = $request->file('file')->store('public/shops/documents');
 
-            // ステータスを「提出済み（未承認）」に更新
             $type = $request->input('type');
-            $statuses = session('shop_documents_status', [
-                'business_license' => 'not_submitted',
-                'adult_entertainment_license' => 'not_submitted',
-            ]);
-            if (isset($statuses[$type])) {
-                $statuses[$type] = 'pending';
-                session(['shop_documents_status' => $statuses]);
-            }
+            $column = $type === 'business_license' ? 'business_license_status' : 'entertainment_license_status';
+            DB::table('shops')->where('id', self::DEMO_SHOP_ID)->update([$column => 2]);
 
             return response()->json([
                 'success' => true,
@@ -238,9 +278,12 @@ class MypageController extends Controller
      */
     public function approveDeposit(Request $request)
     {
-        $step = (int) session('deposit_flow_step', 0);
-        if ($step >= 1 && $step < 2) {
-            session(['deposit_flow_step' => 2]);
+        $depositId = $this->getLatestDepositIdForShop();
+        if ($depositId) {
+            $current = DB::table('application_deposits')->where('id', $depositId)->value('status');
+            if ((int)$current === 1) {
+                DB::table('application_deposits')->where('id', $depositId)->update(['status' => 2]);
+            }
         }
 
         return redirect()->route('shop.mypage.payment.index')->with('status', 'ノルマ達成・店舗審査を完了しました。運営の確認をお待ちください。');
@@ -251,29 +294,68 @@ class MypageController extends Controller
      */
     public function payToPlatform(Request $request)
     {
-        $step = (int) session('deposit_flow_step', 0);
-        if ($step >= 3 && $step < 4) {
-            session(['deposit_flow_step' => 4]);
+        $depositId = $this->getLatestDepositIdForShop();
+        if ($depositId) {
+            $current = DB::table('application_deposits')->where('id', $depositId)->value('status');
+            if ((int)$current === 3) {
+                DB::table('application_deposits')->where('id', $depositId)->update(['status' => 4]);
+            }
         }
 
         return redirect()->route('shop.mypage.payment.index')->with('status', '運営へのお振込が完了しました。運営の入金確認をお待ちください。');
     }
 
     /**
-     * 入金フローの現在ステータス（3者分）を組み立てる
+     * デモ店舗に紐づく直近の application_deposits.id を取得
      */
-    private function buildDepositFlowState(int $step): array
+    private function getLatestDepositIdForShop(): ?int
     {
-        $map = [
-            0 => ['cast' => '未申請',       'shop' => '未稼働',           'admin' => '未稼働'],
-            1 => ['cast' => '申請中',       'shop' => '未稼働',           'admin' => '未稼働'],
-            2 => ['cast' => '店舗審査中',   'shop' => '店舗審査中',       'admin' => '店舗審査待ち'],
-            3 => ['cast' => 'お振込準備中', 'shop' => 'お支払い準備中',   'admin' => '店舗入金依頼中'],
-            4 => ['cast' => 'お振込準備中', 'shop' => 'お支払い済み',     'admin' => '店舗入金確認中'],
-            5 => ['cast' => 'お振込手続き中', 'shop' => 'お支払い完了', 'admin' => 'キャスト振込済'],
-            6 => ['cast' => '完了',         'shop' => '完了',             'admin' => '完了'],
-        ];
+        $row = DB::table('application_deposits')
+            ->join('shop_job_applications', 'application_deposits.shop_job_application_id', '=', 'shop_job_applications.id')
+            ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
+            ->where('shop_jobs.shop_id', self::DEMO_SHOP_ID)
+            ->orderByDesc('application_deposits.id')
+            ->value('application_deposits.id');
 
-        return $map[$step] ?? $map[0];
+        return $row ? (int)$row : null;
+    }
+
+    /**
+     * shop_job_applications.status をラベル・タグ・次アクションに変換
+     * 1:やり取り中, 2:面談日調整中, 3:面談日決定, 4:採用, 5:不採用
+     */
+    private function mapApplicationStatus(int $status): array
+    {
+        return match ($status) {
+            1 => ['label' => 'やり取り中',       'tag' => 'in_progress',     'next' => 'メッセージで日程調整'],
+            2 => ['label' => '面談日調整中',     'tag' => 'interview_pending', 'next' => '候補日の返信待ち'],
+            3 => ['label' => '面談日決定',       'tag' => 'interview_fixed',  'next' => '当日の来店フォロー'],
+            4 => ['label' => '採用',             'tag' => 'hired',           'next' => '入店手続き'],
+            5 => ['label' => '不採用',           'tag' => 'rejected',        'next' => '—'],
+            default => ['label' => 'やり取り中', 'tag' => 'in_progress',     'next' => '—'],
+        };
+    }
+
+    /**
+     * application_deposits.status から3者分のステータスを構成（キャスト側と同一マッピング）
+     */
+    private function buildDepositFlowStateFromDb($deposit): array
+    {
+        if (!$deposit) {
+            return ['cast' => '未申請', 'shop' => '未稼働', 'admin' => '未稼働'];
+        }
+
+        $status = (int)$deposit->status;
+
+        return match ($status) {
+            1 => ['cast' => '申請中', 'shop' => '承認待ち', 'admin' => '提出待ち'],
+            2 => ['cast' => '申請中', 'shop' => '店舗確認中', 'admin' => '請求待ち'],
+            3 => ['cast' => 'お振込準備中', 'shop' => 'お支払い待ち', 'admin' => '店舗へ請求中'],
+            4 => ['cast' => 'お振込準備中', 'shop' => '入金報告済', 'admin' => '店舗入金確認中'],
+            5 => ['cast' => 'お振込準備中', 'shop' => 'お支払い完了', 'admin' => '店舗入金確認済'],
+            6 => ['cast' => 'お振込手続き中', 'shop' => 'お支払い完了', 'admin' => 'キャスト振込済'],
+            7 => ['cast' => '完了', 'shop' => '完了', 'admin' => '完了'],
+            default => ['cast' => '未申請', 'shop' => '未稼働', 'admin' => '未稼働'],
+        };
     }
 }
