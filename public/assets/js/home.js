@@ -98,19 +98,73 @@ document.addEventListener('DOMContentLoaded', function() {
     // 4. アクションボタンの簡易動作
     initActionButtons();
 
-    // 5. ガイドの表示制御（数秒後に消すなど）
+    // 5. キャラクターガイドの少しフェード
     setTimeout(() => {
         const guide = document.getElementById('discovery-guide');
         if (guide) {
             guide.style.transition = 'opacity 1s ease';
             guide.style.opacity = '0.5';
         }
-        const swipeGuide = document.getElementById('home-swipe-guide');
-        if (swipeGuide) {
-            swipeGuide.style.transition = 'opacity 1s ease';
-            swipeGuide.style.opacity = '0';
-        }
     }, 8000);
+
+    // 6. 初回・久しぶり用オンボーディング（ホームスワイプガイド）
+    const onboardingOverlay = document.getElementById('home-swipe-onboarding');
+    const ONBOARDING_KEY = 'home_swipe_onboarding_last_shown_at';
+    const ONBOARDING_INTERVAL_DAYS = 90;
+
+    function shouldShowOnboarding() {
+        try {
+            const raw = localStorage.getItem(ONBOARDING_KEY);
+            if (!raw) return true; // 新アカウント（初回）
+            const last = parseInt(raw, 10);
+            if (!last) return true;
+            const diffMs = Date.now() - last;
+            const thresholdMs = ONBOARDING_INTERVAL_DAYS * 24 * 60 * 60 * 1000;
+            return diffMs >= thresholdMs;
+        } catch (e) {
+            return true;
+        }
+    }
+
+    function markOnboardingShown() {
+        try {
+            localStorage.setItem(ONBOARDING_KEY, String(Date.now()));
+        } catch (e) {
+            // ignore
+        }
+    }
+
+    function showOnboarding() {
+        if (!onboardingOverlay) return;
+        onboardingOverlay.classList.add('is-active');
+        onboardingOverlay.setAttribute('aria-hidden', 'false');
+        window.forceCharacterGuideVisible = true;
+        if (typeof window.updateCharacterMessage === 'function') {
+            window.updateCharacterMessage(
+                "上下スワイプで次 / 前のアカウントに移動できるよ！\n" +
+                "左右スワイプで同じアカウントの別の写真を見られるよ。\n" +
+                "気になる人がいたら右側のボタンからアクションしてみてね。"
+            );
+        }
+    }
+
+    function hideOnboarding() {
+        if (!onboardingOverlay) return;
+        onboardingOverlay.classList.remove('is-active');
+        onboardingOverlay.setAttribute('aria-hidden', 'true');
+        window.forceCharacterGuideVisible = false;
+        markOnboardingShown();
+    }
+
+    if (onboardingOverlay && shouldShowOnboarding()) {
+        showOnboarding();
+        const closeHandler = (e) => {
+            e.preventDefault();
+            hideOnboarding();
+        };
+        onboardingOverlay.addEventListener('click', closeHandler, { once: true });
+        onboardingOverlay.addEventListener('touchstart', closeHandler, { passive: true, once: true });
+    }
 });
 
 /**

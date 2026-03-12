@@ -98,11 +98,32 @@
         <div class="home-swiper-pagination swiper-pagination"></div>
     </div>
 
-    {{-- スワイプガイド（画面上部に小さく表示） --}}
-    <div class="swipe-guide-overlay" id="home-swipe-guide">
-        <div class="swipe-guide-pill">
-            <span class="swipe-guide-caret">＾</span>
-            <span class="swipe-guide-text">上下：アカウント / 左右：写真</span>
+    {{-- スワイプ操作オンボーディング（初回・久しぶりのみ表示） --}}
+    <div class="home-onboarding-overlay" id="home-swipe-onboarding" aria-hidden="true">
+        <div class="home-onboarding-inner">
+            <div class="home-onboarding-header">
+                <div class="swipe-guide-pill">
+                    <span class="swipe-guide-caret">＾</span>
+                    <span class="swipe-guide-text">上下：アカウント / 左右：写真</span>
+                </div>
+            </div>
+            <div class="home-onboarding-body">
+                <div class="home-onboarding-row">
+                    <span class="home-onboarding-label">↑ / ↓</span>
+                    <span class="home-onboarding-desc">次 / 前のアカウントに移動</span>
+                </div>
+                <div class="home-onboarding-row">
+                    <span class="home-onboarding-label">← / →</span>
+                    <span class="home-onboarding-desc">同じアカウントの別写真を表示</span>
+                </div>
+                <div class="home-onboarding-row">
+                    <span class="home-onboarding-label">タップ</span>
+                    <span class="home-onboarding-desc">プロフィール詳細を開く</span>
+                </div>
+            </div>
+            <div class="home-onboarding-footer">
+                画面をタップしてガイドを閉じる
+            </div>
         </div>
     </div>
 </div>

@@ -2,7 +2,7 @@
 @php $isOwn = $isOwn ?? false; @endphp
 <section class="profile-hero" aria-label="プロフィール写真">
     <div class="profile-hero-inner">
-        <img id="profile-main-img" src="{{ $cast['img'] }}" alt="{{ $cast['nickname'] ?? $cast['name'] }}" class="profile-hero-img">
+        <img id="profile-main-img" src="{{ $cast['img'] }}" alt="{{ $cast['nickname'] ?? $cast['name'] }}" class="profile-hero-img js-lightbox-target">
         <div class="profile-hero-gradient"></div>
         <div class="profile-hero-badge">
             @if($cast['is_applied'] ?? false)
@@ -16,7 +16,7 @@
     <div class="profile-photo-strip">
         @foreach($cast['images'] as $index => $imgUrl)
             <button type="button" class="profile-photo-thumb {{ $index === 0 ? 'active' : '' }}" data-index="{{ $index }}" onclick="setProfileMainImage({{ $index }})" aria-label="写真{{ $index + 1 }}を表示">
-                <img src="{{ $imgUrl }}" alt="">
+                <img src="{{ $imgUrl }}" alt="" class="js-lightbox-target">
             </button>
         @endforeach
     </div>
@@ -147,4 +147,12 @@
             @endif
         </section>
     </div>
+</div>
+
+{{-- 画像フルスクリーン用ライトボックス（共通） --}}
+<div id="lightbox-overlay" class="lightbox-overlay" onclick="closeLightbox(event)">
+    <img id="lightbox-image" src="" alt="" class="lightbox-image">
+    <button type="button" class="lightbox-close" aria-label="閉じる" onclick="closeLightbox(event)">
+        <i class="fas fa-times"></i>
+    </button>
 </div>

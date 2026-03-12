@@ -69,7 +69,49 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="{{ asset('assets/js/character-guide.js') }}"></script>
     <script src="{{ asset('assets/js/push-notification.js') }}"></script>
+
+    {{-- 画像フルスクリーン用ライトボックス（全画面共通） --}}
+    <div id="global-lightbox-overlay" class="lightbox-overlay" onclick="window._closeGlobalLightbox && window._closeGlobalLightbox(event)">
+        <img id="global-lightbox-image" src="" alt="" class="lightbox-image">
+        <button type="button" class="lightbox-close" aria-label="閉じる" onclick="window._closeGlobalLightbox && window._closeGlobalLightbox(event)">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
     @stack('scripts')
+    <script>
+    (function () {
+        var overlay = document.getElementById('global-lightbox-overlay');
+        var img = document.getElementById('global-lightbox-image');
+        if (!overlay || !img) return;
+
+        window.openImageLightbox = function (src) {
+            if (!src) return;
+            img.src = src;
+            overlay.classList.add('is-open');
+        };
+
+        window._closeGlobalLightbox = function (e) {
+            if (e) {
+                if (e.target && !e.target.classList.contains('lightbox-overlay') && !e.target.closest('.lightbox-close')) {
+                    return;
+                }
+                e.stopPropagation();
+            }
+            overlay.classList.remove('is-open');
+            img.src = '';
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.js-lightbox-target').forEach(function (el) {
+                el.style.cursor = 'zoom-in';
+                el.addEventListener('click', function () {
+                    window.openImageLightbox(el.currentSrc || el.src);
+                });
+            });
+        });
+    })();
+    </script>
     {{-- PWA: Service Worker 登録 --}}
     <script>
       if ('serviceWorker' in navigator) {

@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 吹き出しを隠す（スワイプ・操作時 or 3秒経過）
     function hideBubble() {
+        if (window.forceCharacterGuideVisible) {
+            return;
+        }
         if (bubbleHideTimer) {
             clearTimeout(bubbleHideTimer);
             bubbleHideTimer = null;
@@ -19,6 +22,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 3秒後に吹き出しを隠すタイマーを開始
     function startBubbleAutoHide() {
+        if (window.forceCharacterGuideVisible) {
+            return;
+        }
         if (bubbleHideTimer) clearTimeout(bubbleHideTimer);
         if (!characterGuide || characterGuide.classList.contains('is-hidden')) return;
         bubbleHideTimer = setTimeout(hideBubble, BUBBLE_AUTO_HIDE_MS);
