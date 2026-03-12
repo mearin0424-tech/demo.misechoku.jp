@@ -2,9 +2,10 @@
     $routeName = Route::currentRouteName();
     $pageId = $pageId ?? (explode('.', $routeName)[1] ?? 'home');
 
-    // ロゴを表示する主要画面の判定
+    // ロゴを表示する主要画面の判定（ログイン画面など一部は戻るボタンを非表示）
     $isMainPage = request()->is('*/home', '*/search', '*/interaction', '*/talk', '*/mypage');
-    $showBackButton = !$isMainPage;
+    $isLoginPage = request()->routeIs('login.demo');
+    $showBackButton = !$isMainPage && !$isLoginPage;
 
     $engTitles = [
         'home'       => 'HOME',
@@ -16,28 +17,7 @@
     ];
     $currentEngTitle = $engTitles[$pageId] ?? '-';
 
-    // デモ用：キャスト／お店の切り替え用URL（現在のパスを他方のプレフィックスに変換）
-    $path = request()->path();
     $isCast = request()->is('cast/*');
-    $castUrl = '/cast/home';
-    $shopUrl = '/shop/home';
-    if (request()->is('cast/*')) {
-        // キャスト→お店に切り替え: cast/shopprofileview/{id} は shop/castprofileview/{id} へ、それ以外は cast/ → shop/
-        if (preg_match('#^cast/shopprofileview/(\d+)$#', $path, $m)) {
-            $shopUrl = '/shop/castprofileview/' . $m[1];
-        } else {
-            $shopUrl = '/' . preg_replace('#^cast/#', 'shop/', $path);
-        }
-    } elseif (request()->is('shop/*')) {
-        if (preg_match('#^shop/(recruits|profile/store)#', $path)) {
-            $castUrl = '/cast/home';
-        } elseif (preg_match('#^shop/castprofileview/(\d+)$#', $path, $m)) {
-            // お店→キャストに切り替え: shop/castprofileview/{id} は cast/shopprofileview/{id} へ
-            $castUrl = '/cast/shopprofileview/' . $m[1];
-        } else {
-            $castUrl = '/' . preg_replace('#^shop/#', 'cast/', $path);
-        }
-    }
 @endphp
 
 <header id="global-header">
@@ -50,12 +30,11 @@
         @endif
     </div>
 
-    {{-- 中央：デモ用キャスト／お店スイッチ（ピル型トグル） --}}
+    {{-- 中央：ページタイトル表示 --}}
     <div class="header-center-title">
-        <nav class="demo-pill-switch" role="tablist" aria-label="デモモード切り替え">
-            <a href="{{ $castUrl }}" class="demo-pill-switch__segment {{ $isCast ? 'is-active' : '' }}" role="tab" aria-selected="{{ $isCast ? 'true' : 'false' }}">キャスト</a>
-            <a href="{{ $shopUrl }}" class="demo-pill-switch__segment {{ !$isCast ? 'is-active' : '' }}" role="tab" aria-selected="{{ !$isCast ? 'true' : 'false' }}">お店</a>
-        </nav>
+        <span class="header-title-main">
+            {{ $currentEngTitle }}
+        </span>
     </div>
 
     {{-- 右側：タスク / 通知 / ハンバーガーメニュー --}}

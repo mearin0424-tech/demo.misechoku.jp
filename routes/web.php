@@ -6,9 +6,19 @@ use Illuminate\Support\Facades\Route;
 // 共通・認証系
 use App\Http\Controllers\Common\PageController;
 use App\Http\Controllers\Common\SettingController;
+use App\Http\Controllers\Common\DemoLoginController;
 use App\Http\Controllers\Auth\Cast\LoginController as CastLogin;
 use App\Http\Controllers\Auth\Shop\LoginController as ShopLogin;
 use App\Http\Controllers\Common\TalkController as TalkController;
+
+// 管理者（バックオフィス）
+use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
+use App\Http\Controllers\Admin\DepositController as AdminDeposit;
+use App\Http\Controllers\Admin\SalesController as AdminSales;
+use App\Http\Controllers\Admin\MasterController as AdminMaster;
+use App\Http\Controllers\Admin\ColumnController as AdminColumn;
+use App\Http\Controllers\Admin\InquiryController as AdminInquiry;
+use App\Http\Controllers\Admin\AuthController as AdminAuth;
 
 // 店舗側
 use App\Http\Controllers\Shops\HomeController as ShopHome;
@@ -73,15 +83,56 @@ Route::get('/manifest.json', function () {
 | リダイレクト設定
 |--------------------------------------------------------------------------
 */
-Route::redirect('/', '/shop/home');
+Route::redirect('/', '/login');
 Route::redirect('/shop', '/shop/home');
 Route::redirect('/cast', '/cast/home');
+
+/*
+|--------------------------------------------------------------------------
+| Admin Portal (管理者専用)
+|--------------------------------------------------------------------------
+|
+| 店舗・キャストとは別のプレフィックス `/bk` で管理画面を提供する。
+| 認証まわりは今後拡張しやすいようにルートを分離しておく。
+|
+*/
+Route::prefix('bk')->name('bk.')->group(function () {
+
+    // ログイン画面（簡易版）
+    Route::get('/login', [AdminAuth::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AdminAuth::class, 'login'])->name('login.post');
+    Route::post('/logout', [AdminAuth::class, 'logout'])->name('logout');
+
+    // 管理画面本体
+    Route::middleware([])->group(function () {
+        Route::get('/', [AdminDashboard::class, 'index'])->name('dashboard');
+
+        // 入金・振込管理
+        Route::get('/deposits', [AdminDeposit::class, 'index'])->name('deposits.index');
+
+        // 売上管理
+        Route::get('/sales', [AdminSales::class, 'index'])->name('sales.index');
+
+        // マスタ設定管理
+        Route::get('/masters', [AdminMaster::class, 'index'])->name('masters.index');
+
+        // コラム管理
+        Route::get('/columns', [AdminColumn::class, 'index'])->name('columns.index');
+
+        // 問い合わせ管理
+        Route::get('/inquiries', [AdminInquiry::class, 'index'])->name('inquiries.index');
+    });
+});
 
 /*
 |--------------------------------------------------------------------------
 | 1. Public & Guest Routes (LP・認証)
 |--------------------------------------------------------------------------
 */
+// デモ用共通ログイン
+Route::get('/login', [DemoLoginController::class, 'show'])->name('login.demo');
+Route::post('/login', [DemoLoginController::class, 'login'])->name('login.demo.post');
+
 Route::name('pages.')->group(function () {
     Route::get('/about', [PageController::class, 'about'])->name('official.about');
     Route::get('/terms', [PageController::class, 'terms'])->name('official.terms');
