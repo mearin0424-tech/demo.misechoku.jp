@@ -11,9 +11,9 @@
     {{-- ヒーロー（画像 or グラデ＋店名・所在地） --}}
     <div class="recruit-hero-wrap">
         @if(!empty($shop['main_img'] ?? null))
-            <img src="{{ $shop['main_img'] }}" alt="{{ $recruit['store_name'] ?? ($shop['name'] ?? '') }}">
+            <img src="{{ $shop['main_img'] }}" alt="{{ $recruit['store_name'] ?? ($shop['name'] ?? '') }}" class="js-lightbox-target">
         @elseif(!empty($recruit['hero_image']))
-            <img src="{{ $recruit['hero_image'] }}" alt="{{ $recruit['store_name'] ?? '' }}">
+            <img src="{{ $recruit['hero_image'] }}" alt="{{ $recruit['store_name'] ?? '' }}" class="js-lightbox-target">
         @else
             <div style="width:100%;height:100%;background:linear-gradient(135deg, #1a0c0e 0%, #2d1518 50%, #120405 100%);"></div>
         @endif
@@ -49,7 +49,7 @@
                 <div class="recruit-shop-gallery-scroll">
                     @foreach($shop['sub_images'] as $img)
                         <div class="recruit-shop-gallery-item">
-                            <img src="{{ $img }}" alt="{{ $shop['name'] ?? '' }}" loading="lazy">
+                            <img src="{{ $img }}" alt="{{ $shop['name'] ?? '' }}" loading="lazy" class="js-lightbox-target">
                         </div>
                     @endforeach
                 </div>
@@ -223,4 +223,45 @@
         </div>
     @endif
 </div>
+{{-- 画像フルスクリーン用ライトボックス（profile と共通ID） --}}
+<div id="lightbox-overlay" class="lightbox-overlay" onclick="closeLightbox(event)">
+    <img id="lightbox-image" src="" alt="" class="lightbox-image">
+    <button type="button" class="lightbox-close" aria-label="閉じる" onclick="closeLightbox(event)">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var targets = document.querySelectorAll('.js-lightbox-target');
+    var overlay = document.getElementById('lightbox-overlay');
+    var img = document.getElementById('lightbox-image');
+    if (!overlay || !img || targets.length === 0) return;
+
+    targets.forEach(function (el) {
+        el.style.cursor = 'zoom-in';
+        el.addEventListener('click', function () {
+            img.src = el.currentSrc || el.src;
+            overlay.classList.add('is-open');
+        });
+    });
+});
+
+function closeLightbox(e) {
+    if (e) {
+        // 背景クリックか閉じるボタンのみで閉じる
+        if (e.target && !e.target.classList.contains('lightbox-overlay') && !e.target.closest('.lightbox-close')) {
+            return;
+        }
+        e.stopPropagation();
+    }
+    var overlay = document.getElementById('lightbox-overlay');
+    var img = document.getElementById('lightbox-image');
+    if (!overlay) return;
+    overlay.classList.remove('is-open');
+    if (img) img.src = '';
+}
+</script>
+@endpush
