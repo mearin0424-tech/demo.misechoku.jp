@@ -1,3 +1,11 @@
+<IfModule mod_authz_core.c>
+    # PWA に必要な公開ファイルだけは Basic 認証を外す
+    <FilesMatch "^(manifest\.json|sw\.js|icon-(192|512)\.png)$">
+        AuthType None
+        Require all granted
+    </FilesMatch>
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
