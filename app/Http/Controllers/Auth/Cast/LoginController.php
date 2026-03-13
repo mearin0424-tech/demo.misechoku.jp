@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth\Cast;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class LoginController extends Controller
@@ -34,13 +35,30 @@ class LoginController extends Controller
             'password' => ['required', 'string', 'min:8'],
         ]);
 
+        if (!auth()->guard('member')->attempt($request->only('email', 'password'))) {
+            return back()
+                ->withErrors(['email' => 'メールアドレスまたはパスワードが正しくありません。'])
+                ->withInput();
+        }
+
+        $request->session()->regenerate();
+        DB::table('casts')
+            ->where('id', auth()->guard('member')->id())
+            ->update(['last_login_at' => now(), 'updated_at' => now()]);
+
         return redirect()
             ->route('cast.home')
-            ->with('message', 'デモ用ログインとしてキャスト画面へ移動しました。');
+            ->with('message', 'キャストとしてログインしました。');
     }
 
-    public function logout(): RedirectResponse
+    public function logout(Request $request): RedirectResponse
     {
+        auth()->guard('member')->logout();
+        auth()->guard('shop')->logout();
+        auth()->guard()->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
         return redirect()
             ->route('login.demo')
             ->with('message', 'ログアウトしました。');

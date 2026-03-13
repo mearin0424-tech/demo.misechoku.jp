@@ -10,26 +10,11 @@ use Illuminate\Support\Facades\File;
 
 class ProfileController extends Controller
 {
-    /** デモ用固定店舗ID */
-    private const DEMO_SHOP_ID = 's00000001';
     /**
      * プロフィール表示（閲覧・プレビュー）
      */
     public function show($id = null) {
-        $shop = [
-            'name'       => 'Club Luxurious',
-            'word'       => '最高級の空間で、最高の出会いを。',
-            'main_img'   => asset('storage/mock/shops/out-1.png'),
-            'area'       => '東京都港区六本木',
-            'concept'    => "六本木駅から徒歩3分。落ち着いた雰囲気の高級ラウンジです。\n選び抜かれたキャストと共に、至福のひとときを提供いたします。",
-            'review_avg' => 4.8,
-            'review_cnt' => 124,
-            'sub_images' => [
-                asset('storage/mock/shops/inside-1.png'),
-                asset('storage/mock/shops/inside-2.png'),
-                asset('storage/mock/shops/inside-3.png'),
-            ]
-        ];
+        $shop = $this->buildShopViewData($id ? (string) $id : $this->currentShopId());
 
         return view('shops.profile.show', [
             'pageId' => 'shop_info',
@@ -42,7 +27,10 @@ class ProfileController extends Controller
      * 編集画面表示
      */
     public function edit() {
-        return view('shops.profile.edit', ['pageId' => 'mypage']);
+        return view('shops.profile.edit', [
+            'pageId' => 'mypage',
+            'shopData' => $this->buildShopEditData($this->currentShopId()),
+        ]);
     }
 
     /**
@@ -51,27 +39,44 @@ class ProfileController extends Controller
      */
     public function update(Request $request) {
         $request->validate([
-            'name' => 'required|string|max:100',
+            'shop_name' => 'required|string|max:100',
             'overview' => 'nullable|string',
             'word' => 'nullable|string|max:50',
+            'pref' => 'required|string|max:50',
+            'city' => 'nullable|string|max:100',
+            'addr1' => 'nullable|string|max:255',
         ]);
 
+        $shopId = $this->currentShopId();
         $imageCount = (int) DB::table('shop_images')
-            ->where('shop_id', self::DEMO_SHOP_ID)
+            ->where('shop_id', $shopId)
             ->count();
-        $mainImagePath = DB::table('shop_profiles')
-            ->where('shop_id', self::DEMO_SHOP_ID)
-            ->value('main_image_path');
 
-        if ($imageCount < 1 && empty($mainImagePath)) {
+        if ($imageCount < 1) {
             return response()->json([
                 'success' => false,
                 'message' => 'ホーム表示用の画像を1枚以上登録してください。',
             ], 422);
         }
 
-        // モックなので現在は保存成功レスポンスのみ
-        return response()->json(['success' => true, 'message' => 'プロフィールを更新しました']);
+        DB::table('shop_profiles')->updateOrInsert(
+            ['shop_id' => $shopId],
+            [
+                'shop_name' => $request->input('shop_name'),
+                'pref' => $request->input('pref'),
+                'city' => $request->input('city'),
+                'addr2' => $request->input('addr1'),
+                'catch' => $request->input('word'),
+                'overview' => $request->input('overview'),
+                'message' => $request->input('overview'),
+                'updated_at' => now(),
+                'created_at' => now(),
+            ]
+        );
+
+        return redirect()
+            ->route('shop.profile.store.edit')
+            ->with('message', 'プロフィールを更新しました');
     }
 
     /**
@@ -92,12 +97,13 @@ class ProfileController extends Controller
 
         $slotIndex = (int) $request->input('slot_index', -1);
 
-        $maxOrder = DB::table('shop_images')->where('shop_id', self::DEMO_SHOP_ID)->max('main_order');
+        $shopId = $this->currentShopId();
+        $maxOrder = DB::table('shop_images')->where('shop_id', $shopId)->max('main_order');
         $mainOrder = $maxOrder !== null ? $maxOrder + 1 : 0;
         $isMain = $slotIndex === 0 ? 1 : 0;
 
         $id = DB::table('shop_images')->insertGetId([
-            'shop_id'    => self::DEMO_SHOP_ID,
+            'shop_id'    => $shopId,
             'image_path' => $path,
             'type'       => null,
             'is_main'    => $isMain,
@@ -107,7 +113,7 @@ class ProfileController extends Controller
         ]);
 
         if ($isMain) {
-            DB::table('shop_profiles')->where('shop_id', self::DEMO_SHOP_ID)->update([
+            DB::table('shop_profiles')->where('shop_id', $shopId)->update([
                 'main_image_path' => $path,
                 'updated_at'      => now(),
             ]);
@@ -125,13 +131,15 @@ class ProfileController extends Controller
      */
     public function deleteImage(Request $request, $id)
     {
+        $shopId = $this->currentShopId();
+
         $currentCount = (int) DB::table('shop_images')
-            ->where('shop_id', self::DEMO_SHOP_ID)
+            ->where('shop_id', $shopId)
             ->count();
 
         $row = DB::table('shop_images')
             ->where('id', $id)
-            ->where('shop_id', self::DEMO_SHOP_ID)
+            ->where('shop_id', $shopId)
             ->first();
 
         if (!$row) {
@@ -152,12 +160,12 @@ class ProfileController extends Controller
 
         if (!empty($row->is_main)) {
             $next = DB::table('shop_images')
-                ->where('shop_id', self::DEMO_SHOP_ID)
+                ->where('shop_id', $shopId)
                 ->orderBy('main_order')
                 ->orderBy('id')
                 ->first();
             $mainPath = $next ? $next->image_path : null;
-            DB::table('shop_profiles')->where('shop_id', self::DEMO_SHOP_ID)->update([
+            DB::table('shop_profiles')->where('shop_id', $shopId)->update([
                 'main_image_path' => $mainPath,
                 'updated_at'      => now(),
             ]);
@@ -183,5 +191,105 @@ class ProfileController extends Controller
 
         // 本来は foreach で DB の順番を更新
         return response()->json(['success' => true, 'message' => '並び順を保存しました']);
+    }
+
+    private function buildShopViewData(string $shopId): array
+    {
+        $row = DB::table('shops')
+            ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
+            ->leftJoin('reviews', 'shops.id', '=', 'reviews.shop_id')
+            ->where('shops.id', $shopId)
+            ->select(
+                'shops.id',
+                'shop_profiles.shop_name',
+                'shop_profiles.pref',
+                'shop_profiles.city',
+                'shop_profiles.addr2',
+                'shop_profiles.addr3',
+                'shop_profiles.catch',
+                'shop_profiles.overview',
+                'shop_profiles.message',
+                'shop_profiles.main_image_path',
+                DB::raw('AVG(reviews.eva) as avg_eva'),
+                DB::raw('COUNT(reviews.id) as review_count')
+            )
+            ->groupBy(
+                'shops.id',
+                'shop_profiles.shop_name',
+                'shop_profiles.pref',
+                'shop_profiles.city',
+                'shop_profiles.addr2',
+                'shop_profiles.addr3',
+                'shop_profiles.catch',
+                'shop_profiles.overview',
+                'shop_profiles.message',
+                'shop_profiles.main_image_path'
+            )
+            ->first();
+
+        $subImages = DB::table('shop_images')
+            ->where('shop_id', $shopId)
+            ->orderByRaw('main_order IS NULL')
+            ->orderBy('main_order')
+            ->orderBy('id')
+            ->pluck('image_path')
+            ->map(fn ($path) => $this->assetPathForStored($path))
+            ->all();
+
+        $mainImage = $subImages[0] ?? $this->assetPathForStored($row->main_image_path ?? null);
+
+        if (empty($subImages) && $mainImage) {
+            $subImages = [$mainImage];
+        }
+
+        return [
+            'name' => $row->shop_name ?? 'ショップ',
+            'word' => $row->catch ?? ($row->message ?? ''),
+            'main_img' => $mainImage ?: asset('assets/images/common/no-image.png'),
+            'area' => trim(implode('', array_filter([$row->pref ?? null, $row->city ?? null, $row->addr2 ?? null, $row->addr3 ?? null]))),
+            'concept' => $row->overview ?? ($row->message ?? ''),
+            'review_avg' => $row && $row->avg_eva ? round((float) $row->avg_eva, 1) : 0,
+            'review_cnt' => $row ? (int) $row->review_count : 0,
+            'sub_images' => $subImages,
+        ];
+    }
+
+    private function buildShopEditData(string $shopId): array
+    {
+        $row = DB::table('shop_profiles')
+            ->where('shop_id', $shopId)
+            ->select('shop_name', 'catch', 'overview', 'pref', 'city', 'addr2', 'addr3')
+            ->first();
+
+        return [
+            'shop_name' => $row->shop_name ?? '',
+            'word' => $row->catch ?? '',
+            'overview' => $row->overview ?? '',
+            'pref' => $row->pref ?? '東京都',
+            'city' => $row->city ?? '',
+            'addr1' => trim(implode(' ', array_filter([$row->addr2 ?? null, $row->addr3 ?? null]))),
+        ];
+    }
+
+    private function currentShopId(): string
+    {
+        return (string) auth()->guard('shop')->user()->shop_id;
+    }
+
+    private function assetPathForStored(?string $path): string
+    {
+        if (empty($path)) {
+            return asset('assets/images/common/no-image.png');
+        }
+
+        if (str_starts_with($path, 'uploads/')) {
+            return asset($path);
+        }
+
+        if (str_starts_with($path, 'public/')) {
+            return asset('storage/' . substr($path, 7));
+        }
+
+        return asset(ltrim($path, '/'));
     }
 }

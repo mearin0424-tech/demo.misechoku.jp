@@ -160,7 +160,7 @@
         <img id="modal-img" src="" alt="" class="mypage-modal-preview-img">
         <div class="gallery-preview-actions">
             <button type="button" class="btn-action btn-action-secondary gallery-preview-btn-close" onclick="closeGalleryPreview()">閉じる</button>
-            <button type="button" class="btn-action gallery-preview-btn-delete" onclick="deleteGalleryImageFromModal(event)">削除</button>
+            <button type="button" id="gallery-preview-delete-btn" class="btn-action gallery-preview-btn-delete" onclick="deleteGalleryImageFromModal(event)">削除</button>
         </div>
     </div>
 </div>
@@ -199,6 +199,11 @@ function handleGallerySlotClick(ev, slotEl, slotIndex) {
         _galleryPreviewImageId = imageId;
         _galleryPreviewLi = li;
         document.getElementById('modal-img').src = imageUrl;
+        var deleteBtn = document.getElementById('gallery-preview-delete-btn');
+        if (deleteBtn) {
+            var canDelete = !!imageId && !String(imageId).startsWith('local-');
+            deleteBtn.style.display = canDelete ? '' : 'none';
+        }
         document.getElementById('image-preview-modal').style.display = 'flex';
     } else {
         _galleryUploadSlotIndex = slotIndex;
@@ -209,6 +214,10 @@ function handleGallerySlotClick(ev, slotEl, slotIndex) {
 function closeGalleryPreview(ev) {
     if (ev && ev.target !== ev.currentTarget) return;
     document.getElementById('image-preview-modal').style.display = 'none';
+    var deleteBtn = document.getElementById('gallery-preview-delete-btn');
+    if (deleteBtn) {
+        deleteBtn.style.display = '';
+    }
     _galleryPreviewImageId = null;
     _galleryPreviewLi = null;
 }

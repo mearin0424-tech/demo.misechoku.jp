@@ -16,8 +16,7 @@ class MypageController extends Controller
      */
     public function index()
     {
-        // TODO: 将来的にはログイン中キャストIDを利用する
-        $cast = $this->getCastFromDatabase('c00000001');
+        $cast = $this->getCastFromDatabase($this->currentCastId());
         $reviewCount = count($cast['reviews']);
         $reviewAvg = $reviewCount > 0
             ? round(array_sum(array_column($cast['reviews'], 'score')) / $reviewCount, 1)
@@ -58,7 +57,7 @@ class MypageController extends Controller
      */
     public function payment()
     {
-        $castId = 'c00000001';
+        $castId = $this->currentCastId();
 
         $deposit = DB::table('application_deposits')
             ->join('shop_job_applications', 'application_deposits.shop_job_application_id', '=', 'shop_job_applications.id')
@@ -111,7 +110,7 @@ class MypageController extends Controller
      */
     public function identity()
     {
-        $castId = 'c00000001';
+        $castId = $this->currentCastId();
         $raw = DB::table('casts')->where('id', $castId)->value('identity_status');
 
         // 1:未提出, 2:未承認, 3:承認済み
@@ -139,7 +138,7 @@ class MypageController extends Controller
 
         // 実装ではストレージとDBに保存する想定。
         // デモでは casts.identity_status を「提出済み（未承認）」に更新。
-        $castId = 'c00000001';
+        $castId = $this->currentCastId();
         DB::table('casts')
             ->where('id', $castId)
             ->update(['identity_status' => 2, 'updated_at' => now()]);
@@ -149,9 +148,6 @@ class MypageController extends Controller
             'message' => '本人確認書類をアップロードしました。運営による確認・承認をお待ちください。',
         ]);
     }
-
-    /** デモ用固定キャストID */
-    private const DEMO_CAST_ID = 'c00000001';
 
     /**
      * キャスト画像アップロード（DB: cast_images type=1 に保存）
@@ -171,15 +167,17 @@ class MypageController extends Controller
 
         $slotIndex = (int) $request->input('slot_index', -1);
 
+        $castId = $this->currentCastId();
+
         $maxOrder = DB::table('cast_images')
-            ->where('cast_id', self::DEMO_CAST_ID)
+            ->where('cast_id', $castId)
             ->where('type', 1)
             ->max('main_order');
         $mainOrder = $maxOrder !== null ? $maxOrder + 1 : 0;
         $isMain = $slotIndex === 0 ? 1 : 0;
 
         $id = DB::table('cast_images')->insertGetId([
-            'cast_id'       => self::DEMO_CAST_ID,
+            'cast_id'       => $castId,
             'image_path'    => $path,
             'type'          => 1,
             'front_and_back'=> 0,
@@ -191,7 +189,7 @@ class MypageController extends Controller
         ]);
 
         if ($isMain) {
-            DB::table('cast_profiles')->where('cast_id', self::DEMO_CAST_ID)->update([
+            DB::table('cast_profiles')->where('cast_id', $castId)->update([
                 'main_image_path' => $path,
                 'updated_at'      => now(),
             ]);
@@ -205,14 +203,16 @@ class MypageController extends Controller
      */
     public function deleteImage(Request $request, $id)
     {
+        $castId = $this->currentCastId();
+
         $currentCount = (int) DB::table('cast_images')
-            ->where('cast_id', self::DEMO_CAST_ID)
+            ->where('cast_id', $castId)
             ->where('type', 1)
             ->count();
 
         $row = DB::table('cast_images')
             ->where('id', $id)
-            ->where('cast_id', self::DEMO_CAST_ID)
+            ->where('cast_id', $castId)
             ->where('type', 1)
             ->first();
 
@@ -234,13 +234,13 @@ class MypageController extends Controller
 
         if (!empty($row->is_main)) {
             $next = DB::table('cast_images')
-                ->where('cast_id', self::DEMO_CAST_ID)
+                ->where('cast_id', $castId)
                 ->where('type', 1)
                 ->orderBy('main_order')
                 ->orderBy('id')
                 ->first();
             $mainPath = $next ? $next->image_path : null;
-            DB::table('cast_profiles')->where('cast_id', self::DEMO_CAST_ID)->update([
+            DB::table('cast_profiles')->where('cast_id', $castId)->update([
                 'main_image_path' => $mainPath,
                 'updated_at'      => now(),
             ]);
@@ -344,10 +344,13 @@ class MypageController extends Controller
      */
     public function reviews()
     {
-        $cast = $this->getCastFromDatabase('c00000001');
+        $cast = $this->getCastFromDatabase($this->currentCastId());
+        $reviewCount = count($cast['reviews']);
         $castData = [
-            'review_avg'   => 4.5,
-            'review_count' => count($cast['reviews']),
+            'review_avg'   => $reviewCount > 0
+                ? round(array_sum(array_column($cast['reviews'], 'score')) / $reviewCount, 1)
+                : 0,
+            'review_count' => $reviewCount,
         ];
         return view('casts.mypage.reviews', [
             'pageId'    => 'mypage',
@@ -361,6 +364,8 @@ class MypageController extends Controller
      */
     private function getCastFromDatabase(string $castId): array
     {
+        $this->cleanupStaleMainImagePath($castId);
+
         $castRow = DB::table('casts')
             ->leftJoin('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id')
             ->where('casts.id', $castId)
@@ -380,7 +385,11 @@ class MypageController extends Controller
                 'cast_profiles.bust',
                 'cast_profiles.waist',
                 'cast_profiles.hip',
+                'cast_profiles.shift',
+                'cast_profiles.profession',
+                'cast_profiles.exp',
                 'cast_profiles.pr',
+                'cast_profiles.memo',
                 'cast_profiles.main_image_path'
             )
             ->first();
@@ -392,6 +401,10 @@ class MypageController extends Controller
 
         $birthday = $castRow->birthday ? Carbon::parse($castRow->birthday) : null;
         $age = $birthday ? $birthday->age : null;
+        $memo = $this->decodeProfileMemo($castRow->memo ?? null);
+        $shiftHope = $memo['shift_hope'] ?? $this->shiftHopeLabel($castRow->shift);
+        $workTime = $memo['work_time'] ?? '';
+        $nightWorkExp = $memo['night_work_exp'] ?? ((int) ($castRow->exp ?? 0) === 1 ? 'yes' : 'none');
 
         // 画像: cast_images (type=1) を id + url で取得（is_main を先に）
         $images = [];
@@ -408,9 +421,6 @@ class MypageController extends Controller
                 'id'  => $img->id,
                 'url' => $this->assetPathForStored($img->image_path),
             ];
-        }
-        if (empty($images) && !empty($castRow->main_image_path)) {
-            $images[] = ['id' => null, 'url' => $this->assetPathForStored($castRow->main_image_path)];
         }
         if (empty($images)) {
             $images[] = ['id' => null, 'url' => asset('assets/images/common/no-image.png')];
@@ -460,16 +470,16 @@ class MypageController extends Controller
             'word'             => $castRow->pr ? mb_strimwidth($castRow->pr, 0, 80, '...') : '',
             'pr'               => $castRow->pr ?? '',
             'intro'            => $castRow->pr ?? '',
-            'desired_job'      => '',
-            'my_field'         => '',
-            'my_inner_skills'  => '',
+            'desired_job'      => $memo['desired_job'] ?? '',
+            'my_field'         => $memo['my_field'] ?? '',
+            'my_inner_skills'  => $memo['my_inner_skills'] ?? '',
             'personality_type' => '',
-            'shift_hope'       => '',
-            'work_time'        => '',
-            'work_time_label'  => '',
-            'current_job'      => '',
-            'night_work_exp'   => '',
-            'night_work_label' => '',
+            'shift_hope'       => $shiftHope,
+            'work_time'        => $workTime,
+            'work_time_label'  => $this->workTimeLabel($workTime),
+            'current_job'      => $memo['current_job'] ?? ($castRow->profession ?? ''),
+            'night_work_exp'   => $nightWorkExp,
+            'night_work_label' => $nightWorkExp === 'yes' ? '有り' : '無し',
             'reviews'          => $reviews,
         ];
     }
@@ -537,5 +547,58 @@ class MypageController extends Controller
             'night_work_label' => '',
             'reviews'          => [],
         ];
+    }
+
+    private function currentCastId(): string
+    {
+        return (string) auth()->guard('member')->id();
+    }
+
+    private function cleanupStaleMainImagePath(string $castId): void
+    {
+        $hasImages = DB::table('cast_images')
+            ->where('cast_id', $castId)
+            ->where('type', 1)
+            ->exists();
+
+        if (!$hasImages) {
+            DB::table('cast_profiles')
+                ->where('cast_id', $castId)
+                ->whereNotNull('main_image_path')
+                ->update([
+                    'main_image_path' => null,
+                    'updated_at' => now(),
+                ]);
+        }
+    }
+
+    private function decodeProfileMemo(?string $memo): array
+    {
+        if (empty($memo)) {
+            return [];
+        }
+
+        $decoded = json_decode($memo, true);
+
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    private function shiftHopeLabel($shift): string
+    {
+        return match ((int) ($shift ?? 0)) {
+            1 => '週1回出勤',
+            2 => '週2回出勤',
+            3 => '週3回以上',
+            default => '',
+        };
+    }
+
+    private function workTimeLabel(string $workTime): string
+    {
+        return match ($workTime) {
+            'morning' => '朝',
+            'day_night' => '昼or夜',
+            default => '',
+        };
     }
 }

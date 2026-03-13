@@ -33,49 +33,5 @@
             ※ 実装時には、期間指定（年月や日付範囲）・CSV エクスポート・グラフ表示などを拡張予定です。
         </p>
     </div>
-
-    <style>
-        .admin-page {
-            padding: 24px 0;
-        }
-        .admin-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: #e5e7eb;
-        }
-        .admin-description {
-            font-size: 0.9rem;
-            color: #cbd5f5;
-            margin-bottom: 16px;
-            line-height: 1.6;
-        }
-        .sales-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-        }
-        .sales-card {
-            padding: 12px 14px;
-            border-radius: 8px;
-            background: rgba(17, 24, 39, 0.95);
-            border: 1px solid rgba(55, 65, 81, 0.9);
-        }
-        .sales-card h2 {
-            font-size: 0.85rem;
-            color: #e5e7eb;
-            margin-bottom: 4px;
-        }
-        .sales-amount {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #bfdbfe;
-        }
-        .admin-note {
-            margin-top: 14px;
-            font-size: 0.8rem;
-            color: #9ca3af;
-        }
-    </style>
 @endsection
 

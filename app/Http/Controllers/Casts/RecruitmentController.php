@@ -27,7 +27,7 @@ class RecruitmentController extends Controller
     /**
      * 求人情報＋店舗情報をDBから取得して画面用に整形
      * ルートの {id} は内部の shop_id を 1,2.. とした表示用として扱い、
-     * 実テーブルID (s00000001 形式) に変換する。
+     * 実テーブルの文字列ID形式へ変換する。
      */
     private function getRecruitDataFromDatabase(int $shopNumericId): array
     {

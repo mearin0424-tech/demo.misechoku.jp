@@ -10,12 +10,10 @@ use Carbon\Carbon;
 
 class MypageController extends Controller
 {
-    /** デモ用固定店舗ID（将来はログイン中店舗ID） */
-    private const DEMO_SHOP_ID = 's00000001';
-
     public function index()
     {
-        $shopId = self::DEMO_SHOP_ID;
+        $shopId = $this->currentShopId();
+        $this->cleanupStaleMainImagePath($shopId);
 
         $row = DB::table('shops')
             ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
@@ -24,13 +22,13 @@ class MypageController extends Controller
             ->select(
                 'shops.id',
                 'shops.status',
-                'shops.business_license_status',
-                'shops.entertainment_license_status',
+                'shops.license_status',
                 'shop_profiles.shop_name',
                 'shop_profiles.pref',
                 'shop_profiles.city',
                 'shop_profiles.addr2',
                 'shop_profiles.addr3',
+                'shop_profiles.catch',
                 'shop_profiles.overview',
                 'shop_profiles.message',
                 'shop_profiles.main_image_path',
@@ -40,13 +38,13 @@ class MypageController extends Controller
             ->groupBy(
                 'shops.id',
                 'shops.status',
-                'shops.business_license_status',
-                'shops.entertainment_license_status',
+                'shops.license_status',
                 'shop_profiles.shop_name',
                 'shop_profiles.pref',
                 'shop_profiles.city',
                 'shop_profiles.addr2',
                 'shop_profiles.addr3',
+                'shop_profiles.catch',
                 'shop_profiles.overview',
                 'shop_profiles.message',
                 'shop_profiles.main_image_path'
@@ -59,19 +57,18 @@ class MypageController extends Controller
             3 => 'approved',
             default => 'not_submitted',
         };
-        $businessStatus = $row ? $statusKey((int)$row->business_license_status) : 'not_submitted';
-        $entertainmentStatus = $row ? $statusKey((int)$row->entertainment_license_status) : 'not_submitted';
+        $documentStatus = $row ? $statusKey((int) $row->license_status) : 'not_submitted';
 
         $shopData = [
             'shop_name'    => $row->shop_name ?? 'ショップ',
-            'word'         => $row->message ?? '最高級の空間で、最高の出会いを。',
+            'word'         => $row->catch ?? ($row->message ?? '最高級の空間で、最高の出会いを。'),
             'review_avg'   => $row && $row->avg_eva ? round((float)$row->avg_eva, 1) : 0.0,
             'review_count' => $row ? (int)$row->review_count : 0,
             'pref'         => $row->pref ?? '',
             'city'         => $row->city ?? '',
             'addr1'        => trim(($row->addr2 ?? '') . ' ' . ($row->addr3 ?? '')),
             'overview'     => $row->overview ?? '',
-            'approval'     => ($businessStatus === 'approved' && $entertainmentStatus === 'approved') ? 1 : 0,
+            'approval'     => $documentStatus === 'approved' ? 1 : 0,
         ];
 
         $subImages = [];
@@ -84,16 +81,13 @@ class MypageController extends Controller
         foreach ($shopImages as $i => $img) {
             $subImages[] = ['id' => $img->id, 'url' => $this->shopImageUrl($img->image_path)];
         }
-        if (empty($subImages) && $row && $row->main_image_path) {
-            $subImages[] = ['id' => 1, 'url' => $this->shopImageUrl($row->main_image_path)];
-        }
         if (empty($subImages)) {
-            $subImages[] = ['id' => null, 'url' => asset('assets/images/common/no-image.png')];
+            $subImages = [];
         }
 
         $documents = [
-            ['key' => 'business_license', 'name' => '営業許可証', 'status' => $businessStatus],
-            ['key' => 'adult_entertainment_license', 'name' => '風営許可証', 'status' => $entertainmentStatus],
+            ['key' => 'business_license', 'name' => '営業許可証', 'status' => $documentStatus],
+            ['key' => 'adult_entertainment_license', 'name' => '風営許可証', 'status' => $documentStatus],
         ];
 
         $allDocumentsApproved = collect($documents)->every(fn ($doc) => $doc['status'] === 'approved');
@@ -109,7 +103,7 @@ class MypageController extends Controller
 
     public function payment()
     {
-        $shopId = self::DEMO_SHOP_ID;
+        $shopId = $this->currentShopId();
 
         $deposit = DB::table('application_deposits')
             ->join('shop_job_applications', 'application_deposits.shop_job_application_id', '=', 'shop_job_applications.id')
@@ -223,8 +217,6 @@ class MypageController extends Controller
             'account_name'   => 'required|string|max:100',
         ]);
 
-        // 本番ではここでログイン中店舗のIDを取得し、BankAccountRepository 経由で保存する想定
-        // デモ環境のため、今回は実保存は行わずフロント側からの確認用レスポンスのみ返す
         return response()->json([
             'success' => true,
             'message' => '口座情報を保存しました。（デモ環境ではDB保存は行っていません）',
@@ -246,8 +238,7 @@ class MypageController extends Controller
             $path = $request->file('file')->store('public/shops/documents');
 
             $type = $request->input('type');
-            $column = $type === 'business_license' ? 'business_license_status' : 'entertainment_license_status';
-            DB::table('shops')->where('id', self::DEMO_SHOP_ID)->update([$column => 2]);
+            DB::table('shops')->where('id', $this->currentShopId())->update(['license_status' => 2]);
 
             return response()->json([
                 'success' => true,
@@ -296,14 +287,14 @@ class MypageController extends Controller
     }
 
     /**
-     * デモ店舗に紐づく直近の application_deposits.id を取得
+     * ログイン中店舗に紐づく直近の application_deposits.id を取得
      */
     private function getLatestDepositIdForShop(): ?int
     {
         $row = DB::table('application_deposits')
             ->join('shop_job_applications', 'application_deposits.shop_job_application_id', '=', 'shop_job_applications.id')
             ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
-            ->where('shop_jobs.shop_id', self::DEMO_SHOP_ID)
+            ->where('shop_jobs.shop_id', $this->currentShopId())
             ->orderByDesc('application_deposits.id')
             ->value('application_deposits.id');
 
@@ -362,5 +353,27 @@ class MypageController extends Controller
             return asset('storage/' . substr($path, 7));
         }
         return asset(ltrim($path, '/'));
+    }
+
+    private function currentShopId(): string
+    {
+        return (string) auth()->guard('shop')->user()->shop_id;
+    }
+
+    private function cleanupStaleMainImagePath(string $shopId): void
+    {
+        $hasImages = DB::table('shop_images')
+            ->where('shop_id', $shopId)
+            ->exists();
+
+        if (!$hasImages) {
+            DB::table('shop_profiles')
+                ->where('shop_id', $shopId)
+                ->whereNotNull('main_image_path')
+                ->update([
+                    'main_image_path' => null,
+                    'updated_at' => now(),
+                ]);
+        }
     }
 }

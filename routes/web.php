@@ -229,7 +229,7 @@ Route::prefix('shop')->name('shop.')->group(function () {
 | 2. Shop Portal (店舗専用)
 |--------------------------------------------------------------------------
 */
-Route::prefix('shop')->name('shop.')->group(function () {
+Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function () {
 
     Route::get('/home', [ShopHome::class, 'index'])->name('home');
     Route::get('/search', fn () => redirect()->route('shop.search.index', ['tab' => 'timeline']));
@@ -296,7 +296,7 @@ Route::prefix('shop')->name('shop.')->group(function () {
 | 3. Cast Portal (キャスト専用)
 |--------------------------------------------------------------------------
 */
-Route::prefix('cast')->name('cast.')->group(function () {
+Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function () {
     Route::get('/register', [RegistrationController::class, 'showCast'])->name('register');
     Route::post('/register', [RegistrationController::class, 'storeCast'])->name('register.store');
     Route::get('/home', [ShopHome::class, 'index'])->name('home');

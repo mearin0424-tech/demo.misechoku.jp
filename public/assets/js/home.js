@@ -4,8 +4,10 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     
-    const slides = document.querySelectorAll('.main-swiper .swiper-slide');
-    const slideCount = slides.length;
+    const mainSwiperEl = document.querySelector('.main-swiper');
+    const mainWrapper = mainSwiperEl ? mainSwiperEl.querySelector(':scope > .swiper-wrapper') : null;
+    const mainSlides = mainWrapper ? Array.from(mainWrapper.children).filter((el) => el.classList.contains('swiper-slide')) : [];
+    const slideCount = mainSlides.length;
     let isPhotoSwiping = false;
 
     function releasePhotoSwipeLock() {
@@ -69,6 +71,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const photoSwipers = [];
     document.querySelectorAll('.photo-swiper').forEach((el) => {
         const paginationEl = el.querySelector('.photo-pagination');
+        const photoSlideCount = el.querySelectorAll(':scope > .swiper-wrapper > .swiper-slide').length;
+        if (photoSlideCount <= 1) {
+            return;
+        }
         const options = {
             direction: 'horizontal',
             slidesPerView: 1,

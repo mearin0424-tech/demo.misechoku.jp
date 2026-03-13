@@ -16,15 +16,12 @@ class MemberAuth
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!auth()->guard('member')->check()) {
-            auth()->guard('member')->login(\App\Models\Member::find(1000034));
-        }
-
         if (auth()->guard('member')->check()) {
             return $next($request);
         }
 
-        return redirect(route('user.index'));
-        //return $next($request);
+        return redirect()
+            ->route('cast.login')
+            ->with('message', 'ログインの有効期限が切れました。もう一度ログインしてください。');
     }
 }

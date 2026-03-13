@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth\Shop;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class LoginController extends Controller
@@ -34,8 +35,19 @@ class LoginController extends Controller
             'password' => ['required', 'string', 'min:8'],
         ]);
 
+        if (!auth()->guard('shop')->attempt($request->only('email', 'password'))) {
+            return back()
+                ->withErrors(['email' => 'メールアドレスまたはパスワードが正しくありません。'])
+                ->withInput();
+        }
+
+        $request->session()->regenerate();
+        DB::table('shop_managers')
+            ->where('id', auth()->guard('shop')->id())
+            ->update(['last_login_at' => now(), 'updated_at' => now()]);
+
         return redirect()
             ->route('shop.home')
-            ->with('message', 'デモ用ログインとして店舗画面へ移動しました。');
+            ->with('message', '店舗としてログインしました。');
     }
 }
