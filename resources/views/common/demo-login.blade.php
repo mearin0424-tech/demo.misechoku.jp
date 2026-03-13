@@ -2,7 +2,7 @@
 
 @section('title', 'ログイン（デモ）')
 @section('body-class', 'page-demo-login')
-@section('guide_message', "ようこそ、ミセチョクへ。\n体験したい立場を選ぶだけで、すぐにデモを始められるよ。")
+@section('guide_message', "ようこそ、ミセチョクへ。\n役割とアカウントを選ぶだけで、通常ログインもLINEログインも試せるよ。")
 
 @section('content')
     <div class="demo-login-page">
@@ -14,67 +14,96 @@
 
             <h1 class="demo-login-title">体験したい視点から、ミセチョクへ。</h1>
             <p class="demo-login-desc">
-                管理者・店舗・キャストの各導線を、
-                落ち着いた世界観のままスムーズに試せるデモログインです。
+                管理運営者・店舗マネージャー・キャストの既存データからアカウントを選び、
+                通常ログインと LINE ログインの両方をデモ体験できます。
             </p>
         </div>
 
-        <form method="POST" action="{{ route('login.demo.post') }}" class="demo-login-form">
-            @csrf
+        @if (session('message'))
+            <div class="demo-login-alert demo-login-alert-info">
+                {{ session('message') }}
+            </div>
+        @endif
 
-            @if ($errors->any())
-                <div class="demo-login-alert">
-                    @foreach ($errors->all() as $error)
-                        <div>{{ $error }}</div>
-                    @endforeach
-                </div>
-            @endif
+        @if ($errors->any())
+            <div class="demo-login-alert">
+                @foreach ($errors->all() as $error)
+                    <div>{{ $error }}</div>
+                @endforeach
+            </div>
+        @endif
 
-            <button type="submit" name="role" value="admin" class="demo-login-btn demo-login-btn-admin">
-                <span class="demo-login-btn-icon"><i class="fas fa-crown"></i></span>
-                <span class="demo-login-btn-copy">
-                    <span class="demo-login-btn-label">BACK OFFICE</span>
-                    <span class="demo-login-btn-main">管理者としてログイン</span>
-                    <span class="demo-login-btn-sub">運営用ダッシュボードを確認</span>
-                </span>
-                <span class="demo-login-btn-arrow"><i class="fas fa-arrow-right"></i></span>
-            </button>
+        <div class="demo-login-grid">
+            @foreach ($roleGroups as $group)
+                <form method="POST" action="{{ route('login.demo.post') }}" class="demo-login-card">
+                    @csrf
+                    <input type="hidden" name="role" value="{{ $group['key'] }}">
 
-            <button type="submit" name="role" value="shop" class="demo-login-btn demo-login-btn-shop">
-                <span class="demo-login-btn-icon"><i class="fas fa-store"></i></span>
-                <span class="demo-login-btn-copy">
-                    <span class="demo-login-btn-label">SHOP ACCOUNT</span>
-                    <span class="demo-login-btn-main">店舗としてログイン</span>
-                    <span class="demo-login-btn-sub">ホーム・求人・マイページを確認</span>
-                </span>
-                <span class="demo-login-btn-arrow"><i class="fas fa-arrow-right"></i></span>
-            </button>
+                    <div class="demo-login-card-head">
+                        <span class="demo-login-card-icon"><i class="fas {{ $group['icon'] }}"></i></span>
+                        <div class="demo-login-card-copy">
+                            <p class="demo-login-btn-label">{{ $group['eyebrow'] }}</p>
+                            <h2 class="demo-login-card-title">{{ $group['label'] }}</h2>
+                            <p class="demo-login-card-desc">{{ $group['description'] }}</p>
+                        </div>
+                    </div>
 
-            <button type="submit" name="role" value="cast" class="demo-login-btn demo-login-btn-cast">
-                <span class="demo-login-btn-icon"><i class="fas fa-gem"></i></span>
-                <span class="demo-login-btn-copy">
-                    <span class="demo-login-btn-label">CAST ACCOUNT</span>
-                    <span class="demo-login-btn-main">キャストとしてログイン</span>
-                    <span class="demo-login-btn-sub">ホーム・検索・マイページを確認</span>
-                </span>
-                <span class="demo-login-btn-arrow"><i class="fas fa-arrow-right"></i></span>
-            </button>
-        </form>
+                    <label class="demo-login-field">
+                        <span>登録済みデータから選択</span>
+                        <select name="account_id" required>
+                            @foreach ($group['accounts'] as $account)
+                                <option value="{{ $account['id'] }}" @selected(old('role') === $group['key'] && old('account_id') === $account['id'])>
+                                    {{ $account['label'] }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
 
-        <div class="demo-register-links">
-            <a href="{{ route('cast.register') }}" class="demo-register-link">
-                <i class="fas fa-user-plus"></i>
-                <span>キャスト新規登録</span>
-            </a>
-            <a href="{{ route('shop.register') }}" class="demo-register-link">
-                <i class="fas fa-store"></i>
-                <span>店舗新規登録</span>
-            </a>
+                    <div class="demo-login-actions">
+                        <button type="submit" name="auth_channel" value="standard" class="demo-login-action demo-login-action-primary">
+                            <i class="fas fa-arrow-right-to-bracket"></i>
+                            <span>通常ログイン</span>
+                        </button>
+                        <button type="submit" name="auth_channel" value="line" class="demo-login-action demo-login-action-line">
+                            <i class="fab fa-line"></i>
+                            <span>LINEでログイン</span>
+                        </button>
+                    </div>
+
+                    @if ($group['register_url'])
+                        <a href="{{ $group['register_url'] }}" class="demo-login-inline-link">{{ $group['register_label'] }}</a>
+                    @else
+                        <p class="demo-login-inline-note">{{ $group['register_label'] }}</p>
+                    @endif
+                </form>
+            @endforeach
         </div>
+
+        <section class="demo-register-panel">
+            <div class="demo-register-panel-head">
+                <p class="demo-login-eyebrow">REGISTER</p>
+                <h2 class="demo-register-panel-title">新規登録もすぐに試せます</h2>
+                <p class="demo-register-panel-desc">
+                    デモではキャストと店舗マネージャーの登録画面へ遷移できます。
+                    管理運営者は既存の運営アカウントを選択してお試しください。
+                </p>
+            </div>
+
+            <div class="demo-register-links">
+                <a href="{{ route('cast.register') }}" class="demo-register-link">
+                    <i class="fas fa-user-plus"></i>
+                    <span>キャスト新規登録</span>
+                </a>
+                <a href="{{ route('shop.register') }}" class="demo-register-link">
+                    <i class="fas fa-store"></i>
+                    <span>店舗マネージャー新規登録</span>
+                </a>
+            </div>
+        </section>
 
         <div class="demo-login-note">
             <span class="demo-login-note-badge">DEMO</span>
-            <p>認証はデモ用です。アカウント情報の入力なしで各画面の体験を始められます。</p>
+            <p>認証はデモ用です。実パスワード入力は不要で、既存アカウントを選択して各画面の体験を始められます。</p>
         </div>
     </div>
 
@@ -186,54 +215,68 @@
             line-height: 1.7;
             box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
             text-align: left;
+            margin-bottom: 16px;
         }
 
-        .demo-login-btn {
+        .demo-login-alert-info {
+            border-color: rgba(229, 193, 88, 0.24);
+            background: rgba(255, 255, 255, 0.045);
+            color: #f9efcf;
+        }
+
+        .demo-login-grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .demo-login-card {
             position: relative;
             width: 100%;
-            padding: 18px 18px 18px 16px;
+            padding: 20px 18px 18px;
             border-radius: 22px;
             border: 1px solid rgba(229, 193, 88, 0.18);
             background:
                 linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015)),
                 linear-gradient(135deg, rgba(35, 13, 17, 0.98), rgba(21, 7, 10, 0.98));
             color: #f6ead0;
-            cursor: pointer;
             text-align: left;
-            display: grid;
-            grid-template-columns: 52px 1fr auto;
-            gap: 14px;
-            align-items: center;
-            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
             overflow: hidden;
         }
 
-        .demo-login-btn::before {
+        .demo-login-card::before {
             content: '';
             position: absolute;
             inset: 0;
             background: linear-gradient(120deg, rgba(229, 193, 88, 0.08), transparent 28%, transparent 72%, rgba(229, 193, 88, 0.08));
             opacity: 0;
             transition: opacity 0.18s ease;
+            pointer-events: none;
         }
 
-        .demo-login-btn:hover {
+        .demo-login-card:hover {
             transform: translateY(-2px);
             border-color: rgba(229, 193, 88, 0.42);
             box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
         }
 
-        .demo-login-btn:hover::before {
+        .demo-login-card:hover::before {
             opacity: 1;
         }
 
-        .demo-login-btn:focus-visible {
-            outline: none;
-            border-color: rgba(253, 240, 178, 0.86);
-            box-shadow: 0 0 0 3px rgba(229, 193, 88, 0.18);
+        .demo-login-card-head {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: 52px 1fr;
+            gap: 14px;
+            align-items: start;
         }
 
-        .demo-login-btn-icon {
+        .demo-login-card-icon {
             position: relative;
             z-index: 1;
             display: grid;
@@ -248,12 +291,12 @@
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
         }
 
-        .demo-login-btn-copy {
+        .demo-login-card-copy {
             position: relative;
             z-index: 1;
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 4px;
             min-width: 0;
         }
 
@@ -263,23 +306,130 @@
             color: rgba(253, 240, 178, 0.62);
         }
 
-        .demo-login-btn-main {
+        .demo-login-card-title {
+            margin: 0;
             font-size: 1rem;
             font-weight: 700;
             color: #fff7e4;
         }
 
-        .demo-login-btn-sub {
+        .demo-login-card-desc {
+            margin: 0;
             font-size: 0.82rem;
             line-height: 1.6;
             color: rgba(218, 199, 199, 0.78);
         }
 
-        .demo-login-btn-arrow {
+        .demo-login-field {
             position: relative;
             z-index: 1;
-            color: rgba(229, 193, 88, 0.9);
-            font-size: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .demo-login-field span {
+            color: #f7ecd3;
+            font-size: 0.84rem;
+        }
+
+        .demo-login-field select {
+            width: 100%;
+            padding: 13px 14px;
+            border-radius: 16px;
+            border: 1px solid rgba(229, 193, 88, 0.16);
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+            font-size: 0.93rem;
+        }
+
+        .demo-login-field select:focus {
+            outline: none;
+            border-color: rgba(253, 240, 178, 0.72);
+            box-shadow: 0 0 0 3px rgba(229, 193, 88, 0.12);
+        }
+
+        .demo-login-actions {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .demo-login-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 48px;
+            padding: 12px 14px;
+            border-radius: 16px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            font-size: 0.84rem;
+            font-weight: 700;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+
+        .demo-login-action:hover {
+            transform: translateY(-1px);
+        }
+
+        .demo-login-action-primary {
+            background: linear-gradient(135deg, #f4df9c, #c99722);
+            color: #2a1208;
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.22);
+        }
+
+        .demo-login-action-line {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(6, 199, 85, 0.34);
+            color: #ecfff4;
+        }
+
+        .demo-login-inline-link,
+        .demo-login-inline-note {
+            position: relative;
+            z-index: 1;
+            margin: 0;
+            font-size: 0.81rem;
+            line-height: 1.7;
+        }
+
+        .demo-login-inline-link {
+            color: #f6d98b;
+            text-decoration: none;
+        }
+
+        .demo-login-inline-note {
+            color: rgba(218, 199, 199, 0.74);
+        }
+
+        .demo-register-panel {
+            margin-top: 18px;
+            padding: 22px 20px;
+            border-radius: 22px;
+            border: 1px solid rgba(229, 193, 88, 0.16);
+            background: rgba(255, 255, 255, 0.035);
+            box-shadow: 0 16px 34px rgba(0, 0, 0, 0.2);
+        }
+
+        .demo-register-panel-head {
+            margin-bottom: 14px;
+        }
+
+        .demo-register-panel-title {
+            margin: 0 0 8px;
+            font-size: 1.1rem;
+            color: #fff4d6;
+        }
+
+        .demo-register-panel-desc {
+            margin: 0;
+            color: rgba(231, 217, 217, 0.82);
+            line-height: 1.8;
+            font-size: 0.84rem;
         }
 
         .demo-login-note {
@@ -300,7 +450,6 @@
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 12px;
-            margin-top: 16px;
         }
 
         .demo-register-link {
@@ -373,25 +522,33 @@
                 border-radius: 24px;
             }
 
-            .demo-login-btn {
-                grid-template-columns: 46px 1fr auto;
-                gap: 12px;
-                padding: 16px 14px;
+            .demo-login-card {
+                padding: 18px 14px 16px;
                 border-radius: 18px;
             }
 
-            .demo-login-btn-icon {
+            .demo-login-card-head {
+                grid-template-columns: 46px 1fr;
+                gap: 12px;
+            }
+
+            .demo-login-card-icon {
                 width: 46px;
                 height: 46px;
                 border-radius: 14px;
+            }
+
+            .demo-login-actions,
+            .demo-register-links {
+                grid-template-columns: 1fr;
             }
 
             .demo-login-note {
                 align-items: flex-start;
             }
 
-            .demo-register-links {
-                grid-template-columns: 1fr;
+            .demo-register-panel {
+                padding: 20px 16px;
             }
         }
     </style>
@@ -400,26 +557,25 @@
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 const guide = document.getElementById('character-guide');
-                const form = document.querySelector('.demo-login-form');
 
                 if (!guide || typeof window.updateCharacterMessage !== 'function') {
                     return;
                 }
 
                 window.forceCharacterGuideVisible = true;
-                window.updateCharacterMessage("オコジョがご案内するよ。\n入りたい立場を選ぶだけで、すぐに試せるよ。");
+                window.updateCharacterMessage("オコジョがご案内するよ。\n役割とアカウントを選んだら、通常ログインかLINEログインを押してね。");
 
                 const releaseGuide = function () {
                     window.forceCharacterGuideVisible = false;
                     guide.classList.add('bubble-hidden');
                 };
 
-                if (form) {
-                    form.addEventListener('pointerdown', releaseGuide, { once: true });
-                    form.addEventListener('submit', function () {
+                document.querySelectorAll('.demo-login-card').forEach(function (card) {
+                    card.addEventListener('pointerdown', releaseGuide, { once: true });
+                    card.addEventListener('submit', function () {
                         window.forceCharacterGuideVisible = false;
                     });
-                }
+                });
             });
         </script>
     @endpush

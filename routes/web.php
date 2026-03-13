@@ -215,6 +215,8 @@ Route::prefix('api/push')->name('push.')->group(function () {
 Route::prefix('cast')->name('cast.')->group(function () {
     Route::get('/login', [CastLogin::class, 'showLoginForm'])->name('login');
     Route::post('/login', [CastLogin::class, 'login'])->name('login.post');
+    Route::get('/register', [RegistrationController::class, 'showCast'])->name('register');
+    Route::post('/register', [RegistrationController::class, 'storeCast'])->name('register.store');
 });
 
 Route::prefix('shop')->name('shop.')->group(function () {
@@ -297,8 +299,6 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
 |--------------------------------------------------------------------------
 */
 Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function () {
-    Route::get('/register', [RegistrationController::class, 'showCast'])->name('register');
-    Route::post('/register', [RegistrationController::class, 'storeCast'])->name('register.store');
     Route::get('/home', [ShopHome::class, 'index'])->name('home');
     Route::get('/profile/edit', [CastProfile::class, 'edit'])->name('profile.edit');
     Route::post('/profile/update', [CastProfile::class, 'update'])->name('profile.update');

@@ -218,47 +218,7 @@ class ProfileController extends Controller
         }
 
         // お店側 → キャストの情報を表示
-        $castId = $id;
-        $images = [];
-        for ($i = 1; $i <= 6; $i++) {
-            $images[] = asset("storage/mock/casts/{$castId}-{$i}.png");
-        }
-        $cast = [
-            'id'             => $castId,
-            'nickname'       => '愛華',
-            'name'           => 'かめわりゆい',
-            'age'            => 24,
-            'birth_year'     => '1994',
-            'birth_month'    => '4',
-            'birth_day'      => '24',
-            'images'         => $images,
-            'img'            => $images[0],
-            'is_applied'     => true,
-            'is_kept'        => true,
-            'like_cnt'       => 12,
-            'pref'           => '東京都',
-            'city'           => '中央区',
-            'height'         => 165,
-            'weight'         => 48,
-            'bust'           => 85,
-            'waist'          => 58,
-            'hip'            => 86,
-            'pr'             => "はじめまして！楽しくお話しするのが大好きです。\nお酒も少し飲めます！よろしくお願いします。",
-            'intro'          => "はじめまして！楽しくお話しするのが大好きです。\nお酒も少し飲めます！よろしくお願いします。",
-            'desired_job'    => '',
-            'my_field'       => '',
-            'my_inner_skills'=> '',
-            'shift_hope'     => '週1回出勤',
-            'work_time'      => 'morning',
-            'work_time_label'=> '朝',
-            'current_job'    => "都内でITコンサルタントに従事しております。\nこちらは副業で勤務したいと考えています。",
-            'night_work_exp' => 'none',
-            'night_work_label' => '無し',
-            'reviews'        => [
-                ['score' => 5, 'text' => '大変礼儀正しく、お酒の作り方も完璧でした。'],
-                ['score' => 4, 'text' => '笑顔が素敵で、お客様からも好評でした。'],
-            ],
-        ];
+        $cast = $this->buildCastDetailData((string) $id);
 
         return view('casts.profile.show', [
             'pageId' => 'cast_detail',
@@ -281,6 +241,183 @@ class ProfileController extends Controller
     private function currentCastId(): string
     {
         return (string) auth()->guard('member')->id();
+    }
+
+    private function buildCastDetailData(string $castId): array
+    {
+        $this->cleanupStaleMainImagePath($castId);
+
+        $row = DB::table('casts')
+            ->leftJoin('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id')
+            ->where('casts.id', $castId)
+            ->select(
+                'casts.id',
+                'cast_profiles.nickname',
+                'cast_profiles.name',
+                'cast_profiles.birthday',
+                'cast_profiles.pref',
+                'cast_profiles.city',
+                'cast_profiles.height',
+                'cast_profiles.weight',
+                'cast_profiles.bust',
+                'cast_profiles.waist',
+                'cast_profiles.hip',
+                'cast_profiles.shift',
+                'cast_profiles.profession',
+                'cast_profiles.exp',
+                'cast_profiles.pr',
+                'cast_profiles.memo'
+            )
+            ->first();
+
+        if (!$row) {
+            return $this->buildFallbackCastDetail($castId);
+        }
+
+        $birthday = $row->birthday ? Carbon::parse($row->birthday) : null;
+        $memo = $this->decodeProfileMemo($row->memo ?? null);
+        $nightWorkExp = $memo['night_work_exp'] ?? ((int) ($row->exp ?? 0) === 1 ? 'yes' : 'none');
+
+        $images = DB::table('cast_images')
+            ->where('cast_id', $castId)
+            ->where('type', 1)
+            ->orderByRaw('is_main DESC')
+            ->orderByRaw('main_order IS NULL')
+            ->orderBy('main_order')
+            ->orderBy('id')
+            ->pluck('image_path')
+            ->map(fn ($path) => $this->assetPathForStored($path))
+            ->filter()
+            ->values()
+            ->all();
+
+        if (empty($images)) {
+            $images[] = asset('assets/images/common/no-image.png');
+        }
+
+        $reviewRows = DB::table('reviews')
+            ->leftJoin('review_details', 'reviews.id', '=', 'review_details.review_id')
+            ->where('reviews.cast_id', $castId)
+            ->groupBy('reviews.id', 'reviews.contents', 'reviews.created_at')
+            ->select(
+                'reviews.id',
+                'reviews.contents',
+                DB::raw('AVG(review_details.score) as avg_score')
+            )
+            ->get();
+
+        $reviews = [];
+        foreach ($reviewRows as $review) {
+            $reviews[] = [
+                'score' => $review->avg_score !== null ? (float) $review->avg_score : 0.0,
+                'text' => $review->contents ?? '',
+            ];
+        }
+
+        return [
+            'id' => $castId,
+            'nickname' => $row->nickname ?? '',
+            'name' => $row->name ?? '',
+            'age' => $birthday ? $birthday->age : null,
+            'birth_year' => $birthday ? (string) $birthday->year : null,
+            'birth_month' => $birthday ? (string) $birthday->month : null,
+            'birth_day' => $birthday ? (string) $birthday->day : null,
+            'images' => $images,
+            'img' => $images[0] ?? asset('assets/images/common/no-image.png'),
+            'is_applied' => true,
+            'is_kept' => true,
+            'like_cnt' => 0,
+            'pref' => $row->pref ?? '',
+            'city' => $row->city ?? '',
+            'height' => $row->height,
+            'weight' => $row->weight,
+            'bust' => $row->bust,
+            'waist' => $row->waist,
+            'hip' => $row->hip,
+            'pr' => $row->pr ?? '',
+            'intro' => $row->pr ?? '',
+            'desired_job' => $memo['desired_job'] ?? '',
+            'my_field' => $memo['my_field'] ?? '',
+            'my_inner_skills' => $memo['my_inner_skills'] ?? '',
+            'shift_hope' => $memo['shift_hope'] ?? $this->shiftHopeLabel($row->shift),
+            'work_time' => $memo['work_time'] ?? '',
+            'work_time_label' => $this->workTimeLabel($memo['work_time'] ?? ''),
+            'current_job' => $memo['current_job'] ?? ($row->profession ?? ''),
+            'night_work_exp' => $nightWorkExp,
+            'night_work_label' => $nightWorkExp === 'yes' ? '有り' : '無し',
+            'reviews' => $reviews,
+        ];
+    }
+
+    private function buildFallbackCastDetail(string $castId): array
+    {
+        $images = [asset('assets/images/common/no-image.png')];
+
+        return [
+            'id' => $castId,
+            'nickname' => 'ゲスト',
+            'name' => '',
+            'age' => null,
+            'birth_year' => null,
+            'birth_month' => null,
+            'birth_day' => null,
+            'images' => $images,
+            'img' => $images[0],
+            'is_applied' => false,
+            'is_kept' => false,
+            'like_cnt' => 0,
+            'pref' => '',
+            'city' => '',
+            'height' => null,
+            'weight' => null,
+            'bust' => null,
+            'waist' => null,
+            'hip' => null,
+            'pr' => '',
+            'intro' => '',
+            'desired_job' => '',
+            'my_field' => '',
+            'my_inner_skills' => '',
+            'shift_hope' => '',
+            'work_time' => '',
+            'work_time_label' => '',
+            'current_job' => '',
+            'night_work_exp' => 'none',
+            'night_work_label' => '無し',
+            'reviews' => [],
+        ];
+    }
+
+    private function cleanupStaleMainImagePath(string $castId): void
+    {
+        $hasImages = DB::table('cast_images')
+            ->where('cast_id', $castId)
+            ->where('type', 1)
+            ->exists();
+
+        if (!$hasImages) {
+            DB::table('cast_profiles')
+                ->where('cast_id', $castId)
+                ->whereNotNull('main_image_path')
+                ->update([
+                    'main_image_path' => null,
+                    'updated_at' => now(),
+                ]);
+        }
+    }
+
+    private function assetPathForStored(?string $path): string
+    {
+        if (empty($path)) {
+            return asset('assets/images/common/no-image.png');
+        }
+        if (str_starts_with($path, 'uploads/')) {
+            return asset($path);
+        }
+        if (str_starts_with($path, 'public/')) {
+            return asset('storage/' . substr($path, 7));
+        }
+        return asset(ltrim($path, '/'));
     }
 
     private function decodeProfileMemo(?string $memo): array
@@ -311,6 +448,15 @@ class ProfileController extends Controller
             '週2回出勤' => 2,
             '週3回以上' => 3,
             default => null,
+        };
+    }
+
+    private function workTimeLabel(string $workTime): string
+    {
+        return match ($workTime) {
+            'morning' => '朝',
+            'day_night' => '昼or夜',
+            default => '',
         };
     }
 }
