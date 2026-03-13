@@ -3,11 +3,26 @@
 @section('title', 'マスタ設定管理')
 
 @section('content')
+    @php
+        $catalogGroups = $catalogs->groupBy('group');
+        $editingRecord = $selectedCatalog['editing_record'] ?? null;
+        $sortLabels = [
+            'created_desc' => '登録日順',
+            'name_asc' => 'あいうえお順',
+        ];
+        $hasDirectory = $selectedCatalog
+            ? collect($selectedCatalog['fields'])->contains(fn ($field) => $field['input'] === 'directory')
+            : false;
+        $hasActive = $selectedCatalog
+            ? (!empty($selectedCatalog['uses_del_flg']) || !empty($selectedCatalog['uses_is_active']))
+            : false;
+        $columnCount = 3 + ($hasDirectory ? 1 : 0) + ($hasActive ? 1 : 0);
+    @endphp
     <div class="admin-page">
-        <h1 class="admin-title">マスタメンテナンス</h1>
+        <h1 class="admin-title">マスタコントロール</h1>
         <p class="admin-description">
-            手動で準備した新マスタテーブルを一覧・追加する画面です。<br>
-            キャストプロフィール用、店舗・求人用、コラム用のマスタをまとめて管理できます。
+            追加・編集したいマスタを選んで、対象ごとに管理する画面です。<br>
+            すべてのマスタを同じ操作レイアウトで扱い、検索・並び替え・追加・編集を1つの導線で行えるようにしています。
         </p>
 
         @if (session('status'))
@@ -41,116 +56,183 @@
             </div>
         </div>
 
-        <div class="admin-grid">
-            @foreach($catalogs as $catalog)
-                @php
-                    $hasDirectory = $catalog['records']->contains(fn($row) => isset($row->directory));
-                    $hasActive = $catalog['records']->contains(fn($row) => isset($row->is_active));
-                    $columnCount = 3 + ($hasDirectory ? 1 : 0) + ($hasActive ? 1 : 0);
-                @endphp
-                <section class="admin-card admin-card-wide">
-                    <div class="admin-card-head">
-                        <div>
-                            <h2>{{ $catalog['title'] }}</h2>
-                            <p>{{ $catalog['description'] }}</p>
-                        </div>
-                        <span class="admin-card-count">{{ $catalog['count'] }}件</span>
-                    </div>
+        <section class="admin-card admin-card-wide">
+            <div class="admin-card-head">
+                <div>
+                    <h2>マスタを選択</h2>
+                    <p>編集したいマスタを選ぶと、この下に追加フォームと一覧が表示されます。</p>
+                </div>
+                <a href="{{ route('admin.ngwords.index') }}" class="admin-master-link">NGワード管理へ</a>
+            </div>
 
-                    <form method="POST" action="{{ route('admin.masters.catalogs.store', $catalog['key']) }}" class="admin-master-form">
-                        @csrf
-                        <div class="admin-master-form-grid">
-                            @foreach($catalog['fields'] as $field)
-                                <label class="admin-master-field">
-                                    <span>{{ $field['label'] }}</span>
-                                    <input
-                                        type="text"
-                                        name="{{ $field['input'] }}"
-                                        value="{{ old($field['input']) }}"
-                                        placeholder="{{ $field['placeholder'] ?? '' }}"
-                                    >
-                                </label>
+            <div class="admin-catalog-groups">
+                @foreach ($catalogGroups as $group => $items)
+                    <section class="admin-catalog-group">
+                        <h3>{{ $group }}</h3>
+                        <div class="admin-catalog-grid">
+                            @foreach ($items as $catalog)
+                                <a
+                                    href="{{ route('admin.masters.index', ['catalog' => $catalog['key']]) }}"
+                                    class="admin-catalog-card {{ ($selectedCatalog['key'] ?? null) === $catalog['key'] ? 'is-active' : '' }}"
+                                >
+                                    <div class="admin-catalog-card-head">
+                                        <strong>{{ $catalog['title'] }}</strong>
+                                        <span>{{ $catalog['count'] }}件</span>
+                                    </div>
+                                    <p>{{ $catalog['description'] }}</p>
+                                </a>
                             @endforeach
-                            <button type="submit" class="admin-master-submit">{{ $catalog['title'] }}を追加</button>
                         </div>
-                    </form>
+                    </section>
+                @endforeach
+            </div>
+        </section>
 
-                    <div class="table-wrapper">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>名称</th>
-                                    @if($hasDirectory)
-                                        <th>ディレクトリ</th>
-                                    @endif
-                                    @if($hasActive)
-                                        <th>状態</th>
-                                    @endif
-                                    <th>登録日</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($catalog['records'] as $item)
-                                    <tr>
-                                        <td>{{ $item->id }}</td>
-                                        <td>{{ $item->name }}</td>
-                                        @if($hasDirectory)
-                                            <td>{{ $item->directory ?? '-' }}</td>
-                                        @endif
-                                        @if($hasActive)
-                                            <td>{{ ($item->is_active ?? 1) ? '有効' : '無効' }}</td>
-                                        @endif
-                                        <td>{{ $item->created_at ? \Illuminate\Support\Carbon::parse($item->created_at)->format('Y-m-d') : '-' }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="{{ $columnCount }}" class="text-center">まだ登録されていません。</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-            @endforeach
-
+        @if ($selectedCatalog)
             <section class="admin-card admin-card-wide">
                 <div class="admin-card-head">
                     <div>
-                        <h2>NGワード一覧</h2>
-                        <p>禁止ワードテーブルの内容を確認します。</p>
+                        <h2>{{ $selectedCatalog['title'] }}</h2>
+                        <p>{{ $selectedCatalog['description'] }}</p>
                     </div>
-                    <a href="{{ route('admin.ngwords.index') }}" class="admin-master-link">NGワード管理へ</a>
+                    <span class="admin-card-count">{{ $selectedCatalog['count'] }}件</span>
                 </div>
 
-                <div class="table-wrapper">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>ワード</th>
-                                <th>状態</th>
-                                <th>登録日</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($ngWords as $word)
-                                <tr>
-                                    <td>{{ $word->id }}</td>
-                                    <td>{{ $word->word }}</td>
-                                    <td>{{ $word->is_active ? '有効' : '無効' }}</td>
-                                    <td>{{ $word->created_at ? \Illuminate\Support\Carbon::parse($word->created_at)->format('Y-m-d') : '-' }}</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="text-center">NGワードマスタはまだ登録されていません。</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                <div class="admin-master-layout">
+                    <div class="admin-master-forms">
+                        <form method="POST" action="{{ route('admin.masters.catalogs.store', $selectedCatalog['key']) }}" class="admin-master-form">
+                            @csrf
+                            <input type="hidden" name="current_sort" value="{{ $selectedSort }}">
+                            <div class="admin-master-form-header">
+                                <h3>新規追加</h3>
+                                <p>{{ $selectedCatalog['title'] }}に新しい項目を追加します。</p>
+                            </div>
+                            <div class="admin-master-form-grid">
+                                @foreach ($selectedCatalog['fields'] as $field)
+                                    <label class="admin-master-field">
+                                        <span>{{ $field['label'] }}</span>
+                                        <input
+                                            type="text"
+                                            name="{{ $field['input'] }}"
+                                            value="{{ old($field['input']) }}"
+                                            placeholder="{{ $field['placeholder'] ?? '' }}"
+                                        >
+                                    </label>
+                                @endforeach
+                                <button type="submit" class="admin-master-submit">{{ $selectedCatalog['title'] }}を追加</button>
+                            </div>
+                        </form>
+
+                        @if ($editingRecord)
+                            <form method="POST" action="{{ route('admin.masters.catalogs.update', [$selectedCatalog['key'], $editingRecord->id]) }}" class="admin-master-form admin-master-form-edit">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="current_sort" value="{{ $selectedSort }}">
+                                <div class="admin-master-form-header">
+                                    <div>
+                                        <h3>選択中の項目を編集</h3>
+                                        <p>必要な内容を変更して保存してください。</p>
+                                    </div>
+                                    <a href="{{ route('admin.masters.index', ['catalog' => $selectedCatalog['key'], 'sort' => $selectedSort]) }}" class="admin-master-cancel">編集をやめる</a>
+                                </div>
+                                <div class="admin-master-form-grid">
+                                    @foreach ($selectedCatalog['fields'] as $field)
+                                        <label class="admin-master-field">
+                                            <span>{{ $field['label'] }}</span>
+                                            <input
+                                                type="text"
+                                                name="{{ $field['input'] }}"
+                                                value="{{ old($field['input'], $editingRecord->{$field['column']} ?? '') }}"
+                                                placeholder="{{ $field['placeholder'] ?? '' }}"
+                                            >
+                                        </label>
+                                    @endforeach
+                                    <button type="submit" class="admin-master-submit">変更を保存</button>
+                                </div>
+                            </form>
+                        @endif
+                    </div>
+
+                    <div class="admin-master-records">
+                        <div class="admin-records-head">
+                            <div>
+                                <div class="admin-records-title">登録済み一覧</div>
+                                <div class="admin-records-copy">IDは表示せず、運用で見たい情報だけを整理しています。</div>
+                            </div>
+                            <div class="admin-records-toolbar">
+                                <label class="admin-search-box">
+                                    <i class="fas fa-magnifying-glass"></i>
+                                    <input
+                                        type="text"
+                                        id="master-record-search"
+                                        placeholder="{{ $selectedCatalog['title'] }}を検索"
+                                        autocomplete="off"
+                                    >
+                                </label>
+                                <div class="admin-sort-switch" role="group" aria-label="一覧の並び順">
+                                    @foreach ($sortLabels as $sortValue => $sortLabel)
+                                        <a
+                                            href="{{ route('admin.masters.index', ['catalog' => $selectedCatalog['key'], 'sort' => $sortValue]) }}"
+                                            class="admin-sort-link {{ $selectedSort === $sortValue ? 'is-active' : '' }}"
+                                        >
+                                            {{ $sortLabel }}
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-wrapper">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>名称</th>
+                                        @if ($hasDirectory)
+                                            <th>ディレクトリ</th>
+                                        @endif
+                                        @if ($hasActive)
+                                            <th>状態</th>
+                                        @endif
+                                        <th>登録日</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="master-records-body">
+                                    @forelse ($selectedCatalog['records'] as $item)
+                                        <tr class="master-record-row" data-search="{{ strtolower(trim($item->name . ' ' . ($item->directory ?? '') . ' ' . (($item->is_active ?? 1) ? '有効' : '無効') . ' ' . ($item->created_at ? \Illuminate\Support\Carbon::parse($item->created_at)->format('Y-m-d') : ''))) }}">
+                                            <td data-label="名称">{{ $item->name }}</td>
+                                            @if ($hasDirectory)
+                                                <td data-label="ディレクトリ">{{ $item->directory ?? '-' }}</td>
+                                            @endif
+                                            @if ($hasActive)
+                                                <td data-label="状態">{{ ($item->is_active ?? 1) ? '有効' : '無効' }}</td>
+                                            @endif
+                                            <td data-label="登録日">{{ $item->created_at ? \Illuminate\Support\Carbon::parse($item->created_at)->format('Y-m-d') : '-' }}</td>
+                                            <td data-label="操作">
+                                                <a
+                                                    href="{{ route('admin.masters.index', ['catalog' => $selectedCatalog['key'], 'edit' => $item->id, 'sort' => $selectedSort]) }}"
+                                                    class="admin-row-edit {{ $editingRecord && $editingRecord->id === $item->id ? 'is-active' : '' }}"
+                                                >
+                                                    編集
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr id="master-records-empty">
+                                            <td colspan="{{ $columnCount }}" class="text-center">まだ登録されていません。</td>
+                                        </tr>
+                                    @endforelse
+                                    @if ($selectedCatalog['records']->isNotEmpty())
+                                        <tr id="master-records-no-result" hidden>
+                                            <td colspan="{{ $columnCount }}" class="text-center">検索条件に一致する項目がありません。</td>
+                                        </tr>
+                                    @endif
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </section>
-        </div>
+        @endif
     </div>
 
     <style>
@@ -235,6 +317,73 @@
             white-space: nowrap;
         }
 
+        .admin-catalog-groups {
+            display: grid;
+            gap: 18px;
+        }
+
+        .admin-catalog-group h3 {
+            margin: 0 0 10px;
+            font-size: 0.88rem;
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        .admin-catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .admin-catalog-card {
+            display: block;
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.02);
+            text-decoration: none;
+            transition: border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
+        }
+
+        .admin-catalog-card:hover,
+        .admin-catalog-card.is-active {
+            transform: translateY(-1px);
+            border-color: rgba(230, 208, 128, 0.3);
+            background: rgba(230, 208, 128, 0.06);
+        }
+
+        .admin-catalog-card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .admin-catalog-card-head strong {
+            font-size: 0.9rem;
+            color: #fff;
+        }
+
+        .admin-catalog-card-head span {
+            display: inline-flex;
+            align-items: center;
+            min-height: 26px;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 0.72rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .admin-catalog-card p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.68);
+            line-height: 1.6;
+            font-size: 0.8rem;
+        }
+
         .admin-alert {
             margin-bottom: 18px;
             padding: 12px 14px;
@@ -254,17 +403,56 @@
         }
 
         .admin-master-form {
-            margin-bottom: 16px;
             padding: 16px;
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 18px;
             background: rgba(255, 255, 255, 0.025);
         }
 
+        .admin-master-layout {
+            display: grid;
+            grid-template-columns: minmax(300px, 420px) minmax(0, 1fr);
+            gap: 18px;
+        }
+
+        .admin-master-forms {
+            display: grid;
+            gap: 16px;
+            align-content: start;
+        }
+
+        .admin-master-form-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .admin-master-form-header h3 {
+            margin: 0 0 4px;
+            font-size: 0.95rem;
+        }
+
+        .admin-master-form-header p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.64);
+            font-size: 0.8rem;
+            line-height: 1.6;
+        }
+
+        .admin-master-cancel {
+            color: #f6d98b;
+            text-decoration: none;
+            white-space: nowrap;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
         .admin-master-form-grid {
             display: grid;
             gap: 12px;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: 1fr;
             align-items: end;
         }
 
@@ -301,9 +489,130 @@
             white-space: nowrap;
         }
 
+        .admin-master-records {
+            min-width: 0;
+        }
+
+        .admin-records-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .admin-records-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.86);
+        }
+
+        .admin-records-copy {
+            margin-top: 4px;
+            font-size: 0.76rem;
+            color: rgba(255, 255, 255, 0.58);
+        }
+
+        .admin-records-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .admin-search-box {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            min-width: 240px;
+        }
+
+        .admin-search-box i {
+            position: absolute;
+            left: 12px;
+            color: rgba(255, 255, 255, 0.42);
+            font-size: 0.78rem;
+        }
+
+        .admin-search-box input {
+            width: 100%;
+            min-height: 38px;
+            padding: 0 12px 0 34px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+            font-size: 0.8rem;
+            outline: none;
+        }
+
+        .admin-search-box input:focus {
+            border-color: rgba(230, 208, 128, 0.32);
+            box-shadow: 0 0 0 3px rgba(230, 208, 128, 0.06);
+        }
+
+        .admin-sort-switch {
+            display: inline-flex;
+            gap: 4px;
+            padding: 4px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .admin-sort-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 32px;
+            padding: 0 12px;
+            border-radius: 999px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 0.76rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .admin-sort-link.is-active {
+            background: #f3f4f6;
+            color: #111827;
+        }
+
+        .admin-row-edit {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 34px;
+            padding: 0 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(230, 208, 128, 0.22);
+            background: rgba(230, 208, 128, 0.08);
+            color: #f6d98b;
+            text-decoration: none;
+            font-size: 0.76rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .admin-row-edit.is-active {
+            background: linear-gradient(135deg, #f4df9c, #c99722);
+            color: #2a1208;
+            border-color: transparent;
+        }
+
+        .master-record-row.is-hidden {
+            display: none;
+        }
+
         @media (max-width: 960px) {
             .admin-summary-grid {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .admin-master-layout {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -316,7 +625,112 @@
                 flex-direction: column;
                 align-items: flex-start;
             }
+
+            .admin-master-form-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .admin-records-head {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .admin-records-toolbar {
+                justify-content: stretch;
+            }
+
+            .admin-search-box {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .admin-sort-switch {
+                width: 100%;
+            }
+
+            .admin-sort-link {
+                flex: 1 1 0;
+            }
+
+            .admin-catalog-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-table thead {
+                display: none;
+            }
+
+            .admin-table tbody {
+                display: block;
+            }
+
+            .admin-table tbody tr {
+                display: block;
+                margin-bottom: 12px;
+                border-top: 1px solid rgba(255, 255, 255, 0.06);
+            }
+
+            .admin-table tbody td {
+                display: grid;
+                grid-template-columns: 84px minmax(0, 1fr);
+                gap: 8px;
+                white-space: normal;
+            }
+
+            .admin-table tbody td::before {
+                content: attr(data-label);
+                color: rgba(255, 255, 255, 0.52);
+                font-size: 0.7rem;
+                font-weight: 700;
+            }
+
+            .admin-table tbody td.text-center {
+                display: block;
+            }
+
+            .admin-table tbody td.text-center::before {
+                content: none;
+            }
         }
     </style>
 @endsection
+
+@push('admin-scripts')
+<script>
+    (function () {
+        var searchInput = document.getElementById('master-record-search');
+        var rows = document.querySelectorAll('.master-record-row');
+        var noResultRow = document.getElementById('master-records-no-result');
+
+        if (!searchInput || !rows.length) {
+            return;
+        }
+
+        function normalize(value) {
+            return (value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+        }
+
+        function applySearch() {
+            var keyword = normalize(searchInput.value);
+            var visibleCount = 0;
+
+            rows.forEach(function (row) {
+                var haystack = normalize(row.getAttribute('data-search'));
+                var matched = keyword === '' || haystack.indexOf(keyword) !== -1;
+                row.classList.toggle('is-hidden', !matched);
+                if (matched) {
+                    visibleCount += 1;
+                }
+            });
+
+            if (noResultRow) {
+                noResultRow.hidden = visibleCount !== 0;
+            }
+        }
+
+        searchInput.addEventListener('input', applySearch);
+    })();
+</script>
+@endpush
 

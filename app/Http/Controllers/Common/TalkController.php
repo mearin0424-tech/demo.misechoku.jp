@@ -255,7 +255,7 @@ class TalkController extends Controller
 
         return $rows
             ->groupBy($partnerColumn)
-            ->map(function ($messages, $partnerId) use ($isCastPortal, $mySenderType) {
+            ->map(function ($messages, $partnerId) use ($isCastPortal, $mySenderType, $currentId) {
                 $latest = $messages->first();
                 $partner = $this->resolvePartner((string) $partnerId, $isCastPortal);
                 if (!$partner) {

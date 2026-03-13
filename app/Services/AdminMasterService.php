@@ -9,13 +9,13 @@ use Illuminate\Support\Facades\Schema;
 
 class AdminMasterService
 {
-    public function getMasterIndexData(array $sorts = []): array
+    public function getMasterIndexData(?string $selectedCatalogKey = null, ?int $editingRecordId = null, string $selectedSort = 'created_desc'): array
     {
         try {
+            $selectedSort = in_array($selectedSort, ['created_desc', 'name_asc'], true) ? $selectedSort : 'created_desc';
             $catalogs = collect($this->catalogDefinitions())
                 ->map(function (array $catalog) {
-                    $catalog['records'] = $this->fetchCatalogRecords($catalog);
-                    $catalog['count'] = $catalog['records']->count();
+                    $catalog['count'] = $this->countCatalogRecords($catalog);
 
                     return $catalog;
                 });
@@ -33,6 +33,16 @@ class AdminMasterService
                 'tags_facility',
                 'tags_atmosphere',
             ]);
+            $selectedCatalog = $selectedCatalogKey
+                ? $catalogs->firstWhere('key', $selectedCatalogKey)
+                : $catalogs->first();
+
+            if ($selectedCatalog) {
+                $selectedCatalog['records'] = $this->fetchCatalogRecords($selectedCatalog, $selectedSort);
+                $selectedCatalog['editing_record'] = $editingRecordId
+                    ? $selectedCatalog['records']->firstWhere('id', $editingRecordId)
+                    : null;
+            }
 
             return [
                 'summary' => [
@@ -47,6 +57,8 @@ class AdminMasterService
                     'ng_word_count' => $ngWords->count(),
                 ],
                 'catalogs' => $catalogs,
+                'selectedCatalog' => $selectedCatalog,
+                'selectedSort' => $selectedSort,
                 'ngWords' => $ngWords,
                 'error' => null,
             ];
@@ -60,6 +72,8 @@ class AdminMasterService
                     'ng_word_count' => 0,
                 ],
                 'catalogs' => collect(),
+                'selectedCatalog' => null,
+                'selectedSort' => $selectedSort,
                 'ngWords' => collect(),
                 'error' => 'データベースに接続できないため、マスタ設定を読み込めませんでした。',
             ];
@@ -117,6 +131,39 @@ class AdminMasterService
         DB::table($catalog['table'])->insert($payload);
     }
 
+    public function getCatalogRecord(string $key, int $recordId): ?object
+    {
+        $catalog = $this->getCatalogDefinition($key);
+
+        if (!$catalog || !Schema::hasTable($catalog['table'])) {
+            return null;
+        }
+
+        return DB::table($catalog['table'])
+            ->where('id', $recordId)
+            ->first();
+    }
+
+    public function updateCatalogRecord(string $key, int $recordId, array $data): void
+    {
+        $catalog = $this->getCatalogDefinition($key);
+
+        if (!$catalog) {
+            return;
+        }
+
+        $payload = [];
+        foreach ($catalog['fields'] as $field) {
+            $payload[$field['column']] = $data[$field['input']] ?? null;
+        }
+
+        $payload['updated_at'] = now();
+
+        DB::table($catalog['table'])
+            ->where('id', $recordId)
+            ->update($payload);
+    }
+
     public function getCastProfileMasters(): array
     {
         return [
@@ -153,6 +200,7 @@ class AdminMasterService
                 'table' => 'industries',
                 'title' => '業種マスタ',
                 'description' => '店舗・キャストの業種選択で使うマスタです。',
+                'group' => 'プロフィール系',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => '業種名', 'placeholder' => '例: キャバクラ'],
                 ],
@@ -162,6 +210,7 @@ class AdminMasterService
                 'table' => 'review_contents',
                 'title' => 'レビュー設問マスタ',
                 'description' => 'レビュー投稿時に参照する設問です。',
+                'group' => 'レビュー系',
                 'fields' => [
                     ['input' => 'content', 'column' => $this->reviewContentColumn(), 'label' => '設問内容', 'placeholder' => '例: スタッフの対応は親切ですか？'],
                 ],
@@ -174,6 +223,7 @@ class AdminMasterService
                 'table' => 'column_categories',
                 'title' => 'お役立ち情報カテゴリ',
                 'description' => 'コラムのカテゴリです。',
+                'group' => 'コンテンツ系',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'カテゴリ名', 'placeholder' => '例: 面接対策'],
                     ['input' => 'directory', 'column' => 'directory', 'label' => 'ディレクトリ', 'placeholder' => '例: interview'],
@@ -185,6 +235,7 @@ class AdminMasterService
                 'table' => 'column_tags',
                 'title' => 'お役立ち情報タグ',
                 'description' => 'コラムのタグです。',
+                'group' => 'コンテンツ系',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 面接'],
                     ['input' => 'directory', 'column' => 'directory', 'label' => 'ディレクトリ', 'placeholder' => '例: interview'],
@@ -196,6 +247,7 @@ class AdminMasterService
                 'table' => 'tags_cast_looks',
                 'title' => 'キャストタグ: ルックス・属性',
                 'description' => 'キャストプロフィールで使う見た目・属性タグです。',
+                'group' => 'プロフィール系',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: スレンダー'],
                 ],
@@ -205,6 +257,7 @@ class AdminMasterService
                 'table' => 'tags_cast_personality',
                 'title' => 'キャストタグ: 性格・タイプ',
                 'description' => 'キャストプロフィールで使う性格タグです。',
+                'group' => 'プロフィール系',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 明るい'],
                 ],
@@ -214,6 +267,7 @@ class AdminMasterService
                 'table' => 'tags_salary',
                 'title' => '店舗タグ: 給与・待遇',
                 'description' => '求人の給与・待遇タグです。',
+                'group' => '求人系',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 交通費支給'],
                 ],
@@ -223,6 +277,7 @@ class AdminMasterService
                 'table' => 'tags_howto',
                 'title' => '店舗タグ: 働き方',
                 'description' => '求人の働き方タグです。',
+                'group' => '求人系',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 週1からOK'],
                 ],
@@ -232,6 +287,7 @@ class AdminMasterService
                 'table' => 'tags_merit',
                 'title' => '店舗タグ: メリット・待遇',
                 'description' => '求人のメリット・待遇タグです。',
+                'group' => '求人系',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 送り有り'],
                 ],
@@ -241,6 +297,7 @@ class AdminMasterService
                 'table' => 'tags_feature',
                 'title' => '店舗タグ: 店舗特徴',
                 'description' => '求人の店舗特徴タグです。',
+                'group' => '求人系',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 未経験'],
                 ],
@@ -250,6 +307,7 @@ class AdminMasterService
                 'table' => 'tags_facility',
                 'title' => '店舗タグ: 設備',
                 'description' => '求人の設備タグです。',
+                'group' => '求人系',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 駐車場有り'],
                 ],
@@ -259,6 +317,7 @@ class AdminMasterService
                 'table' => 'tags_atmosphere',
                 'title' => '店舗タグ: お店の雰囲気',
                 'description' => '求人のお店の雰囲気タグです。',
+                'group' => '求人系',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: アットホーム'],
                 ],
@@ -266,7 +325,16 @@ class AdminMasterService
         ];
     }
 
-    private function fetchCatalogRecords(array $catalog): Collection
+    private function countCatalogRecords(array $catalog): int
+    {
+        if (!Schema::hasTable($catalog['table'])) {
+            return 0;
+        }
+
+        return (int) DB::table($catalog['table'])->count();
+    }
+
+    private function fetchCatalogRecords(array $catalog, string $sort = 'created_desc'): Collection
     {
         if (!Schema::hasTable($catalog['table'])) {
             return collect();
@@ -286,6 +354,13 @@ class AdminMasterService
             $query->addSelect(DB::raw('CASE WHEN del_flg = 0 THEN 1 ELSE 0 END as is_active'));
         } elseif ($this->hasColumn($catalog['table'], 'is_active')) {
             $query->addSelect('is_active');
+        }
+
+        if ($sort === 'name_asc') {
+            return $query
+                ->orderBy('name')
+                ->orderBy('id')
+                ->get();
         }
 
         return $query
