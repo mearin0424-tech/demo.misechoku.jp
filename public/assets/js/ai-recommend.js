@@ -48,9 +48,35 @@
         var avatar = root.getAttribute('data-avatar') || '';
         var role = root.getAttribute('data-role') || payload.role || 'cast';
         var redirectUrl = 'https://mearin0424-tech.github.io/personality-test/personality-test.html';
-        var type16Codes = [
-            'LATF', 'LATP', 'LASF', 'LASP', 'LETF', 'LETP', 'LESF', 'LESP',
-            'IATF', 'IATP', 'IASF', 'IASP', 'IETF', 'IETP', 'IESF', 'IESP'
+        var type16Dimensions = [
+            {
+                title: '1つ目を選んでね。',
+                options: [
+                    { value: 'L', label: 'L' },
+                    { value: 'I', label: 'I' }
+                ]
+            },
+            {
+                title: '2つ目を選んでね。',
+                options: [
+                    { value: 'A', label: 'A' },
+                    { value: 'E', label: 'E' }
+                ]
+            },
+            {
+                title: '3つ目を選んでね。',
+                options: [
+                    { value: 'T', label: 'T' },
+                    { value: 'S', label: 'S' }
+                ]
+            },
+            {
+                title: '4つ目を選んでね。',
+                options: [
+                    { value: 'F', label: 'F' },
+                    { value: 'P', label: 'P' }
+                ]
+            }
         ];
         var areaGroups = {
             '六本木・西麻布': ['六本木', '西麻布', '麻布'],
@@ -63,7 +89,8 @@
             step: 1,
             answers: {},
             matches: [],
-            matchIndex: 0
+            matchIndex: 0,
+            typeDraft: []
         };
 
         function inferType(item) {
@@ -392,29 +419,92 @@
             }, 1100);
         }
 
+        function getAreaOptions() {
+            return [
+                { value: '六本木・西麻布', label: '六本木・西麻布' },
+                { value: '新宿・歌舞伎町', label: '新宿・歌舞伎町' },
+                { value: '銀座・新橋', label: '銀座・新橋' },
+                { value: '恵比寿・中目黒', label: '恵比寿・中目黒' },
+                { value: 'こだわらない', label: 'こだわらない' }
+            ];
+        }
+
+        function askAreaQuestion() {
+            if (role === 'cast') {
+                addAiMessage('**' + state.answers.type + '** タイプだね。次は**希望のエリア**を教えてね。', getAreaOptions());
+            } else {
+                addAiMessage('**' + state.answers.type + '** タイプ向けの視点で見ていくね。まずは**希望のエリア**を教えて。', getAreaOptions());
+            }
+        }
+
+        function askAreaQuestionWithoutType() {
+            if (role === 'cast') {
+                addAiMessage('OK、そのまま進めよう。**希望のエリア**はどのあたり？', getAreaOptions());
+            } else {
+                addAiMessage('OK、そのまま進めよう。まずは**希望のエリア**を教えて。', getAreaOptions());
+            }
+        }
+
+        function askTypeDimension(index) {
+            var dimension = type16Dimensions[index];
+            if (!dimension) {
+                return;
+            }
+
+            var intro = role === 'cast'
+                ? 'おつかれさま。オコジョガイドだよ。\nあなたに合う**お店**を探すために、いくつか質問させてね。\n\n'
+                : 'おつかれさま。オコジョガイドだよ。\n希望に合う**キャスト**を見つけるために、いくつか質問させてね。\n\n';
+            var draft = state.typeDraft.length ? '\n\nいまの選択: **' + state.typeDraft.join('') + '**' : '';
+            var message = index === 0
+                ? intro + 'まずは**16タイプ接客診断**の結果を、順番に選んでね。\n' + dimension.title
+                : '次は' + dimension.title + draft;
+            var options = dimension.options.slice();
+
+            if (index === 0) {
+                options.push({ value: 'まだやっていない / わからない', label: 'まだやっていない / わからない', wide: true });
+            }
+
+            addAiMessage(message, options);
+        }
+
+        function handleTypeDrillDown(text) {
+            if (typeof state.step !== 'string' || state.step.indexOf('type') !== 0) {
+                return false;
+            }
+
+            if (text.indexOf('まだ') !== -1 || text.indexOf('わからない') !== -1) {
+                state.step = 1.5;
+                addAiMessage(role === 'cast'
+                    ? '16タイプがわかると、より合うお店を選びやすいよ。今すぐ診断してみる？'
+                    : '16タイプがあると、雰囲気に合うキャストを絞りやすいよ。今すぐ診断してみる？', [
+                    { value: 'やってみる (診断サイトへ)', label: 'やってみる (診断サイトへ)' },
+                    { value: '今はやらない', label: '今はやらない' }
+                ]);
+                return true;
+            }
+
+            var currentIndex = parseInt(state.step.replace('type', ''), 10) - 1;
+            if (isNaN(currentIndex) || !type16Dimensions[currentIndex]) {
+                return false;
+            }
+
+            state.typeDraft[currentIndex] = text;
+
+            if (currentIndex < type16Dimensions.length - 1) {
+                state.step = 'type' + String(currentIndex + 2);
+                askTypeDimension(currentIndex + 1);
+                return true;
+            }
+
+            state.answers.type = state.typeDraft.join('');
+            state.typeDraft = [];
+            state.step = 2;
+            askAreaQuestion();
+            return true;
+        }
+
         function nextQuestionCast(text) {
             switch (state.step) {
-                case 1:
-                    if (text.indexOf('まだ') !== -1 || text.indexOf('わからない') !== -1) {
-                        state.step = 1.5;
-                        addAiMessage('16タイプがわかると、より合うお店を選びやすいよ。今すぐ診断してみる？', [
-                            { value: 'やってみる (診断サイトへ)', label: 'やってみる (診断サイトへ)' },
-                            { value: '今はやらない', label: '今はやらない' }
-                        ]);
-                        return;
-                    }
-
-                    state.answers.type = text;
-                    state.step = 2;
-                    addAiMessage('**' + text + '** タイプだね。次は**希望のエリア**を教えてね。', [
-                        { value: '六本木・西麻布', label: '六本木・西麻布' },
-                        { value: '新宿・歌舞伎町', label: '新宿・歌舞伎町' },
-                        { value: '銀座・新橋', label: '銀座・新橋' },
-                        { value: '恵比寿・中目黒', label: '恵比寿・中目黒' },
-                        { value: 'こだわらない', label: 'こだわらない' }
-                    ]);
-                    return;
-
                 case 1.5:
                     if (text.indexOf('やってみる') !== -1) {
                         addAiMessage('診断が終わったら、また戻ってきて教えてね。');
@@ -426,13 +516,7 @@
 
                     state.answers.type = 'unknown';
                     state.step = 2;
-                    addAiMessage('OK、そのまま進めよう。**希望のエリア**はどのあたり？', [
-                        { value: '六本木・西麻布', label: '六本木・西麻布' },
-                        { value: '新宿・歌舞伎町', label: '新宿・歌舞伎町' },
-                        { value: '銀座・新橋', label: '銀座・新橋' },
-                        { value: '恵比寿・中目黒', label: '恵比寿・中目黒' },
-                        { value: 'こだわらない', label: 'こだわらない' }
-                    ]);
+                    askAreaQuestionWithoutType();
                     return;
 
                 case 2:
@@ -491,27 +575,6 @@
 
         function nextQuestionShop(text) {
             switch (state.step) {
-                case 1:
-                    if (text.indexOf('まだ') !== -1 || text.indexOf('わからない') !== -1) {
-                        state.step = 1.5;
-                        addAiMessage('16タイプがあると、雰囲気に合うキャストを絞りやすいよ。今すぐ診断してみる？', [
-                            { value: 'やってみる (診断サイトへ)', label: 'やってみる (診断サイトへ)' },
-                            { value: '今はやらない', label: '今はやらない' }
-                        ]);
-                        return;
-                    }
-
-                    state.answers.type = text;
-                    state.step = 2;
-                    addAiMessage('**' + text + '** タイプ向けの視点で見ていくね。まずは**希望のエリア**を教えて。', [
-                        { value: '六本木・西麻布', label: '六本木・西麻布' },
-                        { value: '新宿・歌舞伎町', label: '新宿・歌舞伎町' },
-                        { value: '銀座・新橋', label: '銀座・新橋' },
-                        { value: '恵比寿・中目黒', label: '恵比寿・中目黒' },
-                        { value: 'こだわらない', label: 'こだわらない' }
-                    ]);
-                    return;
-
                 case 1.5:
                     if (text.indexOf('やってみる') !== -1) {
                         addAiMessage('診断が終わったら、また戻ってきて教えてね。');
@@ -523,13 +586,7 @@
 
                     state.answers.type = 'unknown';
                     state.step = 2;
-                    addAiMessage('OK、そのまま進めよう。まずは**希望のエリア**を教えて。', [
-                        { value: '六本木・西麻布', label: '六本木・西麻布' },
-                        { value: '新宿・歌舞伎町', label: '新宿・歌舞伎町' },
-                        { value: '銀座・新橋', label: '銀座・新橋' },
-                        { value: '恵比寿・中目黒', label: '恵比寿・中目黒' },
-                        { value: 'こだわらない', label: 'こだわらない' }
-                    ]);
+                    askAreaQuestionWithoutType();
                     return;
 
                 case 2:
@@ -587,11 +644,7 @@
         }
 
         function askInitialQuestion() {
-            addAiMessage(role === 'cast'
-                ? 'おつかれさま。オコジョガイドだよ。\nあなたに合う**お店**を探すために、いくつか質問させてね。\n\nまずは**16タイプ接客診断**の結果を教えて。'
-                : 'おつかれさま。オコジョガイドだよ。\n希望に合う**キャスト**を見つけるために、いくつか質問させてね。\n\nまずは**16タイプ接客診断**の結果を教えて。', type16Codes.map(function (code) {
-                return { value: code, label: code };
-            }).concat([{ value: 'まだやっていない / わからない', label: 'まだやっていない / わからない', wide: true }]), 'type_selection');
+            askTypeDimension(0);
         }
 
         function processAnswer(text) {
@@ -618,6 +671,10 @@
                     return;
                 }
 
+                if (handleTypeDrillDown(text)) {
+                    return;
+                }
+
                 if (role === 'cast') {
                     nextQuestionCast(text);
                 } else {
@@ -627,10 +684,11 @@
         }
 
         function init() {
-            state.step = 1;
+            state.step = 'type1';
             state.answers = {};
             state.matches = [];
             state.matchIndex = 0;
+            state.typeDraft = [];
             chatBox.innerHTML = '';
 
             if (!allItems.length) {
