@@ -1,6 +1,9 @@
 @extends('layouts.app')
 
-@section('title', '求人情報')
+@section('title', ($recruit['store_name'] ?? ($shop['name'] ?? '店舗')) . 'の求人情報')
+@section('meta_description', trim((string) (($recruit['catch_copy'] ?? '') ?: ($recruit['message'] ?? 'ミセチョクの求人情報です。'))))
+@section('meta_image', $shop['main_img'] ?? ($recruit['hero_image'] ?? asset('assets/images/common/no-image.png')))
+@section('canonical', $shareUrl ?? url()->current())
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/recruitment.css') }}">
@@ -31,6 +34,15 @@
             </p>
         </div>
     </div>
+
+    @if(!empty($shareUrl))
+        @include('common.share-actions', [
+            'shareUrl' => $shareUrl,
+            'shareTitle' => $shareTitle ?? (($recruit['store_name'] ?? ($shop['name'] ?? '店舗')) . 'の求人情報'),
+            'shareText' => $shareText ?? ($recruit['message'] ?? ''),
+            'shareLabel' => 'この求人票をSNSで共有'
+        ])
+    @endif
 
     {{-- お店のギャラリー（プロフィールと連携） --}}
     @if(!empty($shop ?? null))
