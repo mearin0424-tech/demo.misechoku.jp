@@ -134,6 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const submitBtn = overlay ? overlay.querySelector('.btn-interview-submit') : null;
         const hireBtn = document.getElementById('send-hire-message');
         const rejectBtn = document.getElementById('send-reject-message');
+        const cancelStatusBtn = document.getElementById('send-cancel-status');
 
         const openModal = () => {
             if (!overlay) return;
@@ -202,6 +203,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 } catch (error) {
                     window.alert(error.message || '不採用メッセージの送信に失敗しました。');
                     rejectBtn.disabled = false;
+                }
+            });
+        }
+
+        if (cancelStatusBtn) {
+            cancelStatusBtn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                if (!window.confirm('現在の面談ステータスをキャンセルして、やり取り中に戻しますか？')) {
+                    return;
+                }
+                cancelStatusBtn.disabled = true;
+                try {
+                    await postJson(actionUrl, token, { partner_id: partnerId, action_type: 'cancel_status' });
+                    window.location.reload();
+                } catch (error) {
+                    window.alert(error.message || 'ステータスのキャンセルに失敗しました。');
+                    cancelStatusBtn.disabled = false;
                 }
             });
         }

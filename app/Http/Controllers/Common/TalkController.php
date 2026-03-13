@@ -15,6 +15,11 @@ class TalkController extends Controller
     private const MESSAGE_TYPE_INTERVIEW_CONFIRMED = 3;
     private const MESSAGE_TYPE_HIRED = 4;
     private const MESSAGE_TYPE_REJECTED = 5;
+    private const APPLICATION_STATUS_CHATTING = 1;
+    private const APPLICATION_STATUS_INTERVIEW_PENDING = 2;
+    private const APPLICATION_STATUS_INTERVIEW_FIXED = 3;
+    private const APPLICATION_STATUS_HIRED = 4;
+    private const APPLICATION_STATUS_REJECTED = 5;
 
     /**
      * メッセージ一覧
@@ -55,6 +60,7 @@ class TalkController extends Controller
         $castId = $isCastPortal ? $currentId : $partnerId;
         $shopId = $isCastPortal ? $partnerId : $currentId;
         $blockState = $this->getBlockState($castId, $shopId, $isCastPortal);
+        $currentApplicationStatus = $this->getCurrentApplicationStatus($castId, $shopId);
 
         $rawMessages = DB::table('messages')
             ->where($isCastPortal ? 'cast_id' : 'shop_id', $currentId)
@@ -83,9 +89,23 @@ class TalkController extends Controller
             'blockUrl' => $isCastPortal ? route('cast.talk.block') : route('shop.talk.block'),
             'blockState' => $blockState,
             'canSend' => !$blockState['is_blocked'],
+            'currentStatusCode' => $this->applicationStatusCode($currentApplicationStatus),
+            'currentStatusLabel' => $this->statusLabel($this->applicationStatusCode($currentApplicationStatus)),
+            'canOfferInterview' => !$isCastPortal
+                && !$blockState['is_blocked']
+                && $currentApplicationStatus === self::APPLICATION_STATUS_CHATTING,
+            'canConfirmInterview' => $isCastPortal
+                && !$blockState['is_blocked']
+                && $currentApplicationStatus === self::APPLICATION_STATUS_INTERVIEW_PENDING,
             'canSelectResult' => !$isCastPortal
                 && !$blockState['is_blocked']
-                && $this->canSelectRecruitmentResult($rawMessages),
+                && $currentApplicationStatus === self::APPLICATION_STATUS_INTERVIEW_FIXED,
+            'canCancelStatus' => !$isCastPortal
+                && !$blockState['is_blocked']
+                && in_array($currentApplicationStatus, [
+                    self::APPLICATION_STATUS_INTERVIEW_PENDING,
+                    self::APPLICATION_STATUS_INTERVIEW_FIXED,
+                ], true),
         ]);
     }
 
@@ -132,7 +152,7 @@ class TalkController extends Controller
         $isCastPortal = request()->is('cast/*');
         $request->validate([
             'partner_id' => ['required', 'string'],
-            'action_type' => ['required', 'string', 'in:interview_offer,interview_confirm,hired,rejected'],
+            'action_type' => ['required', 'string', 'in:interview_offer,interview_confirm,hired,rejected,cancel_status'],
             'options' => ['nullable', 'array'],
             'options.*' => ['nullable', 'string'],
             'offer_token' => ['nullable', 'string'],
@@ -146,11 +166,42 @@ class TalkController extends Controller
         $actionType = $request->input('action_type');
         abort_if($isCastPortal && $actionType !== 'interview_confirm', 403);
         abort_if(!$isCastPortal && $actionType === 'interview_confirm', 403);
+        $castId = $isCastPortal ? $this->currentCastId() : $partnerId;
+        $shopId = $isCastPortal ? $partnerId : $this->currentShopId();
+        $currentApplicationStatus = $this->getCurrentApplicationStatus($castId, $shopId);
+
+        if ($actionType === 'interview_offer') {
+            abort_if(
+                $currentApplicationStatus !== self::APPLICATION_STATUS_CHATTING,
+                422,
+                '面談候補日は「やり取り中」のときのみ送信できます。再設定する場合は先にキャンセルしてください。'
+            );
+        }
+
+        if ($actionType === 'interview_confirm') {
+            abort_if(
+                $currentApplicationStatus !== self::APPLICATION_STATUS_INTERVIEW_PENDING,
+                422,
+                '面談日は「面談日調整中」の候補に対してのみ確定できます。'
+            );
+        }
+
         if (in_array($actionType, ['hired', 'rejected'], true)) {
             abort_if(
-                !$this->canSelectRecruitmentResult($this->conversationMessages($partnerId, $isCastPortal)),
+                $currentApplicationStatus !== self::APPLICATION_STATUS_INTERVIEW_FIXED,
                 422,
-                '採用／不採用は面談日決定後に選択してください。'
+                '採用／不採用は面談日決定後にのみ選択できます。'
+            );
+        }
+
+        if ($actionType === 'cancel_status') {
+            abort_if(
+                !in_array($currentApplicationStatus, [
+                    self::APPLICATION_STATUS_INTERVIEW_PENDING,
+                    self::APPLICATION_STATUS_INTERVIEW_FIXED,
+                ], true),
+                422,
+                'キャンセルできるのは面談日調整中または面談日決定のステータスのみです。'
             );
         }
 
@@ -180,6 +231,10 @@ class TalkController extends Controller
             'rejected' => [
                 self::MESSAGE_TYPE_REJECTED,
                 'この度はご応募ありがとうございました。慎重に検討させていただいた結果、今回は見送らせていただくこととなりました。またご縁がございましたらよろしくお願いいたします。',
+            ],
+            'cancel_status' => [
+                self::MESSAGE_TYPE_TEXT,
+                '面談ステータスをキャンセルし、やり取り中に戻しました。必要に応じて面談候補日を再設定してください。',
             ],
         };
 
@@ -276,6 +331,11 @@ class TalkController extends Controller
 
                 $latestAt = Carbon::parse($latest->created_at);
                 $statusCode = $this->resolveConversationStatusCode($messages);
+                $applicationStatus = $this->getCurrentApplicationStatus(
+                    $isCastPortal ? $currentId : (string) $partnerId,
+                    $isCastPortal ? (string) $partnerId : $currentId
+                );
+                $statusCode = $this->applicationStatusCode($applicationStatus);
                 $blockState = $this->getBlockState(
                     $isCastPortal ? $currentId : (string) $partnerId,
                     $isCastPortal ? (string) $partnerId : $currentId,
@@ -473,13 +533,6 @@ class TalkController extends Controller
         };
     }
 
-    private function canSelectRecruitmentResult($messages): bool
-    {
-        $latestAction = $this->latestConversationAction($messages);
-
-        return $latestAction && (int) $latestAction->type === self::MESSAGE_TYPE_INTERVIEW_CONFIRMED;
-    }
-
     private function latestConversationAction($messages)
     {
         return $messages
@@ -568,6 +621,24 @@ class TalkController extends Controller
         return (int) ltrim(str_starts_with($shopId, 's') ? substr($shopId, 1) : $shopId, '0');
     }
 
+    private function getCurrentApplicationStatus(string $castId, string $shopId): int
+    {
+        $application = $this->findApplicationForTalk($castId, $shopId);
+
+        return (int) ($application->status ?? self::APPLICATION_STATUS_CHATTING);
+    }
+
+    private function applicationStatusCode(int $status): string
+    {
+        return match ($status) {
+            self::APPLICATION_STATUS_INTERVIEW_PENDING => 'interview_pending',
+            self::APPLICATION_STATUS_INTERVIEW_FIXED => 'interview_fixed',
+            self::APPLICATION_STATUS_HIRED => 'hired',
+            self::APPLICATION_STATUS_REJECTED => 'rejected',
+            default => 'chatting',
+        };
+    }
+
     private function syncApplicationStatusFromTalkAction(string $partnerId, bool $isCastPortal, string $actionType, string $content): void
     {
         $castId = $isCastPortal ? $this->currentCastId() : $partnerId;
@@ -582,16 +653,19 @@ class TalkController extends Controller
         $meta = $content !== '' ? (json_decode($content, true) ?: []) : [];
 
         if ($actionType === 'interview_offer') {
-            $updates['status'] = max(2, (int) $application->status);
+            $updates['status'] = self::APPLICATION_STATUS_INTERVIEW_PENDING;
         } elseif ($actionType === 'interview_confirm') {
-            $updates['status'] = 3;
+            $updates['status'] = self::APPLICATION_STATUS_INTERVIEW_FIXED;
             $updates['result_date'] = !empty($meta['selected_option'])
                 ? Carbon::parse($meta['selected_option'])->toDateString()
                 : $application->result_date;
         } elseif ($actionType === 'hired') {
-            $updates['status'] = 4;
+            $updates['status'] = self::APPLICATION_STATUS_HIRED;
         } elseif ($actionType === 'rejected') {
-            $updates['status'] = 5;
+            $updates['status'] = self::APPLICATION_STATUS_REJECTED;
+        } elseif ($actionType === 'cancel_status') {
+            $updates['status'] = self::APPLICATION_STATUS_CHATTING;
+            $updates['result_date'] = null;
         }
 
         DB::table('shop_job_applications')
@@ -599,15 +673,20 @@ class TalkController extends Controller
             ->update($updates);
     }
 
-    private function resolveOrCreateApplicationForTalk(string $castId, string $shopId): ?object
+    private function findApplicationForTalk(string $castId, string $shopId): ?object
     {
-        $application = DB::table('shop_job_applications')
+        return DB::table('shop_job_applications')
             ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
             ->where('shop_job_applications.cast_id', $castId)
             ->where('shop_jobs.shop_id', $shopId)
             ->orderByDesc('shop_job_applications.id')
             ->select('shop_job_applications.*')
             ->first();
+    }
+
+    private function resolveOrCreateApplicationForTalk(string $castId, string $shopId): ?object
+    {
+        $application = $this->findApplicationForTalk($castId, $shopId);
 
         if ($application) {
             return $application;

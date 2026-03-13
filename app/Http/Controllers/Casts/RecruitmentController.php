@@ -94,6 +94,8 @@ class RecruitmentController extends Controller
             'nearest_station'    => $row->station1,
             'hourly_wage_regular'=> $row->hourly_wage_regular ? (int) $row->hourly_wage_regular : 0,
             'trial_hourly_wage'  => !empty($row->has_trial) ? (int) $row->trial_hourly_wage : null,
+            'noruma_reward'      => $row->noruma_reward ? (int) $row->noruma_reward : 0,
+            'bonus_condition'    => $meta['bonus_condition'] ?? '',
             'salary_text'        => $row->salary ?? '',
             'working_hours'      => Schema::hasColumn('shop_jobs', 'working_hours') ? ($row->working_hours ?? null) : ($meta['working_hours'] ?? null),
             'working_days'       => Schema::hasColumn('shop_jobs', 'working_day') ? ($row->working_day ?? null) : ($meta['working_days'] ?? null),

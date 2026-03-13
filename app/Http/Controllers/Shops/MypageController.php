@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shops;
 
+use App\Rules\KouzaMeig;
 use App\Services\BillingManagementService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -177,6 +178,7 @@ class MypageController extends Controller
             'shopBank'       => $paymentData['bank'],
             'paymentForm'    => $paymentData['payment_form'],
             'currentDeposit' => $currentDeposit,
+            'approvalTarget' => $paymentData['approval_target'],
             'canReportPayment' => $paymentData['can_report_payment'],
         ]);
     }
@@ -186,12 +188,20 @@ class MypageController extends Controller
      */
     public function updateBank(Request $request)
     {
+        $request->merge(
+            $this->billingManagementService->normalizeBankAccountData($request->all())
+        );
+
         $request->validate([
             'bank_name'      => 'required|string|max:100',
             'branch_name'    => 'nullable|string|max:100',
             'account_type'   => 'required|string|max:20',
-            'account_number' => 'required|string|max:30',
-            'account_name'   => 'required|string|max:100',
+            'account_number' => ['required', 'regex:/^\d{7}$/'],
+            'account_name'   => ['required', 'string', 'max:100', new KouzaMeig()],
+        ], [
+            'account_number.required' => '口座番号を入力してください。',
+            'account_number.regex' => '口座番号は7桁の数字で入力してください。',
+            'account_name.required' => '口座名義（カナ）を入力してください。',
         ]);
 
         $this->billingManagementService->saveShopBankAccount($this->currentShopId(), $request->only([
@@ -244,7 +254,10 @@ class MypageController extends Controller
      */
     public function approveDeposit(Request $request)
     {
-        $result = $this->billingManagementService->confirmDepositForShop($this->currentShopId());
+        $result = $this->billingManagementService->confirmDepositForShop(
+            $this->currentShopId(),
+            $request->all()
+        );
 
         return redirect()
             ->route('shop.mypage.payment.index')

@@ -29,9 +29,14 @@ class DepositController extends Controller
     /**
      * 運営側：店舗への請求書発行
      */
-    public function issueInvoice(int $deposit)
+    public function issueInvoice(Request $request, int $deposit)
     {
-        $result = $this->billingManagementService->issueInvoice($deposit);
+        $payload = $request->validate([
+            'confirm_shop_approved' => 'required|accepted',
+            'confirm_admin_bank_ready' => 'required|accepted',
+        ]);
+
+        $result = $this->billingManagementService->issueInvoice($deposit, $payload);
 
         return redirect()
             ->route('admin.deposits.index')
@@ -45,6 +50,9 @@ class DepositController extends Controller
     {
         $payload = $request->validate([
             'confirmed_amount' => 'required|integer|min:1',
+            'confirm_amount_checked' => 'required|accepted',
+            'confirm_report_checked' => 'required|accepted',
+            'confirm_bank_checked' => 'required|accepted',
         ]);
 
         $result = $this->billingManagementService->confirmShopPayment($deposit, $payload);
@@ -63,6 +71,10 @@ class DepositController extends Controller
             'transferred_at' => 'required|date',
             'reference' => 'nullable|string|max:255',
             'note' => 'nullable|string|max:1000',
+            'confirm_transfer_amount' => 'required|accepted',
+            'confirm_account_name' => 'required|accepted',
+            'confirm_transfer_executed' => 'required|accepted',
+            'confirm_receipt_checked' => 'required|accepted',
         ]);
 
         $result = $this->billingManagementService->executeCastTransfer($deposit, $payload);

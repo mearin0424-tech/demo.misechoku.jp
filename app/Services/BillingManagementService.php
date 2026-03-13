@@ -21,6 +21,17 @@ class BillingManagementService
     private const SYSTEM_FEE_RATE = 0.10;
     private const INVOICE_DUE_DAYS = 7;
 
+    public function normalizeBankAccountData(array $data): array
+    {
+        return [
+            'bank_name' => trim((string) ($data['bank_name'] ?? '')),
+            'branch_name' => $this->nullIfEmpty(trim((string) ($data['branch_name'] ?? ''))),
+            'account_type' => trim((string) ($data['account_type'] ?? '')),
+            'account_number' => preg_replace('/\D+/', '', (string) ($data['account_number'] ?? '')) ?? '',
+            'account_name' => $this->normalizeBankAccountName((string) ($data['account_name'] ?? '')),
+        ];
+    }
+
     public function getAdminBankAccount(): ?object
     {
         return DB::table('admin_bank_accounts')
@@ -31,6 +42,8 @@ class BillingManagementService
 
     public function saveAdminBankAccount(array $data): void
     {
+        $data = $this->normalizeBankAccountData($data);
+
         DB::table('admin_bank_accounts')->update(['is_active' => false, 'updated_at' => now()]);
 
         DB::table('admin_bank_accounts')->insert([
@@ -54,6 +67,8 @@ class BillingManagementService
 
     public function saveCastBankAccount(string $castId, array $data): void
     {
+        $data = $this->normalizeBankAccountData($data);
+
         DB::table('bank_accounts')->updateOrInsert(
             ['member_id' => $castId],
             [
@@ -77,6 +92,8 @@ class BillingManagementService
 
     public function saveShopBankAccount(string $shopId, array $data): void
     {
+        $data = $this->normalizeBankAccountData($data);
+
         DB::table('bank_account_shops')->updateOrInsert(
             ['shop_id' => $shopId],
             [
@@ -106,6 +123,28 @@ class BillingManagementService
         ];
     }
 
+    private function normalizeBankAccountName(string $value): string
+    {
+        $value = trim($value);
+        $value = str_replace(["\r", "\n", ' ', '　'], '', $value);
+        $value = mb_convert_kana($value, 'asCV', 'UTF-8');
+        $value = $this->hiraganaToKatakana($value);
+
+        return mb_strtoupper($value, 'UTF-8');
+    }
+
+    private function hiraganaToKatakana(string $value): string
+    {
+        return preg_replace_callback('/[ぁ-ゖ]/u', function (array $matches) {
+            return mb_chr(mb_ord($matches[0], 'UTF-8') + 0x60, 'UTF-8');
+        }, $value) ?? $value;
+    }
+
+    private function nullIfEmpty(string $value): ?string
+    {
+        return $value === '' ? null : $value;
+    }
+
     public function getPendingTasks(): array
     {
         return collect($this->getAllDeposits())
@@ -129,13 +168,31 @@ class BillingManagementService
                     default => null,
                 };
 
+                $deposit['task_actor_label'] = match ($deposit['status_code']) {
+                    self::STATUS_SHOP_APPROVED => '運営',
+                    self::STATUS_SHOP_PAYMENT_REPORTED => '運営',
+                    self::STATUS_SHOP_PAYMENT_CONFIRMED => '運営',
+                    default => 'システム',
+                };
+
+                $deposit['task_summary'] = match ($deposit['status_code']) {
+                    self::STATUS_SHOP_APPROVED => trim((string) ($deposit['bonus_condition'] ?: '店舗承認済みのため、請求書発行へ進めます。')),
+                    self::STATUS_SHOP_PAYMENT_REPORTED => '店舗報告金額: ¥' . number_format((int) ($deposit['shop_payment_reported_amount'] ?? 0))
+                        . ' / 参照: ' . (($deposit['shop_payment_reference'] ?? '') ?: '未入力'),
+                    self::STATUS_SHOP_PAYMENT_CONFIRMED => '振込予定額: ¥' . number_format((int) ($deposit['cast_transfer_amount'] ?? 0))
+                        . ' / キャスト口座: ' . (!empty($deposit['has_cast_bank']) ? '登録済み' : '未登録'),
+                    default => '',
+                };
+
+                $deposit['task_review_summary'] = trim((string) ($deposit['review_comment'] ?? ''));
+
                 return $deposit;
             })
             ->values()
             ->all();
     }
 
-    public function requestDepositForCast(string $castId): array
+    public function requestDepositForCast(string $castId, array $payload = []): array
     {
         if (!$this->getCastBankAccount($castId)) {
             return ['success' => false, 'message' => '入金申請の前に、キャストの振込先口座を登録してください。'];
@@ -156,6 +213,20 @@ class BillingManagementService
             return ['success' => false, 'message' => 'この案件の入金申請はすでに登録済みです。'];
         }
 
+        if (empty($payload['confirm_bonus_condition'])) {
+            return ['success' => false, 'message' => 'ボーナス金達成条件を確認したうえで申請してください。'];
+        }
+
+        $existingReview = $this->findExistingReviewForApplication($application);
+        if (!$existingReview) {
+            $reviewValidation = $this->validateReviewPayload($payload);
+            if (!$reviewValidation['success']) {
+                return $reviewValidation;
+            }
+
+            $this->createReviewForApplication($application, $payload);
+        }
+
         $amounts = $this->calculateAmounts($application);
         $depositId = DB::table('application_deposits')->insertGetId([
             'shop_job_application_id' => $application->id,
@@ -174,12 +245,24 @@ class BillingManagementService
         return ['success' => true, 'message' => '入金申請を受け付けました。店舗・運営の確認をお待ちください。'];
     }
 
-    public function confirmDepositForShop(string $shopId): array
+    public function confirmDepositForShop(string $shopId, array $payload = []): array
     {
         $deposit = $this->findLatestDepositForShop($shopId);
 
         if (!$deposit || (int) $deposit->status !== self::STATUS_CAST_REQUESTED) {
             return ['success' => false, 'message' => '店舗確認待ちの入金申請がありません。'];
+        }
+
+        if (empty($payload['confirm_bonus_condition'])) {
+            return ['success' => false, 'message' => '求人に登録したボーナス達成条件を確認してから承認してください。'];
+        }
+
+        if (empty($payload['confirm_review_checked'])) {
+            return ['success' => false, 'message' => 'キャストのレビュー内容を確認してから承認してください。'];
+        }
+
+        if (!$this->findLatestReviewForCastShop((string) $deposit->cast_id, (string) $deposit->shop_id)) {
+            return ['success' => false, 'message' => 'キャストのレビューが見つかりません。内容を確認してから再度お試しください。'];
         }
 
         DB::table('application_deposits')
@@ -194,7 +277,7 @@ class BillingManagementService
         return ['success' => true, 'message' => 'ノルマ達成・店舗審査を完了しました。運営による請求書発行をお待ちください。'];
     }
 
-    public function issueInvoice(int $depositId): array
+    public function issueInvoice(int $depositId, array $payload = []): array
     {
         $deposit = $this->findDepositById($depositId);
         $adminBank = $this->getAdminBankAccount();
@@ -209,6 +292,10 @@ class BillingManagementService
 
         if (!$adminBank) {
             return ['success' => false, 'message' => '先に運営口座を登録してください。'];
+        }
+
+        if (empty($payload['confirm_shop_approved']) || empty($payload['confirm_admin_bank_ready'])) {
+            return ['success' => false, 'message' => '請求書発行前の確認項目を完了してください。'];
         }
 
         $amounts = $this->calculateAmounts($deposit);
@@ -284,6 +371,14 @@ class BillingManagementService
             return ['success' => false, 'message' => 'この入金報告は現在のステータスでは照合できません。'];
         }
 
+        if (
+            empty($payload['confirm_amount_checked'])
+            || empty($payload['confirm_report_checked'])
+            || empty($payload['confirm_bank_checked'])
+        ) {
+            return ['success' => false, 'message' => '店舗入金照合前の確認項目を完了してください。'];
+        }
+
         $confirmedAmount = (int) $payload['confirmed_amount'];
         $expectedAmount = (int) ($deposit->invoice_amount ?? 0);
         $reportedAmount = (int) ($deposit->shop_payment_reported_amount ?? 0);
@@ -319,6 +414,15 @@ class BillingManagementService
 
         if (!$this->getCastBankAccount((string) $deposit->cast_id)) {
             return ['success' => false, 'message' => 'キャストの口座情報が未登録です。'];
+        }
+
+        if (
+            empty($payload['confirm_transfer_amount'])
+            || empty($payload['confirm_account_name'])
+            || empty($payload['confirm_transfer_executed'])
+            || empty($payload['confirm_receipt_checked'])
+        ) {
+            return ['success' => false, 'message' => 'キャスト振込記録前の確認項目を完了してください。'];
         }
 
         DB::table('application_deposits')
@@ -365,6 +469,9 @@ class BillingManagementService
 
         $current = $deposits->first();
         $bank = $this->normalizeBankAccount($this->getShopBankAccount($shopId));
+        $approvalTarget = ($current && (int) ($current['status_code'] ?? 0) === self::STATUS_CAST_REQUESTED)
+            ? $this->buildShopApprovalTarget($current)
+            : null;
 
         return [
             'current' => $current,
@@ -400,6 +507,7 @@ class BillingManagementService
                 'reported_at' => $current['shop_payment_reported_at_form'] ?? now()->format('Y-m-d\TH:i'),
                 'reference' => $current['shop_payment_reference'] ?? '',
             ],
+            'approval_target' => $approvalTarget,
             'can_report_payment' => $current && in_array($current['status_code'], [
                 self::STATUS_INVOICE_ISSUED,
                 self::STATUS_SHOP_PAYMENT_REPORTED,
@@ -421,6 +529,7 @@ class BillingManagementService
                 ->where('shop_job_application_id', $eligibleApplication->id)
                 ->exists()
             : false;
+        $requestTarget = $eligibleApplication ? $this->buildCastDepositRequestTarget($eligibleApplication) : null;
 
         $requestDisabledReason = null;
         if (!$bank['exists']) {
@@ -449,6 +558,7 @@ class BillingManagementService
             'bank' => $bank,
             'can_request' => $requestDisabledReason === null,
             'request_disabled_reason' => $requestDisabledReason,
+            'request_target' => $requestTarget,
         ];
     }
 
@@ -560,6 +670,7 @@ class BillingManagementService
                 'shop_jobs.shop_id',
                 'shop_jobs.hourly_wage_regular',
                 'shop_jobs.noruma_reward',
+                'shop_jobs.noruma_cond',
                 'shops.email as shop_email',
                 'shop_profiles.shop_name',
                 'shop_profiles.pref as shop_pref',
@@ -601,21 +712,186 @@ class BillingManagementService
     {
         return DB::table('shop_job_applications')
             ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
+            ->join('shops', 'shop_jobs.shop_id', '=', 'shops.id')
+            ->leftJoin('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
             ->where('shop_job_applications.cast_id', $castId)
             ->where('shop_job_applications.status', 4)
             ->orderByDesc('shop_job_applications.id')
             ->select(
                 'shop_job_applications.*',
+                'shop_jobs.shop_id',
                 'shop_jobs.noruma_reward',
-                'shop_jobs.hourly_wage_regular'
+                'shop_jobs.hourly_wage_regular',
+                'shop_jobs.noruma_cond',
+                'shop_profiles.shop_name'
             )
             ->first();
+    }
+
+    private function buildCastDepositRequestTarget(object $application): array
+    {
+        $reviewContents = DB::table('review_contents')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get(['id', 'name'])
+            ->map(fn (object $row) => [
+                'id' => (int) $row->id,
+                'name' => $row->name,
+            ])
+            ->all();
+
+        $meta = $this->decodeJobMeta($application->noruma_cond ?? null);
+        $existingReview = $this->findExistingReviewForApplication($application);
+
+        return [
+            'application_id' => (int) $application->id,
+            'shop_id' => $application->shop_id,
+            'shop_name' => $application->shop_name ?: $application->shop_id,
+            'bonus_amount' => (int) ($application->noruma_reward ?? $application->hourly_wage_regular ?? 0),
+            'bonus_condition' => trim((string) ($meta['bonus_condition'] ?? '')),
+            'review_contents' => $reviewContents,
+            'review_exists' => $existingReview !== null,
+            'review_comment' => $existingReview->contents ?? '',
+            'review_posted_at' => !empty($existingReview->created_at)
+                ? Carbon::parse($existingReview->created_at)->format('Y-m-d H:i')
+                : null,
+        ];
+    }
+
+    private function findExistingReviewForApplication(object $application): ?object
+    {
+        return $this->findLatestReviewForCastShop((string) $application->cast_id, (string) $application->shop_id);
+    }
+
+    private function findLatestReviewForCastShop(string $castId, string $shopId): ?object
+    {
+        return DB::table('reviews')
+            ->where('cast_id', $castId)
+            ->where('shop_id', $shopId)
+            ->orderByDesc('id')
+            ->first();
+    }
+
+    private function buildShopApprovalTarget(array $deposit): array
+    {
+        $review = $this->findLatestReviewForCastShop((string) $deposit['cast_id'], (string) $deposit['shop_id']);
+        $reviewDetails = [];
+
+        if ($review) {
+            $reviewDetails = DB::table('review_details')
+                ->join('review_contents', 'review_details.review_content_id', '=', 'review_contents.id')
+                ->where('review_details.review_id', $review->id)
+                ->orderBy('review_contents.sort_order')
+                ->orderBy('review_contents.id')
+                ->get([
+                    'review_contents.name',
+                    'review_details.score',
+                ])
+                ->map(fn (object $row) => [
+                    'name' => $row->name,
+                    'score' => (float) $row->score,
+                ])
+                ->all();
+        }
+
+        $meta = $this->decodeJobMeta($deposit['noruma_cond'] ?? null);
+
+        return [
+            'application_id' => $deposit['application_id'],
+            'cast_name' => $deposit['cast_name'],
+            'bonus_amount' => (int) ($deposit['bonus_amount'] ?? 0),
+            'bonus_condition' => trim((string) ($meta['bonus_condition'] ?? '')),
+            'requested_at' => $deposit['updated_at_label'] ?? null,
+            'review_comment' => $review->contents ?? '',
+            'review_average' => isset($review->eva) ? (float) $review->eva : null,
+            'review_posted_at' => !empty($review->created_at)
+                ? Carbon::parse($review->created_at)->format('Y-m-d H:i')
+                : null,
+            'review_details' => $reviewDetails,
+        ];
+    }
+
+    private function validateReviewPayload(array $payload): array
+    {
+        $comment = trim((string) ($payload['review_comment'] ?? ''));
+        $requiredContentIds = DB::table('review_contents')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+        $scores = collect($payload['review_scores'] ?? [])
+            ->mapWithKeys(fn ($score, $contentId) => [(int) $contentId => (int) $score])
+            ->filter(fn ($score, $contentId) => $contentId > 0 && $score >= 1 && $score <= 5);
+
+        if ($comment === '') {
+            return ['success' => false, 'message' => '入金申請の前にレビューコメントを入力してください。'];
+        }
+
+        if (empty($requiredContentIds)) {
+            return ['success' => false, 'message' => 'レビュー設問マスタが未設定です。管理者にお問い合わせください。'];
+        }
+
+        foreach ($requiredContentIds as $contentId) {
+            if (!$scores->has($contentId)) {
+                return ['success' => false, 'message' => 'レビュー評価をすべて入力してから申請してください。'];
+            }
+        }
+
+        return ['success' => true];
+    }
+
+    private function createReviewForApplication(object $application, array $payload): void
+    {
+        $scores = collect($payload['review_scores'] ?? [])
+            ->mapWithKeys(fn ($score, $contentId) => [(int) $contentId => (int) $score])
+            ->filter(fn ($score, $contentId) => $contentId > 0 && $score >= 1 && $score <= 5);
+
+        $reviewId = DB::table('reviews')->insertGetId([
+            'cast_id' => $application->cast_id,
+            'shop_id' => $application->shop_id,
+            'contents' => trim((string) ($payload['review_comment'] ?? '')),
+            'eva' => round($scores->avg() ?? 0, 1),
+            'created_at' => now(),
+        ]);
+
+        $detailRows = $scores->map(fn ($score, $contentId) => [
+            'review_id' => $reviewId,
+            'review_content_id' => (int) $contentId,
+            'score' => $score,
+        ])->values()->all();
+
+        if (!empty($detailRows)) {
+            DB::table('review_details')->insert($detailRows);
+        }
     }
 
     private function mapDepositRow(object $row): array
     {
         $amounts = $this->calculateAmounts($row);
         $status = (int) $row->status;
+        $meta = $this->decodeJobMeta($row->noruma_cond ?? null);
+        $review = $this->findLatestReviewForCastShop((string) $row->cast_id, (string) $row->shop_id);
+        $reviewDetails = [];
+
+        if ($review) {
+            $reviewDetails = DB::table('review_details')
+                ->join('review_contents', 'review_details.review_content_id', '=', 'review_contents.id')
+                ->where('review_details.review_id', $review->id)
+                ->orderBy('review_contents.sort_order')
+                ->orderBy('review_contents.id')
+                ->get([
+                    'review_contents.name',
+                    'review_details.score',
+                ])
+                ->map(fn (object $detail) => [
+                    'name' => $detail->name,
+                    'score' => (float) $detail->score,
+                ])
+                ->all();
+        }
 
         return [
             'id' => (int) $row->id,
@@ -650,6 +926,14 @@ class BillingManagementService
             'has_cast_bank' => !empty($row->cast_bank_id),
             'has_shop_bank' => !empty($row->shop_bank_id),
             'updated_at_label' => $this->formatDateTime($row->updated_at),
+            'noruma_cond' => $row->noruma_cond ?? null,
+            'bonus_condition' => trim((string) ($meta['bonus_condition'] ?? '')),
+            'review_comment' => $review->contents ?? '',
+            'review_average' => isset($review->eva) ? (float) $review->eva : null,
+            'review_posted_at' => !empty($review->created_at)
+                ? Carbon::parse($review->created_at)->format('Y-m-d H:i')
+                : null,
+            'review_details' => $reviewDetails,
         ];
     }
 
@@ -763,5 +1047,16 @@ class BillingManagementService
         }
 
         return Carbon::parse($value)->format('Y-m-d H:i');
+    }
+
+    private function decodeJobMeta(?string $raw): array
+    {
+        if (empty($raw)) {
+            return [];
+        }
+
+        $decoded = json_decode($raw, true);
+
+        return is_array($decoded) ? $decoded : [];
     }
 }

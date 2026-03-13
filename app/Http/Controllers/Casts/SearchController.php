@@ -113,6 +113,8 @@ class SearchController extends BaseSearchController
                     'shop_name' => (string) ($row->shop_name ?: 'ショップ'),
                     'pref' => $row->pref ?? '',
                     'city' => $row->city ?? '',
+                    'catch' => (string) ($row->catch ?? ''),
+                    'overview' => (string) ($row->overview ?? ''),
                     'main_img' => $this->getShopImages((string) $row->id)[0] ?? asset('assets/images/common/no-image.png'),
                 ];
             })

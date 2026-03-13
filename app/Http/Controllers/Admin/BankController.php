@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Rules\KouzaMeig;
 use App\Services\BillingManagementService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -34,12 +35,20 @@ class BankController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge(
+            $this->billingManagementService->normalizeBankAccountData($request->all())
+        );
+
         $data = $request->validate([
             'bank_name'      => 'required|string|max:100',
             'branch_name'    => 'nullable|string|max:100',
             'account_type'   => 'required|string|max:20',
-            'account_number' => 'required|string|max:30',
-            'account_name'   => 'required|string|max:100',
+            'account_number' => ['required', 'regex:/^\d{7}$/'],
+            'account_name'   => ['required', 'string', 'max:100', new KouzaMeig()],
+        ], [
+            'account_number.required' => '口座番号を入力してください。',
+            'account_number.regex' => '口座番号は7桁の数字で入力してください。',
+            'account_name.required' => '口座名義（カナ）を入力してください。',
         ]);
 
         $this->billingManagementService->saveAdminBankAccount($data);

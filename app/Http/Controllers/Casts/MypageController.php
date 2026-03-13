@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Casts;
 
+use App\Rules\KouzaMeig;
 use App\Services\BillingManagementService;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
@@ -103,6 +104,7 @@ class MypageController extends Controller
             'currentDeposit' => $paymentData['current'],
             'canRequestDeposit' => $paymentData['can_request'],
             'requestDisabledReason' => $paymentData['request_disabled_reason'],
+            'requestTarget' => $paymentData['request_target'],
         ]);
     }
 
@@ -278,7 +280,10 @@ class MypageController extends Controller
      */
     public function requestDeposit(\Illuminate\Http\Request $request)
     {
-        $result = $this->billingManagementService->requestDepositForCast($this->currentCastId());
+        $result = $this->billingManagementService->requestDepositForCast(
+            $this->currentCastId(),
+            $request->all()
+        );
 
         return redirect()
             ->route('cast.mypage.payment')
@@ -344,12 +349,20 @@ class MypageController extends Controller
      */
     public function updateBank(\Illuminate\Http\Request $request)
     {
+        $request->merge(
+            $this->billingManagementService->normalizeBankAccountData($request->all())
+        );
+
         $request->validate([
             'bank_name'      => 'required|string|max:100',
             'branch_name'    => 'nullable|string|max:100',
             'account_type'   => 'required|string|max:20',
-            'account_number' => 'required|string|max:30',
-            'account_name'   => 'required|string|max:100',
+            'account_number' => ['required', 'regex:/^\d{7}$/'],
+            'account_name'   => ['required', 'string', 'max:100', new KouzaMeig()],
+        ], [
+            'account_number.required' => '口座番号を入力してください。',
+            'account_number.regex' => '口座番号は7桁の数字で入力してください。',
+            'account_name.required' => '口座名義（カナ）を入力してください。',
         ]);
 
         $this->billingManagementService->saveCastBankAccount($this->currentCastId(), $request->only([

@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('header_title', $partnerName . ' 様')
+@section('body-class', 'page-talk page-talk-room')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}">
@@ -31,7 +32,7 @@
         </div>
         @if(empty($blockState['blocked_by_other']))
         <div class="talk-room-header-actions">
-            @if(!$isCast && empty($blockState['is_blocked']))
+            @if(!$isCast && !empty($canOfferInterview))
                 <button type="button" id="open-interview-modal" class="btn-interview">
                     <i class="far fa-calendar-alt"></i>
                     <span>面談日を提案</span>
@@ -73,6 +74,15 @@
                     </div>
                 @endif
                 <div class="message-block">
+                    <div class="message-inline">
+                        @if($msg->is_mine)
+                            <div class="msg-meta">
+                                @if($msg->is_mine)
+                                    <span class="msg-status"><i class="fas fa-check"></i></span>
+                                @endif
+                                <span class="msg-time">{{ $msg->created_at->format('H:i') }}</span>
+                            </div>
+                        @endif
                     @if($msg->type === 2)
                         @php
                             $selectedOption = $msg->selected_option ? \Carbon\Carbon::parse($msg->selected_option) : null;
@@ -93,7 +103,7 @@
                                         $isSelectedOption = $msg->selected_option === $option;
                                     @endphp
                                     <li>
-                                        @if($isCast && !$msg->selected_option && !$msg->is_mine && empty($blockState['is_blocked']))
+                                        @if(!empty($canConfirmInterview) && !$msg->selected_option && !$msg->is_mine && empty($blockState['is_blocked']))
                                             <button
                                                 type="button"
                                                 class="interview-option-btn"
@@ -126,9 +136,14 @@
                                     確定日時: {{ $selectedOption->format('Y年n月j日 H:i') }}
                                 </p>
                             @endif
+                            @if($msg->is_mine)
+                                <span class="message-bubble-tail" aria-hidden="true">
+                                    <svg viewBox="0 0 8 12" fill="currentColor"><path d="M0 0V12C3 12 8 8 8 0H0Z"/></svg>
+                                </span>
+                            @endif
                         </div>
                     @elseif($msg->type === 3)
-                        <div class="message-bubble message-bubble-interview">
+                        <div class="message-bubble message-bubble-interview message-bubble-confirmed">
                             <div class="interview-title">
                                 <i class="far fa-calendar-check"></i>
                                 <span>面談日が確定しました</span>
@@ -136,16 +151,26 @@
                             <p class="interview-confirmed-date">
                                 {{ \Carbon\Carbon::parse($msg->selected_option)->format('Y年n月j日 H:i') }}
                             </p>
+                            @if($msg->is_mine)
+                                <span class="message-bubble-tail" aria-hidden="true">
+                                    <svg viewBox="0 0 8 12" fill="currentColor"><path d="M0 0V12C3 12 8 8 8 0H0Z"/></svg>
+                                </span>
+                            @endif
                         </div>
                     @else
                         <div class="message-bubble">
                             <p class="m-0">{!! nl2br(e(trim($msg->content))) !!}</p>
+                            @if($msg->is_mine)
+                                <span class="message-bubble-tail" aria-hidden="true">
+                                    <svg viewBox="0 0 8 12" fill="currentColor"><path d="M0 0V12C3 12 8 8 8 0H0Z"/></svg>
+                                </span>
+                            @endif
                         </div>
                     @endif
-                    <div class="msg-footer">
-                        <span class="msg-time">{{ $msg->created_at->format('H:i') }}</span>
-                        @if($msg->is_mine)
-                            <span class="msg-status"><i class="fas fa-check"></i></span>
+                        @if(!$msg->is_mine)
+                            <div class="msg-meta">
+                                <span class="msg-time">{{ $msg->created_at->format('H:i') }}</span>
+                            </div>
                         @endif
                     </div>
                 </div>
@@ -158,21 +183,33 @@
         @endforelse
     </div>
 
-    @if(!empty($canSelectResult))
+    @if(!empty($canCancelStatus) || !empty($canSelectResult))
         <div class="talk-result-panel">
             <div class="talk-result-panel-copy">
-                <span class="talk-result-panel-title">面談結果を選択</span>
-                <p>面談日が確定しています。結果をこのトーク内から送信できます。</p>
+                <span class="talk-result-panel-title">現在のステータス: {{ $currentStatusLabel ?? 'やり取り中' }}</span>
+                @if(!empty($canSelectResult))
+                    <p>面談日が決定しています。結果送信、またはキャンセルしてやり取り中に戻せます。</p>
+                @elseif(!empty($canCancelStatus))
+                    <p>このステータスでは同じ操作を重複実行できません。必要な場合はキャンセルしてやり取り中へ戻してください。</p>
+                @endif
             </div>
             <div class="talk-result-panel-actions">
-                <button type="button" id="send-hire-message" class="btn-interview btn-interview-result">
-                    <i class="fas fa-circle-check"></i>
-                    <span>採用</span>
-                </button>
-                <button type="button" id="send-reject-message" class="btn-interview btn-interview-result btn-interview-result--negative">
-                    <i class="fas fa-circle-xmark"></i>
-                    <span>不採用</span>
-                </button>
+                @if(!empty($canCancelStatus))
+                    <button type="button" id="send-cancel-status" class="btn-interview btn-interview-result btn-interview-cancel-state">
+                        <i class="fas fa-rotate-left"></i>
+                        <span>キャンセル</span>
+                    </button>
+                @endif
+                @if(!empty($canSelectResult))
+                    <button type="button" id="send-hire-message" class="btn-interview btn-interview-result">
+                        <i class="fas fa-circle-check"></i>
+                        <span>採用</span>
+                    </button>
+                    <button type="button" id="send-reject-message" class="btn-interview btn-interview-result btn-interview-result--negative">
+                        <i class="fas fa-circle-xmark"></i>
+                        <span>不採用</span>
+                    </button>
+                @endif
             </div>
         </div>
     @endif

@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'TALK')
+@section('body-class', 'page-talk page-talk-list')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}">
@@ -68,7 +69,15 @@
                         <div class="request-main">
                             <img src="{{ $talk['avatar'] }}" class="request-img">
                             <div class="request-content">
-                                <div class="name">{{ $talk['name'] }}@if(isset($talk['age']) && $talk['age'] !== null) ({{ $talk['age'] }})@endif</div>
+                                <div class="request-top-row">
+                                    <div class="name">{{ $talk['name'] }}@if(isset($talk['age']) && $talk['age'] !== null) ({{ $talk['age'] }})@endif</div>
+                                    @if(!empty($talk['last_time']))
+                                        <span class="request-time">{{ $talk['last_time'] }}</span>
+                                    @endif
+                                </div>
+                                <div class="request-meta-row">
+                                    <span class="request-status">{{ $talk['status_label'] ?? $requestTabText }}</span>
+                                </div>
                                 <div class="request-msg-preview">{{ $talk['last_message'] }}</div>
                             </div>
                         </div>

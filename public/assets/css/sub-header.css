@@ -85,3 +85,52 @@
 .tab-pane.active {
     display: block;
 }
+
+/* ==========================================================================
+   TALK専用サブヘッダー
+   ========================================================================== */
+body.page-talk .sub-header-wrapper {
+    background: rgba(28, 11, 15, 0.9);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18);
+}
+
+body.page-talk .sub-header-tabs {
+    height: 46px;
+    padding: 6px var(--content-padding-x, 15px);
+    gap: 8px;
+    box-sizing: border-box;
+}
+
+body.page-talk .sub-header-tabs .tab-item {
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: #d8c8c8;
+    opacity: 1;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+}
+
+body.page-talk .sub-header-tabs .tab-item:hover {
+    color: #fff0cb;
+    border-color: rgba(226, 188, 79, 0.22);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+body.page-talk .sub-header-tabs .tab-item.active {
+    color: #221517;
+    background: linear-gradient(145deg, #f2d06d 0%, #d6ab2a 55%, #b88a14 100%);
+    border-color: rgba(255, 239, 184, 0.7);
+    box-shadow: 0 8px 18px rgba(212, 175, 55, 0.22);
+}
+
+body.page-talk .sub-header-tabs .tab-item.active::after {
+    display: none;
+}
+
+body.page-talk .tab-page-body {
+    margin-top: calc(var(--sub-header-height) + 18px);
+}

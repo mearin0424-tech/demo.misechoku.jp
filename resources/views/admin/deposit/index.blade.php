@@ -87,6 +87,38 @@
         font-size: 0.78rem;
         line-height: 1.6;
     }
+    .billing-review-box {
+        margin-top: 14px;
+        padding: 14px;
+        border-radius: 14px;
+        background: #171a20;
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+    .billing-review-title {
+        margin: 0 0 8px;
+        font-size: 0.84rem;
+        font-weight: 700;
+    }
+    .billing-review-text {
+        font-size: 0.82rem;
+        line-height: 1.7;
+        color: var(--admin-sub);
+        white-space: pre-wrap;
+    }
+    .billing-review-grid {
+        display: grid;
+        gap: 8px;
+        margin-top: 10px;
+    }
+    .billing-review-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 9px 12px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.04);
+        font-size: 0.8rem;
+    }
     @media (max-width: 980px) {
         .billing-detail-card {
             grid-template-columns: 1fr;
@@ -112,6 +144,12 @@
         @if(session('error'))
             <div class="admin-alert" style="background: rgba(248, 113, 113, 0.12); border-color: rgba(248, 113, 113, 0.3); color: #fee2e2;">
                 {{ session('error') }}
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="admin-alert" style="background: rgba(248, 113, 113, 0.12); border-color: rgba(248, 113, 113, 0.3); color: #fee2e2;">
+                {{ $errors->first() }}
             </div>
         @endif
 
@@ -229,6 +267,39 @@
                             </div>
                         </div>
 
+                        @if(!empty($deposit['bonus_condition']) || !empty($deposit['review_comment']) || !empty($deposit['review_details']))
+                            <div class="billing-review-box">
+                                @if(!empty($deposit['bonus_condition']))
+                                    <h3 class="billing-review-title">求人に登録されたボーナス達成条件</h3>
+                                    <div class="billing-review-text">{{ $deposit['bonus_condition'] }}</div>
+                                @endif
+                                @if(!empty($deposit['review_posted_at']) || !empty($deposit['review_comment']) || !empty($deposit['review_details']))
+                                    <h3 class="billing-review-title" style="margin-top:12px;">
+                                        キャストレビュー
+                                        @if(!empty($deposit['review_posted_at']))
+                                            ({{ $deposit['review_posted_at'] }})
+                                        @endif
+                                        @if(!empty($deposit['review_average']))
+                                            / 総合 {{ number_format((float) $deposit['review_average'], 1) }}
+                                        @endif
+                                    </h3>
+                                    @if(!empty($deposit['review_details']))
+                                        <div class="billing-review-grid">
+                                            @foreach($deposit['review_details'] as $detail)
+                                                <div class="billing-review-item">
+                                                    <span>{{ $detail['name'] }}</span>
+                                                    <strong>{{ number_format((float) $detail['score'], 1) }} / 5</strong>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                    @if(!empty($deposit['review_comment']))
+                                        <div class="billing-review-text" style="margin-top:10px;">{{ $deposit['review_comment'] }}</div>
+                                    @endif
+                                @endif
+                            </div>
+                        @endif
+
                         <table class="admin-table" style="min-width: 0; margin-top:14px;">
                             <thead>
                                 <tr>
@@ -258,10 +329,14 @@
                             <div class="billing-action-box">
                                 <h3 class="billing-action-title">請求書発行</h3>
                                 <p class="admin-note">店舗承認済みです。運営口座を載せた請求書を発行し、店舗へ送付します。</p>
-                                <form method="POST" action="{{ route('admin.deposits.invoice.issue', $deposit['id']) }}">
+                                <form method="POST" action="{{ route('admin.deposits.invoice.issue', $deposit['id']) }}" class="billing-inline-form">
                                     @csrf
+                                    <div class="billing-check-grid" data-check-group>
+                                        <label class="billing-check-item"><input type="checkbox" name="confirm_shop_approved" value="1" data-check-item> 店舗承認済みの申請内容を確認した</label>
+                                        <label class="billing-check-item"><input type="checkbox" name="confirm_admin_bank_ready" value="1" data-check-item> 請求書に記載する運営口座情報を確認した</label>
+                                    </div>
                                     <div class="management-actions">
-                                        <button type="submit" class="btn-action manage" {{ $adminBank ? '' : 'disabled' }}>
+                                        <button type="submit" class="btn-action manage" data-check-submit {{ $adminBank ? '' : 'disabled' }}>
                                             <i class="fas fa-paper-plane"></i> 請求書を発行して送付
                                         </button>
                                     </div>
@@ -279,9 +354,9 @@
                                         <input type="number" name="confirmed_amount" class="admin-input" value="{{ $deposit['invoice_amount'] }}" min="1" required>
                                     </div>
                                     <div class="billing-check-grid" data-check-group>
-                                        <label class="billing-check-item"><input type="checkbox" data-check-item> 金額を照合した</label>
-                                        <label class="billing-check-item"><input type="checkbox" data-check-item> 店舗の入金報告日時を確認した</label>
-                                        <label class="billing-check-item"><input type="checkbox" data-check-item> 銀行口座の着金を確認した</label>
+                                        <label class="billing-check-item"><input type="checkbox" name="confirm_amount_checked" value="1" data-check-item> 金額を照合した</label>
+                                        <label class="billing-check-item"><input type="checkbox" name="confirm_report_checked" value="1" data-check-item> 店舗の入金報告日時を確認した</label>
+                                        <label class="billing-check-item"><input type="checkbox" name="confirm_bank_checked" value="1" data-check-item> 銀行口座の着金を確認した</label>
                                     </div>
                                     <div class="management-actions">
                                         <button type="submit" class="btn-action manage" data-check-submit disabled>
@@ -310,10 +385,10 @@
                                         <textarea name="note" class="admin-input" rows="3" placeholder="銀行窓口で実行、受付票確認済み"></textarea>
                                     </div>
                                     <div class="billing-check-grid" data-check-group>
-                                        <label class="billing-check-item"><input type="checkbox" data-check-item> 金額を確認した</label>
-                                        <label class="billing-check-item"><input type="checkbox" data-check-item> 口座名義を確認した</label>
-                                        <label class="billing-check-item"><input type="checkbox" data-check-item> 銀行で振込を実行した</label>
-                                        <label class="billing-check-item"><input type="checkbox" data-check-item> 受付票を確認した</label>
+                                        <label class="billing-check-item"><input type="checkbox" name="confirm_transfer_amount" value="1" data-check-item> 金額を確認した</label>
+                                        <label class="billing-check-item"><input type="checkbox" name="confirm_account_name" value="1" data-check-item> 口座名義を確認した</label>
+                                        <label class="billing-check-item"><input type="checkbox" name="confirm_transfer_executed" value="1" data-check-item> 銀行で振込を実行した</label>
+                                        <label class="billing-check-item"><input type="checkbox" name="confirm_receipt_checked" value="1" data-check-item> 受付票を確認した</label>
                                     </div>
                                     <div class="management-actions">
                                         <button type="submit" class="btn-action manage" data-check-submit disabled>

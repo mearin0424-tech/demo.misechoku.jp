@@ -72,7 +72,11 @@ class BankLookupService
 
     private function fetchJson(string $url): Collection
     {
-        $response = Http::timeout(5)->acceptJson()->get($url);
+        try {
+            $response = Http::timeout(5)->acceptJson()->get($url);
+        } catch (\Throwable $e) {
+            return collect();
+        }
 
         if (!$response->successful()) {
             return collect();

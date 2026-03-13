@@ -91,6 +91,16 @@
                 <label class="recruit-label">給与備考</label>
                 <textarea name="salary_text" rows="2" class="recruit-textarea" placeholder="指名手当・日払いなど">{{ old('salary_text', $recruit['salary_text']) }}</textarea>
             </div>
+            <div class="recruit-info-grid" style="margin-bottom: 16px;">
+                <div class="recruit-form-group" style="margin-bottom: 0;">
+                    <label class="recruit-label">ボーナス金額</label>
+                    <input type="number" name="noruma_reward" class="recruit-input" value="{{ old('noruma_reward', $recruit['noruma_reward'] ?? 0) }}" placeholder="30000">
+                </div>
+                <div class="recruit-form-group" style="margin-bottom: 0;">
+                    <label class="recruit-label">ボーナス達成条件</label>
+                    <textarea name="bonus_condition" rows="2" class="recruit-textarea" placeholder="例: 10日勤務達成 / 規定シフト消化 / 無断欠勤なし">{{ old('bonus_condition', $recruit['bonus_condition'] ?? '') }}</textarea>
+                </div>
+            </div>
             <div class="recruit-form-group">
                 <label class="recruit-label">給与・待遇タグ</label>
                 <div class="recruit-chip-grid">

@@ -25,8 +25,7 @@ class KouzaMeig implements Rule
      */
     public function passes($attribute, $value)
     {
-        //
-        return preg_match('/^[ァ-ヴーa-zA-Z]+$/u', $value);
+        return preg_match('/^[ァ-ヴー・A-Z0-9]+$/u', (string) $value) === 1;
 
 
     }
@@ -38,6 +37,6 @@ class KouzaMeig implements Rule
      */
     public function message()
     {
-        return ':attribute はカタカナまたはアルファベットで入力してください';
+        return ':attribute はカタカナ・英大文字・数字で入力してください';
     }
 }

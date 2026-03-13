@@ -2,6 +2,82 @@
 
 @section('title', '請求・振込タスク管理')
 
+@push('admin-styles')
+<style>
+    .task-card-list {
+        display: grid;
+        gap: 16px;
+    }
+    .task-card {
+        padding: 18px;
+        border-radius: 18px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: #11151b;
+    }
+    .task-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+    .task-card-id {
+        font-size: 0.78rem;
+        color: var(--admin-muted);
+    }
+    .task-card-title {
+        margin: 4px 0 0;
+        font-size: 1rem;
+        font-weight: 800;
+    }
+    .task-card-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: rgba(96, 165, 250, 0.15);
+        color: #dbeafe;
+        font-size: 0.74rem;
+        font-weight: 700;
+    }
+    .task-card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+    .task-card-item {
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: #171a20;
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+    .task-card-label {
+        font-size: 0.72rem;
+        color: var(--admin-muted);
+        margin-bottom: 6px;
+    }
+    .task-card-value {
+        font-size: 0.88rem;
+        font-weight: 700;
+        line-height: 1.6;
+    }
+    .task-card-text {
+        margin-top: 10px;
+        font-size: 0.83rem;
+        line-height: 1.7;
+        color: var(--admin-sub);
+        white-space: pre-wrap;
+    }
+    .task-card-actions {
+        margin-top: 14px;
+        display: flex;
+        justify-content: flex-end;
+    }
+</style>
+@endpush
+
 @section('content')
     <div class="admin-page">
         <h1 class="admin-title">請求・振込タスク管理</h1>
@@ -22,41 +98,63 @@
             </div>
         @endif
 
-        <div class="table-wrapper">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>タスク</th>
-                        <th>店舗 / キャスト</th>
-                        <th>金額</th>
-                        <th>期限 / 発生日</th>
-                        <th>ステータス</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($tasks as $task)
-                        <tr>
-                            <td>{{ $task['id'] }}</td>
-                            <td>{{ $task['task_title'] }}</td>
-                            <td>{{ $task['shop_name'] }} / {{ $task['cast_name'] }}</td>
-                            <td>¥{{ number_format($task['invoice_amount']) }}</td>
-                            <td>{{ $task['task_due_date'] ?: '—' }}</td>
-                            <td>{{ $task['status_label'] }}</td>
-                            <td>
-                                <a href="{{ route('admin.deposits.index') }}#deposit-{{ $task['id'] }}" class="btn-action manage">
-                                    詳細へ
-                                </a>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="text-center">現在対応が必要なタスクはありません。</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+        <div class="task-card-list">
+            @forelse($tasks as $task)
+                <section class="task-card">
+                    <div class="task-card-head">
+                        <div>
+                            <div class="task-card-id">#{{ $task['id'] }} / {{ $task['task_actor_label'] ?? '運営' }}対応</div>
+                            <h2 class="task-card-title">{{ $task['task_title'] }}</h2>
+                        </div>
+                        <span class="task-card-chip">{{ $task['status_label'] }}</span>
+                    </div>
+
+                    <div class="task-card-grid">
+                        <div class="task-card-item">
+                            <div class="task-card-label">店舗 / キャスト</div>
+                            <div class="task-card-value">{{ $task['shop_name'] }} / {{ $task['cast_name'] }}</div>
+                        </div>
+                        <div class="task-card-item">
+                            <div class="task-card-label">請求額</div>
+                            <div class="task-card-value">¥{{ number_format($task['invoice_amount']) }}</div>
+                        </div>
+                        <div class="task-card-item">
+                            <div class="task-card-label">期限 / 発生日</div>
+                            <div class="task-card-value">{{ $task['task_due_date'] ?: '—' }}</div>
+                        </div>
+                        <div class="task-card-item">
+                            <div class="task-card-label">次アクション</div>
+                            <div class="task-card-value">{{ $task['next_action'] }}</div>
+                        </div>
+                    </div>
+
+                    @if(!empty($task['task_summary']))
+                        <div class="task-card-text">{{ $task['task_summary'] }}</div>
+                    @endif
+
+                    @if(!empty($task['review_average']) || !empty($task['task_review_summary']))
+                        <div class="task-card-text">
+                            レビュー
+                            @if(!empty($task['review_average']))
+                                / 総合 {{ number_format((float) $task['review_average'], 1) }}
+                            @endif
+                            @if(!empty($task['task_review_summary']))
+                                <br>{{ $task['task_review_summary'] }}
+                            @endif
+                        </div>
+                    @endif
+
+                    <div class="task-card-actions">
+                        <a href="{{ route('admin.deposits.index') }}#deposit-{{ $task['id'] }}" class="btn-action manage">
+                            詳細へ
+                        </a>
+                    </div>
+                </section>
+            @empty
+                <div class="admin-panel">
+                    <p class="admin-note">現在対応が必要なタスクはありません。</p>
+                </div>
+            @endforelse
         </div>
     </div>
 @endsection

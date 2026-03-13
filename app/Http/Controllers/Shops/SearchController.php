@@ -110,6 +110,9 @@ class SearchController extends BaseSearchController
                     'name' => $this->castDisplayName($row),
                     'age' => $birthday?->age,
                     'img' => $this->getCastImages((string) $row->id)[0] ?? asset('assets/images/common/no-image.png'),
+                    'pref' => $row->pref ?? '',
+                    'city' => $row->city ?? '',
+                    'pr' => (string) ($row->pr ?? ''),
                 ];
             })
             ->values()

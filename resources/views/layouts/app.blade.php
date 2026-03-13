@@ -129,6 +129,51 @@
     </script>
     <script>
     (function () {
+        function normalizeAccountNumber(value) {
+            return String(value || '').replace(/\D+/g, '').slice(0, 7);
+        }
+
+        function hiraganaToKatakana(value) {
+            return String(value || '').replace(/[ぁ-ゖ]/g, function (char) {
+                return String.fromCharCode(char.charCodeAt(0) + 0x60);
+            });
+        }
+
+        function normalizeAccountName(value) {
+            var normalized = String(value || '')
+                .normalize('NFKC')
+                .replace(/[\r\n]/g, '')
+                .replace(/[ 　]/g, '')
+                .toUpperCase();
+
+            return hiraganaToKatakana(normalized);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('[data-account-number-input]').forEach(function (input) {
+                var syncNumber = function () {
+                    input.value = normalizeAccountNumber(input.value);
+                };
+
+                input.addEventListener('input', syncNumber);
+                input.addEventListener('blur', syncNumber);
+                syncNumber();
+            });
+
+            document.querySelectorAll('[data-account-name-input]').forEach(function (input) {
+                var syncName = function () {
+                    input.value = normalizeAccountName(input.value);
+                };
+
+                input.addEventListener('input', syncName);
+                input.addEventListener('blur', syncName);
+                syncName();
+            });
+        });
+    })();
+    </script>
+    <script>
+    (function () {
         function debounce(fn, wait) {
             var timer = null;
 
@@ -178,6 +223,27 @@
 
                 return response.json();
             });
+        }
+
+        function mapBankItem(item) {
+            return {
+                code: String(item.code || ''),
+                name: String(item.name || (item.normalize && item.normalize.name) || ''),
+                short_name: String(item.short_name || item.name || ''),
+                kana: String(item.kana || (item.normalize && item.normalize.kana) || ''),
+                hira: String(item.hira || (item.normalize && item.normalize.hira) || '')
+            };
+        }
+
+        function mapBranchItem(item, bankCode) {
+            return {
+                bank_code: String(item.bank_code || bankCode || ''),
+                code: String(item.code || ''),
+                name: String(item.name || (item.normalize && item.normalize.name) || ''),
+                short_name: String(item.short_name || item.name || ''),
+                kana: String(item.kana || (item.normalize && item.normalize.kana) || ''),
+                hira: String(item.hira || (item.normalize && item.normalize.hira) || '')
+            };
         }
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -244,6 +310,37 @@
                             }
                         })
                         .catch(function () {
+                            return fetchJson('https://bank.teraren.com/banks.json').then(function (items) {
+                                return Array.isArray(items) ? items.map(mapBankItem) : [];
+                            });
+                        })
+                        .then(function (fallbackItems) {
+                            if (!Array.isArray(fallbackItems)) {
+                                return;
+                            }
+
+                            var filtered = fallbackItems.filter(function (item) {
+                                var needle = query.toLowerCase();
+
+                                return [item.code, item.name, item.short_name, item.kana, item.hira].some(function (value) {
+                                    return normalize(value).toLowerCase().indexOf(needle) !== -1;
+                                });
+                            }).slice(0, 20);
+
+                            bankMap.clear();
+                            filtered.forEach(function (item) {
+                                bankMap.set(normalize(item.name), item);
+                            });
+                            setOptions(bankList, filtered, function (item) {
+                                return item.code;
+                            });
+                            syncSelectedBank();
+
+                            if (normalize(branchInput.value) !== '' && bankCodeInput.value) {
+                                searchBranches();
+                            }
+                        })
+                        .catch(function () {
                             bankMap.clear();
                             bankList.innerHTML = '';
                         });
@@ -264,6 +361,18 @@
                             branchCache.set(bankCode, items);
 
                             return items;
+                        })
+                        .catch(function () {
+                            return fetchJson('https://bank.teraren.com/banks/' + encodeURIComponent(bankCode) + '/branches.json')
+                                .then(function (items) {
+                                    var mapped = Array.isArray(items)
+                                        ? items.map(function (item) { return mapBranchItem(item, bankCode); })
+                                        : [];
+
+                                    branchCache.set(bankCode, mapped);
+
+                                    return mapped;
+                                });
                         });
                 }
 
