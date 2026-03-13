@@ -83,6 +83,9 @@ class TalkController extends Controller
             'blockUrl' => $isCastPortal ? route('cast.talk.block') : route('shop.talk.block'),
             'blockState' => $blockState,
             'canSend' => !$blockState['is_blocked'],
+            'canSelectResult' => !$isCastPortal
+                && !$blockState['is_blocked']
+                && $this->canSelectRecruitmentResult($rawMessages),
         ]);
     }
 
@@ -143,6 +146,13 @@ class TalkController extends Controller
         $actionType = $request->input('action_type');
         abort_if($isCastPortal && $actionType !== 'interview_confirm', 403);
         abort_if(!$isCastPortal && $actionType === 'interview_confirm', 403);
+        if (in_array($actionType, ['hired', 'rejected'], true)) {
+            abort_if(
+                !$this->canSelectRecruitmentResult($this->conversationMessages($partnerId, $isCastPortal)),
+                422,
+                '採用／不採用は面談日決定後に選択してください。'
+            );
+        }
 
         [$messageType, $content] = match ($actionType) {
             'interview_offer' => [
@@ -277,7 +287,7 @@ class TalkController extends Controller
                     'age' => $partner['age'],
                     'location' => $partner['location'],
                     'avatar' => $partner['avatar'],
-                    'last_message' => $latest->content,
+                    'last_message' => $this->formatTalkPreview($latest, $mySenderType),
                     'last_time' => $this->formatTalkTime($latestAt),
                     'sort_key' => $latestAt,
                     'unread_count' => $messages
@@ -327,6 +337,16 @@ class TalkController extends Controller
                 'selected_option' => $offerToken ? ($confirmedByToken[$offerToken] ?? null) : ($meta['selected_option'] ?? null),
             ];
         });
+    }
+
+    private function conversationMessages(string $partnerId, bool $isCastPortal)
+    {
+        return DB::table('messages')
+            ->where($isCastPortal ? 'cast_id' : 'shop_id', $isCastPortal ? $this->currentCastId() : $this->currentShopId())
+            ->where($isCastPortal ? 'shop_id' : 'cast_id', $partnerId)
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get();
     }
 
     private function resolvePartner(string $partnerId, bool $isCastPortal): ?array
@@ -411,17 +431,32 @@ class TalkController extends Controller
         return is_array($decoded) ? $decoded : [];
     }
 
+    private function formatTalkPreview($message, int $mySenderType): string
+    {
+        $type = (int) $message->type;
+        $isMine = (int) $message->sender_type === $mySenderType;
+        $meta = $this->decodeMessageMeta($message);
+
+        return match ($type) {
+            self::MESSAGE_TYPE_INTERVIEW_OFFER => $isMine
+                ? '面談候補日を送りました'
+                : '面談候補日が届いています',
+            self::MESSAGE_TYPE_INTERVIEW_CONFIRMED => empty($meta['selected_option'])
+                ? '面談日が確定しました'
+                : '面談日が確定しました: ' . Carbon::parse($meta['selected_option'])->format('Y年n月j日 H:i'),
+            self::MESSAGE_TYPE_HIRED => $isMine
+                ? '採用メッセージを送りました'
+                : '採用メッセージが届いています',
+            self::MESSAGE_TYPE_REJECTED => $isMine
+                ? '不採用メッセージを送りました'
+                : '不採用メッセージが届いています',
+            default => Str::limit(preg_replace('/\s+/u', ' ', trim((string) $message->content)), 60, '...'),
+        };
+    }
+
     private function resolveConversationStatusCode($messages): string
     {
-        $latestAction = $messages
-            ->filter(fn ($message) => in_array((int) $message->type, [
-                self::MESSAGE_TYPE_INTERVIEW_OFFER,
-                self::MESSAGE_TYPE_INTERVIEW_CONFIRMED,
-                self::MESSAGE_TYPE_HIRED,
-                self::MESSAGE_TYPE_REJECTED,
-            ], true))
-            ->sortByDesc('created_at')
-            ->first();
+        $latestAction = $this->latestConversationAction($messages);
 
         if (!$latestAction) {
             return 'chatting';
@@ -434,6 +469,30 @@ class TalkController extends Controller
             self::MESSAGE_TYPE_REJECTED => 'rejected',
             default => 'chatting',
         };
+    }
+
+    private function canSelectRecruitmentResult($messages): bool
+    {
+        $latestAction = $this->latestConversationAction($messages);
+
+        return $latestAction && (int) $latestAction->type === self::MESSAGE_TYPE_INTERVIEW_CONFIRMED;
+    }
+
+    private function latestConversationAction($messages)
+    {
+        return $messages
+            ->filter(fn ($message) => in_array((int) $message->type, [
+                self::MESSAGE_TYPE_INTERVIEW_OFFER,
+                self::MESSAGE_TYPE_INTERVIEW_CONFIRMED,
+                self::MESSAGE_TYPE_HIRED,
+                self::MESSAGE_TYPE_REJECTED,
+            ], true))
+            ->sortByDesc(fn ($message) => sprintf(
+                '%s-%010d',
+                Carbon::parse($message->created_at)->format('YmdHis'),
+                (int) ($message->id ?? 0)
+            ))
+            ->first();
     }
 
     private function statusLabel(string $code): string

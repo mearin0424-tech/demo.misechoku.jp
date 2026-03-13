@@ -159,12 +159,22 @@ class MypageController extends Controller
             'updated_at'    => now(),
         ]);
 
-        if ($isMain) {
-            DB::table('cast_profiles')->where('cast_id', $castId)->update([
-                'main_image_path' => $path,
-                'updated_at'      => now(),
-            ]);
-        }
+        $orderedIds = DB::table('cast_images')
+            ->where('cast_id', $castId)
+            ->where('type', 1)
+            ->orderByRaw('is_main DESC')
+            ->orderByRaw('main_order IS NULL')
+            ->orderBy('main_order')
+            ->orderBy('id')
+            ->pluck('id')
+            ->map(fn ($imageId) => (int) $imageId)
+            ->all();
+
+        $orderedIds = array_values(array_filter($orderedIds, fn ($imageId) => $imageId !== (int) $id));
+        $slotIndex = max(0, min($slotIndex, count($orderedIds)));
+        array_splice($orderedIds, $slotIndex, 0, [(int) $id]);
+
+        $this->syncCastImageOrder($castId, $orderedIds);
 
         return response()->json(['success' => true, 'path' => asset($path), 'id' => $id]);
     }
@@ -203,24 +213,34 @@ class MypageController extends Controller
         }
         DB::table('cast_images')->where('id', $id)->delete();
 
-        if (!empty($row->is_main)) {
-            $next = DB::table('cast_images')
-                ->where('cast_id', $castId)
-                ->where('type', 1)
-                ->orderBy('main_order')
-                ->orderBy('id')
-                ->first();
-            $mainPath = $next ? $next->image_path : null;
-            DB::table('cast_profiles')->where('cast_id', $castId)->update([
-                'main_image_path' => $mainPath,
-                'updated_at'      => now(),
-            ]);
-            if ($next) {
-                DB::table('cast_images')->where('id', $next->id)->update(['is_main' => 1, 'updated_at' => now()]);
-            }
-        }
+        $orderedIds = DB::table('cast_images')
+            ->where('cast_id', $castId)
+            ->where('type', 1)
+            ->orderByRaw('is_main DESC')
+            ->orderByRaw('main_order IS NULL')
+            ->orderBy('main_order')
+            ->orderBy('id')
+            ->pluck('id')
+            ->map(fn ($imageId) => (int) $imageId)
+            ->all();
+
+        $this->syncCastImageOrder($castId, $orderedIds);
 
         return response()->json(['success' => true, 'message' => '画像を削除しました']);
+    }
+
+    public function updateImageOrder(Request $request)
+    {
+        $imageOrder = $request->input('images');
+
+        if (!is_array($imageOrder)) {
+            return response()->json(['success' => false, 'message' => 'データが不正です'], 400);
+        }
+
+        $orderedIds = array_values(array_unique(array_map('intval', $imageOrder)));
+        $this->syncCastImageOrder($this->currentCastId(), $orderedIds);
+
+        return response()->json(['success' => true, 'message' => '並び順を保存しました']);
     }
 
     /**
@@ -529,6 +549,61 @@ class MypageController extends Controller
     private function currentCastId(): string
     {
         return (string) auth()->guard('member')->id();
+    }
+
+    private function syncCastImageOrder(string $castId, array $orderedIds): void
+    {
+        $existingImages = DB::table('cast_images')
+            ->where('cast_id', $castId)
+            ->where('type', 1)
+            ->orderByRaw('is_main DESC')
+            ->orderByRaw('main_order IS NULL')
+            ->orderBy('main_order')
+            ->orderBy('id')
+            ->get(['id', 'image_path']);
+
+        $existingIds = $existingImages->pluck('id')->map(fn ($id) => (int) $id)->all();
+        $orderedIds = array_values(array_intersect($orderedIds, $existingIds));
+
+        foreach ($existingIds as $imageId) {
+            if (!in_array($imageId, $orderedIds, true)) {
+                $orderedIds[] = $imageId;
+            }
+        }
+
+        DB::transaction(function () use ($castId, $orderedIds, $existingImages) {
+            DB::table('cast_images')
+                ->where('cast_id', $castId)
+                ->where('type', 1)
+                ->update([
+                    'is_main' => 0,
+                    'updated_at' => now(),
+                ]);
+
+            foreach ($orderedIds as $index => $imageId) {
+                DB::table('cast_images')
+                    ->where('cast_id', $castId)
+                    ->where('type', 1)
+                    ->where('id', $imageId)
+                    ->update([
+                        'main_order' => $index,
+                        'is_main' => $index === 0 ? 1 : 0,
+                        'updated_at' => now(),
+                    ]);
+            }
+
+            $mainImageId = $orderedIds[0] ?? null;
+            $mainImagePath = $mainImageId
+                ? optional($existingImages->firstWhere('id', $mainImageId))->image_path
+                : null;
+
+            DB::table('cast_profiles')
+                ->where('cast_id', $castId)
+                ->update([
+                    'main_image_path' => $mainImagePath,
+                    'updated_at' => now(),
+                ]);
+        });
     }
 
     private function cleanupStaleMainImagePath(string $castId): void

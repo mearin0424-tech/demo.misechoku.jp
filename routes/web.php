@@ -277,6 +277,7 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
         Route::get('/store/edit', [ShopProfile::class, 'edit'])->name('store.edit');
         Route::post('/store/update', [ShopProfile::class, 'update'])->name('store.update');
         Route::post('/upload-image', [ShopProfile::class, 'uploadImage'])->name('upload.image');
+        Route::post('/images/order', [ShopProfile::class, 'updateOrder'])->name('images.order');
         Route::delete('/image/{id}', [ShopProfile::class, 'deleteImage'])->name('image.delete');
     });
 
@@ -333,6 +334,7 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
     Route::get('/mypage/identity', [CastMypage::class, 'identity'])->name('mypage.identity');
     Route::post('/mypage/identity/upload', [CastMypage::class, 'uploadIdentity'])->name('mypage.identity.upload');
     Route::post('/mypage/images/upload', [CastMypage::class, 'uploadImage'])->name('mypage.images.upload');
+    Route::post('/mypage/images/order', [CastMypage::class, 'updateImageOrder'])->name('mypage.images.order');
     Route::delete('/mypage/images/{id}', [CastMypage::class, 'deleteImage'])->name('mypage.images.delete');
     Route::post('/mypage/deposit/request', [CastMypage::class, 'requestDeposit'])->name('mypage.deposit.request');
     Route::post('/mypage/deposit/confirm', [CastMypage::class, 'confirmDeposit'])->name('mypage.deposit.confirm');

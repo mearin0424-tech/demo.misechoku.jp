@@ -129,7 +129,7 @@
                     <h2 class="section-title section-title-gold">Image Library</h2>
                     <p class="gallery-section-hint">ドラッグで並び替え（スマホは長押し）</p>
                 </div>
-                <ul class="responsive-gallery gallery-grid" id="gallery-list">
+                <ul class="responsive-gallery gallery-grid" id="gallery-list" data-sort-save-url="{{ route('cast.mypage.images.order') }}" data-empty-image-url="{{ asset('assets/images/common/no-image.png') }}">
                     @for($i = 0; $i < 8; $i++)
                     @php $img = $subImages[$i] ?? null; @endphp
                     <li class="gallery-grid-item" data-slot-index="{{ $i }}">
@@ -235,10 +235,12 @@ function deleteGalleryImageFromModal(ev) {
         slot.removeAttribute('data-image-id');
         slot.removeAttribute('data-image-url');
         slot.innerHTML = '<span class="photo-slot-empty"><i class="fas fa-image"></i></span>';
-        var mainIcon = document.getElementById('main-icon-display');
-        if (mainIcon && li.getAttribute('data-slot-index') === '0') {
-            var firstWithImg = document.querySelector('#gallery-list .photo-slot.has-img');
-            mainIcon.src = firstWithImg ? firstWithImg.getAttribute('data-image-url') : '';
+        var galleryList = document.getElementById('gallery-list');
+        if (window.refreshGalleryMainState && galleryList) {
+            window.refreshGalleryMainState(galleryList);
+        }
+        if (window.persistGalleryOrder && galleryList) {
+            window.persistGalleryOrder(galleryList);
         }
         closeGalleryPreview();
         return;
@@ -253,10 +255,12 @@ function deleteGalleryImageFromModal(ev) {
             slot.removeAttribute('data-image-id');
             slot.removeAttribute('data-image-url');
             slot.innerHTML = '<span class="photo-slot-empty"><i class="fas fa-image"></i></span>';
-            var mainIcon = document.getElementById('main-icon-display');
-            if (mainIcon && li.getAttribute('data-slot-index') === '0') {
-                var firstWithImg = document.querySelector('#gallery-list .photo-slot.has-img');
-                mainIcon.src = firstWithImg ? firstWithImg.getAttribute('data-image-url') : '';
+            var galleryList = document.getElementById('gallery-list');
+            if (window.refreshGalleryMainState && galleryList) {
+                window.refreshGalleryMainState(galleryList);
+            }
+            if (window.persistGalleryOrder && galleryList) {
+                window.persistGalleryOrder(galleryList);
             }
             closeGalleryPreview();
         } else {
@@ -291,8 +295,12 @@ document.getElementById('gallery-upload').addEventListener('change', function() 
                     slot.setAttribute('data-image-id', res.id);
                     slot.setAttribute('data-image-url', res.path);
                     slot.innerHTML = '<img src="' + res.path + '" alt="" loading="lazy">' + (slotIndex === 0 ? '<span class="photo-slot-badge">MAIN</span>' : '');
-                    var mainIcon = document.getElementById('main-icon-display');
-                    if (mainIcon && slotIndex === 0) mainIcon.src = res.path;
+                    if (window.refreshGalleryMainState) {
+                        window.refreshGalleryMainState(list);
+                    }
+                    if (window.persistGalleryOrder) {
+                        window.persistGalleryOrder(list);
+                    }
                 }
             } else {
                 alert(res.message || 'アップロードに失敗しました');

@@ -36,7 +36,7 @@
                                 <span class="talk-name">{{ $talk['name'] }}</span>
                                 <span class="talk-time">{{ $talk['last_time'] }}</span>
                             </div>
-                            <div class="flex justify-between items-center">
+                            <div class="talk-last-msg-row">
                                 <p class="talk-last-msg">{{ $talk['last_message'] }}</p>
                                 @if(isset($talk['unread_count']) && $talk['unread_count'] > 0)
                                     <span class="unread-badge">{{ $talk['unread_count'] }}</span>

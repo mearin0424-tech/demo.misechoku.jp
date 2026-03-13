@@ -104,6 +104,31 @@
     @stack('scripts')
     <script>
     (function () {
+        function formatPostalCode(value) {
+            var digits = String(value || '').replace(/\D+/g, '').slice(0, 7);
+
+            if (digits.length <= 3) {
+                return digits;
+            }
+
+            return digits.slice(0, 3) + '-' + digits.slice(3);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('input[data-postal-code]').forEach(function (input) {
+                var sync = function () {
+                    input.value = formatPostalCode(input.value);
+                };
+
+                input.addEventListener('input', sync);
+                input.addEventListener('blur', sync);
+                sync();
+            });
+        });
+    })();
+    </script>
+    <script>
+    (function () {
         var overlay = document.getElementById('global-lightbox-overlay');
         var img = document.getElementById('global-lightbox-image');
         if (!overlay || !img) return;

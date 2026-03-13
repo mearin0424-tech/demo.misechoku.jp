@@ -42,7 +42,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         if (!response.ok) {
-            throw new Error('Request failed');
+            let message = 'Request failed';
+            try {
+                const errorData = await response.json();
+                message = errorData.message || message;
+            } catch (e) {
+                // JSON で返らないケースは共通メッセージにフォールバックする
+            }
+            throw new Error(message);
         }
 
         return response.json();
@@ -168,11 +175,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (hireBtn) {
             hireBtn.addEventListener('click', async function(e) {
                 e.preventDefault();
+                if (!window.confirm('このユーザーを採用として送信しますか？')) {
+                    return;
+                }
                 hireBtn.disabled = true;
                 try {
                     await postJson(actionUrl, token, { partner_id: partnerId, action_type: 'hired' });
                     window.location.reload();
                 } catch (error) {
+                    window.alert(error.message || '採用メッセージの送信に失敗しました。');
                     hireBtn.disabled = false;
                 }
             });
@@ -181,11 +192,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (rejectBtn) {
             rejectBtn.addEventListener('click', async function(e) {
                 e.preventDefault();
+                if (!window.confirm('このユーザーを不採用として送信しますか？')) {
+                    return;
+                }
                 rejectBtn.disabled = true;
                 try {
                     await postJson(actionUrl, token, { partner_id: partnerId, action_type: 'rejected' });
                     window.location.reload();
                 } catch (error) {
+                    window.alert(error.message || '不採用メッセージの送信に失敗しました。');
                     rejectBtn.disabled = false;
                 }
             });
@@ -204,6 +219,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }).filter(Boolean);
 
                 if (options.length === 0) {
+                    window.alert('面談候補日を1件以上入力してください。');
                     return;
                 }
 
@@ -216,6 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                     window.location.reload();
                 } catch (error) {
+                    window.alert(error.message || '面談候補日の送信に失敗しました。');
                     submitBtn.disabled = false;
                 }
             });
@@ -225,6 +242,63 @@ document.addEventListener('DOMContentLoaded', function() {
     if (isCastRoom && chatForm) {
         const actionUrl = chatForm.getAttribute('data-action-url');
         const token = chatForm.querySelector('input[name="_token"]').value;
+        const confirmOverlay = document.getElementById('interview-confirm-overlay');
+        const confirmSelected = document.getElementById('interview-confirm-selected');
+        const confirmSubmitBtn = document.getElementById('interview-confirm-submit');
+        const confirmCloseButtons = document.querySelectorAll('.js-interview-confirm-close');
+        let pendingInterviewSelection = null;
+
+        const openConfirmModal = (selection) => {
+            if (!confirmOverlay || !confirmSelected) return;
+            pendingInterviewSelection = selection;
+            confirmSelected.textContent = selection.displayLabel || selection.selectedOption;
+            confirmOverlay.setAttribute('aria-hidden', 'false');
+        };
+
+        const closeConfirmModal = () => {
+            if (!confirmOverlay) return;
+            confirmOverlay.setAttribute('aria-hidden', 'true');
+            pendingInterviewSelection = null;
+            if (confirmSubmitBtn) {
+                confirmSubmitBtn.disabled = false;
+            }
+        };
+
+        confirmCloseButtons.forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeConfirmModal();
+            });
+        });
+
+        if (confirmOverlay) {
+            confirmOverlay.addEventListener('click', function(e) {
+                if (e.target === confirmOverlay) {
+                    closeConfirmModal();
+                }
+            });
+        }
+
+        if (confirmSubmitBtn) {
+            confirmSubmitBtn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                if (!pendingInterviewSelection) return;
+
+                confirmSubmitBtn.disabled = true;
+                try {
+                    await postJson(actionUrl, token, {
+                        partner_id: partnerId,
+                        action_type: 'interview_confirm',
+                        offer_token: pendingInterviewSelection.offerToken,
+                        selected_option: pendingInterviewSelection.selectedOption
+                    });
+                    window.location.reload();
+                } catch (error) {
+                    window.alert(error.message || '面談日の確定に失敗しました。');
+                    confirmSubmitBtn.disabled = false;
+                }
+            });
+        }
 
         chatMessages.addEventListener('click', async function(e) {
             const btn = e.target.closest('.interview-option-btn');
@@ -233,20 +307,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const offerToken = btn.getAttribute('data-offer-token');
             const selectedOption = btn.getAttribute('data-option-label');
+            const displayLabel = btn.getAttribute('data-option-display');
             if (!offerToken || !selectedOption) return;
 
-            btn.disabled = true;
-            try {
-                await postJson(actionUrl, token, {
-                    partner_id: partnerId,
-                    action_type: 'interview_confirm',
-                    offer_token: offerToken,
-                    selected_option: selectedOption
-                });
-                window.location.reload();
-            } catch (error) {
-                btn.disabled = false;
-            }
+            openConfirmModal({
+                offerToken: offerToken,
+                selectedOption: selectedOption,
+                displayLabel: displayLabel
+            });
         });
     }
 });

@@ -6,6 +6,14 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/profile_edit.css') }}">
+<style>
+    .input-hint {
+        margin-top: 6px;
+        font-size: 0.72rem;
+        color: #8b8b8b;
+        line-height: 1.6;
+    }
+</style>
 @endpush
 
 @push('scripts')
@@ -69,11 +77,15 @@
                     id="zip"
                     name="zip"
                     class="edit-input p-postal-code"
+                    data-postal-code
+                    maxlength="8"
+                    pattern="[0-9-]*"
                     value="{{ old('zip', $profile['zip']) }}"
                     inputmode="numeric"
                     autocomplete="postal-code"
-                    placeholder="例：1600021"
+                    placeholder="例：160-0021"
                 >
+                <p class="input-hint">半角数字で入力してください。ハイフン有無どちらでも入力でき、住所が自動補完されます。</p>
             </div>
             <div class="address-row">
                 <div class="address-item">

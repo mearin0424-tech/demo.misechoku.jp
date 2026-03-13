@@ -49,7 +49,7 @@ class SearchController extends BaseSearchController
 
             return [
                 'name' => $this->castDisplayName($row),
-                'img' => $this->resolveCastImageUrl((string) $row->id, $row->main_image_path),
+                'img' => $this->getCastImages((string) $row->id)[0] ?? asset('assets/images/common/no-image.png'),
                 'time' => $updatedAt ? $updatedAt->locale('ja')->diffForHumans() : '',
                 'text' => (string) $row->pr,
             ];
@@ -109,29 +109,33 @@ class SearchController extends BaseSearchController
                     'id' => $row->id,
                     'name' => $this->castDisplayName($row),
                     'age' => $birthday?->age,
-                    'img' => $this->resolveCastImageUrl((string) $row->id, $row->main_image_path),
+                    'img' => $this->getCastImages((string) $row->id)[0] ?? asset('assets/images/common/no-image.png'),
                 ];
             })
             ->values()
             ->all();
     }
 
-    private function resolveCastImageUrl(string $castId, ?string $mainImagePath): string
+    private function getCastImages(string $castId): array
     {
-        if (!empty($mainImagePath)) {
-            return $this->assetPathForStored($mainImagePath);
-        }
-
-        $imagePath = DB::table('cast_images')
+        $images = DB::table('cast_images')
             ->where('cast_id', $castId)
             ->where('type', 1)
             ->orderByRaw('is_main DESC')
             ->orderByRaw('main_order IS NULL')
             ->orderBy('main_order')
             ->orderBy('id')
-            ->value('image_path');
+            ->pluck('image_path')
+            ->map(fn ($path) => $this->assetPathForStored($path))
+            ->filter()
+            ->values()
+            ->all();
 
-        return $this->assetPathForStored($imagePath);
+        if (empty($images)) {
+            $images[] = asset('assets/images/common/no-image.png');
+        }
+
+        return $images;
     }
 
     private function castDisplayName(object $row): string

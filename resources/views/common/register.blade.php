@@ -76,11 +76,14 @@
                             name="zip"
                             value="{{ old('zip') }}"
                             class="p-postal-code"
+                            data-postal-code
+                            maxlength="8"
+                            pattern="[0-9-]*"
                             inputmode="numeric"
                             autocomplete="postal-code"
-                            placeholder="例：1600021"
+                            placeholder="例：160-0021"
                         >
-                        <small class="register-field-hint">入力すると都道府県・市区町村が自動補完されます。</small>
+                        <small class="register-field-hint">半角数字で入力してください。ハイフン有無どちらでも入力でき、住所が自動補完されます。</small>
                     </label>
 
                     <div class="register-grid register-grid-two">
@@ -184,11 +187,14 @@
                             name="zip"
                             value="{{ old('zip') }}"
                             class="p-postal-code"
+                            data-postal-code
+                            maxlength="8"
+                            pattern="[0-9-]*"
                             inputmode="numeric"
                             autocomplete="postal-code"
-                            placeholder="例：1060032"
+                            placeholder="例：106-0032"
                         >
-                        <small class="register-field-hint">入力すると都道府県・市区町村が自動補完されます。</small>
+                        <small class="register-field-hint">半角数字で入力してください。ハイフン有無どちらでも入力でき、住所が自動補完されます。</small>
                     </label>
 
                     <div class="register-grid register-grid-two">

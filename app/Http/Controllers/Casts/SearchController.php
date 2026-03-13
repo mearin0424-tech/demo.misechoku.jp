@@ -48,7 +48,7 @@ class SearchController extends BaseSearchController
 
             return [
                 'name' => (string) ($row->shop_name ?: 'ショップ'),
-                'img' => $this->resolveShopImageUrl((string) $row->id, $row->main_image_path),
+                'img' => $this->getShopImages((string) $row->id)[0] ?? asset('assets/images/common/no-image.png'),
                 'time' => $updatedAt ? $updatedAt->locale('ja')->diffForHumans() : '',
                 'text' => (string) $row->catch,
             ];
@@ -113,27 +113,32 @@ class SearchController extends BaseSearchController
                     'shop_name' => (string) ($row->shop_name ?: 'ショップ'),
                     'pref' => $row->pref ?? '',
                     'city' => $row->city ?? '',
-                    'main_img' => $this->resolveShopImageUrl((string) $row->id, $row->main_image_path),
+                    'main_img' => $this->getShopImages((string) $row->id)[0] ?? asset('assets/images/common/no-image.png'),
                 ];
             })
             ->values()
             ->all();
     }
 
-    private function resolveShopImageUrl(string $shopId, ?string $mainImagePath): string
+    private function getShopImages(string $shopId): array
     {
-        if (!empty($mainImagePath)) {
-            return $this->assetPathForStored($mainImagePath);
-        }
-
-        $imagePath = DB::table('shop_images')
+        $images = DB::table('shop_images')
             ->where('shop_id', $shopId)
+            ->orderByRaw('is_main DESC')
             ->orderByRaw('main_order IS NULL')
             ->orderBy('main_order')
             ->orderBy('id')
-            ->value('image_path');
+            ->pluck('image_path')
+            ->map(fn ($path) => $this->assetPathForStored($path))
+            ->filter()
+            ->values()
+            ->all();
 
-        return $this->assetPathForStored($imagePath);
+        if (empty($images)) {
+            $images[] = asset('assets/images/common/no-image.png');
+        }
+
+        return $images;
     }
 
     private function assetPathForStored(?string $path): string

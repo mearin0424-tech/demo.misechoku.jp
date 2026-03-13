@@ -147,12 +147,15 @@
                         type="text"
                         name="zip"
                         class="form-input p-postal-code"
+                        data-postal-code
+                        maxlength="8"
+                        pattern="[0-9-]*"
                         value="{{ old('zip', $shopData['zip']) }}"
                         inputmode="numeric"
                         autocomplete="postal-code"
-                        placeholder="例：1060032"
+                        placeholder="例：106-0032"
                     >
-                    <p class="input-hint">郵便番号を入力すると、都道府県・市区町村が自動補完されます。</p>
+                    <p class="input-hint">半角数字で入力してください。ハイフン有無どちらでも入力でき、住所が自動補完されます。</p>
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4 mb-4">

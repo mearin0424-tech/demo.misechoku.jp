@@ -128,12 +128,21 @@ class ProfileController extends Controller
             'updated_at' => now(),
         ]);
 
-        if ($isMain) {
-            DB::table('shop_profiles')->where('shop_id', $shopId)->update([
-                'main_image_path' => $path,
-                'updated_at'      => now(),
-            ]);
-        }
+        $orderedIds = DB::table('shop_images')
+            ->where('shop_id', $shopId)
+            ->orderByRaw('is_main DESC')
+            ->orderByRaw('main_order IS NULL')
+            ->orderBy('main_order')
+            ->orderBy('id')
+            ->pluck('id')
+            ->map(fn ($imageId) => (int) $imageId)
+            ->all();
+
+        $orderedIds = array_values(array_filter($orderedIds, fn ($imageId) => $imageId !== (int) $id));
+        $slotIndex = max(0, min($slotIndex, count($orderedIds)));
+        array_splice($orderedIds, $slotIndex, 0, [(int) $id]);
+
+        $this->syncShopImageOrder($shopId, $orderedIds);
 
         return response()->json([
             'success' => true,
@@ -174,21 +183,17 @@ class ProfileController extends Controller
         }
         DB::table('shop_images')->where('id', $id)->delete();
 
-        if (!empty($row->is_main)) {
-            $next = DB::table('shop_images')
-                ->where('shop_id', $shopId)
-                ->orderBy('main_order')
-                ->orderBy('id')
-                ->first();
-            $mainPath = $next ? $next->image_path : null;
-            DB::table('shop_profiles')->where('shop_id', $shopId)->update([
-                'main_image_path' => $mainPath,
-                'updated_at'      => now(),
-            ]);
-            if ($next) {
-                DB::table('shop_images')->where('id', $next->id)->update(['is_main' => 1, 'updated_at' => now()]);
-            }
-        }
+        $orderedIds = DB::table('shop_images')
+            ->where('shop_id', $shopId)
+            ->orderByRaw('is_main DESC')
+            ->orderByRaw('main_order IS NULL')
+            ->orderBy('main_order')
+            ->orderBy('id')
+            ->pluck('id')
+            ->map(fn ($imageId) => (int) $imageId)
+            ->all();
+
+        $this->syncShopImageOrder($shopId, $orderedIds);
 
         return response()->json(['success' => true, 'message' => '画像を削除しました']);
     }
@@ -198,15 +203,69 @@ class ProfileController extends Controller
      * (旧 api/update_image_order.php の機能を統合)
      */
     public function updateOrder(Request $request) {
-        // $request->input('images') で送られてくる ID の配列に基づいて main_order を更新
         $imageOrder = $request->input('images');
 
         if (!is_array($imageOrder)) {
             return response()->json(['success' => false, 'message' => 'データが不正です'], 400);
         }
 
-        // 本来は foreach で DB の順番を更新
+        $shopId = $this->currentShopId();
+        $orderedIds = array_values(array_unique(array_map('intval', $imageOrder)));
+        $this->syncShopImageOrder($shopId, $orderedIds);
+
         return response()->json(['success' => true, 'message' => '並び順を保存しました']);
+    }
+
+    private function syncShopImageOrder(string $shopId, array $orderedIds): void
+    {
+        $existingImages = DB::table('shop_images')
+            ->where('shop_id', $shopId)
+            ->orderByRaw('is_main DESC')
+            ->orderByRaw('main_order IS NULL')
+            ->orderBy('main_order')
+            ->orderBy('id')
+            ->get(['id', 'image_path']);
+
+        $existingIds = $existingImages->pluck('id')->map(fn ($id) => (int) $id)->all();
+        $orderedIds = array_values(array_intersect($orderedIds, $existingIds));
+
+        foreach ($existingIds as $imageId) {
+            if (!in_array($imageId, $orderedIds, true)) {
+                $orderedIds[] = $imageId;
+            }
+        }
+
+        DB::transaction(function () use ($shopId, $orderedIds, $existingImages) {
+            DB::table('shop_images')
+                ->where('shop_id', $shopId)
+                ->update([
+                    'is_main' => 0,
+                    'updated_at' => now(),
+                ]);
+
+            foreach ($orderedIds as $index => $imageId) {
+                DB::table('shop_images')
+                    ->where('shop_id', $shopId)
+                    ->where('id', $imageId)
+                    ->update([
+                        'main_order' => $index,
+                        'is_main' => $index === 0 ? 1 : 0,
+                        'updated_at' => now(),
+                    ]);
+            }
+
+            $mainImageId = $orderedIds[0] ?? null;
+            $mainImagePath = $mainImageId
+                ? optional($existingImages->firstWhere('id', $mainImageId))->image_path
+                : null;
+
+            DB::table('shop_profiles')
+                ->where('shop_id', $shopId)
+                ->update([
+                    'main_image_path' => $mainImagePath,
+                    'updated_at' => now(),
+                ]);
+        });
     }
 
     private function buildShopViewData(string $shopId): array

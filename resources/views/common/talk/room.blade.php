@@ -36,14 +36,6 @@
                     <i class="far fa-calendar-alt"></i>
                     <span>面談日を提案</span>
                 </button>
-                <button type="button" id="send-hire-message" class="btn-interview btn-interview-result">
-                    <i class="fas fa-circle-check"></i>
-                    <span>採用</span>
-                </button>
-                <button type="button" id="send-reject-message" class="btn-interview btn-interview-result btn-interview-result--negative">
-                    <i class="fas fa-circle-xmark"></i>
-                    <span>不採用</span>
-                </button>
             @endif
             <form action="{{ $blockUrl }}" method="POST">
                 @csrf
@@ -82,13 +74,24 @@
                 @endif
                 <div class="message-block">
                     @if($msg->type === 2)
+                        @php
+                            $selectedOption = $msg->selected_option ? \Carbon\Carbon::parse($msg->selected_option) : null;
+                        @endphp
                         <div class="message-bubble message-bubble-interview">
-                            <div class="interview-title">
-                                <i class="far fa-calendar-alt"></i>
-                                <span>面談候補日</span>
+                            <div class="interview-card-head">
+                                <div class="interview-title">
+                                    <i class="far fa-calendar-alt"></i>
+                                    <span>面談候補日をお送りします</span>
+                                </div>
+                                <span class="interview-badge">日程調整</span>
                             </div>
+                            <p class="interview-body-copy">ご都合の良い日時をお選びください。</p>
                             <ul class="interview-option-list">
                                 @foreach($msg->interview_options as $option)
+                                    @php
+                                        $optionDate = \Carbon\Carbon::parse($option);
+                                        $isSelectedOption = $msg->selected_option === $option;
+                                    @endphp
                                     <li>
                                         @if($isCast && !$msg->selected_option && !$msg->is_mine && empty($blockState['is_blocked']))
                                             <button
@@ -96,20 +99,32 @@
                                                 class="interview-option-btn"
                                                 data-offer-token="{{ $msg->offer_token }}"
                                                 data-option-label="{{ $option }}"
+                                                data-option-display="{{ $optionDate->format('Y年n月j日 H:i') }}"
                                             >
-                                                <span>{{ $option }}</span>
-                                                <i class="fas fa-chevron-right"></i>
+                                                <span class="interview-option-main">
+                                                    <span class="interview-option-date">{{ $optionDate->format('Y年n月j日') }}</span>
+                                                    <span class="interview-option-time">{{ $optionDate->format('H:i') }}</span>
+                                                </span>
+                                                <span class="interview-option-action">選択する</span>
                                             </button>
                                         @else
-                                            <div class="interview-option-btn {{ $msg->selected_option === $option ? 'is-selected' : '' }}">
-                                                <span>{{ $option }}</span>
+                                            <div class="interview-option-btn {{ $isSelectedOption ? 'is-selected' : '' }}">
+                                                <span class="interview-option-main">
+                                                    <span class="interview-option-date">{{ $optionDate->format('Y年n月j日') }}</span>
+                                                    <span class="interview-option-time">{{ $optionDate->format('H:i') }}</span>
+                                                </span>
+                                                @if($isSelectedOption)
+                                                    <span class="interview-option-action">決定済み</span>
+                                                @endif
                                             </div>
                                         @endif
                                     </li>
                                 @endforeach
                             </ul>
-                            @if($msg->selected_option)
-                                <p class="interview-note">確定日時: {{ $msg->selected_option }}</p>
+                            @if($selectedOption)
+                                <p class="interview-note">
+                                    確定日時: {{ $selectedOption->format('Y年n月j日 H:i') }}
+                                </p>
                             @endif
                         </div>
                     @elseif($msg->type === 3)
@@ -118,7 +133,9 @@
                                 <i class="far fa-calendar-check"></i>
                                 <span>面談日が確定しました</span>
                             </div>
-                            <p class="m-0" style="font-size:0.8rem;">{{ $msg->selected_option }}</p>
+                            <p class="interview-confirmed-date">
+                                {{ \Carbon\Carbon::parse($msg->selected_option)->format('Y年n月j日 H:i') }}
+                            </p>
                         </div>
                     @else
                         <div class="message-bubble">
@@ -140,6 +157,25 @@
             </div>
         @endforelse
     </div>
+
+    @if(!empty($canSelectResult))
+        <div class="talk-result-panel">
+            <div class="talk-result-panel-copy">
+                <span class="talk-result-panel-title">面談結果を選択</span>
+                <p>面談日が確定しています。結果をこのトーク内から送信できます。</p>
+            </div>
+            <div class="talk-result-panel-actions">
+                <button type="button" id="send-hire-message" class="btn-interview btn-interview-result">
+                    <i class="fas fa-circle-check"></i>
+                    <span>採用</span>
+                </button>
+                <button type="button" id="send-reject-message" class="btn-interview btn-interview-result btn-interview-result--negative">
+                    <i class="fas fa-circle-xmark"></i>
+                    <span>不採用</span>
+                </button>
+            </div>
+        </div>
+    @endif
 
     {{-- 入力エリア --}}
     @if(!empty($canSend))
@@ -185,6 +221,26 @@
                 <button type="submit" class="btn-interview-submit">面談候補を送信</button>
             </div>
         </form>
+    </div>
+</div>
+@endif
+
+@if($isCast)
+<div id="interview-confirm-overlay" class="interview-modal-overlay" aria-hidden="true">
+    <div class="interview-modal interview-confirm-modal">
+        <div class="interview-modal-header">
+            <h2>この日時で確定しますか？</h2>
+            <button type="button" class="interview-modal-close js-interview-confirm-close" aria-label="閉じる">&times;</button>
+        </div>
+        <p class="interview-modal-desc">確定後、この面談日時が店舗へ送信されます。</p>
+        <div class="interview-confirm-summary">
+            <span class="interview-confirm-summary-label">選択した日時</span>
+            <strong id="interview-confirm-selected" class="interview-confirm-summary-value">-</strong>
+        </div>
+        <div class="interview-modal-footer">
+            <button type="button" class="btn-interview-cancel js-interview-confirm-close">戻る</button>
+            <button type="button" id="interview-confirm-submit" class="btn-interview-submit">この日時で確定</button>
+        </div>
     </div>
 </div>
 @endif
