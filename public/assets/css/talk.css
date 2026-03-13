@@ -94,10 +94,20 @@
 .talk-last-msg {
     font-size: 0.85rem;
     color: #b1a1a1;
+    flex: 1;
+    min-width: 0;
     white-space: nowrap;     /* 折り返さない */
     overflow: hidden;        /* はみ出たら隠す */
     text-overflow: ellipsis; /* 「...」を出す */
     margin: 0;
+}
+
+.talk-last-msg-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
 }
 
 .unread-badge {
@@ -111,6 +121,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 /* --- Talk Tabs（一覧画面で .talk-tabs を使う場合のみ。TALK は共通 sub-header を使用） --- */
@@ -199,6 +210,7 @@
     justify-content: flex-end;
     margin-top: 4px;
     gap: 6px;
+    flex-wrap: wrap;
 }
 
 .talk-block-notice {
@@ -245,6 +257,8 @@
 
 .btn-interview-result--negative {
     border-color: rgba(239, 68, 68, 0.8);
+    color: #fee2e2;
+    background: rgba(80, 12, 12, 0.45);
 }
 
 /* メッセージ表示エリア（最後の吹き出し・日時が入力欄に被らないよう下余白を確保） */
@@ -257,6 +271,48 @@
     flex-direction: column;
     gap: 8px;
     background: var(--color-main);
+}
+
+.talk-result-panel {
+    flex-shrink: 0;
+    margin: 0 15px 10px;
+    padding: 14px;
+    border-radius: 18px;
+    border: 1px solid rgba(212, 175, 55, 0.26);
+    background:
+        radial-gradient(circle at top left, rgba(212, 175, 55, 0.12), transparent 42%),
+        linear-gradient(180deg, rgba(46, 18, 18, 0.96), rgba(26, 11, 14, 0.96));
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+}
+
+.talk-result-panel-copy {
+    margin-bottom: 10px;
+}
+
+.talk-result-panel-title {
+    display: inline-block;
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: #fef3c7;
+    margin-bottom: 4px;
+}
+
+.talk-result-panel-copy p {
+    margin: 0;
+    color: #d9c9c9;
+    font-size: 0.78rem;
+    line-height: 1.5;
+}
+
+.talk-result-panel-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.talk-result-panel-actions .btn-interview {
+    flex: 1;
+    justify-content: center;
+    min-height: 40px;
 }
 
 /* 行全体を横いっぱいに（吹き出し＋日時が収まるよう行間を確保） */
@@ -741,11 +797,47 @@
     cursor: not-allowed;
 }
 
+.interview-confirm-modal {
+    max-width: 340px;
+}
+
+.interview-confirm-summary {
+    margin-top: 12px;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(212, 175, 55, 0.28);
+    background: rgba(255, 248, 220, 0.06);
+}
+
+.interview-confirm-summary-label {
+    display: block;
+    font-size: 0.72rem;
+    color: rgba(245, 230, 230, 0.72);
+    margin-bottom: 6px;
+}
+
+.interview-confirm-summary-value {
+    display: block;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #fff7da;
+}
+
 /* ==========================================================================
    面談日候補メッセージ
    ========================================================================== */
 .message-bubble-interview {
-    padding: 8px 10px 8px;
+    min-width: min(280px, 100%);
+    padding: 12px;
+    border-radius: 16px;
+}
+
+.interview-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
 }
 
 .interview-title {
@@ -753,61 +845,123 @@
     align-items: center;
     gap: 6px;
     font-size: 0.8rem;
-    font-weight: 600;
-    margin-bottom: 4px;
+    font-weight: 700;
+    margin-bottom: 0;
 }
 
 .interview-title i {
     font-size: 0.85rem;
 }
 
+.interview-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: rgba(212, 175, 55, 0.14);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    color: #fef3c7;
+    font-size: 0.68rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.interview-body-copy {
+    margin: 0 0 10px;
+    font-size: 0.76rem;
+    line-height: 1.5;
+    color: rgba(245, 230, 230, 0.84);
+}
+
 .interview-option-list {
     list-style: none;
     padding: 0;
-    margin: 4px 0 6px;
+    margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 8px;
 }
 
 .interview-option-btn {
     width: 100%;
     text-align: left;
-    border-radius: 999px;
-    border: 1px solid rgba(212, 175, 55, 0.65);
-    background: rgba(0, 0, 0, 0.2);
+    border-radius: 14px;
+    border: 1px solid rgba(212, 175, 55, 0.28);
+    background: rgba(255, 248, 220, 0.08);
     color: #fef3c7;
     font-size: 0.76rem;
-    padding: 4px 10px;
+    padding: 10px 12px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
+    gap: 12px;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
 }
 
-.interview-option-btn span {
+.interview-option-main {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
     flex: 1;
 }
 
-.interview-option-btn i {
-    font-size: 0.75rem;
-    opacity: 0.9;
+.interview-option-date {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #fff7da;
 }
 
-.interview-option-btn:hover {
+.interview-option-time {
+    font-size: 0.7rem;
+    color: rgba(245, 230, 230, 0.7);
+}
+
+.interview-option-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: rgba(212, 175, 55, 0.16);
+    color: #fef3c7;
+    font-size: 0.68rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+button.interview-option-btn:hover {
     background: rgba(212, 175, 55, 0.18);
+    border-color: rgba(212, 175, 55, 0.5);
+    transform: translateY(-1px);
 }
 
 .interview-option-btn.is-selected {
-    background: rgba(212, 175, 55, 0.25);
+    background: rgba(212, 175, 55, 0.22);
+    border-color: rgba(212, 175, 55, 0.55);
     color: #1a0a0a;
+}
+
+.interview-option-btn.is-selected .interview-option-date,
+.interview-option-btn.is-selected .interview-option-time,
+.interview-option-btn.is-selected .interview-option-action {
+    color: #2c1a1d;
+}
+
+.interview-confirmed-date {
+    margin: 0;
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #fff7da;
 }
 
 .interview-note {
     font-size: 0.7rem;
-    opacity: 0.8;
-    margin: 2px 0 0;
+    opacity: 0.84;
+    margin: 10px 0 0;
+    color: rgba(245, 230, 230, 0.82);
 }
 
 /* --- ピン留めボタン --- */
