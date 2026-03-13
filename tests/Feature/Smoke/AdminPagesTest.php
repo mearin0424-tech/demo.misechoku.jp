@@ -2,14 +2,11 @@
 
 namespace Tests\Feature\Smoke;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\SmokeRouteMatrix;
 use Tests\TestCase;
 
 class AdminPagesTest extends TestCase
 {
-    use RefreshDatabase;
-
     protected function setUp(): void
     {
         parent::setUp();
