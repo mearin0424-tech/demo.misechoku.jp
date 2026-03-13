@@ -214,9 +214,9 @@ class AdminMasterService
                 'fields' => [
                     ['input' => 'content', 'column' => $this->reviewContentColumn(), 'label' => '設問内容', 'placeholder' => '例: スタッフの対応は親切ですか？'],
                 ],
-                'uses_del_flg' => $this->reviewContentColumn() === 'content',
-                'uses_is_active' => $this->reviewContentColumn() === 'name',
-                'uses_sort_order' => $this->reviewContentColumn() === 'name',
+                'uses_del_flg' => $this->hasColumn('review_contents', 'del_flg'),
+                'uses_is_active' => $this->hasColumn('review_contents', 'is_active'),
+                'uses_sort_order' => $this->hasColumn('review_contents', 'sort_order'),
             ],
             [
                 'key' => 'column_categories',

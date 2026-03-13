@@ -6,7 +6,7 @@
     <div class="mypage-section mypage-quick-actions">
         <h2 class="mypage-actions-title">メニュー</h2>
         <a href="{{ route('cast.mypage.employment') }}" class="btn-action-card job {{ $current === 'employment' ? 'is-current' : '' }}">
-            <span class="btn-action-icon-wrap"><i class="fas fa-briefcase"></i></span>
+            <span class="btn-action-icon-wrap"><i class="far fa-folder-open"></i></span>
             <span class="btn-action-body">
                 <span class="btn-action-label">EMPLOYMENT</span>
                 <span class="btn-action-text">採用状況</span>
@@ -14,7 +14,7 @@
             <i class="fas fa-chevron-right btn-action-arrow"></i>
         </a>
         <a href="{{ route('cast.mypage.payment') }}" class="btn-action-card manage {{ $current === 'payment' ? 'is-current' : '' }}">
-            <span class="btn-action-icon-wrap"><i class="fas fa-file-invoice-dollar"></i></span>
+            <span class="btn-action-icon-wrap"><i class="far fa-credit-card"></i></span>
             <span class="btn-action-body">
                 <span class="btn-action-label">PAYMENT</span>
                 <span class="btn-action-text">請求・入金管理</span>

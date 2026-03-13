@@ -24,22 +24,28 @@ class BillingManagementService
 
     public function normalizeBankAccountData(array $data): array
     {
+        $accountHolderName = trim((string) ($data['account_holder_name'] ?? ''));
+        $accountName = trim((string) ($data['account_name'] ?? ''));
+
         return [
             'bank_name' => trim((string) ($data['bank_name'] ?? '')),
             'branch_name' => $this->nullIfEmpty(trim((string) ($data['branch_name'] ?? ''))),
             'account_type' => trim((string) ($data['account_type'] ?? '')),
             'account_number' => preg_replace('/\D+/', '', (string) ($data['account_number'] ?? '')) ?? '',
-            'account_holder_name' => trim((string) ($data['account_holder_name'] ?? '')),
-            'account_name' => trim((string) ($data['account_name'] ?? '')),
+            'account_holder_name' => $accountHolderName,
+            'account_name' => $accountName !== '' ? $accountName : $accountHolderName,
         ];
     }
 
     public function getAdminBankAccount(): ?object
     {
-        return DB::table('admin_bank_accounts')
+        $account = DB::table('admin_bank_accounts')
+            ->select($this->bankAccountSelectColumns('admin_bank_accounts'))
             ->where('is_active', true)
             ->orderByDesc('id')
             ->first();
+
+        return $this->normalizeBankAccountRecord($account);
     }
 
     public function saveAdminBankAccount(array $data): void
@@ -48,7 +54,7 @@ class BillingManagementService
 
         DB::table('admin_bank_accounts')->update(['is_active' => false, 'updated_at' => now()]);
 
-        DB::table('admin_bank_accounts')->insert([
+        DB::table('admin_bank_accounts')->insert($this->filterExistingColumns('admin_bank_accounts', [
             'bank_name' => $data['bank_name'],
             'branch_name' => $data['branch_name'] ?? null,
             'account_type' => $data['account_type'],
@@ -58,14 +64,17 @@ class BillingManagementService
             'is_active' => true,
             'created_at' => now(),
             'updated_at' => now(),
-        ]);
+        ]));
     }
 
     public function getCastBankAccount(string $castId): ?object
     {
-        return DB::table('bank_accounts')
+        $account = DB::table('bank_accounts')
+            ->select($this->bankAccountSelectColumns('bank_accounts'))
             ->where('member_id', $castId)
             ->first();
+
+        return $this->normalizeBankAccountRecord($account);
     }
 
     public function saveCastBankAccount(string $castId, array $data): void
@@ -74,7 +83,7 @@ class BillingManagementService
 
         DB::table('bank_accounts')->updateOrInsert(
             ['member_id' => $castId],
-            [
+            $this->filterExistingColumns('bank_accounts', [
                 'bank_name' => $data['bank_name'],
                 'branch_name' => $data['branch_name'] ?? null,
                 'account_type' => $data['account_type'],
@@ -83,15 +92,18 @@ class BillingManagementService
                 'account_name' => $data['account_name'],
                 'updated_at' => now(),
                 'created_at' => now(),
-            ]
+            ])
         );
     }
 
     public function getShopBankAccount(string $shopId): ?object
     {
-        return DB::table('bank_account_shops')
+        $account = DB::table('bank_account_shops')
+            ->select($this->bankAccountSelectColumns('bank_account_shops'))
             ->where('shop_id', $shopId)
             ->first();
+
+        return $this->normalizeBankAccountRecord($account);
     }
 
     public function saveShopBankAccount(string $shopId, array $data): void
@@ -100,7 +112,7 @@ class BillingManagementService
 
         DB::table('bank_account_shops')->updateOrInsert(
             ['shop_id' => $shopId],
-            [
+            $this->filterExistingColumns('bank_account_shops', [
                 'bank_name' => $data['bank_name'],
                 'branch_name' => $data['branch_name'] ?? null,
                 'account_type' => $data['account_type'],
@@ -109,7 +121,7 @@ class BillingManagementService
                 'account_name' => $data['account_name'],
                 'updated_at' => now(),
                 'created_at' => now(),
-            ]
+            ])
         );
     }
 
@@ -216,7 +228,7 @@ class BillingManagementService
         }
 
         $amounts = $this->calculateAmounts($application);
-        $depositId = DB::table('application_deposits')->insertGetId([
+        $depositId = DB::table('application_deposits')->insertGetId($this->filterExistingColumns('application_deposits', [
             'shop_job_application_id' => $application->id,
             'status' => self::STATUS_CAST_REQUESTED,
             'is_read' => false,
@@ -226,7 +238,7 @@ class BillingManagementService
             'cast_transfer_amount' => $amounts['cast_transfer_amount'],
             'created_at' => now(),
             'updated_at' => now(),
-        ]);
+        ]));
 
         $this->appendHistory($depositId, self::STATUS_CAST_REQUESTED);
 
@@ -255,10 +267,10 @@ class BillingManagementService
 
         DB::table('application_deposits')
             ->where('id', $deposit->id)
-            ->update([
+            ->update($this->filterExistingColumns('application_deposits', [
                 'status' => self::STATUS_SHOP_APPROVED,
                 'updated_at' => now(),
-            ]);
+            ]));
 
         $this->appendHistory((int) $deposit->id, self::STATUS_SHOP_APPROVED);
 
@@ -292,7 +304,7 @@ class BillingManagementService
 
         DB::table('application_deposits')
             ->where('id', $depositId)
-            ->update([
+            ->update($this->filterExistingColumns('application_deposits', [
                 'status' => self::STATUS_INVOICE_ISSUED,
                 'invoice_number' => $invoiceNumber,
                 'bonus_amount' => $amounts['bonus_amount'],
@@ -303,7 +315,7 @@ class BillingManagementService
                 'invoice_due_date' => $issuedAt->copy()->addDays(self::INVOICE_DUE_DAYS)->toDateString(),
                 'invoice_sent_at' => $issuedAt,
                 'updated_at' => $issuedAt,
-            ]);
+            ]));
 
         $this->appendHistory($depositId, self::STATUS_INVOICE_ISSUED);
 
@@ -332,13 +344,13 @@ class BillingManagementService
 
         DB::table('application_deposits')
             ->where('id', $deposit->id)
-            ->update([
+            ->update($this->filterExistingColumns('application_deposits', [
                 'status' => self::STATUS_SHOP_PAYMENT_REPORTED,
                 'shop_payment_reported_at' => $reportedAt,
                 'shop_payment_reported_amount' => (int) $payload['reported_amount'],
                 'shop_payment_reference' => $payload['reference'] ?? null,
                 'updated_at' => now(),
-            ]);
+            ]));
 
         if ((int) $deposit->status === self::STATUS_INVOICE_ISSUED) {
             $this->appendHistory((int) $deposit->id, self::STATUS_SHOP_PAYMENT_REPORTED);
@@ -377,11 +389,11 @@ class BillingManagementService
 
         DB::table('application_deposits')
             ->where('id', $depositId)
-            ->update([
+            ->update($this->filterExistingColumns('application_deposits', [
                 'status' => self::STATUS_SHOP_PAYMENT_CONFIRMED,
                 'shop_payment_confirmed_at' => now(),
                 'updated_at' => now(),
-            ]);
+            ]));
 
         $this->appendHistory($depositId, self::STATUS_SHOP_PAYMENT_CONFIRMED);
 
@@ -415,13 +427,13 @@ class BillingManagementService
 
         DB::table('application_deposits')
             ->where('id', $depositId)
-            ->update([
+            ->update($this->filterExistingColumns('application_deposits', [
                 'status' => self::STATUS_CAST_TRANSFERRED,
                 'cast_transferred_at' => Carbon::parse($payload['transferred_at']),
                 'cast_transfer_reference' => $payload['reference'] ?? null,
                 'cast_transfer_note' => $payload['note'] ?? null,
                 'updated_at' => now(),
-            ]);
+            ]));
 
         $this->appendHistory($depositId, self::STATUS_CAST_TRANSFERRED);
 
@@ -438,11 +450,11 @@ class BillingManagementService
 
         DB::table('application_deposits')
             ->where('id', $deposit->id)
-            ->update([
+            ->update($this->filterExistingColumns('application_deposits', [
                 'status' => self::STATUS_COMPLETED,
                 'completed_at' => now(),
                 'updated_at' => now(),
-            ]);
+            ]));
 
         $this->appendHistory((int) $deposit->id, self::STATUS_COMPLETED);
 
@@ -652,7 +664,13 @@ class BillingManagementService
             ->leftJoin('bank_accounts', 'casts.id', '=', 'bank_accounts.member_id')
             ->leftJoin('bank_account_shops', 'shops.id', '=', 'bank_account_shops.shop_id')
             ->select(
-                'application_deposits.*',
+                'application_deposits.id',
+                'application_deposits.shop_job_application_id',
+                'application_deposits.status',
+                'application_deposits.is_read',
+                'application_deposits.created_at',
+                'application_deposits.updated_at',
+                ...$this->optionalDepositSelects(),
                 'shop_job_applications.id as application_id',
                 'shop_job_applications.cast_id',
                 'shop_job_applications.result_date',
@@ -719,13 +737,8 @@ class BillingManagementService
 
     private function buildCastDepositRequestTarget(object $application): array
     {
-        $reviewContentColumn = $this->reviewContentColumn();
-
-        $reviewContents = DB::table('review_contents')
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->get(['id', DB::raw($reviewContentColumn . ' as name')])
+        $reviewContents = $this->orderedReviewContentsQuery()
+            ->get(['id', DB::raw($this->reviewContentColumn() . ' as name')])
             ->map(fn (object $row) => [
                 'id' => (int) $row->id,
                 'name' => $row->name,
@@ -770,15 +783,13 @@ class BillingManagementService
         $reviewDetails = [];
 
         if ($review) {
-            $reviewContentColumn = $this->reviewContentColumn();
-
-            $reviewDetails = DB::table('review_details')
-                ->join('review_contents', 'review_details.review_content_id', '=', 'review_contents.id')
+            $reviewDetails = $this->orderReviewContentJoin(
+                DB::table('review_details')
+                ->join('review_contents', 'review_details.' . $this->reviewDetailContentColumn(), '=', 'review_contents.id')
                 ->where('review_details.review_id', $review->id)
-                ->orderBy('review_contents.sort_order')
-                ->orderBy('review_contents.id')
+            )
                 ->get([
-                    DB::raw('review_contents.' . $reviewContentColumn . ' as name'),
+                    DB::raw('review_contents.' . $this->reviewContentColumn() . ' as name'),
                     'review_details.score',
                 ])
                 ->map(fn (object $row) => [
@@ -808,10 +819,7 @@ class BillingManagementService
     private function validateReviewPayload(array $payload): array
     {
         $comment = trim((string) ($payload['review_comment'] ?? ''));
-        $requiredContentIds = DB::table('review_contents')
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->orderBy('id')
+        $requiredContentIds = $this->orderedReviewContentsQuery()
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->all();
@@ -852,7 +860,7 @@ class BillingManagementService
 
         $detailRows = $scores->map(fn ($score, $contentId) => [
             'review_id' => $reviewId,
-            'review_content_id' => (int) $contentId,
+            $this->reviewDetailContentColumn() => (int) $contentId,
             'score' => $score,
         ])->values()->all();
 
@@ -870,15 +878,13 @@ class BillingManagementService
         $reviewDetails = [];
 
         if ($review) {
-            $reviewContentColumn = $this->reviewContentColumn();
-
-            $reviewDetails = DB::table('review_details')
-                ->join('review_contents', 'review_details.review_content_id', '=', 'review_contents.id')
+            $reviewDetails = $this->orderReviewContentJoin(
+                DB::table('review_details')
+                ->join('review_contents', 'review_details.' . $this->reviewDetailContentColumn(), '=', 'review_contents.id')
                 ->where('review_details.review_id', $review->id)
-                ->orderBy('review_contents.sort_order')
-                ->orderBy('review_contents.id')
+            )
                 ->get([
-                    DB::raw('review_contents.' . $reviewContentColumn . ' as name'),
+                    DB::raw('review_contents.' . $this->reviewContentColumn() . ' as name'),
                     'review_details.score',
                 ])
                 ->map(fn (object $detail) => [
@@ -1016,13 +1022,15 @@ class BillingManagementService
 
     private function normalizeBankAccount(?object $bank): array
     {
+        $accountHolderName = $bank->account_holder_name ?? $bank->account_name ?? '';
+
         return [
             'exists' => $bank !== null,
             'bank_name' => $bank->bank_name ?? '',
             'branch_name' => $bank->branch_name ?? '',
             'account_type' => $bank->account_type ?? 'ordinary',
             'account_number' => $bank->account_number ?? '',
-            'account_holder_name' => $bank->account_holder_name ?? '',
+            'account_holder_name' => $accountHolderName,
             'account_name' => $bank->account_name ?? '',
             'account_type_label' => $this->accountTypeLabel($bank->account_type ?? 'ordinary'),
         ];
@@ -1056,10 +1064,129 @@ class BillingManagementService
         return is_array($decoded) ? $decoded : [];
     }
 
+    private function orderedReviewContentsQuery()
+    {
+        $query = DB::table('review_contents');
+
+        if (Schema::hasTable('review_contents') && Schema::hasColumn('review_contents', 'del_flg')) {
+            $query->where('del_flg', 0);
+        } elseif (Schema::hasTable('review_contents') && Schema::hasColumn('review_contents', 'is_active')) {
+            $query->where('is_active', true);
+        }
+
+        if (Schema::hasTable('review_contents') && Schema::hasColumn('review_contents', 'sort_order')) {
+            $query->orderBy('sort_order');
+        }
+
+        return $query->orderBy('id');
+    }
+
+    private function orderReviewContentJoin($query)
+    {
+        if (Schema::hasTable('review_contents') && Schema::hasColumn('review_contents', 'sort_order')) {
+            $query->orderBy('review_contents.sort_order');
+        }
+
+        return $query->orderBy('review_contents.id');
+    }
+
     private function reviewContentColumn(): string
     {
         return Schema::hasTable('review_contents') && Schema::hasColumn('review_contents', 'content')
             ? 'content'
             : 'name';
+    }
+
+    private function reviewDetailContentColumn(): string
+    {
+        if (Schema::hasTable('review_details') && Schema::hasColumn('review_details', 'val')) {
+            return 'val';
+        }
+
+        return 'review_content_id';
+    }
+
+    private function filterExistingColumns(string $table, array $payload): array
+    {
+        if (!Schema::hasTable($table)) {
+            return $payload;
+        }
+
+        return collect($payload)
+            ->filter(fn ($value, $column) => Schema::hasColumn($table, $column))
+            ->all();
+    }
+
+    private function bankAccountSelectColumns(string $table): array
+    {
+        $columns = [
+            'id',
+            'bank_name',
+            'branch_name',
+            'account_type',
+            'account_number',
+            'account_name',
+        ];
+
+        if (Schema::hasTable($table) && Schema::hasColumn($table, 'account_holder_name')) {
+            $columns[] = 'account_holder_name';
+        } else {
+            $columns[] = DB::raw('account_name as account_holder_name');
+        }
+
+        if (Schema::hasTable($table) && Schema::hasColumn($table, 'member_id')) {
+            $columns[] = 'member_id';
+        }
+
+        if (Schema::hasTable($table) && Schema::hasColumn($table, 'shop_id')) {
+            $columns[] = 'shop_id';
+        }
+
+        if (Schema::hasTable($table) && Schema::hasColumn($table, 'is_active')) {
+            $columns[] = 'is_active';
+        }
+
+        return $columns;
+    }
+
+    private function normalizeBankAccountRecord(?object $account): ?object
+    {
+        if (!$account) {
+            return null;
+        }
+
+        $account->account_holder_name = $account->account_holder_name ?? $account->account_name ?? '';
+
+        return $account;
+    }
+
+    private function optionalDepositSelects(): array
+    {
+        $optionalColumns = [
+            'invoice_number',
+            'bonus_amount',
+            'system_fee_amount',
+            'invoice_amount',
+            'cast_transfer_amount',
+            'invoice_issued_at',
+            'invoice_due_date',
+            'invoice_sent_at',
+            'shop_payment_reported_at',
+            'shop_payment_reported_amount',
+            'shop_payment_reference',
+            'shop_payment_confirmed_at',
+            'cast_transferred_at',
+            'cast_transfer_reference',
+            'cast_transfer_note',
+            'completed_at',
+        ];
+
+        return array_map(function (string $column) {
+            if (Schema::hasTable('application_deposits') && Schema::hasColumn('application_deposits', $column)) {
+                return 'application_deposits.' . $column;
+            }
+
+            return DB::raw('NULL as ' . $column);
+        }, $optionalColumns);
     }
 }

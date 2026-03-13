@@ -4,6 +4,7 @@ namespace App\Repositories\Bank;
 use App\Models\BankAccount;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use App\Lib\StrUtil;
 use App\Lib\FileUtil;
 use Illuminate\Http\Request;
@@ -31,18 +32,10 @@ class BankAccountRepository implements BankAccountRepositoryInterface
      */
     public function store(Request $request,$member_id)
     {
-
-
         BankAccount::updateOrCreate(
             ['member_id' => $member_id], 
-            $request->all()
+            $this->filterPayload('bank_accounts', $request->all())
         );
-
-/*
-        $project = $this->project->create($data);
-        return $project;
-*/
-
     }
 
     public function findBankAccountByMemberId($member_id)
@@ -59,18 +52,10 @@ class BankAccountRepository implements BankAccountRepositoryInterface
 
     public function storeByShopId(Request $request,$shop_id)
     {
-
-
         BankAccountShop::updateOrCreate(
             ['shop_id' => $shop_id], 
-            $request->all()
+            $this->filterPayload('bank_account_shops', $request->all())
         );
-
-/*
-        $project = $this->project->create($data);
-        return $project;
-*/
-
     }
 
     public function findBankAccountByShopId($shop_id)
@@ -82,6 +67,21 @@ class BankAccountRepository implements BankAccountRepositoryInterface
 
         return $records;
 
+    }
+
+    private function filterPayload(string $table, array $payload): array
+    {
+        return collect($payload)
+            ->only([
+                'bank_name',
+                'branch_name',
+                'account_type',
+                'account_number',
+                'account_holder_name',
+                'account_name',
+            ])
+            ->filter(fn ($value, $column) => Schema::hasColumn($table, $column))
+            ->all();
     }
 
 

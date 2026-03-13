@@ -537,7 +537,7 @@
                 ? state.answers.typeTitle + '（' + state.answers.type + '）'
                 : state.answers.type;
             if (role === 'cast') {
-                addAiMessage('**' + typeLabel + '** だね。次は**希望のエリア**を教えてね。', getAreaOptions());
+                addAiMessage('希望のエリアは？', getAreaOptions());
             } else {
                 addAiMessage('**' + typeLabel + '** を踏まえて見ていくね。まずは**希望のエリア**を教えて。', getAreaOptions());
             }

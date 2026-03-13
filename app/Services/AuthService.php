@@ -2,9 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\Cast;
 use App\Models\Shop;
+use App\Models\Manager;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,23 +14,32 @@ use Illuminate\Support\Facades\Auth;
  */
 class AuthService
 {
+    private const ADMIN_ROLE_TYPE = 10;
+
     /**
      * キャストの新規登録
      */
     public function registerCast(array $data): Cast
     {
-        // User (認証基盤) と Cast (属性) を同時に作成
-        $user = User::create([
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-            'role' => 'cast',
-        ]);
+        return DB::transaction(function () use ($data): Cast {
+            $castId = $this->nextSequentialId('casts', 'c');
 
-        return Cast::create([
-            'user_id' => $user->id,
-            'nickname' => $data['nickname'],
-            // その他の初期値
-        ]);
+            $cast = Cast::query()->create([
+                'id' => $castId,
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+                'status' => 1,
+                'identity_status' => 1,
+                'last_login_at' => now(),
+            ]);
+
+            $cast->profile()->create([
+                'nickname' => $data['nickname'] ?? null,
+                'name' => $data['name'] ?? null,
+            ]);
+
+            return $cast;
+        });
     }
 
     /**
@@ -37,17 +47,37 @@ class AuthService
      */
     public function registerShop(array $data): Shop
     {
-        $user = User::create([
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-            'role' => 'shop',
-        ]);
+        return DB::transaction(function () use ($data): Shop {
+            $shopId = $this->nextSequentialId('shops', 's');
+            $managerId = $this->nextSequentialId('shop_managers', 'm');
 
-        return Shop::create([
-            'user_id' => $user->id,
-            'shop_name' => $data['shop_name'],
-            // 求人票などの初期データ
-        ]);
+            $shop = Shop::query()->create([
+                'id' => $shopId,
+                'email' => $data['email'] ?? null,
+                'status' => 1,
+                'license_status' => 1,
+            ]);
+
+            $shop->profile()->create([
+                'shop_name' => $data['shop_name'],
+                'pref' => $data['pref'] ?? '',
+                'addr2' => $data['addr2'] ?? ($data['address'] ?? '-'),
+                'city' => $data['city'] ?? null,
+            ]);
+
+            Manager::query()->create([
+                'id' => $managerId,
+                'shop_id' => $shopId,
+                'name' => $data['manager_name'] ?? ($data['contact_name'] ?? null),
+                'email' => $data['email'] ?? null,
+                'password' => Hash::make($data['password']),
+                'role' => 1,
+                'status' => 1,
+                'last_login_at' => now(),
+            ]);
+
+            return $shop;
+        });
     }
 
     /**
@@ -59,5 +89,19 @@ class AuthService
             'email' => $email,
             'password' => $password
         ]);
+    }
+
+    private function nextSequentialId(string $table, string $prefix): string
+    {
+        $lastId = DB::table($table)
+            ->where('id', 'like', $prefix . '%')
+            ->orderByDesc('id')
+            ->value('id');
+
+        $nextNumber = $lastId
+            ? ((int) substr($lastId, 1)) + 1
+            : 1;
+
+        return $prefix . str_pad((string) $nextNumber, 8, '0', STR_PAD_LEFT);
     }
 }

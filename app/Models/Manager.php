@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Manager extends Authenticatable
 {
@@ -34,5 +36,15 @@ class Manager extends Authenticatable
         return [
             'last_login_at' => 'datetime',
         ];
+    }
+
+    public function shop(): BelongsTo
+    {
+        return $this->belongsTo(Shop::class, 'shop_id', 'id');
+    }
+
+    public function jobs(): HasMany
+    {
+        return $this->hasMany(ShopJob::class, 'shop_id', 'shop_id');
     }
 }

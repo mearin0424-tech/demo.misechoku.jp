@@ -1,7 +1,7 @@
 <?php
 namespace App\Repositories\Bank;
 
-use App\Models\BankAccounts;
+use App\Models\BankAccount;
 use Illuminate\Http\Request;
           
 interface BankAccountRepositoryInterface

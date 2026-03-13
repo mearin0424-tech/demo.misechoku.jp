@@ -11,9 +11,8 @@ return new class extends Migration
     {
         Schema::create('review_contents', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('name');
-            $table->unsignedInteger('sort_order')->default(0);
-            $table->boolean('is_active')->default(true);
+            $table->string('content')->comment('設問内容');
+            $table->boolean('del_flg')->default(false)->comment('削除フラグ');
             $table->timestamps();
         });
 
@@ -27,33 +26,29 @@ return new class extends Migration
         DB::table('review_contents')->insert([
             [
                 'id' => 1,
-                'name' => '接客',
-                'sort_order' => 1,
-                'is_active' => true,
+                'content' => '接客',
+                'del_flg' => false,
                 'created_at' => '2025-01-14 05:33:10',
                 'updated_at' => '2025-01-14 05:33:10',
             ],
             [
                 'id' => 2,
-                'name' => '雰囲気',
-                'sort_order' => 2,
-                'is_active' => true,
+                'content' => '雰囲気',
+                'del_flg' => false,
                 'created_at' => '2025-01-14 05:33:10',
                 'updated_at' => '2025-01-14 05:33:10',
             ],
             [
                 'id' => 3,
-                'name' => '給与条件',
-                'sort_order' => 3,
-                'is_active' => true,
+                'content' => '給与条件',
+                'del_flg' => false,
                 'created_at' => '2025-01-14 05:33:10',
                 'updated_at' => '2025-01-14 05:33:10',
             ],
             [
                 'id' => 4,
-                'name' => '働きやすさ',
-                'sort_order' => 4,
-                'is_active' => true,
+                'content' => '働きやすさ',
+                'del_flg' => false,
                 'created_at' => '2025-01-14 05:33:10',
                 'updated_at' => '2025-01-14 05:33:10',
             ],
@@ -80,8 +75,10 @@ return new class extends Migration
             ],
         ]);
 
-        Schema::table('review_details', function (Blueprint $table) {
-            $table->foreign('review_content_id')
+        $reviewContentColumn = Schema::hasColumn('review_details', 'val') ? 'val' : 'review_content_id';
+
+        Schema::table('review_details', function (Blueprint $table) use ($reviewContentColumn) {
+            $table->foreign($reviewContentColumn)
                 ->references('id')
                 ->on('review_contents')
                 ->onDelete('cascade');
@@ -90,8 +87,10 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('review_details', function (Blueprint $table) {
-            $table->dropForeign(['review_content_id']);
+        $reviewContentColumn = Schema::hasColumn('review_details', 'val') ? 'val' : 'review_content_id';
+
+        Schema::table('review_details', function (Blueprint $table) use ($reviewContentColumn) {
+            $table->dropForeign([$reviewContentColumn]);
         });
 
         Schema::dropIfExists('ng_words');
