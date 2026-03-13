@@ -3,38 +3,16 @@
 namespace App\Http\Controllers\Shops;
 
 use App\Http\Controllers\Common\SearchController as BaseSearchController;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SearchController extends BaseSearchController
 {
     public function index(Request $request, ?string $tab = 'timeline')
     {
-        // タイムラインデータ（キャストの投稿）
-        $timelineData = [
-            [
-                'name' => '美咲',
-                'img' => asset('storage/mock/casts/1-1.png'),
-                'time' => '10分前',
-                'text' => "今から六本木エリアで働けます！\nお誘い待ってます✨",
-                'tags' => ['モデル系', 'お酒強い']
-            ],
-            [
-                'name' => '愛華',
-                'img' => asset('storage/mock/casts/2-1.png'),
-                'time' => '30分前',
-                'text' => "今日から新しく登録しました！\nよろしくお願いします♪",
-                'tags' => ['癒やし系', '聞き上手']
-            ]
-        ];
-
-        // キャスト一覧（名前・タグで検索用）
-        $allItems = [
-            ['id' => 1, 'name' => 'みさき', 'age' => 23, 'img' => asset('storage/mock/casts/1-1.png'), 'tags' => ['モデル系', 'お酒強い']],
-            ['id' => 2, 'name' => '愛華', 'age' => 21, 'img' => asset('storage/mock/casts/2-1.png'), 'tags' => ['癒やし系', '女子大生']],
-            ['id' => 3, 'name' => 'Rena', 'age' => 25, 'img' => asset('storage/mock/casts/3-1.png'), 'tags' => ['フリーランス', 'ハーフ系']],
-        ];
-
-        $items = $this->filterShopSearchItems($allItems, $request);
+        $timelineData = $this->buildTimelineData();
+        $items = $this->buildSearchItems($request);
 
         $activeTab = 'pane-' . (in_array($tab, ['timeline', 'list', 'ai'], true) ? $tab : 'timeline');
 
@@ -47,38 +25,128 @@ class SearchController extends BaseSearchController
         ]);
     }
 
-    /**
-     * 一覧・検索：キーワード・業種などでフィルタ（モック用）
-     */
-    private function filterShopSearchItems(array $items, Request $request): array
+    private function buildTimelineData(): array
+    {
+        $rows = DB::table('casts')
+            ->join('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id')
+            ->leftJoin('cast_images as main_cast_image', function ($join) {
+                $join->on('casts.id', '=', 'main_cast_image.cast_id')
+                    ->where('main_cast_image.type', 1)
+                    ->where('main_cast_image.is_main', 1);
+            })
+            ->whereNotNull('cast_profiles.pr')
+            ->where('cast_profiles.pr', '<>', '')
+            ->orderByDesc('cast_profiles.updated_at')
+            ->orderByDesc('casts.id')
+            ->select(
+                'casts.id',
+                'cast_profiles.nickname',
+                'cast_profiles.name',
+                'cast_profiles.pr',
+                'cast_profiles.main_image_path',
+                'cast_profiles.updated_at',
+                'main_cast_image.image_path as fallback_image_path'
+            )
+            ->limit(20)
+            ->get();
+
+        return $rows->map(function ($row) {
+            $updatedAt = $row->updated_at ? Carbon::parse($row->updated_at) : null;
+
+            return [
+                'name' => $this->castDisplayName($row),
+                'img' => $this->assetPathForStored($row->main_image_path ?: $row->fallback_image_path),
+                'time' => $updatedAt ? $updatedAt->locale('ja')->diffForHumans() : '',
+                'text' => (string) $row->pr,
+            ];
+        })->all();
+    }
+
+    private function buildSearchItems(Request $request): array
     {
         $keyword = $request->query('keyword');
         $keyword = is_string($keyword) ? trim($keyword) : '';
         $normalizedKeyword = $this->normalizeSearchText($keyword);
         $industries = $request->query('industry', []);
-        $industries = is_array($industries) ? $industries : (is_string($industries) ? [$industries] : []);
+        $industries = is_array($industries) ? array_values(array_filter($industries, 'is_string')) : (is_string($industries) ? [$industries] : []);
 
-        return array_values(array_filter($items, function ($item) use ($normalizedKeyword, $industries) {
-            if ($normalizedKeyword !== '') {
-                $haystack = ($item['name'] ?? '') . ' ' . implode(' ', $item['tags'] ?? []);
-                if (!str_contains($this->normalizeSearchText($haystack), $normalizedKeyword)) {
-                    return false;
+        $rows = DB::table('casts')
+            ->join('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id')
+            ->leftJoin('cast_images as main_cast_image', function ($join) {
+                $join->on('casts.id', '=', 'main_cast_image.cast_id')
+                    ->where('main_cast_image.type', 1)
+                    ->where('main_cast_image.is_main', 1);
+            })
+            ->select(
+                'casts.id',
+                'cast_profiles.nickname',
+                'cast_profiles.name',
+                'cast_profiles.birthday',
+                'cast_profiles.pref',
+                'cast_profiles.city',
+                'cast_profiles.pr',
+                'cast_profiles.main_image_path',
+                'main_cast_image.image_path as fallback_image_path'
+            )
+            ->orderByDesc('cast_profiles.updated_at')
+            ->orderByDesc('casts.id');
+
+        if (!empty($industries) && DB::getSchemaBuilder()->hasTable('cast_industry')) {
+            $rows->join('cast_industry', 'casts.id', '=', 'cast_industry.cast_id')
+                ->join('industries', 'cast_industry.industry_id', '=', 'industries.id')
+                ->whereIn('industries.name', $industries)
+                ->distinct();
+        }
+
+        return $rows->get()
+            ->filter(function ($row) use ($normalizedKeyword) {
+                if ($normalizedKeyword === '') {
+                    return true;
                 }
-            }
-            if (!empty($industries)) {
-                $itemTags = $item['tags'] ?? [];
-                $match = false;
-                foreach ($industries as $ind) {
-                    if (in_array($ind, $itemTags, true)) {
-                        $match = true;
-                        break;
-                    }
-                }
-                if (!$match) {
-                    return false;
-                }
-            }
-            return true;
-        }));
+
+                $haystack = implode(' ', array_filter([
+                    $row->nickname,
+                    $row->name,
+                    $row->pref,
+                    $row->city,
+                    $row->pr,
+                ]));
+
+                return str_contains($this->normalizeSearchText($haystack), $normalizedKeyword);
+            })
+            ->map(function ($row) {
+                $birthday = $row->birthday ? Carbon::parse($row->birthday) : null;
+
+                return [
+                    'id' => $row->id,
+                    'name' => $this->castDisplayName($row),
+                    'age' => $birthday?->age,
+                    'img' => $this->assetPathForStored($row->main_image_path ?: $row->fallback_image_path),
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    private function castDisplayName(object $row): string
+    {
+        return (string) ($row->nickname ?: $row->name ?: 'キャスト');
+    }
+
+    private function assetPathForStored(?string $path): string
+    {
+        if (empty($path)) {
+            return asset('assets/images/common/no-image.png');
+        }
+
+        if (str_starts_with($path, 'uploads/')) {
+            return asset($path);
+        }
+
+        if (str_starts_with($path, 'public/')) {
+            return asset('storage/' . substr($path, 7));
+        }
+
+        return asset(ltrim($path, '/'));
     }
 }

@@ -3,38 +3,16 @@
 namespace App\Http\Controllers\Casts;
 
 use App\Http\Controllers\Common\SearchController as BaseSearchController;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SearchController extends BaseSearchController
 {
     public function index(Request $request, ?string $tab = 'timeline')
     {
-        // タイムラインデータ（店舗の投稿）
-        $timelineData = [
-            [
-                'name' => 'CLUB ETERNITY',
-                'img' => asset('storage/mock/shops/out-1.png'),
-                'time' => '5分前',
-                'text' => "【急募】本日21時から働ける方募集！\n体験入店も歓迎です。",
-                'tags' => ['高時給', '即日払い']
-            ],
-            [
-                'name' => 'THE GOLDSTONE',
-                'img' => asset('storage/mock/shops/out-2.png'),
-                'time' => '1時間前',
-                'text' => "週末の大型イベントに向けてキャスト大募集✨",
-                'tags' => ['ノルマなし', '送りあり']
-            ]
-        ];
-
-        // 店舗一覧（業種・エリア等を含む）
-        $allItems = [
-            ['id' => 1, 'shop_name' => 'CLUB ETERNITY', 'pref' => '東京都', 'city' => '港区', 'main_img' => asset('storage/mock/shops/out-1.png'), 'industries' => ['キャバクラ'], 'pref_label' => '東京都'],
-            ['id' => 2, 'shop_name' => 'THE GOLDSTONE', 'pref' => '東京都', 'city' => '中央区', 'main_img' => asset('storage/mock/shops/out-2.png'), 'industries' => ['ラウンジ'], 'pref_label' => '東京都'],
-            ['id' => 3, 'shop_name' => '六本木BAR', 'pref' => '東京都', 'city' => '港区', 'main_img' => asset('storage/mock/shops/out-1.png'), 'industries' => ['バー'], 'pref_label' => '東京都'],
-        ];
-
-        $items = $this->filterCastSearchItems($allItems, $request);
+        $timelineData = $this->buildTimelineData();
+        $items = $this->buildSearchItems($request);
 
         $activeTab = 'pane-' . (in_array($tab, ['timeline', 'list', 'ai'], true) ? $tab : 'timeline');
 
@@ -47,43 +25,125 @@ class SearchController extends BaseSearchController
         ]);
     }
 
-    /**
-     * 求人検索：キーワード・業種などでフィルタ（モック用）
-     */
-    private function filterCastSearchItems(array $items, Request $request): array
+    private function buildTimelineData(): array
+    {
+        $rows = DB::table('shops')
+            ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
+            ->leftJoin('shop_images as main_shop_image', function ($join) {
+                $join->on('shops.id', '=', 'main_shop_image.shop_id')
+                    ->where('main_shop_image.is_main', 1);
+            })
+            ->whereNotNull('shop_profiles.catch')
+            ->where('shop_profiles.catch', '<>', '')
+            ->orderByDesc('shop_profiles.updated_at')
+            ->orderByDesc('shops.id')
+            ->select(
+                'shops.id',
+                'shop_profiles.shop_name',
+                'shop_profiles.catch',
+                'shop_profiles.main_image_path',
+                'shop_profiles.updated_at',
+                'main_shop_image.image_path as fallback_image_path'
+            )
+            ->limit(20)
+            ->get();
+
+        return $rows->map(function ($row) {
+            $updatedAt = $row->updated_at ? Carbon::parse($row->updated_at) : null;
+
+            return [
+                'name' => (string) ($row->shop_name ?: 'ショップ'),
+                'img' => $this->assetPathForStored($row->main_image_path ?: $row->fallback_image_path),
+                'time' => $updatedAt ? $updatedAt->locale('ja')->diffForHumans() : '',
+                'text' => (string) $row->catch,
+            ];
+        })->all();
+    }
+
+    private function buildSearchItems(Request $request): array
     {
         $keyword = $request->query('keyword');
         $keyword = is_string($keyword) ? trim($keyword) : '';
         $normalizedKeyword = $this->normalizeSearchText($keyword);
         $industries = $request->query('industry', []);
-        $industries = is_array($industries) ? $industries : (is_string($industries) ? [$industries] : []);
+        $industries = is_array($industries) ? array_values(array_filter($industries, 'is_string')) : (is_string($industries) ? [$industries] : []);
 
-        return array_values(array_filter($items, function ($item) use ($normalizedKeyword, $industries) {
-            if ($normalizedKeyword !== '') {
-                $haystack = implode(' ', [
-                    $item['shop_name'] ?? '',
-                    $item['pref'] ?? '',
-                    $item['city'] ?? '',
-                    $item['pref_label'] ?? '',
-                ]);
-                if (!str_contains($this->normalizeSearchText($haystack), $normalizedKeyword)) {
-                    return false;
-                }
+        $rows = DB::table('shops')
+            ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
+            ->leftJoin('shop_images as main_shop_image', function ($join) {
+                $join->on('shops.id', '=', 'main_shop_image.shop_id')
+                    ->where('main_shop_image.is_main', 1);
+            })
+            ->select(
+                'shops.id',
+                'shop_profiles.shop_name',
+                'shop_profiles.pref',
+                'shop_profiles.city',
+                'shop_profiles.catch',
+                'shop_profiles.overview',
+                'shop_profiles.main_image_path',
+                'main_shop_image.image_path as fallback_image_path'
+            )
+            ->orderByDesc('shop_profiles.updated_at')
+            ->orderByDesc('shops.id');
+
+        if (!empty($industries)) {
+            if (DB::getSchemaBuilder()->hasTable('industry_shop')) {
+                $rows->join('industry_shop', 'shops.id', '=', 'industry_shop.shop_id')
+                    ->join('industries', 'industry_shop.industry_id', '=', 'industries.id')
+                    ->whereIn('industries.name', $industries)
+                    ->distinct();
+            } elseif (DB::getSchemaBuilder()->hasTable('shop_industries')) {
+                $rows->join('shop_industries', 'shops.id', '=', 'shop_industries.shop_id')
+                    ->join('industries', 'shop_industries.industry_id', '=', 'industries.id')
+                    ->whereIn('industries.name', $industries)
+                    ->distinct();
             }
-            if (!empty($industries)) {
-                $itemIndustries = $item['industries'] ?? [];
-                $match = false;
-                foreach ($industries as $ind) {
-                    if (in_array($ind, $itemIndustries, true)) {
-                        $match = true;
-                        break;
-                    }
+        }
+
+        return $rows->get()
+            ->filter(function ($row) use ($normalizedKeyword) {
+                if ($normalizedKeyword === '') {
+                    return true;
                 }
-                if (!$match) {
-                    return false;
-                }
-            }
-            return true;
-        }));
+
+                $haystack = implode(' ', array_filter([
+                    $row->shop_name,
+                    $row->pref,
+                    $row->city,
+                    $row->catch,
+                    $row->overview,
+                ]));
+
+                return str_contains($this->normalizeSearchText($haystack), $normalizedKeyword);
+            })
+            ->map(function ($row) {
+                return [
+                    'id' => $row->id,
+                    'shop_name' => (string) ($row->shop_name ?: 'ショップ'),
+                    'pref' => $row->pref ?? '',
+                    'city' => $row->city ?? '',
+                    'main_img' => $this->assetPathForStored($row->main_image_path ?: $row->fallback_image_path),
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    private function assetPathForStored(?string $path): string
+    {
+        if (empty($path)) {
+            return asset('assets/images/common/no-image.png');
+        }
+
+        if (str_starts_with($path, 'uploads/')) {
+            return asset($path);
+        }
+
+        if (str_starts_with($path, 'public/')) {
+            return asset('storage/' . substr($path, 7));
+        }
+
+        return asset(ltrim($path, '/'));
     }
 }
