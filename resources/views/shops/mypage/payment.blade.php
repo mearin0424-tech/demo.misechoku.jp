@@ -69,6 +69,73 @@
         line-height: 1.6;
         color: #f2e8e8;
     }
+    .bank-registration-card {
+        margin-top: 14px;
+        padding: 18px;
+        border-radius: 22px;
+        border: 1px solid rgba(212, 175, 55, 0.14);
+        background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    .bank-registration-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 8px;
+    }
+    .bank-registration-title {
+        margin: 0;
+        font-size: 1rem;
+        color: #fff8ea;
+        font-weight: 700;
+    }
+    .bank-registration-copy {
+        margin: 8px 0 0;
+        font-size: 0.84rem;
+        line-height: 1.8;
+        color: #cdbcbc;
+    }
+    .bank-registration-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 16px;
+    }
+    .bank-registration-note {
+        margin-top: 14px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: rgba(255,255,255,0.04);
+        color: #d7c8c8;
+        font-size: 0.78rem;
+        line-height: 1.7;
+    }
+    .bank-status-message {
+        display: none;
+        margin-top: 14px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        font-size: 0.83rem;
+        line-height: 1.7;
+    }
+    .bank-status-message.is-success {
+        display: block;
+        background: rgba(34, 197, 94, 0.14);
+        border: 1px solid rgba(34, 197, 94, 0.22);
+        color: #dcfce7;
+    }
+    .bank-status-message.is-error {
+        display: block;
+        background: rgba(248, 113, 113, 0.12);
+        border: 1px solid rgba(248, 113, 113, 0.24);
+        color: #fee2e2;
+    }
+    @media (max-width: 640px) {
+        .bank-registration-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 @endpush
 
@@ -342,47 +409,71 @@
     <section class="management-bank-section">
         <h2 class="management-invoices-title">店舗口座情報</h2>
         <p class="management-summary-note">
-            店舗側で管理している口座情報を保存しておくと、運営との照合時に便利です。
+            運営との照合に使う、店舗口座の基本情報を登録します。
         </p>
         <form id="shop-bank-form" class="management-bank-form" data-bank-autocomplete>
             @csrf
-            <div class="bank-form-row">
-                <label class="bank-label">金融機関名</label>
-                <input type="text" name="bank_name" class="bank-input" value="{{ $shopBank['bank_name'] ?? '' }}" placeholder="〇〇銀行" autocomplete="off" list="shop-bank-suggestions" data-bank-name-input required>
-                <input type="hidden" name="bank_code" value="{{ $shopBank['bank_code'] ?? '' }}" data-bank-code-input>
-                <datalist id="shop-bank-suggestions" data-bank-list></datalist>
-                <p class="input-hint">金融機関名を入力すると候補が表示されます。候補から選ぶと支店候補も検索しやすくなります。</p>
+            <div class="bank-registration-card">
+                <div class="bank-registration-head">
+                    <div>
+                        <h3 class="bank-registration-title">店舗口座の登録</h3>
+                        <p class="bank-registration-copy">名義人の氏名と口座名義カナの両方を登録してください。店舗名ではなく、銀行口座に登録されている名義情報を入力してください。</p>
+                    </div>
+                    <span class="management-invoice-status {{ !empty($shopBank['exists']) ? 'status-paid' : 'status-pending' }}">
+                        {{ !empty($shopBank['exists']) ? '登録済み' : '未登録' }}
+                    </span>
+                </div>
+
+                <div class="bank-registration-grid">
+                    <div class="bank-form-row">
+                        <label class="bank-label">金融機関名</label>
+                        <input type="text" name="bank_name" class="bank-input" value="{{ $shopBank['bank_name'] ?? '' }}" placeholder="〇〇銀行" autocomplete="off" list="shop-bank-suggestions" data-bank-name-input required>
+                        <input type="hidden" name="bank_code" value="{{ $shopBank['bank_code'] ?? '' }}" data-bank-code-input>
+                        <datalist id="shop-bank-suggestions" data-bank-list></datalist>
+                        <p class="input-hint">候補から選ぶと、支店名も探しやすくなります。</p>
+                    </div>
+                    <div class="bank-form-row">
+                        <label class="bank-label">支店名</label>
+                        <input type="text" name="branch_name" class="bank-input" value="{{ $shopBank['branch_name'] ?? '' }}" placeholder="△△支店" autocomplete="off" list="shop-branch-suggestions" data-branch-name-input>
+                        <input type="hidden" name="branch_code" value="{{ $shopBank['branch_code'] ?? '' }}" data-branch-code-input>
+                        <datalist id="shop-branch-suggestions" data-branch-list></datalist>
+                        <p class="input-hint">金融機関選択後に候補が表示されます。</p>
+                    </div>
+                    <div class="bank-form-row">
+                        <label class="bank-label">口座種別</label>
+                        <select name="account_type" class="bank-input" required>
+                            <option value="ordinary" {{ ($shopBank['account_type'] ?? 'ordinary') === 'ordinary' ? 'selected' : '' }}>普通</option>
+                            <option value="checking" {{ ($shopBank['account_type'] ?? '') === 'checking' ? 'selected' : '' }}>当座</option>
+                        </select>
+                    </div>
+                    <div class="bank-form-row">
+                        <label class="bank-label">口座番号</label>
+                        <input type="text" name="account_number" class="bank-input" value="{{ $shopBank['account_number'] ?? '' }}" placeholder="1234567" inputmode="numeric" maxlength="7" pattern="[0-9]*" data-account-number-input required>
+                        <p class="input-hint">7桁の数字で入力してください。</p>
+                    </div>
+                    <div class="bank-form-row">
+                        <label class="bank-label">名義人氏名</label>
+                        <input type="text" name="account_holder_name" class="bank-input" value="{{ $shopBank['account_holder_name'] ?? '' }}" placeholder="山田 太郎" autocomplete="name" required>
+                        <p class="input-hint">口座に登録されている名義人の氏名を入力してください。</p>
+                    </div>
+                    <div class="bank-form-row">
+                        <label class="bank-label">口座名義（カナ）</label>
+                        <input type="text" name="account_name" class="bank-input" value="{{ $shopBank['account_name'] ?? '' }}" placeholder="ヤマダタロウ" required>
+                        <p class="input-hint">銀行側の登録カナ表記に合わせて入力してください。</p>
+                    </div>
+                </div>
+
+                <div class="bank-registration-note">
+                    店舗名や屋号ではなく、実際の口座名義情報で登録してください。照合時の差分を減らせます。
+                </div>
+
+                <div class="management-actions">
+                    <button type="submit" class="btn-action manage">
+                        <i class="fas fa-save"></i> 口座情報を保存
+                    </button>
+                </div>
             </div>
-            <div class="bank-form-row">
-                <label class="bank-label">支店名</label>
-                <input type="text" name="branch_name" class="bank-input" value="{{ $shopBank['branch_name'] ?? '' }}" placeholder="△△支店" autocomplete="off" list="shop-branch-suggestions" data-branch-name-input>
-                <input type="hidden" name="branch_code" value="{{ $shopBank['branch_code'] ?? '' }}" data-branch-code-input>
-                <datalist id="shop-branch-suggestions" data-branch-list></datalist>
-                <p class="input-hint">支店名は、金融機関を候補から選択したあとに候補表示されます。</p>
-            </div>
-            <div class="bank-form-row">
-                <label class="bank-label">口座種別</label>
-                <select name="account_type" class="bank-input" required>
-                    <option value="ordinary" {{ ($shopBank['account_type'] ?? 'ordinary') === 'ordinary' ? 'selected' : '' }}>普通</option>
-                    <option value="checking" {{ ($shopBank['account_type'] ?? '') === 'checking' ? 'selected' : '' }}>当座</option>
-                </select>
-            </div>
-            <div class="bank-form-row">
-                <label class="bank-label">口座番号</label>
-                <input type="text" name="account_number" class="bank-input" value="{{ $shopBank['account_number'] ?? '' }}" placeholder="1234567" inputmode="numeric" maxlength="7" pattern="[0-9]*" data-account-number-input required>
-                <p class="input-hint">口座番号は7桁の数字で入力してください。</p>
-            </div>
-            <div class="bank-form-row">
-                <label class="bank-label">口座名義（カナ）</label>
-                <input type="text" name="account_name" class="bank-input" value="{{ $shopBank['account_name'] ?? '' }}" placeholder="ミセチョクタロウ" data-account-name-input required>
-                <p class="input-hint">ひらがな・半角ｶﾅで入力しても、自動で口座名義向けの形式に整えます。</p>
-            </div>
-            <div class="management-actions">
-                <button type="submit" class="btn-action manage">
-                    <i class="fas fa-save"></i> 口座情報を保存
-                </button>
-            </div>
-            <p id="shop-bank-message" class="management-summary-note" style="display:none;"></p>
+            <p id="shop-bank-message" class="bank-status-message"></p>
         </form>
     </section>
 </div>
@@ -393,6 +484,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     var form = document.getElementById('shop-bank-form');
     if (!form) return;
+    var msgEl = document.getElementById('shop-bank-message');
 
     form.addEventListener('submit', function (e) {
         e.preventDefault();
@@ -403,14 +495,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Accept': 'application/json'
             },
             body: formData
-        }).then(function (r) { return r.json(); })
+        }).then(function (r) {
+            return r.json().then(function (body) {
+                return { ok: r.ok, body: body };
+            });
+        })
         .then(function (res) {
-            var msgEl = document.getElementById('shop-bank-message');
             if (!msgEl) return;
-            msgEl.style.display = 'block';
-            msgEl.textContent = res && res.message ? res.message : '保存しました。';
+            msgEl.className = 'bank-status-message ' + (res.ok ? 'is-success' : 'is-error');
+            if (res.ok) {
+                msgEl.textContent = res.body && res.body.message ? res.body.message : '保存しました。';
+                return;
+            }
+            var errors = res.body && res.body.errors ? Object.values(res.body.errors).flat().join(' ') : '';
+            msgEl.textContent = errors || (res.body && res.body.message ? res.body.message : '保存に失敗しました。');
         }).catch(function () {
-            alert('保存に失敗しました。時間をおいて再度お試しください。');
+            if (!msgEl) return;
+            msgEl.className = 'bank-status-message is-error';
+            msgEl.textContent = '保存に失敗しました。時間をおいて再度お試しください。';
         });
     });
 });
