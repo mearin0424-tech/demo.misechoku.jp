@@ -26,6 +26,8 @@ use App\Http\Controllers\Admin\NgWordController as AdminNgWord;
 use App\Http\Controllers\Admin\NoticeController as AdminNotice;
 use App\Http\Controllers\Admin\TaskController as AdminTask;
 use App\Http\Controllers\Admin\AdminAccountController as AdminAccount;
+use App\Http\Controllers\Admin\VerificationController as AdminVerification;
+use App\Http\Controllers\Admin\BankController as AdminBank;
 
 // 店舗側
 use App\Http\Controllers\Shops\HomeController as ShopHome;
@@ -147,11 +149,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // 請求・振込タスク管理
         Route::get('/tasks', [AdminTask::class, 'index'])->name('tasks.index');
 
+        // 本人・書類審査
+        Route::get('/verification', [AdminVerification::class, 'index'])->name('verification.index');
+        Route::post('/verification/cast/approve', [AdminVerification::class, 'approveCast'])->name('verification.cast.approve');
+        Route::post('/verification/shopdoc/approve', [AdminVerification::class, 'approveShopDocument'])->name('verification.shopdoc.approve');
+
         // 問い合わせ管理
         Route::get('/inquiries', [AdminInquiry::class, 'index'])->name('inquiries.index');
 
         // アカウント管理（運営）
         Route::get('/admin-accounts', [AdminAccount::class, 'index'])->name('admin-accounts.index');
+
+        // 運営口座情報
+        Route::get('/bank', [AdminBank::class, 'index'])->name('bank.index');
+        Route::post('/bank', [AdminBank::class, 'store'])->name('bank.store');
     });
 });
 

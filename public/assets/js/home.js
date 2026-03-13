@@ -8,6 +8,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const slideCount = slides.length;
     let isPhotoSwiping = false;
 
+    function releasePhotoSwipeLock() {
+        isPhotoSwiping = false;
+    }
+
     // メインの上下スワイプ（モダン・操作性重視）
     const mainSwiper = new Swiper('.main-swiper', {
         direction: 'vertical',
@@ -21,12 +25,14 @@ document.addEventListener('DOMContentLoaded', function() {
             thresholdDelta: 20
         },
         touchRatio: 1,
-        touchAngle: 45,
-        threshold: 15,
+        touchAngle: 25,
+        threshold: 12,
         resistance: true,
-        resistanceRatio: 0.7,
+        resistanceRatio: 0.82,
         touchStartPreventDefault: false,
         grabCursor: true,
+        preventClicks: true,
+        preventClicksPropagation: true,
         pagination: {
             el: '.home-swiper-pagination',
             clickable: true,
@@ -71,21 +77,35 @@ document.addEventListener('DOMContentLoaded', function() {
             allowTouchMove: true,
             touchStartPreventDefault: false,
             touchReleaseOnEdges: true,
-            touchAngle: 45,
-            threshold: 6,
+            touchAngle: 35,
+            threshold: 4,
+            speed: 280,
+            resistance: true,
+            resistanceRatio: 0.85,
+            longSwipes: true,
+            longSwipesRatio: 0.12,
+            longSwipesMs: 180,
+            shortSwipes: true,
+            followFinger: true,
+            watchOverflow: true,
+            preventClicks: true,
+            preventClicksPropagation: true,
+            touchMoveStopPropagation: true,
             on: {
+                touchStart: function () {
+                    isPhotoSwiping = false;
+                },
                 touchMove: function () {
                     isPhotoSwiping = true;
                 },
                 transitionEnd: function () {
-                    setTimeout(function () {
-                        isPhotoSwiping = false;
-                    }, 120);
+                    setTimeout(releasePhotoSwipeLock, 80);
                 },
                 touchEnd: function () {
-                    setTimeout(function () {
-                        isPhotoSwiping = false;
-                    }, 120);
+                    setTimeout(releasePhotoSwipeLock, 80);
+                },
+                touchCancel: function () {
+                    setTimeout(releasePhotoSwipeLock, 80);
                 }
             }
         };
@@ -99,43 +119,14 @@ document.addEventListener('DOMContentLoaded', function() {
         photoSwipers.push(swiper);
     });
 
-    // 写真エリアは「スワイプ優先 / 軽いタップで詳細へ」
+    // 写真エリアは「Swiperでスワイプ / clickで詳細遷移」
     document.querySelectorAll('.home-photo-wrap').forEach((wrap) => {
         const detailUrl = wrap.getAttribute('data-detail-url');
         if (!detailUrl) return;
-
-        let startX = 0;
-        let startY = 0;
-        let moved = false;
-
-        const handleStart = (event) => {
-            const point = event.touches ? event.touches[0] : event;
-            startX = point.clientX;
-            startY = point.clientY;
-            moved = false;
-        };
-
-        const handleMove = (event) => {
-            const point = event.touches ? event.touches[0] : event;
-            const deltaX = Math.abs(point.clientX - startX);
-            const deltaY = Math.abs(point.clientY - startY);
-            if (deltaX > 8 || deltaY > 8) {
-                moved = true;
-            }
-        };
-
-        const handleEnd = () => {
-            if (!moved && !isPhotoSwiping) {
-                window.location.href = detailUrl;
-            }
-        };
-
-        wrap.addEventListener('touchstart', handleStart, { passive: true });
-        wrap.addEventListener('touchmove', handleMove, { passive: true });
-        wrap.addEventListener('touchend', handleEnd);
-        wrap.addEventListener('mousedown', handleStart);
-        wrap.addEventListener('mousemove', handleMove);
-        wrap.addEventListener('mouseup', handleEnd);
+        wrap.addEventListener('click', function () {
+            if (isPhotoSwiping) return;
+            window.location.href = detailUrl;
+        });
     });
 
     // リサイズ・ビューポート変化時に Swiper を更新（モバイルのアドレスバー表示切替など）
