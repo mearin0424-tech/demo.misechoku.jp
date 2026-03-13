@@ -130,6 +130,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // マスタ設定管理
         Route::get('/masters', [AdminMaster::class, 'index'])->name('masters.index');
+        Route::post('/masters/review-contents', [AdminMaster::class, 'storeReviewContent'])->name('masters.review-contents.store');
+        Route::post('/masters/tags', [AdminMaster::class, 'storeTag'])->name('masters.tags.store');
+        Route::post('/masters/ngwords', [AdminMaster::class, 'storeNgWord'])->name('masters.ngwords.store');
 
         // 店舗管理
         Route::get('/shops', [AdminShop::class, 'index'])->name('shops.index');
@@ -181,6 +184,11 @@ Route::name('pages.')->group(function () {
     Route::get('/privacy', [PageController::class, 'privacy'])->name('official.privacy');
     Route::get('/support/column', [PageController::class, 'column'])->name('support.column');
     Route::get('/support/form', [PageController::class, 'supportForm'])->name('support.form');
+});
+
+Route::prefix('share')->name('share.')->group(function () {
+    Route::get('/recruit/{id}', [CastRecruit::class, 'publicShow'])->name('recruit.show');
+    Route::get('/cast/{id}', [CastProfile::class, 'publicShow'])->name('cast.show');
 });
 
 // 設定系（共通）

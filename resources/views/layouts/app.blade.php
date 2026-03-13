@@ -1,9 +1,32 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+    @php
+        $pageTitle = trim($__env->yieldContent('title'));
+        $metaTitle = trim($__env->yieldContent('meta_title'));
+        $metaDescription = trim($__env->yieldContent('meta_description')) ?: 'ミセチョクのデモサイトです。';
+        $metaImage = trim($__env->yieldContent('meta_image')) ?: asset('assets/images/pwa/icon-512.png');
+        $canonicalUrl = trim($__env->yieldContent('canonical')) ?: url()->current();
+        $resolvedTitle = $metaTitle !== ''
+            ? $metaTitle
+            : ($pageTitle !== '' ? $pageTitle . ' | ' . config('app.name', 'ミセチョク') : config('app.name', 'ミセチョク'));
+    @endphp
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="{{ $metaDescription }}">
+    <link rel="canonical" href="{{ $canonicalUrl }}">
+    <meta property="og:site_name" content="{{ config('app.name', 'ミセチョク') }}">
+    <meta property="og:locale" content="ja_JP">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ $resolvedTitle }}">
+    <meta property="og:description" content="{{ $metaDescription }}">
+    <meta property="og:url" content="{{ $canonicalUrl }}">
+    <meta property="og:image" content="{{ $metaImage }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $resolvedTitle }}">
+    <meta name="twitter:description" content="{{ $metaDescription }}">
+    <meta name="twitter:image" content="{{ $metaImage }}">
     {{-- PWA --}}
     <meta name="theme-color" content="#190509">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,7 +36,7 @@
     <link rel="apple-touch-icon" href="{{ asset('assets/images/pwa/icon-192.png') }}">
     {{-- ファビコン（データURIで404防止。色はアプリのゴールド・ダーク） --}}
     <link rel="icon" href="data:image/svg+xml,{{ rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#190509"/><text x="16" y="22" font-size="18" text-anchor="middle" fill="#D4AF37">店</text></svg>') }}" type="image/svg+xml">
-    <title>@yield('title'){{ isset($title) ? ' | ' . config('app.name', 'ミセチョク') : config('app.name', 'ミセチョク') }}</title>
+    <title>{{ $resolvedTitle }}</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
@@ -48,7 +71,7 @@
 
             {{-- メインコンテンツ（プロフィール詳細は content-wrapper を使わず幅をアプリ全体に統一） --}}
             <main id="main-content">
-                @if(request()->routeIs('cast.shopprofileview.show') || request()->routeIs('shop.castprofileview.show') || request()->routeIs('cast.mypage.index'))
+                @if(request()->routeIs('cast.shopprofileview.show', 'shop.castprofileview.show', 'cast.mypage.index', 'share.cast.show', 'share.recruit.show'))
                     @yield('content')
                 @else
                     <div class="content-wrapper animate-fadeIn">

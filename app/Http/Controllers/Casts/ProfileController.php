@@ -218,12 +218,15 @@ class ProfileController extends Controller
         }
 
         // お店側 → キャストの情報を表示
-        $cast = $this->buildCastDetailData((string) $id);
+        return view('casts.profile.show', $this->buildCastProfileViewData((string) $id, false));
+    }
 
-        return view('casts.profile.show', [
-            'pageId' => 'cast_detail',
-            'cast'   => $cast
-        ]);
+    /**
+     * SNS共有用の公開キャストプロフィール
+     */
+    public function publicShow(string $id)
+    {
+        return view('casts.profile.show', $this->buildCastProfileViewData($id, true));
     }
 
     /** お店モック（キャストがお店を閲覧する用） */
@@ -349,6 +352,29 @@ class ProfileController extends Controller
         ];
     }
 
+    private function buildCastProfileViewData(string $castId, bool $isPublicShare): array
+    {
+        abort_unless($this->castExists($castId), 404);
+
+        $cast = $this->buildCastDetailData($castId);
+        $displayName = trim((string) ($cast['nickname'] ?? $cast['name'] ?? 'キャスト'));
+        $shareText = trim((string) ($cast['intro'] ?? $cast['pr'] ?? ''));
+
+        if ($shareText === '') {
+            $shareText = 'ミセチョクのキャストプロフィールです。';
+        }
+
+        return [
+            'pageId' => 'cast_detail',
+            'cast' => $cast,
+            'isPublicShare' => $isPublicShare,
+            'showInteractionActions' => !$isPublicShare,
+            'shareUrl' => route('share.cast.show', ['id' => $castId]),
+            'shareTitle' => $displayName . 'のプロフィール',
+            'shareText' => mb_strimwidth($shareText, 0, 80, '…'),
+        ];
+    }
+
     private function buildFallbackCastDetail(string $castId): array
     {
         $images = [asset('assets/images/common/no-image.png')];
@@ -404,6 +430,13 @@ class ProfileController extends Controller
                     'updated_at' => now(),
                 ]);
         }
+    }
+
+    private function castExists(string $castId): bool
+    {
+        return DB::table('casts')
+            ->where('id', $castId)
+            ->exists();
     }
 
     private function assetPathForStored(?string $path): string

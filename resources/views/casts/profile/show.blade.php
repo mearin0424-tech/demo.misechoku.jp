@@ -1,7 +1,10 @@
 @extends('layouts.app')
 
-@section('title', ($cast['nickname'] ?? $cast['name']) . ' - プロフィール')
+@section('title', ($cast['nickname'] ?? $cast['name']) . 'のプロフィール')
 @section('body-class', 'page-cast-profile')
+@section('meta_description', trim((string) (($cast['intro'] ?? $cast['pr'] ?? '') ?: 'ミセチョクのキャストプロフィールです。')))
+@section('meta_image', $cast['img'] ?? asset('assets/images/common/no-image.png'))
+@section('canonical', $shareUrl ?? url()->current())
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/cast_profile.css') }}">
@@ -9,7 +12,14 @@
 
 @section('content')
 <div class="cast-profile-wrapper animate-fadeIn">
-    @include('casts.profile.parts.show-content', ['cast' => $cast, 'isOwn' => false])
+    @include('casts.profile.parts.show-content', [
+        'cast' => $cast,
+        'isOwn' => false,
+        'showInteractionActions' => $showInteractionActions ?? true,
+        'shareUrl' => $shareUrl ?? null,
+        'shareTitle' => $shareTitle ?? (($cast['nickname'] ?? $cast['name']) . 'のプロフィール'),
+        'shareText' => $shareText ?? ($cast['intro'] ?? $cast['pr'] ?? ''),
+    ])
 </div>
 
 <script>

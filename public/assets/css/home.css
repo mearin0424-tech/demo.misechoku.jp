@@ -182,71 +182,30 @@ body.no-scroll main#main-content .content-wrapper {
     background-color: #2a2a2a;
 }
 
-.photo-swipe-hint {
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    right: 16px;
-    z-index: 18;
-    display: flex;
-    justify-content: space-between;
-    pointer-events: none;
-}
-
-.photo-swipe-hint span {
-    padding: 4px 8px;
-    border-radius: 999px;
-    background: rgba(0, 0, 0, 0.38);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    color: rgba(255, 255, 255, 0.78);
-    font-size: 0.68rem;
-    letter-spacing: 0.02em;
-    backdrop-filter: blur(8px);
-}
-
-/* --- カード用ページネーション（ドット） --- */
-.home-swiper-pagination.swiper-pagination-bullets {
-    bottom: auto !important;
-    top: 12px !important;
-    left: 0 !important;
-    right: 0 !important;
-    z-index: 50 !important;
-    display: flex !important;
-    justify-content: center;
-    gap: 6px;
-    padding: 8px 0;
-}
-
-.home-swiper-pagination .swiper-pagination-bullet {
-    width: 8px;
-    height: 8px;
-    background: rgba(255, 255, 255, 0.4) !important;
-    opacity: 1;
-    transition: width 0.25s ease, background 0.25s ease;
-}
-
-.home-swiper-pagination .swiper-pagination-bullet-active {
-    width: 24px;
-    border-radius: 4px;
-    background: rgba(212, 175, 55, 0.95) !important;
-    box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
-}
-
-/* 従来の photo-pagination を同じスタイルに統一 */
 .photo-pagination.swiper-pagination-bullets {
     bottom: auto !important;
     top: 12px !important;
+    left: 12px !important;
+    right: 12px !important;
     z-index: 50 !important;
+    display: flex !important;
+    gap: 4px;
+    align-items: center;
 }
 .photo-pagination .swiper-pagination-bullet {
-    background: rgba(255, 255, 255, 0.4) !important;
+    flex: 1 1 0;
+    width: auto !important;
+    height: 3px;
+    margin: 0 !important;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.28) !important;
     opacity: 1;
+    transition: background 0.2s ease, transform 0.2s ease;
 }
 .photo-pagination .swiper-pagination-bullet-active {
-    background: rgba(212, 175, 55, 0.95) !important;
+    background: rgba(255, 255, 255, 0.96) !important;
     opacity: 1;
-    width: 24px;
-    border-radius: 4px;
+    transform: scaleY(1.05);
 }
 
 /* --- プロフィール情報オーバーレイ --- */
@@ -591,17 +550,6 @@ body.no-scroll main#main-content .content-wrapper {
     .card-actions-overlay {
         right: 8px;
         bottom: 24%;
-    }
-    .home-swiper-pagination .swiper-pagination-bullet { width: 6px; height: 6px; }
-    .home-swiper-pagination .swiper-pagination-bullet-active { width: 18px; }
-    .photo-swipe-hint {
-        top: 12px;
-        left: 12px;
-        right: 12px;
-    }
-    .photo-swipe-hint span {
-        font-size: 0.62rem;
-        padding: 3px 7px;
     }
     .home-onboarding-body {
         padding: 14px;

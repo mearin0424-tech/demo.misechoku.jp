@@ -35,12 +35,6 @@ document.addEventListener('DOMContentLoaded', function() {
         grabCursor: true,
         preventClicks: true,
         preventClicksPropagation: true,
-        pagination: {
-            el: '.home-swiper-pagination',
-            clickable: true,
-            dynamicBullets: slideCount > 5,
-            dynamicMainBullets: 3
-        },
         keyboard: {
             enabled: true,
             onlyInViewport: true
@@ -72,15 +66,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.photo-swiper').forEach((el) => {
         const paginationEl = el.querySelector('.photo-pagination');
         const photoSlideCount = el.querySelectorAll(':scope > .swiper-wrapper > .swiper-slide').length;
-        if (photoSlideCount <= 1) {
-            return;
-        }
         const options = {
             direction: 'horizontal',
             slidesPerView: 1,
             loop: false,
             nested: true,
-            allowTouchMove: true,
+            allowTouchMove: photoSlideCount > 1,
             touchStartPreventDefault: false,
             touchReleaseOnEdges: true,
             touchAngle: 35,

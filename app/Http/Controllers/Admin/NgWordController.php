@@ -3,22 +3,21 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\AdminMasterService;
 
 class NgWordController extends Controller
 {
+    public function __construct(
+        private readonly AdminMasterService $adminMasterService
+    ) {
+    }
+
     /**
-     * NGワード管理一覧（デモ用）
+     * NGワード管理一覧
      */
     public function index()
     {
-        $words = [
-            ['id' => 1, 'word' => 'NGワード例1', 'created_at' => now()->subDays(1)],
-            ['id' => 2, 'word' => 'NGワード例2', 'created_at' => now()->subDays(2)],
-        ];
-
-        return view('admin.ngwords.index', [
-            'words' => $words,
-        ]);
+        return view('admin.ngwords.index', $this->adminMasterService->getNgWordData());
     }
 }
 

@@ -45,15 +45,7 @@
                                 </div>
                             @endforeach
                         </div>
-                        @if($imageCount > 1)
                         <div class="photo-pagination swiper-pagination"></div>
-                        @endif
-                    </div>
-                    <div class="photo-swipe-hint" aria-hidden="true">
-                        @if($imageCount > 1)
-                        <span>← 写真</span>
-                        <span>写真 →</span>
-                        @endif
                     </div>
                 </div>
 
@@ -95,8 +87,6 @@
             </div>
             @endforeach
         </div>
-        {{-- ページネーション（ドット） --}}
-        <div class="home-swiper-pagination swiper-pagination"></div>
     </div>
 
     {{-- スワイプ操作オンボーディング（初回・久しぶりのみ表示） --}}

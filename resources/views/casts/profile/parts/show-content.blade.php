@@ -1,5 +1,6 @@
 {{-- キャストプロフィール本文（shop/castprofileview と cast/mypage で共通） --}}
 @php $isOwn = $isOwn ?? false; @endphp
+@php $showInteractionActions = $showInteractionActions ?? true; @endphp
 <section class="profile-hero" aria-label="プロフィール写真">
     <div class="profile-hero-inner">
         <img id="profile-main-img" src="{{ $cast['img'] }}" alt="{{ $cast['nickname'] ?? $cast['name'] }}" class="profile-hero-img js-lightbox-target">
@@ -44,15 +45,25 @@
             @endif
         @else
             <div class="profile-detail-actions">
-                <button type="button" id="btn-profile-keep" class="detail-action-btn keep {{ ($cast['is_kept'] ?? false) ? 'active' : '' }}" aria-pressed="{{ ($cast['is_kept'] ?? false) ? 'true' : 'false' }}">
-                    <i class="fas fa-bookmark"></i>
-                    <span>KEEP</span>
-                </button>
-                <button type="button" id="btn-profile-like" class="detail-action-btn like" data-count="{{ $cast['like_cnt'] ?? 0 }}">
-                    <i class="fas fa-heart"></i>
-                    <span class="like-count-text">LIKE：<span class="num">{{ $cast['like_cnt'] ?? 0 }}</span>件</span>
-                </button>
+                @if($showInteractionActions)
+                    <button type="button" id="btn-profile-keep" class="detail-action-btn keep {{ ($cast['is_kept'] ?? false) ? 'active' : '' }}" aria-pressed="{{ ($cast['is_kept'] ?? false) ? 'true' : 'false' }}">
+                        <i class="fas fa-bookmark"></i>
+                        <span>KEEP</span>
+                    </button>
+                    <button type="button" id="btn-profile-like" class="detail-action-btn like" data-count="{{ $cast['like_cnt'] ?? 0 }}">
+                        <i class="fas fa-heart"></i>
+                        <span class="like-count-text">LIKE：<span class="num">{{ $cast['like_cnt'] ?? 0 }}</span>件</span>
+                    </button>
+                @endif
             </div>
+            @if(!empty($shareUrl))
+                @include('common.share-actions', [
+                    'shareUrl' => $shareUrl,
+                    'shareTitle' => $shareTitle ?? (($cast['nickname'] ?? $cast['name']) . 'のプロフィール'),
+                    'shareText' => $shareText ?? ($cast['intro'] ?? $cast['pr'] ?? ''),
+                    'shareLabel' => 'このキャストプロフィールをSNSで共有'
+                ])
+            @endif
         @endif
 
         <section class="specs-section" aria-labelledby="specs-heading">

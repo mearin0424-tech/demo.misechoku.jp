@@ -48,11 +48,16 @@ class RecruitmentController extends Controller
         $recruitData = $this->getMockData();
         // プロファイル画面と同等の店舗情報もあわせて渡し、求人票側でお店の写真・情報を連携表示する
         $shop = $this->getMockShopProfile();
+        $shareText = trim((string) ($recruitData['catch_copy'] ?? $recruitData['message'] ?? ''));
 
         return view('shops.recruit.show', [
             'pageId' => 'job_info', 
             'recruit' => $recruitData,
             'shop'   => $shop,
+            'shareUrl' => $id ? route('share.recruit.show', ['id' => $id]) : null,
+            'shareTitle' => ($shop['name'] ?? $recruitData['store_name'] ?? '店舗') . 'の求人情報',
+            'shareText' => $shareText !== '' ? mb_strimwidth($shareText, 0, 80, '…') : 'ミセチョクの求人情報です。',
+            'isPublicShare' => false,
         ]);
     }
 

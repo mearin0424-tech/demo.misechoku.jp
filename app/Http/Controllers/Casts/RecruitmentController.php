@@ -16,12 +16,20 @@ class RecruitmentController extends Controller
     public function show(int $id)
     {
         $data = $this->getRecruitDataFromDatabase($id);
-        return view('shops.recruit.show', [
-            'pageId' => 'job_info',
-            'recruit' => $data['recruit'],
-            'shop'    => $data['shop'],
-            'forCast' => true,
-        ]);
+        abort_if(empty($data['recruit']), 404);
+
+        return view('shops.recruit.show', $this->buildRecruitViewData($data, $id, true, false));
+    }
+
+    /**
+     * SNS共有用の公開求人情報詳細
+     */
+    public function publicShow(int $id)
+    {
+        $data = $this->getRecruitDataFromDatabase($id);
+        abort_if(empty($data['recruit']), 404);
+
+        return view('shops.recruit.show', $this->buildRecruitViewData($data, $id, true, true));
     }
 
     /**
@@ -125,6 +133,29 @@ class RecruitmentController extends Controller
             'shop'    => $shop,
         ];
     }
+
+    private function buildRecruitViewData(array $data, int $id, bool $forCast, bool $isPublicShare): array
+    {
+        $shopName = $data['shop']['name'] ?? $data['recruit']['store_name'] ?? '店舗';
+        $shareUrl = route('share.recruit.show', ['id' => $id]);
+        $shareText = trim((string) ($data['recruit']['catch_copy'] ?? $data['recruit']['message'] ?? ''));
+
+        if ($shareText === '') {
+            $shareText = 'ミセチョクの求人情報です。';
+        }
+
+        return [
+            'pageId' => 'job_info',
+            'recruit' => $data['recruit'],
+            'shop' => $data['shop'],
+            'forCast' => $forCast,
+            'isPublicShare' => $isPublicShare,
+            'shareUrl' => $shareUrl,
+            'shareTitle' => $shopName . 'の求人情報',
+            'shareText' => mb_strimwidth($shareText, 0, 80, '…'),
+        ];
+    }
+
     private function imageUrl(?string $path): string
     {
         if (empty($path)) {
