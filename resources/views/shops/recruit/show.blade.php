@@ -101,6 +101,22 @@
             @endif
         </section>
 
+        @if(!empty($recruit['store_features']) && is_array($recruit['store_features']))
+            <section>
+                <h3 class="recruit-block-title"><i class="fas fa-tags"></i> タグ情報</h3>
+                <div class="recruit-shop-info-grid">
+                    @foreach($recruit['store_features'] as $label => $items)
+                        @if(!empty($items))
+                            <div class="recruit-shop-info-item recruit-shop-info-wide">
+                                <div class="label">{{ $label }}</div>
+                                <div class="value">{{ implode(' / ', $items) }}</div>
+                            </div>
+                        @endif
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
         {{-- お店からのメッセージ --}}
         @if(!empty($recruit['message']) || !empty($recruit['job_content']))
             <section class="recruit-message-block-new">
