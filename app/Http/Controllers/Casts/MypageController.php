@@ -6,6 +6,7 @@ use App\Rules\KouzaMeig;
 use App\Services\BillingManagementService;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use Carbon\Carbon;
@@ -429,6 +430,9 @@ class MypageController extends Controller
                 'cast_profiles.profession',
                 'cast_profiles.exp',
                 'cast_profiles.pr',
+                Schema::hasColumn('cast_profiles', 'personality_type')
+                    ? 'cast_profiles.personality_type'
+                    : DB::raw('NULL as personality_type'),
                 'cast_profiles.memo',
                 'cast_profiles.main_image_path'
             )
@@ -513,7 +517,7 @@ class MypageController extends Controller
             'desired_job'      => $memo['desired_job'] ?? '',
             'my_field'         => $memo['my_field'] ?? '',
             'my_inner_skills'  => $memo['my_inner_skills'] ?? '',
-            'personality_type' => '',
+            'personality_type' => $this->resolvePersonalityType($castRow->personality_type ?? null, $memo),
             'shift_hope'       => $shiftHope,
             'work_time'        => $workTime,
             'work_time_label'  => $this->workTimeLabel($workTime),
@@ -676,6 +680,13 @@ class MypageController extends Controller
         $decoded = json_decode($memo, true);
 
         return is_array($decoded) ? $decoded : [];
+    }
+
+    private function resolvePersonalityType(?string $columnType, array $memo): string
+    {
+        $type = $columnType ?? ($memo['personality_type'] ?? '');
+
+        return is_string($type) && preg_match('/^[LF][CP][IO][HR]$/', $type) ? $type : '';
     }
 
     private function shiftHopeLabel($shift): string

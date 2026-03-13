@@ -12,6 +12,37 @@ const axisDescriptions = {
     'R': { title: 'リレーション型 (R)', text: '「マメな連絡」や「継続力」で、お客様との関係をじっくり育てるのが得意なタイプです。' } 
 };
 
+function getCookie(name) {
+    const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const match = document.cookie.match(new RegExp('(?:^|; )' + escapedName + '=([^;]*)'));
+    return match ? decodeURIComponent(match[1]) : null;
+}
+
+async function savePersonalityType(type) {
+    const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+    };
+    const xsrfToken = getCookie('XSRF-TOKEN');
+    if (xsrfToken) {
+        headers['X-XSRF-TOKEN'] = xsrfToken;
+    }
+
+    const response = await fetch('/cast/profile/personality-type', {
+        method: 'POST',
+        headers,
+        credentials: 'same-origin',
+        body: JSON.stringify({ personality_type: type })
+    });
+
+    if (!response.ok) {
+        throw new Error('save_failed');
+    }
+
+    return response.json();
+}
+
 // --- 1. アプリの初期化処理 ---
 document.addEventListener('DOMContentLoaded', () => {
     // 画面要素を取得
@@ -54,6 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('#result-description').innerHTML = ''; 
         document.querySelector('#result-breakdown').innerHTML = '';
         document.getElementById('result-image').style.display = 'none';
+        const saveStatus = document.getElementById('save-status');
+        if (saveStatus) saveStatus.textContent = '';
 
         document.getElementById('shindan-app').scrollIntoView({ behavior: 'smooth' });
     }
@@ -165,7 +198,7 @@ function setupAnsweredListener() {
 }
 
 // --- 5. 診断実行 ---
-document.getElementById('shindan-form').addEventListener('submit', function(event) {
+document.getElementById('shindan-form').addEventListener('submit', async function(event) {
     event.preventDefault(); 
     const REPO_PATH = './'; // ★修正点：相対パス
     const backToTopBtns = document.querySelectorAll('.btn-back-to-top:not(#notification-test-btn)'); 
@@ -246,6 +279,23 @@ document.getElementById('shindan-form').addEventListener('submit', function(even
     
     resultEl.querySelector('#share-x').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
     resultEl.querySelector('#share-line').href = `https://line.me/R/msg/text/?${encodeURIComponent(shareText + shareUrl)}`;
+
+    const saveStatus = resultEl.querySelector('#save-status');
+    if (saveStatus) {
+        saveStatus.textContent = 'プロフィールに保存しています...';
+    }
+
+    try {
+        await savePersonalityType(type);
+        if (saveStatus) {
+            saveStatus.textContent = `接客タイプ診断結果（${type}）をプロフィールに保存しました。`;
+        }
+    } catch (error) {
+        console.error('接客タイプ診断結果の保存に失敗しました:', error);
+        if (saveStatus) {
+            saveStatus.textContent = 'プロフィールへの保存に失敗しました。ログイン後にもう一度お試しください。';
+        }
+    }
 
     resultEl.scrollIntoView({ behavior: 'smooth' });
 });

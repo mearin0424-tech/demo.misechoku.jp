@@ -7,6 +7,7 @@ use App\Services\AdminMasterService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ProfileController extends Controller
 {
@@ -39,6 +40,9 @@ class ProfileController extends Controller
                 'cast_profiles.shift',
                 'cast_profiles.profession',
                 'cast_profiles.exp',
+                Schema::hasColumn('cast_profiles', 'personality_type')
+                    ? 'cast_profiles.personality_type'
+                    : DB::raw('NULL as personality_type'),
                 'cast_profiles.memo'
             )
             ->first();
@@ -77,6 +81,7 @@ class ProfileController extends Controller
             'industry_ids'   => $this->fetchCastIndustryIds($castId),
             'look_tag_ids'   => collect($memo['look_tag_ids'] ?? [])->map(fn ($id) => (int) $id)->all(),
             'personality_tag_ids' => collect($memo['personality_tag_ids'] ?? [])->map(fn ($id) => (int) $id)->all(),
+            'personality_type' => $this->resolvePersonalityType($row->personality_type ?? null, $memo),
         ];
     }
 
@@ -108,6 +113,7 @@ class ProfileController extends Controller
             'industry_ids'   => [],
             'look_tag_ids'   => [],
             'personality_tag_ids' => [],
+            'personality_type' => '',
         ];
     }
 
@@ -237,6 +243,49 @@ class ProfileController extends Controller
             ->withInput([]);
     }
 
+    public function updatePersonalityType(Request $request)
+    {
+        $validated = $request->validate([
+            'personality_type' => ['required', 'regex:/^[LF][CP][IO][HR]$/'],
+        ]);
+
+        $castId = $this->currentCastId();
+        $existingMemo = DB::table('cast_profiles')
+            ->where('cast_id', $castId)
+            ->value('memo');
+
+        $memo = $this->decodeProfileMemo($existingMemo);
+        $memo['personality_type'] = $validated['personality_type'];
+
+        $payload = [
+            'memo' => json_encode($memo, JSON_UNESCAPED_UNICODE),
+            'updated_at' => now(),
+        ];
+
+        if (Schema::hasColumn('cast_profiles', 'personality_type')) {
+            $payload['personality_type'] = $validated['personality_type'];
+        }
+
+        $exists = DB::table('cast_profiles')
+            ->where('cast_id', $castId)
+            ->exists();
+
+        if ($exists) {
+            DB::table('cast_profiles')
+                ->where('cast_id', $castId)
+                ->update($payload);
+        } else {
+            $payload['cast_id'] = $castId;
+            $payload['created_at'] = now();
+            DB::table('cast_profiles')->insert($payload);
+        }
+
+        return response()->json([
+            'success' => true,
+            'personality_type' => $validated['personality_type'],
+        ]);
+    }
+
     /**
      * プロフィール詳細表示
      * - cast/* から呼ばれた場合: お店のプロフィール（キャストがお店を閲覧）
@@ -307,6 +356,9 @@ class ProfileController extends Controller
                 'cast_profiles.profession',
                 'cast_profiles.exp',
                 'cast_profiles.pr',
+                Schema::hasColumn('cast_profiles', 'personality_type')
+                    ? 'cast_profiles.personality_type'
+                    : DB::raw('NULL as personality_type'),
                 'cast_profiles.memo'
             )
             ->first();
@@ -380,6 +432,7 @@ class ProfileController extends Controller
             'desired_job' => $memo['desired_job'] ?? '',
             'my_field' => $memo['my_field'] ?? '',
             'my_inner_skills' => $memo['my_inner_skills'] ?? '',
+            'personality_type' => $this->resolvePersonalityType($row->personality_type ?? null, $memo),
             'shift_hope' => $memo['shift_hope'] ?? $this->shiftHopeLabel($row->shift),
             'work_time' => $memo['work_time'] ?? '',
             'work_time_label' => $this->workTimeLabel($memo['work_time'] ?? ''),
@@ -442,6 +495,7 @@ class ProfileController extends Controller
             'desired_job' => '',
             'my_field' => '',
             'my_inner_skills' => '',
+            'personality_type' => '',
             'shift_hope' => '',
             'work_time' => '',
             'work_time_label' => '',
@@ -500,6 +554,13 @@ class ProfileController extends Controller
         $decoded = json_decode($memo, true);
 
         return is_array($decoded) ? $decoded : [];
+    }
+
+    private function resolvePersonalityType(?string $columnType, array $memo): string
+    {
+        $type = $columnType ?? ($memo['personality_type'] ?? '');
+
+        return is_string($type) && preg_match('/^[LF][CP][IO][HR]$/', $type) ? $type : '';
     }
 
     private function fetchCastIndustryIds(string $castId): array

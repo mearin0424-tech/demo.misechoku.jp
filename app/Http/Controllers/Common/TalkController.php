@@ -434,7 +434,7 @@ class TalkController extends Controller
                 'name' => $row->shop_name ?: 'お店',
                 'age' => null,
                 'location' => trim(implode('', array_filter([$row->pref ?? null, $row->city ?? null]))),
-                'avatar' => $this->assetPathForStored($row->main_image_path ?? null),
+                'avatar' => $this->resolveShopAvatar((string) $row->id, $row->main_image_path ?? null),
             ];
         }
 
@@ -614,6 +614,19 @@ class TalkController extends Controller
         }
 
         return asset(ltrim($path, '/'));
+    }
+
+    private function resolveShopAvatar(string $shopId, ?string $fallbackPath = null): string
+    {
+        $imagePath = DB::table('shop_images')
+            ->where('shop_id', $shopId)
+            ->orderByRaw('is_main DESC')
+            ->orderByRaw('main_order IS NULL')
+            ->orderBy('main_order')
+            ->orderBy('id')
+            ->value('image_path');
+
+        return $this->assetPathForStored($imagePath ?: $fallbackPath);
     }
 
     private function toNumericShopId(string $shopId): int

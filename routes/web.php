@@ -325,6 +325,7 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
     Route::get('/home', [ShopHome::class, 'index'])->name('home');
     Route::get('/profile/edit', [CastProfile::class, 'edit'])->name('profile.edit');
     Route::post('/profile/update', [CastProfile::class, 'update'])->name('profile.update');
+    Route::post('/profile/personality-type', [CastProfile::class, 'updatePersonalityType'])->name('profile.personality-type');
     Route::get('/shopprofileview/{id}', [CastProfile::class, 'show'])->name('shopprofileview.show');
     Route::redirect('/profile/{id}', '/cast/shopprofileview/{id}')->name('profile.show.redirect');
     Route::get('/search', fn () => redirect()->route('cast.search.index', ['tab' => 'timeline']));

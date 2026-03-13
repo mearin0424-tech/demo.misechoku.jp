@@ -97,6 +97,7 @@
             <script type="application/json" id="ai-recommend-data">{!! json_encode([
                 'role' => $prefix,
                 'items' => $aiRecommendItems,
+                'personalityType' => $personalityType ?? null,
             ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
         </div>
 </div>
