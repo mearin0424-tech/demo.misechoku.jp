@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Services\BillingManagementService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 class BankController extends Controller
 {
+    public function __construct(private readonly BillingManagementService $billingManagementService)
+    {
+    }
+
     /**
      * 運営側口座情報設定画面
      *
@@ -15,13 +20,14 @@ class BankController extends Controller
      */
     public function index()
     {
-        $bank = session('admin_bank_account', [
-            'bank_name'      => '',
-            'branch_name'    => '',
-            'account_type'   => 'ordinary',
-            'account_number' => '',
-            'account_name'   => '',
-        ]);
+        $stored = $this->billingManagementService->getAdminBankAccount();
+        $bank = [
+            'bank_name' => $stored->bank_name ?? '',
+            'branch_name' => $stored->branch_name ?? '',
+            'account_type' => $stored->account_type ?? 'ordinary',
+            'account_number' => $stored->account_number ?? '',
+            'account_name' => $stored->account_name ?? '',
+        ];
 
         return view('admin.bank.index', compact('bank'));
     }
@@ -36,12 +42,11 @@ class BankController extends Controller
             'account_name'   => 'required|string|max:100',
         ]);
 
-        // 本番では設定テーブル等に永続化する想定。デモのためセッションに保持。
-        session(['admin_bank_account' => $data]);
+        $this->billingManagementService->saveAdminBankAccount($data);
 
         return redirect()
             ->route('admin.bank.index')
-            ->with('status', '運営の口座情報を保存しました。（デモ環境ではセッション保存のみ）');
+            ->with('status', '運営の口座情報を保存しました。今後発行する請求書へ自動反映されます。');
     }
 }
 

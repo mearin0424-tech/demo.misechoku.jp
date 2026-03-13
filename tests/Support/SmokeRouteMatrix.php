@@ -1,0 +1,83 @@
+<?php
+
+namespace Tests\Support;
+
+final class SmokeRouteMatrix
+{
+    public static function publicPages(): array
+    {
+        return [
+            'demo login' => ['login.demo', [], 200],
+            'about' => ['pages.official.about', [], 200],
+            'terms' => ['pages.official.terms', [], 200],
+            'privacy' => ['pages.official.privacy', [], 200],
+            'support column' => ['pages.support.column', [], 200],
+            'support form' => ['pages.support.form', [], 200],
+            'setting notification' => ['setting.notification', [], 200],
+            'setting account email' => ['setting.account.email', [], 200],
+            'setting account password' => ['setting.account.password', [], 200],
+            'setting account withdraw' => ['setting.account.withdraw', [], 200],
+            'subscription' => ['subscription', [], 200],
+            'maintenance' => ['maintenance', [], 200],
+        ];
+    }
+
+    public static function adminPages(): array
+    {
+        return [
+            'admin dashboard' => ['admin.dashboard', [], 200],
+            'admin deposits' => ['admin.deposits.index', [], 200],
+            'admin sales' => ['admin.sales.index', [], 200],
+            'admin masters' => ['admin.masters.index', [], 200],
+            'admin shops' => ['admin.shops.index', [], 200],
+            'admin casts' => ['admin.casts.index', [], 200],
+            'admin ngwords' => ['admin.ngwords.index', [], 200],
+            'admin notices' => ['admin.notices.index', [], 200],
+            'admin columns' => ['admin.columns.index', [], 200],
+            'admin tasks' => ['admin.tasks.index', [], 200],
+            'admin verification' => ['admin.verification.index', [], 200],
+            'admin inquiries' => ['admin.inquiries.index', [], 200],
+            'admin accounts' => ['admin.admin-accounts.index', [], 200],
+            'admin bank' => ['admin.bank.index', [], 200],
+        ];
+    }
+
+    public static function shopPages(): array
+    {
+        return [
+            'shop home' => ['shop.home', [], 200],
+            'shop search timeline' => ['shop.search.index', ['tab' => 'timeline'], 200],
+            'shop search list' => ['shop.search.index', ['tab' => 'list'], 200],
+            'shop search ai' => ['shop.search.index', ['tab' => 'ai'], 200],
+            'shop interaction index' => ['shop.interaction.index', [], 200],
+            'shop interaction keep' => ['shop.interaction.keep', [], 200],
+            'shop interaction like' => ['shop.interaction.like', [], 200],
+            'shop profile show' => ['shop.profile.show', [], 200],
+            'shop profile store edit' => ['shop.profile.store.edit', [], 200],
+            'shop recruits status' => ['shop.recruits.status', [], 200],
+            'shop recruits edit' => ['shop.recruits.edit', [], 200],
+            'shop mypage index' => ['shop.mypage.index', [], 200],
+            'shop mypage payment' => ['shop.mypage.payment.index', [], 200],
+            'shop mypage reviews' => ['shop.mypage.review.index', [], 200],
+            'shop talk index' => ['shop.talk.index', [], 200],
+        ];
+    }
+
+    public static function castPages(): array
+    {
+        return [
+            'cast home' => ['cast.home', [], 200],
+            'cast search timeline' => ['cast.search.index', ['tab' => 'timeline'], 200],
+            'cast search list' => ['cast.search.index', ['tab' => 'list'], 200],
+            'cast search ai' => ['cast.search.index', ['tab' => 'ai'], 200],
+            'cast profile edit' => ['cast.profile.edit', [], 200],
+            'cast mypage index' => ['cast.mypage.index', [], 200],
+            'cast mypage employment' => ['cast.mypage.employment', [], 200],
+            'cast mypage payment' => ['cast.mypage.payment', [], 200],
+            'cast mypage reviews' => ['cast.mypage.reviews', [], 200],
+            'cast mypage identity' => ['cast.mypage.identity', [], 200],
+            'cast interaction index' => ['cast.interaction.index', [], 200],
+            'cast talk index' => ['cast.talk.index', [], 200],
+        ];
+    }
+}

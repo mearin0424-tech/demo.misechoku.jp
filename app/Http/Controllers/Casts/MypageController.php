@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Casts;
 
+use App\Services\BillingManagementService;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -11,6 +12,10 @@ use Illuminate\Http\Request;
 
 class MypageController extends Controller
 {
+    public function __construct(private readonly BillingManagementService $billingManagementService)
+    {
+    }
+
     /**
      * キャスト用マイページ（プロフィール確認＝shop/castprofileview と同じ内容）
      */
@@ -58,50 +63,16 @@ class MypageController extends Controller
     public function payment()
     {
         $castId = $this->currentCastId();
-
-        $deposit = DB::table('application_deposits')
-            ->join('shop_job_applications', 'application_deposits.shop_job_application_id', '=', 'shop_job_applications.id')
-            ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
-            ->join('shops', 'shop_jobs.shop_id', '=', 'shops.id')
-            ->where('shop_job_applications.cast_id', $castId)
-            ->select(
-                'application_deposits.*',
-                'shop_job_applications.result_date',
-                'shop_jobs.hourly_wage_regular',
-                'shops.id as shop_id'
-            )
-            ->orderByDesc('application_deposits.id')
-            ->first();
-
-        $payments = [];
-        $flow = $this->buildDepositFlowStateFromDb($deposit);
-
-        if ($deposit) {
-            $statusLabel = match ((int)$deposit->status) {
-                1 => '申請中',
-                2 => '店舗確認中',
-                3 => '運営請求中',
-                4 => '店舗入金報告済',
-                5 => '店舗入金確認済',
-                6 => 'キャスト振込済',
-                7 => '完了',
-                default => '不明',
-            };
-            $statusClass = in_array((int)$deposit->status, [6, 7], true) ? 'status-paid' : 'status-pending';
-
-            $payments[] = [
-                'title'        => 'ボーナス入金申請',
-                'status_label' => $statusLabel,
-                'status_class' => $statusClass,
-                'date'         => $deposit->created_at ? Carbon::parse($deposit->created_at)->format('Y/m/d H:i') : null,
-                'link'         => null,
-            ];
-        }
+        $paymentData = $this->billingManagementService->getCastPaymentPageData($castId);
 
         return view('casts.mypage.payment', [
             'pageId'       => 'mypage',
-            'payments'     => $payments,
-            'depositFlow' => $flow,
+            'payments'     => $paymentData['payments'],
+            'depositFlow'  => $paymentData['flow'],
+            'castBank'     => $paymentData['bank'],
+            'currentDeposit' => $paymentData['current'],
+            'canRequestDeposit' => $paymentData['can_request'],
+            'requestDisabledReason' => $paymentData['request_disabled_reason'],
         ]);
     }
 
@@ -257,12 +228,11 @@ class MypageController extends Controller
      */
     public function requestDeposit(\Illuminate\Http\Request $request)
     {
-        $step = (int) session('deposit_flow_step', 0);
-        if ($step < 1) {
-            session(['deposit_flow_step' => 1]);
-        }
+        $result = $this->billingManagementService->requestDepositForCast($this->currentCastId());
 
-        return redirect()->route('cast.mypage.payment')->with('status', '入金申請を受け付けました。店舗・運営の確認をお待ちください。');
+        return redirect()
+            ->route('cast.mypage.payment')
+            ->with($result['success'] ? 'status' : 'error', $result['message']);
     }
 
     /**
@@ -270,12 +240,11 @@ class MypageController extends Controller
      */
     public function confirmDeposit(\Illuminate\Http\Request $request)
     {
-        $step = (int) session('deposit_flow_step', 0);
-        if ($step >= 5) {
-            session(['deposit_flow_step' => 6]);
-        }
+        $result = $this->billingManagementService->confirmCastReceipt($this->currentCastId());
 
-        return redirect()->route('cast.mypage.payment')->with('status', '入金を確認しました。ありがとうございました。');
+        return redirect()
+            ->route('cast.mypage.payment')
+            ->with($result['success'] ? 'status' : 'error', $result['message']);
     }
 
     /**
@@ -333,9 +302,17 @@ class MypageController extends Controller
             'account_name'   => 'required|string|max:100',
         ]);
 
+        $this->billingManagementService->saveCastBankAccount($this->currentCastId(), $request->only([
+            'bank_name',
+            'branch_name',
+            'account_type',
+            'account_number',
+            'account_name',
+        ]));
+
         return response()->json([
             'success' => true,
-            'message' => '口座情報を保存しました。（デモ環境ではDB保存は行っていません）',
+            'message' => 'キャスト口座情報を保存しました。',
         ]);
     }
 

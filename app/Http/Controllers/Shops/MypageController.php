@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shops;
 
+use App\Services\BillingManagementService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -10,6 +11,10 @@ use Carbon\Carbon;
 
 class MypageController extends Controller
 {
+    public function __construct(private readonly BillingManagementService $billingManagementService)
+    {
+    }
+
     public function index()
     {
         $shopId = $this->currentShopId();
@@ -104,38 +109,8 @@ class MypageController extends Controller
     public function payment()
     {
         $shopId = $this->currentShopId();
-
-        $deposit = DB::table('application_deposits')
-            ->join('shop_job_applications', 'application_deposits.shop_job_application_id', '=', 'shop_job_applications.id')
-            ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
-            ->join('shops', 'shop_jobs.shop_id', '=', 'shops.id')
-            ->where('shops.id', $shopId)
-            ->select(
-                'application_deposits.*',
-                'shop_job_applications.cast_id',
-                'shop_job_applications.result_date',
-                'shop_jobs.hourly_wage_regular'
-            )
-            ->orderByDesc('application_deposits.id')
-            ->first();
-
-        $summary = [
-            'unpaid_total'    => $deposit ? (int)($deposit->hourly_wage_regular ?? 0) : 0,
-            'next_settlement' => $deposit && $deposit->created_at
-                ? Carbon::parse($deposit->created_at)->addDays(7)->format('Y/m/d')
-                : null,
-        ];
-
-        $invoices = [];
-        if ($deposit) {
-            $invoices[] = [
-                'id'     => $deposit->id,
-                'title'  => 'ボーナス入金申請',
-                'amount' => (int)($deposit->hourly_wage_regular ?? 0),
-                'status' => in_array((int)$deposit->status, [6, 7], true) ? 'paid' : 'pending',
-                'date'   => $deposit->created_at ? Carbon::parse($deposit->created_at)->format('Y/m/d') : null,
-            ];
-        }
+        $paymentData = $this->billingManagementService->getShopPaymentPageData($shopId);
+        $currentDeposit = $paymentData['current'] ?? null;
 
         $jobIds = DB::table('shop_jobs')->where('shop_id', $shopId)->pluck('id');
         $applications = collect();
@@ -182,25 +157,27 @@ class MypageController extends Controller
                 ];
             }
         }
-        if ($deposit && $deposit->created_at) {
+        if ($currentDeposit && !empty($currentDeposit['invoice_issued_at'])) {
             $calendarEvents[] = [
-                'date'  => Carbon::parse($deposit->created_at)->toDateString(),
-                'time'  => Carbon::parse($deposit->created_at)->format('H:i'),
+                'date'  => Carbon::parse($currentDeposit['invoice_issued_at'])->toDateString(),
+                'time'  => Carbon::parse($currentDeposit['invoice_issued_at'])->format('H:i'),
                 'type'  => 'deposit',
                 'actor' => 'admin',
-                'label' => '運営 → キャスト振込フロー',
+                'label' => '運営 → 店舗請求書発行',
             ];
         }
 
-        $flow = $this->buildDepositFlowStateFromDb($deposit);
-
         return view('shops.mypage.payment', [
             'pageId'         => 'manage',
-            'invoices'       => $invoices,
-            'summary'        => $summary,
+            'invoices'       => $paymentData['invoices'],
+            'summary'        => $paymentData['summary'],
             'candidates'     => $candidates,
             'calendarEvents' => $calendarEvents,
-            'depositFlow'    => $flow,
+            'depositFlow'    => $paymentData['flow'],
+            'shopBank'       => $paymentData['bank'],
+            'paymentForm'    => $paymentData['payment_form'],
+            'currentDeposit' => $currentDeposit,
+            'canReportPayment' => $paymentData['can_report_payment'],
         ]);
     }
 
@@ -217,9 +194,17 @@ class MypageController extends Controller
             'account_name'   => 'required|string|max:100',
         ]);
 
+        $this->billingManagementService->saveShopBankAccount($this->currentShopId(), $request->only([
+            'bank_name',
+            'branch_name',
+            'account_type',
+            'account_number',
+            'account_name',
+        ]));
+
         return response()->json([
             'success' => true,
-            'message' => '口座情報を保存しました。（デモ環境ではDB保存は行っていません）',
+            'message' => '店舗口座情報を保存しました。',
         ]);
     }
 
@@ -259,15 +244,11 @@ class MypageController extends Controller
      */
     public function approveDeposit(Request $request)
     {
-        $depositId = $this->getLatestDepositIdForShop();
-        if ($depositId) {
-            $current = DB::table('application_deposits')->where('id', $depositId)->value('status');
-            if ((int)$current === 1) {
-                DB::table('application_deposits')->where('id', $depositId)->update(['status' => 2]);
-            }
-        }
+        $result = $this->billingManagementService->confirmDepositForShop($this->currentShopId());
 
-        return redirect()->route('shop.mypage.payment.index')->with('status', 'ノルマ達成・店舗審査を完了しました。運営の確認をお待ちください。');
+        return redirect()
+            ->route('shop.mypage.payment.index')
+            ->with($result['success'] ? 'status' : 'error', $result['message']);
     }
 
     /**
@@ -275,15 +256,17 @@ class MypageController extends Controller
      */
     public function payToPlatform(Request $request)
     {
-        $depositId = $this->getLatestDepositIdForShop();
-        if ($depositId) {
-            $current = DB::table('application_deposits')->where('id', $depositId)->value('status');
-            if ((int)$current === 3) {
-                DB::table('application_deposits')->where('id', $depositId)->update(['status' => 4]);
-            }
-        }
+        $payload = $request->validate([
+            'reported_amount' => 'required|integer|min:1',
+            'reported_at' => 'required|date',
+            'reference' => 'nullable|string|max:255',
+        ]);
 
-        return redirect()->route('shop.mypage.payment.index')->with('status', '運営へのお振込が完了しました。運営の入金確認をお待ちください。');
+        $result = $this->billingManagementService->reportShopPayment($this->currentShopId(), $payload);
+
+        return redirect()
+            ->route('shop.mypage.payment.index')
+            ->with($result['success'] ? 'status' : 'error', $result['message']);
     }
 
     /**

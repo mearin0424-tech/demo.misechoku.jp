@@ -122,8 +122,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // 入金・振込管理
         Route::get('/deposits', [AdminDeposit::class, 'index'])->name('deposits.index');
-        Route::post('/deposits/approve', [AdminDeposit::class, 'approve'])->name('deposits.approve');
-        Route::post('/deposits/pay-cast', [AdminDeposit::class, 'payCast'])->name('deposits.paycast');
+        Route::get('/deposits/{deposit}/invoice', [AdminDeposit::class, 'showInvoice'])->name('deposits.invoice.show');
+        Route::post('/deposits/{deposit}/invoice', [AdminDeposit::class, 'issueInvoice'])->name('deposits.invoice.issue');
+        Route::post('/deposits/{deposit}/confirm-shop-payment', [AdminDeposit::class, 'confirmShopPayment'])->name('deposits.shop-payment.confirm');
+        Route::post('/deposits/{deposit}/transfer-cast', [AdminDeposit::class, 'transferCast'])->name('deposits.cast-transfer.execute');
 
         // 売上管理
         Route::get('/sales', [AdminSales::class, 'index'])->name('sales.index');
@@ -208,6 +210,9 @@ Route::get('/maintenance', function () {
 })->name('maintenance');
 
 Route::get('/logout', [CastLogin::class, 'logout'])->name('auth.logout');
+
+Route::middleware('signed')->get('/billing/invoices/{deposit}', [AdminDeposit::class, 'showSignedInvoice'])
+    ->name('billing.invoices.show');
 
 /*
 |--------------------------------------------------------------------------
