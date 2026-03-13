@@ -914,6 +914,45 @@
     gap: 16px;
 }
 
+.ai-recommend__intro-card {
+    margin: 0 0 14px;
+    padding: 16px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(39, 17, 22, 0.98), rgba(30, 12, 16, 0.98));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+.ai-recommend__intro-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff1cf;
+    margin-bottom: 8px;
+}
+
+.ai-recommend__intro-text {
+    margin: 0;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: #dccccc;
+}
+
+.ai-recommend__intro-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 14px;
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 999px;
+    background: linear-gradient(145deg, #f2d06d 0%, #d6ab2a 55%, #b88a14 100%);
+    color: #231516;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 10px 22px rgba(212, 175, 55, 0.22);
+}
+
 .ai-recommend__message {
     max-width: 88%;
     display: flex;
