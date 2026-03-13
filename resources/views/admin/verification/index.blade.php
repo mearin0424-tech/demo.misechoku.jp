@@ -43,7 +43,7 @@
                         <td>{{ $castLabelForAdmin }}</td>
                         <td>
                             @if($castStatus !== 'approved')
-                                <form method="POST" action="{{ route('bk.verification.cast.approve') }}">
+                                <form method="POST" action="{{ route('admin.verification.cast.approve') }}">
                                     @csrf
                                     <button type="submit" class="btn-action manage">
                                         承認する
@@ -95,7 +95,7 @@
                             <td>{{ $adminLabel }}</td>
                             <td>
                                 @if($status === 'pending')
-                                    <form method="POST" action="{{ route('bk.verification.shopdoc.approve') }}">
+                                    <form method="POST" action="{{ route('admin.verification.shopdoc.approve') }}">
                                         @csrf
                                         <input type="hidden" name="type" value="{{ $key }}">
                                         <button type="submit" class="btn-action manage">

@@ -18,7 +18,7 @@
 
         <div class="admin-panel">
             <h2 class="admin-panel-title">口座情報</h2>
-            <form method="POST" action="{{ route('bk.bank.store') }}" class="admin-bank-form">
+            <form method="POST" action="{{ route('admin.bank.store') }}" class="admin-bank-form">
                 @csrf
                 <div class="admin-form-row">
                     <label class="admin-label">金融機関名</label>

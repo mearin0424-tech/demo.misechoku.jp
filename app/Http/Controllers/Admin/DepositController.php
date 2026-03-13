@@ -53,7 +53,7 @@ class DepositController extends Controller
             session(['deposit_flow_step' => 3]);
         }
 
-        return redirect()->route('bk.deposits.index')->with('status', '入金額を承認しました。店舗からの入金をお待ちください。');
+        return redirect()->route('admin.deposits.index')->with('status', '入金額を承認しました。店舗からの入金をお待ちください。');
     }
 
     /**
@@ -66,7 +66,7 @@ class DepositController extends Controller
             session(['deposit_flow_step' => 5]);
         }
 
-        return redirect()->route('bk.deposits.index')->with('status', 'キャストへの振込手続きを開始しました。キャストからの入金確認をお待ちください。');
+        return redirect()->route('admin.deposits.index')->with('status', 'キャストへの振込手続きを開始しました。キャストからの入金確認をお待ちください。');
     }
 
     /**

@@ -13,7 +13,8 @@
         'mypage'     => 'MY PAGE',
         'talk'       => 'TALK',
         'interaction'=> 'CONNECTION',
-        'manage'     => 'MANAGEMENT'
+        'manage'     => 'MANAGEMENT',
+        'register'   => 'ENTRY',
     ];
     $currentEngTitle = $engTitles[$pageId] ?? '-';
 

@@ -61,6 +61,17 @@
             </button>
         </form>
 
+        <div class="demo-register-links">
+            <a href="{{ route('cast.register') }}" class="demo-register-link">
+                <i class="fas fa-user-plus"></i>
+                <span>キャスト新規登録</span>
+            </a>
+            <a href="{{ route('shop.register') }}" class="demo-register-link">
+                <i class="fas fa-store"></i>
+                <span>店舗新規登録</span>
+            </a>
+        </div>
+
         <div class="demo-login-note">
             <span class="demo-login-note-badge">DEMO</span>
             <p>認証はデモ用です。アカウント情報の入力なしで各画面の体験を始められます。</p>
@@ -285,6 +296,35 @@
             -webkit-backdrop-filter: blur(10px);
         }
 
+        .demo-register-links {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .demo-register-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 50px;
+            padding: 12px 14px;
+            border-radius: 18px;
+            border: 1px solid rgba(229, 193, 88, 0.18);
+            background: rgba(255, 255, 255, 0.035);
+            color: #f7ecd3;
+            text-decoration: none;
+            font-size: 0.88rem;
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .demo-register-link:hover {
+            transform: translateY(-1px);
+            border-color: rgba(229, 193, 88, 0.4);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
+        }
+
         .demo-login-note-badge {
             flex-shrink: 0;
             padding: 5px 10px;
@@ -348,6 +388,10 @@
 
             .demo-login-note {
                 align-items: flex-start;
+            }
+
+            .demo-register-links {
+                grid-template-columns: 1fr;
             }
         }
     </style>

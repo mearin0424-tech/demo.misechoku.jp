@@ -26,7 +26,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('bk.login.post') }}" class="admin-form">
+        <form method="POST" action="{{ route('admin.login.post') }}" class="admin-form">
             @csrf
             <div class="form-group">
                 <label for="email">メールアドレス</label>

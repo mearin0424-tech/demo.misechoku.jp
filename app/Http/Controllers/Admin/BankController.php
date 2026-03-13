@@ -40,7 +40,7 @@ class BankController extends Controller
         session(['admin_bank_account' => $data]);
 
         return redirect()
-            ->route('bk.bank.index')
+            ->route('admin.bank.index')
             ->with('status', '運営の口座情報を保存しました。（デモ環境ではセッション保存のみ）');
     }
 }

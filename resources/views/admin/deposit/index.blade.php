@@ -35,14 +35,14 @@
             @php $step = session('deposit_flow_step', 0); @endphp
             <div class="management-actions" style="text-align:right;">
                 @if($step == 2)
-                    <form method="POST" action="{{ route('bk.deposits.approve') }}">
+                    <form method="POST" action="{{ route('admin.deposits.approve') }}">
                         @csrf
                         <button type="submit" class="btn-action manage">
                             入金額を承認する
                         </button>
                     </form>
                 @elseif($step == 4)
-                    <form method="POST" action="{{ route('bk.deposits.paycast') }}">
+                    <form method="POST" action="{{ route('admin.deposits.paycast') }}">
                         @csrf
                         <button type="submit" class="btn-action manage">
                             キャストへの振込を実行する

@@ -32,7 +32,7 @@ class VerificationController extends Controller
         session(['cast_identity_status' => 'approved']);
 
         return redirect()
-            ->route('bk.verification.index')
+            ->route('admin.verification.index')
             ->with('status', 'キャストの本人確認を承認しました。（デモ）');
     }
 
@@ -54,7 +54,7 @@ class VerificationController extends Controller
         session(['shop_documents_status' => $statuses]);
 
         return redirect()
-            ->route('bk.verification.index')
+            ->route('admin.verification.index')
             ->with('status', '店舗の書類（' . $data['type'] . '）を承認しました。（デモ）');
     }
 }
