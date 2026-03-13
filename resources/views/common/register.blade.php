@@ -227,7 +227,7 @@
                         >
                     </label>
 
-                    <label class="register-field">
+                    <div class="register-field">
                         <span>ご利用プラン <em>必須</em></span>
                         <div class="register-plan-grid">
                             <label class="register-plan-option">
@@ -245,7 +245,7 @@
                                 </span>
                             </label>
                         </div>
-                    </label>
+                    </div>
                 </section>
             @endif
 

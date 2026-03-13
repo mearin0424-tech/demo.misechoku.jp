@@ -29,10 +29,6 @@ class SearchController extends BaseSearchController
     {
         $rows = DB::table('shops')
             ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
-            ->leftJoin('shop_images as main_shop_image', function ($join) {
-                $join->on('shops.id', '=', 'main_shop_image.shop_id')
-                    ->where('main_shop_image.is_main', 1);
-            })
             ->whereNotNull('shop_profiles.catch')
             ->where('shop_profiles.catch', '<>', '')
             ->orderByDesc('shop_profiles.updated_at')
@@ -42,8 +38,7 @@ class SearchController extends BaseSearchController
                 'shop_profiles.shop_name',
                 'shop_profiles.catch',
                 'shop_profiles.main_image_path',
-                'shop_profiles.updated_at',
-                'main_shop_image.image_path as fallback_image_path'
+                'shop_profiles.updated_at'
             )
             ->limit(20)
             ->get();
@@ -53,7 +48,7 @@ class SearchController extends BaseSearchController
 
             return [
                 'name' => (string) ($row->shop_name ?: 'ショップ'),
-                'img' => $this->assetPathForStored($row->main_image_path ?: $row->fallback_image_path),
+                'img' => $this->resolveShopImageUrl((string) $row->id, $row->main_image_path),
                 'time' => $updatedAt ? $updatedAt->locale('ja')->diffForHumans() : '',
                 'text' => (string) $row->catch,
             ];
@@ -70,10 +65,6 @@ class SearchController extends BaseSearchController
 
         $rows = DB::table('shops')
             ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
-            ->leftJoin('shop_images as main_shop_image', function ($join) {
-                $join->on('shops.id', '=', 'main_shop_image.shop_id')
-                    ->where('main_shop_image.is_main', 1);
-            })
             ->select(
                 'shops.id',
                 'shop_profiles.shop_name',
@@ -81,8 +72,7 @@ class SearchController extends BaseSearchController
                 'shop_profiles.city',
                 'shop_profiles.catch',
                 'shop_profiles.overview',
-                'shop_profiles.main_image_path',
-                'main_shop_image.image_path as fallback_image_path'
+                'shop_profiles.main_image_path'
             )
             ->orderByDesc('shop_profiles.updated_at')
             ->orderByDesc('shops.id');
@@ -123,11 +113,27 @@ class SearchController extends BaseSearchController
                     'shop_name' => (string) ($row->shop_name ?: 'ショップ'),
                     'pref' => $row->pref ?? '',
                     'city' => $row->city ?? '',
-                    'main_img' => $this->assetPathForStored($row->main_image_path ?: $row->fallback_image_path),
+                    'main_img' => $this->resolveShopImageUrl((string) $row->id, $row->main_image_path),
                 ];
             })
             ->values()
             ->all();
+    }
+
+    private function resolveShopImageUrl(string $shopId, ?string $mainImagePath): string
+    {
+        if (!empty($mainImagePath)) {
+            return $this->assetPathForStored($mainImagePath);
+        }
+
+        $imagePath = DB::table('shop_images')
+            ->where('shop_id', $shopId)
+            ->orderByRaw('main_order IS NULL')
+            ->orderBy('main_order')
+            ->orderBy('id')
+            ->value('image_path');
+
+        return $this->assetPathForStored($imagePath);
     }
 
     private function assetPathForStored(?string $path): string

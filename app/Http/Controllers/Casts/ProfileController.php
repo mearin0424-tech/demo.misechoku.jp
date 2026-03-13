@@ -161,6 +161,8 @@ class ProfileController extends Controller
             'look_tag_ids.*' => 'integer|exists:tags_cast_looks,id',
             'personality_tag_ids' => 'nullable|array',
             'personality_tag_ids.*' => 'integer|exists:tags_cast_personality,id',
+        ], [
+            'zip.regex' => '郵便番号は 7 桁、または 123-4567 形式で入力してください。',
         ]);
 
         $castId = $this->currentCastId();

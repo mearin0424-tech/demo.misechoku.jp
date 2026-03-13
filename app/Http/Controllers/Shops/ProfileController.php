@@ -56,6 +56,8 @@ class ProfileController extends Controller
             'addr1' => 'nullable|string|max:255',
             'industry_ids' => 'nullable|array',
             'industry_ids.*' => 'integer|exists:industries,id',
+        ], [
+            'zip.regex' => '郵便番号は 7 桁、または 123-4567 形式で入力してください。',
         ]);
 
         $shopId = $this->currentShopId();

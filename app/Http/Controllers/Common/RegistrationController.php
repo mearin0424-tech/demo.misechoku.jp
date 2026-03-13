@@ -42,6 +42,9 @@ class RegistrationController extends Controller
             'shift_style' => ['required', 'in:once,twice,flex'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'terms' => ['accepted'],
+        ], [
+            'zip.required' => '郵便番号を入力してください。',
+            'zip.regex' => '郵便番号は 7 桁、または 123-4567 形式で入力してください。',
         ]);
 
         if (!checkdate(
@@ -117,6 +120,9 @@ class RegistrationController extends Controller
             'plan' => ['required', 'in:basic,premium'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'terms' => ['accepted'],
+        ], [
+            'zip.required' => '郵便番号を入力してください。',
+            'zip.regex' => '郵便番号は 7 桁、または 123-4567 形式で入力してください。',
         ]);
 
         $manager = DB::transaction(function () use ($request) {

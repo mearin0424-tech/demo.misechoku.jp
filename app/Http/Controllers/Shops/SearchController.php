@@ -29,11 +29,6 @@ class SearchController extends BaseSearchController
     {
         $rows = DB::table('casts')
             ->join('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id')
-            ->leftJoin('cast_images as main_cast_image', function ($join) {
-                $join->on('casts.id', '=', 'main_cast_image.cast_id')
-                    ->where('main_cast_image.type', 1)
-                    ->where('main_cast_image.is_main', 1);
-            })
             ->whereNotNull('cast_profiles.pr')
             ->where('cast_profiles.pr', '<>', '')
             ->orderByDesc('cast_profiles.updated_at')
@@ -44,8 +39,7 @@ class SearchController extends BaseSearchController
                 'cast_profiles.name',
                 'cast_profiles.pr',
                 'cast_profiles.main_image_path',
-                'cast_profiles.updated_at',
-                'main_cast_image.image_path as fallback_image_path'
+                'cast_profiles.updated_at'
             )
             ->limit(20)
             ->get();
@@ -55,7 +49,7 @@ class SearchController extends BaseSearchController
 
             return [
                 'name' => $this->castDisplayName($row),
-                'img' => $this->assetPathForStored($row->main_image_path ?: $row->fallback_image_path),
+                'img' => $this->resolveCastImageUrl((string) $row->id, $row->main_image_path),
                 'time' => $updatedAt ? $updatedAt->locale('ja')->diffForHumans() : '',
                 'text' => (string) $row->pr,
             ];
@@ -72,11 +66,6 @@ class SearchController extends BaseSearchController
 
         $rows = DB::table('casts')
             ->join('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id')
-            ->leftJoin('cast_images as main_cast_image', function ($join) {
-                $join->on('casts.id', '=', 'main_cast_image.cast_id')
-                    ->where('main_cast_image.type', 1)
-                    ->where('main_cast_image.is_main', 1);
-            })
             ->select(
                 'casts.id',
                 'cast_profiles.nickname',
@@ -85,8 +74,7 @@ class SearchController extends BaseSearchController
                 'cast_profiles.pref',
                 'cast_profiles.city',
                 'cast_profiles.pr',
-                'cast_profiles.main_image_path',
-                'main_cast_image.image_path as fallback_image_path'
+                'cast_profiles.main_image_path'
             )
             ->orderByDesc('cast_profiles.updated_at')
             ->orderByDesc('casts.id');
@@ -121,11 +109,29 @@ class SearchController extends BaseSearchController
                     'id' => $row->id,
                     'name' => $this->castDisplayName($row),
                     'age' => $birthday?->age,
-                    'img' => $this->assetPathForStored($row->main_image_path ?: $row->fallback_image_path),
+                    'img' => $this->resolveCastImageUrl((string) $row->id, $row->main_image_path),
                 ];
             })
             ->values()
             ->all();
+    }
+
+    private function resolveCastImageUrl(string $castId, ?string $mainImagePath): string
+    {
+        if (!empty($mainImagePath)) {
+            return $this->assetPathForStored($mainImagePath);
+        }
+
+        $imagePath = DB::table('cast_images')
+            ->where('cast_id', $castId)
+            ->where('type', 1)
+            ->orderByRaw('is_main DESC')
+            ->orderByRaw('main_order IS NULL')
+            ->orderBy('main_order')
+            ->orderBy('id')
+            ->value('image_path');
+
+        return $this->assetPathForStored($imagePath);
     }
 
     private function castDisplayName(object $row): string
