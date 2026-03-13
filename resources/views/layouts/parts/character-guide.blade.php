@@ -8,7 +8,5 @@
     {{-- 右側のキャラクター --}}
     <div class="guide-character-wrap">
         <img src="{{ asset('assets/images/guide/guide-character.png') }}" alt="ガイド">
-        {{-- ×ボタン：キャラクターの肩付近に配置 --}}
-        <button type="button" id="character-close-trigger" class="guide-close-x">×</button>
     </div>
 </div>

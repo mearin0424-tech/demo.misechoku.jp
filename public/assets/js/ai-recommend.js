@@ -45,8 +45,6 @@
 
         var payload = parseJson(dataEl.textContent || '{}') || {};
         var chatBox = root.querySelector('[data-ai-chat]');
-        var input = root.querySelector('[data-ai-input]');
-        var sendButton = root.querySelector('[data-ai-send]');
         var resetButton = root.querySelector('[data-ai-reset]');
         var avatar = root.getAttribute('data-avatar') || '';
         var role = root.getAttribute('data-role') || payload.role || 'cast';
@@ -129,20 +127,6 @@
             return unique(traits);
         }
 
-        function buildTags(traits, type) {
-            var tags = [];
-
-            if (traits.indexOf('norma_loose') !== -1 || traits.indexOf('ambition_soft') !== -1) tags.push('#ゆるめ');
-            if (traits.indexOf('norma_hard') !== -1 || traits.indexOf('ambition_hard') !== -1) tags.push('#ガッツリ');
-            if (traits.indexOf('vibe_quiet') !== -1) tags.push('#落ち着き');
-            if (traits.indexOf('vibe_party') !== -1) tags.push('#ワイワイ');
-            if (traits.indexOf('staff_teach') !== -1 || traits.indexOf('support_teach') !== -1) tags.push('#育成枠');
-            if (traits.indexOf('staff_free') !== -1 || traits.indexOf('support_free') !== -1) tags.push('#自由度高め');
-            if (type && type !== 'キャスト' && type !== 'ナイトワーク') tags.push('#' + type);
-
-            return unique(tags).slice(0, 4);
-        }
-
         var allItems = Array.isArray(payload.items) ? payload.items.map(function (raw) {
             var item = {
                 id: raw.id || '',
@@ -156,7 +140,6 @@
 
             item.type = inferType(item);
             item.traits = role === 'cast' ? inferCastTraits(item) : inferShopTraits(item);
-            item.tags = buildTags(item.traits, item.type);
             item.desc = item.text || (role === 'cast'
                 ? '条件に合いそうなお店候補です。詳細ページで雰囲気を確認してみてください。'
                 : '雰囲気が合いそうなキャスト候補です。プロフィール詳細で確認してみてください。');
@@ -313,9 +296,6 @@
                         '<h4 class="ai-recommend__card-title">' + title + '</h4>' +
                         '<div class="ai-recommend__reason"><i class="fas fa-check-circle"></i>' + escapeHtml(reason) + '</div>' +
                         '<p class="ai-recommend__card-desc">' + escapeHtml(item.desc) + '</p>' +
-                        '<div class="ai-recommend__tags">' + item.tags.map(function (tag) {
-                            return '<span class="ai-recommend__tag">' + escapeHtml(tag) + '</span>';
-                        }).join('') + '</div>' +
                         '<a href="' + escapeHtml(item.url) + '" class="ai-recommend__card-link">' + linkLabel + '</a>' +
                     '</div>' +
                 '</article>';
@@ -469,8 +449,8 @@
                     state.answers.vibe = text.indexOf('ワイワイ') !== -1 ? 'vibe_party' : 'vibe_quiet';
                     state.step = 4;
                     addAiMessage('ぶっちゃけ、数字やノルマの温度感はどっちがいい？', [
-                        { value: '絶対ムリ！気楽にやりたい (#ゆる稼ぎ)', label: '絶対ムリ！気楽にやりたい' },
-                        { value: '稼げるなら戦う (#ガッツリ)', label: '稼げるなら戦う' }
+                        { value: '絶対ムリ！気楽にやりたい', label: '絶対ムリ！気楽にやりたい' },
+                        { value: '稼げるなら戦う', label: '稼げるなら戦う' }
                     ]);
                     return;
 
@@ -478,8 +458,8 @@
                     state.answers.norma = text.indexOf('ムリ') !== -1 ? 'norma_loose' : 'norma_hard';
                     state.step = 5;
                     addAiMessage('スタッフさんとの距離感はどうしたい？', [
-                        { value: '手取り足取り教えてほしい (#育成枠)', label: '手取り足取り教えてほしい' },
-                        { value: '自由にやらせてほしい (#個人商店)', label: '自由にやらせてほしい' }
+                        { value: '手取り足取り教えてほしい', label: '手取り足取り教えてほしい' },
+                        { value: '自由にやらせてほしい', label: '自由にやらせてほしい' }
                     ]);
                     return;
 
@@ -622,7 +602,6 @@
 
             disableOptionButtons();
             addUserMessage(text);
-            if (input) input.value = '';
 
             var typing = showTyping();
             window.setTimeout(function () {
@@ -669,21 +648,6 @@
                 processAnswer(answerButton.getAttribute('data-ai-answer') || '');
             }
         });
-
-        if (sendButton) {
-            sendButton.addEventListener('click', function () {
-                processAnswer((input && input.value ? input.value : '').trim());
-            });
-        }
-
-        if (input) {
-            input.addEventListener('keydown', function (event) {
-                if (event.key === 'Enter') {
-                    event.preventDefault();
-                    processAnswer(input.value.trim());
-                }
-            });
-        }
 
         if (resetButton) {
             resetButton.addEventListener('click', init);

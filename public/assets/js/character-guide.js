@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
     const characterGuide = document.getElementById('character-guide');
-    const closeBtn = document.getElementById('character-close-trigger');
     const characterWrap = characterGuide ? characterGuide.querySelector('.guide-character-wrap') : null;
     const messageContent = document.getElementById('character-message-content');
     const BUBBLE_AUTO_HIDE_MS = 3000;
@@ -37,17 +36,6 @@ document.addEventListener('DOMContentLoaded', function() {
             characterGuide.classList.remove('bubble-hidden');
             startBubbleAutoHide(); // 再表示後も3秒で消す
         }
-    }
-
-    // ×ボタンでガイド全体を非表示
-    if (closeBtn && characterGuide) {
-        closeBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            characterGuide.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-            characterGuide.style.opacity = '0';
-            characterGuide.style.transform = 'translateY(10px)';
-            setTimeout(() => characterGuide.classList.add('is-hidden'), 300);
-        });
     }
 
     // オコジョ（キャラクター）を押したら吹き出しを再表示

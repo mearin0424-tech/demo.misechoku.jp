@@ -102,19 +102,6 @@
                 </div>
 
                 <div class="ai-recommend__chat" data-ai-chat aria-live="polite"></div>
-
-                <div class="ai-recommend__composer">
-                    <input
-                        type="text"
-                        class="ai-recommend__input"
-                        data-ai-input
-                        placeholder="メッセージを入力..."
-                        autocomplete="off"
-                    >
-                    <button type="button" class="ai-recommend__send" data-ai-send aria-label="送信">
-                        <i class="fas fa-paper-plane" aria-hidden="true"></i>
-                    </button>
-                </div>
             </div>
 
             <script type="application/json" id="ai-recommend-data">{!! json_encode([
