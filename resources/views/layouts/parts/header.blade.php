@@ -9,6 +9,7 @@
 
     $engTitles = [
         'home'       => 'HOME',
+        'login'      => 'LOGIN',
         'search'     => 'SEARCH',
         'mypage'     => 'MY PAGE',
         'talk'       => 'TALK',

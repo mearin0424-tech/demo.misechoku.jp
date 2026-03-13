@@ -212,9 +212,14 @@ Route::prefix('api/push')->name('push.')->group(function () {
     Route::post('send-test', [\App\Http\Controllers\Api\PushController::class, 'sendTest'])->name('send-test');
 });
 
+Route::prefix('cast')->name('cast.')->group(function () {
+    Route::get('/login', [CastLogin::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [CastLogin::class, 'login'])->name('login.post');
+});
+
 Route::prefix('shop')->name('shop.')->group(function () {
     Route::get('/login', [ShopLogin::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [ShopLogin::class, 'login']);
+    Route::post('/login', [ShopLogin::class, 'login'])->name('login.post');
     Route::get('/register', [RegistrationController::class, 'showShop'])->name('register');
     Route::post('/register', [RegistrationController::class, 'storeShop'])->name('register.store');
 });
