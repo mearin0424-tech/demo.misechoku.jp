@@ -93,16 +93,16 @@
                         <tbody id="task-table-body">
                             @foreach ($tasks as $task)
                                 <tr class="task-row" data-category="{{ $task['cat_id'] }}">
-                                    <td>
+                                    <td data-label="カテゴリ">
                                         <span class="task-category-badge tone-{{ $task['cat_id'] }}">
                                             {{ $task['category'] }}
                                         </span>
                                     </td>
-                                    <td>
+                                    <td data-label="対象">
                                         <div class="task-target-name">{{ $task['target'] }}</div>
                                         <div class="task-target-meta">{{ $task['type'] }} ・ {{ $task['id'] }}</div>
                                     </td>
-                                    <td>
+                                    <td data-label="ステータス">
                                         <div class="task-status {{ $task['urgency'] === 'critical' ? 'is-critical' : ($task['urgency'] === 'high' ? 'is-high' : '') }}">
                                             @if ($task['urgency'] === 'critical')
                                                 <i class="fas fa-circle-exclamation"></i>
@@ -112,9 +112,9 @@
                                             <span>{{ $task['status'] }}</span>
                                         </div>
                                     </td>
-                                    <td class="task-amount">{{ $task['amount'] ?: '-' }}</td>
-                                    <td class="task-date">{{ $task['date'] }}</td>
-                                    <td class="text-right">
+                                    <td class="task-amount" data-label="金額">{{ $task['amount'] ?: '-' }}</td>
+                                    <td class="task-date" data-label="申請日時">{{ $task['date'] }}</td>
+                                    <td class="text-right" data-label="アクション">
                                         <button type="button" class="task-action-button {{ $task['urgency'] === 'critical' ? 'is-critical' : '' }}">
                                             <span>{{ $task['action'] }}</span>
                                             <i class="fas fa-arrow-right"></i>
@@ -139,6 +139,9 @@
 
     <style>
         .dashboard-page {
+            width: 100%;
+            max-width: 780px;
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
             gap: 28px;
@@ -252,7 +255,7 @@
         }
         .task-summary-grid {
             display: grid;
-            grid-template-columns: repeat(6, minmax(0, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 12px;
         }
         .task-summary-card {
@@ -320,6 +323,9 @@
             font-weight: 800;
             color: #f3f4f6;
         }
+        .task-summary-text {
+            min-width: 0;
+        }
         .task-panel {
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -375,7 +381,7 @@
         }
         .task-table {
             width: 100%;
-            min-width: 880px;
+            min-width: 760px;
             border-collapse: collapse;
         }
         .task-table thead th {
@@ -504,22 +510,128 @@
         .task-row.is-hidden {
             display: none;
         }
-        @media (max-width: 1200px) {
+        @media (max-width: 1023px) {
             .task-summary-grid {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
             .kpi-grid {
                 grid-template-columns: repeat(1, minmax(0, 1fr));
             }
         }
         @media (max-width: 767px) {
+            .dashboard-page {
+                gap: 20px;
+            }
+            .dashboard-section-head {
+                align-items: flex-start;
+            }
+            .dashboard-updated-at {
+                width: 100%;
+            }
+            .kpi-card {
+                padding: 16px;
+                border-radius: 16px;
+            }
+            .kpi-title {
+                margin-bottom: 10px;
+            }
+            .kpi-value {
+                font-size: 1.7rem;
+            }
+            .task-summary-card {
+                padding: 14px;
+                border-radius: 14px;
+            }
             .task-summary-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
+                grid-template-columns: repeat(1, minmax(0, 1fr));
+            }
+            .task-panel-head {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 14px;
+            }
+            .task-filter-state {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .task-filter-reset,
+            .task-sort-button,
+            .task-filter-indicator {
+                width: 100%;
+                justify-content: center;
+            }
+            .task-table {
+                min-width: 0;
+            }
+            .task-table-wrap {
+                overflow: visible;
+                padding: 12px;
+            }
+            .task-table thead {
+                display: none;
+            }
+            .task-table tbody {
+                display: block;
+            }
+            .task-table tbody tr {
+                display: block;
+                margin-bottom: 12px;
+                border-radius: 16px;
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                background: #171a20;
+                overflow: hidden;
+            }
+            .task-table tbody tr:last-child {
+                margin-bottom: 0;
+            }
+            .task-table tbody td {
+                display: grid;
+                grid-template-columns: 82px minmax(0, 1fr);
+                gap: 10px;
+                padding: 12px 14px;
+            }
+            .task-table tbody td::before {
+                content: attr(data-label);
+                font-size: 0.72rem;
+                font-weight: 700;
+                color: #8a92a0;
+            }
+            .task-table tbody td:first-child {
+                border-top: 0;
+            }
+            .text-right {
+                text-align: left;
+            }
+            .task-action-button {
+                width: 100%;
+                justify-content: center;
+            }
+            #task-empty-row td {
+                display: block;
+                padding: 0;
+                border-top: 0;
+            }
+            #task-empty-row td::before {
+                content: none;
             }
         }
         @media (max-width: 560px) {
-            .task-summary-grid {
-                grid-template-columns: repeat(1, minmax(0, 1fr));
+            .dashboard-page {
+                max-width: 100%;
+            }
+            .dashboard-section-title {
+                font-size: 1.05rem;
+            }
+            .task-table-wrap {
+                padding: 10px;
+            }
+            .task-table tbody td {
+                grid-template-columns: 1fr;
+                gap: 6px;
+                padding: 11px 12px;
+            }
+            .task-table tbody td::before {
+                font-size: 0.68rem;
             }
         }
     </style>

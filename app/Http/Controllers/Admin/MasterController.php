@@ -20,64 +20,32 @@ class MasterController extends Controller
      *
      * レビュー項目・検索タグなどへのリンク集をまとめる。
      */
-    public function index()
+    public function index(Request $request)
     {
         return view('admin.master.index', $this->adminMasterService->getMasterIndexData());
     }
 
-    public function storeReviewContent(Request $request): RedirectResponse
+    public function storeCatalog(Request $request, string $catalogKey): RedirectResponse
     {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:review_contents,name'],
-            'sort_order' => ['required', 'integer', 'min:1', 'max:999'],
-            'is_active' => ['nullable', 'boolean'],
-        ]);
+        $catalog = $this->adminMasterService->getCatalogDefinition($catalogKey);
 
-        $this->adminMasterService->createReviewContent([
-            'name' => $data['name'],
-            'sort_order' => (int) $data['sort_order'],
-            'is_active' => $request->boolean('is_active', true),
-        ]);
+        abort_unless($catalog, 404);
+
+        $rules = [];
+        foreach ($catalog['fields'] as $field) {
+            $rules[$field['input']] = ['required', 'string', 'max:255'];
+            if ($field['input'] === 'directory') {
+                $rules[$field['input']][] = 'alpha_dash';
+            }
+            $rules[$field['input']][] = Rule::unique($catalog['table'], $field['column']);
+        }
+
+        $data = $request->validate($rules);
+        $this->adminMasterService->createCatalogRecord($catalogKey, $data);
 
         return redirect()
             ->route('admin.masters.index')
-            ->with('status', 'レビュー項目を登録しました。');
-    }
-
-    public function storeTag(Request $request): RedirectResponse
-    {
-        $data = $request->validate([
-            'type' => ['required', 'string', Rule::in(['salary', 'howto', 'casttag'])],
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('tags', 'name')->where(fn ($query) => $query->where('type', $request->input('type'))),
-            ],
-        ]);
-
-        $this->adminMasterService->createTag($data);
-
-        return redirect()
-            ->route('admin.masters.index')
-            ->with('status', '検索タグを登録しました。');
-    }
-
-    public function storeNgWord(Request $request): RedirectResponse
-    {
-        $data = $request->validate([
-            'word' => ['required', 'string', 'max:255', 'unique:ng_words,word'],
-            'is_active' => ['nullable', 'boolean'],
-        ]);
-
-        $this->adminMasterService->createNgWord([
-            'word' => $data['word'],
-            'is_active' => $request->boolean('is_active', true),
-        ]);
-
-        return redirect()
-            ->route('admin.masters.index')
-            ->with('status', 'NGワードを登録しました。');
+            ->with('status', $catalog['title'] . 'を登録しました。');
     }
 }
 

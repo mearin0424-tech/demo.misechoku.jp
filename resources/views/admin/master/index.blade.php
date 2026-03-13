@@ -3,11 +3,17 @@
 @section('title', 'マスタ設定管理')
 
 @section('content')
+    @php
+        $sortLabels = [
+            'created_desc' => '登録日順',
+            'name_asc' => 'あいうえお順',
+        ];
+    @endphp
     <div class="admin-page">
-        <h1 class="admin-title">マスタ設定管理</h1>
+        <h1 class="admin-title">マスタメンテナンス</h1>
         <p class="admin-description">
-            レビュー項目や検索タグ、NGワードなど、全体で共通利用するマスタデータをデータベースから表示しています。<br>
-            デモ環境でも、管理画面で確認する内容は DB の状態に追従します。
+            レビュー項目や検索タグ、NGワードなど、全体で共通利用するマスタデータを管理します。<br>
+            各一覧は「登録日順」と「あいうえお順」を切り替えられるようにし、日々の確認がしやすい構成にしています。
         </p>
 
         @if (session('status'))
@@ -48,6 +54,19 @@
                         <h2>レビュー項目マスタ</h2>
                         <p>レビュー詳細で参照される評価項目一覧です。</p>
                     </div>
+                    <div class="admin-card-meta">
+                        <span class="admin-card-count">{{ $reviewContents->count() }}件</span>
+                        <div class="admin-sort-switch" role="group" aria-label="レビュー項目の並び順">
+                            @foreach ($sortLabels as $value => $label)
+                                <a
+                                    href="{{ request()->fullUrlWithQuery(['review_sort' => $value]) }}"
+                                    class="admin-sort-link {{ ($sorts['review'] ?? 'created_desc') === $value ? 'is-active' : '' }}"
+                                >
+                                    {{ $label }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
 
                 <form method="POST" action="{{ route('admin.masters.review-contents.store') }}" class="admin-master-form">
@@ -73,21 +92,21 @@
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>ID</th>
                                 <th>項目名</th>
                                 <th>表示順</th>
                                 <th>利用件数</th>
                                 <th>状態</th>
+                                <th>登録日</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($reviewContents as $item)
                                 <tr>
-                                    <td>{{ $item->id }}</td>
-                                    <td>{{ $item->name }}</td>
-                                    <td>{{ $item->sort_order }}</td>
-                                    <td>{{ $item->usage_count }}</td>
-                                    <td>{{ $item->is_active ? '有効' : '無効' }}</td>
+                                    <td data-label="項目名">{{ $item->name }}</td>
+                                    <td data-label="表示順">{{ $item->sort_order }}</td>
+                                    <td data-label="利用件数">{{ $item->usage_count }}</td>
+                                    <td data-label="状態">{{ $item->is_active ? '有効' : '無効' }}</td>
+                                    <td data-label="登録日">{{ $item->created_at ? \Illuminate\Support\Carbon::parse($item->created_at)->format('Y-m-d') : '-' }}</td>
                                 </tr>
                             @empty
                                 <tr>
@@ -104,6 +123,19 @@
                     <div>
                         <h2>検索タグマスタ</h2>
                         <p>タグ種別ごとに、キャスト・店舗で使われている検索タグを表示します。</p>
+                    </div>
+                    <div class="admin-card-meta">
+                        <span class="admin-card-count">{{ $summary['tag_count'] }}件</span>
+                        <div class="admin-sort-switch" role="group" aria-label="検索タグの並び順">
+                            @foreach ($sortLabels as $value => $label)
+                                <a
+                                    href="{{ request()->fullUrlWithQuery(['tag_sort' => $value]) }}"
+                                    class="admin-sort-link {{ ($sorts['tag'] ?? 'created_desc') === $value ? 'is-active' : '' }}"
+                                >
+                                    {{ $label }}
+                                </a>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
 
@@ -138,21 +170,21 @@
                                 <table class="admin-table">
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
                                             <th>タグ名</th>
                                             <th>キャスト利用</th>
                                             <th>店舗利用</th>
                                             <th>合計</th>
+                                            <th>登録日</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($items as $item)
                                             <tr>
-                                                <td>{{ $item->id }}</td>
-                                                <td>{{ $item->name }}</td>
-                                                <td>{{ $item->cast_usage_count }}</td>
-                                                <td>{{ $item->shop_usage_count }}</td>
-                                                <td>{{ $item->usage_count }}</td>
+                                                <td data-label="タグ名">{{ $item->name }}</td>
+                                                <td data-label="キャスト利用">{{ $item->cast_usage_count }}</td>
+                                                <td data-label="店舗利用">{{ $item->shop_usage_count }}</td>
+                                                <td data-label="合計">{{ $item->usage_count }}</td>
+                                                <td data-label="登録日">{{ $item->created_at ? \Illuminate\Support\Carbon::parse($item->created_at)->format('Y-m-d') : '-' }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -171,7 +203,20 @@
                         <h2>NGワードマスタ</h2>
                         <p>メッセージ・投稿チェックで参照する禁止ワードです。</p>
                     </div>
-                    <a href="{{ route('admin.ngwords.index') }}" class="admin-master-link">NGワード管理へ</a>
+                    <div class="admin-card-meta">
+                        <span class="admin-card-count">{{ $ngWords->count() }}件</span>
+                        <div class="admin-sort-switch" role="group" aria-label="NGワードの並び順">
+                            @foreach ($sortLabels as $value => $label)
+                                <a
+                                    href="{{ request()->fullUrlWithQuery(['ng_sort' => $value]) }}"
+                                    class="admin-sort-link {{ ($sorts['ng'] ?? 'created_desc') === $value ? 'is-active' : '' }}"
+                                >
+                                    {{ $label }}
+                                </a>
+                            @endforeach
+                        </div>
+                        <a href="{{ route('admin.ngwords.index') }}" class="admin-master-link">NGワード管理へ</a>
+                    </div>
                 </div>
 
                 <form method="POST" action="{{ route('admin.masters.ngwords.store') }}" class="admin-master-form">
@@ -193,7 +238,6 @@
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>ID</th>
                                 <th>ワード</th>
                                 <th>状態</th>
                                 <th>登録日</th>
@@ -202,14 +246,13 @@
                         <tbody>
                             @forelse($ngWords->take(10) as $word)
                                 <tr>
-                                    <td>{{ $word->id }}</td>
-                                    <td>{{ $word->word }}</td>
-                                    <td>{{ $word->is_active ? '有効' : '無効' }}</td>
-                                    <td>{{ $word->created_at ? \Illuminate\Support\Carbon::parse($word->created_at)->format('Y-m-d') : '-' }}</td>
+                                    <td data-label="ワード">{{ $word->word }}</td>
+                                    <td data-label="状態">{{ $word->is_active ? '有効' : '無効' }}</td>
+                                    <td data-label="登録日">{{ $word->created_at ? \Illuminate\Support\Carbon::parse($word->created_at)->format('Y-m-d') : '-' }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="text-center">NGワードマスタはまだ登録されていません。</td>
+                                    <td colspan="3" class="text-center">NGワードマスタはまだ登録されていません。</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -284,6 +327,54 @@
             margin: 0;
             color: rgba(255, 255, 255, 0.68);
             line-height: 1.7;
+        }
+
+        .admin-card-meta {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .admin-card-count {
+            display: inline-flex;
+            align-items: center;
+            min-height: 36px;
+            padding: 0 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.78);
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .admin-sort-switch {
+            display: inline-flex;
+            padding: 4px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            gap: 4px;
+        }
+
+        .admin-sort-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 32px;
+            padding: 0 12px;
+            border-radius: 999px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 0.78rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .admin-sort-link.is-active {
+            background: #f3f4f6;
+            color: #111827;
         }
 
         .admin-tag-groups {
@@ -390,6 +481,56 @@
             white-space: nowrap;
         }
 
+        @media (max-width: 767px) {
+            .table-wrapper .admin-table {
+                min-width: 0;
+            }
+
+            .table-wrapper .admin-table thead {
+                display: none;
+            }
+
+            .table-wrapper .admin-table tbody {
+                display: block;
+            }
+
+            .table-wrapper .admin-table tbody tr {
+                display: block;
+                margin: 0 0 12px;
+                border-bottom: none;
+                border-radius: 16px;
+                background: rgba(255, 255, 255, 0.03);
+                overflow: hidden;
+            }
+
+            .table-wrapper .admin-table tbody tr:last-child {
+                margin-bottom: 0;
+            }
+
+            .table-wrapper .admin-table tbody td {
+                display: grid;
+                grid-template-columns: 88px minmax(0, 1fr);
+                gap: 8px;
+                padding: 12px 14px;
+                white-space: normal;
+            }
+
+            .table-wrapper .admin-table tbody td::before {
+                content: attr(data-label);
+                color: rgba(255, 255, 255, 0.58);
+                font-size: 0.72rem;
+                font-weight: 700;
+            }
+
+            .table-wrapper .admin-table tbody td.text-center {
+                display: block;
+            }
+
+            .table-wrapper .admin-table tbody td.text-center::before {
+                content: none;
+            }
+        }
+
         @media (max-width: 960px) {
             .admin-summary-grid {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -411,6 +552,19 @@
             .admin-tag-group-head {
                 flex-direction: column;
                 align-items: flex-start;
+            }
+
+            .admin-card-meta {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .admin-sort-switch {
+                width: 100%;
+            }
+
+            .admin-sort-link {
+                flex: 1 1 0;
             }
 
             .admin-master-form-grid-review,

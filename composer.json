@@ -34,6 +34,14 @@
         }
     },
     "scripts": {
+        "test:prepare": [
+            "@php -r \"file_exists('database/testing.sqlite') || touch('database/testing.sqlite');\""
+        ],
+        "test:smoke": [
+            "@composer test:prepare",
+            "@php artisan migrate:fresh --env=testing --force",
+            "vendor/bin/phpunit tests/Feature/Smoke"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

@@ -132,9 +132,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // マスタ設定管理
         Route::get('/masters', [AdminMaster::class, 'index'])->name('masters.index');
-        Route::post('/masters/review-contents', [AdminMaster::class, 'storeReviewContent'])->name('masters.review-contents.store');
-        Route::post('/masters/tags', [AdminMaster::class, 'storeTag'])->name('masters.tags.store');
-        Route::post('/masters/ngwords', [AdminMaster::class, 'storeNgWord'])->name('masters.ngwords.store');
+        Route::post('/masters/catalogs/{catalogKey}', [AdminMaster::class, 'storeCatalog'])->name('masters.catalogs.store');
 
         // 店舗管理
         Route::get('/shops', [AdminShop::class, 'index'])->name('shops.index');

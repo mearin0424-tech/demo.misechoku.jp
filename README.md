@@ -1,5 +1,47 @@
 # demo.misechoku.jp
 
+## 自動テスト実行環境
+
+本番は Plesk 上で動かしつつ、画面スモークテストは **本番 DB を使わずに別環境で実行** する前提です。
+
+### 方針
+
+- 本番の `.env` や MySQL を使わない
+- テスト時は `.env.testing` と `database/testing.sqlite` を使う
+- 画面スモークテストは `tests/Feature/Smoke` に集約する
+- GitHub Actions でも同じ手順で実行する
+
+### ローカル or サーバで必要な PHP 拡張
+
+- `openssl`
+- `mbstring`
+- `sqlite3`
+- `pdo_sqlite`
+- `dom`
+- `xml`
+- `xmlwriter`
+
+### 実行手順
+
+```bash
+composer install
+composer test:smoke
+```
+
+`composer test:smoke` は次をまとめて実行します。
+
+- `database/testing.sqlite` の作成
+- `php artisan migrate:fresh --env=testing --force`
+- `tests/Feature/Smoke` の実行
+
+### Plesk での扱い
+
+- 本番サーバ上で直接テストを流す場合も、必ず `.env.testing` を使う
+- 本番 MySQL に向けたまま実行しない
+- 可能なら GitHub Actions か Plesk のステージング環境で回す
+
+---
+
 ## スマホにアプリとしてインストールする（PWA）
 
 Chrome の「ショートカット」ではなく、**アプリとして**インストールするために以下を実施してください。
