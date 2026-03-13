@@ -4,8 +4,51 @@
 @section('admin_page_title', 'ダッシュボード')
 
 @section('content')
+    @php
+        $taskCount = count($tasks);
+        $buildChart = function (array $data, array $series, int $width = 600, int $height = 180, int $padX = 20, int $padY = 20) {
+            $allValues = [];
+            foreach ($data as $row) {
+                foreach ($series as $item) {
+                    $allValues[] = $row[$item['key']];
+                }
+            }
+            $max = max($allValues) * 1.1;
+            $count = max(count($data) - 1, 1);
+            $getX = fn ($index) => $padX + ($index / $count) * ($width - ($padX * 2));
+            $getY = fn ($value) => $height - $padY - (($value / $max) * ($height - ($padY * 2)));
+            $grid = [
+                $padY,
+                $padY + (($height - ($padY * 2)) * 0.5),
+                $height - $padY,
+            ];
+            $seriesData = [];
+            foreach ($series as $item) {
+                $points = [];
+                foreach ($data as $index => $row) {
+                    $points[] = ['x' => $getX($index), 'y' => $getY($row[$item['key']]), 'value' => $row[$item['key']]];
+                }
+                $polyline = implode(' ', array_map(fn ($point) => round($point['x'], 2) . ',' . round($point['y'], 2), $points));
+                $area = round($getX(0), 2) . ',' . ($height - $padY) . ' ' . $polyline . ' ' . round($getX(count($data) - 1), 2) . ',' . ($height - $padY);
+                $seriesData[] = $item + ['points' => $points, 'polyline' => $polyline, 'area' => $area];
+            }
+
+            return ['width' => $width, 'height' => $height, 'padX' => $padX, 'padY' => $padY, 'grid' => $grid, 'series' => $seriesData];
+        };
+        $registrationChart = $buildChart($chartData, [
+            ['key' => 'cast', 'label' => 'キャスト', 'color' => '#E6D080'],
+            ['key' => 'shop', 'label' => '店舗', 'color' => '#A78BFA'],
+        ]);
+        $countChart = $buildChart($chartData, [
+            ['key' => 'count', 'label' => '件数', 'color' => '#60A5FA'],
+        ]);
+        $amountChart = $buildChart($chartData, [
+            ['key' => 'amount', 'label' => '金額', 'color' => '#34D399'],
+        ]);
+    @endphp
+
     <div class="dashboard-page">
-        @if(session('status'))
+        @if (session('status'))
             <div class="dashboard-alert">
                 {{ session('status') }}
             </div>
@@ -13,69 +56,197 @@
 
         <section class="dashboard-section">
             <div class="dashboard-section-head">
-                <h2 class="dashboard-section-title">プラットフォーム状況</h2>
-                <div class="dashboard-updated-at">更新: 今日 10:45</div>
+                <div class="dashboard-section-title-wrap">
+                    <h2 class="dashboard-section-title">プラットフォーム分析</h2>
+                    <div class="dashboard-date-chip">
+                        <i class="fas fa-calendar"></i>
+                        <span>今月 (Oct 2026)</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+                <button type="button" class="dashboard-export-button">
+                    <i class="fas fa-download"></i>
+                    <span>エクスポート</span>
+                </button>
             </div>
 
-            <div class="kpi-grid">
-                @foreach ($kpis as $kpi)
-                    <article class="kpi-card">
-                        <div class="kpi-title">{{ $kpi['title'] }}</div>
-                        <div class="kpi-main">
-                            <span class="kpi-value">{{ $kpi['value'] }}</span>
-                            <span class="kpi-unit">{{ $kpi['unit'] }}</span>
+            <div class="bi-panel">
+                <div class="bi-tabs">
+                    <button type="button" class="bi-tab-button is-active" data-bi-tab="registration">登録状況</button>
+                    <button type="button" class="bi-tab-button" data-bi-tab="transaction">取引・売上状況</button>
+                </div>
+
+                <div class="bi-tab-panel is-active" data-bi-panel="registration">
+                    <div class="dashboard-kpi-grid">
+                        @foreach ($registrationKpis as $kpi)
+                            <article class="dashboard-kpi-card">
+                                <div class="dashboard-kpi-head">
+                                    <div class="dashboard-kpi-title">{{ $kpi['title'] }}</div>
+                                    <i class="fas {{ $kpi['icon'] }}"></i>
+                                </div>
+                                <div class="dashboard-kpi-main">
+                                    <span class="dashboard-kpi-value">{{ $kpi['value'] }}</span>
+                                    <span class="dashboard-kpi-unit">{{ $kpi['unit'] }}</span>
+                                    @if (!empty($kpi['sub_value']))
+                                        <span class="dashboard-kpi-sub-value">({{ $kpi['sub_value'] }})</span>
+                                        <span class="dashboard-kpi-unit">{{ $kpi['unit'] }}</span>
+                                    @endif
+                                </div>
+                                <div class="dashboard-kpi-trend {{ $kpi['is_up'] ? 'is-up' : 'is-down' }}">
+                                    <i class="fas fa-arrow-trend-up {{ $kpi['is_up'] ? '' : 'is-down' }}"></i>
+                                    <span>{{ $kpi['trend'] }}</span>
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+
+                    <div class="dashboard-chart-card">
+                        <div class="dashboard-chart-head">
+                            <h3>キャスト・店舗 登録推移</h3>
+                            <div class="dashboard-chart-legend">
+                                @foreach ($registrationChart['series'] as $series)
+                                    <span><i style="background: {{ $series['color'] }}"></i>{{ $series['label'] }}</span>
+                                @endforeach
+                            </div>
                         </div>
-                        <div class="kpi-trend {{ $kpi['is_up'] ? 'is-up' : 'is-down' }}">
-                            <i class="fas {{ $kpi['is_up'] ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down' }}"></i>
-                            <span>{{ $kpi['trend'] }}</span>
-                            <small>{{ $kpi['trend_label'] }}</small>
+                        <div class="dashboard-chart-scroll">
+                            <div class="dashboard-chart-canvas">
+                                <svg viewBox="0 0 {{ $registrationChart['width'] }} {{ $registrationChart['height'] }}" preserveAspectRatio="none" class="dashboard-chart-svg">
+                                    <defs>
+                                        @foreach ($registrationChart['series'] as $series)
+                                            <linearGradient id="grad-{{ $series['key'] }}" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stop-color="{{ $series['color'] }}" stop-opacity="0.4"></stop>
+                                                <stop offset="100%" stop-color="{{ $series['color'] }}" stop-opacity="0"></stop>
+                                            </linearGradient>
+                                        @endforeach
+                                    </defs>
+                                    @foreach ($registrationChart['grid'] as $lineY)
+                                        <line x1="{{ $registrationChart['padX'] }}" y1="{{ $lineY }}" x2="{{ $registrationChart['width'] - $registrationChart['padX'] }}" y2="{{ $lineY }}" class="dashboard-chart-grid"></line>
+                                    @endforeach
+                                    @foreach ($registrationChart['series'] as $series)
+                                        <polygon points="{{ $series['area'] }}" fill="url(#grad-{{ $series['key'] }})"></polygon>
+                                        <polyline points="{{ $series['polyline'] }}" fill="none" stroke="{{ $series['color'] }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
+                                        @foreach ($series['points'] as $point)
+                                            <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="3" fill="#150A0B" stroke="{{ $series['color'] }}" stroke-width="1.5"></circle>
+                                        @endforeach
+                                    @endforeach
+                                </svg>
+                                <div class="dashboard-chart-labels">
+                                    @foreach ($chartData as $point)
+                                        <span>{{ $point['month'] }}</span>
+                                    @endforeach
+                                </div>
+                            </div>
                         </div>
-                    </article>
-                @endforeach
+                    </div>
+                </div>
+
+                <div class="bi-tab-panel" data-bi-panel="transaction">
+                    <div class="dashboard-kpi-grid">
+                        @foreach ($transactionKpis as $kpi)
+                            <article class="dashboard-kpi-card">
+                                <div class="dashboard-kpi-head">
+                                    <div class="dashboard-kpi-title">{{ $kpi['title'] }}</div>
+                                    <i class="fas {{ $kpi['icon'] }}"></i>
+                                </div>
+                                <div class="dashboard-kpi-main">
+                                    <span class="dashboard-kpi-value">{{ $kpi['value'] }}</span>
+                                    <span class="dashboard-kpi-unit">{{ $kpi['unit'] }}</span>
+                                </div>
+                                <div class="dashboard-kpi-trend {{ $kpi['is_up'] ? 'is-up' : 'is-down' }}">
+                                    <i class="fas fa-arrow-trend-up {{ $kpi['is_up'] ? '' : 'is-down' }}"></i>
+                                    <span>{{ $kpi['trend'] }}</span>
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+
+                    <div class="dashboard-subchart-grid">
+                        <div class="dashboard-chart-card">
+                            <div class="dashboard-chart-head">
+                                <h3>取引件数推移</h3>
+                                <div class="dashboard-chart-legend"><span><i style="background: #60A5FA"></i>件数</span></div>
+                            </div>
+                            <div class="dashboard-chart-scroll">
+                                <div class="dashboard-chart-canvas is-compact">
+                                    <svg viewBox="0 0 {{ $countChart['width'] }} {{ $countChart['height'] }}" preserveAspectRatio="none" class="dashboard-chart-svg">
+                                        <defs>
+                                            <linearGradient id="grad-count" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stop-color="#60A5FA" stop-opacity="0.4"></stop>
+                                                <stop offset="100%" stop-color="#60A5FA" stop-opacity="0"></stop>
+                                            </linearGradient>
+                                        </defs>
+                                        @foreach ($countChart['grid'] as $lineY)
+                                            <line x1="{{ $countChart['padX'] }}" y1="{{ $lineY }}" x2="{{ $countChart['width'] - $countChart['padX'] }}" y2="{{ $lineY }}" class="dashboard-chart-grid"></line>
+                                        @endforeach
+                                        <polygon points="{{ $countChart['series'][0]['area'] }}" fill="url(#grad-count)"></polygon>
+                                        <polyline points="{{ $countChart['series'][0]['polyline'] }}" fill="none" stroke="#60A5FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
+                                        @foreach ($countChart['series'][0]['points'] as $point)
+                                            <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="3" fill="#150A0B" stroke="#60A5FA" stroke-width="1.5"></circle>
+                                        @endforeach
+                                    </svg>
+                                    <div class="dashboard-chart-labels">
+                                        @foreach ($chartData as $point)
+                                            <span>{{ $point['month'] }}</span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-chart-card">
+                            <div class="dashboard-chart-head">
+                                <h3>取引金額推移 (単位: M円)</h3>
+                                <div class="dashboard-chart-legend"><span><i style="background: #34D399"></i>金額</span></div>
+                            </div>
+                            <div class="dashboard-chart-scroll">
+                                <div class="dashboard-chart-canvas is-compact">
+                                    <svg viewBox="0 0 {{ $amountChart['width'] }} {{ $amountChart['height'] }}" preserveAspectRatio="none" class="dashboard-chart-svg">
+                                        <defs>
+                                            <linearGradient id="grad-amount" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stop-color="#34D399" stop-opacity="0.4"></stop>
+                                                <stop offset="100%" stop-color="#34D399" stop-opacity="0"></stop>
+                                            </linearGradient>
+                                        </defs>
+                                        @foreach ($amountChart['grid'] as $lineY)
+                                            <line x1="{{ $amountChart['padX'] }}" y1="{{ $lineY }}" x2="{{ $amountChart['width'] - $amountChart['padX'] }}" y2="{{ $lineY }}" class="dashboard-chart-grid"></line>
+                                        @endforeach
+                                        <polygon points="{{ $amountChart['series'][0]['area'] }}" fill="url(#grad-amount)"></polygon>
+                                        <polyline points="{{ $amountChart['series'][0]['polyline'] }}" fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
+                                        @foreach ($amountChart['series'][0]['points'] as $point)
+                                            <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="3" fill="#150A0B" stroke="#34D399" stroke-width="1.5"></circle>
+                                        @endforeach
+                                    </svg>
+                                    <div class="dashboard-chart-labels">
+                                        @foreach ($chartData as $point)
+                                            <span>{{ $point['month'] }}</span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
         <section class="dashboard-section">
             <div class="dashboard-section-head">
-                <h2 class="dashboard-section-title">要対応タスク</h2>
+                <h2 class="dashboard-section-title">要対応タスク一覧</h2>
             </div>
 
-            <div class="task-summary-grid">
-                <button type="button" class="task-summary-card is-active" data-filter="all">
-                    <div class="task-summary-icon tone-neutral">
-                        <i class="fas fa-layer-group"></i>
-                    </div>
-                    <div class="task-summary-text">
-                        <div class="task-summary-title">すべて表示</div>
-                        <div class="task-summary-count">{{ count($tasks) }}件</div>
-                    </div>
-                </button>
-
-                @foreach ($taskSummary as $summary)
-                    <button type="button" class="task-summary-card" data-filter="{{ $summary['id'] }}">
-                        <div class="task-summary-icon tone-{{ $summary['tone'] }}">
-                            <i class="fas {{ $summary['icon'] }}"></i>
-                        </div>
-                        <div class="task-summary-text">
-                            <div class="task-summary-title">{{ $summary['title'] }}</div>
-                            <div class="task-summary-count">{{ $summary['count'] }}件</div>
-                        </div>
-                    </button>
-                @endforeach
-            </div>
-        </section>
-
-        <section class="dashboard-section">
             <div class="task-panel">
-                <div class="task-panel-head">
-                    <div class="task-filter-state">
-                        <button type="button" class="task-filter-reset is-active" data-filter="all">すべて表示</button>
-                        <div id="task-filter-indicator" class="task-filter-indicator" hidden></div>
-                    </div>
-                    <button type="button" class="task-sort-button">
-                        <i class="fas fa-clock"></i>
-                        <span>古い順</span>
+                <div class="task-summary-row">
+                    <button type="button" class="task-filter-chip is-active" data-filter="all">
+                        <span>すべて</span>
+                        <strong>{{ $taskCount }}</strong>
                     </button>
+                    @foreach ($taskSummary as $summary)
+                        <button type="button" class="task-filter-chip" data-filter="{{ $summary['id'] }}">
+                            <span>{{ $summary['title'] }}</span>
+                            <strong>{{ $summary['count'] }}</strong>
+                        </button>
+                    @endforeach
                 </div>
 
                 <div class="task-table-wrap">
@@ -84,41 +255,37 @@
                             <tr>
                                 <th>カテゴリ</th>
                                 <th>対象</th>
-                                <th>現在のステータス</th>
+                                <th>ステータス</th>
                                 <th>金額</th>
                                 <th>申請日時</th>
                                 <th class="text-right">アクション</th>
                             </tr>
                         </thead>
-                        <tbody id="task-table-body">
+                        <tbody>
                             @foreach ($tasks as $task)
                                 <tr class="task-row" data-category="{{ $task['cat_id'] }}">
                                     <td data-label="カテゴリ">
-                                        <span class="task-category-badge tone-{{ $task['cat_id'] }}">
-                                            {{ $task['category'] }}
-                                        </span>
+                                        <span class="task-category-badge tone-{{ $task['cat_id'] }}">{{ $task['category'] }}</span>
                                     </td>
                                     <td data-label="対象">
-                                        <div class="task-target-name">{{ $task['target'] }}</div>
-                                        <div class="task-target-meta">{{ $task['type'] }} ・ {{ $task['id'] }}</div>
+                                        <div class="task-target">
+                                            <div class="task-target-avatar">{{ $task['type'] === '店舗' ? '店' : 'C' }}</div>
+                                            <div>
+                                                <div class="task-target-name">{{ $task['target'] }}</div>
+                                                <div class="task-target-meta">{{ $task['id'] }}</div>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td data-label="ステータス">
                                         <div class="task-status {{ $task['urgency'] === 'critical' ? 'is-critical' : ($task['urgency'] === 'high' ? 'is-high' : '') }}">
-                                            @if ($task['urgency'] === 'critical')
-                                                <i class="fas fa-circle-exclamation"></i>
-                                            @elseif ($task['urgency'] === 'high')
-                                                <i class="fas fa-clock"></i>
-                                            @endif
+                                            <i class="fas {{ $task['urgency'] === 'critical' ? 'fa-circle-exclamation' : 'fa-clock' }}"></i>
                                             <span>{{ $task['status'] }}</span>
                                         </div>
                                     </td>
-                                    <td class="task-amount" data-label="金額">{{ $task['amount'] ?: '-' }}</td>
-                                    <td class="task-date" data-label="申請日時">{{ $task['date'] }}</td>
-                                    <td class="text-right" data-label="アクション">
-                                        <button type="button" class="task-action-button {{ $task['urgency'] === 'critical' ? 'is-critical' : '' }}">
-                                            <span>{{ $task['action'] }}</span>
-                                            <i class="fas fa-arrow-right"></i>
-                                        </button>
+                                    <td data-label="金額" class="task-amount">{{ $task['amount'] ?: '-' }}</td>
+                                    <td data-label="申請日時" class="task-date">{{ $task['date'] }}</td>
+                                    <td data-label="アクション" class="text-right">
+                                        <button type="button" class="task-action-button {{ $task['urgency'] === 'critical' ? 'is-critical' : '' }}">{{ $task['action'] }}</button>
                                     </td>
                                 </tr>
                             @endforeach
@@ -139,20 +306,17 @@
 
     <style>
         .dashboard-page {
-            width: 100%;
-            max-width: 780px;
-            margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: 28px;
+            gap: 24px;
         }
         .dashboard-alert {
             padding: 12px 14px;
             border-radius: 14px;
-            background: rgba(96, 165, 250, 0.08);
-            border: 1px solid rgba(96, 165, 250, 0.24);
-            color: #dbeafe;
-            font-size: 0.9rem;
+            background: rgba(230, 208, 128, 0.08);
+            border: 1px solid rgba(230, 208, 128, 0.18);
+            color: #f6ead6;
+            font-size: 0.88rem;
         }
         .dashboard-section {
             display: flex;
@@ -166,292 +330,339 @@
             gap: 12px;
             flex-wrap: wrap;
         }
+        .dashboard-section-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
         .dashboard-section-title {
             margin: 0;
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: #f3f4f6;
-        }
-        .dashboard-updated-at {
-            padding: 8px 12px;
-            border-radius: 10px;
-            background: #1b1f26;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            color: #aeb6c2;
-            font-size: 0.78rem;
-            font-weight: 600;
-        }
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 16px;
-        }
-        .kpi-card {
-            position: relative;
-            overflow: hidden;
-            padding: 20px;
-            border-radius: 18px;
-            background: linear-gradient(180deg, rgba(32, 36, 43, 0.98), rgba(24, 27, 33, 0.98));
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
-        }
-        .kpi-card::after {
-            content: "";
-            position: absolute;
-            top: -32px;
-            right: -32px;
-            width: 120px;
-            height: 120px;
-            border-radius: 999px;
-            background: radial-gradient(circle, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0) 70%);
-        }
-        .kpi-title {
-            position: relative;
-            z-index: 1;
-            font-size: 0.88rem;
-            font-weight: 700;
-            color: #aeb6c2;
-            margin-bottom: 12px;
-        }
-        .kpi-main {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            align-items: flex-end;
-            gap: 6px;
-            margin-bottom: 10px;
-        }
-        .kpi-value {
-            font-size: 2rem;
-            line-height: 1;
-            font-weight: 800;
-            letter-spacing: 0.02em;
-        }
-        .kpi-unit {
-            font-size: 0.88rem;
-            font-weight: 700;
-            color: #aeb6c2;
-            margin-bottom: 4px;
-        }
-        .kpi-trend {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.84rem;
+            font-size: 1.2rem;
             font-weight: 700;
         }
-        .kpi-trend small {
-            color: #8a92a0;
-            font-size: 0.74rem;
-            font-weight: 600;
-        }
-        .kpi-trend.is-up {
-            color: #34d399;
-        }
-        .kpi-trend.is-down {
-            color: #f87171;
-        }
-        .task-summary-grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 12px;
-        }
-        .task-summary-card {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            width: 100%;
-            padding: 16px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: #20242b;
-            color: #f3f4f6;
-            text-align: left;
-            cursor: pointer;
-            transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-        }
-        .task-summary-card:hover,
-        .task-summary-card.is-active {
-            transform: translateY(-1px);
-            background: #262b33;
-            border-color: rgba(255, 255, 255, 0.16);
-        }
-        .task-summary-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            flex: 0 0 auto;
-        }
-        .tone-neutral {
-            background: rgba(255, 255, 255, 0.08);
-            color: #d1d5db;
-        }
-        .tone-info {
-            background: rgba(96, 165, 250, 0.12);
-            color: #60a5fa;
-        }
-        .tone-purple {
-            background: rgba(167, 139, 250, 0.12);
-            color: #a78bfa;
-        }
-        .tone-success {
-            background: rgba(52, 211, 153, 0.12);
-            color: #34d399;
-        }
-        .tone-warning {
-            background: rgba(251, 191, 36, 0.12);
-            color: #fbbf24;
-        }
-        .tone-danger {
-            background: rgba(248, 113, 113, 0.12);
-            color: #f87171;
-        }
-        .task-summary-title {
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: #aeb6c2;
-            margin-bottom: 4px;
-        }
-        .task-summary-count {
-            font-size: 1.35rem;
-            font-weight: 800;
-            color: #f3f4f6;
-        }
-        .task-summary-text {
-            min-width: 0;
-        }
-        .task-panel {
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: #20242b;
-            overflow: hidden;
-            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
-        }
-        .task-panel-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            padding: 16px 18px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(15, 17, 21, 0.4);
-        }
-        .task-filter-state {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .task-filter-reset,
-        .task-sort-button {
+        .dashboard-date-chip,
+        .dashboard-export-button {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 9px 12px;
+            min-height: 34px;
+            padding: 0 12px;
             border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: #171a20;
-            color: #aeb6c2;
-            font-size: 0.8rem;
+            border: 1px solid rgba(230, 208, 128, 0.14);
+            background: #150a0b;
+            color: #bfaeaf;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+        .dashboard-date-chip {
+            color: #e6d080;
+        }
+        .dashboard-export-button {
+            cursor: pointer;
+        }
+        .dashboard-export-button:hover {
+            color: #e6d080;
+            background: #1a0c0e;
+        }
+        .bi-panel,
+        .task-panel {
+            background: #150a0b;
+            border: 1px solid rgba(230, 208, 128, 0.1);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.26);
+        }
+        .bi-tabs {
+            display: flex;
+            border-bottom: 1px solid rgba(230, 208, 128, 0.08);
+        }
+        .bi-tab-button {
+            border: 0;
+            border-bottom: 2px solid transparent;
+            background: transparent;
+            color: #8a7577;
+            padding: 14px 16px;
+            font-size: 0.82rem;
             font-weight: 700;
             cursor: pointer;
         }
-        .task-filter-reset.is-active {
-            background: #eef2f7;
-            color: #111827;
-            border-color: #eef2f7;
+        .bi-tab-button.is-active {
+            border-bottom-color: #e6d080;
+            color: #e6d080;
         }
-        .task-filter-indicator {
-            padding: 9px 12px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.08);
-            color: #f3f4f6;
-            font-size: 0.8rem;
+        .bi-tab-panel {
+            display: none;
+            padding: 16px;
+        }
+        .bi-tab-panel.is-active {
+            display: block;
+        }
+        .dashboard-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .dashboard-kpi-card,
+        .dashboard-chart-card {
+            background: #150a0b;
+            border: 1px solid rgba(230, 208, 128, 0.1);
+            border-radius: 16px;
+        }
+        .dashboard-kpi-card {
+            padding: 14px;
+            min-height: 112px;
+        }
+        .dashboard-kpi-head,
+        .dashboard-chart-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .dashboard-kpi-head {
+            margin-bottom: 8px;
+        }
+        .dashboard-kpi-head i {
+            color: rgba(230, 208, 128, 0.6);
+        }
+        .dashboard-kpi-title {
+            font-size: 0.72rem;
             font-weight: 700;
+            color: #8a7577;
+        }
+        .dashboard-kpi-main {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        .dashboard-kpi-value,
+        .dashboard-kpi-sub-value {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #f5e6e6;
+            letter-spacing: 0.02em;
+        }
+        .dashboard-kpi-sub-value {
+            color: #e6d080;
+        }
+        .dashboard-kpi-unit {
+            font-size: 0.62rem;
+            font-weight: 700;
+            color: #8a7577;
+        }
+        .dashboard-kpi-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.68rem;
+            font-weight: 700;
+        }
+        .dashboard-kpi-trend.is-up {
+            color: #34d399;
+        }
+        .dashboard-kpi-trend.is-down {
+            color: #f87171;
+        }
+        .dashboard-kpi-trend .is-down {
+            transform: rotate(180deg);
+        }
+        .dashboard-chart-card {
+            padding: 16px;
+        }
+        .dashboard-chart-head h3 {
+            margin: 0;
+            font-size: 0.86rem;
+            font-weight: 700;
+        }
+        .dashboard-chart-legend {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-size: 0.66rem;
+            font-weight: 700;
+            color: #bfaeaf;
+        }
+        .dashboard-chart-legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .dashboard-chart-legend i {
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+            display: inline-block;
+        }
+        .dashboard-chart-scroll {
+            overflow-x: auto;
+            padding-top: 14px;
+        }
+        .dashboard-chart-canvas {
+            min-width: 600px;
+            position: relative;
+            height: 210px;
+        }
+        .dashboard-chart-canvas.is-compact {
+            min-width: 400px;
+        }
+        .dashboard-chart-svg {
+            width: 100%;
+            height: 180px;
+            overflow: visible;
+        }
+        .dashboard-chart-grid {
+            stroke: #2a1518;
+            stroke-dasharray: 3 3;
+            stroke-width: 1;
+        }
+        .dashboard-chart-labels {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            font-size: 0.62rem;
+            color: #8a7577;
+        }
+        .dashboard-subchart-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+        .task-summary-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(230, 208, 128, 0.08);
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .task-filter-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: #8a7577;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .task-filter-chip strong {
+            min-width: 20px;
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: #2a1518;
+            color: #f5e6e6;
+            font-size: 0.62rem;
+            text-align: center;
+        }
+        .task-filter-chip.is-active {
+            color: #e6d080;
+            border-color: rgba(230, 208, 128, 0.26);
+            background: rgba(230, 208, 128, 0.08);
+        }
+        .task-filter-chip.is-active strong {
+            background: #e6d080;
+            color: #120405;
         }
         .task-table-wrap {
             overflow-x: auto;
         }
         .task-table {
             width: 100%;
-            min-width: 760px;
+            min-width: 800px;
             border-collapse: collapse;
         }
         .task-table thead th {
-            padding: 14px 18px;
+            padding: 10px 16px;
             text-align: left;
-            font-size: 0.74rem;
+            font-size: 0.64rem;
             font-weight: 700;
-            color: #8a92a0;
-            background: #171a20;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            color: #8a7577;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid rgba(230, 208, 128, 0.08);
         }
         .task-table tbody td {
-            padding: 18px;
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 12px 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
             vertical-align: middle;
+            font-size: 0.78rem;
         }
         .task-row:hover {
-            background: rgba(255, 255, 255, 0.02);
+            background: #1a0c0e;
         }
         .task-category-badge {
             display: inline-flex;
             align-items: center;
-            padding: 6px 10px;
+            padding: 4px 8px;
             border-radius: 999px;
-            font-size: 0.72rem;
-            font-weight: 700;
             border: 1px solid transparent;
+            font-size: 0.66rem;
+            font-weight: 700;
         }
         .task-category-badge.tone-kyc {
-            background: rgba(96, 165, 250, 0.12);
             color: #60a5fa;
-            border-color: rgba(96, 165, 250, 0.22);
+            border-color: rgba(96, 165, 250, 0.3);
         }
         .task-category-badge.tone-doc {
-            background: rgba(167, 139, 250, 0.12);
             color: #a78bfa;
-            border-color: rgba(167, 139, 250, 0.22);
+            border-color: rgba(167, 139, 250, 0.3);
         }
         .task-category-badge.tone-deposit {
-            background: rgba(52, 211, 153, 0.12);
             color: #34d399;
-            border-color: rgba(52, 211, 153, 0.22);
+            border-color: rgba(52, 211, 153, 0.3);
         }
         .task-category-badge.tone-transfer {
-            background: rgba(251, 191, 36, 0.12);
             color: #fbbf24;
-            border-color: rgba(251, 191, 36, 0.22);
+            border-color: rgba(251, 191, 36, 0.3);
         }
         .task-category-badge.tone-error {
-            background: rgba(248, 113, 113, 0.12);
             color: #f87171;
-            border-color: rgba(248, 113, 113, 0.22);
+            border-color: rgba(248, 113, 113, 0.3);
+        }
+        .task-target {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .task-target-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 8px;
+            background: #2a1518;
+            color: #e6d080;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            font-size: 0.65rem;
+            font-weight: 700;
         }
         .task-target-name {
-            font-size: 0.92rem;
+            margin-bottom: 2px;
             font-weight: 700;
-            color: #f3f4f6;
-            margin-bottom: 4px;
         }
         .task-target-meta {
-            font-size: 0.74rem;
-            color: #8a92a0;
+            font-size: 0.62rem;
+            color: #8a7577;
         }
         .task-status {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            font-size: 0.84rem;
+            font-size: 0.72rem;
             font-weight: 700;
-            color: #f3f4f6;
+            color: #f5e6e6;
         }
         .task-status.is-high {
             color: #fbbf24;
@@ -460,178 +671,146 @@
             color: #f87171;
         }
         .task-amount {
-            font-size: 0.88rem;
             font-weight: 700;
-            color: #f3f4f6;
+            letter-spacing: 0.02em;
         }
         .task-date {
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: #aeb6c2;
+            color: #bfaeaf;
+            font-size: 0.72rem;
         }
         .text-right {
             text-align: right;
         }
         .task-action-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 13px;
+            padding: 8px 12px;
             border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            background: #171a20;
-            color: #d7dde7;
-            font-size: 0.78rem;
+            border: 1px solid rgba(230, 208, 128, 0.26);
+            background: rgba(230, 208, 128, 0.08);
+            color: #e6d080;
+            font-size: 0.72rem;
             font-weight: 700;
             cursor: pointer;
         }
         .task-action-button:hover {
-            background: #2a3038;
+            background: #e6d080;
+            color: #120405;
         }
         .task-action-button.is-critical {
+            border-color: rgba(248, 113, 113, 0.3);
+            background: rgba(248, 113, 113, 0.1);
             color: #f87171;
-            border-color: rgba(248, 113, 113, 0.28);
-            background: rgba(248, 113, 113, 0.08);
+        }
+        .task-action-button.is-critical:hover {
+            background: #f87171;
+            color: #fff;
         }
         .task-empty {
-            padding: 44px 20px;
-            color: #aeb6c2;
+            padding: 40px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 10px;
+            color: #bfaeaf;
             font-weight: 700;
         }
         .task-empty i {
-            font-size: 1.9rem;
             color: #34d399;
-            opacity: 0.65;
         }
         .task-row.is-hidden {
             display: none;
         }
         @media (max-width: 1023px) {
-            .task-summary-grid {
+            .dashboard-kpi-grid,
+            .dashboard-subchart-grid {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-            .kpi-grid {
-                grid-template-columns: repeat(1, minmax(0, 1fr));
             }
         }
         @media (max-width: 767px) {
             .dashboard-page {
                 gap: 20px;
             }
+            .dashboard-section-title-wrap,
             .dashboard-section-head {
                 align-items: flex-start;
             }
-            .dashboard-updated-at {
-                width: 100%;
-            }
-            .kpi-card {
-                padding: 16px;
-                border-radius: 16px;
-            }
-            .kpi-title {
-                margin-bottom: 10px;
-            }
-            .kpi-value {
-                font-size: 1.7rem;
-            }
-            .task-summary-card {
-                padding: 14px;
-                border-radius: 14px;
-            }
-            .task-summary-grid {
-                grid-template-columns: repeat(1, minmax(0, 1fr));
-            }
-            .task-panel-head {
-                flex-direction: column;
-                align-items: stretch;
+            .bi-tab-panel {
                 padding: 14px;
             }
-            .task-filter-state {
-                flex-direction: column;
-                align-items: stretch;
+            .dashboard-kpi-grid,
+            .dashboard-subchart-grid {
+                grid-template-columns: 1fr;
             }
-            .task-filter-reset,
-            .task-sort-button,
-            .task-filter-indicator {
-                width: 100%;
-                justify-content: center;
+            .dashboard-chart-card {
+                padding: 14px;
+            }
+            .task-summary-row {
+                padding: 12px;
+            }
+            .task-filter-chip {
+                width: calc(50% - 4px);
+                justify-content: space-between;
             }
             .task-table {
                 min-width: 0;
-            }
-            .task-table-wrap {
-                overflow: visible;
-                padding: 12px;
             }
             .task-table thead {
                 display: none;
             }
             .task-table tbody {
                 display: block;
+                padding: 12px;
             }
             .task-table tbody tr {
                 display: block;
                 margin-bottom: 12px;
-                border-radius: 16px;
-                border: 1px solid rgba(255, 255, 255, 0.08);
-                background: #171a20;
+                border: 1px solid rgba(230, 208, 128, 0.1);
+                border-radius: 14px;
                 overflow: hidden;
-            }
-            .task-table tbody tr:last-child {
-                margin-bottom: 0;
+                background: rgba(255, 255, 255, 0.02);
             }
             .task-table tbody td {
                 display: grid;
-                grid-template-columns: 82px minmax(0, 1fr);
-                gap: 10px;
-                padding: 12px 14px;
+                grid-template-columns: 86px minmax(0, 1fr);
+                gap: 8px;
+                padding: 11px 12px;
+                white-space: normal;
             }
             .task-table tbody td::before {
                 content: attr(data-label);
-                font-size: 0.72rem;
+                font-size: 0.64rem;
                 font-weight: 700;
-                color: #8a92a0;
-            }
-            .task-table tbody td:first-child {
-                border-top: 0;
+                color: #8a7577;
             }
             .text-right {
                 text-align: left;
             }
             .task-action-button {
                 width: 100%;
-                justify-content: center;
             }
             #task-empty-row td {
                 display: block;
                 padding: 0;
-                border-top: 0;
             }
             #task-empty-row td::before {
                 content: none;
             }
         }
         @media (max-width: 560px) {
-            .dashboard-page {
-                max-width: 100%;
+            .dashboard-date-chip,
+            .dashboard-export-button,
+            .task-filter-chip {
+                width: 100%;
             }
-            .dashboard-section-title {
-                font-size: 1.05rem;
+            .dashboard-chart-canvas,
+            .dashboard-chart-canvas.is-compact {
+                min-width: 360px;
             }
-            .task-table-wrap {
-                padding: 10px;
+            .task-filter-chip {
+                width: 100%;
             }
             .task-table tbody td {
                 grid-template-columns: 1fr;
-                gap: 6px;
-                padding: 11px 12px;
-            }
-            .task-table tbody td::before {
-                font-size: 0.68rem;
+                gap: 5px;
             }
         }
     </style>
@@ -640,51 +819,42 @@
 @push('admin-scripts')
 <script>
     (function () {
+        var biButtons = document.querySelectorAll('[data-bi-tab]');
+        var biPanels = document.querySelectorAll('[data-bi-panel]');
         var filterButtons = document.querySelectorAll('[data-filter]');
-        var rows = document.querySelectorAll('.task-row');
+        var taskRows = document.querySelectorAll('.task-row');
         var emptyRow = document.getElementById('task-empty-row');
-        var indicator = document.getElementById('task-filter-indicator');
-        var titles = {
-            all: 'すべて表示',
-            kyc: '本人確認待ち',
-            doc: '書類審査待ち',
-            deposit: '店舗入金確認',
-            transfer: 'キャスト振込',
-            error: '振込エラー'
-        };
 
-        function applyFilter(target) {
-            var visibleCount = 0;
-
-            filterButtons.forEach(function (button) {
-                button.classList.toggle('is-active', button.getAttribute('data-filter') === target);
+        biButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                var target = button.getAttribute('data-bi-tab');
+                biButtons.forEach(function (item) {
+                    item.classList.toggle('is-active', item === button);
+                });
+                biPanels.forEach(function (panel) {
+                    panel.classList.toggle('is-active', panel.getAttribute('data-bi-panel') === target);
+                });
             });
-
-            rows.forEach(function (row) {
-                var matches = target === 'all' || row.getAttribute('data-category') === target;
-                row.classList.toggle('is-hidden', !matches);
-                if (matches) visibleCount += 1;
-            });
-
-            if (emptyRow) {
-                emptyRow.hidden = visibleCount !== 0;
-            }
-
-            if (!indicator) return;
-
-            if (target === 'all') {
-                indicator.hidden = true;
-                indicator.textContent = '';
-                return;
-            }
-
-            indicator.hidden = false;
-            indicator.textContent = (titles[target] || target) + ' で絞り込み中';
-        }
+        });
 
         filterButtons.forEach(function (button) {
             button.addEventListener('click', function () {
-                applyFilter(button.getAttribute('data-filter'));
+                var target = button.getAttribute('data-filter');
+                var visibleCount = 0;
+
+                filterButtons.forEach(function (item) {
+                    item.classList.toggle('is-active', item === button);
+                });
+
+                taskRows.forEach(function (row) {
+                    var matches = target === 'all' || row.getAttribute('data-category') === target;
+                    row.classList.toggle('is-hidden', !matches);
+                    if (matches) visibleCount += 1;
+                });
+
+                if (emptyRow) {
+                    emptyRow.hidden = visibleCount !== 0;
+                }
             });
         });
     })();

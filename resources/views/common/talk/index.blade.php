@@ -43,7 +43,7 @@
                                 @endif
                             </div>
                             <div class="flex justify-between items-center mt-1">
-                                <span class="talk-status" data-partner-id="{{ $talk['partner_id'] }}"></span>
+                                <span class="talk-status">{{ $talk['status_label'] ?? 'やり取り中' }}</span>
                             </div>
                         </div>
                     </a>
@@ -61,7 +61,7 @@
             @forelse($requestTalks as $talk)
                 <div class="request-card">
                     @if(Route::has($profileRoute))
-                        <a href="{{ route($profileRoute, $talk['partner_id']) }}" class="request-upper-link">
+                        <a href="{{ route($profileRoute, $talk['profile_id'] ?? $talk['partner_id']) }}" class="request-upper-link">
                     @else
                         <div class="request-upper-link">
                     @endif
@@ -156,10 +156,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ===== トークピン留め（LINEのように上部固定）＋採用ステータス管理 =====
+    // ===== トークピン留め（LINEのように上部固定） =====
     const isCastPortal = {!! $isCast ? 'true' : 'false' !!};
     const pinStorageKey = isCastPortal ? 'talk_pins_cast' : 'talk_pins_shop';
-    const statusStorageKey = isCastPortal ? 'talk_recruit_status_cast' : 'talk_recruit_status_shop';
     const ongoingPane = document.getElementById('pane-ongoing');
 
     function loadPinnedIds() {
@@ -179,44 +178,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (e) {
             // ignore
         }
-    }
-
-    function loadStatusMap() {
-        try {
-            const raw = localStorage.getItem(statusStorageKey);
-            if (!raw) return {};
-            const parsed = JSON.parse(raw);
-            return parsed && typeof parsed === 'object' ? parsed : {};
-        } catch (e) {
-            return {};
-        }
-    }
-
-    function getStatusLabel(code) {
-        switch (code) {
-            case 'interview_pending':
-                return '面談調整中';
-            case 'interview_fixed':
-                return '面談日決定';
-            case 'hired':
-                return '採用';
-            case 'rejected':
-                return '不採用';
-            case 'chatting':
-            default:
-                return 'やり取り中';
-        }
-    }
-
-    function applyRecruitStatus() {
-        if (!ongoingPane) return;
-        const map = loadStatusMap();
-        ongoingPane.querySelectorAll('.talk-status').forEach(function(el) {
-            const id = el.getAttribute('data-partner-id');
-            const code = map && id != null ? map[String(id)] : null;
-            const label = getStatusLabel(code || 'chatting');
-            el.textContent = label;
-        });
     }
 
     function applyPinState() {
@@ -290,7 +251,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // 初期状態の反映
         applyPinState();
         applyPinnedOrder();
-        applyRecruitStatus();
     }
 });
 </script>
