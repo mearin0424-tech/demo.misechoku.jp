@@ -407,24 +407,26 @@ a.btn-outline-gold {
 
 /* 左側アイコンエリア */
 .mypage-quick-actions .btn-action-card .btn-action-icon-wrap {
-    width: 58px;
-    min-width: 58px;
-    height: 58px;
+    width: 22px;
+    min-width: 22px;
+    height: 22px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at 30% 0%, rgba(253, 240, 178, 0.68), rgba(179, 138, 34, 0.6));
-    color: var(--mypage-gold);
-    font-size: 1.25rem;
+    margin-left: 18px;
+    background: transparent;
+    color: rgba(226, 188, 79, 0.78);
+    font-size: 1rem;
+    flex-shrink: 0;
 }
 
 .mypage-quick-actions .btn-action-card.job .btn-action-icon-wrap,
 .mypage-quick-actions .btn-action-card.profile .btn-action-icon-wrap {
-    background: radial-gradient(circle at 25% 0%, rgba(253, 240, 178, 0.8), rgba(179, 138, 34, 0.7));
+    background: transparent;
 }
 
 .mypage-quick-actions .btn-action-card.manage .btn-action-icon-wrap {
-    background: radial-gradient(circle at 25% 0%, rgba(229, 193, 88, 0.75), rgba(179, 138, 34, 0.55));
+    background: transparent;
 }
 
 /* キャストマイページ：メニューが full-bleed 内にあるときの左右余白 */
@@ -447,6 +449,10 @@ a.btn-outline-gold {
     box-shadow:
         0 12px 30px rgba(0, 0, 0, 0.6),
         0 0 18px rgba(253, 240, 178, 0.6);
+}
+
+.mypage-quick-actions .btn-action-card.is-current .btn-action-icon-wrap {
+    color: rgba(255, 242, 184, 0.9);
 }
 
 /* テキストエリア */

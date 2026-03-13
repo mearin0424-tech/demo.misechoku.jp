@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 
 class BillingManagementService
@@ -718,11 +719,13 @@ class BillingManagementService
 
     private function buildCastDepositRequestTarget(object $application): array
     {
+        $reviewContentColumn = $this->reviewContentColumn();
+
         $reviewContents = DB::table('review_contents')
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->orderBy('id')
-            ->get(['id', 'name'])
+            ->get(['id', DB::raw($reviewContentColumn . ' as name')])
             ->map(fn (object $row) => [
                 'id' => (int) $row->id,
                 'name' => $row->name,
@@ -767,13 +770,15 @@ class BillingManagementService
         $reviewDetails = [];
 
         if ($review) {
+            $reviewContentColumn = $this->reviewContentColumn();
+
             $reviewDetails = DB::table('review_details')
                 ->join('review_contents', 'review_details.review_content_id', '=', 'review_contents.id')
                 ->where('review_details.review_id', $review->id)
                 ->orderBy('review_contents.sort_order')
                 ->orderBy('review_contents.id')
                 ->get([
-                    'review_contents.name',
+                    DB::raw('review_contents.' . $reviewContentColumn . ' as name'),
                     'review_details.score',
                 ])
                 ->map(fn (object $row) => [
@@ -865,13 +870,15 @@ class BillingManagementService
         $reviewDetails = [];
 
         if ($review) {
+            $reviewContentColumn = $this->reviewContentColumn();
+
             $reviewDetails = DB::table('review_details')
                 ->join('review_contents', 'review_details.review_content_id', '=', 'review_contents.id')
                 ->where('review_details.review_id', $review->id)
                 ->orderBy('review_contents.sort_order')
                 ->orderBy('review_contents.id')
                 ->get([
-                    'review_contents.name',
+                    DB::raw('review_contents.' . $reviewContentColumn . ' as name'),
                     'review_details.score',
                 ])
                 ->map(fn (object $detail) => [
@@ -1047,5 +1054,12 @@ class BillingManagementService
         $decoded = json_decode($raw, true);
 
         return is_array($decoded) ? $decoded : [];
+    }
+
+    private function reviewContentColumn(): string
+    {
+        return Schema::hasTable('review_contents') && Schema::hasColumn('review_contents', 'content')
+            ? 'content'
+            : 'name';
     }
 }

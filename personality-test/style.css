@@ -343,26 +343,3 @@ body {
     .breakdown-item p strong { font-size: 1em; }
     .share-btn { display: block; width: calc(100% - 40px); margin: 10px auto; }
 }
-
-/* ミセチョクモックサイトに戻るボタン */
-#misechoku-btn {
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #fff7b0 0%, #ffee88 100%);
-    color: #5d491a;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 50px;
-    font-size: 1.1em;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 5px 15px rgba(150, 130, 0, 0.2);
-    transition: all 0.3s ease-in-out;
-    position: static; 
-    display: block; 
-    margin: 15px auto 0 auto; 
-    width: 100%; 
-    max-width: 300px; 
-    box-sizing: border-box;
-}
-#misechoku-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(150, 130, 0, 0.3); }
-#misechoku-btn:active { transform: translateY(-1px); }

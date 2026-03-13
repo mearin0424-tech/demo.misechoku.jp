@@ -98,7 +98,7 @@
                         <div class="detail-row"><span class="detail-label">ご自分の系統</span><span class="detail-value">{{ $cast['my_field'] ?? '--' }}</span></div>
                         <div class="detail-row"><span class="detail-label">ご自分の内面・特技</span><span class="detail-value">{{ $cast['my_inner_skills'] ?? '--' }}</span></div>
                     </div>
-                    <a href="{{ asset('personality-test/personality-test.html') }}" target="_blank" rel="noopener noreferrer" class="btn-personality-test">
+                    <a href="{{ asset('personality-test') }}" target="_blank" rel="noopener noreferrer" class="btn-personality-test">
                         <i class="fas fa-up-right-from-square"></i>
                         <span>接客タイプ診断を別タブで開く</span>
                     </a>

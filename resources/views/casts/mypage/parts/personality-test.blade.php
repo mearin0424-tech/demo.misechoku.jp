@@ -10,7 +10,7 @@
                 12の質問であなたの強みを診断します！
             </p>
 
-            <img src="{{ asset('personality-test/images/top_image.png') }}" alt="トップ画像" id="top-image">
+            <img src="{{ asset('assets/images/guide/guide-character.png') }}" alt="オコジョガイド" id="top-image">
             <br><br>
             <button id="start-btn" type="button" disabled>読み込み中...</button>
         </div>

@@ -29,7 +29,7 @@
     ];
     $aiTabUrl = route($routeName, ['tab' => 'ai']);
     $aiPersonalityTestUrl = $prefix === 'cast'
-        ? asset('personality-test/personality-test.html') . '?' . http_build_query(['return_to' => $aiTabUrl])
+        ? asset('personality-test') . '?' . http_build_query(['return_to' => $aiTabUrl])
         : null;
     $aiRecommendItems = collect($items)->map(function (array $item) use ($prefix) {
         if ($prefix === 'cast') {

@@ -1,7 +1,7 @@
 {
   "name": "接客タイプ診断",
   "short_name": "診断",
-  "start_url": "personality-test.html",
+  "start_url": "/personality-test",
   "display": "standalone",
   "icons": []
 }

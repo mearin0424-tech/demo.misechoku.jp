@@ -19,12 +19,12 @@ class RecruitmentController extends Controller
      */
     public function status()
     {
-        $recruit = $this->getRecruitData($this->currentShopId());
+        $recruitData = $this->getRecruitData($this->currentShopId());
         $numericShopId = $this->toNumericShopId($this->currentShopId());
 
         return view('shops.recruit.status', [
             'pageId' => 'job_status',
-            'recruit' => $recruit,
+            'recruit' => $recruitData['recruit'],
             'previewRoute' => route('shop.recruits.show'),
             'publicPreviewRoute' => $numericShopId ? route('share.recruit.show', ['id' => $numericShopId]) : null,
         ]);

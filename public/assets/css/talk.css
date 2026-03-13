@@ -146,18 +146,29 @@
     flex: 1;
     text-align: center;
     padding: 15px 0;
-    color: #888;
+    color: #857070;
     font-size: 0.9rem;
-    font-weight: bold;
+    font-weight: 500;
     cursor: pointer;
-    transition: 0.3s;
-    border-bottom: 2px solid transparent;
+    transition: color 0.2s ease;
+    border-bottom: none;
+    position: relative;
 }
 
 .talk-tabs .tab-item.active {
-    color: var(--gold);
-    border-bottom: 2px solid var(--gold);
-    background: rgba(212, 175, 55, 0.05);
+    color: #d4af37;
+    font-weight: 700;
+    background: transparent;
+}
+
+.talk-tabs .tab-item.active::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(to right, transparent, #d4af37, transparent);
 }
 
 /* 表示パネルの切り替え制御（.talk-tabs 利用時用） */
