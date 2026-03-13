@@ -19,6 +19,10 @@
         </div>
     </header>
 
+    @if(session('message'))
+        <p class="profile-edit-flash" style="margin-bottom:16px;">{{ session('message') }}</p>
+    @endif
+
     <section class="recruit-status-list">
         <article class="recruit-status-card">
             <div class="recruit-status-card-head">
@@ -32,6 +36,16 @@
                         <p class="recruit-status-card-meta">更新日: {{ $recruit['updated_at'] }}</p>
                     @endif
                 </div>
+                <form action="{{ route('shop.recruits.toggle-status') }}" method="POST">
+                    @csrf
+                    <button
+                        type="submit"
+                        class="toggle-btn {{ ($recruit['status'] ?? 'active') === 'active' ? 'active' : '' }}"
+                        aria-label="公開のON/OFF"
+                    >
+                        <div class="toggle-circle"></div>
+                    </button>
+                </form>
             </div>
 
             {{-- お店からのひとこと --}}
