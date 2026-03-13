@@ -142,6 +142,12 @@
     color: var(--color-gold);
     margin-bottom: 6px;
 }
+.search-filter-simple__note {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    color: #aaa;
+    line-height: 1.5;
+}
 /* 簡単キーワード検索：入力欄と検索ボタンを1行に */
 .search-filter-simple-row {
     display: flex;
