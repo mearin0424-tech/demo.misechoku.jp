@@ -6,6 +6,7 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/cast_profile.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/personality-test-inline.css') }}">
 @endpush
 
 @section('content')
@@ -91,16 +92,18 @@
                 <div class="mypage-profile-block">
                     <h3 class="section-title section-title-gold">接客タイプ・系統</h3>
                     <div class="mypage-cast-other other-info-detail-body">
-                        @if(!empty($cast['personality_type']))
-                            <div class="detail-row"><span class="detail-label">接客タイプ診断結果</span><span class="detail-value">{{ $cast['personality_type'] }}</span></div>
-                        @endif
+                        <div class="detail-row" id="personality-type-row" style="{{ !empty($cast['personality_type']) ? '' : 'display:none;' }}">
+                            <span class="detail-label">接客タイプ診断結果</span>
+                            <span class="detail-value" id="personality-type-display">{{ $cast['personality_type'] ?? '' }}</span>
+                        </div>
                         <div class="detail-row"><span class="detail-label">ご自分の系統</span><span class="detail-value">{{ $cast['my_field'] ?? '--' }}</span></div>
                         <div class="detail-row"><span class="detail-label">ご自分の内面・特技</span><span class="detail-value">{{ $cast['my_inner_skills'] ?? '--' }}</span></div>
                     </div>
-                    <a href="{{ url('personality-test/personality-test.html') }}" class="btn-personality-test" target="_blank" rel="noopener noreferrer">
+                    <button type="button" class="btn-personality-test" id="open-personality-test-btn">
                         <i class="fas fa-clipboard-list"></i>
-                        <span>接客タイプ診断</span>
-                    </a>
+                        <span>接客タイプ診断を開く</span>
+                    </button>
+                    @include('casts.mypage.parts.personality-test')
                 </div>
 
                 {{-- 経歴・スキル --}}
@@ -182,7 +185,9 @@
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="{{ asset('assets/js/gallery-sortable.js') }}"></script>
+<script src="{{ asset('personality-test/script.js') }}"></script>
 <script>
 var _galleryPreviewImageId = null;
 var _galleryPreviewLi = null;
@@ -323,5 +328,24 @@ function saveWord() {
     document.getElementById('display-word').innerText = val || 'ひとことを設定しましょう';
     closeWordEdit();
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    var openButton = document.getElementById('open-personality-test-btn');
+    var panel = document.getElementById('mypage-personality-test-panel');
+
+    if (!openButton || !panel) {
+        return;
+    }
+
+    openButton.addEventListener('click', function () {
+        var isHidden = panel.style.display === 'none';
+        panel.style.display = isHidden ? 'block' : 'none';
+        openButton.querySelector('span').textContent = isHidden ? '接客タイプ診断を閉じる' : '接客タイプ診断を開く';
+
+        if (isHidden) {
+            panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+});
 </script>
 @endpush

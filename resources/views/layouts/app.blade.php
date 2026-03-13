@@ -134,22 +134,6 @@
             return String(value || '').replace(/\D+/g, '').slice(0, 7);
         }
 
-        function hiraganaToKatakana(value) {
-            return String(value || '').replace(/[ぁ-ゖ]/g, function (char) {
-                return String.fromCharCode(char.charCodeAt(0) + 0x60);
-            });
-        }
-
-        function normalizeAccountName(value) {
-            var normalized = String(value || '')
-                .normalize('NFKC')
-                .replace(/[\r\n]/g, '')
-                .replace(/[ 　]/g, '')
-                .toUpperCase();
-
-            return hiraganaToKatakana(normalized);
-        }
-
         document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('[data-account-number-input]').forEach(function (input) {
                 var syncNumber = function () {
@@ -159,16 +143,6 @@
                 input.addEventListener('input', syncNumber);
                 input.addEventListener('blur', syncNumber);
                 syncNumber();
-            });
-
-            document.querySelectorAll('[data-account-name-input]').forEach(function (input) {
-                var syncName = function () {
-                    input.value = normalizeAccountName(input.value);
-                };
-
-                input.addEventListener('input', syncName);
-                input.addEventListener('blur', syncName);
-                syncName();
             });
         });
     })();

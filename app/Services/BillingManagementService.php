@@ -28,7 +28,8 @@ class BillingManagementService
             'branch_name' => $this->nullIfEmpty(trim((string) ($data['branch_name'] ?? ''))),
             'account_type' => trim((string) ($data['account_type'] ?? '')),
             'account_number' => preg_replace('/\D+/', '', (string) ($data['account_number'] ?? '')) ?? '',
-            'account_name' => $this->normalizeBankAccountName((string) ($data['account_name'] ?? '')),
+            'account_holder_name' => trim((string) ($data['account_holder_name'] ?? '')),
+            'account_name' => trim((string) ($data['account_name'] ?? '')),
         ];
     }
 
@@ -51,6 +52,7 @@ class BillingManagementService
             'branch_name' => $data['branch_name'] ?? null,
             'account_type' => $data['account_type'],
             'account_number' => $data['account_number'],
+            'account_holder_name' => $data['account_holder_name'],
             'account_name' => $data['account_name'],
             'is_active' => true,
             'created_at' => now(),
@@ -76,6 +78,7 @@ class BillingManagementService
                 'branch_name' => $data['branch_name'] ?? null,
                 'account_type' => $data['account_type'],
                 'account_number' => $data['account_number'],
+                'account_holder_name' => $data['account_holder_name'],
                 'account_name' => $data['account_name'],
                 'updated_at' => now(),
                 'created_at' => now(),
@@ -101,6 +104,7 @@ class BillingManagementService
                 'branch_name' => $data['branch_name'] ?? null,
                 'account_type' => $data['account_type'],
                 'account_number' => $data['account_number'],
+                'account_holder_name' => $data['account_holder_name'],
                 'account_name' => $data['account_name'],
                 'updated_at' => now(),
                 'created_at' => now(),
@@ -121,23 +125,6 @@ class BillingManagementService
                 'invoice_total' => collect($deposits)->sum('invoice_amount'),
             ],
         ];
-    }
-
-    private function normalizeBankAccountName(string $value): string
-    {
-        $value = trim($value);
-        $value = str_replace(["\r", "\n", ' ', '　'], '', $value);
-        $value = mb_convert_kana($value, 'asCV', 'UTF-8');
-        $value = $this->hiraganaToKatakana($value);
-
-        return mb_strtoupper($value, 'UTF-8');
-    }
-
-    private function hiraganaToKatakana(string $value): string
-    {
-        return preg_replace_callback('/[ぁ-ゖ]/u', function (array $matches) {
-            return mb_chr(mb_ord($matches[0], 'UTF-8') + 0x60, 'UTF-8');
-        }, $value) ?? $value;
     }
 
     private function nullIfEmpty(string $value): ?string
@@ -600,6 +587,7 @@ class BillingManagementService
                 'branch_name' => $adminBank->branch_name,
                 'account_type_label' => $this->accountTypeLabel($adminBank->account_type),
                 'account_number' => $adminBank->account_number,
+                'account_holder_name' => $adminBank->account_holder_name ?? '',
                 'account_name' => $adminBank->account_name,
             ],
         ];
@@ -1027,6 +1015,7 @@ class BillingManagementService
             'branch_name' => $bank->branch_name ?? '',
             'account_type' => $bank->account_type ?? 'ordinary',
             'account_number' => $bank->account_number ?? '',
+            'account_holder_name' => $bank->account_holder_name ?? '',
             'account_name' => $bank->account_name ?? '',
             'account_type_label' => $this->accountTypeLabel($bank->account_type ?? 'ordinary'),
         ];

@@ -1,0 +1,608 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Playfair+Display:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap');
+
+.mypage-personality-test {
+    margin-top: 24px;
+    padding: 20px;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #fce0f3 0%, #e0d6ff 100%);
+}
+
+.mypage-personality-test #shindan-app {
+    position: relative;
+    max-width: 700px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    padding: 30px 40px;
+    border-radius: 20px;
+    box-shadow: 0 12px 30px rgba(75, 65, 92, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #4B415C;
+    line-height: 1.7;
+    font-family: 'Noto Sans JP', sans-serif;
+}
+
+.mypage-personality-test #start-screen {
+    text-align: center;
+    padding: 20px 0;
+    display: block;
+}
+
+.mypage-personality-test #start-screen h1 {
+    font-family: 'Playfair Display', serif;
+    color: #6A4C9C;
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-size: 3em;
+    font-weight: 700;
+}
+
+.mypage-personality-test #start-screen .subtitle {
+    font-size: 1.1em;
+    font-weight: 500;
+    color: #9279b8;
+    margin-top: 0;
+    margin-bottom: 35px;
+    letter-spacing: 1px;
+}
+
+.mypage-personality-test #start-screen p.description {
+    font-size: 1.1em;
+    color: #4B415C;
+    line-height: 1.8;
+    margin-bottom: 40px;
+}
+
+.mypage-personality-test .title {
+    overflow: hidden;
+    transform: translateX(-100%);
+    transition: transform 0.8s ease-out;
+}
+
+.mypage-personality-test .title span {
+    display: block;
+    transform: translateX(100%);
+    transition: transform 0.8s ease-out;
+}
+
+.mypage-personality-test .title.visible {
+    transform: translateX(0);
+}
+
+.mypage-personality-test .title.visible span {
+    transform: translateX(0);
+}
+
+.mypage-personality-test #top-image {
+    max-width: 80%;
+    height: auto;
+    margin-bottom: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.mypage-personality-test #start-btn {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: linear-gradient(135deg, #f78bb8 0%, #9f85ff 100%);
+    color: #fff;
+    padding: 14px 40px;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.3em;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 5px 20px rgba(106, 76, 156, 0.3);
+    transition: all 0.3s ease-in-out;
+}
+
+.mypage-personality-test #start-btn:hover:not(:disabled) {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 10px 25px rgba(106, 76, 156, 0.5);
+}
+
+.mypage-personality-test #start-btn:active:not(:disabled) {
+    transform: translateY(-2px) scale(0.98);
+}
+
+.mypage-personality-test #start-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+.mypage-personality-test .btn-back-to-top {
+    position: absolute;
+    top: 25px;
+    right: 30px;
+    background: #f7f3ff;
+    color: #6A4C9C;
+    border: 1px solid #c5b5e6;
+    border-radius: 20px;
+    padding: 5px 15px;
+    font-size: 0.85em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+    display: none;
+}
+
+.mypage-personality-test .btn-back-to-top:hover {
+    background: #e0d6ff;
+    color: #4B415C;
+}
+
+.mypage-personality-test #shindan-form {
+    display: none;
+}
+
+.mypage-personality-test .form-title {
+    font-family: 'Playfair Display', serif;
+    color: #6A4C9C;
+    text-align: center;
+    font-size: 1.8em;
+    font-weight: 700;
+    margin-top: 10px;
+    margin-bottom: 30px;
+}
+
+.mypage-personality-test .question {
+    margin-bottom: 35px;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.5s ease;
+}
+
+.mypage-personality-test .question p {
+    font-weight: 700;
+    font-size: 1.15em;
+    color: #3f364f;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.mypage-personality-test .question.answered {
+    background-color: #f4f4f5;
+    opacity: 0.8;
+}
+
+.mypage-personality-test .question.answered p {
+    color: #71717a;
+}
+
+.mypage-personality-test .likert-scale {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.mypage-personality-test .likert-scale label {
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease-in-out;
+}
+
+.mypage-personality-test .likert-scale label:hover {
+    transform: scale(1.1);
+}
+
+.mypage-personality-test .likert-scale input {
+    display: none;
+}
+
+.mypage-personality-test .likert-scale span {
+    display: block;
+    line-height: 35px;
+    border-radius: 50%;
+    font-weight: 500;
+    font-size: 0.9em;
+    transition: all 0.2s ease-in-out;
+    border-width: 3px;
+    border-style: solid;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.mypage-personality-test .likert-scale span::after {
+    content: attr(data-label);
+}
+
+.mypage-personality-test .likert-scale label:nth-child(1) span,
+.mypage-personality-test .likert-scale label:nth-child(5) span {
+    width: 42px;
+    height: 42px;
+    line-height: 42px;
+}
+
+.mypage-personality-test .likert-scale label:nth-child(2) span,
+.mypage-personality-test .likert-scale label:nth-child(4) span {
+    width: 35px;
+    height: 35px;
+    line-height: 35px;
+}
+
+.mypage-personality-test .likert-scale label:nth-child(3) span {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+}
+
+.mypage-personality-test .likert-scale span[data-label="1"] {
+    border-color: #a1a1aa;
+    color: #a1a1aa;
+}
+
+.mypage-personality-test .likert-scale span[data-label="2"] {
+    border-color: #b4b4bd;
+    color: #b4b4bd;
+}
+
+.mypage-personality-test .likert-scale span[data-label="3"] {
+    border-color: #C77DFF;
+    color: #C77DFF;
+}
+
+.mypage-personality-test .likert-scale span[data-label="4"] {
+    border-color: #f472b6;
+    color: #f472b6;
+}
+
+.mypage-personality-test .likert-scale span[data-label="5"] {
+    border-color: #ec4899;
+    color: #ec4899;
+}
+
+.mypage-personality-test .likert-scale input[value="1"]:checked + span {
+    background: #a1a1aa;
+    color: #fff;
+    border-color: #a1a1aa;
+    transform: scale(1.1);
+    box-shadow: 0 4px 10px rgba(161, 161, 170, 0.4);
+}
+
+.mypage-personality-test .likert-scale input[value="2"]:checked + span {
+    background: #b4b4bd;
+    color: #fff;
+    border-color: #b4b4bd;
+    transform: scale(1.1);
+    box-shadow: 0 4px 10px rgba(180, 180, 189, 0.4);
+}
+
+.mypage-personality-test .likert-scale input[value="3"]:checked + span {
+    background: #C77DFF;
+    color: #fff;
+    border-color: #C77DFF;
+    transform: scale(1.1);
+    box-shadow: 0 4px 10px rgba(199, 125, 255, 0.4);
+}
+
+.mypage-personality-test .likert-scale input[value="4"]:checked + span {
+    background: #f472b6;
+    color: #fff;
+    border-color: #f472b6;
+    transform: scale(1.1);
+    box-shadow: 0 4px 10px rgba(244, 114, 182, 0.4);
+}
+
+.mypage-personality-test .likert-scale input[value="5"]:checked + span {
+    background: #ec4899;
+    color: #fff;
+    border-color: #ec4899;
+    transform: scale(1.1);
+    box-shadow: 0 4px 10px rgba(236, 72, 153, 0.4);
+}
+
+.mypage-personality-test .likert-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85em;
+    color: #796c8c;
+    padding: 0 10px;
+}
+
+.mypage-personality-test #submit-btn {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: linear-gradient(135deg, #FF69B4, #6A4C9C);
+    color: #fff;
+    padding: 14px 25px;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.2em;
+    font-weight: 600;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    box-shadow: 0 5px 20px rgba(106, 76, 156, 0.3);
+    transition: all 0.3s ease-in-out;
+}
+
+.mypage-personality-test #submit-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(106, 76, 156, 0.4);
+}
+
+.mypage-personality-test #result {
+    margin-top: 40px;
+    padding: 30px;
+    background: #fff;
+    border: 2px solid #e0d6ff;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    display: none;
+}
+
+.mypage-personality-test #result h2 {
+    margin-top: 0;
+    color: #6A4C9C;
+    font-size: 1.8em;
+    text-align: center;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.mypage-personality-test #result-type-title {
+    font-family: 'Playfair Display', serif;
+    color: #FF69B4;
+    font-size: 1.8em;
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 25px;
+    line-height: 1.2;
+    font-weight: 700;
+}
+
+.mypage-personality-test #result-image {
+    display: block;
+    max-width: 80%;
+    height: auto;
+    margin: 0 auto 25px auto;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.mypage-personality-test .result-section {
+    padding: 15px 0;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 25px;
+}
+
+.mypage-personality-test .result-section .section-title {
+    font-size: 1.1em;
+    font-weight: 700;
+    color: #6A4C9C;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    text-align: center;
+    border-bottom: 2px dashed #e0d6ff;
+    padding-bottom: 5px;
+}
+
+.mypage-personality-test .result-section .result-content {
+    text-align: center;
+    font-size: 1.05em;
+    font-weight: 500;
+    color: #4B415C;
+    line-height: 1.6;
+    padding: 5px 0 15px;
+}
+
+.mypage-personality-test #result-strength,
+.mypage-personality-test #result-weakness {
+    background-color: transparent;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+}
+
+.mypage-personality-test #result-description {
+    font-size: 0.95em;
+    color: #796c8c;
+    padding: 15px 20px;
+    background-color: #f7f3ff;
+    border-radius: 8px;
+    line-height: 1.7;
+    margin-bottom: 30px;
+    text-align: left;
+    border: 1px solid #e0d6ff;
+}
+
+.mypage-personality-test #result-breakdown {
+    margin-top: 30px;
+    margin-bottom: 20px;
+    padding-top: 25px;
+    border-top: 1px dashed #d6c9e0;
+}
+
+.mypage-personality-test .breakdown-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    background: #fdfcff;
+    border: 1px solid #ede7f9;
+    border-radius: 8px;
+    padding: 12px 15px;
+}
+
+.mypage-personality-test .breakdown-item span:first-child {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #FF69B4, #C77DFF);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    margin-right: 15px;
+}
+
+.mypage-personality-test .breakdown-item p {
+    margin: 0;
+    font-size: 0.95em;
+    color: #4B415C;
+    line-height: 1.5;
+}
+
+.mypage-personality-test .breakdown-item p strong {
+    font-size: 1.1em;
+    color: #6A4C9C;
+    display: block;
+}
+
+.mypage-personality-test #share-buttons {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px dashed #d6c9e0;
+    text-align: center;
+}
+
+.mypage-personality-test .share-btn {
+    text-decoration: none;
+    padding: 10px 20px;
+    margin: 8px;
+    border-radius: 50px;
+    color: #fff;
+    font-weight: 600;
+    display: inline-block;
+    font-size: 0.95em;
+    transition: all 0.2s ease-in-out;
+    min-width: 120px;
+    text-align: center;
+}
+
+.mypage-personality-test .share-btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+.mypage-personality-test #share-x {
+    background-color: #000000;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+.mypage-personality-test #share-line {
+    background-color: #00B900;
+    box-shadow: 0 3px 10px rgba(0, 185, 0, 0.3);
+}
+
+.mypage-personality-test #loading {
+    text-align: center;
+    font-size: 1.2em;
+    padding: 30px;
+    color: #6A4C9C;
+    background-color: #f7f3ff;
+    border-radius: 8px;
+    border: 1px dashed #c5b5e6;
+}
+
+@media (max-width: 768px) {
+    .mypage-personality-test {
+        padding: 14px;
+    }
+
+    .mypage-personality-test #shindan-app {
+        padding: 20px 25px;
+    }
+
+    .mypage-personality-test #start-screen h1 {
+        font-size: 2.2em;
+    }
+
+    .mypage-personality-test #start-screen .subtitle {
+        font-size: 1em;
+    }
+
+    .mypage-personality-test #start-screen p.description {
+        font-size: 1em;
+    }
+
+    .mypage-personality-test #top-image {
+        max-width: 90%;
+        margin-bottom: 25px;
+    }
+
+    .mypage-personality-test #start-btn {
+        font-size: 1.1em;
+    }
+
+    .mypage-personality-test .btn-back-to-top {
+        top: 15px;
+        right: 15px;
+        padding: 4px 12px;
+        font-size: 0.8em;
+    }
+
+    .mypage-personality-test .form-title {
+        font-size: 1.5em;
+        margin-bottom: 25px;
+    }
+
+    .mypage-personality-test .question p {
+        font-size: 1.05em;
+    }
+
+    .mypage-personality-test .likert-scale label:nth-child(1) span,
+    .mypage-personality-test .likert-scale label:nth-child(5) span {
+        width: 38px;
+        height: 38px;
+        line-height: 38px;
+    }
+
+    .mypage-personality-test .likert-scale label:nth-child(2) span,
+    .mypage-personality-test .likert-scale label:nth-child(4) span {
+        width: 32px;
+        height: 32px;
+        line-height: 32px;
+    }
+
+    .mypage-personality-test .likert-scale label:nth-child(3) span {
+        width: 28px;
+        height: 28px;
+        line-height: 28px;
+    }
+
+    .mypage-personality-test .likert-labels {
+        font-size: 0.8em;
+    }
+
+    .mypage-personality-test #result-image {
+        max-width: 90%;
+    }
+
+    .mypage-personality-test .result-section .result-content {
+        font-size: 1em;
+    }
+
+    .mypage-personality-test #result-description {
+        font-size: 0.9em;
+    }
+
+    .mypage-personality-test .breakdown-item span:first-child {
+        width: 35px;
+        height: 35px;
+        line-height: 35px;
+        font-size: 1.3em;
+        margin-right: 12px;
+    }
+
+    .mypage-personality-test .breakdown-item p {
+        font-size: 0.9em;
+    }
+
+    .mypage-personality-test .breakdown-item p strong {
+        font-size: 1em;
+    }
+
+    .mypage-personality-test .share-btn {
+        display: block;
+        width: calc(100% - 40px);
+        margin: 10px auto;
+    }
+}

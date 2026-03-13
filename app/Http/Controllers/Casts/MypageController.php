@@ -359,10 +359,12 @@ class MypageController extends Controller
             'branch_name'    => 'nullable|string|max:100',
             'account_type'   => 'required|string|max:20',
             'account_number' => ['required', 'regex:/^\d{7}$/'],
+            'account_holder_name' => ['required', 'string', 'max:100'],
             'account_name'   => ['required', 'string', 'max:100', new KouzaMeig()],
         ], [
             'account_number.required' => '口座番号を入力してください。',
             'account_number.regex' => '口座番号は7桁の数字で入力してください。',
+            'account_holder_name.required' => '口座名義（氏名）を入力してください。',
             'account_name.required' => '口座名義（カナ）を入力してください。',
         ]);
 
@@ -371,6 +373,7 @@ class MypageController extends Controller
             'branch_name',
             'account_type',
             'account_number',
+            'account_holder_name',
             'account_name',
         ]));
 

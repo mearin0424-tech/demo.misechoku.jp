@@ -101,6 +101,12 @@
                         <span class="detail-value">{{ $cast['birth_year'] }}年{{ $cast['birth_month'] }}月{{ $cast['birth_day'] }}日</span>
                     </div>
                 @endif
+                @if(!empty($cast['personality_type']))
+                    <div class="detail-row">
+                        <span class="detail-label">接客タイプ診断結果</span>
+                        <span class="detail-value">{{ $cast['personality_type'] }}</span>
+                    </div>
+                @endif
                 <div class="detail-row">
                     <span class="detail-label">希望職種</span>
                     <span class="detail-value">{{ $cast['desired_job'] ?? '--' }}</span>

@@ -36,6 +36,31 @@
         });
     }
 
+    function getCookie(name) {
+        var escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        var match = document.cookie.match(new RegExp('(?:^|; )' + escapedName + '=([^;]*)'));
+        return match ? decodeURIComponent(match[1]) : null;
+    }
+
+    function savePersonalityType(type) {
+        var headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        };
+        var xsrfToken = getCookie('XSRF-TOKEN');
+        if (xsrfToken) {
+            headers['X-XSRF-TOKEN'] = xsrfToken;
+        }
+
+        return fetch('/cast/profile/personality-type', {
+            method: 'POST',
+            headers: headers,
+            credentials: 'same-origin',
+            body: JSON.stringify({ personality_type: type })
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         var root = document.querySelector('[data-ai-recommend-root]');
         var dataEl = document.getElementById('ai-recommend-data');
@@ -285,10 +310,9 @@
 
         function scrollToBottom() {
             window.setTimeout(function () {
-                window.scrollTo({
-                    top: document.body.scrollHeight,
-                    behavior: 'smooth'
-                });
+                if (chatBox) {
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }
             }, 60);
         }
 
@@ -693,6 +717,7 @@
             state.answers.type = diagnosis.type;
             state.answers.typeTitle = diagnosis.title;
             state.answers.typeStrength = diagnosis.strength;
+            savedPersonalityType = diagnosis.type;
             state.hospitalityAnswers = {};
             state.step = 2;
             addAiMessage(
@@ -702,6 +727,9 @@
                 diagnosis.description + '\n\n' +
                 buildHospitalityBreakdown(diagnosis.type)
             );
+            savePersonalityType(diagnosis.type).catch(function () {
+                return null;
+            });
             window.setTimeout(function () {
                 askAreaQuestion();
             }, 250);
@@ -825,7 +853,14 @@
                 return;
             }
 
-            askHospitalityQuestion(0);
+            if (role === 'cast') {
+                state.step = 'quiz1';
+                askHospitalityQuestion(0);
+                return;
+            }
+
+            state.step = 2;
+            addAiMessage('おつかれさま。オコジョガイドだよ。\nまずは**希望のエリア**を教えてね。', getAreaOptions());
         }
 
         function processAnswer(text) {
@@ -865,7 +900,7 @@
         }
 
         function init() {
-            state.step = 'quiz1';
+            state.step = 1;
             state.answers = {};
             state.matches = [];
             state.matchIndex = 0;
