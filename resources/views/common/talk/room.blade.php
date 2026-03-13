@@ -53,7 +53,7 @@
                 @endif
                 <div class="message-block">
                     <div class="message-bubble">
-                        <p class="m-0">{{ trim($msg->content) }}</p>
+                        <p class="m-0">{!! nl2br(e(trim($msg->content))) !!}</p>
                     </div>
                     <div class="msg-footer">
                         <span class="msg-time">{{ $msg->created_at->format('H:i') }}</span>

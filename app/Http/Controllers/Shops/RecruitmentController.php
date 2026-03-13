@@ -96,6 +96,7 @@ class RecruitmentController extends Controller
 
         $shopId = $this->currentShopId();
         $meta = $this->getRecruitMeta($shopId);
+        $currentStatus = $this->getCurrentRecruitStatus($shopId);
         $payload = array_merge($meta, [
             'catch_copy' => $data['catch_copy'],
             'message' => $data['message'],
@@ -114,7 +115,7 @@ class RecruitmentController extends Controller
 
         $jobPayload = [
             'shop_id' => $shopId,
-            'status' => 1,
+            'status' => $currentStatus,
             'hourly_wage_regular' => (string) $data['hourly_wage_regular'],
             'trial_hourly_wage' => $request->filled('trial_hourly_wage') ? (string) $data['trial_hourly_wage'] : null,
             'has_trial' => $request->filled('trial_hourly_wage') ? 1 : 0,
@@ -153,6 +154,34 @@ class RecruitmentController extends Controller
         return redirect()
             ->route('shop.recruits.edit')
             ->with('message', '求人情報を保存しました');
+    }
+
+    public function toggleStatus(Request $request)
+    {
+        $shopId = $this->currentShopId();
+        $currentStatus = $this->getCurrentRecruitStatus($shopId);
+        $nextStatus = $currentStatus === 1 ? 0 : 1;
+        $existing = DB::table('shop_jobs')->where('shop_id', $shopId)->exists();
+
+        if ($existing) {
+            DB::table('shop_jobs')
+                ->where('shop_id', $shopId)
+                ->update([
+                    'status' => $nextStatus,
+                    'updated_at' => now(),
+                ]);
+        } else {
+            DB::table('shop_jobs')->insert([
+                'shop_id' => $shopId,
+                'status' => $nextStatus,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return redirect()
+            ->route('shop.recruits.status')
+            ->with('message', $nextStatus === 1 ? '求人を公開しました' : '求人を非公開にしました');
     }
 
     private function getRecruitData(string $shopId): array
@@ -311,6 +340,13 @@ class RecruitmentController extends Controller
     private function currentShopId(): string
     {
         return (string) auth()->guard('shop')->user()->shop_id;
+    }
+
+    private function getCurrentRecruitStatus(string $shopId): int
+    {
+        $status = DB::table('shop_jobs')->where('shop_id', $shopId)->value('status');
+
+        return $status === null ? 1 : (int) $status;
     }
 
     private function normalizeShopId(string|int $value): string

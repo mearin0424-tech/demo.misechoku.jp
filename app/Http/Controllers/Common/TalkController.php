@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Common;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class TalkController extends Controller
 {
@@ -16,33 +17,20 @@ class TalkController extends Controller
         $isCastPortal = request()->is('cast/*');
 
         if ($isCastPortal) {
-            // キャスト側：相手はお店 → お店のプロフィールへ
             $profileRoute = 'cast.shopprofileview.show';
-            $ongoingTalks = [
-                ['partner_id' => 1, 'name' => 'CLUB ETERNITY', 'avatar' => 'storage/mock/shops/out-1.png', 'last_message' => '本日はありがとうございました！またお待ちしております。', 'last_time' => '10:25', 'sort_key' => Carbon::today()->setHour(10)->setMinute(25), 'unread_count' => 0, 'last_message_by_me' => true, 'is_read' => true, 'pinned' => false],
-                ['partner_id' => 2, 'name' => 'THE GOLDSTONE', 'avatar' => 'storage/mock/shops/out-2.png', 'last_message' => '了解いたしました！調整してみますね。', 'last_time' => '昨日', 'sort_key' => Carbon::yesterday(), 'unread_count' => 0, 'last_message_by_me' => true, 'is_read' => false, 'pinned' => false],
-            ];
-            $requestTalks = [
-                ['partner_id' => 1, 'name' => 'CLUB ETERNITY', 'age' => null, 'location' => '六本木', 'avatar' => 'storage/mock/shops/out-1.png', 'last_message' => 'オファーが届きました。週末の出勤いかがですか？', 'last_time' => '1時間前', 'unread_count' => 1],
-                ['partner_id' => 2, 'name' => 'THE GOLDSTONE', 'age' => null, 'location' => '中央区', 'avatar' => 'storage/mock/shops/out-2.png', 'last_message' => '急募です。本日21時から可能な方いらっしゃいますか？', 'last_time' => '1時間前', 'unread_count' => 1],
-            ];
         } else {
-            // お店側：相手はキャスト → キャストのプロフィールへ
             $profileRoute = 'shop.castprofileview.show';
-            $ongoingTalks = [
-                ['partner_id' => 1, 'name' => 'みさき', 'avatar' => 'storage/mock/casts/1-1.png', 'last_message' => '本日はありがとうございました！またお待ちしております。', 'last_time' => '10:25', 'sort_key' => Carbon::today()->setHour(10)->setMinute(25), 'unread_count' => 0, 'last_message_by_me' => true, 'is_read' => true, 'pinned' => false],
-                ['partner_id' => 2, 'name' => '愛華', 'avatar' => 'storage/mock/casts/2-1.png', 'last_message' => '了解いたしました！調整してみますね。', 'last_time' => '昨日', 'sort_key' => Carbon::yesterday(), 'unread_count' => 0, 'last_message_by_me' => true, 'is_read' => false, 'pinned' => false],
-            ];
-            $requestTalks = [
-                ['partner_id' => 1, 'name' => 'みさき', 'age' => 30, 'location' => '六本木', 'avatar' => 'storage/mock/casts/1-1.png', 'last_message' => '初めまして！今夜空いていますか？', 'last_time' => '1時間前', 'unread_count' => 1],
-                ['partner_id' => 2, 'name' => '愛華', 'age' => 30, 'location' => '渋谷', 'avatar' => 'storage/mock/casts/2-1.png', 'last_message' => '初めまして！今夜空いていますか？', 'last_time' => '1時間前', 'unread_count' => 1],
-                ['partner_id' => 3, 'name' => 'Rena', 'age' => 30, 'location' => '新宿', 'avatar' => 'storage/mock/casts/3-1.png', 'last_message' => '初めまして！今夜空いていますか？', 'last_time' => '1時間前', 'unread_count' => 1],
-                ['partner_id' => 4, 'name' => 'Yumi', 'age' => 28, 'location' => '恵比寿', 'avatar' => 'storage/mock/casts/4-1.png', 'last_message' => '初めまして！今夜空いていますか？', 'last_time' => '2時間前', 'unread_count' => 1],
-            ];
         }
 
-        $ongoingTalks = collect($ongoingTalks)->sortByDesc('sort_key')->values()->all();
-        $requestTalks = collect($requestTalks)->sortByDesc('sort_key')->values()->all();
+        $conversations = $this->buildTalkList($isCastPortal);
+        $requestTalks = $conversations
+            ->filter(fn ($talk) => ($talk['unread_count'] ?? 0) > 0 && ($talk['reply_count'] ?? 0) === 0)
+            ->values()
+            ->all();
+        $ongoingTalks = $conversations
+            ->reject(fn ($talk) => ($talk['unread_count'] ?? 0) > 0 && ($talk['reply_count'] ?? 0) === 0)
+            ->values()
+            ->all();
 
         return view('common.talk.index', compact('ongoingTalks', 'requestTalks', 'profileRoute'));
     }
@@ -52,40 +40,40 @@ class TalkController extends Controller
     public function room($id)
     {
         $isCastPortal = request()->is('cast/*');
-        if ($isCastPortal) {
-            $names = [1 => 'CLUB ETERNITY', 2 => 'THE GOLDSTONE', 3 => 'Club Luxurious', 4 => 'BAR STELLA'];
-            $avatars = [1 => asset('storage/mock/shops/out-1.png'), 2 => asset('storage/mock/shops/out-2.png'), 3 => asset('storage/mock/shops/out-1.png'), 4 => asset('storage/mock/shops/out-2.png')];
-            $partnerName = $names[$id] ?? 'お店';
-        } else {
-            $names = [1 => '愛華', 2 => 'みさき', 3 => 'Rena', 4 => 'Yumi'];
-            $avatars = [1 => asset('storage/mock/casts/1-1.png'), 2 => asset('storage/mock/casts/2-1.png'), 3 => asset('storage/mock/casts/3-1.png'), 4 => asset('storage/mock/casts/4-1.png')];
-            $partnerName = $names[$id] ?? 'ゲスト';
-        }
-        $partnerAvatar = $avatars[$id] ?? asset('assets/images/common/no-image.png');
+        $currentId = $isCastPortal ? $this->currentCastId() : $this->currentShopId();
+        $partnerId = (string) $id;
+        $partner = $this->resolvePartner($partnerId, $isCastPortal);
+        abort_unless($partner, 404);
 
-        $messages = [
-            (object)[
-                'content' => 'お疲れ様です！本日はありがとうございました。',
-                'is_mine' => false,
-                'created_at' => Carbon::now()->subHours(2),
-            ],
-            (object)[
-                'content' => 'こちらこそありがとうございました！楽しかったです。',
-                'is_mine' => true,
-                'created_at' => Carbon::now()->subHour(),
-            ],
-            (object)[
-                'content' => 'またよろしくお願いいたします！',
-                'is_mine' => false,
-                'created_at' => Carbon::now()->subMinutes(10),
-            ],
-        ];
+        $messages = DB::table('messages')
+            ->where($isCastPortal ? 'cast_id' : 'shop_id', $currentId)
+            ->where($isCastPortal ? 'shop_id' : 'cast_id', $partnerId)
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get()
+            ->map(function ($message) use ($isCastPortal) {
+                return (object) [
+                    'content' => $message->content,
+                    'is_mine' => (int) $message->sender_type === ($isCastPortal ? 1 : 2),
+                    'created_at' => Carbon::parse($message->created_at),
+                ];
+            });
+
+        DB::table('messages')
+            ->where($isCastPortal ? 'cast_id' : 'shop_id', $currentId)
+            ->where($isCastPortal ? 'shop_id' : 'cast_id', $partnerId)
+            ->where('sender_type', $isCastPortal ? 2 : 1)
+            ->where('is_read', false)
+            ->update([
+                'is_read' => true,
+                'updated_at' => now(),
+            ]);
 
         return view('common.talk.room', [
-            'partnerName' => $partnerName,
-            'partnerAvatar' => $partnerAvatar,
+            'partnerName' => $partner['name'],
+            'partnerAvatar' => $partner['avatar'],
             'messages' => $messages,
-            'partnerId' => $id
+            'partnerId' => $partnerId
         ]);
     }
 
@@ -94,21 +82,185 @@ class TalkController extends Controller
      */
     public function store(Request $request)
     {
+        $isCastPortal = request()->is('cast/*');
         $request->validate([
-            'partner_id' => 'required', // member_id から名称を汎用的に変更
-            'message' => 'required|string'
+            'partner_id' => ['required', 'string'],
+            'message' => ['required', 'string', 'max:5000'],
         ]);
 
-        // TODO: Message::create([...]) でDB保存
-        // 相手への通知処理(ServiceWorker等)もここに集約可能
+        $partnerId = (string) $request->input('partner_id');
+        abort_unless($this->resolvePartner($partnerId, $isCastPortal), 404);
+
+        $payload = [
+            'cast_id' => $isCastPortal ? $this->currentCastId() : $partnerId,
+            'shop_id' => $isCastPortal ? $partnerId : $this->currentShopId(),
+            'sender_type' => $isCastPortal ? 1 : 2,
+            'type' => 1,
+            'content' => trim((string) $request->input('message')),
+            'is_read' => false,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        DB::table('messages')->insert($payload);
 
         return response()->json([
             'success' => true,
             'message' => '送信しました',
             'data' => [
-                'content' => trim($request->message),
+                'content' => $payload['content'],
                 'time' => Carbon::now()->format('H:i')
             ]
         ]);
+    }
+
+    private function buildTalkList(bool $isCastPortal)
+    {
+        $currentId = $isCastPortal ? $this->currentCastId() : $this->currentShopId();
+        $mySenderType = $isCastPortal ? 1 : 2;
+        $partnerColumn = $isCastPortal ? 'shop_id' : 'cast_id';
+
+        $rows = DB::table('messages')
+            ->where($isCastPortal ? 'cast_id' : 'shop_id', $currentId)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->get();
+
+        return $rows
+            ->groupBy($partnerColumn)
+            ->map(function ($messages, $partnerId) use ($isCastPortal, $mySenderType) {
+                $latest = $messages->first();
+                $partner = $this->resolvePartner((string) $partnerId, $isCastPortal);
+                if (!$partner) {
+                    return null;
+                }
+
+                $latestAt = Carbon::parse($latest->created_at);
+
+                return [
+                    'partner_id' => (string) $partnerId,
+                    'name' => $partner['name'],
+                    'age' => $partner['age'],
+                    'location' => $partner['location'],
+                    'avatar' => $partner['avatar'],
+                    'last_message' => $latest->content,
+                    'last_time' => $this->formatTalkTime($latestAt),
+                    'sort_key' => $latestAt,
+                    'unread_count' => $messages
+                        ->where('sender_type', '!=', $mySenderType)
+                        ->where('is_read', false)
+                        ->count(),
+                    'reply_count' => $messages
+                        ->where('sender_type', $mySenderType)
+                        ->count(),
+                    'last_message_by_me' => (int) $latest->sender_type === $mySenderType,
+                    'is_read' => (bool) $latest->is_read,
+                    'pinned' => false,
+                ];
+            })
+            ->filter()
+            ->sortByDesc('sort_key')
+            ->values();
+    }
+
+    private function resolvePartner(string $partnerId, bool $isCastPortal): ?array
+    {
+        if ($isCastPortal) {
+            $row = DB::table('shops')
+                ->leftJoin('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
+                ->where('shops.id', $partnerId)
+                ->select(
+                    'shops.id',
+                    'shop_profiles.shop_name',
+                    'shop_profiles.pref',
+                    'shop_profiles.city',
+                    'shop_profiles.main_image_path'
+                )
+                ->first();
+
+            if (!$row) {
+                return null;
+            }
+
+            return [
+                'name' => $row->shop_name ?: 'お店',
+                'age' => null,
+                'location' => trim(implode('', array_filter([$row->pref ?? null, $row->city ?? null]))),
+                'avatar' => $this->assetPathForStored($row->main_image_path ?? null),
+            ];
+        }
+
+        $row = DB::table('casts')
+            ->leftJoin('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id')
+            ->where('casts.id', $partnerId)
+            ->select(
+                'casts.id',
+                'cast_profiles.nickname',
+                'cast_profiles.name',
+                'cast_profiles.pref',
+                'cast_profiles.city',
+                'cast_profiles.birthday'
+            )
+            ->first();
+
+        if (!$row) {
+            return null;
+        }
+
+        $mainImagePath = DB::table('cast_images')
+            ->where('cast_id', $partnerId)
+            ->where('type', 1)
+            ->orderByRaw('is_main DESC')
+            ->orderByRaw('main_order IS NULL')
+            ->orderBy('main_order')
+            ->orderBy('id')
+            ->value('image_path');
+
+        return [
+            'name' => $row->nickname ?: ($row->name ?: 'キャスト'),
+            'age' => !empty($row->birthday) ? Carbon::parse($row->birthday)->age : null,
+            'location' => trim(implode('', array_filter([$row->pref ?? null, $row->city ?? null]))),
+            'avatar' => $this->assetPathForStored($mainImagePath),
+        ];
+    }
+
+    private function currentCastId(): string
+    {
+        return (string) auth()->guard('member')->id();
+    }
+
+    private function currentShopId(): string
+    {
+        return (string) auth()->guard('shop')->user()->shop_id;
+    }
+
+    private function formatTalkTime(Carbon $dateTime): string
+    {
+        if ($dateTime->isToday()) {
+            return $dateTime->format('H:i');
+        }
+
+        if ($dateTime->isYesterday()) {
+            return '昨日';
+        }
+
+        return $dateTime->format('Y/m/d');
+    }
+
+    private function assetPathForStored(?string $path): string
+    {
+        if (empty($path)) {
+            return asset('assets/images/common/no-image.png');
+        }
+
+        if (str_starts_with($path, 'uploads/')) {
+            return asset($path);
+        }
+
+        if (str_starts_with($path, 'public/')) {
+            return asset('storage/' . substr($path, 7));
+        }
+
+        return asset(ltrim($path, '/'));
     }
 }

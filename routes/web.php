@@ -136,6 +136,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // 店舗管理
         Route::get('/shops', [AdminShop::class, 'index'])->name('shops.index');
+        Route::post('/shops/{shopId}/toggle-recruit-status', [AdminShop::class, 'toggleRecruitStatus'])->name('shops.toggle-recruit-status');
 
         // キャスト管理
         Route::get('/casts', [AdminCast::class, 'index'])->name('casts.index');
@@ -282,6 +283,7 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
         Route::get('/edit', [ShopRecruit::class, 'edit'])->name('edit');
         Route::get('/show/{id?}', [ShopRecruit::class, 'show'])->name('show');
         Route::put('/update', [ShopRecruit::class, 'update'])->name('update');
+        Route::post('/toggle-status', [ShopRecruit::class, 'toggleStatus'])->name('toggle-status');
     });
 
     // マイページ

@@ -16,7 +16,7 @@ class RecruitmentController extends Controller
      */
     public function show(int $id)
     {
-        $data = $this->getRecruitDataFromDatabase($id);
+        $data = $this->getRecruitDataFromDatabase($id, true);
         abort_if(empty($data['recruit']), 404);
 
         return view('shops.recruit.show', $this->buildRecruitViewData($data, $id, true, false));
@@ -27,7 +27,7 @@ class RecruitmentController extends Controller
      */
     public function publicShow(int $id)
     {
-        $data = $this->getRecruitDataFromDatabase($id);
+        $data = $this->getRecruitDataFromDatabase($id, true);
         abort_if(empty($data['recruit']), 404);
 
         return view('shops.recruit.show', $this->buildRecruitViewData($data, $id, true, true));
@@ -38,7 +38,7 @@ class RecruitmentController extends Controller
      * ルートの {id} は内部の shop_id を 1,2.. とした表示用として扱い、
      * 実テーブルの文字列ID形式へ変換する。
      */
-    private function getRecruitDataFromDatabase(int $shopNumericId): array
+    private function getRecruitDataFromDatabase(int $shopNumericId, bool $publishedOnly = false): array
     {
         $shopId = 's' . str_pad((string) $shopNumericId, 8, '0', STR_PAD_LEFT);
 
@@ -48,7 +48,7 @@ class RecruitmentController extends Controller
             ->where('shops.id', $shopId)
             ->select(
                 'shops.id',
-                'shops.status',
+                'shops.status as shop_status',
                 'shop_profiles.shop_name',
                 'shop_profiles.main_image_path',
                 'shop_profiles.opened_on',
@@ -68,11 +68,14 @@ class RecruitmentController extends Controller
                 'shop_jobs.working_day',
                 'shop_jobs.working_hours',
                 'shop_jobs.regular_holiday',
-                'shop_jobs.qualification'
+                'shop_jobs.qualification',
+                'shop_jobs.status as recruit_status',
+                'shop_jobs.salary',
+                'shop_jobs.noruma_cond'
             )
             ->first();
 
-        if (!$row) {
+        if (!$row || ($publishedOnly && (int) ($row->recruit_status ?? 0) !== 1)) {
             return [
                 'recruit' => [],
                 'shop'    => null,
