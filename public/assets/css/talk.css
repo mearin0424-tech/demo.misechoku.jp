@@ -315,6 +315,12 @@
     min-height: 40px;
 }
 
+.btn-interview-cancel-state {
+    border-color: rgba(251, 191, 36, 0.65);
+    color: #fef3c7;
+    background: rgba(66, 38, 3, 0.42);
+}
+
 /* 行全体を横いっぱいに（吹き出し＋日時が収まるよう行間を確保） */
 .message-row {
     display: flex;

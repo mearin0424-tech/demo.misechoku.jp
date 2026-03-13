@@ -12,6 +12,67 @@
         line-height: 1.6;
         color: #9f8d8d;
     }
+    .deposit-precheck {
+        display: grid;
+        gap: 14px;
+    }
+    .deposit-precheck-card {
+        padding: 18px;
+        border-radius: 18px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.03);
+    }
+    .deposit-precheck-title {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+    .deposit-precheck-meta,
+    .deposit-precheck-note {
+        font-size: 0.82rem;
+        line-height: 1.7;
+        color: #cdbcbc;
+    }
+    .deposit-precheck-note {
+        margin-top: 10px;
+    }
+    .deposit-checklist {
+        display: grid;
+        gap: 10px;
+        margin-top: 12px;
+    }
+    .deposit-check-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 0.9rem;
+        color: #f7eded;
+    }
+    .deposit-review-grid {
+        display: grid;
+        gap: 12px;
+        margin-top: 12px;
+    }
+    .deposit-review-score {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+    .deposit-review-score select,
+    .deposit-review-grid textarea {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(14, 7, 8, 0.9);
+        color: #fff;
+        padding: 12px 14px;
+    }
+    .deposit-review-score select {
+        max-width: 120px;
+    }
 </style>
 @endpush
 
@@ -82,6 +143,78 @@
                     @endif
                 </div>
 
+                @if(!empty($requestTarget))
+                    <div class="mypage-section">
+                        <h2 class="mypage-actions-title">ボーナス金申請前の確認</h2>
+                        <div class="deposit-precheck">
+                            <div class="deposit-precheck-card">
+                                <div class="deposit-precheck-title">
+                                    <span>{{ $requestTarget['shop_name'] ?? '対象案件' }}</span>
+                                    <span class="doc-status status-pending">採用済み案件</span>
+                                </div>
+                                <div class="deposit-precheck-meta">
+                                    ボーナス金額: ¥{{ number_format((int) ($requestTarget['bonus_amount'] ?? 0)) }}
+                                </div>
+                                <div class="deposit-precheck-note">
+                                    {!! nl2br(e($requestTarget['bonus_condition'] ?: '求人情報に登録された条件を満たしているか確認してください。')) !!}
+                                </div>
+                            </div>
+
+                            @if($canRequestDeposit ?? false)
+                                <form method="POST" action="{{ route('cast.mypage.deposit.request') }}" class="deposit-precheck-card">
+                                    @csrf
+                                    <div class="deposit-precheck-title">
+                                        <span>確認・レビュー投稿・入金依頼</span>
+                                        @if(!empty($requestTarget['review_exists']))
+                                            <span class="doc-status status-paid">レビュー投稿済み</span>
+                                        @else
+                                            <span class="doc-status status-pending">レビュー未投稿</span>
+                                        @endif
+                                    </div>
+                                    <div class="deposit-checklist">
+                                        <label class="deposit-check-row">
+                                            <input type="checkbox" name="confirm_bonus_condition" value="1">
+                                            <span>求人情報に登録されたボーナス達成条件を確認し、申請内容に相違がないことを確認しました。</span>
+                                        </label>
+                                    </div>
+
+                                    @if(!empty($requestTarget['review_exists']))
+                                        <p class="deposit-precheck-note">
+                                            {{ $requestTarget['review_posted_at'] ?? '' }} にレビュー投稿済みです。<br>
+                                            {{ $requestTarget['review_comment'] ?? '' }}
+                                        </p>
+                                    @else
+                                        <div class="deposit-review-grid">
+                                            @foreach(($requestTarget['review_contents'] ?? []) as $content)
+                                                <label class="deposit-review-score">
+                                                    <span>{{ $content['name'] }}</span>
+                                                    <select name="review_scores[{{ $content['id'] }}]">
+                                                        <option value="">選択</option>
+                                                        @for($score = 5; $score >= 1; $score--)
+                                                            <option value="{{ $score }}">{{ $score }} / 5</option>
+                                                        @endfor
+                                                    </select>
+                                                </label>
+                                            @endforeach
+                                            <textarea name="review_comment" rows="4" placeholder="働いてみた感想、雰囲気、条件の印象などを入力してください。"></textarea>
+                                        </div>
+                                    @endif
+
+                                    <div class="text-right mt-3">
+                                        <button type="submit" class="btn-action manage">
+                                            {{ !empty($requestTarget['review_exists']) ? '入金依頼を送信する' : 'レビュー投稿と入金依頼を送信する' }}
+                                        </button>
+                                    </div>
+                                </form>
+                            @elseif(!empty($requestDisabledReason))
+                                <div class="deposit-precheck-card">
+                                    <p class="deposit-precheck-note">{{ $requestDisabledReason }}</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
                 <div class="mypage-section">
                     <h2 class="mypage-actions-title">現在の入金ステータス</h2>
                     <div class="mypage-flow-grid">
@@ -99,21 +232,14 @@
                         </div>
                     </div>
                     <div class="text-right">
-                        @if($canRequestDeposit ?? false)
-                            <form method="POST" action="{{ route('cast.mypage.deposit.request') }}">
-                                @csrf
-                                <button type="submit" class="btn-action manage">
-                                    ボーナス達成・入金を申請する
-                                </button>
-                            </form>
-                        @elseif(($currentDeposit['status_code'] ?? null) === 6)
+                        @if(($currentDeposit['status_code'] ?? null) === 6)
                             <form method="POST" action="{{ route('cast.mypage.deposit.confirm') }}">
                                 @csrf
                                 <button type="submit" class="btn-action manage">
                                     入金を確認しました
                                 </button>
                             </form>
-                        @elseif(!empty($requestDisabledReason))
+                        @elseif(empty($requestTarget) && !empty($requestDisabledReason))
                             <p class="text-xs" style="color:#C9B8B8;">{{ $requestDisabledReason }}</p>
                         @endif
                     </div>

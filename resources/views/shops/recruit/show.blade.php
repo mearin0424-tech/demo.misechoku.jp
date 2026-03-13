@@ -91,6 +91,9 @@
                 @if(!empty($recruit['trial_hourly_wage']))
                     <p class="text-sm mt-2" style="color:#A89090;">体験時給 ¥{{ number_format($recruit['trial_hourly_wage']) }}〜</p>
                 @endif
+                @if(!empty($recruit['noruma_reward']))
+                    <p class="text-sm mt-2" style="color:#F8E7B0;">ボーナス金: ¥{{ number_format($recruit['noruma_reward']) }}</p>
+                @endif
             </div>
             @if(!empty($recruit['selected_benefits']) && is_array($recruit['selected_benefits']))
                 <div class="recruit-feature-tags">
@@ -113,6 +116,18 @@
                             </div>
                         @endif
                     @endforeach
+                </div>
+            </section>
+        @endif
+
+        @if(!empty($recruit['bonus_condition']) || !empty($recruit['noruma_reward']))
+            <section>
+                <h3 class="recruit-block-title"><i class="fas fa-award"></i> ボーナス金達成条件</h3>
+                <div class="recruit-message-block-new">
+                    @if(!empty($recruit['noruma_reward']))
+                        <p>達成ボーナス: ¥{{ number_format($recruit['noruma_reward']) }}</p>
+                    @endif
+                    <p>{!! nl2br(e($recruit['bonus_condition'] ?? '条件は店舗との合意内容に従います。')) !!}</p>
                 </div>
             </section>
         @endif
