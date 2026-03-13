@@ -6,7 +6,6 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/cast_profile.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/css/personality-test-inline.css') }}">
 @endpush
 
 @section('content')
@@ -99,11 +98,10 @@
                         <div class="detail-row"><span class="detail-label">ご自分の系統</span><span class="detail-value">{{ $cast['my_field'] ?? '--' }}</span></div>
                         <div class="detail-row"><span class="detail-label">ご自分の内面・特技</span><span class="detail-value">{{ $cast['my_inner_skills'] ?? '--' }}</span></div>
                     </div>
-                    <button type="button" class="btn-personality-test" id="open-personality-test-btn">
-                        <i class="fas fa-clipboard-list"></i>
-                        <span>接客タイプ診断を開く</span>
-                    </button>
-                    @include('casts.mypage.parts.personality-test')
+                    <a href="{{ asset('personality-test/personality-test.html') }}" target="_blank" rel="noopener noreferrer" class="btn-personality-test">
+                        <i class="fas fa-up-right-from-square"></i>
+                        <span>接客タイプ診断を別タブで開く</span>
+                    </a>
                 </div>
 
                 {{-- 経歴・スキル --}}
@@ -187,7 +185,6 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="{{ asset('assets/js/gallery-sortable.js') }}"></script>
-<script src="{{ asset('personality-test/script.js') }}"></script>
 <script>
 var _galleryPreviewImageId = null;
 var _galleryPreviewLi = null;
@@ -329,23 +326,5 @@ function saveWord() {
     closeWordEdit();
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    var openButton = document.getElementById('open-personality-test-btn');
-    var panel = document.getElementById('mypage-personality-test-panel');
-
-    if (!openButton || !panel) {
-        return;
-    }
-
-    openButton.addEventListener('click', function () {
-        var isHidden = panel.style.display === 'none';
-        panel.style.display = isHidden ? 'block' : 'none';
-        openButton.querySelector('span').textContent = isHidden ? '接客タイプ診断を閉じる' : '接客タイプ診断を開く';
-
-        if (isHidden) {
-            panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    });
-});
 </script>
 @endpush

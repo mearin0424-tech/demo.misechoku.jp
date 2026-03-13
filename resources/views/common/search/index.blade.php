@@ -2,7 +2,7 @@
 
 {{-- 各ページから渡されるオコジョのメッセージをセット --}}
 @section('guide_message', ($activeTab ?? 'pane-timeline') === 'pane-ai'
-    ? '接客タイプ診断と質問に答えて、ぴったりのお店をご案内します'
+    ? '登録済みの接客タイプ診断結果をもとに、ぴったりのお店をご案内します'
     : ($guideMessage ?? '気になる相手を探してみてね！'))
 
 @section('title', 'SEARCH')
@@ -98,6 +98,7 @@
                 'role' => $prefix,
                 'items' => $aiRecommendItems,
                 'personalityType' => $personalityType ?? null,
+                'personalityTestUrl' => $prefix === 'cast' ? asset('personality-test/personality-test.html') : null,
             ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
         </div>
 </div>

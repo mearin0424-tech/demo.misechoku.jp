@@ -36,31 +36,6 @@
         });
     }
 
-    function getCookie(name) {
-        var escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        var match = document.cookie.match(new RegExp('(?:^|; )' + escapedName + '=([^;]*)'));
-        return match ? decodeURIComponent(match[1]) : null;
-    }
-
-    function savePersonalityType(type) {
-        var headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        };
-        var xsrfToken = getCookie('XSRF-TOKEN');
-        if (xsrfToken) {
-            headers['X-XSRF-TOKEN'] = xsrfToken;
-        }
-
-        return fetch('/cast/profile/personality-type', {
-            method: 'POST',
-            headers: headers,
-            credentials: 'same-origin',
-            body: JSON.stringify({ personality_type: type })
-        });
-    }
-
     document.addEventListener('DOMContentLoaded', function () {
         var root = document.querySelector('[data-ai-recommend-root]');
         var dataEl = document.getElementById('ai-recommend-data');
@@ -76,6 +51,7 @@
         var chatBox = root.querySelector('[data-ai-chat]');
         var avatar = root.getAttribute('data-avatar') || '';
         var role = root.getAttribute('data-role') || payload.role || 'cast';
+        var personalityTestUrl = payload.personalityTestUrl || '';
         var hospitalityAxisDescriptions = {
             L: { title: 'リード型 (L)', text: '会話の主導権を握り、積極的に場を盛り上げるのが得意なタイプです。' },
             F: { title: 'フォロワー型 (F)', text: '聞き役に徹し、お客様のペースに合わせて心地よい空間を作るのが得意なタイプです。' },
@@ -218,8 +194,7 @@
             step: 1,
             answers: {},
             matches: [],
-            matchIndex: 0,
-            hospitalityAnswers: {}
+            matchIndex: 0
         };
 
         function inferType(item) {
@@ -576,90 +551,6 @@
             }
         }
 
-        function getHospitalityScaleOptions() {
-            return [
-                { value: '1', label: '1' },
-                { value: '2', label: '2' },
-                { value: '3', label: '3' },
-                { value: '4', label: '4' },
-                { value: '5', label: '5' }
-            ];
-        }
-
-        function askHospitalityQuestion(index) {
-            var question = hospitalityQuestions[index];
-            if (!question) {
-                return;
-            }
-
-            var intro = '';
-            if (index === 0) {
-                intro = role === 'cast'
-                    ? 'おつかれさま。オコジョガイドだよ。\nあなたに合う**お店**を探す前に、まずは**接客タイプ診断**をしよう。\n**1 = そう思わない / 5 = そう思う** で答えてね。\n\n'
-                    : 'おつかれさま。オコジョガイドだよ。\n希望に合う**キャスト**を見つける前に、まずは**接客タイプ診断**をしよう。\n**1 = そう思わない / 5 = そう思う** で答えてね。\n\n';
-            }
-
-            addAiMessage(intro + 'Q' + String(index + 1) + '. ' + question.statement, getHospitalityScaleOptions(), 'type_selection');
-        }
-
-        function calculateHospitalityDiagnosis() {
-            var scores = {
-                axis1: { A: 0, B: 0 },
-                axis2: { A: 0, B: 0 },
-                axis3: { A: 0, B: 0 },
-                axis4: { A: 0, B: 0 }
-            };
-
-            hospitalityQuestions.forEach(function (question) {
-                var answer = state.hospitalityAnswers[question.id];
-                if (!scores[question.axis]) {
-                    return;
-                }
-
-                switch (answer) {
-                    case '5':
-                        scores[question.axis].A += 2;
-                        break;
-                    case '4':
-                        scores[question.axis].A += 1;
-                        break;
-                    case '2':
-                        scores[question.axis].B += 1;
-                        break;
-                    case '1':
-                        scores[question.axis].B += 2;
-                        break;
-                }
-            });
-
-            var type = [
-                scores.axis1.A > scores.axis1.B ? 'L' : 'F',
-                scores.axis2.A > scores.axis2.B ? 'C' : 'P',
-                scores.axis3.A > scores.axis3.B ? 'I' : 'O',
-                scores.axis4.A > scores.axis4.B ? 'H' : 'R'
-            ].join('');
-            var result = hospitalityResults[type] || hospitalityResults.DEFAULT;
-
-            return {
-                type: type,
-                title: result.title,
-                strength: result.strength,
-                description: result.description,
-                weakness: result.weakness
-            };
-        }
-
-        function buildHospitalityBreakdown(type) {
-            return String(type || '').split('').map(function (key) {
-                var axis = hospitalityAxisDescriptions[key];
-                if (!axis) {
-                    return '';
-                }
-
-                return '・**' + axis.title + '** ' + axis.text;
-            }).filter(Boolean).join('\n');
-        }
-
         function applyHospitalityDiagnosis(type) {
             var normalizedType = String(type || '').toUpperCase();
             var diagnosis = hospitalityResults[normalizedType];
@@ -688,51 +579,6 @@
                 askAreaQuestion();
             }, 250);
 
-            return true;
-        }
-
-        function handleHospitalityDiagnosis(text) {
-            if (typeof state.step !== 'string' || state.step.indexOf('quiz') !== 0) {
-                return false;
-            }
-
-            if (!/^[1-5]$/.test(text)) {
-                return false;
-            }
-
-            var currentIndex = parseInt(state.step.replace('quiz', ''), 10) - 1;
-            if (isNaN(currentIndex) || !hospitalityQuestions[currentIndex]) {
-                return false;
-            }
-
-            state.hospitalityAnswers[hospitalityQuestions[currentIndex].id] = text;
-
-            if (currentIndex < hospitalityQuestions.length - 1) {
-                state.step = 'quiz' + String(currentIndex + 2);
-                askHospitalityQuestion(currentIndex + 1);
-                return true;
-            }
-
-            var diagnosis = calculateHospitalityDiagnosis();
-            state.answers.type = diagnosis.type;
-            state.answers.typeTitle = diagnosis.title;
-            state.answers.typeStrength = diagnosis.strength;
-            savedPersonalityType = diagnosis.type;
-            state.hospitalityAnswers = {};
-            state.step = 2;
-            addAiMessage(
-                '診断結果は **(' + diagnosis.type + ') ' + diagnosis.title + '** だったよ。\n\n' +
-                '**あなたの強み**\n' + diagnosis.strength + '\n\n' +
-                '**ニガテかも**\n' + diagnosis.weakness + '\n\n' +
-                diagnosis.description + '\n\n' +
-                buildHospitalityBreakdown(diagnosis.type)
-            );
-            savePersonalityType(diagnosis.type).catch(function () {
-                return null;
-            });
-            window.setTimeout(function () {
-                askAreaQuestion();
-            }, 250);
             return true;
         }
 
@@ -854,8 +700,14 @@
             }
 
             if (role === 'cast') {
-                state.step = 'quiz1';
-                askHospitalityQuestion(0);
+                state.step = 'need_type';
+                addAiMessage(
+                    '接客タイプ診断結果がまだ登録されていないみたい。\n**別タブで診断を開く**か、**診断結果なしでそのまま探す**か選んでね。',
+                    [
+                        { value: '接客タイプ診断を別タブで開く', label: '接客タイプ診断を別タブで開く', wide: true },
+                        { value: '診断結果なしで進める', label: '診断結果なしで進める', wide: true }
+                    ]
+                );
                 return;
             }
 
@@ -887,7 +739,28 @@
                     return;
                 }
 
-                if (handleHospitalityDiagnosis(text)) {
+                if (text.indexOf('AIレコメンドを再読み込みする') !== -1) {
+                    window.location.reload();
+                    return;
+                }
+
+                if (role === 'cast' && text.indexOf('接客タイプ診断を別タブで開く') !== -1) {
+                    if (personalityTestUrl) {
+                        window.open(personalityTestUrl, '_blank', 'noopener');
+                    }
+                    addAiMessage(
+                        '別タブで接客タイプ診断を開いたよ。診断結果を保存したら、このタブを**再読み込み**すると反映できるよ。',
+                        [
+                            { value: 'AIレコメンドを再読み込みする', label: 'AIレコメンドを再読み込みする', wide: true },
+                            { value: '診断結果なしで進める', label: '診断結果なしで進める', wide: true }
+                        ]
+                    );
+                    return;
+                }
+
+                if (role === 'cast' && text.indexOf('診断結果なしで進める') !== -1) {
+                    state.step = 2;
+                    askAreaQuestionWithoutType();
                     return;
                 }
 
@@ -904,7 +777,6 @@
             state.answers = {};
             state.matches = [];
             state.matchIndex = 0;
-            state.hospitalityAnswers = {};
             chatBox.innerHTML = '';
 
             if (!allItems.length) {
