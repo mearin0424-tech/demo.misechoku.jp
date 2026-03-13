@@ -27,6 +27,10 @@
         ['id' => 'pane-list', 'label' => $listTabLabel, 'url' => route($routeName, ['tab' => 'list']), 'active' => $activeTab === 'pane-list'],
         ['id' => 'pane-ai', 'label' => 'AIレコメンド', 'url' => route($routeName, ['tab' => 'ai']), 'active' => $activeTab === 'pane-ai'],
     ];
+    $aiTabUrl = route($routeName, ['tab' => 'ai']);
+    $aiPersonalityTestUrl = $prefix === 'cast'
+        ? asset('personality-test/personality-test.html') . '?' . http_build_query(['return_to' => $aiTabUrl])
+        : null;
     $aiRecommendItems = collect($items)->map(function (array $item) use ($prefix) {
         if ($prefix === 'cast') {
             return [
@@ -85,6 +89,18 @@
 
         {{-- パネル3：AI --}}
         <div id="pane-ai" class="tab-pane {{ $activeTab === 'pane-ai' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-ai' ? 'display:none' : '' }}">
+            @if($prefix === 'cast' && empty($personalityType))
+                <div class="ai-recommend__intro-card">
+                    <div class="ai-recommend__intro-title">接客タイプ診断結果を使っておすすめ精度を上げられます</div>
+                    <p class="ai-recommend__intro-text">
+                        AIレコメンドでは診断ロジックは実行せず、保存済みの診断結果だけを読み込みます。<br>
+                        まだ未登録の場合は、先に接客タイプ診断を別タブで実施してください。
+                    </p>
+                    <a href="{{ $aiPersonalityTestUrl }}" target="_blank" rel="noopener noreferrer" class="ai-recommend__intro-link">
+                        接客タイプ診断を別タブで開く
+                    </a>
+                </div>
+            @endif
             <div
                 class="ai-recommend"
                 data-ai-recommend-root
@@ -98,7 +114,7 @@
                 'role' => $prefix,
                 'items' => $aiRecommendItems,
                 'personalityType' => $personalityType ?? null,
-                'personalityTestUrl' => $prefix === 'cast' ? asset('personality-test/personality-test.html') : null,
+                'personalityTestUrl' => $aiPersonalityTestUrl,
             ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
         </div>
 </div>

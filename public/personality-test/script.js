@@ -19,6 +19,12 @@ function getRepoPath() {
     return getShindanApp()?.dataset.basePath || './';
 }
 
+function getReturnUrl() {
+    const url = new URL(window.location.href);
+    const value = url.searchParams.get('return_to') || '';
+    return value;
+}
+
 function getCookie(name) {
     const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const match = document.cookie.match(new RegExp('(?:^|; )' + escapedName + '=([^;]*)'));
@@ -174,6 +180,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultScreen = appRoot.querySelector('#result');
     const startBtn = appRoot.querySelector('#start-btn');
     const backToTopBtns = appRoot.querySelectorAll('.btn-back-to-top:not(#notification-test-btn)');
+    const returnToAiBtn = appRoot.querySelector('#return-to-ai-btn');
+    const resultReturnToAiBtn = appRoot.querySelector('#result-return-to-ai-btn');
+    const returnUrl = getReturnUrl();
+
+    if (returnUrl) {
+        [returnToAiBtn, resultReturnToAiBtn].forEach((linkEl) => {
+            if (!linkEl) {
+                return;
+            }
+            linkEl.href = returnUrl;
+            linkEl.style.display = 'inline-flex';
+        });
+    }
 
     startScreen.style.display = 'block';
     shindanForm.style.display = 'none';
@@ -341,7 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await savePersonalityType(type);
             reflectSavedPersonalityType(type);
             if (saveStatus) {
-                saveStatus.textContent = `接客タイプ診断結果（${type}）をプロフィールに保存しました。`;
+            saveStatus.textContent = `接客タイプ診断結果（${type}）をプロフィールに保存しました。`;
             }
         } catch (error) {
             console.error('接客タイプ診断結果の保存に失敗しました:', error);
