@@ -30,7 +30,7 @@
                     $imageCount = $isShop ? 1 : 3;
                 @endphp
                 {{-- メイン写真（左右スワイプで同一アカウントの別写真を表示） --}}
-                <div class="home-photo-wrap">
+                <div class="home-photo-wrap" data-detail-url="{{ route($detailRoute, $item['id']) }}">
                     <div class="photo-swiper swiper">
                         <div class="swiper-wrapper">
                             @for($i = 1; $i <= $imageCount; $i++)
@@ -53,7 +53,12 @@
                         <div class="photo-pagination swiper-pagination"></div>
                         @endif
                     </div>
-                    <a href="{{ route($detailRoute, $item['id']) }}" class="card-detail-link"></a>
+                    <div class="photo-swipe-hint" aria-hidden="true">
+                        @if($imageCount > 1)
+                        <span>← 写真</span>
+                        <span>写真 →</span>
+                        @endif
+                    </div>
                 </div>
 
                 {{-- アクションボタン --}}
@@ -102,23 +107,22 @@
     <div class="home-onboarding-overlay" id="home-swipe-onboarding" aria-hidden="true">
         <div class="home-onboarding-inner">
             <div class="home-onboarding-header">
-                <div class="swipe-guide-pill">
-                    <span class="swipe-guide-caret">＾</span>
-                    <span class="swipe-guide-text">上下：アカウント / 左右：写真</span>
-                </div>
+                <span class="home-onboarding-kicker">DISCOVERY GUIDE</span>
+                <h2 class="home-onboarding-title">スワイプで直感的にチェック</h2>
+                <p class="home-onboarding-lead">まずはホームの操作だけ覚えればOKです。</p>
             </div>
             <div class="home-onboarding-body">
                 <div class="home-onboarding-row">
-                    <span class="home-onboarding-label">↑ / ↓</span>
-                    <span class="home-onboarding-desc">次 / 前のアカウントに移動</span>
+                    <span class="home-onboarding-icon">↑↓</span>
+                    <span class="home-onboarding-desc">上下で次 / 前のアカウントへ</span>
                 </div>
                 <div class="home-onboarding-row">
-                    <span class="home-onboarding-label">← / →</span>
-                    <span class="home-onboarding-desc">同じアカウントの別写真を表示</span>
+                    <span class="home-onboarding-icon">←→</span>
+                    <span class="home-onboarding-desc">左右で同じアカウントの別写真へ</span>
                 </div>
                 <div class="home-onboarding-row">
-                    <span class="home-onboarding-label">タップ</span>
-                    <span class="home-onboarding-desc">プロフィール詳細を開く</span>
+                    <span class="home-onboarding-icon">TAP</span>
+                    <span class="home-onboarding-desc">タップでプロフィール詳細を表示</span>
                 </div>
             </div>
             <div class="home-onboarding-footer">

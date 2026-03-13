@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\Shops\UploadImageRequest;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 
 class ProfileController extends Controller
 {
@@ -68,7 +69,13 @@ class ProfileController extends Controller
             return response()->json(['success' => false, 'message' => 'ファイルが見つかりません'], 400);
         }
 
-        $path = $request->file('image')->store('public/shops/gallery');
+        $dir = public_path('uploads/shops/gallery');
+        File::ensureDirectoryExists($dir);
+        $file = $request->file('image');
+        $name = $file->hashName();
+        $file->move($dir, $name);
+        $path = 'uploads/shops/gallery/' . $name;
+
         $slotIndex = (int) $request->input('slot_index', -1);
 
         $maxOrder = DB::table('shop_images')->where('shop_id', self::DEMO_SHOP_ID)->max('main_order');
@@ -92,10 +99,9 @@ class ProfileController extends Controller
             ]);
         }
 
-        $url = asset(ltrim(Storage::url($path), '/'));
         return response()->json([
             'success' => true,
-            'path'    => $url,
+            'path'    => asset($path),
             'id'      => $id,
         ]);
     }
@@ -114,7 +120,12 @@ class ProfileController extends Controller
             return response()->json(['success' => false, 'message' => '画像が見つかりません'], 404);
         }
 
-        Storage::delete($row->image_path);
+        $fullPath = str_starts_with($row->image_path ?? '', 'uploads/')
+            ? public_path($row->image_path)
+            : storage_path('app/' . $row->image_path);
+        if (File::exists($fullPath)) {
+            File::delete($fullPath);
+        }
         DB::table('shop_images')->where('id', $id)->delete();
 
         if (!empty($row->is_main)) {

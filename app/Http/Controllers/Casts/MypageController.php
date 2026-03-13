@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Casts;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -161,7 +162,13 @@ class MypageController extends Controller
             'image' => 'required|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
         ]);
 
-        $path = $request->file('image')->store('public/casts/gallery');
+        $dir = public_path('uploads/casts/gallery');
+        File::ensureDirectoryExists($dir);
+        $file = $request->file('image');
+        $name = $file->hashName();
+        $file->move($dir, $name);
+        $path = 'uploads/casts/gallery/' . $name;
+
         $slotIndex = (int) $request->input('slot_index', -1);
 
         $maxOrder = DB::table('cast_images')
@@ -190,8 +197,7 @@ class MypageController extends Controller
             ]);
         }
 
-        $url = asset(ltrim(Storage::url($path), '/'));
-        return response()->json(['success' => true, 'path' => $url, 'id' => $id]);
+        return response()->json(['success' => true, 'path' => asset($path), 'id' => $id]);
     }
 
     /**
@@ -209,7 +215,12 @@ class MypageController extends Controller
             return response()->json(['success' => false, 'message' => '画像が見つかりません'], 404);
         }
 
-        Storage::delete($row->image_path);
+        $fullPath = str_starts_with($row->image_path ?? '', 'uploads/')
+            ? public_path($row->image_path)
+            : storage_path('app/' . $row->image_path);
+        if (File::exists($fullPath)) {
+            File::delete($fullPath);
+        }
         DB::table('cast_images')->where('id', $id)->delete();
 
         if (!empty($row->is_main)) {
@@ -393,7 +404,7 @@ class MypageController extends Controller
             $images[] = ['id' => null, 'url' => $this->assetPathForStored($castRow->main_image_path)];
         }
         if (empty($images)) {
-            $images[] = ['id' => null, 'url' => asset('storage/mock/casts/1-1.png')];
+            $images[] = ['id' => null, 'url' => asset('assets/images/common/no-image.png')];
         }
 
         // レビュー（レビュー本文＋平均スコア）
@@ -464,21 +475,24 @@ class MypageController extends Controller
         return asset($path);
     }
 
-    /** ストレージパス(public/...)の場合は Storage::url で URL 化 */
+    /** 保存先パスを表示用URLに変換（uploads/ または public/ または / 始まり） */
     private function assetPathForStored(?string $path): string
     {
         if (empty($path)) {
             return asset('assets/images/common/no-image.png');
         }
+        if (str_starts_with($path, 'uploads/')) {
+            return asset($path);
+        }
         if (str_starts_with($path, 'public/')) {
-            return asset(ltrim(\Illuminate\Support\Facades\Storage::url($path), '/'));
+            return asset('storage/' . substr($path, 7));
         }
         return $this->assetPath($path);
     }
 
     private function buildEmptyCast(): array
     {
-        $images = [['id' => null, 'url' => asset('storage/mock/casts/1-1.png')]];
+        $images = [['id' => null, 'url' => asset('assets/images/common/no-image.png')]];
         return [
             'id'               => null,
             'nickname'         => '',

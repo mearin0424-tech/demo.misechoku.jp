@@ -94,9 +94,7 @@ class RecruitmentController extends Controller
             'store_features'     => [],
         ];
 
-        $mainImg = $row->main_image_path
-            ? asset(ltrim($row->main_image_path, '/'))
-            : asset('storage/mock/shops/out-1.png');
+        $mainImg = $this->imageUrl($row->main_image_path);
         $subImagesRows = DB::table('shop_images')
             ->where('shop_id', $shopId)
             ->orderByRaw('main_order IS NULL')
@@ -105,14 +103,10 @@ class RecruitmentController extends Controller
             ->get();
         $subImages = [];
         foreach ($subImagesRows as $img) {
-            $subImages[] = asset(ltrim($img->image_path, '/'));
+            $subImages[] = $this->imageUrl($img->image_path);
         }
         if (empty($subImages)) {
-            $subImages = [
-                asset('storage/mock/shops/inside-1.png'),
-                asset('storage/mock/shops/inside-2.png'),
-                asset('storage/mock/shops/inside-3.png'),
-            ];
+            $subImages[] = $mainImg;
         }
 
         $shop = [
@@ -130,5 +124,19 @@ class RecruitmentController extends Controller
             'recruit' => $recruit,
             'shop'    => $shop,
         ];
+    }
+    private function imageUrl(?string $path): string
+    {
+        if (empty($path)) {
+            return asset('assets/images/common/no-image.png');
+        }
+        if (str_starts_with($path, 'uploads/')) {
+            return asset($path);
+        }
+        if (str_starts_with($path, 'public/')) {
+            return asset('storage/' . substr($path, 7));
+        }
+
+        return asset(ltrim($path, '/'));
     }
 }

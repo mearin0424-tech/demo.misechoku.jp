@@ -82,23 +82,13 @@ class MypageController extends Controller
             ->orderBy('id')
             ->get();
         foreach ($shopImages as $i => $img) {
-            $url = str_starts_with($img->image_path ?? '', 'public/')
-                ? asset(ltrim(Storage::url($img->image_path), '/'))
-                : asset(ltrim($img->image_path, '/'));
-            $subImages[] = ['id' => $img->id, 'url' => $url];
+            $subImages[] = ['id' => $img->id, 'url' => $this->shopImageUrl($img->image_path)];
         }
         if (empty($subImages) && $row && $row->main_image_path) {
-            $url = str_starts_with($row->main_image_path ?? '', 'public/')
-                ? asset(ltrim(Storage::url($row->main_image_path), '/'))
-                : asset(ltrim($row->main_image_path, '/'));
-            $subImages[] = ['id' => 1, 'url' => $url];
+            $subImages[] = ['id' => 1, 'url' => $this->shopImageUrl($row->main_image_path)];
         }
         if (empty($subImages)) {
-            $subImages = [
-                ['id' => 1, 'url' => asset('storage/mock/shops/inside-1.png')],
-                ['id' => 2, 'url' => asset('storage/mock/shops/inside-2.png')],
-                ['id' => 3, 'url' => asset('storage/mock/shops/inside-3.png')],
-            ];
+            $subImages[] = ['id' => null, 'url' => asset('assets/images/common/no-image.png')];
         }
 
         $documents = [
@@ -357,5 +347,20 @@ class MypageController extends Controller
             7 => ['cast' => '完了', 'shop' => '完了', 'admin' => '完了'],
             default => ['cast' => '未申請', 'shop' => '未稼働', 'admin' => '未稼働'],
         };
+    }
+
+    /** 店舗画像パスを表示用URLに変換（uploads/ または storage 対応） */
+    private function shopImageUrl(?string $path): string
+    {
+        if (empty($path)) {
+            return asset('assets/images/common/no-image.png');
+        }
+        if (str_starts_with($path, 'uploads/')) {
+            return asset($path);
+        }
+        if (str_starts_with($path, 'public/')) {
+            return asset('storage/' . substr($path, 7));
+        }
+        return asset(ltrim($path, '/'));
     }
 }

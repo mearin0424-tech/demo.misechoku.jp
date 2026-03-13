@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const slides = document.querySelectorAll('.main-swiper .swiper-slide');
     const slideCount = slides.length;
+    let isPhotoSwiping = false;
 
     // メインの上下スワイプ（モダン・操作性重視）
     const mainSwiper = new Swiper('.main-swiper', {
@@ -24,6 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
         threshold: 15,
         resistance: true,
         resistanceRatio: 0.7,
+        touchStartPreventDefault: false,
         grabCursor: true,
         pagination: {
             el: '.home-swiper-pagination',
@@ -66,8 +68,26 @@ document.addEventListener('DOMContentLoaded', function() {
             slidesPerView: 1,
             loop: false,
             nested: true,
+            allowTouchMove: true,
+            touchStartPreventDefault: false,
+            touchReleaseOnEdges: true,
             touchAngle: 45,
-            threshold: 10
+            threshold: 6,
+            on: {
+                touchMove: function () {
+                    isPhotoSwiping = true;
+                },
+                transitionEnd: function () {
+                    setTimeout(function () {
+                        isPhotoSwiping = false;
+                    }, 120);
+                },
+                touchEnd: function () {
+                    setTimeout(function () {
+                        isPhotoSwiping = false;
+                    }, 120);
+                }
+            }
         };
         if (paginationEl) {
             options.pagination = {
@@ -77,6 +97,45 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         const swiper = new Swiper(el, options);
         photoSwipers.push(swiper);
+    });
+
+    // 写真エリアは「スワイプ優先 / 軽いタップで詳細へ」
+    document.querySelectorAll('.home-photo-wrap').forEach((wrap) => {
+        const detailUrl = wrap.getAttribute('data-detail-url');
+        if (!detailUrl) return;
+
+        let startX = 0;
+        let startY = 0;
+        let moved = false;
+
+        const handleStart = (event) => {
+            const point = event.touches ? event.touches[0] : event;
+            startX = point.clientX;
+            startY = point.clientY;
+            moved = false;
+        };
+
+        const handleMove = (event) => {
+            const point = event.touches ? event.touches[0] : event;
+            const deltaX = Math.abs(point.clientX - startX);
+            const deltaY = Math.abs(point.clientY - startY);
+            if (deltaX > 8 || deltaY > 8) {
+                moved = true;
+            }
+        };
+
+        const handleEnd = () => {
+            if (!moved && !isPhotoSwiping) {
+                window.location.href = detailUrl;
+            }
+        };
+
+        wrap.addEventListener('touchstart', handleStart, { passive: true });
+        wrap.addEventListener('touchmove', handleMove, { passive: true });
+        wrap.addEventListener('touchend', handleEnd);
+        wrap.addEventListener('mousedown', handleStart);
+        wrap.addEventListener('mousemove', handleMove);
+        wrap.addEventListener('mouseup', handleEnd);
     });
 
     // リサイズ・ビューポート変化時に Swiper を更新（モバイルのアドレスバー表示切替など）
