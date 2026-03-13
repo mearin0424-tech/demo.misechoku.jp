@@ -203,6 +203,8 @@ class TalkController extends Controller
             'updated_at' => now(),
         ]);
 
+        $this->syncApplicationStatusFromTalkAction($partnerId, $isCastPortal, $actionType, $content);
+
         return response()->json([
             'success' => true,
         ]);
@@ -564,5 +566,73 @@ class TalkController extends Controller
     private function toNumericShopId(string $shopId): int
     {
         return (int) ltrim(str_starts_with($shopId, 's') ? substr($shopId, 1) : $shopId, '0');
+    }
+
+    private function syncApplicationStatusFromTalkAction(string $partnerId, bool $isCastPortal, string $actionType, string $content): void
+    {
+        $castId = $isCastPortal ? $this->currentCastId() : $partnerId;
+        $shopId = $isCastPortal ? $partnerId : $this->currentShopId();
+        $application = $this->resolveOrCreateApplicationForTalk($castId, $shopId);
+
+        if (!$application) {
+            return;
+        }
+
+        $updates = ['updated_at' => now()];
+        $meta = $content !== '' ? (json_decode($content, true) ?: []) : [];
+
+        if ($actionType === 'interview_offer') {
+            $updates['status'] = max(2, (int) $application->status);
+        } elseif ($actionType === 'interview_confirm') {
+            $updates['status'] = 3;
+            $updates['result_date'] = !empty($meta['selected_option'])
+                ? Carbon::parse($meta['selected_option'])->toDateString()
+                : $application->result_date;
+        } elseif ($actionType === 'hired') {
+            $updates['status'] = 4;
+        } elseif ($actionType === 'rejected') {
+            $updates['status'] = 5;
+        }
+
+        DB::table('shop_job_applications')
+            ->where('id', $application->id)
+            ->update($updates);
+    }
+
+    private function resolveOrCreateApplicationForTalk(string $castId, string $shopId): ?object
+    {
+        $application = DB::table('shop_job_applications')
+            ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
+            ->where('shop_job_applications.cast_id', $castId)
+            ->where('shop_jobs.shop_id', $shopId)
+            ->orderByDesc('shop_job_applications.id')
+            ->select('shop_job_applications.*')
+            ->first();
+
+        if ($application) {
+            return $application;
+        }
+
+        $shopJob = DB::table('shop_jobs')
+            ->where('shop_id', $shopId)
+            ->orderByDesc('id')
+            ->first();
+
+        if (!$shopJob) {
+            return null;
+        }
+
+        $applicationId = DB::table('shop_job_applications')->insertGetId([
+            'cast_id' => $castId,
+            'shop_job_id' => $shopJob->id,
+            'status' => 1,
+            'result_date' => null,
+            'hourly_wage_regular' => $shopJob->hourly_wage_regular,
+            'normal_time' => $shopJob->normal_time,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return DB::table('shop_job_applications')->where('id', $applicationId)->first();
     }
 }

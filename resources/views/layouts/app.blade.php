@@ -129,6 +129,212 @@
     </script>
     <script>
     (function () {
+        function debounce(fn, wait) {
+            var timer = null;
+
+            return function () {
+                var args = arguments;
+                var context = this;
+                clearTimeout(timer);
+                timer = window.setTimeout(function () {
+                    fn.apply(context, args);
+                }, wait);
+            };
+        }
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        function setOptions(listEl, items, formatLabel) {
+            if (!listEl) {
+                return;
+            }
+
+            listEl.innerHTML = items.map(function (item) {
+                var label = formatLabel ? formatLabel(item) : '';
+
+                return '<option value="' + escapeHtml(item.name) + '" label="' + escapeHtml(label) + '"></option>';
+            }).join('');
+        }
+
+        function normalize(value) {
+            return String(value || '').trim();
+        }
+
+        function fetchJson(url) {
+            return fetch(url, {
+                headers: {
+                    Accept: 'application/json'
+                }
+            }).then(function (response) {
+                if (!response.ok) {
+                    throw new Error('Request failed');
+                }
+
+                return response.json();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('form[data-bank-autocomplete]').forEach(function (form) {
+                var bankInput = form.querySelector('[data-bank-name-input]');
+                var bankCodeInput = form.querySelector('[data-bank-code-input]');
+                var bankList = form.querySelector('[data-bank-list]');
+                var branchInput = form.querySelector('[data-branch-name-input]');
+                var branchCodeInput = form.querySelector('[data-branch-code-input]');
+                var branchList = form.querySelector('[data-branch-list]');
+
+                if (!bankInput || !bankCodeInput || !bankList || !branchInput || !branchCodeInput || !branchList) {
+                    return;
+                }
+
+                var bankMap = new Map();
+                var branchCache = new Map();
+                var branchMap = new Map();
+
+                function syncSelectedBank() {
+                    var key = normalize(bankInput.value);
+                    var selected = bankMap.get(key);
+
+                    bankCodeInput.value = selected ? selected.code : '';
+                    branchCodeInput.value = '';
+
+                    if (!selected) {
+                        branchMap.clear();
+                        branchList.innerHTML = '';
+                    }
+                }
+
+                function syncSelectedBranch() {
+                    var key = normalize(branchInput.value);
+                    var selected = branchMap.get(key);
+
+                    branchCodeInput.value = selected ? selected.code : '';
+                }
+
+                var searchBanks = debounce(function () {
+                    var query = normalize(bankInput.value);
+
+                    if (query.length < 1) {
+                        bankMap.clear();
+                        bankList.innerHTML = '';
+                        bankCodeInput.value = '';
+                        return;
+                    }
+
+                    fetchJson('/api/bank-lookup/banks?q=' + encodeURIComponent(query))
+                        .then(function (data) {
+                            var items = Array.isArray(data.items) ? data.items : [];
+                            bankMap.clear();
+                            items.forEach(function (item) {
+                                bankMap.set(normalize(item.name), item);
+                            });
+                            setOptions(bankList, items, function (item) {
+                                return item.code;
+                            });
+                            syncSelectedBank();
+
+                            if (normalize(branchInput.value) !== '' && bankCodeInput.value) {
+                                searchBranches();
+                            }
+                        })
+                        .catch(function () {
+                            bankMap.clear();
+                            bankList.innerHTML = '';
+                        });
+                }, 250);
+
+                function loadBranches(bankCode) {
+                    if (!bankCode) {
+                        return Promise.resolve([]);
+                    }
+
+                    if (branchCache.has(bankCode)) {
+                        return Promise.resolve(branchCache.get(bankCode));
+                    }
+
+                    return fetchJson('/api/bank-lookup/branches?bank_code=' + encodeURIComponent(bankCode))
+                        .then(function (data) {
+                            var items = Array.isArray(data.items) ? data.items : [];
+                            branchCache.set(bankCode, items);
+
+                            return items;
+                        });
+                }
+
+                var searchBranches = debounce(function () {
+                    var bankCode = normalize(bankCodeInput.value);
+                    var query = normalize(branchInput.value);
+
+                    if (!bankCode) {
+                        branchMap.clear();
+                        branchList.innerHTML = '';
+                        branchCodeInput.value = '';
+                        return;
+                    }
+
+                    loadBranches(bankCode)
+                        .then(function (items) {
+                            var needle = query.toLowerCase();
+                            var filtered = items.filter(function (item) {
+                                if (query === '') {
+                                    return true;
+                                }
+
+                                return [item.code, item.name, item.short_name, item.kana, item.hira].some(function (value) {
+                                    return normalize(value).toLowerCase().indexOf(needle) !== -1;
+                                });
+                            }).slice(0, 30);
+
+                            branchMap.clear();
+                            filtered.forEach(function (item) {
+                                branchMap.set(normalize(item.name), item);
+                            });
+                            setOptions(branchList, filtered, function (item) {
+                                return item.code;
+                            });
+                            syncSelectedBranch();
+                        })
+                        .catch(function () {
+                            branchMap.clear();
+                            branchList.innerHTML = '';
+                        });
+                }, 250);
+
+                bankInput.addEventListener('input', function () {
+                    bankCodeInput.value = '';
+                    branchInput.value = '';
+                    branchCodeInput.value = '';
+                    branchMap.clear();
+                    branchList.innerHTML = '';
+                    searchBanks();
+                });
+
+                bankInput.addEventListener('change', syncSelectedBank);
+                bankInput.addEventListener('blur', syncSelectedBank);
+
+                branchInput.addEventListener('focus', searchBranches);
+                branchInput.addEventListener('input', function () {
+                    branchCodeInput.value = '';
+                    searchBranches();
+                });
+                branchInput.addEventListener('change', syncSelectedBranch);
+                branchInput.addEventListener('blur', syncSelectedBranch);
+
+                if (normalize(bankInput.value) !== '') {
+                    searchBanks();
+                }
+            });
+        });
+    })();
+    </script>
+    <script>
+    (function () {
         var overlay = document.getElementById('global-lightbox-overlay');
         var img = document.getElementById('global-lightbox-image');
         if (!overlay || !img) return;

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Common\PageController;
 use App\Http\Controllers\Common\SettingController;
 use App\Http\Controllers\Common\DemoLoginController;
+use App\Http\Controllers\Common\BankLookupController;
 use App\Http\Controllers\Common\RegistrationController;
 use App\Http\Controllers\Auth\Cast\LoginController as CastLogin;
 use App\Http\Controllers\Auth\Shop\LoginController as ShopLogin;
@@ -223,6 +224,11 @@ Route::prefix('api/push')->name('push.')->group(function () {
     Route::get('vapid-public-key', [\App\Http\Controllers\Api\PushController::class, 'vapidPublicKey'])->name('vapid');
     Route::post('subscribe', [\App\Http\Controllers\Api\PushController::class, 'subscribe'])->name('subscribe');
     Route::post('send-test', [\App\Http\Controllers\Api\PushController::class, 'sendTest'])->name('send-test');
+});
+
+Route::prefix('api/bank-lookup')->name('api.bank-lookup.')->group(function () {
+    Route::get('banks', [BankLookupController::class, 'banks'])->name('banks');
+    Route::get('branches', [BankLookupController::class, 'branches'])->name('branches');
 });
 
 Route::prefix('cast')->name('cast.')->group(function () {

@@ -52,8 +52,38 @@ class MypageController extends Controller
      */
     public function employment()
     {
+        $castId = $this->currentCastId();
+        $employments = DB::table('shop_job_applications')
+            ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
+            ->join('shops', 'shop_jobs.shop_id', '=', 'shops.id')
+            ->leftJoin('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
+            ->where('shop_job_applications.cast_id', $castId)
+            ->orderByDesc('shop_job_applications.updated_at')
+            ->select(
+                'shop_job_applications.status',
+                'shop_job_applications.result_date',
+                'shops.id as shop_id',
+                'shop_profiles.shop_name'
+            )
+            ->get()
+            ->map(function ($row) {
+                $status = $this->mapApplicationStatus((int) $row->status);
+
+                return [
+                    'shop_name' => $row->shop_name ?: $row->shop_id,
+                    'status_label' => $status['label'],
+                    'status_class' => $status['class'],
+                    'applied_at' => !empty($row->result_date)
+                        ? Carbon::parse($row->result_date)->format('Y-m-d')
+                        : null,
+                    'link' => route('cast.talk.room', $row->shop_id),
+                ];
+            })
+            ->all();
+
         return view('casts.mypage.employment', [
             'pageId' => 'mypage',
+            'employments' => $employments,
         ]);
     }
 
@@ -651,6 +681,17 @@ class MypageController extends Controller
             'morning' => '朝',
             'day_night' => '昼or夜',
             default => '',
+        };
+    }
+
+    private function mapApplicationStatus(int $status): array
+    {
+        return match ($status) {
+            2 => ['label' => '面談日調整中', 'class' => 'status-pending'],
+            3 => ['label' => '面談日決定', 'class' => 'status-pending'],
+            4 => ['label' => '採用', 'class' => 'status-paid'],
+            5 => ['label' => '不採用', 'class' => 'status-ng'],
+            default => ['label' => 'やり取り中', 'class' => 'status-pending'],
         };
     }
 }
