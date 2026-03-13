@@ -5,30 +5,30 @@
 
 :root {
     /* --- Gold & Bordeaux Palette（高級感のあるグラデーション） --- */
-    --gold: #E5C158;
-    --gold-light: #FDF0B2;
-    --gold-deep: #B38A22;
-    --dark-bg: #120405;
-    --surface: #1A0B0E;
-    --glass: rgba(255, 255, 255, 0.04);
+    --gold: #E2BC4F;
+    --gold-light: #FFF2B8;
+    --gold-deep: #B98C24;
+    --dark-bg: #16080a;
+    --surface: #221114;
+    --glass: rgba(255, 255, 255, 0.06);
 
     /* UI Colors（ボルドー基調） */
-    --color-main: #190509;        /* ベース背景 */
-    --color-sub: #22070d;         /* サブ背景 */
+    --color-main: #1a090d;        /* ベース背景 */
+    --color-sub: #241117;         /* サブ背景 */
     --color-accent: #b91c1c;      /* 既存のアクセントカラーを維持 */
-    --color-text: #D6C6C6;
-    --color-text-header: #F5E6E6;
-    --color-card: #1E0D11;        /* カード系コンポーネント */
-    --color-border: #5A1625;
+    --color-text: #dfd2d2;
+    --color-text-header: #fff4f2;
+    --color-card: #241116;        /* カード系コンポーネント */
+    --color-border: #6b2938;
     
     /* Typography */
     --font-serif: 'Noto Serif JP', serif;
     --font-sans: 'Noto Sans JP', 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 
     /* Glassmorphism */
-    --glass-bg: rgba(34, 10, 10, 0.8);
+    --glass-bg: rgba(38, 15, 20, 0.82);
     --glass-blur: blur(10px);
-    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.14);
 
     /* Layout（実ヘッダー60pxに統一＝TALK等の隙間防止） */
     --header-height: 60px;
@@ -66,7 +66,9 @@
 
 /* 構造：ベース設定 */
 body {
-    background: var(--dark-bg); 
+    background:
+        radial-gradient(circle at top, rgba(120, 46, 60, 0.14), transparent 34%),
+        linear-gradient(180deg, #1a0b0d 0%, var(--dark-bg) 100%);
     margin: 0;
     padding: 0;
     -webkit-tap-highlight-color: transparent;
@@ -84,9 +86,11 @@ body {
     width: 100%;
     max-width: min(100%, var(--max-content-width));
     margin: 0 auto;
-    background: var(--color-main);
+    background: linear-gradient(180deg, rgba(31, 12, 17, 0.98), rgba(23, 8, 11, 0.98));
     position: relative;
-    box-shadow: 0 0 50px rgba(0,0,0,1);
+    box-shadow: 0 18px 48px rgba(0,0,0,0.7);
+    border-left: 1px solid rgba(255,255,255,0.04);
+    border-right: 1px solid rgba(255,255,255,0.04);
     box-sizing: border-box;
 }
 

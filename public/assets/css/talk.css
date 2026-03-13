@@ -24,14 +24,14 @@
 .talk-item {
     display: flex;
     align-items: center;
-    padding: 8px 12px;
-    background: var(--color-card);
-    border: 1px solid var(--color-border);
-    border-radius: 18px;
-    margin-bottom: 10px;
+    padding: 10px 12px;
+    background: linear-gradient(180deg, rgba(39, 17, 22, 0.98), rgba(30, 12, 16, 0.98));
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 22px;
+    margin-bottom: 12px;
     text-decoration: none;
     transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
 }
 
 .talk-item-main {
@@ -43,7 +43,8 @@
 }
 
 .talk-item:hover {
-    background: rgba(255,255,255,0.03);
+    background: linear-gradient(180deg, rgba(45, 20, 26, 0.98), rgba(33, 13, 18, 0.98));
+    border-color: rgba(255,255,255,0.12);
 }
 
 .talk-item:active {
@@ -52,19 +53,22 @@
 }
 
 .talk-item.is-pinned {
-    border-color: var(--talk-accent-gold, #d4af37);
-    box-shadow: 0 8px 18px rgba(212, 175, 55, 0.35);
-    background: radial-gradient(circle at 0 0, rgba(212, 175, 55, 0.16), transparent 55%), var(--color-card);
+    border-color: rgba(226, 188, 79, 0.64);
+    box-shadow: 0 12px 30px rgba(212, 175, 55, 0.18);
+    background:
+        radial-gradient(circle at top left, rgba(226, 188, 79, 0.18), transparent 48%),
+        linear-gradient(180deg, rgba(41, 19, 23, 0.98), rgba(31, 12, 16, 0.98));
 }
 
 .talk-avatar {
-    width: 64px;
-    height: 64px;
+    width: 58px;
+    height: 58px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1.5px solid var(--talk-accent-gold);
-    margin-right: 15px;
+    border: 1.5px solid rgba(226, 188, 79, 0.7);
+    margin-right: 13px;
     flex-shrink: 0;
+    box-shadow: 0 0 0 3px rgba(226, 188, 79, 0.08);
 }
 .talk-info {
     flex: 1;
@@ -74,26 +78,28 @@
 .talk-header {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 6px;
+    align-items: center;
+    margin-bottom: 5px;
+    gap: 12px;
 }
 
 .talk-name {
     font-weight: bold;
-    color: #f5ecec;
-    font-size: 1.05rem;
+    color: #fff3f0;
+    font-size: 0.98rem;
 }
 
 .talk-time {
-    font-size: 0.7rem;
-    color: #888;
+    font-size: 0.66rem;
+    color: #c5b0b0;
     margin-left: 8px;
     flex-shrink: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 .talk-last-msg {
-    font-size: 0.85rem;
-    color: #b1a1a1;
+    font-size: 0.8rem;
+    color: #d3c0c0;
     flex: 1;
     min-width: 0;
     white-space: nowrap;     /* 折り返さない */
@@ -106,22 +112,23 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
+    gap: 10px;
     min-width: 0;
 }
 
 .unread-badge {
-    background: #b91c1c; /* ★★★通知赤の色変？*/
+    background: linear-gradient(180deg, #ef4444, #b91c1c);
     color: #fff;
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     font-weight: bold;
-    min-width: 20px;
-    height: 20px;
-    border-radius: 10px;
+    min-width: 22px;
+    height: 22px;
+    border-radius: 11px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(185, 28, 28, 0.32);
 }
 
 /* --- Talk Tabs（一覧画面で .talk-tabs を使う場合のみ。TALK は共通 sub-header を使用） --- */
@@ -168,7 +175,9 @@
     flex-direction: column;
     min-height: calc(100vh - var(--header-height) - var(--footer-height));
     height: calc(100vh - var(--header-height) - var(--footer-height));
-    background: #120505;
+    background:
+        radial-gradient(circle at top, rgba(126, 57, 66, 0.18), transparent 32%),
+        linear-gradient(180deg, #18090c 0%, #120505 100%);
     position: relative;
     margin: 0 calc(-1 * var(--content-padding-x)); /* コンテンツ幅いっぱいに広げる */
     width: calc(100% + 2 * var(--content-padding-x));
@@ -181,8 +190,9 @@
     flex-shrink: 0;
     padding: 10px 15px 8px;
     padding-top: max(10px, env(safe-area-inset-top));
-    background: #220a0a;
-    border-bottom: 1px solid #4d1a1a;
+    background: rgba(30, 12, 16, 0.96);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
     z-index: 100;
 }
 .talk-room-header-inner {
@@ -202,7 +212,7 @@
 .talk-room-header-name {
     font-weight: 700;
     font-size: 1rem;
-    color: #f5ecec;
+    color: #fff4f1;
 }
 
 .talk-room-header-actions {
@@ -229,9 +239,9 @@
     padding: 4px 10px;
     font-size: 0.75rem;
     border-radius: 999px;
-    border: 1px solid rgba(212, 175, 55, 0.7);
-    background: radial-gradient(circle at 0 0, rgba(212, 175, 55, 0.3), rgba(34, 10, 10, 0.95));
-    color: #fef9c3;
+    border: 1px solid rgba(226, 188, 79, 0.7);
+    background: linear-gradient(180deg, rgba(51, 19, 25, 0.95), rgba(32, 12, 16, 0.98));
+    color: #fff2c4;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
@@ -241,7 +251,7 @@
 }
 
 .btn-interview:hover {
-    background: radial-gradient(circle at 0 0, rgba(212, 175, 55, 0.4), rgba(34, 10, 10, 1));
+    background: linear-gradient(180deg, rgba(62, 24, 31, 0.98), rgba(38, 14, 19, 1));
 }
 
 .btn-interview:active {
@@ -250,9 +260,9 @@
 }
 
 .btn-interview-result {
-    background: rgba(0, 0, 0, 0.35);
-    border-color: rgba(148, 148, 148, 0.7);
-    color: #f9fafb;
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: #fff8f8;
 }
 
 .btn-interview-result--negative {
@@ -266,11 +276,12 @@
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    padding: 10px 12px 18px;
+    padding: 14px 12px 20px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    background: var(--color-main);
+    gap: 10px;
+    background:
+        linear-gradient(180deg, rgba(31, 11, 15, 0.96), rgba(22, 7, 10, 0.98));
 }
 
 .talk-result-panel {
@@ -325,7 +336,7 @@
 .message-row {
     display: flex;
     width: 100%;
-    margin-bottom: 4px;
+    margin-bottom: 0;
     align-items: flex-end;
 }
 
@@ -336,15 +347,15 @@
 /* 相手メッセージ用：吹き出し左端のアイコン */
 .msg-avatar-wrap {
     flex-shrink: 0;
-    margin-right: 6px;
+    margin-right: 8px;
     align-self: flex-end;
 }
 .msg-avatar {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid rgba(90, 22, 37, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     display: block;
 }
 
@@ -352,23 +363,32 @@
 .message-block {
     display: inline-flex;
     flex-direction: column;
-    align-items: flex-end;
-    max-width: 78%;
-    gap: 1px;
+    max-width: 82%;
 }
 .msg-left .message-block { align-items: flex-start; max-width: calc(100% - 42px); }
 
-/* 時刻・既読（bubble の外・直下に表示・吹き出しと被らない余白） */
-.msg-footer {
+/* 時刻・既読（bubble 横配置） */
+.message-inline {
     display: flex;
     align-items: center;
+    gap: 8px;
+    max-width: 100%;
+}
+
+.msg-left .message-inline {
+    justify-content: flex-start;
+}
+
+.msg-right .message-inline {
     justify-content: flex-end;
-    gap: 2px;
-    margin-top: 1px;
-    padding: 0 1px;
+}
+
+.msg-meta {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 4px;
     flex-shrink: 0;
 }
-.msg-left .msg-footer { justify-content: flex-start; }
 
 /* ==========================================================================
    吹き出し：テキストにぴったり・尻尾で吹き出し形に
@@ -376,81 +396,74 @@
 .message-bubble {
     display: inline-block;
     max-width: 100%;
-    padding: 3px 8px 4px;
-    border-radius: 9px;
-    font-size: 0.78rem;
-    line-height: 1.25;
+    padding: 10px 13px;
+    border-radius: 18px;
+    font-size: 0.82rem;
+    line-height: 1.5;
     letter-spacing: 0;
     white-space: pre-wrap;
     word-break: break-word;
     position: relative;
     box-sizing: border-box;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.24);
 }
 
 .message-bubble p {
     margin: 0;
     padding: 0;
-    line-height: 1.25;
+    line-height: 1.5;
     display: block;
 }
 
 .msg-left .message-bubble {
-    background: linear-gradient(160deg, #1E0D11 0%, #1A0B0E 100%);
-    color: #F5E6E6;
-    border-radius: 9px 9px 9px 2px;
-    border: 1px solid rgba(230, 208, 128, 0.28);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
-}
-
-/* 相手用尻尾（左側に突き出し、吹き出しに接続） */
-.msg-left .message-bubble::after {
-    content: "";
-    position: absolute;
-    left: -8px;
-    bottom: 4px;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 5px 8px 5px 0;
-    border-color: transparent #1A0B0E transparent transparent;
-    z-index: 0;
+    background: linear-gradient(180deg, rgba(43, 19, 24, 0.98), rgba(30, 12, 16, 0.98));
+    color: #f7eded;
+    border-radius: 18px 18px 18px 7px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .msg-right .message-bubble {
-    background: #E8E1D5;
-    color: #2C1A1D;
+    background: linear-gradient(145deg, #e3bd52 0%, #d5aa2b 100%);
+    color: #231516;
     font-weight: 500;
-    border-radius: 9px 9px 2px 9px;
-    border: 1px solid rgba(232, 225, 213, 0.7);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+    border-radius: 18px 18px 7px 18px;
+    border: 1px solid rgba(255, 239, 184, 0.7);
+    --bubble-tail-fill: #d5aa2b;
 }
 
-/* 自分用尻尾（右側に突き出し、吹き出しに接続） */
-.msg-right .message-bubble::after {
-    content: "";
+.message-bubble-tail {
+    display: none;
     position: absolute;
-    right: -8px;
-    bottom: 4px;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 5px 0 5px 8px;
-    border-color: transparent transparent transparent #E8E1D5;
-    z-index: 0;
+    right: -7px;
+    bottom: 0;
+    width: 8px;
+    height: 12px;
+    color: var(--bubble-tail-fill, #d5aa2b);
+    pointer-events: none;
 }
 
-/* 時刻・既読（bubble 外・画像のように小さく） */
-.msg-time {
-    font-size: 0.5rem;
-    opacity: 0.85;
-    line-height: 1;
+.message-bubble-tail svg {
+    display: block;
+    width: 100%;
+    height: 100%;
 }
-.msg-right .msg-time { color: #A89090; }
-.msg-left .msg-time { color: #A89090; }
+
+.msg-right .message-bubble-tail {
+    display: block;
+}
+
+.msg-time {
+    font-size: 0.62rem;
+    opacity: 0.96;
+    line-height: 1;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.msg-right .msg-time { color: #bda287; }
+.msg-left .msg-time { color: #b9a2a2; }
 
 .msg-status {
-    font-size: 0.5rem;
-    color: rgba(212, 175, 55, 0.85);
+    font-size: 0.58rem;
+    color: rgba(226, 188, 79, 0.95);
     opacity: 0.9;
     display: flex;
     align-items: center;
@@ -474,29 +487,35 @@
     flex-shrink: 0;
     width: 100%;
     max-width: 100%;
-    background: rgba(22, 5, 5, 0.98);
-    border-top: 1px solid rgba(90, 22, 37, 0.5);
-    padding: 8px var(--content-padding-x, 15px) 10px;
+    background: rgba(26, 10, 14, 0.98);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 10px var(--content-padding-x, 15px) 12px;
     box-sizing: border-box;
+    box-shadow: 0 -8px 22px rgba(0, 0, 0, 0.22);
 }
 
 .chat-input-wrapper {
     display: flex;
     align-items: flex-end;
     gap: 8px;
-    background: rgba(40, 12, 18, 0.95);
-    border: 1px solid var(--color-border);
-    border-radius: 22px;
+    background: linear-gradient(180deg, rgba(18, 7, 10, 0.98), rgba(11, 4, 6, 0.98));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
     padding: 6px 6px 6px 16px;
-    min-height: 44px;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+    min-height: 48px;
+    box-shadow: inset 0 2px 7px rgba(0, 0, 0, 0.38), 0 10px 18px rgba(0, 0, 0, 0.18);
+}
+
+.chat-input-wrapper:focus-within {
+    border-color: rgba(226, 188, 79, 0.52);
+    box-shadow: inset 0 2px 7px rgba(0, 0, 0, 0.38), 0 0 0 3px rgba(226, 188, 79, 0.12);
 }
 
 .chat-input-wrapper textarea {
     flex: 1;
     background: transparent;
     border: none;
-    color: #f5ecec;
+    color: #fff2f0;
     padding: 8px 0;
     font-size: 0.9rem;
     line-height: 1.4;
@@ -506,7 +525,7 @@
 }
 
 .chat-input-wrapper textarea::placeholder {
-    color: rgba(209, 193, 193, 0.5);
+    color: rgba(209, 193, 193, 0.66);
 }
 
 /* 送信ボタン：ゴールドで高級感（コンパクトに） */
@@ -515,7 +534,7 @@
     height: 40px;
     min-width: 40px;
     min-height: 40px;
-    background: linear-gradient(145deg, #c9a227 0%, #d4af37 50%, #b8960c 100%);
+    background: linear-gradient(145deg, #f2d06d 0%, #d6ab2a 55%, #b88a14 100%);
     color: #1a0a0a;
     border-radius: 50%;
     display: flex;
@@ -523,7 +542,7 @@
     justify-content: center;
     flex-shrink: 0;
     border: none;
-    box-shadow: 0 3px 12px rgba(212, 175, 55, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.35), 0 2px 6px rgba(0, 0, 0, 0.3);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -556,10 +575,17 @@
 }
 
 .talk-status {
-    font-size: 0.7rem;
-    color: var(--color-gold, #d4af37);
-    margin-left: 5px;
-    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    padding: 0 9px;
+    border-radius: 999px;
+    font-size: 0.64rem;
+    color: #fff2c4;
+    margin-left: 0;
+    font-weight: 700;
+    border: 1px solid rgba(226, 188, 79, 0.28);
+    background: rgba(226, 188, 79, 0.08);
 }
 
 .talk-status.unread {
@@ -572,42 +598,73 @@
 
 /* --- Request Card Specific Styles --- */
 .request-card {
-    background: #1e1212; /* 画像に近い暗い茶褐色 */
-    border-radius: 20px;
-    padding: 20px;
-    margin-bottom: 15px;
-    border: 1px solid #3d2a2a;
+    background: linear-gradient(180deg, rgba(39, 17, 22, 0.98), rgba(30, 12, 16, 0.98));
+    border-radius: 24px;
+    padding: 16px;
+    margin-bottom: 14px;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.24);
 }
 
 .request-main {
     display: flex;
-    gap: 15px;
-    margin-bottom: 12px;
+    gap: 14px;
+    margin-bottom: 0;
 }
 
 .request-img {
-    width: 100px;
-    height: 100px;
-    border-radius: 15px;
+    width: 84px;
+    height: 84px;
+    border-radius: 18px;
     object-fit: cover;
     flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.08);
 }
 
 .request-content {
     flex: 1;
+    min-width: 0;
 }
 
 .request-top-row {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
+    gap: 10px;
+}
+
+.request-time {
+    font-size: 0.66rem;
+    color: #c5b0b0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    flex-shrink: 0;
 }
 
 .request-user-info .name,
 .request-content .name {
-    font-size: 1.2rem;
+    font-size: 0.98rem;
     font-weight: bold;
-    color: #fff;
+    color: #fff4f1;
+    min-width: 0;
+}
+
+.request-meta-row {
+    display: flex;
+    align-items: center;
+    margin-top: 6px;
+}
+
+.request-status {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    padding: 0 9px;
+    border-radius: 999px;
+    font-size: 0.64rem;
+    font-weight: 700;
+    color: #fff2c4;
+    border: 1px solid rgba(226, 188, 79, 0.28);
+    background: rgba(226, 188, 79, 0.08);
 }
 
 .request-user-info .location {
@@ -622,12 +679,16 @@
 }
 
 .request-msg-preview {
-    margin-top: 12px;
-    color: #eee;
-    font-size: 0.95rem;
-    line-height: 1.4;
-    border-top: 1px solid #3d2a2a;
+    margin-top: 10px;
+    color: #d8c6c6;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    border-top: 1px solid rgba(255,255,255,0.08);
     padding-top: 10px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 /* 承認・拒否ボタンエリア */
@@ -635,7 +696,7 @@
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-    margin-top: 10px;
+    margin-top: 14px;
 }
 
 .btn-action {
@@ -653,19 +714,20 @@
 }
 
 .btn-approve {
-    background: transparent;
-    color: #fff;
-    border: 1px solid #fff;
+    background: linear-gradient(145deg, #f2d06d 0%, #d6ab2a 55%, #b88a14 100%);
+    color: #231516;
+    border: 1px solid rgba(255, 239, 184, 0.72);
+    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.22);
 }
 
 .btn-reject {
-    background: transparent;
-    color: #ccc;
-    border: 1px solid #444;
+    background: rgba(255,255,255,0.04);
+    color: #e4d2d2;
+    border: 1px solid rgba(255,255,255,0.12);
 }
 
-.btn-approve:active { background: rgba(255,255,255,0.1); }
-.btn-reject:active { background: rgba(255,255,255,0.05); }
+.btn-approve:active { transform: scale(0.98); }
+.btn-reject:active { background: rgba(255,255,255,0.07); }
 
 /* リクエストカード内のリンクエリア */
 .request-upper-link {
@@ -673,7 +735,7 @@
     text-decoration: none;
     color: inherit;
     transition: background 0.2s;
-    border-radius: 15px 15px 0 0; /* 上部だけ角丸 */
+    border-radius: 18px 18px 0 0; /* 上部だけ角丸 */
 }
 
 /* タップした時に少し暗くしてフィードバックを出す */
@@ -682,9 +744,9 @@
 }
 
 .request-main {
-    padding: 5px; /* リンク内の余白 */
+    padding: 2px; /* リンク内の余白 */
     display: flex;
-    gap: 15px;
+    gap: 14px;
 }
 
 /* ==========================================================================
@@ -833,9 +895,35 @@
    面談日候補メッセージ
    ========================================================================== */
 .message-bubble-interview {
-    min-width: min(248px, 100%);
-    padding: 8px 9px;
-    border-radius: 12px;
+    min-width: min(264px, 100%);
+    padding: 12px 12px 11px;
+    border-radius: 20px;
+}
+
+.msg-right .message-bubble-confirmed {
+    background: linear-gradient(180deg, #f6ead0 0%, #efe0bc 100%);
+    color: #2c1a1d;
+    border-color: rgba(239, 224, 188, 0.9);
+    --bubble-tail-fill: #efe0bc;
+}
+
+.msg-left .message-bubble-confirmed {
+    background: linear-gradient(180deg, rgba(43, 19, 24, 0.98), rgba(30, 12, 16, 0.98));
+    color: #fff3cf;
+}
+
+.message-bubble-confirmed .interview-title {
+    margin-bottom: 6px;
+}
+
+.msg-right .message-bubble-confirmed .interview-title,
+.msg-right .message-bubble-confirmed .interview-confirmed-date {
+    color: #2c1a1d;
+}
+
+.msg-left .message-bubble-confirmed .interview-title,
+.msg-left .message-bubble-confirmed .interview-confirmed-date {
+    color: #fff3cf;
 }
 
 .interview-card-head {
@@ -843,14 +931,14 @@
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    margin-bottom: 5px;
+    margin-bottom: 7px;
 }
 
 .interview-title {
     display: flex;
     align-items: center;
     gap: 5px;
-    font-size: 0.76rem;
+    font-size: 0.8rem;
     font-weight: 700;
     margin-bottom: 0;
 }
@@ -865,9 +953,9 @@
     min-height: 20px;
     padding: 0 8px;
     border-radius: 999px;
-    background: rgba(212, 175, 55, 0.14);
-    border: 1px solid rgba(212, 175, 55, 0.35);
-    color: #fef3c7;
+    background: rgba(226, 188, 79, 0.14);
+    border: 1px solid rgba(226, 188, 79, 0.35);
+    color: #fff1bc;
     font-size: 0.62rem;
     font-weight: 700;
     white-space: nowrap;
@@ -875,9 +963,9 @@
 
 .interview-body-copy {
     margin: 0 0 6px;
-    font-size: 0.7rem;
-    line-height: 1.35;
-    color: rgba(245, 230, 230, 0.84);
+    font-size: 0.74rem;
+    line-height: 1.5;
+    color: rgba(247, 237, 237, 0.92);
 }
 
 .interview-option-list {
@@ -892,12 +980,14 @@
 .interview-option-btn {
     width: 100%;
     text-align: left;
-    border-radius: 11px;
-    border: 1px solid rgba(212, 175, 55, 0.28);
-    background: rgba(255, 248, 220, 0.08);
-    color: #fef3c7;
-    font-size: 0.72rem;
-    padding: 7px 9px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 248, 220, 0.06);
+    color: #fff1bc;
+    font-size: 0.74rem;
+    padding: 9px 11px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -914,14 +1004,14 @@
 }
 
 .interview-option-date {
-    font-size: 0.73rem;
+    font-size: 0.78rem;
     font-weight: 700;
-    color: #fff7da;
+    color: #fff4cf;
 }
 
 .interview-option-time {
-    font-size: 0.64rem;
-    color: rgba(245, 230, 230, 0.7);
+    font-size: 0.66rem;
+    color: rgba(230, 214, 214, 0.8);
 }
 
 .interview-option-action {
@@ -931,43 +1021,53 @@
     min-height: 24px;
     padding: 0 9px;
     border-radius: 999px;
-    background: rgba(212, 175, 55, 0.16);
-    color: #fef3c7;
+    background: rgba(226, 188, 79, 0.14);
+    color: #fff1bc;
     font-size: 0.62rem;
     font-weight: 700;
     white-space: nowrap;
 }
 
 button.interview-option-btn:hover {
-    background: rgba(212, 175, 55, 0.18);
-    border-color: rgba(212, 175, 55, 0.5);
+    background: rgba(226, 188, 79, 0.14);
+    border-color: rgba(226, 188, 79, 0.5);
     transform: translateY(-1px);
 }
 
 .interview-option-btn.is-selected {
-    background: rgba(212, 175, 55, 0.22);
-    border-color: rgba(212, 175, 55, 0.55);
-    color: #1a0a0a;
+    background: rgba(39, 17, 16, 0.92);
+    border-color: rgba(226, 188, 79, 0.52);
+    color: #fff6da;
+}
+
+.interview-option-btn.is-selected::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #f4da8a, #d6ab2a);
 }
 
 .interview-option-btn.is-selected .interview-option-date,
 .interview-option-btn.is-selected .interview-option-time,
 .interview-option-btn.is-selected .interview-option-action {
-    color: #2c1a1d;
+    color: #fff3cf;
 }
 
 .interview-confirmed-date {
     margin: 0;
-    font-size: 0.76rem;
+    font-size: 0.84rem;
     font-weight: 700;
-    color: #fff7da;
+    color: inherit;
 }
 
 .interview-note {
-    font-size: 0.64rem;
-    opacity: 0.84;
-    margin: 6px 0 0;
-    color: rgba(245, 230, 230, 0.82);
+    font-size: 0.66rem;
+    opacity: 0.95;
+    margin: 8px 0 0;
+    color: rgba(245, 230, 230, 0.9);
 }
 
 /* --- ピン留めボタン --- */

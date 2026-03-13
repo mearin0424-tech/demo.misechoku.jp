@@ -230,3 +230,79 @@
     padding: 1px 4px;
     position: absolute;
 }
+
+/* ==========================================================================
+   TALK専用ヘッダー
+   ========================================================================== */
+body.page-talk #global-header {
+    background:
+        radial-gradient(circle at 0% 0%, rgba(226, 188, 79, 0.18), transparent 45%),
+        radial-gradient(circle at 100% 0%, rgba(126, 57, 66, 0.22), transparent 55%),
+        rgba(28, 11, 15, 0.92);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.34),
+        0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+}
+
+body.page-talk .header-title-main {
+    color: #f2e7d0;
+    font-size: 0.96rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+}
+
+body.page-talk .btn-back {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    justify-content: center;
+    color: #fff4f2;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.16);
+}
+
+body.page-talk .btn-back:hover {
+    color: #fff6d0;
+    border-color: rgba(226, 188, 79, 0.28);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+body.page-talk .header-right {
+    gap: 8px;
+}
+
+body.page-talk .header-icon-btn {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    color: #e2bc4f;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.14);
+}
+
+body.page-talk .header-icon-btn:hover {
+    color: #fff2c4;
+    border-color: rgba(226, 188, 79, 0.28) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+}
+
+body.page-talk .header-icon-btn i {
+    font-size: 1rem;
+}
+
+body.page-talk .badge-notify {
+    top: -4px;
+    right: -5px;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    box-shadow: 0 4px 10px rgba(185, 28, 28, 0.32);
+}

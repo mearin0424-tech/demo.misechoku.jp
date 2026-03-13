@@ -275,11 +275,13 @@
                         </div>
                         <div class="bank-form-row">
                             <label class="bank-label">口座番号</label>
-                            <input type="text" name="account_number" class="bank-input" value="{{ $castBank['account_number'] ?? '' }}" placeholder="1234567" required>
+                            <input type="text" name="account_number" class="bank-input" value="{{ $castBank['account_number'] ?? '' }}" placeholder="1234567" inputmode="numeric" maxlength="7" pattern="[0-9]*" data-account-number-input required>
+                            <p class="input-hint">口座番号は7桁の数字で入力してください。</p>
                         </div>
                         <div class="bank-form-row">
                             <label class="bank-label">口座名義（カナ）</label>
-                            <input type="text" name="account_name" class="bank-input" value="{{ $castBank['account_name'] ?? '' }}" placeholder="ミセチョク ハナコ" required>
+                            <input type="text" name="account_name" class="bank-input" value="{{ $castBank['account_name'] ?? '' }}" placeholder="ミセチョクハナコ" data-account-name-input required>
+                            <p class="input-hint">ひらがな・半角ｶﾅで入力しても、自動で口座名義向けの形式に整えます。</p>
                         </div>
                         <div class="text-right mt-3">
                             <button type="submit" class="btn-action manage">

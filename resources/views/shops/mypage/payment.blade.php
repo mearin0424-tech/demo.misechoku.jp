@@ -12,6 +12,63 @@
         line-height: 1.6;
         color: #9f8d8d;
     }
+    .management-request-card {
+        padding: 18px;
+        border-radius: 18px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.03);
+        margin-bottom: 14px;
+    }
+    .management-request-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .management-request-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #fff;
+    }
+    .management-request-meta,
+    .management-request-text {
+        font-size: 0.84rem;
+        line-height: 1.7;
+        color: #d7c8c8;
+    }
+    .management-request-text {
+        margin-top: 10px;
+        white-space: pre-wrap;
+    }
+    .management-review-list {
+        display: grid;
+        gap: 8px;
+        margin-top: 12px;
+    }
+    .management-review-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.04);
+        color: #f6eeee;
+        font-size: 0.84rem;
+    }
+    .management-checklist {
+        display: grid;
+        gap: 10px;
+        margin: 14px 0 0;
+    }
+    .management-check-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 0.88rem;
+        line-height: 1.6;
+        color: #f2e8e8;
+    }
 </style>
 @endpush
 
@@ -151,6 +208,45 @@
 
     <section class="management-invoices">
         <h2 class="management-invoices-title">現在の入金ステータス</h2>
+        @if(!empty($approvalTarget))
+            <div class="management-request-card">
+                <div class="management-request-head">
+                    <span class="management-request-title">{{ $approvalTarget['cast_name'] ?? 'キャスト' }} さんの申請内容</span>
+                    <span class="management-invoice-status status-pending">承認待ち</span>
+                </div>
+                <div class="management-request-meta">
+                    申請金額: ¥{{ number_format((int) ($approvalTarget['bonus_amount'] ?? 0)) }}
+                    @if(!empty($approvalTarget['requested_at']))
+                        / 申請日時: {{ $approvalTarget['requested_at'] }}
+                    @endif
+                </div>
+                <div class="management-request-text">{{ $approvalTarget['bonus_condition'] ?: '求人情報に登録した条件に従って確認してください。' }}</div>
+                @if(!empty($approvalTarget['review_posted_at']) || !empty($approvalTarget['review_comment']))
+                    <div class="management-request-text" style="margin-top:14px;">
+                        レビュー投稿
+                        @if(!empty($approvalTarget['review_posted_at']))
+                            （{{ $approvalTarget['review_posted_at'] }}）
+                        @endif
+                        @if(!empty($approvalTarget['review_average']))
+                            / 総合 {{ number_format((float) $approvalTarget['review_average'], 1) }}
+                        @endif
+                    </div>
+                    @if(!empty($approvalTarget['review_details']))
+                        <div class="management-review-list">
+                            @foreach($approvalTarget['review_details'] as $detail)
+                                <div class="management-review-row">
+                                    <span>{{ $detail['name'] }}</span>
+                                    <strong>{{ number_format((float) $detail['score'], 1) }} / 5</strong>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                    @if(!empty($approvalTarget['review_comment']))
+                        <div class="management-request-text">{{ $approvalTarget['review_comment'] }}</div>
+                    @endif
+                @endif
+            </div>
+        @endif
         @php $flow = $depositFlow ?? ['cast' => '未申請','shop' => '未稼働','admin' => '未稼働']; @endphp
         <table class="admin-table" style="margin-bottom:8px;">
             <thead>
@@ -169,6 +265,16 @@
             @if(($currentDeposit['status_code'] ?? null) === 1)
                 <form method="POST" action="{{ route('shop.mypage.deposit.approve') }}">
                     @csrf
+                    <div class="management-checklist">
+                        <label class="management-check-row">
+                            <input type="checkbox" name="confirm_bonus_condition" value="1">
+                            <span>求人情報に登録したボーナス達成条件と、今回の申請内容が一致していることを確認しました。</span>
+                        </label>
+                        <label class="management-check-row">
+                            <input type="checkbox" name="confirm_review_checked" value="1">
+                            <span>キャストのレビュー内容を確認し、店舗審査を進めて問題ないことを確認しました。</span>
+                        </label>
+                    </div>
                     <button type="submit" class="btn-action manage">
                         ノルマ達成を確認し、店舗審査を完了する
                     </button>
@@ -263,11 +369,13 @@
             </div>
             <div class="bank-form-row">
                 <label class="bank-label">口座番号</label>
-                <input type="text" name="account_number" class="bank-input" value="{{ $shopBank['account_number'] ?? '' }}" placeholder="1234567" required>
+                <input type="text" name="account_number" class="bank-input" value="{{ $shopBank['account_number'] ?? '' }}" placeholder="1234567" inputmode="numeric" maxlength="7" pattern="[0-9]*" data-account-number-input required>
+                <p class="input-hint">口座番号は7桁の数字で入力してください。</p>
             </div>
             <div class="bank-form-row">
                 <label class="bank-label">口座名義（カナ）</label>
-                <input type="text" name="account_name" class="bank-input" value="{{ $shopBank['account_name'] ?? '' }}" placeholder="ミセチョク タロウ" required>
+                <input type="text" name="account_name" class="bank-input" value="{{ $shopBank['account_name'] ?? '' }}" placeholder="ミセチョクタロウ" data-account-name-input required>
+                <p class="input-hint">ひらがな・半角ｶﾅで入力しても、自動で口座名義向けの形式に整えます。</p>
             </div>
             <div class="management-actions">
                 <button type="submit" class="btn-action manage">
