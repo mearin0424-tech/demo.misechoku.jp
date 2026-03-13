@@ -7,6 +7,7 @@
         $metaDescription = trim($__env->yieldContent('meta_description')) ?: 'ミセチョクのデモサイトです。';
         $metaImage = trim($__env->yieldContent('meta_image')) ?: asset('assets/images/pwa/icon-512.png');
         $canonicalUrl = trim($__env->yieldContent('canonical')) ?: url()->current();
+        $assetVersion = '20260313-guide-2';
         $resolvedTitle = $metaTitle !== ''
             ? $metaTitle
             : ($pageTitle !== '' ? $pageTitle . ' | ' . config('app.name', 'ミセチョク') : config('app.name', 'ミセチョク'));
@@ -48,7 +49,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/layout-header.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/layout-footer.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/layout-sidebar.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/character-guide.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/character-guide.css') }}?v={{ $assetVersion }}">
 
     <script src="{{ asset('assets/js/app.js') }}" defer></script>
 
@@ -90,7 +91,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script src="{{ asset('assets/js/character-guide.js') }}"></script>
+    <script src="{{ asset('assets/js/character-guide.js') }}?v={{ $assetVersion }}"></script>
     <script src="{{ asset('assets/js/push-notification.js') }}"></script>
 
     {{-- 画像フルスクリーン用ライトボックス（全画面共通） --}}
@@ -479,7 +480,7 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
-          navigator.serviceWorker.register('{{ asset("sw.js") }}', { scope: '/' })
+          navigator.serviceWorker.register('{{ asset("sw.js") }}?v={{ $assetVersion }}', { scope: '/' })
             .then(function (reg) { /* 登録完了 */ })
             .catch(function () { /* 登録失敗時は無視 */ });
         });

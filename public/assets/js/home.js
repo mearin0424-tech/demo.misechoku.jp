@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 5. キャラクターガイドの少しフェード
     setTimeout(() => {
-        const guide = document.getElementById('discovery-guide');
+        const guide = document.getElementById('character-guide');
         if (guide) {
             guide.style.transition = 'opacity 1s ease';
             guide.style.opacity = '0.5';

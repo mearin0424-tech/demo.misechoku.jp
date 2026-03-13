@@ -1,7 +1,9 @@
 @extends('layouts.app')
 
 {{-- 各ページから渡されるオコジョのメッセージをセット --}}
-@section('guide_message', $guideMessage ?? '気になる相手を探してみてね！')
+@section('guide_message', ($activeTab ?? 'pane-timeline') === 'pane-ai'
+    ? '接客タイプ診断と質問に答えて、ぴったりのお店をご案内します'
+    : ($guideMessage ?? '気になる相手を探してみてね！'))
 
 @section('title', 'SEARCH')
 @section('body-class', $activeTab === 'pane-ai' ? 'page-search page-search-ai' : 'page-search')
@@ -89,18 +91,6 @@
                 data-role="{{ $prefix }}"
                 data-avatar="{{ asset('assets/images/guide/guide-character.png') }}"
             >
-                <div class="ai-recommend__hero">
-                    <div class="ai-recommend__hero-icon">
-                        <img src="{{ asset('assets/images/guide/guide-character.png') }}" alt="オコジョガイド">
-                    </div>
-                    <div class="ai-recommend__hero-body">
-                        <p class="ai-recommend__eyebrow">AIレコメンド</p>
-                        <h3>オコジョガイドがぴったりの{{ $prefix === 'cast' ? 'お店' : 'キャスト' }}を案内します</h3>
-                        <p>16タイプと希望条件をもとに、会話形式でおすすめ候補を3件ずつ提案します。</p>
-                    </div>
-                    <button type="button" class="ai-recommend__reset" data-ai-reset>最初から</button>
-                </div>
-
                 <div class="ai-recommend__chat" data-ai-chat aria-live="polite"></div>
             </div>
 

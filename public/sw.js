@@ -2,7 +2,7 @@
  * ミセチョク PWA Service Worker
  * 静的アセットをキャッシュし、オフラインでも基本動作をサポート
  */
-const CACHE_NAME = 'misechoku-v1';
+const CACHE_NAME = 'misechoku-v2';
 const STATIC_ASSETS = [
   '/',
   '/shop/home',

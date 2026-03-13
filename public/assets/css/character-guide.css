@@ -1,4 +1,9 @@
 /* ガイド全体の浮遊コンテナ */
+#character-close-trigger,
+.guide-close-x {
+    display: none !important;
+}
+
 .discovery-guide {
     position: fixed;
     bottom: calc(var(--footer-height) + 15px); /* フッターの直上 */
@@ -11,11 +16,6 @@
 
 .discovery-guide.is-hidden {
     display: none;
-}
-
-/* HOMEのスワイプ画面ではオコジョを表示しない */
-body.page-home #character-guide {
-    display: none !important;
 }
 
 /* 吹き出しのみ非表示（キャラクターは残す） */

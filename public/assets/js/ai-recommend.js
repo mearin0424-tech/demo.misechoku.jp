@@ -45,7 +45,6 @@
 
         var payload = parseJson(dataEl.textContent || '{}') || {};
         var chatBox = root.querySelector('[data-ai-chat]');
-        var resetButton = root.querySelector('[data-ai-reset]');
         var avatar = root.getAttribute('data-avatar') || '';
         var role = root.getAttribute('data-role') || payload.role || 'cast';
         var redirectUrl = 'https://mearin0424-tech.github.io/personality-test/personality-test.html';
@@ -648,10 +647,6 @@
                 processAnswer(answerButton.getAttribute('data-ai-answer') || '');
             }
         });
-
-        if (resetButton) {
-            resetButton.addEventListener('click', init);
-        }
 
         init();
     });

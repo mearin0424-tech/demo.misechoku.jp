@@ -6,7 +6,6 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/home.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/css/character-guide.css') }}">
 @endpush
 
 @php
@@ -120,6 +119,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/character-guide.js') }}"></script>
-<script src="{{ asset('assets/js/home.js') }}"></script>
+<script src="{{ asset('assets/js/home.js') }}?v=20260313-guide-2"></script>
 @endpush
