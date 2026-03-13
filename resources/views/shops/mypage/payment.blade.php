@@ -35,6 +35,18 @@
         @endif
     </section>
 
+    @if(session('status'))
+        <section class="management-invoices">
+            <p class="management-summary-note">{{ session('status') }}</p>
+        </section>
+    @endif
+
+    @if(session('error'))
+        <section class="management-invoices">
+            <p class="management-summary-note" style="color:#fca5a5;">{{ session('error') }}</p>
+        </section>
+    @endif
+
     {{-- 採用ステータス（やり取り中のキャスト） --}}
     <section class="management-invoices">
         <h2 class="management-invoices-title">採用ステータス（やり取り中のキャスト）</h2>
@@ -83,7 +95,6 @@
         @endforelse
     </section>
 
-    {{-- 採用・入金カレンダー --}}
     <section class="management-invoices">
         <h2 class="management-invoices-title">採用・入金カレンダー</h2>
         @php
@@ -132,9 +143,6 @@
 
     <section class="management-invoices">
         <h2 class="management-invoices-title">現在の入金ステータス</h2>
-        @if(session('status'))
-            <p class="management-summary-note">{{ session('status') }}</p>
-        @endif
         @php $flow = $depositFlow ?? ['cast' => '未申請','shop' => '未稼働','admin' => '未稼働']; @endphp
         <table class="admin-table" style="margin-bottom:8px;">
             <thead>
@@ -149,20 +157,12 @@
                 <tr><td>運営</td><td>{{ $flow['admin'] }}</td></tr>
             </tbody>
         </table>
-        @php $step = session('deposit_flow_step', 0); @endphp
         <div class="management-actions">
-            @if($step == 1)
+            @if(($currentDeposit['status_code'] ?? null) === 1)
                 <form method="POST" action="{{ route('shop.mypage.deposit.approve') }}">
                     @csrf
                     <button type="submit" class="btn-action manage">
                         ノルマ達成を確認し、店舗審査を完了する
-                    </button>
-                </form>
-            @elseif($step == 3)
-                <form method="POST" action="{{ route('shop.mypage.deposit.pay') }}">
-                    @csrf
-                    <button type="submit" class="btn-action manage">
-                        運営への入金が完了した
                     </button>
                 </form>
             @endif
@@ -170,7 +170,38 @@
     </section>
 
     <section class="management-invoices">
-        <h2 class="management-invoices-title">Billing History</h2>
+        <h2 class="management-invoices-title">店舗からの入金報告</h2>
+        @if($canReportPayment ?? false)
+            <form method="POST" action="{{ route('shop.mypage.deposit.pay') }}" class="management-bank-form">
+                @csrf
+                <div class="bank-form-row">
+                    <label class="bank-label">報告金額</label>
+                    <input type="number" name="reported_amount" class="bank-input" value="{{ old('reported_amount', $paymentForm['reported_amount'] ?? '') }}" min="1" required>
+                </div>
+                <div class="bank-form-row">
+                    <label class="bank-label">振込日時</label>
+                    <input type="datetime-local" name="reported_at" class="bank-input" value="{{ old('reported_at', $paymentForm['reported_at'] ?? now()->format('Y-m-d\\TH:i')) }}" required>
+                </div>
+                <div class="bank-form-row">
+                    <label class="bank-label">振込管理番号 / メモ</label>
+                    <input type="text" name="reference" class="bank-input" value="{{ old('reference', $paymentForm['reference'] ?? '') }}" placeholder="RCP-20260313-01">
+                </div>
+                <div class="management-actions">
+                    <button type="submit" class="btn-action manage">
+                        運営へ入金報告する
+                    </button>
+                </div>
+            </form>
+            <p class="management-summary-note">
+                実際の銀行振込は店舗側で行い、この画面では運営に共有するための報告情報を登録します。
+            </p>
+        @else
+            <p class="management-invoices-empty">現在、入金報告が必要な請求はありません。</p>
+        @endif
+    </section>
+
+    <section class="management-invoices">
+        <h2 class="management-invoices-title">請求履歴</h2>
         @forelse($invoices as $inv)
         <div class="management-invoice-item">
             <div class="management-invoice-info">
@@ -182,9 +213,9 @@
                 <span class="management-invoice-status {{ $inv['status'] === 'paid' ? 'status-paid' : 'status-pending' }}">
                     {{ $inv['status'] === 'paid' ? '支払い済み' : '未決済' }}
                 </span>
-                @if(!empty($inv['receipt_url']))
-                    <a href="{{ $inv['receipt_url'] }}" class="management-invoice-pdf" target="_blank" rel="noopener">
-                        <i class="fas fa-file-pdf"></i> 領収書
+                @if(!empty($inv['invoice_url']))
+                    <a href="{{ $inv['invoice_url'] }}" class="management-invoice-pdf" target="_blank" rel="noopener">
+                        <i class="fas fa-file-pdf"></i> 請求書
                     </a>
                 @endif
             </div>
@@ -195,34 +226,34 @@
     </section>
 
     <section class="management-bank-section">
-        <h2 class="management-invoices-title">店舗の振込先口座</h2>
+        <h2 class="management-invoices-title">店舗口座情報</h2>
         <p class="management-summary-note">
-            売上の振込先となる口座情報を登録してください。
+            店舗側で管理している口座情報を保存しておくと、運営との照合時に便利です。
         </p>
         <form id="shop-bank-form" class="management-bank-form">
             @csrf
             <div class="bank-form-row">
                 <label class="bank-label">金融機関名</label>
-                <input type="text" name="bank_name" class="bank-input" placeholder="〇〇銀行" required>
+                <input type="text" name="bank_name" class="bank-input" value="{{ $shopBank['bank_name'] ?? '' }}" placeholder="〇〇銀行" required>
             </div>
             <div class="bank-form-row">
                 <label class="bank-label">支店名</label>
-                <input type="text" name="branch_name" class="bank-input" placeholder="△△支店">
+                <input type="text" name="branch_name" class="bank-input" value="{{ $shopBank['branch_name'] ?? '' }}" placeholder="△△支店">
             </div>
             <div class="bank-form-row">
                 <label class="bank-label">口座種別</label>
                 <select name="account_type" class="bank-input" required>
-                    <option value="ordinary">普通</option>
-                    <option value="checking">当座</option>
+                    <option value="ordinary" {{ ($shopBank['account_type'] ?? 'ordinary') === 'ordinary' ? 'selected' : '' }}>普通</option>
+                    <option value="checking" {{ ($shopBank['account_type'] ?? '') === 'checking' ? 'selected' : '' }}>当座</option>
                 </select>
             </div>
             <div class="bank-form-row">
                 <label class="bank-label">口座番号</label>
-                <input type="text" name="account_number" class="bank-input" placeholder="1234567" required>
+                <input type="text" name="account_number" class="bank-input" value="{{ $shopBank['account_number'] ?? '' }}" placeholder="1234567" required>
             </div>
             <div class="bank-form-row">
                 <label class="bank-label">口座名義（カナ）</label>
-                <input type="text" name="account_name" class="bank-input" placeholder="ミセチョク タロウ" required>
+                <input type="text" name="account_name" class="bank-input" value="{{ $shopBank['account_name'] ?? '' }}" placeholder="ミセチョク タロウ" required>
             </div>
             <div class="management-actions">
                 <button type="submit" class="btn-action manage">
@@ -240,6 +271,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     var form = document.getElementById('shop-bank-form');
     if (!form) return;
+
     form.addEventListener('submit', function (e) {
         e.preventDefault();
         var formData = new FormData(form);

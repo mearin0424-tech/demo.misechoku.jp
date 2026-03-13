@@ -17,6 +17,12 @@
             <h1 class="mypage-page-title serif-font">請求・入金管理</h1>
             <div class="mypage-detail-box">
                 <div class="mypage-section">
+                    @if(session('status'))
+                        <p class="management-summary-note">{{ session('status') }}</p>
+                    @endif
+                    @if(session('error'))
+                        <p class="management-summary-note" style="color:#fca5a5;">{{ session('error') }}</p>
+                    @endif
                     @if(empty($payments))
                         <p class="cast-mypage-placeholder">
                             請求履歴や入金状況を確認できます。<br>
@@ -38,6 +44,9 @@
                                         @if(!empty($row['date']))
                                             <span class="date-text numeric-font">{{ $row['date'] }}</span>
                                         @endif
+                                        @if(!empty($row['amount']))
+                                            <span class="date-text numeric-font">振込予定額: ¥{{ number_format($row['amount']) }}</span>
+                                        @endif
                                     </div>
                                     @if(!empty($row['link']))
                                         <a href="{{ $row['link'] }}" class="doc-arrow">
@@ -52,9 +61,6 @@
 
                 <div class="mypage-section">
                     <h2 class="mypage-actions-title">現在の入金ステータス</h2>
-                    @if(session('status'))
-                        <p class="management-summary-note">{{ session('status') }}</p>
-                    @endif
                     @php $flow = $depositFlow ?? ['cast' => '未申請','shop' => '未稼働','admin' => '未稼働']; @endphp
                     <table class="admin-table" style="margin-bottom:8px;">
                         <thead>
@@ -70,21 +76,22 @@
                         </tbody>
                     </table>
                     <div class="text-right">
-                        @php $step = session('deposit_flow_step', 0); @endphp
-                        @if($step == 0)
+                        @if($canRequestDeposit ?? false)
                             <form method="POST" action="{{ route('cast.mypage.deposit.request') }}">
                                 @csrf
                                 <button type="submit" class="btn-action manage">
                                     ボーナス達成・入金を申請する
                                 </button>
                             </form>
-                        @elseif($step == 5)
+                        @elseif(($currentDeposit['status_code'] ?? null) === 6)
                             <form method="POST" action="{{ route('cast.mypage.deposit.confirm') }}">
                                 @csrf
                                 <button type="submit" class="btn-action manage">
                                     入金を確認しました
                                 </button>
                             </form>
+                        @elseif(!empty($requestDisabledReason))
+                            <p class="text-xs" style="color:#C9B8B8;">{{ $requestDisabledReason }}</p>
                         @endif
                     </div>
                 </div>
@@ -98,26 +105,26 @@
                         @csrf
                         <div class="bank-form-row">
                             <label class="bank-label">金融機関名</label>
-                            <input type="text" name="bank_name" class="bank-input" placeholder="〇〇銀行" required>
+                            <input type="text" name="bank_name" class="bank-input" value="{{ $castBank['bank_name'] ?? '' }}" placeholder="〇〇銀行" required>
                         </div>
                         <div class="bank-form-row">
                             <label class="bank-label">支店名</label>
-                            <input type="text" name="branch_name" class="bank-input" placeholder="△△支店">
+                            <input type="text" name="branch_name" class="bank-input" value="{{ $castBank['branch_name'] ?? '' }}" placeholder="△△支店">
                         </div>
                         <div class="bank-form-row">
                             <label class="bank-label">口座種別</label>
                             <select name="account_type" class="bank-input" required>
-                                <option value="ordinary">普通</option>
-                                <option value="checking">当座</option>
+                                <option value="ordinary" {{ ($castBank['account_type'] ?? 'ordinary') === 'ordinary' ? 'selected' : '' }}>普通</option>
+                                <option value="checking" {{ ($castBank['account_type'] ?? '') === 'checking' ? 'selected' : '' }}>当座</option>
                             </select>
                         </div>
                         <div class="bank-form-row">
                             <label class="bank-label">口座番号</label>
-                            <input type="text" name="account_number" class="bank-input" placeholder="1234567" required>
+                            <input type="text" name="account_number" class="bank-input" value="{{ $castBank['account_number'] ?? '' }}" placeholder="1234567" required>
                         </div>
                         <div class="bank-form-row">
                             <label class="bank-label">口座名義（カナ）</label>
-                            <input type="text" name="account_name" class="bank-input" placeholder="ミセチョク ハナコ" required>
+                            <input type="text" name="account_name" class="bank-input" value="{{ $castBank['account_name'] ?? '' }}" placeholder="ミセチョク ハナコ" required>
                         </div>
                         <div class="text-right mt-3">
                             <button type="submit" class="btn-action manage">
