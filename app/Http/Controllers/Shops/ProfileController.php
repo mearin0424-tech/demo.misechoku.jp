@@ -56,6 +56,20 @@ class ProfileController extends Controller
             'word' => 'nullable|string|max:50',
         ]);
 
+        $imageCount = (int) DB::table('shop_images')
+            ->where('shop_id', self::DEMO_SHOP_ID)
+            ->count();
+        $mainImagePath = DB::table('shop_profiles')
+            ->where('shop_id', self::DEMO_SHOP_ID)
+            ->value('main_image_path');
+
+        if ($imageCount < 1 && empty($mainImagePath)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'ホーム表示用の画像を1枚以上登録してください。',
+            ], 422);
+        }
+
         // モックなので現在は保存成功レスポンスのみ
         return response()->json(['success' => true, 'message' => 'プロフィールを更新しました']);
     }
@@ -111,6 +125,10 @@ class ProfileController extends Controller
      */
     public function deleteImage(Request $request, $id)
     {
+        $currentCount = (int) DB::table('shop_images')
+            ->where('shop_id', self::DEMO_SHOP_ID)
+            ->count();
+
         $row = DB::table('shop_images')
             ->where('id', $id)
             ->where('shop_id', self::DEMO_SHOP_ID)
@@ -118,6 +136,10 @@ class ProfileController extends Controller
 
         if (!$row) {
             return response()->json(['success' => false, 'message' => '画像が見つかりません'], 404);
+        }
+
+        if ($currentCount <= 1) {
+            return response()->json(['success' => false, 'message' => '店舗画像は1枚以上必要です。最低1枚は残してください。'], 422);
         }
 
         $fullPath = str_starts_with($row->image_path ?? '', 'uploads/')

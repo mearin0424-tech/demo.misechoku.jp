@@ -31,7 +31,7 @@ class DemoLoginController extends Controller
 
         switch ($request->input('role')) {
             case 'admin':
-                return redirect()->route('bk.dashboard');
+                return redirect()->route('admin.dashboard');
             case 'cast':
                 return redirect()->route('cast.home');
             case 'shop':

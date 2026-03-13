@@ -205,6 +205,11 @@ class MypageController extends Controller
      */
     public function deleteImage(Request $request, $id)
     {
+        $currentCount = (int) DB::table('cast_images')
+            ->where('cast_id', self::DEMO_CAST_ID)
+            ->where('type', 1)
+            ->count();
+
         $row = DB::table('cast_images')
             ->where('id', $id)
             ->where('cast_id', self::DEMO_CAST_ID)
@@ -213,6 +218,10 @@ class MypageController extends Controller
 
         if (!$row) {
             return response()->json(['success' => false, 'message' => '画像が見つかりません'], 404);
+        }
+
+        if ($currentCount <= 1) {
+            return response()->json(['success' => false, 'message' => 'プロフィール画像は1枚以上必要です。最低1枚は残してください。'], 422);
         }
 
         $fullPath = str_starts_with($row->image_path ?? '', 'uploads/')

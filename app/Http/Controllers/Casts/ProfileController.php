@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Casts;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProfileController extends Controller
 {
@@ -78,6 +79,21 @@ class ProfileController extends Controller
             'current_job'  => 'nullable|string',
             'night_work_exp' => 'nullable|string|max:20',
         ]);
+
+        $imageCount = (int) DB::table('cast_images')
+            ->where('cast_id', 'c00000001')
+            ->where('type', 1)
+            ->count();
+        $mainImagePath = DB::table('cast_profiles')
+            ->where('cast_id', 'c00000001')
+            ->value('main_image_path');
+
+        if ($imageCount < 1 && empty($mainImagePath)) {
+            return redirect()->back()
+                ->withErrors(['images' => 'ホーム表示用の画像を1枚以上登録してください。'])
+                ->withInput();
+        }
+
         // モックのため保存処理は行わず、リダイレクト先は呼び元（shop/cast）に合わせる
         $editRoute = request()->routeIs('shop.profile.update') ? 'shop.profile.edit' : 'cast.profile.edit';
         return redirect()->route($editRoute)

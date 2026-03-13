@@ -4,7 +4,8 @@
 namespace App\Http\Controllers\Shops;
 
 use App\Http\Controllers\Controller;
-use App\Models\Cast; // キャストモデル
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -13,13 +14,7 @@ class HomeController extends Controller
         $isCastPortal = request()->is('cast/*');
 
         if ($isCastPortal) {
-            // キャスト側：お店を探している → お店一覧
-            $shops = [
-                ['id' => 1, 'name' => 'CLUB ETERNITY', 'age' => null, 'tags' => ['高時給', '即日払い'], 'like_count' => 8, 'rating' => 4.5],
-                ['id' => 2, 'name' => 'THE GOLDSTONE', 'age' => null, 'tags' => ['ノルマなし', '送りあり'], 'like_count' => 12, 'rating' => 4.8],
-                ['id' => 3, 'name' => 'Club Luxurious', 'age' => null, 'tags' => ['六本木', '高級'], 'like_count' => 5, 'rating' => 4.2],
-                ['id' => 4, 'name' => 'BAR STELLA', 'age' => null, 'tags' => ['落ち着いた', 'カジュアル'], 'like_count' => 3, 'rating' => 4.0],
-            ];
+            $shops = $this->getHomeShops();
             return view('shops.home.index', [
                 'pageId' => 'home',
                 'items' => $shops,
@@ -27,17 +22,194 @@ class HomeController extends Controller
             ]);
         }
 
-        // お店側：キャストを探している → キャスト一覧
-        $casts = [
-            ['id' => 1, 'name' => 'みさき', 'age' => 23, 'tags' => ['モデル系', 'お酒強い'], 'like_count' => 12],
-            ['id' => 2, 'name' => '愛華', 'age' => 21, 'tags' => ['癒やし系', '聞き上手'], 'like_count' => 8],
-            ['id' => 3, 'name' => 'さくら', 'age' => 25, 'tags' => ['元気系', 'トーク上手'], 'like_count' => 24],
-            ['id' => 4, 'name' => 'ナナ', 'age' => 22, 'tags' => ['清楚系', 'お酒弱い'], 'like_count' => 5],
-        ];
+        $casts = $this->getHomeCasts();
         return view('shops.home.index', [
             'pageId' => 'home',
             'items' => $casts,
             'itemType' => 'cast',
         ]);
+    }
+
+    private function getHomeCasts(): array
+    {
+        $rows = DB::table('casts')
+            ->leftJoin('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id')
+            ->select(
+                'casts.id',
+                'cast_profiles.nickname',
+                'cast_profiles.name',
+                'cast_profiles.birthday',
+                'cast_profiles.pref',
+                'cast_profiles.city',
+                'cast_profiles.pr',
+                'cast_profiles.main_image_path'
+            )
+            ->orderBy('casts.id')
+            ->limit(20)
+            ->get();
+
+        $items = [];
+        foreach ($rows as $row) {
+            $birthday = $row->birthday ? Carbon::parse($row->birthday) : null;
+            $images = $this->getCastImages($row->id, $row->main_image_path);
+            $items[] = [
+                'id' => $row->id,
+                'name' => $row->nickname ?: ($row->name ?: 'ゲスト'),
+                'age' => $birthday ? $birthday->age : null,
+                'tags' => $this->buildCastTags($row),
+                'like_count' => 0,
+                'images' => $images,
+            ];
+        }
+
+        if (!empty($items)) {
+            return $items;
+        }
+
+        return [
+            ['id' => 1, 'name' => 'みさき', 'age' => 23, 'tags' => ['モデル系', 'お酒強い'], 'like_count' => 12, 'images' => [asset('storage/mock/casts/1-1.png'), asset('storage/mock/casts/1-2.png'), asset('storage/mock/casts/1-3.png')]],
+            ['id' => 2, 'name' => '愛華', 'age' => 21, 'tags' => ['癒やし系', '聞き上手'], 'like_count' => 8, 'images' => [asset('storage/mock/casts/2-1.png'), asset('storage/mock/casts/2-2.png'), asset('storage/mock/casts/2-3.png')]],
+            ['id' => 3, 'name' => 'さくら', 'age' => 25, 'tags' => ['元気系', 'トーク上手'], 'like_count' => 24, 'images' => [asset('storage/mock/casts/3-1.png')]],
+            ['id' => 4, 'name' => 'ナナ', 'age' => 22, 'tags' => ['清楚系', 'お酒弱い'], 'like_count' => 5, 'images' => [asset('storage/mock/casts/4-1.png')]],
+        ];
+    }
+
+    private function getHomeShops(): array
+    {
+        $rows = DB::table('shops')
+            ->leftJoin('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
+            ->select(
+                'shops.id',
+                'shop_profiles.shop_name',
+                'shop_profiles.pref',
+                'shop_profiles.city',
+                'shop_profiles.message',
+                'shop_profiles.main_image_path'
+            )
+            ->orderBy('shops.id')
+            ->limit(20)
+            ->get();
+
+        $items = [];
+        foreach ($rows as $row) {
+            $images = $this->getShopImages($row->id, $row->main_image_path);
+            $items[] = [
+                'id' => $row->id,
+                'name' => $row->shop_name ?: '店舗',
+                'age' => null,
+                'tags' => $this->buildShopTags($row),
+                'like_count' => 0,
+                'rating' => 0,
+                'images' => $images,
+            ];
+        }
+
+        if (!empty($items)) {
+            return $items;
+        }
+
+        return [
+            ['id' => 1, 'name' => 'CLUB ETERNITY', 'age' => null, 'tags' => ['高時給', '即日払い'], 'like_count' => 8, 'rating' => 4.5, 'images' => [asset('storage/mock/shops/out-1.png')]],
+            ['id' => 2, 'name' => 'THE GOLDSTONE', 'age' => null, 'tags' => ['ノルマなし', '送りあり'], 'like_count' => 12, 'rating' => 4.8, 'images' => [asset('storage/mock/shops/out-2.png')]],
+            ['id' => 3, 'name' => 'Club Luxurious', 'age' => null, 'tags' => ['六本木', '高級'], 'like_count' => 5, 'rating' => 4.2, 'images' => [asset('storage/mock/shops/out-1.png')]],
+            ['id' => 4, 'name' => 'BAR STELLA', 'age' => null, 'tags' => ['落ち着いた', 'カジュアル'], 'like_count' => 3, 'rating' => 4.0, 'images' => [asset('storage/mock/shops/out-2.png')]],
+        ];
+    }
+
+    private function getCastImages(string $castId, ?string $mainImagePath): array
+    {
+        $images = DB::table('cast_images')
+            ->where('cast_id', $castId)
+            ->where('type', 1)
+            ->orderByRaw('is_main DESC')
+            ->orderByRaw('main_order IS NULL')
+            ->orderBy('main_order')
+            ->orderBy('id')
+            ->pluck('image_path')
+            ->map(fn ($path) => $this->assetPathForStored($path))
+            ->filter()
+            ->values()
+            ->all();
+
+        if (empty($images) && !empty($mainImagePath)) {
+            $images[] = $this->assetPathForStored($mainImagePath);
+        }
+
+        if (empty($images)) {
+            $images[] = asset('assets/images/common/no-image.png');
+        }
+
+        return $images;
+    }
+
+    private function getShopImages(string $shopId, ?string $mainImagePath): array
+    {
+        $images = DB::table('shop_images')
+            ->where('shop_id', $shopId)
+            ->orderByRaw('is_main DESC')
+            ->orderByRaw('main_order IS NULL')
+            ->orderBy('main_order')
+            ->orderBy('id')
+            ->pluck('image_path')
+            ->map(fn ($path) => $this->assetPathForStored($path))
+            ->filter()
+            ->values()
+            ->all();
+
+        if (empty($images) && !empty($mainImagePath)) {
+            $images[] = $this->assetPathForStored($mainImagePath);
+        }
+
+        if (empty($images)) {
+            $images[] = asset('assets/images/common/no-image.png');
+        }
+
+        return $images;
+    }
+
+    private function buildCastTags(object $row): array
+    {
+        $tags = [];
+        if (!empty($row->pref)) {
+            $tags[] = $row->pref;
+        }
+        if (!empty($row->city)) {
+            $tags[] = $row->city;
+        }
+        if (!empty($row->pr)) {
+            $tags[] = mb_strimwidth(trim((string) $row->pr), 0, 16, '…');
+        }
+
+        return !empty($tags) ? array_slice($tags, 0, 3) : ['プロフィール登録中'];
+    }
+
+    private function buildShopTags(object $row): array
+    {
+        $tags = [];
+        if (!empty($row->pref)) {
+            $tags[] = $row->pref;
+        }
+        if (!empty($row->city)) {
+            $tags[] = $row->city;
+        }
+        if (!empty($row->message)) {
+            $tags[] = mb_strimwidth(trim((string) $row->message), 0, 18, '…');
+        }
+
+        return !empty($tags) ? array_slice($tags, 0, 3) : ['店舗情報登録中'];
+    }
+
+    private function assetPathForStored(?string $path): string
+    {
+        if (empty($path)) {
+            return asset('assets/images/common/no-image.png');
+        }
+        if (str_starts_with($path, 'uploads/')) {
+            return asset($path);
+        }
+        if (str_starts_with($path, 'public/')) {
+            return asset('storage/' . substr($path, 7));
+        }
+        return asset(ltrim($path, '/'));
     }
 }

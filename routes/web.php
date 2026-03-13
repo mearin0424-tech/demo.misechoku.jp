@@ -92,17 +92,21 @@ Route::get('/manifest.json', function () {
 Route::redirect('/', '/login');
 Route::redirect('/shop', '/shop/home');
 Route::redirect('/cast', '/cast/home');
+Route::redirect('/bk', '/admin');
+Route::get('/bk/{path}', function ($path) {
+    return redirect('/admin/' . $path);
+})->where('path', '.*');
 
 /*
 |--------------------------------------------------------------------------
 | Admin Portal (管理者専用)
 |--------------------------------------------------------------------------
 |
-| 店舗・キャストとは別のプレフィックス `/bk` で管理画面を提供する。
+| 店舗・キャストとは別のプレフィックス `/admin` で管理画面を提供する。
 | 認証まわりは今後拡張しやすいようにルートを分離しておく。
 |
 */
-Route::prefix('bk')->name('bk.')->group(function () {
+Route::prefix('admin')->name('admin.')->group(function () {
 
     // ログイン画面（簡易版）
     Route::get('/login', [AdminAuth::class, 'showLoginForm'])->name('login');

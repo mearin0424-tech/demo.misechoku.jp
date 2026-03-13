@@ -24,30 +24,26 @@
             @foreach($items as $item)
             <div class="swiper-slide cast-card glass-card">
                 @php
-                    $baseImgPath = $isShop
-                        ? "storage/mock/shops/out-{$item['id']}.png"
-                        : "storage/mock/casts/{$item['id']}";
-                    $imageCount = $isShop ? 1 : 3;
+                    $images = $item['images'] ?? [];
+                    if (empty($images)) {
+                        $images = [asset('assets/images/common/no-image.png')];
+                    }
+                    $imageCount = count($images);
                 @endphp
                 {{-- メイン写真（左右スワイプで同一アカウントの別写真を表示） --}}
                 <div class="home-photo-wrap" data-detail-url="{{ route($detailRoute, $item['id']) }}">
                     <div class="photo-swiper swiper">
                         <div class="swiper-wrapper">
-                            @for($i = 1; $i <= $imageCount; $i++)
-                                @php
-                                    $imgPath = $isShop
-                                        ? $baseImgPath
-                                        : "{$baseImgPath}-{$i}.png";
-                                @endphp
+                            @foreach($images as $index => $imgPath)
                                 <div class="swiper-slide">
                                     <img
-                                        src="{{ asset($imgPath) }}"
-                                        alt="{{ $item['name'] }}の写真{{ $imageCount > 1 ? '（' . $i . '枚目）' : '' }}"
+                                        src="{{ $imgPath }}"
+                                        alt="{{ $item['name'] }}の写真{{ $imageCount > 1 ? '（' . ($index + 1) . '枚目）' : '' }}"
                                         class="home-photo"
                                         loading="lazy"
                                     >
                                 </div>
-                            @endfor
+                            @endforeach
                         </div>
                         @if($imageCount > 1)
                         <div class="photo-pagination swiper-pagination"></div>
