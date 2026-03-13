@@ -45,8 +45,8 @@ jobs:
           mkdir -p database
           touch database/testing.sqlite
 
-      - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist
+      - name: Sync Composer lock for CI
+        run: composer update minishlink/web-push --no-interaction --prefer-dist
 
       - name: Run smoke tests
         run: composer test:smoke

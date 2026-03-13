@@ -77,6 +77,23 @@
             </div>
         </div>
 
+        <div class="form-section">
+            <label class="edit-label">希望業種</label>
+            <div class="checkbox-chip-grid">
+                @foreach(($masters['industries'] ?? []) as $industry)
+                    <label class="checkbox-chip">
+                        <input
+                            type="checkbox"
+                            name="industry_ids[]"
+                            value="{{ $industry->id }}"
+                            {{ in_array((int) $industry->id, old('industry_ids', $profile['industry_ids'] ?? []), true) ? 'checked' : '' }}
+                        >
+                        <span>{{ $industry->name }}</span>
+                    </label>
+                @endforeach
+            </div>
+        </div>
+
         {{-- 自己紹介 --}}
         <div class="form-section">
             <label class="edit-label" for="intro">自己紹介</label>
@@ -143,6 +160,19 @@
                     </button>
                     <div class="accordion-content" id="my-field-body">
                         <input type="text" name="my_field" class="edit-input" value="{{ old('my_field', $profile['my_field']) }}" placeholder="ご自分の系統を入力">
+                        <div class="checkbox-chip-grid mt-12">
+                            @foreach(($masters['looks'] ?? []) as $look)
+                                <label class="checkbox-chip">
+                                    <input
+                                        type="checkbox"
+                                        name="look_tag_ids[]"
+                                        value="{{ $look->id }}"
+                                        {{ in_array((int) $look->id, old('look_tag_ids', $profile['look_tag_ids'] ?? []), true) ? 'checked' : '' }}
+                                    >
+                                    <span>{{ $look->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
                 {{-- ご自分の内面・特技 --}}
@@ -153,6 +183,19 @@
                     </button>
                     <div class="accordion-content" id="my-inner-body">
                         <input type="text" name="my_inner_skills" class="edit-input" value="{{ old('my_inner_skills', $profile['my_inner_skills']) }}" placeholder="内面・特技を入力">
+                        <div class="checkbox-chip-grid mt-12">
+                            @foreach(($masters['personalities'] ?? []) as $personality)
+                                <label class="checkbox-chip">
+                                    <input
+                                        type="checkbox"
+                                        name="personality_tag_ids[]"
+                                        value="{{ $personality->id }}"
+                                        {{ in_array((int) $personality->id, old('personality_tag_ids', $profile['personality_tag_ids'] ?? []), true) ? 'checked' : '' }}
+                                    >
+                                    <span>{{ $personality->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
 
@@ -232,4 +275,40 @@ function toggleAccordionItem(btn) {
     icon.classList.toggle('fa-minus', expanded);
 }
 </script>
+<style>
+.checkbox-chip-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.checkbox-chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+.checkbox-chip input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+.checkbox-chip span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 38px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+    font-size: 0.9rem;
+}
+.checkbox-chip input:checked + span {
+    border-color: #d4af37;
+    background: rgba(212, 175, 55, 0.18);
+    color: #f8e7b0;
+}
+.mt-12 {
+    margin-top: 12px;
+}
+</style>
 @endsection

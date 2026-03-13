@@ -133,6 +133,18 @@ class AdminMasterService
         ];
     }
 
+    public function getRecruitmentMasters(): array
+    {
+        return [
+            'salary' => $this->fetchSimpleOptions('tags_salary'),
+            'howto' => $this->fetchSimpleOptions('tags_howto'),
+            'merit' => $this->fetchSimpleOptions('tags_merit'),
+            'feature' => $this->fetchSimpleOptions('tags_feature'),
+            'facility' => $this->fetchSimpleOptions('tags_facility'),
+            'atmosphere' => $this->fetchSimpleOptions('tags_atmosphere'),
+        ];
+    }
+
     private function catalogDefinitions(): array
     {
         return [

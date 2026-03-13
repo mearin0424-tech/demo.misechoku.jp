@@ -2,12 +2,17 @@
 namespace App\Http\Controllers\Casts;
 
 use App\Http\Controllers\Controller;
+use App\Services\AdminMasterService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ProfileController extends Controller
 {
+    public function __construct(private readonly AdminMasterService $adminMasterService)
+    {
+    }
+
     /**
      * ログイン中キャストのプロフィール編集データ
      */
@@ -64,6 +69,9 @@ class ProfileController extends Controller
             'work_time'      => $memo['work_time'] ?? '',
             'current_job'    => $memo['current_job'] ?? ($row->profession ?? ''),
             'night_work_exp' => $nightWorkExp,
+            'industry_ids'   => $this->fetchCastIndustryIds($castId),
+            'look_tag_ids'   => collect($memo['look_tag_ids'] ?? [])->map(fn ($id) => (int) $id)->all(),
+            'personality_tag_ids' => collect($memo['personality_tag_ids'] ?? [])->map(fn ($id) => (int) $id)->all(),
         ];
     }
 
@@ -90,6 +98,9 @@ class ProfileController extends Controller
             'work_time'      => '',
             'current_job'    => '',
             'night_work_exp' => 'none',
+            'industry_ids'   => [],
+            'look_tag_ids'   => [],
+            'personality_tag_ids' => [],
         ];
     }
 
@@ -102,6 +113,7 @@ class ProfileController extends Controller
         return view('casts.profile.edit', [
             'pageId'      => 'mypage',
             'profile'     => $data,
+            'masters'     => $this->adminMasterService->getCastProfileMasters(),
             'updateRoute' => 'cast.profile.update',
             'editRoute'   => 'cast.profile.edit',
         ]);
@@ -133,6 +145,12 @@ class ProfileController extends Controller
             'work_time'    => 'nullable|string|max:20',
             'current_job'  => 'nullable|string',
             'night_work_exp' => 'nullable|string|max:20',
+            'industry_ids' => 'nullable|array',
+            'industry_ids.*' => 'integer|exists:industries,id',
+            'look_tag_ids' => 'nullable|array',
+            'look_tag_ids.*' => 'integer|exists:tags_cast_looks,id',
+            'personality_tag_ids' => 'nullable|array',
+            'personality_tag_ids.*' => 'integer|exists:tags_cast_personality,id',
         ]);
 
         $castId = $this->currentCastId();
@@ -158,6 +176,8 @@ class ProfileController extends Controller
                 ->withInput();
         }
 
+        $memo = $this->decodeProfileMemo(DB::table('cast_profiles')->where('cast_id', $castId)->value('memo'));
+
         DB::table('cast_profiles')->updateOrInsert(
             ['cast_id' => $castId],
             [
@@ -180,7 +200,7 @@ class ProfileController extends Controller
                 'shift' => $this->shiftCode($request->input('shift_hope')),
                 'profession' => $request->input('current_job'),
                 'exp' => $request->input('night_work_exp') === 'yes' ? 1 : 0,
-                'memo' => json_encode([
+                'memo' => json_encode(array_merge($memo, [
                     'desired_job' => $request->input('desired_job'),
                     'my_field' => $request->input('my_field'),
                     'my_inner_skills' => $request->input('my_inner_skills'),
@@ -188,11 +208,15 @@ class ProfileController extends Controller
                     'work_time' => $request->input('work_time'),
                     'current_job' => $request->input('current_job'),
                     'night_work_exp' => $request->input('night_work_exp'),
-                ], JSON_UNESCAPED_UNICODE),
+                    'look_tag_ids' => array_values(array_map('intval', $request->input('look_tag_ids', []))),
+                    'personality_tag_ids' => array_values(array_map('intval', $request->input('personality_tag_ids', []))),
+                ]), JSON_UNESCAPED_UNICODE),
                 'updated_at' => now(),
                 'created_at' => now(),
             ]
         );
+
+        $this->syncCastIndustries($castId, $request->input('industry_ids', []));
 
         return redirect()->route('cast.profile.edit')
             ->with('message', 'プロフィールを更新しました')
@@ -462,6 +486,44 @@ class ProfileController extends Controller
         $decoded = json_decode($memo, true);
 
         return is_array($decoded) ? $decoded : [];
+    }
+
+    private function fetchCastIndustryIds(string $castId): array
+    {
+        if (!DB::getSchemaBuilder()->hasTable('cast_industry')) {
+            return [];
+        }
+
+        return DB::table('cast_industry')
+            ->where('cast_id', $castId)
+            ->orderBy('industry_id')
+            ->pluck('industry_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+    }
+
+    private function syncCastIndustries(string $castId, array $industryIds): void
+    {
+        if (!DB::getSchemaBuilder()->hasTable('cast_industry')) {
+            return;
+        }
+
+        DB::table('cast_industry')->where('cast_id', $castId)->delete();
+
+        $rows = collect($industryIds)
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->map(fn ($industryId) => [
+                'cast_id' => $castId,
+                'industry_id' => $industryId,
+            ])
+            ->all();
+
+        if (!empty($rows)) {
+            DB::table('cast_industry')->insert($rows);
+        }
     }
 
     private function shiftHopeLabel($shift): string

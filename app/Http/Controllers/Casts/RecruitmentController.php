@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Casts;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * キャスト向け：店舗の求人情報表示
@@ -79,6 +80,8 @@ class RecruitmentController extends Controller
         }
 
         $address = trim(($row->pref ?? '') . ($row->city ?? '') . ($row->addr2 ?? '') . ' ' . ($row->addr3 ?? ''));
+        $meta = $this->decodeMeta($row->noruma_cond ?? null);
+        $tagMap = $this->resolveRecruitTagNames($meta['tag_ids'] ?? []);
 
         $recruit = [
             'store_name'         => $row->shop_name,
@@ -88,18 +91,25 @@ class RecruitmentController extends Controller
             'nearest_station'    => $row->station1,
             'hourly_wage_regular'=> $row->hourly_wage_regular ? (int) $row->hourly_wage_regular : 0,
             'trial_hourly_wage'  => !empty($row->has_trial) ? (int) $row->trial_hourly_wage : null,
-            'salary_text'        => $row->atmosphere ?? '',
-            'working_hours'      => $row->working_hours ?? null,
-            'working_days'       => $row->working_day ?? null,
-            'regular_holiday'    => $row->regular_holiday ?? null,
+            'salary_text'        => $row->salary ?? '',
+            'working_hours'      => Schema::hasColumn('shop_jobs', 'working_hours') ? ($row->working_hours ?? null) : ($meta['working_hours'] ?? null),
+            'working_days'       => Schema::hasColumn('shop_jobs', 'working_day') ? ($row->working_day ?? null) : ($meta['working_days'] ?? null),
+            'regular_holiday'    => Schema::hasColumn('shop_jobs', 'regular_holiday') ? ($row->regular_holiday ?? null) : ($meta['regular_holiday'] ?? null),
             'job_content'        => $row->job_description ?? '',
             'store_atmosphere'   => $row->atmosphere ?? '',
-            'qualification'      => $row->qualification ?? '18歳以上（高校生不可）',
-            'catch_copy'         => $row->catch ?? '',
-            'message'            => $row->message ?? '',
+            'qualification'      => Schema::hasColumn('shop_jobs', 'qualification') ? ($row->qualification ?? '18歳以上（高校生不可）') : ($meta['qualification'] ?? '18歳以上（高校生不可）'),
+            'catch_copy'         => $meta['catch_copy'] ?? ($row->catch ?? ''),
+            'message'            => $meta['message'] ?? ($row->message ?? ''),
             'benefits'           => [],
-            'selected_benefits'  => [],
-            'store_features'     => [],
+            'selected_benefits'  => $tagMap['merit'],
+            'store_features'     => [
+                '報酬' => $tagMap['salary'],
+                '働き方' => $tagMap['howto'],
+                'メリット' => $tagMap['merit'],
+                '特徴' => $tagMap['feature'],
+                '設備' => $tagMap['facility'],
+                'お店の雰囲気' => $tagMap['atmosphere'],
+            ],
         ];
 
         $mainImg = $this->imageUrl($row->main_image_path);
@@ -169,5 +179,51 @@ class RecruitmentController extends Controller
         }
 
         return asset(ltrim($path, '/'));
+    }
+
+    private function decodeMeta(?string $raw): array
+    {
+        if (empty($raw)) {
+            return [];
+        }
+
+        $decoded = json_decode($raw, true);
+
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    private function resolveRecruitTagNames(array $tagIds): array
+    {
+        $tables = [
+            'salary' => 'tags_salary',
+            'howto' => 'tags_howto',
+            'merit' => 'tags_merit',
+            'feature' => 'tags_feature',
+            'facility' => 'tags_facility',
+            'atmosphere' => 'tags_atmosphere',
+        ];
+
+        $resolved = [];
+        foreach ($tables as $key => $table) {
+            $ids = collect($tagIds[$key] ?? [])
+                ->map(fn ($id) => (int) $id)
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
+
+            if (empty($ids) || !Schema::hasTable($table)) {
+                $resolved[$key] = [];
+                continue;
+            }
+
+            $resolved[$key] = DB::table($table)
+                ->whereIn('id', $ids)
+                ->orderBy('id')
+                ->pluck('name')
+                ->all();
+        }
+
+        return $resolved;
     }
 }

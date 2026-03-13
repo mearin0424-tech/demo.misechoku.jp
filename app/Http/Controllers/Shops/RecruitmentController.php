@@ -3,39 +3,30 @@
 namespace App\Http\Controllers\Shops;
 
 use App\Http\Controllers\Controller;
+use App\Services\AdminMasterService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class RecruitmentController extends Controller
 {
+    public function __construct(private readonly AdminMasterService $adminMasterService)
+    {
+    }
+
     /**
      * 求人ステータス一覧画面
      */
     public function status()
     {
-        $recruits = [
-            [
-                'id' => 1,
-                'title' => 'レギュラーキャスト募集',
-                'status' => 'active',
-                'hourly_wage_regular' => 5000,
-                'updated_at' => '2026.01.06',
-            ],
-            [
-                'id' => 2,
-                'title' => '週末・体験入店',
-                'status' => 'inactive',
-                'hourly_wage_regular' => 4000,
-                'updated_at' => '2026.01.01',
-            ]
-        ];
-
-        // 表示用の求人詳細（お店からのひとこと・本入店/体験/ヘルプの3種別）
-        $recruitDetail = $this->getRecruitDetailForStatus();
+        $recruit = $this->getRecruitData($this->currentShopId());
+        $numericShopId = $this->toNumericShopId($this->currentShopId());
 
         return view('shops.recruit.status', [
             'pageId' => 'job_status',
-            'recruits' => $recruits,
-            'recruitDetail' => $recruitDetail,
+            'recruit' => $recruit,
+            'previewRoute' => route('shop.recruits.show'),
+            'publicPreviewRoute' => $numericShopId ? route('share.recruit.show', ['id' => $numericShopId]) : null,
         ]);
     }
 
@@ -44,18 +35,17 @@ class RecruitmentController extends Controller
      */
     public function show($id = null)
     {
-        // editと同じモックデータを使用して詳細を表示
-        $recruitData = $this->getMockData();
-        // プロファイル画面と同等の店舗情報もあわせて渡し、求人票側でお店の写真・情報を連携表示する
-        $shop = $this->getMockShopProfile();
-        $shareText = trim((string) ($recruitData['catch_copy'] ?? $recruitData['message'] ?? ''));
+        $shopId = $id ? $this->normalizeShopId($id) : $this->currentShopId();
+        $recruitData = $this->getRecruitData($shopId);
+        $shareText = trim((string) ($recruitData['recruit']['catch_copy'] ?? $recruitData['recruit']['message'] ?? ''));
+        $numericShopId = $this->toNumericShopId($shopId);
 
         return view('shops.recruit.show', [
             'pageId' => 'job_info', 
-            'recruit' => $recruitData,
-            'shop'   => $shop,
-            'shareUrl' => $id ? route('share.recruit.show', ['id' => $id]) : null,
-            'shareTitle' => ($shop['name'] ?? $recruitData['store_name'] ?? '店舗') . 'の求人情報',
+            'recruit' => $recruitData['recruit'],
+            'shop'   => $recruitData['shop'],
+            'shareUrl' => $numericShopId ? route('share.recruit.show', ['id' => $numericShopId]) : null,
+            'shareTitle' => (($recruitData['shop']['name'] ?? null) ?: ($recruitData['recruit']['store_name'] ?? '店舗')) . 'の求人情報',
             'shareText' => $shareText !== '' ? mb_strimwidth($shareText, 0, 80, '…') : 'ミセチョクの求人情報です。',
             'isPublicShare' => false,
         ]);
@@ -66,10 +56,10 @@ class RecruitmentController extends Controller
      */
     public function edit()
     {
-        $recruitData = $this->getMockData();
         return view('shops.recruit.edit', [
             'pageId' => 'job_edit', 
-            'recruit' => $recruitData
+            'recruit' => $this->getRecruitData($this->currentShopId())['recruit'],
+            'masters' => $this->adminMasterService->getRecruitmentMasters(),
         ]);
     }
 
@@ -78,100 +68,264 @@ class RecruitmentController extends Controller
      */
     public function update(Request $request) 
     {
-        // TODO: バリデーションとDB更新ロジック
-        return response()->json(['success' => true, 'message' => '求人情報を保存しました']);
+        $data = $request->validate([
+            'catch_copy' => 'required|string|max:100',
+            'message' => 'required|string|max:1000',
+            'hourly_wage_regular' => 'required|integer|min:0',
+            'trial_hourly_wage' => 'nullable|integer|min:0',
+            'salary_text' => 'nullable|string|max:1000',
+            'working_hours' => 'required|string|max:255',
+            'working_days' => 'required|string|max:255',
+            'regular_holiday' => 'nullable|string|max:255',
+            'job_content' => 'required|string|max:2000',
+            'store_atmosphere' => 'nullable|string|max:2000',
+            'qualification' => 'required|string|max:255',
+            'salary_tag_ids' => 'nullable|array',
+            'salary_tag_ids.*' => 'integer|exists:tags_salary,id',
+            'howto_tag_ids' => 'nullable|array',
+            'howto_tag_ids.*' => 'integer|exists:tags_howto,id',
+            'merit_tag_ids' => 'nullable|array',
+            'merit_tag_ids.*' => 'integer|exists:tags_merit,id',
+            'feature_tag_ids' => 'nullable|array',
+            'feature_tag_ids.*' => 'integer|exists:tags_feature,id',
+            'facility_tag_ids' => 'nullable|array',
+            'facility_tag_ids.*' => 'integer|exists:tags_facility,id',
+            'atmosphere_tag_ids' => 'nullable|array',
+            'atmosphere_tag_ids.*' => 'integer|exists:tags_atmosphere,id',
+        ]);
+
+        $shopId = $this->currentShopId();
+        $meta = $this->getRecruitMeta($shopId);
+        $payload = array_merge($meta, [
+            'catch_copy' => $data['catch_copy'],
+            'message' => $data['message'],
+            'working_days' => $data['working_days'],
+            'regular_holiday' => $data['regular_holiday'] ?? '',
+            'qualification' => $data['qualification'],
+            'tag_ids' => [
+                'salary' => array_values(array_map('intval', $request->input('salary_tag_ids', []))),
+                'howto' => array_values(array_map('intval', $request->input('howto_tag_ids', []))),
+                'merit' => array_values(array_map('intval', $request->input('merit_tag_ids', []))),
+                'feature' => array_values(array_map('intval', $request->input('feature_tag_ids', []))),
+                'facility' => array_values(array_map('intval', $request->input('facility_tag_ids', []))),
+                'atmosphere' => array_values(array_map('intval', $request->input('atmosphere_tag_ids', []))),
+            ],
+        ]);
+
+        $jobPayload = [
+            'shop_id' => $shopId,
+            'status' => 1,
+            'hourly_wage_regular' => (string) $data['hourly_wage_regular'],
+            'trial_hourly_wage' => $request->filled('trial_hourly_wage') ? (string) $data['trial_hourly_wage'] : null,
+            'has_trial' => $request->filled('trial_hourly_wage') ? 1 : 0,
+            'job_description' => $data['job_content'],
+            'salary' => $data['salary_text'] ?? '',
+            'atmosphere' => $data['store_atmosphere'] ?? '',
+            'noruma_cond' => json_encode($payload, JSON_UNESCAPED_UNICODE),
+            'updated_at' => now(),
+        ];
+
+        if (Schema::hasColumn('shop_jobs', 'working_hours')) {
+            $jobPayload['working_hours'] = $data['working_hours'];
+        }
+        if (Schema::hasColumn('shop_jobs', 'working_day')) {
+            $jobPayload['working_day'] = $data['working_days'];
+        }
+        if (Schema::hasColumn('shop_jobs', 'regular_holiday')) {
+            $jobPayload['regular_holiday'] = $data['regular_holiday'] ?? '';
+        }
+        if (Schema::hasColumn('shop_jobs', 'qualification')) {
+            $jobPayload['qualification'] = $data['qualification'];
+        }
+
+        $existing = DB::table('shop_jobs')->where('shop_id', $shopId)->exists();
+
+        if ($existing) {
+            DB::table('shop_jobs')
+                ->where('shop_id', $shopId)
+                ->update($jobPayload);
+        } else {
+            DB::table('shop_jobs')->insert(array_merge($jobPayload, [
+                'created_at' => now(),
+            ]));
+        }
+
+        return redirect()
+            ->route('shop.recruits.edit')
+            ->with('message', '求人情報を保存しました');
     }
 
-    /**
-     * ステータスページ用の求人詳細（お店からのひとこと・3種別カード）
-     */
-    private function getRecruitDetailForStatus()
+    private function getRecruitData(string $shopId): array
     {
+        $row = DB::table('shops')
+            ->leftJoin('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
+            ->leftJoin('shop_jobs', 'shops.id', '=', 'shop_jobs.shop_id')
+            ->where('shops.id', $shopId)
+            ->select('shops.id', 'shop_profiles.*', 'shop_jobs.*')
+            ->first();
+
+        $meta = $this->decodeMeta($row->noruma_cond ?? null);
+        $tagMap = $this->resolveRecruitTagNames($meta['tag_ids'] ?? []);
+        $subImages = DB::table('shop_images')
+            ->where('shop_id', $shopId)
+            ->orderByRaw('main_order IS NULL')
+            ->orderBy('main_order')
+            ->orderBy('id')
+            ->pluck('image_path')
+            ->map(fn ($path) => $this->assetPathForStored($path))
+            ->filter()
+            ->values()
+            ->all();
+
+        $mainImage = $this->assetPathForStored($row->main_image_path ?? null);
+        if (empty($subImages) && $mainImage) {
+            $subImages[] = $mainImage;
+        }
+
+        $workingHours = Schema::hasColumn('shop_jobs', 'working_hours') ? ($row->working_hours ?? '') : ($meta['working_hours'] ?? '');
+        $workingDays = Schema::hasColumn('shop_jobs', 'working_day') ? ($row->working_day ?? '') : ($meta['working_days'] ?? '');
+        $regularHoliday = Schema::hasColumn('shop_jobs', 'regular_holiday') ? ($row->regular_holiday ?? '') : ($meta['regular_holiday'] ?? '');
+        $qualification = Schema::hasColumn('shop_jobs', 'qualification') ? ($row->qualification ?? '') : ($meta['qualification'] ?? '');
+
         return [
-            'store_message' => "店長MESSAGE 未経験の方でも安心の研修制度があります。まずは体験入店からお気軽にどうぞ。一緒に楽しく働きましょう！",
-            'job_types' => [
-                'regular' => [
-                    'label' => '本入店',
-                    'hourly_wage' => 3000,
-                    'bonus' => 'ノルマ達成ボーナス報酬',
-                    'work_reward' => '5日勤務で 35,000〜200,000円',
-                    'daily_hours' => 6,
-                    'notes' => '本入店ノルマ達成時は別途ボーナス。交通費支給あり。',
+            'recruit' => [
+                'store_name' => $row->shop_name ?? '店舗',
+                'open_date' => !empty($row->opened_on) ? date('Y年n月j日', strtotime($row->opened_on)) : null,
+                'address' => trim(implode(' ', array_filter([$row->pref ?? null, $row->city ?? null, $row->addr2 ?? null, $row->addr3 ?? null]))),
+                'map_embed_src' => null,
+                'nearest_station' => $row->station1 ?? '',
+                'hourly_wage_regular' => isset($row->hourly_wage_regular) ? (int) $row->hourly_wage_regular : 0,
+                'trial_hourly_wage' => !empty($row->has_trial) && !empty($row->trial_hourly_wage) ? (int) $row->trial_hourly_wage : null,
+                'salary_text' => $row->salary ?? '',
+                'working_hours' => $workingHours,
+                'working_days' => $workingDays,
+                'regular_holiday' => $regularHoliday,
+                'job_content' => $row->job_description ?? '',
+                'store_atmosphere' => $row->atmosphere ?? '',
+                'qualification' => $qualification ?: '18歳以上（高校生不可）',
+                'catch_copy' => $meta['catch_copy'] ?? ($row->catch ?? ''),
+                'message' => $meta['message'] ?? ($row->message ?? ''),
+                'selected_benefits' => $tagMap['merit'],
+                'store_features' => [
+                    '報酬' => $tagMap['salary'],
+                    '働き方' => $tagMap['howto'],
+                    'メリット' => $tagMap['merit'],
+                    '特徴' => $tagMap['feature'],
+                    '設備' => $tagMap['facility'],
+                    'お店の雰囲気' => $tagMap['atmosphere'],
                 ],
-                'trial' => [
-                    'label' => '体験入店',
-                    'hourly_wage' => 2500,
-                    'bonus' => 'ノルマ達成ボーナス報酬',
-                    'work_reward' => '3日勤務で 10,000〜50,000円',
-                    'daily_hours' => 4,
-                    'notes' => '体験入店ノルマ達成で本入店への道も。まずはお試しから。',
-                ],
-                'help' => [
-                    'label' => 'ヘルプ採用',
-                    'hourly_wage' => 3000,
-                    'bonus' => 'ノルマ達成ボーナス報酬',
-                    'work_reward' => '5,000〜10,000円',
-                    'daily_hours' => 4,
-                    'notes' => 'ヘルプ求人ノルマ達成時は優遇。単発・短期OK。',
-                ],
+                'salary_tag_ids' => $this->normalizeTagIds($meta['tag_ids']['salary'] ?? []),
+                'howto_tag_ids' => $this->normalizeTagIds($meta['tag_ids']['howto'] ?? []),
+                'merit_tag_ids' => $this->normalizeTagIds($meta['tag_ids']['merit'] ?? []),
+                'feature_tag_ids' => $this->normalizeTagIds($meta['tag_ids']['feature'] ?? []),
+                'facility_tag_ids' => $this->normalizeTagIds($meta['tag_ids']['facility'] ?? []),
+                'atmosphere_tag_ids' => $this->normalizeTagIds($meta['tag_ids']['atmosphere'] ?? []),
+                'status' => ((int) ($row->status ?? 1)) === 1 ? 'active' : 'inactive',
+                'updated_at' => !empty($row->updated_at) ? date('Y.m.d', strtotime($row->updated_at)) : null,
+            ],
+            'shop' => [
+                'name' => $row->shop_name ?? '店舗',
+                'word' => $row->catch ?? '',
+                'main_img' => $mainImage,
+                'area' => trim(implode(' ', array_filter([$row->pref ?? null, $row->city ?? null]))),
+                'concept' => $row->overview ?? '',
+                'review_avg' => 0,
+                'review_cnt' => 0,
+                'sub_images' => $subImages,
             ],
         ];
     }
 
-    /**
-     * 共通のモックデータ取得用（プレビュー・編集用）
-     */
-    private function getMockData()
+    private function getRecruitMeta(string $shopId): array
     {
-        return [
-            'store_name' => 'KKK',
-            'open_date' => '1979年11月11日',
-            'address' => '東京都豊島区東池袋1-18-1 Hareza池袋20F',
-            'map_embed_src' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3238.388244628906!2d139.7106!3d35.7295!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzXCsDQzJzQ2LjIiTiAxMznCsDQyJzM4LjIiRQ!5e0!3m2!1sja!2sjp!4v1640000000000!5m2!1sja!2sjp',
-            'nearest_station' => '池袋駅徒歩5分',
-            'hourly_wage_regular' => 5000,
-            'trial_hourly_wage' => 4000,
-            'salary_text' => "各種バック完備。指名・同伴手当あり。ノルマ達成ボーナスあり。",
-            'working_hours' => "20:00 〜 翌1:00",
-            'working_days' => "週1日からOK / シフト制",
-            'regular_holiday' => "不定休（要相談）",
-            'job_content' => "接客・ドリンク提供・お客様との会話が主なお仕事です。未経験者も研修でサポートします。",
-            'store_atmosphere' => "落ち着いた雰囲気で、初めての方でも働きやすいお店です。スタッフ同士の仲も良く、アットホームです。",
-            'qualification' => "18歳以上（高校生不可）",
-            'catch_copy' => "六本木で一番稼げるお店です！",
-            'message' => "未経験の方でも安心の研修制度があります。まずは体験入店からお気軽にどうぞ。",
-            'benefits' => ['送迎あり', '日払いOK', '衣装貸出あり', '寮完備'],
-            'selected_benefits' => ['送迎あり', '日払いOK'],
-            'store_features' => [
-                '報酬' => ['1ヶ月払い', '15日払い', '10日払い', '1週間払い', '翌日払い'],
-                '働き方' => ['週1からOK', '短期OK', '1日1h以内'],
-                'お店の雰囲気' => ['アットホーム', '少人数', '未経験歓迎'],
-                'メリット' => ['レンタル衣装有り', 'ヘアメイク有り', 'ヘアメイク不要'],
-                '特徴' => ['未経験', 'シングルマザーOK', '経験者優遇'],
-                '設備' => ['駐車場有り', '車通勤OK', '寮有り'],
-            ],
-        ];
+        $raw = DB::table('shop_jobs')->where('shop_id', $shopId)->value('noruma_cond');
+
+        return $this->decodeMeta($raw);
     }
 
-    /**
-     * 店舗プロフィール画面と同等のモック店舗情報
-     * プロファイルと求人票の見た目・内容を揃えるために使用
-     */
-    private function getMockShopProfile()
+    private function decodeMeta(?string $raw): array
     {
-        return [
-            'name'       => 'Club Luxurious',
-            'word'       => '最高級の空間で、最高の出会いを。',
-            'main_img'   => asset('storage/mock/shops/out-1.png'),
-            'area'       => '東京都港区六本木',
-            'concept'    => "六本木駅から徒歩3分。落ち着いた雰囲気の高級ラウンジです。\n選び抜かれたキャストと共に、至福のひとときを提供いたします。",
-            'review_avg' => 4.8,
-            'review_cnt' => 124,
-            'sub_images' => [
-                asset('storage/mock/shops/inside-1.png'),
-                asset('storage/mock/shops/inside-2.png'),
-                asset('storage/mock/shops/inside-3.png'),
-            ],
+        if (empty($raw)) {
+            return [];
+        }
+
+        $decoded = json_decode($raw, true);
+
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    private function resolveRecruitTagNames(array $tagIds): array
+    {
+        $tables = [
+            'salary' => 'tags_salary',
+            'howto' => 'tags_howto',
+            'merit' => 'tags_merit',
+            'feature' => 'tags_feature',
+            'facility' => 'tags_facility',
+            'atmosphere' => 'tags_atmosphere',
         ];
+
+        $resolved = [];
+        foreach ($tables as $key => $table) {
+            $ids = $this->normalizeTagIds($tagIds[$key] ?? []);
+            if (empty($ids) || !Schema::hasTable($table)) {
+                $resolved[$key] = [];
+                continue;
+            }
+
+            $resolved[$key] = DB::table($table)
+                ->whereIn('id', $ids)
+                ->orderBy('id')
+                ->pluck('name')
+                ->all();
+        }
+
+        return $resolved;
+    }
+
+    private function normalizeTagIds(array $ids): array
+    {
+        return collect($ids)
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    private function assetPathForStored(?string $path): string
+    {
+        if (empty($path)) {
+            return asset('assets/images/common/no-image.png');
+        }
+        if (str_starts_with($path, 'uploads/')) {
+            return asset($path);
+        }
+        if (str_starts_with($path, 'public/')) {
+            return asset('storage/' . substr($path, 7));
+        }
+
+        return asset(ltrim($path, '/'));
+    }
+
+    private function currentShopId(): string
+    {
+        return (string) auth()->guard('shop')->user()->shop_id;
+    }
+
+    private function normalizeShopId(string|int $value): string
+    {
+        return str_starts_with((string) $value, 's')
+            ? (string) $value
+            : 's' . str_pad((string) $value, 8, '0', STR_PAD_LEFT);
+    }
+
+    private function toNumericShopId(string $shopId): ?int
+    {
+        if (!str_starts_with($shopId, 's')) {
+            return is_numeric($shopId) ? (int) $shopId : null;
+        }
+
+        return (int) ltrim(substr($shopId, 1), '0');
     }
 }

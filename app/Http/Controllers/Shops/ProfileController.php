@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Shops;
 
 use App\Http\Controllers\Controller;
+use App\Services\AdminMasterService;
 use Illuminate\Http\Request;
 use App\Http\Requests\Shops\UploadImageRequest;
 use Illuminate\Support\Facades\Storage;
@@ -10,6 +11,10 @@ use Illuminate\Support\Facades\File;
 
 class ProfileController extends Controller
 {
+    public function __construct(private readonly AdminMasterService $adminMasterService)
+    {
+    }
+
     /**
      * プロフィール表示（閲覧・プレビュー）
      */
@@ -30,6 +35,7 @@ class ProfileController extends Controller
         return view('shops.profile.edit', [
             'pageId' => 'mypage',
             'shopData' => $this->buildShopEditData($this->currentShopId()),
+            'masters' => $this->adminMasterService->getShopProfileMasters(),
         ]);
     }
 
@@ -45,6 +51,8 @@ class ProfileController extends Controller
             'pref' => 'required|string|max:50',
             'city' => 'nullable|string|max:100',
             'addr1' => 'nullable|string|max:255',
+            'industry_ids' => 'nullable|array',
+            'industry_ids.*' => 'integer|exists:industries,id',
         ]);
 
         $shopId = $this->currentShopId();
@@ -73,6 +81,8 @@ class ProfileController extends Controller
                 'created_at' => now(),
             ]
         );
+
+        $this->syncShopIndustries($shopId, $request->input('industry_ids', []));
 
         return redirect()
             ->route('shop.profile.store.edit')
@@ -268,6 +278,7 @@ class ProfileController extends Controller
             'pref' => $row->pref ?? '東京都',
             'city' => $row->city ?? '',
             'addr1' => trim(implode(' ', array_filter([$row->addr2 ?? null, $row->addr3 ?? null]))),
+            'industry_ids' => $this->fetchShopIndustryIds($shopId),
         ];
     }
 
@@ -291,5 +302,43 @@ class ProfileController extends Controller
         }
 
         return asset(ltrim($path, '/'));
+    }
+
+    private function fetchShopIndustryIds(string $shopId): array
+    {
+        if (!DB::getSchemaBuilder()->hasTable('industry_shop')) {
+            return [];
+        }
+
+        return DB::table('industry_shop')
+            ->where('shop_id', $shopId)
+            ->orderBy('industry_id')
+            ->pluck('industry_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+    }
+
+    private function syncShopIndustries(string $shopId, array $industryIds): void
+    {
+        if (!DB::getSchemaBuilder()->hasTable('industry_shop')) {
+            return;
+        }
+
+        DB::table('industry_shop')->where('shop_id', $shopId)->delete();
+
+        $rows = collect($industryIds)
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->map(fn ($industryId) => [
+                'shop_id' => $shopId,
+                'industry_id' => $industryId,
+            ])
+            ->all();
+
+        if (!empty($rows)) {
+            DB::table('industry_shop')->insert($rows);
+        }
     }
 }

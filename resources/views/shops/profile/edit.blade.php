@@ -38,6 +38,37 @@
         color: #666;
         margin-top: 5px;
     }
+    .checkbox-chip-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .checkbox-chip {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+    }
+    .checkbox-chip input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+    .checkbox-chip span {
+        display: inline-flex;
+        align-items: center;
+        min-height: 38px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.04);
+        color: #fff;
+        font-size: 0.85rem;
+    }
+    .checkbox-chip input:checked + span {
+        border-color: var(--gold);
+        background: rgba(212, 175, 55, 0.18);
+        color: #f8e7b0;
+    }
 </style>
 @endpush
 
@@ -70,6 +101,23 @@
                         <label class="form-label">キャッチコピー（ひとこと）</label>
                         <input type="text" name="word" class="form-input" value="{{ old('word', $shopData['word']) }}" placeholder="例：最高級の夜を、あなたに。">
                         <p class="input-hint">一覧画面やマイページ上部に表示される短い紹介文です。</p>
+                    </div>
+
+                    <div>
+                        <label class="form-label">業種</label>
+                        <div class="checkbox-chip-grid">
+                            @foreach(($masters['industries'] ?? []) as $industry)
+                                <label class="checkbox-chip">
+                                    <input
+                                        type="checkbox"
+                                        name="industry_ids[]"
+                                        value="{{ $industry->id }}"
+                                        {{ in_array((int) $industry->id, old('industry_ids', $shopData['industry_ids'] ?? []), true) ? 'checked' : '' }}
+                                    >
+                                    <span>{{ $industry->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
             </div>
