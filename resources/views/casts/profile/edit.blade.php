@@ -8,14 +8,19 @@
 <link rel="stylesheet" href="{{ asset('assets/css/profile_edit.css') }}">
 @endpush
 
+@push('scripts')
+<script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
+@endpush
+
 @section('content')
 <div class="edit-container cast-profile-edit">
     @if(session('message'))
         <p class="profile-edit-flash">{{ session('message') }}</p>
     @endif
 
-    <form action="{{ route($updateRoute ?? 'cast.profile.update') }}" method="POST" class="profile-edit-form">
+    <form action="{{ route($updateRoute ?? 'cast.profile.update') }}" method="POST" class="profile-edit-form h-adr">
         @csrf
+        <span class="p-country-name" style="display:none;">Japan</span>
 
         {{-- ニックネーム --}}
         <div class="form-section">
@@ -57,23 +62,53 @@
         {{-- 居住地 --}}
         <div class="form-section">
             <label class="edit-label">居住地</label>
+            <div class="address-item" style="margin-bottom: 12px;">
+                <label class="edit-label sub" for="zip">郵便番号</label>
+                <input
+                    type="text"
+                    id="zip"
+                    name="zip"
+                    class="edit-input p-postal-code"
+                    value="{{ old('zip', $profile['zip']) }}"
+                    inputmode="numeric"
+                    autocomplete="postal-code"
+                    placeholder="例：1600021"
+                >
+            </div>
             <div class="address-row">
                 <div class="address-item">
                     <label class="edit-label sub" for="pref">都道府県</label>
-                    <select id="pref" name="pref" class="edit-select">
-                        <option value="東京都" {{ old('pref', $profile['pref']) === '東京都' ? 'selected' : '' }}>東京都</option>
-                        <option value="大阪府" {{ old('pref', $profile['pref']) === '大阪府' ? 'selected' : '' }}>大阪府</option>
-                        <option value="福岡県" {{ old('pref', $profile['pref']) === '福岡県' ? 'selected' : '' }}>福岡県</option>
+                    <select id="pref" name="pref" class="edit-select p-region">
+                        <option value="">選択してください</option>
+                        @foreach ($prefOptions as $pref)
+                            <option value="{{ $pref }}" {{ old('pref', $profile['pref']) === $pref ? 'selected' : '' }}>{{ $pref }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div class="address-item">
                     <label class="edit-label sub" for="city">市区町村</label>
-                    <select id="city" name="city" class="edit-select">
-                        <option value="中央区" {{ old('city', $profile['city']) === '中央区' ? 'selected' : '' }}>中央区</option>
-                        <option value="港区" {{ old('city', $profile['city']) === '港区' ? 'selected' : '' }}>港区</option>
-                        <option value="渋谷区" {{ old('city', $profile['city']) === '渋谷区' ? 'selected' : '' }}>渋谷区</option>
-                    </select>
+                    <input
+                        type="text"
+                        id="city"
+                        name="city"
+                        class="edit-input p-locality"
+                        value="{{ old('city', $profile['city']) }}"
+                        autocomplete="address-level2"
+                        placeholder="例：新宿区"
+                    >
                 </div>
+            </div>
+            <div class="address-item" style="margin-top: 12px;">
+                <label class="edit-label sub" for="addr1">町名・番地</label>
+                <input
+                    type="text"
+                    id="addr1"
+                    name="addr1"
+                    class="edit-input p-street-address"
+                    value="{{ old('addr1', $profile['addr1']) }}"
+                    autocomplete="address-line1"
+                    placeholder="例：1-2-3"
+                >
             </div>
         </div>
 

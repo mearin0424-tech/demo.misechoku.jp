@@ -72,6 +72,10 @@
 </style>
 @endpush
 
+@push('scripts')
+<script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
+@endpush
+
 @section('content')
 <div class="contents inner animate-fadeIn p-4 pb-24">
     {{-- ヘッダーエリア --}}
@@ -83,8 +87,9 @@
         <a href="{{ route('shop.mypage.index') }}" class="text-gray-400 text-sm">キャンセル</a>
     </div>
 
-    <form action="{{ route('shop.profile.store.update') }}" method="POST">
+    <form action="{{ route('shop.profile.store.update') }}" method="POST" class="h-adr">
         @csrf
+        <span class="p-country-name" style="display:none;">Japan</span>
         <div class="space-y-6">
 
             {{-- 基本情報セクション --}}
@@ -135,25 +140,54 @@
             {{-- 所在地セクション --}}
             <div class="form-section glass-panel p-6 rounded-2xl">
                 <h3 class="text-xs text-gray-500 mb-6 border-b border-white/5 pb-2 uppercase tracking-widest">Location</h3>
+
+                <div class="mb-4">
+                    <label class="form-label">郵便番号</label>
+                    <input
+                        type="text"
+                        name="zip"
+                        class="form-input p-postal-code"
+                        value="{{ old('zip', $shopData['zip']) }}"
+                        inputmode="numeric"
+                        autocomplete="postal-code"
+                        placeholder="例：1060032"
+                    >
+                    <p class="input-hint">郵便番号を入力すると、都道府県・市区町村が自動補完されます。</p>
+                </div>
                 
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="form-label">都道府県</label>
-                        <select name="pref" class="form-select">
-                            <option value="東京都" {{ $shopData['pref'] == '東京都' ? 'selected' : '' }}>東京都</option>
-                            <option value="大阪府" {{ $shopData['pref'] == '大阪府' ? 'selected' : '' }}>大阪府</option>
-                            {{-- 他の都道府県 --}}
+                        <select name="pref" class="form-select p-region">
+                            <option value="">選択してください</option>
+                            @foreach ($prefOptions as $pref)
+                                <option value="{{ $pref }}" {{ old('pref', $shopData['pref']) === $pref ? 'selected' : '' }}>{{ $pref }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div>
                         <label class="form-label">市区町村</label>
-                        <input type="text" name="city" class="form-input" value="{{ old('city', $shopData['city']) }}" placeholder="例：港区六本木">
+                        <input
+                            type="text"
+                            name="city"
+                            class="form-input p-locality"
+                            value="{{ old('city', $shopData['city']) }}"
+                            autocomplete="address-level2"
+                            placeholder="例：港区六本木"
+                        >
                     </div>
                 </div>
 
                 <div>
                     <label class="form-label">以降の住所・ビル名</label>
-                    <input type="text" name="addr1" class="form-input" value="{{ old('addr1', $shopData['addr1']) }}" placeholder="例：7-12-34 〇〇ビル 2F">
+                    <input
+                        type="text"
+                        name="addr1"
+                        class="form-input p-street-address"
+                        value="{{ old('addr1', $shopData['addr1']) }}"
+                        autocomplete="address-line1"
+                        placeholder="例：7-12-34 〇〇ビル 2F"
+                    >
                 </div>
             </div>
 

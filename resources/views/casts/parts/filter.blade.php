@@ -8,6 +8,7 @@
                 <span>検索</span>
             </button>
         </div>
+        <div class="search-filter-simple__note">ひらがな・カタカナ、全角・半角の違いを吸収して検索します。</div>
     </div>
     <div class="search-filter-detail-row">
         <button type="button" class="search-filter-detail-btn" id="open-detail-search" aria-controls="detail-search-modal" aria-expanded="false">

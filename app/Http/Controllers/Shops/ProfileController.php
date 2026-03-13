@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Shops;
 
+use App\Consts\CommonConsts;
 use App\Http\Controllers\Controller;
 use App\Services\AdminMasterService;
 use Illuminate\Http\Request;
@@ -36,6 +37,7 @@ class ProfileController extends Controller
             'pageId' => 'mypage',
             'shopData' => $this->buildShopEditData($this->currentShopId()),
             'masters' => $this->adminMasterService->getShopProfileMasters(),
+            'prefOptions' => CommonConsts::PREFS,
         ]);
     }
 
@@ -48,6 +50,7 @@ class ProfileController extends Controller
             'shop_name' => 'required|string|max:100',
             'overview' => 'nullable|string',
             'word' => 'nullable|string|max:50',
+            'zip' => ['nullable', 'regex:/^\d{3}-?\d{4}$/'],
             'pref' => 'required|string|max:50',
             'city' => 'nullable|string|max:100',
             'addr1' => 'nullable|string|max:255',
@@ -71,6 +74,7 @@ class ProfileController extends Controller
             ['shop_id' => $shopId],
             [
                 'shop_name' => $request->input('shop_name'),
+                'zip' => $this->normalizeZip($request->input('zip')),
                 'pref' => $request->input('pref'),
                 'city' => $request->input('city'),
                 'addr2' => $request->input('addr1'),
@@ -268,13 +272,14 @@ class ProfileController extends Controller
     {
         $row = DB::table('shop_profiles')
             ->where('shop_id', $shopId)
-            ->select('shop_name', 'catch', 'overview', 'pref', 'city', 'addr2', 'addr3')
+            ->select('shop_name', 'catch', 'overview', 'zip', 'pref', 'city', 'addr2', 'addr3')
             ->first();
 
         return [
             'shop_name' => $row->shop_name ?? '',
             'word' => $row->catch ?? '',
             'overview' => $row->overview ?? '',
+            'zip' => $row->zip ?? '',
             'pref' => $row->pref ?? '東京都',
             'city' => $row->city ?? '',
             'addr1' => trim(implode(' ', array_filter([$row->addr2 ?? null, $row->addr3 ?? null]))),
@@ -340,5 +345,24 @@ class ProfileController extends Controller
         if (!empty($rows)) {
             DB::table('industry_shop')->insert($rows);
         }
+    }
+
+    private function normalizeZip(?string $zip): ?string
+    {
+        if ($zip === null) {
+            return null;
+        }
+
+        $digits = preg_replace('/\D+/', '', $zip);
+
+        if ($digits === null || $digits === '') {
+            return null;
+        }
+
+        if (strlen($digits) !== 7) {
+            return trim($zip);
+        }
+
+        return substr($digits, 0, 3) . '-' . substr($digits, 3);
     }
 }

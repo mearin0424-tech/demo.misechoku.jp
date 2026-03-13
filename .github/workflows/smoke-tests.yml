@@ -8,16 +8,35 @@ on:
 jobs:
   php-smoke:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: testing
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
     env:
       APP_ENV: testing
       APP_KEY: base64:QkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkI=
       APP_URL: http://localhost
-      DB_CONNECTION: sqlite
-      DB_DATABASE: database/testing.sqlite
+      BCRYPT_ROUNDS: 4
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: testing
+      DB_USERNAME: root
+      DB_PASSWORD: root
       CACHE_DRIVER: array
       SESSION_DRIVER: array
       QUEUE_CONNECTION: sync
       MAIL_MAILER: array
+      VIEW_COMPILED_PATH: storage/framework/views
 
     steps:
       - name: Checkout
@@ -28,7 +47,7 @@ jobs:
         with:
           php-version: '8.2'
           coverage: none
-          extensions: mbstring, sqlite3, pdo_sqlite, openssl, dom, xml, xmlwriter
+          extensions: mbstring, pdo_mysql, openssl, dom, xml, xmlwriter
 
       - name: Cache Composer packages
         uses: actions/cache@v4
@@ -42,8 +61,6 @@ jobs:
           cp .env.testing .env
           mkdir -p storage/framework/views
           mkdir -p bootstrap/cache
-          mkdir -p database
-          touch database/testing.sqlite
 
       - name: Sync Composer lock for CI
         run: composer update minishlink/web-push --no-interaction --prefer-dist

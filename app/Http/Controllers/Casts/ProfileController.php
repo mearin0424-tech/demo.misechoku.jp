@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Casts;
 
+use App\Consts\CommonConsts;
 use App\Http\Controllers\Controller;
 use App\Services\AdminMasterService;
 use Carbon\Carbon;
@@ -25,8 +26,10 @@ class ProfileController extends Controller
                 'cast_profiles.nickname',
                 'cast_profiles.name',
                 'cast_profiles.birthday',
+                'cast_profiles.zip',
                 'cast_profiles.pref',
                 'cast_profiles.city',
+                'cast_profiles.addr1',
                 'cast_profiles.pr',
                 'cast_profiles.height',
                 'cast_profiles.weight',
@@ -54,8 +57,10 @@ class ProfileController extends Controller
             'birth_year'     => $birthday ? (string) $birthday->year : (string) date('Y'),
             'birth_month'    => $birthday ? (string) $birthday->month : '1',
             'birth_day'      => $birthday ? (string) $birthday->day : '1',
+            'zip'            => $row->zip ?? '',
             'pref'           => $row->pref ?? '東京都',
             'city'           => $row->city ?? '中央区',
+            'addr1'          => $row->addr1 ?? '',
             'intro'          => $row->pr ?? '',
             'height'         => $row->height ? (string) $row->height : '',
             'weight'         => $row->weight ? (string) $row->weight : '',
@@ -83,8 +88,10 @@ class ProfileController extends Controller
             'birth_year'     => (string) date('Y'),
             'birth_month'    => '1',
             'birth_day'      => '1',
+            'zip'            => '',
             'pref'           => '東京都',
             'city'           => '中央区',
+            'addr1'          => '',
             'intro'          => '',
             'height'         => '',
             'weight'         => '',
@@ -114,6 +121,7 @@ class ProfileController extends Controller
             'pageId'      => 'mypage',
             'profile'     => $data,
             'masters'     => $this->adminMasterService->getCastProfileMasters(),
+            'prefOptions' => CommonConsts::PREFS,
             'updateRoute' => 'cast.profile.update',
             'editRoute'   => 'cast.profile.edit',
         ]);
@@ -130,8 +138,10 @@ class ProfileController extends Controller
             'birth_year'   => 'required|string|max:4',
             'birth_month'  => 'required|string|max:2',
             'birth_day'    => 'required|string|max:2',
+            'zip'          => ['nullable', 'regex:/^\d{3}-?\d{4}$/'],
             'pref'         => 'nullable|string|max:50',
             'city'         => 'nullable|string|max:50',
+            'addr1'        => 'nullable|string|max:100',
             'intro'        => 'nullable|string',
             'height'       => 'nullable|string|max:10',
             'weight'       => 'nullable|string|max:10',
@@ -189,8 +199,10 @@ class ProfileController extends Controller
                     (int) $request->input('birth_month'),
                     (int) $request->input('birth_day')
                 ),
+                'zip' => $this->normalizeZip($request->input('zip')),
                 'pref' => $request->input('pref'),
                 'city' => $request->input('city'),
+                'addr1' => $request->input('addr1'),
                 'pr' => $request->input('intro'),
                 'height' => $request->filled('height') ? (int) $request->input('height') : null,
                 'weight' => $request->filled('weight') ? (int) $request->input('weight') : null,
@@ -553,5 +565,24 @@ class ProfileController extends Controller
             'day_night' => '昼or夜',
             default => '',
         };
+    }
+
+    private function normalizeZip(?string $zip): ?string
+    {
+        if ($zip === null) {
+            return null;
+        }
+
+        $digits = preg_replace('/\D+/', '', $zip);
+
+        if ($digits === null || $digits === '') {
+            return null;
+        }
+
+        if (strlen($digits) !== 7) {
+            return trim($zip);
+        }
+
+        return substr($digits, 0, 3) . '-' . substr($digits, 3);
     }
 }

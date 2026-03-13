@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Common;
 
+use App\Consts\CommonConsts;
 use App\Http\Controllers\Controller;
 use App\Models\Manager;
 use App\Models\Member;
@@ -31,8 +32,10 @@ class RegistrationController extends Controller
             'birth_year' => ['required', 'integer', 'between:1950,2100'],
             'birth_month' => ['required', 'integer', 'between:1,12'],
             'birth_day' => ['required', 'integer', 'between:1,31'],
+            'zip' => ['required', 'regex:/^\d{3}-?\d{4}$/'],
             'pref' => ['required', 'string', 'max:20'],
             'city' => ['required', 'string', 'max:100'],
+            'addr1' => ['nullable', 'string', 'max:100'],
             'phone' => ['required', 'string', 'max:20'],
             'email' => ['required', 'email', 'max:255', 'unique:casts,email'],
             'experience' => ['required', 'in:beginner,experienced'],
@@ -75,8 +78,10 @@ class RegistrationController extends Controller
                     (int) $request->input('birth_month'),
                     (int) $request->input('birth_day')
                 ),
+                'zip' => $this->normalizeZip($request->input('zip')),
                 'pref' => $request->input('pref'),
                 'city' => $request->input('city'),
+                'addr1' => $request->input('addr1'),
                 'tel' => $request->input('phone'),
                 'shift' => $this->mapCastShift((string) $request->input('shift_style')),
                 'exp' => $request->input('experience') === 'experienced' ? 1 : 0,
@@ -102,6 +107,7 @@ class RegistrationController extends Controller
             'company_name' => ['required', 'string', 'max:100'],
             'shop_name' => ['required', 'string', 'max:100'],
             'contact_name' => ['required', 'string', 'max:100'],
+            'zip' => ['required', 'regex:/^\d{3}-?\d{4}$/'],
             'pref' => ['required', 'string', 'max:20'],
             'city' => ['required', 'string', 'max:100'],
             'address' => ['required', 'string', 'max:255'],
@@ -129,6 +135,7 @@ class RegistrationController extends Controller
             DB::table('shop_profiles')->insert([
                 'shop_id' => $shopId,
                 'shop_name' => $request->input('shop_name'),
+                'zip' => $this->normalizeZip($request->input('zip')),
                 'pref' => $request->input('pref'),
                 'city' => $request->input('city'),
                 'addr2' => $request->input('address'),
@@ -199,7 +206,7 @@ class RegistrationController extends Controller
             'alternateUrl' => $isCast ? route('shop.register') : route('cast.register'),
             'alternateLabel' => $isCast ? '店舗登録はこちら' : 'キャスト登録はこちら',
             'loginUrl' => route('login.demo'),
-            'prefOptions' => ['東京都', '大阪府', '愛知県', '福岡県', '北海道'],
+            'prefOptions' => CommonConsts::PREFS,
         ];
     }
 
@@ -239,5 +246,24 @@ class RegistrationController extends Controller
     private function mapPlanLabel(string $plan): string
     {
         return $plan === 'premium' ? 'Premium' : 'Basic';
+    }
+
+    private function normalizeZip(?string $zip): ?string
+    {
+        if ($zip === null) {
+            return null;
+        }
+
+        $digits = preg_replace('/\D+/', '', $zip);
+
+        if ($digits === null || $digits === '') {
+            return null;
+        }
+
+        if (strlen($digits) !== 7) {
+            return trim($zip);
+        }
+
+        return substr($digits, 0, 3) . '-' . substr($digits, 3);
     }
 }

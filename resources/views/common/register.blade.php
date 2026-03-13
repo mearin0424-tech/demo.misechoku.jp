@@ -4,6 +4,10 @@
 @section('body-class', $bodyClass)
 @section('guide_message', $guideMessage)
 
+@push('scripts')
+    <script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
+@endpush
+
 @section('content')
     <div class="register-page">
         <section class="register-hero">
@@ -19,8 +23,9 @@
             </div>
         </section>
 
-        <form method="POST" action="{{ $formAction }}" class="register-form">
+        <form method="POST" action="{{ $formAction }}" class="register-form h-adr">
             @csrf
+            <span class="p-country-name" style="display:none;">Japan</span>
 
             @if (session('success'))
                 <div class="register-alert register-alert-success">
@@ -64,10 +69,24 @@
                         </div>
                     </div>
 
+                    <label class="register-field">
+                        <span>郵便番号 <em>必須</em></span>
+                        <input
+                            type="text"
+                            name="zip"
+                            value="{{ old('zip') }}"
+                            class="p-postal-code"
+                            inputmode="numeric"
+                            autocomplete="postal-code"
+                            placeholder="例：1600021"
+                        >
+                        <small class="register-field-hint">入力すると都道府県・市区町村が自動補完されます。</small>
+                    </label>
+
                     <div class="register-grid register-grid-two">
                         <label class="register-field">
                             <span>都道府県 <em>必須</em></span>
-                            <select name="pref">
+                            <select name="pref" class="p-region">
                                 <option value="">選択してください</option>
                                 @foreach ($prefOptions as $pref)
                                     <option value="{{ $pref }}" @selected(old('pref') === $pref)>{{ $pref }}</option>
@@ -77,9 +96,28 @@
 
                         <label class="register-field">
                             <span>市区町村 <em>必須</em></span>
-                            <input type="text" name="city" value="{{ old('city') }}" placeholder="例：新宿区歌舞伎町">
+                            <input
+                                type="text"
+                                name="city"
+                                value="{{ old('city') }}"
+                                class="p-locality"
+                                autocomplete="address-level2"
+                                placeholder="例：新宿区歌舞伎町"
+                            >
                         </label>
                     </div>
+
+                    <label class="register-field">
+                        <span>町名・番地</span>
+                        <input
+                            type="text"
+                            name="addr1"
+                            value="{{ old('addr1') }}"
+                            class="p-street-address"
+                            autocomplete="address-line1"
+                            placeholder="例：1-2-3"
+                        >
+                    </label>
 
                     <div class="register-grid register-grid-two">
                         <label class="register-field">
@@ -139,10 +177,24 @@
                         </label>
                     </div>
 
+                    <label class="register-field">
+                        <span>郵便番号 <em>必須</em></span>
+                        <input
+                            type="text"
+                            name="zip"
+                            value="{{ old('zip') }}"
+                            class="p-postal-code"
+                            inputmode="numeric"
+                            autocomplete="postal-code"
+                            placeholder="例：1060032"
+                        >
+                        <small class="register-field-hint">入力すると都道府県・市区町村が自動補完されます。</small>
+                    </label>
+
                     <div class="register-grid register-grid-two">
                         <label class="register-field">
                             <span>都道府県 <em>必須</em></span>
-                            <select name="pref">
+                            <select name="pref" class="p-region">
                                 <option value="">選択してください</option>
                                 @foreach ($prefOptions as $pref)
                                     <option value="{{ $pref }}" @selected(old('pref') === $pref)>{{ $pref }}</option>
@@ -152,13 +204,27 @@
 
                         <label class="register-field">
                             <span>市区町村 <em>必須</em></span>
-                            <input type="text" name="city" value="{{ old('city') }}" placeholder="例：港区六本木">
+                            <input
+                                type="text"
+                                name="city"
+                                value="{{ old('city') }}"
+                                class="p-locality"
+                                autocomplete="address-level2"
+                                placeholder="例：港区六本木"
+                            >
                         </label>
                     </div>
 
                     <label class="register-field">
                         <span>住所・ビル名 <em>必須</em></span>
-                        <input type="text" name="address" value="{{ old('address') }}" placeholder="例：7-12-34 ミセチョクビル 5F">
+                        <input
+                            type="text"
+                            name="address"
+                            value="{{ old('address') }}"
+                            class="p-street-address"
+                            autocomplete="address-line1"
+                            placeholder="例：7-12-34 ミセチョクビル 5F"
+                        >
                     </label>
 
                     <label class="register-field">
@@ -413,6 +479,12 @@
             color: #f6d98b;
             font-size: 0.73rem;
             margin-left: 6px;
+        }
+
+        .register-field-hint {
+            color: rgba(218, 199, 199, 0.7);
+            font-size: 0.73rem;
+            line-height: 1.6;
         }
 
         .register-field input,

@@ -54,13 +54,14 @@ class SearchController extends BaseSearchController
     {
         $keyword = $request->query('keyword');
         $keyword = is_string($keyword) ? trim($keyword) : '';
+        $normalizedKeyword = $this->normalizeSearchText($keyword);
         $industries = $request->query('industry', []);
         $industries = is_array($industries) ? $industries : (is_string($industries) ? [$industries] : []);
 
-        return array_values(array_filter($items, function ($item) use ($keyword, $industries) {
-            if ($keyword !== '') {
+        return array_values(array_filter($items, function ($item) use ($normalizedKeyword, $industries) {
+            if ($normalizedKeyword !== '') {
                 $haystack = ($item['name'] ?? '') . ' ' . implode(' ', $item['tags'] ?? []);
-                if (mb_stripos($haystack, $keyword) === false) {
+                if (!str_contains($this->normalizeSearchText($haystack), $normalizedKeyword)) {
                     return false;
                 }
             }
