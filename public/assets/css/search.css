@@ -605,80 +605,12 @@
 }
 
 /* ========== AIレコメンド ========== */
-body.page-search-ai #character-guide {
-    display: none;
-}
-
 .ai-recommend {
     display: flex;
     flex-direction: column;
     gap: 14px;
     min-height: calc(100vh - var(--header-height) - var(--footer-height) - 56px);
-    padding: 14px 0 calc(var(--footer-height) + 16px);
-}
-
-.ai-recommend__hero {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px;
-    background: linear-gradient(180deg, rgba(42, 18, 24, 0.96), rgba(26, 11, 14, 0.98));
-    border: 1px solid rgba(230, 208, 128, 0.18);
-    border-radius: 18px;
-    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.22);
-}
-
-.ai-recommend__hero-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    overflow: hidden;
-    flex-shrink: 0;
-    background: radial-gradient(circle at 35% 35%, #fff2c2 0%, #d4af37 100%);
-    border: 2px solid rgba(255, 255, 255, 0.65);
-}
-
-.ai-recommend__hero-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-.ai-recommend__hero-body {
-    min-width: 0;
-    flex: 1;
-}
-
-.ai-recommend__eyebrow {
-    margin: 0 0 4px;
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    color: var(--color-gold);
-}
-
-.ai-recommend__hero-body h3 {
-    margin: 0;
-    font-size: 1rem;
-    line-height: 1.5;
-    color: #fff8e6;
-}
-
-.ai-recommend__hero-body p:last-child {
-    margin: 6px 0 0;
-    font-size: 0.82rem;
-    line-height: 1.6;
-    color: rgba(255, 248, 230, 0.72);
-}
-
-.ai-recommend__reset {
-    flex-shrink: 0;
-    padding: 9px 12px;
-    border: 1px solid rgba(230, 208, 128, 0.35);
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.06);
-    color: var(--color-gold);
-    font-size: 0.78rem;
-    cursor: pointer;
+    padding: 4px 0 calc(var(--footer-height) + 16px);
 }
 
 .ai-recommend__chat {
@@ -879,15 +811,6 @@ body.page-search-ai #character-guide {
 }
 
 @media (max-width: 640px) {
-    .ai-recommend__hero {
-        align-items: flex-start;
-        flex-wrap: wrap;
-    }
-
-    .ai-recommend__reset {
-        margin-left: 68px;
-    }
-
     .ai-recommend__message,
     .ai-recommend__cards {
         max-width: 100%;
