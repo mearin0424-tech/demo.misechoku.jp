@@ -266,10 +266,10 @@
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    padding: 12px 15px 24px;
+    padding: 10px 12px 18px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
     background: var(--color-main);
 }
 
@@ -319,7 +319,7 @@
 .message-row {
     display: flex;
     width: 100%;
-    margin-bottom: 10px;
+    margin-bottom: 4px;
     align-items: flex-end;
 }
 
@@ -330,12 +330,12 @@
 /* 相手メッセージ用：吹き出し左端のアイコン */
 .msg-avatar-wrap {
     flex-shrink: 0;
-    margin-right: 8px;
+    margin-right: 6px;
     align-self: flex-end;
 }
 .msg-avatar {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     object-fit: cover;
     border: 1px solid rgba(90, 22, 37, 0.5);
@@ -348,9 +348,9 @@
     flex-direction: column;
     align-items: flex-end;
     max-width: 78%;
-    gap: 2px;
+    gap: 1px;
 }
-.msg-left .message-block { align-items: flex-start; max-width: calc(100% - 50px); }
+.msg-left .message-block { align-items: flex-start; max-width: calc(100% - 42px); }
 
 /* 時刻・既読（bubble の外・直下に表示・吹き出しと被らない余白） */
 .msg-footer {
@@ -358,7 +358,7 @@
     align-items: center;
     justify-content: flex-end;
     gap: 2px;
-    margin-top: 3px;
+    margin-top: 1px;
     padding: 0 1px;
     flex-shrink: 0;
 }
@@ -370,10 +370,10 @@
 .message-bubble {
     display: inline-block;
     max-width: 100%;
-    padding: 2px 8px 3px;
-    border-radius: 10px;
-    font-size: 0.8rem;
-    line-height: 1.3;
+    padding: 3px 8px 4px;
+    border-radius: 9px;
+    font-size: 0.78rem;
+    line-height: 1.25;
     letter-spacing: 0;
     white-space: pre-wrap;
     word-break: break-word;
@@ -384,14 +384,14 @@
 .message-bubble p {
     margin: 0;
     padding: 0;
-    line-height: 1.3;
+    line-height: 1.25;
     display: block;
 }
 
 .msg-left .message-bubble {
     background: linear-gradient(160deg, #1E0D11 0%, #1A0B0E 100%);
     color: #F5E6E6;
-    border-radius: 10px 10px 10px 2px;
+    border-radius: 9px 9px 9px 2px;
     border: 1px solid rgba(230, 208, 128, 0.28);
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
 }
@@ -414,7 +414,7 @@
     background: #E8E1D5;
     color: #2C1A1D;
     font-weight: 500;
-    border-radius: 10px 10px 2px 10px;
+    border-radius: 9px 9px 2px 9px;
     border: 1px solid rgba(232, 225, 213, 0.7);
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
 }
@@ -435,7 +435,7 @@
 
 /* 時刻・既読（bubble 外・画像のように小さく） */
 .msg-time {
-    font-size: 0.55rem;
+    font-size: 0.5rem;
     opacity: 0.85;
     line-height: 1;
 }
@@ -443,7 +443,7 @@
 .msg-left .msg-time { color: #A89090; }
 
 .msg-status {
-    font-size: 0.55rem;
+    font-size: 0.5rem;
     color: rgba(212, 175, 55, 0.85);
     opacity: 0.9;
     display: flex;
@@ -827,50 +827,50 @@
    面談日候補メッセージ
    ========================================================================== */
 .message-bubble-interview {
-    min-width: min(280px, 100%);
-    padding: 12px;
-    border-radius: 16px;
+    min-width: min(248px, 100%);
+    padding: 8px 9px;
+    border-radius: 12px;
 }
 
 .interview-card-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 8px;
+    gap: 8px;
+    margin-bottom: 5px;
 }
 
 .interview-title {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.8rem;
+    gap: 5px;
+    font-size: 0.76rem;
     font-weight: 700;
     margin-bottom: 0;
 }
 
 .interview-title i {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
 }
 
 .interview-badge {
     display: inline-flex;
     align-items: center;
-    min-height: 24px;
-    padding: 0 10px;
+    min-height: 20px;
+    padding: 0 8px;
     border-radius: 999px;
     background: rgba(212, 175, 55, 0.14);
     border: 1px solid rgba(212, 175, 55, 0.35);
     color: #fef3c7;
-    font-size: 0.68rem;
+    font-size: 0.62rem;
     font-weight: 700;
     white-space: nowrap;
 }
 
 .interview-body-copy {
-    margin: 0 0 10px;
-    font-size: 0.76rem;
-    line-height: 1.5;
+    margin: 0 0 6px;
+    font-size: 0.7rem;
+    line-height: 1.35;
     color: rgba(245, 230, 230, 0.84);
 }
 
@@ -880,41 +880,41 @@
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 5px;
 }
 
 .interview-option-btn {
     width: 100%;
     text-align: left;
-    border-radius: 14px;
+    border-radius: 11px;
     border: 1px solid rgba(212, 175, 55, 0.28);
     background: rgba(255, 248, 220, 0.08);
     color: #fef3c7;
-    font-size: 0.76rem;
-    padding: 10px 12px;
+    font-size: 0.72rem;
+    padding: 7px 9px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 8px;
     transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
 }
 
 .interview-option-main {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 1px;
     flex: 1;
 }
 
 .interview-option-date {
-    font-size: 0.78rem;
+    font-size: 0.73rem;
     font-weight: 700;
     color: #fff7da;
 }
 
 .interview-option-time {
-    font-size: 0.7rem;
+    font-size: 0.64rem;
     color: rgba(245, 230, 230, 0.7);
 }
 
@@ -922,12 +922,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 32px;
-    padding: 0 12px;
+    min-height: 24px;
+    padding: 0 9px;
     border-radius: 999px;
     background: rgba(212, 175, 55, 0.16);
     color: #fef3c7;
-    font-size: 0.68rem;
+    font-size: 0.62rem;
     font-weight: 700;
     white-space: nowrap;
 }
@@ -952,15 +952,15 @@ button.interview-option-btn:hover {
 
 .interview-confirmed-date {
     margin: 0;
-    font-size: 0.84rem;
+    font-size: 0.76rem;
     font-weight: 700;
     color: #fff7da;
 }
 
 .interview-note {
-    font-size: 0.7rem;
+    font-size: 0.64rem;
     opacity: 0.84;
-    margin: 10px 0 0;
+    margin: 6px 0 0;
     color: rgba(245, 230, 230, 0.82);
 }
 

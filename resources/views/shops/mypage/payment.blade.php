@@ -5,6 +5,14 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/management.css') }}">
+<style>
+    .input-hint {
+        margin-top: 6px;
+        font-size: 0.72rem;
+        line-height: 1.6;
+        color: #9f8d8d;
+    }
+</style>
 @endpush
 
 @section('content')
@@ -230,15 +238,21 @@
         <p class="management-summary-note">
             店舗側で管理している口座情報を保存しておくと、運営との照合時に便利です。
         </p>
-        <form id="shop-bank-form" class="management-bank-form">
+        <form id="shop-bank-form" class="management-bank-form" data-bank-autocomplete>
             @csrf
             <div class="bank-form-row">
                 <label class="bank-label">金融機関名</label>
-                <input type="text" name="bank_name" class="bank-input" value="{{ $shopBank['bank_name'] ?? '' }}" placeholder="〇〇銀行" required>
+                <input type="text" name="bank_name" class="bank-input" value="{{ $shopBank['bank_name'] ?? '' }}" placeholder="〇〇銀行" autocomplete="off" list="shop-bank-suggestions" data-bank-name-input required>
+                <input type="hidden" name="bank_code" value="{{ $shopBank['bank_code'] ?? '' }}" data-bank-code-input>
+                <datalist id="shop-bank-suggestions" data-bank-list></datalist>
+                <p class="input-hint">金融機関名を入力すると候補が表示されます。候補から選ぶと支店候補も検索しやすくなります。</p>
             </div>
             <div class="bank-form-row">
                 <label class="bank-label">支店名</label>
-                <input type="text" name="branch_name" class="bank-input" value="{{ $shopBank['branch_name'] ?? '' }}" placeholder="△△支店">
+                <input type="text" name="branch_name" class="bank-input" value="{{ $shopBank['branch_name'] ?? '' }}" placeholder="△△支店" autocomplete="off" list="shop-branch-suggestions" data-branch-name-input>
+                <input type="hidden" name="branch_code" value="{{ $shopBank['branch_code'] ?? '' }}" data-branch-code-input>
+                <datalist id="shop-branch-suggestions" data-branch-list></datalist>
+                <p class="input-hint">支店名は、金融機関を候補から選択したあとに候補表示されます。</p>
             </div>
             <div class="bank-form-row">
                 <label class="bank-label">口座種別</label>
