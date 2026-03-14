@@ -4,6 +4,7 @@
 @section('meta_description', trim((string) (($recruit['catch_copy'] ?? '') ?: ($recruit['message'] ?? 'ミセチョクの求人情報です。'))))
 @section('meta_image', $shop['main_img'] ?? ($recruit['hero_image'] ?? asset('assets/images/common/no-image.png')))
 @section('canonical', $shareUrl ?? url()->current())
+@section('guide_message', empty($forCast) ? '表示の見え方を確認しながら、時給・勤務条件・メッセージがきちんと伝わっているかチェックしてみよう。気になるところがあればそのまま編集画面へ戻れるようにしてあるよ。' : '')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/recruitment.css') }}">
@@ -11,6 +12,28 @@
 
 @section('content')
 <div class="recruit-detail-page animate-fadeIn">
+    @if(empty($forCast))
+        <div class="recruit-preview-toolbar">
+            <div>
+                <p class="recruit-preview-toolbar-title">店舗側プレビュー</p>
+                <p class="recruit-preview-toolbar-text">キャストからどう見えるかを確認できます。内容修正や公開管理にもすぐ戻れます。</p>
+            </div>
+            <div class="recruit-preview-toolbar-actions">
+                <a href="{{ route('shop.recruits.status') }}" class="recruit-ghost-btn">
+                    <i class="fas fa-list-check"></i> ステータス管理
+                </a>
+                <a href="{{ route('shop.recruits.edit') }}" class="recruit-ghost-btn">
+                    <i class="fas fa-pen"></i> 編集する
+                </a>
+                @if(!empty($shareUrl))
+                    <a href="{{ $shareUrl }}" class="recruit-ghost-btn">
+                        <i class="fas fa-share-nodes"></i> 公開URL
+                    </a>
+                @endif
+            </div>
+        </div>
+    @endif
+
     {{-- ヒーロー（画像 or グラデ＋店名・所在地） --}}
     <div class="recruit-hero-wrap">
         @if(!empty($shop['main_img'] ?? null))
@@ -34,6 +57,25 @@
             </p>
         </div>
     </div>
+
+    <section class="recruit-preview-summary">
+        <div class="recruit-preview-summary-item">
+            <span class="recruit-preview-summary-label">基本時給</span>
+            <span class="recruit-preview-summary-value">¥{{ number_format($recruit['hourly_wage_regular'] ?? 0) }}〜</span>
+        </div>
+        <div class="recruit-preview-summary-item">
+            <span class="recruit-preview-summary-label">体験時給</span>
+            <span class="recruit-preview-summary-value">{{ !empty($recruit['trial_hourly_wage']) ? '¥' . number_format($recruit['trial_hourly_wage']) . '〜' : '未設定' }}</span>
+        </div>
+        <div class="recruit-preview-summary-item">
+            <span class="recruit-preview-summary-label">勤務条件</span>
+            <span class="recruit-preview-summary-value">{{ $recruit['working_days'] ?: '未設定' }}</span>
+        </div>
+        <div class="recruit-preview-summary-item">
+            <span class="recruit-preview-summary-label">応募資格</span>
+            <span class="recruit-preview-summary-value">{{ $recruit['qualification'] ?: '未設定' }}</span>
+        </div>
+    </section>
 
     @if(!empty($shareUrl))
         @include('common.share-actions', [
@@ -71,7 +113,7 @@
 
     <div class="px-0">
         {{-- 給与ハイライト --}}
-        <section class="recruit-salary-block">
+        <section class="recruit-salary-block recruit-detail-section">
             @if(!empty($recruit['catch_copy']))
                 <p class="recruit-salary-catch">
                     {!! nl2br(e($recruit['catch_copy'])) !!}
@@ -105,8 +147,9 @@
         </section>
 
         @if(!empty($recruit['store_features']) && is_array($recruit['store_features']))
-            <section>
+            <section class="recruit-detail-section">
                 <h3 class="recruit-block-title"><i class="fas fa-tags"></i> タグ情報</h3>
+                <p class="recruit-detail-note">募集条件やお店の特徴を、項目ごとに見比べやすく整理しています。</p>
                 <div class="recruit-shop-info-grid">
                     @foreach($recruit['store_features'] as $label => $items)
                         @if(!empty($items))
@@ -121,7 +164,7 @@
         @endif
 
         @if(!empty($recruit['bonus_condition']) || !empty($recruit['noruma_reward']))
-            <section>
+            <section class="recruit-detail-section">
                 <h3 class="recruit-block-title"><i class="fas fa-award"></i> ボーナス金達成条件</h3>
                 <div class="recruit-message-block-new">
                     @if(!empty($recruit['noruma_reward']))
@@ -134,7 +177,7 @@
 
         {{-- お店からのメッセージ --}}
         @if(!empty($recruit['message']) || !empty($recruit['job_content']))
-            <section class="recruit-message-block-new">
+            <section class="recruit-message-block-new recruit-detail-section">
                 <h3 class="recruit-block-title"><i class="fas fa-sparkles"></i> お店からのメッセージ</h3>
                 <div class="recruit-message-block-new">
                     @if(!empty($recruit['message']))
@@ -148,8 +191,9 @@
         @endif
 
         {{-- 募集要項 --}}
-        <section>
+        <section class="recruit-detail-section">
             <h3 class="recruit-block-title"><i class="fas fa-file-alt"></i> 募集要項</h3>
+            <p class="recruit-detail-note">応募前に気になる基本条件を、読み飛ばしにくい形でまとめています。</p>
             <div class="recruit-table-wrap">
                 <table class="recruit-table">
                     <tbody>
@@ -169,9 +213,11 @@
                             <th>待遇</th>
                             <td>
                                 @if(!empty($recruit['selected_benefits']) && is_array($recruit['selected_benefits']))
-                                    @foreach($recruit['selected_benefits'] as $b)
-                                       ・{{ $b }}<br>
-                                    @endforeach
+                                    <ul class="recruit-line-list">
+                                        @foreach($recruit['selected_benefits'] as $b)
+                                            <li>{{ $b }}</li>
+                                        @endforeach
+                                    </ul>
                                 @else
                                     {{ $recruit['salary_text'] ?? '—' }}
                                 @endif
@@ -183,7 +229,7 @@
         </section>
 
         {{-- 勤務時間・勤務日 --}}
-        <div class="recruit-grid-2">
+        <div class="recruit-grid-2 recruit-detail-section">
             <div class="recruit-mini-card">
                 <div class="label"><i class="fas fa-clock"></i> 勤務時間</div>
                 <div class="value">{{ $recruit['working_hours'] ?? '—' }}</div>
@@ -195,7 +241,7 @@
         </div>
 
         {{-- 勤務地 --}}
-        <section class="recruit-location-block">
+        <section class="recruit-location-block recruit-detail-section">
             <div class="label"><i class="fas fa-map-marker-alt"></i> 勤務地</div>
             <p class="recruit-location-address">{{ $recruit['address'] ?? '—' }}</p>
             @if(!empty($recruit['nearest_station']))
@@ -218,7 +264,7 @@
 
         {{-- お店の情報（プロフィールと連携） --}}
         @if(!empty($shop ?? null))
-            <section class="recruit-shop-info-section">
+            <section class="recruit-shop-info-section recruit-detail-section">
                 <h3 class="recruit-block-title"><i class="fas fa-store"></i> お店の情報</h3>
                 <div class="recruit-shop-info-grid">
                     @if(!empty($shop['area'] ?? null))
@@ -249,11 +295,29 @@
             </section>
         @endif
 
+        @if(!empty($recruit['selected_benefits']) && is_array($recruit['selected_benefits']))
+            <section class="recruit-detail-section">
+                <h3 class="recruit-block-title"><i class="fas fa-circle-check"></i> こんな条件で働けます</h3>
+                <div class="recruit-info-pill-grid">
+                    @foreach($recruit['selected_benefits'] as $benefit)
+                        <span class="recruit-info-pill"><i class="fas fa-check"></i> {{ $benefit }}</span>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
         @if(empty($forCast))
             <div class="mt-8 text-center">
-                <a href="{{ route('shop.recruits.status') }}" class="recruit-cta-btn" style="max-width:320px;margin:0 auto;">
-                    <i class="fas fa-list"></i> ステータス管理に戻る
-                </a>
+                <div class="recruit-preview-toolbar" style="justify-content:center;">
+                    <div class="recruit-preview-toolbar-actions" style="justify-content:center;">
+                        <a href="{{ route('shop.recruits.edit') }}" class="recruit-ghost-btn">
+                            <i class="fas fa-pen"></i> この内容を編集
+                        </a>
+                        <a href="{{ route('shop.recruits.status') }}" class="recruit-ghost-btn">
+                            <i class="fas fa-list"></i> ステータス管理に戻る
+                        </a>
+                    </div>
+                </div>
             </div>
         @endif
     </div>

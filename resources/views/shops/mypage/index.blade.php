@@ -1,9 +1,203 @@
 @extends('layouts.app')
 
 @section('title', 'マイページ')
+@php
+    $showLicenseGuide = collect($documents ?? [])->contains(fn ($doc) => ($doc['status'] ?? null) === 'not_submitted');
+@endphp
+@section('guide_message')
+    @if($showLicenseGuide)
+        営業許可証か風営許可証がまだそろっていないみたいだよ。両方そろうと、面談日設定みたいな機能も使えるようになるから、先にここを整えておこうね。
+    @endif
+@endsection
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
+<style>
+    .document-upload-list {
+        display: grid;
+        gap: 14px;
+    }
+
+    .document-upload-card {
+        padding: 18px;
+        border-radius: 20px;
+        border: 1px solid rgba(212, 175, 55, 0.14);
+        background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+
+    .document-upload-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .document-upload-title {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        min-width: 0;
+    }
+
+    .document-upload-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        color: #f6e7af;
+        background: rgba(212, 175, 55, 0.12);
+        border: 1px solid rgba(212, 175, 55, 0.18);
+        flex-shrink: 0;
+    }
+
+    .document-upload-name {
+        display: block;
+        font-size: 0.98rem;
+        font-weight: 700;
+        color: #fff8ea;
+    }
+
+    .document-upload-meta {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.78rem;
+        line-height: 1.7;
+        color: #cdbcbc;
+    }
+
+    .document-status-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 92px;
+        padding: 7px 12px;
+        border-radius: 999px;
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+    }
+
+    .document-status-chip.is-approved {
+        color: #dcfce7;
+        background: rgba(34, 197, 94, 0.14);
+        border: 1px solid rgba(34, 197, 94, 0.24);
+    }
+
+    .document-status-chip.is-rejected {
+        color: #fee2e2;
+        background: rgba(248, 113, 113, 0.12);
+        border: 1px solid rgba(248, 113, 113, 0.24);
+    }
+
+    .document-status-chip.is-pending,
+    .document-status-chip.is-not-submitted {
+        color: #f6e7af;
+        background: rgba(212, 175, 55, 0.12);
+        border: 1px solid rgba(212, 175, 55, 0.22);
+    }
+
+    .document-upload-notice {
+        margin: 0 0 14px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        font-size: 0.8rem;
+        line-height: 1.75;
+        background: rgba(255,255,255,0.04);
+        color: #d7c8c8;
+    }
+
+    .document-upload-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .document-upload-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #f4d77b;
+        font-size: 0.8rem;
+        text-decoration: none;
+    }
+
+    .document-upload-link:hover {
+        opacity: 0.85;
+    }
+
+    .document-upload-form {
+        display: grid;
+        gap: 12px;
+        margin-top: 14px;
+    }
+
+    .document-upload-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(140px, 180px);
+        gap: 12px;
+        align-items: end;
+    }
+
+    .document-upload-field {
+        display: grid;
+        gap: 6px;
+    }
+
+    .document-upload-label {
+        font-size: 0.78rem;
+        color: #cdbcbc;
+    }
+
+    .document-upload-input {
+        width: 100%;
+        min-height: 46px;
+        padding: 11px 14px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.10);
+        background: rgba(20, 8, 8, 0.55);
+        color: #f6eeee;
+    }
+
+    .document-upload-input::file-selector-button {
+        margin-right: 12px;
+        padding: 8px 12px;
+        border: 0;
+        border-radius: 10px;
+        background: rgba(212, 175, 55, 0.18);
+        color: #f7e7b7;
+        cursor: pointer;
+    }
+
+    .document-upload-actions {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    @media (max-width: 640px) {
+        .document-upload-head,
+        .document-upload-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .document-upload-head {
+            align-items: stretch;
+        }
+
+        .document-status-chip {
+            width: fit-content;
+        }
+
+        .document-upload-actions .btn-action {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
 @endpush
 
 @section('content')
@@ -74,45 +268,82 @@
             {{-- 書類管理 --}}
             <div class="mypage-section document-section">
                 <h2 class="section-title section-title-gold">書類管理</h2>
-                <p class="text-xs" style="color:#C9B8B8; margin-bottom:8px;">
-                    営業許可証と風営許可証の<span style="color:var(--color-gold);">両方が運営に承認されるまで</span>、メッセージ後の面談日設定など一部機能はご利用いただけません。
+                <p class="document-upload-notice">
+                    許可証の提出状況を確認しながら、そのまま差し替えアップロードできます。
                 </p>
-                <ul class="doc-list">
+                <div class="document-upload-list">
                     @foreach($documents as $doc)
-                    <li class="doc-item">
-                        <div class="doc-icon"><i class="fas fa-file-alt"></i></div>
-                        <div class="doc-info">
-                            <span class="doc-name">{{ $doc['name'] }}</span>
-                            @php $s = $doc['status']; $record = $doc['record'] ?? null; @endphp
-                            <span class="doc-status {{ $s === 'approved' ? 'done' : 'pending' }}" data-doc-key="{{ $doc['key'] }}">
-                                {{ [
-                                    'approved' => '承認済',
-                                    'pending' => '提出済み（未承認）',
-                                    'rejected' => '不備・却下',
-                                    'not_submitted' => '未提出',
-                                ][$s] ?? '未提出' }}
-                            </span>
+                        @php
+                            $s = $doc['status'];
+                            $record = $doc['record'] ?? null;
+                            $statusLabel = [
+                                'approved' => '承認済',
+                                'pending' => '提出済み（未承認）',
+                                'rejected' => '不備・却下',
+                                'not_submitted' => '未提出',
+                            ][$s] ?? '未提出';
+                        @endphp
+                        <div class="document-upload-card">
+                            <div class="document-upload-head">
+                                <div class="document-upload-title">
+                                    <div class="document-upload-icon">
+                                        <i class="fas fa-file-shield"></i>
+                                    </div>
+                                    <div>
+                                        <span class="document-upload-name">{{ $doc['name'] }}</span>
+                                        <span class="document-upload-meta">
+                                            @if($record && !empty($record['updated_at_label']))
+                                                最終更新: {{ $record['updated_at_label'] }}
+                                            @else
+                                                まだ提出されていません
+                                            @endif
+                                            @if($record && !empty($record['expired_at']))
+                                                / 有効期限: {{ $record['expired_at'] }}
+                                            @endif
+                                        </span>
+                                    </div>
+                                </div>
+                                <span class="document-status-chip is-{{ str_replace('_', '-', $s) }}" data-doc-key="{{ $doc['key'] }}">
+                                    {{ $statusLabel }}
+                                </span>
+                            </div>
+
                             @if($record && !empty($record['ng_reason']))
-                                <span class="text-xs" style="display:block; margin-top:6px; color:#ffb4b4;">
+                                <div class="document-upload-notice" style="margin-bottom:0; color:#ffcdcd;">
                                     差し戻し理由: {{ $record['ng_reason'] }}
-                                </span>
+                                </div>
                             @endif
+
                             @if($record && !empty($record['file_url']))
-                                <span class="text-xs" style="display:block; margin-top:6px;">
-                                    <a href="{{ $record['file_url'] }}" target="_blank" rel="noopener">提出ファイルを確認</a>
-                                </span>
+                                <div class="document-upload-links">
+                                    <a href="{{ $record['file_url'] }}" target="_blank" rel="noopener" class="document-upload-link">
+                                        <i class="fas fa-arrow-up-right-from-square"></i> 提出ファイルを確認
+                                    </a>
+                                </div>
                             @endif
+
+                            <form class="shop-document-form document-upload-form" data-doc-key="{{ $doc['key'] }}" enctype="multipart/form-data">
+                                @csrf
+                                <input type="hidden" name="type" value="{{ $doc['key'] }}">
+                                <div class="document-upload-grid">
+                                    <div class="document-upload-field">
+                                        <label class="document-upload-label">ファイル</label>
+                                        <input type="file" name="file" class="document-upload-input" accept=".pdf,image/*" required>
+                                    </div>
+                                    <div class="document-upload-field">
+                                        <label class="document-upload-label">有効期限</label>
+                                        <input type="date" name="expired_at" class="bank-input" value="{{ $record['expired_at'] ?? '' }}">
+                                    </div>
+                                </div>
+                                <div class="document-upload-actions">
+                                    <button type="submit" class="btn-action manage">
+                                        <i class="fas fa-upload"></i> アップロード
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                        <form class="shop-document-form" data-doc-key="{{ $doc['key'] }}" enctype="multipart/form-data">
-                            @csrf
-                            <input type="hidden" name="type" value="{{ $doc['key'] }}">
-                            <input type="file" name="file" accept=".pdf,image/*" required style="max-width:180px;">
-                            <input type="date" name="expired_at" class="bank-input" style="max-width:160px;" value="{{ $record['expired_at'] ?? '' }}">
-                            <button type="submit" class="btn-action-small">アップロード</button>
-                        </form>
-                    </li>
                     @endforeach
-                </ul>
+                </div>
             </div>
 
             {{-- Image Library（ドラッグで並び替え・タップで大表示・削除・空きタップで登録） --}}
