@@ -55,11 +55,22 @@
         gap: 12px;
         margin-top: 12px;
     }
+    .deposit-review-card {
+        padding: 14px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.02);
+    }
+    .deposit-review-label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #fff8ea;
+    }
     .deposit-review-score {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
+        display: grid;
+        gap: 8px;
     }
     .deposit-review-score select,
     .deposit-review-grid textarea {
@@ -240,30 +251,56 @@
                                     </div>
                                     <div class="deposit-checklist">
                                         <label class="deposit-check-row">
-                                            <input type="checkbox" name="confirm_bonus_condition" value="1">
+                                            <input type="checkbox" name="confirm_bonus_condition" value="1" {{ old('confirm_bonus_condition') ? 'checked' : '' }}>
                                             <span>求人情報に登録されたボーナス達成条件を確認し、申請内容に相違がないことを確認しました。</span>
                                         </label>
                                     </div>
 
                                     @if(!empty($requestTarget['review_exists']))
-                                        <p class="deposit-precheck-note">
-                                            {{ $requestTarget['review_posted_at'] ?? '' }} にレビュー投稿済みです。<br>
-                                            {{ $requestTarget['review_comment'] ?? '' }}
-                                        </p>
+                                        <div class="deposit-precheck-note">
+                                            @if(!empty($requestTarget['review_posted_at']))
+                                                <div>投稿日時: {{ $requestTarget['review_posted_at'] }}</div>
+                                            @endif
+                                            @if(!empty($requestTarget['review_average']))
+                                                <div style="margin-top:4px;">総合評価: {{ number_format((float) $requestTarget['review_average'], 1) }} / 5</div>
+                                            @endif
+                                        </div>
+                                        @if(!empty($requestTarget['review_details']))
+                                            <div class="deposit-review-grid">
+                                                @foreach($requestTarget['review_details'] as $detail)
+                                                    <div class="deposit-review-card">
+                                                        <span class="deposit-review-label">{{ $detail['name'] }}</span>
+                                                        <strong>{{ number_format((float) $detail['score'], 1) }} / 5</strong>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                        @if(!empty($requestTarget['review_comment']))
+                                            <div class="deposit-precheck-note">{!! nl2br(e($requestTarget['review_comment'])) !!}</div>
+                                        @endif
                                     @else
+                                        <div class="deposit-precheck-note">
+                                            勤務完了後、お店の雰囲気や働きやすさをレビューしてください。設問は運営のレビュー設問マスタに基づいて表示されます。
+                                        </div>
                                         <div class="deposit-review-grid">
                                             @foreach(($requestTarget['review_contents'] ?? []) as $content)
-                                                <label class="deposit-review-score">
-                                                    <span>{{ $content['name'] }}</span>
-                                                    <select name="review_scores[{{ $content['id'] }}]">
-                                                        <option value="">選択</option>
-                                                        @for($score = 5; $score >= 1; $score--)
-                                                            <option value="{{ $score }}">{{ $score }} / 5</option>
-                                                        @endfor
-                                                    </select>
-                                                </label>
+                                                <div class="deposit-review-card">
+                                                    <label class="deposit-review-score">
+                                                        <span class="deposit-review-label">{{ $content['name'] }}</span>
+                                                        <select name="review_scores[{{ $content['id'] }}]" required>
+                                                            <option value="">評価を選択してください</option>
+                                                            @for($score = 5; $score >= 1; $score--)
+                                                                <option value="{{ $score }}" {{ (string) old('review_scores.' . $content['id']) === (string) $score ? 'selected' : '' }}>{{ $score }} / 5</option>
+                                                            @endfor
+                                                        </select>
+                                                    </label>
+                                                </div>
                                             @endforeach
-                                            <textarea name="review_comment" rows="4" placeholder="働いてみた感想、雰囲気、条件の印象などを入力してください。"></textarea>
+                                            <div class="deposit-review-card">
+                                                <label class="deposit-review-label" for="review-comment">レビューコメント</label>
+                                                <textarea id="review-comment" name="review_comment" rows="4" placeholder="働いてみた感想、雰囲気、条件の印象などを入力してください。">{{ old('review_comment') }}</textarea>
+                                                <p class="input-hint">接客のしやすさ、スタッフ対応、給与条件の納得感などを書くと他のキャストの参考になります。</p>
+                                            </div>
                                         </div>
                                     @endif
 

@@ -1,14 +1,17 @@
 @extends('layouts.admin')
 
-@section('title', '管理者ログイン')
+@section('title', '運営ログイン')
 
 @section('content')
     <div class="admin-page">
-        <h1 class="admin-title">管理者ログイン</h1>
-        <p class="admin-description">
-            管理者用のバックオフィスにログインします。<br>
-            現在はダミー実装のため、任意のメールアドレスとパスワードでログイン可能です。
-        </p>
+        <div class="admin-role-switch">
+            <a href="{{ route('cast.login') }}" class="admin-role-link">キャスト</a>
+            <a href="{{ route('shop.login') }}" class="admin-role-link">店舗</a>
+            <a href="{{ route('admin.login') }}" class="admin-role-link is-active">運営</a>
+        </div>
+
+        <h1 class="admin-title">運営ログイン</h1>
+        <p class="admin-description">運営用ログインです。</p>
 
         @if ($errors->any())
             <div class="admin-alert admin-alert-error">
@@ -46,6 +49,29 @@
             max-width: 420px;
             margin: 0 auto;
         }
+        .admin-role-switch {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .admin-role-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            border: 1px solid rgba(148, 163, 184, 0.45);
+            border-radius: 14px;
+            background: rgba(15, 23, 42, 0.72);
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 0.82rem;
+            font-weight: 700;
+        }
+        .admin-role-link.is-active {
+            border-color: rgba(251, 191, 36, 0.65);
+            color: #fef3c7;
+        }
         .admin-title {
             font-size: 1.4rem;
             font-weight: 700;
@@ -57,7 +83,6 @@
             font-size: 0.9rem;
             color: #e5d4d4;
             margin-bottom: 18px;
-            line-height: 1.6;
             text-align: center;
         }
         .admin-alert {
@@ -124,6 +149,11 @@
             transform: translateY(-1px);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
             filter: brightness(1.05);
+        }
+        @media (max-width: 640px) {
+            .admin-role-switch {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 @endsection

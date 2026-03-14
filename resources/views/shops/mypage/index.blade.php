@@ -83,22 +83,33 @@
                         <div class="doc-icon"><i class="fas fa-file-alt"></i></div>
                         <div class="doc-info">
                             <span class="doc-name">{{ $doc['name'] }}</span>
-                            @php $s = $doc['status']; @endphp
+                            @php $s = $doc['status']; $record = $doc['record'] ?? null; @endphp
                             <span class="doc-status {{ $s === 'approved' ? 'done' : 'pending' }}" data-doc-key="{{ $doc['key'] }}">
-                                @if($s === 'approved')
-                                    承認済
-                                @elseif($s === 'pending')
-                                    提出済み（未承認）
-                                @else
-                                    未提出
-                                @endif
+                                {{ [
+                                    'approved' => '承認済',
+                                    'pending' => '提出済み（未承認）',
+                                    'rejected' => '不備・却下',
+                                    'not_submitted' => '未提出',
+                                ][$s] ?? '未提出' }}
                             </span>
+                            @if($record && !empty($record['ng_reason']))
+                                <span class="text-xs" style="display:block; margin-top:6px; color:#ffb4b4;">
+                                    差し戻し理由: {{ $record['ng_reason'] }}
+                                </span>
+                            @endif
+                            @if($record && !empty($record['file_url']))
+                                <span class="text-xs" style="display:block; margin-top:6px;">
+                                    <a href="{{ $record['file_url'] }}" target="_blank" rel="noopener">提出ファイルを確認</a>
+                                </span>
+                            @endif
                         </div>
-                        <button type="button"
-                                class="btn-action-small"
-                                onclick="openDocumentUpload('{{ $doc['key'] }}')">
-                            アップロード
-                        </button>
+                        <form class="shop-document-form" data-doc-key="{{ $doc['key'] }}" enctype="multipart/form-data">
+                            @csrf
+                            <input type="hidden" name="type" value="{{ $doc['key'] }}">
+                            <input type="file" name="file" accept=".pdf,image/*" required style="max-width:180px;">
+                            <input type="date" name="expired_at" class="bank-input" style="max-width:160px;" value="{{ $record['expired_at'] ?? '' }}">
+                            <button type="submit" class="btn-action-small">アップロード</button>
+                        </form>
                     </li>
                     @endforeach
                 </ul>
@@ -159,7 +170,6 @@
 </div>
 
 <input type="file" id="gallery-upload" class="sr-only" accept="image/*">
-<input type="file" id="document-upload" class="sr-only" accept=".pdf,image/*">
 @endsection
 
 @push('scripts')
@@ -169,7 +179,6 @@
 var _galleryPreviewImageId = null;
 var _galleryPreviewLi = null;
 var _galleryUploadSlotIndex = null;
-var _currentDocumentKey = null;
 
 function handleGallerySlotClick(ev, slotEl, slotIndex) {
     var li = slotEl.closest('li');
@@ -294,49 +303,29 @@ function saveWord() {
     // TODO: API で保存する場合はここで送信
 }
 
-function openDocumentUpload(docKey) {
-    _currentDocumentKey = docKey;
-    document.getElementById('document-upload').click();
-}
-
 (function() {
-    var docInput = document.getElementById('document-upload');
-    if (!docInput) return;
-    docInput.addEventListener('change', function() {
-        var file = this.files && this.files[0];
-        if (!file || !_currentDocumentKey) {
-            this.value = '';
-            return;
-        }
-        var formData = new FormData();
-        formData.append('file', file);
-        formData.append('type', _currentDocumentKey);
-        formData.append('_token', '{{ csrf_token() }}');
-
-        fetch('{{ route("shop.mypage.documents.upload") }}', {
-            method: 'POST',
-            body: formData
-        }).then(function(r) { return r.json(); })
-          .then(function(res) {
-              if (res && res.success) {
-                  var statusEls = document.querySelectorAll('.doc-status[data-doc-key="' + _currentDocumentKey + '"]');
-                  statusEls.forEach(function(el) {
-                      el.classList.remove('pending');
-                      el.classList.add('pending'); // アップロード直後は「提出済み（未承認）」扱い
-                      el.textContent = '提出済み（未承認）';
-                  });
-                  alert('書類をアップロードしました。運営による確認・承認をお待ちください。');
-              } else {
-                  alert(res && res.message ? res.message : 'アップロードに失敗しました。');
-              }
-          })
-          .catch(function() {
-              alert('アップロードに失敗しました。');
-          })
-          .finally(function() {
-              docInput.value = '';
-              _currentDocumentKey = null;
-          });
+    var forms = document.querySelectorAll('.shop-document-form');
+    forms.forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var formData = new FormData(form);
+            fetch('{{ route("shop.mypage.documents.upload") }}', {
+                method: 'POST',
+                headers: { 'Accept': 'application/json' },
+                body: formData
+            }).then(function(r) {
+                return r.json().then(function(json) {
+                    if (!r.ok) throw json;
+                    return json;
+                });
+            }).then(function(res) {
+                alert(res.message || '書類をアップロードしました。');
+                window.location.reload();
+            }).catch(function(error) {
+                var messages = error && error.errors ? Object.values(error.errors).flat() : [];
+                alert(messages[0] || 'アップロードに失敗しました。');
+            });
+        });
     });
 })();
 </script>

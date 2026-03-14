@@ -5,11 +5,39 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}">
+<style>
+    .result-template-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 12px 0;
+    }
+    .result-template-button {
+        border: 1px solid rgba(229, 193, 88, 0.35);
+        background: rgba(255, 255, 255, 0.06);
+        color: #f4e7c2;
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 0.85rem;
+        cursor: pointer;
+    }
+    .result-message-textarea {
+        width: 100%;
+        min-height: 140px;
+        border-radius: 14px;
+        border: 1px solid rgba(229, 193, 88, 0.22);
+        background: rgba(255, 255, 255, 0.05);
+        color: #fff;
+        padding: 14px;
+        resize: vertical;
+    }
+</style>
 @endpush
 
 @push('scripts')
 <script>
     window.isCastTalkRoom = {!! request()->is('cast/*') ? 'true' : 'false' !!};
+    window.talkResultMessageTemplates = @json($resultMessageTemplates ?? []);
 </script>
 <script src="{{ asset('assets/js/talk-room.js') }}"></script>
 @endpush
@@ -277,6 +305,24 @@
         <div class="interview-modal-footer">
             <button type="button" class="btn-interview-cancel js-interview-confirm-close">戻る</button>
             <button type="button" id="interview-confirm-submit" class="btn-interview-submit">この日時で確定</button>
+        </div>
+    </div>
+</div>
+@endif
+
+@if(!$isCast && !empty($canSelectResult))
+<div id="result-message-overlay" class="interview-modal-overlay" aria-hidden="true">
+    <div class="interview-modal">
+        <div class="interview-modal-header">
+            <h2 id="result-message-title">結果メッセージを送信</h2>
+            <button type="button" class="interview-modal-close js-result-message-close" aria-label="閉じる">&times;</button>
+        </div>
+        <p id="result-message-desc" class="interview-modal-desc">テンプレートを選択し、必要に応じて文面を編集してください。</p>
+        <div class="result-template-list" id="result-template-list"></div>
+        <textarea id="result-message-textarea" class="result-message-textarea" placeholder="送信するメッセージを入力"></textarea>
+        <div class="interview-modal-footer">
+            <button type="button" class="btn-interview-cancel js-result-message-close">キャンセル</button>
+            <button type="button" id="result-message-submit" class="btn-interview-submit">送信する</button>
         </div>
     </div>
 </div>

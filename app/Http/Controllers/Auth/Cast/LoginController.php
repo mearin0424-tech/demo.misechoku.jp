@@ -16,15 +16,15 @@ class LoginController extends Controller
             'role' => 'cast',
             'title' => 'キャストログイン',
             'bodyClass' => 'page-auth-login page-auth-login-cast',
-            'guideMessage' => "キャスト用ログインだよ。\nデモでは入力後すぐに画面体験へ進めるよ。",
-            'eyebrow' => 'CAST LOGIN',
-            'heroTitle' => '理想のお店とつながるログイン入口。',
-            'heroDescription' => '応募、検索、マイページ体験につながるキャスト向けログイン画面です。',
+            'guideMessage' => "キャストログインです。\n入力して進んでください。",
+            'eyebrow' => '',
+            'heroTitle' => 'キャストログイン',
+            'heroDescription' => '',
             'formAction' => route('cast.login.post'),
             'registerUrl' => route('cast.register'),
-            'registerLabel' => 'キャスト新規登録はこちら',
+            'registerLabel' => '新規登録',
             'alternateUrl' => route('shop.login'),
-            'alternateLabel' => '店舗ログインはこちら',
+            'alternateLabel' => '店舗',
         ]);
     }
 

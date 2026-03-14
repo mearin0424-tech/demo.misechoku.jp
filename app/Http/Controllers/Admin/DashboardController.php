@@ -3,9 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\BillingManagementService;
+use App\Services\DocumentReviewService;
 
 class DashboardController extends Controller
 {
+    public function __construct(
+        private readonly BillingManagementService $billingManagementService,
+        private readonly DocumentReviewService $documentReviewService
+    ) {
+    }
+
     /**
      * 管理者ダッシュボード
      *
@@ -66,119 +74,40 @@ class DashboardController extends Controller
             ['month' => '10月', 'cast' => 1452, 'shop' => 215, 'amount' => 18.45, 'count' => 4892],
         ];
 
-        $taskSummary = [
-            [
-                'id' => 'kyc',
-                'title' => '本人確認',
-                'count' => 5,
-            ],
-            [
-                'id' => 'doc',
-                'title' => '書類審査',
-                'count' => 2,
-            ],
-            [
-                'id' => 'deposit',
-                'title' => '入金確認',
-                'count' => 4,
-            ],
-            [
-                'id' => 'transfer',
-                'title' => '振込実行',
-                'count' => 8,
-            ],
-            [
-                'id' => 'error',
-                'title' => '振込エラー',
-                'count' => 1,
-            ],
-        ];
+        $documentTasks = $this->documentReviewService->getDashboardTasks();
+        $billingTasks = collect($this->billingManagementService->getPendingTasks())
+            ->map(function (array $task) {
+                $catId = match ($task['status_code'] ?? null) {
+                    BillingManagementService::STATUS_SHOP_PAYMENT_CONFIRMED => 'transfer',
+                    BillingManagementService::STATUS_SHOP_PAYMENT_REPORTED => 'deposit',
+                    default => 'deposit',
+                };
 
-        $tasks = [
-            [
-                'id' => 'T-001',
-                'category' => '本人確認',
-                'target' => '愛華',
-                'type' => 'キャスト',
-                'status' => '未承認',
-                'date' => '今日 10:30',
-                'urgency' => 'high',
-                'action' => '審査する',
-                'cat_id' => 'kyc',
-                'amount' => null,
-            ],
-            [
-                'id' => 'T-002',
-                'category' => '書類審査',
-                'target' => 'CLUB ETERNITY',
-                'type' => '店舗',
-                'status' => '未承認',
-                'date' => '今日 09:15',
-                'urgency' => 'normal',
-                'action' => '書類確認',
-                'cat_id' => 'doc',
-                'amount' => null,
-            ],
-            [
-                'id' => 'T-003',
-                'category' => '入金照合',
-                'target' => 'THE GOLDSTONE',
-                'type' => '店舗',
-                'status' => '店舗入金確認中',
-                'date' => '昨日 18:00',
-                'urgency' => 'high',
-                'action' => '着金確認',
-                'cat_id' => 'deposit',
-                'amount' => '¥66,000',
-            ],
-            [
-                'id' => 'T-004',
-                'category' => '振込実行',
-                'target' => 'みさき',
-                'type' => 'キャスト',
-                'status' => 'お振込準備中',
-                'date' => '昨日 15:45',
-                'urgency' => 'normal',
-                'action' => '振込実行',
-                'cat_id' => 'transfer',
-                'amount' => '¥50,000',
-            ],
-            [
-                'id' => 'T-005',
-                'category' => '振込エラー',
-                'target' => 'リナ',
-                'type' => 'キャスト',
-                'status' => '口座情報不備',
-                'date' => '昨日 11:20',
-                'urgency' => 'critical',
-                'action' => '口座確認',
-                'cat_id' => 'error',
-                'amount' => '¥25,000',
-            ],
-            [
-                'id' => 'T-006',
-                'category' => '本人確認',
-                'target' => 'ユリア',
-                'type' => 'キャスト',
-                'status' => '未承認',
-                'date' => '2日前',
-                'urgency' => 'normal',
-                'action' => '審査する',
-                'cat_id' => 'kyc',
-                'amount' => null,
-            ],
-            [
-                'id' => 'T-007',
-                'category' => '入金照合',
-                'target' => '六本木BAR',
-                'type' => '店舗',
-                'status' => '店舗入金確認中',
-                'date' => '2日前',
-                'urgency' => 'normal',
-                'action' => '着金確認',
-                'cat_id' => 'deposit',
-                'amount' => '¥120,000',
-            ],
+                return [
+                    'id' => 'deposit-' . ($task['id'] ?? 'unknown'),
+                    'category' => $catId === 'transfer' ? '振込実行' : '入金照合',
+                    'target' => $task['shop_name'] ?? $task['cast_name'] ?? '取引',
+                    'type' => $catId === 'transfer' ? 'キャスト' : '店舗',
+                    'status' => $task['status_label'] ?? '未処理',
+                    'date' => $task['updated_at_label'] ?? ($task['task_due_date'] ?? '-'),
+                    'urgency' => $catId === 'transfer' ? 'normal' : 'high',
+                    'action' => $catId === 'transfer' ? '振込確認' : '着金確認',
+                    'cat_id' => $catId,
+                    'amount' => !empty($task['invoice_amount'])
+                        ? '¥' . number_format((int) $task['invoice_amount'])
+                        : (!empty($task['cast_transfer_amount']) ? '¥' . number_format((int) $task['cast_transfer_amount']) : null),
+                    'url' => route('admin.deposits.index'),
+                ];
+            })
+            ->all();
+
+        $tasks = array_values(array_merge($documentTasks, $billingTasks));
+        $taskSummary = [
+            ['id' => 'kyc', 'title' => '本人確認', 'count' => collect($tasks)->where('cat_id', 'kyc')->count()],
+            ['id' => 'doc', 'title' => '書類審査', 'count' => collect($tasks)->where('cat_id', 'doc')->count()],
+            ['id' => 'deposit', 'title' => '入金確認', 'count' => collect($tasks)->where('cat_id', 'deposit')->count()],
+            ['id' => 'transfer', 'title' => '振込実行', 'count' => collect($tasks)->where('cat_id', 'transfer')->count()],
+            ['id' => 'error', 'title' => '振込エラー', 'count' => collect($tasks)->where('cat_id', 'error')->count()],
         ];
 
         return view('admin.dashboard', compact('registrationKpis', 'transactionKpis', 'chartData', 'taskSummary', 'tasks'));

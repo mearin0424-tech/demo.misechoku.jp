@@ -58,4 +58,9 @@ class Shop extends Model
         return $this->hasOne(BankAccount::class, 'holder_id', 'id')
             ->where('holder_type', BankAccount::HOLDER_SHOP);
     }
+
+    public function licenseDocuments(): HasMany
+    {
+        return $this->hasMany(ShopLicenseDocument::class, 'shop_id', 'id');
+    }
 }

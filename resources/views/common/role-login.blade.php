@@ -16,8 +16,6 @@
         <div class="role-login-page">
             <div class="role-login-brand">
                 <img src="{{ asset('assets/images/common/logo-yoko.png') }}" alt="ミセチョク" class="role-login-logo">
-                <h1 class="role-login-brand-title">MISECHOKU</h1>
-                <p class="role-login-brand-subtitle">ナイトワーク特化型マッチングプラットフォーム</p>
             </div>
 
             @if (session('message'))
@@ -41,10 +39,14 @@
                 </div>
 
                 <div class="role-login-card-body">
+                    <div class="role-login-role-switch">
+                        <a href="{{ route('cast.login') }}" class="role-login-role {{ $role === 'cast' ? 'is-active' : '' }}">キャスト</a>
+                        <a href="{{ route('shop.login') }}" class="role-login-role {{ $role === 'shop' ? 'is-active' : '' }}">店舗</a>
+                        <a href="{{ route('admin.login') }}" class="role-login-role">運営</a>
+                    </div>
+
                     <div class="role-login-copy">
-                        <p class="role-login-eyebrow">{{ $eyebrow }}</p>
                         <h2 class="role-login-title">{{ $heroTitle }}</h2>
-                        <p class="role-login-desc">{{ $heroDescription }}</p>
                     </div>
 
                     <form method="POST" action="{{ $formAction }}" class="role-login-form">
@@ -53,32 +55,26 @@
                         <label class="role-login-field">
                             <span>メールアドレス</span>
                             <div class="role-login-input-wrap">
-                                <i class="fas fa-envelope"></i>
-                                <input type="email" name="email" value="{{ old('email') }}" placeholder="{{ $role === 'cast' ? 'cast@example.com' : 'shop@example.com' }}">
+                                <input type="email" name="email" value="{{ old('email') }}" placeholder="example@misechoku.jp">
                             </div>
                         </label>
 
                         <label class="role-login-field">
-                            <div class="role-login-label-row">
-                                <span>パスワード</span>
-                                <small>8文字以上</small>
-                            </div>
+                            <span>パスワード</span>
                             <div class="role-login-input-wrap">
-                                <i class="fas fa-lock"></i>
                                 <input type="password" name="password" placeholder="••••••••">
                             </div>
                         </label>
 
                         <button type="submit" class="role-login-submit">
-                            <span>{{ $role === 'cast' ? 'キャストとしてログイン' : '店舗としてログイン' }}</span>
-                            <i class="fas fa-arrow-right"></i>
+                            <span>ログイン</span>
                         </button>
                     </form>
                 </div>
             </div>
 
             <div class="role-login-links">
-                <a href="{{ $alternateUrl }}" class="role-login-secondary">{{ $alternateLabel }}</a>
+                <a href="{{ $registerUrl }}" class="role-login-secondary">新規登録</a>
                 <a href="{{ route('login.demo') }}" class="role-login-back">デモログイン一覧へ戻る</a>
             </div>
         </div>
@@ -188,48 +184,15 @@
         .role-login-logo {
             width: 200px;
             max-width: 72%;
-            margin-bottom: 12px;
+            margin-bottom: 0;
             filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.4));
         }
 
-        .role-login-brand-title {
-            margin: 0 0 8px;
-            font-family: "Yu Mincho", "游明朝", "Hiragino Mincho ProN", "Noto Serif JP", serif;
-            font-size: clamp(2rem, 6vw, 2.4rem);
-            letter-spacing: 0.18em;
-            color: transparent;
-            background: linear-gradient(90deg, #e5c158 0%, #fdf0b2 50%, #b38a22 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
-        }
-
-        .role-login-brand-subtitle {
-            margin: 0;
-            color: #a89090;
-            font-size: 0.72rem;
-            letter-spacing: 0.25em;
-        }
-
         .role-login-title {
-            margin: 0 0 10px;
-            font-size: clamp(1.5rem, 4vw, 1.9rem);
-            line-height: 1.45;
-            color: #f9efcf;
-        }
-
-        .role-login-desc {
             margin: 0;
-            font-size: 0.88rem;
-            line-height: 1.85;
-            color: rgba(236, 221, 221, 0.82);
-        }
-
-        .role-login-eyebrow {
-            margin: 0 0 10px;
-            color: rgba(253, 240, 178, 0.78);
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.24em;
+            font-size: clamp(1.4rem, 4vw, 1.7rem);
+            line-height: 1.4;
+            color: #f9efcf;
         }
 
         .role-login-alert {
@@ -303,8 +266,36 @@
             padding: 24px;
         }
 
+        .role-login-role-switch {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .role-login-role {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            border: 1px solid #3d1a1f;
+            border-radius: 14px;
+            background: rgba(18, 4, 5, 0.58);
+            color: #a89090;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .role-login-role.is-active {
+            border-color: rgba(230, 208, 128, 0.42);
+            color: #e6d080;
+            background: rgba(35, 15, 18, 0.95);
+        }
+
         .role-login-copy {
-            margin-bottom: 22px;
+            margin-bottom: 18px;
+            text-align: center;
         }
 
         .role-login-form {
@@ -328,36 +319,14 @@
             letter-spacing: 0.14em;
         }
 
-        .role-login-label-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-        }
-
-        .role-login-label-row small {
-            color: #a89090;
-            font-size: 0.68rem;
-            letter-spacing: 0.08em;
-        }
-
         .role-login-input-wrap {
             position: relative;
-        }
-
-        .role-login-input-wrap i {
-            position: absolute;
-            top: 50%;
-            left: 14px;
-            transform: translateY(-50%);
-            color: #a89090;
-            pointer-events: none;
         }
 
         .role-login-input-wrap input {
             width: 100%;
             min-height: 54px;
-            padding: 0 16px 0 42px;
+            padding: 0 16px;
             border-radius: 16px;
             border: 1px solid #3d1a1f;
             background: rgba(18, 4, 5, 0.5);
@@ -430,6 +399,10 @@
 
             .role-login-card-body {
                 padding: 20px 18px;
+            }
+
+            .role-login-role-switch {
+                grid-template-columns: 1fr;
             }
         }
     </style>

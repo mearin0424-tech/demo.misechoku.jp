@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Common;
 
 use App\Http\Controllers\Controller;
+use App\Services\MessageTemplateService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -20,6 +21,10 @@ class TalkController extends Controller
     private const APPLICATION_STATUS_INTERVIEW_FIXED = 3;
     private const APPLICATION_STATUS_HIRED = 4;
     private const APPLICATION_STATUS_REJECTED = 5;
+
+    public function __construct(private readonly MessageTemplateService $messageTemplateService)
+    {
+    }
 
     /**
      * メッセージ一覧
@@ -106,6 +111,12 @@ class TalkController extends Controller
                     self::APPLICATION_STATUS_INTERVIEW_PENDING,
                     self::APPLICATION_STATUS_INTERVIEW_FIXED,
                 ], true),
+            'resultMessageTemplates' => !$isCastPortal
+                ? [
+                    'hired' => $this->messageTemplateService->getTemplates('talk_hired'),
+                    'rejected' => $this->messageTemplateService->getTemplates('talk_rejected'),
+                ]
+                : [],
         ]);
     }
 
@@ -157,6 +168,7 @@ class TalkController extends Controller
             'options.*' => ['nullable', 'string'],
             'offer_token' => ['nullable', 'string'],
             'selected_option' => ['nullable', 'string'],
+            'message' => ['nullable', 'string', 'max:5000'],
         ]);
 
         $partnerId = (string) $request->input('partner_id');
@@ -226,11 +238,11 @@ class TalkController extends Controller
             ],
             'hired' => [
                 self::MESSAGE_TYPE_HIRED,
-                'この度は面談ありがとうございました。採用で進めさせていただきたいと考えております。詳細は追ってご連絡いたします。',
+                $this->resolveResultMessage((string) $actionType, (string) $request->input('message')),
             ],
             'rejected' => [
                 self::MESSAGE_TYPE_REJECTED,
-                'この度はご応募ありがとうございました。慎重に検討させていただいた結果、今回は見送らせていただくこととなりました。またご縁がございましたらよろしくお願いいたします。',
+                $this->resolveResultMessage((string) $actionType, (string) $request->input('message')),
             ],
             'cancel_status' => [
                 self::MESSAGE_TYPE_TEXT,
@@ -674,11 +686,14 @@ class TalkController extends Controller
                 : $application->result_date;
         } elseif ($actionType === 'hired') {
             $updates['status'] = self::APPLICATION_STATUS_HIRED;
+            $updates['reason_rejection'] = null;
         } elseif ($actionType === 'rejected') {
             $updates['status'] = self::APPLICATION_STATUS_REJECTED;
+            $updates['reason_rejection'] = trim($content);
         } elseif ($actionType === 'cancel_status') {
             $updates['status'] = self::APPLICATION_STATUS_CHATTING;
             $updates['result_date'] = null;
+            $updates['reason_rejection'] = null;
         }
 
         DB::table('shop_job_applications')
@@ -726,5 +741,19 @@ class TalkController extends Controller
         ]);
 
         return DB::table('shop_job_applications')->where('id', $applicationId)->first();
+    }
+
+    private function resolveResultMessage(string $actionType, string $customMessage): string
+    {
+        $message = trim($customMessage);
+        if ($message !== '') {
+            return $message;
+        }
+
+        return match ($actionType) {
+            'hired' => $this->messageTemplateService->getDefaultBody('talk_hired'),
+            'rejected' => $this->messageTemplateService->getDefaultBody('talk_rejected'),
+            default => '',
+        };
     }
 }

@@ -714,6 +714,24 @@ class BillingManagementService
 
         $meta = $this->decodeJobMeta($application->noruma_cond ?? null);
         $existingReview = $this->findExistingReviewForApplication($application);
+        $existingReviewDetails = [];
+
+        if ($existingReview) {
+            $existingReviewDetails = $this->orderReviewContentJoin(
+                DB::table('review_details')
+                    ->join('review_contents', 'review_details.' . $this->reviewDetailContentColumn(), '=', 'review_contents.id')
+                    ->where('review_details.review_id', $existingReview->id)
+            )
+                ->get([
+                    DB::raw('review_contents.' . $this->reviewContentColumn() . ' as name'),
+                    'review_details.score',
+                ])
+                ->map(fn (object $row) => [
+                    'name' => $row->name,
+                    'score' => (float) $row->score,
+                ])
+                ->all();
+        }
 
         return [
             'application_id' => (int) $application->id,
@@ -727,6 +745,8 @@ class BillingManagementService
             'review_posted_at' => !empty($existingReview->created_at)
                 ? Carbon::parse($existingReview->created_at)->format('Y-m-d H:i')
                 : null,
+            'review_average' => isset($existingReview->eva) ? (float) $existingReview->eva : null,
+            'review_details' => $existingReviewDetails,
         ];
     }
 
@@ -769,6 +789,7 @@ class BillingManagementService
         $meta = $this->decodeJobMeta($deposit['noruma_cond'] ?? null);
 
         return [
+            'review_id' => $review->id ?? null,
             'application_id' => $deposit['application_id'],
             'cast_name' => $deposit['cast_name'],
             'bonus_amount' => (int) ($deposit['bonus_amount'] ?? 0),

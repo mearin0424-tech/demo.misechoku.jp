@@ -135,6 +135,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const hireBtn = document.getElementById('send-hire-message');
         const rejectBtn = document.getElementById('send-reject-message');
         const cancelStatusBtn = document.getElementById('send-cancel-status');
+        const resultOverlay = document.getElementById('result-message-overlay');
+        const resultTitle = document.getElementById('result-message-title');
+        const resultDesc = document.getElementById('result-message-desc');
+        const resultTemplateList = document.getElementById('result-template-list');
+        const resultTextarea = document.getElementById('result-message-textarea');
+        const resultSubmitBtn = document.getElementById('result-message-submit');
+        const resultCloseButtons = document.querySelectorAll('.js-result-message-close');
+        const resultTemplates = window.talkResultMessageTemplates || {};
+        let currentResultAction = null;
 
         const openModal = () => {
             if (!overlay) return;
@@ -144,6 +153,53 @@ document.addEventListener('DOMContentLoaded', function() {
         const closeModal = () => {
             if (!overlay) return;
             overlay.setAttribute('aria-hidden', 'true');
+        };
+
+        const renderResultTemplates = (actionType) => {
+            if (!resultTemplateList) return;
+            resultTemplateList.innerHTML = '';
+            (resultTemplates[actionType] || []).forEach(function(template) {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'result-template-button';
+                button.textContent = template.title || 'テンプレート';
+                button.addEventListener('click', function() {
+                    if (resultTextarea) {
+                        resultTextarea.value = template.body || '';
+                        resultTextarea.focus();
+                    }
+                });
+                resultTemplateList.appendChild(button);
+            });
+        };
+
+        const openResultModal = (actionType) => {
+            if (!resultOverlay || !resultTextarea || !resultSubmitBtn) return;
+            currentResultAction = actionType;
+            renderResultTemplates(actionType);
+            if (resultTitle) {
+                resultTitle.textContent = actionType === 'hired' ? '採用メッセージを送信' : '不採用メッセージを送信';
+            }
+            if (resultDesc) {
+                resultDesc.textContent = actionType === 'hired'
+                    ? '採用テンプレートを選択し、必要に応じて文面を編集してください。'
+                    : '不採用テンプレートを選択し、必要に応じて文面を編集してください。';
+            }
+            const defaults = resultTemplates[actionType] || [];
+            resultTextarea.value = defaults[0] && defaults[0].body ? defaults[0].body : '';
+            resultOverlay.setAttribute('aria-hidden', 'false');
+            resultSubmitBtn.disabled = false;
+            setTimeout(function() { resultTextarea.focus(); }, 0);
+        };
+
+        const closeResultModal = () => {
+            if (!resultOverlay || !resultTextarea) return;
+            resultOverlay.setAttribute('aria-hidden', 'true');
+            currentResultAction = null;
+            resultTextarea.value = '';
+            if (resultSubmitBtn) {
+                resultSubmitBtn.disabled = false;
+            }
         };
 
         if (openInterviewBtn && overlay) {
@@ -172,37 +228,58 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // 採用・不採用メッセージ（店舗側のみ）
-        if (hireBtn) {
-            hireBtn.addEventListener('click', async function(e) {
+        resultCloseButtons.forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
                 e.preventDefault();
-                if (!window.confirm('このユーザーを採用として送信しますか？')) {
-                    return;
-                }
-                hireBtn.disabled = true;
-                try {
-                    await postJson(actionUrl, token, { partner_id: partnerId, action_type: 'hired' });
-                    window.location.reload();
-                } catch (error) {
-                    window.alert(error.message || '採用メッセージの送信に失敗しました。');
-                    hireBtn.disabled = false;
+                closeResultModal();
+            });
+        });
+
+        if (resultOverlay) {
+            resultOverlay.addEventListener('click', function(e) {
+                if (e.target === resultOverlay) {
+                    closeResultModal();
                 }
             });
         }
 
-        if (rejectBtn) {
-            rejectBtn.addEventListener('click', async function(e) {
+        // 採用・不採用メッセージ（店舗側のみ）
+        if (hireBtn) {
+            hireBtn.addEventListener('click', function(e) {
                 e.preventDefault();
-                if (!window.confirm('このユーザーを不採用として送信しますか？')) {
+                openResultModal('hired');
+            });
+        }
+
+        if (rejectBtn) {
+            rejectBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                openResultModal('rejected');
+            });
+        }
+
+        if (resultSubmitBtn && resultTextarea) {
+            resultSubmitBtn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                if (!currentResultAction) return;
+
+                const message = resultTextarea.value.trim();
+                if (!message) {
+                    window.alert('送信メッセージを入力してください。');
                     return;
                 }
-                rejectBtn.disabled = true;
+
+                resultSubmitBtn.disabled = true;
                 try {
-                    await postJson(actionUrl, token, { partner_id: partnerId, action_type: 'rejected' });
+                    await postJson(actionUrl, token, {
+                        partner_id: partnerId,
+                        action_type: currentResultAction,
+                        message: message
+                    });
                     window.location.reload();
                 } catch (error) {
-                    window.alert(error.message || '不採用メッセージの送信に失敗しました。');
-                    rejectBtn.disabled = false;
+                    window.alert(error.message || '結果メッセージの送信に失敗しました。');
+                    resultSubmitBtn.disabled = false;
                 }
             });
         }
@@ -255,6 +332,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key !== 'Escape') return;
+            if (overlay && overlay.getAttribute('aria-hidden') === 'false') {
+                closeModal();
+            }
+            if (resultOverlay && resultOverlay.getAttribute('aria-hidden') === 'false') {
+                closeResultModal();
+            }
+        });
     }
 
     if (isCastRoom && chatForm) {

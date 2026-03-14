@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Shops;
 
 use App\Rules\KouzaMeig;
 use App\Services\BillingManagementService;
+use App\Services\DocumentReviewService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -12,14 +13,16 @@ use Carbon\Carbon;
 
 class MypageController extends Controller
 {
-    public function __construct(private readonly BillingManagementService $billingManagementService)
+    public function __construct(
+        private readonly BillingManagementService $billingManagementService,
+        private readonly DocumentReviewService $documentReviewService
+    )
     {
     }
 
     public function index()
     {
         $shopId = $this->currentShopId();
-        $this->cleanupStaleMainImagePath($shopId);
 
         $row = DB::table('shops')
             ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
@@ -37,7 +40,6 @@ class MypageController extends Controller
                 'shop_profiles.catch',
                 'shop_profiles.overview',
                 'shop_profiles.message',
-                'shop_profiles.main_image_path',
                 DB::raw('AVG(reviews.eva) as avg_eva'),
                 DB::raw('COUNT(reviews.id) as review_count')
             )
@@ -52,18 +54,11 @@ class MypageController extends Controller
                 'shop_profiles.addr3',
                 'shop_profiles.catch',
                 'shop_profiles.overview',
-                'shop_profiles.message',
-                'shop_profiles.main_image_path'
+                'shop_profiles.message'
             )
             ->first();
 
-        $statusKey = fn (int $v) => match ($v) {
-            1 => 'not_submitted',
-            2 => 'pending',
-            3 => 'approved',
-            default => 'not_submitted',
-        };
-        $documentStatus = $row ? $statusKey((int) $row->license_status) : 'not_submitted';
+        $documentData = $this->documentReviewService->getShopLicensePageData($shopId);
 
         $shopData = [
             'shop_name'    => $row->shop_name ?? 'ショップ',
@@ -74,7 +69,7 @@ class MypageController extends Controller
             'city'         => $row->city ?? '',
             'addr1'        => trim(($row->addr2 ?? '') . ' ' . ($row->addr3 ?? '')),
             'overview'     => $row->overview ?? '',
-            'approval'     => $documentStatus === 'approved' ? 1 : 0,
+            'approval'     => $documentData['all_approved'] ? 1 : 0,
         ];
 
         $subImages = [];
@@ -91,19 +86,12 @@ class MypageController extends Controller
             $subImages = [];
         }
 
-        $documents = [
-            ['key' => 'business_license', 'name' => '営業許可証', 'status' => $documentStatus],
-            ['key' => 'adult_entertainment_license', 'name' => '風営許可証', 'status' => $documentStatus],
-        ];
-
-        $allDocumentsApproved = collect($documents)->every(fn ($doc) => $doc['status'] === 'approved');
-
         return view('shops.mypage.index', [
             'pageId'    => 'mypage',
             'shopData'  => $shopData,
             'subImages' => $subImages,
-            'documents' => $documents,
-            'allDocumentsApproved' => $allDocumentsApproved,
+            'documents' => $documentData['documents'],
+            'allDocumentsApproved' => $documentData['all_approved'],
         ]);
     }
 
@@ -235,21 +223,25 @@ class MypageController extends Controller
     public function uploadDocument(Request $request)
     {
         $request->validate([
-            'type' => 'required|string|in:business_license,adult_entertainment_license',
+            'type' => 'required|string|in:business,entertainment',
             'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:8192',
+            'expired_at' => 'nullable|date',
         ]);
 
         if ($request->hasFile('file')) {
-            $path = $request->file('file')->store('public/shops/documents');
-
-            $type = $request->input('type');
-            DB::table('shops')->where('id', $this->currentShopId())->update(['license_status' => 2]);
+            $type = (string) $request->input('type');
+            $document = $this->documentReviewService->uploadShopLicenseDocument(
+                $this->currentShopId(),
+                $type,
+                $request->file('file'),
+                $request->input('expired_at')
+            );
 
             return response()->json([
                 'success' => true,
                 'message' => '書類をアップロードしました。運営による確認・承認をお待ちください。',
                 'type'    => $type,
-                'path'    => Storage::url($path),
+                'path'    => Storage::url($document->image_path),
             ]);
         }
 
@@ -364,22 +356,5 @@ class MypageController extends Controller
     private function currentShopId(): string
     {
         return (string) auth()->guard('shop')->user()->shop_id;
-    }
-
-    private function cleanupStaleMainImagePath(string $shopId): void
-    {
-        $hasImages = DB::table('shop_images')
-            ->where('shop_id', $shopId)
-            ->exists();
-
-        if (!$hasImages) {
-            DB::table('shop_profiles')
-                ->where('shop_id', $shopId)
-                ->whereNotNull('main_image_path')
-                ->update([
-                    'main_image_path' => null,
-                    'updated_at' => now(),
-                ]);
-        }
     }
 }

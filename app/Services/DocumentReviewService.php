@@ -1,0 +1,480 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\CastIdentityDocument;
+use App\Models\ShopLicenseDocument;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+
+class DocumentReviewService
+{
+    public function getCastIdentityPageData(string $castId): array
+    {
+        $documents = CastIdentityDocument::query()
+            ->where('cast_id', $castId)
+            ->orderByDesc('updated_at')
+            ->orderByDesc('id')
+            ->get();
+
+        $latestDocument = $documents->first();
+
+        return [
+            'status' => $this->castStatusKey($documents),
+            'documents' => $documents
+                ->map(fn (CastIdentityDocument $document) => $this->mapCastDocument($document))
+                ->all(),
+            'latest_document' => $latestDocument ? $this->mapCastDocument($latestDocument) : null,
+        ];
+    }
+
+    public function uploadCastIdentityDocument(
+        string $castId,
+        string $type,
+        UploadedFile $frontFile,
+        ?UploadedFile $backFile = null,
+        ?string $expiredAt = null
+    ): CastIdentityDocument {
+        $frontPath = $frontFile->store('public/casts/identity');
+        $backPath = $backFile?->store('public/casts/identity');
+
+        $document = CastIdentityDocument::query()->updateOrCreate(
+            [
+                'cast_id' => $castId,
+                'type' => $type,
+            ],
+            [
+                'image_path_front' => $frontPath,
+                'image_path_back' => $backPath,
+                'status' => CastIdentityDocument::STATUS_PENDING,
+                'ng_reason' => null,
+                'expired_at' => $expiredAt ?: null,
+                'approved_at' => null,
+            ]
+        );
+
+        $this->syncCastLegacyStatus($castId);
+
+        return $document->fresh();
+    }
+
+    public function getShopLicensePageData(string $shopId): array
+    {
+        $documents = ShopLicenseDocument::query()
+            ->where('shop_id', $shopId)
+            ->orderByDesc('updated_at')
+            ->orderByDesc('id')
+            ->get()
+            ->keyBy('type');
+
+        $mapped = collect([
+            'business' => '営業許可証',
+            'entertainment' => '風営許可証',
+        ])->map(function (string $label, string $type) use ($documents) {
+            /** @var ShopLicenseDocument|null $document */
+            $document = $documents->get($type);
+
+            return [
+                'key' => $type,
+                'name' => $label,
+                'status' => $this->shopStatusKey($document),
+                'record' => $document ? $this->mapShopDocument($document) : null,
+            ];
+        })->values();
+
+        return [
+            'documents' => $mapped->all(),
+            'all_approved' => $mapped->every(fn (array $document) => $document['status'] === 'approved'),
+        ];
+    }
+
+    public function uploadShopLicenseDocument(
+        string $shopId,
+        string $type,
+        UploadedFile $file,
+        ?string $expiredAt = null
+    ): ShopLicenseDocument {
+        $path = $file->store('public/shops/documents');
+
+        $document = ShopLicenseDocument::query()->updateOrCreate(
+            [
+                'shop_id' => $shopId,
+                'type' => $type,
+            ],
+            [
+                'image_path' => $path,
+                'status' => ShopLicenseDocument::STATUS_PENDING,
+                'ng_reason' => null,
+                'expired_at' => $expiredAt ?: null,
+                'approved_at' => null,
+            ]
+        );
+
+        $this->syncShopLegacyStatus($shopId);
+
+        return $document->fresh();
+    }
+
+    public function getAdminVerificationData(): array
+    {
+        $castDocuments = CastIdentityDocument::query()
+            ->leftJoin('cast_profiles', 'cast_identity_documents.cast_id', '=', 'cast_profiles.cast_id')
+            ->select('cast_identity_documents.*', 'cast_profiles.nickname', 'cast_profiles.name')
+            ->orderByRaw('CASE WHEN cast_identity_documents.status = 1 THEN 0 WHEN cast_identity_documents.status = 3 THEN 1 ELSE 2 END')
+            ->orderByDesc('cast_identity_documents.updated_at')
+            ->get()
+            ->map(fn (object $document) => $this->mapCastDocumentRecord($document))
+            ->all();
+
+        $shopDocuments = ShopLicenseDocument::query()
+            ->leftJoin('shop_profiles', 'shop_license_documents.shop_id', '=', 'shop_profiles.shop_id')
+            ->select('shop_license_documents.*', 'shop_profiles.shop_name')
+            ->orderByRaw('CASE WHEN shop_license_documents.status = 1 THEN 0 WHEN shop_license_documents.status = 3 THEN 1 ELSE 2 END')
+            ->orderByDesc('shop_license_documents.updated_at')
+            ->get()
+            ->map(fn (object $document) => $this->mapShopDocumentRecord($document))
+            ->all();
+
+        return [
+            'cast_documents' => $castDocuments,
+            'shop_documents' => $shopDocuments,
+            'summary' => [
+                'cast_pending' => collect($castDocuments)->where('status_code', CastIdentityDocument::STATUS_PENDING)->count(),
+                'shop_pending' => collect($shopDocuments)->where('status_code', ShopLicenseDocument::STATUS_PENDING)->count(),
+            ],
+        ];
+    }
+
+    public function approveCastDocument(int $documentId): void
+    {
+        $document = CastIdentityDocument::query()->findOrFail($documentId);
+        $document->update([
+            'status' => CastIdentityDocument::STATUS_APPROVED,
+            'ng_reason' => null,
+            'approved_at' => now(),
+        ]);
+
+        $this->syncCastLegacyStatus($document->cast_id);
+    }
+
+    public function rejectCastDocument(int $documentId, string $reason): void
+    {
+        $document = CastIdentityDocument::query()->findOrFail($documentId);
+        $document->update([
+            'status' => CastIdentityDocument::STATUS_REJECTED,
+            'ng_reason' => $reason,
+            'approved_at' => null,
+        ]);
+
+        $this->syncCastLegacyStatus($document->cast_id);
+    }
+
+    public function approveShopDocument(int $documentId): void
+    {
+        $document = ShopLicenseDocument::query()->findOrFail($documentId);
+        $document->update([
+            'status' => ShopLicenseDocument::STATUS_APPROVED,
+            'ng_reason' => null,
+            'approved_at' => now(),
+        ]);
+
+        $this->syncShopLegacyStatus($document->shop_id);
+    }
+
+    public function rejectShopDocument(int $documentId, string $reason): void
+    {
+        $document = ShopLicenseDocument::query()->findOrFail($documentId);
+        $document->update([
+            'status' => ShopLicenseDocument::STATUS_REJECTED,
+            'ng_reason' => $reason,
+            'approved_at' => null,
+        ]);
+
+        $this->syncShopLegacyStatus($document->shop_id);
+    }
+
+    public function getDashboardTasks(): array
+    {
+        $verificationData = $this->getAdminVerificationData();
+
+        $castTasks = collect($verificationData['cast_documents'])
+            ->whereIn('status_code', [CastIdentityDocument::STATUS_PENDING, CastIdentityDocument::STATUS_REJECTED])
+            ->map(fn (array $document) => [
+                'id' => 'cast-doc-' . $document['id'],
+                'category' => '本人確認',
+                'target' => $document['target_name'],
+                'type' => 'キャスト',
+                'status' => $document['status_label'],
+                'date' => $document['updated_at_label'],
+                'urgency' => $document['status_code'] === CastIdentityDocument::STATUS_PENDING ? 'high' : 'critical',
+                'action' => '審査する',
+                'cat_id' => 'kyc',
+                'amount' => null,
+                'url' => route('admin.verification.index', [
+                    'cast_status' => 'pending',
+                    'focus' => 'cast',
+                ]),
+            ]);
+
+        $shopTasks = collect($verificationData['shop_documents'])
+            ->whereIn('status_code', [ShopLicenseDocument::STATUS_PENDING, ShopLicenseDocument::STATUS_REJECTED])
+            ->map(fn (array $document) => [
+                'id' => 'shop-doc-' . $document['id'],
+                'category' => '書類審査',
+                'target' => $document['target_name'],
+                'type' => '店舗',
+                'status' => $document['status_label'],
+                'date' => $document['updated_at_label'],
+                'urgency' => $document['status_code'] === ShopLicenseDocument::STATUS_PENDING ? 'normal' : 'high',
+                'action' => '書類確認',
+                'cat_id' => 'doc',
+                'amount' => null,
+                'url' => route('admin.verification.index', [
+                    'shop_status' => 'pending',
+                    'focus' => 'shop',
+                ]),
+            ]);
+
+        return $castTasks
+            ->concat($shopTasks)
+            ->values()
+            ->all();
+    }
+
+    private function syncCastLegacyStatus(string $castId): void
+    {
+        $documents = CastIdentityDocument::query()->where('cast_id', $castId)->get();
+        $status = match ($this->castStatusKey($documents)) {
+            'approved' => 3,
+            'not_submitted' => 1,
+            default => 2,
+        };
+
+        DB::table('casts')
+            ->where('id', $castId)
+            ->update([
+                'identity_status' => $status,
+                'updated_at' => now(),
+            ]);
+    }
+
+    private function syncShopLegacyStatus(string $shopId): void
+    {
+        $documents = ShopLicenseDocument::query()
+            ->where('shop_id', $shopId)
+            ->get()
+            ->keyBy('type');
+
+        $business = $documents->get('business');
+        $entertainment = $documents->get('entertainment');
+
+        $businessStatus = $this->legacyShopTypeStatus($business);
+        $entertainmentStatus = $this->legacyShopTypeStatus($entertainment);
+        $overallStatus = $businessStatus === 3 && $entertainmentStatus === 3
+            ? 3
+            : (($business || $entertainment) ? 2 : 1);
+
+        DB::table('shops')
+            ->where('id', $shopId)
+            ->update([
+                'license_status' => $overallStatus,
+                'business_license_status' => $businessStatus,
+                'entertainment_license_status' => $entertainmentStatus,
+                'updated_at' => now(),
+            ]);
+    }
+
+    private function legacyShopTypeStatus(?ShopLicenseDocument $document): int
+    {
+        if (!$document) {
+            return 1;
+        }
+
+        return $document->status === ShopLicenseDocument::STATUS_APPROVED ? 3 : 2;
+    }
+
+    private function castStatusKey(Collection $documents): string
+    {
+        if ($documents->isEmpty()) {
+            return 'not_submitted';
+        }
+
+        if ($documents->contains(fn (CastIdentityDocument $document) => $document->status === CastIdentityDocument::STATUS_PENDING)) {
+            return 'pending';
+        }
+
+        if ($documents->contains(fn (CastIdentityDocument $document) => $document->status === CastIdentityDocument::STATUS_REJECTED)) {
+            return 'rejected';
+        }
+
+        return 'approved';
+    }
+
+    private function shopStatusKey(?ShopLicenseDocument $document): string
+    {
+        if (!$document) {
+            return 'not_submitted';
+        }
+
+        return match ((int) $document->status) {
+            ShopLicenseDocument::STATUS_APPROVED => 'approved',
+            ShopLicenseDocument::STATUS_REJECTED => 'rejected',
+            default => 'pending',
+        };
+    }
+
+    private function mapCastDocument(CastIdentityDocument $document): array
+    {
+        return [
+            'id' => $document->id,
+            'type' => $document->type,
+            'type_label' => $this->castTypeLabel($document->type),
+            'status_code' => (int) $document->status,
+            'status_key' => match ((int) $document->status) {
+                CastIdentityDocument::STATUS_APPROVED => 'approved',
+                CastIdentityDocument::STATUS_REJECTED => 'rejected',
+                default => 'pending',
+            },
+            'status_label' => $this->statusLabel((int) $document->status),
+            'ng_reason' => $document->ng_reason,
+            'expired_at' => optional($document->expired_at)->format('Y-m-d'),
+            'approved_at' => optional($document->approved_at)->format('Y-m-d H:i'),
+            'updated_at_label' => optional($document->updated_at)->format('Y-m-d H:i'),
+            'front_url' => $this->documentUrl($document->image_path_front),
+            'back_url' => $this->documentUrl($document->image_path_back),
+        ];
+    }
+
+    private function mapShopDocument(ShopLicenseDocument $document): array
+    {
+        return [
+            'id' => $document->id,
+            'type' => $document->type,
+            'type_label' => $this->shopTypeLabel($document->type),
+            'status_code' => (int) $document->status,
+            'status_key' => $this->shopStatusKey($document),
+            'status_label' => $this->statusLabel((int) $document->status),
+            'ng_reason' => $document->ng_reason,
+            'expired_at' => optional($document->expired_at)->format('Y-m-d'),
+            'approved_at' => optional($document->approved_at)->format('Y-m-d H:i'),
+            'updated_at_label' => optional($document->updated_at)->format('Y-m-d H:i'),
+            'file_url' => $this->documentUrl($document->image_path),
+        ];
+    }
+
+    private function mapCastDocumentRecord(object $document): array
+    {
+        $name = trim((string) ($document->nickname ?: $document->name ?: $document->cast_id));
+
+        return [
+            'id' => (int) $document->id,
+            'target_id' => $document->cast_id,
+            'target_name' => $name !== '' ? $name : $document->cast_id,
+            'type' => $document->type,
+            'type_label' => $this->castTypeLabel($document->type),
+            'status_code' => (int) $document->status,
+            'status_key' => $this->statusKey((int) $document->status),
+            'status_label' => $this->statusLabel((int) $document->status),
+            'sort_rank' => $this->statusSortRank((int) $document->status),
+            'ng_reason' => $document->ng_reason,
+            'expired_at' => $document->expired_at,
+            'approved_at' => $document->approved_at,
+            'expired_at_label' => $document->expired_at ? date('Y-m-d', strtotime((string) $document->expired_at)) : null,
+            'approved_at_label' => $this->formatDateTime($document->approved_at),
+            'updated_at_label' => $this->formatDateTime($document->updated_at),
+            'updated_at_sort' => $document->updated_at ? strtotime((string) $document->updated_at) : 0,
+            'front_url' => $this->documentUrl($document->image_path_front),
+            'back_url' => $this->documentUrl($document->image_path_back),
+        ];
+    }
+
+    private function mapShopDocumentRecord(object $document): array
+    {
+        return [
+            'id' => (int) $document->id,
+            'target_id' => $document->shop_id,
+            'target_name' => $document->shop_name ?: $document->shop_id,
+            'type' => $document->type,
+            'type_label' => $this->shopTypeLabel($document->type),
+            'status_code' => (int) $document->status,
+            'status_key' => $this->statusKey((int) $document->status),
+            'status_label' => $this->statusLabel((int) $document->status),
+            'sort_rank' => $this->statusSortRank((int) $document->status),
+            'ng_reason' => $document->ng_reason,
+            'expired_at' => $document->expired_at,
+            'approved_at' => $document->approved_at,
+            'expired_at_label' => $document->expired_at ? date('Y-m-d', strtotime((string) $document->expired_at)) : null,
+            'approved_at_label' => $this->formatDateTime($document->approved_at),
+            'updated_at_label' => $this->formatDateTime($document->updated_at),
+            'updated_at_sort' => $document->updated_at ? strtotime((string) $document->updated_at) : 0,
+            'file_url' => $this->documentUrl($document->image_path),
+        ];
+    }
+
+    private function castTypeLabel(string $type): string
+    {
+        return match ($type) {
+            'passport' => '旅券',
+            'my_number' => 'マイナンバーカード',
+            default => '運転免許証',
+        };
+    }
+
+    private function shopTypeLabel(string $type): string
+    {
+        return match ($type) {
+            'entertainment' => '風営許可証',
+            default => '営業許可証',
+        };
+    }
+
+    private function statusLabel(int $status): string
+    {
+        return match ($status) {
+            2 => '承認済み',
+            3 => '不備・却下',
+            default => '未承認',
+        };
+    }
+
+    private function statusKey(int $status): string
+    {
+        return match ($status) {
+            2 => 'approved',
+            3 => 'rejected',
+            default => 'pending',
+        };
+    }
+
+    private function statusSortRank(int $status): int
+    {
+        return match ($status) {
+            1 => 0,
+            3 => 1,
+            2 => 2,
+            default => 9,
+        };
+    }
+
+    private function documentUrl(?string $path): ?string
+    {
+        if (empty($path)) {
+            return null;
+        }
+
+        return str_starts_with($path, 'public/')
+            ? Storage::url($path)
+            : asset(ltrim($path, '/'));
+    }
+
+    private function formatDateTime($value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        return date('Y-m-d H:i', strtotime((string) $value));
+    }
+}

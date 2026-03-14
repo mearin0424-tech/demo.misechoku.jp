@@ -189,28 +189,16 @@ class RegistrationController extends Controller
             'title' => $isCast ? 'キャスト新規登録' : '店舗新規登録',
             'bodyClass' => $isCast ? 'page-auth-register page-auth-register-cast' : 'page-auth-register page-auth-register-shop',
             'guideMessage' => $isCast
-                ? "気になるお店と、もっと自然につながろう。\nまずは基本情報を登録してスタート。"
-                : "お店の魅力が伝わる入口を整えよう。\nまずは店舗情報の登録から始めよう。",
-            'eyebrow' => $isCast ? 'CAST REGISTRATION' : 'SHOP REGISTRATION',
-            'heroTitle' => $isCast ? '理想のお店と出会うための、最初の一歩。' : '魅力あるお店づくりを、登録からスムーズに。',
-            'heroDescription' => $isCast
-                ? 'プロフィール作成や応募導線につながる、新規登録画面です。デモとして雰囲気と入力体験を確認できます。'
-                : '店舗情報や担当者情報を整理して、求人掲載やキャストとのマッチングにつながる登録画面を用意しました。',
-            'benefits' => $isCast
-                ? [
-                    '気になる店舗へスムーズに応募',
-                    'プロフィール入力の土台をまとめて登録',
-                    '希望条件に合う求人を探しやすく',
-                ]
-                : [
-                    '店舗プロフィールの公開準備を開始',
-                    '求人掲載に必要な基本情報を整理',
-                    'キャストとの接点づくりをスムーズに',
-                ],
+                ? "キャスト登録です。\n必要項目を入力してください。"
+                : "店舗登録です。\n必要項目を入力してください。",
+            'eyebrow' => '',
+            'heroTitle' => $isCast ? 'キャスト登録' : '店舗登録',
+            'heroDescription' => '',
+            'benefits' => [],
             'formAction' => $isCast ? route('cast.register.store') : route('shop.register.store'),
-            'submitLabel' => $isCast ? 'キャストとして無料登録する' : '店舗として無料登録する',
+            'submitLabel' => '登録する',
             'alternateUrl' => $isCast ? route('shop.register') : route('cast.register'),
-            'alternateLabel' => $isCast ? '店舗登録はこちら' : 'キャスト登録はこちら',
+            'alternateLabel' => $isCast ? '店舗' : 'キャスト',
             'loginUrl' => route('login.demo'),
             'prefOptions' => CommonConsts::PREFS,
         ];

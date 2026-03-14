@@ -11,16 +11,13 @@
 @section('content')
     <div class="register-page">
         <section class="register-hero">
-            <p class="register-eyebrow">{{ $eyebrow }}</p>
+            <div class="register-role-switch">
+                <a href="{{ route('cast.register') }}" class="register-role {{ $role === 'cast' ? 'is-active' : '' }}">キャスト</a>
+                <a href="{{ route('shop.register') }}" class="register-role {{ $role === 'shop' ? 'is-active' : '' }}">店舗</a>
+                <a href="{{ route('admin.login') }}" class="register-role">運営</a>
+            </div>
             <img src="{{ asset('assets/images/common/logo-yoko.png') }}" alt="ミセチョク" class="register-logo">
             <h1 class="register-title">{{ $heroTitle }}</h1>
-            <p class="register-desc">{{ $heroDescription }}</p>
-
-            <div class="register-benefits">
-                @foreach ($benefits as $benefit)
-                    <span class="register-benefit-chip">{{ $benefit }}</span>
-                @endforeach
-            </div>
         </section>
 
         <form method="POST" action="{{ $formAction }}" class="register-form h-adr">
@@ -45,7 +42,6 @@
                 <section class="register-card">
                     <div class="register-card-head">
                         <h2>基本情報</h2>
-                        <p>応募やプロフィール入力の基礎になる内容です。</p>
                     </div>
 
                     <div class="register-grid register-grid-two">
@@ -83,7 +79,7 @@
                             autocomplete="postal-code"
                             placeholder="例：160-0021"
                         >
-                        <small class="register-field-hint">半角数字で入力してください。ハイフン有無どちらでも入力でき、住所が自動補完されます。</small>
+                        <small class="register-field-hint">住所を自動入力します。</small>
                     </label>
 
                     <div class="register-grid register-grid-two">
@@ -147,7 +143,6 @@
                 <section class="register-card">
                     <div class="register-card-head">
                         <h2>店舗情報</h2>
-                        <p>掲載や求人作成に必要な基本情報をまとめます。</p>
                     </div>
 
                     <div class="register-grid register-grid-two">
@@ -194,7 +189,7 @@
                             autocomplete="postal-code"
                             placeholder="例：106-0032"
                         >
-                        <small class="register-field-hint">半角数字で入力してください。ハイフン有無どちらでも入力でき、住所が自動補完されます。</small>
+                        <small class="register-field-hint">住所を自動入力します。</small>
                     </label>
 
                     <div class="register-grid register-grid-two">
@@ -240,14 +235,12 @@
                                 <input type="radio" name="plan" value="basic" @checked(old('plan', 'basic') === 'basic')>
                                 <span>
                                     <strong>Basic</strong>
-                                    <small>まずは求人掲載の準備から始めたい店舗向け</small>
                                 </span>
                             </label>
                             <label class="register-plan-option">
                                 <input type="radio" name="plan" value="premium" @checked(old('plan') === 'premium')>
                                 <span>
                                     <strong>Premium</strong>
-                                    <small>露出強化やマッチング効率も重視したい店舗向け</small>
                                 </span>
                             </label>
                         </div>
@@ -258,7 +251,6 @@
             <section class="register-card">
                 <div class="register-card-head">
                     <h2>アカウント情報</h2>
-                    <p>ログインやご連絡に利用する情報です。</p>
                 </div>
 
                 <div class="register-grid register-grid-two">
@@ -298,7 +290,7 @@
 
             <div class="register-actions">
                 <button type="submit" class="register-submit">{{ $submitLabel }}</button>
-                <a href="{{ $alternateUrl }}" class="register-secondary">{{ $alternateLabel }}</a>
+                <a href="{{ $loginUrl }}" class="register-secondary">ログインへ戻る</a>
                 <a href="{{ $loginUrl }}" class="register-login-link">デモログインへ戻る</a>
             </div>
         </form>
@@ -357,50 +349,45 @@
             text-align: center;
         }
 
-        .register-eyebrow {
-            margin: 0 0 14px;
-            font-size: 0.72rem;
-            letter-spacing: 0.28em;
-            color: rgba(253, 240, 178, 0.76);
+        .register-role-switch {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .register-role {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            border: 1px solid #3d1a1f;
+            border-radius: 14px;
+            background: rgba(18, 4, 5, 0.58);
+            color: #a89090;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .register-role.is-active {
+            border-color: rgba(230, 208, 128, 0.42);
+            color: #e6d080;
+            background: rgba(35, 15, 18, 0.95);
         }
 
         .register-logo {
             width: 210px;
             max-width: 70%;
-            margin-bottom: 18px;
+            margin-bottom: 14px;
             filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.35));
         }
 
         .register-title {
-            margin: 0 0 10px;
-            font-size: clamp(1.6rem, 4vw, 2.1rem);
+            margin: 0;
+            font-size: clamp(1.5rem, 4vw, 1.9rem);
             line-height: 1.4;
             color: #fff4d6;
-        }
-
-        .register-desc {
-            margin: 0 auto;
-            max-width: 34rem;
-            color: rgba(236, 221, 221, 0.86);
-            line-height: 1.85;
-            font-size: 0.94rem;
-        }
-
-        .register-benefits {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .register-benefit-chip {
-            padding: 8px 14px;
-            border-radius: 999px;
-            border: 1px solid rgba(229, 193, 88, 0.2);
-            background: rgba(255, 255, 255, 0.04);
-            color: #f6e8c5;
-            font-size: 0.79rem;
         }
 
         .register-form {
@@ -442,16 +429,9 @@
         }
 
         .register-card-head h2 {
-            margin: 0 0 6px;
+            margin: 0;
             font-size: 1.05rem;
             color: #fff4d6;
-        }
-
-        .register-card-head p {
-            margin: 0;
-            color: rgba(218, 199, 199, 0.76);
-            font-size: 0.82rem;
-            line-height: 1.7;
         }
 
         .register-grid {
@@ -539,14 +519,7 @@
 
         .register-plan-option strong {
             display: block;
-            margin-bottom: 4px;
             color: #fff5da;
-        }
-
-        .register-plan-option small {
-            display: block;
-            color: rgba(218, 199, 199, 0.76);
-            line-height: 1.7;
         }
 
         .register-check {
@@ -636,6 +609,10 @@
 
             .register-grid-two,
             .register-grid-birth {
+                grid-template-columns: 1fr;
+            }
+
+            .register-role-switch {
                 grid-template-columns: 1fr;
             }
         }

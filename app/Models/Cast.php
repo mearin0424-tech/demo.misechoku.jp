@@ -65,4 +65,9 @@ class Cast extends Authenticatable
         return $this->hasOne(BankAccount::class, 'holder_id', 'id')
             ->where('holder_type', BankAccount::HOLDER_CAST);
     }
+
+    public function identityDocuments(): HasMany
+    {
+        return $this->hasMany(CastIdentityDocument::class, 'cast_id', 'id');
+    }
 }

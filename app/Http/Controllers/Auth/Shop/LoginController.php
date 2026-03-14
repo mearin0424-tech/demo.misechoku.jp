@@ -16,15 +16,15 @@ class LoginController extends Controller
             'role' => 'shop',
             'title' => '店舗ログイン',
             'bodyClass' => 'page-auth-login page-auth-login-shop',
-            'guideMessage' => "店舗用ログインだよ。\nデモでは入力後すぐに店舗ホームへ進めるよ。",
-            'eyebrow' => 'SHOP LOGIN',
-            'heroTitle' => 'お店の魅力を届けるためのログイン入口。',
-            'heroDescription' => '求人管理、ホーム、マイページ体験につながる店舗向けログイン画面です。',
+            'guideMessage' => "店舗ログインです。\n入力して進んでください。",
+            'eyebrow' => '',
+            'heroTitle' => '店舗ログイン',
+            'heroDescription' => '',
             'formAction' => route('shop.login.post'),
             'registerUrl' => route('shop.register'),
-            'registerLabel' => '店舗新規登録はこちら',
+            'registerLabel' => '新規登録',
             'alternateUrl' => route('cast.login'),
-            'alternateLabel' => 'キャストログインはこちら',
+            'alternateLabel' => 'キャスト',
         ]);
     }
 

@@ -3,59 +3,85 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\DocumentReviewService;
+use App\Services\MessageTemplateService;
 use Illuminate\Http\Request;
 
 class VerificationController extends Controller
 {
+    public function __construct(
+        private readonly DocumentReviewService $documentReviewService,
+        private readonly MessageTemplateService $messageTemplateService
+    )
+    {
+    }
+
     /**
-     * 本人確認・書類提出ステータス一覧（デモ用）
+     * 本人確認・書類提出ステータス一覧
      */
     public function index()
     {
-        $castIdentityStatus = session('cast_identity_status', 'not_submitted');
-        $shopDocStatus = session('shop_documents_status', [
-            'business_license' => 'not_submitted',
-            'adult_entertainment_license' => 'not_submitted',
-        ]);
+        $verificationData = $this->documentReviewService->getAdminVerificationData();
 
         return view('admin.verification.index', [
-            'castIdentityStatus' => $castIdentityStatus,
-            'shopDocStatus' => $shopDocStatus,
+            'castDocuments' => $verificationData['cast_documents'],
+            'shopDocuments' => $verificationData['shop_documents'],
+            'summary' => $verificationData['summary'],
+            'rejectTemplates' => $this->messageTemplateService->getGroupedTemplates([
+                'document_reject_cast',
+                'document_reject_shop',
+            ]),
         ]);
     }
 
     /**
      * キャスト本人確認の承認
      */
-    public function approveCast(Request $request)
+    public function approveCast(Request $request, int $document)
     {
-        session(['cast_identity_status' => 'approved']);
+        $this->documentReviewService->approveCastDocument($document);
 
         return redirect()
             ->route('admin.verification.index')
-            ->with('status', 'キャストの本人確認を承認しました。（デモ）');
+            ->with('status', 'キャストの本人確認書類を承認しました。');
+    }
+
+    public function rejectCast(Request $request, int $document)
+    {
+        $data = $request->validate([
+            'ng_reason' => 'required|string|max:2000',
+        ]);
+
+        $this->documentReviewService->rejectCastDocument($document, (string) $data['ng_reason']);
+
+        return redirect()
+            ->route('admin.verification.index')
+            ->with('status', 'キャストの本人確認書類を却下しました。');
     }
 
     /**
      * 店舗の書類提出の承認
      */
-    public function approveShopDocument(Request $request)
+    public function approveShopDocument(Request $request, int $document)
     {
-        $data = $request->validate([
-            'type' => 'required|string|in:business_license,adult_entertainment_license',
-        ]);
-
-        $statuses = session('shop_documents_status', [
-            'business_license' => 'not_submitted',
-            'adult_entertainment_license' => 'not_submitted',
-        ]);
-
-        $statuses[$data['type']] = 'approved';
-        session(['shop_documents_status' => $statuses]);
+        $this->documentReviewService->approveShopDocument($document);
 
         return redirect()
             ->route('admin.verification.index')
-            ->with('status', '店舗の書類（' . $data['type'] . '）を承認しました。（デモ）');
+            ->with('status', '店舗提出書類を承認しました。');
+    }
+
+    public function rejectShopDocument(Request $request, int $document)
+    {
+        $data = $request->validate([
+            'ng_reason' => 'required|string|max:2000',
+        ]);
+
+        $this->documentReviewService->rejectShopDocument($document, (string) $data['ng_reason']);
+
+        return redirect()
+            ->route('admin.verification.index')
+            ->with('status', '店舗提出書類を却下しました。');
     }
 }
 

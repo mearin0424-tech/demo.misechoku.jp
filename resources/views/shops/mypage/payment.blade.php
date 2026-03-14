@@ -311,6 +311,13 @@
                     @if(!empty($approvalTarget['review_comment']))
                         <div class="management-request-text">{{ $approvalTarget['review_comment'] }}</div>
                     @endif
+                    @if(!empty($approvalTarget['review_id']))
+                        <div class="management-actions" style="margin-top:12px;">
+                            <a href="{{ route('shop.mypage.review.index') }}#review-{{ $approvalTarget['review_id'] }}" class="btn-action manage">
+                                レビュー一覧で確認する
+                            </a>
+                        </div>
+                    @endif
                 @endif
             </div>
         @endif

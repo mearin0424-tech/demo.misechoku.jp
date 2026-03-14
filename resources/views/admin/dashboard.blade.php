@@ -285,7 +285,11 @@
                                     <td data-label="金額" class="task-amount">{{ $task['amount'] ?: '-' }}</td>
                                     <td data-label="申請日時" class="task-date">{{ $task['date'] }}</td>
                                     <td data-label="アクション" class="text-right">
-                                        <button type="button" class="task-action-button {{ $task['urgency'] === 'critical' ? 'is-critical' : '' }}">{{ $task['action'] }}</button>
+                                        @if(!empty($task['url']))
+                                            <a href="{{ $task['url'] }}" class="task-action-button {{ $task['urgency'] === 'critical' ? 'is-critical' : '' }}">{{ $task['action'] }}</a>
+                                        @else
+                                            <button type="button" class="task-action-button {{ $task['urgency'] === 'critical' ? 'is-critical' : '' }}">{{ $task['action'] }}</button>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach

@@ -48,7 +48,7 @@
                     </div>
                 @else
                     @foreach($reviews as $rev)
-                    <div class="review-card {{ $rev['release'] == 0 ? 'is-hidden' : '' }}">
+                    <div id="review-{{ $rev['id'] }}" class="review-card {{ $rev['release'] == 0 ? 'is-hidden' : '' }}">
                         <div class="rev-main-row">
                             <div class="rev-user-aside">
                                 <img src="{{ $rev['user_img'] ?: asset('assets/images/common/user-default.svg') }}" class="rev-user-img">
@@ -65,6 +65,9 @@
                                         <i class="fas fa-star"></i> {{ number_format($rev['avg_score'], 1) }}
                                     </span>
                                 </div>
+                                @if(!empty($rev['created_at_label']))
+                                    <div class="text-xs" style="margin-bottom:8px; color:#9ca3af;">{{ $rev['created_at_label'] }}</div>
+                                @endif
 
                                 <div class="rev-comment">
                                     {!! nl2br(e($rev['text'])) !!}

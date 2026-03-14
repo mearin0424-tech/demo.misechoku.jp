@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Casts;
 
 use App\Rules\KouzaMeig;
 use App\Services\BillingManagementService;
+use App\Services\DocumentReviewService;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -14,7 +15,10 @@ use Illuminate\Http\Request;
 
 class MypageController extends Controller
 {
-    public function __construct(private readonly BillingManagementService $billingManagementService)
+    public function __construct(
+        private readonly BillingManagementService $billingManagementService,
+        private readonly DocumentReviewService $documentReviewService
+    )
     {
     }
 
@@ -115,19 +119,13 @@ class MypageController extends Controller
     public function identity()
     {
         $castId = $this->currentCastId();
-        $raw = DB::table('casts')->where('id', $castId)->value('identity_status');
-
-        // 1:未提出, 2:未承認, 3:承認済み
-        $status = match ((int)($raw ?? 1)) {
-            1 => 'not_submitted',
-            2 => 'pending',
-            3 => 'approved',
-            default => 'not_submitted',
-        };
+        $identityData = $this->documentReviewService->getCastIdentityPageData($castId);
 
         return view('casts.mypage.identity', [
             'pageId' => 'mypage',
-            'identityStatus' => $status,
+            'identityStatus' => $identityData['status'],
+            'identityDocuments' => $identityData['documents'],
+            'latestIdentityDocument' => $identityData['latest_document'],
         ]);
     }
 
@@ -137,15 +135,20 @@ class MypageController extends Controller
     public function uploadIdentity(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:8192',
+            'type' => 'required|string|in:driver_license,passport,my_number',
+            'front_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:8192',
+            'back_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:8192',
+            'expired_at' => 'nullable|date',
         ]);
 
-        // 実装ではストレージとDBに保存する想定。
-        // デモでは casts.identity_status を「提出済み（未承認）」に更新。
         $castId = $this->currentCastId();
-        DB::table('casts')
-            ->where('id', $castId)
-            ->update(['identity_status' => 2, 'updated_at' => now()]);
+        $this->documentReviewService->uploadCastIdentityDocument(
+            $castId,
+            (string) $request->input('type'),
+            $request->file('front_file'),
+            $request->file('back_file'),
+            $request->input('expired_at')
+        );
 
         return response()->json([
             'success' => true,
@@ -286,9 +289,11 @@ class MypageController extends Controller
             $request->all()
         );
 
-        return redirect()
+        $redirect = redirect()
             ->route('cast.mypage.payment')
             ->with($result['success'] ? 'status' : 'error', $result['message']);
+
+        return $result['success'] ? $redirect : $redirect->withInput();
     }
 
     /**

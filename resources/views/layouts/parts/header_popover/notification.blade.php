@@ -11,9 +11,22 @@
         </div>
         @if(isset($notifications) && count($notifications) > 0)
             @foreach($notifications as $item)
-                <div style="padding:10px; border-bottom:1px solid #333; font-size:0.85rem; color:#fff;">
-                    {{ $item['title'] }}
-                </div>
+                @php $url = $item['url'] ?? null; @endphp
+                @if($url)
+                    <a href="{{ $url }}" style="display:block; padding:10px; border-bottom:1px solid #333; text-decoration:none; color:#fff;">
+                        <div style="font-size:0.85rem;">{{ $item['title'] }}</div>
+                        @if(!empty($item['body']))
+                            <div style="margin-top:4px; font-size:0.76rem; color:#bbb;">{{ $item['body'] }}</div>
+                        @endif
+                    </a>
+                @else
+                    <div style="padding:10px; border-bottom:1px solid #333; font-size:0.85rem; color:#fff;">
+                        <div>{{ $item['title'] }}</div>
+                        @if(!empty($item['body']))
+                            <div style="margin-top:4px; font-size:0.76rem; color:#bbb;">{{ $item['body'] }}</div>
+                        @endif
+                    </div>
+                @endif
             @endforeach
         @else
             <div style="padding:15px; color:#999; text-align:center; font-size:0.8rem;">新しいお知らせはありません。</div>

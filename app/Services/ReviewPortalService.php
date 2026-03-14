@@ -1,0 +1,199 @@
+<?php
+
+namespace App\Services;
+
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
+class ReviewPortalService
+{
+    public function getShopReviewPageData(string $shopId): array
+    {
+        $reviewRows = DB::table('reviews')
+            ->leftJoin('cast_profiles', 'reviews.cast_id', '=', 'cast_profiles.cast_id')
+            ->where('reviews.shop_id', $shopId)
+            ->orderByDesc('reviews.id')
+            ->select(
+                'reviews.id',
+                'reviews.cast_id',
+                'reviews.contents',
+                'reviews.eva',
+                'reviews.created_at',
+                DB::raw($this->reviewReleaseExpression() . ' as release'),
+                DB::raw($this->reviewAnonymousExpression() . ' as anonymous'),
+                'cast_profiles.nickname',
+                'cast_profiles.name'
+            )
+            ->get();
+
+        $reviewIds = $reviewRows->pluck('id')->map(fn ($id) => (int) $id)->all();
+        $detailMap = $this->loadReviewDetails($reviewIds);
+
+        $reviews = $reviewRows->map(function ($row) use ($detailMap) {
+            $castId = (string) $row->cast_id;
+            $displayName = trim((string) ($row->nickname ?: $row->name ?: $castId));
+
+            return [
+                'id' => (int) $row->id,
+                'user_name' => $displayName !== '' ? $displayName : $castId,
+                'user_img' => $this->resolveCastAvatar($castId),
+                'anonymous' => (int) ($row->anonymous ?? 0),
+                'avg_score' => (float) ($row->eva ?? 0),
+                'text' => (string) ($row->contents ?? ''),
+                'release' => (int) ($row->release ?? 1),
+                'details' => $detailMap[(int) $row->id] ?? [],
+                'created_at_label' => !empty($row->created_at) ? date('Y-m-d H:i', strtotime((string) $row->created_at)) : null,
+            ];
+        })->all();
+
+        return [
+            'shopData' => [
+                'review_avg' => round($reviewRows->avg(fn ($row) => (float) ($row->eva ?? 0)) ?: 0, 1),
+                'review_count' => count($reviews),
+            ],
+            'reviews' => $reviews,
+            'supports_release' => Schema::hasTable('reviews') && Schema::hasColumn('reviews', 'release'),
+        ];
+    }
+
+    public function updateShopReviewStatus(string $shopId, int $reviewId, int $release): bool
+    {
+        if (!(Schema::hasTable('reviews') && Schema::hasColumn('reviews', 'release'))) {
+            return false;
+        }
+
+        return DB::table('reviews')
+            ->where('id', $reviewId)
+            ->where('shop_id', $shopId)
+            ->update(['release' => $release]) > 0;
+    }
+
+    public function getShopReviewNotifications(string $shopId, int $limit = 10): array
+    {
+        return DB::table('reviews')
+            ->leftJoin('cast_profiles', 'reviews.cast_id', '=', 'cast_profiles.cast_id')
+            ->where('reviews.shop_id', $shopId)
+            ->orderByDesc('reviews.id')
+            ->limit($limit)
+            ->get([
+                'reviews.id',
+                'reviews.cast_id',
+                'reviews.created_at',
+                'cast_profiles.nickname',
+                'cast_profiles.name',
+            ])
+            ->map(function ($row) {
+                $name = trim((string) ($row->nickname ?: $row->name ?: $row->cast_id));
+                $label = $name !== '' ? $name : (string) $row->cast_id;
+
+                return [
+                    'title' => $label . ' さんがレビューを投稿しました',
+                    'body' => !empty($row->created_at)
+                        ? date('Y-m-d H:i', strtotime((string) $row->created_at))
+                        : 'レビューが投稿されました',
+                    'url' => route('shop.mypage.review.index') . '#review-' . (int) $row->id,
+                ];
+            })
+            ->all();
+    }
+
+    /**
+     * @param array<int, int> $reviewIds
+     * @return array<int, array<int, array{name:string, score:float}>>
+     */
+    private function loadReviewDetails(array $reviewIds): array
+    {
+        if (empty($reviewIds)) {
+            return [];
+        }
+
+        $contentColumn = $this->reviewContentColumn();
+        $detailColumn = $this->reviewDetailContentColumn();
+
+        return DB::table('review_details')
+            ->join('review_contents', 'review_details.' . $detailColumn, '=', 'review_contents.id')
+            ->whereIn('review_details.review_id', $reviewIds)
+            ->orderBy('review_details.review_id')
+            ->when(
+                Schema::hasTable('review_contents') && Schema::hasColumn('review_contents', 'sort_order'),
+                fn ($query) => $query->orderBy('review_contents.sort_order')
+            )
+            ->orderBy('review_contents.id')
+            ->get([
+                'review_details.review_id',
+                DB::raw('review_contents.' . $contentColumn . ' as name'),
+                'review_details.score',
+            ])
+            ->groupBy('review_id')
+            ->map(fn ($rows) => collect($rows)->map(fn ($row) => [
+                'name' => (string) $row->name,
+                'score' => (float) $row->score,
+            ])->all())
+            ->all();
+    }
+
+    private function resolveCastAvatar(string $castId): string
+    {
+        $path = DB::table('cast_images')
+            ->where('cast_id', $castId)
+            ->where('type', 1)
+            ->orderByRaw('is_main DESC')
+            ->orderByRaw('main_order IS NULL')
+            ->orderBy('main_order')
+            ->orderBy('id')
+            ->value('image_path');
+
+        return $this->assetPathForStored($path) ?: asset('assets/images/common/user-default.svg');
+    }
+
+    private function assetPathForStored(?string $path): ?string
+    {
+        if (empty($path)) {
+            return null;
+        }
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        if (str_starts_with($path, 'public/')) {
+            return asset('storage/' . ltrim(substr($path, 7), '/'));
+        }
+
+        if (str_starts_with($path, 'uploads/')) {
+            return asset($path);
+        }
+
+        return asset(ltrim($path, '/'));
+    }
+
+    private function reviewContentColumn(): string
+    {
+        return Schema::hasTable('review_contents') && Schema::hasColumn('review_contents', 'content')
+            ? 'content'
+            : 'name';
+    }
+
+    private function reviewDetailContentColumn(): string
+    {
+        if (Schema::hasTable('review_details') && Schema::hasColumn('review_details', 'val')) {
+            return 'val';
+        }
+
+        return 'review_content_id';
+    }
+
+    private function reviewReleaseExpression(): string
+    {
+        return Schema::hasTable('reviews') && Schema::hasColumn('reviews', 'release')
+            ? 'reviews.release'
+            : '1';
+    }
+
+    private function reviewAnonymousExpression(): string
+    {
+        return Schema::hasTable('reviews') && Schema::hasColumn('reviews', 'is_anonymous')
+            ? 'reviews.is_anonymous'
+            : '0';
+    }
+}
