@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Eloquents;
 
-use App\Models\Manager;
+use App\Models\ShopManager;
 use App\Repositories\Interfaces\ManagerRepositoryInterface;
 use Illuminate\Support\Facades\Hash;
 
@@ -16,7 +16,7 @@ class ManagerRepository implements ManagerRepositoryInterface
      *
      * @param User $user
      */
-    public function __construct(Manager $user)
+    public function __construct(ShopManager $user)
     {
         $this->user = $user;
     }
@@ -24,7 +24,7 @@ class ManagerRepository implements ManagerRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function findFromEmail(string $email): Manager
+    public function findFromEmail(string $email): ShopManager
     {
         return $this->user->where('email', $email)->firstOrFail();
     }

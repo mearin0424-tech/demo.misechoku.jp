@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Interfaces;
 
-use App\Models\Manager;
+use App\Models\ShopManager;
 
 interface ManagerRepositoryInterface
 {
@@ -12,7 +12,7 @@ interface ManagerRepositoryInterface
      * @param string $email
      * @return User
      */
-    public function findFromEmail(string $email): Manager;
+    public function findFromEmail(string $email): ShopManager;
 
     /**
      * 引数に渡されたIDのユーザーのパスワードを更新する

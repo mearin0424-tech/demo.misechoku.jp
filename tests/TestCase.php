@@ -2,27 +2,27 @@
 
 namespace Tests;
 
-use App\Models\Manager;
-use App\Models\Member;
-use App\Models\User;
+use App\Models\Cast;
+use App\Models\ShopManager;
+use App\Models\SystemAccount;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
 
-    protected function adminUser(): User
+    protected function adminUser(): SystemAccount
     {
-        return User::query()->findOrFail('admin001');
+        return SystemAccount::query()->findOrFail(1);
     }
 
-    protected function shopManager(): Manager
+    protected function shopManager(): ShopManager
     {
-        return Manager::query()->findOrFail('m00000001');
+        return ShopManager::query()->findOrFail('m00000001');
     }
 
-    protected function castMember(): Member
+    protected function castMember(): Cast
     {
-        return Member::query()->findOrFail('c00000001');
+        return Cast::query()->findOrFail('c00000001');
     }
 }

@@ -2,34 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
-
-class User extends Authenticatable
+class User extends SystemAccount
 {
-    public const ROLE_ADMIN = 10;
-
-    protected $table = 'users';
-
-    protected $primaryKey = 'id';
-
-    public $incrementing = false;
-
-    protected $keyType = 'string';
-
-    protected $fillable = [
-        'id',
-        'name',
-        'email',
-        'password',
-        'role_type',
-    ];
-
-    protected $hidden = [
-        'password',
-    ];
-
-    public function isAdmin(): bool
-    {
-        return (int) $this->role_type === self::ROLE_ADMIN;
-    }
+    // 互換維持用。新規実装では SystemAccount を利用する。
 }

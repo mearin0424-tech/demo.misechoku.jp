@@ -55,6 +55,7 @@ class Shop extends Model
 
     public function bankAccount(): HasOne
     {
-        return $this->hasOne(BankAccountShop::class, 'shop_id', 'id');
+        return $this->hasOne(BankAccount::class, 'holder_id', 'id')
+            ->where('holder_type', BankAccount::HOLDER_SHOP);
     }
 }

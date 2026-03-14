@@ -1,6 +1,7 @@
 <?php
 namespace App\Repositories\Member;
 
+use App\Models\Cast;
 use App\Models\Identity;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +14,7 @@ class IdentityRepository implements MemberRepositoryInterface
      */
     private $project;
 
-    public function __construct(Member $project) {
+    public function __construct(Cast $project) {
         $this->project = $project;
     }
 

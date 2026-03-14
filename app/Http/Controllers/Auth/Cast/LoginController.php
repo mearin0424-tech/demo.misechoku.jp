@@ -55,7 +55,7 @@ class LoginController extends Controller
     {
         auth()->guard('member')->logout();
         auth()->guard('shop')->logout();
-        auth()->guard()->logout();
+        auth()->guard('admin')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

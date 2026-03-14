@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Member;
 
-use App\Models\Member;
+use App\Models\Cast;
 use App\Models\WMember;
 use App\Models\MemberIndustry;
 use App\Models\MemberIndustryExp;
@@ -34,7 +34,7 @@ class MemberRepository implements MemberRepositoryInterface
      */
     private $project;
 
-    public function __construct(Member $project)
+    public function __construct(Cast $project)
     {
         $this->project = $project;
     }
@@ -55,7 +55,7 @@ class MemberRepository implements MemberRepositoryInterface
 
     public function newApprovaCnt()
     {
-        return  Member::where('approval', \FrontConsts::APPROVAL_OFF)->count();
+        return Cast::where('status', \FrontConsts::APPROVAL_OFF)->count();
     }
 
     public function getActiveUser()
@@ -101,10 +101,9 @@ class MemberRepository implements MemberRepositoryInterface
 
     public function saveMemberFromFront($inputData, $member_id)
     {
-
-        $inputData['approval'] = FrontConsts::APPROVAL_OFF;
-        $member = $this->findById($member_id);
-        $res = $member->fill($inputData)->save();
+        $inputData['status'] = FrontConsts::APPROVAL_OFF;
+        $member = $this->syncCastRecord($member_id, $inputData);
+        $res = (bool) $member;
         if (!$res) return false;
         $industrys = $inputData['industry'];
         foreach ($industrys as $key => $industry) {
@@ -121,13 +120,10 @@ class MemberRepository implements MemberRepositoryInterface
 
     public function saveMember(Request $request, $member_id)
     {
+        $payload = $request->except('_token', '_method');
+        $payload['status'] = FrontConsts::APPROVAL_ON;
 
-        $request['approval'] = FrontConsts::APPROVAL_ON;
-        $member = $this->findById($member_id);
-        $res = $member->fill($request->except('_token', '_method'))->save();
-
-
-        return $res;
+        return (bool) $this->syncCastRecord($member_id, $payload);
     }
 
     public function saveMemberIdentity(Request $request, $member_id)
@@ -413,18 +409,13 @@ class MemberRepository implements MemberRepositoryInterface
     {
 
         if (!empty($request['ng_reason'])) {
-            $request['approval'] = \FrontConsts::APPROVAL_NG;
             $request['status'] = \FrontConsts::APPROVAL_NG;
         } else {
-            $request['approval'] = \FrontConsts::APPROVAL_ON;
             $request['status'] = \FrontConsts::APPROVAL_ON;
             $request['ng_reason'] = "";
         }
 
-        $res = Member::updateOrCreate(
-            ['id' => $member_id],
-            $request->all()
-        );
+        $res = $this->syncCastRecord($member_id, $request->all());
 
         WMember::updateOrCreate(
             ['id' => $member_id],
@@ -448,20 +439,16 @@ class MemberRepository implements MemberRepositoryInterface
 
     public function findById($id)
     {
-        $records =  Member::find($id);
-        return $records;
+        return $this->findCastRecord($id);
     }
 
 
     public function saveMember2(Request $request, $member_id)
     {
+        $payload = $request->except('_token', '_method');
+        $payload['status'] = FrontConsts::APPROVAL_ON;
 
-        $request['approval'] = FrontConsts::APPROVAL_ON;
-        $member = $this->findById($member_id);
-        $res = $member->fill($request->except('_token', '_method'))->save();
-
-
-        return $res;
+        return (bool) $this->syncCastRecord($member_id, $payload);
     }
 
     public function saveMemberProfileByAdmin(Request $request, $member_id)
@@ -483,31 +470,22 @@ class MemberRepository implements MemberRepositoryInterface
 
     public function findByIdShop($id)
     {
-        $records =  Member::find($id);
-
-        $records = Member::where('id', $id)->where('approval', \FrontConsts::APPROVAL_ON)->first();
-        if (!Member::where('id', $id)->where('approval', \FrontConsts::APPROVAL_ON)->exists()) {
-            //$records = WMember::where('id', $id)->first();
-            //if (!WMember::where('id', $id)->exists()) {
-                $records = Member::where('id', $id)->first();
-            //}
+        $records = Cast::where('id', $id)->where('status', \FrontConsts::APPROVAL_ON)->first();
+        if (!Cast::where('id', $id)->where('status', \FrontConsts::APPROVAL_ON)->exists()) {
+            $records = Cast::where('id', $id)->first();
         }
 
-        return $records;
+        return $records ? $this->findCastRecord($records->id) : null;
     }
 
     public function findByIdShop2($id)
     {
-
-        $records = Member::where('id', $id)->where('approval', \FrontConsts::APPROVAL_ON)->first();
-        if (!Member::where('id', $id)->where('approval', \FrontConsts::APPROVAL_ON)->exists()) {
-            //$records = WMember::where('id', $id)->first();
-            //if (!WMember::where('id', $id)->exists()) {
-                $records = Member::where('id', $id)->first();
-            //}
+        $records = Cast::where('id', $id)->where('status', \FrontConsts::APPROVAL_ON)->first();
+        if (!Cast::where('id', $id)->where('status', \FrontConsts::APPROVAL_ON)->exists()) {
+            $records = Cast::where('id', $id)->first();
         }
 
-        return $records;
+        return $records ? $this->findCastRecord($records->id) : null;
 
 /*
         $records = Member::select('members.id as member_id', 'tags.id as cast_tag_id', 'tags.content as content')
@@ -544,7 +522,8 @@ class MemberRepository implements MemberRepositoryInterface
 
     public function getTagContentsByMemberID($id) {
 
-        $records = Member::select('tags.content as content')
+        $records = DB::table('members')
+            ->select('tags.content as content')
             ->leftJoin('member_tags', 'members.id', '=', 'member_tags.member_id')
             ->leftJoin('tags', 'member_tags.tag_id', '=', 'tags.id')
             ->where('members.id', $id)
@@ -640,7 +619,8 @@ class MemberRepository implements MemberRepositoryInterface
     public function findCastTagById($member_id, $type = "")
     {
 
-        $records = Member::select('members.id as member_id', 'tags.id as cast_tag_id', 'tags.content as name')
+        $records = DB::table('members')
+        ->select('members.id as member_id', 'tags.id as cast_tag_id', 'tags.content as name')
         ->join('member_tags', 'members.id', '=', 'member_tags.member_id')
         ->join('tags', 'member_tags.tag_id', '=', 'tags.id')
         ->where('members.id', $member_id);
@@ -685,7 +665,7 @@ class MemberRepository implements MemberRepositoryInterface
         $search = $request->search;
 
 
-        $query = Member::query();
+        $query = DB::table('members');
         //$query->join('shop_industries', function ($query) use ($request) {
         //$query->on('shops.id', '=', 'shop_industries.shop_id');
         //});
@@ -981,13 +961,13 @@ class MemberRepository implements MemberRepositoryInterface
 
     public function delete($request, $member_id)
     {
+        $member = Cast::find($member_id);
+        if (!$member) {
+            return;
+        }
 
-        $member = $this->findById($member_id);
-        $member['del_flg'] = \CommonConsts::DEL_ON;
-        $member['line_notify_token'] = null;
-        $member['line_user_id'] = null;
-
-        $res = $member->fill($request->except('_token', '_method'))->save();
+        $member->deleted_at = now();
+        $member->save();
     }
 
     public function saveApproval($request, $member_id)
@@ -1212,10 +1192,10 @@ class MemberRepository implements MemberRepositoryInterface
 
     public function deleteMember(Request $request, $member_id){
 
-        $member = Member::find($member_id);
+        $member = Cast::find($member_id);
 
         if ($member) {
-            $member->del_flg = CommonConsts::DEL_ON;
+            $member->deleted_at = now();
             $member->save();
         } else {
             return response()->json(['error' => 'Member not found'], 404);
@@ -1241,6 +1221,161 @@ class MemberRepository implements MemberRepositoryInterface
 
        return response()->json(['message' => 'Shop added by member']);
    }
+
+    private function syncCastRecord(string $memberId, array $payload): ?Cast
+    {
+        $castPayload = collect($payload)
+            ->only([
+                'email',
+                'password',
+                'identity_status',
+                'last_login_at',
+                'remember_token',
+            ])
+            ->filter(fn ($value) => $value !== null && $value !== '')
+            ->all();
+
+        if (array_key_exists('status', $payload)) {
+            $castPayload['status'] = $payload['status'];
+        } elseif (array_key_exists('approval', $payload)) {
+            $castPayload['status'] = $payload['approval'];
+        }
+
+        $cast = Cast::query()->find($memberId);
+
+        if (!$cast) {
+            $cast = new Cast();
+            $cast->id = $memberId;
+        }
+
+        if ($castPayload !== []) {
+            $cast->fill($castPayload);
+        }
+
+        $cast->save();
+
+        $profilePayload = $this->extractCastProfilePayload($payload);
+        if ($profilePayload !== []) {
+            DB::table('cast_profiles')->updateOrInsert(
+                ['cast_id' => $memberId],
+                array_merge(
+                    ['created_at' => now()],
+                    $profilePayload,
+                    ['updated_at' => now()]
+                )
+            );
+        }
+
+        return $this->findCastRecord($memberId);
+    }
+
+    private function extractCastProfilePayload(array $payload): array
+    {
+        $profilePayload = collect([
+            'nickname' => $payload['nickname'] ?? null,
+            'name' => $payload['name'] ?? null,
+            'name_kana' => $payload['name_kana'] ?? ($payload['kana'] ?? null),
+            'gender' => $payload['gender'] ?? null,
+            'zip' => $payload['zip'] ?? null,
+            'pref' => $payload['pref'] ?? null,
+            'city' => $payload['city'] ?? null,
+            'addr1' => $payload['addr1'] ?? null,
+            'addr2' => $payload['addr2'] ?? null,
+            'addr3' => $payload['addr3'] ?? null,
+            'tel' => $payload['tel'] ?? ($payload['phone'] ?? null),
+            'height' => $payload['height'] ?? null,
+            'weight' => $payload['weight'] ?? null,
+            'bust' => $payload['bust'] ?? ($payload['b'] ?? null),
+            'waist' => $payload['waist'] ?? ($payload['w'] ?? null),
+            'hip' => $payload['hip'] ?? ($payload['h'] ?? null),
+            'shift' => $payload['shift'] ?? null,
+            'profession' => $payload['profession'] ?? null,
+            'exp' => $payload['exp'] ?? null,
+            'years_exp' => $payload['years_exp'] ?? null,
+            'where_work' => $payload['where_work'] ?? null,
+            'pr' => $payload['pr'] ?? null,
+            'charm_point' => $payload['charm_point'] ?? null,
+            'memo' => $payload['memo'] ?? null,
+            'ng_reason' => $payload['ng_reason'] ?? null,
+            'latitude' => $payload['latitude'] ?? null,
+            'longitude' => $payload['longitude'] ?? null,
+        ])
+            ->filter(fn ($value) => $value !== null && $value !== '')
+            ->all();
+
+        if (!empty($payload['birthday'])) {
+            $profilePayload['birthday'] = $payload['birthday'];
+        } elseif (
+            !empty($payload['birthday_y'])
+            && !empty($payload['birthday_m'])
+            && !empty($payload['birthday_d'])
+            && checkdate((int) $payload['birthday_m'], (int) $payload['birthday_d'], (int) $payload['birthday_y'])
+        ) {
+            $profilePayload['birthday'] = sprintf(
+                '%04d-%02d-%02d',
+                (int) $payload['birthday_y'],
+                (int) $payload['birthday_m'],
+                (int) $payload['birthday_d']
+            );
+        }
+
+        return $profilePayload;
+    }
+
+    private function findCastRecord(string $memberId): ?Cast
+    {
+        $cast = Cast::query()->with('profile')->find($memberId);
+
+        if (!$cast) {
+            return null;
+        }
+
+        $profile = $cast->profile;
+
+        $cast->setAttribute('approval', $cast->status);
+        $cast->setAttribute('del_flg', $cast->deleted_at ? CommonConsts::DEL_ON : CommonConsts::DEL_OFF);
+        $cast->setAttribute('line_user_id', null);
+        $cast->setAttribute('line_notify_token', null);
+        $cast->setAttribute('matching', 0);
+        $cast->setAttribute('release', 0);
+        $cast->setAttribute('footprints', 0);
+
+        if ($profile) {
+            $cast->setAttribute('nickname', $profile->nickname);
+            $cast->setAttribute('name', $profile->name);
+            $cast->setAttribute('kana', $profile->name_kana);
+            $cast->setAttribute('birthday', $profile->birthday);
+            $cast->setAttribute('birthday_y', optional($profile->birthday)?->format('Y'));
+            $cast->setAttribute('birthday_m', optional($profile->birthday)?->format('m'));
+            $cast->setAttribute('birthday_d', optional($profile->birthday)?->format('d'));
+            $cast->setAttribute('gender', $profile->gender);
+            $cast->setAttribute('zip', $profile->zip);
+            $cast->setAttribute('pref', $profile->pref);
+            $cast->setAttribute('city', $profile->city);
+            $cast->setAttribute('addr1', $profile->addr1);
+            $cast->setAttribute('addr2', $profile->addr2);
+            $cast->setAttribute('addr3', $profile->addr3);
+            $cast->setAttribute('tel', $profile->tel);
+            $cast->setAttribute('height', $profile->height);
+            $cast->setAttribute('weight', $profile->weight);
+            $cast->setAttribute('b', $profile->bust);
+            $cast->setAttribute('w', $profile->waist);
+            $cast->setAttribute('h', $profile->hip);
+            $cast->setAttribute('shift', $profile->shift);
+            $cast->setAttribute('profession', $profile->profession);
+            $cast->setAttribute('exp', $profile->exp);
+            $cast->setAttribute('years_exp', $profile->years_exp);
+            $cast->setAttribute('where_work', $profile->where_work);
+            $cast->setAttribute('pr', $profile->pr);
+            $cast->setAttribute('charm_point', $profile->charm_point);
+            $cast->setAttribute('memo', $profile->memo);
+            $cast->setAttribute('ng_reason', $profile->ng_reason);
+            $cast->setAttribute('latitude', $profile->latitude);
+            $cast->setAttribute('longitude', $profile->longitude);
+        }
+
+        return $cast;
+    }
 
     public function doBlockByShop($member_id, $shop_id)
     {

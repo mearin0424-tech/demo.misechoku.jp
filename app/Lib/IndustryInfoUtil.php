@@ -5,7 +5,6 @@ namespace App\Lib;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\DB;
 use App\Models\Shop;
-use App\Models\Member;
 use App\Models\Industry;
 use App\Models\ShopIndustry;
 use App\Models\MemberIndustry;

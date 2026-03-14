@@ -15,7 +15,7 @@ return [
 
     'defaults' => [
         'guard' => 'web',
-        'passwords' => 'users',
+        'passwords' => 'system_accounts',
     ],
 
     /*
@@ -38,13 +38,18 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'system_accounts',
         ],
 
         'api' => [
             'driver' => 'token',
-            'provider' => 'users',
+            'provider' => 'system_accounts',
             'hash' => false,
+        ],
+
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'system_accounts',
         ],
 
         'shop' => [
@@ -75,9 +80,9 @@ return [
     */
 
     'providers' => [
-        'users' => [
+        'system_accounts' => [
             'driver' => 'eloquent',
-            'model' => App\Models\User::class,
+            'model' => App\Models\SystemAccount::class,
         ],
 
         // 'users' => [
@@ -87,11 +92,11 @@ return [
 
         'managers' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Manager::class,
+            'model' => App\Models\ShopManager::class,
         ],
         'members' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Member::class,
+            'model' => App\Models\Cast::class,
         ],
 
     ],
@@ -112,8 +117,8 @@ return [
     */
 
     'passwords' => [
-        'users' => [
-            'provider' => 'users',
+        'system_accounts' => [
+            'provider' => 'system_accounts',
             'table' => 'password_resets',
             'expire' => 60,
             'throttle' => 60,

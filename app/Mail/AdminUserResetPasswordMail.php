@@ -5,7 +5,7 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use App\Models\User;
+use App\Models\SystemAccount;
 use App\Models\UserToken;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -24,7 +24,7 @@ class AdminUserResetPasswordMail extends Mailable
      *
      * @return void
      */
-    public function __construct(User $user, UserToken $userToken)
+    public function __construct(SystemAccount $user, UserToken $userToken)
     {
         //
         $this->user = $user;

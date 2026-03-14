@@ -9,7 +9,6 @@ use App\Lib\StrUtil;
 use App\Lib\FileUtil;
 use Illuminate\Http\Request;
 use App\Consts\ShopConsts;
-use App\Models\BankAccountShop;
 
 
 class BankAccountRepository implements BankAccountRepositoryInterface
@@ -32,56 +31,60 @@ class BankAccountRepository implements BankAccountRepositoryInterface
      */
     public function store(Request $request,$member_id)
     {
-        BankAccount::updateOrCreate(
-            ['member_id' => $member_id], 
-            $this->filterPayload('bank_accounts', $request->all())
-        );
+        $this->storeForHolder(BankAccount::HOLDER_CAST, $member_id, $request);
     }
 
     public function findBankAccountByMemberId($member_id)
     {
-
-        $records = DB::table('bank_accounts')
-                   ->where('member_id',$member_id)
-                   ->first();
-
-        return $records;
-
+        return $this->findBankAccount(BankAccount::HOLDER_CAST, $member_id);
     }
 
 
     public function storeByShopId(Request $request,$shop_id)
     {
-        BankAccountShop::updateOrCreate(
-            ['shop_id' => $shop_id], 
-            $this->filterPayload('bank_account_shops', $request->all())
-        );
+        $this->storeForHolder(BankAccount::HOLDER_SHOP, $shop_id, $request);
     }
 
     public function findBankAccountByShopId($shop_id)
     {
-
-        $records = DB::table('bank_account_shops')
-                   ->where('shop_id',$shop_id)
-                   ->first();
-
-        return $records;
-
+        return $this->findBankAccount(BankAccount::HOLDER_SHOP, $shop_id);
     }
 
     private function filterPayload(string $table, array $payload): array
     {
         return collect($payload)
             ->only([
+                'bank_code',
                 'bank_name',
+                'bank_name_kana',
+                'branch_code',
                 'branch_name',
+                'branch_name_kana',
                 'account_type',
                 'account_number',
-                'account_holder_name',
                 'account_name',
             ])
             ->filter(fn ($value, $column) => Schema::hasColumn($table, $column))
             ->all();
+    }
+
+    private function storeForHolder(string $holderType, string $holderId, Request $request): void
+    {
+        BankAccount::updateOrCreate(
+            [
+                'holder_type' => $holderType,
+                'holder_id' => $holderId,
+            ],
+            $this->filterPayload('bank_accounts', $request->all())
+        );
+    }
+
+    private function findBankAccount(string $holderType, string $holderId): ?object
+    {
+        return DB::table('bank_accounts')
+            ->where('holder_type', $holderType)
+            ->where('holder_id', $holderId)
+            ->first();
     }
 
 

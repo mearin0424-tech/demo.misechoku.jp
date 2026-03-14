@@ -11,45 +11,21 @@ return new class extends Migration
     {
         Schema::create('bank_accounts', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('member_id', 20)->unique();
+            $table->string('holder_type', 255)->comment('所有者モデル (casts, shops, users等)');
+            $table->string('holder_id', 20)->comment('所有者のID (c0001, s0001等)');
+            $table->string('bank_code', 4)->comment('銀行コード (4桁)');
             $table->string('bank_name', 100);
-            $table->string('branch_name', 100)->nullable();
+            $table->string('bank_name_kana', 100);
+            $table->string('branch_code', 3)->comment('支店コード (3桁)');
+            $table->string('branch_name', 100);
+            $table->string('branch_name_kana', 100);
             $table->string('account_type', 20);
-            $table->string('account_number', 30);
+            $table->string('account_number', 8);
             $table->string('account_name', 100);
             $table->timestamps();
 
-            $table->foreign('member_id')
-                ->references('id')
-                ->on('casts')
-                ->onDelete('cascade');
-        });
-
-        Schema::create('bank_account_shops', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->string('shop_id', 20)->unique();
-            $table->string('bank_name', 100);
-            $table->string('branch_name', 100)->nullable();
-            $table->string('account_type', 20);
-            $table->string('account_number', 30);
-            $table->string('account_name', 100);
-            $table->timestamps();
-
-            $table->foreign('shop_id')
-                ->references('id')
-                ->on('shops')
-                ->onDelete('cascade');
-        });
-
-        Schema::create('admin_bank_accounts', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->string('bank_name', 100);
-            $table->string('branch_name', 100)->nullable();
-            $table->string('account_type', 20);
-            $table->string('account_number', 30);
-            $table->string('account_name', 100);
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
+            $table->unique(['holder_type', 'holder_id'], 'uq_holder');
+            $table->index(['holder_type', 'holder_id'], 'idx_holder');
         });
 
         Schema::table('application_deposits', function (Blueprint $table) {
@@ -71,58 +47,79 @@ return new class extends Migration
             $table->timestamp('completed_at')->nullable()->after('cast_transfer_note');
         });
 
-        DB::table('admin_bank_accounts')->insert([
-            'bank_name' => 'みせちょく銀行',
-            'branch_name' => '本店営業部',
-            'account_type' => 'ordinary',
-            'account_number' => '1234567',
-            'account_name' => 'ミセチョク ウンエイ',
-            'is_active' => true,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('bank_account_shops')->insert([
-            [
-                'shop_id' => 's00000001',
-                'bank_name' => '六本木銀行',
-                'branch_name' => '六本木支店',
-                'account_type' => 'ordinary',
-                'account_number' => '7654321',
-                'account_name' => 'クラブルミナス',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'shop_id' => 's00000002',
-                'bank_name' => '新宿銀行',
-                'branch_name' => '歌舞伎町支店',
-                'account_type' => 'ordinary',
-                'account_number' => '1122334',
-                'account_name' => 'ラウンジステラ',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
-
         DB::table('bank_accounts')->insert([
             [
-                'member_id' => 'c00000001',
-                'bank_name' => '渋谷銀行',
-                'branch_name' => '青山支店',
+                'holder_type' => 'system_accounts',
+                'holder_id' => '1',
+                'bank_code' => '0001',
+                'bank_name' => 'みせちょく銀行',
+                'bank_name_kana' => 'ﾐｾﾁｮｸ',
+                'branch_code' => '001',
+                'branch_name' => '本店営業部',
+                'branch_name_kana' => 'ﾎﾝﾃﾝ',
                 'account_type' => 'ordinary',
-                'account_number' => '2200113',
-                'account_name' => 'サクライ ミサキ',
+                'account_number' => '1234567',
+                'account_name' => 'ﾐｾﾁｮｸｳﾝｴｲ',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'member_id' => 'c00000002',
+                'holder_type' => 'shops',
+                'holder_id' => 's00000001',
+                'bank_code' => '0002',
+                'bank_name' => '六本木銀行',
+                'bank_name_kana' => 'ﾛｯﾎﾟﾝｷﾞ',
+                'branch_code' => '101',
+                'branch_name' => '六本木支店',
+                'branch_name_kana' => 'ﾛｯﾎﾟﾝｷﾞ',
+                'account_type' => 'ordinary',
+                'account_number' => '7654321',
+                'account_name' => 'ｸﾗﾌﾞﾙﾐﾅｽ',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'holder_type' => 'shops',
+                'holder_id' => 's00000002',
+                'bank_code' => '0003',
+                'bank_name' => '新宿銀行',
+                'bank_name_kana' => 'ｼﾝｼﾞｭｸ',
+                'branch_code' => '102',
+                'branch_name' => '歌舞伎町支店',
+                'branch_name_kana' => 'ｶﾌﾞｷﾁｮｳ',
+                'account_type' => 'ordinary',
+                'account_number' => '1122334',
+                'account_name' => 'ﾗｳﾝｼﾞｽﾃﾗ',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'holder_type' => 'casts',
+                'holder_id' => 'c00000001',
+                'bank_code' => '0004',
+                'bank_name' => '渋谷銀行',
+                'bank_name_kana' => 'ｼﾌﾞﾔ',
+                'branch_code' => '201',
+                'branch_name' => '青山支店',
+                'branch_name_kana' => 'ｱｵﾔﾏ',
+                'account_type' => 'ordinary',
+                'account_number' => '2200113',
+                'account_name' => 'ｻｸﾗｲﾐｻｷ',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'holder_type' => 'casts',
+                'holder_id' => 'c00000002',
+                'bank_code' => '0005',
                 'bank_name' => '横浜銀行',
+                'bank_name_kana' => 'ﾖｺﾊﾏ',
+                'branch_code' => '202',
                 'branch_name' => '横浜中央支店',
+                'branch_name_kana' => 'ﾖｺﾊﾏﾁｭｳｵｳ',
                 'account_type' => 'ordinary',
                 'account_number' => '3344556',
-                'account_name' => 'ヤマダ アイ',
+                'account_name' => 'ﾔﾏﾀﾞｱｲ',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -173,8 +170,6 @@ return new class extends Migration
             ]);
         });
 
-        Schema::dropIfExists('admin_bank_accounts');
-        Schema::dropIfExists('bank_account_shops');
         Schema::dropIfExists('bank_accounts');
     }
 };

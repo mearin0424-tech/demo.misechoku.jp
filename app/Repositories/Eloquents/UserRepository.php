@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Eloquents;
 
-use App\Models\User;
+use App\Models\SystemAccount;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Support\Facades\Hash;
 
@@ -14,9 +14,9 @@ class UserRepository implements UserRepositoryInterface
     /**
      * constructor
      *
-     * @param User $user
+     * @param SystemAccount $user
      */
-    public function __construct(User $user)
+    public function __construct(SystemAccount $user)
     {
         $this->user = $user;
     }
@@ -24,7 +24,7 @@ class UserRepository implements UserRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function findFromEmail(string $email): User
+    public function findFromEmail(string $email): SystemAccount
     {
         return $this->user->where('email', $email)->firstOrFail();
     }

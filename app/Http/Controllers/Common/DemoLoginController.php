@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Common;
 
 use App\Http\Controllers\Controller;
-use App\Models\Manager;
-use App\Models\Member;
-use App\Models\User;
+use App\Models\Cast;
+use App\Models\ShopManager;
+use App\Models\SystemAccount;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -42,7 +42,7 @@ class DemoLoginController extends Controller
 
         auth()->guard('member')->logout();
         auth()->guard('shop')->logout();
-        auth()->guard()->logout();
+        auth()->guard('admin')->logout();
 
         $role = (string) $request->input('role');
         $accountId = (string) $request->input('account_id');
@@ -58,7 +58,9 @@ class DemoLoginController extends Controller
 
     private function loginAdmin(Request $request, string $accountId, string $authChannel): RedirectResponse
     {
-        $admin = User::query()->find($accountId);
+        $admin = SystemAccount::query()
+            ->where('is_active', true)
+            ->find($accountId);
 
         if (!$admin) {
             return back()
@@ -66,7 +68,7 @@ class DemoLoginController extends Controller
                 ->withInput();
         }
 
-        auth()->guard()->login($admin);
+        auth()->guard('admin')->login($admin);
         $request->session()->regenerate();
 
         return redirect()
@@ -76,7 +78,7 @@ class DemoLoginController extends Controller
 
     private function loginCast(Request $request, string $accountId, string $authChannel): RedirectResponse
     {
-        $member = Member::query()->where('status', 1)->find($accountId);
+        $member = Cast::query()->where('status', 1)->find($accountId);
 
         if (!$member) {
             return back()
@@ -104,7 +106,7 @@ class DemoLoginController extends Controller
 
     private function loginShop(Request $request, string $accountId, string $authChannel): RedirectResponse
     {
-        $manager = Manager::query()->where('status', 1)->find($accountId);
+        $manager = ShopManager::query()->where('status', 1)->find($accountId);
 
         if (!$manager) {
             return back()
@@ -177,10 +179,11 @@ class DemoLoginController extends Controller
     private function loadAdminAccounts(): array
     {
         try {
-            $accounts = User::query()
+            $accounts = SystemAccount::query()
+                ->where('is_active', true)
                 ->orderBy('id')
                 ->get(['id', 'name', 'email'])
-                ->map(fn (User $user) => [
+                ->map(fn (SystemAccount $user) => [
                     'id' => $user->id,
                     'label' => trim(($user->name ?? '管理運営者') . ' / ' . ($user->email ?? $user->id)),
                 ])
@@ -246,7 +249,7 @@ class DemoLoginController extends Controller
     {
         return [
             [
-                'id' => 'admin001',
+                'id' => '1',
                 'label' => '管理者アカウント1 / admin@misechoku.jp',
             ],
         ];

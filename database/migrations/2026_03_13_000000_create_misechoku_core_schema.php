@@ -326,12 +326,15 @@ return new class extends Migration
         // 【5】 System (システム)
         // ==============================================================================
 
-        Schema::create('users', function (Blueprint $table) {
-            $table->string('id', 20)->primary(); // admin001~
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->string('password');
-            $table->integer('role_type')->default(10);
+        Schema::create('system_accounts', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('name', 100)->comment('管理者名');
+            $table->string('email', 255)->unique()->comment('ログインメールアドレス');
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password', 255)->comment('ハッシュ化パスワード');
+            $table->string('role', 20)->default('staff')->comment('権限(admin:全機能, staff:一部機能)');
+            $table->boolean('is_active')->default(true)->comment('有効フラグ(falseでログイン不可)');
+            $table->rememberToken();
             $table->timestamps();
         });
 
@@ -686,13 +689,16 @@ return new class extends Migration
             ['shop_id' => 's00000002', 'tag_id' => 14],
         ]);
 
-        DB::table('users')->insert([
+        DB::table('system_accounts')->insert([
             [
-                'id' => 'admin001',
                 'name' => '管理者アカウント１',
                 'email' => 'admin@misechoku.jp',
                 'password' => '$2y$10$dummyhashedpasswordAdmin01',
+                'role' => 'admin',
+                'is_active' => true,
+                'email_verified_at' => '2025-01-01 00:00:00',
                 'created_at' => '2025-01-01 00:00:00',
+                'updated_at' => '2025-01-01 00:00:00',
             ],
         ]);
     }
@@ -717,7 +723,7 @@ return new class extends Migration
         Schema::dropIfExists('cast_providers');
         Schema::dropIfExists('cast_profiles');
         Schema::dropIfExists('casts');
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('system_accounts');
     }
 };
 

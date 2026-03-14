@@ -323,7 +323,7 @@
                             <div class="bank-registration-head">
                                 <div>
                                     <h3 class="bank-registration-title">振込先口座の登録</h3>
-                                    <p class="bank-registration-copy">名義人の氏名と口座名義カナの両方を登録してください。口座名義カナは、銀行側に登録している表記に合わせると照合がスムーズです。</p>
+                                    <p class="bank-registration-copy">金融機関と支店は候補から選択してください。口座名義カナは、銀行側に登録している表記に合わせると照合がスムーズです。</p>
                                 </div>
                                 <span class="doc-status {{ !empty($castBank['exists']) ? 'status-paid' : 'status-pending' }}">
                                     {{ !empty($castBank['exists']) ? '登録済み' : '未登録' }}
@@ -340,7 +340,7 @@
                                 </div>
                                 <div class="bank-form-row">
                                     <label class="bank-label">支店名</label>
-                                    <input type="text" name="branch_name" class="bank-input" value="{{ $castBank['branch_name'] ?? '' }}" placeholder="△△支店" autocomplete="off" list="cast-branch-suggestions" data-branch-name-input>
+                                    <input type="text" name="branch_name" class="bank-input" value="{{ $castBank['branch_name'] ?? '' }}" placeholder="△△支店" autocomplete="off" list="cast-branch-suggestions" data-branch-name-input required>
                                     <input type="hidden" name="branch_code" value="{{ $castBank['branch_code'] ?? '' }}" data-branch-code-input>
                                     <datalist id="cast-branch-suggestions" data-branch-list></datalist>
                                     <p class="input-hint">金融機関選択後に候補が表示されます。</p>
@@ -349,18 +349,13 @@
                                     <label class="bank-label">口座種別</label>
                                     <select name="account_type" class="bank-input" required>
                                         <option value="ordinary" {{ ($castBank['account_type'] ?? 'ordinary') === 'ordinary' ? 'selected' : '' }}>普通</option>
-                                        <option value="checking" {{ ($castBank['account_type'] ?? '') === 'checking' ? 'selected' : '' }}>当座</option>
+                                        <option value="current" {{ ($castBank['account_type'] ?? '') === 'current' ? 'selected' : '' }}>当座</option>
                                     </select>
                                 </div>
                                 <div class="bank-form-row">
                                     <label class="bank-label">口座番号</label>
-                                    <input type="text" name="account_number" class="bank-input" value="{{ $castBank['account_number'] ?? '' }}" placeholder="1234567" inputmode="numeric" maxlength="7" pattern="[0-9]*" data-account-number-input required>
-                                    <p class="input-hint">7桁の数字で入力してください。</p>
-                                </div>
-                                <div class="bank-form-row">
-                                    <label class="bank-label">名義人氏名</label>
-                                    <input type="text" name="account_holder_name" class="bank-input" value="{{ $castBank['account_holder_name'] ?? '' }}" placeholder="山田 花子" autocomplete="name" required>
-                                    <p class="input-hint">口座の名義人本人の氏名を入力してください。</p>
+                                    <input type="text" name="account_number" class="bank-input" value="{{ $castBank['account_number'] ?? '' }}" placeholder="1234567" inputmode="numeric" maxlength="8" pattern="[0-9]*" data-account-number-input required>
+                                    <p class="input-hint">7桁または8桁の数字で入力してください。</p>
                                 </div>
                                 <div class="bank-form-row">
                                     <label class="bank-label">口座名義（カナ）</label>
@@ -370,7 +365,7 @@
                             </div>
 
                             <div class="bank-registration-note">
-                                口座情報は振込処理と照合のために利用します。氏名とカナの不一致があると、入金確認に時間がかかる場合があります。
+                                口座情報は振込処理と照合のために利用します。金融機関・支店の候補選択と口座名義カナが一致していると、入金確認がスムーズになります。
                             </div>
 
                             <div class="text-right mt-3">

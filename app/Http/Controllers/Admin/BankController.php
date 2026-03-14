@@ -23,11 +23,14 @@ class BankController extends Controller
     {
         $stored = $this->billingManagementService->getAdminBankAccount();
         $bank = [
+            'bank_code' => $stored->bank_code ?? '',
             'bank_name' => $stored->bank_name ?? '',
+            'bank_name_kana' => $stored->bank_name_kana ?? '',
+            'branch_code' => $stored->branch_code ?? '',
             'branch_name' => $stored->branch_name ?? '',
+            'branch_name_kana' => $stored->branch_name_kana ?? '',
             'account_type' => $stored->account_type ?? 'ordinary',
             'account_number' => $stored->account_number ?? '',
-            'account_holder_name' => $stored->account_holder_name ?? '',
             'account_name' => $stored->account_name ?? '',
         ];
 
@@ -41,16 +44,20 @@ class BankController extends Controller
         );
 
         $data = $request->validate([
+            'bank_code' => ['required', 'regex:/^\d{4}$/'],
             'bank_name'      => 'required|string|max:100',
-            'branch_name'    => 'nullable|string|max:100',
-            'account_type'   => 'required|string|max:20',
-            'account_number' => ['required', 'regex:/^\d{7}$/'],
-            'account_holder_name' => ['required', 'string', 'max:100'],
+            'branch_code' => ['required', 'regex:/^\d{3}$/'],
+            'branch_name'    => 'required|string|max:100',
+            'account_type'   => 'required|in:ordinary,current',
+            'account_number' => ['required', 'regex:/^\d{7,8}$/'],
             'account_name'   => ['required', 'string', 'max:100', new KouzaMeig()],
         ], [
+            'bank_code.required' => '金融機関を候補から選択してください。',
+            'bank_code.regex' => '金融機関コードが不正です。',
+            'branch_code.required' => '支店を候補から選択してください。',
+            'branch_code.regex' => '支店コードが不正です。',
             'account_number.required' => '口座番号を入力してください。',
-            'account_number.regex' => '口座番号は7桁の数字で入力してください。',
-            'account_holder_name.required' => '口座名義（氏名）を入力してください。',
+            'account_number.regex' => '口座番号は7桁または8桁の数字で入力してください。',
             'account_name.required' => '口座名義（カナ）を入力してください。',
         ]);
 

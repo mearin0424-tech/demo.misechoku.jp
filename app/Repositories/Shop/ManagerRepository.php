@@ -1,7 +1,7 @@
 <?php
 namespace App\Repositories\Shop;
 
-use App\Models\Manager;
+use App\Models\ShopManager;
 use App\Models\ShopTreatment;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +20,7 @@ class ManagerRepository implements ManagerRepositoryInterface
      */
     private $project;
 
-    public function __construct(Manager $project) {
+    public function __construct(ShopManager $project) {
         $this->project = $project;
     }
 
@@ -28,7 +28,7 @@ class ManagerRepository implements ManagerRepositoryInterface
     public function findByMail($email)
     {
 
-        $records =  Manager::where('email',$email)->get();
+        $records =  ShopManager::where('email',$email)->get();
         
         foreach($records as $record){
             $record;
@@ -41,7 +41,7 @@ class ManagerRepository implements ManagerRepositoryInterface
 
     public function findById($manager_id)
     {
-        $records =  Manager::find($manager_id);
+        $records =  ShopManager::find($manager_id);
         return $records;
 
     }
@@ -55,14 +55,14 @@ class ManagerRepository implements ManagerRepositoryInterface
 
     public function getAccountCnt($shop_id)
     {
-        $records =  Manager::where('shop_id',$shop_id)->count();
+        $records =  ShopManager::where('shop_id',$shop_id)->count();
         return $records;
 
     }
 
     public function findByShop($shop_id)
     {
-        $records =  Manager::where('shop_id',$shop_id)->paginate(\ShopConsts::PAGENATION_COUNT);
+        $records =  ShopManager::where('shop_id',$shop_id)->paginate(\ShopConsts::PAGENATION_COUNT);
         return $records;
 
     }
@@ -80,7 +80,7 @@ class ManagerRepository implements ManagerRepositoryInterface
         $shop_id = $request['shop_id'];
         $email = $request['email'];
 
-        Manager::updateOrCreate(
+        ShopManager::updateOrCreate(
             ['shop_id' => $shop_id,'email' => $email], 
             $request->all()
         );
@@ -94,7 +94,7 @@ class ManagerRepository implements ManagerRepositoryInterface
         $req_all['shop_id'] = $shop_id;
         $req_all['password'] =  Hash::make($req_all['password']);
 
-        $data = Manager::Create(
+        $data = ShopManager::Create(
             $req_all
         );
         return $data->id;
@@ -111,12 +111,12 @@ class ManagerRepository implements ManagerRepositoryInterface
         $req_all['password'] =  Hash::make($req_all['password']);
         $req_all['status'] = \ShopConsts::REGISTER;
 
-        $data = Manager::Create(
+        $data = ShopManager::Create(
             $req_all
         );
 */
 
-        Manager::where('shop_id',$shop_id)->where('email', $req_all['email'])
+        ShopManager::where('shop_id',$shop_id)->where('email', $req_all['email'])
           ->update(['password' =>  Hash::make($req_all['password']),'status'=> \ShopConsts::REGISTER]);
 
     }
@@ -126,7 +126,7 @@ class ManagerRepository implements ManagerRepositoryInterface
 
         $data = $request->all(); 
         $data['password'] =  Hash::make($data['password']);
-        Manager::updateOrCreate(
+        ShopManager::updateOrCreate(
             ['id' => $id], 
             $data
         );
@@ -139,7 +139,7 @@ class ManagerRepository implements ManagerRepositoryInterface
 
         $shop_id    = $request['shop_id'];
         $manager_id = $request['manager_id'];
-        return Manager::where('shop_id', $shop_id)->where('manager_id', $manager_id)->delete();
+        return ShopManager::where('shop_id', $shop_id)->where('manager_id', $manager_id)->delete();
 
     }
 */
@@ -148,7 +148,7 @@ class ManagerRepository implements ManagerRepositoryInterface
     {
 
         $id    = \StrUtil::dec($enc_id);
-        return Manager::where('id', $id)->delete();
+        return ShopManager::where('id', $id)->delete();
 
     }
 

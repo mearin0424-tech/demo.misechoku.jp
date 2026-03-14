@@ -9,7 +9,6 @@ use App\Repositories\Master\ShopInterface as MyRepository;
 use Illuminate\Support\Facades\DB;
 use App\Models\Shop;
 use App\Models\ShopTreatment;
-use App\Models\Member;
 
 class NewsInfoUtil extends Facade {
 

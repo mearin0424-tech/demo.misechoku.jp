@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\Cast;
 use App\Models\Shop;
-use App\Models\Manager;
+use App\Models\ShopManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -65,7 +65,7 @@ class AuthService
                 'city' => $data['city'] ?? null,
             ]);
 
-            Manager::query()->create([
+            ShopManager::query()->create([
                 'id' => $managerId,
                 'shop_id' => $shopId,
                 'name' => $data['manager_name'] ?? ($data['contact_name'] ?? null),

@@ -131,7 +131,7 @@
     <script>
     (function () {
         function normalizeAccountNumber(value) {
-            return String(value || '').replace(/\D+/g, '').slice(0, 7);
+            return String(value || '').replace(/\D+/g, '').slice(0, 8);
         }
 
         document.addEventListener('DOMContentLoaded', function () {

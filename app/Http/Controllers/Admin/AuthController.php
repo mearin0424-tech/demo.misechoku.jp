@@ -10,7 +10,7 @@ class AuthController extends Controller
     /**
      * 管理者ログイン画面
      *
-     * まずはダミーフォームのみ用意し、実際の認証実装は別タスクで行う前提とする。
+     * system_accounts を用いた管理者ログイン画面。
      */
     public function showLoginForm()
     {
@@ -18,10 +18,7 @@ class AuthController extends Controller
     }
 
     /**
-     * ダミーログイン処理
-     *
-     * 現時点ではバリデーションのみ行い、常にダッシュボードへ遷移させる。
-     * 実際の認証（Guard 連携）は今後の実装とする。
+     * 管理者ログイン処理
      */
     public function login(Request $request)
     {
@@ -30,19 +27,32 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        // TODO: 実際の管理者認証ロジックをここに実装する
+        if (!auth()->guard('admin')->attempt([
+            'email' => (string) $request->input('email'),
+            'password' => (string) $request->input('password'),
+            'is_active' => true,
+        ])) {
+            return back()
+                ->withErrors(['email' => 'メールアドレスまたはパスワードが正しくありません。'])
+                ->withInput();
+        }
+
+        $request->session()->regenerate();
 
         return redirect()->route('admin.dashboard')
-            ->with('status', 'ダミーログインとしてダッシュボードへ遷移しました（実際の認証は未実装）。');
+            ->with('status', '管理者としてログインしました。');
     }
 
     /**
-     * ダミーログアウト
+     * 管理者ログアウト
      */
-    public function logout()
+    public function logout(Request $request)
     {
-        // TODO: 実際のログアウト処理を追加する
-        return redirect()->route('admin.login')->with('status', 'ログアウトしました（ダミー処理）。');
+        auth()->guard('admin')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('admin.login')->with('status', 'ログアウトしました。');
     }
 }
 

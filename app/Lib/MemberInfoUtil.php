@@ -7,8 +7,9 @@ use App\Consts\ShopConsts;
 use App\Consts\TreatmentConsts;
 use Illuminate\Support\Facades\DB;
 use App\Models\Shop;
-use App\Models\Member;
+use App\Models\Cast;
 use App\Lib\FileUtil;
+use App\Models\BankAccount;
 use App\Models\Matching;
 use Carbon\Carbon;
 use App\Models\Like2;
@@ -172,7 +173,7 @@ class MemberInfoUtil extends Facade
 
     public static function nickname($member_id)
     {
-        $records = Member::find($member_id);
+        $records = Cast::find($member_id);
         return $records->nickname;
     }
 
@@ -232,18 +233,18 @@ class MemberInfoUtil extends Facade
 
     public static function isBank($member_id)
     {
-
-        $records = DB::select(
-            "SELECT count(*) as cnt FROM bank_accounts where member_id =?",
-            [$member_id]
-        );
-        if ($records[0]->cnt > 0) return true;
-        return false;
+        return DB::table('bank_accounts')
+            ->where('holder_type', BankAccount::HOLDER_CAST)
+            ->where('holder_id', $member_id)
+            ->exists();
     }
 
     public static function isBankShop($shop_id)
     {
-        return DB::table('bank_account_shops')->where('shop_id', $shop_id)->exists();
+        return DB::table('bank_accounts')
+            ->where('holder_type', BankAccount::HOLDER_SHOP)
+            ->where('holder_id', $shop_id)
+            ->exists();
     }
 
     public static function isJobShop($shop_id)
@@ -1094,11 +1095,11 @@ class MemberInfoUtil extends Facade
     {
 
         $records = DB::table('shops')
-            ->join('managers', 'shops.id', '=', 'managers.shop_id')
+            ->join('shop_managers', 'shops.id', '=', 'shop_managers.shop_id')
             ->where('shops.id', $shop_id)
-            ->orderBy('managers.last_login_at', 'desc')
+            ->orderBy('shop_managers.last_login_at', 'desc')
             ->limit(1)
-            ->select('managers.last_login_at')
+            ->select('shop_managers.last_login_at')
             ->get();
         $last_login_at = "";
         foreach ($records as $val) {
@@ -1113,8 +1114,10 @@ class MemberInfoUtil extends Facade
 
     public static function bankAccounts($member_id)
     {
-
-        return DB::table('bank_accounts')->where('member_id', $member_id)->get();
+        return DB::table('bank_accounts')
+            ->where('holder_type', BankAccount::HOLDER_CAST)
+            ->where('holder_id', $member_id)
+            ->get();
     }
 
     public static function matchingStatusName2($matching)
@@ -1159,7 +1162,7 @@ class MemberInfoUtil extends Facade
 
     public static function findById($member_id)
     {
-        $records = Member::find($member_id);
+        $records = Cast::find($member_id);
         return $records;
     }
 

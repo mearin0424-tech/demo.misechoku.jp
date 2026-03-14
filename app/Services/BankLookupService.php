@@ -46,6 +46,31 @@ class BankLookupService
             ->all();
     }
 
+    public function findBankByCode(string $bankCode): ?array
+    {
+        $bankCode = trim($bankCode);
+
+        if (!preg_match('/^\d{4}$/', $bankCode)) {
+            return null;
+        }
+
+        return $this->banks()
+            ->first(fn (array $bank) => ($bank['code'] ?? '') === $bankCode);
+    }
+
+    public function findBranchByCode(string $bankCode, string $branchCode): ?array
+    {
+        $bankCode = trim($bankCode);
+        $branchCode = trim($branchCode);
+
+        if (!preg_match('/^\d{4}$/', $bankCode) || !preg_match('/^\d{3}$/', $branchCode)) {
+            return null;
+        }
+
+        return $this->branches($bankCode)
+            ->first(fn (array $branch) => ($branch['code'] ?? '') === $branchCode);
+    }
+
     private function banks(): Collection
     {
         return collect(Cache::remember(self::BANKS_CACHE_KEY, now()->addDay(), function () {

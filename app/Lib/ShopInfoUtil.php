@@ -9,7 +9,6 @@ use App\Repositories\Master\ShopInterface as MyRepository;
 use Illuminate\Support\Facades\DB;
 use App\Models\Shop;
 use App\Models\ShopTreatment;
-use App\Models\Member;
 use App\Models\InformationByShop;
 use App\Models\Good;
 use App\Models\Good2;
@@ -381,11 +380,11 @@ class ShopInfoUtil extends Facade {
     public static function last_login_at ($shop_id) {
 
         $records = DB::table('shops')
-                   ->join('managers', 'shops.id', '=', 'managers.shop_id')
+                   ->join('shop_managers', 'shops.id', '=', 'shop_managers.shop_id')
                    ->where('shops.id',$shop_id)
-                   ->orderBy('managers.last_login_at','desc')
+                   ->orderBy('shop_managers.last_login_at','desc')
                    ->limit(1)
-                   ->select('managers.last_login_at')
+                   ->select('shop_managers.last_login_at')
                    ->get();
         $last_login_at = "";
         foreach($records as $val ) {

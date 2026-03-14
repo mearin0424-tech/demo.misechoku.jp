@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Common;
 
 use App\Consts\CommonConsts;
 use App\Http\Controllers\Controller;
-use App\Models\Manager;
-use App\Models\Member;
+use App\Models\Cast;
+use App\Models\ShopManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
@@ -92,7 +92,7 @@ class RegistrationController extends Controller
                 'updated_at' => now(),
             ]);
 
-            return Member::query()->findOrFail($castId);
+            return Cast::query()->findOrFail($castId);
         });
 
         auth()->guard('shop')->logout();
@@ -167,7 +167,7 @@ class RegistrationController extends Controller
                 'updated_at' => now(),
             ]);
 
-            return Manager::query()->findOrFail($managerId);
+            return ShopManager::query()->findOrFail($managerId);
         });
 
         auth()->guard('member')->logout();

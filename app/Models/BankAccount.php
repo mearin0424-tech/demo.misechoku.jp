@@ -2,25 +2,36 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BankAccount extends Model
 {
+    public const HOLDER_CAST = 'casts';
+    public const HOLDER_SHOP = 'shops';
+    public const HOLDER_SYSTEM_ACCOUNT = 'system_accounts';
+    public const HOLDER_USER = self::HOLDER_SYSTEM_ACCOUNT;
+
     protected $table = 'bank_accounts';
 
     protected $fillable = [
-        'member_id',
+        'holder_type',
+        'holder_id',
+        'bank_code',
         'bank_name',
+        'bank_name_kana',
+        'branch_code',
         'branch_name',
+        'branch_name_kana',
         'account_type',
         'account_number',
-        'account_holder_name',
         'account_name',
     ];
 
-    public function cast(): BelongsTo
+    public function scopeForHolder(Builder $query, string $holderType, string $holderId): Builder
     {
-        return $this->belongsTo(Cast::class, 'member_id', 'id');
+        return $query
+            ->where('holder_type', $holderType)
+            ->where('holder_id', $holderId);
     }
 }

@@ -1,7 +1,7 @@
 <?php
 namespace App\Repositories\Member;
 
-use App\Models\Member;
+use App\Models\Cast;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 

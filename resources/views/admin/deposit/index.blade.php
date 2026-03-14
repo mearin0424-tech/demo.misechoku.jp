@@ -190,7 +190,7 @@
                     </div>
                     <div class="billing-meta-item">
                         <div class="billing-meta-label">口座種別 / 口座番号</div>
-                        <div class="billing-meta-value">{{ $adminBank->account_type === 'checking' ? '当座' : '普通' }} / {{ $adminBank->account_number }}</div>
+                        <div class="billing-meta-value">{{ in_array($adminBank->account_type, ['current', 'checking'], true) ? '当座' : '普通' }} / {{ $adminBank->account_number }}</div>
                     </div>
                     <div class="billing-meta-item">
                         <div class="billing-meta-label">口座名義</div>

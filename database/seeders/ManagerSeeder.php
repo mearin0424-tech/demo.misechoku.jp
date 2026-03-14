@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Manager;
+use App\Models\ShopManager;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -16,26 +16,25 @@ class ManagerSeeder extends Seeder
      */
     public function run()
     {
-        Manager::truncate();
+        DB::table('shop_managers')->delete();
 
-        $administrators_data = [];
         for ($i = 1; $i <= 10; $i++) {
-            $administrators_data[] = [
+            $shopId = sprintf('s%08d', $i);
+
+            if (!DB::table('shops')->where('id', $shopId)->exists()) {
+                continue;
+            }
+
+            ShopManager::query()->create([
+                'id' => sprintf('m%08d', $i),
+                'shop_id' => $shopId,
+                'name' => sprintf('店舗担当者%02d', $i),
                 'email' => sprintf('shop%03d@test.jp', $i),
-                'password' => sprintf('pass%04d', $i),
-                'shop_name' => sprintf('shopName%03d', $i),
-                'name' => sprintf('Name%03d', $i),
-
-            ];
-        }
-
-        foreach($administrators_data as $data) {
-            $administrator = new Manager();
-            $administrator->email = $data['email'];
-            $administrator->password = Hash::make($data['password']);
-            $administrator->shop_name = $data['shop_name'];
-            $administrator->name = $data['name'];
-            $administrator->save();
+                'password' => Hash::make(sprintf('pass%04d', $i)),
+                'role' => 1,
+                'status' => 1,
+                'last_login_at' => now(),
+            ]);
         }
     }
 }

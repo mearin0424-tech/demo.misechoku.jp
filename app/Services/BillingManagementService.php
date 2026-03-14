@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\BankAccount;
+use App\Models\SystemAccount;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -22,107 +24,67 @@ class BillingManagementService
     private const SYSTEM_FEE_RATE = 0.10;
     private const INVOICE_DUE_DAYS = 7;
 
+    public function __construct(private readonly BankLookupService $bankLookupService)
+    {
+    }
+
     public function normalizeBankAccountData(array $data): array
     {
-        $accountHolderName = trim((string) ($data['account_holder_name'] ?? ''));
+        $bankCode = substr(preg_replace('/\D+/', '', (string) ($data['bank_code'] ?? '')) ?? '', 0, 4);
+        $branchCode = substr(preg_replace('/\D+/', '', (string) ($data['branch_code'] ?? '')) ?? '', 0, 3);
+        $bank = $this->bankLookupService->findBankByCode($bankCode);
+        $branch = $this->bankLookupService->findBranchByCode($bankCode, $branchCode);
         $accountName = trim((string) ($data['account_name'] ?? ''));
+        $accountType = trim((string) ($data['account_type'] ?? 'ordinary'));
+
+        if ($accountType === 'checking') {
+            $accountType = 'current';
+        }
 
         return [
-            'bank_name' => trim((string) ($data['bank_name'] ?? '')),
-            'branch_name' => $this->nullIfEmpty(trim((string) ($data['branch_name'] ?? ''))),
-            'account_type' => trim((string) ($data['account_type'] ?? '')),
-            'account_number' => preg_replace('/\D+/', '', (string) ($data['account_number'] ?? '')) ?? '',
-            'account_holder_name' => $accountHolderName,
-            'account_name' => $accountName !== '' ? $accountName : $accountHolderName,
+            'bank_code' => $bankCode,
+            'bank_name' => trim((string) ($bank['name'] ?? ($data['bank_name'] ?? ''))),
+            'bank_name_kana' => trim((string) ($bank['kana'] ?? ($data['bank_name_kana'] ?? ''))),
+            'branch_code' => $branchCode,
+            'branch_name' => trim((string) ($branch['name'] ?? ($data['branch_name'] ?? ''))),
+            'branch_name_kana' => trim((string) ($branch['kana'] ?? ($data['branch_name_kana'] ?? ''))),
+            'account_type' => $accountType === 'current' ? 'current' : 'ordinary',
+            'account_number' => substr(preg_replace('/\D+/', '', (string) ($data['account_number'] ?? '')) ?? '', 0, 8),
+            'account_name' => $accountName,
+            'account_holder_name' => $accountName,
         ];
     }
 
     public function getAdminBankAccount(): ?object
     {
-        $account = DB::table('admin_bank_accounts')
-            ->select($this->bankAccountSelectColumns('admin_bank_accounts'))
-            ->where('is_active', true)
-            ->orderByDesc('id')
-            ->first();
+        $holderId = $this->resolveAdminHolderId();
 
-        return $this->normalizeBankAccountRecord($account);
+        return $holderId ? $this->getHolderBankAccount(BankAccount::HOLDER_SYSTEM_ACCOUNT, $holderId) : null;
     }
 
     public function saveAdminBankAccount(array $data): void
     {
-        $data = $this->normalizeBankAccountData($data);
-
-        DB::table('admin_bank_accounts')->update(['is_active' => false, 'updated_at' => now()]);
-
-        DB::table('admin_bank_accounts')->insert($this->filterExistingColumns('admin_bank_accounts', [
-            'bank_name' => $data['bank_name'],
-            'branch_name' => $data['branch_name'] ?? null,
-            'account_type' => $data['account_type'],
-            'account_number' => $data['account_number'],
-            'account_holder_name' => $data['account_holder_name'],
-            'account_name' => $data['account_name'],
-            'is_active' => true,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]));
+        $this->saveHolderBankAccount(BankAccount::HOLDER_SYSTEM_ACCOUNT, $this->resolveAdminHolderId(), $data);
     }
 
     public function getCastBankAccount(string $castId): ?object
     {
-        $account = DB::table('bank_accounts')
-            ->select($this->bankAccountSelectColumns('bank_accounts'))
-            ->where('member_id', $castId)
-            ->first();
-
-        return $this->normalizeBankAccountRecord($account);
+        return $this->getHolderBankAccount(BankAccount::HOLDER_CAST, $castId);
     }
 
     public function saveCastBankAccount(string $castId, array $data): void
     {
-        $data = $this->normalizeBankAccountData($data);
-
-        DB::table('bank_accounts')->updateOrInsert(
-            ['member_id' => $castId],
-            $this->filterExistingColumns('bank_accounts', [
-                'bank_name' => $data['bank_name'],
-                'branch_name' => $data['branch_name'] ?? null,
-                'account_type' => $data['account_type'],
-                'account_number' => $data['account_number'],
-                'account_holder_name' => $data['account_holder_name'],
-                'account_name' => $data['account_name'],
-                'updated_at' => now(),
-                'created_at' => now(),
-            ])
-        );
+        $this->saveHolderBankAccount(BankAccount::HOLDER_CAST, $castId, $data);
     }
 
     public function getShopBankAccount(string $shopId): ?object
     {
-        $account = DB::table('bank_account_shops')
-            ->select($this->bankAccountSelectColumns('bank_account_shops'))
-            ->where('shop_id', $shopId)
-            ->first();
-
-        return $this->normalizeBankAccountRecord($account);
+        return $this->getHolderBankAccount(BankAccount::HOLDER_SHOP, $shopId);
     }
 
     public function saveShopBankAccount(string $shopId, array $data): void
     {
-        $data = $this->normalizeBankAccountData($data);
-
-        DB::table('bank_account_shops')->updateOrInsert(
-            ['shop_id' => $shopId],
-            $this->filterExistingColumns('bank_account_shops', [
-                'bank_name' => $data['bank_name'],
-                'branch_name' => $data['branch_name'] ?? null,
-                'account_type' => $data['account_type'],
-                'account_number' => $data['account_number'],
-                'account_holder_name' => $data['account_holder_name'],
-                'account_name' => $data['account_name'],
-                'updated_at' => now(),
-                'created_at' => now(),
-            ])
-        );
+        $this->saveHolderBankAccount(BankAccount::HOLDER_SHOP, $shopId, $data);
     }
 
     public function getAdminBillingDashboard(): array
@@ -138,11 +100,6 @@ class BillingManagementService
                 'invoice_total' => collect($deposits)->sum('invoice_amount'),
             ],
         ];
-    }
-
-    private function nullIfEmpty(string $value): ?string
-    {
-        return $value === '' ? null : $value;
     }
 
     public function getPendingTasks(): array
@@ -661,35 +618,45 @@ class BillingManagementService
             ->leftJoin('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
             ->join('casts', 'shop_job_applications.cast_id', '=', 'casts.id')
             ->leftJoin('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id')
-            ->leftJoin('bank_accounts', 'casts.id', '=', 'bank_accounts.member_id')
-            ->leftJoin('bank_account_shops', 'shops.id', '=', 'bank_account_shops.shop_id')
-            ->select(
-                'application_deposits.id',
-                'application_deposits.shop_job_application_id',
-                'application_deposits.status',
-                'application_deposits.is_read',
-                'application_deposits.created_at',
-                'application_deposits.updated_at',
-                ...$this->optionalDepositSelects(),
-                'shop_job_applications.id as application_id',
-                'shop_job_applications.cast_id',
-                'shop_job_applications.result_date',
-                'shop_jobs.shop_id',
-                'shop_jobs.hourly_wage_regular',
-                'shop_jobs.noruma_reward',
-                'shop_jobs.noruma_cond',
-                'shops.email as shop_email',
-                'shop_profiles.shop_name',
-                'shop_profiles.pref as shop_pref',
-                'shop_profiles.city as shop_city',
-                'shop_profiles.addr2 as shop_addr2',
-                'shop_profiles.addr3 as shop_addr3',
-                'cast_profiles.nickname as cast_nickname',
-                'cast_profiles.name as cast_full_name',
-                'casts.email as cast_email',
-                DB::raw('bank_accounts.id as cast_bank_id'),
-                DB::raw('bank_account_shops.id as shop_bank_id')
-            );
+            ->leftJoin('bank_accounts as cast_bank_accounts', function ($join) {
+                $join->on('casts.id', '=', 'cast_bank_accounts.holder_id')
+                    ->where('cast_bank_accounts.holder_type', '=', BankAccount::HOLDER_CAST);
+            })
+            ->leftJoin('bank_accounts as shop_bank_accounts', function ($join) {
+                $join->on('shops.id', '=', 'shop_bank_accounts.holder_id')
+                    ->where('shop_bank_accounts.holder_type', '=', BankAccount::HOLDER_SHOP);
+            })
+            ->select(array_merge(
+                [
+                    'application_deposits.id',
+                    'application_deposits.shop_job_application_id',
+                    'application_deposits.status',
+                    'application_deposits.is_read',
+                    'application_deposits.created_at',
+                    'application_deposits.updated_at',
+                ],
+                $this->optionalDepositSelects(),
+                [
+                    'shop_job_applications.id as application_id',
+                    'shop_job_applications.cast_id',
+                    'shop_job_applications.result_date',
+                    'shop_jobs.shop_id',
+                    'shop_jobs.hourly_wage_regular',
+                    'shop_jobs.noruma_reward',
+                    'shop_jobs.noruma_cond',
+                    'shops.email as shop_email',
+                    'shop_profiles.shop_name',
+                    'shop_profiles.pref as shop_pref',
+                    'shop_profiles.city as shop_city',
+                    'shop_profiles.addr2 as shop_addr2',
+                    'shop_profiles.addr3 as shop_addr3',
+                    'cast_profiles.nickname as cast_nickname',
+                    'cast_profiles.name as cast_full_name',
+                    'casts.email as cast_email',
+                    DB::raw('cast_bank_accounts.id as cast_bank_id'),
+                    DB::raw('shop_bank_accounts.id as shop_bank_id'),
+                ]
+            ));
     }
 
     private function findDepositById(int $depositId): ?object
@@ -1022,15 +989,17 @@ class BillingManagementService
 
     private function normalizeBankAccount(?object $bank): array
     {
-        $accountHolderName = $bank->account_holder_name ?? $bank->account_name ?? '';
-
         return [
             'exists' => $bank !== null,
+            'bank_code' => $bank->bank_code ?? '',
             'bank_name' => $bank->bank_name ?? '',
+            'bank_name_kana' => $bank->bank_name_kana ?? '',
+            'branch_code' => $bank->branch_code ?? '',
             'branch_name' => $bank->branch_name ?? '',
+            'branch_name_kana' => $bank->branch_name_kana ?? '',
             'account_type' => $bank->account_type ?? 'ordinary',
             'account_number' => $bank->account_number ?? '',
-            'account_holder_name' => $accountHolderName,
+            'account_holder_name' => $bank->account_holder_name ?? $bank->account_name ?? '',
             'account_name' => $bank->account_name ?? '',
             'account_type_label' => $this->accountTypeLabel($bank->account_type ?? 'ordinary'),
         ];
@@ -1039,7 +1008,7 @@ class BillingManagementService
     private function accountTypeLabel(string $accountType): string
     {
         return match ($accountType) {
-            'checking' => '当座',
+            'current', 'checking' => '当座',
             default => '普通',
         };
     }
@@ -1121,8 +1090,14 @@ class BillingManagementService
     {
         $columns = [
             'id',
+            'holder_type',
+            'holder_id',
+            'bank_code',
             'bank_name',
+            'bank_name_kana',
+            'branch_code',
             'branch_name',
+            'branch_name_kana',
             'account_type',
             'account_number',
             'account_name',
@@ -1132,18 +1107,6 @@ class BillingManagementService
             $columns[] = 'account_holder_name';
         } else {
             $columns[] = DB::raw('account_name as account_holder_name');
-        }
-
-        if (Schema::hasTable($table) && Schema::hasColumn($table, 'member_id')) {
-            $columns[] = 'member_id';
-        }
-
-        if (Schema::hasTable($table) && Schema::hasColumn($table, 'shop_id')) {
-            $columns[] = 'shop_id';
-        }
-
-        if (Schema::hasTable($table) && Schema::hasColumn($table, 'is_active')) {
-            $columns[] = 'is_active';
         }
 
         return $columns;
@@ -1156,8 +1119,62 @@ class BillingManagementService
         }
 
         $account->account_holder_name = $account->account_holder_name ?? $account->account_name ?? '';
+        $account->account_type = $account->account_type === 'checking'
+            ? 'current'
+            : $account->account_type;
 
         return $account;
+    }
+
+    private function getHolderBankAccount(string $holderType, string $holderId): ?object
+    {
+        $account = DB::table('bank_accounts')
+            ->select($this->bankAccountSelectColumns('bank_accounts'))
+            ->where('holder_type', $holderType)
+            ->where('holder_id', $holderId)
+            ->first();
+
+        return $this->normalizeBankAccountRecord($account);
+    }
+
+    private function saveHolderBankAccount(string $holderType, string $holderId, array $data): void
+    {
+        $normalized = $this->normalizeBankAccountData($data);
+
+        DB::table('bank_accounts')->updateOrInsert(
+            [
+                'holder_type' => $holderType,
+                'holder_id' => $holderId,
+            ],
+            $this->filterExistingColumns('bank_accounts', [
+                'bank_code' => $normalized['bank_code'],
+                'bank_name' => $normalized['bank_name'],
+                'bank_name_kana' => $normalized['bank_name_kana'],
+                'branch_code' => $normalized['branch_code'],
+                'branch_name' => $normalized['branch_name'],
+                'branch_name_kana' => $normalized['branch_name_kana'],
+                'account_type' => $normalized['account_type'],
+                'account_number' => $normalized['account_number'],
+                'account_name' => $normalized['account_name'],
+                'updated_at' => now(),
+                'created_at' => now(),
+            ])
+        );
+    }
+
+    private function resolveAdminHolderId(): string
+    {
+        $authenticatedUserId = auth()->guard('admin')->id();
+
+        if (!empty($authenticatedUserId)) {
+            return (string) $authenticatedUserId;
+        }
+
+        return (string) DB::table('system_accounts')
+            ->where('role', SystemAccount::ROLE_ADMIN)
+            ->where('is_active', true)
+            ->orderBy('id')
+            ->value('id');
     }
 
     private function optionalDepositSelects(): array

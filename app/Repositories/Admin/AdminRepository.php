@@ -1,7 +1,7 @@
 <?php
 namespace App\Repositories\Admin;
 
-use App\Models\User;
+use App\Models\SystemAccount;
 use App\Models\ShopTreatment;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -22,21 +22,21 @@ class AdminRepository implements AdminRepositoryInterface
 
     private $project;
 
-    public function __construct(User $project) {
+    public function __construct(SystemAccount $project) {
         $this->project = $project;
     }
 
 
     public function all()
     {
-        $records =  User::select()->paginate(\ShopConsts::PAGENATION_COUNT);
+        $records =  SystemAccount::select()->paginate(\ShopConsts::PAGENATION_COUNT);
         return $records;
 
     }
 
     public function findById($id)
     {
-        $records =  User::find($id);
+        $records =  SystemAccount::find($id);
         return $records;
 
     }
@@ -78,7 +78,7 @@ class AdminRepository implements AdminRepositoryInterface
     {
         $data = $request->all();
         $data['password'] = Hash::make($data['password']);
-        User::updateOrCreate(
+        SystemAccount::updateOrCreate(
             ['id' => $id], 
             $data
         );
@@ -91,7 +91,7 @@ class AdminRepository implements AdminRepositoryInterface
         $data = $request->all();
         $data['password'] = Hash::make($data['password']);
 
-        $data = User::Create(
+        $data = SystemAccount::create(
             $data
         );
         return $data->id;
@@ -101,7 +101,7 @@ class AdminRepository implements AdminRepositoryInterface
     public function delete(Request $request,$id)
     {
 
-        return User::where('id', $id)->delete();
+        return SystemAccount::where('id', $id)->delete();
 
     }
 

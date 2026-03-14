@@ -12,7 +12,7 @@ use App\Consts\ShopConsts;
 use App\Models\Shop;
 use App\Models\ShopSubImage;
 use App\Models\ShopIndustry;
-use App\Models\Manager;
+use App\Models\ShopManager;
 use App\Models\WShop;
 use App\Models\WShopSubImage;
 use App\Models\WShopIndustry;
@@ -402,7 +402,7 @@ class ShopRepository implements ShopRepositoryInterface
             ]);
         }
 
-        Manager::create(array('shop_id' => $shop_id, 'email' => $request['email'], 'password' => Hash::make($request['password']), 'plain_password' => $request['password']));
+        ShopManager::create(array('shop_id' => $shop_id, 'email' => $request['email'], 'password' => Hash::make($request['password']), 'plain_password' => $request['password']));
 
 
         return $project;
@@ -763,7 +763,10 @@ class ShopRepository implements ShopRepositoryInterface
 
     public function findShopWithManagerById($shop_id)
     {
-        $records =  Shop::Join('managers', 'shops.id', '=', 'managers.shop_id')->where("shops.id", $shop_id)->select("shops.*", "managers.*", "managers.id as managers_id")->get();
+        $records = Shop::join('shop_managers', 'shops.id', '=', 'shop_managers.shop_id')
+            ->where('shops.id', $shop_id)
+            ->select('shops.*', 'shop_managers.*', 'shop_managers.id as managers_id')
+            ->get();
         return $records;
     }
 
@@ -1700,12 +1703,12 @@ class ShopRepository implements ShopRepositoryInterface
         $res = $this->saveShop($request, $shop_id);
 
         $this->saveShopIdentity($request, $shop_id);
-        $managers = Manager::where('shop_id', $shop_id)->orderBy('created_at', 'desc')->limit(1)->get();
+        $managers = ShopManager::where('shop_id', $shop_id)->orderBy('created_at', 'desc')->limit(1)->get();
         $id = "";
         foreach ($managers as $manager) {
             $id = $manager->id;
         }
-        Manager::updateOrCreate(
+        ShopManager::updateOrCreate(
             ['id' => $id],
             ['email' => $request->email]
         );

@@ -2,7 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Member;
+use App\Models\Cast;
+use App\Models\CastProfile;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -16,67 +17,48 @@ class MemberSeeder extends Seeder
      */
     public function run()
     {
-        Member::truncate();
+        DB::table('cast_profiles')->delete();
+        DB::table('casts')->delete();
 
-        $member_data = [];
-        for ($i = 1; $i <= 100; $i++) {
+        for ($i = 1; $i <= 20; $i++) {
+            $castId = sprintf('c%08d', $i);
+            $pref = match (true) {
+                $i <= 5 => '東京都',
+                $i <= 10 => '千葉県',
+                $i <= 15 => '神奈川県',
+                default => '愛知県',
+            };
 
-            if($i<=20) {
-                $pref = "東京都";
-                $jendar = 1;
-            }else if($i<=40) {
-                 $pref = "千葉県";
-                $jendar = 1;
+            Cast::query()->create([
+                'id' => $castId,
+                'email' => sprintf('cast%02d@example.com', $i),
+                'password' => Hash::make(sprintf('pass%04d', $i)),
+                'status' => 1,
+                'identity_status' => 1,
+                'last_login_at' => now(),
+            ]);
 
-            }else if($i<=60) {
-                 $pref = "北海道";
-                $jendar = 1;
-
-            }else if($i<=80) {
-                 $pref = "神奈川県";
-                $jendar = 1;
-
-            }else if($i<=100) {
-                 $pref = "愛知県";
-                $jendar = 2;
-            }
-            
-            Member::create( [
-                'email' => sprintf('member%02d@example.com', $i),
-                'password' => sprintf('pass%04d', $i),
-                'line_user_id' => sprintf('line%04d', $i),
-                'nickname' => sprintf('nickname%04d', $i),
-                'name' => sprintf('名前%04d', $i),
-                'kana' => sprintf('なまえ%04d', $i),
-                'zip' => sprintf('%03d', $i).sprintf('%04d', $i),
-                'pref'=>$pref,
-                'addr1' => sprintf('addr1%04d', $i),
-                'addr2' => sprintf('addr2%04d', $i),
-                'addr3' => sprintf('addr3%04d', $i),
-                'birthday_y' => rand(1975,2000),
-                'birthday_m' => rand(1,12),
-                'birthday_d' => rand(1,28),
-                'height' => rand(140,200),
-                'weight' => rand(40,100),
-                'b' => rand(75,100),
-                'w' => rand(50,100),
-                'h' => rand(80,100),
-                'shift'=>rand(0,6),
-                'profession'=> sprintf('職業%04d', $i),
-                'exp'=> rand(0,1),
-                'years_exp'=> rand(1,15),
-                'where_work'=> sprintf('where_work%04d', $i),
-                'pr'=> sprintf('pr%04d', $i),
-                'charm_point'=> sprintf('charm_point%04d', $i)
+            CastProfile::query()->create([
+                'cast_id' => $castId,
+                'nickname' => sprintf('cast%02d', $i),
+                'name' => sprintf('キャスト%02d', $i),
+                'birthday' => sprintf('%04d-%02d-%02d', rand(1988, 2002), rand(1, 12), rand(1, 28)),
+                'pref' => $pref,
+                'city' => sprintf('%s市', mb_substr($pref, 0, 2)),
+                'addr1' => sprintf('addr1%02d', $i),
+                'addr2' => sprintf('addr2%02d', $i),
+                'addr3' => sprintf('addr3%02d', $i),
+                'tel' => sprintf('0901234%04d', $i),
+                'shift' => rand(0, 6),
+                'exp' => rand(0, 1),
+                'profession' => sprintf('職業%02d', $i),
+                'years_exp' => (string) rand(1, 10),
+                'where_work' => sprintf('勤務地%02d', $i),
+                'pr' => sprintf('自己PR%02d', $i),
+                'charm_point' => sprintf('チャームポイント%02d', $i),
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         }
-/*
-        foreach($member_data as $data) {
-            $member = new Member();
-            $member->email = $data['email'];
-            $member->password = Hash::make($data['password']);
-            $member->save();
-        }
-*/
     }
 }
