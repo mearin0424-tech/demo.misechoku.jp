@@ -256,7 +256,7 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
 
     Route::get('/home', [ShopHome::class, 'index'])->name('home');
     Route::get('/search', fn () => redirect()->route('shop.search.index', ['tab' => 'timeline']));
-    Route::get('/search/{tab}', [ShopSearch::class, 'index'])->name('search.index')->where('tab', 'timeline|list|ai');
+    Route::get('/search/{tab}', [ShopSearch::class, 'index'])->name('search.index')->where('tab', 'timeline|list');
 
     // トーク
     Route::prefix('talk')->name('talk.')->group(function () {

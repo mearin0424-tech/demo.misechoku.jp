@@ -11,17 +11,20 @@ class SearchController extends BaseSearchController
 {
     public function index(Request $request, ?string $tab = 'timeline')
     {
+        $searchTab = in_array($tab, ['timeline', 'list'], true) ? $tab : 'timeline';
         $timelineData = $this->buildTimelineData();
         $items = $this->buildSearchItems($request);
-
-        $activeTab = 'pane-' . (in_array($tab, ['timeline', 'list', 'ai'], true) ? $tab : 'timeline');
+        $activeTab = 'pane-' . $searchTab;
+        $guideMessage = $searchTab === 'list'
+            ? "ここでは気になるキャストを条件で絞り込んで探せるよ！\n詳細検索でぴったりの相手を見つけてみてね。"
+            : "ここでは新着のキャストをチェックできるよ！\n気になる相手を見つけたら詳細も見てみてね。";
 
         return $this->renderIndex([
-            'guideMessage' => "ここでは気になるキャストを検索できるよ！\nスワイプして探してみてね。",
+            'guideMessage' => $guideMessage,
             'timelineData' => $timelineData,
             'items'        => $items,
             'activeTab'    => $activeTab,
-            'searchTab'    => $tab,
+            'searchTab'    => $searchTab,
         ]);
     }
 

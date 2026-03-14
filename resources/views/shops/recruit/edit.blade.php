@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', '求人情報の編集')
-@section('guide_message', '求人票は、最初に目に入る条件とお店らしさが伝わるほど応募につながりやすいよ。上から順に埋めれば、そのまま見やすい求人票になるように整えてあるよ。')
+@section('guide_message', '求人票は、最初に目に入る条件とお店らしさが伝わるほど、応募につながりやすくなります。上から順にご入力いただければ、そのまま見やすい求人票になるよう整えております。')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/recruitment.css') }}">

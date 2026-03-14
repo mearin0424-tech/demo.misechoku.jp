@@ -6,7 +6,7 @@
 @endphp
 @section('guide_message')
     @if($showLicenseGuide)
-        営業許可証か風営許可証がまだそろっていないみたいだよ。両方そろうと、面談日設定みたいな機能も使えるようになるから、先にここを整えておこうね。
+        営業許可証または風営許可証が、まだそろっていないようです。両方がそろいますと、面談日設定などの機能もご利用いただけますので、先にこちらをご準備ください。
     @endif
 @endsection
 
@@ -15,57 +15,41 @@
 <style>
     .document-upload-list {
         display: grid;
-        gap: 14px;
+        gap: 10px;
     }
 
     .document-upload-card {
-        padding: 18px;
-        border-radius: 20px;
-        border: 1px solid rgba(212, 175, 55, 0.14);
-        background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
-    }
-
-    .document-upload-head {
         display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 12px;
-        margin-bottom: 12px;
-    }
-
-    .document-upload-title {
-        display: flex;
-        gap: 12px;
         align-items: center;
-        min-width: 0;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(212, 175, 55, 0.12);
+        background: rgba(255,255,255,0.025);
     }
 
-    .document-upload-icon {
-        width: 42px;
-        height: 42px;
-        border-radius: 14px;
-        display: grid;
-        place-items: center;
-        color: #f6e7af;
-        background: rgba(212, 175, 55, 0.12);
-        border: 1px solid rgba(212, 175, 55, 0.18);
-        flex-shrink: 0;
+    .document-upload-main {
+        min-width: 0;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
     }
 
     .document-upload-name {
-        display: block;
-        font-size: 0.98rem;
+        font-size: 0.88rem;
         font-weight: 700;
         color: #fff8ea;
+        white-space: nowrap;
     }
 
     .document-upload-meta {
-        display: block;
-        margin-top: 4px;
-        font-size: 0.78rem;
-        line-height: 1.7;
-        color: #cdbcbc;
+        font-size: 0.73rem;
+        line-height: 1.5;
+        color: #bdaaaa;
+        white-space: nowrap;
     }
 
     .document-status-chip {
@@ -73,9 +57,9 @@
         align-items: center;
         justify-content: center;
         min-width: 92px;
-        padding: 7px 12px;
+        padding: 6px 11px;
         border-radius: 999px;
-        font-size: 0.76rem;
+        font-size: 0.72rem;
         font-weight: 700;
         letter-spacing: 0.04em;
         white-space: nowrap;
@@ -101,29 +85,17 @@
     }
 
     .document-upload-notice {
-        margin: 0 0 14px;
-        padding: 12px 14px;
-        border-radius: 16px;
-        font-size: 0.8rem;
-        line-height: 1.75;
-        background: rgba(255,255,255,0.04);
-        color: #d7c8c8;
-    }
-
-    .document-upload-links {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 10px;
+        margin: 0 0 10px;
+        font-size: 0.76rem;
+        line-height: 1.7;
+        color: #cdbcbc;
     }
 
     .document-upload-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
         color: #f4d77b;
-        font-size: 0.8rem;
+        font-size: 0.76rem;
         text-decoration: none;
+        white-space: nowrap;
     }
 
     .document-upload-link:hover {
@@ -131,70 +103,88 @@
     }
 
     .document-upload-form {
-        display: grid;
-        gap: 12px;
-        margin-top: 14px;
-    }
-
-    .document-upload-grid {
-        display: grid;
-        grid-template-columns: minmax(0, 1.5fr) minmax(140px, 180px);
-        gap: 12px;
-        align-items: end;
-    }
-
-    .document-upload-field {
-        display: grid;
-        gap: 6px;
-    }
-
-    .document-upload-label {
-        font-size: 0.78rem;
-        color: #cdbcbc;
-    }
-
-    .document-upload-input {
-        width: 100%;
-        min-height: 46px;
-        padding: 11px 14px;
-        border-radius: 14px;
-        border: 1px solid rgba(255,255,255,0.10);
-        background: rgba(20, 8, 8, 0.55);
-        color: #f6eeee;
-    }
-
-    .document-upload-input::file-selector-button {
-        margin-right: 12px;
-        padding: 8px 12px;
-        border: 0;
-        border-radius: 10px;
-        background: rgba(212, 175, 55, 0.18);
-        color: #f7e7b7;
-        cursor: pointer;
+        display: contents;
     }
 
     .document-upload-actions {
+        flex-shrink: 0;
         display: flex;
-        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .document-upload-trigger {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(212, 175, 55, 0.24);
+        background: rgba(212, 175, 55, 0.10);
+        color: #f8e7b0;
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    }
+
+    .document-upload-trigger:hover {
+        background: rgba(212, 175, 55, 0.16);
+        border-color: rgba(212, 175, 55, 0.34);
+    }
+
+    .document-upload-input {
+        display: none;
+    }
+
+    .document-upload-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.10);
+        background: rgba(255,255,255,0.04);
+        color: #f2e7c4;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    }
+
+    .document-upload-link:hover {
+        background: rgba(255,255,255,0.08);
+        border-color: rgba(212, 175, 55, 0.24);
+        color: #f8e7b0;
+    }
+
+    .document-upload-error {
+        width: 100%;
+        margin-top: 8px;
+        font-size: 0.75rem;
+        color: #ffcdcd;
     }
 
     @media (max-width: 640px) {
-        .document-upload-head,
-        .document-upload-grid {
-            grid-template-columns: 1fr;
+        .document-upload-card {
+            gap: 10px;
         }
 
-        .document-upload-head {
-            align-items: stretch;
+        .document-upload-actions {
+            margin-left: auto;
         }
 
-        .document-status-chip {
-            width: fit-content;
+        .document-upload-main {
+            gap: 6px;
         }
 
-        .document-upload-actions .btn-action {
+        .document-upload-meta {
             width: 100%;
-            justify-content: center;
+            white-space: normal;
         }
     }
 </style>
@@ -206,7 +196,7 @@
         {{-- ヒーロー：店舗名 --}}
         <h1 class="mypage-shop-name serif-font gold-gradient">{{ $shopData['shop_name'] }}</h1>
 
-        {{-- アイコン＋ひとこと --}}
+        {{-- アイコン＋アピール --}}
         <div class="mypage-hero">
             <div class="shop-icon-wrapper">
                 <img src="{{ (isset($subImages[0]) ? $subImages[0]['url'] : null) ?? asset('assets/images/common/no-image.png') }}" class="shop-icon-main" id="main-icon-display" alt="">
@@ -215,8 +205,14 @@
                 </button>
             </div>
             <div class="shop-word-bubble glass-panel" onclick="openWordEdit()" role="button" tabindex="0">
+                <span class="shop-word-bubble-label">Appeal</span>
+                <span class="shop-word-bubble-note">タイムラインに表示される店舗アピールです</span>
                 <p id="display-word" class="shop-word-text">{{ $shopData['word'] }}</p>
-                <button type="button" class="btn-word-edit" aria-label="ひとことを編集">
+                <div class="shop-word-bubble-footer">
+                    <span class="shop-word-bubble-hint">タップしてすぐ編集</span>
+                    <span id="display-word-updated" class="shop-word-bubble-updated">最終更新 {{ $shopData['appeal_updated_at'] ?? '未設定' }}</span>
+                </div>
+                <button type="button" class="btn-word-edit" aria-label="アピールを編集">
                     <i class="fas fa-pen"></i>
                 </button>
             </div>
@@ -269,7 +265,7 @@
             <div class="mypage-section document-section">
                 <h2 class="section-title section-title-gold">書類管理</h2>
                 <p class="document-upload-notice">
-                    許可証の提出状況を確認しながら、そのまま差し替えアップロードできます。
+                    提出状況を確認しながら、そのまま差し替えできます。
                 </p>
                 <div class="document-upload-list">
                     @foreach($documents as $doc)
@@ -284,64 +280,39 @@
                             ][$s] ?? '未提出';
                         @endphp
                         <div class="document-upload-card">
-                            <div class="document-upload-head">
-                                <div class="document-upload-title">
-                                    <div class="document-upload-icon">
-                                        <i class="fas fa-file-shield"></i>
-                                    </div>
-                                    <div>
-                                        <span class="document-upload-name">{{ $doc['name'] }}</span>
-                                        <span class="document-upload-meta">
-                                            @if($record && !empty($record['updated_at_label']))
-                                                最終更新: {{ $record['updated_at_label'] }}
-                                            @else
-                                                まだ提出されていません
-                                            @endif
-                                            @if($record && !empty($record['expired_at']))
-                                                / 有効期限: {{ $record['expired_at'] }}
-                                            @endif
-                                        </span>
-                                    </div>
-                                </div>
+                            <div class="document-upload-main">
+                                <span class="document-upload-name">{{ $doc['name'] }}</span>
                                 <span class="document-status-chip is-{{ str_replace('_', '-', $s) }}" data-doc-key="{{ $doc['key'] }}">
                                     {{ $statusLabel }}
                                 </span>
+                                <span class="document-upload-meta">
+                                    @if($record && !empty($record['updated_at_label']))
+                                        最終更新 {{ $record['updated_at_label'] }}
+                                    @else
+                                        まだ提出されていません
+                                    @endif
+                                </span>
+                                @if($record && !empty($record['file_url']))
+                                    <a href="{{ $record['file_url'] }}" target="_blank" rel="noopener" class="document-upload-link">確認</a>
+                                @endif
                             </div>
-
-                            @if($record && !empty($record['ng_reason']))
-                                <div class="document-upload-notice" style="margin-bottom:0; color:#ffcdcd;">
-                                    差し戻し理由: {{ $record['ng_reason'] }}
-                                </div>
-                            @endif
-
-                            @if($record && !empty($record['file_url']))
-                                <div class="document-upload-links">
-                                    <a href="{{ $record['file_url'] }}" target="_blank" rel="noopener" class="document-upload-link">
-                                        <i class="fas fa-arrow-up-right-from-square"></i> 提出ファイルを確認
-                                    </a>
-                                </div>
-                            @endif
-
                             <form class="shop-document-form document-upload-form" data-doc-key="{{ $doc['key'] }}" enctype="multipart/form-data">
                                 @csrf
                                 <input type="hidden" name="type" value="{{ $doc['key'] }}">
-                                <div class="document-upload-grid">
-                                    <div class="document-upload-field">
-                                        <label class="document-upload-label">ファイル</label>
-                                        <input type="file" name="file" class="document-upload-input" accept=".pdf,image/*" required>
-                                    </div>
-                                    <div class="document-upload-field">
-                                        <label class="document-upload-label">有効期限</label>
-                                        <input type="date" name="expired_at" class="bank-input" value="{{ $record['expired_at'] ?? '' }}">
-                                    </div>
-                                </div>
                                 <div class="document-upload-actions">
-                                    <button type="submit" class="btn-action manage">
-                                        <i class="fas fa-upload"></i> アップロード
-                                    </button>
+                                    @if($record && !empty($record['file_url']))
+                                        <a href="{{ $record['file_url'] }}" target="_blank" rel="noopener" class="document-upload-link">確認</a>
+                                    @endif
+                                    <label class="document-upload-trigger">
+                                        更新
+                                        <input type="file" name="file" class="document-upload-input" accept=".pdf,image/*" required data-auto-upload-input>
+                                    </label>
                                 </div>
                             </form>
                         </div>
+                        @if($record && !empty($record['ng_reason']))
+                            <p class="document-upload-error">差し戻し理由: {{ $record['ng_reason'] }}</p>
+                        @endif
                     @endforeach
                 </div>
             </div>
@@ -388,11 +359,11 @@
     </div>
 </div>
 
-{{-- ひとこと編集モーダル --}}
+{{-- アピール編集モーダル --}}
 <div id="modal-word" class="mypage-modal-overlay modal-word-edit" style="display:none;">
     <div class="mypage-modal-panel glass-panel">
-        <h3 class="mypage-modal-title serif-font">ひとこと編集</h3>
-        <textarea id="word-input" rows="3" class="mypage-modal-textarea" placeholder="新人大歓迎！"></textarea>
+        <h3 class="mypage-modal-title serif-font">タイムライン用アピールを編集</h3>
+        <textarea id="word-input" rows="3" class="mypage-modal-textarea" placeholder="新人大歓迎！働きやすさもお任せください。"></textarea>
         <div class="mypage-modal-actions">
             <button type="button" class="btn-action btn-action-secondary" onclick="closeWordEdit()">戻る</button>
             <button type="button" class="btn-action btn-action-primary" onclick="saveWord()">保存</button>
@@ -519,7 +490,7 @@ function deleteGalleryImageFromModal(ev) {
 
 function openWordEdit() {
     document.getElementById('modal-word').style.display = 'flex';
-    document.getElementById('word-input').value = document.getElementById('display-word').innerText;
+    document.getElementById('word-input').value = document.getElementById('display-word').innerText.trim();
 }
 function closeWordEdit() {
     document.getElementById('modal-word').style.display = 'none';
@@ -529,7 +500,15 @@ function openProfileEdit() {
 }
 function saveWord() {
     var val = document.getElementById('word-input').value.trim();
-    document.getElementById('display-word').innerText = val || 'ひとことを設定しましょう';
+    var fallback = 'タイムラインに載るアピールを設定しましょう';
+    document.getElementById('display-word').innerText = val || fallback;
+    var updated = document.getElementById('display-word-updated');
+    if (updated) {
+        var now = new Date();
+        var date = now.getFullYear() + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + String(now.getDate()).padStart(2, '0');
+        var time = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        updated.innerText = '最終更新 ' + date + ' ' + time;
+    }
     closeWordEdit();
     // TODO: API で保存する場合はここで送信
 }
@@ -537,6 +516,13 @@ function saveWord() {
 (function() {
     var forms = document.querySelectorAll('.shop-document-form');
     forms.forEach(function(form) {
+        var fileInput = form.querySelector('[data-auto-upload-input]');
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                if (!fileInput.files || !fileInput.files.length) return;
+                form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            });
+        }
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             var formData = new FormData(form);

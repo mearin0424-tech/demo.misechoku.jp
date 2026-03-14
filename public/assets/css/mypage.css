@@ -87,14 +87,27 @@
 
 .shop-word-bubble {
     flex: 1;
-    min-height: 72px;
+    min-height: 96px;
     padding: 14px 44px 14px 16px;
-    border-radius: 14px;
+    border-radius: 18px;
     border: 1px solid var(--mypage-gold-border);
     background: var(--mypage-card-bg);
     position: relative;
     cursor: pointer;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.shop-word-bubble::after {
+    content: '';
+    position: absolute;
+    left: 18px;
+    bottom: -10px;
+    width: 18px;
+    height: 18px;
+    background: var(--mypage-card-bg);
+    border-right: 1px solid var(--mypage-gold-border);
+    border-bottom: 1px solid var(--mypage-gold-border);
+    transform: rotate(45deg);
 }
 
 .shop-word-bubble:hover {
@@ -103,10 +116,48 @@
 }
 
 .shop-word-text {
-    margin: 0;
+    margin: 6px 0 0;
     font-size: 0.9rem;
     line-height: 1.5;
     color: var(--color-text);
+}
+
+.shop-word-bubble-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--mypage-gold);
+    font-weight: 700;
+}
+
+.shop-word-bubble-note {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.74rem;
+    line-height: 1.6;
+    color: #cbbbbb;
+}
+
+.shop-word-bubble-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.shop-word-bubble-hint,
+.shop-word-bubble-updated {
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: #b79f9f;
+}
+
+.shop-word-bubble-hint {
+    color: #d4bf84;
 }
 
 .btn-word-edit {
@@ -209,6 +260,33 @@
     color: var(--color-text);
     opacity: 0.8;
     margin-left: 2px;
+}
+
+.mypage-like-summary {
+    gap: 8px;
+    cursor: default;
+}
+
+.mypage-like-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ff8ea5;
+    font-size: 1rem;
+}
+
+.mypage-like-label {
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #ffb8c5;
+    font-weight: 700;
+}
+
+.mypage-like-count {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text-header);
 }
 
 /* --- 詳細ボックス（セクション共通） --- */
@@ -1118,6 +1196,15 @@ a.btn-outline-gold {
 }
 
 @media (max-width: 640px) {
+    .shop-word-bubble {
+        min-height: 108px;
+    }
+
+    .shop-word-bubble-footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
     .mypage-status-overview,
     .mypage-flow-grid {
         grid-template-columns: 1fr;

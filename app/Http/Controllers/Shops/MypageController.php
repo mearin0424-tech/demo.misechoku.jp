@@ -40,6 +40,7 @@ class MypageController extends Controller
                 'shop_profiles.catch',
                 'shop_profiles.overview',
                 'shop_profiles.message',
+                'shop_profiles.updated_at as profile_updated_at',
                 DB::raw('AVG(reviews.eva) as avg_eva'),
                 DB::raw('COUNT(reviews.id) as review_count')
             )
@@ -54,7 +55,8 @@ class MypageController extends Controller
                 'shop_profiles.addr3',
                 'shop_profiles.catch',
                 'shop_profiles.overview',
-                'shop_profiles.message'
+                'shop_profiles.message',
+                'shop_profiles.updated_at'
             )
             ->first();
 
@@ -69,6 +71,9 @@ class MypageController extends Controller
             'city'         => $row->city ?? '',
             'addr1'        => trim(($row->addr2 ?? '') . ' ' . ($row->addr3 ?? '')),
             'overview'     => $row->overview ?? '',
+            'appeal_updated_at' => !empty($row?->profile_updated_at)
+                ? Carbon::parse($row->profile_updated_at)->format('Y/m/d H:i')
+                : null,
             'approval'     => $documentData['all_approved'] ? 1 : 0,
         ];
 

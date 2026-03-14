@@ -48,7 +48,6 @@ final class SmokeRouteMatrix
             'shop home' => ['shop.home', [], 200],
             'shop search timeline' => ['shop.search.index', ['tab' => 'timeline'], 200],
             'shop search list' => ['shop.search.index', ['tab' => 'list'], 200],
-            'shop search ai' => ['shop.search.index', ['tab' => 'ai'], 200],
             'shop interaction index' => ['shop.interaction.index', [], 200],
             'shop interaction keep' => ['shop.interaction.keep', [], 200],
             'shop interaction like' => ['shop.interaction.like', [], 200],

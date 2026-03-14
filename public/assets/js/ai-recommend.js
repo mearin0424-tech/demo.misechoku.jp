@@ -271,8 +271,8 @@
             item.type = inferType(item);
             item.traits = role === 'cast' ? inferCastTraits(item) : inferShopTraits(item);
             item.desc = item.text || (role === 'cast'
-                ? '条件に合いそうなお店候補です。詳細ページで雰囲気を確認してみてください。'
-                : '雰囲気が合いそうなキャスト候補です。プロフィール詳細で確認してみてください。');
+                ? 'ご希望に合いそうなお店候補です。詳細ページで雰囲気をご確認ください。'
+                : '雰囲気の合いそうなキャスト候補です。プロフィール詳細をご確認ください。');
 
             return item;
         }) : [];
@@ -326,7 +326,7 @@
                 box.className += ' ai-recommend__message--typing';
                 bubbleRow.innerHTML =
                     '<div class="ai-recommend__avatar"><img src="' + escapeHtml(avatar) + '" alt="オコジョガイド"></div>' +
-                    '<div class="ai-recommend__bubble"><i class="fas fa-ellipsis-h"></i> 入力中...</div>';
+                    '<div class="ai-recommend__bubble"><i class="fas fa-ellipsis-h"></i> 入力中です...</div>';
             } else {
                 bubbleRow.innerHTML = '<div class="ai-recommend__bubble">' + escapeHtml(text) + '</div>';
             }
@@ -432,17 +432,17 @@
 
         function reasonText(item) {
             if (role === 'cast') {
-                if (state.answers.priority.indexOf('場所') !== -1) return 'エリア希望に近い候補';
-                if (state.answers.priority.indexOf('稼ぐ') !== -1) return '高収入狙いと相性が良さそう';
-                if (item.traits.indexOf('norma_loose') !== -1) return 'ノルマ面で無理しにくそう';
-                if (item.traits.indexOf('staff_teach') !== -1) return 'サポートが手厚そう';
-                return '働きやすさの相性が良さそう';
+                if (state.answers.priority.indexOf('場所') !== -1) return 'エリアのご希望に近い候補です';
+                if (state.answers.priority.indexOf('収入') !== -1) return '高収入重視のご希望と相性が良さそうです';
+                if (item.traits.indexOf('norma_loose') !== -1) return 'ノルマ面で無理なく働きやすそうです';
+                if (item.traits.indexOf('staff_teach') !== -1) return 'サポートが手厚く安心感があります';
+                return '働きやすさの相性が良さそうです';
             }
 
-            if (state.answers.priority.indexOf('場所') !== -1) return 'エリア希望に近い候補';
-            if (state.answers.priority.indexOf('即戦力') !== -1) return '即戦力イメージに近い候補';
-            if (item.traits.indexOf('support_teach') !== -1) return '育成方針と相性が良さそう';
-            return '雰囲気の相性が良さそう';
+            if (state.answers.priority.indexOf('場所') !== -1) return 'エリアのご希望に近い候補です';
+            if (state.answers.priority.indexOf('即戦力') !== -1) return '即戦力のイメージに近い候補です';
+            if (item.traits.indexOf('support_teach') !== -1) return '育成方針との相性が良さそうです';
+            return '雰囲気の相性が良さそうです';
         }
 
         function showCards(batch) {
@@ -459,8 +459,8 @@
             var batch = state.matches.slice(state.matchIndex, state.matchIndex + 3);
 
             if (!batch.length) {
-                addAiMessage('この条件で出せる候補はここまででした。条件を変えて、もう一度探してみる？', [
-                    { value: 'リセットして最初から', label: 'リセットして最初から' }
+                addAiMessage('この条件でご案内できる候補は以上でした。条件を変えて、もう一度お探しになりますか？', [
+                    { value: 'リセットして最初から', label: '最初からやり直す' }
                 ]);
                 return;
             }
@@ -469,23 +469,23 @@
             if (state.matchIndex === 0) {
                 if (role === 'cast') {
                     if (state.answers.priority.indexOf('働きやすさ') !== -1) {
-                        introText = 'あなたの性格と希望条件を重ねると、まずはこの3件が相性よさそうだよ。';
+                        introText = 'ご希望条件とお人柄の傾向を踏まえると、まずはこちらの3件がおすすめです。';
                     } else if (state.answers.priority.indexOf('場所') !== -1) {
-                        introText = '**エリア重視**で条件が近い順に並べたよ。';
+                        introText = '**エリア重視**で、ご希望に近い順にお並べしました。';
                     } else {
-                        introText = '**稼ぎ重視**で勢いが合いそうな候補から出してみるね。';
+                        introText = '**収入重視**で、相性の良さそうな候補からご案内いたします。';
                     }
                 } else {
                     if (state.answers.priority.indexOf('相性') !== -1) {
-                        introText = '雰囲気と育成方針の相性を見て、まずはこの3名が良さそうだよ。';
+                        introText = '雰囲気と育成方針の相性を踏まえ、まずはこちらの3名がおすすめです。';
                     } else if (state.answers.priority.indexOf('場所') !== -1) {
-                        introText = '**エリア重視**で候補を先に出すね。';
+                        introText = '**エリア重視**で、候補を優先してご案内いたします。';
                     } else {
-                        introText = '**即戦力重視**で前向きさが合いそうな候補から並べたよ。';
+                        introText = '**即戦力重視**で、前向きさが合いそうな候補からお並べしました。';
                     }
                 }
             } else {
-                introText = 'ほかにも相性が良さそうな候補があるよ。';
+                introText = 'ほかにも相性の良さそうな候補がございます。';
             }
 
             addAiMessage(introText);
@@ -494,12 +494,12 @@
                 state.matchIndex += 3;
 
                 if (state.matches.length > state.matchIndex) {
-                    addAiMessage('どうかな？ もっと他の候補も見てみる？', [
-                        { value: 'もっと他の候補を見る', label: 'もっと他の候補を見る' },
+                    addAiMessage('いかがでしょうか。さらに別の候補もご覧になりますか？', [
+                        { value: 'もっと他の候補を見る', label: 'さらに候補を見る' },
                         { value: 'この中から選ぶ', label: 'この中から選ぶ' }
                     ]);
                 } else {
-                    addAiMessage('おすすめは以上だよ。気になる候補があれば、そのまま詳細を開いて確認してみてね。', [
+                    addAiMessage('おすすめは以上でございます。気になる候補がございましたら、そのまま詳細をご確認ください。', [
                         { value: 'リセットして最初から', label: 'もう一度やり直す' }
                     ]);
                 }
@@ -508,8 +508,8 @@
 
         function calculateMatches() {
             addAiMessage(role === 'cast'
-                ? '候補を整理しているよ。少し待ってね...'
-                : 'キャスト候補を整理しているよ。少し待ってね...');
+                ? '候補を整理しております。少々お待ちください...'
+                : 'キャスト候補を整理しております。少々お待ちください...');
 
             window.setTimeout(function () {
                 state.matches = allItems.slice().sort(function (a, b) {
@@ -537,17 +537,17 @@
                 ? state.answers.typeTitle + '（' + state.answers.type + '）'
                 : state.answers.type;
             if (role === 'cast') {
-                addAiMessage('希望のエリアは？', getAreaOptions());
+                addAiMessage('ご希望のエリアをお選びください。', getAreaOptions());
             } else {
-                addAiMessage('**' + typeLabel + '** を踏まえて見ていくね。まずは**希望のエリア**を教えて。', getAreaOptions());
+                addAiMessage('**' + typeLabel + '** を踏まえてご案内いたします。まずは**ご希望のエリア**をお聞かせください。', getAreaOptions());
             }
         }
 
         function askAreaQuestionWithoutType() {
             if (role === 'cast') {
-                addAiMessage('OK、そのまま進めよう。**希望のエリア**はどのあたり？', getAreaOptions());
+                addAiMessage('承知いたしました。そのまま進めますので、**ご希望のエリア**をお選びください。', getAreaOptions());
             } else {
-                addAiMessage('OK、そのまま進めよう。まずは**希望のエリア**を教えて。', getAreaOptions());
+                addAiMessage('承知いたしました。そのまま進めますので、まずは**ご希望のエリア**をお聞かせください。', getAreaOptions());
             }
         }
 
@@ -572,8 +572,8 @@
 
             state.step = 2;
             addAiMessage(
-                '登録済みの接客タイプ診断結果は **(' + state.answers.type + ') ' + state.answers.typeTitle + '** だよ。\n' +
-                'この結果をもとに、おすすめを探していくね。'
+                '登録済みの接客タイプ診断結果は **(' + state.answers.type + ') ' + state.answers.typeTitle + '** です。\n' +
+                'こちらの結果をもとに、おすすめをご案内いたします。'
             );
             window.setTimeout(function () {
                 askAreaQuestion();
@@ -587,37 +587,37 @@
                 case 2:
                     state.answers.area = text;
                     state.step = 3;
-                    addAiMessage('お店の雰囲気はどっちが楽？', [
-                        { value: 'ワイワイ盛り上がる (パリピ系)', label: 'ワイワイ盛り上がる (パリピ系)' },
-                        { value: 'しっぽり話す (落ち着き系)', label: 'しっぽり話す (落ち着き系)' }
+                    addAiMessage('お店の雰囲気は、どちらがお好みに近いでしょうか？', [
+                        { value: '明るくにぎやかな雰囲気', label: '明るくにぎやかな雰囲気' },
+                        { value: '落ち着いて会話を楽しめる雰囲気', label: '落ち着いて会話を楽しめる雰囲気' }
                     ]);
                     return;
 
                 case 3:
-                    state.answers.vibe = text.indexOf('ワイワイ') !== -1 ? 'vibe_party' : 'vibe_quiet';
+                    state.answers.vibe = text.indexOf('にぎやか') !== -1 ? 'vibe_party' : 'vibe_quiet';
                     state.step = 4;
-                    addAiMessage('ぶっちゃけ、数字やノルマの温度感はどっちがいい？', [
-                        { value: '絶対ムリ！気楽にやりたい', label: '絶対ムリ！気楽にやりたい' },
-                        { value: '稼げるなら戦う', label: '稼げるなら戦う' }
+                    addAiMessage('ノルマや数字への向き合い方は、どちらがご希望に近いでしょうか？', [
+                        { value: '無理のない環境で働きたいです', label: '無理のない環境で働きたいです' },
+                        { value: 'しっかり稼げる環境を重視します', label: 'しっかり稼げる環境を重視します' }
                     ]);
                     return;
 
                 case 4:
-                    state.answers.norma = text.indexOf('ムリ') !== -1 ? 'norma_loose' : 'norma_hard';
+                    state.answers.norma = text.indexOf('無理') !== -1 ? 'norma_loose' : 'norma_hard';
                     state.step = 5;
-                    addAiMessage('スタッフさんとの距離感はどうしたい？', [
-                        { value: '手取り足取り教えてほしい', label: '手取り足取り教えてほしい' },
-                        { value: '自由にやらせてほしい', label: '自由にやらせてほしい' }
+                    addAiMessage('スタッフとの距離感は、どのような形をご希望でしょうか？', [
+                        { value: '丁寧に教えていただけると安心です', label: '丁寧に教えていただけると安心です' },
+                        { value: 'ある程度自由に進めたいです', label: 'ある程度自由に進めたいです' }
                     ]);
                     return;
 
                 case 5:
                     state.answers.staff = text.indexOf('教えて') !== -1 ? 'staff_teach' : 'staff_free';
                     state.step = 6;
-                    addAiMessage('最後に、今回のお店探しで何を一番優先したい？', [
-                        { value: '場所 (エリア絶対！)', label: '場所 (エリア絶対！)' },
-                        { value: '働きやすさ (性格重視)', label: '働きやすさ (性格重視)' },
-                        { value: 'とにかく稼ぐ', label: 'とにかく稼ぐ' }
+                    addAiMessage('最後に、今回のお店探しで最も重視される点をお選びください。', [
+                        { value: '場所を重視したいです', label: '場所を重視したいです' },
+                        { value: '働きやすさを重視したいです', label: '働きやすさを重視したいです' },
+                        { value: '収入を重視したいです', label: '収入を重視したいです' }
                     ]);
                     return;
 
@@ -629,7 +629,7 @@
 
                 default:
                     if (text.indexOf('この中から選ぶ') !== -1) {
-                        addAiMessage('気になる候補のボタンから、そのまま詳細ページを開いてみてね。');
+                        addAiMessage('気になる候補のボタンから、そのまま詳細ページをご覧ください。');
                         return;
                     }
                     if (text.indexOf('リセット') !== -1) {
@@ -643,37 +643,37 @@
                 case 2:
                     state.answers.area = text;
                     state.step = 3;
-                    addAiMessage('採用したい接客の空気感はどっち寄り？', [
-                        { value: '明るくワイワイ盛り上がるタイプ', label: '明るくワイワイ盛り上がるタイプ' },
-                        { value: '落ち着いて丁寧に話せるタイプ', label: '落ち着いて丁寧に話せるタイプ' }
+                    addAiMessage('採用したい接客の雰囲気は、どちらに近いでしょうか？', [
+                        { value: '明るく華やかなタイプ', label: '明るく華やかなタイプ' },
+                        { value: '落ち着いて丁寧にお話しできるタイプ', label: '落ち着いて丁寧にお話しできるタイプ' }
                     ]);
                     return;
 
                 case 3:
-                    state.answers.vibe = text.indexOf('ワイワイ') !== -1 ? 'vibe_party' : 'vibe_quiet';
+                    state.answers.vibe = text.indexOf('明るく') !== -1 ? 'vibe_party' : 'vibe_quiet';
                     state.step = 4;
-                    addAiMessage('採用したい温度感はどっち？', [
-                        { value: '安心重視でじっくり育てたい', label: '安心重視でじっくり育てたい' },
-                        { value: '稼ぐ意欲が高い子がいい', label: '稼ぐ意欲が高い子がいい' }
+                    addAiMessage('採用したい温度感は、どちらが近いでしょうか？', [
+                        { value: '安心感を重視して丁寧に育成したいです', label: '安心感を重視して丁寧に育成したいです' },
+                        { value: '収入意欲の高い方を重視したいです', label: '収入意欲の高い方を重視したいです' }
                     ]);
                     return;
 
                 case 4:
-                    state.answers.ambition = text.indexOf('稼ぐ') !== -1 ? 'ambition_hard' : 'ambition_soft';
+                    state.answers.ambition = text.indexOf('収入') !== -1 ? 'ambition_hard' : 'ambition_soft';
                     state.step = 5;
-                    addAiMessage('サポートの距離感はどうしたい？', [
-                        { value: '手厚く育成したい', label: '手厚く育成したい' },
-                        { value: '自走できる子がいい', label: '自走できる子がいい' }
+                    addAiMessage('サポートの距離感は、どのような形をご希望でしょうか？', [
+                        { value: '手厚く育成したいです', label: '手厚く育成したいです' },
+                        { value: '自走できる方を歓迎します', label: '自走できる方を歓迎します' }
                     ]);
                     return;
 
                 case 5:
                     state.answers.support = text.indexOf('手厚く') !== -1 ? 'support_teach' : 'support_free';
                     state.step = 6;
-                    addAiMessage('最後に、今回の推薦で一番重視したいことは？', [
-                        { value: '場所 (エリア絶対！)', label: '場所 (エリア絶対！)' },
-                        { value: '相性 (雰囲気重視)', label: '相性 (雰囲気重視)' },
-                        { value: 'とにかく即戦力', label: 'とにかく即戦力' }
+                    addAiMessage('最後に、今回の推薦で最も重視される点をお選びください。', [
+                        { value: '場所を重視したいです', label: '場所を重視したいです' },
+                        { value: '相性を重視したいです', label: '相性を重視したいです' },
+                        { value: '即戦力を重視したいです', label: '即戦力を重視したいです' }
                     ]);
                     return;
 
@@ -685,7 +685,7 @@
 
                 default:
                     if (text.indexOf('この中から選ぶ') !== -1) {
-                        addAiMessage('気になる候補のボタンから、そのままプロフィール詳細を開いてみてね。');
+                        addAiMessage('気になる候補のボタンから、そのままプロフィール詳細をご覧ください。');
                         return;
                     }
                     if (text.indexOf('リセット') !== -1) {
@@ -702,7 +702,7 @@
             if (role === 'cast') {
                 state.step = 'need_type';
                 addAiMessage(
-                    '接客タイプ診断結果がまだ登録されていないみたい。\n**別タブで診断を開く**か、**診断結果なしでそのまま探す**か選んでね。',
+                    '接客タイプ診断結果がまだ登録されていないようです。\n**別タブで診断を開く**か、**診断結果なしでそのまま探す**かをお選びください。',
                     [
                         { value: '接客タイプ診断を別タブで開く', label: '接客タイプ診断を別タブで開く', wide: true },
                         { value: '診断結果なしで進める', label: '診断結果なしで進める', wide: true }
@@ -712,7 +712,7 @@
             }
 
             state.step = 2;
-            addAiMessage('おつかれさま。オコジョガイドだよ。\nまずは**希望のエリア**を教えてね。', getAreaOptions());
+            addAiMessage('お疲れさまでございます。オコジョガイドでございます。\nまずは**ご希望のエリア**をお聞かせください。', getAreaOptions());
         }
 
         function processAnswer(text) {
@@ -749,7 +749,7 @@
                         window.open(personalityTestUrl, '_blank', 'noopener');
                     }
                     addAiMessage(
-                        '別タブで接客タイプ診断を開いたよ。診断結果を保存したら、診断ページの**AIレコメンドに戻る**から戻るか、このタブを**再読み込み**すると反映できるよ。',
+                        '別タブで接客タイプ診断を開きました。診断結果を保存後、診断ページの**AIレコメンドに戻る**からお戻りいただくか、このタブを**再読み込み**していただくと反映されます。',
                         [
                             { value: 'AIレコメンドを再読み込みする', label: 'AIレコメンドを再読み込みする', wide: true },
                             { value: '診断結果なしで進める', label: '診断結果なしで進める', wide: true }
@@ -780,7 +780,7 @@
             chatBox.innerHTML = '';
 
             if (!allItems.length) {
-                addAiMessage('今はおすすめ候補のデータがまだ少ないみたい。検索条件を変えるか、一覧タブから探してみてね。');
+                addAiMessage('現在はおすすめ候補のデータが十分ではないようです。検索条件を変更いただくか、一覧タブからお探しください。');
                 return;
             }
 

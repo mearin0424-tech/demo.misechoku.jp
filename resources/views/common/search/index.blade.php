@@ -2,11 +2,11 @@
 
 {{-- 各ページから渡されるオコジョのメッセージをセット --}}
 @section('guide_message', ($activeTab ?? 'pane-timeline') === 'pane-ai'
-    ? '登録済みの接客タイプ診断結果をもとに、ぴったりのお店をご案内します'
-    : ($guideMessage ?? '気になる相手を探してみてね！'))
+    ? '登録済みの接客タイプ診断結果をもとに、ぴったりのお店をご案内いたします'
+    : ($guideMessage ?? '気になるお相手をお探しください。'))
 
 @section('title', 'SEARCH')
-@section('body-class', $activeTab === 'pane-ai' ? 'page-search page-search-ai' : 'page-search')
+@section('body-class', request()->is('cast/*') && ($activeTab ?? null) === 'pane-ai' ? 'page-search page-search-ai' : 'page-search')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/search.css') }}">
@@ -17,6 +17,7 @@
 @php
     // 現在のプレフィックス（shop または cast）を取得
     $prefix = request()->is('cast/*') ? 'cast' : 'shop';
+    $showAiTab = $prefix === 'cast';
     $routeName = $prefix . '.search.index';
     $partsView = $prefix === 'cast' ? 'casts.parts' : 'shops.search.parts';
     $listTabLabel = $prefix === 'cast' ? '求人検索' : '一覧・検索';
@@ -25,13 +26,15 @@
     $tabsForHeader = [
         ['id' => 'pane-timeline', 'label' => 'タイムライン', 'url' => route($routeName, ['tab' => 'timeline']), 'active' => $activeTab === 'pane-timeline'],
         ['id' => 'pane-list', 'label' => $listTabLabel, 'url' => route($routeName, ['tab' => 'list']), 'active' => $activeTab === 'pane-list'],
-        ['id' => 'pane-ai', 'label' => 'AIレコメンド', 'url' => route($routeName, ['tab' => 'ai']), 'active' => $activeTab === 'pane-ai'],
     ];
-    $aiTabUrl = route($routeName, ['tab' => 'ai']);
-    $aiPersonalityTestUrl = $prefix === 'cast'
+    if ($showAiTab) {
+        $tabsForHeader[] = ['id' => 'pane-ai', 'label' => 'AIレコメンド', 'url' => route($routeName, ['tab' => 'ai']), 'active' => $activeTab === 'pane-ai'];
+    }
+    $aiTabUrl = $showAiTab ? route($routeName, ['tab' => 'ai']) : null;
+    $aiPersonalityTestUrl = $showAiTab
         ? asset('personality-test') . '?' . http_build_query(['return_to' => $aiTabUrl])
         : null;
-    $aiRecommendItems = collect($items)->map(function (array $item) use ($prefix) {
+    $aiRecommendItems = $showAiTab ? collect($items)->map(function (array $item) use ($prefix) {
         if ($prefix === 'cast') {
             return [
                 'id' => (string) ($item['id'] ?? ''),
@@ -52,7 +55,7 @@
             'age' => $item['age'] ?? null,
             'url' => Route::has('shop.castprofileview.show') && !empty($item['id']) ? route('shop.castprofileview.show', $item['id']) : '#',
         ];
-    })->values()->all();
+    })->values()->all() : [];
 @endphp
 
 <div class="has-sub-header">
@@ -87,41 +90,45 @@
             </ul>
         </div>
 
-        {{-- パネル3：AI --}}
-        <div id="pane-ai" class="tab-pane {{ $activeTab === 'pane-ai' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-ai' ? 'display:none' : '' }}">
-            @if($prefix === 'cast' && empty($personalityType))
-                <div class="ai-recommend__intro-card">
-                    <div class="ai-recommend__intro-title">接客タイプ診断結果を使っておすすめ精度を上げられます</div>
-                    <p class="ai-recommend__intro-text">
-                        AIレコメンドでは診断ロジックは実行せず、保存済みの診断結果だけを読み込みます。<br>
-                        まだ未登録の場合は、先に接客タイプ診断を別タブで実施してください。
-                    </p>
-                    <a href="{{ $aiPersonalityTestUrl }}" target="_blank" rel="noopener noreferrer" class="ai-recommend__intro-link">
-                        接客タイプ診断を別タブで開く
-                    </a>
+        @if($showAiTab)
+            {{-- パネル3：AI --}}
+            <div id="pane-ai" class="tab-pane {{ $activeTab === 'pane-ai' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-ai' ? 'display:none' : '' }}">
+                @if(empty($personalityType))
+                    <div class="ai-recommend__intro-card">
+                        <div class="ai-recommend__intro-title">接客タイプ診断結果をご利用いただくと、おすすめの精度を高められます</div>
+                        <p class="ai-recommend__intro-text">
+                            AIレコメンドでは診断ロジックは実行せず、保存済みの診断結果のみを読み込みます。<br>
+                            まだ未登録の場合は、先に接客タイプ診断を別タブでご実施ください。
+                        </p>
+                        <a href="{{ $aiPersonalityTestUrl }}" target="_blank" rel="noopener noreferrer" class="ai-recommend__intro-link">
+                            接客タイプ診断を別タブで開く
+                        </a>
+                    </div>
+                @endif
+                <div
+                    class="ai-recommend"
+                    data-ai-recommend-root
+                    data-role="{{ $prefix }}"
+                    data-avatar="{{ asset('assets/images/guide/guide-character.png') }}"
+                >
+                    <div class="ai-recommend__chat" data-ai-chat aria-live="polite"></div>
                 </div>
-            @endif
-            <div
-                class="ai-recommend"
-                data-ai-recommend-root
-                data-role="{{ $prefix }}"
-                data-avatar="{{ asset('assets/images/guide/guide-character.png') }}"
-            >
-                <div class="ai-recommend__chat" data-ai-chat aria-live="polite"></div>
-            </div>
 
-            <script type="application/json" id="ai-recommend-data">{!! json_encode([
-                'role' => $prefix,
-                'items' => $aiRecommendItems,
-                'personalityType' => $personalityType ?? null,
-                'personalityTestUrl' => $aiPersonalityTestUrl,
-            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
-        </div>
+                <script type="application/json" id="ai-recommend-data">{!! json_encode([
+                    'role' => $prefix,
+                    'items' => $aiRecommendItems,
+                    'personalityType' => $personalityType ?? null,
+                    'personalityTestUrl' => $aiPersonalityTestUrl,
+                ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+            </div>
+        @endif
 </div>
 @endsection
 
 @push('scripts')
 <script src="{{ asset('assets/js/sub-header.js') }}"></script>
 <script src="{{ asset('assets/js/search-detail.js') }}"></script>
+@if($showAiTab)
 <script src="{{ asset('assets/js/ai-recommend.js') }}"></script>
+@endif
 @endpush

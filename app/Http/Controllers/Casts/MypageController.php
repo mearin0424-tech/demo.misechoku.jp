@@ -28,11 +28,6 @@ class MypageController extends Controller
     public function index()
     {
         $cast = $this->getCastFromDatabase($this->currentCastId());
-        $reviewCount = count($cast['reviews']);
-        $reviewAvg = $reviewCount > 0
-            ? round(array_sum(array_column($cast['reviews'], 'score')) / $reviewCount, 1)
-            : 0;
-        // プロフィール画面にはレビュー本文を出さず、★カードから一覧へ遷移
         $castForProfile = $cast;
         $castForProfile['reviews'] = [];
         // ギャラリー用：id + url（削除APIで id を使用）
@@ -47,8 +42,6 @@ class MypageController extends Controller
             'pageId'       => 'mypage',
             'cast'         => $castForProfile,
             'isOwn'        => true,
-            'review_avg'   => $reviewAvg,
-            'review_count' => $reviewCount,
             'subImages'    => $subImages,
         ]);
     }
@@ -449,7 +442,8 @@ class MypageController extends Controller
                     ? 'cast_profiles.personality_type'
                     : DB::raw('NULL as personality_type'),
                 'cast_profiles.memo',
-                'cast_profiles.main_image_path'
+                'cast_profiles.main_image_path',
+                'cast_profiles.updated_at as profile_updated_at'
             )
             ->first();
 
@@ -464,6 +458,10 @@ class MypageController extends Controller
         $shiftHope = $memo['shift_hope'] ?? $this->shiftHopeLabel($castRow->shift);
         $workTime = $memo['work_time'] ?? '';
         $nightWorkExp = $memo['night_work_exp'] ?? ((int) ($castRow->exp ?? 0) === 1 ? 'yes' : 'none');
+        $likeCount = DB::table('favorites')
+            ->where('cast_id', $castId)
+            ->where('action_type', 3)
+            ->count();
 
         // 画像: cast_images (type=1) を id + url で取得（is_main を先に）
         $images = [];
@@ -518,7 +516,7 @@ class MypageController extends Controller
             'img'              => $images[0]['url'] ?? null,
             'is_applied'       => true,
             'is_kept'          => true,
-            'like_cnt'         => 0,
+            'like_cnt'         => $likeCount,
             'pref'             => $castRow->pref ?? '',
             'city'             => $castRow->city ?? '',
             'height'           => $castRow->height,
@@ -529,6 +527,9 @@ class MypageController extends Controller
             'word'             => $castRow->pr ? mb_strimwidth($castRow->pr, 0, 80, '...') : '',
             'pr'               => $castRow->pr ?? '',
             'intro'            => $castRow->pr ?? '',
+            'appeal_updated_at'=> !empty($castRow->profile_updated_at)
+                ? Carbon::parse($castRow->profile_updated_at)->format('Y/m/d H:i')
+                : null,
             'desired_job'      => $memo['desired_job'] ?? '',
             'my_field'         => $memo['my_field'] ?? '',
             'my_inner_skills'  => $memo['my_inner_skills'] ?? '',
@@ -594,6 +595,7 @@ class MypageController extends Controller
             'word'             => '',
             'pr'               => '',
             'intro'            => '',
+            'appeal_updated_at'=> null,
             'desired_job'      => '',
             'my_field'         => '',
             'my_inner_skills'  => '',

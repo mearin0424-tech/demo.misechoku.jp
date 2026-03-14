@@ -2,7 +2,7 @@
 
 @section('title', 'プロフィール確認・編集')
 @section('header_title', 'プロフィール確認・編集')
-@section('guide_message', 'プロフィールを充実させるとマッチしやすいよ！見られたくないことは書かなくてOK！')
+@section('guide_message', 'プロフィールを充実させていただくと、よりマッチしやすくなります。公開したくない内容は、無理にご記入いただかなくても問題ございません。')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/profile_edit.css') }}">

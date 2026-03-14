@@ -15,7 +15,7 @@
         {{-- ヒーロー：キャスト名（お店マイページと同じ位置） --}}
         <h1 class="mypage-shop-name serif-font gold-gradient">{{ $cast['nickname'] ?? $cast['name'] }}</h1>
 
-        {{-- アイコン＋ひとこと（お店同様・編集可能） --}}
+        {{-- アイコン＋アピール（お店同様・編集可能） --}}
         <div class="mypage-hero">
             <div class="shop-icon-wrapper">
                 <img src="{{ (isset($subImages[0]) ? $subImages[0]['url'] : null) ?? $cast['img'] ?? asset('assets/images/common/no-image.png') }}" class="shop-icon-main" id="main-icon-display" alt="">
@@ -24,33 +24,26 @@
                 </button>
             </div>
             <div class="shop-word-bubble glass-panel" onclick="openWordEdit()" role="button" tabindex="0">
-                <p id="display-word" class="shop-word-text">{{ $cast['word'] ?? Str::limit($cast['intro'] ?? $cast['pr'] ?? 'ひとことを設定しましょう', 50) }}</p>
-                <button type="button" class="btn-word-edit" aria-label="ひとことを編集">
+                <span class="shop-word-bubble-label">Appeal</span>
+                <span class="shop-word-bubble-note">タイムラインに表示されるキャストアピールです</span>
+                <p id="display-word" class="shop-word-text">{{ $cast['word'] ?: 'タイムラインに載るアピールを設定しましょう' }}</p>
+                <div class="shop-word-bubble-footer">
+                    <span class="shop-word-bubble-hint">タップしてすぐ編集</span>
+                    <span id="display-word-updated" class="shop-word-bubble-updated">最終更新 {{ $cast['appeal_updated_at'] ?? '未設定' }}</span>
+                </div>
+                <button type="button" class="btn-word-edit" aria-label="アピールを編集">
                     <i class="fas fa-pen"></i>
                 </button>
             </div>
         </div>
 
-        {{-- レビュー表示（枠なし・星＋数値で画像のようなイメージ） --}}
-        @php
-            $avg = (float)($review_avg ?? 0);
-            $avgRounded = round($avg * 2) / 2;
-        @endphp
-        <a href="{{ route('cast.mypage.reviews') }}" class="mypage-review-link-frameless">
-            <span class="mypage-review-stars-inline" aria-label="{{ $avg }}点">
-                @for($i = 1; $i <= 5; $i++)
-                    @if($i <= $avgRounded)
-                        <i class="fas fa-star"></i>
-                    @elseif($i - 0.5 <= $avgRounded)
-                        <i class="fas fa-star-half-alt"></i>
-                    @else
-                        <i class="far fa-star"></i>
-                    @endif
-                @endfor
-            </span>
-            <span class="mypage-review-num">{{ number_format($avg, 1) }}</span>
-            <span class="mypage-review-count-text">({{ $review_count ?? 0 }}件)</span>
-        </a>
+        {{-- LIKE表示 --}}
+        <div class="mypage-review-link-frameless mypage-like-summary" aria-label="LIKE数">
+            <span class="mypage-like-icon"><i class="fas fa-heart"></i></span>
+            <span class="mypage-like-label">LIKE</span>
+            <span class="mypage-like-count">{{ number_format((int) ($cast['like_cnt'] ?? 0)) }}</span>
+            <span class="mypage-review-count-text">件</span>
+        </div>
 
         <div class="mypage-detail-box">
             {{-- メニュー（プロフィール情報より上） --}}
@@ -166,11 +159,11 @@
     </div>
 </div>
 
-{{-- ひとこと編集モーダル --}}
+{{-- アピール編集モーダル --}}
 <div id="modal-word" class="mypage-modal-overlay modal-word-edit" style="display:none;">
     <div class="mypage-modal-panel glass-panel">
-        <h3 class="mypage-modal-title serif-font">ひとこと編集</h3>
-        <textarea id="word-input" rows="3" class="mypage-modal-textarea" placeholder="ひとことを入力"></textarea>
+        <h3 class="mypage-modal-title serif-font">タイムライン用アピールを編集</h3>
+        <textarea id="word-input" rows="3" class="mypage-modal-textarea" placeholder="気配りと笑顔には自信があります。"></textarea>
         <div class="mypage-modal-actions">
             <button type="button" class="btn-action btn-action-secondary" onclick="closeWordEdit()">戻る</button>
             <button type="button" class="btn-action btn-action-primary" onclick="saveWord()">保存</button>
@@ -315,14 +308,22 @@ document.getElementById('gallery-upload').addEventListener('change', function() 
 
 function openWordEdit() {
     document.getElementById('modal-word').style.display = 'flex';
-    document.getElementById('word-input').value = document.getElementById('display-word').innerText;
+    document.getElementById('word-input').value = document.getElementById('display-word').innerText.trim();
 }
 function closeWordEdit() {
     document.getElementById('modal-word').style.display = 'none';
 }
 function saveWord() {
     var val = document.getElementById('word-input').value.trim();
-    document.getElementById('display-word').innerText = val || 'ひとことを設定しましょう';
+    var fallback = 'タイムラインに載るアピールを設定しましょう';
+    document.getElementById('display-word').innerText = val || fallback;
+    var updated = document.getElementById('display-word-updated');
+    if (updated) {
+        var now = new Date();
+        var date = now.getFullYear() + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + String(now.getDate()).padStart(2, '0');
+        var time = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        updated.innerText = '最終更新 ' + date + ' ' + time;
+    }
     closeWordEdit();
 }
 
