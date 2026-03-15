@@ -63,6 +63,7 @@ class RecruitmentController extends Controller
                 'shop_jobs.hourly_wage_regular',
                 'shop_jobs.has_trial',
                 'shop_jobs.trial_hourly_wage',
+                'shop_jobs.noruma_reward',
                 'shop_jobs.job_description',
                 'shop_jobs.atmosphere',
                 'shop_jobs.working_day',

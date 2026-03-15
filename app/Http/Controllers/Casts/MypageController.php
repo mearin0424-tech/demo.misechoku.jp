@@ -158,12 +158,16 @@ class MypageController extends Controller
             'image' => 'required|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
         ]);
 
-        $dir = public_path('uploads/casts/gallery');
-        File::ensureDirectoryExists($dir);
-        $file = $request->file('image');
-        $name = $file->hashName();
-        $file->move($dir, $name);
-        $path = 'uploads/casts/gallery/' . $name;
+        try {
+            $dir = public_path('uploads/casts/gallery');
+            File::ensureDirectoryExists($dir);
+            $file = $request->file('image');
+            $name = $file->hashName();
+            $file->move($dir, $name);
+            $path = 'uploads/casts/gallery/' . $name;
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => '画像の保存に失敗しました。'], 500);
+        }
 
         $slotIndex = (int) $request->input('slot_index', -1);
 
@@ -203,7 +207,11 @@ class MypageController extends Controller
         $slotIndex = max(0, min($slotIndex, count($orderedIds)));
         array_splice($orderedIds, $slotIndex, 0, [(int) $id]);
 
-        $this->syncCastImageOrder($castId, $orderedIds);
+        try {
+            $this->syncCastImageOrder($castId, $orderedIds);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => '画像の登録に失敗しました。'], 500);
+        }
 
         return response()->json(['success' => true, 'path' => asset($path), 'id' => $id]);
     }

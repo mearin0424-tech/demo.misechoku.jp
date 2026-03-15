@@ -104,14 +104,20 @@
         Sortable.create(list, {
             animation: 200,
             delayOnTouchOnly: true,
-            delay: 400,
+            delay: 500,
             draggable: '.gallery-grid-item',
             ghostClass: 'gallery-sortable-ghost',
             chosenClass: 'gallery-sortable-chosen',
             dragClass: 'gallery-sortable-drag',
+            forceFallback: false,
             onEnd: function () {
                 refreshGalleryMainState(list);
                 persistGalleryOrder(list);
+            },
+            onChoose: function () {
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(50);
+                }
             }
         });
     }

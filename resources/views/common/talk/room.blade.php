@@ -46,6 +46,7 @@
 @php
     $isCast = request()->is('cast/*');
     $sendUrl = $isCast ? route('cast.talk.send') : route('shop.talk.send');
+    $deleteUrl = $isCast ? route('cast.talk.delete') : route('shop.talk.delete');
     $actionUrl = $actionUrl ?? ($isCast ? route('cast.talk.action') : route('shop.talk.action'));
     $blockUrl = $blockUrl ?? ($isCast ? route('cast.talk.block') : route('shop.talk.block'));
     $partnerAvatar = $partnerAvatar ?? asset('assets/images/common/no-image.png');
@@ -93,9 +94,9 @@
     @endif
 
     {{-- メッセージ表示エリア --}}
-    <div class="chat-messages" id="chat-messages">
+    <div class="chat-messages" id="chat-messages" data-delete-url="{{ $deleteUrl }}">
         @forelse($messages as $msg)
-            <div class="message-row {{ $msg->is_mine ? 'msg-right' : 'msg-left' }}">
+            <div class="message-row {{ $msg->is_mine ? 'msg-right' : 'msg-left' }}" data-message-id="{{ $msg->id }}">
                 @if(!$msg->is_mine)
                     <div class="msg-avatar-wrap">
                         <img src="{{ $partnerAvatar }}" alt="" class="msg-avatar">
@@ -105,6 +106,9 @@
                     <div class="message-inline">
                         @if($msg->is_mine)
                             <div class="msg-meta">
+                                @if(!empty($msg->can_delete))
+                                    <button type="button" class="msg-delete-btn" data-message-id="{{ $msg->id }}" title="削除" aria-label="メッセージを削除"><i class="fas fa-trash-alt"></i></button>
+                                @endif
                                 @if($msg->is_mine)
                                     <span class="msg-status"><i class="fas fa-check"></i></span>
                                 @endif

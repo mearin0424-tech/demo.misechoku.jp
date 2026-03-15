@@ -13,36 +13,6 @@
     display: none;
 }
 
-/* ×ボタン：ガイドを閉じる（吹き出しの右上） */
-.guide-close-btn {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    z-index: 2;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    border: none;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.5);
-    color: #fff;
-    font-size: 16px;
-    line-height: 1;
-    cursor: pointer;
-    pointer-events: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s ease;
-}
-.guide-close-btn:hover {
-    background: rgba(0, 0, 0, 0.75);
-}
-.guide-close-btn:focus {
-    outline: 2px solid rgba(255, 255, 255, 0.8);
-    outline-offset: 2px;
-}
-
 /* 吹き出しのみ非表示（キャラクターは残す） */
 .discovery-guide.bubble-hidden .guide-speech-bubble {
     opacity: 0;

@@ -58,11 +58,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (chatForm && messageInput) {
         messageInput.addEventListener('input', autoResize);
 
+        let isSubmitting = false;
         chatForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const content = messageInput.value.trim();
             if (!content) return;
+            if (isSubmitting) return;
+            isSubmitting = true;
 
             const url = chatForm.getAttribute('data-url');
             const partnerId = chatForm.getAttribute('data-partner-id');
@@ -76,16 +79,23 @@ document.addEventListener('DOMContentLoaded', function() {
             const messageHtml = `
                 <div class="message-row msg-right" id="${tempId}">
                     <div class="message-block">
-                        <div class="message-bubble">
-                            <p class="m-0">${escapeHtml(content).replace(/\n/g, '<br>')}</p>
-                        </div>
-                        <div class="msg-footer">
-                            <span class="msg-time">${timeStr}</span>
-                            <span class="msg-status sending"><i class="fas fa-check"></i></span>
+                        <div class="message-inline">
+                            <div class="msg-meta">
+                                <span class="msg-status sending"><i class="fas fa-check"></i></span>
+                                <span class="msg-time">${timeStr}</span>
+                            </div>
+                            <div class="message-bubble">
+                                <p class="m-0">${escapeHtml(content).replace(/\n/g, '<br>')}</p>
+                                <span class="message-bubble-tail" aria-hidden="true">
+                                    <svg viewBox="0 0 8 12" fill="currentColor"><path d="M0 0V12C3 12 8 8 8 0H0Z"/></svg>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
             `;
+            const emptyState = chatMessages.querySelector('.talk-empty-state');
+            if (emptyState) emptyState.remove();
             chatMessages.insertAdjacentHTML('beforeend', messageHtml);
 
             messageInput.value = '';
@@ -100,6 +110,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 const sentMsg = document.getElementById(tempId);
                 if (sentMsg) {
                     sentMsg.querySelector('.msg-status').classList.remove('sending');
+                    if (result.data && result.data.message_id) {
+                        sentMsg.dataset.messageId = String(result.data.message_id);
+                        const meta = sentMsg.querySelector('.msg-meta');
+                        if (meta) {
+                            const deleteBtn = document.createElement('button');
+                            deleteBtn.type = 'button';
+                            deleteBtn.className = 'msg-delete-btn';
+                            deleteBtn.dataset.messageId = String(result.data.message_id);
+                            deleteBtn.title = '削除';
+                            deleteBtn.setAttribute('aria-label', 'メッセージを削除');
+                            deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                            meta.insertBefore(deleteBtn, meta.firstChild);
+                        }
+                    }
                 }
             } catch (error) {
                 const errorMsg = document.getElementById(tempId);
@@ -108,6 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     errorMsg.querySelector('.msg-status').classList.remove('sending');
                 }
             } finally {
+                isSubmitting = false;
                 submitBtn.disabled = false;
                 messageInput.focus();
             }
@@ -117,6 +142,37 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => scrollToBottom('smooth'), 300);
         });
     }
+
+    // メッセージ削除（10分以内の自分のテキストメッセージのみ）
+    chatMessages.addEventListener('click', async function(e) {
+        const btn = e.target.closest('.msg-delete-btn');
+        if (!btn) return;
+        e.preventDefault();
+        const messageId = btn.dataset.messageId;
+        if (!messageId) return;
+        const deleteUrl = chatMessages.getAttribute('data-delete-url');
+        if (!deleteUrl || !chatForm) return;
+        const partnerId = chatForm.getAttribute('data-partner-id');
+        const token = chatForm.querySelector('input[name="_token"]').value;
+        if (!window.confirm('このメッセージを削除しますか？')) return;
+        const row = btn.closest('.message-row');
+        btn.disabled = true;
+        try {
+            await postJson(deleteUrl, token, { partner_id: partnerId, message_id: messageId });
+            if (row) {
+                row.remove();
+                if (chatMessages.querySelectorAll('.message-row').length === 0) {
+                    chatMessages.insertAdjacentHTML('afterbegin',
+                        '<div class="text-center text-gray-500 mt-20 talk-empty-state">' +
+                        '<i class="fas fa-comments opacity-10 text-6xl mb-4 block"></i>' +
+                        '<p>メッセージはまだありません</p></div>');
+                }
+            }
+        } catch (err) {
+            window.alert(err.message || '削除に失敗しました。');
+            btn.disabled = false;
+        }
+    });
 
     // ===============================
     // 面談日候補モーダル（店舗側のみ）

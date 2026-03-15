@@ -146,16 +146,56 @@ class TalkController extends Controller
             'updated_at' => now(),
         ];
 
-        DB::table('messages')->insert($payload);
+        $messageId = DB::table('messages')->insertGetId($payload);
 
         return response()->json([
             'success' => true,
             'message' => '送信しました',
             'data' => [
+                'message_id' => $messageId,
                 'content' => $payload['content'],
                 'time' => Carbon::now()->format('H:i')
             ]
         ]);
+    }
+
+    /**
+     * メッセージ削除（送信から10分以内の自分のテキストメッセージのみ）
+     */
+    public function destroy(Request $request)
+    {
+        $isCastPortal = request()->is('cast/*');
+        $request->validate([
+            'partner_id' => ['required', 'string'],
+            'message_id' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $partnerId = (string) $request->input('partner_id');
+        $messageId = (int) $request->input('message_id');
+        abort_unless($this->resolvePartner($partnerId, $isCastPortal), 404);
+
+        $currentId = $isCastPortal ? $this->currentCastId() : $this->currentShopId();
+        $mySenderType = $this->mySenderType($isCastPortal);
+        $castId = $isCastPortal ? $currentId : $partnerId;
+        $shopId = $isCastPortal ? $partnerId : $currentId;
+
+        $message = DB::table('messages')
+            ->where('id', $messageId)
+            ->where('cast_id', $castId)
+            ->where('shop_id', $shopId)
+            ->first();
+
+        abort_unless($message, 404);
+        abort_if((int) $message->sender_type !== $mySenderType, 403, '自分のメッセージのみ削除できます。');
+        abort_if((int) $message->type !== self::MESSAGE_TYPE_TEXT, 403, 'テキストメッセージのみ削除できます。');
+
+        $createdAt = Carbon::parse($message->created_at);
+        $limit = Carbon::now()->subMinutes(10);
+        abort_if($createdAt->lt($limit), 422, '送信から10分を過ぎたメッセージは削除できません。');
+
+        DB::table('messages')->where('id', $messageId)->delete();
+
+        return response()->json(['success' => true, 'message' => '削除しました']);
     }
 
     public function action(Request $request)
@@ -394,18 +434,26 @@ class TalkController extends Controller
                 return empty($meta['offer_token']) ? [] : [$meta['offer_token'] => ($meta['selected_option'] ?? null)];
             });
 
-        return $messages->map(function ($message) use ($isCastPortal, $confirmedByToken) {
+        $now = Carbon::now();
+        $deleteLimit = $now->copy()->subMinutes(10);
+
+        return $messages->map(function ($message) use ($isCastPortal, $confirmedByToken, $deleteLimit) {
             $meta = $this->decodeMessageMeta($message);
             $type = (int) $message->type;
             $offerToken = $meta['offer_token'] ?? null;
+            $isMine = (int) $message->sender_type === $this->mySenderType($isCastPortal);
+            $createdAt = Carbon::parse($message->created_at);
+            $canDelete = $isMine && $type === self::MESSAGE_TYPE_TEXT && $createdAt->gte($deleteLimit);
 
             return (object) [
+                'id' => (int) $message->id,
                 'type' => $type,
                 'content' => $type === self::MESSAGE_TYPE_TEXT || $type === self::MESSAGE_TYPE_HIRED || $type === self::MESSAGE_TYPE_REJECTED
                     ? $message->content
                     : ($meta['selected_option'] ?? ''),
-                'is_mine' => (int) $message->sender_type === $this->mySenderType($isCastPortal),
-                'created_at' => Carbon::parse($message->created_at),
+                'is_mine' => $isMine,
+                'created_at' => $createdAt,
+                'can_delete' => $canDelete,
                 'interview_options' => $type === self::MESSAGE_TYPE_INTERVIEW_OFFER ? ($meta['options'] ?? []) : [],
                 'offer_token' => $offerToken,
                 'selected_option' => $offerToken ? ($confirmedByToken[$offerToken] ?? null) : ($meta['selected_option'] ?? null),

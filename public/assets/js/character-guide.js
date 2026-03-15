@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const characterGuide = document.getElementById('character-guide');
     const characterWrap = characterGuide ? characterGuide.querySelector('.guide-character-wrap') : null;
     const messageContent = document.getElementById('character-message-content');
-    const closeBtn = document.getElementById('character-guide-close');
 
     const STORAGE_KEY = 'character-guide-dismissed';
 
@@ -15,28 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (e) {
             return false;
         }
-    }
-
-    function saveDismissed() {
-        try {
-            var raw = sessionStorage.getItem(STORAGE_KEY);
-            var paths = raw ? JSON.parse(raw) : [];
-            if (paths.indexOf(window.location.pathname) === -1) {
-                paths.push(window.location.pathname);
-                sessionStorage.setItem(STORAGE_KEY, JSON.stringify(paths));
-            }
-        } catch (e) {}
-    }
-
-    function dismissGuide(e) {
-        if (e) e.stopPropagation();
-        if (!characterGuide) return;
-        characterGuide.classList.add('is-dismissed');
-        saveDismissed();
-    }
-
-    if (closeBtn) {
-        closeBtn.addEventListener('click', dismissGuide);
     }
 
     if (characterGuide && isDismissedForThisPage()) {

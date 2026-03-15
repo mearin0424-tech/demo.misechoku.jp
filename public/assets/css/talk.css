@@ -377,6 +377,11 @@
     max-width: 82%;
 }
 .msg-left .message-block { align-items: flex-start; max-width: calc(100% - 42px); }
+/* 自分の吹き出しの尻尾が下の余白にはみ出さないようスペースを確保 */
+.msg-right .message-block {
+    padding-bottom: 12px;
+    box-sizing: border-box;
+}
 
 /* 時刻・既読（bubble 横配置） */
 .message-inline {
@@ -399,6 +404,31 @@
     align-items: flex-end;
     gap: 4px;
     flex-shrink: 0;
+}
+
+/* メッセージ削除ボタン（送信から10分以内の自分のテキストのみ表示） */
+.msg-delete-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    font-size: 0.7rem;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.msg-delete-btn:hover {
+    background: rgba(239, 68, 68, 0.25);
+    color: #fca5a5;
+}
+.msg-delete-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* ==========================================================================

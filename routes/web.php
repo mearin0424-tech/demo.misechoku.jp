@@ -263,6 +263,7 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
         Route::get('/', [TalkController::class, 'index'])->name('index');
         Route::get('/room/{id}', [TalkController::class, 'room'])->name('room');
         Route::post('/send', [TalkController::class, 'store'])->name('send');
+        Route::post('/delete', [TalkController::class, 'destroy'])->name('delete');
         Route::post('/action', [TalkController::class, 'action'])->name('action');
         Route::post('/block', [TalkController::class, 'toggleBlock'])->name('block');
     });
@@ -352,6 +353,7 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
         Route::get('/', [TalkController::class, 'index'])->name('index');
         Route::get('/room/{id}', [TalkController::class, 'room'])->name('room');
         Route::post('/send', [TalkController::class, 'store'])->name('send');
+        Route::post('/delete', [TalkController::class, 'destroy'])->name('delete');
         Route::post('/action', [TalkController::class, 'action'])->name('action');
         Route::post('/block', [TalkController::class, 'toggleBlock'])->name('block');
     });

@@ -277,10 +277,16 @@ document.getElementById('gallery-upload').addEventListener('change', function() 
     formData.append('slot_index', slotIndex);
     formData.append('_token', '{{ csrf_token() }}');
     var self = this;
-    fetch('{{ route("cast.mypage.images.upload") }}', { method: 'POST', body: formData })
-        .then(function(r) { return r.json(); })
-        .then(function(res) {
-            if (res.success && res.path && res.id) {
+    fetch('{{ route("cast.mypage.images.upload") }}', {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'same-origin'
+    })
+        .then(function(r) { return r.text().then(function(text) { try { return { ok: r.ok, data: JSON.parse(text) }; } catch(e) { return { ok: false, data: { message: 'アップロードに失敗しました' } }; }); })
+        .then(function(result) {
+            var res = result.data;
+            if (result.ok && res.success && res.path && res.id) {
                 var list = document.getElementById('gallery-list');
                 var items = list.querySelectorAll('.gallery-grid-item');
                 var li = items[slotIndex];
@@ -298,7 +304,7 @@ document.getElementById('gallery-upload').addEventListener('change', function() 
                     }
                 }
             } else {
-                alert(res.message || 'アップロードに失敗しました');
+                alert(res.message || (res.errors && res.errors.image ? res.errors.image[0] : '') || 'アップロードに失敗しました');
             }
         })
         .catch(function() { alert('アップロードに失敗しました'); });

@@ -16,11 +16,11 @@ class HomeController extends Controller
         $isCastPortal = request()->is('cast/*');
 
         if ($isCastPortal) {
-            $shops = $this->getHomeShops();
+            $recruits = $this->getHomeRecruits();
             return view('shops.home.index', [
                 'pageId' => 'home',
-                'items' => $shops,
-                'itemType' => 'shop',
+                'items' => $recruits,
+                'itemType' => 'recruit',
             ]);
         }
 
@@ -74,6 +74,104 @@ class HomeController extends Controller
             ['id' => 3, 'name' => 'さくら', 'age' => 25, 'tags' => ['元気系', 'トーク上手'], 'like_count' => 24, 'images' => [asset('storage/mock/casts/3-1.png')]],
             ['id' => 4, 'name' => 'ナナ', 'age' => 22, 'tags' => ['清楚系', 'お酒弱い'], 'like_count' => 5, 'images' => [asset('storage/mock/casts/4-1.png')]],
         ];
+    }
+
+    /**
+     * キャスト向けホーム：求人票ベースの一覧（ボーナス金・時給など重要情報を表示するため）
+     */
+    private function getHomeRecruits(): array
+    {
+        $rows = DB::table('shops')
+            ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
+            ->join('shop_jobs', 'shops.id', '=', 'shop_jobs.shop_id')
+            ->where('shop_jobs.status', 1)
+            ->select(
+                'shops.id',
+                'shop_profiles.shop_name',
+                'shop_profiles.pref',
+                'shop_profiles.city',
+                'shop_profiles.main_image_path',
+                'shop_jobs.hourly_wage_regular',
+                'shop_jobs.has_trial',
+                'shop_jobs.trial_hourly_wage',
+                'shop_jobs.noruma_reward',
+                'shop_jobs.noruma_cond'
+            )
+            ->orderBy('shops.id')
+            ->limit(20)
+            ->get();
+
+        $items = [];
+        foreach ($rows as $row) {
+            $numericId = $this->toNumericShopId($row->id);
+            $images = $this->getShopImages($row->id, $row->main_image_path);
+            $meta = $this->decodeRecruitMeta($row->noruma_cond ?? null);
+            $items[] = [
+                'id' => $numericId,
+                'name' => $row->shop_name ?: '店舗',
+                'images' => $images,
+                'hourly_wage_regular' => isset($row->hourly_wage_regular) ? (int) $row->hourly_wage_regular : 0,
+                'trial_hourly_wage' => !empty($row->has_trial) && isset($row->trial_hourly_wage) ? (int) $row->trial_hourly_wage : null,
+                'noruma_reward' => isset($row->noruma_reward) ? (int) $row->noruma_reward : 0,
+                'bonus_condition' => $meta['bonus_condition'] ?? '',
+                'catch_copy' => $meta['catch_copy'] ?? '',
+                'tags' => $this->buildRecruitCardTags($row, $meta),
+                'pref' => $row->pref ?? '',
+                'city' => $row->city ?? '',
+                'like_count' => 0,
+            ];
+        }
+
+        if (!empty($items)) {
+            return $items;
+        }
+
+        return [
+            ['id' => 1, 'name' => 'CLUB ETERNITY', 'images' => [asset('storage/mock/shops/out-1.png')], 'hourly_wage_regular' => 3500, 'trial_hourly_wage' => 3000, 'noruma_reward' => 50000, 'bonus_condition' => '', 'catch_copy' => '未経験歓迎', 'tags' => ['高時給', 'ボーナスあり', '六本木'], 'pref' => '東京都', 'city' => '港区', 'like_count' => 0],
+            ['id' => 2, 'name' => 'THE GOLDSTONE', 'images' => [asset('storage/mock/shops/out-2.png')], 'hourly_wage_regular' => 3200, 'trial_hourly_wage' => null, 'noruma_reward' => 0, 'bonus_condition' => '', 'catch_copy' => 'ノルマなし', 'tags' => ['送りあり', '六本木'], 'pref' => '東京都', 'city' => '港区', 'like_count' => 0],
+        ];
+    }
+
+    private function toNumericShopId(string $shopId): int
+    {
+        if (!str_starts_with($shopId, 's')) {
+            return is_numeric($shopId) ? (int) $shopId : 0;
+        }
+
+        return (int) ltrim(substr($shopId, 1), '0') ?: 0;
+    }
+
+    private function decodeRecruitMeta(?string $raw): array
+    {
+        if (empty($raw)) {
+            return [];
+        }
+        $decoded = json_decode($raw, true);
+
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    private function buildRecruitCardTags(object $row, array $meta): array
+    {
+        $tags = [];
+        if (!empty($row->pref)) {
+            $tags[] = $row->pref;
+        }
+        if (!empty($row->city)) {
+            $tags[] = $row->city;
+        }
+        if (isset($row->hourly_wage_regular) && (int) $row->hourly_wage_regular >= 3000) {
+            $tags[] = '高時給';
+        }
+        if (isset($row->noruma_reward) && (int) $row->noruma_reward > 0) {
+            $tags[] = 'ボーナスあり';
+        }
+        $catch = $meta['catch_copy'] ?? '';
+        if ($catch !== '') {
+            $tags[] = mb_strimwidth(trim($catch), 0, 12, '…');
+        }
+
+        return array_slice(array_unique($tags), 0, 5);
     }
 
     private function getHomeShops(): array

@@ -11,9 +11,10 @@
 @php
     $itemType = $itemType ?? 'cast';
     $isShop = ($itemType === 'shop');
-    // キャスト側でお店一覧 → お店詳細は cast/shopprofileview/{id}、お店側でキャスト一覧 → キャスト詳細は shop/castprofileview/{id}
-    $detailRoute = $isShop ? 'cast.shopprofileview.show' : 'shop.castprofileview.show';
-    $talkRoute = $isShop ? 'cast.talk.room' : 'shop.talk.room';
+    $isRecruit = ($itemType === 'recruit');
+    // キャスト側：求人票ベース → 求人詳細 cast.recruit.show / 店舗プロファイルは廃止。お店側でキャスト一覧 → キャスト詳細は shop/castprofileview/{id}
+    $detailRoute = $isRecruit ? 'cast.recruit.show' : ($isShop ? 'cast.shopprofileview.show' : 'shop.castprofileview.show');
+    $talkRoute = ($isRecruit || $isShop) ? 'cast.talk.room' : 'shop.talk.room';
 @endphp
 @section('content')
 <div id="home-screen">
@@ -58,16 +59,28 @@
                     <a href="{{ route($talkRoute, $item['id']) }}" class="action-btn-message" aria-label="メッセージを送る">
                         <i class="fas fa-paper-plane"></i>
                     </a>
-                    @if($isShop)
+                    @if($isRecruit)
+                    <a href="{{ route('cast.recruit.show', $item['id']) }}" class="card-recruit-btn">求人詳細</a>
+                    @elseif($isShop)
                     <a href="{{ route('cast.recruit.show', $item['id']) }}" class="card-recruit-btn">求人</a>
                     @endif
                 </div>
 
-                {{-- プロフィール情報 --}}
+                {{-- プロフィール情報（キャスト） / 求人票情報（キャスト側ホーム） --}}
                 <div class="card-bottom-info">
-                    <h2 class="cast-name serif-font">{{ $item['name'] }}@if(!$isShop && isset($item['age'])) <span class="age">{{ $item['age'] }}</span>@endif</h2>
-                    <div class="card-location"><i class="fas fa-map-marker-alt"></i> {{ $isShop ? '六本木' : '六本木' }}</div>
-                    @if($isShop && isset($item['rating']))
+                    <h2 class="cast-name serif-font">{{ $item['name'] }}@if(!$isShop && !$isRecruit && isset($item['age'])) <span class="age">{{ $item['age'] }}</span>@endif</h2>
+                    <div class="card-location"><i class="fas fa-map-marker-alt"></i> {{ $isRecruit ? (trim(($item['pref'] ?? '') . ' ' . ($item['city'] ?? '')) ?: '六本木') : '六本木' }}</div>
+                    @if($isRecruit)
+                    <div class="card-recruit-summary">
+                        <span class="card-recruit-wage">時給 ¥{{ number_format($item['hourly_wage_regular'] ?? 0) }}〜</span>
+                        @if(!empty($item['trial_hourly_wage']))
+                        <span class="card-recruit-trial">体験 ¥{{ number_format($item['trial_hourly_wage']) }}〜</span>
+                        @endif
+                        @if(!empty($item['noruma_reward']))
+                        <span class="card-recruit-bonus">ボーナス ¥{{ number_format($item['noruma_reward']) }}</span>
+                        @endif
+                    </div>
+                    @elseif($isShop && isset($item['rating']))
                     <div class="card-rating">
                         <span class="card-rating-stars" aria-label="評価 {{ $item['rating'] }}">
                             @for($i = 1; $i <= 5; $i++)
@@ -78,7 +91,7 @@
                     </div>
                     @endif
                     <div class="card-tags-row">
-                        @foreach($item['tags'] as $tag)
+                        @foreach($item['tags'] ?? [] as $tag)
                             <span class="tag-pill">#{{ $tag }}</span>
                         @endforeach
                     </div>
@@ -107,7 +120,7 @@
                 </div>
                 <div class="home-onboarding-row">
                     <span class="home-onboarding-icon">TAP</span>
-                    <span class="home-onboarding-desc">タップでプロフィール詳細を表示</span>
+                    <span class="home-onboarding-desc">{{ $isRecruit ? 'タップで求人詳細を表示' : 'タップでプロフィール詳細を表示' }}</span>
                 </div>
             </div>
             <div class="home-onboarding-footer">
