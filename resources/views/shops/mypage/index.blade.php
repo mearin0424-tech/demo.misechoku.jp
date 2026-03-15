@@ -204,11 +204,11 @@
                     <i class="fas fa-plus"></i>
                 </button>
             </div>
-            <div class="shop-word-bubble glass-panel" id="open-word-edit-trigger" role="button" tabindex="0">
+            <div class="shop-word-bubble glass-panel">
                 <p id="display-word" class="shop-word-text {{ empty(trim($shopData['word'] ?? '')) ? 'is-placeholder' : '' }}" data-placeholder="アピールメッセージを入力すると、タイムラインに表示されます。">{{ !empty(trim($shopData['word'] ?? '')) ? $shopData['word'] : 'アピールメッセージを入力すると、タイムラインに表示されます。' }}</p>
                 <div class="shop-word-bubble-footer">
                     <span id="display-word-updated" class="shop-word-bubble-updated">最終更新 {{ $shopData['appeal_updated_at'] ?? '未設定' }}</span>
-                    <button type="button" class="btn-word-edit" aria-label="アピールを編集">
+                    <button type="button" class="btn-word-edit" id="open-word-edit-btn" aria-label="アピールを編集">
                         <i class="fas fa-pen"></i>
                     </button>
                 </div>
@@ -387,30 +387,34 @@ function closeGalleryPreview() {
 }
 
 function bindShopMypageGallery() {
-    var list = document.getElementById('gallery-list');
-    if (!list) return;
-    list.addEventListener('click', function(ev) {
-    var slot = ev.target.closest('.photo-slot');
-    if (!slot) return;
-    ev.preventDefault();
-    ev.stopPropagation();
-    var li = slot.closest('.gallery-grid-item');
-    var slotIndex = parseInt(li.getAttribute('data-slot-index'), 10);
-    var hasImg = slot.classList.contains('has-img');
-    var imageId = slot.getAttribute('data-image-id');
-    var imageUrl = slot.getAttribute('data-image-url');
-    if (hasImg && imageUrl) {
-        _galleryPreviewImageId = imageId;
-        _galleryPreviewLi = li;
-        document.getElementById('modal-img').src = imageUrl;
-        var deleteBtn = document.getElementById('gallery-preview-delete-btn');
-        if (deleteBtn) deleteBtn.style.display = (!!imageId) ? '' : 'none';
-        document.getElementById('image-preview-modal').style.display = 'flex';
-    } else {
-        _galleryUploadSlotIndex = slotIndex;
-        document.getElementById('gallery-upload').click();
-    }
-});
+    var galleryList = document.getElementById('gallery-list');
+    var uploadInput = document.getElementById('gallery-upload');
+    if (!uploadInput) return;
+    document.addEventListener('click', function(ev) {
+        var slot = ev.target.closest('.photo-slot');
+        if (!slot) return;
+        if (!galleryList || !galleryList.contains(slot)) return;
+        ev.preventDefault();
+        ev.stopPropagation();
+        var li = slot.closest('.gallery-grid-item');
+        var slotIndex = parseInt(li.getAttribute('data-slot-index'), 10);
+        if (isNaN(slotIndex)) slotIndex = 0;
+        var imageUrl = (slot.getAttribute('data-image-url') || '').trim();
+        var imageId = slot.getAttribute('data-image-id') || '';
+        if (imageUrl) {
+            _galleryPreviewImageId = imageId;
+            _galleryPreviewLi = li;
+            var modalImg = document.getElementById('modal-img');
+            if (modalImg) modalImg.src = imageUrl;
+            var deleteBtn = document.getElementById('gallery-preview-delete-btn');
+            if (deleteBtn) deleteBtn.style.display = (!!imageId) ? '' : 'none';
+            var modal = document.getElementById('image-preview-modal');
+            if (modal) modal.style.display = 'flex';
+        } else {
+            _galleryUploadSlotIndex = slotIndex;
+            uploadInput.click();
+        }
+    }, true);
 
     var delBtn = document.getElementById('gallery-preview-delete-btn');
     if (delBtn) delBtn.addEventListener('click', function(ev) {
@@ -485,8 +489,8 @@ function bindShopMypageGallery() {
     });
 
     var placeholderText = 'アピールメッセージを入力すると、タイムラインに表示されます。';
-    var openWord = document.getElementById('open-word-edit-trigger');
-    if (openWord) openWord.addEventListener('click', function() {
+    var openWordBtn = document.getElementById('open-word-edit-btn');
+    if (openWordBtn) openWordBtn.addEventListener('click', function() {
         document.getElementById('modal-word').style.display = 'flex';
         var displayEl = document.getElementById('display-word');
         var current = displayEl.innerText.trim();

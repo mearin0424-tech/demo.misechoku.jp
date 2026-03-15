@@ -94,24 +94,26 @@
     border: 1px solid var(--mypage-gold-border);
     background: var(--mypage-card-bg);
     position: relative;
-    cursor: pointer;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    margin-left: -4px;
 }
 
+/* 吹き出しの尾：アイコン側（左）から出る */
 .shop-word-bubble::after {
     content: '';
     position: absolute;
-    left: 18px;
-    bottom: -10px;
+    left: -9px;
+    top: 50%;
+    margin-top: -9px;
     width: 18px;
     height: 18px;
     background: var(--mypage-card-bg);
-    border-right: 1px solid var(--mypage-gold-border);
+    border-left: 1px solid var(--mypage-gold-border);
     border-bottom: 1px solid var(--mypage-gold-border);
-    transform: rotate(45deg);
+    transform: translateY(-50%) rotate(45deg);
 }
 
 .shop-word-bubble:hover {

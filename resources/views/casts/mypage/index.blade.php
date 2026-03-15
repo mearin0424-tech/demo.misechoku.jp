@@ -23,11 +23,11 @@
                     <i class="fas fa-plus"></i>
                 </button>
             </div>
-            <div class="shop-word-bubble glass-panel" id="open-word-edit-trigger" role="button" tabindex="0">
+            <div class="shop-word-bubble glass-panel">
                 <p id="display-word" class="shop-word-text {{ empty(trim($cast['word'] ?? '')) ? 'is-placeholder' : '' }}" data-placeholder="アピールメッセージを入力すると、タイムラインに表示されます。">{{ !empty(trim($cast['word'] ?? '')) ? $cast['word'] : 'アピールメッセージを入力すると、タイムラインに表示されます。' }}</p>
                 <div class="shop-word-bubble-footer">
                     <span id="display-word-updated" class="shop-word-bubble-updated">最終更新 {{ $cast['appeal_updated_at'] ?? '未設定' }}</span>
-                    <button type="button" class="btn-word-edit" aria-label="アピールを編集">
+                    <button type="button" class="btn-word-edit" id="open-word-edit-btn" aria-label="アピールを編集">
                         <i class="fas fa-pen"></i>
                     </button>
                 </div>
@@ -186,172 +186,189 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="{{ asset('assets/js/gallery-sortable.js') }}"></script>
 <script>
-var _galleryPreviewImageId = null;
-var _galleryPreviewLi = null;
-var _galleryUploadSlotIndex = null;
+(function() {
+    var _galleryPreviewImageId = null;
+    var _galleryPreviewLi = null;
+    var _galleryUploadSlotIndex = null;
+    var _csrfToken = '{{ csrf_token() }}';
 
-function closeGalleryPreview() {
-    document.getElementById('image-preview-modal').style.display = 'none';
-    var deleteBtn = document.getElementById('gallery-preview-delete-btn');
-    if (deleteBtn) deleteBtn.style.display = '';
-    _galleryPreviewImageId = null;
-    _galleryPreviewLi = null;
-}
-
-function bindMypageGallery() {
-    var list = document.getElementById('gallery-list');
-    if (!list) return;
-    list.addEventListener('click', function(ev) {
-    var slot = ev.target.closest('.photo-slot');
-    if (!slot) return;
-    ev.preventDefault();
-    ev.stopPropagation();
-    var li = slot.closest('.gallery-grid-item');
-    var slotIndex = parseInt(li.getAttribute('data-slot-index'), 10);
-    var hasImg = slot.classList.contains('has-img');
-    var imageId = slot.getAttribute('data-image-id');
-    var imageUrl = slot.getAttribute('data-image-url');
-    if (hasImg && imageUrl) {
-        _galleryPreviewImageId = imageId;
-        _galleryPreviewLi = li;
-        document.getElementById('modal-img').src = imageUrl;
+    function closeGalleryPreview() {
+        var modal = document.getElementById('image-preview-modal');
+        if (modal) modal.style.display = 'none';
         var deleteBtn = document.getElementById('gallery-preview-delete-btn');
-        if (deleteBtn) {
-            deleteBtn.style.display = (!!imageId && !String(imageId).startsWith('local-')) ? '' : 'none';
-        }
-        document.getElementById('image-preview-modal').style.display = 'flex';
-    } else {
-        _galleryUploadSlotIndex = slotIndex;
-        document.getElementById('gallery-upload').click();
+        if (deleteBtn) deleteBtn.style.display = '';
+        _galleryPreviewImageId = null;
+        _galleryPreviewLi = null;
     }
-});
 
-    var modal = document.getElementById('image-preview-modal');
-    if (modal) modal.addEventListener('click', function(ev) { if (ev.target === this) closeGalleryPreview(); });
-    var inner = document.querySelector('.gallery-preview-inner');
-    if (inner) inner.addEventListener('click', function(ev) { ev.stopPropagation(); });
-    var closeBtn = document.getElementById('gallery-preview-close-btn');
-    if (closeBtn) closeBtn.addEventListener('click', closeGalleryPreview);
-    var delBtn = document.getElementById('gallery-preview-delete-btn');
-    if (delBtn) delBtn.addEventListener('click', function(ev) {
-    ev.preventDefault();
-    ev.stopPropagation();
-    if (!_galleryPreviewImageId || !_galleryPreviewLi) return;
-    if (!confirm('この画像を削除しますか？')) return;
-    var id = _galleryPreviewImageId;
-    var li = _galleryPreviewLi;
-    if (!id || id === '' || String(id).startsWith('local-')) {
-        var slot = li.querySelector('.photo-slot');
-        slot.classList.remove('has-img');
-        slot.removeAttribute('data-image-id');
-        slot.removeAttribute('data-image-url');
-        slot.innerHTML = '<span class="photo-slot-empty"><i class="fas fa-image"></i></span>';
+    function init() {
         var galleryList = document.getElementById('gallery-list');
-        if (window.refreshGalleryMainState && galleryList) window.refreshGalleryMainState(galleryList);
-        if (window.persistGalleryOrder && galleryList) window.persistGalleryOrder(galleryList);
-        closeGalleryPreview();
-        return;
-    }
-    fetch('{{ route("cast.mypage.images.delete", ["id" => "__ID__"]) }}'.replace('__ID__', id), {
-        method: 'DELETE',
-        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
-    }).then(function(r) { return r.json(); }).then(function(res) {
-        if (res.success) {
-            var slot = li.querySelector('.photo-slot');
-            slot.classList.remove('has-img');
-            slot.removeAttribute('data-image-id');
-            slot.removeAttribute('data-image-url');
-            slot.innerHTML = '<span class="photo-slot-empty"><i class="fas fa-image"></i></span>';
-            var galleryList = document.getElementById('gallery-list');
-            if (window.refreshGalleryMainState && galleryList) window.refreshGalleryMainState(galleryList);
-            if (window.persistGalleryOrder && galleryList) window.persistGalleryOrder(galleryList);
-            closeGalleryPreview();
+        var uploadInput = document.getElementById('gallery-upload');
+        var modal = document.getElementById('image-preview-modal');
+        var modalImg = document.getElementById('modal-img');
+        var deleteBtn = document.getElementById('gallery-preview-delete-btn');
+        var closeBtn = document.getElementById('gallery-preview-close-btn');
+
+        if (!uploadInput) return;
+
+        document.addEventListener('click', function(ev) {
+            var slot = ev.target.closest('.photo-slot');
+            if (!slot) return;
+            var list = document.getElementById('gallery-list');
+            if (!list || !list.contains(slot)) return;
+            ev.preventDefault();
+            ev.stopPropagation();
+            var li = slot.closest('.gallery-grid-item');
+            var slotIndex = parseInt(li.getAttribute('data-slot-index'), 10);
+            if (isNaN(slotIndex)) slotIndex = 0;
+            var imageUrl = (slot.getAttribute('data-image-url') || '').trim();
+            var imageId = slot.getAttribute('data-image-id') || '';
+
+            if (imageUrl) {
+                _galleryPreviewImageId = imageId;
+                _galleryPreviewLi = li;
+                if (modalImg) modalImg.src = imageUrl;
+                if (deleteBtn) deleteBtn.style.display = (imageId && !String(imageId).startsWith('local-')) ? '' : 'none';
+                if (modal) modal.style.display = 'flex';
+            } else {
+                _galleryUploadSlotIndex = slotIndex;
+                uploadInput.click();
+            }
+        }, true);
+
+        if (modal) modal.addEventListener('click', function(ev) {
+            if (ev.target === this) closeGalleryPreview();
+        });
+        var inner = document.querySelector('#image-preview-modal .gallery-preview-inner');
+        if (inner) inner.addEventListener('click', function(ev) { ev.stopPropagation(); });
+        if (closeBtn) closeBtn.addEventListener('click', closeGalleryPreview);
+        if (deleteBtn) deleteBtn.addEventListener('click', function(ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            if (!_galleryPreviewImageId || !_galleryPreviewLi) return;
+            if (!confirm('この画像を削除しますか？')) return;
+            var id = _galleryPreviewImageId;
+            var li = _galleryPreviewLi;
+            if (!id || String(id).startsWith('local-')) {
+                var slot = li.querySelector('.photo-slot');
+                if (slot) {
+                    slot.classList.remove('has-img');
+                    slot.removeAttribute('data-image-id');
+                    slot.removeAttribute('data-image-url');
+                    slot.innerHTML = '<span class="photo-slot-empty"><i class="fas fa-image"></i></span>';
+                }
+                var list = document.getElementById('gallery-list');
+                if (window.refreshGalleryMainState && list) window.refreshGalleryMainState(list);
+                if (window.persistGalleryOrder && list) window.persistGalleryOrder(list);
+                closeGalleryPreview();
+                return;
+            }
+            fetch('{{ route("cast.mypage.images.delete", ["id" => "__ID__"]) }}'.replace('__ID__', id), {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': _csrfToken, 'Accept': 'application/json' }
+            }).then(function(r) { return r.json(); }).then(function(res) {
+                if (res.success) {
+                    var slot = li.querySelector('.photo-slot');
+                    if (slot) {
+                        slot.classList.remove('has-img');
+                        slot.removeAttribute('data-image-id');
+                        slot.removeAttribute('data-image-url');
+                        slot.innerHTML = '<span class="photo-slot-empty"><i class="fas fa-image"></i></span>';
+                    }
+                    var list = document.getElementById('gallery-list');
+                    if (window.refreshGalleryMainState && list) window.refreshGalleryMainState(list);
+                    if (window.persistGalleryOrder && list) window.persistGalleryOrder(list);
+                    closeGalleryPreview();
         } else {
             alert(res.message || '削除に失敗しました');
         }
     }).catch(function() { alert('削除に失敗しました'); });
-});
-}
+        });
 
-    var uploadEl = document.getElementById('gallery-upload');
-    if (uploadEl) uploadEl.addEventListener('change', function() {
-        var file = this.files && this.files[0];
-        if (!file) return;
-        var slotIndex = _galleryUploadSlotIndex;
-        if (slotIndex == null) {
-            var firstEmpty = document.querySelector('#gallery-list .gallery-grid-item .photo-slot:not(.has-img)');
-            slotIndex = firstEmpty ? Array.prototype.indexOf.call(document.querySelectorAll('#gallery-list .gallery-grid-item'), firstEmpty.closest('.gallery-grid-item')) : 0;
-        }
-        var formData = new FormData();
-        formData.append('image', file);
-        formData.append('slot_index', slotIndex);
-        formData.append('_token', '{{ csrf_token() }}');
-        var self = this;
-        fetch('{{ route("cast.mypage.images.upload") }}', {
-            method: 'POST',
-            body: formData,
-            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-            credentials: 'same-origin'
-        })
-            .then(function(r) { return r.text().then(function(text) { try { return { ok: r.ok, data: JSON.parse(text) }; } catch(e) { return { ok: false, data: { message: 'アップロードに失敗しました' } }; }); })
-            .then(function(result) {
-                var res = result.data;
-                if (result.ok && res.success && res.path && res.id) {
-                    var list = document.getElementById('gallery-list');
-                    var items = list && list.querySelectorAll('.gallery-grid-item');
-                    var li = items && items[slotIndex];
-                    if (li) {
-                        var slot = li.querySelector('.photo-slot');
-                        slot.classList.add('has-img');
-                        slot.setAttribute('data-image-id', res.id);
-                        slot.setAttribute('data-image-url', res.path);
-                        slot.innerHTML = '<img src="' + res.path + '" alt="" loading="lazy">' + (slotIndex === 0 ? '<span class="photo-slot-badge">MAIN</span>' : '');
-                        if (window.refreshGalleryMainState && list) window.refreshGalleryMainState(list);
-                        if (window.persistGalleryOrder && list) window.persistGalleryOrder(list);
-                    }
-                } else {
-                    alert(res.message || (res.errors && res.errors.image ? res.errors.image[0] : '') || 'アップロードに失敗しました');
+        uploadInput.addEventListener('change', function() {
+            var file = this.files && this.files[0];
+            this.value = '';
+            if (!file) return;
+            var slotIndex = _galleryUploadSlotIndex;
+            if (slotIndex == null) {
+                var list = document.getElementById('gallery-list');
+                if (list) {
+                    var firstEmpty = list.querySelector('.photo-slot:not(.has-img)');
+                    var items = list.querySelectorAll('.gallery-grid-item');
+                    slotIndex = firstEmpty ? Array.prototype.indexOf.call(items, firstEmpty.closest('.gallery-grid-item')) : 0;
                 }
+            }
+            if (slotIndex == null) slotIndex = 0;
+            var formData = new FormData();
+            formData.append('image', file);
+            formData.append('slot_index', slotIndex);
+            formData.append('_token', _csrfToken);
+            fetch('{{ route("cast.mypage.images.upload") }}', {
+                method: 'POST',
+                body: formData,
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin'
             })
-            .catch(function() { alert('アップロードに失敗しました'); });
-        self.value = '';
-        _galleryUploadSlotIndex = null;
-    });
+                .then(function(r) { return r.text().then(function(text) { try { return { ok: r.ok, data: JSON.parse(text) }; } catch(e) { return { ok: false, data: {} }; }); })
+                .then(function(result) {
+                    var res = result.data;
+                    var list = document.getElementById('gallery-list');
+                    if (result.ok && res.success && res.path && res.id != null && list) {
+                        var items = list.querySelectorAll('.gallery-grid-item');
+                        var li = items[slotIndex];
+                        if (li) {
+                            var slot = li.querySelector('.photo-slot');
+                            if (slot) {
+                                slot.classList.add('has-img');
+                                slot.setAttribute('data-image-id', res.id);
+                                slot.setAttribute('data-image-url', res.path);
+                                slot.innerHTML = '<img src="' + res.path + '" alt="" loading="lazy">' + (slotIndex === 0 ? '<span class="photo-slot-badge">MAIN</span>' : '');
+                            }
+                            if (window.refreshGalleryMainState) window.refreshGalleryMainState(list);
+                            if (window.persistGalleryOrder) window.persistGalleryOrder(list);
+                        }
+                    } else {
+                        alert(res.message || (res.errors && res.errors.image ? res.errors.image[0] : '') || 'アップロードに失敗しました');
+                    }
+                })
+                .catch(function() { alert('アップロードに失敗しました'); });
+            _galleryUploadSlotIndex = null;
+        });
 
-    var placeholderText = 'アピールメッセージを入力すると、タイムラインに表示されます。';
-    var openWord = document.getElementById('open-word-edit-trigger');
-    if (openWord) openWord.addEventListener('click', function() {
-        document.getElementById('modal-word').style.display = 'flex';
-        var displayEl = document.getElementById('display-word');
-        var current = displayEl.innerText.trim();
-        document.getElementById('word-input').value = (current === placeholderText) ? '' : current;
-    });
-    var cancelWord = document.getElementById('word-edit-cancel-btn');
-    if (cancelWord) cancelWord.addEventListener('click', function() { document.getElementById('modal-word').style.display = 'none'; });
-    var saveWordBtn = document.getElementById('word-edit-save-btn');
-    if (saveWordBtn) saveWordBtn.addEventListener('click', function() {
-        var val = document.getElementById('word-input').value.trim();
-        var displayEl = document.getElementById('display-word');
-        if (val) {
-            displayEl.innerText = val;
-            displayEl.classList.remove('is-placeholder');
-        } else {
-            displayEl.innerText = placeholderText;
-            displayEl.classList.add('is-placeholder');
-        }
-        var updated = document.getElementById('display-word-updated');
-        if (updated) {
-            var now = new Date();
-            updated.innerText = '最終更新 ' + now.getFullYear() + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + String(now.getDate()).padStart(2, '0') + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-        }
-        document.getElementById('modal-word').style.display = 'none';
-    });
-}
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bindMypageGallery);
-} else {
-    bindMypageGallery();
-}
+        var placeholderText = 'アピールメッセージを入力すると、タイムラインに表示されます。';
+        var openWordBtn = document.getElementById('open-word-edit-btn');
+        if (openWordBtn) openWordBtn.addEventListener('click', function() {
+            var m = document.getElementById('modal-word');
+            if (m) m.style.display = 'flex';
+            var displayEl = document.getElementById('display-word');
+            var wordInput = document.getElementById('word-input');
+            if (displayEl && wordInput) wordInput.value = (displayEl.innerText.trim() === placeholderText) ? '' : displayEl.innerText.trim();
+        });
+        var cancelWord = document.getElementById('word-edit-cancel-btn');
+        if (cancelWord) cancelWord.addEventListener('click', function() { var m = document.getElementById('modal-word'); if (m) m.style.display = 'none'; });
+        var saveWordBtn = document.getElementById('word-edit-save-btn');
+        if (saveWordBtn) saveWordBtn.addEventListener('click', function() {
+            var val = (document.getElementById('word-input').value || '').trim();
+            var displayEl = document.getElementById('display-word');
+            if (displayEl) {
+                displayEl.innerText = val || placeholderText;
+                displayEl.classList.toggle('is-placeholder', !val);
+            }
+            var updated = document.getElementById('display-word-updated');
+            if (updated) {
+                var now = new Date();
+                updated.innerText = '最終更新 ' + now.getFullYear() + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + String(now.getDate()).padStart(2, '0') + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+            }
+            var m = document.getElementById('modal-word');
+            if (m) m.style.display = 'none';
+        });
+    }
 
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
 </script>
 @endpush
