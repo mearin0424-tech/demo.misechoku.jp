@@ -370,11 +370,12 @@
     display: block;
 }
 
-/* 吹き出し＋フッターをまとめるブロック（footer は bubble の外・被らないように余白） */
+/* 吹き出し＋フッターをまとめるブロック（内容幅に収める＝1行文で余白が出ない） */
 .message-block {
     display: inline-flex;
     flex-direction: column;
     max-width: 82%;
+    width: max-content; /* 1行文でも幅を内容に合わせる */
 }
 .msg-left .message-block { align-items: flex-start; max-width: calc(100% - 42px); }
 /* 自分の吹き出しの尻尾が下の余白にはみ出さないようスペースを確保 */
@@ -383,12 +384,13 @@
     box-sizing: border-box;
 }
 
-/* 時刻・既読（bubble 横配置） */
+/* 時刻・既読（bubble 横配置）・内容幅に収める */
 .message-inline {
     display: flex;
     align-items: center;
     gap: 8px;
     max-width: 100%;
+    width: max-content; /* 吹き出し＋メタのみの幅にし、余白を出さない */
 }
 
 .msg-left .message-inline {
@@ -437,6 +439,7 @@
 .message-bubble {
     display: inline-block;
     max-width: 100%;
+    width: fit-content; /* テキスト1行なら1行分の幅に収める */
     padding: 10px 13px;
     border-radius: 18px;
     font-size: 0.82rem;
@@ -470,12 +473,14 @@
     border-radius: 18px 18px 7px 18px;
     border: 1px solid rgba(255, 239, 184, 0.7);
     --bubble-tail-fill: #d5aa2b;
+    overflow: visible;
 }
 
+/* 尻尾：吹き出しの角に重ねて一体化（right で本体に食い込ませ、ずれを解消） */
 .message-bubble-tail {
     display: none;
     position: absolute;
-    right: -7px;
+    right: -4px;
     bottom: 0;
     width: 8px;
     height: 12px;

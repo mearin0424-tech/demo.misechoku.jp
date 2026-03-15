@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const characterGuide = document.getElementById('character-guide');
     const characterWrap = characterGuide ? characterGuide.querySelector('.guide-character-wrap') : null;
     const messageContent = document.getElementById('character-message-content');
+    const closeBtn = document.getElementById('character-guide-close');
 
     const STORAGE_KEY = 'character-guide-dismissed';
 
@@ -53,6 +54,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (characterWrap && characterGuide) {
         characterWrap.addEventListener('click', toggleBubble);
+    }
+
+    if (closeBtn && characterGuide) {
+        closeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            try {
+                var raw = sessionStorage.getItem(STORAGE_KEY);
+                var paths = raw ? JSON.parse(raw) : [];
+                if (!Array.isArray(paths)) paths = [];
+                if (paths.indexOf(window.location.pathname) === -1) {
+                    paths.push(window.location.pathname);
+                    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(paths));
+                }
+            } catch (err) {}
+            characterGuide.classList.add('is-dismissed');
+        });
     }
 
     // 外部（Swiperなど）からメッセージを更新する関数

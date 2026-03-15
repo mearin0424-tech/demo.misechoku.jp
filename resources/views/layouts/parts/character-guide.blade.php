@@ -10,10 +10,11 @@
     }
 @endphp
 
-{{-- オコジョガイド：右下浮遊デザイン --}}
+{{-- オコジョガイド：右下浮遊デザイン（×は吹き出し内に絶対配置し、欄外に出さない） --}}
 <div id="character-guide" class="discovery-guide {{ $resolvedGuideMessage !== '' ? '' : 'is-hidden' }}">
     {{-- 左側の吹き出し --}}
     <div class="guide-speech-bubble">
+        <button type="button" class="guide-close-btn" id="character-guide-close" aria-label="ガイドを閉じる">&times;</button>
         <p id="character-message-content">{!! nl2br(e($resolvedGuideMessage)) !!}</p>
     </div>
     {{-- 右側のキャラクター --}}

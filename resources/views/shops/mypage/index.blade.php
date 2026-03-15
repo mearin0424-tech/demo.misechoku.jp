@@ -382,7 +382,7 @@ var _galleryPreviewImageId = null;
 var _galleryPreviewLi = null;
 var _galleryUploadSlotIndex = null;
 
-function handleGallerySlotClick(ev, slotEl, slotIndex) {
+window.handleGallerySlotClick = function handleGallerySlotClick(ev, slotEl, slotIndex) {
     var li = slotEl.closest('li');
     var hasImg = slotEl.classList.contains('has-img');
     var imageId = slotEl.getAttribute('data-image-id');
@@ -405,7 +405,7 @@ function handleGallerySlotClick(ev, slotEl, slotIndex) {
     }
 }
 
-function closeGalleryPreview(ev) {
+window.closeGalleryPreview = function closeGalleryPreview(ev) {
     if (ev && ev.target !== ev.currentTarget) return;
     document.getElementById('image-preview-modal').style.display = 'none';
     var deleteBtn = document.getElementById('gallery-preview-delete-btn');
@@ -416,7 +416,7 @@ function closeGalleryPreview(ev) {
     _galleryPreviewLi = null;
 }
 
-function deleteGalleryImageFromModal(ev) {
+window.deleteGalleryImageFromModal = function deleteGalleryImageFromModal(ev) {
     ev.preventDefault();
     ev.stopPropagation();
     if (!_galleryPreviewImageId || !_galleryPreviewLi) return;
@@ -496,7 +496,7 @@ function deleteGalleryImageFromModal(ev) {
     });
 })();
 
-function openWordEdit() {
+window.openWordEdit = function openWordEdit() {
     document.getElementById('modal-word').style.display = 'flex';
     document.getElementById('word-input').value = document.getElementById('display-word').innerText.trim();
 }
@@ -506,7 +506,7 @@ function closeWordEdit() {
 function openProfileEdit() {
     location.href = "{{ route('shop.profile.store.edit') }}";
 }
-function saveWord() {
+window.saveWord = function saveWord() {
     var val = document.getElementById('word-input').value.trim();
     var fallback = 'タイムラインに載るアピールを設定しましょう';
     document.getElementById('display-word').innerText = val || fallback;
