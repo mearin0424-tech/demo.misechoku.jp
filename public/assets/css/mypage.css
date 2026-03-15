@@ -324,6 +324,16 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
+/* 統計パネルがリンクの場合（例：ショップマイページの評価→レビュー一覧） */
+a.mypage-stat-panel-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+a.mypage-stat-panel-link:hover {
+    color: inherit;
+}
+
 .mypage-stat-icon {
     display: inline-flex;
     align-items: center;

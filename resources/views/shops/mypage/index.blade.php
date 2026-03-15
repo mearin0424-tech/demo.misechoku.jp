@@ -196,7 +196,7 @@
         {{-- ヒーロー：店舗名 --}}
         <h1 class="mypage-shop-name serif-font gold-gradient">{{ $shopData['shop_name'] }}</h1>
 
-        {{-- アイコン＋アピール --}}
+        {{-- アイコン＋ひとこと（モーダルで編集） --}}
         <div class="mypage-hero">
             <div class="shop-icon-wrapper">
                 <img src="{{ (isset($subImages[0]) ? $subImages[0]['url'] : null) ?? asset('assets/images/common/no-image.png') }}" class="shop-icon-main" id="main-icon-display" alt="">
@@ -205,25 +205,40 @@
                 </button>
             </div>
             <div class="shop-word-bubble glass-panel">
-                <p id="display-word" class="shop-word-text {{ empty(trim($shopData['word'] ?? '')) ? 'is-placeholder' : '' }}" data-placeholder="アピールメッセージを入力すると、タイムラインに表示されます。">{{ !empty(trim($shopData['word'] ?? '')) ? $shopData['word'] : 'アピールメッセージを入力すると、タイムラインに表示されます。' }}</p>
+                <p id="display-word" class="shop-word-text {{ empty(trim($shopData['word'] ?? '')) ? 'is-placeholder' : '' }}" data-placeholder="ひとことを入力すると、タイムラインに表示されます。">{{ !empty(trim($shopData['word'] ?? '')) ? $shopData['word'] : 'ひとことを入力すると、タイムラインに表示されます。' }}</p>
                 <div class="shop-word-bubble-footer">
                     <span id="display-word-updated" class="shop-word-bubble-updated">最終更新 {{ $shopData['appeal_updated_at'] ?? '未設定' }}</span>
-                    <button type="button" class="btn-word-edit" id="open-word-edit-btn" aria-label="アピールを編集">
+                    <button type="button" class="btn-word-edit" id="open-word-edit-btn" aria-label="ひとことを編集">
                         <i class="fas fa-pen"></i>
                     </button>
                 </div>
             </div>
         </div>
 
-        {{-- レビューカード --}}
-        <a href="{{ route('shop.mypage.review.index') }}" class="mypage-review-card shop-review-link">
-            <span class="review-stars"><i class="fas fa-star"></i> {{ $shopData['review_avg'] }}</span>
-            <span class="review-count">({{ $shopData['review_count'] }}件)</span>
-            <i class="fas fa-chevron-right review-arrow"></i>
-        </a>
+        {{-- 評価・応募数・採用数（キャストのLIKE・マッチ・ボーナスと同様の統計行） --}}
+        <div class="mypage-stats-row" aria-label="統計">
+            <a href="{{ route('shop.mypage.review.index') }}" class="mypage-stat-panel mypage-stat-panel-link">
+                <span class="mypage-stat-icon"><i class="fas fa-star"></i></span>
+                <span class="mypage-stat-label">評価</span>
+                <span class="mypage-stat-value">{{ $shopData['review_avg'] }}</span>
+            </a>
+            <div class="mypage-stat-panel">
+                <span class="mypage-stat-icon"><i class="fas fa-envelope"></i></span>
+                <span class="mypage-stat-label">応募数</span>
+                <span class="mypage-stat-value">{{ number_format((int) ($shopData['applicant_count'] ?? 0)) }}</span>
+            </div>
+            <div class="mypage-stat-panel">
+                <span class="mypage-stat-icon"><i class="fas fa-user-check"></i></span>
+                <span class="mypage-stat-label">採用数</span>
+                <span class="mypage-stat-value">{{ number_format((int) ($shopData['hired_count'] ?? 0)) }}</span>
+            </div>
+        </div>
 
         <div class="mypage-detail-box">
-            {{-- プロフィール情報 --}}
+            {{-- メニュー（キャストマイページと同じボタンデザイン） --}}
+            @include('shops.mypage.parts.menu', ['current' => 'profile', 'fullWidth' => false])
+
+            {{-- プロフィール情報（住所・編集のみ。ひとことは吹き出しでモーダル編集） --}}
             <div class="mypage-section profile-info-section">
                 <div class="section-title-row">
                     <h2 class="section-title">プロフィール情報</h2>
@@ -232,30 +247,6 @@
                 <p class="shop-access-text">
                     <i class="fas fa-map-marker-alt"></i> {{ $shopData['pref'] }}{{ $shopData['city'] }}{{ $shopData['addr1'] }}
                 </p>
-                <div class="shop-overview-text" id="display-overview">
-                    {!! nl2br(e($shopData['overview'])) !!}
-                </div>
-            </div>
-
-            {{-- メニュー --}}
-            <div class="mypage-section mypage-quick-actions">
-                <h2 class="mypage-actions-title">メニュー</h2>
-                <a href="{{ route('shop.recruits.status') }}" class="btn-action-card job">
-                    <span class="btn-action-icon-wrap"><i class="far fa-folder-open"></i></span>
-                    <span class="btn-action-body">
-                        <span class="btn-action-label">Recruit</span>
-                        <span class="btn-action-text">求人の掲載</span>
-                    </span>
-                    <i class="fas fa-chevron-right btn-action-arrow"></i>
-                </a>
-                <a href="{{ route('shop.mypage.payment.index') }}" class="btn-action-card manage">
-                    <span class="btn-action-icon-wrap"><i class="far fa-credit-card"></i></span>
-                    <span class="btn-action-body">
-                        <span class="btn-action-label">MANAGEMENT</span>
-                        <span class="btn-action-text">採用・請求管理</span>
-                    </span>
-                    <i class="fas fa-chevron-right btn-action-arrow"></i>
-                </a>
             </div>
 
             {{-- 書類管理 --}}
@@ -355,11 +346,11 @@
     </div>
 </div>
 
-{{-- アピール編集モーダル --}}
+{{-- ひとこと編集モーダル --}}
 <div id="modal-word" class="mypage-modal-overlay modal-word-edit" style="display:none;">
     <div class="mypage-modal-panel glass-panel">
-        <h3 class="mypage-modal-title serif-font">タイムライン用アピールを編集</h3>
-        <textarea id="word-input" rows="3" class="mypage-modal-textarea" placeholder="新人大歓迎！働きやすさもお任せください。"></textarea>
+        <h3 class="mypage-modal-title serif-font">ひとことを編集</h3>
+        <textarea id="word-input" rows="3" class="mypage-modal-textarea" placeholder="例：新人大歓迎！働きやすさもお任せください。"></textarea>
         <div class="mypage-modal-actions">
             <button type="button" class="btn-action btn-action-secondary" id="word-edit-cancel-btn">戻る</button>
             <button type="button" class="btn-action btn-action-primary" id="word-edit-save-btn">保存</button>
@@ -374,159 +365,70 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script src="{{ asset('assets/js/gallery-sortable.js') }}"></script>
 <script>
-var _galleryPreviewImageId = null;
-var _galleryPreviewLi = null;
-var _galleryUploadSlotIndex = null;
-
-function closeGalleryPreview() {
-    document.getElementById('image-preview-modal').style.display = 'none';
-    var deleteBtn = document.getElementById('gallery-preview-delete-btn');
-    if (deleteBtn) deleteBtn.style.display = '';
-    _galleryPreviewImageId = null;
-    _galleryPreviewLi = null;
-}
-
-function bindShopMypageGallery() {
-    var galleryList = document.getElementById('gallery-list');
-    var uploadInput = document.getElementById('gallery-upload');
-    if (!uploadInput) return;
-    document.addEventListener('click', function(ev) {
-        var slot = ev.target.closest('.photo-slot');
-        if (!slot) return;
-        if (!galleryList || !galleryList.contains(slot)) return;
-        ev.preventDefault();
-        ev.stopPropagation();
-        var li = slot.closest('.gallery-grid-item');
-        var slotIndex = parseInt(li.getAttribute('data-slot-index'), 10);
-        if (isNaN(slotIndex)) slotIndex = 0;
-        var imageUrl = (slot.getAttribute('data-image-url') || '').trim();
-        var imageId = slot.getAttribute('data-image-id') || '';
-        if (imageUrl) {
-            _galleryPreviewImageId = imageId;
-            _galleryPreviewLi = li;
-            var modalImg = document.getElementById('modal-img');
-            if (modalImg) modalImg.src = imageUrl;
-            var deleteBtn = document.getElementById('gallery-preview-delete-btn');
-            if (deleteBtn) deleteBtn.style.display = (!!imageId) ? '' : 'none';
-            var modal = document.getElementById('image-preview-modal');
-            if (modal) modal.style.display = 'flex';
-        } else {
-            _galleryUploadSlotIndex = slotIndex;
-            uploadInput.click();
-        }
-    }, true);
-
-    var delBtn = document.getElementById('gallery-preview-delete-btn');
-    if (delBtn) delBtn.addEventListener('click', function(ev) {
-    ev.preventDefault();
-    ev.stopPropagation();
-    if (!_galleryPreviewImageId || !_galleryPreviewLi) return;
-    if (!confirm('この画像を削除しますか？')) return;
-    var id = _galleryPreviewImageId;
-    var li = _galleryPreviewLi;
-    fetch('{{ route("shop.profile.image.delete", ["id" => "__ID__"]) }}'.replace('__ID__', id), {
-        method: 'DELETE',
-        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
-    }).then(function(r) { return r.json(); }).then(function(res) {
-        if (res.success) {
-            var slot = li.querySelector('.photo-slot');
-            slot.classList.remove('has-img');
-            slot.removeAttribute('data-image-id');
-            slot.removeAttribute('data-image-url');
-            slot.innerHTML = '<span class="photo-slot-empty"><i class="fas fa-image"></i></span>';
-            var galleryList = document.getElementById('gallery-list');
-            if (window.refreshGalleryMainState && galleryList) window.refreshGalleryMainState(galleryList);
-            if (window.persistGalleryOrder && galleryList) window.persistGalleryOrder(galleryList);
-            closeGalleryPreview();
-        } else {
-            alert(res.message || '削除に失敗しました');
-        }
-    }).catch(function() { alert('削除に失敗しました'); });
-});
-
-    var uploadEl = document.getElementById('gallery-upload');
-    if (uploadEl) uploadEl.addEventListener('change', function() {
-        var file = this.files && this.files[0];
-        if (!file) return;
-        var slotIndex = _galleryUploadSlotIndex;
-        if (slotIndex == null) {
-            var firstEmpty = document.querySelector('#gallery-list .gallery-grid-item .photo-slot:not(.has-img)');
-            slotIndex = firstEmpty ? Array.prototype.indexOf.call(document.querySelectorAll('#gallery-list .gallery-grid-item'), firstEmpty.closest('.gallery-grid-item')) : 0;
-        }
-        var formData = new FormData();
-        formData.append('image', file);
-        formData.append('slot_index', slotIndex);
-        formData.append('_token', '{{ csrf_token() }}');
-        fetch('{{ route("shop.profile.upload.image") }}', {
-            method: 'POST',
-            body: formData,
-            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-            credentials: 'same-origin'
-        })
-            .then(function(r) { return r.text().then(function(text) { try { return { ok: r.ok, data: JSON.parse(text) }; } catch(e) { return { ok: false, data: { message: 'アップロードに失敗しました' } }; }); })
-            .then(function(result) {
-                var res = result.data;
-                if (result.ok && res.success && res.path) {
-                    var list = document.getElementById('gallery-list');
-                    var items = list && list.querySelectorAll('.gallery-grid-item');
-                    var li = items && items[slotIndex];
-                    if (li) {
-                        var slot = li.querySelector('.photo-slot');
-                        slot.classList.add('has-img');
-                        slot.setAttribute('data-image-id', res.id);
-                        slot.setAttribute('data-image-url', res.path);
-                        slot.innerHTML = '<img src="' + res.path + '" alt="" loading="lazy">' + (slotIndex === 0 ? '<span class="photo-slot-badge">MAIN</span>' : '');
-                        if (window.refreshGalleryMainState && list) window.refreshGalleryMainState(list);
-                        if (window.persistGalleryOrder && list) window.persistGalleryOrder(list);
-                    }
-                } else {
-                    alert(res.message || res.errors ? (typeof res.errors === 'object' ? (res.errors.image && res.errors.image[0]) || '入力に誤りがあります' : 'アップロードに失敗しました') : 'アップロードに失敗しました');
-                }
-            })
-            .catch(function() { alert('アップロードに失敗しました'); });
-        this.value = '';
-        _galleryUploadSlotIndex = null;
-    });
-
-    var placeholderText = 'アピールメッセージを入力すると、タイムラインに表示されます。';
+window.MYPAGE_GALLERY_CONFIG = {
+    csrfToken: @json(csrf_token()),
+    uploadUrl: @json(route('shop.profile.upload.image')),
+    deleteUrlTemplate: @json(route('shop.profile.image.delete', ['id' => '__ID__']))
+};
+</script>
+<script src="{{ asset('assets/js/mypage-gallery.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var placeholderText = 'ひとことを入力すると、タイムラインに表示されます。';
     var openWordBtn = document.getElementById('open-word-edit-btn');
     if (openWordBtn) openWordBtn.addEventListener('click', function() {
         document.getElementById('modal-word').style.display = 'flex';
         var displayEl = document.getElementById('display-word');
-        var current = displayEl.innerText.trim();
-        document.getElementById('word-input').value = (current === placeholderText) ? '' : current;
+        var current = displayEl && displayEl.innerText ? displayEl.innerText.trim() : '';
+        var wordInput = document.getElementById('word-input');
+        if (wordInput) wordInput.value = (current === placeholderText) ? '' : current;
     });
     var cancelWord = document.getElementById('word-edit-cancel-btn');
-    if (cancelWord) cancelWord.addEventListener('click', function() { document.getElementById('modal-word').style.display = 'none'; });
+    if (cancelWord) cancelWord.addEventListener('click', function() { var modalWord = document.getElementById('modal-word'); if (modalWord) modalWord.style.display = 'none'; });
     var saveWordBtn = document.getElementById('word-edit-save-btn');
     if (saveWordBtn) saveWordBtn.addEventListener('click', function() {
-        var val = document.getElementById('word-input').value.trim();
+        var wordInputEl = document.getElementById('word-input');
+        var val = (wordInputEl && wordInputEl.value || '').trim();
         var displayEl = document.getElementById('display-word');
-        if (val) {
-            displayEl.innerText = val;
-            displayEl.classList.remove('is-placeholder');
-        } else {
-            displayEl.innerText = placeholderText;
-            displayEl.classList.add('is-placeholder');
-        }
-        var updated = document.getElementById('display-word-updated');
-        if (updated) {
-            var now = new Date();
-            updated.innerText = '最終更新 ' + now.getFullYear() + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + String(now.getDate()).padStart(2, '0') + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-        }
-        document.getElementById('modal-word').style.display = 'none';
+        var updatedEl = document.getElementById('display-word-updated');
+        var m = document.getElementById('modal-word');
+        var btn = saveWordBtn;
+        if (btn.disabled) return;
+        btn.disabled = true;
+        fetch('{{ route('shop.mypage.word') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ word: val })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+            if (res.success) {
+                if (displayEl) {
+                    displayEl.innerText = val || placeholderText;
+                    displayEl.classList.toggle('is-placeholder', !val);
+                }
+                if (updatedEl && res.appeal_updated_at) {
+                    updatedEl.innerText = '最終更新 ' + res.appeal_updated_at;
+                }
+                if (m) m.style.display = 'none';
+            } else {
+                alert(res.message || '保存に失敗しました');
+            }
+        })
+        .catch(function() { alert('保存に失敗しました'); })
+        .finally(function() { btn.disabled = false; });
     });
     var profileEditBtn = document.getElementById('open-profile-edit-btn');
     if (profileEditBtn) profileEditBtn.addEventListener('click', function() {
         location.href = "{{ route('shop.profile.store.edit') }}";
     });
-}
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bindShopMypageGallery);
-} else {
-    bindShopMypageGallery();
-}
-
+});
+</script>
+<script>
 (function() {
     var forms = document.querySelectorAll('.shop-document-form');
     forms.forEach(function(form) {

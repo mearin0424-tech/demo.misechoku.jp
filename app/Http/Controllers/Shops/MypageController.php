@@ -62,11 +62,29 @@ class MypageController extends Controller
 
         $documentData = $this->documentReviewService->getShopLicensePageData($shopId);
 
+        $jobIds = DB::table('shop_jobs')->where('shop_id', $shopId)->pluck('id');
+        $applicantCount = 0;
+        $hiredCount = 0;
+        if ($jobIds->isNotEmpty()) {
+            $applicantCount = DB::table('shop_job_applications')
+                ->whereIn('shop_job_id', $jobIds)
+                ->select('cast_id')
+                ->groupBy('cast_id')
+                ->get()
+                ->count();
+            $hiredCount = (int) DB::table('shop_job_applications')
+                ->whereIn('shop_job_id', $jobIds)
+                ->where('status', 4)
+                ->count();
+        }
+
         $shopData = [
             'shop_name'    => $row->shop_name ?? 'ショップ',
             'word'         => $row->catch ?? ($row->message ?? '最高級の空間で、最高の出会いを。'),
             'review_avg'   => $row && $row->avg_eva ? round((float)$row->avg_eva, 1) : 0.0,
             'review_count' => $row ? (int)$row->review_count : 0,
+            'applicant_count' => $applicantCount,
+            'hired_count'  => $hiredCount,
             'pref'         => $row->pref ?? '',
             'city'         => $row->city ?? '',
             'addr1'        => trim(($row->addr2 ?? '') . ' ' . ($row->addr3 ?? '')),
@@ -97,6 +115,31 @@ class MypageController extends Controller
             'subImages' => $subImages,
             'documents' => $documentData['documents'],
             'allDocumentsApproved' => $documentData['all_approved'],
+        ]);
+    }
+
+    /**
+     * ひとこと（キャッチコピー）をモーダルから更新
+     */
+    public function updateWord(Request $request)
+    {
+        $request->validate([
+            'word' => 'nullable|string|max:500',
+        ]);
+
+        $shopId = $this->currentShopId();
+        $word = $request->input('word', '');
+        $word = is_string($word) ? trim($word) : '';
+
+        DB::table('shop_profiles')->where('shop_id', $shopId)->update([
+            'catch' => $word,
+            'message' => $word,
+            'updated_at' => Carbon::now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'appeal_updated_at' => Carbon::now()->format('Y/m/d H:i'),
         ]);
     }
 
