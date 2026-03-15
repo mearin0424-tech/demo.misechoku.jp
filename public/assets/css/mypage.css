@@ -647,6 +647,145 @@ a.btn-outline-gold {
     flex-shrink: 0;
 }
 
+/* --- キャストマイページ：メニューボタン（採用状況・請求入金管理）新デザイン --- */
+.cast-mypage-menu-buttons .menu-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px;
+    background-color: #1a1111;
+    border: 1px solid #3a2828;
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    text-decoration: none;
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+.cast-mypage-menu-buttons .menu-btn:last-child {
+    margin-bottom: 0;
+}
+.cast-mypage-menu-buttons .menu-btn:active {
+    transform: scale(0.98);
+}
+.cast-mypage-menu-buttons .menu-btn:hover {
+    border-color: rgba(138, 110, 61, 0.5);
+}
+
+.cast-mypage-menu-buttons .menu-btn-shine {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to right, transparent, rgba(205, 167, 102, 0.05), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.7s ease-out;
+    pointer-events: none;
+}
+.cast-mypage-menu-buttons .menu-btn:hover .menu-btn-shine {
+    transform: translateX(100%);
+}
+
+.cast-mypage-menu-buttons .menu-btn-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    z-index: 10;
+}
+
+.cast-mypage-menu-buttons .menu-btn-icon {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background-color: #231818;
+    border: 1px solid #3a2828;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #cda766;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+.cast-mypage-menu-buttons .menu-btn:hover .menu-btn-icon {
+    transform: scale(1.05);
+    background-color: rgba(205, 167, 102, 0.1);
+    border-color: rgba(205, 167, 102, 0.3);
+}
+
+.cast-mypage-menu-buttons .menu-btn-text {
+    text-align: left;
+    min-width: 0;
+}
+.cast-mypage-menu-buttons .menu-btn-label {
+    font-size: 9px;
+    color: #8a7b7b;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    margin: 0 0 2px 0;
+    transition: color 0.3s ease;
+}
+.cast-mypage-menu-buttons .menu-btn:hover .menu-btn-label {
+    color: #cda766;
+}
+.cast-mypage-menu-buttons .menu-btn-title {
+    font-size: 15px;
+    font-family: var(--font-serif), serif;
+    color: #cda766;
+    letter-spacing: 0.1em;
+    margin: 0;
+    transition: color 0.3s ease;
+}
+.cast-mypage-menu-buttons .menu-btn:hover .menu-btn-title {
+    color: #ffffff;
+}
+
+.cast-mypage-menu-buttons .menu-btn-arrow {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background-color: #160d0d;
+    border: 1px solid #3a2828;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #5a4a4a;
+    position: relative;
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+.cast-mypage-menu-buttons .menu-btn:hover .menu-btn-arrow {
+    background: linear-gradient(to bottom right, #cda766, #b38f4a);
+    border-color: #cda766;
+    color: #110a0a;
+}
+
+/* 現在のページのメニュー項目 */
+.cast-mypage-menu-buttons .menu-btn.is-current {
+    border-color: rgba(205, 167, 102, 0.6);
+}
+.cast-mypage-menu-buttons .menu-btn.is-current .menu-btn-label {
+    color: #cda766;
+}
+.cast-mypage-menu-buttons .menu-btn.is-current .menu-btn-title {
+    color: #ffffff;
+}
+.cast-mypage-menu-buttons .menu-btn.is-current .menu-btn-icon {
+    background-color: rgba(205, 167, 102, 0.1);
+    border-color: rgba(205, 167, 102, 0.3);
+}
+.cast-mypage-menu-buttons .menu-btn.is-current .menu-btn-arrow {
+    background: linear-gradient(to bottom right, #cda766, #b38f4a);
+    border-color: #cda766;
+    color: #110a0a;
+}
+
 /* --- 書類管理 --- */
 .doc-list {
     list-style: none;
