@@ -151,14 +151,27 @@ class DepositController extends Controller
     }
 
     /**
+     * 請求書帳票テンプレートをサンプルデータでPDFダウンロード（運営管理画面用）
+     */
+    public function downloadInvoiceTemplate(): Response
+    {
+        $invoice = $this->billingManagementService->getSampleInvoiceData();
+
+        return $this->invoiceToPdfResponse($invoice, '請求書_帳票テンプレート.pdf');
+    }
+
+    /**
      * 請求書データを帳票テンプレートでPDF化してレスポンスを返す。
      * barryvdh/laravel-dompdf がインストールされていない場合はHTML表示へリダイレクト。
      */
     private function invoiceToPdfResponse(array $invoice, string $filename): Response
     {
         if (!class_exists(\Barryvdh\DomPDF\Facade\Pdf::class)) {
+            $route = $invoice['deposit_id'] > 0
+                ? route('admin.deposits.invoice.show', ['deposit' => $invoice['deposit_id']])
+                : route('admin.invoices.index');
             return redirect()
-                ->route('admin.deposits.invoice.show', ['deposit' => $invoice['deposit_id']])
+                ->to($route)
                 ->with('status', 'PDF生成には barryvdh/laravel-dompdf のインストールが必要です。画面の「印刷」から「PDFに保存」を選択してください。');
         }
 

@@ -6,6 +6,9 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}">
+@if($isCast)
+<link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
+@endif
 <style>
     .result-template-list {
         display: flex;
@@ -62,6 +65,12 @@
         </div>
         @if(empty($blockState['blocked_by_other']))
         <div class="talk-room-header-actions">
+            @if($isCast && !empty($reviewApplicationId))
+                <button type="button" class="btn-interview btn-review-post" data-application-id="{{ $reviewApplicationId }}" title="レビュー投稿">
+                    <i class="fas fa-star"></i>
+                    <span>レビュー投稿</span>
+                </button>
+            @endif
             @if(!$isCast && !empty($canOfferInterview))
                 <button type="button" id="open-interview-modal" class="btn-interview">
                     <i class="far fa-calendar-alt"></i>
@@ -165,8 +174,11 @@
                                 @endforeach
                             </ul>
                             @if($selectedOption)
-                                <p class="interview-note">
-                                    確定日時: {{ $selectedOption->format('Y年n月j日 H:i') }}
+                                <p class="interview-note">確定日時: {{ $selectedOption->format('Y年n月j日 H:i') }}</p>
+                            @endif
+                            @if(!$isCast && !empty($canCancelStatus) && $msg->is_mine && $msg->selected_option)
+                                <p class="interview-change-schedule-wrap">
+                                    <button type="button" class="js-interview-change-schedule interview-change-schedule-btn">日程を変更</button>
                                 </p>
                             @endif
                             @if($msg->is_mine)
@@ -331,6 +343,216 @@
         </div>
     </div>
 </div>
+@endif
+
+@if($isCast)
+{{-- レビュー投稿・ボーナス条件達成確認モーダル（キャスト用） --}}
+<div id="review-post-modal" class="payment-bank-modal" role="dialog" aria-labelledby="review-post-modal-title" aria-modal="true" hidden>
+    <div class="payment-bank-modal-backdrop" data-close-review-modal></div>
+    <div class="payment-bank-modal-panel">
+        <div class="payment-bank-modal-header">
+            <h3 id="review-post-modal-title" class="payment-bank-modal-title">レビュー投稿</h3>
+            <button type="button" class="payment-bank-modal-close" data-close-review-modal aria-label="閉じる"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="payment-bank-modal-body">
+            <p id="review-modal-loading" class="deposit-precheck-note">読み込み中...</p>
+            <div id="review-modal-form-wrap" style="display:none;">
+                <p class="deposit-precheck-note">勤務完了後、お店の雰囲気や働きやすさをレビューしてください。</p>
+                <form id="review-post-form">
+                    <input type="hidden" name="application_id" id="review-form-application-id" value="">
+                    @csrf
+                    <div class="deposit-review-grid" id="review-modal-scores"></div>
+                    <div class="deposit-review-card">
+                        <label class="deposit-review-label" for="review-modal-comment">レビューコメント</label>
+                        <textarea id="review-modal-comment" name="review_comment" rows="4" placeholder="働いてみた感想、雰囲気、条件の印象などを入力してください。" required></textarea>
+                    </div>
+                    <p id="review-modal-error" class="deposit-precheck-note" style="color:#fca5a5; display:none;"></p>
+                    <div class="text-right mt-3">
+                        <button type="submit" class="btn-action manage" id="review-submit-btn">投稿する</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="bonus-confirm-modal" class="payment-bank-modal" role="dialog" aria-labelledby="bonus-confirm-modal-title" aria-modal="true" hidden>
+    <div class="payment-bank-modal-backdrop" data-close-bonus-modal></div>
+    <div class="payment-bank-modal-panel">
+        <div class="payment-bank-modal-header">
+            <h3 id="bonus-confirm-modal-title" class="payment-bank-modal-title">ボーナス条件達成確認</h3>
+            <button type="button" class="payment-bank-modal-close" data-close-bonus-modal aria-label="閉じる"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="payment-bank-modal-body">
+            <p class="deposit-precheck-note">採用された時点のボーナス金・達成条件です。内容を確認のうえ「完了」で入金申請を行ってください。</p>
+            <div class="deposit-precheck-card">
+                <div class="deposit-precheck-title">
+                    <span id="bonus-confirm-shop-name">—</span>
+                    <span class="doc-status status-pending">採用済み案件</span>
+                </div>
+                <div class="deposit-precheck-meta">ボーナス金額: ¥<span id="bonus-confirm-amount">0</span></div>
+                <div class="deposit-precheck-note" id="bonus-confirm-condition">—</div>
+            </div>
+            <form id="bonus-confirm-form">
+                <input type="hidden" name="application_id" id="bonus-confirm-application-id" value="">
+                @csrf
+                <input type="hidden" name="confirm_bonus_condition" value="1">
+                <label class="deposit-check-row">
+                    <input type="checkbox" name="confirm_checked" value="1" required>
+                    <span>上記のボーナス達成条件を確認し、申請内容に相違がないことを確認しました。</span>
+                </label>
+                <p id="bonus-confirm-error" class="deposit-precheck-note" style="color:#fca5a5; display:none;"></p>
+                <div class="text-right mt-3">
+                    <button type="submit" class="btn-action manage" id="bonus-confirm-submit-btn">完了</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
+
+@if($isCast)
+@push('scripts')
+<script>
+(function () {
+    var reviewModal = document.getElementById('review-post-modal');
+    var bonusModal = document.getElementById('bonus-confirm-modal');
+    if (!reviewModal || !bonusModal) return;
+    var requestTargetUrl = '{{ route("cast.mypage.deposit.request-target") }}';
+    var reviewPostUrl = '{{ route("cast.mypage.deposit.review") }}';
+    var depositRequestUrl = '{{ route("cast.mypage.deposit.request") }}';
+
+    function openReviewModal(applicationId) {
+        document.getElementById('review-form-application-id').value = applicationId;
+        document.getElementById('review-modal-loading').style.display = 'block';
+        document.getElementById('review-modal-form-wrap').style.display = 'none';
+        document.getElementById('review-modal-error').style.display = 'none';
+        reviewModal.removeAttribute('hidden');
+        document.body.style.overflow = 'hidden';
+        fetch(requestTargetUrl + '?application_id=' + encodeURIComponent(applicationId), {
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            document.getElementById('review-modal-loading').style.display = 'none';
+            if (!data.success || !data.request_target) {
+                document.getElementById('review-modal-error').textContent = data.message || 'データの取得に失敗しました。';
+                document.getElementById('review-modal-error').style.display = 'block';
+                return;
+            }
+            var target = data.request_target;
+            if (target.review_exists) {
+                reviewModal.setAttribute('hidden', '');
+                document.body.style.overflow = '';
+                showBonusConfirmModal(applicationId, target);
+                return;
+            }
+            var scoresWrap = document.getElementById('review-modal-scores');
+            scoresWrap.innerHTML = '';
+            (target.review_contents || []).forEach(function (c) {
+                var div = document.createElement('div');
+                div.className = 'deposit-review-card';
+                div.innerHTML = '<label class="deposit-review-label">' + (c.name || '') + '</label>' +
+                    '<select name="review_scores[' + c.id + ']" required><option value="">評価を選択</option>' +
+                    [5,4,3,2,1].map(function (s) { return '<option value="' + s + '">' + s + ' / 5</option>'; }).join('') + '</select>';
+                scoresWrap.appendChild(div);
+            });
+            document.getElementById('review-modal-form-wrap').style.display = 'block';
+        })
+        .catch(function () {
+            document.getElementById('review-modal-loading').style.display = 'none';
+            document.getElementById('review-modal-error').textContent = '読み込みに失敗しました。';
+            document.getElementById('review-modal-error').style.display = 'block';
+        });
+    }
+    function closeReviewModal() {
+        reviewModal.setAttribute('hidden', '');
+        document.body.style.overflow = '';
+    }
+    function showBonusConfirmModal(applicationId, target) {
+        document.getElementById('bonus-confirm-application-id').value = applicationId;
+        document.getElementById('bonus-confirm-shop-name').textContent = target.shop_name || '—';
+        document.getElementById('bonus-confirm-amount').textContent = (target.bonus_amount || 0).toLocaleString();
+        document.getElementById('bonus-confirm-condition').innerHTML = (target.bonus_condition || '（条件の記載なし）').replace(/\n/g, '<br>');
+        document.getElementById('bonus-confirm-form').querySelector('input[name="confirm_checked"]').checked = false;
+        document.getElementById('bonus-confirm-error').style.display = 'none';
+        bonusModal.removeAttribute('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeBonusModal() {
+        bonusModal.setAttribute('hidden', '');
+        document.body.style.overflow = '';
+    }
+    document.querySelectorAll('.btn-review-post').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var id = this.getAttribute('data-application-id');
+            if (id) openReviewModal(id);
+        });
+    });
+    document.querySelectorAll('[data-close-review-modal]').forEach(function (el) { el.addEventListener('click', closeReviewModal); });
+    document.querySelectorAll('[data-close-bonus-modal]').forEach(function (el) { el.addEventListener('click', closeBonusModal); });
+    reviewModal.addEventListener('click', function (e) { if (e.target === reviewModal) closeReviewModal(); });
+    bonusModal.addEventListener('click', function (e) { if (e.target === bonusModal) closeBonusModal(); });
+    document.getElementById('review-post-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var form = this;
+        var fd = new FormData(form);
+        var btn = document.getElementById('review-submit-btn');
+        if (btn) btn.disabled = true;
+        fetch(reviewPostUrl, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            body: fd
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+            if (btn) btn.disabled = false;
+            if (res.success && res.request_target) {
+                closeReviewModal();
+                showBonusConfirmModal(parseInt(form.querySelector('input[name="application_id"]').value, 10), res.request_target);
+            } else {
+                document.getElementById('review-modal-error').textContent = res.message || '投稿に失敗しました。';
+                document.getElementById('review-modal-error').style.display = 'block';
+            }
+        })
+        .catch(function () {
+            if (btn) btn.disabled = false;
+            document.getElementById('review-modal-error').textContent = '送信に失敗しました。';
+            document.getElementById('review-modal-error').style.display = 'block';
+        });
+    });
+    document.getElementById('bonus-confirm-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var form = this;
+        var fd = new FormData(form);
+        fd.set('confirm_bonus_condition', '1');
+        var btn = document.getElementById('bonus-confirm-submit-btn');
+        if (btn) btn.disabled = true;
+        var errEl = document.getElementById('bonus-confirm-error');
+        fetch(depositRequestUrl, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            body: fd
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+            if (btn) btn.disabled = false;
+            if (res.success) {
+                closeBonusModal();
+                window.location.href = '{{ route("cast.mypage.employment") }}';
+            } else {
+                errEl.textContent = res.message || '申請に失敗しました。';
+                errEl.style.display = 'block';
+            }
+        })
+        .catch(function () {
+            if (btn) btn.disabled = false;
+            errEl.textContent = '送信に失敗しました。';
+            errEl.style.display = 'block';
+        });
+    });
+})();
+</script>
+@endpush
 @endif
 
 @endsection

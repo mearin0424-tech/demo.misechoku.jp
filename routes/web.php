@@ -16,6 +16,7 @@ use App\Http\Controllers\Common\TalkController as TalkController;
 // 管理者（バックオフィス）
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\DepositController as AdminDeposit;
+use App\Http\Controllers\Admin\InvoiceController as AdminInvoice;
 use App\Http\Controllers\Admin\SalesController as AdminSales;
 use App\Http\Controllers\Admin\MasterController as AdminMaster;
 use App\Http\Controllers\Admin\ColumnController as AdminColumn;
@@ -121,7 +122,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware([])->group(function () {
         Route::get('/', [AdminDashboard::class, 'index'])->name('dashboard');
 
+        // 請求書発行
+        Route::get('/invoices', [AdminInvoice::class, 'index'])->name('invoices.index');
+
         // 入金・振込管理
+        Route::get('/deposits/invoice-template/download', [AdminDeposit::class, 'downloadInvoiceTemplate'])->name('deposits.invoice-template.download');
         Route::get('/deposits', [AdminDeposit::class, 'index'])->name('deposits.index');
         Route::get('/deposits/{deposit}/invoice', [AdminDeposit::class, 'showInvoice'])->name('deposits.invoice.show');
         Route::get('/deposits/{deposit}/invoice/pdf', [AdminDeposit::class, 'downloadInvoicePdf'])->name('deposits.invoice.pdf');
@@ -342,7 +347,6 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
     Route::get('/interaction', [ShopInteraction::class, 'index'])->name('interaction.index');
     Route::get('/mypage', [CastMypage::class, 'index'])->name('mypage.index');
     Route::get('/mypage/employment', [CastMypage::class, 'employment'])->name('mypage.employment');
-    Route::get('/mypage/payment', [CastMypage::class, 'payment'])->name('mypage.payment');
     Route::get('/mypage/reviews', [CastMypage::class, 'reviews'])->name('mypage.reviews');
     Route::post('/mypage/payment/bank', [CastMypage::class, 'updateBank'])->name('mypage.payment.bank.update');
     Route::get('/mypage/identity', [CastMypage::class, 'identity'])->name('mypage.identity');
@@ -351,6 +355,8 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
     Route::post('/mypage/images/order', [CastMypage::class, 'updateImageOrder'])->name('mypage.images.order');
     Route::delete('/mypage/images/{id}', [CastMypage::class, 'deleteImage'])->name('mypage.images.delete');
     Route::post('/mypage/deposit/request', [CastMypage::class, 'requestDeposit'])->name('mypage.deposit.request');
+    Route::post('/mypage/deposit/review', [CastMypage::class, 'postReview'])->name('mypage.deposit.review');
+    Route::get('/mypage/deposit/request-target', [CastMypage::class, 'getDepositRequestTarget'])->name('mypage.deposit.request-target');
     Route::post('/mypage/deposit/confirm', [CastMypage::class, 'confirmDeposit'])->name('mypage.deposit.confirm');
 
     Route::prefix('talk')->name('talk.')->group(function () {

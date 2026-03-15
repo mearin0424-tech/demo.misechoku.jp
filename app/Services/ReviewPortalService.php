@@ -19,8 +19,8 @@ class ReviewPortalService
                 'reviews.contents',
                 'reviews.eva',
                 'reviews.created_at',
-                DB::raw($this->reviewReleaseExpression() . ' as release'),
-                DB::raw($this->reviewAnonymousExpression() . ' as anonymous'),
+                DB::raw($this->reviewReleaseExpression() . ' as `release`'),
+                DB::raw($this->reviewAnonymousExpression() . ' as `anonymous`'),
                 'cast_profiles.nickname',
                 'cast_profiles.name'
             )

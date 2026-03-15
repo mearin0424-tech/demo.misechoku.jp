@@ -342,6 +342,21 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
+        document.querySelectorAll('.js-interview-change-schedule').forEach(function(btn) {
+            btn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                if (!window.confirm('現在の面談日をキャンセルして、別の候補日を送信しますか？')) return;
+                btn.disabled = true;
+                try {
+                    await postJson(actionUrl, token, { partner_id: partnerId, action_type: 'cancel_status' });
+                    window.location.reload();
+                } catch (error) {
+                    window.alert(error.message || 'キャンセルに失敗しました。');
+                    btn.disabled = false;
+                }
+            });
+        });
+
         if (interviewForm && submitBtn) {
             interviewForm.addEventListener('submit', async function(e) {
                 e.preventDefault();

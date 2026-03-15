@@ -149,13 +149,15 @@ class BillingManagementService
             ->all();
     }
 
-    public function requestDepositForCast(string $castId, array $payload = []): array
+    public function requestDepositForCast(string $castId, array $payload = [], ?int $applicationId = null): array
     {
         if (!$this->getCastBankAccount($castId)) {
             return ['success' => false, 'message' => '入金申請の前に、キャストの振込先口座を登録してください。'];
         }
 
-        $application = $this->getLatestEligibleApplicationForCast($castId);
+        $application = $applicationId !== null
+            ? $this->getEligibleApplicationForCastById($castId, $applicationId)
+            : $this->getLatestEligibleApplicationForCast($castId);
 
         if (!$application) {
             return ['success' => false, 'message' => '入金申請の対象となる採用済み案件がありません。'];
@@ -564,6 +566,50 @@ class BillingManagementService
         ];
     }
 
+    /**
+     * 帳票テンプレート用のサンプル請求データ（管理画面からテンプレートDL時に使用）
+     */
+    public function getSampleInvoiceData(): array
+    {
+        $adminBank = $this->getAdminBankAccount();
+        $issuedAt = now();
+        $dueDate = $issuedAt->copy()->addDays(self::INVOICE_DUE_DAYS);
+
+        $adminBankData = $adminBank
+            ? [
+                'bank_name' => $adminBank->bank_name,
+                'branch_name' => $adminBank->branch_name,
+                'account_type_label' => $this->accountTypeLabel($adminBank->account_type),
+                'account_number' => $adminBank->account_number,
+                'account_holder_name' => $adminBank->account_holder_name ?? '',
+                'account_name' => $adminBank->account_name,
+            ]
+            : [
+                'bank_name' => 'サンプル銀行',
+                'branch_name' => '本店',
+                'account_type_label' => '普通',
+                'account_number' => '1234567',
+                'account_holder_name' => 'ミセチョク運営',
+                'account_name' => 'ミセチョク ウンエイ',
+            ];
+
+        return [
+            'deposit_id' => 0,
+            'invoice_number' => 'SAMPLE-' . $issuedAt->format('Ymd'),
+            'issued_at' => $issuedAt,
+            'due_date' => $dueDate,
+            'shop_name' => 'サンプル店舗名 御中',
+            'shop_email' => 'sample@example.com',
+            'shop_address' => '東京都渋谷区〇〇 1-2-3',
+            'cast_name' => 'サンプルキャスト名',
+            'bonus_amount' => 50000,
+            'system_fee_amount' => 5000,
+            'invoice_amount' => 55000,
+            'cast_transfer_amount' => 50000,
+            'admin_bank' => $adminBankData,
+        ];
+    }
+
     public function getSignedInvoiceUrl(int $depositId, ?Carbon $expiresAt = null): string
     {
         return URL::temporarySignedRoute(
@@ -713,6 +759,94 @@ class BillingManagementService
             ->first();
     }
 
+    /**
+     * 指定IDの採用済み応募を取得（キャスト本人のものに限定）
+     */
+    public function getEligibleApplicationForCastById(string $castId, int $applicationId): ?object
+    {
+        $row = DB::table('shop_job_applications')
+            ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
+            ->join('shops', 'shop_jobs.shop_id', '=', 'shops.id')
+            ->leftJoin('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
+            ->where('shop_job_applications.id', $applicationId)
+            ->where('shop_job_applications.cast_id', $castId)
+            ->where('shop_job_applications.status', 4)
+            ->select(
+                'shop_job_applications.*',
+                'shop_jobs.shop_id',
+                'shop_jobs.noruma_reward',
+                'shop_jobs.hourly_wage_regular',
+                'shop_jobs.noruma_cond',
+                'shop_profiles.shop_name'
+            )
+            ->first();
+
+        return $row ?: null;
+    }
+
+    /**
+     * 指定応募の入金申請用ターゲット（採用時点のボーナス焼き付けを含む）を返す
+     */
+    public function getRequestTargetByApplicationId(string $castId, int $applicationId): ?array
+    {
+        $application = $this->getEligibleApplicationForCastById($castId, $applicationId);
+        return $application ? $this->buildCastDepositRequestTarget($application) : null;
+    }
+
+    /**
+     * 指定店舗の採用済み応募の入金申請用ターゲットを返す（そのキャストの最新1件）
+     */
+    public function getRequestTargetByCastAndShopId(string $castId, string $shopId): ?array
+    {
+        $application = DB::table('shop_job_applications')
+            ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
+            ->join('shops', 'shop_jobs.shop_id', '=', 'shops.id')
+            ->leftJoin('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
+            ->where('shop_job_applications.cast_id', $castId)
+            ->where('shop_jobs.shop_id', $shopId)
+            ->where('shop_job_applications.status', 4)
+            ->orderByDesc('shop_job_applications.id')
+            ->select(
+                'shop_job_applications.*',
+                'shop_jobs.shop_id',
+                'shop_jobs.noruma_reward',
+                'shop_jobs.hourly_wage_regular',
+                'shop_jobs.noruma_cond',
+                'shop_profiles.shop_name'
+            )
+            ->first();
+        return $application ? $this->buildCastDepositRequestTarget($application) : null;
+    }
+
+    /**
+     * レビューのみ投稿し、ボーナス条件達成確認用の request_target を返す
+     */
+    public function submitReviewOnly(string $castId, int $applicationId, array $payload): array
+    {
+        $application = $this->getEligibleApplicationForCastById($castId, $applicationId);
+        if (!$application) {
+            return ['success' => false, 'message' => '対象の採用案件が見つかりません。'];
+        }
+        $existingDeposit = DB::table('application_deposits')
+            ->where('shop_job_application_id', $application->id)
+            ->exists();
+        if ($existingDeposit) {
+            return ['success' => false, 'message' => 'この案件の入金申請はすでに登録済みです。'];
+        }
+        $existingReview = $this->findExistingReviewForApplication($application);
+        if ($existingReview) {
+            $target = $this->buildCastDepositRequestTarget($application);
+            return ['success' => true, 'message' => 'レビューはすでに投稿済みです。', 'request_target' => $target];
+        }
+        $validation = $this->validateReviewPayload($payload);
+        if (!$validation['success']) {
+            return $validation;
+        }
+        $this->createReviewForApplication($application, $payload);
+        $requestTarget = $this->buildCastDepositRequestTarget($application);
+        return ['success' => true, 'message' => 'レビューを投稿しました。', 'request_target' => $requestTarget];
+    }
+
     private function buildCastDepositRequestTarget(object $application): array
     {
         $reviewContents = $this->orderedReviewContentsQuery()
@@ -724,6 +858,8 @@ class BillingManagementService
             ->all();
 
         $meta = $this->decodeJobMeta($application->noruma_cond ?? null);
+        $bonusAmount = $this->resolveApplicationBonusAmount($application);
+        $bonusCondition = $this->resolveApplicationBonusCondition($application, $meta);
         $existingReview = $this->findExistingReviewForApplication($application);
         $existingReviewDetails = [];
 
@@ -748,8 +884,8 @@ class BillingManagementService
             'application_id' => (int) $application->id,
             'shop_id' => $application->shop_id,
             'shop_name' => $application->shop_name ?: $application->shop_id,
-            'bonus_amount' => (int) ($application->noruma_reward ?? $application->hourly_wage_regular ?? 0),
-            'bonus_condition' => trim((string) ($meta['bonus_condition'] ?? '')),
+            'bonus_amount' => $bonusAmount,
+            'bonus_condition' => $bonusCondition,
             'review_contents' => $reviewContents,
             'review_exists' => $existingReview !== null,
             'review_comment' => $existingReview->contents ?? '',
@@ -764,6 +900,24 @@ class BillingManagementService
     private function findExistingReviewForApplication(object $application): ?object
     {
         return $this->findLatestReviewForCastShop((string) $application->cast_id, (string) $application->shop_id);
+    }
+
+    /** 採用時点の焼き付けがあればそれを、なければ求人から取得 */
+    private function resolveApplicationBonusAmount(object $application): int
+    {
+        if (isset($application->hired_bonus_amount) && $application->hired_bonus_amount !== null && $application->hired_bonus_amount !== '') {
+            return (int) $application->hired_bonus_amount;
+        }
+        return (int) ($application->noruma_reward ?? $application->hourly_wage_regular ?? 0);
+    }
+
+    /** 採用時点の焼き付けがあればそれを、なければ求人metaから取得 */
+    private function resolveApplicationBonusCondition(object $application, array $meta): string
+    {
+        if (isset($application->hired_bonus_condition) && $application->hired_bonus_condition !== null) {
+            return trim((string) $application->hired_bonus_condition);
+        }
+        return trim((string) ($meta['bonus_condition'] ?? ''));
     }
 
     private function findLatestReviewForCastShop(string $castId, string $shopId): ?object
@@ -940,6 +1094,7 @@ class BillingManagementService
     private function calculateAmounts(object $row): array
     {
         $bonusAmount = (int) ($row->bonus_amount
+            ?? $row->hired_bonus_amount
             ?? $row->noruma_reward
             ?? $row->hourly_wage_regular
             ?? 0);

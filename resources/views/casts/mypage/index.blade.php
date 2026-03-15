@@ -101,7 +101,7 @@
                     </div>
                     <a href="{{ asset('personality-test') }}" target="_blank" rel="noopener noreferrer" class="btn-personality-test">
                         <i class="fas fa-up-right-from-square"></i>
-                        <span>接客タイプ診断を別タブで開く</span>
+                        <span>接客タイプ診断を開く</span>
                     </a>
                 </div>
 

@@ -533,16 +533,15 @@
    ========================================================================== */
 #talk-room-container .chat-input-area {
     position: fixed;
-    left: 0;
-    right: 0;
+    left: 50%;
+    transform: translateX(-50%);
     bottom: var(--footer-height);
     z-index: 100;
-    width: 100%;
-    max-width: min(100vw, calc(var(--max-content-width) + 2 * var(--content-padding-x)));
-    margin: 0 auto;
+    width: min(100vw, var(--max-content-width));
+    max-width: var(--max-content-width);
+    box-sizing: border-box;
     padding: 10px var(--content-padding-x) 12px;
     padding-bottom: calc(12px + env(safe-area-inset-bottom, 0));
-    box-sizing: border-box;
     background: rgba(26, 10, 14, 0.98);
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 -8px 22px rgba(0, 0, 0, 0.22);
@@ -959,7 +958,7 @@
    ========================================================================== */
 .message-bubble-interview {
     min-width: min(264px, 100%);
-    padding: 12px 12px 11px;
+    padding: 10px 12px 8px;
     border-radius: 20px;
 }
 .msg-right .message-bubble-interview {
@@ -982,7 +981,7 @@
 }
 
 .message-bubble-confirmed .interview-title {
-    margin-bottom: 6px;
+    margin-bottom: 3px;
 }
 
 .msg-right .message-bubble-confirmed .interview-title,
@@ -1000,7 +999,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    margin-bottom: 7px;
+    margin-bottom: 4px;
 }
 
 .interview-title {
@@ -1031,7 +1030,7 @@
 }
 
 .interview-body-copy {
-    margin: 0 0 6px;
+    margin: 0 0 3px;
     font-size: 0.74rem;
     line-height: 1.5;
     color: rgba(247, 237, 237, 0.92);
@@ -1043,7 +1042,7 @@
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 4px;
 }
 
 .interview-option-btn {
@@ -1067,8 +1066,9 @@
 
 .interview-option-main {
     display: flex;
-    flex-direction: column;
-    gap: 1px;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
     flex: 1;
 }
 
@@ -1135,8 +1135,41 @@ button.interview-option-btn:hover {
 .interview-note {
     font-size: 0.66rem;
     opacity: 0.95;
-    margin: 8px 0 0;
+    margin: 4px 0 0;
     color: rgba(245, 230, 230, 0.9);
+}
+
+.interview-change-schedule-wrap {
+    margin: 4px 0 0;
+}
+
+.interview-change-schedule-btn {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #2c1a1d;
+    background: rgba(226, 188, 79, 0.25);
+    border: 1px solid rgba(226, 188, 79, 0.4);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.msg-right .interview-change-schedule-btn:hover {
+    background: rgba(226, 188, 79, 0.4);
+    border-color: rgba(226, 188, 79, 0.6);
+}
+
+.msg-left .interview-change-schedule-btn {
+    color: #fff3cf;
+    background: rgba(226, 188, 79, 0.2);
+    border-color: rgba(226, 188, 79, 0.35);
+}
+
+.msg-left .interview-change-schedule-btn:hover {
+    background: rgba(226, 188, 79, 0.3);
+    border-color: rgba(226, 188, 79, 0.5);
 }
 
 /* --- ピン留めボタン --- */

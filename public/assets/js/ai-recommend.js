@@ -704,7 +704,7 @@
                 addAiMessage(
                     '接客タイプ診断結果がまだ登録されていないようです。\n**別タブで診断を開く**か、**診断結果なしでそのまま探す**かをお選びください。',
                     [
-                        { value: '接客タイプ診断を別タブで開く', label: '接客タイプ診断を別タブで開く', wide: true },
+                        { value: '接客タイプ診断を開く', label: '接客タイプ診断を開く', wide: true },
                         { value: '診断結果なしで進める', label: '診断結果なしで進める', wide: true }
                     ]
                 );
@@ -744,7 +744,7 @@
                     return;
                 }
 
-                if (role === 'cast' && text.indexOf('接客タイプ診断を別タブで開く') !== -1) {
+                if (role === 'cast' && text.indexOf('接客タイプ診断を開く') !== -1) {
                     if (personalityTestUrl) {
                         window.open(personalityTestUrl, '_blank', 'noopener');
                     }

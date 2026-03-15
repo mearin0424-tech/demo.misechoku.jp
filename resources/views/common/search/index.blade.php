@@ -98,10 +98,10 @@
                         <div class="ai-recommend__intro-title">接客タイプ診断結果をご利用いただくと、おすすめの精度を高められます</div>
                         <p class="ai-recommend__intro-text">
                             AIレコメンドでは診断ロジックは実行せず、保存済みの診断結果のみを読み込みます。<br>
-                            まだ未登録の場合は、先に接客タイプ診断を別タブでご実施ください。
+                            まだ未登録の場合は、先に接客タイプ診断をご実施ください。
                         </p>
                         <a href="{{ $aiPersonalityTestUrl }}" target="_blank" rel="noopener noreferrer" class="ai-recommend__intro-link">
-                            接客タイプ診断を別タブで開く
+                            接客タイプ診断を開く
                         </a>
                     </div>
                 @endif

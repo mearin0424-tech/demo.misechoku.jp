@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class TalkController extends Controller
 {
@@ -66,6 +67,9 @@ class TalkController extends Controller
         $shopId = $isCastPortal ? $partnerId : $currentId;
         $blockState = $this->getBlockState($castId, $shopId, $isCastPortal);
         $currentApplicationStatus = $this->getCurrentApplicationStatus($castId, $shopId);
+        $applicationForReview = $isCastPortal && $currentApplicationStatus === self::APPLICATION_STATUS_HIRED
+            ? $this->findApplicationForTalk($castId, $shopId)
+            : null;
 
         $rawMessages = DB::table('messages')
             ->where($isCastPortal ? 'cast_id' : 'shop_id', $currentId)
@@ -117,6 +121,7 @@ class TalkController extends Controller
                     'rejected' => $this->messageTemplateService->getTemplates('talk_rejected'),
                 ]
                 : [],
+            'reviewApplicationId' => $applicationForReview ? (int) $applicationForReview->id : null,
         ]);
     }
 
@@ -739,6 +744,14 @@ class TalkController extends Controller
         } elseif ($actionType === 'hired') {
             $updates['status'] = self::APPLICATION_STATUS_HIRED;
             $updates['reason_rejection'] = null;
+            if (Schema::hasTable('shop_job_applications')
+                && Schema::hasColumn('shop_job_applications', 'hired_bonus_amount')) {
+                $snapshot = $this->snapshotHiredBonusForApplication($application->shop_job_id);
+                if ($snapshot !== null) {
+                    $updates['hired_bonus_amount'] = $snapshot['bonus_amount'];
+                    $updates['hired_bonus_condition'] = $snapshot['bonus_condition'];
+                }
+            }
         } elseif ($actionType === 'rejected') {
             $updates['status'] = self::APPLICATION_STATUS_REJECTED;
             $updates['reason_rejection'] = trim($content);
@@ -807,5 +820,28 @@ class TalkController extends Controller
             'rejected' => $this->messageTemplateService->getDefaultBody('talk_rejected'),
             default => '',
         };
+    }
+
+    /**
+     * 採用時点のボーナス金・達成条件を求人から取得して返す（焼き付け用）
+     */
+    private function snapshotHiredBonusForApplication(int $shopJobId): ?array
+    {
+        $job = DB::table('shop_jobs')->where('id', $shopJobId)->first();
+        if (!$job) {
+            return null;
+        }
+
+        $bonusAmount = (int) ($job->noruma_reward ?? $job->hourly_wage_regular ?? 0);
+        $bonusCondition = '';
+        if (!empty($job->noruma_cond)) {
+            $meta = json_decode($job->noruma_cond, true);
+            $bonusCondition = trim((string) ($meta['bonus_condition'] ?? ''));
+        }
+
+        return [
+            'bonus_amount' => $bonusAmount,
+            'bonus_condition' => $bonusCondition,
+        ];
     }
 }

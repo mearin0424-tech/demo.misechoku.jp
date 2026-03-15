@@ -177,7 +177,12 @@
         </section>
 
         <section class="admin-panel">
-            <h2 class="admin-panel-title">運営口座</h2>
+            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px;">
+                <h2 class="admin-panel-title" style="margin-bottom: 0;">運営口座</h2>
+                <a href="{{ route('admin.deposits.invoice-template.download') }}" class="btn-action manage" target="_blank" rel="noopener">
+                    <i class="fas fa-file-pdf"></i> 請求書帳票テンプレートをダウンロード
+                </a>
+            </div>
             @if($adminBank)
                 <div class="billing-meta-list">
                     <div class="billing-meta-item">

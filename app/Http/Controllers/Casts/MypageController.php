@@ -47,11 +47,12 @@ class MypageController extends Controller
     }
 
     /**
-     * 採用状況
+     * 採用・入金管理（採用状況と請求・入金を1画面に統合）
      */
     public function employment()
     {
         $castId = $this->currentCastId();
+
         $employments = DB::table('shop_job_applications')
             ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
             ->join('shops', 'shop_jobs.shop_id', '=', 'shops.id')
@@ -59,6 +60,7 @@ class MypageController extends Controller
             ->where('shop_job_applications.cast_id', $castId)
             ->orderByDesc('shop_job_applications.updated_at')
             ->select(
+                'shop_job_applications.id as application_id',
                 'shop_job_applications.status',
                 'shop_job_applications.result_date',
                 'shops.id as shop_id',
@@ -69,6 +71,7 @@ class MypageController extends Controller
                 $status = $this->mapApplicationStatus((int) $row->status);
 
                 return [
+                    'application_id' => (int) $row->application_id,
                     'shop_name' => $row->shop_name ?: $row->shop_id,
                     'status_label' => $status['label'],
                     'status_class' => $status['class'],
@@ -80,25 +83,14 @@ class MypageController extends Controller
             })
             ->all();
 
+        $paymentData = $this->billingManagementService->getCastPaymentPageData($castId);
+
         return view('casts.mypage.employment', [
             'pageId' => 'mypage',
             'employments' => $employments,
-        ]);
-    }
-
-    /**
-     * 請求・入金管理
-     */
-    public function payment()
-    {
-        $castId = $this->currentCastId();
-        $paymentData = $this->billingManagementService->getCastPaymentPageData($castId);
-
-        return view('casts.mypage.payment', [
-            'pageId'       => 'mypage',
-            'payments'     => $paymentData['payments'],
-            'depositFlow'  => $paymentData['flow'],
-            'castBank'     => $paymentData['bank'],
+            'payments' => $paymentData['payments'],
+            'depositFlow' => $paymentData['flow'],
+            'castBank' => $paymentData['bank'],
             'currentDeposit' => $paymentData['current'],
             'canRequestDeposit' => $paymentData['can_request'],
             'requestDisabledReason' => $paymentData['request_disabled_reason'],
@@ -282,19 +274,64 @@ class MypageController extends Controller
 
     /**
      * キャスト側：入金申請（ボーナス条件達成後に押す想定）
+     * application_id があればその案件で申請（モーダル「完了」用）
      */
     public function requestDeposit(\Illuminate\Http\Request $request)
     {
+        $applicationId = $request->filled('application_id') ? (int) $request->input('application_id') : null;
         $result = $this->billingManagementService->requestDepositForCast(
             $this->currentCastId(),
-            $request->all()
+            $request->all(),
+            $applicationId
         );
 
+        if ($request->wantsJson()) {
+            return response()->json($result);
+        }
+
         $redirect = redirect()
-            ->route('cast.mypage.payment')
+            ->route('cast.mypage.employment')
             ->with($result['success'] ? 'status' : 'error', $result['message']);
 
         return $result['success'] ? $redirect : $redirect->withInput();
+    }
+
+    /**
+     * レビューのみ投稿（モーダル用）。成功時はボーナス条件達成確認用の request_target を返す
+     */
+    public function postReview(Request $request)
+    {
+        $request->validate(['application_id' => 'required|integer']);
+        $applicationId = (int) $request->input('application_id');
+        $result = $this->billingManagementService->submitReviewOnly(
+            $this->currentCastId(),
+            $applicationId,
+            $request->all()
+        );
+        return response()->json($result);
+    }
+
+    /**
+     * 指定案件のボーナス条件達成確認用データ（採用時点の焼き付け）を返す
+     */
+    public function getDepositRequestTarget(Request $request)
+    {
+        $applicationId = $request->input('application_id');
+        $shopId = $request->input('shop_id');
+        $castId = $this->currentCastId();
+
+        if ($applicationId !== null && $applicationId !== '') {
+            $target = $this->billingManagementService->getRequestTargetByApplicationId($castId, (int) $applicationId);
+        } elseif ($shopId !== null && $shopId !== '') {
+            $target = $this->billingManagementService->getRequestTargetByCastAndShopId($castId, (string) $shopId);
+        } else {
+            $target = null;
+        }
+
+        if ($target === null) {
+            return response()->json(['success' => false, 'message' => '対象の採用案件が見つかりません。'], 404);
+        }
+        return response()->json(['success' => true, 'request_target' => $target]);
     }
 
     /**
@@ -305,7 +342,7 @@ class MypageController extends Controller
         $result = $this->billingManagementService->confirmCastReceipt($this->currentCastId());
 
         return redirect()
-            ->route('cast.mypage.payment')
+            ->route('cast.mypage.employment')
             ->with($result['success'] ? 'status' : 'error', $result['message']);
     }
 
