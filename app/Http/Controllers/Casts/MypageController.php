@@ -471,6 +471,23 @@ class MypageController extends Controller
             ->where('action_type', 3)
             ->count();
 
+        $matchCount = 0;
+        if (Schema::hasTable('shop_job_applications')) {
+            $matchCount = (int) DB::table('shop_job_applications')
+                ->where('cast_id', $castId)
+                ->where('status', 4)
+                ->count();
+        }
+
+        $bonusTotal = 0;
+        if (Schema::hasTable('application_deposits') && Schema::hasTable('shop_job_applications')) {
+            $bonusTotal = (int) DB::table('application_deposits')
+                ->join('shop_job_applications', 'application_deposits.shop_job_application_id', '=', 'shop_job_applications.id')
+                ->where('shop_job_applications.cast_id', $castId)
+                ->whereNotNull('application_deposits.bonus_amount')
+                ->sum('application_deposits.bonus_amount');
+        }
+
         // 画像: cast_images (type=1) を id + url で取得（is_main を先に）
         $images = [];
         $castImages = DB::table('cast_images')
@@ -525,6 +542,8 @@ class MypageController extends Controller
             'is_applied'       => true,
             'is_kept'          => true,
             'like_cnt'         => $likeCount,
+            'match_cnt'        => $matchCount,
+            'bonus_total'      => $bonusTotal,
             'pref'             => $castRow->pref ?? '',
             'city'             => $castRow->city ?? '',
             'height'           => $castRow->height,
@@ -593,6 +612,8 @@ class MypageController extends Controller
             'is_applied'       => false,
             'is_kept'          => false,
             'like_cnt'         => 0,
+            'match_cnt'        => 0,
+            'bonus_total'      => 0,
             'pref'             => '',
             'city'             => '',
             'height'           => null,

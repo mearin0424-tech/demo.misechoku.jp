@@ -378,9 +378,9 @@
     width: max-content; /* 1行文でも幅を内容に合わせる */
 }
 .msg-left .message-block { align-items: flex-start; max-width: calc(100% - 42px); }
-/* 自分の吹き出しの尻尾が下の余白にはみ出さないようスペースを確保 */
+/* 尻尾は吹き出し内に収めたため下余白は控えめ */
 .msg-right .message-block {
-    padding-bottom: 12px;
+    padding-bottom: 6px;
     box-sizing: border-box;
 }
 
@@ -390,7 +390,8 @@
     align-items: center;
     gap: 8px;
     max-width: 100%;
-    width: max-content; /* 吹き出し＋メタのみの幅にし、余白を出さない */
+    width: max-content;
+    min-width: 0; /* flexで幅が縮むようにする */
 }
 
 .msg-left .message-inline {
@@ -439,9 +440,10 @@
 .message-bubble {
     display: inline-block;
     max-width: 100%;
-    width: fit-content; /* テキスト1行なら1行分の幅に収める */
-    padding: 10px 13px;
-    border-radius: 18px;
+    width: fit-content;
+    min-width: 0;
+    padding: 8px 11px; /* 1行文の余白を抑える */
+    border-radius: 14px;
     font-size: 0.82rem;
     line-height: 1.5;
     letter-spacing: 0;
@@ -462,7 +464,7 @@
 .msg-left .message-bubble {
     background: linear-gradient(180deg, rgba(43, 19, 24, 0.98), rgba(30, 12, 16, 0.98));
     color: #f7eded;
-    border-radius: 18px 18px 18px 7px;
+    border-radius: 14px 14px 14px 5px;
     border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -470,20 +472,20 @@
     background: linear-gradient(145deg, #e3bd52 0%, #d5aa2b 100%);
     color: #231516;
     font-weight: 500;
-    border-radius: 18px 18px 7px 18px;
+    border-radius: 14px 14px 5px 14px;
     border: 1px solid rgba(255, 239, 184, 0.7);
     --bubble-tail-fill: #d5aa2b;
     overflow: visible;
 }
 
-/* 尻尾：吹き出しの角に重ねて一体化（right で本体に食い込ませ、ずれを解消） */
+/* 尻尾：吹き出しの角の内側にのみ描画（欄外に出さない） */
 .message-bubble-tail {
     display: none;
     position: absolute;
-    right: -4px;
-    bottom: 0;
-    width: 8px;
-    height: 12px;
+    right: 2px;
+    bottom: 3px;
+    width: 6px;
+    height: 10px;
     color: var(--bubble-tail-fill, #d5aa2b);
     pointer-events: none;
 }
@@ -540,15 +542,23 @@
     box-shadow: 0 -8px 22px rgba(0, 0, 0, 0.22);
 }
 
-.chat-input-wrapper {
+/* LINE風：入力欄と送信ボタンを横並び（ボタンは入力欄の外） */
+.chat-input-row {
     display: flex;
     align-items: flex-end;
-    gap: 8px;
+    gap: 10px;
+}
+
+.chat-input-wrapper {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: flex-end;
     background: linear-gradient(180deg, rgba(18, 7, 10, 0.98), rgba(11, 4, 6, 0.98));
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 999px;
-    padding: 6px 6px 6px 16px;
-    min-height: 48px;
+    padding: 8px 16px 8px 16px;
+    min-height: 44px;
     box-shadow: inset 0 2px 7px rgba(0, 0, 0, 0.38), 0 10px 18px rgba(0, 0, 0, 0.18);
 }
 
@@ -559,10 +569,11 @@
 
 .chat-input-wrapper textarea {
     flex: 1;
+    min-width: 0;
     background: transparent;
     border: none;
     color: #fff2f0;
-    padding: 8px 0;
+    padding: 4px 0;
     font-size: 0.9rem;
     line-height: 1.4;
     max-height: 100px;
@@ -574,20 +585,20 @@
     color: rgba(209, 193, 193, 0.66);
 }
 
-/* 送信ボタン：ゴールドで高級感（コンパクトに） */
+/* 送信ボタン：入力欄の外・LINEのように右側に独立配置 */
 .btn-send {
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
-    min-height: 40px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    flex-shrink: 0;
     background: linear-gradient(145deg, #f2d06d 0%, #d6ab2a 55%, #b88a14 100%);
     color: #1a0a0a;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    border: none;
+    border: 1px solid rgba(255, 239, 184, 0.4);
     box-shadow: 0 8px 20px rgba(212, 175, 55, 0.35), 0 2px 6px rgba(0, 0, 0, 0.3);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }

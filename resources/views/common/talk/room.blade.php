@@ -251,9 +251,11 @@
         <div class="chat-input-area">
             <form id="chat-form" data-url="{{ $sendUrl }}" data-action-url="{{ $actionUrl }}" data-partner-id="{{ $partnerId }}">
                 @csrf
-                <div class="chat-input-wrapper">
-                    <textarea name="message" rows="1" placeholder="メッセージを入力..." class="focus:outline-none"></textarea>
-                    <button type="submit" class="btn-send"><i class="fas fa-paper-plane"></i></button>
+                <div class="chat-input-row">
+                    <div class="chat-input-wrapper">
+                        <textarea name="message" rows="1" placeholder="メッセージを入力..." class="focus:outline-none"></textarea>
+                    </div>
+                    <button type="submit" class="btn-send" aria-label="送信"><i class="fas fa-paper-plane"></i></button>
                 </div>
             </form>
         </div>
