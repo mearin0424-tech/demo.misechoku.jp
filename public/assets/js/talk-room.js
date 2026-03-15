@@ -76,24 +76,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const tempId = 'msg-' + Date.now();
             const now = new Date();
             const timeStr = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
-            const messageHtml = `
-                <div class="message-row msg-right" id="${tempId}">
-                    <div class="message-block">
-                        <div class="message-inline">
-                            <div class="msg-meta">
-                                <span class="msg-status sending"><i class="fas fa-check"></i></span>
-                                <span class="msg-time">${timeStr}</span>
-                            </div>
-                            <div class="message-bubble">
-                                <p class="m-0">${escapeHtml(content).replace(/\n/g, '<br>')}</p>
-                                <span class="message-bubble-tail" aria-hidden="true">
-                                    <svg viewBox="0 0 8 12" fill="currentColor"><path d="M0 0V12C3 12 8 8 8 0H0Z"/></svg>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
+            const normalizedContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n{2,}/g, '\n').trim();
+            const bubbleHtml = '<p class="m-0">' + escapeHtml(normalizedContent).replace(/\n/g, '<br>') + '</p><span class="message-bubble-tail" aria-hidden="true"><svg viewBox="0 0 8 12" fill="currentColor"><path d="M0 0V12C3 12 8 8 8 0H0Z"/></svg></span>';
+            const messageHtml = '<div class="message-row msg-right" id="' + tempId + '"><div class="message-block"><div class="message-inline"><div class="msg-meta"><span class="msg-status sending"><i class="fas fa-check"></i></span><span class="msg-time">' + timeStr + '</span></div><div class="message-bubble">' + bubbleHtml + '</div></div></div></div>';
             const emptyState = chatMessages.querySelector('.talk-empty-state');
             if (emptyState) emptyState.remove();
             chatMessages.insertAdjacentHTML('beforeend', messageHtml);

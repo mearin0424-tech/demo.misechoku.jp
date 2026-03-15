@@ -288,12 +288,13 @@
     background: rgba(80, 12, 12, 0.45);
 }
 
-/* メッセージ表示エリア（最後の吹き出し・日時が入力欄に被らないよう下余白を確保） */
+/* メッセージ表示エリア（スクロールはここだけ。入力欄分の下余白で固定入力に被らない） */
 .chat-messages {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    padding: 14px 12px 20px;
+    overflow-x: hidden;
+    padding: 14px 12px 90px;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -461,9 +462,9 @@
     max-width: 100%;
     padding: 14px 20px;
     border-radius: 16px;
-    font-size: 15px;
+    font-size: 0.82rem;
     line-height: 1.5;
-    letter-spacing: 0;
+    letter-spacing: 0.02em;
     white-space: pre-wrap;
     word-break: break-word;
     box-sizing: border-box;
@@ -480,16 +481,16 @@
 /* 相手：左下だけ角を小さく（しっぽ） */
 .msg-left .message-bubble {
     background: #1a1111;
-    color: #f4ecec;
+    color: #f7eded;
     border: 1px solid rgba(58, 40, 40, 0.8);
     border-radius: 16px 16px 16px 4px;
 }
 
-/* 自分：右下だけ角を小さく（しっぽ）＝参考 rounded-2xl rounded-br-sm */
+/* 自分：右下だけ角を小さく（しっぽ） */
 .msg-right .message-bubble {
     background: linear-gradient(to bottom right, #eeb949, #dcae44);
-    color: #110a0a;
-    font-weight: 600;
+    color: #231516;
+    font-weight: 500;
     border: none;
     border-radius: 16px 16px 4px 16px;
 }
@@ -528,16 +529,22 @@
 }
 
 /* ==========================================================================
-   トークルーム：入力エリア（main コンテンツ最下部に配置・フロー内）
+   トークルーム：入力エリアを最下部に固定（スクロールしても動かない）
    ========================================================================== */
-.chat-input-area {
-    flex-shrink: 0;
+#talk-room-container .chat-input-area {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: var(--footer-height);
+    z-index: 100;
     width: 100%;
-    max-width: 100%;
+    max-width: min(100vw, calc(var(--max-content-width) + 2 * var(--content-padding-x)));
+    margin: 0 auto;
+    padding: 10px var(--content-padding-x) 12px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0));
+    box-sizing: border-box;
     background: rgba(26, 10, 14, 0.98);
     border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 10px var(--content-padding-x, 15px) 12px;
-    box-sizing: border-box;
     box-shadow: 0 -8px 22px rgba(0, 0, 0, 0.22);
 }
 

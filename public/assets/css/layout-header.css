@@ -81,6 +81,13 @@
     white-space: nowrap;
 }
 
+/* ヘッダータイトル：明朝・セリフで上品に */
+.header-title-main.header-title-serif {
+    font-family: 'Shippori Mincho', 'Noto Serif JP', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
 /* デモ用：キャスト／お店ピル型トグルスイッチ（センター） */
 .demo-pill-switch {
     display: inline-flex;
@@ -261,6 +268,9 @@ body.page-talk .header-title-main {
     font-size: 0.96rem;
     font-weight: 700;
     letter-spacing: 0.22em;
+}
+body.page-talk .header-title-main.header-title-serif {
+    font-family: 'Shippori Mincho', 'Noto Serif JP', 'Yu Mincho', serif;
 }
 
 body.page-talk .btn-back {

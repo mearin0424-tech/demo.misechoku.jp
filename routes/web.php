@@ -124,6 +124,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // 入金・振込管理
         Route::get('/deposits', [AdminDeposit::class, 'index'])->name('deposits.index');
         Route::get('/deposits/{deposit}/invoice', [AdminDeposit::class, 'showInvoice'])->name('deposits.invoice.show');
+        Route::get('/deposits/{deposit}/invoice/pdf', [AdminDeposit::class, 'downloadInvoicePdf'])->name('deposits.invoice.pdf');
         Route::post('/deposits/{deposit}/invoice', [AdminDeposit::class, 'issueInvoice'])->name('deposits.invoice.issue');
         Route::post('/deposits/{deposit}/confirm-shop-payment', [AdminDeposit::class, 'confirmShopPayment'])->name('deposits.shop-payment.confirm');
         Route::post('/deposits/{deposit}/transfer-cast', [AdminDeposit::class, 'transferCast'])->name('deposits.cast-transfer.execute');
@@ -214,8 +215,10 @@ Route::get('/maintenance', function () {
 
 Route::get('/logout', [CastLogin::class, 'logout'])->name('auth.logout');
 
-Route::middleware('signed')->get('/billing/invoices/{deposit}', [AdminDeposit::class, 'showSignedInvoice'])
-    ->name('billing.invoices.show');
+Route::middleware('signed')->group(function () {
+    Route::get('/billing/invoices/{deposit}', [AdminDeposit::class, 'showSignedInvoice'])->name('billing.invoices.show');
+    Route::get('/billing/invoices/{deposit}/pdf', [AdminDeposit::class, 'showSignedInvoicePdf'])->name('billing.invoices.pdf');
+});
 
 /*
 |--------------------------------------------------------------------------

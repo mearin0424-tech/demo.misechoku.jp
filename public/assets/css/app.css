@@ -253,10 +253,6 @@ h1, h2, h3, .luxury-title {
     max-height: 100%;
     object-fit: contain;
 }
-#global-lightbox-overlay .lightbox-close {
-    top: max(16px, env(safe-area-inset-top));
-    right: max(16px, var(--content-padding-x));
-}
 
 /* ユーティリティ */
 .opacity-70 { opacity: 0.7; }

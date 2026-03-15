@@ -102,16 +102,23 @@
                         <p class="recruit-status-card-meta">更新日: {{ $recruit['updated_at'] }}</p>
                     @endif
                 </div>
-                <form action="{{ route('shop.recruits.toggle-status') }}" method="POST">
-                    @csrf
-                    <button
-                        type="submit"
-                        class="toggle-btn {{ ($recruit['status'] ?? 'active') === 'active' ? 'active' : '' }}"
-                        aria-label="公開のON/OFF"
-                    >
-                        <div class="toggle-circle"></div>
+                <div class="recruit-status-card-head-actions">
+                    @if(!empty($shareUrl))
+                    <button type="button" class="recruit-share-icon-btn" id="recruit-share-icon-open" aria-label="求人を共有">
+                        <i class="fas fa-share-nodes"></i>
                     </button>
-                </form>
+                    @endif
+                    <form action="{{ route('shop.recruits.toggle-status') }}" method="POST">
+                        @csrf
+                        <button
+                            type="submit"
+                            class="toggle-btn {{ ($recruit['status'] ?? 'active') === 'active' ? 'active' : '' }}"
+                            aria-label="公開のON/OFF"
+                        >
+                            <div class="toggle-circle"></div>
+                        </button>
+                    </form>
+                </div>
             </div>
 
             @if(!empty($recruit['message']))
@@ -168,44 +175,36 @@
                 </a>
             </div>
         </article>
-    </section>
-
-    {{-- ========== 3. 求人情報の共有 ========== --}}
-    <section class="recruit-status-section recruit-status-section-share">
-        <h2 class="recruit-status-section-title">
-            <span class="recruit-status-section-icon"><i class="fas fa-share-nodes"></i></span>
-            求人情報の共有
-        </h2>
-        <p class="recruit-status-section-desc">この求人ページのURLをコピーしたり、SNSで共有できます。</p>
 
         @if(!empty($shareUrl))
-            <div class="recruit-share-box">
-                <label class="recruit-share-label">共有用URL</label>
-                <div class="recruit-share-input-row">
-                    <input type="text" class="recruit-share-input" id="recruit-share-url" readonly value="{{ $shareUrl }}" aria-label="共有用URL">
-                    <button type="button" class="recruit-share-copy-btn" id="recruit-share-copy" aria-label="URLをコピー">
-                        <i class="fas fa-copy"></i> コピー
+        {{-- 共有シート（スマホの共有機能風：リンクコピー・X・LINE・Instagram） --}}
+        <div class="recruit-share-sheet" id="recruit-share-sheet" role="dialog" aria-modal="true" aria-label="求人を共有" aria-hidden="true"
+             data-share-url="{{ e($shareUrl) }}"
+             data-share-text="{{ e(($recruit['catch_copy'] ?? '求人情報') . ' ' . $shareUrl) }}">
+            <div class="recruit-share-sheet-backdrop" id="recruit-share-sheet-backdrop"></div>
+            <div class="recruit-share-sheet-panel">
+                <p class="recruit-share-sheet-title">求人を共有</p>
+                <div class="recruit-share-sheet-actions">
+                    <button type="button" class="recruit-share-sheet-item" data-action="copy-link" aria-label="リンクをコピー">
+                        <span class="recruit-share-sheet-item-icon"><i class="fas fa-link"></i></span>
+                        <span class="recruit-share-sheet-item-label">リンクコピー</span>
+                    </button>
+                    <a href="https://twitter.com/intent/tweet?text={{ rawurlencode(($recruit['catch_copy'] ?? '求人情報') . ' ' . $shareUrl) }}" target="_blank" rel="noopener" class="recruit-share-sheet-item" data-action="x" aria-label="Xで共有">
+                        <span class="recruit-share-sheet-item-icon"><i class="fab fa-x-twitter"></i></span>
+                        <span class="recruit-share-sheet-item-label">X</span>
+                    </a>
+                    <a href="https://line.me/R/msg/text/?{{ rawurlencode(($recruit['catch_copy'] ?? '求人情報') . ' ' . $shareUrl) }}" target="_blank" rel="noopener" class="recruit-share-sheet-item" data-action="line" aria-label="LINEで共有">
+                        <span class="recruit-share-sheet-item-icon"><i class="fab fa-line"></i></span>
+                        <span class="recruit-share-sheet-item-label">LINE</span>
+                    </a>
+                    <button type="button" class="recruit-share-sheet-item" data-action="instagram" aria-label="Instagramで共有">
+                        <span class="recruit-share-sheet-item-icon"><i class="fab fa-instagram"></i></span>
+                        <span class="recruit-share-sheet-item-label">Instagram</span>
                     </button>
                 </div>
-                <div class="recruit-share-actions">
-                    <a href="{{ $shareUrl }}" target="_blank" rel="noopener" class="recruit-share-btn recruit-share-btn-open">
-                        <i class="fas fa-external-link-alt"></i> 新しいタブで開く
-                    </a>
-                    <a href="https://twitter.com/intent/tweet?text={{ rawurlencode(($recruit['catch_copy'] ?? '求人情報') . ' ' . $shareUrl) }}" target="_blank" rel="noopener" class="recruit-share-btn recruit-share-btn-x" aria-label="Xで共有">
-                        <i class="fab fa-x-twitter"></i> X
-                    </a>
-                    <button type="button" class="recruit-share-btn recruit-share-btn-instagram" id="recruit-share-instagram" aria-label="Instagramで共有（テキストをコピーしてInstagramを開く）" data-share-text="{{ e(($recruit['catch_copy'] ?? '求人情報') . ' ' . $shareUrl) }}">
-                        <i class="fab fa-instagram"></i> Instagram
-                    </button>
-                    <a href="https://line.me/R/msg/text/?{{ rawurlencode(($recruit['catch_copy'] ?? '求人情報') . ' ' . $shareUrl) }}" target="_blank" rel="noopener" class="recruit-share-btn recruit-share-btn-line" aria-label="LINEで共有">
-                        <i class="fab fa-line"></i> LINE
-                    </a>
-                </div>
+                <button type="button" class="recruit-share-sheet-cancel" id="recruit-share-sheet-cancel">キャンセル</button>
             </div>
-        @else
-            <div class="recruit-status-empty recruit-status-empty-small">
-                <p class="recruit-status-empty-text">求人を保存すると共有用URLが発行されます。</p>
-            </div>
+        </div>
         @endif
     </section>
 </div>
@@ -214,51 +213,60 @@
 @push('scripts')
 <script>
 (function() {
-    var copyBtn = document.getElementById('recruit-share-copy');
-    var input = document.getElementById('recruit-share-url');
-    if (copyBtn && input) {
-        copyBtn.addEventListener('click', function() {
-            input.select();
-            input.setSelectionRange(0, 99999);
-            try {
-                navigator.clipboard.writeText(input.value);
-                copyBtn.innerHTML = '<i class="fas fa-check"></i> コピーしました';
-                copyBtn.classList.add('is-copied');
-                setTimeout(function() {
-                    copyBtn.innerHTML = '<i class="fas fa-copy"></i> コピー';
-                    copyBtn.classList.remove('is-copied');
-                }, 2000);
-            } catch (e) {
-                document.execCommand('copy');
-                copyBtn.innerHTML = '<i class="fas fa-check"></i> コピーしました';
-                setTimeout(function() { copyBtn.innerHTML = '<i class="fas fa-copy"></i> コピー'; }, 2000);
-            }
-        });
+    var openBtn = document.getElementById('recruit-share-icon-open');
+    var sheet = document.getElementById('recruit-share-sheet');
+    var backdrop = document.getElementById('recruit-share-sheet-backdrop');
+    var cancelBtn = document.getElementById('recruit-share-sheet-cancel');
+    if (!sheet) return;
+
+    function openSheet() {
+        sheet.classList.add('is-open');
+        sheet.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeSheet() {
+        sheet.classList.remove('is-open');
+        sheet.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
     }
 
-    var igBtn = document.getElementById('recruit-share-instagram');
-    if (igBtn) {
-        igBtn.addEventListener('click', function() {
-            var text = igBtn.getAttribute('data-share-text') || '';
-            var url = input ? input.value : '';
-            if (!text && url) text = url;
-            if (!text) return;
-            try {
-                navigator.clipboard.writeText(text);
-                igBtn.innerHTML = '<i class="fas fa-check"></i> コピーしました';
-                igBtn.classList.add('is-copied');
-                setTimeout(function() {
-                    igBtn.innerHTML = '<i class="fab fa-instagram"></i> Instagram';
-                    igBtn.classList.remove('is-copied');
-                }, 2500);
-            } catch (e) {
-                document.execCommand('copy');
-                igBtn.innerHTML = '<i class="fas fa-check"></i> コピーしました';
-                setTimeout(function() { igBtn.innerHTML = '<i class="fab fa-instagram"></i> Instagram'; }, 2500);
-            }
-            window.open('https://www.instagram.com/', '_blank', 'noopener');
-        });
-    }
+    if (openBtn) openBtn.addEventListener('click', openSheet);
+    if (backdrop) backdrop.addEventListener('click', closeSheet);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeSheet);
+
+    var shareUrl = sheet.getAttribute('data-share-url') || '';
+    var shareText = sheet.getAttribute('data-share-text') || shareUrl;
+
+    sheet.querySelectorAll('.recruit-share-sheet-item').forEach(function(el) {
+        var action = el.getAttribute('data-action');
+        if (action === 'copy-link') {
+            el.addEventListener('click', function(e) {
+                e.preventDefault();
+                try {
+                    navigator.clipboard.writeText(shareUrl);
+                    el.querySelector('.recruit-share-sheet-item-label').textContent = 'コピーしました';
+                    setTimeout(function() {
+                        el.querySelector('.recruit-share-sheet-item-label').textContent = 'リンクコピー';
+                        closeSheet();
+                    }, 600);
+                } catch (err) {
+                    document.execCommand('copy');
+                    closeSheet();
+                }
+            });
+        } else if (action === 'instagram') {
+            el.addEventListener('click', function(e) {
+                e.preventDefault();
+                try {
+                    navigator.clipboard.writeText(shareText);
+                } catch (err) {}
+                window.open('https://www.instagram.com/', '_blank', 'noopener');
+                closeSheet();
+            });
+        } else if (action === 'x' || action === 'line') {
+            el.addEventListener('click', function() { closeSheet(); });
+        }
+    });
 })();
 </script>
 @endpush

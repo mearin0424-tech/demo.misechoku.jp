@@ -8,7 +8,7 @@
     $showBackButton = !$isMainPage && !$isLoginPage;
 
     $engTitles = [
-        'home'       => 'HOME',
+        'home'       => 'SWIPE',
         'login'      => 'LOGIN',
         'search'     => 'SEARCH',
         'mypage'     => 'MY PAGE',
@@ -16,8 +16,20 @@
         'interaction'=> 'CONNECTION',
         'manage'     => 'MANAGEMENT',
         'register'   => 'ENTRY',
+        'profile'    => 'PROFILE',
+        'recruit'    => 'RECRUIT',
+        'recruits'   => 'RECRUIT',
+        'setting'    => 'SETTING',
+        'support'    => 'SUPPORT',
+        'official'   => 'OFFICIAL',
+        'share'      => 'SHARE',
     ];
     $currentEngTitle = $engTitles[$pageId] ?? '-';
+
+    // 表示タイトル: ページで header_title を指定 > レイアウトから渡された headerTitle（@section('title')）> ルート由来の英語タイトル
+    $headerTitleCustom = trim((string) ($__env->yieldContent('header_title') ?? ''));
+    $headerTitleFromPage = isset($headerTitle) ? trim((string) $headerTitle) : '';
+    $displayTitle = $headerTitleCustom !== '' ? $headerTitleCustom : ($headerTitleFromPage !== '' ? $headerTitleFromPage : $currentEngTitle);
 
     $isCast = request()->is('cast/*');
 @endphp
@@ -32,10 +44,10 @@
         @endif
     </div>
 
-    {{-- 中央：ページタイトル表示 --}}
+    {{-- 中央：ページタイトル表示（明朝・セリフで上品に） --}}
     <div class="header-center-title">
-        <span class="header-title-main">
-            {{ $currentEngTitle }}
+        <span class="header-title-main header-title-serif">
+            {{ $displayTitle }}
         </span>
     </div>
 

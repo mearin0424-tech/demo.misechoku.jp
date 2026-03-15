@@ -455,6 +455,7 @@ class BillingManagementService
                     ], true) ? 'paid' : 'pending',
                     'date' => $deposit['invoice_issued_at'],
                     'invoice_url' => $this->getSignedInvoiceUrl($deposit['id']),
+                    'invoice_pdf_url' => $this->getSignedInvoicePdfUrl($deposit['id']),
                 ])
                 ->values()
                 ->all(),
@@ -567,6 +568,16 @@ class BillingManagementService
     {
         return URL::temporarySignedRoute(
             'billing.invoices.show',
+            $expiresAt ?: now()->addDays(30),
+            ['deposit' => $depositId]
+        );
+    }
+
+    /** 店舗向け：請求書PDFの署名付きダウンロードURL */
+    public function getSignedInvoicePdfUrl(int $depositId, ?Carbon $expiresAt = null): string
+    {
+        return URL::temporarySignedRoute(
+            'billing.invoices.pdf',
             $expiresAt ?: now()->addDays(30),
             ['deposit' => $depositId]
         );

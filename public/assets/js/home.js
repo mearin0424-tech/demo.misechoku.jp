@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
             preventClicksPropagation: true,
             touchMoveStopPropagation: true,
             slideToClickedSlide: false,
-            centeredSlides: false,
+            centeredSlides: true,
             observer: true,
             observeParents: true,
             on: {

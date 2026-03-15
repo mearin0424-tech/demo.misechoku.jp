@@ -143,78 +143,24 @@ class MypageController extends Controller
         ]);
     }
 
+    /**
+     * 請求・入金管理（請求見込・請求書DL・運営口座への入金に特化）
+     * 採用ステータスは recruits/status で管理。店舗口座登録は不要（入金のみのため）。
+     */
     public function payment()
     {
         $shopId = $this->currentShopId();
         $paymentData = $this->billingManagementService->getShopPaymentPageData($shopId);
         $currentDeposit = $paymentData['current'] ?? null;
 
-        $jobIds = DB::table('shop_jobs')->where('shop_id', $shopId)->pluck('id');
-        $applications = collect();
-        if ($jobIds->isNotEmpty()) {
-            $applications = DB::table('shop_job_applications')
-                ->join('casts', 'shop_job_applications.cast_id', '=', 'casts.id')
-                ->leftJoin('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id')
-                ->whereIn('shop_job_applications.shop_job_id', $jobIds)
-                ->select(
-                    'shop_job_applications.*',
-                    'cast_profiles.nickname',
-                    'cast_profiles.birthday'
-                )
-                ->get();
-        }
-
-        $candidates = [];
-        foreach ($applications as $app) {
-            $statusInfo = $this->mapApplicationStatus((int)$app->status);
-            $birthday = $app->birthday ? Carbon::parse($app->birthday) : null;
-            $candidates[] = [
-                'id'            => $app->id,
-                'name'          => $app->nickname ?? $app->cast_id,
-                'age'           => $birthday ? $birthday->age : null,
-                'job_type'      => '本入店',
-                'status_label'  => $statusInfo['label'],
-                'status_tag'    => $statusInfo['tag'],
-                'next_step'     => $statusInfo['next'],
-                'interview_at'  => $app->result_date,
-                'deadline_at'   => null,
-                'last_message'  => null,
-            ];
-        }
-
-        $calendarEvents = [];
-        foreach ($applications as $app) {
-            if ($app->result_date) {
-                $calendarEvents[] = [
-                    'date'  => $app->result_date,
-                    'time'  => null,
-                    'type'  => 'interview',
-                    'actor' => 'shop',
-                    'label' => ($this->mapApplicationStatus((int)$app->status)['label'] ?? 'やり取り中') . '（' . ($app->nickname ?? $app->cast_id) . '）',
-                ];
-            }
-        }
-        if ($currentDeposit && !empty($currentDeposit['invoice_issued_at'])) {
-            $calendarEvents[] = [
-                'date'  => Carbon::parse($currentDeposit['invoice_issued_at'])->toDateString(),
-                'time'  => Carbon::parse($currentDeposit['invoice_issued_at'])->format('H:i'),
-                'type'  => 'deposit',
-                'actor' => 'admin',
-                'label' => '運営 → 店舗請求書発行',
-            ];
-        }
-
         return view('shops.mypage.payment', [
-            'pageId'         => 'manage',
-            'invoices'       => $paymentData['invoices'],
-            'summary'        => $paymentData['summary'],
-            'candidates'     => $candidates,
-            'calendarEvents' => $calendarEvents,
-            'depositFlow'    => $paymentData['flow'],
-            'shopBank'       => $paymentData['bank'],
-            'paymentForm'    => $paymentData['payment_form'],
-            'currentDeposit' => $currentDeposit,
-            'approvalTarget' => $paymentData['approval_target'],
+            'pageId'           => 'payment',
+            'invoices'         => $paymentData['invoices'],
+            'summary'          => $paymentData['summary'],
+            'depositFlow'      => $paymentData['flow'],
+            'paymentForm'      => $paymentData['payment_form'],
+            'currentDeposit'   => $currentDeposit,
+            'approvalTarget'   => $paymentData['approval_target'],
             'canReportPayment' => $paymentData['can_report_payment'],
         ]);
     }

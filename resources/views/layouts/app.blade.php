@@ -30,6 +30,7 @@
     <meta name="twitter:image" content="{{ $metaImage }}">
     {{-- PWA --}}
     <meta name="theme-color" content="#190509">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ミセチョク">
@@ -64,8 +65,8 @@
         {{-- メインレイアウト部分を縦並びのFlexコンテナとして包む --}}
         <div class="main-layout-container flex-1 flex flex-col min-w-0">
 
-            {{-- ヘッダー --}}
-            @include('layouts.parts.header')
+            {{-- ヘッダー（ページタイトルを渡して表示） --}}
+            @include('layouts.parts.header', ['headerTitle' => trim($__env->yieldContent('title'))])
 
             {{-- @yield('guide_message') で各ページの設定内容を注入する --}}
             @include('layouts.parts.character-guide', ['guideMessage' => $__env->yieldContent('guide_message')])
@@ -94,12 +95,9 @@
     <script src="{{ asset('assets/js/character-guide.js') }}?v={{ $assetVersion }}"></script>
     <script src="{{ asset('assets/js/push-notification.js') }}"></script>
 
-    {{-- 画像フルスクリーン用ライトボックス（全画面共通） --}}
+    {{-- 画像フルスクリーン用ライトボックス（全画面共通・オーバーレイクリックで閉じる） --}}
     <div id="global-lightbox-overlay" class="lightbox-overlay" onclick="window._closeGlobalLightbox && window._closeGlobalLightbox(event)">
         <img id="global-lightbox-image" src="" alt="" class="lightbox-image">
-        <button type="button" class="lightbox-close" aria-label="閉じる" onclick="window._closeGlobalLightbox && window._closeGlobalLightbox(event)">
-            <i class="fas fa-times"></i>
-        </button>
     </div>
 
     @stack('scripts')
@@ -431,7 +429,7 @@
 
         window._closeGlobalLightbox = function (e) {
             if (e) {
-                if (e.target && !e.target.classList.contains('lightbox-overlay') && !e.target.closest('.lightbox-close')) {
+                if (e.target && !e.target.classList.contains('lightbox-overlay')) {
                     return;
                 }
                 e.stopPropagation();

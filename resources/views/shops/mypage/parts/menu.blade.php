@@ -26,8 +26,8 @@
                     <i class="far fa-credit-card"></i>
                 </div>
                 <div class="menu-btn-text">
-                    <p class="menu-btn-label">MANAGEMENT</p>
-                    <p class="menu-btn-title">採用・請求管理</p>
+                    <p class="menu-btn-label">PAYMENT</p>
+                    <p class="menu-btn-title">請求・入金管理</p>
                 </div>
             </div>
             <div class="menu-btn-arrow">

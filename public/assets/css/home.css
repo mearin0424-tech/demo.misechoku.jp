@@ -201,6 +201,7 @@ body.no-scroll main#main-content .content-wrapper {
     min-width: 0;
     min-height: 0;
     object-fit: cover;
+    object-position: center center;
 }
 
 /* 画像：画面サイズに合わせて cover でフィット、縦横比は中央でトリム */

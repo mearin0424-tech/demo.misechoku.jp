@@ -135,12 +135,16 @@ class TalkController extends Controller
         abort_unless($this->resolvePartner($partnerId, $isCastPortal), 404);
         $this->abortIfBlocked($partnerId, $isCastPortal);
 
+        $content = trim((string) $request->input('message'));
+        $content = str_replace(["\r\n", "\r"], "\n", $content);
+        $content = preg_replace('/\n{2,}/', "\n", $content);
+
         $payload = [
             'cast_id' => $isCastPortal ? $this->currentCastId() : $partnerId,
             'shop_id' => $isCastPortal ? $partnerId : $this->currentShopId(),
             'sender_type' => $this->mySenderType($isCastPortal),
             'type' => self::MESSAGE_TYPE_TEXT,
-            'content' => trim((string) $request->input('message')),
+            'content' => $content,
             'is_read' => false,
             'created_at' => now(),
             'updated_at' => now(),

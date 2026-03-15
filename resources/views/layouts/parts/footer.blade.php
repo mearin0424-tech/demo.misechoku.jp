@@ -13,10 +13,10 @@
 
 {{-- ボトムナビゲーション --}}
 <nav id="bottom-nav" class="fixed-ui bottom-0 bg-[#220a0a] border-t border-[#4d1a1a] h-[var(--footer-height)] z-[1000] flex items-center justify-around px-2">
-    {{-- ホーム --}}
+    {{-- スワイプ（ホーム） --}}
     <a href="{{ route($prefix . '.home') }}" class="nav-item {{ $isHome ? 'active' : '' }}">
         <i class="fas fa-home"></i>
-        <span>HOME</span>
+        <span>SWIPE</span>
     </a>
 
     {{-- さがす（タイムラインタブへ） --}}

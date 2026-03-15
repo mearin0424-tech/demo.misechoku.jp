@@ -1,5 +1,6 @@
 @extends('layouts.app')
 
+@section('title', ($partnerName ?? 'トーク') . ' 様')
 @section('header_title', $partnerName . ' 様')
 @section('body-class', 'page-talk page-talk-room')
 
@@ -190,14 +191,12 @@
                             @endif
                         </div>
                     @else
-                        <div class="message-bubble">
-                            <p class="m-0">{!! nl2br(e(trim($msg->content))) !!}</p>
-                            @if($msg->is_mine)
-                                <span class="message-bubble-tail" aria-hidden="true">
-                                    <svg viewBox="0 0 8 12" fill="currentColor"><path d="M0 0V12C3 12 8 8 8 0H0Z"/></svg>
-                                </span>
-                            @endif
-                        </div>
+                        @php
+                            $displayContent = trim((string) $msg->content);
+                            $displayContent = str_replace(["\r\n", "\r"], "\n", $displayContent);
+                            $displayContent = preg_replace('/\n{2,}/', "\n", $displayContent);
+                        @endphp
+                        <div class="message-bubble"><p class="m-0">{!! nl2br(e($displayContent)) !!}</p>@if($msg->is_mine)<span class="message-bubble-tail" aria-hidden="true"><svg viewBox="0 0 8 12" fill="currentColor"><path d="M0 0V12C3 12 8 8 8 0H0Z"/></svg></span>@endif</div>
                     @endif
                         @if(!$msg->is_mine)
                             <div class="msg-meta">
