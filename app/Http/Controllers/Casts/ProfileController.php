@@ -317,7 +317,7 @@ class ProfileController extends Controller
     }
 
     /** お店モック（キャストがお店を閲覧する用） */
-    private function getShopMock(int $id): array
+    private function getShopMock(int|string $id): array
     {
         $shops = [
             1 => ['name' => 'CLUB ETERNITY', 'word' => '最高の一夜を。', 'main_img' => asset('storage/mock/shops/out-1.png'), 'area' => '東京都港区六本木', 'concept' => "六本木駅から徒歩3分。\n急募・即日払い対応です。", 'review_avg' => 4.5, 'review_cnt' => 80, 'sub_images' => [asset('storage/mock/shops/inside-1.png'), asset('storage/mock/shops/inside-2.png'), asset('storage/mock/shops/inside-3.png')]],
@@ -325,7 +325,8 @@ class ProfileController extends Controller
             3 => ['name' => 'Club Luxurious', 'word' => '最高級の空間で、最高の出会いを。', 'main_img' => asset('storage/mock/shops/out-1.png'), 'area' => '東京都港区六本木', 'concept' => "六本木駅から徒歩3分。落ち着いた雰囲気の高級ラウンジです。\n選び抜かれたキャストと共に、至福のひとときを提供いたします。", 'review_avg' => 4.8, 'review_cnt' => 124, 'sub_images' => [asset('storage/mock/shops/inside-1.png'), asset('storage/mock/shops/inside-2.png'), asset('storage/mock/shops/inside-3.png')]],
             4 => ['name' => 'BAR STELLA', 'word' => '落ち着いた大人の空間', 'main_img' => asset('storage/mock/shops/out-2.png'), 'area' => '東京都渋谷区', 'concept' => "カジュアルな雰囲気でリラックスして働けます。", 'review_avg' => 4.3, 'review_cnt' => 56, 'sub_images' => [asset('storage/mock/shops/inside-1.png'), asset('storage/mock/shops/inside-2.png'), asset('storage/mock/shops/inside-3.png')]],
         ];
-        return $shops[$id] ?? $shops[1];
+        $key = is_numeric($id) ? (int) $id : 1;
+        return $shops[$key] ?? $shops[1];
     }
 
     private function currentCastId(): string

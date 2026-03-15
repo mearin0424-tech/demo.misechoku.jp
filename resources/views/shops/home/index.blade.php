@@ -2,7 +2,7 @@
 
 @section('title', 'DISCOVERY')
 @section('body-class', 'no-scroll page-home')
-@section('guide_message', "上下スワイプ：次 / 前のアカウントに移動\n左右スワイプ：同じアカウントの別写真を表示\nタップ：詳細プロフィールを開く\n右側のボタン：いいね・キープ・メッセージ")
+@section('guide_message', '') {{-- ホームのスワイプ画面ではオコジョを表示しない --}}
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/home.css') }}">
