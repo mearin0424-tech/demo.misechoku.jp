@@ -189,16 +189,24 @@
 
         body.page-demo-login .content-wrapper {
             width: 100%;
-            max-width: none;
+            max-width: 100%;
             padding: 0;
             background: transparent;
             box-shadow: none;
+            overflow-x: hidden;
+        }
+
+        body.page-demo-login #app {
+            max-width: 100%;
         }
 
         .demo-login-shell {
             position: relative;
             min-height: 100vh;
             overflow: hidden;
+            width: 100%;
+            max-width: 100vw;
+            box-sizing: border-box;
         }
 
         .demo-login-bg,
@@ -245,9 +253,11 @@
         .demo-login-page {
             position: relative;
             z-index: 1;
-            width: min(100%, 460px);
+            width: 100%;
+            max-width: min(460px, calc(100vw - 2 * var(--content-padding-x, 16px)));
             margin: 0 auto;
-            padding: 40px 16px 28px;
+            padding: 40px max(16px, var(--content-padding-x)) 28px;
+            box-sizing: border-box;
         }
 
         .demo-login-brand {
@@ -286,6 +296,7 @@
 
         .demo-login-card-wrap {
             position: relative;
+            max-width: 100%;
         }
 
         .demo-login-card {
@@ -296,6 +307,8 @@
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .demo-login-tabs {
@@ -469,6 +482,8 @@
             color: #f5e6e6;
             font-size: 0.92rem;
             transition: border-color 0.18s ease, box-shadow 0.18s ease;
+            box-sizing: border-box;
+            max-width: 100%;
         }
 
         .demo-login-select {
@@ -564,6 +579,8 @@
         @media (max-width: 640px) {
             .demo-login-page {
                 padding-top: 24px;
+                padding-left: var(--content-padding-x, 12px);
+                padding-right: var(--content-padding-x, 12px);
             }
 
             .demo-login-form,
@@ -574,6 +591,25 @@
 
             .demo-role-switch {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .demo-login-page {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+            .demo-login-form,
+            .demo-register-panel {
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+
+            .demo-login-footer-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px;
             }
         }
     </style>

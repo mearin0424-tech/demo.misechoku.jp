@@ -115,16 +115,24 @@
 
         body.page-auth-login .content-wrapper {
             width: 100%;
-            max-width: none;
+            max-width: 100%;
             padding: 0;
             background: transparent;
             box-shadow: none;
+            overflow-x: hidden;
+        }
+
+        body.page-auth-login #app {
+            max-width: 100%;
         }
 
         .role-login-shell {
             position: relative;
             min-height: 100vh;
             overflow: hidden;
+            width: 100%;
+            max-width: 100vw;
+            box-sizing: border-box;
         }
 
         .role-login-bg,
@@ -171,9 +179,11 @@
         .role-login-page {
             position: relative;
             z-index: 1;
-            width: min(100%, 460px);
+            width: 100%;
+            max-width: min(460px, calc(100vw - 2 * var(--content-padding-x, 16px)));
             margin: 0 auto;
-            padding: 40px 16px 28px;
+            padding: 40px max(16px, var(--content-padding-x)) 28px;
+            box-sizing: border-box;
         }
 
         .role-login-brand {
@@ -225,6 +235,8 @@
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .role-login-tabs {
@@ -332,6 +344,8 @@
             background: rgba(18, 4, 5, 0.5);
             color: #fff;
             font-size: 0.94rem;
+            box-sizing: border-box;
+            max-width: 100%;
         }
 
         .role-login-input-wrap input::placeholder {
@@ -395,6 +409,8 @@
         @media (max-width: 640px) {
             .role-login-page {
                 padding-top: 24px;
+                padding-left: var(--content-padding-x, 12px);
+                padding-right: var(--content-padding-x, 12px);
             }
 
             .role-login-card-body {
@@ -403,6 +419,17 @@
 
             .role-login-role-switch {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .role-login-page {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+            .role-login-card-body {
+                padding: 16px 14px;
             }
         }
     </style>
