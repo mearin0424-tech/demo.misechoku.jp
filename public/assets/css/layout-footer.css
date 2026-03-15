@@ -15,8 +15,9 @@
     display: flex;
     justify-content: space-around;
     align-items: center;
-    padding-bottom: env(safe-area-inset-bottom);
+    padding: 0 max(var(--content-padding-x), 8px) env(safe-area-inset-bottom) max(var(--content-padding-x), 8px);
     z-index: 2000;
+    box-sizing: border-box;
 }
 
 .nav-item {
@@ -38,7 +39,20 @@
     font-size: 10px;
     font-weight: bold;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+@media (max-width: 360px) {
+    .nav-item i {
+        font-size: 1.2rem;
+    }
+    .nav-item span {
+        font-size: 9px;
+        letter-spacing: 0;
+    }
 }
 
 /* アクティブ時のゴールドカラー */

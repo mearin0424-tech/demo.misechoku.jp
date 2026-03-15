@@ -23,10 +23,11 @@
 
 .sub-header-tabs .tab-item {
     flex: 1;
+    min-width: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 14px 0;
+    padding: 14px 4px;
     color: #857070;
     font-size: 0.75rem;
     font-weight: 500;
@@ -37,6 +38,9 @@
     text-decoration: none;
     background: transparent;
     border: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .sub-header-tabs .tab-item:hover {

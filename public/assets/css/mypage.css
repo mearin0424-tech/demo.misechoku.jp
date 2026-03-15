@@ -17,14 +17,17 @@
 
 .mypage-area {
     max-width: var(--max-content-width);
+    width: 100%;
     margin: 0 auto;
     padding: 0 var(--content-padding-x);
     text-align: left;
+    box-sizing: border-box;
+    min-width: 0;
 }
 
 /* --- 店舗名（ヒーロー） --- */
 .mypage-shop-name {
-    font-size: 1.7rem;
+    font-size: clamp(1.25rem, 5vw, 1.7rem);
     color: #fff;
     margin: 0;
     padding: 18px 0 6px;
@@ -32,6 +35,9 @@
     font-family: var(--font-serif);
     letter-spacing: 0.02em;
     line-height: 1.2;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
 }
 
 /* --- アイコン＋ひとこと --- */
@@ -40,6 +46,8 @@
     align-items: stretch;
     gap: 16px;
     margin-bottom: 16px;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .shop-icon-wrapper {
@@ -87,6 +95,7 @@
 
 .shop-word-bubble {
     flex: 1;
+    min-width: 0;
     height: 88px;
     min-height: 88px;
     padding: 10px 14px 10px 14px;
@@ -99,6 +108,7 @@
     flex-direction: column;
     justify-content: space-between;
     margin-left: -4px;
+    overflow: hidden;
 }
 
 /* 吹き出しの尾：アイコン側（左）から出る */
@@ -378,6 +388,8 @@ a.mypage-stat-panel-link:hover {
 /* --- 詳細ボックス（セクション共通） --- */
 .mypage-detail-box {
     padding: 0;
+    max-width: 100%;
+    min-width: 0;
 }
 
 .mypage-section {
@@ -545,6 +557,8 @@ a.btn-outline-gold {
         radial-gradient(circle at bottom right, rgba(16, 4, 6, 0.9), rgba(10, 2, 4, 0.95));
     box-sizing: border-box;
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
     text-align: left;
     overflow: hidden;
 }
@@ -1026,8 +1040,10 @@ a.btn-outline-gold {
     background: rgba(0, 0, 0, 0.88);
     justify-content: center;
     align-items: center;
-    padding: 20px;
+    padding: max(12px, var(--content-padding-x));
     box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 /* ひとこと編集モーダル：画面上部に表示 */
@@ -1081,10 +1097,12 @@ a.btn-outline-gold {
 
 .mypage-modal-panel {
     width: 100%;
-    max-width: 400px;
+    max-width: min(400px, calc(100vw - 2 * var(--content-padding-x)));
     padding: 24px;
     border-radius: 20px;
     border: 1px solid var(--mypage-gold-border);
+    box-sizing: border-box;
+    min-width: 0;
 }
 
 .mypage-modal-title {
@@ -1121,6 +1139,10 @@ a.btn-outline-gold {
 .mypage-modal-actions {
     display: flex;
     gap: 12px;
+    flex-wrap: wrap;
+}
+.mypage-modal-actions .btn-action {
+    min-width: 0;
 }
 
 .mypage-modal-actions .btn-action {
@@ -1457,5 +1479,34 @@ a.btn-outline-gold {
     .mypage-status-card-head {
         align-items: flex-start;
         flex-direction: column;
+    }
+    .mypage-modal-panel {
+        padding: 18px;
+    }
+}
+
+@media (max-width: 360px) {
+    .mypage-hero {
+        gap: 12px;
+    }
+    .shop-icon-wrapper {
+        width: 72px;
+        height: 72px;
+    }
+    .shop-word-bubble {
+        height: 72px;
+        min-height: 72px;
+    }
+    .mypage-stats-row {
+        gap: 8px;
+    }
+    .mypage-stat-panel {
+        padding: 10px 6px;
+    }
+    .mypage-stat-label {
+        font-size: 0.6rem;
+    }
+    .mypage-stat-value {
+        font-size: 0.9rem;
     }
 }

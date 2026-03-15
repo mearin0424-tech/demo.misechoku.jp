@@ -7,6 +7,9 @@
     border-radius: 16px;
     padding: 20px;
     margin-bottom: 16px;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 .recruit-section:last-child { margin-bottom: 0; }
 .recruit-section-head {
@@ -65,6 +68,8 @@
     font-size: 0.85rem;
     color: #fff;
     line-height: 1.4;
+    word-break: break-word;
+    min-width: 0;
 }
 .recruit-hero-value {
     font-size: 1.5rem;
@@ -84,8 +89,10 @@
     padding: 0 var(--content-padding-x);
     padding-bottom: calc(var(--footer-height) + 24px);
     max-width: var(--max-content-width);
+    width: 100%;
     margin: 0 auto;
     box-sizing: border-box;
+    min-width: 0;
 }
 .recruit-status-header {
     margin-bottom: 24px;
@@ -1186,6 +1193,237 @@
 .recruit-store-message-label { color: var(--gold); font-weight: 700; }
 .recruit-store-message-text { color: #E8E1D5; font-size: 0.9rem; line-height: 1.6; }
 
+/* ========== Recruit Status ページ：3セクション（採用ステータス・公開求人・共有） ========== */
+.recruit-status-flash {
+    margin-bottom: 20px;
+}
+.recruit-status-section {
+    margin-bottom: 28px;
+}
+.recruit-status-section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text-header);
+    margin: 0 0 8px 0;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(230, 208, 128, 0.25);
+}
+.recruit-status-section-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(212, 175, 55, 0.12);
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+}
+.recruit-status-section-desc {
+    font-size: 0.8rem;
+    color: var(--color-text);
+    opacity: 0.85;
+    margin: 0 0 16px 0;
+    line-height: 1.5;
+}
+
+/* 採用ステータス：テーブル */
+.recruit-status-table-wrap {
+    overflow-x: auto;
+    border-radius: 14px;
+    border: 1px solid var(--color-border);
+    background: rgba(26, 12, 14, 0.95);
+}
+.recruit-status-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+}
+.recruit-status-table th,
+.recruit-status-table td {
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid rgba(230, 208, 128, 0.1);
+}
+.recruit-status-table tr:last-child th,
+.recruit-status-table tr:last-child td { border-bottom: none; }
+.recruit-status-table th {
+    font-weight: 700;
+    color: var(--gold);
+    white-space: nowrap;
+}
+.recruit-status-table td {
+    color: var(--color-text);
+}
+.recruit-status-cast-name {
+    display: block;
+    font-weight: 600;
+    color: #F5E6E6;
+}
+.recruit-status-cast-id {
+    display: block;
+    font-size: 0.7rem;
+    opacity: 0.7;
+    margin-top: 2px;
+}
+.recruit-status-date { font-weight: 600; color: var(--gold); }
+.recruit-status-date-none { opacity: 0.6; }
+.recruit-status-meta { opacity: 0.85; }
+.recruit-status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+.recruit-status-badge-1 { background: rgba(96, 165, 250, 0.2); color: #93c5fd; border: 1px solid rgba(96, 165, 250, 0.4); }
+.recruit-status-badge-2 { background: rgba(167, 139, 250, 0.2); color: #c4b5fd; border: 1px solid rgba(167, 139, 250, 0.4); }
+.recruit-status-badge-3 { background: rgba(212, 175, 55, 0.2); color: var(--gold); border: 1px solid rgba(212, 175, 55, 0.4); }
+.recruit-status-badge-4 { background: rgba(34, 197, 94, 0.2); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.4); }
+.recruit-status-badge-5 { background: rgba(255, 255, 255, 0.06); color: var(--color-text); border: 1px solid var(--color-border); }
+.recruit-status-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--gold);
+    text-decoration: none;
+    white-space: nowrap;
+}
+.recruit-status-link:hover { text-decoration: underline; }
+
+/* 空状態 */
+.recruit-status-empty {
+    text-align: center;
+    padding: 32px 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed var(--color-border);
+    border-radius: 16px;
+}
+.recruit-status-empty-icon {
+    font-size: 2rem;
+    color: var(--gold);
+    opacity: 0.5;
+    margin-bottom: 12px;
+}
+.recruit-status-empty-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0 0 4px 0;
+}
+.recruit-status-empty-sub {
+    font-size: 0.8rem;
+    color: var(--color-text);
+    opacity: 0.8;
+    margin: 0;
+}
+.recruit-status-empty-small {
+    padding: 20px;
+}
+.recruit-status-empty-small .recruit-status-empty-text { margin: 0; }
+
+/* 求人情報の共有 */
+.recruit-share-box {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 20px;
+}
+.recruit-share-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+.recruit-share-input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+.recruit-share-input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--color-text);
+    font-size: 0.8rem;
+}
+.recruit-share-copy-btn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(212, 175, 55, 0.5);
+    background: rgba(212, 175, 55, 0.1);
+    color: var(--gold);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+.recruit-share-copy-btn:hover {
+    background: rgba(212, 175, 55, 0.18);
+    border-color: var(--gold);
+}
+.recruit-share-copy-btn.is-copied {
+    border-color: rgba(34, 197, 94, 0.6);
+    background: rgba(34, 197, 94, 0.15);
+    color: #86efac;
+}
+.recruit-share-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.recruit-share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+}
+.recruit-share-btn-open {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-header);
+}
+.recruit-share-btn-open:hover { background: rgba(255, 255, 255, 0.1); }
+.recruit-share-btn-x {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e7e9ea;
+}
+.recruit-share-btn-x:hover { border-color: var(--gold); color: var(--gold); }
+.recruit-share-btn-instagram {
+    background: linear-gradient(135deg, rgba(225, 48, 108, 0.2), rgba(253, 29, 29, 0.15), rgba(252, 175, 69, 0.15));
+    border: 1px solid rgba(225, 48, 108, 0.45);
+    color: #f093b4;
+    cursor: pointer;
+    font: inherit;
+}
+.recruit-share-btn-instagram:hover { background: linear-gradient(135deg, rgba(225, 48, 108, 0.3), rgba(253, 29, 29, 0.25), rgba(252, 175, 69, 0.25)); border-color: #e1306c; color: #ffc8dd; }
+.recruit-share-btn-instagram.is-copied { border-color: rgba(34, 197, 94, 0.6); background: rgba(34, 197, 94, 0.15); color: #86efac; }
+.recruit-share-btn-line {
+    background: rgba(0, 184, 0, 0.15);
+    border: 1px solid rgba(0, 184, 0, 0.4);
+    color: #00d26a;
+}
+.recruit-share-btn-line:hover { background: rgba(0, 184, 0, 0.25); }
+
 /* ========== 求人票：お店ギャラリー／店舗情報（プロフィール連携） ========== */
 .recruit-shop-gallery-section {
     margin-top: 12px;
@@ -1336,5 +1574,20 @@
 
     .recruit-bottom-actions {
         bottom: calc(var(--footer-height) + 8px);
+    }
+
+    .recruit-status-table th,
+    .recruit-status-table td {
+        padding: 10px 8px;
+        font-size: 0.75rem;
+    }
+    .recruit-share-input-row {
+        flex-direction: column;
+    }
+    .recruit-share-actions {
+        flex-direction: column;
+    }
+    .recruit-share-btn {
+        justify-content: center;
     }
 }

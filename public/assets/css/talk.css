@@ -5,6 +5,8 @@
 /* --- Talk List (一覧画面) --- */
 .talk-list-container {
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
     box-sizing: border-box;
 }
 .talk-list-container.tab-page-body {
@@ -32,6 +34,9 @@
     text-decoration: none;
     transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .talk-item-main {
@@ -192,8 +197,9 @@
     position: relative;
     margin: 0 calc(-1 * var(--content-padding-x)); /* コンテンツ幅いっぱいに広げる */
     width: calc(100% + 2 * var(--content-padding-x));
-    max-width: none;
+    max-width: 100vw;
     box-sizing: border-box;
+    min-width: 0;
 }
 
 /* ルーム画面上部ヘッダー（LINE風：相手のアイコンと名前） */
@@ -364,9 +370,6 @@
     align-self: flex-start;
     width: max-content;
 }
-#talk-room-container .message-bubble {
-    width: fit-content;
-}
 
 /* 相手メッセージ用：吹き出し左端のアイコン */
 .msg-avatar-wrap {
@@ -383,18 +386,20 @@
     display: block;
 }
 
-/* 吹き出し＋フッターをまとめるブロック（内容幅に収める＝1行文で余白が出ない） */
+/* 吹き出し＋メタのブロック（参考: max-w-[75%] で幅上限、内容で幅が決まる） */
 .message-block {
     display: inline-flex;
     flex-direction: column;
-    max-width: 82%;
+    align-items: flex-end;
+    max-width: 75%;
     width: max-content;
     min-width: 0;
 }
-.msg-left .message-block { align-items: flex-start; max-width: calc(100% - 42px); }
-/* 尻尾は吹き出し内に収めたため下余白は控えめ */
+.msg-left .message-block {
+    align-items: flex-start;
+    max-width: calc(100% - 42px);
+}
 .msg-right .message-block {
-    padding-bottom: 6px;
     box-sizing: border-box;
 }
 
@@ -449,23 +454,20 @@
 }
 
 /* ==========================================================================
-   吹き出し：テキストにぴったり・尻尾で吹き出し形に
+   吹き出し：参考の通り「右下だけ角を小さく」でしっぽ表現（三角形は使わない）
    ========================================================================== */
 .message-bubble {
     display: inline-block;
     max-width: 100%;
-    width: fit-content;
-    min-width: 0;
-    padding: 8px 11px; /* 1行文の余白を抑える */
-    border-radius: 14px;
-    font-size: 0.82rem;
+    padding: 14px 20px;
+    border-radius: 16px;
+    font-size: 15px;
     line-height: 1.5;
     letter-spacing: 0;
     white-space: pre-wrap;
     word-break: break-word;
-    position: relative;
     box-sizing: border-box;
-    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.24);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
 }
 
 .message-bubble p {
@@ -475,43 +477,25 @@
     display: block;
 }
 
+/* 相手：左下だけ角を小さく（しっぽ） */
 .msg-left .message-bubble {
-    background: linear-gradient(180deg, rgba(43, 19, 24, 0.98), rgba(30, 12, 16, 0.98));
-    color: #f7eded;
-    border-radius: 14px 14px 14px 5px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #1a1111;
+    color: #f4ecec;
+    border: 1px solid rgba(58, 40, 40, 0.8);
+    border-radius: 16px 16px 16px 4px;
 }
 
+/* 自分：右下だけ角を小さく（しっぽ）＝参考 rounded-2xl rounded-br-sm */
 .msg-right .message-bubble {
-    background: linear-gradient(145deg, #e3bd52 0%, #d5aa2b 100%);
-    color: #231516;
-    font-weight: 500;
-    border-radius: 14px 14px 5px 14px;
-    border: 1px solid rgba(255, 239, 184, 0.7);
-    --bubble-tail-fill: #d5aa2b;
-    overflow: visible;
+    background: linear-gradient(to bottom right, #eeb949, #dcae44);
+    color: #110a0a;
+    font-weight: 600;
+    border: none;
+    border-radius: 16px 16px 4px 16px;
 }
 
-/* 自分の吹き出しの尻尾：CSS ::after で描画（吹き出しに必ず付く＝ずれ防止） */
-.msg-right .message-bubble::after {
-    content: '';
-    position: absolute;
-    right: -5px;
-    bottom: 5px;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 0 0 12px 7px;
-    border-color: transparent transparent var(--bubble-tail-fill, #d5aa2b) transparent;
-    pointer-events: none;
-}
-
-/* HTMLの尻尾（SVG）は非表示にして ::after に統一 */
+/* 別要素のしっぽは使わない（参考に合わせる） */
 .message-bubble-tail {
-    display: none !important;
-}
-
-.msg-right .message-bubble-tail {
     display: none !important;
 }
 
@@ -970,6 +954,12 @@
     min-width: min(264px, 100%);
     padding: 12px 12px 11px;
     border-radius: 20px;
+}
+.msg-right .message-bubble-interview {
+    border-radius: 20px 20px 4px 20px;
+}
+.msg-left .message-bubble-interview {
+    border-radius: 20px 20px 20px 4px;
 }
 
 .msg-right .message-bubble-confirmed {

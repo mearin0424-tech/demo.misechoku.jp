@@ -3,6 +3,17 @@
 /* フォント：Montserrat / Noto Sans JP / Noto Serif JP */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Noto+Sans+JP:wght@300;400;500&family=Noto+Serif+JP:wght@400;500;600&display=swap');
 
+/* レスポンシブ基盤：はみ出し防止・ボックスモデル統一 */
+html {
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 :root {
     /* --- Gold & Bordeaux Palette（高級感のあるグラデーション） --- */
     --gold: #E2BC4F;
@@ -40,6 +51,13 @@
     --content-padding-x: 15px;
 }
 
+/* 極小スマホ（〜360px）：余白を詰めてコンテンツ幅を確保 */
+@media (max-width: 360px) {
+    :root {
+        --content-padding-x: 10px;
+    }
+}
+
 /* タブレット縦（600px〜）: コンテンツ幅をやや拡大 */
 @media (min-width: 600px) {
     :root {
@@ -75,6 +93,16 @@ body {
     font-family: var(--font-sans);
     color: var(--color-text);
     overflow-x: hidden;
+    min-width: 0;
+}
+
+/* 画像・メディアの幅制限（横スクロール防止） */
+img, video, iframe, embed, object {
+    max-width: 100%;
+    height: auto;
+}
+img {
+    vertical-align: middle;
 }
 
 /* アプリ全体のコンテナ（ヘッダー・フッター・コンテンツと同じ幅に統一）
@@ -122,8 +150,10 @@ main {
 .content-wrapper {
     width: 100%;
     max-width: 100%;
+    min-width: 0;
     padding: 0 var(--content-padding-x);
     box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 /* レスポンシブ対応 */
@@ -194,6 +224,8 @@ h1, h2, h3, .luxury-title {
     display: inline-block;
     text-decoration: none;
     border: none;
+    max-width: 100%;
+    min-width: 0;
 }
 
 .btn-gold:hover {
@@ -210,6 +242,20 @@ h1, h2, h3, .luxury-title {
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
+}
+
+/* グローバルライトボックス（スマホでは余白・閉じるボタンがはみ出さないように） */
+#global-lightbox-overlay.lightbox-overlay {
+    padding: max(12px, env(safe-area-inset-top)) max(var(--content-padding-x), 12px) max(12px, env(safe-area-inset-bottom)) max(var(--content-padding-x), 12px);
+}
+#global-lightbox-overlay .lightbox-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+#global-lightbox-overlay .lightbox-close {
+    top: max(16px, env(safe-area-inset-top));
+    right: max(16px, var(--content-padding-x));
 }
 
 /* ユーティリティ */

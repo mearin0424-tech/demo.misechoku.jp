@@ -62,6 +62,16 @@ class DemoLoginController extends Controller
             ->where('is_active', true)
             ->find($accountId);
 
+        // デモ用: IDで見つからない場合は先頭の有効アカウントか、デフォルト運営を取得
+        if (!$admin) {
+            $admin = SystemAccount::query()
+                ->where('is_active', true)
+                ->orderBy('id')
+                ->first();
+        }
+        if (!$admin) {
+            $admin = $this->ensureDefaultAdminAccount();
+        }
         if (!$admin) {
             return back()
                 ->withErrors(['account_id' => '選択された管理運営者アカウントが見つかりません。'])
@@ -184,7 +194,22 @@ class DemoLoginController extends Controller
                 ->orderBy('id')
                 ->get(['id', 'name', 'email'])
                 ->map(fn (SystemAccount $user) => [
-                    'id' => $user->id,
+                    'id' => (string) $user->id,
+                    'label' => trim(($user->name ?? '管理運営者') . ' / ' . ($user->email ?? $user->id)),
+                ])
+                ->all();
+
+            if ($accounts !== []) {
+                return $accounts;
+            }
+            // 1件もいない場合はデフォルト運営を作成してから再取得
+            $this->ensureDefaultAdminAccount();
+            $accounts = SystemAccount::query()
+                ->where('is_active', true)
+                ->orderBy('id')
+                ->get(['id', 'name', 'email'])
+                ->map(fn (SystemAccount $user) => [
+                    'id' => (string) $user->id,
                     'label' => trim(($user->name ?? '管理運営者') . ' / ' . ($user->email ?? $user->id)),
                 ])
                 ->all();
@@ -192,6 +217,27 @@ class DemoLoginController extends Controller
             return $accounts !== [] ? $accounts : $this->fallbackAdminAccounts();
         } catch (QueryException) {
             return $this->fallbackAdminAccounts();
+        }
+    }
+
+    /**
+     * デモ用: 運営アカウントが0件のときに1件だけ作成する
+     */
+    private function ensureDefaultAdminAccount(): ?SystemAccount
+    {
+        try {
+            $admin = SystemAccount::query()->updateOrCreate(
+                ['email' => 'admin@misechoku.jp'],
+                [
+                    'name' => '管理者アカウント1',
+                    'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+                    'role' => SystemAccount::ROLE_ADMIN,
+                    'is_active' => true,
+                ]
+            );
+            return $admin;
+        } catch (QueryException) {
+            return null;
         }
     }
 

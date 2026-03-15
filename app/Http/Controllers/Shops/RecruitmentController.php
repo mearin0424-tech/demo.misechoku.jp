@@ -14,20 +14,77 @@ class RecruitmentController extends Controller
     {
     }
 
+    /** 採用ステータスラベル（shop_job_applications.status） */
+    private const APPLICATION_STATUS_LABELS = [
+        1 => '書類選考中',
+        2 => '面談設定済',
+        3 => '面談予定',
+        4 => '採用',
+        5 => '不採用',
+    ];
+
     /**
      * 求人ステータス一覧画面
      */
     public function status()
     {
-        $recruitData = $this->getRecruitData($this->currentShopId());
-        $numericShopId = $this->toNumericShopId($this->currentShopId());
+        $shopId = $this->currentShopId();
+        $recruitData = $this->getRecruitData($shopId);
+        $numericShopId = $this->toNumericShopId($shopId);
+        $applications = $this->getApplicationsForShop($shopId);
 
         return view('shops.recruit.status', [
             'pageId' => 'job_status',
             'recruit' => $recruitData['recruit'],
+            'applications' => $applications,
+            'applicationStatusLabels' => self::APPLICATION_STATUS_LABELS,
             'previewRoute' => route('shop.recruits.show'),
             'publicPreviewRoute' => $numericShopId ? route('share.recruit.show', ['id' => $numericShopId]) : null,
+            'shareUrl' => $numericShopId ? route('share.recruit.show', ['id' => $numericShopId]) : null,
         ]);
+    }
+
+    /**
+     * 自店舗の求人への応募一覧（マッチしているキャスト）
+     */
+    private function getApplicationsForShop(string $shopId): array
+    {
+        $jobIds = DB::table('shop_jobs')->where('shop_id', $shopId)->pluck('id');
+        if ($jobIds->isEmpty()) {
+            return [];
+        }
+
+        return DB::table('shop_job_applications')
+            ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
+            ->join('cast_profiles', 'shop_job_applications.cast_id', '=', 'cast_profiles.cast_id')
+            ->whereIn('shop_job_applications.shop_job_id', $jobIds)
+            ->select(
+                'shop_job_applications.id',
+                'shop_job_applications.cast_id',
+                'shop_job_applications.status',
+                'shop_job_applications.result_date',
+                'shop_job_applications.real_start_date',
+                'shop_job_applications.created_at',
+                'shop_job_applications.updated_at',
+                'cast_profiles.nickname',
+                'cast_profiles.name'
+            )
+            ->orderBy('shop_job_applications.status')
+            ->orderByDesc('shop_job_applications.updated_at')
+            ->get()
+            ->map(function ($row) {
+                return [
+                    'id' => $row->id,
+                    'cast_id' => $row->cast_id,
+                    'status' => (int) $row->status,
+                    'status_label' => self::APPLICATION_STATUS_LABELS[(int) $row->status] ?? '未設定',
+                    'result_date' => $row->result_date ? date('Y/m/d', strtotime($row->result_date)) : null,
+                    'real_start_date' => $row->real_start_date ? date('Y/m/d', strtotime($row->real_start_date)) : null,
+                    'created_at' => $row->created_at ? date('Y/m/d', strtotime($row->created_at)) : null,
+                    'cast_name' => $row->nickname ?: $row->name ?: 'キャスト',
+                ];
+            })
+            ->all();
     }
 
     /**

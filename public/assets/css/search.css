@@ -5,9 +5,11 @@
     margin-left: calc(-1 * var(--content-padding-x));
     margin-right: calc(-1 * var(--content-padding-x));
     width: calc(100% + 2 * var(--content-padding-x));
+    max-width: 100vw;
     box-sizing: border-box;
     padding-left: var(--content-padding-x);
     padding-right: var(--content-padding-x);
+    min-width: 0;
 }
 
 /* タイムラインカード（他タブのカードと統一） */
@@ -28,15 +30,17 @@
     padding-top: 0;
 }
 
-.tl-header { display: flex; align-items: center; margin-bottom: 12px; }
+.tl-header { display: flex; align-items: center; margin-bottom: 12px; min-width: 0; }
 .tl-icon { 
     width: 45px; height: 45px; 
     border-radius: 50%; 
     object-fit: cover; 
     margin-right: 12px; 
-    border: 1px solid var(--color-gold); 
+    border: 1px solid var(--color-gold);
+    flex-shrink: 0;
 }
-.tl-info h3 { margin: 0; font-size: 1rem; color: var(--color-text-header); }
+.tl-info { flex: 1; min-width: 0; }
+.tl-info h3 { margin: 0; font-size: 1rem; color: var(--color-text-header); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tl-info span { font-size: 0.75rem; color: #888; }
 
 .tl-body { 
@@ -44,15 +48,17 @@
     line-height: 1.6; 
     color: var(--color-text); 
     margin-bottom: 12px; 
-    white-space: pre-wrap; 
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-width: 100%;
 }
+.tl-tags { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
 .tl-tags span { 
     background: var(--color-sub); 
     color: var(--color-gold); 
     font-size: 0.75rem; 
     padding: 3px 8px; 
     border-radius: 4px; 
-    margin-right: 6px; 
     border: 1px solid var(--color-border);
 }
 
@@ -64,15 +70,18 @@
     padding: 15px;
     border-bottom: 1px solid var(--color-border);
     background: var(--color-card);
+    min-width: 0;
+    max-width: 100%;
 }
 .conn-thumb {
     width: 55px; height: 55px;
     border-radius: 10px;
     object-fit: cover;
     margin-right: 15px;
+    flex-shrink: 0;
 }
-.conn-info { flex: 1; }
-.conn-name { font-weight: bold; color: #fff; font-size: 1rem; }
+.conn-info { flex: 1; min-width: 0; }
+.conn-name { font-weight: bold; color: #fff; font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .conn-date { font-size: 0.75rem; color: var(--color-gold); margin-top: 4px; }
 .conn-action {
     background: transparent;
@@ -82,6 +91,8 @@
     border-radius: 20px;
     font-size: 0.8rem;
     cursor: pointer;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 /* 求人検索一覧：行全体クリックで求人情報へ */
@@ -116,6 +127,8 @@
     background: rgba(26, 11, 14, 0.95);
     padding: 14px;
     border-bottom: 1px solid rgba(230, 208, 128, 0.2);
+    box-sizing: border-box;
+    max-width: 100%;
 }
 .search-filter-box input, .search-filter-box select {
     background: var(--surface);
@@ -124,6 +137,8 @@
     padding: 10px;
     border-radius: 10px;
     font-size: 0.9rem;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 /* ========== 一覧・検索：詳細検索UI（賃貸検索風） ========== */
@@ -154,6 +169,8 @@
     align-items: center;
     gap: 10px;
     width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
 }
 .search-filter-simple__input {
     flex: 1;

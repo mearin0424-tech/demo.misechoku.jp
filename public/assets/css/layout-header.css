@@ -5,6 +5,8 @@
     align-items: center;
     height: 60px;
     padding: 0 var(--content-padding-x, 15px);
+    min-width: 0;
+    overflow: hidden;
     background:
         radial-gradient(circle at 0% 0%, rgba(229, 193, 88, 0.20), transparent 55%),
         radial-gradient(circle at 100% 0%, rgba(179, 138, 34, 0.30), transparent 60%),
@@ -70,6 +72,13 @@
     align-items: center;
     justify-content: center;
     text-align: center;
+    min-width: 0;
+    overflow: hidden;
+}
+.header-center-title .header-title-main {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* デモ用：キャスト／お店ピル型トグルスイッチ（センター） */
@@ -83,6 +92,8 @@
         radial-gradient(circle at 0% 0%, rgba(253, 240, 178, 0.08), transparent 60%),
         rgba(26, 11, 14, 0.9);
     overflow: hidden;
+    max-width: 100%;
+    min-width: 0;
 }
 .demo-pill-switch__segment {
     display: inline-flex;
@@ -92,7 +103,7 @@
     font-weight: 600;
     text-decoration: none;
     padding: 5px 14px;
-    min-width: 58px;
+    min-width: 0;
     border: none;
     border-radius: 999px;
     transition: color 0.2s, background 0.2s;
@@ -120,8 +131,8 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 15px; 
-    min-width: 120px;
+    gap: 15px;
+    min-width: 0;
 }
 
 .header-icon-btn {
@@ -305,4 +316,39 @@ body.page-talk .badge-notify {
     justify-content: center;
     border-radius: 999px;
     box-shadow: 0 4px 10px rgba(185, 28, 28, 0.32);
+}
+
+/* スマホ：ヘッダー内余白・アイコン間隔の調整 */
+@media (max-width: 480px) {
+    #global-header {
+        padding-left: var(--content-padding-x);
+        padding-right: var(--content-padding-x);
+    }
+    .header-right {
+        gap: 8px;
+    }
+    .header-icon-btn {
+        width: 30px;
+        height: 30px;
+        padding: 5px;
+    }
+    .header-icon-btn i {
+        font-size: 1rem;
+    }
+}
+@media (max-width: 360px) {
+    .header-left {
+        min-width: 44px;
+    }
+    .header-right {
+        gap: 6px;
+    }
+    .header-icon-btn {
+        width: 28px;
+        height: 28px;
+    }
+    .demo-pill-switch__segment {
+        padding: 4px 10px;
+        font-size: 0.65rem;
+    }
 }
