@@ -78,7 +78,7 @@ class ProfileController extends Controller
             'work_time'      => $memo['work_time'] ?? '',
             'current_job'    => $memo['current_job'] ?? ($row->profession ?? ''),
             'night_work_exp' => $nightWorkExp,
-            'industry_ids'   => $this->fetchCastIndustryIds($castId),
+            'industry_id'    => $row->industry_id ?? null,
             'look_tag_ids'   => collect($memo['look_tag_ids'] ?? [])->map(fn ($id) => (int) $id)->all(),
             'personality_tag_ids' => collect($memo['personality_tag_ids'] ?? [])->map(fn ($id) => (int) $id)->all(),
             'personality_type' => $this->resolvePersonalityType($row->personality_type ?? null, $memo),
@@ -110,7 +110,7 @@ class ProfileController extends Controller
             'work_time'      => '',
             'current_job'    => '',
             'night_work_exp' => 'none',
-            'industry_ids'   => [],
+            'industry_id'    => null,
             'look_tag_ids'   => [],
             'personality_tag_ids' => [],
             'personality_type' => '',
@@ -161,8 +161,7 @@ class ProfileController extends Controller
             'work_time'    => 'nullable|string|max:20',
             'current_job'  => 'nullable|string',
             'night_work_exp' => 'nullable|string|max:20',
-            'industry_ids' => 'nullable|array',
-            'industry_ids.*' => 'integer|exists:industries,id',
+            'industry_id'   => 'nullable|integer|exists:industries,id',
             'look_tag_ids' => 'nullable|array',
             'look_tag_ids.*' => 'integer|exists:tags_cast_looks,id',
             'personality_tag_ids' => 'nullable|array',
@@ -220,6 +219,7 @@ class ProfileController extends Controller
                 'shift' => $this->shiftCode($request->input('shift_hope')),
                 'profession' => $request->input('current_job'),
                 'exp' => $request->input('night_work_exp') === 'yes' ? 1 : 0,
+                'industry_id' => $request->input('industry_id') ?: null,
                 'memo' => json_encode(array_merge($memo, [
                     'desired_job' => $request->input('desired_job'),
                     'my_field' => $request->input('my_field'),
@@ -235,8 +235,6 @@ class ProfileController extends Controller
                 'created_at' => now(),
             ]
         );
-
-        $this->syncCastIndustries($castId, $request->input('industry_ids', []));
 
         return redirect()->route('cast.profile.edit')
             ->with('message', 'プロフィールを更新しました')

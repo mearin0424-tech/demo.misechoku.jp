@@ -54,8 +54,7 @@ class ProfileController extends Controller
             'pref' => 'required|string|max:50',
             'city' => 'nullable|string|max:100',
             'addr1' => 'nullable|string|max:255',
-            'industry_ids' => 'nullable|array',
-            'industry_ids.*' => 'integer|exists:industries,id',
+            'industry_id' => 'nullable|integer|exists:industries,id',
         ], [
             'zip.regex' => '郵便番号は 7 桁、または 123-4567 形式で入力してください。',
         ]);
@@ -83,12 +82,11 @@ class ProfileController extends Controller
                 'catch' => $request->input('word'),
                 'overview' => $request->input('overview'),
                 'message' => $request->input('overview'),
+                'industry_id' => $request->input('industry_id') ?: null,
                 'updated_at' => now(),
                 'created_at' => now(),
             ]
         );
-
-        $this->syncShopIndustries($shopId, $request->input('industry_ids', []));
 
         return redirect()
             ->route('shop.profile.store.edit')
@@ -341,7 +339,7 @@ class ProfileController extends Controller
     {
         $row = DB::table('shop_profiles')
             ->where('shop_id', $shopId)
-            ->select('shop_name', 'catch', 'overview', 'zip', 'pref', 'city', 'addr2', 'addr3')
+            ->select('shop_name', 'catch', 'overview', 'zip', 'pref', 'city', 'addr2', 'addr3', 'industry_id')
             ->first();
 
         return [
@@ -352,7 +350,7 @@ class ProfileController extends Controller
             'pref' => $row->pref ?? '東京都',
             'city' => $row->city ?? '',
             'addr1' => trim(implode(' ', array_filter([$row->addr2 ?? null, $row->addr3 ?? null]))),
-            'industry_ids' => $this->fetchShopIndustryIds($shopId),
+            'industry_id' => $row->industry_id ?? null,
         ];
     }
 
@@ -376,44 +374,6 @@ class ProfileController extends Controller
         }
 
         return asset(ltrim($path, '/'));
-    }
-
-    private function fetchShopIndustryIds(string $shopId): array
-    {
-        if (!DB::getSchemaBuilder()->hasTable('industry_shop')) {
-            return [];
-        }
-
-        return DB::table('industry_shop')
-            ->where('shop_id', $shopId)
-            ->orderBy('industry_id')
-            ->pluck('industry_id')
-            ->map(fn ($id) => (int) $id)
-            ->all();
-    }
-
-    private function syncShopIndustries(string $shopId, array $industryIds): void
-    {
-        if (!DB::getSchemaBuilder()->hasTable('industry_shop')) {
-            return;
-        }
-
-        DB::table('industry_shop')->where('shop_id', $shopId)->delete();
-
-        $rows = collect($industryIds)
-            ->map(fn ($id) => (int) $id)
-            ->filter()
-            ->unique()
-            ->values()
-            ->map(fn ($industryId) => [
-                'shop_id' => $shopId,
-                'industry_id' => $industryId,
-            ])
-            ->all();
-
-        if (!empty($rows)) {
-            DB::table('industry_shop')->insert($rows);
-        }
     }
 
     private function normalizeZip(?string $zip): ?string

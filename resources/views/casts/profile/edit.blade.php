@@ -130,15 +130,16 @@
                 @foreach(($masters['industries'] ?? []) as $industry)
                     <label class="checkbox-chip">
                         <input
-                            type="checkbox"
-                            name="industry_ids[]"
+                            type="radio"
+                            name="industry_id"
                             value="{{ $industry->id }}"
-                            {{ in_array((int) $industry->id, old('industry_ids', $profile['industry_ids'] ?? []), true) ? 'checked' : '' }}
+                            {{ (int) old('industry_id', $profile['industry_id'] ?? 0) === (int) $industry->id ? 'checked' : '' }}
                         >
                         <span>{{ $industry->name }}</span>
                     </label>
                 @endforeach
             </div>
+            <p class="input-hint mt-1">※ 1つだけ選択できます。未選択でも保存できます。</p>
         </div>
 
         {{-- 自己紹介 --}}

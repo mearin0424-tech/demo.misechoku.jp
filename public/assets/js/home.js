@@ -77,13 +77,13 @@ document.addEventListener('DOMContentLoaded', function() {
             longSwipesMs: 150,
             shortSwipes: true,
             followFinger: true,
-            watchOverflow: true,
+            watchOverflow: false,
             preventClicks: true,
             preventClicksPropagation: true,
             // 横スワイプ時はメインの縦スワイプにイベントが伝搬しないようにする
             touchMoveStopPropagation: true,
             slideToClickedSlide: false,
-            centeredSlides: true,
+            centeredSlides: false,
             observer: true,
             observeParents: true,
             on: {
