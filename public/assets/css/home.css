@@ -169,25 +169,23 @@ body.no-scroll main#main-content .content-wrapper {
     }
 }
 
-/* 画像エリア：カードサイズにぴったり合わせて表示（縮小・切り取りでスワイプ領域を固定） */
+/* 画像エリア：カード内で残り高さをすべて使い、画像は縦方向をカードに合わせて縮小し、横はみ出し分をトリム */
 .home-photo-wrap {
     position: relative;
     flex: 1 1 0;
     width: 100%;
-    min-height: 0;
+    min-height: 200px;
     overflow: hidden;
     border-radius: var(--home-card-radius);
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
 }
 
 .photo-swiper {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
     width: 100%;
     height: 100%;
+    min-height: 0;
     touch-action: pan-x;
     overflow: hidden;
 }
@@ -198,11 +196,9 @@ body.no-scroll main#main-content .content-wrapper {
 }
 .photo-swiper .swiper-slide {
     height: 100%;
-    width: 100%;
     flex-shrink: 0;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: stretch;
     box-sizing: border-box;
 }
 .photo-swiper .swiper-slide img {
@@ -213,7 +209,7 @@ body.no-scroll main#main-content .content-wrapper {
     display: block;
 }
 
-/* 画像：カードの画像エリアにぴったり縮小・切り取り表示（左右スワイプが安定） */
+/* 画像：カードの画像エリアに合わせて縦をフィットさせ、横はみ出し分をトリム（中央寄せ） */
 .home-photo {
     width: 100%;
     height: 100%;

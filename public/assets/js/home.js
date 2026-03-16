@@ -45,14 +45,6 @@ document.addEventListener('DOMContentLoaded', function() {
             init: function () {
                 var self = this;
                 setTimeout(function () { self.update(); }, 100);
-            },
-            slideChangeTransitionEnd: function () {
-                // アクティブなカード内の左右スワイプ用 Swiper を再計算（小さい画面で正しく表示・スワイプできるように）
-                var activeSlide = this.slides && this.slides[this.activeIndex];
-                var photoEl = activeSlide ? activeSlide.querySelector('.photo-swiper') : null;
-                if (photoEl && photoEl.swiper && typeof photoEl.swiper.update === 'function') {
-                    setTimeout(function () { photoEl.swiper.update(); }, 50);
-                }
             }
         }
     });
@@ -72,9 +64,9 @@ document.addEventListener('DOMContentLoaded', function() {
             allowTouchMove: photoSlideCount > 1,
             touchStartPreventDefault: false,
             touchReleaseOnEdges: true,
-            touchAngle: 55,
-            threshold: 5,
-            speed: 280,
+            touchAngle: 40,
+            threshold: 10,
+            speed: 300,
             resistance: true,
             resistanceRatio: 0.6,
             longSwipes: true,
