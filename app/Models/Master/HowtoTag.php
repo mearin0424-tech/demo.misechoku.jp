@@ -4,7 +4,8 @@ namespace App\Models\Master;
 
 class HowtoTag extends BaseMaster
 {
-    protected $table = 'tags_howto';
+    // 働き方・シフトマスタ
+    protected $table = 'tags_shop_working_styles';
 
     public const DELETE_FLAG = 'del_flg';
 }

@@ -142,15 +142,15 @@ class RecruitmentController extends Controller
             'salary_tag_ids' => 'nullable|array',
             'salary_tag_ids.*' => 'integer|exists:tags_salary,id',
             'howto_tag_ids' => 'nullable|array',
-            'howto_tag_ids.*' => 'integer|exists:tags_howto,id',
+            'howto_tag_ids.*' => 'integer|exists:tags_shop_working_styles,id',
             'merit_tag_ids' => 'nullable|array',
-            'merit_tag_ids.*' => 'integer|exists:tags_merit,id',
+            'merit_tag_ids.*' => 'integer|exists:tags_shop_benefits,id',
             'feature_tag_ids' => 'nullable|array',
-            'feature_tag_ids.*' => 'integer|exists:tags_feature,id',
+            'feature_tag_ids.*' => 'integer|exists:tags_shop_conditions,id',
             'facility_tag_ids' => 'nullable|array',
-            'facility_tag_ids.*' => 'integer|exists:tags_facility,id',
+            'facility_tag_ids.*' => 'integer|exists:tags_shop_facilities,id',
             'atmosphere_tag_ids' => 'nullable|array',
-            'atmosphere_tag_ids.*' => 'integer|exists:tags_atmosphere,id',
+            'atmosphere_tag_ids.*' => 'integer|exists:tags_shop_atmospheres,id',
         ]);
 
         $shopId = $this->currentShopId();
@@ -211,6 +211,14 @@ class RecruitmentController extends Controller
                 'created_at' => now(),
             ]));
         }
+
+        // 店舗タグを中間テーブル shop_tag_relations で同期
+        $this->syncShopTags($shopId, 'salary', $request->input('salary_tag_ids', []));
+        $this->syncShopTags($shopId, 'howto', $request->input('howto_tag_ids', []));
+        $this->syncShopTags($shopId, 'merit', $request->input('merit_tag_ids', []));
+        $this->syncShopTags($shopId, 'feature', $request->input('feature_tag_ids', []));
+        $this->syncShopTags($shopId, 'facility', $request->input('facility_tag_ids', []));
+        $this->syncShopTags($shopId, 'atmosphere', $request->input('atmosphere_tag_ids', []));
 
         return redirect()
             ->route('shop.recruits.edit')
@@ -349,12 +357,12 @@ class RecruitmentController extends Controller
     private function resolveRecruitTagNames(array $tagIds): array
     {
         $tables = [
-            'salary' => 'tags_salary',
-            'howto' => 'tags_howto',
-            'merit' => 'tags_merit',
-            'feature' => 'tags_feature',
-            'facility' => 'tags_facility',
-            'atmosphere' => 'tags_atmosphere',
+            'salary'     => 'tags_salary',
+            'howto'      => 'tags_shop_working_styles',
+            'merit'      => 'tags_shop_benefits',
+            'feature'    => 'tags_shop_conditions',
+            'facility'   => 'tags_shop_facilities',
+            'atmosphere' => 'tags_shop_atmospheres',
         ];
 
         $resolved = [];
@@ -383,6 +391,36 @@ class RecruitmentController extends Controller
             ->unique()
             ->values()
             ->all();
+    }
+
+    private function syncShopTags(string $shopId, string $tagType, array $tagIds): void
+    {
+        if (!DB::getSchemaBuilder()->hasTable('shop_tag_relations')) {
+            return;
+        }
+
+        DB::table('shop_tag_relations')
+            ->where('shop_id', $shopId)
+            ->where('tag_type', $tagType)
+            ->delete();
+
+        $rows = collect($tagIds)
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->map(fn ($tagId) => [
+                'shop_id'    => $shopId,
+                'tag_id'     => $tagId,
+                'tag_type'   => $tagType,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ])
+            ->all();
+
+        if (!empty($rows)) {
+            DB::table('shop_tag_relations')->insert($rows);
+        }
     }
 
     private function assetPathForStored(?string $path): string

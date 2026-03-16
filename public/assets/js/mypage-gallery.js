@@ -374,30 +374,3 @@
         run();
     }
 })();
-                        editModal.style.display = 'none';
-                        performUpload(blob, _pendingUploadFile.name, _pendingUploadSlotIndex);
-                    })
-                    .catch(function(err) {
-                        alert(err && err.message ? err.message : '画像の加工に失敗しました');
-                    })
-                    .finally(function() {
-                        btn.disabled = false;
-                    });
-            });
-        }
-
-        uploadInput.addEventListener('change', function() {
-            var file = this.files && this.files[0];
-            this.value = '';
-            if (!file) return;
-            var slotIndex = resolveSlotIndex();
-            openEditModal(file, slotIndex);
-        });
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', run);
-    } else {
-        run();
-    }
-})();

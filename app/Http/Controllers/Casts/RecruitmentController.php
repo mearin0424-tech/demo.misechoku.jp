@@ -12,14 +12,18 @@ use Illuminate\Support\Facades\Schema;
 class RecruitmentController extends Controller
 {
     /**
-     * 求人情報詳細（店舗IDで表示）
+     * 求人情報詳細
+     * ルートの {id} は以下どちらも許容する:
+     * - 数値ID (1, 2, 3, ...)
+     * - 店舗ID文字列 (s00000001 など)
      */
-    public function show(int $id)
+    public function show($id)
     {
-        $data = $this->getRecruitDataFromDatabase($id, true);
+        $numericId = $this->normalizeRouteIdToNumeric($id);
+        $data = $this->getRecruitDataFromDatabase($numericId, true);
         abort_if(empty($data['recruit']), 404);
 
-        return view('shops.recruit.show', $this->buildRecruitViewData($data, $id, true, false));
+        return view('shops.recruit.show', $this->buildRecruitViewData($data, $numericId, true, false));
     }
 
     /**
@@ -201,12 +205,12 @@ class RecruitmentController extends Controller
     private function resolveRecruitTagNames(array $tagIds): array
     {
         $tables = [
-            'salary' => 'tags_salary',
-            'howto' => 'tags_howto',
-            'merit' => 'tags_merit',
-            'feature' => 'tags_feature',
-            'facility' => 'tags_facility',
-            'atmosphere' => 'tags_atmosphere',
+            'salary'     => 'tags_salary',
+            'howto'      => 'tags_shop_working_styles',
+            'merit'      => 'tags_shop_benefits',
+            'feature'    => 'tags_shop_conditions',
+            'facility'   => 'tags_shop_facilities',
+            'atmosphere' => 'tags_shop_atmospheres',
         ];
 
         $resolved = [];
@@ -231,5 +235,24 @@ class RecruitmentController extends Controller
         }
 
         return $resolved;
+    }
+
+    /**
+     * ルートの {id} を内部で扱う数値IDに正規化する
+     * - "s00000001" → 1
+     * - "1" / 1     → 1
+     */
+    private function normalizeRouteIdToNumeric($id): int
+    {
+        if (is_int($id) || ctype_digit((string) $id)) {
+            return (int) $id;
+        }
+
+        $id = (string) $id;
+        if (str_starts_with($id, 's')) {
+            return (int) ltrim(substr($id, 1), '0') ?: 0;
+        }
+
+        return 0;
     }
 }

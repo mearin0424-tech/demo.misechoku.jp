@@ -19,7 +19,9 @@ document.addEventListener('DOMContentLoaded', function() {
         direction: 'vertical',
         slidesPerView: 1,
         centeredSlides: true,
-        loop: slideCount >= 2,
+        // 最後のユーザーまで行ったら先頭にループ
+        loop: true,
+        loopAdditionalSlides: Math.max(2, slideCount),
         speed: 400,
         mousewheel: {
             enabled: true,

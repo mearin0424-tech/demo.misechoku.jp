@@ -4,7 +4,8 @@ namespace App\Models\Master;
 
 class FacilityTag extends BaseMaster
 {
-    protected $table = 'tags_facility';
+    // 設備・空間マスタ
+    protected $table = 'tags_shop_facilities';
 
     public const DELETE_FLAG = 'del_flg';
 }

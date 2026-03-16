@@ -236,6 +236,10 @@ class ProfileController extends Controller
             ]
         );
 
+        // キャストタグ（ルックス・性格）を中間テーブル cast_tag_relations で同期
+        $this->syncCastTags($castId, 'looks', $request->input('look_tag_ids', []));
+        $this->syncCastTags($castId, 'personality', $request->input('personality_tag_ids', []));
+
         return redirect()->route('cast.profile.edit')
             ->with('message', 'プロフィールを更新しました')
             ->withInput([]);
@@ -562,41 +566,33 @@ class ProfileController extends Controller
         return is_string($type) && preg_match('/^[LF][CP][IO][HR]$/', $type) ? $type : '';
     }
 
-    private function fetchCastIndustryIds(string $castId): array
+    private function syncCastTags(string $castId, string $tagType, array $tagIds): void
     {
-        if (!DB::getSchemaBuilder()->hasTable('cast_industry')) {
-            return [];
-        }
-
-        return DB::table('cast_industry')
-            ->where('cast_id', $castId)
-            ->orderBy('industry_id')
-            ->pluck('industry_id')
-            ->map(fn ($id) => (int) $id)
-            ->all();
-    }
-
-    private function syncCastIndustries(string $castId, array $industryIds): void
-    {
-        if (!DB::getSchemaBuilder()->hasTable('cast_industry')) {
+        if (!DB::getSchemaBuilder()->hasTable('cast_tag_relations')) {
             return;
         }
 
-        DB::table('cast_industry')->where('cast_id', $castId)->delete();
+        DB::table('cast_tag_relations')
+            ->where('cast_id', $castId)
+            ->where('tag_type', $tagType)
+            ->delete();
 
-        $rows = collect($industryIds)
+        $rows = collect($tagIds)
             ->map(fn ($id) => (int) $id)
             ->filter()
             ->unique()
             ->values()
-            ->map(fn ($industryId) => [
-                'cast_id' => $castId,
-                'industry_id' => $industryId,
+            ->map(fn ($tagId) => [
+                'cast_id'   => $castId,
+                'tag_id'    => $tagId,
+                'tag_type'  => $tagType,
+                'created_at'=> now(),
+                'updated_at'=> now(),
             ])
             ->all();
 
         if (!empty($rows)) {
-            DB::table('cast_industry')->insert($rows);
+            DB::table('cast_tag_relations')->insert($rows);
         }
     }
 

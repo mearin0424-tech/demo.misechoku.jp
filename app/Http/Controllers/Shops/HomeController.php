@@ -103,11 +103,15 @@ class HomeController extends Controller
 
         $items = [];
         foreach ($rows as $row) {
+            // 画面からは「DBの店舗ID（例: s00000001）」でアクセスできるようにする
             $numericId = $this->toNumericShopId($row->id);
             $images = $this->getShopImages($row->id, $row->main_image_path);
             $meta = $this->decodeRecruitMeta($row->noruma_cond ?? null);
             $items[] = [
-                'id' => $numericId,
+                // ルート用には文字列ID（例: s00000001）をそのまま渡す
+                'id' => $row->id,
+                // 必要に応じて数値IDを併用したい場合に備えて保持
+                'numeric_id' => $numericId,
                 'name' => $row->shop_name ?: '店舗',
                 'images' => $images,
                 'hourly_wage_regular' => isset($row->hourly_wage_regular) ? (int) $row->hourly_wage_regular : 0,

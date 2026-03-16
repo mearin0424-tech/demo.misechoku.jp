@@ -307,10 +307,10 @@ class AdminMasterService
             ],
             [
                 'key' => 'tags_howto',
-                'table' => 'tags_howto',
+                'table' => 'tags_shop_working_styles',
                 'model' => HowtoTag::class,
-                'title' => '店舗タグ: 働き方',
-                'description' => '求人の働き方タグです。',
+                'title' => '働き方・シフトマスタ',
+                'description' => '週1からOK、1日3h以内、終電上がりOK など',
                 'group' => '求人系',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 週1からOK'],
@@ -318,10 +318,10 @@ class AdminMasterService
             ],
             [
                 'key' => 'tags_merit',
-                'table' => 'tags_merit',
+                'table' => 'tags_shop_benefits',
                 'model' => MeritTag::class,
-                'title' => '店舗タグ: メリット・待遇',
-                'description' => '求人のメリット・待遇タグです。',
+                'title' => '待遇・サポートマスタ',
+                'description' => '服装自由、レンタル衣装、寮有り、ノルマ無し など',
                 'group' => '求人系',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 送り有り'],
@@ -329,10 +329,10 @@ class AdminMasterService
             ],
             [
                 'key' => 'tags_feature',
-                'table' => 'tags_feature',
+                'table' => 'tags_shop_conditions',
                 'model' => FeatureTag::class,
-                'title' => '店舗タグ: 店舗特徴',
-                'description' => '求人の店舗特徴タグです。',
+                'title' => '店舗営業情報マスタ',
+                'description' => '新規オープン、日曜営業、定休日無し など',
                 'group' => '求人系',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 未経験'],
@@ -340,10 +340,10 @@ class AdminMasterService
             ],
             [
                 'key' => 'tags_facility',
-                'table' => 'tags_facility',
+                'table' => 'tags_shop_facilities',
                 'model' => FacilityTag::class,
-                'title' => '店舗タグ: 設備',
-                'description' => '求人の設備タグです。',
+                'title' => '設備・空間マスタ',
+                'description' => '個人ロッカー有り、カラオケ有り、禁煙店 など',
                 'group' => '求人系',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 駐車場有り'],
@@ -351,10 +351,10 @@ class AdminMasterService
             ],
             [
                 'key' => 'tags_atmosphere',
-                'table' => 'tags_atmosphere',
+                'table' => 'tags_shop_atmospheres',
                 'model' => AtmosphereTag::class,
-                'title' => '店舗タグ: お店の雰囲気',
-                'description' => '求人のお店の雰囲気タグです。',
+                'title' => 'お店の雰囲気・規模マスタ',
+                'description' => 'わいわい、大型店、派閥無し、アットホーム など',
                 'group' => '求人系',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: アットホーム'],
