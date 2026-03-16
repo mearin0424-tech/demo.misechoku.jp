@@ -62,7 +62,8 @@ document.addEventListener('DOMContentLoaded', function() {
             spaceBetween: 0,
             loop: false,
             nested: true,
-            allowTouchMove: photoSlideCount > 1,
+            // デバッグを兼ねて常にスワイプ可能にする（1枚でも「横に動く」ことを明示）
+            allowTouchMove: true,
             touchStartPreventDefault: false,
             touchReleaseOnEdges: true,
             // ほぼ水平のジェスチャーのみを横スワイプとして扱う

@@ -362,6 +362,13 @@
                 <div class="image-edit-frame-mask"></div>
             </div>
         </div>
+        <div class="image-edit-zoom-controls">
+            <label class="image-edit-zoom-label">
+                表示サイズ
+                <input type="range" id="image-edit-zoom" min="1" max="3" step="0.1" value="1">
+                <span id="image-edit-zoom-value">100%</span>
+            </label>
+        </div>
         <div class="gallery-preview-actions image-edit-actions">
             <button type="button" class="btn-action btn-action-secondary" id="image-edit-cancel-btn">別の画像を選ぶ</button>
             <button type="button" class="btn-action btn-action-primary" id="image-edit-confirm-btn">この画像でアップロード</button>

@@ -43,7 +43,6 @@
                     <h2>マスタを選択</h2>
                     <p>編集したいマスタを選ぶと、この下に追加フォームと一覧が表示されます。</p>
                 </div>
-                <a href="{{ route('admin.ngwords.index') }}" class="admin-master-link">NGワード管理へ</a>
             </div>
 
             <div class="admin-master-filters">

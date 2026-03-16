@@ -11,6 +11,7 @@
     var _galleryUploadSlotIndex = null;
     var _pendingUploadFile = null;
     var _pendingUploadSlotIndex = null;
+    var _pendingZoom = 1;
     var csrfToken = config.csrfToken || '';
     var uploadUrl = config.uploadUrl;
     var deleteUrlTemplate = config.deleteUrlTemplate || '';
@@ -37,6 +38,8 @@
         var editPreviewImg = document.getElementById('image-edit-preview');
         var editConfirmBtn = document.getElementById('image-edit-confirm-btn');
         var editCancelBtn = document.getElementById('image-edit-cancel-btn');
+        var editZoomInput = document.getElementById('image-edit-zoom');
+        var editZoomValue = document.getElementById('image-edit-zoom-value');
 
         document.addEventListener('click', function(ev) {
             var slot = ev.target.closest('.photo-slot');
@@ -128,7 +131,7 @@
             return slotIndex;
         }
 
-        function resizeImageForUpload(file, maxWidth, maxHeight) {
+        function resizeImageForUpload(file, maxWidth, maxHeight, zoom) {
             return new Promise(function(resolve, reject) {
                 var reader = new FileReader();
                 reader.onload = function(e) {
@@ -154,6 +157,17 @@
                             sh = sw / targetRatio;
                             sx = 0;
                             sy = (img.height - sh) / 2;
+                        }
+
+                        // 拡大率（ズーム）を反映（中央を基準にアップ）
+                        var z = zoom && zoom > 1 ? zoom : 1;
+                        if (z > 1) {
+                            var origSw = sw;
+                            var origSh = sh;
+                            sw = origSw / z;
+                            sh = origSh / z;
+                            sx += (origSw - sw) / 2;
+                            sy += (origSh - sh) / 2;
                         }
 
                         // 出力サイズを決定（4:3を維持しつつ、maxWidth/maxHeight以内 & おおよそ 2MP 以下）
@@ -239,6 +253,7 @@
                     _galleryUploadSlotIndex = null;
                     _pendingUploadFile = null;
                     _pendingUploadSlotIndex = null;
+                    _pendingZoom = 1;
                 });
         }
 
@@ -251,6 +266,14 @@
             }
             _pendingUploadFile = file;
             _pendingUploadSlotIndex = slotIndex != null ? slotIndex : resolveSlotIndex();
+            _pendingZoom = 1;
+            if (editZoomInput && editZoomValue) {
+                editZoomInput.value = '1';
+                editZoomValue.textContent = '100%';
+            }
+            if (editPreviewImg) {
+                editPreviewImg.style.transform = 'scale(1)';
+            }
 
             var reader = new FileReader();
             reader.onload = function(e) {
@@ -265,6 +288,21 @@
                 editModal.style.display = 'none';
                 _pendingUploadFile = null;
                 _pendingUploadSlotIndex = null;
+                _pendingZoom = 1;
+                if (editPreviewImg) {
+                    editPreviewImg.style.transform = 'scale(1)';
+                }
+            });
+        }
+
+        if (editZoomInput && editPreviewImg && editZoomValue) {
+            editZoomInput.addEventListener('input', function() {
+                var z = parseFloat(editZoomInput.value || '1') || 1;
+                if (z < 1) z = 1;
+                if (z > 3) z = 3;
+                _pendingZoom = z;
+                editPreviewImg.style.transform = 'scale(' + z + ')';
+                editZoomValue.textContent = Math.round(z * 100) + '%';
             });
         }
 
@@ -280,7 +318,7 @@
                 // 4:3（約 1600x1200）を目安にリサイズ
                 var MAX_WIDTH = 1600;
                 var MAX_HEIGHT = 1200;
-                resizeImageForUpload(_pendingUploadFile, MAX_WIDTH, MAX_HEIGHT)
+                resizeImageForUpload(_pendingUploadFile, MAX_WIDTH, MAX_HEIGHT, _pendingZoom || 1)
                     .then(function(blob) {
                         editModal.style.display = 'none';
                         performUpload(blob, _pendingUploadFile.name, _pendingUploadSlotIndex);
