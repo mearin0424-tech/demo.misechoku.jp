@@ -27,9 +27,9 @@ document.addEventListener('DOMContentLoaded', function() {
             thresholdDelta: 20
         },
         touchRatio: 1,
-        // ほぼ縦方向のジェスチャーのみを縦スワイプとして扱う
-        touchAngle: 25,
-        threshold: 8,
+        // ある程度斜めのジェスチャーも縦として拾う
+        touchAngle: 35,
+        threshold: 10,
         resistance: true,
         resistanceRatio: 0.7,
         touchStartPreventDefault: false,
@@ -80,8 +80,8 @@ document.addEventListener('DOMContentLoaded', function() {
             watchOverflow: false,
             preventClicks: true,
             preventClicksPropagation: true,
-            // 横スワイプ時はメインの縦スワイプにイベントが伝搬しないようにする
-            touchMoveStopPropagation: true,
+            // 縦方向の動きは親のメインSwiperに伝搬させる
+            touchMoveStopPropagation: false,
             slideToClickedSlide: false,
             centeredSlides: false,
             observer: true,

@@ -6,6 +6,7 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/cast_profile.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
 @endpush
 
 @section('content')
@@ -164,7 +165,7 @@
         <div class="image-edit-header">
             <h3 class="mypage-modal-title serif-font">画像を調整してアップロード</h3>
             <p class="image-edit-guide">
-                推奨サイズは <strong>4:3（例：1600×1200px）</strong> です。<br>
+                推奨サイズは <strong>3:4（例：1200×1600px、縦長）</strong> です。<br>
                 画面に表示されている範囲で中央を基準に自動トリミングし、スマホ表示でも粗くなりすぎないよう約2MPまでサイズ調整してアップロードします。
             </p>
         </div>
@@ -173,13 +174,6 @@
                 <img id="image-edit-preview" src="" alt="編集プレビュー" class="image-edit-preview-img">
                 <div class="image-edit-frame-mask"></div>
             </div>
-        </div>
-        <div class="image-edit-zoom-controls">
-            <label class="image-edit-zoom-label">
-                表示サイズ
-                <input type="range" id="image-edit-zoom" min="1" max="3" step="0.1" value="1">
-                <span id="image-edit-zoom-value">100%</span>
-            </label>
         </div>
         <div class="gallery-preview-actions image-edit-actions">
             <button type="button" class="btn-action btn-action-secondary" id="image-edit-cancel-btn">別の画像を選ぶ</button>
@@ -207,6 +201,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="{{ asset('assets/js/gallery-sortable.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 <script>
 window.MYPAGE_GALLERY_CONFIG = {
     csrfToken: @json(csrf_token()),

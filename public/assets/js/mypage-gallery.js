@@ -12,6 +12,7 @@
     var _pendingUploadFile = null;
     var _pendingUploadSlotIndex = null;
     var _pendingZoom = 1;
+    var _cropper = null;
     var csrfToken = config.csrfToken || '';
     var uploadUrl = config.uploadUrl;
     var deleteUrlTemplate = config.deleteUrlTemplate || '';
@@ -38,8 +39,8 @@
         var editPreviewImg = document.getElementById('image-edit-preview');
         var editConfirmBtn = document.getElementById('image-edit-confirm-btn');
         var editCancelBtn = document.getElementById('image-edit-cancel-btn');
-        var editZoomInput = document.getElementById('image-edit-zoom');
-        var editZoomValue = document.getElementById('image-edit-zoom-value');
+        var editZoomInput = null;
+        var editZoomValue = null;
 
         document.addEventListener('click', function(ev) {
             var slot = ev.target.closest('.photo-slot');
@@ -131,17 +132,17 @@
             return slotIndex;
         }
 
-        function resizeImageForUpload(file, maxWidth, maxHeight, zoom) {
+        function resizeImageFallback(file, maxWidth, maxHeight) {
             return new Promise(function(resolve, reject) {
                 var reader = new FileReader();
                 reader.onload = function(e) {
                     var img = new Image();
                     img.onload = function() {
-                        var ASPECT_W = 4;
-                        var ASPECT_H = 3;
+                        var ASPECT_W = 3;
+                        var ASPECT_H = 4;
                         var aspect = ASPECT_W / ASPECT_H;
 
-                        // 元画像から 4:3 にクロップする（中央基準）
+                        // 元画像から 3:4 にクロップする（中央基準）
                         var srcRatio = img.width / img.height;
                         var targetRatio = aspect;
                         var sx, sy, sw, sh;
@@ -159,18 +160,7 @@
                             sy = (img.height - sh) / 2;
                         }
 
-                        // 拡大率（ズーム）を反映（中央を基準にアップ）
-                        var z = zoom && zoom > 1 ? zoom : 1;
-                        if (z > 1) {
-                            var origSw = sw;
-                            var origSh = sh;
-                            sw = origSw / z;
-                            sh = origSh / z;
-                            sx += (origSw - sw) / 2;
-                            sy += (origSh - sh) / 2;
-                        }
-
-                        // 出力サイズを決定（4:3を維持しつつ、maxWidth/maxHeight以内 & おおよそ 2MP 以下）
+                        // 出力サイズを決定（3:4を維持しつつ、maxWidth/maxHeight以内 & おおよそ 2MP 以下）
                         var MAX_PIXELS = 2000000; // 約 2MP
                         var outWidth = Math.min(img.width, maxWidth || img.width);
                         var outHeight = Math.round(outWidth * ASPECT_H / ASPECT_W);
@@ -267,17 +257,33 @@
             _pendingUploadFile = file;
             _pendingUploadSlotIndex = slotIndex != null ? slotIndex : resolveSlotIndex();
             _pendingZoom = 1;
-            if (editZoomInput && editZoomValue) {
-                editZoomInput.value = '1';
-                editZoomValue.textContent = '100%';
-            }
-            if (editPreviewImg) {
-                editPreviewImg.style.transform = 'scale(1)';
+            if (_cropper) {
+                _cropper.destroy();
+                _cropper = null;
             }
 
             var reader = new FileReader();
             reader.onload = function(e) {
                 editPreviewImg.src = e.target.result;
+                if (_cropper) {
+                    _cropper.destroy();
+                    _cropper = null;
+                }
+                if (window.Cropper) {
+                    _cropper = new Cropper(editPreviewImg, {
+                        aspectRatio: 3 / 4,
+                        viewMode: 1,
+                        dragMode: 'move',
+                        autoCropArea: 1,
+                        zoomable: true,
+                        movable: true,
+                        scalable: false,
+                        rotatable: false,
+                        responsive: true,
+                        background: false,
+                        toggleDragModeOnDblclick: false,
+                    });
+                }
                 editModal.style.display = 'flex';
             };
             reader.readAsDataURL(file);
@@ -289,20 +295,10 @@
                 _pendingUploadFile = null;
                 _pendingUploadSlotIndex = null;
                 _pendingZoom = 1;
-                if (editPreviewImg) {
-                    editPreviewImg.style.transform = 'scale(1)';
+                if (_cropper) {
+                    _cropper.destroy();
+                    _cropper = null;
                 }
-            });
-        }
-
-        if (editZoomInput && editPreviewImg && editZoomValue) {
-            editZoomInput.addEventListener('input', function() {
-                var z = parseFloat(editZoomInput.value || '1') || 1;
-                if (z < 1) z = 1;
-                if (z > 3) z = 3;
-                _pendingZoom = z;
-                editPreviewImg.style.transform = 'scale(' + z + ')';
-                editZoomValue.textContent = Math.round(z * 100) + '%';
             });
         }
 
@@ -315,11 +311,69 @@
                 var btn = editConfirmBtn;
                 if (btn.disabled) return;
                 btn.disabled = true;
-                // 4:3（約 1600x1200）を目安にリサイズ
-                var MAX_WIDTH = 1600;
-                var MAX_HEIGHT = 1200;
-                resizeImageForUpload(_pendingUploadFile, MAX_WIDTH, MAX_HEIGHT, _pendingZoom || 1)
-                    .then(function(blob) {
+                // 3:4（約 1200x1600）でトリミング
+                var MAX_WIDTH = 1200;
+                var MAX_HEIGHT = 1600;
+
+                var cropAndUpload = function() {
+                    if (_cropper && typeof _cropper.getCroppedCanvas === 'function') {
+                        var canvas = _cropper.getCroppedCanvas({
+                            width: MAX_WIDTH,
+                            height: MAX_HEIGHT,
+                            imageSmoothingQuality: 'high'
+                        });
+                        if (!canvas) {
+                            throw new Error('画像のトリミングに失敗しました');
+                        }
+                        canvas.toBlob(function(blob) {
+                            if (!blob) {
+                                alert('画像の加工に失敗しました');
+                                btn.disabled = false;
+                                return;
+                            }
+                            editModal.style.display = 'none';
+                            performUpload(blob, _pendingUploadFile.name, _pendingUploadSlotIndex);
+                        }, 'image/jpeg', 0.9);
+                    } else {
+                        // フォールバック：従来の中央トリミング
+                        resizeImageFallback(_pendingUploadFile, MAX_WIDTH, MAX_HEIGHT)
+                            .then(function(blob) {
+                                editModal.style.display = 'none';
+                                performUpload(blob, _pendingUploadFile.name, _pendingUploadSlotIndex);
+                            })
+                            .catch(function(err) {
+                                alert(err && err.message ? err.message : '画像の加工に失敗しました');
+                            })
+                            .finally(function() {
+                                btn.disabled = false;
+                            });
+                    }
+                };
+
+                try {
+                    cropAndUpload();
+                } catch (e) {
+                    alert(e && e.message ? e.message : '画像の加工に失敗しました');
+                    btn.disabled = false;
+                }
+            });
+        }
+
+        uploadInput.addEventListener('change', function() {
+            var file = this.files && this.files[0];
+            this.value = '';
+            if (!file) return;
+            var slotIndex = resolveSlotIndex();
+            openEditModal(file, slotIndex);
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', run);
+    } else {
+        run();
+    }
+})();
                         editModal.style.display = 'none';
                         performUpload(blob, _pendingUploadFile.name, _pendingUploadSlotIndex);
                     })
