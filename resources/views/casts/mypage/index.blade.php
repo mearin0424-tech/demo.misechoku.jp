@@ -158,6 +158,29 @@
     </div>
 </div>
 
+{{-- 画像編集モーダル（推奨サイズに合わせてトリミング） --}}
+<div id="image-edit-modal" class="mypage-modal-overlay gallery-preview-overlay" role="dialog" aria-label="画像編集" style="display:none;">
+    <div class="gallery-preview-inner image-edit-inner">
+        <div class="image-edit-header">
+            <h3 class="mypage-modal-title serif-font">画像を調整してアップロード</h3>
+            <p class="image-edit-guide">
+                推奨サイズは <strong>4:3（例：1600×1200px）</strong> です。<br>
+                画面に表示されている範囲で中央を基準に自動トリミングし、スマホ表示でも粗くなりすぎないよう約2MPまでサイズ調整してアップロードします。
+            </p>
+        </div>
+        <div class="image-edit-preview-wrapper">
+            <div class="image-edit-frame">
+                <img id="image-edit-preview" src="" alt="編集プレビュー" class="image-edit-preview-img">
+                <div class="image-edit-frame-mask"></div>
+            </div>
+        </div>
+        <div class="gallery-preview-actions image-edit-actions">
+            <button type="button" class="btn-action btn-action-secondary" id="image-edit-cancel-btn">別の画像を選ぶ</button>
+            <button type="button" class="btn-action btn-action-primary" id="image-edit-confirm-btn">この画像でアップロード</button>
+        </div>
+    </div>
+</div>
+
 {{-- アピール編集モーダル --}}
 <div id="modal-word" class="mypage-modal-overlay modal-word-edit" style="display:none;">
     <div class="mypage-modal-panel glass-panel">
