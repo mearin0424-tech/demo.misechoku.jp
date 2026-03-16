@@ -2,10 +2,11 @@
     $bodyClass = trim($__env->yieldContent('body-class'));
     $resolvedGuideMessage = '';
 
-    // オコジョガイドは SEARCH と LIKES（つながり / interaction）の画面でのみ表示
+    // オコジョガイドは SEARCH と LIKES（つながり / interaction）の画面でのみ表示。ホームのスワイプ画面では表示しない
+    $isHome = str_contains($bodyClass, 'page-home');
     $isSearch = str_contains($bodyClass, 'page-search') || request()->is('*/search*');
     $isLikes = str_contains($bodyClass, 'page-interaction') || request()->is('*/interaction*');
-    if ($isSearch || $isLikes) {
+    if (!$isHome && ($isSearch || $isLikes)) {
         $resolvedGuideMessage = '現在ガイドのセリフは実装中です';
     }
 @endphp

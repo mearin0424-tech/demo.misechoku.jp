@@ -73,9 +73,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 外部（Swiperなど）からメッセージを更新する関数
+    // 外部（Swiperなど）からメッセージを更新する関数（ホームのスワイプ画面ではオコジョを表示しない）
     window.updateCharacterMessage = function(newMessage) {
         if (!messageContent || !characterGuide) return;
+        if (document.body.classList.contains('page-home')) return;
 
         if (newMessage && newMessage.trim() !== "") {
             messageContent.innerHTML = newMessage.replace(/\n/g, '<br>');

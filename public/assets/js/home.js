@@ -45,18 +45,6 @@ document.addEventListener('DOMContentLoaded', function() {
             init: function () {
                 var self = this;
                 setTimeout(function () { self.update(); }, 100);
-            },
-            slideChange: function () {
-                var messages = [
-                    "上下スワイプで次 / 前のアカウントに移動できるよ！\n左右スワイプでこの人の別の写真が見られるよ。",
-                    "左右にスワイプしてこのキャストの他の写真をチェックしてみてね。\n上下スワイプで別のキャストに切り替わるよ。",
-                    "気になる人がいたら右側のボタンから「いいね」「キープ」「メッセージ」を使ってみよう！"
-                ];
-                var realIndex = this.realIndex != null ? this.realIndex : this.activeIndex;
-                var currentMsg = messages[realIndex % messages.length] || "素敵な出会いがありますように！";
-                if (typeof window.updateCharacterMessage === 'function') {
-                    window.updateCharacterMessage(currentMsg);
-                }
             }
         }
     });
@@ -151,16 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 4. アクションボタンの簡易動作
     initActionButtons();
 
-    // 5. キャラクターガイドの少しフェード
-    setTimeout(() => {
-        const guide = document.getElementById('character-guide');
-        if (guide) {
-            guide.style.transition = 'opacity 1s ease';
-            guide.style.opacity = '0.5';
-        }
-    }, 8000);
-
-    // 6. 初回・久しぶり用オンボーディング（ホームスワイプガイド）
+    // 5. 初回・久しぶり用オンボーディング（ホームスワイプガイド・オコジョは表示しない）
     const onboardingOverlay = document.getElementById('home-swipe-onboarding');
     const ONBOARDING_KEY = 'home_swipe_onboarding_last_shown_at';
     const ONBOARDING_INTERVAL_DAYS = 90;
@@ -205,7 +184,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!onboardingOverlay) return;
         onboardingOverlay.classList.remove('is-active');
         onboardingOverlay.setAttribute('aria-hidden', 'true');
-        window.forceCharacterGuideVisible = false;
         markOnboardingShown();
     }
 
