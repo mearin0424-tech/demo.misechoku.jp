@@ -285,6 +285,17 @@ CREATE TABLE IF NOT EXISTS `cast_tag` (
   CONSTRAINT `cast_tag_tag_id_foreign` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `cast_posts` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `cast_id` varchar(20) NOT NULL,
+  `body` text COMMENT 'ひとこと',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `cast_posts_cast_id_unique` (`cast_id`),
+  CONSTRAINT `cast_posts_cast_id_foreign` FOREIGN KEY (`cast_id`) REFERENCES `casts` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS `shop_tag` (
   `shop_id` varchar(20) NOT NULL,
   `tag_id` bigint unsigned NOT NULL,

@@ -20,7 +20,7 @@
     </div>
 
     <div class="invoice-to">
-        <p class="invoice-to-name">{{ $invoice['shop_name'] }} 御中</p>
+        <p class="invoice-to-name">{{ trim($invoice['shop_name'] ?? '') }}{{ str_ends_with(trim($invoice['shop_name'] ?? ''), '御中') ? '' : ' 御中' }}</p>
         <div class="invoice-to-addr">
             {{ $invoice['shop_address'] ?: '住所未登録' }}<br>
             {{ $invoice['shop_email'] ?: 'メール未登録' }}

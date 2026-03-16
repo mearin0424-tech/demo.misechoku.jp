@@ -291,6 +291,62 @@ class BillingManagementService
         ];
     }
 
+    /**
+     * 手動で請求書を発行（障害時等の回避策。ステータスが「入金依頼確認済み」でなくても発行可能）
+     */
+    public function issueInvoiceManually(int $depositId, array $payload = []): array
+    {
+        $deposit = $this->findDepositById($depositId);
+        $adminBank = $this->getAdminBankAccount();
+
+        if (!$deposit) {
+            return ['success' => false, 'message' => '対象データが見つかりません。'];
+        }
+
+        if (!empty($deposit->invoice_number)) {
+            return ['success' => false, 'message' => 'この申請はすでに請求書が発行されています。'];
+        }
+
+        if (!$adminBank) {
+            return ['success' => false, 'message' => '先に運営口座を登録してください。'];
+        }
+
+        if (empty($payload['confirm_manual_workaround']) || empty($payload['confirm_admin_bank_ready'])) {
+            return ['success' => false, 'message' => '手動発行の確認にチェックを入れてください。'];
+        }
+
+        $amounts = $this->calculateAmounts($deposit);
+        $issuedAt = now();
+        $invoiceNumber = $this->generateInvoiceNumber((int) $deposit->id, $issuedAt);
+
+        DB::table('application_deposits')
+            ->where('id', $depositId)
+            ->update($this->filterExistingColumns('application_deposits', [
+                'status' => self::STATUS_INVOICE_ISSUED,
+                'invoice_number' => $invoiceNumber,
+                'bonus_amount' => $amounts['bonus_amount'],
+                'system_fee_amount' => $amounts['system_fee_amount'],
+                'invoice_amount' => $amounts['invoice_amount'],
+                'cast_transfer_amount' => $amounts['cast_transfer_amount'],
+                'invoice_issued_at' => $issuedAt,
+                'invoice_due_date' => $issuedAt->copy()->addDays(self::INVOICE_DUE_DAYS)->toDateString(),
+                'invoice_sent_at' => $issuedAt,
+                'updated_at' => $issuedAt,
+            ]));
+
+        $this->appendHistory($depositId, self::STATUS_INVOICE_ISSUED);
+
+        $mailSent = false;
+        if (!empty($deposit->shop_email)) {
+            $mailSent = $this->sendInvoiceMail($depositId, $deposit->shop_email);
+        }
+
+        return [
+            'success' => true,
+            'message' => '手動で請求書を発行しました。' . ($mailSent ? ' 店舗へメール送付済みです。' : ' メール送付は行っていません。'),
+        ];
+    }
+
     public function reportShopPayment(string $shopId, array $payload): array
     {
         $deposit = $this->findLatestDepositForShop($shopId);
@@ -601,7 +657,7 @@ class BillingManagementService
             'invoice_number' => 'SAMPLE-' . $issuedAt->format('Ymd'),
             'issued_at' => $issuedAt,
             'due_date' => $dueDate,
-            'shop_name' => 'サンプル店舗名 御中',
+            'shop_name' => 'サンプル店舗名',
             'shop_email' => 'sample@example.com',
             'shop_address' => '東京都渋谷区〇〇 1-2-3',
             'cast_name' => 'サンプルキャスト名',

@@ -43,7 +43,7 @@
             <span class="invoice-toolbar-msg">PDFで保存する場合は「印刷」→「PDFに保存」を選択してください。</span>
             <div style="display: flex; gap: 10px;">
                 <button type="button" class="invoice-btn" onclick="window.print();">印刷 / PDFに保存</button>
-                <a href="{{ route('admin.invoices.index') }}" class="invoice-btn" style="background:#374151;">請求書発行画面へ戻る</a>
+                <button type="button" class="invoice-btn" style="background:#374151;" onclick="window.close();">閉じる</button>
             </div>
         </div>
         <div class="invoice-paper">

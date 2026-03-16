@@ -1378,6 +1378,11 @@ a.btn-outline-gold {
     line-height: 1.6;
 }
 
+/* スマホでも更新日を1行で表示（レイアウト崩れ防止） */
+.mypage-status-card-date {
+    white-space: nowrap;
+}
+
 .mypage-status-card-link {
     display: inline-flex;
     align-items: center;

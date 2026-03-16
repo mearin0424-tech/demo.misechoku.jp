@@ -122,6 +122,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // 請求書発行
         Route::get('/invoices', [AdminInvoice::class, 'index'])->name('invoices.index');
+        Route::post('/invoices/issue-manual', [AdminInvoice::class, 'issueManual'])->name('invoices.issue-manual');
         Route::get('/invoices/template-settings', [AdminInvoice::class, 'templateSettings'])->name('invoices.template-settings');
         Route::post('/invoices/template-settings', [AdminInvoice::class, 'updateTemplateSettings'])->name('invoices.template-settings.update');
 
@@ -347,6 +348,7 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
     
     Route::get('/interaction', [ShopInteraction::class, 'index'])->name('interaction.index');
     Route::get('/mypage', [CastMypage::class, 'index'])->name('mypage.index');
+    Route::post('/mypage/word', [CastMypage::class, 'updateWord'])->name('mypage.word');
     Route::get('/mypage/employment', [CastMypage::class, 'employment'])->name('mypage.employment');
     Route::get('/mypage/reviews', [CastMypage::class, 'reviews'])->name('mypage.reviews');
     Route::post('/mypage/payment/bank', [CastMypage::class, 'updateBank'])->name('mypage.payment.bank.update');

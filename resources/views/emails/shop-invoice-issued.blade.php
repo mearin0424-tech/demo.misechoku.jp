@@ -8,7 +8,7 @@
     <div style="max-width:640px; margin:0 auto; background:#ffffff; border-radius:16px; padding:32px;">
         <h1 style="margin:0 0 16px; font-size:24px;">請求書を発行しました</h1>
         <p style="margin:0 0 12px; line-height:1.8;">
-            {{ $invoice['shop_name'] }} 御中
+            {{ trim($invoice['shop_name'] ?? '') }}{{ str_ends_with(trim($invoice['shop_name'] ?? ''), '御中') ? '' : ' 御中' }}
         </p>
         <p style="margin:0 0 12px; line-height:1.8;">
             ミセチョク運営事務局です。店舗へのご請求書を発行しました。<br>

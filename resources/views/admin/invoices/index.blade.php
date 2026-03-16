@@ -120,6 +120,31 @@
         background: rgba(230, 208, 128, 0.14);
         color: var(--admin-gold);
     }
+    .invoice-manual-warning {
+        padding: 16px 18px;
+        border-radius: 14px;
+        background: rgba(251, 191, 36, 0.12);
+        border: 1px solid rgba(251, 191, 36, 0.35);
+        color: #fef3c7;
+        font-size: 0.88rem;
+        line-height: 1.7;
+        margin-bottom: 16px;
+    }
+    .invoice-manual-warning strong { color: #fcd34d; }
+    .invoice-manual-list { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; }
+    .invoice-manual-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+    }
+    .invoice-manual-row input[type="radio"] { flex-shrink: 0; }
+    .invoice-manual-row label { flex: 1; min-width: 0; cursor: pointer; margin: 0; }
+    .invoice-manual-check { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .invoice-manual-check label { display: flex; gap: 10px; align-items: flex-start; font-size: 0.86rem; color: var(--admin-sub); cursor: pointer; }
 </style>
 @endpush
 
@@ -199,5 +224,68 @@
                 </a>
             </div>
         </section>
+
+        {{-- 手動で請求書を発行（障害時等の回避策） --}}
+        <section class="admin-panel">
+            <h2 class="admin-panel-title">手動で請求書を発行（回避策）</h2>
+            <div class="invoice-manual-warning">
+                <strong>注意事項（回避策としての利用に限定してください）</strong><br>
+                通常は「請求書発行待ち」の案件のみ、入金・振込管理画面から発行してください。<br>
+                システム不具合や運用上の理由で、ステータスが「入金依頼確認済み」でない場合に限り、ここから宛先（入金申請）を指定して手動で請求書を発行できます。<br>
+                誤用するとフローと実態がずれるため、必要な場合のみご利用ください。
+            </div>
+            @if(!empty($manualTargets))
+                <form method="POST" action="{{ route('admin.invoices.issue-manual') }}" id="form-manual-invoice">
+                    @csrf
+                    <p class="admin-note" style="margin-bottom: 10px;">請求書をまだ発行していない入金申請から、発行先を1件選択してください。</p>
+                    <div class="invoice-manual-list">
+                        @foreach($manualTargets as $d)
+                            <div class="invoice-manual-row">
+                                <input type="radio" name="deposit_id" id="manual-deposit-{{ $d['id'] }}" value="{{ $d['id'] }}" required>
+                                <label for="manual-deposit-{{ $d['id'] }}">
+                                    <span class="invoice-pending-card-title">#{{ $d['id'] }} {{ $d['shop_name'] }} / {{ $d['cast_name'] }}</span>
+                                    <span class="invoice-pending-card-meta">ステータス: {{ $d['status_label'] }}　請求額: ¥{{ number_format($d['invoice_amount'] ?? 0) }}</span>
+                                </label>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="invoice-manual-check" data-check-group>
+                        <label>
+                            <input type="checkbox" name="confirm_manual_workaround" value="1" data-check-item required>
+                            システム不具合等の回避策として手動発行することを理解し、宛先を確認した
+                        </label>
+                        <label>
+                            <input type="checkbox" name="confirm_admin_bank_ready" value="1" data-check-item required>
+                            請求書に記載する運営口座情報を確認した
+                        </label>
+                    </div>
+                    <div class="management-actions" style="margin-top: 16px;">
+                        <button type="submit" class="btn-action manage" data-check-submit disabled>
+                            <i class="fas fa-paper-plane"></i> 手動で請求書を発行する
+                        </button>
+                    </div>
+                </form>
+            @else
+                <p class="invoice-empty-note">手動発行の対象（請求書未発行の入金申請）はありません。</p>
+            @endif
+        </section>
     </div>
 @endsection
+
+@push('admin-scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var form = document.getElementById('form-manual-invoice');
+    if (!form) return;
+    var group = form.querySelector('[data-check-group]');
+    var submit = form.querySelector('[data-check-submit]');
+    var items = form.querySelectorAll('[data-check-item]');
+    if (!group || !submit || !items.length) return;
+    function sync() {
+        submit.disabled = Array.from(items).some(function (el) { return !el.checked; });
+    }
+    items.forEach(function (el) { el.addEventListener('change', sync); });
+    sync();
+});
+</script>
+@endpush

@@ -527,7 +527,7 @@
                             まだ応募履歴がありません。
                         </p>
                     @else
-                        <h2 class="mypage-actions-title">応募中・採用中の店舗</h2>
+                        <h2 class="mypage-actions-title">応募した店舗</h2>
                         <ul class="mypage-status-card-list">
                             @foreach($employments as $item)
                                 <li class="mypage-status-card">

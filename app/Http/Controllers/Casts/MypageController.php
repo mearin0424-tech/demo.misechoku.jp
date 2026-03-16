@@ -454,6 +454,45 @@ class MypageController extends Controller
     }
 
     /**
+     * ひとことを cast_posts に保存（店舗の updateWord と同様）
+     */
+    public function updateWord(Request $request)
+    {
+        $request->validate([
+            'word' => 'nullable|string|max:500',
+        ]);
+
+        $castId = $this->currentCastId();
+        $word = $request->input('word', '');
+        $word = is_string($word) ? trim($word) : '';
+
+        if (!Schema::hasTable('cast_posts')) {
+            return response()->json(['success' => false, 'message' => 'cast_posts テーブルが存在しません。'], 500);
+        }
+
+        $now = Carbon::now();
+        $exists = DB::table('cast_posts')->where('cast_id', $castId)->exists();
+        if ($exists) {
+            DB::table('cast_posts')->where('cast_id', $castId)->update([
+                'body' => $word,
+                'updated_at' => $now,
+            ]);
+        } else {
+            DB::table('cast_posts')->insert([
+                'cast_id' => $castId,
+                'body' => $word,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'appeal_updated_at' => $now->format('Y/m/d H:i'),
+        ]);
+    }
+
+    /**
      * キャスト・プロフィール・レビューをDBから取得し、画面用配列に整形
      */
     private function getCastFromDatabase(string $castId): array
@@ -566,6 +605,19 @@ class MypageController extends Controller
             ];
         }
 
+        // ひとこと：cast_posts テーブルから取得（店舗の catch と同様）
+        $word = '';
+        $appealUpdatedAt = null;
+        if (Schema::hasTable('cast_posts')) {
+            $post = DB::table('cast_posts')->where('cast_id', $castId)->first();
+            if ($post && $post->body !== null && trim($post->body) !== '') {
+                $word = trim($post->body);
+                $appealUpdatedAt = !empty($post->updated_at)
+                    ? Carbon::parse($post->updated_at)->format('Y/m/d H:i')
+                    : null;
+            }
+        }
+
         return [
             'id'               => $castRow->id,
             'nickname'         => $castRow->nickname ?? '',
@@ -588,12 +640,10 @@ class MypageController extends Controller
             'bust'             => $castRow->bust,
             'waist'            => $castRow->waist,
             'hip'              => $castRow->hip,
-            'word'             => $castRow->pr ? mb_strimwidth($castRow->pr, 0, 80, '...') : '',
+            'word'             => $word,
             'pr'               => $castRow->pr ?? '',
             'intro'            => $castRow->pr ?? '',
-            'appeal_updated_at'=> !empty($castRow->profile_updated_at)
-                ? Carbon::parse($castRow->profile_updated_at)->format('Y/m/d H:i')
-                : null,
+            'appeal_updated_at'=> $appealUpdatedAt,
             'desired_job'      => $memo['desired_job'] ?? '',
             'my_field'         => $memo['my_field'] ?? '',
             'my_inner_skills'  => $memo['my_inner_skills'] ?? '',

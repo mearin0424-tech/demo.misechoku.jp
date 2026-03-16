@@ -18,20 +18,43 @@ class InvoiceController extends Controller
     }
 
     /**
-     * 請求書発行画面（発行待ち一覧・帳票テンプレートDL・入金振込管理への導線）
+     * 請求書発行画面（発行待ち一覧・手動発行・帳票テンプレートDL・入金振込管理への導線）
      */
     public function index(): View
     {
         $dashboard = $this->billingManagementService->getAdminBillingDashboard();
         $pending = collect($dashboard['deposits'])->where('status_code', BillingManagementService::STATUS_SHOP_APPROVED)->values()->all();
+        $manualTargets = collect($dashboard['deposits'])->filter(fn ($d) => empty($d['invoice_number']))->values()->all();
         $summary = $dashboard['summary'];
         $adminBank = $this->billingManagementService->getAdminBankAccount();
 
         return view('admin.invoices.index', [
             'pending' => $pending,
+            'manualTargets' => $manualTargets,
             'summary' => $summary,
             'adminBank' => $adminBank,
         ]);
+    }
+
+    /**
+     * 手動で請求書を発行（障害時等の回避策）
+     */
+    public function issueManual(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'deposit_id' => 'required|integer|min:1',
+            'confirm_manual_workaround' => 'required|accepted',
+            'confirm_admin_bank_ready' => 'required|accepted',
+        ]);
+
+        $result = $this->billingManagementService->issueInvoiceManually(
+            (int) $request->input('deposit_id'),
+            $request->only(['confirm_manual_workaround', 'confirm_admin_bank_ready'])
+        );
+
+        return redirect()
+            ->route('admin.invoices.index')
+            ->with($result['success'] ? 'status' : 'error', $result['message']);
     }
 
     /**

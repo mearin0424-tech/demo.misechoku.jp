@@ -24,10 +24,10 @@
                 </button>
             </div>
             <div class="shop-word-bubble glass-panel">
-                <p id="display-word" class="shop-word-text {{ empty(trim($cast['word'] ?? '')) ? 'is-placeholder' : '' }}" data-placeholder="アピールメッセージを入力すると、タイムラインに表示されます。">{{ !empty(trim($cast['word'] ?? '')) ? $cast['word'] : 'アピールメッセージを入力すると、タイムラインに表示されます。' }}</p>
+                <p id="display-word" class="shop-word-text {{ empty(trim($cast['word'] ?? '')) ? 'is-placeholder' : '' }}" data-placeholder="ひとことを入力すると、タイムラインに表示されます。">{{ !empty(trim($cast['word'] ?? '')) ? $cast['word'] : 'ひとことを入力すると、タイムラインに表示されます。' }}</p>
                 <div class="shop-word-bubble-footer">
                     <span id="display-word-updated" class="shop-word-bubble-updated">最終更新 {{ $cast['appeal_updated_at'] ?? '未設定' }}</span>
-                    <button type="button" class="btn-word-edit" id="open-word-edit-btn" aria-label="アピールを編集">
+                    <button type="button" class="btn-word-edit" id="open-word-edit-btn" aria-label="ひとことを編集">
                         <i class="fas fa-pen"></i>
                     </button>
                 </div>
@@ -66,14 +66,6 @@
                 <p class="shop-access-text">
                     <i class="fas fa-map-marker-alt"></i> @if(!empty($cast['pref']) || !empty($cast['city'])){{ implode(' ', array_filter([$cast['pref'] ?? null, $cast['city'] ?? null])) }} / @endifキャスト
                 </p>
-
-                {{-- 自己PR --}}
-                <div class="mypage-profile-block">
-                    <h3 class="section-title section-title-gold">自己PR</h3>
-                    <div class="shop-overview-text mypage-cast-intro">
-                        {!! nl2br(e($cast['intro'] ?? $cast['pr'] ?? '—')) !!}
-                    </div>
-                </div>
 
                 {{-- 基本情報（生年月日、身長体重、サイズ） --}}
                 <div class="mypage-profile-block">
@@ -169,8 +161,8 @@
 {{-- アピール編集モーダル --}}
 <div id="modal-word" class="mypage-modal-overlay modal-word-edit" style="display:none;">
     <div class="mypage-modal-panel glass-panel">
-        <h3 class="mypage-modal-title serif-font">タイムライン用アピールを編集</h3>
-        <textarea id="word-input" rows="3" class="mypage-modal-textarea" placeholder="気配りと笑顔には自信があります。"></textarea>
+        <h3 class="mypage-modal-title serif-font">ひとことを編集</h3>
+        <textarea id="word-input" rows="3" class="mypage-modal-textarea" placeholder="例：明るく楽しく接客します！"></textarea>
         <div class="mypage-modal-actions">
             <button type="button" class="btn-action btn-action-secondary" id="word-edit-cancel-btn">戻る</button>
             <button type="button" class="btn-action btn-action-primary" id="word-edit-save-btn">保存</button>
@@ -194,36 +186,54 @@ window.MYPAGE_GALLERY_CONFIG = {
 </script>
 <script src="{{ asset('assets/js/mypage-gallery.js') }}"></script>
 <script>
-(function() {
-    var placeholderText = 'アピールメッセージを入力すると、タイムラインに表示されます。';
-    document.addEventListener('DOMContentLoaded', function() {
-        var openWordBtn = document.getElementById('open-word-edit-btn');
-        if (openWordBtn) openWordBtn.addEventListener('click', function() {
-            var m = document.getElementById('modal-word');
-            if (m) m.style.display = 'flex';
-            var displayEl = document.getElementById('display-word');
-            var wordInput = document.getElementById('word-input');
-            if (displayEl && wordInput) wordInput.value = (displayEl.innerText.trim() === placeholderText) ? '' : displayEl.innerText.trim();
-        });
-        var cancelWord = document.getElementById('word-edit-cancel-btn');
-        if (cancelWord) cancelWord.addEventListener('click', function() { var m = document.getElementById('modal-word'); if (m) m.style.display = 'none'; });
-        var saveWordBtn = document.getElementById('word-edit-save-btn');
-        if (saveWordBtn) saveWordBtn.addEventListener('click', function() {
-            var val = (document.getElementById('word-input').value || '').trim();
-            var displayEl = document.getElementById('display-word');
-            if (displayEl) {
-                displayEl.innerText = val || placeholderText;
-                displayEl.classList.toggle('is-placeholder', !val);
-            }
-            var updated = document.getElementById('display-word-updated');
-            if (updated) {
-                var now = new Date();
-                updated.innerText = '最終更新 ' + now.getFullYear() + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + String(now.getDate()).padStart(2, '0') + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-            }
-            var m = document.getElementById('modal-word');
-            if (m) m.style.display = 'none';
-        });
+document.addEventListener('DOMContentLoaded', function() {
+    var placeholderText = 'ひとことを入力すると、タイムラインに表示されます。';
+    var openWordBtn = document.getElementById('open-word-edit-btn');
+    if (openWordBtn) openWordBtn.addEventListener('click', function() {
+        var m = document.getElementById('modal-word');
+        if (m) m.style.display = 'flex';
+        var displayEl = document.getElementById('display-word');
+        var wordInput = document.getElementById('word-input');
+        if (displayEl && wordInput) wordInput.value = (displayEl.innerText.trim() === placeholderText) ? '' : displayEl.innerText.trim();
     });
-})();
+    var cancelWord = document.getElementById('word-edit-cancel-btn');
+    if (cancelWord) cancelWord.addEventListener('click', function() { var m = document.getElementById('modal-word'); if (m) m.style.display = 'none'; });
+    var saveWordBtn = document.getElementById('word-edit-save-btn');
+    if (saveWordBtn) saveWordBtn.addEventListener('click', function() {
+        var wordInputEl = document.getElementById('word-input');
+        var val = (wordInputEl && wordInputEl.value || '').trim();
+        var displayEl = document.getElementById('display-word');
+        var updatedEl = document.getElementById('display-word-updated');
+        var m = document.getElementById('modal-word');
+        if (saveWordBtn.disabled) return;
+        saveWordBtn.disabled = true;
+        fetch('{{ route('cast.mypage.word') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ word: val })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+            if (res.success) {
+                if (displayEl) {
+                    displayEl.innerText = val || placeholderText;
+                    displayEl.classList.toggle('is-placeholder', !val);
+                }
+                if (updatedEl && res.appeal_updated_at) {
+                    updatedEl.innerText = '最終更新 ' + res.appeal_updated_at;
+                }
+                if (m) m.style.display = 'none';
+            } else {
+                alert(res.message || '保存に失敗しました');
+            }
+        })
+        .catch(function() { alert('保存に失敗しました'); })
+        .finally(function() { saveWordBtn.disabled = false; });
+    });
+});
 </script>
 @endpush
