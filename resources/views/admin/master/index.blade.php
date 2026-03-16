@@ -37,25 +37,6 @@
             </div>
         @endif
 
-        <div class="admin-summary-grid">
-            <div class="admin-summary-card">
-                <span class="admin-summary-label">マスタテーブル数</span>
-                <strong>{{ $summary['catalog_count'] }}</strong>
-            </div>
-            <div class="admin-summary-card">
-                <span class="admin-summary-label">総レコード数</span>
-                <strong>{{ $summary['record_count'] }}</strong>
-            </div>
-            <div class="admin-summary-card">
-                <span class="admin-summary-label">プロフィール系</span>
-                <strong>{{ $summary['profile_master_count'] }}</strong>
-            </div>
-            <div class="admin-summary-card">
-                <span class="admin-summary-label">求人系</span>
-                <strong>{{ $summary['recruit_master_count'] }}</strong>
-            </div>
-        </div>
-
         <section class="admin-card admin-card-wide">
             <div class="admin-card-head">
                 <div>
@@ -65,7 +46,27 @@
                 <a href="{{ route('admin.ngwords.index') }}" class="admin-master-link">NGワード管理へ</a>
             </div>
 
-            <div class="admin-catalog-groups">
+            <div class="admin-master-filters">
+                <div class="admin-master-filter-select">
+                    <select id="master-group-filter">
+                        <option value="">すべてのカテゴリ</option>
+                        @foreach ($catalogGroups as $group => $items)
+                            <option value="{{ $group }}">{{ $group }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="admin-master-filter-search">
+                    <i class="fas fa-magnifying-glass"></i>
+                    <input
+                        type="text"
+                        id="master-name-search"
+                        placeholder="マスタ名で検索（例: 業種、店舗タグ…）"
+                        autocomplete="off"
+                    >
+                </div>
+            </div>
+
+            <div class="admin-catalog-groups" id="master-catalog-groups">
                 @foreach ($catalogGroups as $group => $items)
                     <section class="admin-catalog-group">
                         <h3>{{ $group }}</h3>
@@ -74,12 +75,12 @@
                                 <a
                                     href="{{ route('admin.masters.index', ['catalog' => $catalog['key']]) }}"
                                     class="admin-catalog-card {{ ($selectedCatalog['key'] ?? null) === $catalog['key'] ? 'is-active' : '' }}"
+                                    data-group="{{ $group }}"
+                                    data-name="{{ mb_strtolower($catalog['title']) }}"
                                 >
                                     <div class="admin-catalog-card-head">
                                         <strong>{{ $catalog['title'] }}</strong>
-                                        <span>{{ $catalog['count'] }}件</span>
                                     </div>
-                                    <p>{{ $catalog['description'] }}</p>
                                 </a>
                             @endforeach
                         </div>
@@ -95,7 +96,6 @@
                         <h2>{{ $selectedCatalog['title'] }}</h2>
                         <p>{{ $selectedCatalog['description'] }}</p>
                     </div>
-                    <span class="admin-card-count">{{ $selectedCatalog['count'] }}件</span>
                 </div>
 
                 <div class="admin-master-layout">
@@ -236,35 +236,11 @@
     </div>
 
     <style>
-        .admin-summary-grid {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 14px;
-            margin-bottom: 18px;
-        }
-
-        .admin-summary-card,
         .admin-card {
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 20px;
             background: rgba(255, 255, 255, 0.03);
             box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16);
-        }
-
-        .admin-summary-card {
-            padding: 18px;
-        }
-
-        .admin-summary-card strong {
-            display: block;
-            margin-top: 10px;
-            font-size: 1.9rem;
-            color: #fff;
-        }
-
-        .admin-summary-label {
-            color: rgba(255, 255, 255, 0.68);
-            font-size: 0.8rem;
         }
 
         .admin-grid {
@@ -322,6 +298,66 @@
             gap: 18px;
         }
 
+        .admin-master-filters {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .admin-master-filter-select select {
+            min-width: 200px;
+            padding: 8px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.02);
+            color: #fff;
+            font-size: 0.8rem;
+            outline: none;
+        }
+
+        .admin-master-filter-select select:focus {
+            border-color: rgba(230, 208, 128, 0.4);
+            box-shadow: 0 0 0 2px rgba(230, 208, 128, 0.16);
+        }
+
+        .admin-master-filter-search {
+            position: relative;
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .admin-master-filter-search i {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.42);
+            font-size: 0.78rem;
+        }
+
+        #master-name-search {
+            width: 100%;
+            min-height: 38px;
+            padding: 8px 10px 8px 32px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.02);
+            color: #fff;
+            font-size: 0.8rem;
+            outline: none;
+        }
+
+        #master-name-search::placeholder {
+            color: rgba(255, 255, 255, 0.42);
+        }
+
+        #master-name-search:focus {
+            border-color: rgba(230, 208, 128, 0.4);
+            box-shadow: 0 0 0 2px rgba(230, 208, 128, 0.12);
+        }
+
         .admin-catalog-group h3 {
             margin: 0 0 10px;
             font-size: 0.88rem;
@@ -330,14 +366,16 @@
 
         .admin-catalog-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 8px;
         }
 
         .admin-catalog-card {
-            display: block;
-            padding: 16px;
-            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border-radius: 999px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             background: rgba(255, 255, 255, 0.02);
             text-decoration: none;
@@ -354,34 +392,12 @@
         .admin-catalog-card-head {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 8px;
+            gap: 8px;
         }
 
         .admin-catalog-card-head strong {
-            font-size: 0.9rem;
+            font-size: 0.84rem;
             color: #fff;
-        }
-
-        .admin-catalog-card-head span {
-            display: inline-flex;
-            align-items: center;
-            min-height: 26px;
-            padding: 0 10px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.06);
-            color: rgba(255, 255, 255, 0.72);
-            font-size: 0.72rem;
-            font-weight: 700;
-            white-space: nowrap;
-        }
-
-        .admin-catalog-card p {
-            margin: 0;
-            color: rgba(255, 255, 255, 0.68);
-            line-height: 1.6;
-            font-size: 0.8rem;
         }
 
         .admin-alert {
@@ -699,37 +715,66 @@
 @push('admin-scripts')
 <script>
     (function () {
-        var searchInput = document.getElementById('master-record-search');
+        // 登録済み一覧の検索
+        var recordSearchInput = document.getElementById('master-record-search');
         var rows = document.querySelectorAll('.master-record-row');
         var noResultRow = document.getElementById('master-records-no-result');
-
-        if (!searchInput || !rows.length) {
-            return;
-        }
 
         function normalize(value) {
             return (value || '').toLowerCase().replace(/\s+/g, ' ').trim();
         }
 
-        function applySearch() {
-            var keyword = normalize(searchInput.value);
-            var visibleCount = 0;
+        if (recordSearchInput && rows.length) {
+            function applyRecordSearch() {
+                var keyword = normalize(recordSearchInput.value);
+                var visibleCount = 0;
 
-            rows.forEach(function (row) {
-                var haystack = normalize(row.getAttribute('data-search'));
-                var matched = keyword === '' || haystack.indexOf(keyword) !== -1;
-                row.classList.toggle('is-hidden', !matched);
-                if (matched) {
-                    visibleCount += 1;
+                rows.forEach(function (row) {
+                    var haystack = normalize(row.getAttribute('data-search'));
+                    var matched = keyword === '' || haystack.indexOf(keyword) !== -1;
+                    row.classList.toggle('is-hidden', !matched);
+                    if (matched) {
+                        visibleCount += 1;
+                    }
+                });
+
+                if (noResultRow) {
+                    noResultRow.hidden = visibleCount !== 0;
                 }
-            });
-
-            if (noResultRow) {
-                noResultRow.hidden = visibleCount !== 0;
             }
+
+            recordSearchInput.addEventListener('input', applyRecordSearch);
         }
 
-        searchInput.addEventListener('input', applySearch);
+        // マスタ一覧のカテゴリ＆名称フィルタ
+        var groupSelect = document.getElementById('master-group-filter');
+        var nameInput = document.getElementById('master-name-search');
+        var catalogCards = document.querySelectorAll('.admin-catalog-card');
+
+        function applyCatalogFilter() {
+            if (!catalogCards.length) return;
+
+            var selectedGroup = groupSelect ? groupSelect.value : '';
+            var keyword = nameInput ? normalize(nameInput.value) : '';
+
+            catalogCards.forEach(function (card) {
+                var cardGroup = card.getAttribute('data-group') || '';
+                var cardName = normalize(card.getAttribute('data-name') || '');
+
+                var matchGroup = !selectedGroup || cardGroup === selectedGroup;
+                var matchName = !keyword || cardName.indexOf(keyword) !== -1;
+
+                var visible = matchGroup && matchName;
+                card.style.display = visible ? '' : 'none';
+            });
+        }
+
+        if (groupSelect) {
+            groupSelect.addEventListener('change', applyCatalogFilter);
+        }
+        if (nameInput) {
+            nameInput.addEventListener('input', applyCatalogFilter);
+        }
     })();
 </script>
 @endpush
