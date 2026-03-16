@@ -102,6 +102,20 @@ body.no-scroll main#main-content .content-wrapper {
     }
 }
 
+/* 小さいスマホ：画像エリア・左右スワイプが確実に動くように */
+@media (max-width: 480px) {
+    .home-photo-wrap {
+        min-height: 200px;
+    }
+    .photo-swiper {
+        min-height: 200px;
+    }
+    .photo-swiper .swiper-slide {
+        width: 100% !important;
+        min-width: 100%;
+    }
+}
+
 /* --- Swiper Container --- */
 .main-swiper {
     width: 100%;
@@ -189,6 +203,7 @@ body.no-scroll main#main-content .content-wrapper {
 }
 .photo-swiper .swiper-slide {
     height: 100%;
+    width: 100%;
     flex-shrink: 0;
     display: flex;
     align-items: stretch;
