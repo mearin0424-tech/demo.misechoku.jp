@@ -102,17 +102,10 @@ body.no-scroll main#main-content .content-wrapper {
     }
 }
 
-/* 小さいスマホ：画像エリア・左右スワイプが確実に動くように */
+/* 小さいスマホ：画像エリアの高さを保証（左右スワイプのタッチ領域が確実に取れるように） */
 @media (max-width: 480px) {
     .home-photo-wrap {
-        min-height: 200px;
-    }
-    .photo-swiper {
-        min-height: 200px;
-    }
-    .photo-swiper .swiper-slide {
-        width: 100% !important;
-        min-width: 100%;
+        min-height: 180px;
     }
 }
 
@@ -176,7 +169,7 @@ body.no-scroll main#main-content .content-wrapper {
     }
 }
 
-/* 画像エリア：カード内で残り高さをすべて使い、端末サイズに合わせて伸縮 */
+/* 画像エリア：カードサイズにぴったり合わせて表示（縮小・切り取りでスワイプ領域を固定） */
 .home-photo-wrap {
     position: relative;
     flex: 1 1 0;
@@ -185,14 +178,16 @@ body.no-scroll main#main-content .content-wrapper {
     overflow: hidden;
     border-radius: var(--home-card-radius);
     cursor: pointer;
-    display: flex;
-    flex-direction: column;
 }
 
 .photo-swiper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     width: 100%;
     height: 100%;
-    min-height: 0;
     touch-action: pan-x;
     overflow: hidden;
 }
@@ -206,28 +201,23 @@ body.no-scroll main#main-content .content-wrapper {
     width: 100%;
     flex-shrink: 0;
     display: flex;
-    align-items: stretch;
+    align-items: center;
+    justify-content: center;
     box-sizing: border-box;
 }
 .photo-swiper .swiper-slide img {
     width: 100%;
     height: 100%;
-    flex: 0 0 auto;
-    min-width: 0;
-    min-height: 0;
-    object-fit: contain;
+    object-fit: cover;
     object-position: center center;
+    display: block;
 }
 
-/* 画像：画面サイズに収まるよう contain で全体を表示（切り捨てなし） */
+/* 画像：カードの画像エリアにぴったり縮小・切り取り表示（左右スワイプが安定） */
 .home-photo {
     width: 100%;
     height: 100%;
-    min-width: 0;
-    min-height: 180px;
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
+    object-fit: cover;
     object-position: center center;
     display: block;
     border-radius: var(--home-card-radius);
@@ -235,7 +225,6 @@ body.no-scroll main#main-content .content-wrapper {
 }
 .home-photo[src=""],
 .home-photo:not([src]) {
-    min-height: 180px;
     background-color: #2a2a2a;
 }
 
