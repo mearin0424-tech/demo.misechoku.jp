@@ -65,6 +65,26 @@ class MasterController extends Controller
             ->with('status', $catalog['title'] . 'を更新しました。');
     }
 
+    /**
+     * マスタ項目の論理削除
+     */
+    public function destroyCatalog(Request $request, string $catalogKey, int $recordId): RedirectResponse
+    {
+        $catalog = $this->adminMasterService->getCatalogDefinition($catalogKey);
+
+        abort_unless($catalog, 404);
+        abort_unless($this->adminMasterService->getCatalogRecord($catalogKey, $recordId), 404);
+
+        $this->adminMasterService->deleteCatalogRecord($catalogKey, $recordId);
+
+        return redirect()
+            ->route('admin.masters.index', [
+                'catalog' => $catalogKey,
+                'sort' => $request->input('current_sort', 'created_desc'),
+            ])
+            ->with('status', $catalog['title'] . 'を削除しました。');
+    }
+
     private function buildCatalogRules(array $catalog, ?int $ignoreId = null): array
     {
         $rules = [];

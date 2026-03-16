@@ -142,6 +142,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/masters', [AdminMaster::class, 'index'])->name('masters.index');
         Route::post('/masters/catalogs/{catalogKey}', [AdminMaster::class, 'storeCatalog'])->name('masters.catalogs.store');
         Route::patch('/masters/catalogs/{catalogKey}/{recordId}', [AdminMaster::class, 'updateCatalog'])->name('masters.catalogs.update');
+        Route::delete('/masters/catalogs/{catalogKey}/{recordId}', [AdminMaster::class, 'destroyCatalog'])->name('masters.catalogs.destroy');
 
         // 店舗管理
         Route::get('/shops', [AdminShop::class, 'index'])->name('shops.index');

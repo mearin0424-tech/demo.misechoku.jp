@@ -27,10 +27,12 @@ document.addEventListener('DOMContentLoaded', function() {
             thresholdDelta: 20
         },
         touchRatio: 1,
-        touchAngle: 25,
-        threshold: 12,
+        // 縦方向のスワイプをやや拾いやすくする
+        touchAngle: 45,
+        // 少しの移動でも反応しやすくする
+        threshold: 6,
         resistance: true,
-        resistanceRatio: 0.82,
+        resistanceRatio: 0.6,
         touchStartPreventDefault: false,
         grabCursor: true,
         preventClicks: true,
@@ -64,7 +66,8 @@ document.addEventListener('DOMContentLoaded', function() {
             allowTouchMove: photoSlideCount > 1,
             touchStartPreventDefault: false,
             touchReleaseOnEdges: true,
-            touchAngle: 40,
+            // ほぼ水平のジェスチャーのみを横スワイプとして扱う
+            touchAngle: 60,
             threshold: 10,
             speed: 300,
             resistance: true,
@@ -77,7 +80,8 @@ document.addEventListener('DOMContentLoaded', function() {
             watchOverflow: true,
             preventClicks: true,
             preventClicksPropagation: true,
-            touchMoveStopPropagation: true,
+            // 縦方向の動きは親（メインの縦スワイプ）に渡す
+            touchMoveStopPropagation: false,
             slideToClickedSlide: false,
             centeredSlides: true,
             observer: true,

@@ -107,6 +107,12 @@ body.no-scroll main#main-content .content-wrapper {
     .home-photo-wrap {
         min-height: 180px;
     }
+    /* 非常に狭い画面では極端なトリミングを避けつつ中央寄せで表示 */
+    .photo-swiper .swiper-slide img,
+    .home-photo {
+        object-fit: contain;
+        object-position: center center;
+    }
 }
 
 /* --- Swiper Container --- */
@@ -186,7 +192,8 @@ body.no-scroll main#main-content .content-wrapper {
     width: 100%;
     height: 100%;
     min-height: 0;
-    touch-action: pan-x;
+    /* ブラウザのタッチ挙動はSwiperに任せ、縦方向のスワイプも親のSwiperが受け取れるようにする */
+    touch-action: auto;
     overflow: hidden;
 }
 .photo-swiper .swiper-wrapper {

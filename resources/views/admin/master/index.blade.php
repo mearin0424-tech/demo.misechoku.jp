@@ -66,6 +66,30 @@
                 </div>
             </div>
 
+            {{-- プルダウンでもマスタを選択できる --}}
+            <div class="admin-master-select">
+                @php
+                    $allCatalogs = $catalogGroups->flatten(1);
+                @endphp
+                <label class="admin-master-select-label">
+                    <span>マスタを直接選択</span>
+                    <select
+                        id="master-catalog-select"
+                        onchange="if(this.value){window.location.href=this.value;}"
+                    >
+                        <option value="">マスタを選択してください</option>
+                        @foreach ($allCatalogs as $catalog)
+                            <option
+                                value="{{ route('admin.masters.index', ['catalog' => $catalog['key']]) }}"
+                                @selected(($selectedCatalog['key'] ?? null) === $catalog['key'])
+                            >
+                                {{ $catalog['title'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                </label>
+            </div>
+
             <div class="admin-catalog-groups" id="master-catalog-groups">
                 @foreach ($catalogGroups as $group => $items)
                     <section class="admin-catalog-group">
@@ -207,13 +231,32 @@
                                                 <td data-label="状態">{{ ($item->is_active ?? 1) ? '有効' : '無効' }}</td>
                                             @endif
                                             <td data-label="登録日">{{ $item->created_at ? \Illuminate\Support\Carbon::parse($item->created_at)->format('Y-m-d') : '-' }}</td>
-                                            <td data-label="操作">
+                                            <td data-label="操作" class="admin-row-actions">
+                                                {{-- 編集（鉛筆アイコン） --}}
                                                 <a
                                                     href="{{ route('admin.masters.index', ['catalog' => $selectedCatalog['key'], 'edit' => $item->id, 'sort' => $selectedSort]) }}"
-                                                    class="admin-row-edit {{ $editingRecord && $editingRecord->id === $item->id ? 'is-active' : '' }}"
+                                                    class="admin-row-icon-btn {{ $editingRecord && $editingRecord->id === $item->id ? 'is-active' : '' }}"
+                                                    title="編集"
                                                 >
-                                                    編集
+                                                    <i class="fas fa-pen"></i>
                                                 </a>
+
+                                                {{-- 削除（×アイコン） --}}
+                                                <form
+                                                    method="POST"
+                                                    action="{{ route('admin.masters.catalogs.destroy', [$selectedCatalog['key'], $item->id]) }}"
+                                                    onsubmit="return confirm('この項目を削除しますか？');"
+                                                >
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button
+                                                        type="submit"
+                                                        class="admin-row-icon-btn admin-row-icon-delete"
+                                                        title="削除"
+                                                    >
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </form>
                                             </td>
                                         </tr>
                                     @empty
@@ -304,6 +347,35 @@
             align-items: center;
             margin-bottom: 16px;
             flex-wrap: wrap;
+        }
+
+        .admin-master-select {
+            margin-bottom: 12px;
+        }
+
+        .admin-master-select-label {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.76);
+        }
+
+        .admin-master-select-label select {
+            min-width: 260px;
+            max-width: 100%;
+            padding: 8px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.02);
+            color: #fff;
+            font-size: 0.8rem;
+            outline: none;
+        }
+
+        .admin-master-select-label select:focus {
+            border-color: rgba(230, 208, 128, 0.4);
+            box-shadow: 0 0 0 2px rgba(230, 208, 128, 0.16);
         }
 
         .admin-master-filter-select select {
@@ -596,26 +668,37 @@
             color: #111827;
         }
 
-        .admin-row-edit {
+        .admin-row-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .admin-row-icon-btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-height: 34px;
-            padding: 0 12px;
-            border-radius: 999px;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
             border: 1px solid rgba(230, 208, 128, 0.22);
             background: rgba(230, 208, 128, 0.08);
             color: #f6d98b;
             text-decoration: none;
-            font-size: 0.76rem;
-            font-weight: 700;
-            white-space: nowrap;
+            font-size: 0.72rem;
+            cursor: pointer;
         }
 
-        .admin-row-edit.is-active {
+        .admin-row-icon-btn.is-active {
             background: linear-gradient(135deg, #f4df9c, #c99722);
             color: #2a1208;
             border-color: transparent;
+        }
+
+        .admin-row-icon-delete {
+            border-color: rgba(248, 113, 113, 0.4);
+            background: rgba(127, 29, 29, 0.4);
+            color: #fecaca;
         }
 
         .master-record-row.is-hidden {

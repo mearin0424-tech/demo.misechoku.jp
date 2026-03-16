@@ -164,6 +164,44 @@ class AdminMasterService
             ->update($payload);
     }
 
+    /**
+     * マスタレコードの論理削除
+     *
+     * - del_flg カラムがあれば del_flg = 1
+     * - なければ is_active カラムがあれば is_active = 0
+     * - どちらもなければ物理削除
+     */
+    public function deleteCatalogRecord(string $key, int $recordId): void
+    {
+        $catalog = $this->getCatalogDefinition($key);
+
+        if (!$catalog || !Schema::hasTable($catalog['table'])) {
+            return;
+        }
+
+        $query = DB::table($catalog['table'])->where('id', $recordId);
+
+        if ($this->hasColumn($catalog['table'], 'del_flg')) {
+            $query->update([
+                'del_flg' => 1,
+                'updated_at' => now(),
+            ]);
+
+            return;
+        }
+
+        if ($this->hasColumn($catalog['table'], 'is_active')) {
+            $query->update([
+                'is_active' => 0,
+                'updated_at' => now(),
+            ]);
+
+            return;
+        }
+
+        $query->delete();
+    }
+
     public function getCastProfileMasters(): array
     {
         return [
@@ -331,7 +369,15 @@ class AdminMasterService
             return 0;
         }
 
-        return (int) DB::table($catalog['table'])->count();
+        $query = DB::table($catalog['table']);
+
+        if ($this->hasColumn($catalog['table'], 'del_flg')) {
+            $query->where('del_flg', 0);
+        } elseif ($this->hasColumn($catalog['table'], 'is_active')) {
+            $query->where('is_active', 1);
+        }
+
+        return (int) $query->count();
     }
 
     private function fetchCatalogRecords(array $catalog, string $sort = 'created_desc'): Collection
@@ -345,6 +391,12 @@ class AdminMasterService
             DB::raw($this->nameExpressionFor($catalog['key']) . ' as name'),
             'created_at'
         );
+
+        if ($this->hasColumn($catalog['table'], 'del_flg')) {
+            $query->where('del_flg', 0);
+        } elseif ($this->hasColumn($catalog['table'], 'is_active')) {
+            $query->where('is_active', 1);
+        }
 
         if ($this->hasColumn($catalog['table'], 'directory')) {
             $query->addSelect('directory');
