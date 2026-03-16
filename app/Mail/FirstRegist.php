@@ -34,7 +34,7 @@ class FirstRegist extends Mailable
         // 48時間後を期限とした署名付きURLを生成
         // $url = URL::temporarySignedRoute('register.showForm', $now->addHours(\CommonConsts::PASSWORD_RESET_HOURS), $tokenParam);
         //$url = URL::signedRoute('register.showForm', $tokenParam);
-        $url = "/shop/login/";
+        $url = "/login";
 
         // ログに情報を出力
         /*

@@ -38,7 +38,7 @@ class RecruitmentController extends Controller
             'recruit' => $recruitData['recruit'],
             'applications' => $applications,
             'applicationStatusLabels' => self::APPLICATION_STATUS_LABELS,
-            'previewRoute' => route('shop.recruits.show'),
+            'previewRoute' => route('shop.jobdescription'),
             'publicPreviewRoute' => $numericShopId ? route('share.recruit.show', ['id' => $numericShopId]) : null,
             'shareUrl' => $numericShopId ? route('share.recruit.show', ['id' => $numericShopId]) : null,
         ]);

@@ -40,9 +40,9 @@
 
                 <div class="role-login-card-body">
                     <div class="role-login-role-switch">
-                        <a href="{{ route('cast.login') }}" class="role-login-role {{ $role === 'cast' ? 'is-active' : '' }}">キャスト</a>
-                        <a href="{{ route('shop.login') }}" class="role-login-role {{ $role === 'shop' ? 'is-active' : '' }}">店舗</a>
-                        <a href="{{ route('admin.login') }}" class="role-login-role">運営</a>
+                        <a href="{{ route('login.demo') }}" class="role-login-role {{ $role === 'cast' ? 'is-active' : '' }}">キャスト</a>
+                        <a href="{{ route('login.demo') }}" class="role-login-role {{ $role === 'shop' ? 'is-active' : '' }}">店舗</a>
+                        <a href="{{ route('login.demo') }}" class="role-login-role">運営</a>
                     </div>
 
                     <div class="role-login-copy">

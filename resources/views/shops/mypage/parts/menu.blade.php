@@ -12,7 +12,7 @@
                 </div>
                 <div class="menu-btn-text">
                     <p class="menu-btn-label">RECRUIT</p>
-                    <p class="menu-btn-title">求人の掲載</p>
+                    <p class="menu-btn-title">採用管理</p>
                 </div>
             </div>
             <div class="menu-btn-arrow">
@@ -27,7 +27,22 @@
                 </div>
                 <div class="menu-btn-text">
                     <p class="menu-btn-label">PAYMENT</p>
-                    <p class="menu-btn-title">請求・入金管理</p>
+                    <p class="menu-btn-title">請求管理</p>
+                </div>
+            </div>
+            <div class="menu-btn-arrow">
+                <i class="fas fa-chevron-right"></i>
+            </div>
+        </a>
+        <a href="{{ route('shop.jobdescription') }}" class="menu-btn job {{ $current === 'jobdescription' ? 'is-current' : '' }}">
+            <div class="menu-btn-shine"></div>
+            <div class="menu-btn-content">
+                <div class="menu-btn-icon">
+                    <i class="far fa-file-alt"></i>
+                </div>
+                <div class="menu-btn-text">
+                    <p class="menu-btn-label">JOB</p>
+                    <p class="menu-btn-title">求人票</p>
                 </div>
             </div>
             <div class="menu-btn-arrow">

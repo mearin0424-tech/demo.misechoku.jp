@@ -21,6 +21,6 @@ class AdminAuth
             return $next($request);
         }
 
-        return redirect()->route('admin.login')->with('message', 'ログインの有効期限が切れました。もう一度ログインしてください。');
+        return redirect()->route('login.demo')->with('message', 'ログインの有効期限が切れました。もう一度ログインしてください。');
     }
 }

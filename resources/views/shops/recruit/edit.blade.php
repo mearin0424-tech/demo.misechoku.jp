@@ -63,7 +63,7 @@
             </div>
         </div>
         <div class="recruit-edit-toolbar">
-            <a href="{{ route('shop.recruits.show') }}" class="recruit-ghost-btn">
+            <a href="{{ route('shop.jobdescription') }}" class="recruit-ghost-btn">
                 <i class="fas fa-eye"></i> プレビューを見る
             </a>
             <a href="{{ route('shop.recruits.status') }}" class="recruit-ghost-btn">
@@ -283,7 +283,7 @@
                 <p class="recruit-bottom-actions-text">保存後にプレビューを確認して、見え方や文言の最終調整をしてください。</p>
             </div>
             <div class="recruit-bottom-actions-buttons">
-                <a href="{{ route('shop.recruits.show') }}" class="recruit-ghost-btn">
+                <a href="{{ route('shop.jobdescription') }}" class="recruit-ghost-btn">
                     <i class="fas fa-eye"></i> プレビュー
                 </a>
                 <button type="submit" class="btn-gold shadow-2xl" style="min-width: 190px;">

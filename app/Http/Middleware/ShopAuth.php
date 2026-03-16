@@ -21,7 +21,7 @@ class ShopAuth
             return $next($request);
         }
 
-        return redirect()->route('shop.login')->with('message', 'ログインの有効期限が切れました。もう一度ログインしてください。');
+        return redirect()->route('login.demo')->with('message', 'ログインの有効期限が切れました。もう一度ログインしてください。');
         //return $next($request);
     }
 }

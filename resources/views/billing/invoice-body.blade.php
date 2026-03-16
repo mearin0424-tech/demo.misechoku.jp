@@ -4,6 +4,9 @@
 --}}
 <div class="invoice-wrap">
     <div class="invoice-header">
+        @if(!empty($invoice['logo_url']))
+            <div class="invoice-logo" style="margin-bottom: 10pt;"><img src="{{ $invoice['logo_url'] }}" alt="" style="max-height: 48px; max-width: 200px;"></div>
+        @endif
         <h1 class="invoice-title">請 求 書</h1>
         <div class="invoice-meta">
             請求書番号: {{ $invoice['invoice_number'] }}<br>
@@ -11,8 +14,8 @@
             支払期限: {{ $invoice['due_date']->format('Y年n月j日') }}
         </div>
         <div class="invoice-issuer">
-            ミセチョク運営事務局<br>
-            support@misechoku.jp
+            {{ $invoice['issuer_name'] ?? 'ミセチョク運営事務局' }}<br>
+            {{ $invoice['issuer_email'] ?? 'support@misechoku.jp' }}
         </div>
     </div>
 
@@ -50,8 +53,12 @@
             <tr>
                 <th>備考</th>
                 <td>
-                    店舗からのご入金確認後、運営にてキャストへの振込を行います。<br>
-                    上記支払期限までに、下記お振込先へお振り込みください。
+                    @if(!empty($invoice['footer_text']))
+                        {!! nl2br(e($invoice['footer_text'])) !!}
+                    @else
+                        店舗からのご入金確認後、運営にてキャストへの振込を行います。<br>
+                        上記支払期限までに、下記お振込先へお振り込みください。
+                    @endif
                 </td>
             </tr>
         </tbody>

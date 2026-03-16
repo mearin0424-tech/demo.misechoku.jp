@@ -10,7 +10,6 @@ use App\Http\Controllers\Common\DemoLoginController;
 use App\Http\Controllers\Common\BankLookupController;
 use App\Http\Controllers\Common\RegistrationController;
 use App\Http\Controllers\Auth\Cast\LoginController as CastLogin;
-use App\Http\Controllers\Auth\Shop\LoginController as ShopLogin;
 use App\Http\Controllers\Common\TalkController as TalkController;
 
 // 管理者（バックオフィス）
@@ -113,9 +112,8 @@ Route::get('/bk/{path}', function ($path) {
 */
 Route::prefix('admin')->name('admin.')->group(function () {
 
-    // ログイン画面（簡易版）
-    Route::get('/login', [AdminAuth::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AdminAuth::class, 'login'])->name('login.post');
+    // ログインは共通 /login に統一（リダイレクトのみ）
+    Route::get('/login', fn () => redirect('/login'))->name('login');
     Route::post('/logout', [AdminAuth::class, 'logout'])->name('logout');
 
     // 管理画面本体
@@ -124,6 +122,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // 請求書発行
         Route::get('/invoices', [AdminInvoice::class, 'index'])->name('invoices.index');
+        Route::get('/invoices/template-settings', [AdminInvoice::class, 'templateSettings'])->name('invoices.template-settings');
+        Route::post('/invoices/template-settings', [AdminInvoice::class, 'updateTemplateSettings'])->name('invoices.template-settings.update');
 
         // 入金・振込管理
         Route::get('/deposits/invoice-template/download', [AdminDeposit::class, 'downloadInvoiceTemplate'])->name('deposits.invoice-template.download');
@@ -242,15 +242,13 @@ Route::prefix('api/bank-lookup')->name('api.bank-lookup.')->group(function () {
 });
 
 Route::prefix('cast')->name('cast.')->group(function () {
-    Route::get('/login', [CastLogin::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [CastLogin::class, 'login'])->name('login.post');
+    Route::get('/login', fn () => redirect('/login'))->name('login');
     Route::get('/register', [RegistrationController::class, 'showCast'])->name('register');
     Route::post('/register', [RegistrationController::class, 'storeCast'])->name('register.store');
 });
 
 Route::prefix('shop')->name('shop.')->group(function () {
-    Route::get('/login', [ShopLogin::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [ShopLogin::class, 'login'])->name('login.post');
+    Route::get('/login', fn () => redirect('/login'))->name('login');
     Route::get('/register', [RegistrationController::class, 'showShop'])->name('register');
     Route::post('/register', [RegistrationController::class, 'storeShop'])->name('register.store');
 });
@@ -300,12 +298,15 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
 
     // ★ 求人票 (Recruits)
     Route::prefix('recruits')->name('recruits.')->group(function () {
-        Route::get('/status', [ShopRecruit::class, 'status'])->name('status'); 
+        Route::get('/status', [ShopRecruit::class, 'status'])->name('status');
         Route::get('/edit', [ShopRecruit::class, 'edit'])->name('edit');
         Route::get('/show/{id?}', [ShopRecruit::class, 'show'])->name('show');
         Route::put('/update', [ShopRecruit::class, 'update'])->name('update');
         Route::post('/toggle-status', [ShopRecruit::class, 'toggleStatus'])->name('toggle-status');
     });
+
+    // 求人票（recruits/show と同じ内容を shop/jobdescription で提供）
+    Route::get('/jobdescription/{id?}', [ShopRecruit::class, 'show'])->name('jobdescription');
 
     // マイページ
     Route::prefix('mypage')->name('mypage.')->group(function () {

@@ -537,7 +537,9 @@ class BillingManagementService
             ? Carbon::parse($deposit->invoice_due_date)
             : $issuedAt->copy()->addDays(self::INVOICE_DUE_DAYS);
 
-        return [
+        $template = app(InvoiceTemplateSettingsService::class)->getForInvoice();
+
+        return array_merge($template, [
             'deposit_id' => (int) $deposit->id,
             'invoice_number' => $deposit->invoice_number ?: $this->generateInvoiceNumber((int) $deposit->id, $issuedAt),
             'issued_at' => $issuedAt,
@@ -563,7 +565,7 @@ class BillingManagementService
                 'account_holder_name' => $adminBank->account_holder_name ?? '',
                 'account_name' => $adminBank->account_name,
             ],
-        ];
+        ]);
     }
 
     /**
@@ -572,6 +574,7 @@ class BillingManagementService
     public function getSampleInvoiceData(): array
     {
         $adminBank = $this->getAdminBankAccount();
+        $template = app(InvoiceTemplateSettingsService::class)->getForInvoice();
         $issuedAt = now();
         $dueDate = $issuedAt->copy()->addDays(self::INVOICE_DUE_DAYS);
 
@@ -593,7 +596,7 @@ class BillingManagementService
                 'account_name' => 'ミセチョク ウンエイ',
             ];
 
-        return [
+        return array_merge($template, [
             'deposit_id' => 0,
             'invoice_number' => 'SAMPLE-' . $issuedAt->format('Ymd'),
             'issued_at' => $issuedAt,
@@ -607,7 +610,7 @@ class BillingManagementService
             'invoice_amount' => 55000,
             'cast_transfer_amount' => 50000,
             'admin_bank' => $adminBankData,
-        ];
+        ]);
     }
 
     public function getSignedInvoiceUrl(int $depositId, ?Carbon $expiresAt = null): string

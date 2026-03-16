@@ -152,10 +152,15 @@ class DepositController extends Controller
 
     /**
      * 請求書帳票テンプレートをサンプルデータでPDFダウンロード（運営管理画面用）
+     * DomPDF 未導入時は印刷用HTMLプレビューを返し、別タブで同じ画面が開く問題を避ける。
      */
-    public function downloadInvoiceTemplate(): Response
+    public function downloadInvoiceTemplate(): Response|\Illuminate\Contracts\View\View
     {
         $invoice = $this->billingManagementService->getSampleInvoiceData();
+
+        if (!class_exists(\Barryvdh\DomPDF\Facade\Pdf::class)) {
+            return view('admin.deposit.invoice-template-preview', ['invoice' => $invoice]);
+        }
 
         return $this->invoiceToPdfResponse($invoice, '請求書_帳票テンプレート.pdf');
     }
@@ -167,12 +172,14 @@ class DepositController extends Controller
     private function invoiceToPdfResponse(array $invoice, string $filename): Response
     {
         if (!class_exists(\Barryvdh\DomPDF\Facade\Pdf::class)) {
-            $route = $invoice['deposit_id'] > 0
-                ? route('admin.deposits.invoice.show', ['deposit' => $invoice['deposit_id']])
-                : route('admin.invoices.index');
+            if ($invoice['deposit_id'] > 0) {
+                return redirect()
+                    ->route('admin.deposits.invoice.show', ['deposit' => $invoice['deposit_id']])
+                    ->with('status', 'PDF生成には barryvdh/laravel-dompdf のインストールが必要です。画面の「印刷」から「PDFに保存」を選択してください。');
+            }
             return redirect()
-                ->to($route)
-                ->with('status', 'PDF生成には barryvdh/laravel-dompdf のインストールが必要です。画面の「印刷」から「PDFに保存」を選択してください。');
+                ->route('admin.invoices.index')
+                ->with('status', 'PDF生成には barryvdh/laravel-dompdf のインストールが必要です。テンプレートは「帳票テンプレートをダウンロード」で開いた画面の印刷からPDFに保存できます。');
         }
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('billing.invoice-template', ['invoice' => $invoice]);

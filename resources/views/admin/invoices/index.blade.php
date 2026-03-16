@@ -142,18 +142,23 @@
             </div>
         @endif
 
-        {{-- 帳票テンプレートのダウンロード --}}
+        {{-- 帳票テンプレートのダウンロード・設定 --}}
         <section class="admin-panel">
             <div class="invoice-issue-hero">
                 <div>
                     <h2 class="invoice-issue-hero-title">請求書 帳票テンプレート</h2>
                     <p class="invoice-issue-hero-desc">
-                        発行前にサンプルPDFでレイアウトを確認できます。運営口座を登録済みの場合はその情報が反映されます。
+                        発行元名・ロゴ・備考文は「テンプレートを設定」で変更できます。運営口座を登録済みの場合はその情報が反映されます。
                     </p>
                 </div>
-                <a href="{{ route('admin.deposits.invoice-template.download') }}" class="invoice-template-dl" target="_blank" rel="noopener">
-                    <i class="fas fa-file-pdf"></i> 帳票テンプレートをダウンロード（PDF）
-                </a>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                    <a href="{{ route('admin.invoices.template-settings') }}" class="btn-action manage">
+                        <i class="fas fa-cog"></i> テンプレートを設定
+                    </a>
+                    <a href="{{ route('admin.deposits.invoice-template.download') }}" class="invoice-template-dl" target="_blank" rel="noopener">
+                        <i class="fas fa-file-pdf"></i> 帳票テンプレートをダウンロード（PDF）
+                    </a>
+                </div>
             </div>
         </section>
 

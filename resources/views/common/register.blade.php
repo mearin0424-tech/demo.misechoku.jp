@@ -14,7 +14,7 @@
             <div class="register-role-switch">
                 <a href="{{ route('cast.register') }}" class="register-role {{ $role === 'cast' ? 'is-active' : '' }}">キャスト</a>
                 <a href="{{ route('shop.register') }}" class="register-role {{ $role === 'shop' ? 'is-active' : '' }}">店舗</a>
-                <a href="{{ route('admin.login') }}" class="register-role">運営</a>
+                <a href="{{ route('login.demo') }}" class="register-role">運営</a>
             </div>
             <img src="{{ asset('assets/images/common/logo-yoko.png') }}" alt="ミセチョク" class="register-logo">
             <h1 class="register-title">{{ $heroTitle }}</h1>

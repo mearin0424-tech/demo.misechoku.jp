@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@php
+    $isCast = request()->is('cast/*');
+@endphp
+
 @section('title', ($partnerName ?? 'トーク') . ' 様')
 @section('header_title', $partnerName . ' 様')
 @section('body-class', 'page-talk page-talk-room')
@@ -8,6 +12,7 @@
 <link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}">
 @if($isCast)
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/review-modal.css') }}">
 @endif
 <style>
     .result-template-list {
@@ -346,31 +351,34 @@
 @endif
 
 @if($isCast)
-{{-- レビュー投稿・ボーナス条件達成確認モーダル（キャスト用） --}}
+{{-- レビュー投稿モーダル（スターレーティング＋コメント） --}}
 <div id="review-post-modal" class="payment-bank-modal" role="dialog" aria-labelledby="review-post-modal-title" aria-modal="true" hidden>
     <div class="payment-bank-modal-backdrop" data-close-review-modal></div>
-    <div class="payment-bank-modal-panel">
-        <div class="payment-bank-modal-header">
-            <h3 id="review-post-modal-title" class="payment-bank-modal-title">レビュー投稿</h3>
-            <button type="button" class="payment-bank-modal-close" data-close-review-modal aria-label="閉じる"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="payment-bank-modal-body">
-            <p id="review-modal-loading" class="deposit-precheck-note">読み込み中...</p>
+    <div class="payment-bank-modal-panel review-modal-wrap">
+        <header class="review-modal-header">
+            <h3 id="review-post-modal-title" class="review-modal-title">レビュー投稿</h3>
+            <button type="button" class="review-modal-close-btn" data-close-review-modal aria-label="閉じる"><i class="fas fa-times"></i></button>
+        </header>
+        <div class="payment-bank-modal-body review-modal-body">
+            <p id="review-modal-loading" class="review-modal-loading">読み込み中...</p>
             <div id="review-modal-form-wrap" style="display:none;">
-                <p class="deposit-precheck-note">勤務完了後、お店の雰囲気や働きやすさをレビューしてください。</p>
+                <p class="review-modal-intro">勤務完了後、お店の雰囲気や働きやすさをレビューしてください。</p>
                 <form id="review-post-form">
                     <input type="hidden" name="application_id" id="review-form-application-id" value="">
                     @csrf
-                    <div class="deposit-review-grid" id="review-modal-scores"></div>
-                    <div class="deposit-review-card">
-                        <label class="deposit-review-label" for="review-modal-comment">レビューコメント</label>
-                        <textarea id="review-modal-comment" name="review_comment" rows="4" placeholder="働いてみた感想、雰囲気、条件の印象などを入力してください。" required></textarea>
+                    <div class="review-rating-list" id="review-modal-scores"></div>
+                    <div class="review-comment-card">
+                        <label class="review-comment-label" for="review-modal-comment">レビューコメント</label>
+                        <textarea id="review-modal-comment" name="review_comment" class="review-comment-textarea" rows="4" placeholder="働いてみた感想、雰囲気、条件の印象などを入力してください。" required></textarea>
                     </div>
-                    <p id="review-modal-error" class="deposit-precheck-note" style="color:#fca5a5; display:none;"></p>
-                    <div class="text-right mt-3">
-                        <button type="submit" class="btn-action manage" id="review-submit-btn">投稿する</button>
-                    </div>
+                    <p id="review-modal-error" class="review-modal-error"></p>
                 </form>
+                <div class="review-modal-footer">
+                    <button type="submit" form="review-post-form" class="review-submit-btn" id="review-submit-btn" disabled>
+                        <i class="fas fa-paper-plane"></i> 投稿する
+                    </button>
+                    <p class="review-footer-hint" id="review-footer-hint">すべての項目を評価すると送信できます</p>
+                </div>
             </div>
         </div>
     </div>
@@ -425,7 +433,8 @@
         document.getElementById('review-form-application-id').value = applicationId;
         document.getElementById('review-modal-loading').style.display = 'block';
         document.getElementById('review-modal-form-wrap').style.display = 'none';
-        document.getElementById('review-modal-error').style.display = 'none';
+        var errEl = document.getElementById('review-modal-error');
+        if (errEl) { errEl.textContent = ''; errEl.classList.remove('show'); }
         reviewModal.removeAttribute('hidden');
         document.body.style.overflow = 'hidden';
         fetch(requestTargetUrl + '?application_id=' + encodeURIComponent(applicationId), {
@@ -435,8 +444,7 @@
         .then(function (data) {
             document.getElementById('review-modal-loading').style.display = 'none';
             if (!data.success || !data.request_target) {
-                document.getElementById('review-modal-error').textContent = data.message || 'データの取得に失敗しました。';
-                document.getElementById('review-modal-error').style.display = 'block';
+                if (errEl) { errEl.textContent = data.message || 'データの取得に失敗しました。'; errEl.classList.add('show'); }
                 return;
             }
             var target = data.request_target;
@@ -446,24 +454,109 @@
                 showBonusConfirmModal(applicationId, target);
                 return;
             }
-            var scoresWrap = document.getElementById('review-modal-scores');
-            scoresWrap.innerHTML = '';
-            (target.review_contents || []).forEach(function (c) {
-                var div = document.createElement('div');
-                div.className = 'deposit-review-card';
-                div.innerHTML = '<label class="deposit-review-label">' + (c.name || '') + '</label>' +
-                    '<select name="review_scores[' + c.id + ']" required><option value="">評価を選択</option>' +
-                    [5,4,3,2,1].map(function (s) { return '<option value="' + s + '">' + s + ' / 5</option>'; }).join('') + '</select>';
-                scoresWrap.appendChild(div);
-            });
+            buildReviewRatingCards(target.review_contents || []);
+            var cmtEl = document.getElementById('review-modal-comment');
+            if (cmtEl) cmtEl.value = '';
             document.getElementById('review-modal-form-wrap').style.display = 'block';
+            checkReviewFormReady();
         })
         .catch(function () {
             document.getElementById('review-modal-loading').style.display = 'none';
-            document.getElementById('review-modal-error').textContent = '読み込みに失敗しました。';
-            document.getElementById('review-modal-error').style.display = 'block';
+            if (errEl) { errEl.textContent = '読み込みに失敗しました。'; errEl.classList.add('show'); }
         });
     }
+
+    function buildReviewRatingCards(contents) {
+        var scoresWrap = document.getElementById('review-modal-scores');
+        scoresWrap.innerHTML = '';
+        contents.forEach(function (c) {
+            var card = document.createElement('div');
+            card.className = 'review-rating-card';
+            card.setAttribute('data-content-id', c.id);
+            var question = document.createElement('p');
+            question.className = 'review-rating-question';
+            question.textContent = c.name || '';
+            var row = document.createElement('div');
+            row.className = 'review-rating-row';
+            var stars = document.createElement('div');
+            stars.className = 'review-rating-stars';
+            var hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'review_scores[' + c.id + ']';
+            hidden.value = '0';
+            hidden.setAttribute('data-rating-input', '1');
+            for (var s = 1; s <= 5; s++) {
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'review-star-btn';
+                btn.setAttribute('data-value', s);
+                btn.innerHTML = '<i class="far fa-star"></i>';
+                (function (starVal, button) {
+                    button.addEventListener('click', function () {
+                        hidden.value = starVal;
+                        updateStarButtons(card, starVal);
+                        updateRatingValueSpan(card, starVal);
+                        checkReviewFormReady();
+                    });
+                    button.addEventListener('mouseenter', function () { setStarHover(card, starVal); });
+                    button.addEventListener('mouseleave', function () { clearStarHover(card); });
+                })(s, btn);
+                stars.appendChild(btn);
+            }
+            var valueSpan = document.createElement('span');
+            valueSpan.className = 'review-rating-value';
+            valueSpan.textContent = '- / 5';
+            row.appendChild(stars);
+            row.appendChild(valueSpan);
+            card.appendChild(question);
+            card.appendChild(hidden);
+            card.appendChild(row);
+            scoresWrap.appendChild(card);
+        });
+    }
+    function updateStarButtons(card, value) {
+        var btns = card.querySelectorAll('.review-star-btn');
+        btns.forEach(function (btn) {
+            var v = parseInt(btn.getAttribute('data-value'), 10);
+            btn.classList.toggle('active', v <= value);
+            btn.querySelector('.fa-star').className = v <= value ? 'fas fa-star' : 'far fa-star';
+        });
+    }
+    function setStarHover(card, value) {
+        card.querySelectorAll('.review-rating-stars .review-star-btn').forEach(function (btn) {
+            var v = parseInt(btn.getAttribute('data-value'), 10);
+            btn.classList.toggle('hover', v <= value);
+            if (btn.querySelector('.fa-star')) btn.querySelector('.fa-star').className = v <= value ? 'fas fa-star' : 'far fa-star';
+        });
+    }
+    function clearStarHover(card) {
+        card.querySelectorAll('.review-star-btn').forEach(function (btn) { btn.classList.remove('hover'); });
+        var input = card.querySelector('input[name^="review_scores"]');
+        if (input && input.value !== '0') { updateStarButtons(card, parseInt(input.value, 10)); }
+    }
+    function updateRatingValueSpan(card, value) {
+        var span = card.querySelector('.review-rating-value');
+        if (span) {
+            span.textContent = value > 0 ? value + ' / 5' : '- / 5';
+            span.classList.toggle('has-value', value > 0);
+        }
+    }
+    function checkReviewFormReady() {
+        var form = document.getElementById('review-post-form');
+        if (!form) return;
+        var allRated = true;
+        form.querySelectorAll('input[data-rating-input="1"]').forEach(function (inp) {
+            if (!inp.value || inp.value === '0') allRated = false;
+        });
+        var comment = (form.querySelector('#review-modal-comment') && form.querySelector('#review-modal-comment').value) || '';
+        var ready = allRated && comment.trim().length > 0;
+        var btn = document.getElementById('review-submit-btn');
+        var hint = document.getElementById('review-footer-hint');
+        if (btn) btn.disabled = !ready;
+        if (hint) hint.style.display = ready ? 'none' : 'block';
+    }
+    var commentEl = document.getElementById('review-modal-comment');
+    if (commentEl) { commentEl.addEventListener('input', checkReviewFormReady); commentEl.addEventListener('change', checkReviewFormReady); }
     function closeReviewModal() {
         reviewModal.setAttribute('hidden', '');
         document.body.style.overflow = '';
@@ -510,14 +603,14 @@
                 closeReviewModal();
                 showBonusConfirmModal(parseInt(form.querySelector('input[name="application_id"]').value, 10), res.request_target);
             } else {
-                document.getElementById('review-modal-error').textContent = res.message || '投稿に失敗しました。';
-                document.getElementById('review-modal-error').style.display = 'block';
+                var re = document.getElementById('review-modal-error');
+                if (re) { re.textContent = res.message || '投稿に失敗しました。'; re.classList.add('show'); }
             }
         })
         .catch(function () {
             if (btn) btn.disabled = false;
-            document.getElementById('review-modal-error').textContent = '送信に失敗しました。';
-            document.getElementById('review-modal-error').style.display = 'block';
+            var re = document.getElementById('review-modal-error');
+            if (re) { re.textContent = '送信に失敗しました。'; re.classList.add('show'); }
         });
     });
     document.getElementById('bonus-confirm-form').addEventListener('submit', function (e) {

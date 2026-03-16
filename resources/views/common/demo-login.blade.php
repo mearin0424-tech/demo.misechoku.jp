@@ -137,7 +137,7 @@
                                 <a href="{{ route('shop.register') }}" class="demo-register-link">
                                     <span>店舗登録</span>
                                 </a>
-                                <a href="{{ route('admin.login') }}" class="demo-register-link">
+                                <a href="{{ route('login.demo') }}" class="demo-register-link">
                                     <span>運営ログイン</span>
                                 </a>
                             </div>

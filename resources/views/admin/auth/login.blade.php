@@ -5,9 +5,9 @@
 @section('content')
     <div class="admin-page">
         <div class="admin-role-switch">
-            <a href="{{ route('cast.login') }}" class="admin-role-link">キャスト</a>
-            <a href="{{ route('shop.login') }}" class="admin-role-link">店舗</a>
-            <a href="{{ route('admin.login') }}" class="admin-role-link is-active">運営</a>
+            <a href="{{ route('login.demo') }}" class="admin-role-link">キャスト</a>
+            <a href="{{ route('login.demo') }}" class="admin-role-link">店舗</a>
+            <a href="{{ route('login.demo') }}" class="admin-role-link is-active">運営</a>
         </div>
 
         <h1 class="admin-title">運営ログイン</h1>
@@ -29,18 +29,8 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('admin.login.post') }}" class="admin-form">
-            @csrf
-            <div class="form-group">
-                <label for="email">メールアドレス</label>
-                <input type="email" id="email" name="email" value="{{ old('email') }}" required>
-            </div>
-            <div class="form-group">
-                <label for="password">パスワード</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <button type="submit" class="btn-primary">ログイン</button>
-        </form>
+        <p class="admin-description">ログインは共通画面で行います。</p>
+        <a href="{{ route('login.demo') }}" class="btn-primary" style="display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">共通ログイン画面へ</a>
     </div>
 
     <style>
