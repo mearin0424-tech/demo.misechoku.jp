@@ -41,50 +41,47 @@
             <div class="admin-card-head">
                 <div>
                     <h2>マスタを選択</h2>
-                    <p>編集したいマスタを選ぶと、この下に追加フォームと一覧が表示されます。</p>
+                    <p>編集したいマスタを「カテゴリ」と「マスタ名」のプルダウンから選択してください。</p>
                 </div>
             </div>
 
-            <div class="admin-master-filters">
-                <div class="admin-master-filter-select">
-                    <select id="master-group-filter">
-                        <option value="">すべてのカテゴリ</option>
+            <div class="admin-master-select-row">
+                {{-- カテゴリ選択 --}}
+                <label class="admin-master-select-label">
+                    <span>カテゴリ</span>
+                    <select id="master-group-select">
+                        <option value="">すべて</option>
                         @foreach ($catalogGroups as $group => $items)
                             <option value="{{ $group }}">{{ $group }}</option>
                         @endforeach
                     </select>
-                </div>
-                <div class="admin-master-filter-search">
-                    <i class="fas fa-magnifying-glass"></i>
-                    <input
-                        type="text"
-                        id="master-name-search"
-                        placeholder="マスタ名で検索（例: 業種、店舗タグ…）"
-                        autocomplete="off"
-                    >
-                </div>
-            </div>
+                </label>
 
-            <div class="admin-catalog-groups" id="master-catalog-groups">
-                @foreach ($catalogGroups as $group => $items)
-                    <section class="admin-catalog-group">
-                        <h3>{{ $group }}</h3>
-                        <div class="admin-catalog-grid">
-                            @foreach ($items as $catalog)
-                                <a
-                                    href="{{ route('admin.masters.index', ['catalog' => $catalog['key']]) }}"
-                                    class="admin-catalog-card {{ ($selectedCatalog['key'] ?? null) === $catalog['key'] ? 'is-active' : '' }}"
-                                    data-group="{{ $group }}"
-                                    data-name="{{ mb_strtolower($catalog['title']) }}"
-                                >
-                                    <div class="admin-catalog-card-head">
-                                        <strong>{{ $catalog['title'] }}</strong>
-                                    </div>
-                                </a>
-                            @endforeach
-                        </div>
-                    </section>
-                @endforeach
+                {{-- マスタ選択 --}}
+                <label class="admin-master-select-label">
+                    <span>マスタ</span>
+                    @php
+                        $allCatalogs = $catalogGroups->flatten(1);
+                    @endphp
+                    <select
+                        id="master-catalog-select"
+                        onchange="if(this.value){window.location.href=this.value;}"
+                    >
+                        <option value="">マスタを選択してください</option>
+                        @foreach ($allCatalogs as $catalog)
+                            @php
+                                $group = $catalog['group'] ?? '';
+                            @endphp
+                            <option
+                                value="{{ route('admin.masters.index', ['catalog' => $catalog['key']]) }}"
+                                data-group="{{ $group }}"
+                                @selected(($selectedCatalog['key'] ?? null) === $catalog['key'])
+                            >
+                                [{{ $group }}] {{ $catalog['title'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                </label>
             </div>
         </section>
 
@@ -316,24 +313,19 @@
             gap: 18px;
         }
 
-        .admin-master-filters {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-
-        .admin-master-select {
-            margin-bottom: 12px;
-        }
-
         .admin-master-select-label {
             display: flex;
             flex-direction: column;
             gap: 6px;
             font-size: 0.8rem;
             color: rgba(255, 255, 255, 0.76);
+        }
+
+        .admin-master-select-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-end;
         }
 
         .admin-master-select-label select {
@@ -353,99 +345,6 @@
             box-shadow: 0 0 0 2px rgba(230, 208, 128, 0.16);
         }
 
-        .admin-master-filter-select select {
-            min-width: 200px;
-            padding: 8px 10px;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            background: rgba(255, 255, 255, 0.02);
-            color: #fff;
-            font-size: 0.8rem;
-            outline: none;
-        }
-
-        .admin-master-filter-select select:focus {
-            border-color: rgba(230, 208, 128, 0.4);
-            box-shadow: 0 0 0 2px rgba(230, 208, 128, 0.16);
-        }
-
-        .admin-master-filter-search {
-            position: relative;
-            flex: 1;
-            min-width: 220px;
-        }
-
-        .admin-master-filter-search i {
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: rgba(255, 255, 255, 0.42);
-            font-size: 0.78rem;
-        }
-
-        #master-name-search {
-            width: 100%;
-            min-height: 38px;
-            padding: 8px 10px 8px 32px;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            background: rgba(255, 255, 255, 0.02);
-            color: #fff;
-            font-size: 0.8rem;
-            outline: none;
-        }
-
-        #master-name-search::placeholder {
-            color: rgba(255, 255, 255, 0.42);
-        }
-
-        #master-name-search:focus {
-            border-color: rgba(230, 208, 128, 0.4);
-            box-shadow: 0 0 0 2px rgba(230, 208, 128, 0.12);
-        }
-
-        .admin-catalog-group h3 {
-            margin: 0 0 10px;
-            font-size: 0.88rem;
-            color: rgba(255, 255, 255, 0.82);
-        }
-
-        .admin-catalog-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 8px;
-        }
-
-        .admin-catalog-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 14px;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(255, 255, 255, 0.02);
-            text-decoration: none;
-            transition: border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
-        }
-
-        .admin-catalog-card:hover,
-        .admin-catalog-card.is-active {
-            transform: translateY(-1px);
-            border-color: rgba(230, 208, 128, 0.3);
-            background: rgba(230, 208, 128, 0.06);
-        }
-
-        .admin-catalog-card-head {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .admin-catalog-card-head strong {
-            font-size: 0.84rem;
-            color: #fff;
-        }
 
         .admin-alert {
             margin-bottom: 18px;
@@ -804,34 +703,36 @@
             recordSearchInput.addEventListener('input', applyRecordSearch);
         }
 
-        // マスタ一覧のカテゴリ＆名称フィルタ
-        var groupSelect = document.getElementById('master-group-filter');
-        var nameInput = document.getElementById('master-name-search');
-        var catalogCards = document.querySelectorAll('.admin-catalog-card');
+        // カテゴリ選択に応じてマスタのプルダウンを絞り込み
+        var groupSelect = document.getElementById('master-group-select');
+        var catalogSelect = document.getElementById('master-catalog-select');
 
-        function applyCatalogFilter() {
-            if (!catalogCards.length) return;
+        if (groupSelect && catalogSelect) {
+            var allOptions = Array.prototype.slice.call(catalogSelect.querySelectorAll('option'));
 
-            var selectedGroup = groupSelect ? groupSelect.value : '';
-            var keyword = nameInput ? normalize(nameInput.value) : '';
+            function applyMasterSelectFilter() {
+                var selectedGroup = groupSelect.value;
 
-            catalogCards.forEach(function (card) {
-                var cardGroup = card.getAttribute('data-group') || '';
-                var cardName = normalize(card.getAttribute('data-name') || '');
+                allOptions.forEach(function (opt, index) {
+                    if (index === 0) {
+                        // 先頭の「マスタを選択してください」は常に表示
+                        opt.hidden = false;
+                        return;
+                    }
 
-                var matchGroup = !selectedGroup || cardGroup === selectedGroup;
-                var matchName = !keyword || cardName.indexOf(keyword) !== -1;
+                    var optionGroup = opt.getAttribute('data-group') || '';
+                    var visible = !selectedGroup || optionGroup === selectedGroup;
+                    opt.hidden = !visible;
+                });
 
-                var visible = matchGroup && matchName;
-                card.style.display = visible ? '' : 'none';
-            });
-        }
+                // 選択中のマスタが現在のカテゴリに属さない場合はリセット
+                var current = catalogSelect.options[catalogSelect.selectedIndex];
+                if (current && current.hidden) {
+                    catalogSelect.selectedIndex = 0;
+                }
+            }
 
-        if (groupSelect) {
-            groupSelect.addEventListener('change', applyCatalogFilter);
-        }
-        if (nameInput) {
-            nameInput.addEventListener('input', applyCatalogFilter);
+            groupSelect.addEventListener('change', applyMasterSelectFilter);
         }
     })();
 </script>

@@ -240,7 +240,7 @@ class AdminMasterService
                 'model' => Industry::class,
                 'title' => '業種マスタ',
                 'description' => 'キャバクラ、ラウンジ、ガールズバー など',
-                'group' => 'プロフィール系',
+                'group' => 'プロフィール',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => '業種名', 'placeholder' => '例: キャバクラ'],
                 ],
@@ -251,7 +251,7 @@ class AdminMasterService
                 'model' => ReviewContent::class,
                 'title' => 'レビュー設問マスタ',
                 'description' => '清潔感、スタッフ対応などの評価項目',
-                'group' => 'レビュー系',
+                'group' => 'レビュー',
                 'fields' => [
                     ['input' => 'content', 'column' => $this->reviewContentColumn(), 'label' => '設問内容', 'placeholder' => '例: スタッフの対応は親切ですか？'],
                 ],
@@ -265,7 +265,7 @@ class AdminMasterService
                 'model' => ColumnCategory::class,
                 'title' => 'コラムカテゴリマスタ',
                 'description' => 'キャバクラ情報、面接対策 など',
-                'group' => 'コンテンツ系',
+                'group' => 'コンテンツ',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'カテゴリ名', 'placeholder' => '例: 面接対策'],
                     ['input' => 'directory', 'column' => 'directory', 'label' => 'ディレクトリ', 'placeholder' => '例: interview'],
@@ -278,7 +278,7 @@ class AdminMasterService
                 'model' => CastLookTag::class,
                 'title' => 'キャストルックスマスタ',
                 'description' => 'スレンダー、ギャル、顔出しOK など',
-                'group' => 'プロフィール系',
+                'group' => 'プロフィール',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: スレンダー'],
                 ],
@@ -289,7 +289,7 @@ class AdminMasterService
                 'model' => CastPersonalityTag::class,
                 'title' => 'キャスト性格マスタ',
                 'description' => '社交的、お酒飲める人、連絡マメ など',
-                'group' => 'プロフィール系',
+                'group' => 'プロフィール',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 明るい'],
                 ],
@@ -300,7 +300,7 @@ class AdminMasterService
                 'model' => SalaryTag::class,
                 'title' => '給与・各種バックマスタ',
                 'description' => '全額日払い、高額時給、売上バック有り など',
-                'group' => '求人系',
+                'group' => '求人',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 交通費支給'],
                 ],
@@ -311,7 +311,7 @@ class AdminMasterService
                 'model' => HowtoTag::class,
                 'title' => '働き方・シフトマスタ',
                 'description' => '週1からOK、1日3h以内、終電上がりOK など',
-                'group' => '求人系',
+                'group' => '求人',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 週1からOK'],
                 ],
@@ -322,7 +322,7 @@ class AdminMasterService
                 'model' => MeritTag::class,
                 'title' => '待遇・サポートマスタ',
                 'description' => '服装自由、レンタル衣装、寮有り、ノルマ無し など',
-                'group' => '求人系',
+                'group' => '求人',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 送り有り'],
                 ],
@@ -333,7 +333,7 @@ class AdminMasterService
                 'model' => FeatureTag::class,
                 'title' => '店舗営業情報マスタ',
                 'description' => '新規オープン、日曜営業、定休日無し など',
-                'group' => '求人系',
+                'group' => '求人',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 未経験'],
                 ],
@@ -344,7 +344,7 @@ class AdminMasterService
                 'model' => FacilityTag::class,
                 'title' => '設備・空間マスタ',
                 'description' => '個人ロッカー有り、カラオケ有り、禁煙店 など',
-                'group' => '求人系',
+                'group' => '求人',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 駐車場有り'],
                 ],
@@ -355,7 +355,7 @@ class AdminMasterService
                 'model' => AtmosphereTag::class,
                 'title' => 'お店の雰囲気・規模マスタ',
                 'description' => 'わいわい、大型店、派閥無し、アットホーム など',
-                'group' => '求人系',
+                'group' => '求人',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: アットホーム'],
                 ],
