@@ -27,6 +27,11 @@
         0 0 18px rgba(229, 193, 88, 0.26);
 }
 
+/* 画像編集モーダル表示中はヘッダーを隠す */
+body.is-image-editing #global-header {
+    display: none !important;
+}
+
 /* --- 左側：BACKボタン --- */
 .header-left {
     flex: 1;

@@ -63,3 +63,8 @@
 .nav-item.active i {
     filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.5));
 }
+
+/* 画像編集モーダル表示中はボトムナビを隠す */
+body.is-image-editing #bottom-nav {
+    display: none !important;
+}

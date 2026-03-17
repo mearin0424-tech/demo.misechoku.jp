@@ -284,7 +284,12 @@
                         toggleDragModeOnDblclick: false,
                     });
                 }
-                editModal.style.display = 'flex';
+                if (editModal) {
+                    editModal.style.display = 'flex';
+                }
+                try {
+                    document.body.classList.add('is-image-editing');
+                } catch (e) {}
             };
             reader.readAsDataURL(file);
         }
@@ -299,6 +304,9 @@
                     _cropper.destroy();
                     _cropper = null;
                 }
+                try {
+                    document.body.classList.remove('is-image-editing');
+                } catch (e) {}
             });
         }
 
@@ -331,14 +339,20 @@
                                 btn.disabled = false;
                                 return;
                             }
-                            editModal.style.display = 'none';
+                            if (editModal) editModal.style.display = 'none';
+                            try {
+                                document.body.classList.remove('is-image-editing');
+                            } catch (e) {}
                             performUpload(blob, _pendingUploadFile.name, _pendingUploadSlotIndex);
                         }, 'image/jpeg', 0.9);
                     } else {
                         // フォールバック：従来の中央トリミング
                         resizeImageFallback(_pendingUploadFile, MAX_WIDTH, MAX_HEIGHT)
                             .then(function(blob) {
-                                editModal.style.display = 'none';
+                                if (editModal) editModal.style.display = 'none';
+                                try {
+                                    document.body.classList.remove('is-image-editing');
+                                } catch (e) {}
                                 performUpload(blob, _pendingUploadFile.name, _pendingUploadSlotIndex);
                             })
                             .catch(function(err) {

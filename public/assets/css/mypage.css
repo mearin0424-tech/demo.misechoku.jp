@@ -1138,21 +1138,9 @@ a.btn-outline-gold {
     transition: transform 0.15s ease-out;
 }
 
+/* 旧トリミングガイド（Cropper.js のガイドと二重になるため無効化） */
 .image-edit-frame-mask {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-}
-
-.image-edit-frame-mask::before {
-    content: '';
-    position: absolute;
-    inset: 8%;
-    border-radius: 10px;
-    border: 2px dashed rgba(248, 231, 176, 0.85);
-    box-shadow:
-        0 0 0 9999px rgba(0, 0, 0, 0.45),
-        0 0 20px rgba(0, 0, 0, 0.9);
+    display: none;
 }
 
 .image-edit-actions {
