@@ -65,30 +65,6 @@
                 </div>
             </div>
 
-            {{-- プルダウンでもマスタを選択できる --}}
-            <div class="admin-master-select">
-                @php
-                    $allCatalogs = $catalogGroups->flatten(1);
-                @endphp
-                <label class="admin-master-select-label">
-                    <span>マスタを直接選択</span>
-                    <select
-                        id="master-catalog-select"
-                        onchange="if(this.value){window.location.href=this.value;}"
-                    >
-                        <option value="">マスタを選択してください</option>
-                        @foreach ($allCatalogs as $catalog)
-                            <option
-                                value="{{ route('admin.masters.index', ['catalog' => $catalog['key']]) }}"
-                                @selected(($selectedCatalog['key'] ?? null) === $catalog['key'])
-                            >
-                                {{ $catalog['title'] }}
-                            </option>
-                        @endforeach
-                    </select>
-                </label>
-            </div>
-
             <div class="admin-catalog-groups" id="master-catalog-groups">
                 @foreach ($catalogGroups as $group => $items)
                     <section class="admin-catalog-group">

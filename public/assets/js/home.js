@@ -19,9 +19,9 @@ document.addEventListener('DOMContentLoaded', function() {
         direction: 'vertical',
         slidesPerView: 1,
         centeredSlides: true,
-        // 最後のユーザーまで行ったら先頭にループ
-        loop: true,
-        loopAdditionalSlides: Math.max(2, slideCount),
+        // Swiper標準の「端で次に進むと先頭/末尾に戻る」挙動を使う
+        loop: false,
+        rewind: slideCount >= 2,
         speed: 400,
         mousewheel: {
             enabled: true,

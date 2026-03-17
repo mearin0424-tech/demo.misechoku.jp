@@ -6,10 +6,9 @@
             'title' => 'オペレーション',
             'items' => [
                 ['label' => '請求書発行', 'route' => 'admin.invoices.index', 'icon' => 'fa-file-invoice', 'badge' => null, 'badge_class' => ''],
-                ['label' => '入金・振込管理', 'route' => 'admin.deposits.index', 'icon' => 'fa-money-bill-transfer', 'badge' => null, 'badge_class' => ''],
-                ['label' => '本人・書類審査管理', 'route' => 'admin.verification.index', 'icon' => 'fa-shield-halved', 'badge' => '7', 'badge_class' => 'badge-gold'],
-                ['label' => '入金・振込タスク管理', 'route' => 'admin.tasks.index', 'icon' => 'fa-wallet', 'badge' => '13', 'badge_class' => 'badge-red'],
-                ['label' => '問合せ管理', 'route' => 'admin.inquiries.index', 'icon' => 'fa-triangle-exclamation', 'badge' => null, 'badge_class' => ''],
+                ['label' => '入金確認・振込', 'route' => 'admin.deposits.index', 'icon' => 'fa-money-bill-transfer', 'badge' => null, 'badge_class' => ''],
+                ['label' => '身分証・書類審査', 'route' => 'admin.verification.index', 'icon' => 'fa-shield-halved', 'badge' => '7', 'badge_class' => 'badge-gold'],
+                ['label' => '問合せ対応', 'route' => 'admin.inquiries.index', 'icon' => 'fa-triangle-exclamation', 'badge' => null, 'badge_class' => ''],
             ],
         ],
         [
