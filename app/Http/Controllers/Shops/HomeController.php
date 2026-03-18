@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Shops;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class HomeController extends Controller
 {
@@ -50,6 +51,22 @@ class HomeController extends Controller
             ->limit(20)
             ->get();
 
+        // LIKE数は favorites テーブルから集計（存在しない環境でも動くようにガード）
+        $likeCounts = [];
+        if (Schema::hasTable('favorites')) {
+            $likeRows = DB::table('favorites')
+                ->select('cast_id', DB::raw('COUNT(*) as cnt'))
+                ->whereNotNull('cast_id')
+                ->where('action_type', 3)
+                ->groupBy('cast_id')
+                ->get();
+            foreach ($likeRows as $lr) {
+                if ($lr->cast_id !== null) {
+                    $likeCounts[$lr->cast_id] = (int) $lr->cnt;
+                }
+            }
+        }
+
         $items = [];
         foreach ($rows as $row) {
             $birthday = $row->birthday ? Carbon::parse($row->birthday) : null;
@@ -59,7 +76,7 @@ class HomeController extends Controller
                 'name' => $row->nickname ?: ($row->name ?: 'ゲスト'),
                 'age' => $birthday ? $birthday->age : null,
                 'tags' => $this->buildCastTags($row),
-                'like_count' => 0,
+                'like_count' => $likeCounts[$row->id] ?? 0,
                 'images' => $images,
             ];
         }
@@ -101,6 +118,22 @@ class HomeController extends Controller
             ->limit(20)
             ->get();
 
+        // 店舗側求人カードの LIKE数（cast -> shop のいいね数）
+        $likeCounts = [];
+        if (Schema::hasTable('favorites')) {
+            $likeRows = DB::table('favorites')
+                ->select('shop_id', DB::raw('COUNT(*) as cnt'))
+                ->whereNotNull('shop_id')
+                ->where('action_type', 3)
+                ->groupBy('shop_id')
+                ->get();
+            foreach ($likeRows as $lr) {
+                if ($lr->shop_id !== null) {
+                    $likeCounts[$lr->shop_id] = (int) $lr->cnt;
+                }
+            }
+        }
+
         $items = [];
         foreach ($rows as $row) {
             // 画面からは「DBの店舗ID（例: s00000001）」でアクセスできるようにする
@@ -122,7 +155,7 @@ class HomeController extends Controller
                 'tags' => $this->buildRecruitCardTags($row, $meta),
                 'pref' => $row->pref ?? '',
                 'city' => $row->city ?? '',
-                'like_count' => 0,
+                'like_count' => $likeCounts[$row->id] ?? 0,
             ];
         }
 

@@ -6,6 +6,7 @@ use App\Consts\CommonConsts;
 use App\Http\Controllers\Controller;
 use App\Models\Cast;
 use App\Models\ShopManager;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
@@ -40,6 +41,7 @@ class RegistrationController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:casts,email'],
             'experience' => ['required', 'in:beginner,experienced'],
             'shift_style' => ['required', 'in:once,twice,flex'],
+            'profile_image' => ['required', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:2048'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'terms' => ['accepted'],
         ], [
@@ -92,6 +94,35 @@ class RegistrationController extends Controller
                 'updated_at' => now(),
             ]);
 
+            // プロフィール画像（必須1枚）を保存
+            if ($request->hasFile('profile_image')) {
+                $file = $request->file('profile_image');
+                $dir = public_path('uploads/casts/gallery');
+                File::ensureDirectoryExists($dir);
+                $name = $file->hashName();
+                $file->move($dir, $name);
+                $path = 'uploads/casts/gallery/' . $name;
+
+                DB::table('cast_images')->insert([
+                    'cast_id'       => $castId,
+                    'image_path'    => $path,
+                    'type'          => 1,
+                    'front_and_back'=> 0,
+                    'status'        => 0,
+                    'is_main'       => 1,
+                    'main_order'    => 0,
+                    'created_at'    => now(),
+                    'updated_at'    => now(),
+                ]);
+
+                // プロフィールのメイン画像パスを同期（カラムが存在する場合）
+                if (DB::getSchemaBuilder()->hasColumn('cast_profiles', 'main_image_path')) {
+                    DB::table('cast_profiles')
+                        ->where('cast_id', $castId)
+                        ->update(['main_image_path' => $path]);
+                }
+            }
+
             return Cast::query()->findOrFail($castId);
         });
 
@@ -118,6 +149,7 @@ class RegistrationController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:shop_managers,email'],
             'business_type' => ['required', 'in:club,lounge,girls-bar,other'],
             'plan' => ['required', 'in:basic,premium'],
+            'shop_profile_image' => ['required', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:2048'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'terms' => ['accepted'],
         ], [
@@ -166,6 +198,50 @@ class RegistrationController extends Controller
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+
+            // 店舗登録と同時に、求人票（本入・体入・ヘルプを想定したベースレコード）を1件作成しておく
+            // 各勤務形態は時給やフラグの設定有無で任意に利用可能
+            if (DB::getSchemaBuilder()->hasTable('shop_jobs')) {
+                DB::table('shop_jobs')->insert([
+                    'shop_id' => $shopId,
+                    'status' => 0,                 // 初期状態は非公開
+                    'hourly_wage_regular' => null, // 本入の時給（未設定）
+                    'normal_time' => null,
+                    'has_trial' => 0,              // 体入は未設定
+                    'trial_hourly_wage' => null,
+                    'has_help' => 0,               // ヘルプは未設定
+                    'help_hourly_wage' => null,
+                    'job_description' => null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            // 店舗プロフィール画像（必須1枚）を保存
+            if ($request->hasFile('shop_profile_image')) {
+                $file = $request->file('shop_profile_image');
+                $dir = public_path('uploads/shops/gallery');
+                File::ensureDirectoryExists($dir);
+                $name = $file->hashName();
+                $file->move($dir, $name);
+                $path = 'uploads/shops/gallery/' . $name;
+
+                DB::table('shop_images')->insert([
+                    'shop_id'    => $shopId,
+                    'image_path' => $path,
+                    'type'       => null,
+                    'is_main'    => 1,
+                    'main_order' => 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                if (DB::getSchemaBuilder()->hasColumn('shop_profiles', 'main_image_path')) {
+                    DB::table('shop_profiles')
+                        ->where('shop_id', $shopId)
+                        ->update(['main_image_path' => $path]);
+                }
+            }
 
             return ShopManager::query()->findOrFail($managerId);
         });

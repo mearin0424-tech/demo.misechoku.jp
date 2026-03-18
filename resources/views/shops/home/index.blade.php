@@ -51,11 +51,25 @@
 
                 {{-- アクションボタン --}}
                 <div class="card-actions-overlay stop-propagation">
-                    <button type="button" class="action-circle-btn like">
+                    <button
+                        type="button"
+                        class="action-circle-btn like"
+                        data-item-id="{{ $item['id'] }}"
+                        data-item-type="{{ $itemType === 'recruit' ? 'shop' : 'cast' }}"
+                        data-action="like"
+                    >
                         <i class="fas fa-heart"></i>
                         <span class="action-btn-count">{{ $item['like_count'] ?? 0 }}</span>
                     </button>
-                    <button type="button" class="action-circle-btn keep"><i class="fas fa-bookmark"></i></button>
+                    <button
+                        type="button"
+                        class="action-circle-btn keep"
+                        data-item-id="{{ $item['id'] }}"
+                        data-item-type="{{ $itemType === 'recruit' ? 'shop' : 'cast' }}"
+                        data-action="keep"
+                    >
+                        <i class="fas fa-bookmark"></i>
+                    </button>
                     <a href="{{ route($talkRoute, $item['id']) }}" class="action-btn-message" aria-label="メッセージを送る">
                         <i class="fas fa-paper-plane"></i>
                     </a>

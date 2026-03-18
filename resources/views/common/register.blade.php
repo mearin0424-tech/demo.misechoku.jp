@@ -20,7 +20,7 @@
             <h1 class="register-title">{{ $heroTitle }}</h1>
         </section>
 
-        <form method="POST" action="{{ $formAction }}" class="register-form h-adr">
+        <form method="POST" action="{{ $formAction }}" class="register-form h-adr" enctype="multipart/form-data">
             @csrf
             <span class="p-country-name" style="display:none;">Japan</span>
 
@@ -139,6 +139,18 @@
                         </label>
                     </div>
                 </section>
+
+                {{-- プロフィール画像（必須 1枚） --}}
+                <section class="register-card">
+                    <div class="register-card-head">
+                        <h2>プロフィール画像</h2>
+                    </div>
+                    <label class="register-field">
+                        <span>メイン画像 <em>必須</em></span>
+                        <input type="file" name="profile_image" accept="image/jpeg,image/png,image/gif,image/webp" required>
+                        <small class="register-field-hint">顔が分かる画像を1枚アップロードしてください。（JPEG / PNG / GIF / WebP、最大2MB）</small>
+                    </label>
+                </section>
             @else
                 <section class="register-card">
                     <div class="register-card-head">
@@ -245,6 +257,18 @@
                             </label>
                         </div>
                     </div>
+                </section>
+
+                {{-- 店舗プロフィール画像（必須 1枚） --}}
+                <section class="register-card">
+                    <div class="register-card-head">
+                        <h2>店舗プロフィール画像</h2>
+                    </div>
+                    <label class="register-field">
+                        <span>メイン画像 <em>必須</em></span>
+                        <input type="file" name="shop_profile_image" accept="image/jpeg,image/png,image/gif,image/webp" required>
+                        <small class="register-field-hint">店舗の雰囲気が伝わる画像を1枚アップロードしてください。（JPEG / PNG / GIF / WebP、最大2MB）</small>
+                    </label>
                 </section>
             @endif
 

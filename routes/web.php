@@ -238,6 +238,10 @@ Route::prefix('api/push')->name('push.')->group(function () {
     Route::post('send-test', [\App\Http\Controllers\Api\PushController::class, 'sendTest'])->name('send-test');
 });
 
+Route::prefix('api/favorites')->name('api.favorites.')->group(function () {
+    Route::post('toggle', [\App\Http\Controllers\Api\FavoriteController::class, 'toggle'])->name('toggle');
+});
+
 Route::prefix('api/bank-lookup')->name('api.bank-lookup.')->group(function () {
     Route::get('banks', [BankLookupController::class, 'banks'])->name('banks');
     Route::get('branches', [BankLookupController::class, 'branches'])->name('branches');

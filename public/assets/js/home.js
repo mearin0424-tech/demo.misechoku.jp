@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
         el.addEventListener('mousedown', (e) => e.stopPropagation());
     });
 
-    // 4. アクションボタンの簡易動作
+    // 4. アクションボタンの簡易動作（Ajax連携）
     initActionButtons();
 
     // 5. 初回・久しぶり用オンボーディング（ホームスワイプガイド・オコジョは表示しない）
@@ -216,14 +216,69 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 function initActionButtons() {
     const buttons = document.querySelectorAll('.action-circle-btn');
+    if (!buttons.length) return;
+
+    const csrfTokenEl = document.querySelector('meta[name="csrf-token"]');
+    const csrfToken = csrfTokenEl ? csrfTokenEl.getAttribute('content') : null;
+
     buttons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            // ここにLike/Keepの非同期処理(Ajax)などを追加可能
-            if (!this.classList.contains('message')) {
-                e.preventDefault();
+        btn.addEventListener('click', function (e) {
+            if (this.classList.contains('message')) {
+                return;
+            }
+
+            e.preventDefault();
+
+            const action = this.dataset.action;
+            const itemId = this.dataset.itemId;
+            const itemType = this.dataset.itemType;
+
+            if (!action || !itemId || !itemType) {
+                // 単純なエフェクトのみ
                 this.style.transform = 'scale(1.2)';
                 setTimeout(() => this.style.transform = 'scale(1)', 200);
+                return;
             }
+
+            const payload = {
+                action: action,
+                item_id: itemId,
+                item_type: itemType,
+            };
+
+            fetch('/api/favorites/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
+                },
+                body: JSON.stringify(payload),
+                credentials: 'same-origin',
+            })
+                .then(res => res.ok ? res.json() : Promise.reject(res))
+                .then(data => {
+                    if (!data || !data.ok) return;
+
+                    if (typeof data.is_active !== 'undefined') {
+                        this.classList.toggle('is-active', !!data.is_active);
+                    }
+
+                    if (data.action === 'like' && typeof data.like_count === 'number') {
+                        const countEl = this.querySelector('.action-btn-count');
+                        if (countEl) {
+                            countEl.textContent = data.like_count;
+                        }
+                    }
+
+                    this.style.transform = 'scale(1.2)';
+                    setTimeout(() => this.style.transform = 'scale(1)', 200);
+                })
+                .catch(() => {
+                    // エラー時もエフェクトは動かす（UX優先、実際の保存はサーバーログで確認）
+                    this.style.transform = 'scale(1.2)';
+                    setTimeout(() => this.style.transform = 'scale(1)', 200);
+                });
         });
     });
 }
