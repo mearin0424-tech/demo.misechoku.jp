@@ -229,6 +229,9 @@ class TalkController extends Controller
         abort_if(!$isCastPortal && $actionType === 'interview_confirm', 403);
         $castId = $isCastPortal ? $this->currentCastId() : $partnerId;
         $shopId = $isCastPortal ? $partnerId : $this->currentShopId();
+        $bonusMeta = in_array($actionType, ['interview_offer', 'interview_confirm'], true)
+            ? $this->buildJobBonusMetaForConversation($castId, $shopId)
+            : null;
         $currentApplicationStatus = $this->getCurrentApplicationStatus($castId, $shopId);
 
         if ($actionType === 'interview_offer') {
@@ -266,7 +269,7 @@ class TalkController extends Controller
             );
         }
 
-        [$messageType, $content] = match ($actionType) {
+        [$messageType, $content] = match ($actionType) use ($request, $bonusMeta) {
             'interview_offer' => [
                 self::MESSAGE_TYPE_INTERVIEW_OFFER,
                 json_encode([
@@ -276,6 +279,7 @@ class TalkController extends Controller
                         ->filter()
                         ->values()
                         ->all(),
+                    'bonus_meta' => $bonusMeta,
                 ], JSON_UNESCAPED_UNICODE),
             ],
             'interview_confirm' => [
@@ -283,6 +287,7 @@ class TalkController extends Controller
                 json_encode([
                     'offer_token' => (string) $request->input('offer_token'),
                     'selected_option' => trim((string) $request->input('selected_option')),
+                    'bonus_meta' => $bonusMeta,
                 ], JSON_UNESCAPED_UNICODE),
             ],
             'hired' => [
@@ -806,6 +811,42 @@ class TalkController extends Controller
         ]);
 
         return DB::table('shop_job_applications')->where('id', $applicationId)->first();
+    }
+
+    /**
+     * トーク相手との会話コンテキストから、求人票ベースのボーナス条件メタ情報を取得する
+     * （ボーナス金額・勤務日数・勤務時間・フリーテキスト条件）。
+     *
+     * 面談候補日送信／面談日確定メッセージに埋め込み、後続のチェックリスト機能でも再利用する想定。
+     */
+    private function buildJobBonusMetaForConversation(string $castId, string $shopId): ?array
+    {
+        $application = $this->resolveOrCreateApplicationForTalk($castId, $shopId);
+        if (!$application) {
+            return null;
+        }
+
+        $job = DB::table('shop_jobs')->where('id', $application->shop_job_id)->first();
+        if (!$job) {
+            return null;
+        }
+
+        $meta = [];
+        if (!empty($job->noruma_cond)) {
+            $decoded = json_decode($job->noruma_cond, true);
+            if (is_array($decoded)) {
+                $meta = $decoded;
+            }
+        }
+
+        $bonusAmount = (int) ($job->noruma_reward ?? $job->hourly_wage_regular ?? 0);
+
+        return [
+            'bonus_amount' => $bonusAmount,
+            'working_days' => isset($meta['working_days']) ? (string) $meta['working_days'] : '',
+            'working_hours' => isset($meta['working_hours']) ? (string) $meta['working_hours'] : '',
+            'extra_condition' => isset($meta['bonus_condition']) ? trim((string) $meta['bonus_condition']) : '',
+        ];
     }
 
     private function resolveResultMessage(string $actionType, string $customMessage): string

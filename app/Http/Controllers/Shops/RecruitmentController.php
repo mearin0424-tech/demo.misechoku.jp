@@ -285,6 +285,11 @@ class RecruitmentController extends Controller
         $regularHoliday = Schema::hasColumn('shop_jobs', 'regular_holiday') ? ($row->regular_holiday ?? '') : ($meta['regular_holiday'] ?? '');
         $qualification = Schema::hasColumn('shop_jobs', 'qualification') ? ($row->qualification ?? '') : ($meta['qualification'] ?? '');
 
+        // 達成条件の構造化（勤務日数／勤務時間／その他条件）
+        $bonusWorkingDays = (string) ($meta['working_days'] ?? $workingDays ?? '');
+        $bonusWorkingHours = (string) ($meta['working_hours'] ?? $workingHours ?? '');
+        $bonusExtraCondition = trim((string) ($meta['bonus_condition'] ?? ''));
+
         return [
             'recruit' => [
                 'store_name' => $row->shop_name ?? '店舗',
@@ -294,8 +299,11 @@ class RecruitmentController extends Controller
                 'nearest_station' => $row->station1 ?? '',
                 'hourly_wage_regular' => isset($row->hourly_wage_regular) ? (int) $row->hourly_wage_regular : 0,
                 'trial_hourly_wage' => !empty($row->has_trial) && !empty($row->trial_hourly_wage) ? (int) $row->trial_hourly_wage : null,
+                'help_hourly_wage' => !empty($row->has_help) && !empty($row->help_hourly_wage) ? (int) $row->help_hourly_wage : null,
                 'noruma_reward' => isset($row->noruma_reward) ? (int) $row->noruma_reward : 0,
-                'bonus_condition' => $meta['bonus_condition'] ?? '',
+                'bonus_condition' => $bonusExtraCondition,
+                'bonus_working_days' => $bonusWorkingDays,
+                'bonus_working_hours' => $bonusWorkingHours,
                 'salary_text' => $row->salary ?? '',
                 'working_hours' => $workingHours,
                 'working_days' => $workingDays,

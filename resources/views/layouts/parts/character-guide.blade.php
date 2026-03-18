@@ -7,7 +7,14 @@
     $isSearch = str_contains($bodyClass, 'page-search') || request()->is('*/search*');
     $isLikes = str_contains($bodyClass, 'page-interaction') || request()->is('*/interaction*');
     if (!$isHome && ($isSearch || $isLikes)) {
-        $resolvedGuideMessage = '現在ガイドのセリフは実装中です';
+        // オコジョガイド：優良支払店バッヂの条件説明
+        $resolvedGuideMessage = implode("\n", [
+            '【優良支払店バッヂとは？】',
+            '直近3ヶ月のあいだに発生した請求・入金データについて、',
+            '・すべての案件が「店舗入金確認済み」まで完了していて、',
+            '・請求書発行から店舗入金確認までが10日以内',
+            'の店舗だけに付与される、安全性重視のバッヂです。',
+        ]);
     }
 @endphp
 

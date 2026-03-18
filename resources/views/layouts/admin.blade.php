@@ -592,7 +592,7 @@
             width: 100%;
             min-width: 680px;
             border-collapse: collapse;
-            font-size: 0.85rem;
+            font-size: 0.78rem;
         }
         .admin-table thead th {
             padding: 12px 16px;
@@ -605,11 +605,12 @@
             white-space: nowrap;
         }
         .admin-table tbody td {
-            padding: 13px 16px;
+            padding: 10px 14px;
             color: var(--admin-text);
             border-top: 1px solid rgba(255, 255, 255, 0.05);
             white-space: nowrap;
             vertical-align: middle;
+            font-size: 0.78rem;
         }
         .admin-table tbody tr:hover {
             background: var(--admin-card-hover);

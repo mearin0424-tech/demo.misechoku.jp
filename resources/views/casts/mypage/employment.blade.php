@@ -650,9 +650,23 @@
                                             <input type="hidden" name="application_id" value="{{ $requestTarget['application_id'] ?? '' }}">
                                             <input type="hidden" name="confirm_bonus_condition" value="1">
                                             <div class="deposit-checklist">
+                                                @php
+                                                    $bonusMeta = is_array($requestTarget['bonus_meta'] ?? null) ? ($requestTarget['bonus_meta'] ?? []) : [];
+                                                    $bmDays = trim((string) ($bonusMeta['working_days'] ?? ''));
+                                                    $bmHours = trim((string) ($bonusMeta['working_hours'] ?? ''));
+                                                    $bmExtra = trim((string) ($bonusMeta['extra_condition'] ?? ($requestTarget['bonus_condition'] ?? '')));
+                                                @endphp
                                                 <label class="deposit-check-row">
-                                                    <input type="checkbox" name="confirm_checked" value="1" required {{ old('confirm_bonus_condition') ? 'checked' : '' }}>
-                                                    <span>上記のボーナス達成条件（採用時点の内容）を確認し、申請内容に相違がないことを確認しました。</span>
+                                                    <input type="checkbox" name="confirm_bonus_days" value="1" required>
+                                                    <span>{{ $bmDays !== '' ? ('勤務日数（' . $bmDays . '）を完了しました') : '勤務日数条件を満たしています' }}</span>
+                                                </label>
+                                                <label class="deposit-check-row">
+                                                    <input type="checkbox" name="confirm_bonus_hours" value="1" required>
+                                                    <span>{{ $bmHours !== '' ? ('勤務時間（' . $bmHours . '）を完了しました') : '勤務時間条件を満たしています' }}</span>
+                                                </label>
+                                                <label class="deposit-check-row">
+                                                    <input type="checkbox" name="confirm_bonus_extra" value="1" required>
+                                                    <span>{{ $bmExtra !== '' ? ('その他条件（' . $bmExtra . '）を満たしています') : 'その他条件（店舗と合意した条件）を満たしています' }}</span>
                                                 </label>
                                             </div>
                                             <div class="text-right mt-3">
@@ -832,19 +846,33 @@
                     <span class="doc-status status-pending">採用済み案件</span>
                 </div>
                 <div class="deposit-precheck-meta">ボーナス金額: ¥<span id="bonus-confirm-amount">0</span></div>
-                <div class="deposit-precheck-note" id="bonus-confirm-condition">—</div>
+                <div class="deposit-precheck-note" id="bonus-confirm-condition">
+                    <ul class="recruit-line-list" id="bonus-confirm-condition-list">
+                        {{-- JS で bonus_meta から埋め込み --}}
+                    </ul>
+                </div>
             </div>
             <form id="bonus-confirm-form">
                 <input type="hidden" name="application_id" id="bonus-confirm-application-id" value="">
                 @csrf
-                <input type="hidden" name="confirm_bonus_condition" value="1">
-                <label class="deposit-check-row">
-                    <input type="checkbox" name="confirm_checked" value="1" required>
-                    <span>上記のボーナス達成条件を確認し、申請内容に相違がないことを確認しました。</span>
-                </label>
+                {{-- confirm_bonus_condition は全チェック完了時のみ JS で付与する --}}
+                <div class="deposit-checklist" id="bonus-confirm-checklist">
+                    <label class="deposit-check-row">
+                        <input type="checkbox" name="confirm_bonus_days" value="1" required>
+                        <span id="bonus-confirm-check-days">勤務日数条件を満たしています</span>
+                    </label>
+                    <label class="deposit-check-row">
+                        <input type="checkbox" name="confirm_bonus_hours" value="1" required>
+                        <span id="bonus-confirm-check-hours">勤務時間条件を満たしています</span>
+                    </label>
+                    <label class="deposit-check-row">
+                        <input type="checkbox" name="confirm_bonus_extra" value="1" required>
+                        <span id="bonus-confirm-check-extra">その他条件（店舗と合意した条件）を満たしています</span>
+                    </label>
+                </div>
                 <p id="bonus-confirm-error" class="deposit-precheck-note" style="color:#fca5a5; display:none;"></p>
                 <div class="text-right mt-3">
-                    <button type="submit" class="btn-action manage" id="bonus-confirm-submit-btn">完了</button>
+                    <button type="submit" class="btn-action manage" id="bonus-confirm-submit-btn" disabled>完了</button>
                 </div>
             </form>
         </div>
@@ -1136,12 +1164,46 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('bonus-confirm-application-id').value = applicationId;
         document.getElementById('bonus-confirm-shop-name').textContent = target.shop_name || '—';
         document.getElementById('bonus-confirm-amount').textContent = (target.bonus_amount || 0).toLocaleString();
-        var cond = target.bonus_condition || '（条件の記載なし）';
-        document.getElementById('bonus-confirm-condition').innerHTML = cond.replace(/\n/g, '<br>');
-        document.getElementById('bonus-confirm-form').querySelector('input[name="confirm_checked"]').checked = false;
+        var bm = target.bonus_meta || {};
+        var days = (bm.working_days || '').toString().trim();
+        var hours = (bm.working_hours || '').toString().trim();
+        var extra = (bm.extra_condition || '').toString().trim();
+        var listEl = document.getElementById('bonus-confirm-condition-list');
+        if (listEl) {
+            listEl.innerHTML = '';
+            if (days) {
+                var liDays = document.createElement('li');
+                liDays.textContent = '勤務日数: ' + days;
+                listEl.appendChild(liDays);
+            }
+            if (hours) {
+                var liHours = document.createElement('li');
+                liHours.textContent = '勤務時間: ' + hours;
+                listEl.appendChild(liHours);
+            }
+            if (extra) {
+                var liExtra = document.createElement('li');
+                liExtra.textContent = 'その他条件: ' + extra;
+                listEl.appendChild(liExtra);
+            }
+            if (!days && !hours && !extra) {
+                var liDefault = document.createElement('li');
+                liDefault.textContent = '条件は店舗との合意内容に従います。';
+                listEl.appendChild(liDefault);
+            }
+        }
+        var daysLabel = document.getElementById('bonus-confirm-check-days');
+        var hoursLabel = document.getElementById('bonus-confirm-check-hours');
+        var extraLabel = document.getElementById('bonus-confirm-check-extra');
+        if (daysLabel) daysLabel.textContent = days ? ('勤務日数（' + days + '）を完了しました') : '勤務日数条件を満たしています';
+        if (hoursLabel) hoursLabel.textContent = hours ? ('勤務時間（' + hours + '）を完了しました') : '勤務時間条件を満たしています';
+        if (extraLabel) extraLabel.textContent = extra ? ('その他条件（' + extra + '）を満たしています') : 'その他条件（店舗と合意した条件）を満たしています';
+
+        document.querySelectorAll('#bonus-confirm-form input[type="checkbox"]').forEach(function (cb) { cb.checked = false; });
         document.getElementById('bonus-confirm-error').style.display = 'none';
         bonusModal.removeAttribute('hidden');
         document.body.style.overflow = 'hidden';
+        updateBonusConfirmReadyState();
     }
 
     function closeBonusModal() {
@@ -1150,6 +1212,22 @@ document.addEventListener('DOMContentLoaded', function () {
             document.body.style.overflow = '';
         }
     }
+
+    function updateBonusConfirmReadyState() {
+        var form = document.getElementById('bonus-confirm-form');
+        var btn = document.getElementById('bonus-confirm-submit-btn');
+        if (!form || !btn) return;
+        var requiredChecks = form.querySelectorAll('input[type="checkbox"][required]');
+        var allChecked = true;
+        requiredChecks.forEach(function (cb) {
+            if (!cb.checked) allChecked = false;
+        });
+        btn.disabled = !allChecked;
+    }
+
+    document.querySelectorAll('#bonus-confirm-form input[type="checkbox"]').forEach(function (cb) {
+        cb.addEventListener('change', updateBonusConfirmReadyState);
+    });
 
     document.querySelectorAll('.btn-review-post').forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -1199,10 +1277,22 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault();
         var form = this;
         var fd = new FormData(form);
-        fd.set('confirm_bonus_condition', '1');
         var btn = document.getElementById('bonus-confirm-submit-btn');
         if (btn) btn.disabled = true;
         var errEl = document.getElementById('bonus-confirm-error');
+
+        // 全チェックが完了していない場合は confirm_bonus_condition を送らない
+        var requiredChecks = form.querySelectorAll('input[type="checkbox"][required]');
+        var allChecked = true;
+        requiredChecks.forEach(function (cb) { if (!cb.checked) allChecked = false; });
+        if (!allChecked) {
+            if (btn) btn.disabled = false;
+            errEl.textContent = 'すべての条件にチェックを入れてください。';
+            errEl.style.display = 'block';
+            return;
+        }
+        fd.set('confirm_bonus_condition', '1');
+
         fetch(depositRequestUrl, {
             method: 'POST',
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') && document.querySelector('meta[name="csrf-token"]').getAttribute('content')) || '' },

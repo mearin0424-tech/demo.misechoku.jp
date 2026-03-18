@@ -60,16 +60,46 @@
 
     <section class="recruit-preview-summary">
         <div class="recruit-preview-summary-item">
-            <span class="recruit-preview-summary-label">基本時給</span>
-            <span class="recruit-preview-summary-value">¥{{ number_format($recruit['hourly_wage_regular'] ?? 0) }}〜</span>
+            <span class="recruit-preview-summary-label">勤務形態</span>
+            <span class="recruit-preview-summary-value">
+                @php
+                    $types = [];
+                    if (($recruit['hourly_wage_regular'] ?? 0) > 0) {
+                        $types[] = '本入';
+                    }
+                    if (!empty($recruit['trial_hourly_wage'])) {
+                        $types[] = '体入';
+                    }
+                    if (!empty($recruit['help_hourly_wage'])) {
+                        $types[] = 'ヘルプ';
+                    }
+                @endphp
+                {{ $types ? implode(' / ', $types) : '未設定' }}
+            </span>
         </div>
         <div class="recruit-preview-summary-item">
-            <span class="recruit-preview-summary-label">体験時給</span>
-            <span class="recruit-preview-summary-value">{{ !empty($recruit['trial_hourly_wage']) ? '¥' . number_format($recruit['trial_hourly_wage']) . '〜' : '未設定' }}</span>
+            <span class="recruit-preview-summary-label">最低時給</span>
+            <span class="recruit-preview-summary-value">
+                @php
+                    $wages = [];
+                    if (($recruit['hourly_wage_regular'] ?? 0) > 0) {
+                        $wages[] = '本入: ¥' . number_format($recruit['hourly_wage_regular']);
+                    }
+                    if (!empty($recruit['trial_hourly_wage'])) {
+                        $wages[] = '体入: ¥' . number_format($recruit['trial_hourly_wage']);
+                    }
+                    if (!empty($recruit['help_hourly_wage'])) {
+                        $wages[] = 'ヘルプ: ¥' . number_format($recruit['help_hourly_wage']);
+                    }
+                @endphp
+                {{ $wages ? implode(' / ', $wages) : '未設定' }}
+            </span>
         </div>
         <div class="recruit-preview-summary-item">
-            <span class="recruit-preview-summary-label">勤務条件</span>
-            <span class="recruit-preview-summary-value">{{ $recruit['working_days'] ?: '未設定' }}</span>
+            <span class="recruit-preview-summary-label">ボーナス金</span>
+            <span class="recruit-preview-summary-value">
+                {{ ($recruit['noruma_reward'] ?? 0) > 0 ? '¥' . number_format($recruit['noruma_reward']) : 'なし／未設定' }}
+            </span>
         </div>
         <div class="recruit-preview-summary-item">
             <span class="recruit-preview-summary-label">応募資格</span>
@@ -133,6 +163,9 @@
                 @if(!empty($recruit['trial_hourly_wage']))
                     <p class="text-sm mt-2" style="color:#A89090;">体験時給 ¥{{ number_format($recruit['trial_hourly_wage']) }}〜</p>
                 @endif
+                @if(!empty($recruit['help_hourly_wage']))
+                    <p class="text-sm mt-1" style="color:#C3B0D8;">ヘルプ時給 ¥{{ number_format($recruit['help_hourly_wage']) }}〜</p>
+                @endif
                 @if(!empty($recruit['noruma_reward']))
                     <p class="text-sm mt-2" style="color:#F8E7B0;">ボーナス金: ¥{{ number_format($recruit['noruma_reward']) }}</p>
                 @endif
@@ -163,14 +196,28 @@
             </section>
         @endif
 
-        @if(!empty($recruit['bonus_condition']) || !empty($recruit['noruma_reward']))
+        @if(!empty($recruit['bonus_condition']) || !empty($recruit['noruma_reward']) || !empty($recruit['bonus_working_days']) || !empty($recruit['bonus_working_hours']))
             <section class="recruit-detail-section">
                 <h3 class="recruit-block-title"><i class="fas fa-award"></i> ボーナス金達成条件</h3>
                 <div class="recruit-message-block-new">
                     @if(!empty($recruit['noruma_reward']))
                         <p>達成ボーナス: ¥{{ number_format($recruit['noruma_reward']) }}</p>
                     @endif
-                    <p>{!! nl2br(e($recruit['bonus_condition'] ?? '条件は店舗との合意内容に従います。')) !!}</p>
+                    @if(!empty($recruit['bonus_working_days']) || !empty($recruit['bonus_working_hours']) || !empty($recruit['bonus_condition']))
+                        <ul class="recruit-line-list">
+                            @if(!empty($recruit['bonus_working_days']))
+                                <li>勤務日数: {{ $recruit['bonus_working_days'] }}</li>
+                            @endif
+                            @if(!empty($recruit['bonus_working_hours']))
+                                <li>勤務時間: {{ $recruit['bonus_working_hours'] }}</li>
+                            @endif
+                            @if(!empty($recruit['bonus_condition']))
+                                <li>その他条件:<br>{!! nl2br(e($recruit['bonus_condition'])) !!}</li>
+                            @endif
+                        </ul>
+                    @else
+                        <p>条件は店舗との合意内容に従います。</p>
+                    @endif
                 </div>
             </section>
         @endif

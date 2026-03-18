@@ -61,6 +61,7 @@ class MypageController extends Controller
             ->first();
 
         $documentData = $this->documentReviewService->getShopLicensePageData($shopId);
+        $badges = $this->billingManagementService->getShopBadges($shopId);
 
         $jobIds = DB::table('shop_jobs')->where('shop_id', $shopId)->pluck('id');
         $applicantCount = 0;
@@ -93,6 +94,9 @@ class MypageController extends Controller
                 ? Carbon::parse($row->profile_updated_at)->format('Y/m/d H:i')
                 : null,
             'approval'     => $documentData['all_approved'] ? 1 : 0,
+            'badges'       => [
+                'good_payer' => !empty($badges['good_payer']),
+            ],
         ];
 
         $subImages = [];

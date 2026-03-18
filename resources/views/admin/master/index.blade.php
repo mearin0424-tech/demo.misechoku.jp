@@ -50,9 +50,9 @@
                 <label class="admin-master-select-label">
                     <span>カテゴリ</span>
                     <select id="master-group-select">
-                        <option value="">すべて</option>
+                        <option value="" @selected(empty($selectedCatalog))>すべて</option>
                         @foreach ($catalogGroups as $group => $items)
-                            <option value="{{ $group }}">{{ $group }}</option>
+                            <option value="{{ $group }}" @selected(($selectedCatalog['group'] ?? '') === $group)>{{ $group }}</option>
                         @endforeach
                     </select>
                 </label>
@@ -77,7 +77,7 @@
                                 data-group="{{ $group }}"
                                 @selected(($selectedCatalog['key'] ?? null) === $catalog['key'])
                             >
-                                [{{ $group }}] {{ $catalog['title'] }}
+                                {{ $catalog['title'] }}
                             </option>
                         @endforeach
                     </select>
@@ -195,40 +195,54 @@
                                 <tbody id="master-records-body">
                                     @forelse ($selectedCatalog['records'] as $item)
                                         <tr class="master-record-row" data-search="{{ strtolower(trim($item->name . ' ' . ($item->directory ?? '') . ' ' . (($item->is_active ?? 1) ? '有効' : '無効') . ' ' . ($item->created_at ? \Illuminate\Support\Carbon::parse($item->created_at)->format('Y-m-d') : ''))) }}">
-                                            <td data-label="名称">{{ $item->name }}</td>
-                                            @if ($hasDirectory)
-                                                <td data-label="ディレクトリ">{{ $item->directory ?? '-' }}</td>
-                                            @endif
-                                            @if ($hasActive)
-                                                <td data-label="状態">{{ ($item->is_active ?? 1) ? '有効' : '無効' }}</td>
-                                            @endif
-                                            <td data-label="登録日">{{ $item->created_at ? \Illuminate\Support\Carbon::parse($item->created_at)->format('Y-m-d') : '-' }}</td>
-                                            <td data-label="操作" class="admin-row-actions">
-                                                {{-- 編集（鉛筆アイコン） --}}
-                                                <a
-                                                    href="{{ route('admin.masters.index', ['catalog' => $selectedCatalog['key'], 'edit' => $item->id, 'sort' => $selectedSort]) }}"
-                                                    class="admin-row-icon-btn {{ $editingRecord && $editingRecord->id === $item->id ? 'is-active' : '' }}"
-                                                    title="編集"
-                                                >
-                                                    <i class="fas fa-pen"></i>
-                                                </a>
-
-                                                {{-- 削除（×アイコン） --}}
-                                                <form
-                                                    method="POST"
-                                                    action="{{ route('admin.masters.catalogs.destroy', [$selectedCatalog['key'], $item->id]) }}"
-                                                    onsubmit="return confirm('この項目を削除しますか？');"
-                                                >
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button
-                                                        type="submit"
-                                                        class="admin-row-icon-btn admin-row-icon-delete"
-                                                        title="削除"
-                                                    >
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                </form>
+                                            <td data-label="名称" class="cell-main">{{ $item->name }}</td>
+                                            <td colspan="{{ $columnCount - 1 }}" class="cell-detail">
+                                                <div class="detail-row">
+                                                    @if ($hasDirectory)
+                                                        <div class="detail-item">
+                                                            <span class="detail-label">ディレクトリ</span>
+                                                            <span class="detail-value">{{ $item->directory ?? '-' }}</span>
+                                                        </div>
+                                                    @endif
+                                                    @if ($hasActive)
+                                                        <div class="detail-item">
+                                                            <span class="detail-label">状態</span>
+                                                            <span class="detail-value">{{ ($item->is_active ?? 1) ? '有効' : '無効' }}</span>
+                                                        </div>
+                                                    @endif
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">登録日</span>
+                                                        <span class="detail-value">{{ $item->created_at ? \Illuminate\Support\Carbon::parse($item->created_at)->format('Y-m-d') : '-' }}</span>
+                                                    </div>
+                                                    <div class="detail-item">
+                                                        <span class="detail-label">操作</span>
+                                                        <span class="detail-value">
+                                                            <a
+                                                                href="{{ route('admin.masters.index', ['catalog' => $selectedCatalog['key'], 'edit' => $item->id, 'sort' => $selectedSort]) }}"
+                                                                class="admin-row-icon-btn {{ $editingRecord && $editingRecord->id === $item->id ? 'is-active' : '' }}"
+                                                                title="編集"
+                                                            >
+                                                                <i class="fas fa-pen"></i>
+                                                            </a>
+                                                            <form
+                                                                method="POST"
+                                                                action="{{ route('admin.masters.catalogs.destroy', [$selectedCatalog['key'], $item->id]) }}"
+                                                                onsubmit="return confirm('この項目を削除しますか？');"
+                                                                style="display:inline-block;"
+                                                            >
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button
+                                                                    type="submit"
+                                                                    class="admin-row-icon-btn admin-row-icon-delete"
+                                                                    title="削除"
+                                                                >
+                                                                    <i class="fas fa-times"></i>
+                                                                </button>
+                                                            </form>
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </td>
                                         </tr>
                                     @empty
@@ -575,6 +589,26 @@
             color: #fecaca;
         }
 
+        .detail-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 6px 12px;
+        }
+
+        .detail-item {
+            font-size: 0.78rem;
+        }
+
+        .detail-label {
+            display: inline-block;
+            margin-right: 6px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .detail-value {
+            display: inline-block;
+        }
+
         .master-record-row.is-hidden {
             display: none;
         }
@@ -640,30 +674,37 @@
 
             .admin-table tbody tr {
                 display: block;
-                margin-bottom: 12px;
+                margin-bottom: 10px;
                 border-top: 1px solid rgba(255, 255, 255, 0.06);
+                cursor: pointer;
             }
 
-            .admin-table tbody td {
-                display: grid;
-                grid-template-columns: 84px minmax(0, 1fr);
-                gap: 8px;
-                white-space: normal;
+            /* 行の1行目（名称）だけ常に表示 */
+            .admin-table tbody tr .cell-main {
+                display: block;
+                padding: 10px 14px;
+                white-space: nowrap;
+                font-size: 0.8rem;
             }
 
-            .admin-table tbody td::before {
-                content: attr(data-label);
-                color: rgba(255, 255, 255, 0.52);
+            .admin-table tbody tr .cell-main::before {
+                content: none;
+            }
+
+            /* 詳細エリア（有効・登録日・操作）は折りたたみ */
+            .admin-table tbody tr .cell-detail {
+                display: none;
+                padding: 8px 14px 10px;
+                border-top: 1px solid rgba(255, 255, 255, 0.06);
                 font-size: 0.7rem;
-                font-weight: 700;
             }
 
-            .admin-table tbody td.text-center {
+            .admin-table tbody tr.is-open .cell-detail {
                 display: block;
             }
 
-            .admin-table tbody td.text-center::before {
-                content: none;
+            .admin-table tbody tr.is-open {
+                background: rgba(255, 255, 255, 0.02);
             }
         }
     </style>
@@ -733,6 +774,20 @@
             }
 
             groupSelect.addEventListener('change', applyMasterSelectFilter);
+            applyMasterSelectFilter();
+        }
+
+        // モバイル時：行タップで詳細の開閉
+        if (window.matchMedia('(max-width: 640px)').matches && rows.length) {
+            rows.forEach(function (row) {
+                row.addEventListener('click', function (event) {
+                    // フォーム送信やボタン押下は無視
+                    if (event.target.closest('button') || event.target.closest('a') || event.target.closest('form')) {
+                        return;
+                    }
+                    row.classList.toggle('is-open');
+                });
+            });
         }
     })();
 </script>

@@ -725,6 +725,63 @@ class BillingManagementService
             ->all();
     }
 
+    /**
+     * 店舗ごとのバッヂ情報（優良支払店バッヂなど）を返す
+     *
+     * 現在はデモ用に「優良支払店バッヂ」のみを判定する。
+     * - 対象期間: 過去3ヶ月
+     * - 対象: application_deposits に紐づく shop_jobs.shop_id = 指定店舗
+     * - 付与条件:
+     *   1) 対象期間内に1件以上の application_deposits がある
+     *   2) すべてのレコードで status >= STATUS_SHOP_PAYMENT_CONFIRMED（店舗入金確認済み）
+     *   3) 各レコードについて、請求〜入金確認までの所要日数が一定以内
+     *      - invoice_issued_at 〜 shop_payment_confirmed_at が 10 日以内
+     */
+    public function getShopBadges(string $shopId): array
+    {
+        $threeMonthsAgo = Carbon::now()->subMonths(3);
+
+        $rows = $this->baseDepositQuery()
+            ->where('shops.id', $shopId)
+            ->where('application_deposits.created_at', '>=', $threeMonthsAgo)
+            ->get([
+                'application_deposits.status',
+                'application_deposits.invoice_issued_at',
+                'application_deposits.shop_payment_confirmed_at',
+            ]);
+
+        if ($rows->isEmpty()) {
+            return [
+                'good_payer' => false,
+            ];
+        }
+
+        $allStatusOk = $rows->every(function ($row) {
+            return (int) $row->status >= self::STATUS_SHOP_PAYMENT_CONFIRMED;
+        });
+
+        if (!$allStatusOk) {
+            return [
+                'good_payer' => false,
+            ];
+        }
+
+        $allSpeedOk = $rows->every(function ($row) {
+            if (empty($row->invoice_issued_at) || empty($row->shop_payment_confirmed_at)) {
+                return false;
+            }
+            $issued = Carbon::parse($row->invoice_issued_at);
+            $confirmed = Carbon::parse($row->shop_payment_confirmed_at);
+            $diffDays = $issued->diffInDays($confirmed, false);
+
+            return $diffDays >= 0 && $diffDays <= 10;
+        });
+
+        return [
+            'good_payer' => $allSpeedOk,
+        ];
+    }
+
     private function baseDepositQuery()
     {
         return DB::table('application_deposits')
@@ -919,6 +976,12 @@ class BillingManagementService
         $meta = $this->decodeJobMeta($application->noruma_cond ?? null);
         $bonusAmount = $this->resolveApplicationBonusAmount($application);
         $bonusCondition = $this->resolveApplicationBonusCondition($application, $meta);
+        $bonusMeta = [
+            'bonus_amount' => $bonusAmount,
+            'working_days' => isset($meta['working_days']) ? (string) $meta['working_days'] : '',
+            'working_hours' => isset($meta['working_hours']) ? (string) $meta['working_hours'] : '',
+            'extra_condition' => $bonusCondition,
+        ];
         $existingReview = $this->findExistingReviewForApplication($application);
         $existingReviewDetails = [];
 
@@ -945,6 +1008,7 @@ class BillingManagementService
             'shop_name' => $application->shop_name ?: $application->shop_id,
             'bonus_amount' => $bonusAmount,
             'bonus_condition' => $bonusCondition,
+            'bonus_meta' => $bonusMeta,
             'review_contents' => $reviewContents,
             'review_exists' => $existingReview !== null,
             'review_comment' => $existingReview->contents ?? '',

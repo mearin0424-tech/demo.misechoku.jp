@@ -216,7 +216,7 @@
             </div>
         </div>
 
-        {{-- 評価・応募数・採用数（キャストのLIKE・マッチ・ボーナスと同様の統計行） --}}
+        {{-- 評価・応募数・採用数・バッヂ（キャストのLIKE・マッチ・ボーナスと同様の統計行） --}}
         <div class="mypage-stats-row" aria-label="統計">
             <a href="{{ route('shop.mypage.review.index') }}" class="mypage-stat-panel mypage-stat-panel-link">
                 <span class="mypage-stat-icon"><i class="fas fa-star"></i></span>
@@ -233,6 +233,13 @@
                 <span class="mypage-stat-label">採用数</span>
                 <span class="mypage-stat-value">{{ number_format((int) ($shopData['hired_count'] ?? 0)) }}</span>
             </div>
+            @if(!empty($shopData['badges']['good_payer']))
+                <div class="mypage-stat-panel mypage-stat-panel-badge">
+                    <span class="mypage-stat-icon"><i class="fas fa-shield-heart"></i></span>
+                    <span class="mypage-stat-label">バッヂ</span>
+                    <span class="mypage-stat-value">優良支払店</span>
+                </div>
+            @endif
         </div>
 
         <div class="mypage-detail-box">
