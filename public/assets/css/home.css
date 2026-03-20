@@ -35,7 +35,8 @@ body.no-scroll main#main-content .content-wrapper {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    touch-action: pan-x pan-y;
+    /* 横は写真内の .photo-swiper に任せ、画面全体で横パンを奪わない */
+    touch-action: pan-y;
     padding: 24px var(--content-padding-x) max(24px, env(safe-area-inset-bottom)) var(--content-padding-x);
     box-sizing: border-box;
     min-width: 0;
@@ -192,9 +193,15 @@ body.no-scroll main#main-content .content-wrapper {
     width: 100%;
     height: 100%;
     min-height: 0;
-    /* ブラウザ標準の縦スクロールも妨げない */
-    touch-action: auto;
     overflow: hidden;
+}
+/* 複数枚：横スワイプ領域として明示（縦は親メインSwiperへ） */
+.photo-swiper:not(.photo-swiper--single) {
+    touch-action: pan-x pinch-zoom;
+}
+/* 1枚のみ：横Swiper未初期化。縦スワイプを優先 */
+.photo-swiper.photo-swiper--single {
+    touch-action: pan-y;
 }
 .photo-swiper .swiper-wrapper {
     height: 100%;
@@ -675,7 +682,7 @@ body.no-scroll main#main-content .content-wrapper {
     }
     #home-screen {
         padding: 32px 0;
-        touch-action: pan-x pan-y;
+        touch-action: pan-y;
     }
     .cast-card {
         width: min(420px, 45vw) !important;

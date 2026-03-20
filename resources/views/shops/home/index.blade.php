@@ -5,7 +5,7 @@
 @section('guide_message', '') {{-- ホームのスワイプ画面ではオコジョを表示しない --}}
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260320-swipe-nested">
 @endpush
 
 @php
@@ -17,7 +17,7 @@
     $talkRoute = ($isRecruit || $isShop) ? 'cast.talk.room' : 'shop.talk.room';
 @endphp
 @section('content')
-<div id="home-screen">
+<div id="home-screen" data-discovery-mode="{{ $itemType }}">
     {{-- メインスワイパー（上下） --}}
     <div class="main-swiper swiper">
         <div class="swiper-wrapper">
@@ -49,11 +49,11 @@
                     </div>
                 </div>
 
-                {{-- アクションボタン --}}
-                <div class="card-actions-overlay stop-propagation">
+                {{-- アクションボタン（stop-propagation は各操作子のみ。オーバーレイ全面だと縦スワイプの touch が親に届かない） --}}
+                <div class="card-actions-overlay">
                     <button
                         type="button"
-                        class="action-circle-btn like"
+                        class="action-circle-btn like stop-propagation"
                         data-item-id="{{ $item['id'] }}"
                         data-item-type="{{ $itemType === 'recruit' ? 'shop' : 'cast' }}"
                         data-action="like"
@@ -63,20 +63,20 @@
                     </button>
                     <button
                         type="button"
-                        class="action-circle-btn keep"
+                        class="action-circle-btn keep stop-propagation"
                         data-item-id="{{ $item['id'] }}"
                         data-item-type="{{ $itemType === 'recruit' ? 'shop' : 'cast' }}"
                         data-action="keep"
                     >
                         <i class="fas fa-bookmark"></i>
                     </button>
-                    <a href="{{ route($talkRoute, $item['id']) }}" class="action-btn-message" aria-label="メッセージを送る">
+                    <a href="{{ route($talkRoute, $item['id']) }}" class="action-btn-message stop-propagation" aria-label="メッセージを送る">
                         <i class="fas fa-paper-plane"></i>
                     </a>
                     @if($isRecruit)
-                    <a href="{{ route('cast.recruit.show', $item['id']) }}" class="card-recruit-btn">求人詳細</a>
+                    <a href="{{ route('cast.recruit.show', $item['id']) }}" class="card-recruit-btn stop-propagation">求人詳細</a>
                     @elseif($isShop)
-                    <a href="{{ route('cast.recruit.show', $item['id']) }}" class="card-recruit-btn">求人</a>
+                    <a href="{{ route('cast.recruit.show', $item['id']) }}" class="card-recruit-btn stop-propagation">求人</a>
                     @endif
                 </div>
 
@@ -146,5 +146,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/home.js') }}?v=20260313-guide-2"></script>
+<script src="{{ asset('assets/js/home.js') }}?v=20260320-swipe-nested"></script>
 @endpush

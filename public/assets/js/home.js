@@ -57,6 +57,16 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.photo-swiper').forEach((el) => {
         const paginationEl = el.querySelector('.photo-pagination');
         const photoSlideCount = el.querySelectorAll(':scope > .swiper-wrapper > .swiper-slide').length;
+
+        // 1枚のみ：横Swiperを動かさない＝縦のメインSwiperと競合しない（キャスト側求人カードが軽いのと同じ挙動）
+        if (photoSlideCount <= 1) {
+            el.classList.add('photo-swiper--single');
+            if (paginationEl) {
+                paginationEl.style.display = 'none';
+            }
+            return;
+        }
+
         const options = {
             direction: 'horizontal',
             slidesPerView: 1,
@@ -64,13 +74,12 @@ document.addEventListener('DOMContentLoaded', function() {
             spaceBetween: 0,
             loop: false,
             nested: true,
-            // デバッグを兼ねて常にスワイプ可能にする（1枚でも「横に動く」ことを明示）
             allowTouchMove: true,
             touchStartPreventDefault: false,
             touchReleaseOnEdges: true,
-            // ほぼ水平のジェスチャーのみを横スワイプとして扱う
-            touchAngle: 25,
-            threshold: 10,
+            // より水平に近いジェスチャーのみ横スワイプ扱いにし、斜め〜縦は親（上下スワイプ）へ譲る
+            touchAngle: 18,
+            threshold: 12,
             speed: 300,
             resistance: true,
             resistanceRatio: 0.6,
