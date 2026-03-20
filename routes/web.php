@@ -3,7 +3,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-// 共通・認証系
+// 蜈ｱ騾壹・隱崎ｨｼ邉ｻ
 use App\Http\Controllers\Common\PageController;
 use App\Http\Controllers\Common\SettingController;
 use App\Http\Controllers\Common\DemoLoginController;
@@ -13,7 +13,7 @@ use App\Http\Controllers\Auth\Cast\LoginController as CastLogin;
 use App\Http\Controllers\Auth\LineLoginController as LineLogin;
 use App\Http\Controllers\Common\TalkController as TalkController;
 
-// 管理者（バックオフィス）
+// 邂｡逅・・ｼ医ヰ繝・け繧ｪ繝輔ぅ繧ｹ・・
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\DepositController as AdminDeposit;
 use App\Http\Controllers\Admin\InvoiceController as AdminInvoice;
@@ -31,7 +31,7 @@ use App\Http\Controllers\Admin\AdminAccountController as AdminAccount;
 use App\Http\Controllers\Admin\VerificationController as AdminVerification;
 use App\Http\Controllers\Admin\BankController as AdminBank;
 
-// 店舗側
+// 蠎苓・蛛ｴ
 use App\Http\Controllers\Shops\HomeController as ShopHome;
 use App\Http\Controllers\Shops\SearchController as ShopSearch;
 use App\Http\Controllers\Shops\MypageController as ShopMypage;
@@ -40,7 +40,7 @@ use App\Http\Controllers\Shops\RecruitmentController as ShopRecruit;
 use App\Http\Controllers\Shops\ReviewController as ShopReview;
 use App\Http\Controllers\Shops\InteractionController as ShopInteraction;
 
-// キャスト側
+// 繧ｭ繝｣繧ｹ繝亥・
 use App\Http\Controllers\Casts\ProfileController as CastProfile;
 use App\Http\Controllers\Casts\MypageController as CastMypage;
 use App\Http\Controllers\Casts\SearchController as CastSearch;
@@ -48,7 +48,7 @@ use App\Http\Controllers\Casts\RecruitmentController as CastRecruit;
 
 /*
 |--------------------------------------------------------------------------
-| ファビコン（404防止：アイコンは layout の link で指定）
+| 繝輔ぃ繝薙さ繝ｳ・・04髦ｲ豁｢・壹い繧､繧ｳ繝ｳ縺ｯ layout 縺ｮ link 縺ｧ謖・ｮ夲ｼ・
 |--------------------------------------------------------------------------
 */
 Route::get('/favicon.ico', function () {
@@ -57,14 +57,14 @@ Route::get('/favicon.ico', function () {
 
 /*
 |--------------------------------------------------------------------------
-| PWA Manifest（スマホのインストール判定用：MIME と相対URL）
+| PWA Manifest・医せ繝槭・縺ｮ繧､繝ｳ繧ｹ繝医・繝ｫ蛻､螳夂畑・哺IME 縺ｨ逶ｸ蟇ｾURL・・
 |--------------------------------------------------------------------------
 */
 Route::get('/manifest.json', function () {
     $manifest = [
-        'name' => 'ミセチョク',
-        'short_name' => 'ミセチョク',
-        'description' => 'ミセチョク - デモ',
+        'name' => '繝溘そ繝√Ι繧ｯ',
+        'short_name' => '繝溘そ繝√Ι繧ｯ',
+        'description' => '繝溘そ繝√Ι繧ｯ - 繝・Δ',
         'start_url' => '/shop/home',
         'scope' => '/',
         'id' => '/',
@@ -90,7 +90,7 @@ Route::get('/manifest.json', function () {
 
 /*
 |--------------------------------------------------------------------------
-| リダイレクト設定
+| 繝ｪ繝繧､繝ｬ繧ｯ繝郁ｨｭ螳・
 |--------------------------------------------------------------------------
 */
 Route::redirect('/', '/login');
@@ -103,30 +103,30 @@ Route::get('/bk/{path}', function ($path) {
 
 /*
 |--------------------------------------------------------------------------
-| Admin Portal (管理者専用)
+| Admin Portal (邂｡逅・・ｰら畑)
 |--------------------------------------------------------------------------
 |
-| 店舗・キャストとは別のプレフィックス `/admin` で管理画面を提供する。
-| 認証まわりは今後拡張しやすいようにルートを分離しておく。
+| 蠎苓・繝ｻ繧ｭ繝｣繧ｹ繝医→縺ｯ蛻･縺ｮ繝励Ξ繝輔ぅ繝・け繧ｹ `/admin` 縺ｧ邂｡逅・判髱｢繧呈署萓帙☆繧九・
+| 隱崎ｨｼ縺ｾ繧上ｊ縺ｯ莉雁ｾ梧僑蠑ｵ縺励ｄ縺吶＞繧医≧縺ｫ繝ｫ繝ｼ繝医ｒ蛻・屬縺励※縺翫￥縲・
 |
 */
 Route::prefix('admin')->name('admin.')->group(function () {
 
-    // ログインは共通 /login に統一（リダイレクトのみ）
+    // 繝ｭ繧ｰ繧､繝ｳ縺ｯ蜈ｱ騾・/login 縺ｫ邨ｱ荳・医Μ繝繧､繝ｬ繧ｯ繝医・縺ｿ・・
     Route::get('/login', fn () => redirect('/login'))->name('login');
     Route::post('/logout', [AdminAuth::class, 'logout'])->name('logout');
 
-    // 管理画面本体
+    // 邂｡逅・判髱｢譛ｬ菴・
     Route::middleware([])->group(function () {
         Route::get('/', [AdminDashboard::class, 'index'])->name('dashboard');
 
-        // 請求書発行
+        // 隲区ｱよ嶌逋ｺ陦・
         Route::get('/invoices', [AdminInvoice::class, 'index'])->name('invoices.index');
         Route::post('/invoices/issue-manual', [AdminInvoice::class, 'issueManual'])->name('invoices.issue-manual');
         Route::get('/invoices/template-settings', [AdminInvoice::class, 'templateSettings'])->name('invoices.template-settings');
         Route::post('/invoices/template-settings', [AdminInvoice::class, 'updateTemplateSettings'])->name('invoices.template-settings.update');
 
-        // 入金・振込管理
+        // 蜈･驥代・謖ｯ霎ｼ邂｡逅・
         Route::get('/deposits/invoice-template/download', [AdminDeposit::class, 'downloadInvoiceTemplate'])->name('deposits.invoice-template.download');
         Route::get('/deposits', [AdminDeposit::class, 'index'])->name('deposits.index');
         Route::get('/deposits/{deposit}/invoice', [AdminDeposit::class, 'showInvoice'])->name('deposits.invoice.show');
@@ -139,48 +139,48 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/deposits/{deposit}/payment-task-refund-flag', [AdminDeposit::class, 'paymentTaskRefundFlag'])->name('deposits.payment-task.refund-flag');
         Route::post('/deposits/{deposit}/transfer-cast', [AdminDeposit::class, 'transferCast'])->name('deposits.cast-transfer.execute');
 
-        // 売上管理
+        // 螢ｲ荳顔ｮ｡逅・
         Route::get('/sales', [AdminSales::class, 'index'])->name('sales.index');
 
-        // マスタ設定管理
+        // 繝槭せ繧ｿ險ｭ螳夂ｮ｡逅・
         Route::get('/masters', [AdminMaster::class, 'index'])->name('masters.index');
         Route::post('/masters/catalogs/{catalogKey}', [AdminMaster::class, 'storeCatalog'])->name('masters.catalogs.store');
         Route::patch('/masters/catalogs/{catalogKey}/{recordId}', [AdminMaster::class, 'updateCatalog'])->name('masters.catalogs.update');
         Route::delete('/masters/catalogs/{catalogKey}/{recordId}', [AdminMaster::class, 'destroyCatalog'])->name('masters.catalogs.destroy');
 
-        // 店舗管理
+        // 蠎苓・邂｡逅・
         Route::get('/shops', [AdminShop::class, 'index'])->name('shops.index');
         Route::post('/shops/{shopId}/toggle-recruit-status', [AdminShop::class, 'toggleRecruitStatus'])->name('shops.toggle-recruit-status');
 
-        // キャスト管理
+        // 繧ｭ繝｣繧ｹ繝育ｮ｡逅・
         Route::get('/casts', [AdminCast::class, 'index'])->name('casts.index');
 
-        // NGワード管理
+        // NG繝ｯ繝ｼ繝臥ｮ｡逅・
         Route::get('/ngwords', [AdminNgWord::class, 'index'])->name('ngwords.index');
 
-        // お知らせ管理
+        // 縺顔衍繧峨○邂｡逅・
         Route::get('/notices', [AdminNotice::class, 'index'])->name('notices.index');
 
-        // コラム管理
+        // 繧ｳ繝ｩ繝邂｡逅・
         Route::get('/columns', [AdminColumn::class, 'index'])->name('columns.index');
 
-        // 請求・振込タスク管理
+        // 隲区ｱゅ・謖ｯ霎ｼ繧ｿ繧ｹ繧ｯ邂｡逅・
         Route::get('/tasks', [AdminTask::class, 'index'])->name('tasks.index');
 
-        // 本人・書類審査
+        // 譛ｬ莠ｺ繝ｻ譖ｸ鬘槫ｯｩ譟ｻ
         Route::get('/verification', [AdminVerification::class, 'index'])->name('verification.index');
         Route::post('/verification/cast/{document}/approve', [AdminVerification::class, 'approveCast'])->name('verification.cast.approve');
         Route::post('/verification/cast/{document}/reject', [AdminVerification::class, 'rejectCast'])->name('verification.cast.reject');
         Route::post('/verification/shopdoc/{document}/approve', [AdminVerification::class, 'approveShopDocument'])->name('verification.shopdoc.approve');
         Route::post('/verification/shopdoc/{document}/reject', [AdminVerification::class, 'rejectShopDocument'])->name('verification.shopdoc.reject');
 
-        // 問い合わせ管理
+        // 蝠上＞蜷医ｏ縺帷ｮ｡逅・
         Route::get('/inquiries', [AdminInquiry::class, 'index'])->name('inquiries.index');
 
-        // アカウント管理（運営）
+        // 繧｢繧ｫ繧ｦ繝ｳ繝育ｮ｡逅・ｼ磯°蝟ｶ・・
         Route::get('/admin-accounts', [AdminAccount::class, 'index'])->name('admin-accounts.index');
 
-        // 運営口座情報
+        // 驕句霧蜿｣蠎ｧ諠・ｱ
         Route::get('/bank', [AdminBank::class, 'index'])->name('bank.index');
         Route::post('/bank', [AdminBank::class, 'store'])->name('bank.store');
     });
@@ -188,14 +188,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| 1. Public & Guest Routes (LP・認証)
+| 1. Public & Guest Routes (LP繝ｻ隱崎ｨｼ)
 |--------------------------------------------------------------------------
 */
-// デモ用共通ログイン
+// 繝・Δ逕ｨ蜈ｱ騾壹Ο繧ｰ繧､繝ｳ
 Route::get('/login', [DemoLoginController::class, 'show'])->name('login.demo');
 Route::post('/login', [DemoLoginController::class, 'login'])->name('login.demo.post');
 
-// LINEログイン
+// LINE繝ｭ繧ｰ繧､繝ｳ
 Route::get('/login/line', [LineLogin::class, 'redirect'])->name('login.line.redirect');
 Route::get('/login/line/callback', [LineLogin::class, 'callback'])->name('login.line.callback');
 
@@ -212,19 +212,20 @@ Route::prefix('share')->name('share.')->group(function () {
     Route::get('/cast/{id}', [CastProfile::class, 'publicShow'])->name('cast.show');
 });
 
-// 設定系（共通）
+// 險ｭ螳夂ｳｻ・亥・騾夲ｼ・
 Route::prefix('setting')->name('setting.')->group(function () {
     Route::get('/notification', [SettingController::class, 'notification'])->name('notification');
+    Route::post('/notification', [SettingController::class, 'updateNotification'])->name('notification.update');
     Route::get('/line/link', [LineLogin::class, 'redirectLink'])->name('line.link');
     Route::get('/account/email', [SettingController::class, 'accountEmail'])->name('account.email');
     Route::get('/account/password', [SettingController::class, 'accountPassword'])->name('account.password');
     Route::get('/account/withdraw', [SettingController::class, 'accountWithdraw'])->name('account.withdraw');
 });
 
-// プラン設定（店舗専用・デモ用）
+// 繝励Λ繝ｳ險ｭ螳夲ｼ亥ｺ苓・蟆ら畑繝ｻ繝・Δ逕ｨ・・
 Route::get('/subscription', [SettingController::class, 'subscription'])->name('subscription');
 
-// 未実装画面・機能用（maintenance-screen.png を表示）
+// 譛ｪ螳溯｣・判髱｢繝ｻ讖溯・逕ｨ・・aintenance-screen.png 繧定｡ｨ遉ｺ・・
 Route::get('/maintenance', function () {
     return view('common.maintenance');
 })->name('maintenance');
@@ -238,7 +239,7 @@ Route::middleware('signed')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| PWA Push 通知 API（同一オリジン・CSRF あり）
+| PWA Push 騾夂衍 API・亥酔荳繧ｪ繝ｪ繧ｸ繝ｳ繝ｻCSRF 縺ゅｊ・・
 |--------------------------------------------------------------------------
 */
 Route::prefix('api/push')->name('push.')->group(function () {
@@ -270,7 +271,7 @@ Route::prefix('shop')->name('shop.')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| 2. Shop Portal (店舗専用)
+| 2. Shop Portal (蠎苓・蟆ら畑)
 |--------------------------------------------------------------------------
 */
 Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function () {
@@ -279,7 +280,7 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
     Route::get('/search', fn () => redirect()->route('shop.search.index', ['tab' => 'timeline']));
     Route::get('/search/{tab}', [ShopSearch::class, 'index'])->name('search.index')->where('tab', 'timeline|list');
 
-    // トーク
+    // 繝医・繧ｯ
     Route::prefix('talk')->name('talk.')->group(function () {
         Route::get('/', [TalkController::class, 'index'])->name('index');
         Route::get('/room/{id}', [TalkController::class, 'room'])->name('room');
@@ -289,17 +290,17 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
         Route::post('/block', [TalkController::class, 'toggleBlock'])->name('block');
     });
 
-    // つながり
+    // 縺､縺ｪ縺後ｊ
     Route::prefix('interaction')->name('interaction.')->group(function () {
         Route::get('/', [ShopInteraction::class, 'index'])->name('index');
         Route::get('/keep', [ShopInteraction::class, 'keep'])->name('keep');
         Route::get('/like', [ShopInteraction::class, 'like'])->name('like');
     });
 
-    // キャストのプロフィール閲覧（店舗から見る）
+    // 繧ｭ繝｣繧ｹ繝医・繝励Ο繝輔ぅ繝ｼ繝ｫ髢ｲ隕ｧ・亥ｺ苓・縺九ｉ隕九ｋ・・
     Route::get('/castprofileview/{id}', [CastProfile::class, 'show'])->name('castprofileview.show');
 
-    // プロフィール（キャスト用編集＝shop/profile/edit、店舗用は store サブパス）
+    // 繝励Ο繝輔ぅ繝ｼ繝ｫ・医く繝｣繧ｹ繝育畑邱ｨ髮・ｼ捏hop/profile/edit縲∝ｺ苓・逕ｨ縺ｯ store 繧ｵ繝悶ヱ繧ｹ・・
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [ShopProfile::class, 'show'])->name('show');
         Route::get('/edit', [CastProfile::class, 'edit'])->name('edit');
@@ -311,7 +312,7 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
         Route::delete('/image/{id}', [ShopProfile::class, 'deleteImage'])->name('image.delete');
     });
 
-    // ★ 求人票 (Recruits)
+    // 笘・豎ゆｺｺ逾ｨ (Recruits)
     Route::prefix('recruits')->name('recruits.')->group(function () {
         Route::get('/status', [ShopRecruit::class, 'status'])->name('status');
         Route::get('/edit', [ShopRecruit::class, 'edit'])->name('edit');
@@ -320,10 +321,10 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
         Route::post('/toggle-status', [ShopRecruit::class, 'toggleStatus'])->name('toggle-status');
     });
 
-    // 求人票（recruits/show と同じ内容を shop/jobdescription で提供）
+    // 豎ゆｺｺ逾ｨ・・ecruits/show 縺ｨ蜷後§蜀・ｮｹ繧・shop/jobdescription 縺ｧ謠蝉ｾ幢ｼ・
     Route::get('/jobdescription/{id?}', [ShopRecruit::class, 'show'])->name('jobdescription');
 
-    // マイページ
+    // 繝槭う繝壹・繧ｸ
     Route::prefix('mypage')->name('mypage.')->group(function () {
         Route::get('/', [ShopMypage::class, 'index'])->name('index');
         Route::post('/word', [ShopMypage::class, 'updateWord'])->name('word');
@@ -335,10 +336,10 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
         Route::post('/deposit/pay', [ShopMypage::class, 'payToPlatform'])->name('deposit.pay');
     });
 
-    // レビュー公開・非表示の切り替え（reviews 画面の JS から使用）
+    // 繝ｬ繝薙Η繝ｼ蜈ｬ髢九・髱櫁｡ｨ遉ｺ縺ｮ蛻・ｊ譖ｿ縺茨ｼ・eviews 逕ｻ髱｢縺ｮ JS 縺九ｉ菴ｿ逕ｨ・・
     Route::post('/mypage/review/update', [ShopReview::class, 'updateStatus'])->name('review.update');
 
-    // SUPPORT ページ（店舗向け）
+    // SUPPORT 繝壹・繧ｸ・亥ｺ苓・蜷代￠・・
     Route::get('/feature', [PageController::class, 'feature'])->name('feature');
     Route::get('/htu', [PageController::class, 'htu'])->name('htu');
     Route::get('/faq', [PageController::class, 'faq'])->name('faq');
@@ -346,7 +347,7 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
 
 /*
 |--------------------------------------------------------------------------
-| 3. Cast Portal (キャスト専用)
+| 3. Cast Portal (繧ｭ繝｣繧ｹ繝亥ｰら畑)
 |--------------------------------------------------------------------------
 */
 Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function () {
@@ -385,13 +386,13 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
         Route::post('/block', [TalkController::class, 'toggleBlock'])->name('block');
     });
 
-    // SUPPORT ページ（キャスト向け）
+    // SUPPORT 繝壹・繧ｸ・医く繝｣繧ｹ繝亥髄縺托ｼ・
     Route::get('/feature', [PageController::class, 'feature'])->name('feature');
     Route::get('/htu', [PageController::class, 'htu'])->name('htu');
     Route::get('/faq', [PageController::class, 'faq'])->name('faq');
 });
 
-/* 内部キャッシュクリア用 */
+/* 蜀・Κ繧ｭ繝｣繝・す繝･繧ｯ繝ｪ繧｢逕ｨ */
 Route::get('/clear-route', function() {
     \Artisan::call('route:clear');
     return "Route cache cleared!";

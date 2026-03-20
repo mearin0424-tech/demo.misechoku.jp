@@ -3,30 +3,25 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Minishlink\WebPush\WebPush;
 use Minishlink\WebPush\Subscription;
+use Minishlink\WebPush\WebPush;
 
 class PushController extends Controller
 {
-    /**
-     * 公開鍵を返す（フロントで pushManager.subscribe に渡す）
-     */
     public function vapidPublicKey(): JsonResponse
     {
         $key = config('services.push.vapid_public');
         if (empty($key)) {
             return response()->json(['error' => 'VAPID not configured'], 503);
         }
+
         return response()->json(['publicKey' => $key]);
     }
 
-    /**
-     * ブラウザの Push 購読情報を保存
-     */
     public function subscribe(Request $request): JsonResponse
     {
         $request->validate([
@@ -38,27 +33,30 @@ class PushController extends Controller
 
         $endpoint = $request->input('endpoint');
         $keys = $request->input('keys');
+        [$userType, $userId] = $this->resolveActor();
 
         try {
             $now = now();
+            $payload = [
+                'public_key' => $keys['p256dh'] ?? null,
+                'auth_token' => $keys['auth'] ?? null,
+                'user_agent' => $request->userAgent(),
+                'updated_at' => $now,
+            ];
+            if ($userType && $userId) {
+                $payload['user_type'] = $userType;
+                $payload['user_id'] = $userId;
+            }
+
             $exists = DB::table('push_subscriptions')->where('endpoint', $endpoint)->exists();
             if ($exists) {
-                DB::table('push_subscriptions')->where('endpoint', $endpoint)->update([
-                    'public_key' => $keys['p256dh'] ?? null,
-                    'auth_token' => $keys['auth'] ?? null,
-                    'user_agent' => $request->userAgent(),
-                    'updated_at' => $now,
-                ]);
+                DB::table('push_subscriptions')->where('endpoint', $endpoint)->update($payload);
             } else {
-                DB::table('push_subscriptions')->insert([
-                    'endpoint' => $endpoint,
-                    'public_key' => $keys['p256dh'] ?? null,
-                    'auth_token' => $keys['auth'] ?? null,
-                    'user_agent' => $request->userAgent(),
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ]);
+                $payload['endpoint'] = $endpoint;
+                $payload['created_at'] = $now;
+                DB::table('push_subscriptions')->insert($payload);
             }
+
             return response()->json(['ok' => true], 201);
         } catch (\Throwable $e) {
             Log::warning('Push subscribe error: ' . $e->getMessage());
@@ -66,9 +64,6 @@ class PushController extends Controller
         }
     }
 
-    /**
-     * テスト通知を送信（保存済みの全購読に1件送る）
-     */
     public function sendTest(Request $request): JsonResponse
     {
         $publicKey = config('services.push.vapid_public');
@@ -82,7 +77,13 @@ class PushController extends Controller
             ], 503);
         }
 
-        $subscriptions = DB::table('push_subscriptions')->get();
+        [$userType, $userId] = $this->resolveActor();
+        $query = DB::table('push_subscriptions');
+        if ($userType && $userId) {
+            $query->where('user_type', $userType)->where('user_id', $userId);
+        }
+
+        $subscriptions = $query->get();
         if ($subscriptions->isEmpty()) {
             return response()->json([
                 'ok' => false,
@@ -138,5 +139,17 @@ class PushController extends Controller
             'sent' => $sent,
             'failed' => $failed,
         ]);
+    }
+
+    private function resolveActor(): array
+    {
+        if (auth()->guard('member')->check()) {
+            return ['cast', (string) auth()->guard('member')->id()];
+        }
+        if (auth()->guard('shop')->check()) {
+            return ['shop_manager', (string) auth()->guard('shop')->id()];
+        }
+
+        return [null, null];
     }
 }

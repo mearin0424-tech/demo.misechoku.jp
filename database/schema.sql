@@ -1,15 +1,15 @@
 -- ==============================================================================
--- ミセチョク DB スキーマ・初期データ（マイグレーション相当）
--- 実行順序の通り、サーバーで直接実行してください。
+-- 繝溘そ繝√Ι繧ｯ DB 繧ｹ繧ｭ繝ｼ繝槭・蛻晄悄繝・・繧ｿ・医・繧､繧ｰ繝ｬ繝ｼ繧ｷ繝ｧ繝ｳ逶ｸ蠖難ｼ・
+-- 螳溯｡碁・ｺ上・騾壹ｊ縲√し繝ｼ繝舌・縺ｧ逶ｴ謗･螳溯｡後＠縺ｦ縺上□縺輔＞縲・
 --
--- 注意:
--- - 新規DBの場合は上から順にそのまま実行可能です。
--- - 既存DBの場合は、既に存在するテーブル/カラムがあると ALTER や CREATE で
---   エラーになることがあります。その場合は該当ブロックをコメントアウトするか、
---   必要な部分だけを抜き出して実行してください。
--- - INSERT は IGNORE にしてあるため、重複時はスキップされます。
--- - LINE 通知は Messaging API のみ（LINE Notify は使用しない）。
---   キャストの LINE ユーザーIDは cast_providers、店舗マネージャーは shop_managers.line_user_id。
+-- 豕ｨ諢・
+-- - 譁ｰ隕愁B縺ｮ蝣ｴ蜷医・荳翫°繧蛾・↓縺昴・縺ｾ縺ｾ螳溯｡悟庄閭ｽ縺ｧ縺吶・
+-- - 譌｢蟄魯B縺ｮ蝣ｴ蜷医・縲∵里縺ｫ蟄伜惠縺吶ｋ繝・・繝悶Ν/繧ｫ繝ｩ繝縺後≠繧九→ ALTER 繧・CREATE 縺ｧ
+--   繧ｨ繝ｩ繝ｼ縺ｫ縺ｪ繧九％縺ｨ縺後≠繧翫∪縺吶ゅ◎縺ｮ蝣ｴ蜷医・隧ｲ蠖薙ヶ繝ｭ繝・け繧偵さ繝｡繝ｳ繝医い繧ｦ繝医☆繧九°縲・
+--   蠢・ｦ√↑驛ｨ蛻・□縺代ｒ謚懊″蜃ｺ縺励※螳溯｡後＠縺ｦ縺上□縺輔＞縲・
+-- - INSERT 縺ｯ IGNORE 縺ｫ縺励※縺ゅｋ縺溘ａ縲・㍾隍・凾縺ｯ繧ｹ繧ｭ繝・・縺輔ｌ縺ｾ縺吶・
+-- - LINE 騾夂衍縺ｯ Messaging API 縺ｮ縺ｿ・・INE Notify 縺ｯ菴ｿ逕ｨ縺励↑縺・ｼ峨・
+--   繧ｭ繝｣繧ｹ繝医・ LINE 繝ｦ繝ｼ繧ｶ繝ｼID縺ｯ cast_providers縲∝ｺ苓・繝槭ロ繝ｼ繧ｸ繝｣繝ｼ縺ｯ shop_managers.line_user_id縲・
 -- ==============================================================================
 
 -- ------------------------------------------------------------------------------
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `push_subscriptions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------------------------
--- 2. コアスキーマ (2026_03_13_000000_create_misechoku_core_schema)
+-- 2. 繧ｳ繧｢繧ｹ繧ｭ繝ｼ繝・(2026_03_13_000000_create_misechoku_core_schema)
 -- ------------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS `casts` (
@@ -140,7 +140,7 @@ CREATE TABLE IF NOT EXISTS `shop_managers` (
   `name` varchar(255) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
-  `line_user_id` varchar(255) DEFAULT NULL COMMENT 'LINE Login ユーザーID（Messaging API push 用）',
+  `line_user_id` varchar(255) DEFAULT NULL COMMENT 'LINE Login 繝ｦ繝ｼ繧ｶ繝ｼID・・essaging API push 逕ｨ・・,
   `role` tinyint NOT NULL DEFAULT '0',
   `status` tinyint NOT NULL DEFAULT '0',
   `last_login_at` timestamp NULL DEFAULT NULL,
@@ -291,7 +291,7 @@ CREATE TABLE IF NOT EXISTS `cast_tag` (
 CREATE TABLE IF NOT EXISTS `cast_posts` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `cast_id` varchar(20) NOT NULL,
-  `body` text COMMENT 'ひとこと',
+  `body` text COMMENT '縺ｲ縺ｨ縺薙→',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -310,12 +310,12 @@ CREATE TABLE IF NOT EXISTS `shop_tag` (
 
 CREATE TABLE IF NOT EXISTS `system_accounts` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) COMMENT '管理者名',
-  `email` varchar(255) NOT NULL COMMENT 'ログインメールアドレス',
+  `name` varchar(100) COMMENT '邂｡逅・・錐',
+  `email` varchar(255) NOT NULL COMMENT '繝ｭ繧ｰ繧､繝ｳ繝｡繝ｼ繝ｫ繧｢繝峨Ξ繧ｹ',
   `email_verified_at` timestamp NULL DEFAULT NULL,
-  `password` varchar(255) NOT NULL COMMENT 'ハッシュ化パスワード',
-  `role` varchar(20) NOT NULL DEFAULT 'staff' COMMENT '権限(admin:全機能, staff:一部機能)',
-  `is_active` tinyint(1) NOT NULL DEFAULT '1' COMMENT '有効フラグ(falseでログイン不可)',
+  `password` varchar(255) NOT NULL COMMENT '繝上ャ繧ｷ繝･蛹悶ヱ繧ｹ繝ｯ繝ｼ繝・,
+  `role` varchar(20) NOT NULL DEFAULT 'staff' COMMENT '讓ｩ髯・admin:蜈ｨ讖溯・, staff:荳驛ｨ讖溯・)',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1' COMMENT '譛牙柑繝輔Λ繧ｰ(false縺ｧ繝ｭ繧ｰ繧､繝ｳ荳榊庄)',
   `remember_token` varchar(100) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -323,16 +323,16 @@ CREATE TABLE IF NOT EXISTS `system_accounts` (
   UNIQUE KEY `system_accounts_email_unique` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- コア初期データ
+-- 繧ｳ繧｢蛻晄悄繝・・繧ｿ
 INSERT IGNORE INTO `casts` (`id`, `email`, `password`, `status`, `identity_status`, `last_login_at`, `created_at`, `updated_at`) VALUES
 ('c00000001', 'cast01@example.com', '$2y$10$dummyhashedpassword01', 1, 3, '2026-03-01 10:00:00', '2026-01-10 12:00:00', '2026-03-01 10:00:00'),
 ('c00000002', 'cast02@example.com', '$2y$10$dummyhashedpassword02', 1, 3, '2026-03-05 15:30:00', '2026-02-15 09:00:00', '2026-03-05 15:30:00'),
 ('c00000003', 'cast03@example.com', '$2y$10$dummyhashedpassword03', 1, 1, '2026-03-10 20:15:00', '2026-03-01 18:45:00', '2026-03-10 20:15:00');
 
 INSERT IGNORE INTO `cast_profiles` (`cast_id`, `nickname`, `name`, `birthday`, `gender`, `pref`, `city`, `height`, `weight`, `bust`, `waist`, `hip`, `profession`, `exp`, `pr`) VALUES
-('c00000001', 'みさき', '桜井美咲', '2001-05-15', 1, '東京都', '港区', 160, 48, 85, 58, 86, 'アパレル店員', 1, '楽しくお話しするのが大好きです！よろしくお願いします。'),
-('c00000002', 'あい', '山田愛', '1999-10-22', 1, '神奈川県', '横浜市', 155, 45, 82, 56, 84, '美容師', 1, '週末メインで働きたいです！'),
-('c00000003', 'ユナ', '佐藤結衣', '2003-02-14', 1, '埼玉県', 'さいたま市', 165, 50, 88, 60, 89, '大学生', 0, '未経験ですが一生懸命頑張ります！');
+('c00000001', '縺ｿ縺輔″', '譯應ｺ慕ｾ主調', '2001-05-15', 1, '譚ｱ莠ｬ驛ｽ', '貂ｯ蛹ｺ', 160, 48, 85, 58, 86, '繧｢繝代Ξ繝ｫ蠎怜藤', 1, '讌ｽ縺励￥縺願ｩｱ縺励☆繧九・縺悟､ｧ螂ｽ縺阪〒縺呻ｼ√ｈ繧阪＠縺上♀鬘倥＞縺励∪縺吶・),
+('c00000002', '縺ゅ＞', '螻ｱ逕ｰ諢・, '1999-10-22', 1, '逾槫･亥ｷ晉恁', '讓ｪ豬懷ｸ・, 155, 45, 82, 56, 84, '鄒主ｮｹ蟶ｫ', 1, '騾ｱ譛ｫ繝｡繧､繝ｳ縺ｧ蜒阪″縺溘＞縺ｧ縺呻ｼ・),
+('c00000003', '繝ｦ繝・, '菴占陸邨占｡｣', '2003-02-14', 1, '蝓ｼ邇臥恁', '縺輔＞縺溘∪蟶・, 165, 50, 88, 60, 89, '螟ｧ蟄ｦ逕・, 0, '譛ｪ邨碁ｨ薙〒縺吶′荳逕滓・蜻ｽ鬆大ｼｵ繧翫∪縺呻ｼ・);
 
 INSERT IGNORE INTO `cast_providers` (`cast_id`, `provider`, `provider_id`) VALUES
 ('c00000001', 'line', 'U11112222333344445555666677778888'),
@@ -344,16 +344,16 @@ INSERT IGNORE INTO `shops` (`id`, `email`, `status`, `license_status`, `created_
 ('s00000002', 'contact@lounge-stella.example.com', 1, 3, '2026-01-15 14:00:00', '2026-01-20 14:00:00');
 
 INSERT IGNORE INTO `shop_profiles` (`shop_id`, `shop_name`, `opened_on`, `pref`, `city`, `addr2`, `addr3`, `station1`, `catch`, `overview`, `message`) VALUES
-('s00000001', 'Club Luminous (ルミナス)', '2015-04-01', '東京都', '港区', '六本木3-1-1', 'ルミナスビル2F', '六本木駅 徒歩3分', '落ち着いた雰囲気の高級クラブ', '未経験からでもしっかりサポートする安心の環境です。', '一緒に楽しく働ける方をお待ちしております！'),
-('s00000002', 'Lounge Stella (ステラ)', '2020-09-15', '東京都', '新宿区', '歌舞伎町1-2-3', 'ステラタワー5F', '新宿駅 徒歩5分', 'アットホームで働きやすいラウンジ', 'ノルマなし！あなたのペースで働けます。', '学生さんやWワークの方も大歓迎です。');
+('s00000001', 'Club Luminous (繝ｫ繝溘リ繧ｹ)', '2015-04-01', '譚ｱ莠ｬ驛ｽ', '貂ｯ蛹ｺ', '蜈ｭ譛ｬ譛ｨ3-1-1', '繝ｫ繝溘リ繧ｹ繝薙Ν2F', '蜈ｭ譛ｬ譛ｨ鬧・蠕呈ｭｩ3蛻・, '關ｽ縺｡逹縺・◆髮ｰ蝗ｲ豌励・鬮倡ｴ壹け繝ｩ繝・, '譛ｪ邨碁ｨ薙°繧峨〒繧ゅ＠縺｣縺九ｊ繧ｵ繝昴・繝医☆繧句ｮ牙ｿ・・迺ｰ蠅・〒縺吶・, '荳邱偵↓讌ｽ縺励￥蜒阪￠繧区婿繧偵♀蠕・■縺励※縺翫ｊ縺ｾ縺呻ｼ・),
+('s00000002', 'Lounge Stella (繧ｹ繝・Λ)', '2020-09-15', '譚ｱ莠ｬ驛ｽ', '譁ｰ螳ｿ蛹ｺ', '豁瑚・莨守伴1-2-3', '繧ｹ繝・Λ繧ｿ繝ｯ繝ｼ5F', '譁ｰ螳ｿ鬧・蠕呈ｭｩ5蛻・, '繧｢繝・ヨ繝帙・繝縺ｧ蜒阪″繧・☆縺・Λ繧ｦ繝ｳ繧ｸ', '繝弱Ν繝槭↑縺暦ｼ√≠縺ｪ縺溘・繝壹・繧ｹ縺ｧ蜒阪￠縺ｾ縺吶・, '蟄ｦ逕溘＆繧薙ｄW繝ｯ繝ｼ繧ｯ縺ｮ譁ｹ繧ょ､ｧ豁楢ｿ弱〒縺吶・);
 
 INSERT IGNORE INTO `shop_managers` (`id`, `shop_id`, `name`, `email`, `password`, `role`, `status`, `last_login_at`) VALUES
-('m00000001', 's00000001', '佐藤 店長', 'sato.mgr@club-luminous.example.com', '$2y$10$dummyhashedpasswordM1', 1, 1, '2026-03-12 18:00:00'),
-('m00000002', 's00000002', '鈴木 オーナー', 'suzuki.owner@lounge-stella.example.com', '$2y$10$dummyhashedpasswordM2', 1, 1, '2026-03-11 22:30:00');
+('m00000001', 's00000001', '菴占陸 蠎鈴聞', 'sato.mgr@club-luminous.example.com', '$2y$10$dummyhashedpasswordM1', 1, 1, '2026-03-12 18:00:00'),
+('m00000002', 's00000002', '驤ｴ譛ｨ 繧ｪ繝ｼ繝翫・', 'suzuki.owner@lounge-stella.example.com', '$2y$10$dummyhashedpasswordM2', 1, 1, '2026-03-11 22:30:00');
 
 INSERT IGNORE INTO `shop_jobs` (`id`, `shop_id`, `hourly_wage_regular`, `normal_time`, `has_trial`, `trial_hourly_wage`, `has_help`, `help_hourly_wage`, `job_description`, `created_at`, `updated_at`) VALUES
-(1, 's00000001', '5000', 5, 1, '4000', 1, '3500', 'お客様と楽しくおしゃべりしてお酒を作るお仕事です。', '2025-12-05 12:00:00', '2025-12-05 12:00:00'),
-(2, 's00000002', '3500', 4, 1, '3000', 0, NULL, '簡単なドリンク作成と接客をお任せします。ノルマなし！', '2026-01-20 15:00:00', '2026-01-20 15:00:00');
+(1, 's00000001', '5000', 5, 1, '4000', 1, '3500', '縺雁ｮ｢讒倥→讌ｽ縺励￥縺翫＠繧・∋繧翫＠縺ｦ縺企・繧剃ｽ懊ｋ縺贋ｻ穂ｺ九〒縺吶・, '2025-12-05 12:00:00', '2025-12-05 12:00:00'),
+(2, 's00000002', '3500', 4, 1, '3000', 0, NULL, '邁｡蜊倥↑繝峨Μ繝ｳ繧ｯ菴懈・縺ｨ謗･螳｢繧偵♀莉ｻ縺帙＠縺ｾ縺吶ゅヮ繝ｫ繝槭↑縺暦ｼ・, '2026-01-20 15:00:00', '2026-01-20 15:00:00');
 
 INSERT IGNORE INTO `shop_job_applications` (`id`, `cast_id`, `shop_job_id`, `status`, `result_date`, `hourly_wage_regular`, `created_at`, `updated_at`) VALUES
 (1, 'c00000001', 1, 4, '2026-01-15', '5000', '2026-01-10 15:30:00', '2026-01-15 18:00:00'),
@@ -373,19 +373,19 @@ INSERT IGNORE INTO `favorites` (`cast_id`, `shop_id`, `action_type`, `created_at
 ('c00000002', 's00000001', 3, '2026-02-10 21:15:00');
 
 INSERT IGNORE INTO `messages` (`cast_id`, `shop_id`, `sender_type`, `content`, `is_read`, `created_at`) VALUES
-('c00000002', 's00000002', 1, '面接をお願いしたいです！', 1, '2026-03-05 18:05:00'),
-('c00000002', 's00000002', 2, 'ご応募ありがとうございます。今週の土曜日の19時はいかがでしょうか？', 1, '2026-03-05 19:00:00'),
-('c00000003', 's00000001', 1, '未経験ですが応募可能でしょうか？', 0, '2026-03-10 21:05:00');
+('c00000002', 's00000002', 1, '髱｢謗･繧偵♀鬘倥＞縺励◆縺・〒縺呻ｼ・, 1, '2026-03-05 18:05:00'),
+('c00000002', 's00000002', 2, '縺泌ｿ懷供縺ゅｊ縺後→縺・＃縺悶＞縺ｾ縺吶ゆｻ企ｱ縺ｮ蝨滓屆譌･縺ｮ19譎ゅ・縺・°縺後〒縺励ｇ縺・°・・, 1, '2026-03-05 19:00:00'),
+('c00000003', 's00000001', 1, '譛ｪ邨碁ｨ薙〒縺吶′蠢懷供蜿ｯ閭ｽ縺ｧ縺励ｇ縺・°・・, 0, '2026-03-10 21:05:00');
 
 INSERT IGNORE INTO `reviews` (`id`, `cast_id`, `shop_id`, `contents`, `created_at`) VALUES
-(1, 'c00000001', 's00000001', 'スタッフの皆さんが優しくて、とても働きやすいお店でした！', '2026-02-28 10:00:00');
+(1, 'c00000001', 's00000001', '繧ｹ繧ｿ繝・ヵ縺ｮ逧・＆繧薙′蜆ｪ縺励￥縺ｦ縲√→縺ｦ繧ょロ縺阪ｄ縺吶＞縺雁ｺ励〒縺励◆・・, '2026-02-28 10:00:00');
 
 INSERT IGNORE INTO `tags` (`id`, `type`, `name`, `created_at`) VALUES
-(1, 'salary', '1ヶ月払い', '2025-01-14 05:33:11'),
-(8, 'salary', '交通費支給', '2025-01-14 05:33:12'),
-(14, 'howto', '週1からOK', '2025-01-14 05:33:12'),
-(82, 'casttag', 'スレンダー', '2025-01-14 05:33:13'),
-(89, 'casttag', 'キレイ系', '2025-01-14 05:33:13');
+(1, 'salary', '1繝ｶ譛域鴛縺・, '2025-01-14 05:33:11'),
+(8, 'salary', '莠､騾夊ｲｻ謾ｯ邨ｦ', '2025-01-14 05:33:12'),
+(14, 'howto', '騾ｱ1縺九ｉOK', '2025-01-14 05:33:12'),
+(82, 'casttag', '繧ｹ繝ｬ繝ｳ繝繝ｼ', '2025-01-14 05:33:13'),
+(89, 'casttag', '繧ｭ繝ｬ繧､邉ｻ', '2025-01-14 05:33:13');
 
 INSERT IGNORE INTO `cast_tag` (`cast_id`, `tag_id`) VALUES
 ('c00000001', 82), ('c00000001', 89), ('c00000002', 82);
@@ -394,16 +394,16 @@ INSERT IGNORE INTO `shop_tag` (`shop_id`, `tag_id`) VALUES
 ('s00000001', 8), ('s00000002', 14);
 
 INSERT IGNORE INTO `system_accounts` (`name`, `email`, `password`, `role`, `is_active`, `email_verified_at`, `created_at`, `updated_at`) VALUES
-('管理者アカウント１', 'admin@misechoku.jp', '$2y$10$dummyhashedpasswordAdmin01', 'admin', 1, '2025-01-01 00:00:00', '2025-01-01 00:00:00', '2025-01-01 00:00:00');
+('邂｡逅・・い繧ｫ繧ｦ繝ｳ繝茨ｼ・, 'admin@misechoku.jp', '$2y$10$dummyhashedpasswordAdmin01', 'admin', 1, '2025-01-01 00:00:00', '2025-01-01 00:00:00', '2025-01-01 00:00:00');
 
 -- ------------------------------------------------------------------------------
--- 3. 管理マスタ・review_contents (2026_03_13_000002_create_admin_master_tables)
+-- 3. 邂｡逅・・繧ｹ繧ｿ繝ｻreview_contents (2026_03_13_000002_create_admin_master_tables)
 -- ------------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS `review_contents` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `content` varchar(255) NOT NULL COMMENT '設問内容',
-  `del_flg` tinyint(1) NOT NULL DEFAULT '0' COMMENT '削除フラグ',
+  `content` varchar(255) NOT NULL COMMENT '險ｭ蝠丞・螳ｹ',
+  `del_flg` tinyint(1) NOT NULL DEFAULT '0' COMMENT '蜑企勁繝輔Λ繧ｰ',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -420,15 +420,15 @@ CREATE TABLE IF NOT EXISTS `ng_words` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT IGNORE INTO `review_contents` (`id`, `content`, `del_flg`, `created_at`, `updated_at`) VALUES
-(1, '接客', 0, '2025-01-14 05:33:10', '2025-01-14 05:33:10'),
-(2, '雰囲気', 0, '2025-01-14 05:33:10', '2025-01-14 05:33:10'),
-(3, '給与条件', 0, '2025-01-14 05:33:10', '2025-01-14 05:33:10'),
-(4, '働きやすさ', 0, '2025-01-14 05:33:10', '2025-01-14 05:33:10');
+(1, '謗･螳｢', 0, '2025-01-14 05:33:10', '2025-01-14 05:33:10'),
+(2, '髮ｰ蝗ｲ豌・, 0, '2025-01-14 05:33:10', '2025-01-14 05:33:10'),
+(3, '邨ｦ荳取擅莉ｶ', 0, '2025-01-14 05:33:10', '2025-01-14 05:33:10'),
+(4, '蜒阪″繧・☆縺・, 0, '2025-01-14 05:33:10', '2025-01-14 05:33:10');
 
 INSERT IGNORE INTO `ng_words` (`word`, `is_active`, `created_at`, `updated_at`) VALUES
-('個人連絡先', 1, '2025-01-14 05:33:10', '2025-01-14 05:33:10'),
-('直引き', 1, '2025-01-14 05:33:10', '2025-01-14 05:33:10'),
-('裏オプ', 1, '2025-01-14 05:33:10', '2025-01-14 05:33:10');
+('蛟倶ｺｺ騾｣邨｡蜈・, 1, '2025-01-14 05:33:10', '2025-01-14 05:33:10'),
+('逶ｴ蠑輔″', 1, '2025-01-14 05:33:10', '2025-01-14 05:33:10'),
+('陬上が繝・, 1, '2025-01-14 05:33:10', '2025-01-14 05:33:10');
 
 INSERT IGNORE INTO `review_details` (`review_id`, `review_content_id`, `score`) VALUES
 (1, 1, 5.0), (1, 2, 5.0), (1, 3, 4.0), (1, 4, 5.0);
@@ -437,17 +437,17 @@ ALTER TABLE `review_details`
   ADD CONSTRAINT `review_details_review_content_id_foreign` FOREIGN KEY (`review_content_id`) REFERENCES `review_contents` (`id`) ON DELETE CASCADE;
 
 -- ------------------------------------------------------------------------------
--- 4. 請求・入金サポート (2026_03_13_010000_add_billing_management_support_tables)
+-- 4. 隲区ｱゅ・蜈･驥代し繝昴・繝・(2026_03_13_010000_add_billing_management_support_tables)
 -- ------------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS `bank_accounts` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `holder_type` varchar(255) NOT NULL COMMENT '所有者モデル (casts, shops, users等)',
-  `holder_id` varchar(20) NOT NULL COMMENT '所有者のID (c0001, s0001等)',
-  `bank_code` varchar(4) NOT NULL COMMENT '銀行コード (4桁)',
+  `holder_type` varchar(255) NOT NULL COMMENT '謇譛芽・Δ繝・Ν (casts, shops, users遲・',
+  `holder_id` varchar(20) NOT NULL COMMENT '謇譛芽・・ID (c0001, s0001遲・',
+  `bank_code` varchar(4) NOT NULL COMMENT '驫陦後さ繝ｼ繝・(4譯・',
   `bank_name` varchar(100) NOT NULL,
   `bank_name_kana` varchar(100) NOT NULL,
-  `branch_code` varchar(3) NOT NULL COMMENT '支店コード (3桁)',
+  `branch_code` varchar(3) NOT NULL COMMENT '謾ｯ蠎励さ繝ｼ繝・(3譯・',
   `branch_name` varchar(100) NOT NULL,
   `branch_name_kana` varchar(100) NOT NULL,
   `account_type` varchar(20) NOT NULL,
@@ -479,11 +479,11 @@ ALTER TABLE `application_deposits`
   ADD COLUMN `completed_at` timestamp NULL DEFAULT NULL AFTER `cast_transfer_note`;
 
 INSERT IGNORE INTO `bank_accounts` (`holder_type`, `holder_id`, `bank_code`, `bank_name`, `bank_name_kana`, `branch_code`, `branch_name`, `branch_name_kana`, `account_type`, `account_number`, `account_name`, `created_at`, `updated_at`) VALUES
-('system_accounts', '1', '0001', 'みせちょく銀行', 'ﾐｾﾁｮｸ', '001', '本店営業部', 'ﾎﾝﾃﾝ', 'ordinary', '1234567', 'ﾐｾﾁｮｸｳﾝｴｲ', NOW(), NOW()),
-('shops', 's00000001', '0002', '六本木銀行', 'ﾛｯﾎﾟﾝｷﾞ', '101', '六本木支店', 'ﾛｯﾎﾟﾝｷﾞ', 'ordinary', '7654321', 'ｸﾗﾌﾞﾙﾐﾅｽ', NOW(), NOW()),
-('shops', 's00000002', '0003', '新宿銀行', 'ｼﾝｼﾞｭｸ', '102', '歌舞伎町支店', 'ｶﾌﾞｷﾁｮｳ', 'ordinary', '1122334', 'ﾗｳﾝｼﾞｽﾃﾗ', NOW(), NOW()),
-('casts', 'c00000001', '0004', '渋谷銀行', 'ｼﾌﾞﾔ', '201', '青山支店', 'ｱｵﾔﾏ', 'ordinary', '2200113', 'ｻｸﾗｲﾐｻｷ', NOW(), NOW()),
-('casts', 'c00000002', '0005', '横浜銀行', 'ﾖｺﾊﾏ', '202', '横浜中央支店', 'ﾖｺﾊﾏﾁｭｳｵｳ', 'ordinary', '3344556', 'ﾔﾏﾀﾞｱｲ', NOW(), NOW());
+('system_accounts', '1', '0001', '縺ｿ縺帙■繧・￥驫陦・, '・撰ｽｾ・・ｽｮ・ｸ', '001', '譛ｬ蠎怜霧讌ｭ驛ｨ', '・趣ｾ晢ｾ・ｾ・, 'ordinary', '1234567', '・撰ｽｾ・・ｽｮ・ｸ・ｳ・晢ｽｴ・ｲ', NOW(), NOW()),
+('shops', 's00000001', '0002', '蜈ｭ譛ｬ譛ｨ驫陦・, '・幢ｽｯ・趣ｾ滂ｾ晢ｽｷ・・, '101', '蜈ｭ譛ｬ譛ｨ謾ｯ蠎・, '・幢ｽｯ・趣ｾ滂ｾ晢ｽｷ・・, 'ordinary', '7654321', '・ｸ・暦ｾ鯉ｾ橸ｾ呻ｾ撰ｾ・ｽｽ', NOW(), NOW()),
+('shops', 's00000002', '0003', '譁ｰ螳ｿ驫陦・, '・ｼ・晢ｽｼ・橸ｽｭ・ｸ', '102', '豁瑚・莨守伴謾ｯ蠎・, '・ｶ・鯉ｾ橸ｽｷ・・ｽｮ・ｳ', 'ordinary', '1122334', '・暦ｽｳ・晢ｽｼ・橸ｽｽ・・ｾ・, NOW(), NOW()),
+('casts', 'c00000001', '0004', '貂玖ｰｷ驫陦・, '・ｼ・鯉ｾ橸ｾ・, '201', '髱貞ｱｱ謾ｯ蠎・, '・ｱ・ｵ・費ｾ・, 'ordinary', '2200113', '・ｻ・ｸ・暦ｽｲ・撰ｽｻ・ｷ', NOW(), NOW()),
+('casts', 'c00000002', '0005', '讓ｪ豬憺橿陦・, '・厄ｽｺ・奇ｾ・, '202', '讓ｪ豬應ｸｭ螟ｮ謾ｯ蠎・, '・厄ｽｺ・奇ｾ擾ｾ・ｽｭ・ｳ・ｵ・ｳ', 'ordinary', '3344556', '・費ｾ擾ｾ・橸ｽｱ・ｲ', NOW(), NOW());
 
 UPDATE `application_deposits` SET
   `invoice_number` = 'INV-202602-0001',
@@ -500,11 +500,11 @@ UPDATE `application_deposits` SET
   `shop_payment_confirmed_at` = '2026-02-20 10:00:00',
   `cast_transferred_at` = '2026-02-20 14:30:00',
   `cast_transfer_reference` = 'TRF-20260220-01',
-  `cast_transfer_note` = '窓口振込を実施済み'
+  `cast_transfer_note` = '遯灘哨謖ｯ霎ｼ繧貞ｮ滓命貂医∩'
 WHERE `id` = 1;
 
 -- ------------------------------------------------------------------------------
--- 5. 2026_03_13_020000_add_account_holder_name_to_bank_tables → 何もしない(no-op)
+-- 5. 2026_03_13_020000_add_account_holder_name_to_bank_tables 竊・菴輔ｂ縺励↑縺・no-op)
 -- ------------------------------------------------------------------------------
 
 -- ------------------------------------------------------------------------------
@@ -527,8 +527,8 @@ CREATE TABLE IF NOT EXISTS `talk_blocks` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------------------------
--- 7. レガシービュー (2026_03_14_000000_create_legacy_member_manager_views)
---    members.line_user_id は cast_providers（provider=line）から取得（LINE Notify 列は廃止）
+-- 7. 繝ｬ繧ｬ繧ｷ繝ｼ繝薙Η繝ｼ (2026_03_14_000000_create_legacy_member_manager_views)
+--    members.line_user_id 縺ｯ cast_providers・・rovider=line・峨°繧牙叙蠕暦ｼ・INE Notify 蛻励・蟒・ｭ｢・・
 -- ------------------------------------------------------------------------------
 
 DROP VIEW IF EXISTS `members`;
@@ -556,14 +556,14 @@ FROM shop_managers
 LEFT JOIN shop_profiles ON shop_managers.shop_id = shop_profiles.shop_id;
 
 -- ------------------------------------------------------------------------------
--- 8. 採用ボーナススナップショット (2026_03_15_000000_add_hired_bonus_snapshot)
+-- 8. 謗｡逕ｨ繝懊・繝翫せ繧ｹ繝翫ャ繝励す繝ｧ繝・ヨ (2026_03_15_000000_add_hired_bonus_snapshot)
 -- ------------------------------------------------------------------------------
 
 ALTER TABLE `shop_job_applications`
   ADD COLUMN `hired_bonus_amount` int DEFAULT NULL AFTER `normal_time`,
   ADD COLUMN `hired_bonus_condition` text DEFAULT NULL AFTER `hired_bonus_amount`;
 
--- 既存の採用済み(status=4)でスナップショット未設定の行を求人からバックフィル（必要に応じて実行）
+-- 譌｢蟄倥・謗｡逕ｨ貂医∩(status=4)縺ｧ繧ｹ繝翫ャ繝励す繝ｧ繝・ヨ譛ｪ險ｭ螳壹・陦後ｒ豎ゆｺｺ縺九ｉ繝舌ャ繧ｯ繝輔ぅ繝ｫ・亥ｿ・ｦ√↓蠢懊§縺ｦ螳溯｡鯉ｼ・
 -- UPDATE shop_job_applications sja
 -- INNER JOIN shop_jobs sj ON sja.shop_job_id = sj.id
 -- SET sja.hired_bonus_amount = COALESCE(sj.noruma_reward, sj.hourly_wage_regular, 0),
@@ -571,12 +571,12 @@ ALTER TABLE `shop_job_applications`
 -- WHERE sja.status = 4 AND sja.hired_bonus_amount IS NULL;
 
 -- ------------------------------------------------------------------------------
--- 9. 請求書テンプレート設定 (2026_03_16_000000_create_invoice_template_settings_table)
+-- 9. 隲区ｱよ嶌繝・Φ繝励Ξ繝ｼ繝郁ｨｭ螳・(2026_03_16_000000_create_invoice_template_settings_table)
 -- ------------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS `invoice_template_settings` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `key` varchar(64) NOT NULL COMMENT 'issuer_name, issuer_email, logo_url, footer_text 等',
+  `key` varchar(64) NOT NULL COMMENT 'issuer_name, issuer_email, logo_url, footer_text 遲・,
   `value` text,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -585,29 +585,52 @@ CREATE TABLE IF NOT EXISTS `invoice_template_settings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------------------------
--- 10. 振込作業フェイルセーフ (2026_03_17_000000_create_payment_tasks_table)
--- 1 application_deposit = 1 PaymentTask（UNIQUE で二重支払い防止）
+-- 10. 謖ｯ霎ｼ菴懈･ｭ繝輔ぉ繧､繝ｫ繧ｻ繝ｼ繝・(2026_03_17_000000_create_payment_tasks_table)
+-- 1 application_deposit = 1 PaymentTask・・NIQUE 縺ｧ莠碁㍾謾ｯ謇輔＞髦ｲ豁｢・・
 -- ------------------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS `payment_tasks` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `application_deposit_id` bigint unsigned NOT NULL,
-  `status` tinyint NOT NULL DEFAULT '0' COMMENT '0=待機 1=支払準備中 2=振込中 3=支払済 4=無効',
-  `shop_received_amount` int unsigned NOT NULL COMMENT '店舗入金額スナップショット',
-  `platform_fee_amount` int unsigned NOT NULL DEFAULT '0' COMMENT 'プラットフォーム手数料',
-  `bank_fee_amount` int unsigned NOT NULL DEFAULT '0' COMMENT '銀行振込手数料',
-  `payout_amount` int unsigned NOT NULL COMMENT 'キャスト振込額（自動計算）',
-  `transferred_at` timestamp NULL DEFAULT NULL COMMENT '振込作業完了日時',
-  `completed_at` timestamp NULL DEFAULT NULL COMMENT '支払済確定日時',
-  `evidence_file_path` varchar(500) DEFAULT NULL COMMENT '振込完了証跡画像',
+  `status` tinyint NOT NULL DEFAULT '0' COMMENT '0=蠕・ｩ・1=謾ｯ謇墓ｺ門ｙ荳ｭ 2=謖ｯ霎ｼ荳ｭ 3=謾ｯ謇墓ｸ・4=辟｡蜉ｹ',
+  `shop_received_amount` int unsigned NOT NULL COMMENT '蠎苓・蜈･驥鷹｡阪せ繝翫ャ繝励す繝ｧ繝・ヨ',
+  `platform_fee_amount` int unsigned NOT NULL DEFAULT '0' COMMENT '繝励Λ繝・ヨ繝輔か繝ｼ繝謇区焚譁・,
+  `bank_fee_amount` int unsigned NOT NULL DEFAULT '0' COMMENT '驫陦梧険霎ｼ謇区焚譁・,
+  `payout_amount` int unsigned NOT NULL COMMENT '繧ｭ繝｣繧ｹ繝域険霎ｼ鬘搾ｼ郁・蜍戊ｨ育ｮ暦ｼ・,
+  `transferred_at` timestamp NULL DEFAULT NULL COMMENT '謖ｯ霎ｼ菴懈･ｭ螳御ｺ・律譎・,
+  `completed_at` timestamp NULL DEFAULT NULL COMMENT '謾ｯ謇墓ｸ育｢ｺ螳壽律譎・,
+  `evidence_file_path` varchar(500) DEFAULT NULL COMMENT '謖ｯ霎ｼ螳御ｺ・ｨｼ霍｡逕ｻ蜒・,
   `checklist_confirmed_account` tinyint(1) NOT NULL DEFAULT '0',
   `checklist_confirmed_amount` tinyint(1) NOT NULL DEFAULT '0',
-  `operator_id` varchar(20) DEFAULT NULL COMMENT '振込作業担当者ID',
-  `refund_required` tinyint(1) NOT NULL DEFAULT '0' COMMENT '要返金フラグ',
+  `operator_id` varchar(20) DEFAULT NULL COMMENT '謖ｯ霎ｼ菴懈･ｭ諡・ｽ楢・D',
+  `refund_required` tinyint(1) NOT NULL DEFAULT '0' COMMENT '隕∬ｿ秘≡繝輔Λ繧ｰ',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `payment_tasks_application_deposit_id_unique` (`application_deposit_id`),
   KEY `payment_tasks_application_deposit_id_foreign` (`application_deposit_id`),
   CONSTRAINT `payment_tasks_application_deposit_id_foreign` FOREIGN KEY (`application_deposit_id`) REFERENCES `application_deposits` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------------------------
+-- 11. PWA/LINE 繝ｪ繝槭う繝ｳ繝繝ｼ驕狗畑險ｭ螳・(2026_03_20)
+-- ------------------------------------------------------------------------------
+
+ALTER TABLE `push_subscriptions`
+  ADD COLUMN `user_type` varchar(32) DEFAULT NULL AFTER `id`,
+  ADD COLUMN `user_id` varchar(32) DEFAULT NULL AFTER `user_type`,
+  ADD INDEX `push_subscriptions_user_idx` (`user_type`, `user_id`);
+
+CREATE TABLE IF NOT EXISTS `notification_preferences` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_type` varchar(32) NOT NULL,
+  `user_id` varchar(32) NOT NULL,
+  `push_enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `line_enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `interview_reminder_enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `deadline_reminder_enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `notification_preferences_user_unique` (`user_type`, `user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
