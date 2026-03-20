@@ -269,7 +269,7 @@ class TalkController extends Controller
             );
         }
 
-        [$messageType, $content] = match ($actionType) use ($request, $bonusMeta) {
+        [$messageType, $content] = match ($actionType) {
             'interview_offer' => [
                 self::MESSAGE_TYPE_INTERVIEW_OFFER,
                 json_encode([

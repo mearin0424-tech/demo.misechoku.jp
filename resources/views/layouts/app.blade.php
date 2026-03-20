@@ -34,7 +34,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ミセチョク">
-    <link rel="manifest" href="{{ url('/manifest.json') }}">
+    <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="{{ asset('assets/images/pwa/icon-192.png') }}">
     {{-- ファビコン（データURIで404防止。色はアプリのゴールド・ダーク） --}}
     <link rel="icon" href="data:image/svg+xml,{{ rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#190509"/><text x="16" y="22" font-size="18" text-anchor="middle" fill="#D4AF37">店</text></svg>') }}" type="image/svg+xml">
@@ -452,7 +452,7 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
-          navigator.serviceWorker.register('{{ asset("sw.js") }}?v={{ $assetVersion }}', { scope: '/' })
+          navigator.serviceWorker.register('/sw.js?v={{ $assetVersion }}', { scope: '/' })
             .then(function (reg) { /* 登録完了 */ })
             .catch(function () { /* 登録失敗時は無視 */ });
         });
@@ -464,32 +464,57 @@
         var deferredPrompt;
         var section = document.getElementById('pwa-install-section');
         var btn = document.getElementById('pwa-install-btn');
-        if (!section || !btn) return;
+        var inlineBtn = document.getElementById('pwa-install-inline-btn');
+        var iosGuide = document.getElementById('pwa-ios-guide');
+
+        function isIosSafari() {
+          var ua = window.navigator.userAgent || '';
+          var isIos = /iphone|ipad|ipod/i.test(ua);
+          var isSafari = /safari/i.test(ua) && !/crios|fxios|edgios|opr\//i.test(ua);
+          return isIos && isSafari;
+        }
+
+        function hideInstallUi() {
+          if (section) section.style.display = 'none';
+          if (inlineBtn) inlineBtn.style.display = 'none';
+          if (iosGuide) iosGuide.style.display = 'none';
+        }
+
+        window.triggerPwaInstall = function() {
+          if (!deferredPrompt) return false;
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(function(choice) {
+            if (choice.outcome === 'accepted') {
+              hideInstallUi();
+            }
+            deferredPrompt = null;
+          });
+          return true;
+        };
 
         window.addEventListener('beforeinstallprompt', function(e) {
           e.preventDefault();
           deferredPrompt = e;
-          section.style.display = 'block';
+          if (section) section.style.display = 'block';
+          if (inlineBtn) inlineBtn.style.display = 'inline-flex';
         });
 
         window.addEventListener('appinstalled', function() {
           deferredPrompt = null;
-          if (section) section.style.display = 'none';
+          hideInstallUi();
         });
 
-        btn.addEventListener('click', function() {
-          if (!deferredPrompt) return;
-          deferredPrompt.prompt();
-          deferredPrompt.userChoice.then(function(choice) {
-            if (choice.outcome === 'accepted') {
-              if (section) section.style.display = 'none';
-            }
-            deferredPrompt = null;
-          });
-        });
+        if (btn) {
+          btn.addEventListener('click', function() { window.triggerPwaInstall(); });
+        }
 
         if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-          section.style.display = 'none';
+          hideInstallUi();
+          return;
+        }
+
+        if (isIosSafari() && iosGuide) {
+          iosGuide.style.display = 'block';
         }
       })();
     </script>

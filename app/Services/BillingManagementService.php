@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\BankAccount;
+use App\Models\PaymentTask;
 use App\Models\SystemAccount;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +24,8 @@ class BillingManagementService
 
     private const SYSTEM_FEE_RATE = 0.10;
     private const INVOICE_DUE_DAYS = 7;
+    /** 銀行振込手数料（円）。マスタ化する場合はここを参照にせずマスタから取得すること */
+    private const BANK_FEE_AMOUNT = 220;
 
     public function __construct(private readonly BankLookupService $bankLookupService)
     {
@@ -90,6 +93,39 @@ class BillingManagementService
     public function getAdminBillingDashboard(): array
     {
         $deposits = $this->getAllDeposits();
+        $depositIds = collect($deposits)->pluck('id')->all();
+
+        $tasksMap = collect();
+        if (Schema::hasTable('payment_tasks') && !empty($depositIds)) {
+            $tasksMap = DB::table('payment_tasks')
+                ->whereIn('application_deposit_id', $depositIds)
+                ->get()
+                ->keyBy('application_deposit_id');
+        }
+
+        foreach ($deposits as &$d) {
+            $d['payment_task'] = $tasksMap->get($d['id']);
+            // 既存データで店舗入金確認済みなのにタスクがない場合は1件生成（バックフィル）
+            if ($d['status_code'] === self::STATUS_SHOP_PAYMENT_CONFIRMED && !$d['payment_task'] && Schema::hasTable('payment_tasks')) {
+                $this->ensurePaymentTaskForDeposit($d['id']);
+                $d['payment_task'] = $this->getPaymentTaskForDeposit($d['id']);
+            }
+        }
+        unset($d);
+
+        $sevenDaysAgo = Carbon::now()->subDays(7);
+        $unconfirmedOver7 = collect($deposits)->filter(function (array $d) use ($sevenDaysAgo) {
+            if ($d['status_code'] !== self::STATUS_CAST_TRANSFERRED) {
+                return false;
+            }
+            $transferredAt = $d['cast_transferred_at'] ?? null;
+            if (!$transferredAt) {
+                return false;
+            }
+            $t = Carbon::parse($transferredAt);
+
+            return $t->lt($sevenDaysAgo);
+        })->count();
 
         return [
             'deposits' => $deposits,
@@ -98,6 +134,7 @@ class BillingManagementService
                 'payment_confirmation_pending' => collect($deposits)->where('status_code', self::STATUS_SHOP_PAYMENT_REPORTED)->count(),
                 'cast_transfer_pending' => collect($deposits)->where('status_code', self::STATUS_SHOP_PAYMENT_CONFIRMED)->count(),
                 'invoice_total' => collect($deposits)->sum('invoice_amount'),
+                'unconfirmed_cast_over_7days' => $unconfirmedOver7,
             ],
         ];
     }
@@ -412,7 +449,195 @@ class BillingManagementService
 
         $this->appendHistory($depositId, self::STATUS_SHOP_PAYMENT_CONFIRMED);
 
+        $this->ensurePaymentTaskForDeposit($depositId);
+
         return ['success' => true, 'message' => '店舗からの入金を確認しました。キャストへの振込準備に進めます。'];
+    }
+
+    /**
+     * 店舗入金確認済みの deposit に対して PaymentTask を1件のみ生成（UNIQUE で二重防止）
+     * 振込額 = 店舗入金額 - プラットフォーム手数料 - 銀行振込手数料（手入力禁止のため自動計算のみ）
+     */
+    public function ensurePaymentTaskForDeposit(int $depositId): void
+    {
+        if (!Schema::hasTable('payment_tasks')) {
+            return;
+        }
+
+        $deposit = $this->findDepositById($depositId);
+        if (!$deposit || (int) $deposit->status !== self::STATUS_SHOP_PAYMENT_CONFIRMED) {
+            return;
+        }
+
+        $existing = DB::table('payment_tasks')->where('application_deposit_id', $depositId)->first();
+        if ($existing) {
+            return;
+        }
+
+        $shopReceived = (int) ($deposit->invoice_amount ?? 0);
+        $platformFee = (int) ($deposit->system_fee_amount ?? 0);
+        $bankFee = self::BANK_FEE_AMOUNT;
+        $payout = max(0, $shopReceived - $platformFee - $bankFee);
+
+        DB::table('payment_tasks')->insert([
+            'application_deposit_id' => $depositId,
+            'status' => PaymentTask::STATUS_READY,
+            'shop_received_amount' => $shopReceived,
+            'platform_fee_amount' => $platformFee,
+            'bank_fee_amount' => $bankFee,
+            'payout_amount' => $payout,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    /** 入金管理IDに紐づく PaymentTask を1件取得（支払済・無効含む） */
+    public function getPaymentTaskForDeposit(int $depositId): ?object
+    {
+        if (!Schema::hasTable('payment_tasks')) {
+            return null;
+        }
+
+        return DB::table('payment_tasks')->where('application_deposit_id', $depositId)->first();
+    }
+
+    /**
+     * 振込作業を開始（振込中に変更し他担当をロック）
+     * 支払準備中のみ実行可能。
+     */
+    public function startTransfer(int $depositId, ?string $operatorId = null): array
+    {
+        if (!Schema::hasTable('payment_tasks')) {
+            return ['success' => false, 'message' => '振込タスクテーブルが存在しません。'];
+        }
+
+        $task = $this->getPaymentTaskForDeposit($depositId);
+        if (!$task) {
+            return ['success' => false, 'message' => '振込タスクが見つかりません。'];
+        }
+        if ((int) $task->status !== PaymentTask::STATUS_READY) {
+            return ['success' => false, 'message' => '支払準備中のタスクのみ振込開始できます。'];
+        }
+
+        DB::table('payment_tasks')
+            ->where('id', $task->id)
+            ->update([
+                'status' => PaymentTask::STATUS_TRANSFERRING,
+                'operator_id' => $operatorId,
+                'updated_at' => now(),
+            ]);
+
+        return ['success' => true, 'message' => '振込作業を開始しました。証跡画像のアップロードとチェック完了後に「支払済」を実行してください。'];
+    }
+
+    /**
+     * 振込完了処理（証跡画像・チェックリスト・振込作業完了日必須）。支払済は不可逆。
+     */
+    public function completeTransfer(int $depositId, array $payload, ?string $evidenceFilePath = null): array
+    {
+        if (!Schema::hasTable('payment_tasks')) {
+            return ['success' => false, 'message' => '振込タスクテーブルが存在しません。'];
+        }
+
+        $deposit = $this->findDepositById($depositId);
+        if (!$deposit) {
+            return ['success' => false, 'message' => '対象データが見つかりません。'];
+        }
+
+        $task = $this->getPaymentTaskForDeposit($depositId);
+        if (!$task) {
+            return ['success' => false, 'message' => '振込タスクが見つかりません。'];
+        }
+        if ((int) $task->status !== PaymentTask::STATUS_TRANSFERRING) {
+            return ['success' => false, 'message' => '振込中のタスクのみ完了できます。'];
+        }
+
+        if (empty($payload['checklist_confirmed_account']) || empty($payload['checklist_confirmed_amount'])) {
+            return ['success' => false, 'message' => '振込先名義・口座番号と振込金額の両方にチェックを入れてください。'];
+        }
+        if (empty($payload['transferred_at'])) {
+            return ['success' => false, 'message' => '振込作業完了日を入力してください。'];
+        }
+        if (!$evidenceFilePath) {
+            return ['success' => false, 'message' => '振込完了画面のスクリーンショット（証跡画像）をアップロードしてください。'];
+        }
+
+        $transferredAt = Carbon::parse($payload['transferred_at']);
+        $now = now();
+
+        DB::transaction(function () use ($depositId, $task, $evidenceFilePath, $payload, $transferredAt, $now) {
+            DB::table('payment_tasks')
+                ->where('id', $task->id)
+                ->update([
+                    'status' => PaymentTask::STATUS_PAID,
+                    'transferred_at' => $transferredAt,
+                    'completed_at' => $now,
+                    'evidence_file_path' => $evidenceFilePath,
+                    'checklist_confirmed_account' => true,
+                    'checklist_confirmed_amount' => true,
+                    'updated_at' => $now,
+                ]);
+
+            DB::table('application_deposits')
+                ->where('id', $depositId)
+                ->update($this->filterExistingColumns('application_deposits', [
+                    'status' => self::STATUS_CAST_TRANSFERRED,
+                    'cast_transferred_at' => $transferredAt,
+                    'cast_transfer_reference' => $payload['reference'] ?? null,
+                    'cast_transfer_note' => $payload['note'] ?? null,
+                    'updated_at' => $now,
+                ]));
+        });
+
+        $this->appendHistory($depositId, self::STATUS_CAST_TRANSFERRED);
+
+        return ['success' => true, 'message' => 'キャストへの振込を記録しました。キャストの入金確認をお待ちください。'];
+    }
+
+    /**
+     * 振込タスクを無効化（組戻し・口座誤り時）。既存レコードの上書きはせず、口座修正後に別IDで新規タスクを発行する運用。
+     */
+    public function invalidatePaymentTask(int $depositId, string $reason = ''): array
+    {
+        if (!Schema::hasTable('payment_tasks')) {
+            return ['success' => false, 'message' => '振込タスクテーブルが存在しません。'];
+        }
+
+        $task = $this->getPaymentTaskForDeposit($depositId);
+        if (!$task) {
+            return ['success' => false, 'message' => '振込タスクが見つかりません。'];
+        }
+        if ((int) $task->status === PaymentTask::STATUS_PAID) {
+            return ['success' => false, 'message' => '支払済のタスクは無効化できません。要返金フラグで対応してください。'];
+        }
+
+        DB::table('payment_tasks')
+            ->where('id', $task->id)
+            ->update([
+                'status' => PaymentTask::STATUS_INVALID,
+                'updated_at' => now(),
+            ]);
+
+        return ['success' => true, 'message' => '振込タスクを無効にしました。口座修正後、新規タスクで再発行してください。'];
+    }
+
+    /** 要返金フラグを立てる（支払後にレビュー不正等が判明した場合） */
+    public function setPaymentTaskRefundRequired(int $depositId): array
+    {
+        if (!Schema::hasTable('payment_tasks')) {
+            return ['success' => false, 'message' => '振込タスクテーブルが存在しません。'];
+        }
+
+        $task = $this->getPaymentTaskForDeposit($depositId);
+        if (!$task) {
+            return ['success' => false, 'message' => '振込タスクが見つかりません。'];
+        }
+
+        DB::table('payment_tasks')
+            ->where('id', $task->id)
+            ->update(['refund_required' => true, 'updated_at' => now()]);
+
+        return ['success' => true, 'message' => '要返金フラグを設定しました。'];
     }
 
     public function executeCastTransfer(int $depositId, array $payload): array

@@ -10,6 +10,7 @@ use App\Http\Controllers\Common\DemoLoginController;
 use App\Http\Controllers\Common\BankLookupController;
 use App\Http\Controllers\Common\RegistrationController;
 use App\Http\Controllers\Auth\Cast\LoginController as CastLogin;
+use App\Http\Controllers\Auth\LineLoginController as LineLogin;
 use App\Http\Controllers\Common\TalkController as TalkController;
 
 // 管理者（バックオフィス）
@@ -56,18 +57,17 @@ Route::get('/favicon.ico', function () {
 
 /*
 |--------------------------------------------------------------------------
-| PWA Manifest（スマホのインストール判定用：MIME と絶対URL）
+| PWA Manifest（スマホのインストール判定用：MIME と相対URL）
 |--------------------------------------------------------------------------
 */
 Route::get('/manifest.json', function () {
-    $base = rtrim(request()->getSchemeAndHttpHost(), '/');
     $manifest = [
         'name' => 'ミセチョク',
         'short_name' => 'ミセチョク',
         'description' => 'ミセチョク - デモ',
-        'start_url' => $base . '/shop/home',
-        'scope' => $base . '/',
-        'id' => $base . '/',
+        'start_url' => '/shop/home',
+        'scope' => '/',
+        'id' => '/',
         'display' => 'standalone',
         'display_override' => ['standalone', 'minimal-ui', 'browser'],
         'orientation' => 'portrait-primary',
@@ -76,10 +76,10 @@ Route::get('/manifest.json', function () {
         'lang' => 'ja',
         'prefer_related_applications' => false,
         'icons' => [
-            ['src' => $base . '/assets/images/pwa/icon-192.png', 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any'],
-            ['src' => $base . '/assets/images/pwa/icon-192.png', 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'maskable'],
-            ['src' => $base . '/assets/images/pwa/icon-512.png', 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any'],
-            ['src' => $base . '/assets/images/pwa/icon-512.png', 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'maskable'],
+            ['src' => '/assets/images/pwa/icon-192.png', 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any'],
+            ['src' => '/assets/images/pwa/icon-192.png', 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'maskable'],
+            ['src' => '/assets/images/pwa/icon-512.png', 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any'],
+            ['src' => '/assets/images/pwa/icon-512.png', 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'maskable'],
         ],
     ];
     return response()->json($manifest, 200, [
@@ -133,6 +133,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/deposits/{deposit}/invoice/pdf', [AdminDeposit::class, 'downloadInvoicePdf'])->name('deposits.invoice.pdf');
         Route::post('/deposits/{deposit}/invoice', [AdminDeposit::class, 'issueInvoice'])->name('deposits.invoice.issue');
         Route::post('/deposits/{deposit}/confirm-shop-payment', [AdminDeposit::class, 'confirmShopPayment'])->name('deposits.shop-payment.confirm');
+        Route::post('/deposits/{deposit}/transfer-start', [AdminDeposit::class, 'transferStart'])->name('deposits.transfer-start');
+        Route::post('/deposits/{deposit}/transfer-complete', [AdminDeposit::class, 'transferComplete'])->name('deposits.transfer-complete');
+        Route::post('/deposits/{deposit}/payment-task-invalidate', [AdminDeposit::class, 'paymentTaskInvalidate'])->name('deposits.payment-task.invalidate');
+        Route::post('/deposits/{deposit}/payment-task-refund-flag', [AdminDeposit::class, 'paymentTaskRefundFlag'])->name('deposits.payment-task.refund-flag');
         Route::post('/deposits/{deposit}/transfer-cast', [AdminDeposit::class, 'transferCast'])->name('deposits.cast-transfer.execute');
 
         // 売上管理
@@ -191,6 +195,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::get('/login', [DemoLoginController::class, 'show'])->name('login.demo');
 Route::post('/login', [DemoLoginController::class, 'login'])->name('login.demo.post');
 
+// LINEログイン
+Route::get('/login/line', [LineLogin::class, 'redirect'])->name('login.line.redirect');
+Route::get('/login/line/callback', [LineLogin::class, 'callback'])->name('login.line.callback');
+
 Route::name('pages.')->group(function () {
     Route::get('/about', [PageController::class, 'about'])->name('official.about');
     Route::get('/terms', [PageController::class, 'terms'])->name('official.terms');
@@ -207,6 +215,7 @@ Route::prefix('share')->name('share.')->group(function () {
 // 設定系（共通）
 Route::prefix('setting')->name('setting.')->group(function () {
     Route::get('/notification', [SettingController::class, 'notification'])->name('notification');
+    Route::get('/line/link', [LineLogin::class, 'redirectLink'])->name('line.link');
     Route::get('/account/email', [SettingController::class, 'accountEmail'])->name('account.email');
     Route::get('/account/password', [SettingController::class, 'accountPassword'])->name('account.password');
     Route::get('/account/withdraw', [SettingController::class, 'accountWithdraw'])->name('account.withdraw');

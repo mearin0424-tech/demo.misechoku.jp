@@ -356,6 +356,15 @@ a.mypage-stat-panel-link:hover {
 .mypage-stat-panel:nth-child(2) .mypage-stat-icon { color: var(--mypage-gold); }
 .mypage-stat-panel:last-child .mypage-stat-icon { color: #a8d4a8; }
 
+/* 店舗マイページ：統計4列（バッヂ含む）のときは3番目を採用数の緑、4番目はバッヂ側のスタイルに任せる */
+.mypage-stats-row--cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+.mypage-stats-row--cols-4 .mypage-stat-panel:nth-child(3) .mypage-stat-icon { color: #a8d4a8; }
+.mypage-stats-row--cols-4 .mypage-stat-panel:nth-child(4) .mypage-stat-icon {
+    color: var(--mypage-gold);
+}
+
 .mypage-stat-label {
     font-size: 0.7rem;
     letter-spacing: 0.04em;
@@ -373,6 +382,9 @@ a.mypage-stat-panel-link:hover {
     .mypage-stats-row {
         gap: 8px;
         margin-bottom: 16px;
+    }
+    .mypage-stats-row--cols-4 {
+        grid-template-columns: repeat(2, 1fr);
     }
     .mypage-stat-panel {
         padding: 12px 8px;

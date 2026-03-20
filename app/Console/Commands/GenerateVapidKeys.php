@@ -11,16 +11,23 @@ class GenerateVapidKeys extends Command
 
     public function handle(): int
     {
-        $config = [
-            'private_key_type' => OPENSSL_KEYTYPE_EC,
-            'curve_name' => 'prime256v1',
-        ];
-        $res = openssl_pkey_new($config);
-        if ($res === false) {
-            $this->error('OpenSSL key generation failed.');
+        if (!\function_exists('openssl_pkey_new') || !\function_exists('openssl_pkey_get_details')) {
+            $this->error('OpenSSL 拡張が無効です。php.ini で extension=openssl を有効化してください。');
+
             return 1;
         }
-        $details = openssl_pkey_get_details($res);
+
+        $ecKeyType = defined('OPENSSL_KEYTYPE_EC') ? \OPENSSL_KEYTYPE_EC : 3;
+        $config = [
+            'private_key_type' => $ecKeyType,
+            'curve_name' => 'prime256v1',
+        ];
+        $res = \openssl_pkey_new($config);
+        if ($res === false) {
+            $this->error('OpenSSL key generation failed. EC(P-256) に対応した OpenSSL 拡張が必要です。');
+            return 1;
+        }
+        $details = \openssl_pkey_get_details($res);
         if (!$details || !isset($details['ec']['x'], $details['ec']['y'], $details['ec']['d'])) {
             $this->error('Could not get EC key details.');
             return 1;

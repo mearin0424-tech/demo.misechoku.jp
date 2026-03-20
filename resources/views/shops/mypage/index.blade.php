@@ -188,6 +188,64 @@
             white-space: normal;
         }
     }
+
+    /* 安心バッヂパネル（ボタン化・未付与はグレー） */
+    button.mypage-stat-panel-badge {
+        cursor: pointer;
+        font: inherit;
+        text-align: center;
+        width: 100%;
+    }
+    .mypage-stat-panel-badge--inactive {
+        border-color: rgba(120, 120, 120, 0.35);
+        background: rgba(40, 40, 45, 0.55);
+        opacity: 0.92;
+    }
+    .mypage-stat-panel-badge--inactive .mypage-stat-icon {
+        color: #888 !important;
+    }
+    .mypage-stat-panel-badge--inactive .mypage-stat-value {
+        color: #9ca3af;
+        font-size: 0.88rem;
+    }
+    .mypage-stat-panel-badge--active {
+        border-color: rgba(34, 197, 94, 0.45);
+        box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.12);
+    }
+    .mypage-stat-panel-badge--active .mypage-stat-icon {
+        color: #86efac !important;
+    }
+    .mypage-stat-panel-badge--active .mypage-stat-value {
+        color: #bbf7d0;
+    }
+    .good-payer-badge-modal-body {
+        margin: 0 0 16px;
+        font-size: 0.88rem;
+        line-height: 1.75;
+        color: #e8e0d8;
+        text-align: left;
+    }
+    .good-payer-badge-modal-body ul {
+        margin: 10px 0 0 1.1em;
+        padding: 0;
+    }
+    .good-payer-badge-modal-status {
+        margin-top: 14px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        font-size: 0.82rem;
+        font-weight: 700;
+    }
+    .good-payer-badge-modal-status.is-yes {
+        background: rgba(34, 197, 94, 0.12);
+        border: 1px solid rgba(34, 197, 94, 0.28);
+        color: #bbf7d0;
+    }
+    .good-payer-badge-modal-status.is-no {
+        background: rgba(107, 114, 128, 0.15);
+        border: 1px solid rgba(156, 163, 175, 0.25);
+        color: #d1d5db;
+    }
 </style>
 @endpush
 
@@ -216,8 +274,9 @@
             </div>
         </div>
 
-        {{-- 評価・応募数・採用数・バッヂ（キャストのLIKE・マッチ・ボーナスと同様の統計行） --}}
-        <div class="mypage-stats-row" aria-label="統計">
+        {{-- 評価・応募数・採用数・バッヂ（4列。バッヂは未付与でもグレーで表示し、タップで仕様モーダル） --}}
+        @php $hasGoodPayerBadge = !empty($shopData['badges']['good_payer']); @endphp
+        <div class="mypage-stats-row mypage-stats-row--cols-4" aria-label="統計">
             <a href="{{ route('shop.mypage.review.index') }}" class="mypage-stat-panel mypage-stat-panel-link">
                 <span class="mypage-stat-icon"><i class="fas fa-star"></i></span>
                 <span class="mypage-stat-label">評価</span>
@@ -233,13 +292,16 @@
                 <span class="mypage-stat-label">採用数</span>
                 <span class="mypage-stat-value">{{ number_format((int) ($shopData['hired_count'] ?? 0)) }}</span>
             </div>
-            @if(!empty($shopData['badges']['good_payer']))
-                <div class="mypage-stat-panel mypage-stat-panel-badge">
-                    <span class="mypage-stat-icon"><i class="fas fa-shield-heart"></i></span>
-                    <span class="mypage-stat-label">バッヂ</span>
-                    <span class="mypage-stat-value">優良支払店</span>
-                </div>
-            @endif
+            <button type="button"
+                class="mypage-stat-panel mypage-stat-panel-badge {{ $hasGoodPayerBadge ? 'mypage-stat-panel-badge--active' : 'mypage-stat-panel-badge--inactive' }}"
+                id="open-good-payer-badge-modal"
+                aria-haspopup="dialog"
+                aria-controls="modal-good-payer-badge"
+                aria-label="安心バッヂの説明を開く">
+                <span class="mypage-stat-icon" aria-hidden="true"><i class="fas fa-shield-heart"></i></span>
+                <span class="mypage-stat-label">バッヂ</span>
+                <span class="mypage-stat-value">{{ $hasGoodPayerBadge ? '優良支払店' : '未付与' }}</span>
+            </button>
         </div>
 
         <div class="mypage-detail-box">
@@ -377,6 +439,30 @@
     </div>
 </div>
 
+{{-- 優良支払店バッヂの仕様（タップで表示） --}}
+<div id="modal-good-payer-badge" class="mypage-modal-overlay modal-word-edit" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="good-payer-badge-modal-title">
+    <div class="mypage-modal-panel glass-panel">
+        <h3 id="good-payer-badge-modal-title" class="mypage-modal-title serif-font">優良支払店バッヂとは？</h3>
+        <div class="good-payer-badge-modal-body">
+            <p>直近3ヶ月のあいだに発生した請求・入金データについて、次の条件を満たす店舗に付与される、安全性重視のバッヂです。</p>
+            <ul>
+                <li>すべての案件が「店舗入金確認済み」まで完了している</li>
+                <li>請求書発行から店舗入金確認までが10日以内である</li>
+            </ul>
+        </div>
+        <div class="good-payer-badge-modal-status {{ $hasGoodPayerBadge ? 'is-yes' : 'is-no' }}">
+            @if($hasGoodPayerBadge)
+                現在のお店：このバッヂが付与されています。
+            @else
+                現在のお店：条件を満たしていないため、未付与です。上記を満たすと表示が切り替わります。
+            @endif
+        </div>
+        <div class="mypage-modal-actions">
+            <button type="button" class="btn-action btn-action-primary" id="good-payer-badge-modal-close">閉じる</button>
+        </div>
+    </div>
+</div>
+
 {{-- ひとこと編集モーダル --}}
 <div id="modal-word" class="mypage-modal-overlay modal-word-edit" style="display:none;">
     <div class="mypage-modal-panel glass-panel">
@@ -458,6 +544,24 @@ document.addEventListener('DOMContentLoaded', function() {
     if (profileEditBtn) profileEditBtn.addEventListener('click', function() {
         location.href = "{{ route('shop.profile.store.edit') }}";
     });
+
+    var openBadgeModal = document.getElementById('open-good-payer-badge-modal');
+    var badgeModal = document.getElementById('modal-good-payer-badge');
+    var closeBadgeModal = document.getElementById('good-payer-badge-modal-close');
+    function hideBadgeModal() {
+        if (badgeModal) badgeModal.style.display = 'none';
+        if (openBadgeModal) openBadgeModal.focus();
+    }
+    if (openBadgeModal && badgeModal) {
+        openBadgeModal.addEventListener('click', function() {
+            badgeModal.style.display = 'flex';
+            if (closeBadgeModal) closeBadgeModal.focus();
+        });
+        badgeModal.addEventListener('click', function(e) {
+            if (e.target === badgeModal) hideBadgeModal();
+        });
+    }
+    if (closeBadgeModal) closeBadgeModal.addEventListener('click', hideBadgeModal);
 });
 </script>
 <script>

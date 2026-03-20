@@ -119,6 +119,30 @@
         background: rgba(255,255,255,0.04);
         font-size: 0.8rem;
     }
+    .billing-alert-unconfirmed {
+        border-color: rgba(239, 68, 68, 0.5);
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.06) 0%, transparent 50%);
+    }
+    .billing-copy-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .billing-copy-wrap .billing-meta-value { flex: 1; }
+    .billing-amount-readonly {
+        user-select: none;
+        -webkit-user-select: none;
+    }
+    .btn-copy {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+        border-radius: 8px;
+        background: rgba(96, 165, 250, 0.2);
+        border: 1px solid rgba(96, 165, 250, 0.4);
+        color: #93c5fd;
+        cursor: pointer;
+    }
+    .btn-copy:hover { background: rgba(96, 165, 250, 0.3); }
     @media (max-width: 980px) {
         .billing-detail-card {
             grid-template-columns: 1fr;
@@ -144,6 +168,12 @@
         @if(session('error'))
             <div class="admin-alert" style="background: rgba(248, 113, 113, 0.12); border-color: rgba(248, 113, 113, 0.3); color: #fee2e2;">
                 {{ session('error') }}
+            </div>
+        @endif
+
+        @if(!empty($summary['unconfirmed_cast_over_7days']))
+            <div class="admin-alert" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fecaca;">
+                <strong>要確認：</strong> 振込済みのうち、キャストの入金確認が7日以上ない案件が {{ $summary['unconfirmed_cast_over_7days'] }} 件あります。個別フォローを推奨します。
             </div>
         @endif
 
@@ -208,7 +238,13 @@
         </section>
 
         @forelse($deposits as $deposit)
-            <section class="admin-panel" id="deposit-{{ $deposit['id'] }}">
+            @php
+                $task = $deposit['payment_task'] ?? null;
+                $taskStatus = $task ? (int) $task->status : null;
+                $isUnconfirmedOver7 = $deposit['status_code'] === 6 && !empty($deposit['cast_transferred_at'])
+                    && \Carbon\Carbon::parse($deposit['cast_transferred_at'])->lt(now()->subDays(7));
+            @endphp
+            <section class="admin-panel {{ $isUnconfirmedOver7 ? 'billing-alert-unconfirmed' : '' }}" id="deposit-{{ $deposit['id'] }}">
                 <div class="billing-detail-card">
                     <div>
                         <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
@@ -372,7 +408,116 @@
                             </div>
                         @endif
 
-                        @if($deposit['status_code'] === 5)
+                        @if($deposit['status_code'] === 5 && $task && in_array($taskStatus, [1, 2], true))
+                            {{-- PaymentTask フェイルセーフ：金額はすべて自動計算・表示のみ（手入力禁止）。コピーボタンでネットバンキングへ入力 --}}
+                            <div class="billing-action-box">
+                                <h3 class="billing-action-title">キャスト振込（振込額はシステム自動計算・変更不可）</h3>
+                                <p class="admin-note">振込額・手数料はすべて読み取り専用です。コピーボタンでネットバンキング画面へ貼り付けてください。</p>
+                                <div class="billing-amount-list" style="margin-top:12px;">
+                                    <div class="billing-meta-item">
+                                        <div class="billing-meta-label">店舗入金額</div>
+                                        <div class="billing-copy-wrap">
+                                            <div class="billing-meta-value billing-amount-readonly" data-copy="{{ number_format($task->shop_received_amount) }}">¥{{ number_format($task->shop_received_amount) }}</div>
+                                            <button type="button" class="btn-copy" data-copy-target="{{ number_format($task->shop_received_amount) }}">コピー</button>
+                                        </div>
+                                    </div>
+                                    <div class="billing-meta-item">
+                                        <div class="billing-meta-label">プラットフォーム手数料</div>
+                                        <div class="billing-copy-wrap">
+                                            <div class="billing-meta-value billing-amount-readonly">¥{{ number_format($task->platform_fee_amount) }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="billing-meta-item">
+                                        <div class="billing-meta-label">銀行振込手数料</div>
+                                        <div class="billing-meta-value billing-amount-readonly">¥{{ number_format($task->bank_fee_amount) }}</div>
+                                    </div>
+                                    <div class="billing-meta-item">
+                                        <div class="billing-meta-label">キャスト振込額（コピーして振込画面へ）</div>
+                                        <div class="billing-copy-wrap">
+                                            <div class="billing-meta-value billing-amount-readonly" data-copy="{{ number_format($task->payout_amount) }}">¥{{ number_format($task->payout_amount) }}</div>
+                                            <button type="button" class="btn-copy" data-copy-target="{{ number_format($task->payout_amount) }}">コピー</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if($taskStatus === 1)
+                                    <form method="POST" action="{{ route('admin.deposits.transfer-start', $deposit['id']) }}" class="billing-inline-form" style="margin-top:14px;">
+                                        @csrf
+                                        <p class="admin-note">ネットバンキングで振込を実行する前に「振込チェック開始」を押すと、他の担当者が同時に作業しないようロックされます。</p>
+                                        <div class="management-actions">
+                                            <button type="submit" class="btn-action manage">
+                                                <i class="fas fa-lock"></i> 振込チェック開始
+                                            </button>
+                                        </div>
+                                    </form>
+                                    <form method="POST" action="{{ route('admin.deposits.payment-task.invalidate', $deposit['id']) }}" class="billing-inline-form" style="margin-top:10px;" onsubmit="return confirm('振込タスクを無効にしますか？口座修正後は別タスクで再発行してください。');">
+                                        @csrf
+                                        <button type="submit" class="btn-action" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5;">
+                                            <i class="fas fa-ban"></i> 振込タスクを無効にする（組戻し・口座誤り時）
+                                        </button>
+                                    </form>
+                                @endif
+
+                                @if($taskStatus === 2)
+                                    <form method="POST" action="{{ route('admin.deposits.transfer-complete', $deposit['id']) }}" class="billing-inline-form" enctype="multipart/form-data" data-transfer-complete-form style="margin-top:14px;">
+                                        @csrf
+                                        <div class="admin-form-row" style="margin-bottom:0;">
+                                            <label class="admin-label">振込作業完了日時 <span class="required">必須</span></label>
+                                            <input type="datetime-local" name="transferred_at" class="admin-input" value="{{ now()->format('Y-m-d\\TH:i') }}" required>
+                                        </div>
+                                        <div class="admin-form-row" style="margin-bottom:0;">
+                                            <label class="admin-label">振込管理番号</label>
+                                            <input type="text" name="reference" class="admin-input" placeholder="TRF-20260313-01">
+                                        </div>
+                                        <div class="admin-form-row" style="margin-bottom:0;">
+                                            <label class="admin-label">証跡画像（振込完了画面のスクリーンショット） <span class="required">必須</span></label>
+                                            <input type="file" name="evidence_screenshot" accept="image/*" class="admin-input" data-evidence-file required>
+                                        </div>
+                                        <div class="billing-check-grid" data-check-group>
+                                            <label class="billing-check-item"><input type="checkbox" name="checklist_confirmed_account" value="1" data-check-item> 振込先名義・口座番号が正しいことを確認した</label>
+                                            <label class="billing-check-item"><input type="checkbox" name="checklist_confirmed_amount" value="1" data-check-item> 振込金額が正しいことを確認した</label>
+                                        </div>
+                                        <div class="management-actions">
+                                            <button type="submit" class="btn-action manage" data-check-submit disabled data-complete-submit>
+                                                <i class="fas fa-yen-sign"></i> 支払済にする
+                                            </button>
+                                        </div>
+                                    </form>
+                                    <form method="POST" action="{{ route('admin.deposits.payment-task.invalidate', $deposit['id']) }}" class="billing-inline-form" style="margin-top:10px;" onsubmit="return confirm('振込タスクを無効にしますか？');">
+                                        @csrf
+                                        <button type="submit" class="btn-action" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5;">
+                                            <i class="fas fa-ban"></i> 振込タスクを無効にする
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                        @endif
+
+                        @if($deposit['status_code'] === 5 && $task && in_array($taskStatus, [3, 4], true))
+                            <div class="billing-action-box">
+                                <h3 class="billing-action-title">振込タスク</h3>
+                                <p class="billing-note">
+                                    @if($taskStatus === 3)
+                                        この案件は支払済です。編集・巻き戻しはできません。キャストの入金確認をお待ちください。
+                                        @if(empty($task->refund_required))
+                                            <form method="POST" action="{{ route('admin.deposits.payment-task.refund-flag', $deposit['id']) }}" style="margin-top:10px;" onsubmit="return confirm('要返金フラグを立てますか？（支払後にレビュー不正等が判明した場合）');">
+                                                @csrf
+                                                <button type="submit" class="btn-action" style="background: rgba(245, 158, 11, 0.15); color: #fcd34d;">
+                                                    <i class="fas fa-flag"></i> 要返金フラグを立てる
+                                                </button>
+                                            </form>
+                                        @else
+                                            <span class="admin-note" style="display:block; margin-top:8px; color: #f59e0b;">要返金フラグが立っています。</span>
+                                        @endif
+                                    @else
+                                        この振込タスクは無効です。口座修正後は別タスクで再発行してください。
+                                    @endif
+                                </p>
+                            </div>
+                        @endif
+
+                        @if($deposit['status_code'] === 5 && !$task)
+                            {{-- PaymentTask 未使用時の従来フロー --}}
                             <div class="billing-action-box">
                                 <h3 class="billing-action-title">キャスト振込記録</h3>
                                 <form method="POST" action="{{ route('admin.deposits.cast-transfer.execute', $deposit['id']) }}" class="billing-inline-form">
@@ -424,6 +569,7 @@
 @push('admin-scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // チェックリストで完了ボタン制御
     document.querySelectorAll('[data-check-group]').forEach(function (group) {
         var submit = group.parentElement.querySelector('[data-check-submit]');
         var items = group.querySelectorAll('[data-check-item]');
@@ -435,6 +581,52 @@ document.addEventListener('DOMContentLoaded', function () {
 
         items.forEach(function (item) { item.addEventListener('change', sync); });
         sync();
+    });
+
+    // 振込完了フォーム：証跡画像＋チェック＋日時が揃うまで「支払済にする」を非活性
+    document.querySelectorAll('[data-transfer-complete-form]').forEach(function (form) {
+        var submit = form.querySelector('[data-complete-submit]');
+        var checks = form.querySelectorAll('[data-check-item]');
+        var fileInput = form.querySelector('[data-evidence-file]');
+        var dateInput = form.querySelector('input[name="transferred_at"]');
+
+        function syncComplete() {
+            var checksOk = checks.length && Array.from(checks).every(function (c) { return c.checked; });
+            var hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
+            var hasDate = dateInput && dateInput.value.trim() !== '';
+            submit.disabled = !(checksOk && hasFile && hasDate);
+        }
+        if (submit) {
+            checks.forEach(function (c) { c.addEventListener('change', syncComplete); });
+            if (fileInput) fileInput.addEventListener('change', syncComplete);
+            if (dateInput) dateInput.addEventListener('change', syncComplete);
+            syncComplete();
+        }
+    });
+
+    // コピーボタン：振込額などをクリップボードへ
+    document.querySelectorAll('.btn-copy[data-copy-target]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var value = this.getAttribute('data-copy-target');
+            if (!value) return;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(value).then(function () {
+                    var t = btn.textContent;
+                    btn.textContent = 'コピーしました';
+                    setTimeout(function () { btn.textContent = t; }, 1500);
+                });
+            } else {
+                var ta = document.createElement('textarea');
+                ta.value = value;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                var t = btn.textContent;
+                btn.textContent = 'コピーしました';
+                setTimeout(function () { btn.textContent = t; }, 1500);
+            }
+        });
     });
 });
 </script>

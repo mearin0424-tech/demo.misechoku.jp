@@ -44,14 +44,6 @@ return [
 
     ],
 
-    'line_notify' => [
-
-        'client_id' => env('LINE_NOTIFY_CLIENT_ID'),  
-        'client_secret' => env('LINE_NOTIFY_CLIENT_SECRET'),  
-        'callback_url' => env('LINE_NOTIFY_CALLBACK_URL') ,
-
-    ],
-
     'google-map' => [
         'apikey' => env('GOOGLE_MAP_API'),
         'apikey_ip' => env('GOOGLE_MAP_API_IP'),

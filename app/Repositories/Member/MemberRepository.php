@@ -1335,7 +1335,6 @@ class MemberRepository implements MemberRepositoryInterface
         $cast->setAttribute('approval', $cast->status);
         $cast->setAttribute('del_flg', $cast->deleted_at ? CommonConsts::DEL_ON : CommonConsts::DEL_OFF);
         $cast->setAttribute('line_user_id', null);
-        $cast->setAttribute('line_notify_token', null);
         $cast->setAttribute('matching', 0);
         $cast->setAttribute('release', 0);
         $cast->setAttribute('footprints', 0);

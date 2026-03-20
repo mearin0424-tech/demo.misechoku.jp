@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Common;
 
 use App\Http\Controllers\Controller;
+use App\Models\CastProvider;
 use Illuminate\Http\Request;
 
 class SettingController extends Controller
@@ -13,7 +14,26 @@ class SettingController extends Controller
     public function notification()
     {
         $isCast = request()->is('cast/*');
-        return view('common.setting.notification', compact('isCast'));
+        $lineLinked = false;
+        $lineLinkUrl = route('setting.line.link');
+
+        if (auth()->guard('member')->check()) {
+            $user = auth()->guard('member')->user();
+            $lineLinked = CastProvider::query()
+                ->where('cast_id', $user->getAuthIdentifier())
+                ->where('provider', 'line')
+                ->exists();
+        } elseif (auth()->guard('shop')->check()) {
+            $user = auth()->guard('shop')->user();
+            $lineLinked = !empty($user->line_user_id);
+        }
+
+        return view('common.setting.notification', [
+            'isCast' => $isCast,
+            'lineLinked' => $lineLinked,
+            'lineLinkUrl' => $lineLinkUrl,
+            'isLoggedIn' => auth()->guard('member')->check() || auth()->guard('shop')->check(),
+        ]);
     }
 
     /**

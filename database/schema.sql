@@ -8,6 +8,8 @@
 --   エラーになることがあります。その場合は該当ブロックをコメントアウトするか、
 --   必要な部分だけを抜き出して実行してください。
 -- - INSERT は IGNORE にしてあるため、重複時はスキップされます。
+-- - LINE 通知は Messaging API のみ（LINE Notify は使用しない）。
+--   キャストの LINE ユーザーIDは cast_providers、店舗マネージャーは shop_managers.line_user_id。
 -- ==============================================================================
 
 -- ------------------------------------------------------------------------------
@@ -138,6 +140,7 @@ CREATE TABLE IF NOT EXISTS `shop_managers` (
   `name` varchar(255) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
+  `line_user_id` varchar(255) DEFAULT NULL COMMENT 'LINE Login ユーザーID（Messaging API push 用）',
   `role` tinyint NOT NULL DEFAULT '0',
   `status` tinyint NOT NULL DEFAULT '0',
   `last_login_at` timestamp NULL DEFAULT NULL,
@@ -525,6 +528,7 @@ CREATE TABLE IF NOT EXISTS `talk_blocks` (
 
 -- ------------------------------------------------------------------------------
 -- 7. レガシービュー (2026_03_14_000000_create_legacy_member_manager_views)
+--    members.line_user_id は cast_providers（provider=line）から取得（LINE Notify 列は廃止）
 -- ------------------------------------------------------------------------------
 
 DROP VIEW IF EXISTS `members`;
@@ -541,7 +545,8 @@ SELECT
   cast_profiles.tel, cast_profiles.height, cast_profiles.weight, cast_profiles.bust AS b, cast_profiles.waist AS w, cast_profiles.hip AS h,
   cast_profiles.shift, cast_profiles.profession, cast_profiles.exp, cast_profiles.years_exp, cast_profiles.where_work,
   cast_profiles.pr, cast_profiles.charm_point, cast_profiles.memo, cast_profiles.ng_reason, cast_profiles.latitude, cast_profiles.longitude,
-  NULL AS line_user_id, NULL AS line_notify_token, 0 AS `matching`, 0 AS `release`, 0 AS `footprints`, NULL AS shop_name
+  (SELECT cp.provider_id FROM cast_providers cp WHERE cp.cast_id = casts.id AND cp.provider = 'line' LIMIT 1) AS line_user_id,
+  0 AS `matching`, 0 AS `release`, 0 AS `footprints`, NULL AS shop_name
 FROM casts
 LEFT JOIN cast_profiles ON casts.id = cast_profiles.cast_id;
 
@@ -577,4 +582,32 @@ CREATE TABLE IF NOT EXISTS `invoice_template_settings` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `invoice_template_settings_key_unique` (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------------------------
+-- 10. 振込作業フェイルセーフ (2026_03_17_000000_create_payment_tasks_table)
+-- 1 application_deposit = 1 PaymentTask（UNIQUE で二重支払い防止）
+-- ------------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `payment_tasks` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `application_deposit_id` bigint unsigned NOT NULL,
+  `status` tinyint NOT NULL DEFAULT '0' COMMENT '0=待機 1=支払準備中 2=振込中 3=支払済 4=無効',
+  `shop_received_amount` int unsigned NOT NULL COMMENT '店舗入金額スナップショット',
+  `platform_fee_amount` int unsigned NOT NULL DEFAULT '0' COMMENT 'プラットフォーム手数料',
+  `bank_fee_amount` int unsigned NOT NULL DEFAULT '0' COMMENT '銀行振込手数料',
+  `payout_amount` int unsigned NOT NULL COMMENT 'キャスト振込額（自動計算）',
+  `transferred_at` timestamp NULL DEFAULT NULL COMMENT '振込作業完了日時',
+  `completed_at` timestamp NULL DEFAULT NULL COMMENT '支払済確定日時',
+  `evidence_file_path` varchar(500) DEFAULT NULL COMMENT '振込完了証跡画像',
+  `checklist_confirmed_account` tinyint(1) NOT NULL DEFAULT '0',
+  `checklist_confirmed_amount` tinyint(1) NOT NULL DEFAULT '0',
+  `operator_id` varchar(20) DEFAULT NULL COMMENT '振込作業担当者ID',
+  `refund_required` tinyint(1) NOT NULL DEFAULT '0' COMMENT '要返金フラグ',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `payment_tasks_application_deposit_id_unique` (`application_deposit_id`),
+  KEY `payment_tasks_application_deposit_id_foreign` (`application_deposit_id`),
+  CONSTRAINT `payment_tasks_application_deposit_id_foreign` FOREIGN KEY (`application_deposit_id`) REFERENCES `application_deposits` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

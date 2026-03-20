@@ -70,4 +70,9 @@ class Cast extends Authenticatable
     {
         return $this->hasMany(CastIdentityDocument::class, 'cast_id', 'id');
     }
+
+    public function providers(): HasMany
+    {
+        return $this->hasMany(CastProvider::class, 'cast_id', 'id');
+    }
 }

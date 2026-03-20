@@ -25,6 +25,7 @@ class ShopManager extends Authenticatable
         'role',
         'status',
         'last_login_at',
+        'line_user_id',
     ];
 
     protected $hidden = [

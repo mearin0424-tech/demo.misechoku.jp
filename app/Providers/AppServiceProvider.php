@@ -4,7 +4,6 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
-use App\Services\LineNotifyService;
 use App\Services\ReviewPortalService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
@@ -21,9 +20,6 @@ class AppServiceProvider extends ServiceProvider
     {
         //
         //app()->bind('FileConsts', App\Consts\FileConsts::class);
-        //$this->app->singleton(LineNotifyService::class, function ($app) {
-        //    return new LineNotifyService();
-        //});
 
     }
 

@@ -2,7 +2,9 @@
  * ミセチョク PWA Service Worker
  * 静的アセットをキャッシュし、オフラインでも基本動作をサポート
  */
-const CACHE_NAME = 'misechoku-v2';
+const CACHE_NAME = 'misechoku-v4';
+const BADGE_CACHE = 'misechoku-badge';
+const BADGE_KEY_URL = '/__pwa_badge_count__';
 const STATIC_ASSETS = [
   '/',
   '/shop/home',
@@ -14,8 +16,8 @@ const STATIC_ASSETS = [
   '/assets/js/app.js',
   '/assets/js/character-guide.js',
   '/manifest.json',
-  '/assets/images/pwa/icon-192.svg',
-  '/assets/images/pwa/icon-512.svg'
+  '/assets/images/pwa/icon-192.png',
+  '/assets/images/pwa/icon-512.png'
 ];
 
 // インストール: 静的アセットをキャッシュ
@@ -73,6 +75,38 @@ function isCacheable(url) {
   return path.startsWith('/assets/') || path === '/manifest.json' || path === '/';
 }
 
+async function readBadgeCount() {
+  try {
+    const cache = await caches.open(BADGE_CACHE);
+    const res = await cache.match(BADGE_KEY_URL);
+    if (!res) return 0;
+    const txt = await res.text();
+    const count = parseInt(txt, 10);
+    return Number.isFinite(count) && count > 0 ? count : 0;
+  } catch (_) {
+    return 0;
+  }
+}
+
+async function writeBadgeCount(count) {
+  const normalized = Number.isFinite(count) && count > 0 ? Math.floor(count) : 0;
+  const cache = await caches.open(BADGE_CACHE);
+  await cache.put(BADGE_KEY_URL, new Response(String(normalized)));
+  return normalized;
+}
+
+async function applyAppBadge(count) {
+  const normalized = await writeBadgeCount(count);
+  if (typeof self.registration.setAppBadge === 'function') {
+    if (normalized > 0) {
+      await self.registration.setAppBadge(normalized).catch(function () {});
+    } else if (typeof self.registration.clearAppBadge === 'function') {
+      await self.registration.clearAppBadge().catch(function () {});
+    }
+  }
+  return normalized;
+}
+
 // --- Push 通知: サーバーから届いたメッセージをデスクトップ通知で表示 ---
 self.addEventListener('push', function (event) {
   if (!event.data) return;
@@ -85,38 +119,51 @@ self.addEventListener('push', function (event) {
 
   const options = {
     body: data.body,
-    icon: self.location.origin + '/assets/images/pwa/icon-192.svg',
-    badge: self.location.origin + '/assets/images/pwa/icon-192.svg',
+    icon: self.location.origin + '/assets/images/pwa/icon-192.png',
+    badge: self.location.origin + '/assets/images/pwa/icon-192.png',
     data: { url: data.url || '/' },
     tag: 'misechoku-notification',
     renotify: true,
   };
 
-  event.waitUntil(
-    self.registration.showNotification(data.title, options).then(function () {
-      const badge = typeof data.badge === 'number' ? data.badge : 1;
-      if (self.navigator && self.navigator.setAppBadge) {
-        return self.navigator.setAppBadge(badge).catch(function () {});
-      }
-    })
-  );
+  event.waitUntil((async function () {
+    await self.registration.showNotification(data.title, options);
+    const current = await readBadgeCount();
+    const next = typeof data.badge === 'number' ? data.badge : current + 1;
+    const applied = await applyAppBadge(next);
+    const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    clients.forEach(function (client) {
+      client.postMessage({ type: 'badge-update', count: applied });
+    });
+  })());
 });
 
 // 通知クリックでアプリを開く
 self.addEventListener('notificationclick', function (event) {
   event.notification.close();
   const url = event.notification.data && event.notification.data.url ? event.notification.data.url : '/';
-  event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clientList) {
-      for (let i = 0; i < clientList.length; i++) {
-        if (clientList[i].url.indexOf(self.location.origin) === 0 && 'focus' in clientList[i]) {
-          clientList[i].navigate(url);
-          return clientList[i].focus();
-        }
+  event.waitUntil((async function () {
+    await applyAppBadge(0);
+    const clientList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (let i = 0; i < clientList.length; i++) {
+      if (clientList[i].url.indexOf(self.location.origin) === 0 && 'focus' in clientList[i]) {
+        clientList[i].postMessage({ type: 'badge-update', count: 0 });
+        clientList[i].navigate(url);
+        return clientList[i].focus();
       }
-      if (self.clients.openWindow) {
-        return self.clients.openWindow(self.location.origin + url);
-      }
-    })
-  );
+    }
+    if (self.clients.openWindow) {
+      return self.clients.openWindow(self.location.origin + url);
+    }
+  })());
+});
+
+self.addEventListener('message', function (event) {
+  if (!event || !event.data || typeof event.data !== 'object') return;
+  if (event.data.type === 'badge-sync') {
+    const count = Number(event.data.count || 0);
+    event.waitUntil(applyAppBadge(count));
+  } else if (event.data.type === 'badge-clear') {
+    event.waitUntil(applyAppBadge(0));
+  }
 });

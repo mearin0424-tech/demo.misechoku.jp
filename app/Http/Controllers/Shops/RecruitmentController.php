@@ -49,7 +49,9 @@ class RecruitmentController extends Controller
      */
     private function getApplicationsForShop(string $shopId): array
     {
-        $jobIds = DB::table('shop_jobs')->where('shop_id', $shopId)->pluck('id');
+        $jobIds = DB::table('shop_jobs')
+            ->where('shop_id', $shopId)
+            ->pluck('id');
         if ($jobIds->isEmpty()) {
             return [];
         }
@@ -113,9 +115,22 @@ class RecruitmentController extends Controller
      */
     public function edit()
     {
+        $type = request()->query('type', 'fulltime'); // fulltime | trial | help
+        $shopId = $this->currentShopId();
+        $recruitData = $this->getRecruitData($shopId);
+
+        // 編集対象の求人種別に応じて時給などを差し替え
+        $recruit = $recruitData['recruit'];
+        if ($type === 'trial') {
+            $recruit['hourly_wage_regular'] = $recruit['trial_hourly_wage'] ?? null;
+        } elseif ($type === 'help') {
+            $recruit['hourly_wage_regular'] = $recruit['help_hourly_wage'] ?? null;
+        }
+
         return view('shops.recruit.edit', [
             'pageId' => 'job_edit', 
-            'recruit' => $this->getRecruitData($this->currentShopId())['recruit'],
+            'recruit' => $recruit,
+            'recruitType' => $type,
             'masters' => $this->adminMasterService->getRecruitmentMasters(),
         ]);
     }
@@ -130,6 +145,7 @@ class RecruitmentController extends Controller
             'message' => 'required|string|max:1000',
             'hourly_wage_regular' => 'required|integer|min:0',
             'trial_hourly_wage' => 'nullable|integer|min:0',
+            'help_hourly_wage' => 'nullable|integer|min:0',
             'noruma_reward' => 'nullable|integer|min:0',
             'bonus_condition' => 'nullable|string|max:1000',
             'salary_text' => 'nullable|string|max:1000',
@@ -179,6 +195,8 @@ class RecruitmentController extends Controller
             'hourly_wage_regular' => (string) $data['hourly_wage_regular'],
             'trial_hourly_wage' => $request->filled('trial_hourly_wage') ? (string) $data['trial_hourly_wage'] : null,
             'has_trial' => $request->filled('trial_hourly_wage') ? 1 : 0,
+            'help_hourly_wage' => $request->filled('help_hourly_wage') ? (string) $data['help_hourly_wage'] : null,
+            'has_help' => $request->boolean('has_help') && $request->filled('help_hourly_wage') ? 1 : 0,
             'noruma_reward' => $request->filled('noruma_reward') ? (string) $data['noruma_reward'] : null,
             'job_description' => $data['job_content'],
             'salary' => $data['salary_text'] ?? '',
@@ -200,14 +218,20 @@ class RecruitmentController extends Controller
             $jobPayload['qualification'] = $data['qualification'];
         }
 
-        $existing = DB::table('shop_jobs')->where('shop_id', $shopId)->exists();
+        // 本入求人 (job_type = 1) に対してのみ保存する
+        $existing = DB::table('shop_jobs')
+            ->where('shop_id', $shopId)
+            ->where('job_type', 1)
+            ->exists();
 
         if ($existing) {
             DB::table('shop_jobs')
                 ->where('shop_id', $shopId)
+                ->where('job_type', 1)
                 ->update($jobPayload);
         } else {
             DB::table('shop_jobs')->insert(array_merge($jobPayload, [
+                'job_type' => 1,
                 'created_at' => now(),
             ]));
         }
@@ -230,11 +254,15 @@ class RecruitmentController extends Controller
         $shopId = $this->currentShopId();
         $currentStatus = $this->getCurrentRecruitStatus($shopId);
         $nextStatus = $currentStatus === 1 ? 0 : 1;
-        $existing = DB::table('shop_jobs')->where('shop_id', $shopId)->exists();
+        $existing = DB::table('shop_jobs')
+            ->where('shop_id', $shopId)
+            ->where('job_type', 1)
+            ->exists();
 
         if ($existing) {
             DB::table('shop_jobs')
                 ->where('shop_id', $shopId)
+                ->where('job_type', 1)
                 ->update([
                     'status' => $nextStatus,
                     'updated_at' => now(),
@@ -242,6 +270,7 @@ class RecruitmentController extends Controller
         } else {
             DB::table('shop_jobs')->insert([
                 'shop_id' => $shopId,
+                'job_type' => 1,
                 'status' => $nextStatus,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -255,11 +284,25 @@ class RecruitmentController extends Controller
 
     private function getRecruitData(string $shopId): array
     {
+        // 本入求人 (job_type = 1) をベースとして取得
         $row = DB::table('shops')
             ->leftJoin('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
-            ->leftJoin('shop_jobs', 'shops.id', '=', 'shop_jobs.shop_id')
+            ->leftJoin('shop_jobs', function ($join) {
+                $join->on('shops.id', '=', 'shop_jobs.shop_id')
+                     ->where('shop_jobs.job_type', 1);
+            })
             ->where('shops.id', $shopId)
             ->select('shops.id', 'shop_profiles.*', 'shop_jobs.*')
+            ->first();
+
+        // 体入・ヘルプ用の別レコード（存在しない場合は null）
+        $trialRow = DB::table('shop_jobs')
+            ->where('shop_id', $shopId)
+            ->where('job_type', 2)
+            ->first();
+        $helpRow = DB::table('shop_jobs')
+            ->where('shop_id', $shopId)
+            ->where('job_type', 3)
             ->first();
 
         $meta = $this->decodeMeta($row->noruma_cond ?? null);
@@ -298,8 +341,14 @@ class RecruitmentController extends Controller
                 'map_embed_src' => null,
                 'nearest_station' => $row->station1 ?? '',
                 'hourly_wage_regular' => isset($row->hourly_wage_regular) ? (int) $row->hourly_wage_regular : 0,
-                'trial_hourly_wage' => !empty($row->has_trial) && !empty($row->trial_hourly_wage) ? (int) $row->trial_hourly_wage : null,
-                'help_hourly_wage' => !empty($row->has_help) && !empty($row->help_hourly_wage) ? (int) $row->help_hourly_wage : null,
+                'trial_hourly_wage' =>
+                    $trialRow && !empty($trialRow->status) && !empty($trialRow->trial_hourly_wage)
+                        ? (int) $trialRow->trial_hourly_wage
+                        : null,
+                'help_hourly_wage' =>
+                    $helpRow && !empty($helpRow->status) && !empty($helpRow->help_hourly_wage)
+                        ? (int) $helpRow->help_hourly_wage
+                        : null,
                 'noruma_reward' => isset($row->noruma_reward) ? (int) $row->noruma_reward : 0,
                 'bonus_condition' => $bonusExtraCondition,
                 'bonus_working_days' => $bonusWorkingDays,
@@ -346,7 +395,10 @@ class RecruitmentController extends Controller
 
     private function getRecruitMeta(string $shopId): array
     {
-        $raw = DB::table('shop_jobs')->where('shop_id', $shopId)->value('noruma_cond');
+        $raw = DB::table('shop_jobs')
+            ->where('shop_id', $shopId)
+            ->where('job_type', 1)
+            ->value('noruma_cond');
 
         return $this->decodeMeta($raw);
     }
@@ -453,7 +505,10 @@ class RecruitmentController extends Controller
 
     private function getCurrentRecruitStatus(string $shopId): int
     {
-        $status = DB::table('shop_jobs')->where('shop_id', $shopId)->value('status');
+        $status = DB::table('shop_jobs')
+            ->where('shop_id', $shopId)
+            ->where('job_type', 1)
+            ->value('status');
 
         return $status === null ? 1 : (int) $status;
     }

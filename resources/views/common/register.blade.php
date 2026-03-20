@@ -140,6 +140,125 @@
                     </div>
                 </section>
 
+                {{-- プロフィール詳細（編集画面と同等） --}}
+                <section class="register-card">
+                    <div class="register-card-head">
+                        <h2>プロフィール詳細</h2>
+                    </div>
+
+                    <label class="register-field">
+                        <span>自己紹介</span>
+                        <textarea name="intro" rows="4" placeholder="自己紹介">{{ old('intro') }}</textarea>
+                    </label>
+
+                    @if(!empty($masters['industries']) && $masters['industries']->isNotEmpty())
+                    <div class="register-field">
+                        <span>希望業種</span>
+                        <div class="register-chip-grid">
+                            @foreach($masters['industries'] as $industry)
+                                <label class="register-chip">
+                                    <input type="radio" name="industry_id" value="{{ $industry->id }}" @checked((int)old('industry_id') === (int)$industry->id)>
+                                    <span>{{ $industry->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
+                    <div class="register-grid register-grid-three">
+                        <label class="register-field">
+                            <span>身長 (cm)</span>
+                            <input type="number" name="height" value="{{ old('height') }}" min="100" max="250" placeholder="160">
+                        </label>
+                        <label class="register-field">
+                            <span>体重 (kg)</span>
+                            <input type="number" name="weight" value="{{ old('weight') }}" min="30" max="150" placeholder="48">
+                        </label>
+                        <label class="register-field">
+                            <span>3サイズ (B/W/H)</span>
+                            <div class="register-three-size">
+                                <input type="number" name="bust" value="{{ old('bust') }}" placeholder="B" min="50" max="120">
+                                <input type="number" name="waist" value="{{ old('waist') }}" placeholder="W" min="40" max="120">
+                                <input type="number" name="hip" value="{{ old('hip') }}" placeholder="H" min="50" max="120">
+                            </div>
+                        </label>
+                    </div>
+
+                    <label class="register-field">
+                        <span>希望職種</span>
+                        <input type="text" name="desired_job" value="{{ old('desired_job') }}" placeholder="希望職種を入力">
+                    </label>
+                    <label class="register-field">
+                        <span>ご自分の系統</span>
+                        <input type="text" name="my_field" value="{{ old('my_field') }}" placeholder="ご自分の系統を入力">
+                    </label>
+                    @if(!empty($masters['looks']) && $masters['looks']->isNotEmpty())
+                    <div class="register-field">
+                        <span>ルックスタグ</span>
+                        <div class="register-chip-grid">
+                            @foreach($masters['looks'] as $look)
+                                <label class="register-chip">
+                                    <input type="checkbox" name="look_tag_ids[]" value="{{ $look->id }}" @checked(in_array((int)$look->id, old('look_tag_ids', []), true))>
+                                    <span>{{ $look->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
+                    <label class="register-field">
+                        <span>ご自分の内面・特技</span>
+                        <input type="text" name="my_inner_skills" value="{{ old('my_inner_skills') }}" placeholder="内面・特技を入力">
+                    </label>
+                    @if(!empty($masters['personalities']) && $masters['personalities']->isNotEmpty())
+                    <div class="register-field">
+                        <span>性格タグ</span>
+                        <div class="register-chip-grid">
+                            @foreach($masters['personalities'] as $personality)
+                                <label class="register-chip">
+                                    <input type="checkbox" name="personality_tag_ids[]" value="{{ $personality->id }}" @checked(in_array((int)$personality->id, old('personality_tag_ids', []), true))>
+                                    <span>{{ $personality->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
+                    <div class="register-grid register-grid-two">
+                        <label class="register-field">
+                            <span>シフト希望</span>
+                            <select name="shift_hope">
+                                <option value="">基本情報の希望シフトに従う</option>
+                                <option value="週1回出勤" @selected(old('shift_hope') === '週1回出勤')>週1回出勤</option>
+                                <option value="週2回出勤" @selected(old('shift_hope') === '週2回出勤')>週2回出勤</option>
+                                <option value="週3回以上" @selected(old('shift_hope') === '週3回以上')>週3回以上</option>
+                            </select>
+                        </label>
+                        <label class="register-field">
+                            <span>勤務時間</span>
+                            <select name="work_time">
+                                <option value="">未選択</option>
+                                <option value="morning" @selected(old('work_time') === 'morning')>朝</option>
+                                <option value="day_night" @selected(old('work_time') === 'day_night')>昼or夜</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <label class="register-field">
+                        <span>現職業</span>
+                        <textarea name="current_job" rows="2" placeholder="現職業を入力">{{ old('current_job') }}</textarea>
+                    </label>
+
+                    <div class="register-field">
+                        <span>ナイトワーク経験（詳細）</span>
+                        <div class="register-radio-row">
+                            <label class="register-radio"><input type="radio" name="night_work_exp" value="none" @checked(old('night_work_exp', '') === 'none' || old('experience') === 'beginner')> 無し</label>
+                            <label class="register-radio"><input type="radio" name="night_work_exp" value="yes" @checked(old('night_work_exp') === 'yes' || old('experience') === 'experienced')> 有り</label>
+                        </div>
+                        <small class="register-field-hint">上で選択した「ナイトワーク経験」と同一です。上で未選択の場合はここで指定してください。</small>
+                    </div>
+                </section>
+
                 {{-- プロフィール画像（必須 1枚） --}}
                 <section class="register-card">
                     <div class="register-card-head">
@@ -239,6 +358,29 @@
                             placeholder="例：7-12-34 ミセチョクビル 5F"
                         >
                     </label>
+
+                    <label class="register-field">
+                        <span>キャッチコピー（ひとこと）</span>
+                        <input type="text" name="word" value="{{ old('word') }}" placeholder="例：最高級の夜を、あなたに。">
+                        <small class="register-field-hint">一覧やプロフィールに表示される短い紹介文です。</small>
+                    </label>
+                    <label class="register-field">
+                        <span>お店の紹介文</span>
+                        <textarea name="overview" rows="5" placeholder="お店のコンセプト、雰囲気、客層などを入力">{{ old('overview') }}</textarea>
+                    </label>
+                    @if(!empty($masters['industries']) && $masters['industries']->isNotEmpty())
+                    <div class="register-field">
+                        <span>業種</span>
+                        <div class="register-chip-grid">
+                            @foreach($masters['industries'] as $industry)
+                                <label class="register-chip">
+                                    <input type="radio" name="industry_id" value="{{ $industry->id }}" @checked((int)old('industry_id') === (int)$industry->id)>
+                                    <span>{{ $industry->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
 
                     <div class="register-field">
                         <span>ご利用プラン <em>必須</em></span>
@@ -472,6 +614,70 @@
             grid-template-columns: repeat(3, minmax(0, 1fr));
         }
 
+        .register-grid-three {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .register-chip-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .register-chip {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .register-chip input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .register-chip span {
+            display: inline-flex;
+            align-items: center;
+            min-height: 38px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+            font-size: 0.85rem;
+        }
+
+        .register-chip input:checked + span {
+            border-color: rgba(229, 193, 88, 0.5);
+            background: rgba(212, 175, 55, 0.18);
+            color: #f8e7b0;
+        }
+
+        .register-three-size {
+            display: flex;
+            gap: 8px;
+        }
+
+        .register-three-size input {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .register-radio-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .register-radio {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            color: #f8f1e1;
+        }
+
         .register-field {
             display: flex;
             flex-direction: column;
@@ -498,7 +704,8 @@
         }
 
         .register-field input,
-        .register-field select {
+        .register-field select,
+        .register-field textarea {
             width: 100%;
             padding: 13px 14px;
             border-radius: 16px;
@@ -508,12 +715,19 @@
             font-size: 0.94rem;
         }
 
-        .register-field input::placeholder {
+        .register-field textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .register-field input::placeholder,
+        .register-field textarea::placeholder {
             color: rgba(214, 198, 198, 0.48);
         }
 
         .register-field input:focus,
-        .register-field select:focus {
+        .register-field select:focus,
+        .register-field textarea:focus {
             outline: none;
             border-color: rgba(253, 240, 178, 0.72);
             box-shadow: 0 0 0 3px rgba(229, 193, 88, 0.12);

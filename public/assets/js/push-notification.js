@@ -30,7 +30,12 @@
   function initBadgeFromPage() {
     var el = document.querySelector('[data-notification-badge]');
     var count = el ? parseInt(el.getAttribute('data-notification-badge'), 10) : 0;
-    if (!isNaN(count)) setAppBadge(count);
+    if (!isNaN(count)) {
+      setAppBadge(count);
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({ type: 'badge-sync', count: count });
+      }
+    }
   }
 
   function enableNotifications() {
@@ -130,16 +135,25 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     initBadgeFromPage();
+    var btnInstall = document.getElementById('pwa-install-inline-btn');
+    if (btnInstall && typeof window.triggerPwaInstall === 'function') {
+      btnInstall.addEventListener('click', function () { window.triggerPwaInstall(); });
+    }
 
-    var btnEnable = document.getElementById('push-enable-btn');
-    if (btnEnable) {
+    if (navigator.serviceWorker) {
+      navigator.serviceWorker.addEventListener('message', function (event) {
+        if (!event || !event.data || event.data.type !== 'badge-update') return;
+        setAppBadge(Number(event.data.count || 0));
+      });
+    }
+
+    document.querySelectorAll('#push-enable-btn').forEach(function (btnEnable) {
       btnEnable.addEventListener('click', function () { enableNotifications(); });
-    }
+    });
 
-    var btnTest = document.getElementById('push-test-btn');
-    if (btnTest) {
+    document.querySelectorAll('#push-test-btn').forEach(function (btnTest) {
       btnTest.addEventListener('click', function () { sendTestNotification(); });
-    }
+    });
   });
 
   window.MisechokuPush = {

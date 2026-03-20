@@ -70,10 +70,12 @@
                                 @endforeach
                             </div>
 
-                            <button type="submit" name="auth_channel" value="line" class="demo-login-line-btn">
+                            @if (in_array($selectedRole, ['cast', 'shop']))
+                            <a href="{{ route('login.line.redirect', ['role' => $selectedRole]) }}" class="demo-login-line-btn" id="demo-login-line-btn" data-base-url="{{ route('login.line.redirect') }}">
                                 <span class="demo-login-line-btn-shine"></span>
-                                <span>LINEでログイン ※未実装</span>
-                            </button>
+                                <span>LINEでログイン</span>
+                            </a>
+                            @endif
 
                             <div class="demo-login-divider">
                                 <span>OR</span>
@@ -640,8 +642,10 @@
 
                     accountInput.value = activeSelect.value;
                     emailDisplay.value = activeRoleButton.dataset.demoEmail || 'demo@misechoku.jp';
+
                 };
 
+                const lineBtn = document.getElementById('demo-login-line-btn');
                 const switchRole = function (role) {
                     roleInput.value = role;
 
@@ -652,6 +656,15 @@
                     accountSelects.forEach(function (select) {
                         select.classList.toggle('is-active', select.dataset.accountSelect === role);
                     });
+
+                    if (lineBtn) {
+                        if (role === 'cast' || role === 'shop') {
+                            lineBtn.style.display = '';
+                            lineBtn.href = lineBtn.getAttribute('data-base-url') + '?role=' + encodeURIComponent(role);
+                        } else {
+                            lineBtn.style.display = 'none';
+                        }
+                    }
 
                     syncAccountInput(role);
                 };

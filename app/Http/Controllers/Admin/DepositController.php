@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Storage;
 
 class DepositController extends Controller
 {
@@ -65,7 +66,81 @@ class DepositController extends Controller
     }
 
     /**
-     * 運営側：キャストへの振込実行
+     * 振込作業開始（支払準備中 → 振込中、他担当ロック）
+     */
+    public function transferStart(Request $request, int $deposit)
+    {
+        $operatorId = (string) (auth()->guard('admin')->id() ?? '');
+        $result = $this->billingManagementService->startTransfer($deposit, $operatorId ?: null);
+
+        return redirect()
+            ->route('admin.deposits.index')
+            ->with($result['success'] ? 'status' : 'error', $result['message']);
+    }
+
+    /**
+     * 振込完了（証跡画像・チェックリスト・振込作業完了日必須。支払済は不可逆）
+     */
+    public function transferComplete(Request $request, int $deposit)
+    {
+        $payload = $request->validate([
+            'transferred_at' => 'required|date',
+            'reference' => 'nullable|string|max:255',
+            'note' => 'nullable|string|max:1000',
+            'evidence_screenshot' => 'required|file|image|max:10240',
+            'checklist_confirmed_account' => 'required|accepted',
+            'checklist_confirmed_amount' => 'required|accepted',
+        ], [
+            'evidence_screenshot.required' => '振込完了画面のスクリーンショットをアップロードしてください。',
+            'evidence_screenshot.image' => '画像ファイル（JPEG/PNG等）を指定してください。',
+        ]);
+
+        $file = $request->file('evidence_screenshot');
+        $path = $file->store('payment_evidence', 'public');
+
+        $result = $this->billingManagementService->completeTransfer($deposit, [
+            'transferred_at' => $payload['transferred_at'],
+            'reference' => $payload['reference'] ?? null,
+            'note' => $payload['note'] ?? null,
+            'checklist_confirmed_account' => $payload['checklist_confirmed_account'],
+            'checklist_confirmed_amount' => $payload['checklist_confirmed_amount'],
+        ], $path);
+
+        if (!$result['success']) {
+            Storage::disk('public')->delete($path);
+        }
+
+        return redirect()
+            ->route('admin.deposits.index')
+            ->with($result['success'] ? 'status' : 'error', $result['message']);
+    }
+
+    /**
+     * 振込タスクを無効化（組戻し・口座誤り時。口座修正後は別タスクで再発行）
+     */
+    public function paymentTaskInvalidate(Request $request, int $deposit)
+    {
+        $result = $this->billingManagementService->invalidatePaymentTask($deposit);
+
+        return redirect()
+            ->route('admin.deposits.index')
+            ->with($result['success'] ? 'status' : 'error', $result['message']);
+    }
+
+    /**
+     * 要返金フラグを立てる（支払後にレビュー不正等が判明した場合）
+     */
+    public function paymentTaskRefundFlag(Request $request, int $deposit)
+    {
+        $result = $this->billingManagementService->setPaymentTaskRefundRequired($deposit);
+
+        return redirect()
+            ->route('admin.deposits.index')
+            ->with($result['success'] ? 'status' : 'error', $result['message']);
+    }
+
+    /**
+     * 運営側：キャストへの振込実行（PaymentTask 未使用時の従来フロー）
      */
     public function transferCast(Request $request, int $deposit)
     {

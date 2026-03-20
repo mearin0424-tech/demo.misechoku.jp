@@ -6,28 +6,38 @@ use App\Consts\CommonConsts;
 use App\Http\Controllers\Controller;
 use App\Models\Cast;
 use App\Models\ShopManager;
+use App\Services\AdminMasterService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class RegistrationController extends Controller
 {
+    public function __construct(private readonly AdminMasterService $adminMasterService)
+    {
+    }
+
     public function showCast(): View
     {
-        return view('common.register', $this->buildViewData('cast'));
+        return view('common.register', array_merge($this->buildViewData('cast'), [
+            'masters' => $this->adminMasterService->getCastProfileMasters(),
+        ]));
     }
 
     public function showShop(): View
     {
-        return view('common.register', $this->buildViewData('shop'));
+        return view('common.register', array_merge($this->buildViewData('shop'), [
+            'masters' => $this->adminMasterService->getShopProfileMasters(),
+        ]));
     }
 
     public function storeCast(Request $request): RedirectResponse
     {
-        $request->validate([
+        $rules = [
             'nickname' => ['required', 'string', 'max:50'],
             'name' => ['required', 'string', 'max:100'],
             'birth_year' => ['required', 'integer', 'between:1950,2100'],
@@ -44,7 +54,36 @@ class RegistrationController extends Controller
             'profile_image' => ['required', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:2048'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'terms' => ['accepted'],
-        ], [
+            'intro' => ['nullable', 'string', 'max:5000'],
+            'height' => ['nullable', 'integer', 'min:100', 'max:250'],
+            'weight' => ['nullable', 'integer', 'min:30', 'max:150'],
+            'bust' => ['nullable', 'integer', 'min:50', 'max:120'],
+            'waist' => ['nullable', 'integer', 'min:40', 'max:120'],
+            'hip' => ['nullable', 'integer', 'min:50', 'max:120'],
+            'desired_job' => ['nullable', 'string', 'max:255'],
+            'my_field' => ['nullable', 'string', 'max:255'],
+            'my_inner_skills' => ['nullable', 'string', 'max:500'],
+            'shift_hope' => ['nullable', 'string', 'in:週1回出勤,週2回出勤,週3回以上'],
+            'work_time' => ['nullable', 'string', 'in:morning,day_night'],
+            'current_job' => ['nullable', 'string', 'max:1000'],
+            'night_work_exp' => ['nullable', 'string', 'in:none,yes'],
+            'industry_id' => ['nullable', 'integer'],
+            'look_tag_ids' => ['nullable', 'array'],
+            'look_tag_ids.*' => ['integer'],
+            'personality_tag_ids' => ['nullable', 'array'],
+            'personality_tag_ids.*' => ['integer'],
+        ];
+        if (Schema::hasTable('industries')) {
+            $rules['industry_id'][] = 'exists:industries,id';
+        }
+        if (Schema::hasTable('tags_cast_looks')) {
+            $rules['look_tag_ids.*'][] = 'exists:tags_cast_looks,id';
+        }
+        if (Schema::hasTable('tags_cast_personality')) {
+            $rules['personality_tag_ids.*'][] = 'exists:tags_cast_personality,id';
+        }
+
+        $request->validate($rules, [
             'zip.required' => '郵便番号を入力してください。',
             'zip.regex' => '郵便番号は 7 桁、または 123-4567 形式で入力してください。',
         ]);
@@ -73,7 +112,21 @@ class RegistrationController extends Controller
                 'updated_at' => now(),
             ]);
 
-            DB::table('cast_profiles')->insert([
+            $shiftHope = $request->filled('shift_hope') ? $request->input('shift_hope') : $this->shiftStyleToShiftHope((string) $request->input('shift_style'));
+            $nightWorkExp = $request->filled('night_work_exp') ? $request->input('night_work_exp') : ($request->input('experience') === 'experienced' ? 'yes' : 'none');
+            $memo = [
+                'desired_job' => $request->input('desired_job'),
+                'my_field' => $request->input('my_field'),
+                'my_inner_skills' => $request->input('my_inner_skills'),
+                'shift_hope' => $shiftHope,
+                'work_time' => $request->input('work_time'),
+                'current_job' => $request->input('current_job'),
+                'night_work_exp' => $nightWorkExp,
+                'look_tag_ids' => array_values(array_map('intval', $request->input('look_tag_ids', []))),
+                'personality_tag_ids' => array_values(array_map('intval', $request->input('personality_tag_ids', []))),
+            ];
+
+            $profilePayload = [
                 'cast_id' => $castId,
                 'nickname' => $request->input('nickname'),
                 'name' => $request->input('name'),
@@ -88,11 +141,23 @@ class RegistrationController extends Controller
                 'city' => $request->input('city'),
                 'addr1' => $request->input('addr1'),
                 'tel' => $request->input('phone'),
-                'shift' => $this->mapCastShift((string) $request->input('shift_style')),
-                'exp' => $request->input('experience') === 'experienced' ? 1 : 0,
+                'shift' => $this->shiftHopeToCode($shiftHope),
+                'exp' => $nightWorkExp === 'yes' ? 1 : 0,
+                'pr' => $request->input('intro'),
+                'height' => $request->filled('height') ? (int) $request->input('height') : null,
+                'weight' => $request->filled('weight') ? (int) $request->input('weight') : null,
+                'bust' => $request->filled('bust') ? (int) $request->input('bust') : null,
+                'waist' => $request->filled('waist') ? (int) $request->input('waist') : null,
+                'hip' => $request->filled('hip') ? (int) $request->input('hip') : null,
+                'profession' => $request->input('current_job'),
+                'memo' => json_encode($memo, JSON_UNESCAPED_UNICODE),
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]);
+            ];
+            if (Schema::hasColumn('cast_profiles', 'industry_id')) {
+                $profilePayload['industry_id'] = $request->input('industry_id') ?: null;
+            }
+            DB::table('cast_profiles')->insert($profilePayload);
 
             // プロフィール画像（必須1枚）を保存
             if ($request->hasFile('profile_image')) {
@@ -123,6 +188,9 @@ class RegistrationController extends Controller
                 }
             }
 
+            $this->syncCastTags($castId, 'looks', $request->input('look_tag_ids', []));
+            $this->syncCastTags($castId, 'personality', $request->input('personality_tag_ids', []));
+
             return Cast::query()->findOrFail($castId);
         });
 
@@ -137,7 +205,7 @@ class RegistrationController extends Controller
 
     public function storeShop(Request $request): RedirectResponse
     {
-        $request->validate([
+        $shopRules = [
             'company_name' => ['required', 'string', 'max:100'],
             'shop_name' => ['required', 'string', 'max:100'],
             'contact_name' => ['required', 'string', 'max:100'],
@@ -152,7 +220,14 @@ class RegistrationController extends Controller
             'shop_profile_image' => ['required', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:2048'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'terms' => ['accepted'],
-        ], [
+            'word' => ['nullable', 'string', 'max:255'],
+            'overview' => ['nullable', 'string', 'max:2000'],
+            'industry_id' => ['nullable', 'integer'],
+        ];
+        if (Schema::hasTable('industries')) {
+            $shopRules['industry_id'][] = 'exists:industries,id';
+        }
+        $request->validate($shopRules, [
             'zip.required' => '郵便番号を入力してください。',
             'zip.regex' => '郵便番号は 7 桁、または 123-4567 形式で入力してください。',
         ]);
@@ -170,7 +245,7 @@ class RegistrationController extends Controller
                 'updated_at' => now(),
             ]);
 
-            DB::table('shop_profiles')->insert([
+            $shopProfilePayload = [
                 'shop_id' => $shopId,
                 'shop_name' => $request->input('shop_name'),
                 'zip' => $this->normalizeZip($request->input('zip')),
@@ -178,13 +253,17 @@ class RegistrationController extends Controller
                 'city' => $request->input('city'),
                 'addr2' => $request->input('address'),
                 'tel' => $request->input('phone'),
-                'catch' => $this->mapBusinessTypeLabel((string) $request->input('business_type')),
-                'overview' => $request->input('company_name'),
-                'message' => 'ご利用プラン: ' . $this->mapPlanLabel((string) $request->input('plan')),
+                'catch' => $request->filled('word') ? $request->input('word') : $this->mapBusinessTypeLabel((string) $request->input('business_type')),
+                'overview' => $request->filled('overview') ? $request->input('overview') : $request->input('company_name'),
+                'message' => $request->filled('overview') ? $request->input('overview') : ('ご利用プラン: ' . $this->mapPlanLabel((string) $request->input('plan'))),
                 'memo' => '運営会社名: ' . $request->input('company_name'),
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]);
+            ];
+            if (Schema::hasColumn('shop_profiles', 'industry_id')) {
+                $shopProfilePayload['industry_id'] = $request->input('industry_id') ?: null;
+            }
+            DB::table('shop_profiles')->insert($shopProfilePayload);
 
             DB::table('shop_managers')->insert([
                 'id' => $managerId,
@@ -301,6 +380,47 @@ class RegistrationController extends Controller
             'twice' => 2,
             default => 3,
         };
+    }
+
+    private function shiftStyleToShiftHope(string $shiftStyle): string
+    {
+        return match ($shiftStyle) {
+            'once' => '週1回出勤',
+            'twice' => '週2回出勤',
+            'flex' => '週3回以上',
+            default => '週1回出勤',
+        };
+    }
+
+    private function shiftHopeToCode(?string $shiftHope): ?int
+    {
+        return match ($shiftHope) {
+            '週1回出勤' => 1,
+            '週2回出勤' => 2,
+            '週3回以上' => 3,
+            default => null,
+        };
+    }
+
+    private function syncCastTags(string $castId, string $tagType, array $tagIds): void
+    {
+        if (!DB::getSchemaBuilder()->hasTable('cast_tag_relations')) {
+            return;
+        }
+        $tagIds = array_values(array_unique(array_filter(array_map('intval', $tagIds))));
+        DB::table('cast_tag_relations')
+            ->where('cast_id', $castId)
+            ->where('tag_type', $tagType)
+            ->delete();
+        foreach ($tagIds as $tagId) {
+            DB::table('cast_tag_relations')->insert([
+                'cast_id' => $castId,
+                'tag_id' => $tagId,
+                'tag_type' => $tagType,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
     }
 
     private function mapBusinessTypeLabel(string $businessType): string

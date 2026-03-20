@@ -126,12 +126,32 @@
             <p class="recruit-section-copy">もっとも比較されやすい項目です。通常時給、体験時給、ボーナス条件が一目で分かるようにそろえておくと、プレビューでも見やすくなります。</p>
             <div class="recruit-info-grid" style="margin-bottom: 16px;">
                 <div class="recruit-form-group" style="margin-bottom: 0;">
-                    <label class="recruit-label">通常時給 <span class="recruit-field-required">必須</span></label>
+                    <label class="recruit-label">
+                        @if(($recruitType ?? 'fulltime') === 'trial')
+                            体入時給 <span class="recruit-field-required">必須</span>
+                        @elseif(($recruitType ?? 'fulltime') === 'help')
+                            ヘルプ時給 <span class="recruit-field-required">必須</span>
+                        @else
+                            通常時給 <span class="recruit-field-required">必須</span>
+                        @endif
+                    </label>
                     <input type="number" name="hourly_wage_regular" class="recruit-input" value="{{ old('hourly_wage_regular', $recruit['hourly_wage_regular']) }}" placeholder="5000">
                 </div>
                 <div class="recruit-form-group" style="margin-bottom: 0;">
                     <label class="recruit-label">体験時給</label>
                     <input type="number" name="trial_hourly_wage" class="recruit-input" value="{{ old('trial_hourly_wage', $recruit['trial_hourly_wage']) }}" placeholder="4000">
+                </div>
+            </div>
+            <div class="recruit-info-grid" style="margin-bottom: 16px;">
+                <div class="recruit-form-group" style="margin-bottom: 0;">
+                    <label class="recruit-label">ヘルプ時給</label>
+                    <input type="number" name="help_hourly_wage" class="recruit-input" value="{{ old('help_hourly_wage', $recruit['help_hourly_wage'] ?? null) }}" placeholder="3500">
+                </div>
+                <div class="recruit-form-group" style="margin-bottom: 0; align-self: flex-end;">
+                    <label class="recruit-label">
+                        <input type="checkbox" name="has_help" value="1" {{ old('has_help', !empty($recruit['help_hourly_wage'])) ? 'checked' : '' }}>
+                        ヘルプ求人を公開する
+                    </label>
                 </div>
             </div>
             <div class="recruit-form-group">
