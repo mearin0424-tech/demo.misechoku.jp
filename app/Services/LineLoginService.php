@@ -30,12 +30,13 @@ class LineLoginService
      */
     public function getAuthorizationUrl(string $state): string
     {
+        // openid を付ける場合は nonce 必須（未指定だと LINE 側が 400 を返す）。/v2/profile は profile のみで可。
         $params = http_build_query([
             'response_type' => 'code',
             'client_id' => $this->clientId,
             'redirect_uri' => $this->redirectUri,
             'state' => $state,
-            'scope' => 'profile openid',
+            'scope' => 'profile',
         ]);
 
         return $this->authorizeUrl . '?' . $params;
