@@ -5,7 +5,7 @@ namespace App\Http\Requests\Admin;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreColumnArticleRequest extends FormRequest
+class UpdateNoticeRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -17,22 +17,20 @@ class StoreColumnArticleRequest extends FormRequest
         if ($this->input('slug') === '') {
             $this->merge(['slug' => null]);
         }
-        if ($this->input('column_category_id') === '') {
-            $this->merge(['column_category_id' => null]);
-        }
     }
 
     public function rules(): array
     {
+        $notice = $this->route('notice');
+
         return [
             'title' => ['required', 'string', 'max:200'],
-            'slug' => ['nullable', 'string', 'max:191', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'unique:column_articles,slug'],
-            'column_category_id' => [
-                'required',
-                'integer',
-                Rule::exists('column_categories', 'id')->where(function ($query) {
-                    $query->where('del_flg', 0);
-                }),
+            'slug' => [
+                'nullable',
+                'string',
+                'max:191',
+                'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
+                Rule::unique('notices', 'slug')->ignore($notice),
             ],
             'body' => ['required', 'string'],
             'is_published' => ['sometimes', 'boolean'],
@@ -48,7 +46,6 @@ class StoreColumnArticleRequest extends FormRequest
         return [
             'title' => 'タイトル',
             'slug' => 'スラッグ',
-            'column_category_id' => 'カテゴリ',
             'body' => '本文',
             'published_at' => '公開日時',
         ];

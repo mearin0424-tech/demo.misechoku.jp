@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 // 蜈ｱ騾壹・隱崎ｨｼ邉ｻ
 use App\Http\Controllers\Common\PageController;
 use App\Http\Controllers\Common\ColumnArticleController;
+use App\Http\Controllers\Common\SupportNoticeController;
 use App\Http\Controllers\Common\SettingController;
 use App\Http\Controllers\Common\DemoLoginController;
 use App\Http\Controllers\Common\BankLookupController;
@@ -163,6 +164,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // 縺顔衍繧峨○邂｡逅・
         Route::get('/notices', [AdminNotice::class, 'index'])->name('notices.index');
+        Route::get('/notices/create', [AdminNotice::class, 'create'])->name('notices.create');
+        Route::post('/notices', [AdminNotice::class, 'store'])->name('notices.store');
+        Route::get('/notices/{notice}/edit', [AdminNotice::class, 'edit'])->name('notices.edit');
+        Route::put('/notices/{notice}', [AdminNotice::class, 'update'])->name('notices.update');
+        Route::delete('/notices/{notice}', [AdminNotice::class, 'destroy'])->name('notices.destroy');
 
         // 繧ｳ繝ｩ繝邂｡逅・
         Route::get('/columns', [AdminColumn::class, 'index'])->name('columns.index');
@@ -355,6 +361,9 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
 
     Route::get('/column', [ColumnArticleController::class, 'index'])->name('column.index');
     Route::get('/column/{slug}', [ColumnArticleController::class, 'show'])->name('column.show');
+
+    Route::get('/notices', [SupportNoticeController::class, 'index'])->name('notices.index');
+    Route::get('/notices/{slug}', [SupportNoticeController::class, 'show'])->name('notices.show');
 });
 
 /*
@@ -405,6 +414,9 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
 
     Route::get('/column', [ColumnArticleController::class, 'index'])->name('column.index');
     Route::get('/column/{slug}', [ColumnArticleController::class, 'show'])->name('column.show');
+
+    Route::get('/notices', [SupportNoticeController::class, 'index'])->name('notices.index');
+    Route::get('/notices/{slug}', [SupportNoticeController::class, 'show'])->name('notices.show');
 });
 
 /* 蜀・Κ繧ｭ繝｣繝・す繝･繧ｯ繝ｪ繧｢逕ｨ */

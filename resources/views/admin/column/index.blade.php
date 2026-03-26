@@ -39,7 +39,7 @@
                         <tr>
                             <td>{{ $column->id }}</td>
                             <td>{{ $column->title }}</td>
-                            <td>{{ $column->category ?: '-' }}</td>
+                            <td>{{ $column->columnCategory?->name ?? '-' }}</td>
                             <td>{{ $column->status_label }}</td>
                             <td>
                                 @php

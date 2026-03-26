@@ -20,8 +20,8 @@
         <header class="support-column-article-header">
             <h1 class="support-column-title">{{ $article->title }}</h1>
             <p class="support-column-item-meta">
-                @if($article->category)
-                    カテゴリ：{{ $article->category }} ／
+                @if($article->columnCategory)
+                    カテゴリ：{{ $article->columnCategory->name }} ／
                 @endif
                 公開：{{ $article->published_at?->format('Y-m-d H:i') ?? '-' }}
             </p>

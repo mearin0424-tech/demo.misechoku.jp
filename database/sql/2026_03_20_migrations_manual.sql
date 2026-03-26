@@ -88,5 +88,8 @@ CREATE TABLE IF NOT EXISTS `notification_preferences` (
   UNIQUE KEY `notification_preferences_user_unique` (`user_type`, `user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- column_articles は database/sql/2026_03_22_000000_create_column_articles.sql
--- および 2026_03_22_120000_add_image_and_tags_to_column_articles.sql を参照
+-- column_articles は database/sql/2026_03_22_000000_create_column_articles.sql、
+-- 2026_03_22_120000_add_image_and_tags_to_column_articles.sql（任意）、
+-- 2026_03_23_column_articles_column_category.sql（カテゴリFK・旧カラム削除）を参照
+--
+-- お知らせ notices: database/sql/2026_03_24_create_notices.sql

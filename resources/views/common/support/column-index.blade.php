@@ -26,15 +26,12 @@
                 <a href="{{ route($showRoute, $article->slug) }}" class="support-column-item-link">
                     <h2 class="support-column-item-title">{{ $article->title }}</h2>
                     <p class="support-column-item-meta">
-                        @if($article->category)
-                            カテゴリ：{{ $article->category }}
+                        @if($article->columnCategory)
+                            カテゴリ：{{ $article->columnCategory->name }}
                             ／
                         @endif
                         更新：{{ $article->published_at?->format('Y-m-d') ?? $article->updated_at->format('Y-m-d') }}
                     </p>
-                    @if($article->summary)
-                        <p class="support-column-item-summary">{{ $article->summary }}</p>
-                    @endif
                 </a>
             </article>
         @empty
@@ -121,12 +118,6 @@
     font-size: 0.72rem;
     color: #b69f9f;
     margin-bottom: 8px;
-}
-
-.support-column-item-summary {
-    font-size: 0.85rem;
-    line-height: 1.7;
-    color: #efe3e3;
 }
 
 .support-column-empty {

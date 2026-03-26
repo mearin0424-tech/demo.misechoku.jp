@@ -14,6 +14,12 @@
         </div>
     @endif
 
+    @if($categories->isEmpty())
+        <div class="admin-alert" style="border-color: var(--admin-yellow); margin-bottom: 16px;">
+            カテゴリマスタ（column_categories）に有効なデータがありません。先にマスタメンテナンス等でカテゴリを登録してください。
+        </div>
+    @endif
+
     <form method="post" action="{{ $isEdit ? route('admin.columns.update', $column) : route('admin.columns.store') }}" class="admin-bank-form">
         @csrf
         @if($isEdit)
@@ -33,12 +39,15 @@
 
         <div class="admin-form-row">
             <label class="admin-label">カテゴリ</label>
-            <input type="text" name="category" class="admin-input" value="{{ old('category', optional($column)->category) }}" maxlength="100" placeholder="例: 運営ノウハウ">
-        </div>
-
-        <div class="admin-form-row">
-            <label class="admin-label">一覧用抜粋</label>
-            <textarea name="summary" class="admin-input" rows="3" maxlength="2000" placeholder="一覧に表示する短い説明">{{ old('summary', optional($column)->summary) }}</textarea>
+            <select name="column_category_id" class="admin-input" required>
+                <option value="" disabled {{ old('column_category_id', optional($column)->column_category_id) ? '' : 'selected' }}>選択してください</option>
+                @foreach($categories as $cat)
+                    <option value="{{ $cat->id }}" {{ (string) old('column_category_id', optional($column)->column_category_id) === (string) $cat->id ? 'selected' : '' }}>
+                        {{ $cat->name }}
+                    </option>
+                @endforeach
+            </select>
+            <small style="display:block; margin-top:6px; color:#7c8ba3;">マスタの column_categories から選択します。</small>
         </div>
 
         <div class="admin-form-row">
@@ -80,7 +89,7 @@
         </div>
 
         <div class="admin-form-actions">
-            <button type="submit" class="btn-action manage">
+            <button type="submit" class="btn-action manage" @if($categories->isEmpty()) disabled @endif>
                 <i class="fas fa-save"></i> {{ $isEdit ? '更新する' : '登録する' }}
             </button>
             <a href="{{ route('admin.columns.index') }}" class="btn-action" style="margin-left:8px;text-decoration:none;display:inline-flex;align-items:center;">一覧へ戻る</a>

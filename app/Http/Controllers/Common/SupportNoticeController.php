@@ -3,20 +3,19 @@
 namespace App\Http\Controllers\Common;
 
 use App\Http\Controllers\Controller;
-use App\Models\ColumnArticle;
+use App\Models\Notice;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-class ColumnArticleController extends Controller
+class SupportNoticeController extends Controller
 {
     public function index(Request $request): View
     {
-        $isGuest = $request->routeIs('pages.support.column');
+        $isGuest = $request->routeIs('pages.support.notices');
         $isCast = $request->is('cast/*');
         $isShop = $request->is('shop/*');
 
-        $query = ColumnArticle::query()
-            ->with('columnCategory')
+        $query = Notice::query()
             ->published()
             ->orderByDesc('published_at')
             ->orderByDesc('id');
@@ -29,10 +28,10 @@ class ColumnArticleController extends Controller
             $query->forShop();
         }
 
-        $articles = $query->paginate(12)->withQueryString();
+        $notices = $query->paginate(12)->withQueryString();
 
-        return view('common.support.column-index', [
-            'articles' => $articles,
+        return view('common.support.notice-index', [
+            'notices' => $notices,
             'isCast' => $isCast,
             'isShop' => $isShop,
             'isGuest' => $isGuest,
@@ -41,12 +40,11 @@ class ColumnArticleController extends Controller
 
     public function show(Request $request, string $slug): View
     {
-        $isGuest = $request->routeIs('pages.support.column.show');
+        $isGuest = $request->routeIs('pages.support.notices.show');
         $isCast = $request->is('cast/*');
         $isShop = $request->is('shop/*');
 
-        $query = ColumnArticle::query()
-            ->with('columnCategory')
+        $query = Notice::query()
             ->published()
             ->where('slug', $slug);
 
@@ -58,10 +56,10 @@ class ColumnArticleController extends Controller
             $query->forShop();
         }
 
-        $article = $query->firstOrFail();
+        $notice = $query->firstOrFail();
 
-        return view('common.support.column-show', [
-            'article' => $article,
+        return view('common.support.notice-show', [
+            'notice' => $notice,
             'isCast' => $isCast,
             'isShop' => $isShop,
             'isGuest' => $isGuest,

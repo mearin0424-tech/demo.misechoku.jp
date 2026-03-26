@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreColumnArticleRequest;
 use App\Http\Requests\Admin\UpdateColumnArticleRequest;
 use App\Models\ColumnArticle;
+use App\Models\Master\ColumnCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -15,6 +16,7 @@ class ColumnController extends Controller
     public function index(): View
     {
         $columns = ColumnArticle::query()
+            ->with('columnCategory')
             ->orderByDesc('published_at')
             ->orderByDesc('id')
             ->paginate(20);
@@ -24,7 +26,9 @@ class ColumnController extends Controller
 
     public function create(): View
     {
-        return view('admin.column.create');
+        return view('admin.column.create', [
+            'categories' => $this->columnCategories(),
+        ]);
     }
 
     public function store(StoreColumnArticleRequest $request): RedirectResponse
@@ -46,7 +50,10 @@ class ColumnController extends Controller
 
     public function edit(ColumnArticle $column): View
     {
-        return view('admin.column.edit', compact('column'));
+        return view('admin.column.edit', [
+            'column' => $column,
+            'categories' => $this->columnCategories(),
+        ]);
     }
 
     public function update(UpdateColumnArticleRequest $request, ColumnArticle $column): RedirectResponse
@@ -77,7 +84,12 @@ class ColumnController extends Controller
 
     private function normalizePayload(Request $request): array
     {
-        $data = $request->validated();
+        // DB に存在するカラムのみ（fillable）に限定し、旧 category / summary などを除外する
+        $data = array_intersect_key(
+            $request->validated(),
+            array_flip((new ColumnArticle)->getFillable())
+        );
+        unset($data['category'], $data['summary']);
 
         $data['is_published'] = $request->boolean('is_published');
         $data['visible_to_cast'] = $request->boolean('visible_to_cast');
@@ -91,5 +103,13 @@ class ColumnController extends Controller
         }
 
         return $data;
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, ColumnCategory>
+     */
+    private function columnCategories()
+    {
+        return ColumnCategory::query()->active()->orderBy('name')->get();
     }
 }

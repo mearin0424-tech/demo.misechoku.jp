@@ -5,6 +5,6 @@
 @section('content')
     <div class="admin-page">
         <h1 class="admin-title">コラム編集</h1>
-        @include('admin.column.form')
+        @include('admin.column.form', ['categories' => $categories])
     </div>
 @endsection
