@@ -41,7 +41,7 @@ class CastController extends Controller
                     'name' => $cast->nickname ?: ($cast->name ?: '未設定'),
                     'fee' => 0,
                     'published_at' => $cast->created_at,
-                    'identity_status' => ((int) ($cast->identity_document_status ?? 0)) === 1 ? '確認済み' : '未確認',
+                    'identity_status' => ((int) ($cast->identity_document_status ?? 0)) === 2 ? '確認済み' : '未確認',
                     'operation_summary' => $summary,
                 ];
             });

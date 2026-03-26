@@ -66,7 +66,7 @@
         <div class="main-layout-container flex-1 flex flex-col min-w-0">
 
             {{-- ヘッダー（ページタイトルを渡して表示） --}}
-            @include('layouts.parts.header', ['headerTitle' => trim($__env->yieldContent('title'))])
+            @yield('header')
 
             {{-- @yield('guide_message') で各ページの設定内容を注入する --}}
             @include('layouts.parts.character-guide', ['guideMessage' => $__env->yieldContent('guide_message')])
