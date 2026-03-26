@@ -29,6 +29,11 @@
                     <div class="text-xs text-gray-400">店舗書類の未処理</div>
                     <div style="font-size:1.5rem; font-weight:700;">{{ $summary['shop_pending'] ?? 0 }}件</div>
                 </div>
+                <div class="admin-card">
+                    <div class="text-xs text-gray-400">審査完了（実績・累計）</div>
+                    <div style="font-size:1.5rem; font-weight:700;">{{ number_format((int) (($adminOperationAchievements ?? [])['admin.verification.index'] ?? 0)) }}件</div>
+                    <p class="text-xs text-gray-400" style="margin:8px 0 0; line-height:1.5;">承認・却下まで完了した本人確認・書類の合計です。</p>
+                </div>
             </div>
         </section>
 

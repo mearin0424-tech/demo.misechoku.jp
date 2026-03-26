@@ -57,6 +57,7 @@ class AppServiceProvider extends ServiceProvider
         View::composer('layouts.admin', function ($view) {
             $svc = app(AdminOperationalSummaryService::class);
             $view->with('adminOperationBadges', $svc->getOperationBadgeCounts());
+            $view->with('adminOperationAchievements', $svc->getOperationAchievementCounts());
             $notify = $svc->getNotificationsForLayout(30);
             $view->with('adminNotifications', $notify['items']);
             $view->with('adminNotificationCount', $notify['total_count']);

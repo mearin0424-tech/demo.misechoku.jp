@@ -10,6 +10,8 @@
             ひとまずダミーの問い合わせを表示しており、今後問い合わせテーブルと紐付けます。
         </p>
 
+        @include('admin.parts.operation-achievement', ['operationAchievementRoute' => 'admin.inquiries.index'])
+
         <div class="table-wrapper">
             <table class="admin-table">
                 <thead>

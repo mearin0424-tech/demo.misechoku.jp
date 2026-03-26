@@ -155,9 +155,10 @@
     <div class="admin-page">
         <h1 class="admin-title">入金・振込管理</h1>
         <p class="admin-description">
-            店舗への請求書発行、店舗入金の照合、キャストへの振込記録までを一気通貫で管理します。<br>
-            ステータスはシステム固定で持ち、運営の実務フローをこの画面でサポートします。
+            店舗入金の照合とキャストへの振込記録を管理します。キャストからの入金依頼・請求書の発行は「請求書発行」画面で行ってください。
         </p>
+
+        @include('admin.parts.operation-achievement', ['operationAchievementRoute' => 'admin.deposits.index'])
 
         @if(session('status'))
             <div class="admin-alert">
@@ -185,11 +186,6 @@
 
         <section class="billing-summary-grid">
             <div class="admin-card">
-                <h2>請求書発行待ち</h2>
-                <p>店舗承認済みで、まだ請求書を発行していない案件数です。</p>
-                <div class="billing-summary-value">{{ number_format($summary['invoice_pending'] ?? 0) }}</div>
-            </div>
-            <div class="admin-card">
                 <h2>店舗入金照合待ち</h2>
                 <p>店舗が入金報告済みで、運営の着金確認が必要な件数です。</p>
                 <div class="billing-summary-value">{{ number_format($summary['payment_confirmation_pending'] ?? 0) }}</div>
@@ -204,37 +200,6 @@
                 <p>現在一覧にある請求レコードの請求合計金額です。</p>
                 <div class="billing-summary-value">¥{{ number_format($summary['invoice_total'] ?? 0) }}</div>
             </div>
-        </section>
-
-        <section class="admin-panel">
-            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px;">
-                <h2 class="admin-panel-title" style="margin-bottom: 0;">運営口座</h2>
-                <a href="{{ route('admin.bank.index') }}" class="btn-action manage">
-                    <i class="fas fa-university"></i> 口座登録・編集
-                </a>
-            </div>
-            @if($adminBank)
-                <div class="billing-meta-list">
-                    <div class="billing-meta-item">
-                        <div class="billing-meta-label">金融機関</div>
-                        <div class="billing-meta-value">{{ $adminBank->bank_name }}</div>
-                    </div>
-                    <div class="billing-meta-item">
-                        <div class="billing-meta-label">支店名</div>
-                        <div class="billing-meta-value">{{ $adminBank->branch_name ?: '未設定' }}</div>
-                    </div>
-                    <div class="billing-meta-item">
-                        <div class="billing-meta-label">口座種別 / 口座番号</div>
-                        <div class="billing-meta-value">{{ in_array($adminBank->account_type, ['current', 'checking'], true) ? '当座' : '普通' }} / {{ $adminBank->account_number }}</div>
-                    </div>
-                    <div class="billing-meta-item">
-                        <div class="billing-meta-label">口座名義</div>
-                        <div class="billing-meta-value">{{ $adminBank->account_name }}</div>
-                    </div>
-                </div>
-            @else
-                <p class="admin-note">請求書発行前に、上の「口座登録・編集」から請求書記載用の振込先口座を登録してください。</p>
-            @endif
         </section>
 
         @forelse($deposits as $deposit)
@@ -365,25 +330,6 @@
                                 <p class="admin-note">振込管理番号: {{ $deposit['cast_transfer_reference'] }}</p>
                             @endif
                         </div>
-
-                        @if($deposit['status_code'] === 2)
-                            <div class="billing-action-box">
-                                <h3 class="billing-action-title">請求書発行</h3>
-                                <p class="admin-note">店舗承認済みです。運営口座を載せた請求書を発行し、店舗へ送付します。</p>
-                                <form method="POST" action="{{ route('admin.deposits.invoice.issue', $deposit['id']) }}" class="billing-inline-form">
-                                    @csrf
-                                    <div class="billing-check-grid" data-check-group>
-                                        <label class="billing-check-item"><input type="checkbox" name="confirm_shop_approved" value="1" data-check-item> 店舗承認済みの申請内容を確認した</label>
-                                        <label class="billing-check-item"><input type="checkbox" name="confirm_admin_bank_ready" value="1" data-check-item> 請求書に記載する運営口座情報を確認した</label>
-                                    </div>
-                                    <div class="management-actions">
-                                        <button type="submit" class="btn-action manage" data-check-submit {{ $adminBank ? '' : 'disabled' }}>
-                                            <i class="fas fa-paper-plane"></i> 請求書を発行して送付
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        @endif
 
                         @if($deposit['status_code'] === 4)
                             <div class="billing-action-box">

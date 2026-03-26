@@ -5,7 +5,7 @@
 @section('guide_message', '') {{-- ホームのスワイプ画面ではオコジョを表示しない --}}
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260326-shop-jobs">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260326-recruit-bonus-lines">
 @endpush
 
 @php
@@ -82,7 +82,25 @@
 
                 {{-- プロフィール情報（キャスト） / 求人票情報（キャスト側ホーム） --}}
                 <div class="card-bottom-info">
-                    <h2 class="cast-name serif-font">{{ $item['name'] }}@if(!$isShop && !$isRecruit && isset($item['age'])) <span class="age">{{ $item['age'] }}</span>@endif</h2>
+                    @if($isRecruit)
+                    <div class="card-recruit-bonus-head" role="group" aria-label="採用形態別ボーナス">
+                        @foreach($item['recruit_bonus_lines'] ?? [] as $line)
+                        <div class="card-recruit-bonus-line {{ empty($line['offered']) ? 'is-muted' : '' }}">
+                            <span class="card-recruit-bonus-label">{{ $line['label'] }}</span>
+                            <span class="card-recruit-bonus-amount numeric-font">
+                                @if(!empty($line['offered']))
+                                    ¥{{ number_format((int) ($line['amount'] ?? 0)) }}
+                                @else
+                                    —
+                                @endif
+                            </span>
+                        </div>
+                        @endforeach
+                    </div>
+                    <p class="card-shop-name-sub serif-font">{{ $item['name'] }}</p>
+                    @else
+                    <h2 class="cast-name serif-font">{{ $item['name'] }}@if(!$isShop && isset($item['age'])) <span class="age">{{ $item['age'] }}</span>@endif</h2>
+                    @endif
                     <div class="card-location"><i class="fas fa-map-marker-alt"></i> {{ $isRecruit ? (trim(($item['pref'] ?? '') . ' ' . ($item['city'] ?? '')) ?: '六本木') : '六本木' }}</div>
                     @if($isRecruit)
                     <div class="card-recruit-summary">
@@ -90,17 +108,7 @@
                         @if(!empty($item['trial_hourly_wage']))
                         <span class="card-recruit-trial">体験 ¥{{ number_format($item['trial_hourly_wage']) }}〜</span>
                         @endif
-                        @if(!empty($item['noruma_reward']))
-                        <span class="card-recruit-bonus">ボーナス ¥{{ number_format($item['noruma_reward']) }}</span>
-                        @endif
                     </div>
-                    @if(!empty($item['job_titles']) && is_array($item['job_titles']))
-                    <ul class="card-recruit-job-titles" aria-label="募集中の求人">
-                        @foreach($item['job_titles'] as $jt)
-                        <li class="card-recruit-job-titles__item">{{ $jt }}</li>
-                        @endforeach
-                    </ul>
-                    @endif
                     @elseif($isShop && isset($item['rating']))
                     <div class="card-rating">
                         <span class="card-rating-stars" aria-label="評価 {{ $item['rating'] }}">
@@ -153,5 +161,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/home.js') }}?v=20260326-shop-jobs"></script>
+<script src="{{ asset('assets/js/home.js') }}?v=20260320-swipe-nested"></script>
 @endpush

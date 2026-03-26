@@ -30,6 +30,10 @@ class ApplicationDeposit extends Model
         'cast_transfer_reference',
         'cast_transfer_note',
         'completed_at',
+        'invoice_display_shop_name',
+        'invoice_display_shop_address',
+        'invoice_display_shop_email',
+        'invoice_display_cast_name',
     ];
 
     protected function casts(): array

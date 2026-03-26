@@ -3,16 +3,24 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\BillingManagementService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 
 class ShopController extends Controller
 {
+    public function __construct(
+        private readonly BillingManagementService $billingManagementService
+    ) {
+    }
+
     /**
      * 店舗管理一覧
      */
     public function index()
     {
+        $operationSummaries = $this->billingManagementService->getOperationSummaryByEntity('shop');
+
         $shops = DB::table('shops')
             ->leftJoin('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
             ->leftJoin('shop_jobs', 'shops.id', '=', 'shop_jobs.shop_id')
@@ -28,7 +36,9 @@ class ShopController extends Controller
             )
             ->orderByDesc('shops.created_at')
             ->get()
-            ->map(function ($shop) {
+            ->map(function ($shop) use ($operationSummaries) {
+                $shopId = (string) $shop->id;
+
                 return [
                     'id' => $shop->id,
                     'name' => $shop->shop_name ?: '未設定',
@@ -39,6 +49,7 @@ class ShopController extends Controller
                     'job_status' => ((int) ($shop->recruit_status ?? 0)) === 1 ? '公開中' : '非公開',
                     'job_status_key' => ((int) ($shop->recruit_status ?? 0)) === 1 ? 'active' : 'inactive',
                     'hourly_wage_regular' => (int) ($shop->hourly_wage_regular ?? 0),
+                    'operation_summary' => $operationSummaries[$shopId] ?? null,
                 ];
             });
 

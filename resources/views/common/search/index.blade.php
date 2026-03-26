@@ -36,16 +36,11 @@
         : null;
     $aiRecommendItems = $showAiTab ? collect($items)->map(function (array $item) use ($prefix) {
         if ($prefix === 'cast') {
-            $jobLine = '';
-            if (!empty($item['job_titles']) && is_array($item['job_titles'])) {
-                $jobLine = ' ' . implode(' ', $item['job_titles']);
-            }
-
             return [
                 'id' => (string) ($item['id'] ?? ''),
                 'name' => (string) ($item['shop_name'] ?? 'ショップ'),
                 'area' => trim((string) (($item['pref'] ?? '') . ' ' . ($item['city'] ?? ''))),
-                'text' => trim((string) (($item['catch'] ?? '') . ' ' . ($item['overview'] ?? '') . $jobLine)),
+                'text' => trim((string) (($item['catch'] ?? '') . ' ' . ($item['overview'] ?? ''))),
                 'image' => $item['main_img'] ?? asset('assets/images/common/no-image.png'),
                 'url' => Route::has('cast.recruit.show') && !empty($item['id']) ? route('cast.recruit.show', $item['id']) : '#',
             ];

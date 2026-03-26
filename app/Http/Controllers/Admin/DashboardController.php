@@ -80,23 +80,35 @@ class DashboardController extends Controller
                 $catId = match ($task['status_code'] ?? null) {
                     BillingManagementService::STATUS_SHOP_PAYMENT_CONFIRMED => 'transfer',
                     BillingManagementService::STATUS_SHOP_PAYMENT_REPORTED => 'deposit',
+                    BillingManagementService::STATUS_CAST_REQUESTED,
+                    BillingManagementService::STATUS_SHOP_APPROVED => 'invoice',
                     default => 'deposit',
+                };
+
+                $categoryLabel = match ($catId) {
+                    'transfer' => '振込実行',
+                    'invoice' => '請求書発行',
+                    default => '入金照合',
                 };
 
                 return [
                     'id' => 'deposit-' . ($task['id'] ?? 'unknown'),
-                    'category' => $catId === 'transfer' ? '振込実行' : '入金照合',
+                    'category' => $categoryLabel,
                     'target' => $task['shop_name'] ?? $task['cast_name'] ?? '取引',
                     'type' => $catId === 'transfer' ? 'キャスト' : '店舗',
                     'status' => $task['status_label'] ?? '未処理',
                     'date' => $task['updated_at_label'] ?? ($task['task_due_date'] ?? '-'),
                     'urgency' => $catId === 'transfer' ? 'normal' : 'high',
-                    'action' => $catId === 'transfer' ? '振込確認' : '着金確認',
+                    'action' => match ($catId) {
+                        'transfer' => '振込確認',
+                        'invoice' => '請求対応',
+                        default => '着金確認',
+                    },
                     'cat_id' => $catId,
                     'amount' => !empty($task['invoice_amount'])
                         ? '¥' . number_format((int) $task['invoice_amount'])
                         : (!empty($task['cast_transfer_amount']) ? '¥' . number_format((int) $task['cast_transfer_amount']) : null),
-                    'url' => route('admin.deposits.index'),
+                    'url' => $task['task_url'] ?? route('admin.deposits.index'),
                 ];
             })
             ->all();
@@ -105,6 +117,7 @@ class DashboardController extends Controller
         $taskSummary = [
             ['id' => 'kyc', 'title' => '本人確認', 'count' => collect($tasks)->where('cat_id', 'kyc')->count()],
             ['id' => 'doc', 'title' => '書類審査', 'count' => collect($tasks)->where('cat_id', 'doc')->count()],
+            ['id' => 'invoice', 'title' => '請求書発行', 'count' => collect($tasks)->where('cat_id', 'invoice')->count()],
             ['id' => 'deposit', 'title' => '入金確認', 'count' => collect($tasks)->where('cat_id', 'deposit')->count()],
             ['id' => 'transfer', 'title' => '振込実行', 'count' => collect($tasks)->where('cat_id', 'transfer')->count()],
             ['id' => 'error', 'title' => '振込エラー', 'count' => collect($tasks)->where('cat_id', 'error')->count()],

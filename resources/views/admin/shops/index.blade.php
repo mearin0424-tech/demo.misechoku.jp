@@ -6,7 +6,7 @@
     <div class="admin-page">
         <h1 class="admin-title">店舗管理</h1>
         <p class="admin-description">
-            登録されている店舗アカウントの一覧です。書類確認状況や求人公開状況を確認し、管理画面から求人公開を切り替えられます。
+            登録されている店舗アカウントの一覧です。書類確認状況や求人公開状況に加えて、請求書送付・入金確認・振込完了までの運用実績を店舗単位で確認できます。
         </p>
 
         @if (session('status'))
@@ -26,6 +26,7 @@
                         <th>公開日</th>
                         <th>書類提出</th>
                         <th>求人公開</th>
+                        <th>運用実績（店舗単位）</th>
                         <th>操作</th>
                     </tr>
                 </thead>
@@ -43,6 +44,17 @@
                                     {{ $shop['job_status'] }}
                                 </span>
                             </td>
+                            <td style="min-width: 360px;">
+                                @php($summary = $shop['operation_summary'] ?? null)
+                                @if($summary)
+                                    <div style="font-size: .8rem; line-height: 1.7;">
+                                        <div>請求書送付: <strong>{{ number_format($summary['invoice_issued']) }}</strong> 件 / 入金確認: <strong>{{ number_format($summary['payment_confirmed']) }}</strong> 件 / 振込実行: <strong>{{ number_format($summary['cast_transferred']) }}</strong> 件 / 完了: <strong>{{ number_format($summary['completed']) }}</strong> 件</div>
+                                        <div style="color: var(--admin-muted);">最新: {{ $summary['latest_status_label'] }}{{ !empty($summary['latest_updated_at']) ? '（' . $summary['latest_updated_at'] . '）' : '' }}</div>
+                                    </div>
+                                @else
+                                    <span class="text-muted">請求・振込フロー実績なし</span>
+                                @endif
+                            </td>
                             <td>
                                 <form action="{{ route('admin.shops.toggle-recruit-status', $shop['id']) }}" method="POST">
                                     @csrf
@@ -54,7 +66,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center">店舗アカウントがありません。</td>
+                            <td colspan="9" class="text-center">店舗アカウントがありません。</td>
                         </tr>
                     @endforelse
                 </tbody>

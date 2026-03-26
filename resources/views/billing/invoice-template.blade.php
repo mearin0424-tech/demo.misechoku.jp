@@ -7,7 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>請求書 {{ $invoice['invoice_number'] }}</title>
+    <title>@if(!empty($invoice['template_only']))請求書 帳票テンプレート@else請求書 {{ $invoice['invoice_number'] }}@endif</title>
     <style>
         body { margin: 0; padding: 0; color: #111827; font-family: "Helvetica Neue", Arial, "Hiragino Sans", "Meiryo", sans-serif; font-size: 11pt; }
         .invoice-wrap { max-width: 210mm; margin: 0 auto; padding: 16mm; box-sizing: border-box; }

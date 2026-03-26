@@ -897,33 +897,13 @@
             <form id="cast-bank-modal-form" class="management-bank-form" data-bank-autocomplete>
                 @csrf
                 <div class="payment-bank-modal-grid">
-                    <div class="bank-form-row">
-                        <label class="bank-label" for="cast-bank-modal-bank">金融機関名</label>
-                        <input id="cast-bank-modal-bank" type="text" name="bank_name" class="bank-input" value="{{ $castBank['bank_name'] ?? '' }}" placeholder="例: みずほ銀行" autocomplete="off" list="cast-bank-modal-suggestions" data-bank-name-input required>
-                        <input type="hidden" name="bank_code" value="{{ $castBank['bank_code'] ?? '' }}" data-bank-code-input>
-                        <datalist id="cast-bank-modal-suggestions" data-bank-list></datalist>
-                    </div>
-                    <div class="bank-form-row">
-                        <label class="bank-label" for="cast-bank-modal-branch">支店名</label>
-                        <input id="cast-bank-modal-branch" type="text" name="branch_name" class="bank-input" value="{{ $castBank['branch_name'] ?? '' }}" placeholder="例: 渋谷支店" autocomplete="off" list="cast-bank-modal-branch-suggestions" data-branch-name-input required>
-                        <input type="hidden" name="branch_code" value="{{ $castBank['branch_code'] ?? '' }}" data-branch-code-input>
-                        <datalist id="cast-bank-modal-branch-suggestions" data-branch-list></datalist>
-                    </div>
-                    <div class="bank-form-row">
-                        <label class="bank-label" for="cast-bank-modal-type">口座種別</label>
-                        <select id="cast-bank-modal-type" name="account_type" class="bank-input" required>
-                            <option value="ordinary" {{ ($castBank['account_type'] ?? 'ordinary') === 'ordinary' ? 'selected' : '' }}>普通</option>
-                            <option value="current" {{ ($castBank['account_type'] ?? '') === 'current' ? 'selected' : '' }}>当座</option>
-                        </select>
-                    </div>
-                    <div class="bank-form-row">
-                        <label class="bank-label" for="cast-bank-modal-number">口座番号 (7桁)</label>
-                        <input id="cast-bank-modal-number" type="text" name="account_number" class="bank-input" value="{{ $castBank['account_number'] ?? '' }}" placeholder="1234567" inputmode="numeric" maxlength="8" pattern="[0-9]*" data-account-number-input required>
-                    </div>
-                    <div class="bank-form-row">
-                        <label class="bank-label" for="cast-bank-modal-name">口座名義 (全角カナ)</label>
-                        <input id="cast-bank-modal-name" type="text" name="account_name" class="bank-input" value="{{ $castBank['account_name'] ?? $castBank['account_holder_name'] ?? '' }}" placeholder="例: ヤマダ タロウ" required>
-                    </div>
+                    @include('partials.bank-account-form-fields', [
+                        'variant' => 'management',
+                        'bankListId' => 'cast-bank-modal-suggestions',
+                        'branchListId' => 'cast-bank-modal-branch-suggestions',
+                        'inputIdPrefix' => 'cast-bank-modal',
+                        'bankValues' => $castBank ?? [],
+                    ])
                 </div>
             </form>
         </div>

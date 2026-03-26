@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Services\BillingManagementService;
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,10 +22,39 @@ class DepositController extends Controller
     public function index()
     {
         $dashboard = $this->billingManagementService->getAdminBillingDashboard();
+        $exclude = [
+            BillingManagementService::STATUS_CAST_REQUESTED,
+            BillingManagementService::STATUS_SHOP_APPROVED,
+        ];
+        $deposits = collect($dashboard['deposits'])
+            ->reject(fn (array $d) => in_array($d['status_code'], $exclude, true))
+            ->values()
+            ->all();
+
+        $sevenDaysAgo = Carbon::now()->subDays(7);
+        $unconfirmedOver7 = collect($deposits)->filter(function (array $d) use ($sevenDaysAgo) {
+            if ($d['status_code'] !== BillingManagementService::STATUS_CAST_TRANSFERRED) {
+                return false;
+            }
+            $transferredAt = $d['cast_transferred_at'] ?? null;
+            if (!$transferredAt) {
+                return false;
+            }
+
+            return Carbon::parse($transferredAt)->lt($sevenDaysAgo);
+        })->count();
+
+        $ds = collect($deposits);
+        $summary = [
+            'payment_confirmation_pending' => $ds->where('status_code', BillingManagementService::STATUS_SHOP_PAYMENT_REPORTED)->count(),
+            'cast_transfer_pending' => $ds->where('status_code', BillingManagementService::STATUS_SHOP_PAYMENT_CONFIRMED)->count(),
+            'invoice_total' => $ds->sum('invoice_amount'),
+            'unconfirmed_cast_over_7days' => $unconfirmedOver7,
+        ];
 
         return view('admin.deposit.index', [
-            'deposits' => $dashboard['deposits'],
-            'summary' => $dashboard['summary'],
+            'deposits' => $deposits,
+            'summary' => $summary,
             'adminBank' => $this->billingManagementService->getAdminBankAccount(),
         ]);
     }
@@ -42,7 +72,7 @@ class DepositController extends Controller
         $result = $this->billingManagementService->issueInvoice($deposit, $payload);
 
         return redirect()
-            ->route('admin.deposits.index')
+            ->route('admin.invoices.index')
             ->with($result['success'] ? 'status' : 'error', $result['message']);
     }
 
@@ -231,7 +261,7 @@ class DepositController extends Controller
      */
     public function downloadInvoiceTemplate(): Response|\Illuminate\Contracts\View\View
     {
-        $invoice = $this->billingManagementService->getSampleInvoiceData();
+        $invoice = $this->billingManagementService->getInvoiceTemplateShellData();
 
         if (!class_exists(\Barryvdh\DomPDF\Facade\Pdf::class)) {
             return view('admin.deposit.invoice-template-preview', ['invoice' => $invoice]);

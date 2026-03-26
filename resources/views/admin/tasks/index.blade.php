@@ -145,7 +145,7 @@
                     @endif
 
                     <div class="task-card-actions">
-                        <a href="{{ route('admin.deposits.index') }}#deposit-{{ $task['id'] }}" class="btn-action manage">
+                        <a href="{{ $task['task_url'] ?? (route('admin.deposits.index') . '#deposit-' . $task['id']) }}" class="btn-action manage">
                             詳細へ
                         </a>
                     </div>

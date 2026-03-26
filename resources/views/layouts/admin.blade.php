@@ -41,6 +41,7 @@
         ],
     ];
     $opBadges = $adminOperationBadges ?? [];
+    $opAchievements = $adminOperationAchievements ?? [];
     foreach ($menuGroups as &$group) {
         if (($group['title'] ?? '') !== 'オペレーション') {
             continue;
@@ -281,6 +282,22 @@
         .admin-nav-link-label {
             font-size: 0.76rem;
             font-weight: 600;
+        }
+        .admin-nav-link-text-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+        .admin-nav-link-achievement {
+            font-size: 0.58rem;
+            font-weight: 600;
+            color: var(--admin-muted);
+            letter-spacing: 0.02em;
+            line-height: 1.25;
+        }
+        .admin-nav-link.is-active .admin-nav-link-achievement {
+            color: rgba(230, 208, 128, 0.75);
         }
         .admin-badge {
             font-size: 0.56rem;
@@ -868,7 +885,14 @@
                                 <a href="{{ route($item['route']) }}" class="admin-nav-link {{ request()->routeIs($item['route']) ? 'is-active' : '' }}">
                                     <span class="admin-nav-link-main">
                                         <i class="fas {{ $item['icon'] }}"></i>
-                                        <span class="admin-nav-link-label">{{ $item['label'] }}</span>
+                                        @if(($group['title'] ?? '') === 'オペレーション')
+                                            <span class="admin-nav-link-text-wrap">
+                                                <span class="admin-nav-link-label">{{ $item['label'] }}</span>
+                                                <span class="admin-nav-link-achievement">実績 {{ number_format((int) ($opAchievements[$item['route']] ?? 0)) }}件</span>
+                                            </span>
+                                        @else
+                                            <span class="admin-nav-link-label">{{ $item['label'] }}</span>
+                                        @endif
                                     </span>
                                     @if (!empty($item['badge']))
                                         <span class="admin-badge {{ $item['badge_class'] }}">{{ $item['badge'] }}</span>
@@ -1014,6 +1038,7 @@
             });
         })();
     </script>
+    @include('partials.bank-autocomplete-scripts')
     @stack('admin-scripts')
 </body>
 </html>

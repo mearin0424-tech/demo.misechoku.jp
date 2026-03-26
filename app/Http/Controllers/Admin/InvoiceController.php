@@ -23,7 +23,14 @@ class InvoiceController extends Controller
     public function index(): View
     {
         $dashboard = $this->billingManagementService->getAdminBillingDashboard();
-        $pending = collect($dashboard['deposits'])->where('status_code', BillingManagementService::STATUS_SHOP_APPROVED)->values()->all();
+        $pending = collect($dashboard['deposits'])
+            ->whereIn('status_code', [
+                BillingManagementService::STATUS_CAST_REQUESTED,
+                BillingManagementService::STATUS_SHOP_APPROVED,
+            ])
+            ->sortBy(fn (array $d) => [$d['status_code'], $d['id']])
+            ->values()
+            ->all();
         $manualTargets = collect($dashboard['deposits'])->filter(fn ($d) => empty($d['invoice_number']))->values()->all();
         $summary = $dashboard['summary'];
         $adminBank = $this->billingManagementService->getAdminBankAccount();
@@ -41,15 +48,29 @@ class InvoiceController extends Controller
      */
     public function issueManual(Request $request): RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'deposit_id' => 'required|integer|min:1',
+            'shop_name' => 'required|string|max:255',
+            'shop_address' => 'nullable|string|max:500',
+            'shop_email' => 'nullable|email|max:255',
+            'cast_name' => 'required|string|max:255',
+            'bonus_amount' => 'required|integer|min:0',
+            'system_fee_amount' => 'required|integer|min:0',
+            'invoice_amount' => 'required|integer|min:1',
+            'cast_transfer_amount' => 'required|integer|min:0',
             'confirm_manual_workaround' => 'required|accepted',
             'confirm_admin_bank_ready' => 'required|accepted',
         ]);
 
+        if ($validated['bonus_amount'] + $validated['system_fee_amount'] !== $validated['invoice_amount']) {
+            return back()
+                ->withInput()
+                ->withErrors(['invoice_amount' => '請求金額合計は、ボーナス額と運営手数料の合計と一致させてください。']);
+        }
+
         $result = $this->billingManagementService->issueInvoiceManually(
-            (int) $request->input('deposit_id'),
-            $request->only(['confirm_manual_workaround', 'confirm_admin_bank_ready'])
+            (int) $validated['deposit_id'],
+            $validated
         );
 
         return redirect()

@@ -42,7 +42,8 @@
         <div class="invoice-toolbar">
             <a href="{{ route('admin.deposits.invoice.pdf', ['deposit' => $invoice['deposit_id']]) }}" class="invoice-btn" target="_blank" rel="noopener">PDFでダウンロード</a>
             <button type="button" class="invoice-btn" onclick="window.print()">印刷 / 別名でPDF保存</button>
-            <a href="{{ route('admin.deposits.index') }}" class="invoice-btn" style="background:#374151;">管理画面へ戻る</a>
+            <a href="{{ route('admin.invoices.index') }}" class="invoice-btn" style="background:#4b5563;">請求書発行へ戻る</a>
+            <a href="{{ route('admin.deposits.index') }}" class="invoice-btn" style="background:#374151;">入金確認・振込へ</a>
         </div>
         @endif
         <div class="invoice-paper">

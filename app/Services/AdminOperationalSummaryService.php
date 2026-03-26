@@ -2,8 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\CastIdentityDocument;
+use App\Models\ShopLicenseDocument;
 use App\Support\AdminMockInquiries;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * 管理画面サイドバー（オペレーション）の未対応バッジ・ヘッダー通知の集計
@@ -28,11 +32,82 @@ class AdminOperationalSummaryService
         $v = $this->documentReviewService->getAdminVerificationData()['summary'];
 
         return [
-            'admin.invoices.index' => (int) $s['invoice_pending'],
+            'admin.invoices.index' => (int) ($s['invoice_workflow_pending'] ?? 0),
             'admin.deposits.index' => (int) $s['payment_confirmation_pending'] + (int) $s['cast_transfer_pending'],
             'admin.verification.index' => (int) $v['cast_pending'] + (int) $v['shop_pending'],
             'admin.inquiries.index' => $this->getPendingInquiryCount(),
         ];
+    }
+
+    /**
+     * オペレーション各メニューに対応する「実績」（累計の完了系件数）
+     *
+     * @return array<string, int>
+     */
+    public function getOperationAchievementCounts(): array
+    {
+        return [
+            'admin.invoices.index' => $this->countInvoicesIssuedTotal(),
+            'admin.deposits.index' => $this->countDepositFlowsCompletedTotal(),
+            'admin.verification.index' => $this->countVerificationProcessedTotal(),
+            'admin.inquiries.index' => $this->countInquiriesResolvedTotal(),
+        ];
+    }
+
+    private function countInvoicesIssuedTotal(): int
+    {
+        if (! Schema::hasTable('application_deposits')) {
+            return 0;
+        }
+
+        return (int) DB::table('application_deposits')
+            ->whereNotNull('invoice_number')
+            ->where('invoice_number', '!=', '')
+            ->count();
+    }
+
+    private function countDepositFlowsCompletedTotal(): int
+    {
+        if (! Schema::hasTable('application_deposits')) {
+            return 0;
+        }
+
+        return (int) DB::table('application_deposits')
+            ->where('status', BillingManagementService::STATUS_COMPLETED)
+            ->count();
+    }
+
+    private function countVerificationProcessedTotal(): int
+    {
+        $cast = 0;
+        $shop = 0;
+
+        if (Schema::hasTable('cast_identity_documents')) {
+            $cast = (int) CastIdentityDocument::query()
+                ->whereIn('status', [
+                    CastIdentityDocument::STATUS_APPROVED,
+                    CastIdentityDocument::STATUS_REJECTED,
+                ])
+                ->count();
+        }
+
+        if (Schema::hasTable('shop_license_documents')) {
+            $shop = (int) ShopLicenseDocument::query()
+                ->whereIn('status', [
+                    ShopLicenseDocument::STATUS_APPROVED,
+                    ShopLicenseDocument::STATUS_REJECTED,
+                ])
+                ->count();
+        }
+
+        return $cast + $shop;
+    }
+
+    private function countInquiriesResolvedTotal(): int
+    {
+        return (int) collect(AdminMockInquiries::all())
+            ->whereIn('status', ['対応済み', '完了', 'クローズ'])
+            ->count();
     }
 
     /**
@@ -160,7 +235,7 @@ class AdminOperationalSummaryService
             'time_label' => $timeLabel,
             'icon' => $this->billingTaskIcon((int) ($task['status_code'] ?? 0)),
             'class' => $class,
-            'url' => route('admin.deposits.index') . ($id > 0 ? '#deposit-' . $id : ''),
+            'url' => $task['task_url'] ?? route('admin.deposits.index') . ($id > 0 ? '#deposit-' . $id : ''),
             'sort' => $sort,
         ];
     }
@@ -168,6 +243,7 @@ class AdminOperationalSummaryService
     private function billingTaskIcon(int $statusCode): string
     {
         return match ($statusCode) {
+            BillingManagementService::STATUS_CAST_REQUESTED => 'fa-inbox',
             BillingManagementService::STATUS_SHOP_APPROVED => 'fa-file-invoice',
             BillingManagementService::STATUS_SHOP_PAYMENT_REPORTED => 'fa-money-bill-wave',
             BillingManagementService::STATUS_SHOP_PAYMENT_CONFIRMED => 'fa-money-bill-wave',

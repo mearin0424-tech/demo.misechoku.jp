@@ -29,6 +29,14 @@ class AdminMockInquiries
                 'status' => '対応中',
                 'created_at' => now()->subDays(2),
             ],
+            [
+                'id' => 3,
+                'from_type' => '店舗',
+                'from_name' => 'サンプル店舗C',
+                'subject' => '過去の請求書再発行の依頼',
+                'status' => '対応済み',
+                'created_at' => now()->subDays(14),
+            ],
         ];
     }
 }

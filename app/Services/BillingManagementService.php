@@ -130,7 +130,12 @@ class BillingManagementService
         return [
             'deposits' => $deposits,
             'summary' => [
+                'cast_request_pending' => collect($deposits)->where('status_code', self::STATUS_CAST_REQUESTED)->count(),
                 'invoice_pending' => collect($deposits)->where('status_code', self::STATUS_SHOP_APPROVED)->count(),
+                'invoice_workflow_pending' => collect($deposits)->whereIn('status_code', [
+                    self::STATUS_CAST_REQUESTED,
+                    self::STATUS_SHOP_APPROVED,
+                ])->count(),
                 'payment_confirmation_pending' => collect($deposits)->where('status_code', self::STATUS_SHOP_PAYMENT_REPORTED)->count(),
                 'cast_transfer_pending' => collect($deposits)->where('status_code', self::STATUS_SHOP_PAYMENT_CONFIRMED)->count(),
                 'invoice_total' => collect($deposits)->sum('invoice_amount'),
@@ -143,12 +148,14 @@ class BillingManagementService
     {
         return collect($this->getAllDeposits())
             ->filter(fn (array $deposit) => in_array($deposit['status_code'], [
+                self::STATUS_CAST_REQUESTED,
                 self::STATUS_SHOP_APPROVED,
                 self::STATUS_SHOP_PAYMENT_REPORTED,
                 self::STATUS_SHOP_PAYMENT_CONFIRMED,
             ], true))
             ->map(function (array $deposit) {
                 $deposit['task_title'] = match ($deposit['status_code']) {
+                    self::STATUS_CAST_REQUESTED => 'キャスト入金依頼（店舗承認待ち）を確認する',
                     self::STATUS_SHOP_APPROVED => '店舗へ請求書を発行する',
                     self::STATUS_SHOP_PAYMENT_REPORTED => '店舗入金を照合する',
                     self::STATUS_SHOP_PAYMENT_CONFIRMED => 'キャストへの振込を実行する',
@@ -156,6 +163,7 @@ class BillingManagementService
                 };
 
                 $deposit['task_due_date'] = match ($deposit['status_code']) {
+                    self::STATUS_CAST_REQUESTED => $deposit['updated_at_label'] ?: now()->format('Y-m-d H:i'),
                     self::STATUS_SHOP_APPROVED => $deposit['invoice_due_date'] ?: now()->addDays(self::INVOICE_DUE_DAYS)->format('Y-m-d'),
                     self::STATUS_SHOP_PAYMENT_REPORTED => $deposit['shop_payment_reported_at'] ?: now()->format('Y-m-d H:i'),
                     self::STATUS_SHOP_PAYMENT_CONFIRMED => $deposit['shop_payment_confirmed_at'] ?: now()->format('Y-m-d H:i'),
@@ -163,6 +171,7 @@ class BillingManagementService
                 };
 
                 $deposit['task_actor_label'] = match ($deposit['status_code']) {
+                    self::STATUS_CAST_REQUESTED => '運営',
                     self::STATUS_SHOP_APPROVED => '運営',
                     self::STATUS_SHOP_PAYMENT_REPORTED => '運営',
                     self::STATUS_SHOP_PAYMENT_CONFIRMED => '運営',
@@ -170,6 +179,7 @@ class BillingManagementService
                 };
 
                 $deposit['task_summary'] = match ($deposit['status_code']) {
+                    self::STATUS_CAST_REQUESTED => 'キャストから入金依頼があります。店舗承認後に請求書を発行できます（詳細は請求書発行画面）。',
                     self::STATUS_SHOP_APPROVED => trim((string) ($deposit['bonus_condition'] ?: '店舗承認済みのため、請求書発行へ進めます。')),
                     self::STATUS_SHOP_PAYMENT_REPORTED => '店舗報告金額: ¥' . number_format((int) ($deposit['shop_payment_reported_amount'] ?? 0))
                         . ' / 参照: ' . (($deposit['shop_payment_reference'] ?? '') ?: '未入力'),
@@ -179,6 +189,11 @@ class BillingManagementService
                 };
 
                 $deposit['task_review_summary'] = trim((string) ($deposit['review_comment'] ?? ''));
+
+                $id = (int) ($deposit['id'] ?? 0);
+                $deposit['task_url'] = in_array($deposit['status_code'], [self::STATUS_CAST_REQUESTED, self::STATUS_SHOP_APPROVED], true)
+                    ? route('admin.invoices.index') . ($id > 0 ? '#invoice-pending-' . $id : '')
+                    : route('admin.deposits.index') . ($id > 0 ? '#deposit-' . $id : '');
 
                 return $deposit;
             })
@@ -352,30 +367,54 @@ class BillingManagementService
             return ['success' => false, 'message' => '手動発行の確認にチェックを入れてください。'];
         }
 
-        $amounts = $this->calculateAmounts($deposit);
+        $bonusAmount = (int) ($payload['bonus_amount'] ?? 0);
+        $systemFeeAmount = (int) ($payload['system_fee_amount'] ?? 0);
+        $invoiceAmount = (int) ($payload['invoice_amount'] ?? 0);
+        $castTransferAmount = (int) ($payload['cast_transfer_amount'] ?? 0);
+
+        if ($bonusAmount < 0 || $systemFeeAmount < 0 || $invoiceAmount < 1 || $castTransferAmount < 0) {
+            return ['success' => false, 'message' => '金額を正しく入力してください。'];
+        }
+
+        if ($bonusAmount + $systemFeeAmount !== $invoiceAmount) {
+            return ['success' => false, 'message' => '請求金額合計は、ボーナス額と運営手数料の合計と一致させてください。'];
+        }
+
         $issuedAt = now();
         $invoiceNumber = $this->generateInvoiceNumber((int) $deposit->id, $issuedAt);
 
+        $shopName = trim((string) ($payload['shop_name'] ?? ''));
+        $shopAddress = trim((string) ($payload['shop_address'] ?? ''));
+        $shopEmail = trim((string) ($payload['shop_email'] ?? ''));
+        $castName = trim((string) ($payload['cast_name'] ?? ''));
+
+        $update = [
+            'status' => self::STATUS_INVOICE_ISSUED,
+            'invoice_number' => $invoiceNumber,
+            'bonus_amount' => $bonusAmount,
+            'system_fee_amount' => $systemFeeAmount,
+            'invoice_amount' => $invoiceAmount,
+            'cast_transfer_amount' => $castTransferAmount,
+            'invoice_issued_at' => $issuedAt,
+            'invoice_due_date' => $issuedAt->copy()->addDays(self::INVOICE_DUE_DAYS)->toDateString(),
+            'invoice_sent_at' => $issuedAt,
+            'updated_at' => $issuedAt,
+            'invoice_display_shop_name' => $shopName !== '' ? $shopName : null,
+            'invoice_display_shop_address' => $shopAddress !== '' ? $shopAddress : null,
+            'invoice_display_shop_email' => $shopEmail !== '' ? $shopEmail : null,
+            'invoice_display_cast_name' => $castName !== '' ? $castName : null,
+        ];
+
         DB::table('application_deposits')
             ->where('id', $depositId)
-            ->update($this->filterExistingColumns('application_deposits', [
-                'status' => self::STATUS_INVOICE_ISSUED,
-                'invoice_number' => $invoiceNumber,
-                'bonus_amount' => $amounts['bonus_amount'],
-                'system_fee_amount' => $amounts['system_fee_amount'],
-                'invoice_amount' => $amounts['invoice_amount'],
-                'cast_transfer_amount' => $amounts['cast_transfer_amount'],
-                'invoice_issued_at' => $issuedAt,
-                'invoice_due_date' => $issuedAt->copy()->addDays(self::INVOICE_DUE_DAYS)->toDateString(),
-                'invoice_sent_at' => $issuedAt,
-                'updated_at' => $issuedAt,
-            ]));
+            ->update($this->filterExistingColumns('application_deposits', $update));
 
         $this->appendHistory($depositId, self::STATUS_INVOICE_ISSUED);
 
         $mailSent = false;
-        if (!empty($deposit->shop_email)) {
-            $mailSent = $this->sendInvoiceMail($depositId, $deposit->shop_email);
+        $invoice = $this->getInvoiceData($depositId);
+        if ($invoice && ! empty(trim((string) ($invoice['shop_email'] ?? '')))) {
+            $mailSent = $this->sendInvoiceMail($depositId, (string) $invoice['shop_email']);
         }
 
         return [
@@ -820,20 +859,22 @@ class BillingManagementService
 
         $template = app(InvoiceTemplateSettingsService::class)->getForInvoice();
 
+        $defaultAddress = trim(implode(' ', array_filter([
+            $deposit->shop_pref,
+            $deposit->shop_city,
+            $deposit->shop_addr2,
+            $deposit->shop_addr3,
+        ])));
+
         return array_merge($template, [
             'deposit_id' => (int) $deposit->id,
             'invoice_number' => $deposit->invoice_number ?: $this->generateInvoiceNumber((int) $deposit->id, $issuedAt),
             'issued_at' => $issuedAt,
             'due_date' => $dueDate,
-            'shop_name' => $deposit->shop_name,
-            'shop_email' => $deposit->shop_email,
-            'shop_address' => trim(implode(' ', array_filter([
-                $deposit->shop_pref,
-                $deposit->shop_city,
-                $deposit->shop_addr2,
-                $deposit->shop_addr3,
-            ]))),
-            'cast_name' => $this->castName($deposit),
+            'shop_name' => $this->invoiceDisplayString($deposit, 'invoice_display_shop_name', (string) ($deposit->shop_name ?? '')),
+            'shop_email' => $this->invoiceDisplayString($deposit, 'invoice_display_shop_email', (string) ($deposit->shop_email ?? '')),
+            'shop_address' => $this->invoiceDisplayString($deposit, 'invoice_display_shop_address', $defaultAddress),
+            'cast_name' => $this->invoiceDisplayString($deposit, 'invoice_display_cast_name', $this->castName($deposit)),
             'bonus_amount' => $amounts['bonus_amount'],
             'system_fee_amount' => $amounts['system_fee_amount'],
             'invoice_amount' => $amounts['invoice_amount'],
@@ -850,48 +891,57 @@ class BillingManagementService
     }
 
     /**
-     * 帳票テンプレート用のサンプル請求データ（管理画面からテンプレートDL時に使用）
+     * 帳票の体裁のみ（数値・実データなし）。テンプレートDL・プレビュー用。
+     */
+    public function getInvoiceTemplateShellData(): array
+    {
+        $template = app(InvoiceTemplateSettingsService::class)->getForInvoice();
+
+        return array_merge($template, [
+            'template_only' => true,
+            'deposit_id' => 0,
+            'invoice_number' => '',
+            'issued_at' => null,
+            'due_date' => null,
+            'shop_name' => '',
+            'shop_email' => '',
+            'shop_address' => '',
+            'cast_name' => '',
+            'bonus_amount' => 0,
+            'system_fee_amount' => 0,
+            'invoice_amount' => 0,
+            'cast_transfer_amount' => 0,
+            'admin_bank' => [
+                'bank_name' => '（運営口座情報設定を反映）',
+                'branch_name' => '（支店名）',
+                'account_type_label' => '（普通／当座）',
+                'account_number' => '（口座番号）',
+                'account_holder_name' => '',
+                'account_name' => '（口座名義）',
+            ],
+        ]);
+    }
+
+    /**
+     * @deprecated 互換のため getInvoiceTemplateShellData と同等
      */
     public function getSampleInvoiceData(): array
     {
-        $adminBank = $this->getAdminBankAccount();
-        $template = app(InvoiceTemplateSettingsService::class)->getForInvoice();
-        $issuedAt = now();
-        $dueDate = $issuedAt->copy()->addDays(self::INVOICE_DUE_DAYS);
+        return $this->getInvoiceTemplateShellData();
+    }
 
-        $adminBankData = $adminBank
-            ? [
-                'bank_name' => $adminBank->bank_name,
-                'branch_name' => $adminBank->branch_name,
-                'account_type_label' => $this->accountTypeLabel($adminBank->account_type),
-                'account_number' => $adminBank->account_number,
-                'account_holder_name' => $adminBank->account_holder_name ?? '',
-                'account_name' => $adminBank->account_name,
-            ]
-            : [
-                'bank_name' => 'サンプル銀行',
-                'branch_name' => '本店',
-                'account_type_label' => '普通',
-                'account_number' => '1234567',
-                'account_holder_name' => 'ミセチョク運営',
-                'account_name' => 'ミセチョク ウンエイ',
-            ];
+    /**
+     * 請求書宛先の上書きカラム（存在し値あり）を優先
+     */
+    private function invoiceDisplayString(object $deposit, string $column, string $fallback): string
+    {
+        if (! Schema::hasColumn('application_deposits', $column)) {
+            return $fallback;
+        }
 
-        return array_merge($template, [
-            'deposit_id' => 0,
-            'invoice_number' => 'SAMPLE-' . $issuedAt->format('Ymd'),
-            'issued_at' => $issuedAt,
-            'due_date' => $dueDate,
-            'shop_name' => 'サンプル店舗名',
-            'shop_email' => 'sample@example.com',
-            'shop_address' => '東京都渋谷区〇〇 1-2-3',
-            'cast_name' => 'サンプルキャスト名',
-            'bonus_amount' => 50000,
-            'system_fee_amount' => 5000,
-            'invoice_amount' => 55000,
-            'cast_transfer_amount' => 50000,
-            'admin_bank' => $adminBankData,
-        ]);
+        $v = trim((string) ($deposit->{$column} ?? ''));
+
+        return $v !== '' ? $v : $fallback;
     }
 
     public function getSignedInvoiceUrl(int $depositId, ?Carbon $expiresAt = null): string
@@ -948,6 +998,43 @@ class BillingManagementService
             ->get()
             ->map(fn (object $row) => $this->mapDepositRow($row))
             ->all();
+    }
+
+    /**
+     * キャスト/店舗ごとの請求・振込フロー実績サマリーを返す
+     *
+     * @return array<string, array{
+     *     total: int,
+     *     invoice_issued: int,
+     *     payment_reported: int,
+     *     payment_confirmed: int,
+     *     cast_transferred: int,
+     *     completed: int,
+     *     latest_status_label: string,
+     *     latest_updated_at: string|null
+     * }>
+     */
+    public function getOperationSummaryByEntity(string $entityType): array
+    {
+        $key = $entityType === 'shop' ? 'shop_id' : 'cast_id';
+        $groups = collect($this->getAllDeposits())->groupBy($key);
+
+        return $groups->map(function ($rows) {
+            $latest = collect($rows)->sortByDesc(function (array $row) {
+                return $row['id'] ?? 0;
+            })->first();
+
+            return [
+                'total' => collect($rows)->count(),
+                'invoice_issued' => collect($rows)->filter(fn (array $row) => (int) ($row['status_code'] ?? 0) >= self::STATUS_INVOICE_ISSUED)->count(),
+                'payment_reported' => collect($rows)->filter(fn (array $row) => (int) ($row['status_code'] ?? 0) >= self::STATUS_SHOP_PAYMENT_REPORTED)->count(),
+                'payment_confirmed' => collect($rows)->filter(fn (array $row) => (int) ($row['status_code'] ?? 0) >= self::STATUS_SHOP_PAYMENT_CONFIRMED)->count(),
+                'cast_transferred' => collect($rows)->filter(fn (array $row) => (int) ($row['status_code'] ?? 0) >= self::STATUS_CAST_TRANSFERRED)->count(),
+                'completed' => collect($rows)->filter(fn (array $row) => (int) ($row['status_code'] ?? 0) >= self::STATUS_COMPLETED)->count(),
+                'latest_status_label' => (string) ($latest['status_label'] ?? '未申請'),
+                'latest_updated_at' => $latest['updated_at_label'] ?? null,
+            ];
+        })->all();
     }
 
     /**
@@ -1401,6 +1488,12 @@ class BillingManagementService
             'status_label' => $this->statusLabel($status),
             'shop_id' => $row->shop_id,
             'shop_name' => $row->shop_name ?: $row->shop_id,
+            'shop_address' => trim(implode(' ', array_filter([
+                $row->shop_pref ?? '',
+                $row->shop_city ?? '',
+                $row->shop_addr2 ?? '',
+                $row->shop_addr3 ?? '',
+            ]))),
             'shop_email' => $row->shop_email,
             'cast_id' => $row->cast_id,
             'cast_name' => $this->castName($row),
@@ -1731,6 +1824,10 @@ class BillingManagementService
             'cast_transfer_reference',
             'cast_transfer_note',
             'completed_at',
+            'invoice_display_shop_name',
+            'invoice_display_shop_address',
+            'invoice_display_shop_email',
+            'invoice_display_cast_name',
         ];
 
         return array_map(function (string $column) {
