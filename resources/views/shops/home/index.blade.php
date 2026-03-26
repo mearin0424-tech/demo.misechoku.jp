@@ -5,7 +5,7 @@
 @section('guide_message', '') {{-- ホームのスワイプ画面ではオコジョを表示しない --}}
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260320-swipe-nested">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260326-shop-jobs">
 @endpush
 
 @php
@@ -94,6 +94,13 @@
                         <span class="card-recruit-bonus">ボーナス ¥{{ number_format($item['noruma_reward']) }}</span>
                         @endif
                     </div>
+                    @if(!empty($item['job_titles']) && is_array($item['job_titles']))
+                    <ul class="card-recruit-job-titles" aria-label="募集中の求人">
+                        @foreach($item['job_titles'] as $jt)
+                        <li class="card-recruit-job-titles__item">{{ $jt }}</li>
+                        @endforeach
+                    </ul>
+                    @endif
                     @elseif($isShop && isset($item['rating']))
                     <div class="card-rating">
                         <span class="card-rating-stars" aria-label="評価 {{ $item['rating'] }}">
@@ -146,5 +153,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/home.js') }}?v=20260320-swipe-nested"></script>
+<script src="{{ asset('assets/js/home.js') }}?v=20260326-shop-jobs"></script>
 @endpush

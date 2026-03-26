@@ -94,29 +94,34 @@ class HomeController extends Controller
     }
 
     /**
-     * キャスト向けホーム：求人票ベースの一覧（ボーナス金・時給など重要情報を表示するため）
+     * キャスト向けホーム：お店単位（1スライド＝1店舗）。公開中の求人タイトルをまとめて表示。
      */
     private function getHomeRecruits(): array
     {
         $rows = DB::table('shops')
             ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
-            ->join('shop_jobs', 'shops.id', '=', 'shop_jobs.shop_id')
-            ->where('shop_jobs.status', 1)
+            ->whereExists(function ($q) {
+                $q->select(DB::raw(1))
+                    ->from('shop_jobs')
+                    ->whereColumn('shop_jobs.shop_id', 'shops.id')
+                    ->where('shop_jobs.status', 1);
+            })
             ->select(
                 'shops.id',
                 'shop_profiles.shop_name',
                 'shop_profiles.pref',
                 'shop_profiles.city',
-                'shop_profiles.main_image_path',
-                'shop_jobs.hourly_wage_regular',
-                'shop_jobs.has_trial',
-                'shop_jobs.trial_hourly_wage',
-                'shop_jobs.noruma_reward',
-                'shop_jobs.noruma_cond'
+                'shop_profiles.main_image_path'
             )
             ->orderBy('shops.id')
             ->limit(20)
             ->get();
+
+        $jobRows = DB::table('shop_jobs')
+            ->where('status', 1)
+            ->orderBy('id')
+            ->get()
+            ->groupBy('shop_id');
 
         // 店舗側求人カードの LIKE数（cast -> shop のいいね数）
         $likeCounts = [];
@@ -136,23 +141,35 @@ class HomeController extends Controller
 
         $items = [];
         foreach ($rows as $row) {
-            // 画面からは「DBの店舗ID（例: s00000001）」でアクセスできるようにする
+            $jobs = collect($jobRows[$row->id] ?? []);
+            if ($jobs->isEmpty()) {
+                continue;
+            }
+
             $numericId = $this->toNumericShopId($row->id);
             $images = $this->getShopImages($row->id, $row->main_image_path);
-            $meta = $this->decodeRecruitMeta($row->noruma_cond ?? null);
+            $jobTitles = $jobs->map(fn ($j) => $this->titleForShopJob($j))->values()->all();
+
+            $maxHourly = $jobs->map(fn ($j) => (int) ($j->hourly_wage_regular ?? 0))->max() ?? 0;
+            $trialWages = $jobs->filter(fn ($j) => !empty($j->has_trial))->map(fn ($j) => (int) ($j->trial_hourly_wage ?? 0))->filter(fn ($n) => $n > 0);
+            $trialHourly = $trialWages->isNotEmpty() ? $trialWages->max() : null;
+            $maxBonus = $jobs->map(fn ($j) => (int) ($j->noruma_reward ?? 0))->max() ?? 0;
+
+            $primaryJob = $jobs->sortByDesc(fn ($j) => (int) ($j->hourly_wage_regular ?? 0))->first();
+            $primaryMeta = $this->decodeRecruitMeta($primaryJob->noruma_cond ?? null);
+
             $items[] = [
-                // ルート用には文字列ID（例: s00000001）をそのまま渡す
                 'id' => $row->id,
-                // 必要に応じて数値IDを併用したい場合に備えて保持
                 'numeric_id' => $numericId,
                 'name' => $row->shop_name ?: '店舗',
                 'images' => $images,
-                'hourly_wage_regular' => isset($row->hourly_wage_regular) ? (int) $row->hourly_wage_regular : 0,
-                'trial_hourly_wage' => !empty($row->has_trial) && isset($row->trial_hourly_wage) ? (int) $row->trial_hourly_wage : null,
-                'noruma_reward' => isset($row->noruma_reward) ? (int) $row->noruma_reward : 0,
-                'bonus_condition' => $meta['bonus_condition'] ?? '',
-                'catch_copy' => $meta['catch_copy'] ?? '',
-                'tags' => $this->buildRecruitCardTags($row, $meta),
+                'job_titles' => $jobTitles,
+                'hourly_wage_regular' => $maxHourly,
+                'trial_hourly_wage' => $trialHourly,
+                'noruma_reward' => $maxBonus,
+                'bonus_condition' => $primaryMeta['bonus_condition'] ?? '',
+                'catch_copy' => $primaryMeta['catch_copy'] ?? '',
+                'tags' => $this->buildRecruitCardTagsAggregated($row, $jobs),
                 'pref' => $row->pref ?? '',
                 'city' => $row->city ?? '',
                 'like_count' => $likeCounts[$row->id] ?? 0,
@@ -164,9 +181,83 @@ class HomeController extends Controller
         }
 
         return [
-            ['id' => 1, 'name' => 'CLUB ETERNITY', 'images' => [asset('storage/mock/shops/out-1.png')], 'hourly_wage_regular' => 3500, 'trial_hourly_wage' => 3000, 'noruma_reward' => 50000, 'bonus_condition' => '', 'catch_copy' => '未経験歓迎', 'tags' => ['高時給', 'ボーナスあり', '六本木'], 'pref' => '東京都', 'city' => '港区', 'like_count' => 0],
-            ['id' => 2, 'name' => 'THE GOLDSTONE', 'images' => [asset('storage/mock/shops/out-2.png')], 'hourly_wage_regular' => 3200, 'trial_hourly_wage' => null, 'noruma_reward' => 0, 'bonus_condition' => '', 'catch_copy' => 'ノルマなし', 'tags' => ['送りあり', '六本木'], 'pref' => '東京都', 'city' => '港区', 'like_count' => 0],
+            [
+                'id' => 1,
+                'name' => 'CLUB ETERNITY',
+                'images' => [asset('storage/mock/shops/out-1.png')],
+                'job_titles' => ['未経験歓迎・ホール', 'バーテンダー募集'],
+                'hourly_wage_regular' => 3500,
+                'trial_hourly_wage' => 3000,
+                'noruma_reward' => 50000,
+                'bonus_condition' => '',
+                'catch_copy' => '未経験歓迎',
+                'tags' => ['高時給', 'ボーナスあり', '六本木'],
+                'pref' => '東京都',
+                'city' => '港区',
+                'like_count' => 0,
+            ],
+            [
+                'id' => 2,
+                'name' => 'THE GOLDSTONE',
+                'images' => [asset('storage/mock/shops/out-2.png')],
+                'job_titles' => ['ノルマなしキャスト'],
+                'hourly_wage_regular' => 3200,
+                'trial_hourly_wage' => null,
+                'noruma_reward' => 0,
+                'bonus_condition' => '',
+                'catch_copy' => 'ノルマなし',
+                'tags' => ['送りあり', '六本木'],
+                'pref' => '東京都',
+                'city' => '港区',
+                'like_count' => 0,
+            ],
         ];
+    }
+
+    /**
+     * 求人1件分の表示タイトル（noruma_cond の catch_copy → job_description の要約）
+     */
+    private function titleForShopJob(object $job): string
+    {
+        $meta = $this->decodeRecruitMeta($job->noruma_cond ?? null);
+        $fromMeta = trim((string) ($meta['catch_copy'] ?? ''));
+        if ($fromMeta !== '') {
+            return mb_strimwidth($fromMeta, 0, 48, '…');
+        }
+        $desc = trim((string) ($job->job_description ?? ''));
+        if ($desc !== '') {
+            return mb_strimwidth($desc, 0, 48, '…');
+        }
+
+        return '求人';
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, object>  $jobs
+     */
+    private function buildRecruitCardTagsAggregated(object $profileRow, $jobs): array
+    {
+        $tags = [];
+        if (!empty($profileRow->pref)) {
+            $tags[] = $profileRow->pref;
+        }
+        if (!empty($profileRow->city)) {
+            $tags[] = $profileRow->city;
+        }
+        $maxHourly = $jobs->map(fn ($j) => (int) ($j->hourly_wage_regular ?? 0))->max() ?? 0;
+        if ($maxHourly >= 3000) {
+            $tags[] = '高時給';
+        }
+        $maxBonus = $jobs->map(fn ($j) => (int) ($j->noruma_reward ?? 0))->max() ?? 0;
+        if ($maxBonus > 0) {
+            $tags[] = 'ボーナスあり';
+        }
+        $jobCount = $jobs->count();
+        if ($jobCount >= 2) {
+            $tags[] = '求人' . $jobCount . '件';
+        }
+
+        return array_slice(array_unique($tags), 0, 5);
     }
 
     private function toNumericShopId(string $shopId): int
@@ -186,29 +277,6 @@ class HomeController extends Controller
         $decoded = json_decode($raw, true);
 
         return is_array($decoded) ? $decoded : [];
-    }
-
-    private function buildRecruitCardTags(object $row, array $meta): array
-    {
-        $tags = [];
-        if (!empty($row->pref)) {
-            $tags[] = $row->pref;
-        }
-        if (!empty($row->city)) {
-            $tags[] = $row->city;
-        }
-        if (isset($row->hourly_wage_regular) && (int) $row->hourly_wage_regular >= 3000) {
-            $tags[] = '高時給';
-        }
-        if (isset($row->noruma_reward) && (int) $row->noruma_reward > 0) {
-            $tags[] = 'ボーナスあり';
-        }
-        $catch = $meta['catch_copy'] ?? '';
-        if ($catch !== '') {
-            $tags[] = mb_strimwidth(trim($catch), 0, 12, '…');
-        }
-
-        return array_slice(array_unique($tags), 0, 5);
     }
 
     private function getHomeShops(): array

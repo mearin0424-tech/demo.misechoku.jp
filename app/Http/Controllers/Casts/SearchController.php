@@ -87,7 +87,12 @@ class SearchController extends BaseSearchController
 
         $rows = DB::table('shops')
             ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
-            ->leftJoin('shop_jobs', 'shops.id', '=', 'shop_jobs.shop_id')
+            ->whereExists(function ($q) {
+                $q->select(DB::raw(1))
+                    ->from('shop_jobs')
+                    ->whereColumn('shop_jobs.shop_id', 'shops.id')
+                    ->where('shop_jobs.status', 1);
+            })
             ->select(
                 'shops.id',
                 'shop_profiles.shop_name',
@@ -95,10 +100,7 @@ class SearchController extends BaseSearchController
                 'shop_profiles.city',
                 'shop_profiles.catch',
                 'shop_profiles.overview',
-                'shop_profiles.main_image_path',
-                'shop_jobs.hourly_wage_regular',
-                'shop_jobs.noruma_reward',
-                'shop_jobs.noruma_cond'
+                'shop_profiles.main_image_path'
             )
             ->orderByDesc('shop_profiles.updated_at')
             ->orderByDesc('shops.id');
@@ -117,18 +119,37 @@ class SearchController extends BaseSearchController
             }
         }
 
-        return $rows->get()
-            ->filter(function ($row) use ($normalizedKeyword, $areas, $hourlyWage, $reward, $tagFilters) {
+        $shopRows = $rows->get();
+        $shopIds = $shopRows->pluck('id')->all();
+
+        $jobsByShop = collect();
+        if ($shopIds !== []) {
+            $jobsByShop = DB::table('shop_jobs')
+                ->whereIn('shop_id', $shopIds)
+                ->where('status', 1)
+                ->orderBy('id')
+                ->get()
+                ->groupBy('shop_id');
+        }
+
+        return $shopRows
+            ->filter(function ($row) use ($normalizedKeyword, $areas, $hourlyWage, $reward, $tagFilters, $jobsByShop) {
+                $jobs = collect($jobsByShop[$row->id] ?? []);
+                if ($jobs->isEmpty()) {
+                    return false;
+                }
+
                 if ($normalizedKeyword === '') {
                     $matchesKeyword = true;
                 } else {
-                    $haystack = implode(' ', array_filter([
+                    $jobTitles = $jobs->map(fn ($j) => $this->titleForShopJobRow($j))->all();
+                    $haystack = implode(' ', array_filter(array_merge([
                         $row->shop_name,
                         $row->pref,
                         $row->city,
                         $row->catch,
                         $row->overview,
-                    ]));
+                    ], $jobTitles)));
 
                     $matchesKeyword = str_contains($this->normalizeSearchText($haystack), $normalizedKeyword);
                 }
@@ -142,19 +163,26 @@ class SearchController extends BaseSearchController
                     return false;
                 }
 
-                if ($hourlyWage > 0 && (int) ($row->hourly_wage_regular ?? 0) < $hourlyWage) {
+                $maxHourly = (int) ($jobs->map(fn ($j) => (int) ($j->hourly_wage_regular ?? 0))->max() ?? 0);
+                if ($hourlyWage > 0 && $maxHourly < $hourlyWage) {
                     return false;
                 }
 
-                if ($reward > 0 && (int) ($row->noruma_reward ?? 0) < $reward) {
+                $maxReward = (int) ($jobs->map(fn ($j) => (int) ($j->noruma_reward ?? 0))->max() ?? 0);
+                if ($reward > 0 && $maxReward < $reward) {
                     return false;
                 }
 
-                $meta = $this->decodeMeta($row->noruma_cond ?? null);
+                return $jobs->contains(function ($job) use ($tagFilters) {
+                    $meta = $this->decodeMeta($job->noruma_cond ?? null);
 
-                return $this->matchesTagFilters($meta['tag_ids'] ?? [], $tagFilters);
+                    return $this->matchesTagFilters($meta['tag_ids'] ?? [], $tagFilters);
+                });
             })
-            ->map(function ($row) {
+            ->map(function ($row) use ($jobsByShop) {
+                $jobs = collect($jobsByShop[$row->id] ?? []);
+                $jobTitles = $jobs->map(fn ($j) => $this->titleForShopJobRow($j))->values()->all();
+
                 return [
                     'id' => $row->id,
                     'shop_name' => (string) ($row->shop_name ?: 'ショップ'),
@@ -162,11 +190,30 @@ class SearchController extends BaseSearchController
                     'city' => $row->city ?? '',
                     'catch' => (string) ($row->catch ?? ''),
                     'overview' => (string) ($row->overview ?? ''),
+                    'job_titles' => $jobTitles,
                     'main_img' => $this->getShopImages((string) $row->id)[0] ?? asset('assets/images/common/no-image.png'),
                 ];
             })
             ->values()
             ->all();
+    }
+
+    /**
+     * 店舗内の求人1件の表示名（キャッチ or 募集要項の要約）
+     */
+    private function titleForShopJobRow(object $job): string
+    {
+        $meta = $this->decodeMeta($job->noruma_cond ?? null);
+        $fromMeta = trim((string) ($meta['catch_copy'] ?? ''));
+        if ($fromMeta !== '') {
+            return mb_strimwidth($fromMeta, 0, 48, '…');
+        }
+        $desc = trim((string) ($job->job_description ?? ''));
+        if ($desc !== '') {
+            return mb_strimwidth($desc, 0, 48, '…');
+        }
+
+        return '求人';
     }
 
     private function buildDetailSearchOptions(): array

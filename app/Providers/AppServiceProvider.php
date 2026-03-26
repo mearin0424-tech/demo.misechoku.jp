@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
+use App\Services\AdminOperationalSummaryService;
 use App\Services\ReviewPortalService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
@@ -51,6 +52,14 @@ class AppServiceProvider extends ServiceProvider
 
             $view->with('notifications', $notifications);
             $view->with('unreadNewsCount', $unreadNewsCount);
+        });
+
+        View::composer('layouts.admin', function ($view) {
+            $svc = app(AdminOperationalSummaryService::class);
+            $view->with('adminOperationBadges', $svc->getOperationBadgeCounts());
+            $notify = $svc->getNotificationsForLayout(30);
+            $view->with('adminNotifications', $notify['items']);
+            $view->with('adminNotificationCount', $notify['total_count']);
         });
 
     }

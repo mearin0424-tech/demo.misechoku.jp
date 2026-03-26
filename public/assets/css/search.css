@@ -82,6 +82,26 @@
 }
 .conn-info { flex: 1; min-width: 0; }
 .conn-name { font-weight: bold; color: #fff; font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.conn-job-titles {
+    list-style: none;
+    margin: 6px 0 0;
+    padding: 0;
+    max-height: 4.2em;
+    overflow: hidden;
+}
+.conn-job-titles__item {
+    font-size: 0.72rem;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.72);
+    padding-left: 0.85em;
+    position: relative;
+}
+.conn-job-titles__item::before {
+    content: '・';
+    position: absolute;
+    left: 0;
+    opacity: 0.7;
+}
 .conn-date { font-size: 0.75rem; color: var(--color-gold); margin-top: 4px; }
 .conn-action {
     background: transparent;

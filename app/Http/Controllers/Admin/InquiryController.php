@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\AdminMockInquiries;
 
 class InquiryController extends Controller
 {
@@ -13,27 +14,8 @@ class InquiryController extends Controller
      */
     public function index()
     {
-        $mockInquiries = [
-            [
-                'id' => 1,
-                'from_type' => '店舗',
-                'from_name' => 'サンプル店舗A',
-                'subject' => '請求内容の確認について',
-                'status' => '未対応',
-                'created_at' => now()->subDay(),
-            ],
-            [
-                'id' => 2,
-                'from_type' => 'キャスト',
-                'from_name' => 'キャストB',
-                'subject' => 'ログインできない',
-                'status' => '対応中',
-                'created_at' => now()->subDays(2),
-            ],
-        ];
-
         return view('admin.inquiry.index', [
-            'inquiries' => $mockInquiries,
+            'inquiries' => AdminMockInquiries::all(),
         ]);
     }
 }

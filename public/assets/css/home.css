@@ -361,6 +361,30 @@ body.no-scroll main#main-content .content-wrapper {
     text-shadow: 0 0 8px rgba(248, 231, 176, 0.4);
 }
 
+/* お店単位カード：店内の求人タイトル一覧 */
+.card-recruit-job-titles {
+    list-style: none;
+    margin: 0 0 8px;
+    padding: 0;
+    max-height: 4.5em;
+    overflow: hidden;
+    pointer-events: auto;
+}
+.card-recruit-job-titles__item {
+    font-size: clamp(0.72rem, 2.2vw, 0.82rem);
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.88);
+    padding-left: 0.85em;
+    position: relative;
+    margin-bottom: 2px;
+}
+.card-recruit-job-titles__item::before {
+    content: '・';
+    position: absolute;
+    left: 0;
+    opacity: 0.75;
+}
+
 .card-tags-row {
     display: flex;
     flex-wrap: wrap;

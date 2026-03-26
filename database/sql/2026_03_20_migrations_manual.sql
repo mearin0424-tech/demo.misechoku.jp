@@ -93,3 +93,12 @@ CREATE TABLE IF NOT EXISTS `notification_preferences` (
 -- 2026_03_23_column_articles_column_category.sql（カテゴリFK・旧カラム削除）を参照
 --
 -- お知らせ notices: database/sql/2026_03_24_create_notices.sql
+--
+-- 管理画面オペレーションのテスト用 INSERT（請求・入金・審査など）:
+-- database/sql/2026_03_26_admin_operations_test_data.sql
+--
+-- review_details に review_content_id が無い場合:
+-- database/sql/2026_03_27_review_details_add_review_content_id.sql
+--
+-- application_deposits に invoice_number 等の請求・入金カラムが無い場合:
+-- database/sql/2026_03_28_application_deposits_add_billing_columns.sql

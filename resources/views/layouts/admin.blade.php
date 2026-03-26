@@ -6,8 +6,8 @@
             'title' => 'オペレーション',
             'items' => [
                 ['label' => '請求書発行', 'route' => 'admin.invoices.index', 'icon' => 'fa-file-invoice', 'badge' => null, 'badge_class' => ''],
-                ['label' => '入金確認・振込', 'route' => 'admin.deposits.index', 'icon' => 'fa-money-bill-transfer', 'badge' => null, 'badge_class' => ''],
-                ['label' => '身分証・書類審査', 'route' => 'admin.verification.index', 'icon' => 'fa-shield-halved', 'badge' => '7', 'badge_class' => 'badge-gold'],
+                ['label' => '入金確認・振込', 'route' => 'admin.deposits.index', 'icon' => 'fa-money-bill-wave', 'badge' => null, 'badge_class' => ''],
+                ['label' => '身分証・書類審査', 'route' => 'admin.verification.index', 'icon' => 'fa-id-card', 'badge' => null, 'badge_class' => ''],
                 ['label' => '問合せ対応', 'route' => 'admin.inquiries.index', 'icon' => 'fa-triangle-exclamation', 'badge' => null, 'badge_class' => ''],
             ],
         ],
@@ -40,11 +40,23 @@
             ],
         ],
     ];
-    $urgentItems = [
-        ['title' => '【期限超過】リナの振込エラー対応', 'time' => '10分前', 'icon' => 'fa-triangle-exclamation', 'class' => 'is-danger'],
-        ['title' => '【新規問合せ】THE GOLDSTONEより', 'time' => '1時間前', 'icon' => 'fa-comments', 'class' => 'is-warning'],
-        ['title' => '【期限間近】愛華の本人確認審査', 'time' => '2時間前', 'icon' => 'fa-clock', 'class' => 'is-gold'],
-    ];
+    $opBadges = $adminOperationBadges ?? [];
+    foreach ($menuGroups as &$group) {
+        if (($group['title'] ?? '') !== 'オペレーション') {
+            continue;
+        }
+        foreach ($group['items'] as &$item) {
+            $route = $item['route'] ?? '';
+            if (! isset($opBadges[$route])) {
+                continue;
+            }
+            $n = (int) $opBadges[$route];
+            $item['badge'] = $n > 0 ? (string) $n : null;
+            $item['badge_class'] = $n > 0 ? 'badge-gold' : '';
+        }
+        unset($item);
+    }
+    unset($group);
     $sectionMap = [
         'admin.dashboard' => 'ダッシュボード',
         'admin.invoices.*' => 'オペレーション',
@@ -210,15 +222,32 @@
             border-color: rgba(230, 208, 128, 0.26);
         }
         .admin-nav-group {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
         .admin-nav-group-title {
-            font-size: 0.63rem;
-            font-weight: 700;
-            color: var(--admin-muted);
-            letter-spacing: 0.12em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
             padding: 0 8px;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+        }
+        .admin-nav-group:not(:first-child) .admin-nav-group-title {
+            margin-top: 18px;
+        }
+        .admin-nav-group-title-text {
+            flex-shrink: 0;
+            font-size: 0.52rem;
+            font-weight: 600;
+            color: var(--admin-muted);
+            letter-spacing: 0.14em;
+            line-height: 1.2;
+        }
+        .admin-nav-group-title-line {
+            flex: 1;
+            min-width: 12px;
+            height: 1px;
+            background: rgba(138, 117, 119, 0.35);
+            border-radius: 1px;
         }
         .admin-nav-list {
             display: flex;
@@ -413,12 +442,28 @@
         }
         .admin-header-dot {
             position: absolute;
-            top: 8px;
-            right: 8px;
+            top: 6px;
+            right: 6px;
             width: 10px;
             height: 10px;
             border-radius: 999px;
             background: var(--admin-red);
+            border: 2px solid var(--admin-bg);
+        }
+        .admin-header-notification-count {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            min-width: 16px;
+            height: 16px;
+            padding: 0 4px;
+            border-radius: 999px;
+            background: var(--admin-red);
+            color: #fff;
+            font-size: 0.58rem;
+            font-weight: 800;
+            line-height: 16px;
+            text-align: center;
             border: 2px solid var(--admin-bg);
         }
         .admin-task-popover {
@@ -467,6 +512,12 @@
         .admin-task-popover-list {
             max-height: 320px;
             overflow-y: auto;
+        }
+        .admin-task-popover-empty {
+            padding: 18px 14px;
+            font-size: 0.72rem;
+            color: var(--admin-muted);
+            line-height: 1.5;
         }
         .admin-task-item {
             display: flex;
@@ -808,7 +859,10 @@
 
                 @foreach ($menuGroups as $group)
                     <section class="admin-nav-group">
-                        <div class="admin-nav-group-title">{{ $group['title'] }}</div>
+                        <div class="admin-nav-group-title">
+                            <span class="admin-nav-group-title-text">{{ $group['title'] }}</span>
+                            <span class="admin-nav-group-title-line" aria-hidden="true"></span>
+                        </div>
                         <nav class="admin-nav-list">
                             @foreach ($group['items'] as $item)
                                 <a href="{{ route($item['route']) }}" class="admin-nav-link {{ request()->routeIs($item['route']) ? 'is-active' : '' }}">
@@ -860,30 +914,41 @@
                         <input type="text" class="admin-search-input" placeholder="検索...">
                     </div>
                     <div style="position: relative;">
-                        <button type="button" class="admin-header-icon" id="admin-task-toggle" aria-label="緊急タスク">
-                            <i class="fas fa-list-check"></i>
-                            <span class="admin-header-dot"></span>
+                        @php
+                            $nAdminNotify = (int) ($adminNotificationCount ?? 0);
+                        @endphp
+                        <button type="button" class="admin-header-icon" id="admin-notification-toggle" aria-label="通知">
+                            <i class="fas fa-bell"></i>
+                            @if ($nAdminNotify > 0)
+                                @if ($nAdminNotify > 99)
+                                    <span class="admin-header-notification-count" aria-hidden="true">99+</span>
+                                @else
+                                    <span class="admin-header-notification-count" aria-hidden="true">{{ $nAdminNotify }}</span>
+                                @endif
+                            @endif
                         </button>
-                        <div id="admin-task-popover" class="admin-task-popover" aria-hidden="true">
+                        <div id="admin-notification-popover" class="admin-task-popover" aria-hidden="true">
                             <div class="admin-task-popover-head">
-                                <div class="admin-task-popover-title">緊急タスク・問合せ</div>
-                                <div class="admin-task-popover-badge">{{ count($urgentItems) }}件</div>
+                                <div class="admin-task-popover-title">通知</div>
+                                <div class="admin-task-popover-badge">{{ $nAdminNotify }}件</div>
                             </div>
                             <div class="admin-task-popover-list">
-                                @foreach ($urgentItems as $item)
-                                    <a href="{{ route('admin.tasks.index') }}" class="admin-task-item">
+                                @forelse ($adminNotifications ?? [] as $item)
+                                    <a href="{{ $item['url'] }}" class="admin-task-item">
                                         <span class="admin-task-item-icon {{ $item['class'] }}">
                                             <i class="fas {{ $item['icon'] }}"></i>
                                         </span>
                                         <span>
                                             <span class="admin-task-item-title">{{ $item['title'] }}</span>
-                                            <span class="admin-task-item-time">{{ $item['time'] }}</span>
+                                            <span class="admin-task-item-time">{{ $item['time_label'] }}</span>
                                         </span>
                                     </a>
-                                @endforeach
+                                @empty
+                                    <div class="admin-task-popover-empty">現在、表示する通知はありません。</div>
+                                @endforelse
                             </div>
                             <div class="admin-task-popover-foot">
-                                <a href="{{ route('admin.tasks.index') }}" class="admin-task-popover-link">タスク管理画面へ</a>
+                                <a href="{{ route('admin.dashboard') }}" class="admin-task-popover-link">ダッシュボードで全体を確認</a>
                             </div>
                         </div>
                     </div>
@@ -905,8 +970,8 @@
             var overlay = document.getElementById('admin-mobile-overlay');
             var openBtn = document.getElementById('admin-menu-toggle');
             var closeBtn = document.getElementById('admin-sidebar-close');
-            var taskToggle = document.getElementById('admin-task-toggle');
-            var taskPopover = document.getElementById('admin-task-popover');
+            var taskToggle = document.getElementById('admin-notification-toggle');
+            var taskPopover = document.getElementById('admin-notification-popover');
 
             function openSidebar() {
                 if (!sidebar || !overlay) return;

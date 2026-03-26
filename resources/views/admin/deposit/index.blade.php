@@ -209,8 +209,8 @@
         <section class="admin-panel">
             <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px;">
                 <h2 class="admin-panel-title" style="margin-bottom: 0;">運営口座</h2>
-                <a href="{{ route('admin.deposits.invoice-template.download') }}" class="btn-action manage" target="_blank" rel="noopener">
-                    <i class="fas fa-file-pdf"></i> 請求書帳票テンプレートをダウンロード
+                <a href="{{ route('admin.bank.index') }}" class="btn-action manage">
+                    <i class="fas fa-university"></i> 口座登録・編集
                 </a>
             </div>
             @if($adminBank)
@@ -233,7 +233,7 @@
                     </div>
                 </div>
             @else
-                <p class="admin-note">請求書発行前に、`運営口座情報設定` から請求書記載用の振込先口座を登録してください。</p>
+                <p class="admin-note">請求書発行前に、上の「口座登録・編集」から請求書記載用の振込先口座を登録してください。</p>
             @endif
         </section>
 
