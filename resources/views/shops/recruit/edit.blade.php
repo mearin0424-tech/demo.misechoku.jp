@@ -62,47 +62,34 @@
 </style>
 @endpush
 
-@section('header')
-<header class="sticky top-0 z-50 bg-[#0a0505]/95 backdrop-blur-md border-b border-neutral-800/50">
-    <div class="max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
-        <a href="{{ route('shop.recruits.status') }}" class="p-2 hover:bg-white/5 rounded-full transition-colors">
-            <i class="fas fa-chevron-left text-neutral-400"></i>
-        </a>
-        <h1 class="text-lg font-bold text-white tracking-tight text-center">求人情報の編集</h1>
-        <div class="w-10"></div> {{-- Placeholder for balance --}}
-    </div>
-</header>
-@endsection
-
 @section('content')
-<div class="min-h-screen bg-[#0a0505] text-neutral-200 font-sans pb-28">
-    <main class="max-w-2xl mx-auto px-4 py-8 space-y-8">
-        {{-- ステータス切り替え --}}
-        <div class="flex items-center justify-between px-2">
-            <div class="flex flex-col">
-                <span class="text-[10px] font-bold text-neutral-500 uppercase tracking-[0.2em] mb-1">
-                    STATUS
-                </span>
-                <div class="flex items-center gap-3">
-                    <h2 class="text-2xl font-black tracking-tight transition-colors duration-300 {{ ($recruit['status'] ?? 'active') === 'active' ? 'text-white' : 'text-neutral-600' }}">
-                        {{ ($recruit['status'] ?? 'active') === 'active' ? '公開中' : '公開停止中' }}
-                    </h2>
-                    @if(($recruit['status'] ?? 'active') === 'active')
-                        <span class="flex h-2 w-2 rounded-full bg-[#d4a017] animate-pulse"></span>
-                    @endif
-                </div>
-            </div>
+<div class="contents inner recruit-edit-page animate-fadeIn p-4">
+    <header class="recruit-status-header" style="margin-bottom: 18px;">
+        <a href="{{ route('shop.recruits.status') }}" class="recruit-status-back"><i class="fas fa-chevron-left"></i> キャンセル</a>
+        <div class="recruit-status-title-block">
+            <h1 class="recruit-status-title serif-font" style="font-size: 1.4rem;">Edit Recruit</h1>
+            <p class="recruit-status-sub">求人情報の編集</p>
+        </div>
+    </header>
 
-            <div class="flex flex-col items-end gap-2">
-                <label for="publish-toggle" class="relative inline-flex h-9 w-16 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-300 ease-in-out focus:outline-none {{ ($recruit['status'] ?? 'active') === 'active' ? 'bg-[#d4a017]' : 'bg-neutral-800' }}">
-                    <input type="checkbox" id="publish-toggle" name="status" value="active" class="sr-only" {{ ($recruit['status'] ?? 'active') === 'active' ? 'checked' : '' }}>
-                    <span aria-hidden="true" class="pointer-events-none inline-block h-8 w-8 transform rounded-full bg-white shadow-lg ring-0 transition duration-300 ease-in-out {{ ($recruit['status'] ?? 'active') === 'active' ? 'translate-x-7' : 'translate-x-0' }}"></span>
-                </label>
-                <span class="text-[10px] font-bold text-neutral-600 tracking-tighter">
-                    SWITCH TO {{ ($recruit['status'] ?? 'active') === 'active' ? 'OFFLINE' : 'ONLINE' }}
+    <section class="recruit-edit-hero">
+        <div class="recruit-edit-headline">
+            <div>
+                <span class="status-badge {{ ($recruit['status'] ?? 'active') === 'active' ? 'status-active' : 'status-inactive' }}">
+                    {{ ($recruit['status'] ?? 'active') === 'active' ? '現在は公開中' : '現在は非公開' }}
                 </span>
+                <h2 class="recruit-edit-title serif-font">{{ $recruit['catch_copy'] ?: '求人票を整えて応募につながる内容にしましょう' }}</h2>
             </div>
         </div>
+        <div class="recruit-edit-toolbar">
+            <a href="{{ route('shop.jobdescription') }}" class="recruit-ghost-btn">
+                <i class="fas fa-eye"></i> プレビューを見る
+            </a>
+            <a href="{{ route('shop.recruits.status') }}" class="recruit-ghost-btn">
+                <i class="fas fa-list-check"></i> ステータス管理へ
+            </a>
+        </div>
+    </section>
 
     @if(session('message'))
         <p class="profile-edit-flash" style="margin-bottom:16px;">{{ session('message') }}</p>
@@ -247,7 +234,7 @@
                 <div class="recruit-form-group" style="margin-bottom: 0;">
                     <label class="recruit-label">ボーナス金額</label>
                     <div class="recruit-input-with-unit">
-                        <input type="text" name="noruma_reward" class="recruit-input" value="{{ old('noruma_reward', number_format($recruit['noruma_reward'] ?? 0)) }}" placeholder="30,000" inputmode="numeric" pattern="[0-9]*" data-type="currency">
+                        <input type="text" name="noruma_reward" class="recruit-input" value="{{ number_format(floatval(old('noruma_reward', $recruit['noruma_reward'] ?? 0))) }}" placeholder="30,000" inputmode="numeric" pattern="[0-9]*" data-type="currency">
                         <span class="unit">円</span>
                     </div>
                 </div>
