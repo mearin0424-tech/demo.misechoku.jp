@@ -26,12 +26,6 @@
         </div>
 
         <div class="admin-form-row">
-            <label class="admin-label">スラッグ（省略可・英数字とハイフン）</label>
-            <input type="text" name="slug" class="admin-input" value="{{ old('slug', optional($notice)->slug) }}" maxlength="191" placeholder="例: maintenance-2026">
-            <small style="display:block; margin-top:6px; color:#7c8ba3;">空欄の場合はタイトルから自動生成します。URLに使われます。</small>
-        </div>
-
-        <div class="admin-form-row">
             <label class="admin-label">本文</label>
             <textarea name="body" class="admin-input" rows="14" required placeholder="本文（プレーンテキスト。改行はそのまま表示されます）">{{ old('body', optional($notice)->body) }}</textarea>
         </div>

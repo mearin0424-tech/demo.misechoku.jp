@@ -681,12 +681,32 @@
             border-color: rgba(230, 208, 128, 0.3);
             box-shadow: 0 0 0 3px rgba(230, 208, 128, 0.07);
         }
+        select.admin-input {
+            color: var(--admin-text);
+            background-color: var(--admin-card);
+            cursor: pointer;
+            appearance: auto;
+        }
+        select.admin-input option {
+            background-color: var(--admin-card);
+            color: var(--admin-text);
+        }
         .admin-form-actions,
         .management-actions {
             margin-top: 14px;
             display: flex;
             justify-content: flex-end;
             gap: 10px;
+        }
+        a.btn-action,
+        .btn-action {
+            text-decoration: none;
+        }
+        a.btn-action:hover,
+        a.btn-action:focus,
+        .btn-action:hover,
+        .btn-action:focus {
+            text-decoration: none;
         }
         .btn-action.manage {
             display: inline-flex;

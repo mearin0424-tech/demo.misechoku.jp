@@ -219,6 +219,8 @@ Route::name('pages.')->group(function () {
     Route::get('/privacy', [PageController::class, 'privacy'])->name('official.privacy');
     Route::get('/support/column', [ColumnArticleController::class, 'index'])->name('support.column');
     Route::get('/support/column/{slug}', [ColumnArticleController::class, 'show'])->name('support.column.show');
+    Route::get('/support/notices', [SupportNoticeController::class, 'index'])->name('support.notices');
+    Route::get('/support/notices/{slug}', [SupportNoticeController::class, 'show'])->name('support.notices.show');
     Route::get('/support/form', [PageController::class, 'supportForm'])->name('support.form');
 });
 

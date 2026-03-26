@@ -8,6 +8,8 @@ use App\Http\Requests\Admin\UpdateNoticeRequest;
 use App\Models\Notice;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class NoticeController extends Controller
@@ -32,12 +34,12 @@ class NoticeController extends Controller
         $data = $this->normalizePayload($request);
         unset($data['slug']);
 
-        $slugInput = $request->input('slug');
-        $data['slug'] = $slugInput !== null && $slugInput !== ''
-            ? Notice::ensureUniqueSlug($slugInput)
-            : Notice::makeUniqueSlugFromTitle($data['title']);
+        $data['slug'] = 'pending-' . Str::lower(Str::uuid()->toString());
 
-        Notice::query()->create($data);
+        DB::transaction(function () use ($data) {
+            $notice = Notice::query()->create($data);
+            $notice->update(['slug' => (string) $notice->id]);
+        });
 
         return redirect()
             ->route('admin.notices.index')
@@ -53,11 +55,6 @@ class NoticeController extends Controller
     {
         $data = $this->normalizePayload($request);
         unset($data['slug']);
-
-        $slugInput = $request->input('slug');
-        if ($slugInput !== null && $slugInput !== '') {
-            $data['slug'] = Notice::ensureUniqueSlug($slugInput, $notice->id);
-        }
 
         $notice->update($data);
 

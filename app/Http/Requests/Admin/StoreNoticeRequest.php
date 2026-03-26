@@ -11,18 +11,10 @@ class StoreNoticeRequest extends FormRequest
         return true;
     }
 
-    protected function prepareForValidation(): void
-    {
-        if ($this->input('slug') === '') {
-            $this->merge(['slug' => null]);
-        }
-    }
-
     public function rules(): array
     {
         return [
             'title' => ['required', 'string', 'max:200'],
-            'slug' => ['nullable', 'string', 'max:191', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'unique:notices,slug'],
             'body' => ['required', 'string'],
             'is_published' => ['sometimes', 'boolean'],
             'published_at' => ['nullable', 'date'],
@@ -36,7 +28,6 @@ class StoreNoticeRequest extends FormRequest
     {
         return [
             'title' => 'タイトル',
-            'slug' => 'スラッグ',
             'body' => '本文',
             'published_at' => '公開日時',
         ];

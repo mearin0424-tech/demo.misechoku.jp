@@ -9,6 +9,8 @@ use App\Models\ColumnArticle;
 use App\Models\Master\ColumnCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class ColumnController extends Controller
@@ -36,12 +38,13 @@ class ColumnController extends Controller
         $data = $this->normalizePayload($request);
         unset($data['slug']);
 
-        $slugInput = $request->input('slug');
-        $data['slug'] = $slugInput !== null && $slugInput !== ''
-            ? ColumnArticle::ensureUniqueSlug($slugInput)
-            : ColumnArticle::makeUniqueSlugFromTitle($data['title']);
+        // 登録直後に付与される ID と同じ文字列をスラッグにする（一時スラッグで UNIQUE を満たしてから更新）
+        $data['slug'] = 'pending-' . Str::lower(Str::uuid()->toString());
 
-        ColumnArticle::query()->create($data);
+        DB::transaction(function () use ($data) {
+            $article = ColumnArticle::query()->create($data);
+            $article->update(['slug' => (string) $article->id]);
+        });
 
         return redirect()
             ->route('admin.columns.index')
@@ -60,11 +63,6 @@ class ColumnController extends Controller
     {
         $data = $this->normalizePayload($request);
         unset($data['slug']);
-
-        $slugInput = $request->input('slug');
-        if ($slugInput !== null && $slugInput !== '') {
-            $data['slug'] = ColumnArticle::ensureUniqueSlug($slugInput, $column->id);
-        }
 
         $column->update($data);
 

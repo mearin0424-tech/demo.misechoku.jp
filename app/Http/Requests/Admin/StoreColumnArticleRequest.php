@@ -14,9 +14,6 @@ class StoreColumnArticleRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        if ($this->input('slug') === '') {
-            $this->merge(['slug' => null]);
-        }
         if ($this->input('column_category_id') === '') {
             $this->merge(['column_category_id' => null]);
         }
@@ -26,7 +23,6 @@ class StoreColumnArticleRequest extends FormRequest
     {
         return [
             'title' => ['required', 'string', 'max:200'],
-            'slug' => ['nullable', 'string', 'max:191', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', 'unique:column_articles,slug'],
             'column_category_id' => [
                 'required',
                 'integer',
@@ -47,7 +43,6 @@ class StoreColumnArticleRequest extends FormRequest
     {
         return [
             'title' => 'タイトル',
-            'slug' => 'スラッグ',
             'column_category_id' => 'カテゴリ',
             'body' => '本文',
             'published_at' => '公開日時',

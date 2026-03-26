@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class UpdateNoticeRequest extends FormRequest
 {
@@ -12,26 +11,10 @@ class UpdateNoticeRequest extends FormRequest
         return true;
     }
 
-    protected function prepareForValidation(): void
-    {
-        if ($this->input('slug') === '') {
-            $this->merge(['slug' => null]);
-        }
-    }
-
     public function rules(): array
     {
-        $notice = $this->route('notice');
-
         return [
             'title' => ['required', 'string', 'max:200'],
-            'slug' => [
-                'nullable',
-                'string',
-                'max:191',
-                'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
-                Rule::unique('notices', 'slug')->ignore($notice),
-            ],
             'body' => ['required', 'string'],
             'is_published' => ['sometimes', 'boolean'],
             'published_at' => ['nullable', 'date'],
@@ -45,7 +28,6 @@ class UpdateNoticeRequest extends FormRequest
     {
         return [
             'title' => 'タイトル',
-            'slug' => 'スラッグ',
             'body' => '本文',
             'published_at' => '公開日時',
         ];

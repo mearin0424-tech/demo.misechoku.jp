@@ -32,12 +32,6 @@
         </div>
 
         <div class="admin-form-row">
-            <label class="admin-label">スラッグ（省略可・英数字とハイフン）</label>
-            <input type="text" name="slug" class="admin-input" value="{{ old('slug', optional($column)->slug) }}" maxlength="191" placeholder="例: first-guide">
-            <small style="display:block; margin-top:6px; color:#7c8ba3;">空欄の場合はタイトルから自動生成します。URLに使われます。</small>
-        </div>
-
-        <div class="admin-form-row">
             <label class="admin-label">カテゴリ</label>
             <select name="column_category_id" class="admin-input" required>
                 <option value="" disabled {{ old('column_category_id', optional($column)->column_category_id) ? '' : 'selected' }}>選択してください</option>
@@ -47,7 +41,7 @@
                     </option>
                 @endforeach
             </select>
-            <small style="display:block; margin-top:6px; color:#7c8ba3;">マスタの column_categories から選択します。</small>
+            <small style="display:block; margin-top:6px; color:#7c8ba3;">カテゴリはマスタメンテナンス画面から追加可能です。</small>
         </div>
 
         <div class="admin-form-row">
