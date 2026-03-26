@@ -202,7 +202,7 @@
                         @endif
                     </label>
                     <div class="recruit-input-with-unit">
-                        <input type="text" name="hourly_wage_regular" class="recruit-input" value="{{ old('hourly_wage_regular', number_format($recruit['hourly_wage_regular'] ?? '')) }}" placeholder="5,000" inputmode="numeric" pattern="[0-9]*" data-type="currency">
+                        <input type="text" name="hourly_wage_regular" class="recruit-input" value="{{ old('hourly_wage_regular', number_format(floatval($recruit['hourly_wage_regular'] ?? 0))) }}" placeholder="5,000" inputmode="numeric" pattern="[0-9]*" data-type="currency">
                         <span class="unit">円</span>
                     </div>
                 </div>
