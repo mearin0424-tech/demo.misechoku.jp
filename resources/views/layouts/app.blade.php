@@ -7,7 +7,7 @@
         $metaDescription = trim($__env->yieldContent('meta_description')) ?: 'ミセチョクのデモサイトです。';
         $metaImage = trim($__env->yieldContent('meta_image')) ?: asset('assets/images/pwa/icon-512.png');
         $canonicalUrl = trim($__env->yieldContent('canonical')) ?: url()->current();
-        $assetVersion = '20260313-guide-2';
+        $assetVersion = '20260320-pwa-install';
         $resolvedTitle = $metaTitle !== ''
             ? $metaTitle
             : ($pageTitle !== '' ? $pageTitle . ' | ' . config('app.name', 'ミセチョク') : config('app.name', 'ミセチョク'));
@@ -481,7 +481,10 @@
         }
 
         window.triggerPwaInstall = function() {
-          if (!deferredPrompt) return false;
+          if (!deferredPrompt) {
+            alert('ブラウザのメニュー（⋮）から「アプリをインストール」または「ホーム画面に追加」を選んでください。');
+            return false;
+          }
           deferredPrompt.prompt();
           deferredPrompt.userChoice.then(function(choice) {
             if (choice.outcome === 'accepted') {
@@ -492,8 +495,9 @@
           return true;
         };
 
+        // Chrome（Android含む）: preventDefault すると「アドレスバーのインストール」やミニバーが出なくなる。
+        // カスタムボタン用にイベントは保持するが、デフォルトのインストール案内は出す。
         window.addEventListener('beforeinstallprompt', function(e) {
-          e.preventDefault();
           deferredPrompt = e;
           if (section) section.style.display = 'block';
           if (inlineBtn) inlineBtn.style.display = 'inline-flex';

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 // 蜈ｱ騾壹・隱崎ｨｼ邉ｻ
 use App\Http\Controllers\Common\PageController;
+use App\Http\Controllers\Common\ColumnArticleController;
 use App\Http\Controllers\Common\SettingController;
 use App\Http\Controllers\Common\DemoLoginController;
 use App\Http\Controllers\Common\BankLookupController;
@@ -61,13 +62,15 @@ Route::get('/favicon.ico', function () {
 |--------------------------------------------------------------------------
 */
 Route::get('/manifest.json', function () {
+    // 未ログインでも 200 で開ける URL にする（Chrome のインストール判定が通りやすい）
+    $startUrl = '/login?utm_source=pwa';
     $manifest = [
-        'name' => '繝溘そ繝√Ι繧ｯ',
-        'short_name' => '繝溘そ繝√Ι繧ｯ',
-        'description' => '繝溘そ繝√Ι繧ｯ - 繝・Δ',
-        'start_url' => '/shop/home',
+        'name' => 'ミセチョク',
+        'short_name' => 'ミセチョク',
+        'description' => 'ミセチョク - デモ',
+        'start_url' => $startUrl,
         'scope' => '/',
-        'id' => '/',
+        'id' => $startUrl,
         'display' => 'standalone',
         'display_override' => ['standalone', 'minimal-ui', 'browser'],
         'orientation' => 'portrait-primary',
@@ -163,6 +166,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // 繧ｳ繝ｩ繝邂｡逅・
         Route::get('/columns', [AdminColumn::class, 'index'])->name('columns.index');
+        Route::get('/columns/create', [AdminColumn::class, 'create'])->name('columns.create');
+        Route::post('/columns', [AdminColumn::class, 'store'])->name('columns.store');
+        Route::get('/columns/{column}/edit', [AdminColumn::class, 'edit'])->name('columns.edit');
+        Route::put('/columns/{column}', [AdminColumn::class, 'update'])->name('columns.update');
+        Route::delete('/columns/{column}', [AdminColumn::class, 'destroy'])->name('columns.destroy');
 
         // 隲区ｱゅ・謖ｯ霎ｼ繧ｿ繧ｹ繧ｯ邂｡逅・
         Route::get('/tasks', [AdminTask::class, 'index'])->name('tasks.index');
@@ -203,7 +211,8 @@ Route::name('pages.')->group(function () {
     Route::get('/about', [PageController::class, 'about'])->name('official.about');
     Route::get('/terms', [PageController::class, 'terms'])->name('official.terms');
     Route::get('/privacy', [PageController::class, 'privacy'])->name('official.privacy');
-    Route::get('/support/column', [PageController::class, 'column'])->name('support.column');
+    Route::get('/support/column', [ColumnArticleController::class, 'index'])->name('support.column');
+    Route::get('/support/column/{slug}', [ColumnArticleController::class, 'show'])->name('support.column.show');
     Route::get('/support/form', [PageController::class, 'supportForm'])->name('support.form');
 });
 
@@ -343,6 +352,9 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
     Route::get('/feature', [PageController::class, 'feature'])->name('feature');
     Route::get('/htu', [PageController::class, 'htu'])->name('htu');
     Route::get('/faq', [PageController::class, 'faq'])->name('faq');
+
+    Route::get('/column', [ColumnArticleController::class, 'index'])->name('column.index');
+    Route::get('/column/{slug}', [ColumnArticleController::class, 'show'])->name('column.show');
 });
 
 /*
@@ -390,6 +402,9 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
     Route::get('/feature', [PageController::class, 'feature'])->name('feature');
     Route::get('/htu', [PageController::class, 'htu'])->name('htu');
     Route::get('/faq', [PageController::class, 'faq'])->name('faq');
+
+    Route::get('/column', [ColumnArticleController::class, 'index'])->name('column.index');
+    Route::get('/column/{slug}', [ColumnArticleController::class, 'show'])->name('column.show');
 });
 
 /* 蜀・Κ繧ｭ繝｣繝・す繝･繧ｯ繝ｪ繧｢逕ｨ */

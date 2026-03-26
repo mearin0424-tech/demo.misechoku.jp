@@ -6,9 +6,20 @@
     <div class="admin-page">
         <h1 class="admin-title">コラム管理</h1>
         <p class="admin-description">
-            お役立ちコラムの作成・編集・公開設定を行う画面です。<br>
-            まずは一覧 UI を用意し、後続で実際の `columns` テーブルと連携します。
+            キャスト・店舗向けのお役立ちコラムを作成・公開します。未ログイン向けに表示する場合は「未ログイン表示」をオンにしてください。
         </p>
+
+        @if(session('status'))
+            <div class="admin-alert">
+                {{ session('status') }}
+            </div>
+        @endif
+
+        <div class="admin-form-actions" style="margin-bottom: 16px;">
+            <a href="{{ route('admin.columns.create') }}" class="btn-action manage">
+                <i class="fas fa-plus"></i> 新規作成
+            </a>
+        </div>
 
         <div class="table-wrapper">
             <table class="admin-table">
@@ -18,32 +29,57 @@
                         <th>タイトル</th>
                         <th>カテゴリ</th>
                         <th>公開状態</th>
+                        <th>閲覧対象</th>
                         <th>公開日時</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($columns as $column)
                         <tr>
-                            <td>{{ $column['id'] }}</td>
-                            <td>{{ $column['title'] }}</td>
-                            <td>{{ $column['category'] }}</td>
-                            <td>{{ $column['status'] }}</td>
+                            <td>{{ $column->id }}</td>
+                            <td>{{ $column->title }}</td>
+                            <td>{{ $column->category ?: '-' }}</td>
+                            <td>{{ $column->status_label }}</td>
                             <td>
-                                @if(!empty($column['posted_at']))
-                                    {{ $column['posted_at']->format('Y-m-d H:i') }}
+                                @php
+                                    $targets = array_filter([
+                                        $column->visible_to_cast ? 'キャスト' : null,
+                                        $column->visible_to_shop ? '店舗' : null,
+                                        $column->visible_to_guest ? '未ログイン' : null,
+                                    ]);
+                                @endphp
+                                {{ count($targets) ? implode(' / ', $targets) : '-' }}
+                            </td>
+                            <td>
+                                @if($column->published_at)
+                                    {{ $column->published_at->format('Y-m-d H:i') }}
                                 @else
                                     -
                                 @endif
                             </td>
+                            <td class="text-right">
+                                <a href="{{ route('admin.columns.edit', $column) }}" style="color:var(--admin-blue);margin-right:8px;">編集</a>
+                                <form action="{{ route('admin.columns.destroy', $column) }}" method="post" onsubmit="return confirm('削除しますか？');" style="display:inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" style="background:none;border:none;cursor:pointer;color:var(--admin-red);padding:0;font:inherit;">削除</button>
+                                </form>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center">コラム記事がありません。</td>
+                            <td colspan="7" class="text-center">コラム記事がありません。</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+
+        @if($columns->hasPages())
+            <div style="margin-top:16px;">
+                {{ $columns->links() }}
+            </div>
+        @endif
     </div>
 @endsection
-

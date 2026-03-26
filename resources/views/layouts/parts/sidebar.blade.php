@@ -57,7 +57,7 @@
                 <li><a href="{{ url("/$typePath/feature") }}"><i class="fas fa-star"></i> サービスの特徴</a></li>
                 <li><a href="{{ url("/$typePath/htu") }}"><i class="fas fa-book"></i> ご利用ガイド</a></li>
                 <li><a href="{{ url("/$typePath/faq") }}"><i class="fas fa-question-circle"></i> よくある質問（FAQ）</a></li>
-                <li><a href="{{ url('/support/column') }}"><i class="fas fa-lightbulb"></i> お役立ちコラム</a></li>
+                <li><a href="{{ url("/{$typePath}/column") }}"><i class="fas fa-lightbulb"></i> お役立ちコラム</a></li>
                 <li><a href="{{ url('/support/form') }}"><i class="fas fa-paper-plane"></i> 問い合わせ窓口</a></li>
             </ul>
         </div>

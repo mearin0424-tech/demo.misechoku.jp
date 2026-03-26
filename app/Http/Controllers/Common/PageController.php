@@ -49,14 +49,6 @@ class PageController extends Controller
     }
 
     /**
-     * お役立ちコラム
-     */
-    public function column()
-    {
-        return view('common.support.column');
-    }
-
-    /**
      * お問い合わせ窓口（デモ用ダミーページ）
      */
     public function supportForm()

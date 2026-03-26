@@ -2,11 +2,12 @@
  * ミセチョク PWA Service Worker
  * 静的アセットをキャッシュし、オフラインでも基本動作をサポート
  */
-const CACHE_NAME = 'misechoku-v4';
+const CACHE_NAME = 'misechoku-v5';
 const BADGE_CACHE = 'misechoku-badge';
 const BADGE_KEY_URL = '/__pwa_badge_count__';
 const STATIC_ASSETS = [
   '/',
+  '/login',
   '/shop/home',
   '/assets/css/app.css',
   '/assets/css/layout-header.css',
