@@ -209,7 +209,7 @@
                 <div class="recruit-form-group" style="margin-bottom: 0;">
                     <label class="recruit-label">体験時給</label>
                     <div class="recruit-input-with-unit">
-                        <input type="text" name="trial_hourly_wage" class="recruit-input" value="{{ old('trial_hourly_wage', number_format($recruit['trial_hourly_wage'] ?? '')) }}" placeholder="4,000" inputmode="numeric" pattern="[0-9]*" data-type="currency">
+                        <input type="text" name="trial_hourly_wage" class="recruit-input" value="{{ old('trial_hourly_wage', number_format(floatval($recruit['trial_hourly_wage'] ?? 0))) }}" placeholder="4,000" inputmode="numeric" pattern="[0-9]*" data-type="currency">
                         <span class="unit">円</span>
                     </div>
                 </div>
@@ -218,7 +218,7 @@
                 <div class="recruit-form-group" style="margin-bottom: 0;">
                     <label class="recruit-label">ヘルプ時給</label>
                     <div class="recruit-input-with-unit">
-                        <input type="text" name="help_hourly_wage" class="recruit-input" value="{{ old('help_hourly_wage', number_format($recruit['help_hourly_wage'] ?? null)) }}" placeholder="3,500" inputmode="numeric" pattern="[0-9]*" data-type="currency">
+                        <input type="text" name="help_hourly_wage" class="recruit-input" value="{{ old('help_hourly_wage', number_format(floatval($recruit['help_hourly_wage'] ?? null))) }}" placeholder="3,500" inputmode="numeric" pattern="[0-9]*" data-type="currency">
                         <span class="unit">円</span>
                     </div>
                 </div>
