@@ -47,6 +47,7 @@
             if (!slot) return;
             var list = document.getElementById('gallery-list');
             if (!list || !list.contains(slot)) return;
+            if (window.__galleryDragging) return;
             ev.preventDefault();
             ev.stopPropagation();
             var li = slot.closest('.gallery-grid-item');

@@ -33,11 +33,13 @@ class MypageController extends Controller
                 'shops.status',
                 'shops.license_status',
                 'shop_profiles.shop_name',
+                'shop_profiles.zip',
                 'shop_profiles.pref',
                 'shop_profiles.city',
                 'shop_profiles.addr2',
                 'shop_profiles.addr3',
                 'shop_profiles.station1',
+                'shop_profiles.industry_id',
                 'shop_profiles.catch',
                 'shop_profiles.overview',
                 'shop_profiles.message',
@@ -50,11 +52,13 @@ class MypageController extends Controller
                 'shops.status',
                 'shops.license_status',
                 'shop_profiles.shop_name',
+                'shop_profiles.zip',
                 'shop_profiles.pref',
                 'shop_profiles.city',
                 'shop_profiles.addr2',
                 'shop_profiles.addr3',
                 'shop_profiles.station1',
+                'shop_profiles.industry_id',
                 'shop_profiles.catch',
                 'shop_profiles.overview',
                 'shop_profiles.message',
@@ -136,6 +140,12 @@ class MypageController extends Controller
             ->where('job_type', 1)
             ->select('working_hours', 'working_day', 'regular_holiday')
             ->first();
+        $industryName = null;
+        if (!empty($row?->industry_id)) {
+            $industryName = DB::table('industries')
+                ->where('id', $row->industry_id)
+                ->value('name');
+        }
 
         return view('shops.mypage.index', [
             'pageId'    => 'mypage',
@@ -144,6 +154,13 @@ class MypageController extends Controller
             'documents' => $documentData['documents'],
             'allDocumentsApproved' => $documentData['all_approved'],
             'shopInfo' => [
+                'shop_name' => $row->shop_name ?? '',
+                'word' => $row->catch ?? '',
+                'industry' => $industryName,
+                'zip' => $row->zip ?? '',
+                'pref' => $row->pref ?? '',
+                'city' => $row->city ?? '',
+                'addr1' => trim(($row->addr2 ?? '') . ' ' . ($row->addr3 ?? '')),
                 'nearest_station' => $row->station1 ?? '',
                 'working_hours' => $jobRow->working_hours ?? '',
                 'working_days' => $jobRow->working_day ?? '',

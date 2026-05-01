@@ -69,11 +69,28 @@
     .good-payer-badge-modal-bubble::after {
         content: '';
         position: absolute;
-        left: -8px;
+        right: -8px;
         bottom: 10px;
-        border-width: 8px 8px 8px 0;
+        border-width: 8px 0 8px 8px;
         border-style: solid;
-        border-color: transparent #fffaf0 transparent transparent;
+        border-color: transparent transparent transparent #fffaf0;
+    }
+    .good-payer-badge-modal-close-top {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 30px;
+        height: 30px;
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 999px;
+        background: rgba(255,255,255,0.06);
+        color: #f5ead5;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        line-height: 1;
     }
     .good-payer-badge-modal-body {
         margin: 0 0 16px;
@@ -146,6 +163,84 @@
         font-size: 1rem;
         font-weight: 700;
     }
+    .mypage-collapsible {
+        margin-bottom: 16px;
+    }
+    .mypage-collapsible-toggle {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border: 1px solid rgba(212, 175, 55, 0.26);
+        background: rgba(255,255,255,0.03);
+        color: #f5e9cb;
+        border-radius: 12px;
+        padding: 10px 12px;
+        font: inherit;
+        cursor: pointer;
+    }
+    .mypage-collapsible-content {
+        margin-top: 10px;
+    }
+    .mypage-collapsible.is-collapsed .mypage-collapsible-content {
+        display: none;
+    }
+    .document-upload-group {
+        margin-bottom: 14px;
+    }
+    .document-upload-group-title {
+        margin: 0 0 8px;
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #bdaaaa;
+    }
+    .document-upload-list {
+        display: grid;
+        gap: 10px;
+    }
+    .document-upload-card {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        background: rgba(255,255,255,0.02);
+        cursor: pointer;
+        text-align: left;
+        font: inherit;
+    }
+    .document-upload-card.is-missing {
+        border-style: dashed;
+        border-color: rgba(224, 108, 108, 0.45);
+        background: rgba(64, 22, 24, 0.28);
+    }
+    .document-upload-name {
+        margin: 0 0 6px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #fff8ea;
+    }
+    .document-status-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+    .document-status-chip.is-approved { color: #dcfce7; background: rgba(34, 197, 94, 0.14); border: 1px solid rgba(34, 197, 94, 0.24); }
+    .document-status-chip.is-pending { color: #f6e7af; background: rgba(212, 175, 55, 0.12); border: 1px solid rgba(212, 175, 55, 0.22); }
+    .document-status-chip.is-rejected { color: #fee2e2; background: rgba(248, 113, 113, 0.12); border: 1px solid rgba(248, 113, 113, 0.24); }
+    .document-status-chip.is-not-submitted { color: #ffd4d4; background: rgba(128, 30, 35, 0.28); border: 1px solid rgba(224, 108, 108, 0.35); }
+    .document-upload-meta {
+        margin-top: 6px;
+        font-size: 0.73rem;
+        color: #bdaaaa;
+    }
 </style>
 @endpush
 
@@ -159,9 +254,6 @@
         <div class="mypage-hero">
             <div class="shop-icon-wrapper">
                 <img src="{{ (isset($subImages[0]) ? $subImages[0]['url'] : null) ?? asset('assets/images/common/no-image.png') }}" class="shop-icon-main" id="main-icon-display" alt="">
-                <button type="button" class="btn-add-icon" onclick="document.getElementById('gallery-upload').click()" aria-label="写真を追加">
-                    <i class="fas fa-plus"></i>
-                </button>
             </div>
             <div class="shop-word-bubble glass-panel">
                 <p id="display-word" class="shop-word-text {{ empty(trim($shopData['word'] ?? '')) ? 'is-placeholder' : '' }}" data-placeholder="ひとことを入力すると、タイムラインに表示されます。">{{ !empty(trim($shopData['word'] ?? '')) ? $shopData['word'] : 'ひとことを入力すると、タイムラインに表示されます。' }}</p>
@@ -174,7 +266,6 @@
             </div>
         </div>
 
-        <h2 class="section-title section-title-gold">Dash Board</h2>
         {{-- 優良店バッヂ・評価（2列アイコン） --}}
         @php $hasGoodPayerBadge = !empty($shopData['badges']['good_payer']); @endphp
         <div class="mypage-stats-row mypage-stats-row--cols-2" aria-label="統計">
@@ -207,83 +298,131 @@
         @endif
 
         <div class="mypage-detail-box">
-            <div class="mypage-section mypage-quick-actions cast-mypage-menu-buttons">
-                <h2 class="section-title section-title-gold">Status Menu</h2>
-                <div class="status-menu-grid">
-                    <a href="{{ route('shop.recruits.status') }}" class="menu-btn job">
-                        <div class="menu-btn-content">
-                            <div class="menu-btn-icon"><i class="far fa-folder-open"></i></div>
-                            <div class="menu-btn-text">
-                                <p class="menu-btn-title">採用管理へ移動</p>
+            <div class="mypage-collapsible mypage-section mypage-quick-actions cast-mypage-menu-buttons" data-collapsible>
+                <button type="button" class="mypage-collapsible-toggle" data-collapsible-toggle>
+                    <span>Job Management</span><i class="fas fa-chevron-up"></i>
+                </button>
+                <div class="mypage-collapsible-content">
+                    <div class="status-menu-grid">
+                        <a href="{{ route('shop.recruits.status') }}" class="menu-btn job">
+                            <div class="menu-btn-content">
+                                <div class="menu-btn-icon"><i class="far fa-folder-open"></i></div>
+                                <div class="menu-btn-text"><p class="menu-btn-title">採用管理へ移動</p></div>
                             </div>
-                        </div>
-                        <div class="menu-btn-arrow"><i class="fas fa-chevron-right"></i></div>
-                    </a>
-                    <a href="{{ route('shop.mypage.payment.index') }}" class="menu-btn manage">
-                        <div class="menu-btn-content">
-                            <div class="menu-btn-icon"><i class="far fa-credit-card"></i></div>
-                            <div class="menu-btn-text">
-                                <p class="menu-btn-title">入金管理へ移動</p>
+                            <div class="menu-btn-arrow"><i class="fas fa-chevron-right"></i></div>
+                        </a>
+                        <a href="{{ route('shop.mypage.payment.index') }}" class="menu-btn manage">
+                            <div class="menu-btn-content">
+                                <div class="menu-btn-icon"><i class="far fa-credit-card"></i></div>
+                                <div class="menu-btn-text"><p class="menu-btn-title">入金管理へ移動</p></div>
                             </div>
-                        </div>
-                        <div class="menu-btn-arrow"><i class="fas fa-chevron-right"></i></div>
-                    </a>
+                            <div class="menu-btn-arrow"><i class="fas fa-chevron-right"></i></div>
+                        </a>
+                        <a href="{{ route('shop.jobdescription') }}" class="jobdescription-button">
+                            <span>求人票へ移動</span><i class="fas fa-chevron-right"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <div class="mypage-section">
-                <h2 class="section-title section-title-gold">jobdescription</h2>
-                <a href="{{ route('shop.jobdescription') }}" class="jobdescription-button">
-                    <span>求人票へ移動</span>
-                    <i class="fas fa-chevron-right"></i>
-                </a>
-            </div>
-
-            {{-- Image Library（ドラッグで並び替え・タップで大表示・削除・空きタップで登録） --}}
-            <div class="mypage-section gallery-edit-section">
-                <div class="gallery-section-header">
-                    <h2 class="section-title section-title-gold">Image Library</h2>
-                    <p class="gallery-section-hint">ドラッグで並び替え（スマホは長押し）</p>
-                </div>
-                <ul class="responsive-gallery gallery-grid" id="gallery-list" data-sort-save-url="{{ route('shop.profile.images.order') }}" data-empty-image-url="{{ asset('assets/images/common/no-image.png') }}">
-                    @for($i = 0; $i < 8; $i++)
-                    @php $img = $subImages[$i] ?? null; @endphp
-                    <li class="gallery-grid-item" data-slot-index="{{ $i }}">
-                        <div class="photo-slot {{ $img ? 'has-img' : '' }}"
-                             data-image-id="{{ $img['id'] ?? '' }}"
-                             data-image-url="{{ $img['url'] ?? '' }}">
-                            @if($img)
-                                <img src="{{ $img['url'] }}" alt="" loading="lazy">
-                                @if($i === 0)
-                                    <span class="photo-slot-badge">MAIN</span>
+            <div class="mypage-collapsible mypage-section gallery-edit-section" data-collapsible>
+                <button type="button" class="mypage-collapsible-toggle" data-collapsible-toggle>
+                    <span>Image Library</span><i class="fas fa-chevron-up"></i>
+                </button>
+                <div class="mypage-collapsible-content">
+                    <div class="gallery-section-header"><p class="gallery-section-hint">ドラッグで並び替え（スマホは長押し）</p></div>
+                    <ul class="responsive-gallery gallery-grid" id="gallery-list" data-sort-save-url="{{ route('shop.profile.images.order') }}" data-empty-image-url="{{ asset('assets/images/common/no-image.png') }}">
+                        @for($i = 0; $i < 8; $i++)
+                        @php $img = $subImages[$i] ?? null; @endphp
+                        <li class="gallery-grid-item" data-slot-index="{{ $i }}">
+                            <div class="photo-slot {{ $img ? 'has-img' : '' }}" data-image-id="{{ $img['id'] ?? '' }}" data-image-url="{{ $img['url'] ?? '' }}">
+                                @if($img)
+                                    <img src="{{ $img['url'] }}" alt="" loading="lazy">
+                                    @if($i === 0)<span class="photo-slot-badge">MAIN</span>@endif
+                                @else
+                                    <span class="photo-slot-empty"><i class="fas fa-image"></i></span>
                                 @endif
-                            @else
-                                <span class="photo-slot-empty"><i class="fas fa-image"></i></span>
-                            @endif
-                        </div>
-                    </li>
-                    @endfor
-                </ul>
+                            </div>
+                        </li>
+                        @endfor
+                    </ul>
+                </div>
             </div>
 
-            {{-- Shop Information（プロフィール） --}}
-            <div class="mypage-section profile-info-section">
-                <div class="section-title-row">
-                    <h2 class="section-title">Shop Information</h2>
-                    <button type="button" class="btn-outline-gold" id="open-profile-edit-btn">編集</button>
+            <div class="mypage-collapsible mypage-section profile-info-section" data-collapsible>
+                <button type="button" class="mypage-collapsible-toggle" data-collapsible-toggle>
+                    <span>Shop Information</span><i class="fas fa-chevron-up"></i>
+                </button>
+                <div class="mypage-collapsible-content">
+                    <div class="section-title-row">
+                        <h2 class="section-title">Shop Information</h2>
+                        <button type="button" class="btn-outline-gold" id="open-profile-edit-btn">編集</button>
+                    </div>
+                    <p class="shop-access-text"><i class="fas fa-store"></i> 店舗名: {{ $shopInfo['shop_name'] ?? '-' }}</p>
+                    <p class="shop-access-text"><i class="fas fa-quote-left"></i> ひとこと: {{ $shopInfo['word'] ?? '-' }}</p>
+                    <p class="shop-access-text"><i class="fas fa-tags"></i> 業種: {{ $shopInfo['industry'] ?? '未設定' }}</p>
+                    <p class="shop-access-text"><i class="fas fa-map-pin"></i> 郵便番号: {{ $shopInfo['zip'] ?? '-' }}</p>
+                    <p class="shop-access-text"><i class="fas fa-map-marker-alt"></i> 住所: {{ ($shopInfo['pref'] ?? '') . ($shopInfo['city'] ?? '') . ($shopInfo['addr1'] ?? '') }}</p>
+                    @if(!empty($shopInfo['nearest_station'] ?? null))
+                        <p class="shop-access-text"><i class="fas fa-train-subway"></i> {{ $shopInfo['nearest_station'] }}</p>
+                    @endif
+                    @if(!empty($shopInfo['working_hours'] ?? null) || !empty($shopInfo['working_days'] ?? null))
+                        <p class="shop-access-text"><i class="fas fa-clock"></i> 営業時間 {{ $shopInfo['working_hours'] ?: '未設定' }} / 勤務日 {{ $shopInfo['working_days'] ?: '未設定' }}</p>
+                    @endif
+                    @if(!empty($shopInfo['concept'] ?? null))
+                        <p class="shop-overview-text">{!! nl2br(e($shopInfo['concept'])) !!}</p>
+                    @endif
                 </div>
-                <p class="shop-access-text">
-                    <i class="fas fa-map-marker-alt"></i> {{ $shopData['pref'] }}{{ $shopData['city'] }}{{ $shopData['addr1'] }}
-                </p>
-                @if(!empty($shopInfo['nearest_station'] ?? null))
-                    <p class="shop-access-text"><i class="fas fa-train-subway"></i> {{ $shopInfo['nearest_station'] }}</p>
-                @endif
-                @if(!empty($shopInfo['working_hours'] ?? null) || !empty($shopInfo['working_days'] ?? null))
-                    <p class="shop-access-text"><i class="fas fa-clock"></i> 営業時間 {{ $shopInfo['working_hours'] ?: '未設定' }} / 勤務日 {{ $shopInfo['working_days'] ?: '未設定' }}</p>
-                @endif
-                @if(!empty($shopInfo['concept'] ?? null))
-                    <p class="shop-overview-text">{!! nl2br(e($shopInfo['concept'])) !!}</p>
-                @endif
+            </div>
+
+            <div class="mypage-collapsible mypage-section document-section" data-collapsible>
+                <button type="button" class="mypage-collapsible-toggle" data-collapsible-toggle>
+                    <span>Licenses</span><i class="fas fa-chevron-up"></i>
+                </button>
+                <div class="mypage-collapsible-content">
+                    @php
+                        $submittedDocs = collect($documents)->filter(fn ($doc) => ($doc['status'] ?? null) !== 'not_submitted')->values();
+                        $missingDocs = collect($documents)->filter(fn ($doc) => ($doc['status'] ?? null) === 'not_submitted')->values();
+                    @endphp
+                    @if($submittedDocs->isNotEmpty())
+                        <div class="document-upload-group">
+                            <h3 class="document-upload-group-title">Submitted</h3>
+                            <div class="document-upload-list">
+                                @foreach($submittedDocs as $doc)
+                                    @php $s = $doc['status']; $record = $doc['record'] ?? null; @endphp
+                                    <button type="button" class="document-upload-card js-license-card"
+                                        data-doc-key="{{ $doc['key'] }}" data-doc-name="{{ $doc['name'] }}"
+                                        data-doc-status="{{ $s }}" data-doc-url="{{ $record['file_url'] ?? '' }}"
+                                        data-doc-updated="{{ $record['updated_at_label'] ?? '' }}">
+                                        <div>
+                                            <p class="document-upload-name">{{ $doc['name'] }}</p>
+                                            <span class="document-status-chip is-{{ str_replace('_', '-', $s) }}">{{ $s === 'approved' ? '承認済み' : ($s === 'rejected' ? '差し戻し' : '提出済み（審査中）') }}</span>
+                                            <p class="document-upload-meta">最終更新: {{ $record['updated_at_label'] ?? '- -' }}</p>
+                                        </div>
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                    @if($missingDocs->isNotEmpty())
+                        <div class="document-upload-group">
+                            <h3 class="document-upload-group-title">Missing</h3>
+                            <div class="document-upload-list">
+                                @foreach($missingDocs as $doc)
+                                    <button type="button" class="document-upload-card is-missing js-license-card"
+                                        data-doc-key="{{ $doc['key'] }}" data-doc-name="{{ $doc['name'] }}"
+                                        data-doc-status="not_submitted" data-doc-url="" data-doc-updated="">
+                                        <div>
+                                            <p class="document-upload-name">{{ $doc['name'] }}</p>
+                                            <span class="document-status-chip is-not-submitted">未提出</span>
+                                            <p class="document-upload-meta">提出データがありません。アップロードして提出してください。</p>
+                                        </div>
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
     </section>
@@ -326,10 +465,11 @@
 {{-- 優良店バッヂの仕様（タップで表示） --}}
 <div id="modal-good-payer-badge" class="mypage-modal-overlay modal-word-edit" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="good-payer-badge-modal-title">
     <div class="mypage-modal-panel glass-panel">
+        <button type="button" class="good-payer-badge-modal-close-top" id="good-payer-badge-modal-close-top" aria-label="閉じる">×</button>
         <h3 id="good-payer-badge-modal-title" class="mypage-modal-title serif-font">優良店バッヂとは？</h3>
         <div class="good-payer-badge-modal-guide" aria-hidden="true">
+            <p class="good-payer-badge-modal-bubble">条件を満たしていないため未付与です。上記を満たすと優良店バッヂが表示されます。</p>
             <img src="{{ asset('assets/images/guide/guide-character.png') }}" alt="">
-            <p class="good-payer-badge-modal-bubble">オコジョガイドだよ。ここでは、バッヂが付与される条件と現在の状態をわかりやすく案内するね。</p>
         </div>
         <div class="good-payer-badge-modal-body">
             <p>優良店バッヂは、直近3ヶ月の請求・入金履歴をもとに、安心して働ける店舗の目安として付与されます。</p>
@@ -360,6 +500,24 @@
         <div class="mypage-modal-actions">
             <button type="button" class="btn-action btn-action-secondary" id="word-edit-cancel-btn">戻る</button>
             <button type="button" class="btn-action btn-action-primary" id="word-edit-save-btn">保存</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-license-detail" class="mypage-modal-overlay modal-word-edit" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="license-detail-title">
+    <div class="mypage-modal-panel glass-panel">
+        <h3 id="license-detail-title" class="mypage-modal-title serif-font">書類詳細</h3>
+        <p id="license-detail-name" class="document-upload-name"></p>
+        <p id="license-detail-status" class="document-upload-meta"></p>
+        <p id="license-detail-updated" class="document-upload-meta"></p>
+        <div class="mypage-modal-actions" id="license-detail-view-wrap" style="display:none;">
+            <a id="license-detail-view-link" href="#" target="_blank" rel="noopener" class="btn-action btn-action-secondary">書類を表示</a>
+        </div>
+        <input type="hidden" id="license-detail-type">
+        <input type="file" id="license-detail-file" class="document-upload-input" accept=".pdf,image/*">
+        <div class="mypage-modal-actions">
+            <label class="btn-action btn-action-primary" id="license-detail-upload-label" for="license-detail-file">アップロード</label>
+            <button type="button" class="btn-action btn-action-secondary" id="license-detail-close-btn">閉じる</button>
         </div>
     </div>
 </div>
@@ -437,6 +595,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var openBadgeModal = document.getElementById('open-good-payer-badge-modal');
     var badgeModal = document.getElementById('modal-good-payer-badge');
     var closeBadgeModal = document.getElementById('good-payer-badge-modal-close');
+    var closeBadgeModalTop = document.getElementById('good-payer-badge-modal-close-top');
     function hideBadgeModal() {
         if (badgeModal) badgeModal.style.display = 'none';
         if (openBadgeModal) openBadgeModal.focus();
@@ -451,6 +610,92 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     if (closeBadgeModal) closeBadgeModal.addEventListener('click', hideBadgeModal);
+    if (closeBadgeModalTop) closeBadgeModalTop.addEventListener('click', hideBadgeModal);
+
+    document.querySelectorAll('[data-collapsible]').forEach(function(section) {
+        var toggle = section.querySelector('[data-collapsible-toggle]');
+        if (!toggle) return;
+        toggle.addEventListener('click', function() {
+            section.classList.toggle('is-collapsed');
+            var icon = toggle.querySelector('i');
+            if (icon) icon.className = section.classList.contains('is-collapsed') ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+        });
+    });
 });
+</script>
+<script>
+(function() {
+    var cards = document.querySelectorAll('.js-license-card');
+    var detailModal = document.getElementById('modal-license-detail');
+    if (!cards.length || !detailModal) return;
+
+    var detailName = document.getElementById('license-detail-name');
+    var detailStatus = document.getElementById('license-detail-status');
+    var detailUpdated = document.getElementById('license-detail-updated');
+    var detailType = document.getElementById('license-detail-type');
+    var detailFile = document.getElementById('license-detail-file');
+    var detailUploadLabel = document.getElementById('license-detail-upload-label');
+    var detailViewWrap = document.getElementById('license-detail-view-wrap');
+    var detailViewLink = document.getElementById('license-detail-view-link');
+    var detailCloseBtn = document.getElementById('license-detail-close-btn');
+
+    function closeModal() {
+        detailModal.style.display = 'none';
+        if (detailFile) detailFile.value = '';
+    }
+
+    cards.forEach(function(card) {
+        card.addEventListener('click', function() {
+            var docStatus = card.getAttribute('data-doc-status') || 'not_submitted';
+            var docUrl = card.getAttribute('data-doc-url') || '';
+            if (detailName) detailName.textContent = card.getAttribute('data-doc-name') || '書類';
+            if (detailType) detailType.value = card.getAttribute('data-doc-key') || '';
+            if (detailUpdated) detailUpdated.textContent = '最終更新: ' + (card.getAttribute('data-doc-updated') || '- -');
+
+            if (docStatus === 'not_submitted') {
+                if (detailStatus) detailStatus.textContent = 'ステータス: 未提出';
+                if (detailUploadLabel) detailUploadLabel.textContent = '書類をアップロード';
+                if (detailViewWrap) detailViewWrap.style.display = 'none';
+            } else {
+                if (detailStatus) detailStatus.textContent = 'ステータス: ' + (docStatus === 'approved' ? '承認済み' : (docStatus === 'rejected' ? '差し戻し' : '提出済み（審査中）'));
+                if (detailUploadLabel) detailUploadLabel.textContent = '再提出';
+                if (detailViewWrap) detailViewWrap.style.display = docUrl ? 'flex' : 'none';
+                if (detailViewLink && docUrl) detailViewLink.href = docUrl;
+            }
+
+            detailModal.style.display = 'flex';
+        });
+    });
+
+    detailModal.addEventListener('click', function(e) { if (e.target === detailModal) closeModal(); });
+    if (detailCloseBtn) detailCloseBtn.addEventListener('click', closeModal);
+
+    if (detailFile) {
+        detailFile.addEventListener('change', function() {
+            if (!detailFile.files || !detailFile.files.length) return;
+            var formData = new FormData();
+            formData.append('_token', '{{ csrf_token() }}');
+            formData.append('type', detailType ? detailType.value : '');
+            formData.append('file', detailFile.files[0]);
+
+            fetch('{{ route("shop.mypage.documents.upload") }}', {
+                method: 'POST',
+                headers: { 'Accept': 'application/json' },
+                body: formData
+            }).then(function(r) {
+                return r.json().then(function(json) {
+                    if (!r.ok) throw json;
+                    return json;
+                });
+            }).then(function(res) {
+                alert(res.message || '書類をアップロードしました。');
+                window.location.reload();
+            }).catch(function(error) {
+                var messages = error && error.errors ? Object.values(error.errors).flat() : [];
+                alert(messages[0] || 'アップロードに失敗しました。');
+            });
+        });
+    }
+})();
 </script>
 @endpush

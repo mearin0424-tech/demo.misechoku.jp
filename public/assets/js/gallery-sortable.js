@@ -4,6 +4,7 @@
  */
 (function () {
     'use strict';
+    var sortableInstance = null;
 
     function getGalleryList() {
         return document.getElementById('gallery-list');
@@ -98,26 +99,35 @@
         if (typeof Sortable === 'undefined') return;
         var list = getGalleryList();
         if (!list) return;
+        if (sortableInstance) return;
 
         refreshGalleryMainState(list);
 
-        Sortable.create(list, {
+        sortableInstance = Sortable.create(list, {
             animation: 200,
             delayOnTouchOnly: true,
-            delay: 500,
+            delay: 380,
+            touchStartThreshold: 6,
             draggable: '.gallery-grid-item',
             ghostClass: 'gallery-sortable-ghost',
             chosenClass: 'gallery-sortable-chosen',
             dragClass: 'gallery-sortable-drag',
-            forceFallback: false,
+            forceFallback: true,
+            fallbackOnBody: true,
+            fallbackTolerance: 4,
             onEnd: function () {
+                window.__galleryDragging = false;
                 refreshGalleryMainState(list);
                 persistGalleryOrder(list);
             },
             onChoose: function () {
+                window.__galleryDragging = true;
                 if ('vibrate' in navigator) {
                     navigator.vibrate(50);
                 }
+            },
+            onUnchoose: function () {
+                window.__galleryDragging = false;
             }
         });
     }
