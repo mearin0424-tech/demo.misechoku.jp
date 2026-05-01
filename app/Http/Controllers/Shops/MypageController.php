@@ -37,6 +37,7 @@ class MypageController extends Controller
                 'shop_profiles.city',
                 'shop_profiles.addr2',
                 'shop_profiles.addr3',
+                'shop_profiles.station1',
                 'shop_profiles.catch',
                 'shop_profiles.overview',
                 'shop_profiles.message',
@@ -53,6 +54,7 @@ class MypageController extends Controller
                 'shop_profiles.city',
                 'shop_profiles.addr2',
                 'shop_profiles.addr3',
+                'shop_profiles.station1',
                 'shop_profiles.catch',
                 'shop_profiles.overview',
                 'shop_profiles.message',
@@ -129,12 +131,25 @@ class MypageController extends Controller
             $subImages = [];
         }
 
+        $jobRow = DB::table('shop_jobs')
+            ->where('shop_id', $shopId)
+            ->where('job_type', 1)
+            ->select('working_hours', 'working_day', 'regular_holiday')
+            ->first();
+
         return view('shops.mypage.index', [
             'pageId'    => 'mypage',
             'shopData'  => $shopData,
             'subImages' => $subImages,
             'documents' => $documentData['documents'],
             'allDocumentsApproved' => $documentData['all_approved'],
+            'shopInfo' => [
+                'nearest_station' => $row->station1 ?? '',
+                'working_hours' => $jobRow->working_hours ?? '',
+                'working_days' => $jobRow->working_day ?? '',
+                'regular_holiday' => $jobRow->regular_holiday ?? '',
+                'concept' => $row->overview ?? '',
+            ],
             'menuData' => [
                 'recruit_status' => $recruitStatus,
                 'hired_count' => $hiredCount,

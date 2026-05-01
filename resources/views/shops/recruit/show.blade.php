@@ -16,20 +16,12 @@
         <div class="recruit-preview-toolbar">
             <div>
                 <p class="recruit-preview-toolbar-title">店舗側プレビュー</p>
-                <p class="recruit-preview-toolbar-text">キャストからどう見えるかを確認できます。内容修正や公開管理にもすぐ戻れます。</p>
+                <p class="recruit-preview-toolbar-text">キャストからどう見えるかを確認できます。必要があればそのまま編集へ戻れます。</p>
             </div>
             <div class="recruit-preview-toolbar-actions">
-                <a href="{{ route('shop.recruits.status') }}" class="recruit-ghost-btn">
-                    <i class="fas fa-list-check"></i> ステータス管理
-                </a>
                 <a href="{{ route('shop.recruits.edit') }}" class="recruit-ghost-btn">
                     <i class="fas fa-pen"></i> 編集する
                 </a>
-                @if(!empty($shareUrl))
-                    <a href="{{ $shareUrl }}" class="recruit-ghost-btn">
-                        <i class="fas fa-share-nodes"></i> 公開URL
-                    </a>
-                @endif
             </div>
         </div>
     @endif
@@ -309,39 +301,6 @@
             @endif
         </section>
 
-        {{-- お店の情報（プロフィールと連携） --}}
-        @if(!empty($shop ?? null))
-            <section class="recruit-shop-info-section recruit-detail-section">
-                <h3 class="recruit-block-title"><i class="fas fa-store"></i> お店の情報</h3>
-                <div class="recruit-shop-info-grid">
-                    @if(!empty($shop['area'] ?? null))
-                        <div class="recruit-shop-info-item">
-                            <div class="label">エリア</div>
-                            <div class="value">{{ $shop['area'] }}</div>
-                        </div>
-                    @endif
-                    @if(!empty($recruit['working_hours'] ?? null))
-                        <div class="recruit-shop-info-item">
-                            <div class="label">営業時間</div>
-                            <div class="value">{{ $recruit['working_hours'] }}</div>
-                        </div>
-                    @endif
-                    @if(!empty($recruit['nearest_station'] ?? null))
-                        <div class="recruit-shop-info-item">
-                            <div class="label">最寄り駅</div>
-                            <div class="value">{{ $recruit['nearest_station'] }}</div>
-                        </div>
-                    @endif
-                    @if(!empty($shop['concept'] ?? null))
-                        <div class="recruit-shop-info-item recruit-shop-info-wide">
-                            <div class="label">コンセプト</div>
-                            <div class="value">{!! nl2br(e($shop['concept'])) !!}</div>
-                        </div>
-                    @endif
-                </div>
-            </section>
-        @endif
-
         @if(!empty($recruit['selected_benefits']) && is_array($recruit['selected_benefits']))
             <section class="recruit-detail-section">
                 <h3 class="recruit-block-title"><i class="fas fa-circle-check"></i> こんな条件で働けます</h3>
@@ -359,9 +318,6 @@
                     <div class="recruit-preview-toolbar-actions" style="justify-content:center;">
                         <a href="{{ route('shop.recruits.edit') }}" class="recruit-ghost-btn">
                             <i class="fas fa-pen"></i> この内容を編集
-                        </a>
-                        <a href="{{ route('shop.recruits.status') }}" class="recruit-ghost-btn">
-                            <i class="fas fa-list"></i> ステータス管理に戻る
                         </a>
                     </div>
                 </div>

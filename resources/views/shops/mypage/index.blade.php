@@ -14,189 +14,6 @@
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
 <style>
-    .document-upload-notice {
-        margin: 0 0 12px;
-        font-size: 0.76rem;
-        line-height: 1.7;
-        color: #cdbcbc;
-    }
-    .document-upload-group {
-        margin-bottom: 14px;
-    }
-    .document-upload-group:last-child {
-        margin-bottom: 0;
-    }
-    .document-upload-group-title {
-        margin: 0 0 8px;
-        font-size: 0.72rem;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: #bdaaaa;
-    }
-    .document-upload-list {
-        display: grid;
-        gap: 10px;
-    }
-    .document-upload-card {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 12px;
-        border-radius: 14px;
-        border: 1px solid rgba(212, 175, 55, 0.2);
-        background: rgba(255,255,255,0.02);
-    }
-    .document-upload-card.is-submitted {
-        border-style: solid;
-    }
-    .document-upload-card.is-missing {
-        border-style: dashed;
-        border-color: rgba(224, 108, 108, 0.45);
-        background: rgba(64, 22, 24, 0.28);
-    }
-    .document-upload-main {
-        min-width: 0;
-        flex: 1;
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-    }
-    .document-upload-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        border: 1px solid rgba(212, 175, 55, 0.24);
-        background: rgba(255,255,255,0.04);
-        color: #b8942b;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-    .document-upload-card.is-missing .document-upload-icon {
-        color: #e89292;
-        border-color: rgba(224, 108, 108, 0.4);
-        background: rgba(80, 20, 24, 0.35);
-    }
-    .document-upload-info {
-        min-width: 0;
-        flex: 1;
-    }
-    .document-upload-name {
-        margin: 0 0 6px;
-        font-size: 0.9rem;
-        font-weight: 700;
-        color: #fff8ea;
-    }
-    .document-status-chip {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 4px 10px;
-        border-radius: 999px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        letter-spacing: 0.02em;
-    }
-    .document-status-chip.is-approved {
-        color: #dcfce7;
-        background: rgba(34, 197, 94, 0.14);
-        border: 1px solid rgba(34, 197, 94, 0.24);
-    }
-    .document-status-chip.is-rejected {
-        color: #fee2e2;
-        background: rgba(248, 113, 113, 0.12);
-        border: 1px solid rgba(248, 113, 113, 0.24);
-    }
-    .document-status-chip.is-pending {
-        color: #f6e7af;
-        background: rgba(212, 175, 55, 0.12);
-        border: 1px solid rgba(212, 175, 55, 0.22);
-    }
-    .document-status-chip.is-not-submitted {
-        color: #ffd4d4;
-        background: rgba(128, 30, 35, 0.28);
-        border: 1px solid rgba(224, 108, 108, 0.35);
-    }
-    .document-upload-meta {
-        margin-top: 6px;
-        font-size: 0.73rem;
-        line-height: 1.5;
-        color: #bdaaaa;
-    }
-    .document-upload-card.is-missing .document-upload-meta {
-        color: #d6a8a8;
-    }
-    .document-upload-actions {
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .document-upload-trigger,
-    .document-upload-link {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 34px;
-        padding: 0 12px;
-        border-radius: 999px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-decoration: none;
-        white-space: nowrap;
-        transition: background 0.2s, border-color 0.2s, transform 0.15s;
-    }
-    .document-upload-link {
-        border: 1px solid rgba(255,255,255,0.10);
-        background: rgba(255,255,255,0.04);
-        color: #f2e7c4;
-    }
-    .document-upload-link:hover {
-        background: rgba(255,255,255,0.08);
-        border-color: rgba(212, 175, 55, 0.24);
-        color: #f8e7b0;
-    }
-    .document-upload-trigger {
-        border: 1px solid rgba(212, 175, 55, 0.24);
-        background: rgba(212, 175, 55, 0.10);
-        color: #f8e7b0;
-        cursor: pointer;
-    }
-    .document-upload-card.is-missing .document-upload-trigger {
-        border-color: rgba(224, 108, 108, 0.4);
-        background: rgba(128, 30, 35, 0.24);
-        color: #ffdada;
-    }
-    .document-upload-trigger:hover {
-        background: rgba(212, 175, 55, 0.16);
-        border-color: rgba(212, 175, 55, 0.34);
-    }
-    .document-upload-card.is-missing .document-upload-trigger:hover {
-        background: rgba(128, 30, 35, 0.32);
-        border-color: rgba(224, 108, 108, 0.52);
-    }
-    .document-upload-input {
-        display: none;
-    }
-    .document-upload-form {
-        display: contents;
-    }
-    .document-upload-error {
-        margin: 6px 0 0 48px;
-        font-size: 0.75rem;
-        color: #ffcdcd;
-    }
-    @media (max-width: 640px) {
-        .document-upload-main {
-            gap: 8px;
-        }
-        .document-upload-actions {
-            margin-left: auto;
-        }
-    }
-
     /* 安心バッヂパネル（ボタン化・未付与はグレー） */
     button.mypage-stat-panel-badge {
         cursor: pointer;
@@ -292,6 +109,43 @@
         border: 1px solid rgba(156, 163, 175, 0.25);
         color: #d1d5db;
     }
+    .dashboard-task-list {
+        margin: 10px 0 0;
+        display: grid;
+        gap: 8px;
+    }
+    .dashboard-task-item {
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        background: rgba(255,255,255,0.03);
+        font-size: 0.82rem;
+        color: #f0e5d2;
+        line-height: 1.6;
+    }
+    .dashboard-task-empty {
+        margin-top: 10px;
+        font-size: 0.8rem;
+        color: #aaa;
+    }
+    .status-menu-grid {
+        display: grid;
+        gap: 10px;
+    }
+    .jobdescription-button {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 16px 18px;
+        border-radius: 16px;
+        border: 1px solid rgba(212, 175, 55, 0.4);
+        background: radial-gradient(circle at top left, rgba(253, 240, 178, 0.18), rgba(26, 12, 14, 0.96));
+        color: #f7e8c2;
+        text-decoration: none;
+        font-size: 1rem;
+        font-weight: 700;
+    }
 </style>
 @endpush
 
@@ -320,6 +174,7 @@
             </div>
         </div>
 
+        <h2 class="section-title section-title-gold">Dash Board</h2>
         {{-- 優良店バッヂ・評価（2列アイコン） --}}
         @php $hasGoodPayerBadge = !empty($shopData['badges']['good_payer']); @endphp
         <div class="mypage-stats-row mypage-stats-row--cols-2" aria-label="統計">
@@ -339,10 +194,50 @@
                 <span class="mypage-stat-value">{{ $shopData['review_avg'] }}</span>
             </a>
         </div>
+        @if(isset($todoList) && count($todoList) > 0)
+            <div class="dashboard-task-list">
+                @foreach($todoList as $todo)
+                    <div class="dashboard-task-item">
+                        <i class="fas fa-exclamation-circle"></i> {{ $todo['text'] }}
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <p class="dashboard-task-empty">未済タスクはありません。</p>
+        @endif
 
         <div class="mypage-detail-box">
-            {{-- メニュー（キャストマイページと同じボタンデザイン） --}}
-            @include('shops.mypage.parts.menu', ['current' => 'profile', 'fullWidth' => false, 'menuData' => $menuData ?? []])
+            <div class="mypage-section mypage-quick-actions cast-mypage-menu-buttons">
+                <h2 class="section-title section-title-gold">Status Menu</h2>
+                <div class="status-menu-grid">
+                    <a href="{{ route('shop.recruits.status') }}" class="menu-btn job">
+                        <div class="menu-btn-content">
+                            <div class="menu-btn-icon"><i class="far fa-folder-open"></i></div>
+                            <div class="menu-btn-text">
+                                <p class="menu-btn-title">採用管理へ移動</p>
+                            </div>
+                        </div>
+                        <div class="menu-btn-arrow"><i class="fas fa-chevron-right"></i></div>
+                    </a>
+                    <a href="{{ route('shop.mypage.payment.index') }}" class="menu-btn manage">
+                        <div class="menu-btn-content">
+                            <div class="menu-btn-icon"><i class="far fa-credit-card"></i></div>
+                            <div class="menu-btn-text">
+                                <p class="menu-btn-title">入金管理へ移動</p>
+                            </div>
+                        </div>
+                        <div class="menu-btn-arrow"><i class="fas fa-chevron-right"></i></div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="mypage-section">
+                <h2 class="section-title section-title-gold">jobdescription</h2>
+                <a href="{{ route('shop.jobdescription') }}" class="jobdescription-button">
+                    <span>求人票へ移動</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
 
             {{-- Image Library（ドラッグで並び替え・タップで大表示・削除・空きタップで登録） --}}
             <div class="mypage-section gallery-edit-section">
@@ -371,103 +266,6 @@
                 </ul>
             </div>
 
-            {{-- Licenses（書類管理） --}}
-            <div class="mypage-section document-section">
-                <h2 class="section-title section-title-gold">Licenses</h2>
-                <p class="document-upload-notice">
-                    提出状況を確認しながら、そのまま差し替えできます。
-                </p>
-                @php
-                    $submittedDocs = collect($documents)->filter(fn ($doc) => ($doc['status'] ?? null) !== 'not_submitted')->values();
-                    $missingDocs = collect($documents)->filter(fn ($doc) => ($doc['status'] ?? null) === 'not_submitted')->values();
-                @endphp
-
-                @if($submittedDocs->isNotEmpty())
-                    <div class="document-upload-group">
-                        <h3 class="document-upload-group-title">Submitted</h3>
-                        <div class="document-upload-list">
-                            @foreach($submittedDocs as $doc)
-                                @php
-                                    $s = $doc['status'];
-                                    $record = $doc['record'] ?? null;
-                                    $statusLabel = [
-                                        'approved' => '承認済み',
-                                        'pending' => '提出済み（審査中）',
-                                        'rejected' => '差し戻し',
-                                    ][$s] ?? '提出済み';
-                                @endphp
-                                <div class="document-upload-card is-submitted">
-                                    <div class="document-upload-main">
-                                        <span class="document-upload-icon" aria-hidden="true"><i class="fas fa-search"></i></span>
-                                        <div class="document-upload-info">
-                                            <p class="document-upload-name">{{ $doc['name'] }}</p>
-                                            <span class="document-status-chip is-{{ str_replace('_', '-', $s) }}" data-doc-key="{{ $doc['key'] }}">
-                                                {{ $statusLabel }}
-                                            </span>
-                                            <p class="document-upload-meta">
-                                                @if($record && !empty($record['updated_at_label']))
-                                                    最終更新: {{ $record['updated_at_label'] }}
-                                                @else
-                                                    最終更新: - -
-                                                @endif
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <form class="shop-document-form document-upload-form" data-doc-key="{{ $doc['key'] }}" enctype="multipart/form-data">
-                                        @csrf
-                                        <input type="hidden" name="type" value="{{ $doc['key'] }}">
-                                        <div class="document-upload-actions">
-                                            @if($record && !empty($record['file_url']))
-                                                <a href="{{ $record['file_url'] }}" target="_blank" rel="noopener" class="document-upload-link">確認</a>
-                                            @endif
-                                            <label class="document-upload-trigger">
-                                                更新
-                                                <input type="file" name="file" class="document-upload-input" accept=".pdf,image/*" required data-auto-upload-input>
-                                            </label>
-                                        </div>
-                                    </form>
-                                </div>
-                                @if($record && !empty($record['ng_reason']))
-                                    <p class="document-upload-error">差し戻し理由: {{ $record['ng_reason'] }}</p>
-                                @endif
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-
-                @if($missingDocs->isNotEmpty())
-                    <div class="document-upload-group">
-                        <h3 class="document-upload-group-title">Missing</h3>
-                        <div class="document-upload-list">
-                            @foreach($missingDocs as $doc)
-                                <div class="document-upload-card is-missing">
-                                    <div class="document-upload-main">
-                                        <span class="document-upload-icon" aria-hidden="true"><i class="fas fa-circle-plus"></i></span>
-                                        <div class="document-upload-info">
-                                            <p class="document-upload-name">{{ $doc['name'] }}</p>
-                                            <span class="document-status-chip is-not-submitted" data-doc-key="{{ $doc['key'] }}">
-                                                未提出
-                                            </span>
-                                            <p class="document-upload-meta">提出データがありません。アップロードして提出してください。</p>
-                                        </div>
-                                    </div>
-                                    <form class="shop-document-form document-upload-form" data-doc-key="{{ $doc['key'] }}" enctype="multipart/form-data">
-                                        @csrf
-                                        <input type="hidden" name="type" value="{{ $doc['key'] }}">
-                                        <div class="document-upload-actions">
-                                            <label class="document-upload-trigger">
-                                                提出する
-                                                <input type="file" name="file" class="document-upload-input" accept=".pdf,image/*" required data-auto-upload-input>
-                                            </label>
-                                        </div>
-                                    </form>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-            </div>
-
             {{-- Shop Information（プロフィール） --}}
             <div class="mypage-section profile-info-section">
                 <div class="section-title-row">
@@ -477,6 +275,15 @@
                 <p class="shop-access-text">
                     <i class="fas fa-map-marker-alt"></i> {{ $shopData['pref'] }}{{ $shopData['city'] }}{{ $shopData['addr1'] }}
                 </p>
+                @if(!empty($shopInfo['nearest_station'] ?? null))
+                    <p class="shop-access-text"><i class="fas fa-train-subway"></i> {{ $shopInfo['nearest_station'] }}</p>
+                @endif
+                @if(!empty($shopInfo['working_hours'] ?? null) || !empty($shopInfo['working_days'] ?? null))
+                    <p class="shop-access-text"><i class="fas fa-clock"></i> 営業時間 {{ $shopInfo['working_hours'] ?: '未設定' }} / 勤務日 {{ $shopInfo['working_days'] ?: '未設定' }}</p>
+                @endif
+                @if(!empty($shopInfo['concept'] ?? null))
+                    <p class="shop-overview-text">{!! nl2br(e($shopInfo['concept'])) !!}</p>
+                @endif
             </div>
         </div>
     </section>
@@ -645,39 +452,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     if (closeBadgeModal) closeBadgeModal.addEventListener('click', hideBadgeModal);
 });
-</script>
-<script>
-(function() {
-    var forms = document.querySelectorAll('.shop-document-form');
-    forms.forEach(function(form) {
-        var fileInput = form.querySelector('[data-auto-upload-input]');
-        if (fileInput) {
-            fileInput.addEventListener('change', function() {
-                if (!fileInput.files || !fileInput.files.length) return;
-                form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-            });
-        }
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            var formData = new FormData(form);
-            fetch('{{ route("shop.mypage.documents.upload") }}', {
-                method: 'POST',
-                headers: { 'Accept': 'application/json' },
-                body: formData
-            }).then(function(r) {
-                return r.json().then(function(json) {
-                    if (!r.ok) throw json;
-                    return json;
-                });
-            }).then(function(res) {
-                alert(res.message || '書類をアップロードしました。');
-                window.location.reload();
-            }).catch(function(error) {
-                var messages = error && error.errors ? Object.values(error.errors).flat() : [];
-                alert(messages[0] || 'アップロードに失敗しました。');
-            });
-        });
-    });
-})();
 </script>
 @endpush
