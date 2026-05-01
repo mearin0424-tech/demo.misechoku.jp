@@ -360,6 +360,9 @@ a.mypage-stat-panel-link:hover {
 .mypage-stats-row--cols-4 {
     grid-template-columns: repeat(4, 1fr);
 }
+.mypage-stats-row--cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
 .mypage-stats-row--cols-4 .mypage-stat-panel:nth-child(3) .mypage-stat-icon { color: #a8d4a8; }
 .mypage-stats-row--cols-4 .mypage-stat-panel:nth-child(4) .mypage-stat-icon {
     color: var(--mypage-gold);
@@ -384,6 +387,9 @@ a.mypage-stat-panel-link:hover {
         margin-bottom: 16px;
     }
     .mypage-stats-row--cols-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .mypage-stats-row--cols-2 {
         grid-template-columns: repeat(2, 1fr);
     }
     .mypage-stat-panel {
@@ -781,6 +787,15 @@ a.btn-outline-gold {
 }
 .cast-mypage-menu-buttons .menu-btn:hover .menu-btn-title {
     color: #ffffff;
+}
+.cast-mypage-menu-buttons .menu-btn-meta {
+    font-size: 0.76rem;
+    color: #b9a6a6;
+    margin: 3px 0 0;
+    line-height: 1.5;
+}
+.cast-mypage-menu-buttons .menu-btn:hover .menu-btn-meta {
+    color: #e9dbbd;
 }
 
 .cast-mypage-menu-buttons .menu-btn-arrow {

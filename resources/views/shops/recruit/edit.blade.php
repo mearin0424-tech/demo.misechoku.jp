@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', '求人情報の編集')
+@section('header_title', '求人情報の編集')
 @section('guide_message', '求人票は、最初に目に入る条件とお店らしさが伝わるほど、応募につながりやすくなります。上から順にご入力いただければ、そのまま見やすい求人票になるよう整えております。')
 
 @push('styles')
@@ -41,55 +42,166 @@
     .recruit-input-with-unit {
         display: flex;
         align-items: center;
-        border: 1px solid #4a4a4a; /* Input border color */
-        border-radius: 8px; /* Input border radius */
-        overflow: hidden; /* Ensures inner elements respect border-radius */
+        border: 1px solid rgba(255,255,255,0.14);
+        border-radius: 12px;
+        overflow: hidden;
+        background: rgba(0,0,0,0.25);
     }
 
     .recruit-input-with-unit .recruit-input {
         flex-grow: 1;
-        border: none; /* Remove default input border */
-        padding-right: 0; /* Adjust padding if needed */
+        border: none;
+        border-radius: 0;
+        background: transparent;
     }
 
     .recruit-input-with-unit .unit {
         padding: 10px 14px;
-        background-color: #333; /* Unit background color */
-        color: #fff; /* Unit text color */
-        font-size: 0.9rem;
+        background: rgba(255,255,255,0.06);
+        color: #e9dede;
+        font-size: 0.85rem;
+        font-weight: 700;
         white-space: nowrap;
+    }
+
+    .recruit-publish-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 8px 2px 20px;
+        margin-bottom: 4px;
+    }
+    .recruit-publish-label {
+        font-size: 0.62rem;
+        font-weight: 700;
+        color: rgba(255,255,255,0.45);
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        margin: 0 0 6px;
+    }
+    .recruit-publish-title-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .recruit-publish-title {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        color: #fff;
+    }
+    .recruit-publish-title.is-off {
+        color: rgba(255,255,255,0.35);
+    }
+    .recruit-publish-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--gold);
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.25);
+    }
+    .recruit-publish-switch-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 6px;
+    }
+    .recruit-publish-switch {
+        position: relative;
+        display: inline-block;
+        width: 64px;
+        height: 36px;
+        cursor: pointer;
+    }
+    .recruit-publish-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+        position: absolute;
+    }
+    .recruit-publish-switch-track {
+        position: absolute;
+        inset: 0;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.12);
+        transition: background 0.25s ease;
+    }
+    .recruit-publish-switch input:checked + .recruit-publish-switch-track {
+        background: rgba(212, 175, 55, 0.95);
+    }
+    .recruit-publish-switch-knob {
+        position: absolute;
+        top: 3px;
+        left: 4px;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+        transition: transform 0.25s ease;
+    }
+    .recruit-publish-switch input:checked + .recruit-publish-switch-track .recruit-publish-switch-knob {
+        transform: translateX(26px);
+    }
+    .recruit-publish-switch-hint {
+        font-size: 0.58rem;
+        font-weight: 700;
+        color: rgba(255,255,255,0.38);
+        letter-spacing: 0.04em;
+    }
+
+    .recruit-edit-footer-fixed {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: var(--footer-height);
+        z-index: 30;
+        display: flex;
+        gap: 10px;
+        padding: 12px 16px;
+        background: linear-gradient(180deg, rgba(18, 6, 8, 0.92), rgba(12, 4, 6, 0.98));
+        border-top: 1px solid rgba(230, 208, 128, 0.18);
+        box-sizing: border-box;
+    }
+    .recruit-edit-footer-fixed .recruit-edit-footer-btn {
+        flex: 1;
+        justify-content: center;
+        min-height: 48px;
+        margin: 0;
+    }
+    .recruit-edit-footer-primary {
+        flex: 1;
+        min-height: 48px;
+        border: none;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #d4af37, #b8922a);
+        color: #1a0a0c;
+        font-size: 0.85rem;
+        font-weight: 800;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 8px 24px rgba(212, 175, 55, 0.2);
+    }
+    .recruit-edit-footer-primary:hover {
+        filter: brightness(1.05);
+    }
+
+    .recruit-edit-page {
+        padding-bottom: calc(var(--footer-height) + 88px);
     }
 </style>
 @endpush
 
 @section('content')
 <div class="contents inner recruit-edit-page animate-fadeIn p-4">
-    <header class="recruit-status-header" style="margin-bottom: 18px;">
-        <a href="{{ route('shop.recruits.status') }}" class="recruit-status-back"><i class="fas fa-chevron-left"></i> キャンセル</a>
-        <div class="recruit-status-title-block">
-            <h1 class="recruit-status-title serif-font" style="font-size: 1.4rem;">Edit Recruit</h1>
-            <p class="recruit-status-sub">求人情報の編集</p>
-        </div>
-    </header>
-
-    <section class="recruit-edit-hero">
-        <div class="recruit-edit-headline">
-            <div>
-                <span class="status-badge {{ ($recruit['status'] ?? 'active') === 'active' ? 'status-active' : 'status-inactive' }}">
-                    {{ ($recruit['status'] ?? 'active') === 'active' ? '現在は公開中' : '現在は非公開' }}
-                </span>
-                <h2 class="recruit-edit-title serif-font">{{ $recruit['catch_copy'] ?: '求人票を整えて応募につながる内容にしましょう' }}</h2>
-            </div>
-        </div>
-        <div class="recruit-edit-toolbar">
-            <a href="{{ route('shop.jobdescription') }}" class="recruit-ghost-btn">
-                <i class="fas fa-eye"></i> プレビューを見る
-            </a>
-            <a href="{{ route('shop.recruits.status') }}" class="recruit-ghost-btn">
-                <i class="fas fa-list-check"></i> ステータス管理へ
-            </a>
-        </div>
-    </section>
+    @php
+        $isActive = ($recruit['status'] ?? 'active') === 'active';
+    @endphp
 
     @if(session('message'))
         <p class="profile-edit-flash" style="margin-bottom:16px;">{{ session('message') }}</p>
@@ -118,94 +230,79 @@
     <form id="recruit-form" action="{{ route('shop.recruits.update') }}" method="POST">
         @csrf
         @method('PUT')
-        <section class="bg-[#141010] border border-neutral-800/60 rounded-2xl overflow-hidden shadow-xl">
-          <div class="p-5 border-b border-neutral-800/60 bg-gradient-to-r from-[#1a1410] to-transparent flex items-center gap-3">
-            <div class="p-2.5 bg-[#d4a017]/10 rounded-xl text-[#d4a017]">
-              <i class="fas fa-bullhorn" size={20}></i>
-            </div>
-            <h3 class="font-bold text-lg text-white">訴求内容</h3>
-          </div>
-          <div class="p-6 space-y-6">
-            <p class="recruit-section-copy">一覧や詳細の冒頭で目に入る文章です。短くても、お店らしさと魅力が分かる言葉を入れると伝わりやすくなります。</p>
-            <div class="space-y-3">
-              <label class="flex items-center justify-between">
-                <span class="text-sm font-bold text-neutral-300">キャッチコピー <span class="text-[#d4a017] ml-1">必須</span></span>
-              </label>
-              <input 
-                type="text" 
-                name="catch_copy"
-                placeholder="キャッチコピーを入力してください"
-                value="{{ old('catch_copy', $recruit['catch_copy']) }}"
-                class="w-full bg-[#0a0505] border border-neutral-800 text-white px-4 py-3.5 rounded-xl focus:border-[#d4a017]/50 focus:ring-2 focus:ring-[#d4a017]/5 outline-none transition-all"
-              />
-              <div class="flex items-start gap-2 text-xs text-neutral-500">
-                <i class="fas fa-info-circle mt-0.5 text-[#d4a017]/60" size={14}></i>
-                <p>30〜60文字くらいで、エリア・雰囲気・強みが入ると見やすくなります。</p>
-              </div>
-            </div>
-            <div class="space-y-3">
-                <label class="flex items-center justify-between">
-                    <span class="text-sm font-bold text-neutral-300">お店からのメッセージ <span class="text-[#d4a017] ml-1">必須</span></span>
-                </label>
-                <textarea 
-                    name="message" 
-                    rows="3" 
-                    class="w-full bg-[#0a0505] border border-neutral-800 text-white px-4 py-3.5 rounded-xl focus:border-[#d4a017]/50 focus:ring-2 focus:ring-[#d4a017]/5 outline-none transition-all"
-                    placeholder="お店の魅力や募集メッセージ">{{ old('message', $recruit['message']) }}</textarea>
-                <div class="flex items-start gap-2 text-xs text-neutral-500">
-                    <i class="fas fa-info-circle mt-0.5 text-[#d4a017]/60" size={14}></i>
-                    <p>未経験歓迎、客層、サポート体制などを入れると応募前の不安を減らせます。</p>
+
+        <div class="recruit-publish-bar">
+            <div>
+                <p class="recruit-publish-label">ステータス</p>
+                <div class="recruit-publish-title-row">
+                    <h2 class="recruit-publish-title {{ $isActive ? '' : 'is-off' }}">{{ $isActive ? '公開中' : '公開停止中' }}</h2>
+                    @if($isActive)
+                        <span class="recruit-publish-dot" aria-hidden="true"></span>
+                    @endif
                 </div>
             </div>
-          </div>
-        </section>
-
-        <section class="bg-[#141010] border border-neutral-800/60 rounded-2xl overflow-hidden shadow-xl">
-          <div class="p-5 border-b border-neutral-800/60 bg-gradient-to-r from-[#1a1410] to-transparent flex items-center gap-3">
-            <div class="p-2.5 bg-[#d4a017]/10 rounded-xl text-[#d4a017]">
-              <i class="fas fa-coins" size={20}></i>
+            <div class="recruit-publish-switch-wrap">
+                <label class="recruit-publish-switch" for="publish-toggle">
+                    <input type="checkbox" id="publish-toggle" name="status" value="active" {{ $isActive ? 'checked' : '' }}>
+                    <span class="recruit-publish-switch-track"><span class="recruit-publish-switch-knob"></span></span>
+                </label>
+                <span class="recruit-publish-switch-hint">{{ $isActive ? 'オフにすると非公開' : 'オンにすると公開' }}</span>
             </div>
-            <h3 class="font-bold text-lg text-white">給与</h3>
-          </div>
-          <div class="p-6 space-y-6">
+        </div>
+
+        <div class="recruit-section" id="recruit-appeal">
+            <div class="recruit-section-head">
+                <div class="recruit-section-icon"><i class="fas fa-bullhorn"></i></div>
+                <h3 class="recruit-section-title">訴求内容</h3>
+            </div>
+            <p class="recruit-section-copy">一覧や詳細の冒頭で目に入る文章です。短くても、お店らしさと魅力が分かる言葉を入れると伝わりやすくなります。</p>
+            <div class="recruit-form-group">
+                <label class="recruit-label">キャッチコピー <span class="recruit-field-required">必須</span></label>
+                <input type="text" name="catch_copy" class="recruit-input" value="{{ old('catch_copy', $recruit['catch_copy']) }}" placeholder="例: 六本木で一番稼げるお店です！">
+                <p class="recruit-helper-text">30〜60文字くらいで、エリア・雰囲気・強みが入ると見やすくなります。</p>
+            </div>
+            <div class="recruit-form-group">
+                <label class="recruit-label">お店からのメッセージ <span class="recruit-field-required">必須</span></label>
+                <textarea name="message" rows="3" class="recruit-textarea" placeholder="お店の魅力や募集メッセージ">{{ old('message', $recruit['message']) }}</textarea>
+                <p class="recruit-helper-text">未経験歓迎、客層、サポート体制などを入れると応募前の不安を減らせます。</p>
+            </div>
+        </div>
+
+        <div class="recruit-section" id="recruit-salary">
+            <div class="recruit-section-head">
+                <div class="recruit-section-icon"><i class="fas fa-yen-sign"></i></div>
+                <h3 class="recruit-section-title">給与</h3>
+            </div>
             <p class="recruit-section-copy">もっとも比較されやすい項目です。通常時給、体験時給、ボーナス条件が一目で分かるようにそろえておくと、プレビューでも見やすくなります。</p>
-            {{-- 時給タイプ選択ボタン（サンプル） --}}
-            {{-- <div class="grid grid-cols-3 gap-2">
-              {salaryTypes.map(type => (
-                <button key={type} className={`py-2 rounded-xl text-sm font-bold border transition-all ${type === '時給' ? 'bg-[#d4a017] text-[#0a0505] border-[#d4a017]' : 'bg-transparent border-neutral-800 text-neutral-500'}`}>
-                  {type}
-                </button>
-              ))}
-            </div> --}}
-            <div class="flex items-center gap-3">
+            <div class="recruit-info-grid" style="margin-bottom: 16px;">
                 <div class="recruit-form-group" style="margin-bottom: 0;">
                     <label class="recruit-label">
                         @if(($recruitType ?? 'fulltime') === 'trial')
-                            体入時給 <span class="text-[#d4a017] ml-1">必須</span>
+                            体入時給 <span class="recruit-field-required">必須</span>
                         @elseif(($recruitType ?? 'fulltime') === 'help')
-                            ヘルプ時給 <span class="text-[#d4a017] ml-1">必須</span>
+                            ヘルプ時給 <span class="recruit-field-required">必須</span>
                         @else
-                            通常時給 <span class="text-[#d4a017] ml-1">必須</span>
+                            通常時給 <span class="recruit-field-required">必須</span>
                         @endif
                     </label>
                     <div class="recruit-input-with-unit">
-                        <input type="text" name="hourly_wage_regular" class="recruit-input" value="{{ old('hourly_wage_regular', number_format(floatval($recruit['hourly_wage_regular'] ?? 0))) }}" placeholder="5,000" inputmode="numeric" pattern="[0-9]*" data-type="currency">
+                        <input type="text" name="hourly_wage_regular" class="recruit-input" value="{{ old('hourly_wage_regular', number_format((float) ($recruit['hourly_wage_regular'] ?? 0))) }}" placeholder="5,000" inputmode="numeric" pattern="[0-9]*" data-type="currency">
                         <span class="unit">円</span>
                     </div>
                 </div>
                 <div class="recruit-form-group" style="margin-bottom: 0;">
                     <label class="recruit-label">体験時給</label>
                     <div class="recruit-input-with-unit">
-                        <input type="text" name="trial_hourly_wage" class="recruit-input" value="{{ old('trial_hourly_wage', number_format(floatval($recruit['trial_hourly_wage'] ?? 0))) }}" placeholder="4,000" inputmode="numeric" pattern="[0-9]*" data-type="currency">
+                        <input type="text" name="trial_hourly_wage" class="recruit-input" value="{{ old('trial_hourly_wage', number_format((float) ($recruit['trial_hourly_wage'] ?? 0))) }}" placeholder="4,000" inputmode="numeric" pattern="[0-9]*" data-type="currency">
                         <span class="unit">円</span>
                     </div>
                 </div>
             </div>
-            <div class="flex items-center gap-3" style="margin-bottom: 16px;">
+            <div class="recruit-info-grid" style="margin-bottom: 16px;">
                 <div class="recruit-form-group" style="margin-bottom: 0;">
                     <label class="recruit-label">ヘルプ時給</label>
                     <div class="recruit-input-with-unit">
-                        <input type="text" name="help_hourly_wage" class="recruit-input" value="{{ old('help_hourly_wage', number_format(floatval($recruit['help_hourly_wage'] ?? null))) }}" placeholder="3,500" inputmode="numeric" pattern="[0-9]*" data-type="currency">
+                        <input type="text" name="help_hourly_wage" class="recruit-input" value="{{ old('help_hourly_wage', number_format((float) ($recruit['help_hourly_wage'] ?? 0))) }}" placeholder="3,500" inputmode="numeric" pattern="[0-9]*" data-type="currency">
                         <span class="unit">円</span>
                     </div>
                 </div>
@@ -216,51 +313,34 @@
                     </label>
                 </div>
             </div>
-            <div class="space-y-3">
-                <label class="flex items-center justify-between">
-                    <span class="text-sm font-bold text-neutral-300">給与備考</span>
-                </label>
-                <textarea 
-                    name="salary_text" 
-                    rows="2" 
-                    class="w-full bg-[#0a0505] border border-neutral-800 text-white px-4 py-3.5 rounded-xl focus:border-[#d4a017]/50 focus:ring-2 focus:ring-[#d4a017]/5 outline-none transition-all"
-                    placeholder="指名手当・日払いなど">{{ old('salary_text', $recruit['salary_text']) }}</textarea>
-                <div class="flex items-start gap-2 text-xs text-neutral-500">
-                    <i class="fas fa-info-circle mt-0.5 text-[#d4a017]/60" size={14}></i>
-                    <p>バック率、日払い、送迎、ノルマ有無など補足条件をここにまとめると伝わりやすいです。</p>
-                </div>
+            <div class="recruit-form-group">
+                <label class="recruit-label">給与備考</label>
+                <textarea name="salary_text" rows="2" class="recruit-textarea" placeholder="指名手当・日払いなど">{{ old('salary_text', $recruit['salary_text']) }}</textarea>
+                <p class="recruit-helper-text">バック率、日払い、送迎、ノルマ有無など補足条件をここにまとめると伝わりやすいです。</p>
             </div>
-            <div class="flex items-center gap-3" style="margin-bottom: 16px;">
+            <div class="recruit-info-grid" style="margin-bottom: 16px;">
                 <div class="recruit-form-group" style="margin-bottom: 0;">
                     <label class="recruit-label">ボーナス金額</label>
                     <div class="recruit-input-with-unit">
-                        <input type="text" name="noruma_reward" class="recruit-input" value="{{ number_format(floatval(old('noruma_reward', $recruit['noruma_reward'] ?? 0))) }}" placeholder="30,000" inputmode="numeric" pattern="[0-9]*" data-type="currency">
+                        <input type="text" name="noruma_reward" class="recruit-input" value="{{ old('noruma_reward', number_format((float) ($recruit['noruma_reward'] ?? 0))) }}" placeholder="30,000" inputmode="numeric" pattern="[0-9]*" data-type="currency">
                         <span class="unit">円</span>
                     </div>
                 </div>
                 <div class="recruit-form-group" style="margin-bottom: 0;">
                     <label class="recruit-label">合計勤務日数</label>
-                    <input type="number" name="bonus_total_working_days" class="recruit-input" value="{{ old('bonus_total_working_days', $recruit['bonus_total_working_days'] ?? '') }}" placeholder="例: 10日">
+                    <input type="number" name="bonus_total_working_days" class="recruit-input" value="{{ old('bonus_total_working_days', $recruit['bonus_total_working_days'] ?? '') }}" placeholder="例: 10">
                 </div>
                 <div class="recruit-form-group" style="margin-bottom: 0;">
                     <label class="recruit-label">合計勤務時間</label>
-                    <input type="number" name="bonus_total_working_hours" class="recruit-input" value="{{ old('bonus_total_working_hours', $recruit['bonus_total_working_hours'] ?? '') }}" placeholder="例: 40時間">
+                    <input type="number" name="bonus_total_working_hours" class="recruit-input" value="{{ old('bonus_total_working_hours', $recruit['bonus_total_working_hours'] ?? '') }}" placeholder="例: 40">
                 </div>
             </div>
-            <div class="space-y-3">
-                <label class="flex items-center justify-between">
-                    <span class="text-sm font-bold text-neutral-300">その他条件（フリーテキスト）</span>
-                </label>
-                <textarea 
-                    name="bonus_other_conditions" 
-                    rows="2" 
-                    class="w-full bg-[#0a0505] border border-neutral-800 text-white px-4 py-3.5 rounded-xl focus:border-[#d4a017]/50 focus:ring-2 focus:ring-[#d4a017]/5 outline-none transition-all"
-                    placeholder="例: 無断欠勤なし">{{ old('bonus_other_conditions', $recruit['bonus_other_conditions'] ?? '') }}</textarea>
+            <div class="recruit-form-group">
+                <label class="recruit-label">その他条件（フリーテキスト）</label>
+                <textarea name="bonus_other_conditions" rows="2" class="recruit-textarea" placeholder="例: 無断欠勤なし">{{ old('bonus_other_conditions', $recruit['bonus_other_conditions'] ?? '') }}</textarea>
             </div>
-            <div class="space-y-3">
-                <label class="flex items-center justify-between">
-                    <span class="text-sm font-bold text-neutral-300">給与・待遇タグ</span>
-                </label>
+            <div class="recruit-form-group">
+                <label class="recruit-label">給与・待遇タグ</label>
                 <div class="recruit-chip-grid">
                     @foreach(($masters['salary'] ?? []) as $tag)
                         <label class="recruit-chip">
@@ -275,56 +355,29 @@
                     @endforeach
                 </div>
             </div>
-          </div>
-        </section>
+        </div>
 
-        <section class="bg-[#141010] border border-neutral-800/60 rounded-2xl overflow-hidden shadow-xl">
-          <div class="p-5 border-b border-neutral-800/60 bg-gradient-to-r from-[#1a1410] to-transparent flex items-center gap-3">
-            <div class="p-2.5 bg-[#d4a017]/10 rounded-xl text-[#d4a017]">
-              <i class="fas fa-calendar-clock" size={20}></i> {{-- Keeping existing icon, applying new style --}}
+        <div class="recruit-section" id="recruit-work">
+            <div class="recruit-section-head">
+                <div class="recruit-section-icon"><i class="fas fa-calendar-clock"></i></div>
+                <h3 class="recruit-section-title">勤務条件</h3>
             </div>
-            <h3 class="font-bold text-lg text-white">勤務条件</h3>
-          </div>
-          <div class="p-6 space-y-6">
             <p class="recruit-section-copy">勤務のしやすさが伝わるように、時間・日数・休みの情報を具体的に入れてください。</p>
-            <div class="space-y-3">
-                <label class="flex items-center justify-between">
-                    <span class="text-sm font-bold text-neutral-300">勤務時間 <span class="text-[#d4a017] ml-1">必須</span></span>
-                </label>
-                <input
-                    type="text"
-                    name="working_hours"
-                    class="w-full bg-[#0a0505] border border-neutral-800 text-white px-4 py-3.5 rounded-xl focus:border-[#d4a017]/50 focus:ring-2 focus:ring-[#d4a017]/5 outline-none transition-all"
-                    value="{{ old('working_hours', $recruit['working_hours']) }}"
-                    placeholder="20:00〜翌1:00">
+            <div class="recruit-form-group">
+                <label class="recruit-label">勤務時間 <span class="recruit-field-required">必須</span></label>
+                <input type="text" name="working_hours" class="recruit-input" value="{{ old('working_hours', $recruit['working_hours']) }}" placeholder="20:00〜翌1:00">
             </div>
-            <div class="space-y-3">
-                <label class="flex items-center justify-between">
-                    <span class="text-sm font-bold text-neutral-300">勤務日数 <span class="text-[#d4a017] ml-1">必須</span></span>
-                </label>
-                <input
-                    type="text"
-                    name="working_days"
-                    class="w-full bg-[#0a0505] border border-neutral-800 text-white px-4 py-3.5 rounded-xl focus:border-[#d4a017]/50 focus:ring-2 focus:ring-[#d4a017]/5 outline-none transition-all"
-                    value="{{ old('working_days', $recruit['working_days']) }}"
-                    placeholder="週1日からOK">
+            <div class="recruit-form-group">
+                <label class="recruit-label">勤務日数 <span class="recruit-field-required">必須</span></label>
+                <input type="text" name="working_days" class="recruit-input" value="{{ old('working_days', $recruit['working_days']) }}" placeholder="週1日からOK">
             </div>
-            <div class="space-y-3">
-                <label class="flex items-center justify-between">
-                    <span class="text-sm font-bold text-neutral-300">定休日</span>
-                </label>
-                <input
-                    type="text"
-                    name="regular_holiday"
-                    class="w-full bg-[#0a0505] border border-neutral-800 text-white px-4 py-3.5 rounded-xl focus:border-[#d4a017]/50 focus:ring-2 focus:ring-[#d4a017]/5 outline-none transition-all"
-                    value="{{ old('regular_holiday', $recruit['regular_holiday']) }}"
-                    placeholder="不定休">
+            <div class="recruit-form-group">
+                <label class="recruit-label">定休日</label>
+                <input type="text" name="regular_holiday" class="recruit-input" value="{{ old('regular_holiday', $recruit['regular_holiday']) }}" placeholder="不定休">
             </div>
-            <div class="space-y-3">
-                <label class="flex items-center justify-between">
-                    <span class="text-sm font-bold text-neutral-300">働き方タグ</span>
-                </label>
-                <div class="flex flex-wrap gap-2"> {{-- Using flex-wrap gap-2 from React example for tags --}}
+            <div class="recruit-form-group">
+                <label class="recruit-label">働き方タグ</label>
+                <div class="recruit-chip-grid">
                     @foreach(($masters['howto'] ?? []) as $tag)
                         <label class="recruit-chip">
                             <input
@@ -338,66 +391,37 @@
                     @endforeach
                 </div>
             </div>
-          </div>
-        </section>
+        </div>
 
-        <section class="bg-[#141010] border border-neutral-800/60 rounded-2xl overflow-hidden shadow-xl">
-          <div class="p-5 border-b border-neutral-800/60 bg-gradient-to-r from-[#1a1410] to-transparent flex items-center gap-3">
-            <div class="p-2.5 bg-[#d4a017]/10 rounded-xl text-[#d4a017]">
-              <i class="fas fa-file-lines" size={20}></i> {{-- Keeping existing icon, applying new style --}}
+        <div class="recruit-section" id="recruit-detail">
+            <div class="recruit-section-head">
+                <div class="recruit-section-icon"><i class="fas fa-file-lines"></i></div>
+                <h3 class="recruit-section-title">募集要項</h3>
             </div>
-            <h3 class="font-bold text-lg text-white">募集要項</h3>
-          </div>
-          <div class="p-6 space-y-6">
             <p class="recruit-section-copy">仕事内容や雰囲気は、応募するか迷っている人の判断材料になります。働くイメージが湧く説明を意識してください。</p>
-            <div class="space-y-3">
-                <label class="flex items-center justify-between">
-                    <span class="text-sm font-bold text-neutral-300">仕事内容 <span class="text-[#d4a017] ml-1">必須</span></span>
-                </label>
-                <textarea
-                    name="job_content"
-                    rows="4"
-                    class="w-full bg-[#0a0505] border border-neutral-800 text-white px-4 py-3.5 rounded-xl focus:border-[#d4a017]/50 focus:ring-2 focus:ring-[#d4a017]/5 outline-none transition-all"
-                    placeholder="仕事内容">{{ old('job_content', $recruit['job_content']) }}</textarea>
+            <div class="recruit-form-group">
+                <label class="recruit-label">仕事内容 <span class="recruit-field-required">必須</span></label>
+                <textarea name="job_content" rows="4" class="recruit-textarea" placeholder="仕事内容">{{ old('job_content', $recruit['job_content']) }}</textarea>
             </div>
-            <div class="space-y-3">
-                <label class="flex items-center justify-between">
-                    <span class="text-sm font-bold text-neutral-300">お店の雰囲気・補足</span>
-                </label>
-                <textarea
-                    name="store_atmosphere"
-                    rows="3"
-                    class="w-full bg-[#0a0505] border border-neutral-800 text-white px-4 py-3.5 rounded-xl focus:border-[#d4a017]/50 focus:ring-2 focus:ring-[#d4a017]/5 outline-none transition-all"
-                    placeholder="お店の雰囲気">{{ old('store_atmosphere', $recruit['store_atmosphere']) }}</textarea>
+            <div class="recruit-form-group">
+                <label class="recruit-label">お店の雰囲気・補足</label>
+                <textarea name="store_atmosphere" rows="3" class="recruit-textarea" placeholder="お店の雰囲気">{{ old('store_atmosphere', $recruit['store_atmosphere']) }}</textarea>
             </div>
-            <div class="space-y-3">
-                <label class="flex items-center justify-between">
-                    <span class="text-sm font-bold text-neutral-300">応募資格 <span class="text-[#d4a017] ml-1">必須</span></span>
-                </label>
-                <input
-                    type="text"
-                    name="qualification"
-                    class="w-full bg-[#0a0505] border border-neutral-800 text-white px-4 py-3.5 rounded-xl focus:border-[#d4a017]/50 focus:ring-2 focus:ring-[#d4a017]/5 outline-none transition-all"
-                    value="{{ old('qualification', $recruit['qualification']) }}"
-                    placeholder="18歳以上（高校生不可）">
+            <div class="recruit-form-group">
+                <label class="recruit-label">応募資格 <span class="recruit-field-required">必須</span></label>
+                <input type="text" name="qualification" class="recruit-input" value="{{ old('qualification', $recruit['qualification']) }}" placeholder="18歳以上（高校生不可）">
             </div>
-          </div>
-        </section>
+        </div>
 
-        <section class="bg-[#141010] border border-neutral-800/60 rounded-2xl overflow-hidden shadow-xl">
-          <div class="p-5 border-b border-neutral-800/60 bg-gradient-to-r from-[#1a1410] to-transparent flex items-center gap-3">
-            <div class="p-2.5 bg-[#d4a017]/10 rounded-xl text-[#d4a017]">
-              <i class="fas fa-gift" size={20}></i>
+        <div class="recruit-section" id="recruit-tags">
+            <div class="recruit-section-head">
+                <div class="recruit-section-icon"><i class="fas fa-gift"></i></div>
+                <h3 class="recruit-section-title">タグ選択</h3>
             </div>
-            <h3 class="font-bold text-lg text-white">タグ選択</h3>
-          </div>
-          <div class="p-6 space-y-6">
             <p class="recruit-section-copy">詳細画面で条件をざっと見てもらうための補助情報です。該当するものだけ選ぶと、読みやすい求人票になります。</p>
-            <div class="space-y-3">
-                <label class="flex items-center justify-between">
-                    <span class="text-sm font-bold text-neutral-300">メリット・待遇</span>
-                </label>
-                <div class="flex flex-wrap gap-2">
+            <div class="recruit-form-group">
+                <label class="recruit-label">メリット・待遇</label>
+                <div class="recruit-chip-grid">
                     @foreach(($masters['merit'] ?? []) as $tag)
                         <label class="recruit-chip">
                             <input type="checkbox" name="merit_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, old('merit_tag_ids', $recruit['merit_tag_ids'] ?? []), true) ? 'checked' : '' }}>
@@ -406,11 +430,9 @@
                     @endforeach
                 </div>
             </div>
-            <div class="space-y-3">
-                <label class="flex items-center justify-between">
-                    <span class="text-sm font-bold text-neutral-300">店舗特徴</span>
-                </label>
-                <div class="flex flex-wrap gap-2">
+            <div class="recruit-form-group">
+                <label class="recruit-label">店舗特徴</label>
+                <div class="recruit-chip-grid">
                     @foreach(($masters['feature'] ?? []) as $tag)
                         <label class="recruit-chip">
                             <input type="checkbox" name="feature_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, old('feature_tag_ids', $recruit['feature_tag_ids'] ?? []), true) ? 'checked' : '' }}>
@@ -419,11 +441,9 @@
                     @endforeach
                 </div>
             </div>
-            <div class="space-y-3">
-                <label class="flex items-center justify-between">
-                    <span class="text-sm font-bold text-neutral-300">設備</span>
-                </label>
-                <div class="flex flex-wrap gap-2">
+            <div class="recruit-form-group">
+                <label class="recruit-label">設備</label>
+                <div class="recruit-chip-grid">
                     @foreach(($masters['facility'] ?? []) as $tag)
                         <label class="recruit-chip">
                             <input type="checkbox" name="facility_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, old('facility_tag_ids', $recruit['facility_tag_ids'] ?? []), true) ? 'checked' : '' }}>
@@ -432,11 +452,9 @@
                     @endforeach
                 </div>
             </div>
-            <div class="space-y-3">
-                <label class="flex items-center justify-between">
-                    <span class="text-sm font-bold text-neutral-300">お店の雰囲気</span>
-                </label>
-                <div class="flex flex-wrap gap-2">
+            <div class="recruit-form-group">
+                <label class="recruit-label">お店の雰囲気</label>
+                <div class="recruit-chip-grid">
                     @foreach(($masters['atmosphere'] ?? []) as $tag)
                         <label class="recruit-chip">
                             <input type="checkbox" name="atmosphere_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, old('atmosphere_tag_ids', $recruit['atmosphere_tag_ids'] ?? []), true) ? 'checked' : '' }}>
@@ -445,35 +463,23 @@
                     @endforeach
                 </div>
             </div>
-          </div>
-        </section>
+        </div>
 
         <div class="recruit-bottom-actions" id="recruit-save">
             <div class="recruit-bottom-actions-copy">
-                <p class="recruit-bottom-actions-title">入力後はそのまま保存できます</p>
-                <p class="recruit-bottom-actions-text">保存後にプレビューを確認して、見え方や文言の最終調整をしてください。</p>
-            </div>
-            <div class="recruit-bottom-actions-buttons">
-                <a href="{{ route('shop.jobdescription') }}" class="recruit-ghost-btn">
-                    <i class="fas fa-eye"></i> プレビュー
-                </a>
-                <button type="submit" class="btn-gold shadow-2xl" style="min-width: 190px;">
-                    求人情報を保存する
-                </button>
+                <p class="recruit-bottom-actions-title">このあと保存できます</p>
+                <p class="recruit-bottom-actions-text">画面下のボタンからプレビュー確認・保存ができます。</p>
             </div>
         </div>
     </form>
-</div>
-    </main>
-    <footer class="fixed bottom-0 inset-x-0 z-50 bg-[#0a0505]/95 backdrop-blur-md border-t border-neutral-800/50 py-4 px-4">
-        <div class="max-w-2xl mx-auto flex gap-3">
-            <a href="{{ route('shop.jobdescription') }}" class="flex-1 bg-white/5 hover:bg-white/10 text-neutral-300 font-bold py-4 rounded-xl text-sm transition-all border border-white/10 flex items-center justify-center gap-2">
-                <i class="fas fa-eye"></i> プレビューを見る
-            </a>
-            <button type="submit" form="recruit-form" class="flex-1 bg-[#d4a017] hover:bg-[#b88a14] text-[#0a0505] font-bold py-4 rounded-xl text-sm transition-all shadow-lg shadow-[#d4a017]/10 flex items-center justify-center gap-2">
-                <i class="fas fa-save"></i> 更新内容を保存
-            </button>
-        </div>
+
+    <footer class="recruit-edit-footer-fixed" aria-label="求人編集の固定操作">
+        <a href="{{ route('shop.jobdescription') }}" class="recruit-ghost-btn recruit-edit-footer-btn">
+            <i class="fas fa-eye"></i> プレビューを見る
+        </a>
+        <button type="submit" form="recruit-form" class="recruit-edit-footer-primary">
+            <i class="fas fa-save"></i> 更新内容を保存
+        </button>
     </footer>
 </div>
 @endsection

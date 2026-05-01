@@ -8,7 +8,7 @@
     $isLikes = str_contains($bodyClass, 'page-interaction') || request()->is('*/interaction*');
     if (!$isHome && ($isSearch || $isLikes)) {
         // オコジョガイド：詳細は店舗マイページのバッヂ（モーダル）で案内（キャスト向けは一言に短縮）
-        $resolvedGuideMessage = '「優良支払店」バッヂは、直近の請求・入金がスムーズな店舗に付く信頼の目印です。';
+        $resolvedGuideMessage = '「優良店」バッヂは、直近の請求・入金がスムーズな店舗に付く信頼の目印です。';
     }
 @endphp
 

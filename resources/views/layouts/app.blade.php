@@ -65,8 +65,12 @@
         {{-- メインレイアウト部分を縦並びのFlexコンテナとして包む --}}
         <div class="main-layout-container flex-1 flex flex-col min-w-0">
 
-            {{-- ヘッダー（ページタイトルを渡して表示） --}}
-            @yield('header')
+            {{-- ヘッダー（ページで @section('header') がある場合のみ差し替え） --}}
+            @hasSection('header')
+                @yield('header')
+            @else
+                @include('layouts.parts.header', ['headerTitle' => trim($__env->yieldContent('title'))])
+            @endif
 
             {{-- @yield('guide_message') で各ページの設定内容を注入する --}}
             @include('layouts.parts.character-guide', ['guideMessage' => $__env->yieldContent('guide_message')])

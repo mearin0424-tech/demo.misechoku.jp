@@ -14,132 +14,127 @@
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
 <style>
+    .document-upload-notice {
+        margin: 0 0 12px;
+        font-size: 0.76rem;
+        line-height: 1.7;
+        color: #cdbcbc;
+    }
+    .document-upload-group {
+        margin-bottom: 14px;
+    }
+    .document-upload-group:last-child {
+        margin-bottom: 0;
+    }
+    .document-upload-group-title {
+        margin: 0 0 8px;
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #bdaaaa;
+    }
     .document-upload-list {
         display: grid;
         gap: 10px;
     }
-
     .document-upload-card {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        padding: 10px 12px;
+        padding: 12px;
         border-radius: 14px;
-        border: 1px solid rgba(212, 175, 55, 0.12);
-        background: rgba(255,255,255,0.025);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        background: rgba(255,255,255,0.02);
     }
-
+    .document-upload-card.is-submitted {
+        border-style: solid;
+    }
+    .document-upload-card.is-missing {
+        border-style: dashed;
+        border-color: rgba(224, 108, 108, 0.45);
+        background: rgba(64, 22, 24, 0.28);
+    }
     .document-upload-main {
         min-width: 0;
         flex: 1;
         display: flex;
-        align-items: center;
-        gap: 8px;
-        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 10px;
     }
-
+    .document-upload-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        border: 1px solid rgba(212, 175, 55, 0.24);
+        background: rgba(255,255,255,0.04);
+        color: #b8942b;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .document-upload-card.is-missing .document-upload-icon {
+        color: #e89292;
+        border-color: rgba(224, 108, 108, 0.4);
+        background: rgba(80, 20, 24, 0.35);
+    }
+    .document-upload-info {
+        min-width: 0;
+        flex: 1;
+    }
     .document-upload-name {
-        font-size: 0.88rem;
+        margin: 0 0 6px;
+        font-size: 0.9rem;
         font-weight: 700;
         color: #fff8ea;
-        white-space: nowrap;
     }
-
-    .document-upload-meta {
-        font-size: 0.73rem;
-        line-height: 1.5;
-        color: #bdaaaa;
-        white-space: nowrap;
-    }
-
     .document-status-chip {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-width: 92px;
-        padding: 6px 11px;
+        padding: 4px 10px;
         border-radius: 999px;
-        font-size: 0.72rem;
+        font-size: 0.7rem;
         font-weight: 700;
-        letter-spacing: 0.04em;
-        white-space: nowrap;
+        letter-spacing: 0.02em;
     }
-
     .document-status-chip.is-approved {
         color: #dcfce7;
         background: rgba(34, 197, 94, 0.14);
         border: 1px solid rgba(34, 197, 94, 0.24);
     }
-
     .document-status-chip.is-rejected {
         color: #fee2e2;
         background: rgba(248, 113, 113, 0.12);
         border: 1px solid rgba(248, 113, 113, 0.24);
     }
-
-    .document-status-chip.is-pending,
-    .document-status-chip.is-not-submitted {
+    .document-status-chip.is-pending {
         color: #f6e7af;
         background: rgba(212, 175, 55, 0.12);
         border: 1px solid rgba(212, 175, 55, 0.22);
     }
-
-    .document-upload-notice {
-        margin: 0 0 10px;
-        font-size: 0.76rem;
-        line-height: 1.7;
-        color: #cdbcbc;
+    .document-status-chip.is-not-submitted {
+        color: #ffd4d4;
+        background: rgba(128, 30, 35, 0.28);
+        border: 1px solid rgba(224, 108, 108, 0.35);
     }
-
-    .document-upload-link {
-        color: #f4d77b;
-        font-size: 0.76rem;
-        text-decoration: none;
-        white-space: nowrap;
+    .document-upload-meta {
+        margin-top: 6px;
+        font-size: 0.73rem;
+        line-height: 1.5;
+        color: #bdaaaa;
     }
-
-    .document-upload-link:hover {
-        opacity: 0.85;
+    .document-upload-card.is-missing .document-upload-meta {
+        color: #d6a8a8;
     }
-
-    .document-upload-form {
-        display: contents;
-    }
-
     .document-upload-actions {
         flex-shrink: 0;
         display: flex;
         align-items: center;
         gap: 8px;
     }
-
-    .document-upload-trigger {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 34px;
-        padding: 0 12px;
-        border-radius: 999px;
-        border: 1px solid rgba(212, 175, 55, 0.24);
-        background: rgba(212, 175, 55, 0.10);
-        color: #f8e7b0;
-        font-size: 0.75rem;
-        font-weight: 700;
-        cursor: pointer;
-        white-space: nowrap;
-        transition: background 0.2s, border-color 0.2s, transform 0.15s;
-    }
-
-    .document-upload-trigger:hover {
-        background: rgba(212, 175, 55, 0.16);
-        border-color: rgba(212, 175, 55, 0.34);
-    }
-
-    .document-upload-input {
-        display: none;
-    }
-
+    .document-upload-trigger,
     .document-upload-link {
         display: inline-flex;
         align-items: center;
@@ -147,45 +142,58 @@
         min-height: 34px;
         padding: 0 12px;
         border-radius: 999px;
-        border: 1px solid rgba(255,255,255,0.10);
-        background: rgba(255,255,255,0.04);
-        color: #f2e7c4;
         font-size: 0.75rem;
         font-weight: 700;
         text-decoration: none;
         white-space: nowrap;
         transition: background 0.2s, border-color 0.2s, transform 0.15s;
     }
-
+    .document-upload-link {
+        border: 1px solid rgba(255,255,255,0.10);
+        background: rgba(255,255,255,0.04);
+        color: #f2e7c4;
+    }
     .document-upload-link:hover {
         background: rgba(255,255,255,0.08);
         border-color: rgba(212, 175, 55, 0.24);
         color: #f8e7b0;
     }
-
+    .document-upload-trigger {
+        border: 1px solid rgba(212, 175, 55, 0.24);
+        background: rgba(212, 175, 55, 0.10);
+        color: #f8e7b0;
+        cursor: pointer;
+    }
+    .document-upload-card.is-missing .document-upload-trigger {
+        border-color: rgba(224, 108, 108, 0.4);
+        background: rgba(128, 30, 35, 0.24);
+        color: #ffdada;
+    }
+    .document-upload-trigger:hover {
+        background: rgba(212, 175, 55, 0.16);
+        border-color: rgba(212, 175, 55, 0.34);
+    }
+    .document-upload-card.is-missing .document-upload-trigger:hover {
+        background: rgba(128, 30, 35, 0.32);
+        border-color: rgba(224, 108, 108, 0.52);
+    }
+    .document-upload-input {
+        display: none;
+    }
+    .document-upload-form {
+        display: contents;
+    }
     .document-upload-error {
-        width: 100%;
-        margin-top: 8px;
+        margin: 6px 0 0 48px;
         font-size: 0.75rem;
         color: #ffcdcd;
     }
-
     @media (max-width: 640px) {
-        .document-upload-card {
-            gap: 10px;
+        .document-upload-main {
+            gap: 8px;
         }
-
         .document-upload-actions {
             margin-left: auto;
-        }
-
-        .document-upload-main {
-            gap: 6px;
-        }
-
-        .document-upload-meta {
-            width: 100%;
-            white-space: normal;
         }
     }
 
@@ -218,6 +226,38 @@
     .mypage-stat-panel-badge--active .mypage-stat-value {
         color: #bbf7d0;
     }
+    .good-payer-badge-modal-guide {
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+        margin-bottom: 14px;
+    }
+    .good-payer-badge-modal-guide img {
+        width: 56px;
+        height: auto;
+        flex-shrink: 0;
+        filter: drop-shadow(0 4px 10px rgba(0,0,0,0.32));
+    }
+    .good-payer-badge-modal-bubble {
+        position: relative;
+        flex: 1;
+        background: #fffaf0;
+        color: #3f3128;
+        border-radius: 14px;
+        padding: 10px 12px;
+        font-size: 0.8rem;
+        line-height: 1.55;
+        font-weight: 700;
+    }
+    .good-payer-badge-modal-bubble::after {
+        content: '';
+        position: absolute;
+        left: -8px;
+        bottom: 10px;
+        border-width: 8px 8px 8px 0;
+        border-style: solid;
+        border-color: transparent #fffaf0 transparent transparent;
+    }
     .good-payer-badge-modal-body {
         margin: 0 0 16px;
         font-size: 0.88rem;
@@ -228,6 +268,12 @@
     .good-payer-badge-modal-body ul {
         margin: 10px 0 0 1.1em;
         padding: 0;
+    }
+    .good-payer-badge-modal-note {
+        margin-top: 10px;
+        font-size: 0.76rem;
+        line-height: 1.65;
+        color: #cabcbc;
     }
     .good-payer-badge-modal-status {
         margin-top: 14px;
@@ -274,24 +320,9 @@
             </div>
         </div>
 
-        {{-- 評価・応募数・採用数・バッヂ（4列。バッヂは未付与でもグレーで表示し、タップで仕様モーダル） --}}
+        {{-- 優良店バッヂ・評価（2列アイコン） --}}
         @php $hasGoodPayerBadge = !empty($shopData['badges']['good_payer']); @endphp
-        <div class="mypage-stats-row mypage-stats-row--cols-4" aria-label="統計">
-            <a href="{{ route('shop.mypage.review.index') }}" class="mypage-stat-panel mypage-stat-panel-link">
-                <span class="mypage-stat-icon"><i class="fas fa-star"></i></span>
-                <span class="mypage-stat-label">評価</span>
-                <span class="mypage-stat-value">{{ $shopData['review_avg'] }}</span>
-            </a>
-            <div class="mypage-stat-panel">
-                <span class="mypage-stat-icon"><i class="fas fa-envelope"></i></span>
-                <span class="mypage-stat-label">応募数</span>
-                <span class="mypage-stat-value">{{ number_format((int) ($shopData['applicant_count'] ?? 0)) }}</span>
-            </div>
-            <div class="mypage-stat-panel">
-                <span class="mypage-stat-icon"><i class="fas fa-user-check"></i></span>
-                <span class="mypage-stat-label">採用数</span>
-                <span class="mypage-stat-value">{{ number_format((int) ($shopData['hired_count'] ?? 0)) }}</span>
-            </div>
+        <div class="mypage-stats-row mypage-stats-row--cols-2" aria-label="統計">
             <button type="button"
                 class="mypage-stat-panel mypage-stat-panel-badge {{ $hasGoodPayerBadge ? 'mypage-stat-panel-badge--active' : 'mypage-stat-panel-badge--inactive' }}"
                 id="open-good-payer-badge-modal"
@@ -300,80 +331,18 @@
                 aria-label="安心バッヂの説明を開く">
                 <span class="mypage-stat-icon" aria-hidden="true"><i class="fas fa-shield-heart"></i></span>
                 <span class="mypage-stat-label">バッヂ</span>
-                <span class="mypage-stat-value">{{ $hasGoodPayerBadge ? '優良支払店' : '未付与' }}</span>
+                <span class="mypage-stat-value">{{ $hasGoodPayerBadge ? '優良店' : '未付与' }}</span>
             </button>
+            <a href="{{ route('shop.mypage.review.index') }}" class="mypage-stat-panel mypage-stat-panel-link">
+                <span class="mypage-stat-icon"><i class="fas fa-star"></i></span>
+                <span class="mypage-stat-label">評価</span>
+                <span class="mypage-stat-value">{{ $shopData['review_avg'] }}</span>
+            </a>
         </div>
 
         <div class="mypage-detail-box">
             {{-- メニュー（キャストマイページと同じボタンデザイン） --}}
-            @include('shops.mypage.parts.menu', ['current' => 'profile', 'fullWidth' => false])
-
-            {{-- プロフィール情報（住所・編集のみ。ひとことは吹き出しでモーダル編集） --}}
-            <div class="mypage-section profile-info-section">
-                <div class="section-title-row">
-                    <h2 class="section-title">プロフィール情報</h2>
-                    <button type="button" class="btn-outline-gold" id="open-profile-edit-btn">編集</button>
-                </div>
-                <p class="shop-access-text">
-                    <i class="fas fa-map-marker-alt"></i> {{ $shopData['pref'] }}{{ $shopData['city'] }}{{ $shopData['addr1'] }}
-                </p>
-            </div>
-
-            {{-- 書類管理 --}}
-            <div class="mypage-section document-section">
-                <h2 class="section-title section-title-gold">書類管理</h2>
-                <p class="document-upload-notice">
-                    提出状況を確認しながら、そのまま差し替えできます。
-                </p>
-                <div class="document-upload-list">
-                    @foreach($documents as $doc)
-                        @php
-                            $s = $doc['status'];
-                            $record = $doc['record'] ?? null;
-                            $statusLabel = [
-                                'approved' => '承認済',
-                                'pending' => '提出済み（未承認）',
-                                'rejected' => '不備・却下',
-                                'not_submitted' => '未提出',
-                            ][$s] ?? '未提出';
-                        @endphp
-                        <div class="document-upload-card">
-                            <div class="document-upload-main">
-                                <span class="document-upload-name">{{ $doc['name'] }}</span>
-                                <span class="document-status-chip is-{{ str_replace('_', '-', $s) }}" data-doc-key="{{ $doc['key'] }}">
-                                    {{ $statusLabel }}
-                                </span>
-                                <span class="document-upload-meta">
-                                    @if($record && !empty($record['updated_at_label']))
-                                        最終更新 {{ $record['updated_at_label'] }}
-                                    @else
-                                        まだ提出されていません
-                                    @endif
-                                </span>
-                                @if($record && !empty($record['file_url']))
-                                    <a href="{{ $record['file_url'] }}" target="_blank" rel="noopener" class="document-upload-link">確認</a>
-                                @endif
-                            </div>
-                            <form class="shop-document-form document-upload-form" data-doc-key="{{ $doc['key'] }}" enctype="multipart/form-data">
-                                @csrf
-                                <input type="hidden" name="type" value="{{ $doc['key'] }}">
-                                <div class="document-upload-actions">
-                                    @if($record && !empty($record['file_url']))
-                                        <a href="{{ $record['file_url'] }}" target="_blank" rel="noopener" class="document-upload-link">確認</a>
-                                    @endif
-                                    <label class="document-upload-trigger">
-                                        更新
-                                        <input type="file" name="file" class="document-upload-input" accept=".pdf,image/*" required data-auto-upload-input>
-                                    </label>
-                                </div>
-                            </form>
-                        </div>
-                        @if($record && !empty($record['ng_reason']))
-                            <p class="document-upload-error">差し戻し理由: {{ $record['ng_reason'] }}</p>
-                        @endif
-                    @endforeach
-                </div>
-            </div>
+            @include('shops.mypage.parts.menu', ['current' => 'profile', 'fullWidth' => false, 'menuData' => $menuData ?? []])
 
             {{-- Image Library（ドラッグで並び替え・タップで大表示・削除・空きタップで登録） --}}
             <div class="mypage-section gallery-edit-section">
@@ -400,6 +369,114 @@
                     </li>
                     @endfor
                 </ul>
+            </div>
+
+            {{-- Licenses（書類管理） --}}
+            <div class="mypage-section document-section">
+                <h2 class="section-title section-title-gold">Licenses</h2>
+                <p class="document-upload-notice">
+                    提出状況を確認しながら、そのまま差し替えできます。
+                </p>
+                @php
+                    $submittedDocs = collect($documents)->filter(fn ($doc) => ($doc['status'] ?? null) !== 'not_submitted')->values();
+                    $missingDocs = collect($documents)->filter(fn ($doc) => ($doc['status'] ?? null) === 'not_submitted')->values();
+                @endphp
+
+                @if($submittedDocs->isNotEmpty())
+                    <div class="document-upload-group">
+                        <h3 class="document-upload-group-title">Submitted</h3>
+                        <div class="document-upload-list">
+                            @foreach($submittedDocs as $doc)
+                                @php
+                                    $s = $doc['status'];
+                                    $record = $doc['record'] ?? null;
+                                    $statusLabel = [
+                                        'approved' => '承認済み',
+                                        'pending' => '提出済み（審査中）',
+                                        'rejected' => '差し戻し',
+                                    ][$s] ?? '提出済み';
+                                @endphp
+                                <div class="document-upload-card is-submitted">
+                                    <div class="document-upload-main">
+                                        <span class="document-upload-icon" aria-hidden="true"><i class="fas fa-search"></i></span>
+                                        <div class="document-upload-info">
+                                            <p class="document-upload-name">{{ $doc['name'] }}</p>
+                                            <span class="document-status-chip is-{{ str_replace('_', '-', $s) }}" data-doc-key="{{ $doc['key'] }}">
+                                                {{ $statusLabel }}
+                                            </span>
+                                            <p class="document-upload-meta">
+                                                @if($record && !empty($record['updated_at_label']))
+                                                    最終更新: {{ $record['updated_at_label'] }}
+                                                @else
+                                                    最終更新: - -
+                                                @endif
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <form class="shop-document-form document-upload-form" data-doc-key="{{ $doc['key'] }}" enctype="multipart/form-data">
+                                        @csrf
+                                        <input type="hidden" name="type" value="{{ $doc['key'] }}">
+                                        <div class="document-upload-actions">
+                                            @if($record && !empty($record['file_url']))
+                                                <a href="{{ $record['file_url'] }}" target="_blank" rel="noopener" class="document-upload-link">確認</a>
+                                            @endif
+                                            <label class="document-upload-trigger">
+                                                更新
+                                                <input type="file" name="file" class="document-upload-input" accept=".pdf,image/*" required data-auto-upload-input>
+                                            </label>
+                                        </div>
+                                    </form>
+                                </div>
+                                @if($record && !empty($record['ng_reason']))
+                                    <p class="document-upload-error">差し戻し理由: {{ $record['ng_reason'] }}</p>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                @if($missingDocs->isNotEmpty())
+                    <div class="document-upload-group">
+                        <h3 class="document-upload-group-title">Missing</h3>
+                        <div class="document-upload-list">
+                            @foreach($missingDocs as $doc)
+                                <div class="document-upload-card is-missing">
+                                    <div class="document-upload-main">
+                                        <span class="document-upload-icon" aria-hidden="true"><i class="fas fa-circle-plus"></i></span>
+                                        <div class="document-upload-info">
+                                            <p class="document-upload-name">{{ $doc['name'] }}</p>
+                                            <span class="document-status-chip is-not-submitted" data-doc-key="{{ $doc['key'] }}">
+                                                未提出
+                                            </span>
+                                            <p class="document-upload-meta">提出データがありません。アップロードして提出してください。</p>
+                                        </div>
+                                    </div>
+                                    <form class="shop-document-form document-upload-form" data-doc-key="{{ $doc['key'] }}" enctype="multipart/form-data">
+                                        @csrf
+                                        <input type="hidden" name="type" value="{{ $doc['key'] }}">
+                                        <div class="document-upload-actions">
+                                            <label class="document-upload-trigger">
+                                                提出する
+                                                <input type="file" name="file" class="document-upload-input" accept=".pdf,image/*" required data-auto-upload-input>
+                                            </label>
+                                        </div>
+                                    </form>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            </div>
+
+            {{-- Shop Information（プロフィール） --}}
+            <div class="mypage-section profile-info-section">
+                <div class="section-title-row">
+                    <h2 class="section-title">Shop Information</h2>
+                    <button type="button" class="btn-outline-gold" id="open-profile-edit-btn">編集</button>
+                </div>
+                <p class="shop-access-text">
+                    <i class="fas fa-map-marker-alt"></i> {{ $shopData['pref'] }}{{ $shopData['city'] }}{{ $shopData['addr1'] }}
+                </p>
             </div>
         </div>
     </section>
@@ -439,22 +516,27 @@
     </div>
 </div>
 
-{{-- 優良支払店バッヂの仕様（タップで表示） --}}
+{{-- 優良店バッヂの仕様（タップで表示） --}}
 <div id="modal-good-payer-badge" class="mypage-modal-overlay modal-word-edit" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="good-payer-badge-modal-title">
     <div class="mypage-modal-panel glass-panel">
-        <h3 id="good-payer-badge-modal-title" class="mypage-modal-title serif-font">優良支払店バッヂとは？</h3>
+        <h3 id="good-payer-badge-modal-title" class="mypage-modal-title serif-font">優良店バッヂとは？</h3>
+        <div class="good-payer-badge-modal-guide" aria-hidden="true">
+            <img src="{{ asset('assets/images/guide/guide-character.png') }}" alt="">
+            <p class="good-payer-badge-modal-bubble">オコジョガイドだよ。ここでは、バッヂが付与される条件と現在の状態をわかりやすく案内するね。</p>
+        </div>
         <div class="good-payer-badge-modal-body">
-            <p>直近3ヶ月のあいだに発生した請求・入金データについて、次の条件を満たす店舗に付与される、安全性重視のバッヂです。</p>
+            <p>優良店バッヂは、直近3ヶ月の請求・入金履歴をもとに、安心して働ける店舗の目安として付与されます。</p>
             <ul>
                 <li>すべての案件が「店舗入金確認済み」まで完了している</li>
                 <li>請求書発行から店舗入金確認までが10日以内である</li>
             </ul>
+            <p class="good-payer-badge-modal-note">※ 条件は毎月見直され、基準を満たさなくなった場合はバッヂ表示が外れることがあります。</p>
         </div>
         <div class="good-payer-badge-modal-status {{ $hasGoodPayerBadge ? 'is-yes' : 'is-no' }}">
             @if($hasGoodPayerBadge)
-                現在のお店：このバッヂが付与されています。
+                現在のお店：優良店バッヂが付与されています。
             @else
-                現在のお店：条件を満たしていないため、未付与です。上記を満たすと表示が切り替わります。
+                現在のお店：条件を満たしていないため未付与です。上記を満たすと優良店バッヂが表示されます。
             @endif
         </div>
         <div class="mypage-modal-actions">

@@ -66,6 +66,8 @@ class MypageController extends Controller
         $jobIds = DB::table('shop_jobs')->where('shop_id', $shopId)->pluck('id');
         $applicantCount = 0;
         $hiredCount = 0;
+        $recruitStatus = '未設定';
+        $paymentPendingCount = 0;
         if ($jobIds->isNotEmpty()) {
             $applicantCount = DB::table('shop_job_applications')
                 ->whereIn('shop_job_id', $jobIds)
@@ -77,6 +79,20 @@ class MypageController extends Controller
                 ->whereIn('shop_job_id', $jobIds)
                 ->where('status', 4)
                 ->count();
+
+            $paymentPendingCount = (int) DB::table('application_deposits')
+                ->join('shop_job_applications', 'application_deposits.shop_job_application_id', '=', 'shop_job_applications.id')
+                ->whereIn('shop_job_applications.shop_job_id', $jobIds)
+                ->where('application_deposits.status', 3)
+                ->count();
+        }
+
+        $jobStatus = DB::table('shop_jobs')
+            ->where('shop_id', $shopId)
+            ->where('job_type', 1)
+            ->value('status');
+        if ($jobStatus !== null) {
+            $recruitStatus = ((int) $jobStatus) === 1 ? '掲載中' : '掲載停止中';
         }
 
         $shopData = [
@@ -119,6 +135,11 @@ class MypageController extends Controller
             'subImages' => $subImages,
             'documents' => $documentData['documents'],
             'allDocumentsApproved' => $documentData['all_approved'],
+            'menuData' => [
+                'recruit_status' => $recruitStatus,
+                'hired_count' => $hiredCount,
+                'payment_pending_count' => $paymentPendingCount,
+            ],
         ]);
     }
 
