@@ -146,6 +146,7 @@ class MypageController extends Controller
                 ->where('id', $row->industry_id)
                 ->value('name');
         }
+        $shopTagGroups = $this->resolveShopInfoTagGroups($shopId);
 
         return view('shops.mypage.index', [
             'pageId'    => 'mypage',
@@ -162,10 +163,11 @@ class MypageController extends Controller
                 'city' => $row->city ?? '',
                 'addr1' => trim(($row->addr2 ?? '') . ' ' . ($row->addr3 ?? '')),
                 'nearest_station' => $row->station1 ?? '',
-                'working_hours' => $jobRow->working_hours ?? '',
-                'working_days' => $jobRow->working_day ?? '',
-                'regular_holiday' => $jobRow->regular_holiday ?? '',
+                'working_hours' => $jobRow?->working_hours ?? '',
+                'working_days' => $jobRow?->working_day ?? '',
+                'regular_holiday' => $jobRow?->regular_holiday ?? '',
                 'concept' => $row->overview ?? '',
+                'tag_groups' => $shopTagGroups,
             ],
             'menuData' => [
                 'recruit_status' => $recruitStatus,
@@ -407,5 +409,77 @@ class MypageController extends Controller
     private function currentShopId(): string
     {
         return (string) auth()->guard('shop')->user()->shop_id;
+    }
+
+    /**
+     * 店舗プロフィールに紐づくマスタタグを、求人編集と同じ区分でグループ化して返す。
+     *
+     * @return array<int, array{label: string, tags: array<int, string>}>
+     */
+    private function resolveShopInfoTagGroups(string $shopId): array
+    {
+        $schema = DB::getSchemaBuilder();
+        if (!$schema->hasTable('shop_tag_relations')) {
+            return [];
+        }
+
+        $definitions = [
+            ['label' => '給与・支払い', 'types' => ['salary'], 'table' => 'tags_salary'],
+            ['label' => '働き方', 'types' => ['howto'], 'table' => 'tags_shop_working_styles'],
+            ['label' => '待遇・サポート', 'types' => ['merit'], 'table' => 'tags_shop_benefits'],
+            ['label' => '店舗特徴・条件', 'types' => ['feature'], 'table' => 'tags_shop_conditions'],
+            ['label' => '設備・空間', 'types' => ['facility'], 'table' => 'tags_shop_facilities'],
+            ['label' => 'お店の雰囲気・客層', 'types' => ['atmosphere'], 'table' => 'tags_shop_atmospheres'],
+        ];
+
+        $groups = [];
+        foreach ($definitions as $def) {
+            if (!$schema->hasTable($def['table'])) {
+                continue;
+            }
+            $names = $this->fetchShopTagNames($shopId, $def['types'], $def['table']);
+            if (!empty($names)) {
+                $groups[] = ['label' => $def['label'], 'tags' => $names];
+            }
+        }
+
+        if ($schema->hasTable('tags_shop_accesses')) {
+            $accessNames = $this->fetchShopTagNames($shopId, ['access', 'shop_access'], 'tags_shop_accesses');
+            if (!empty($accessNames)) {
+                $groups[] = ['label' => '通勤・アクセス', 'tags' => $accessNames];
+            }
+        }
+
+        return $groups;
+    }
+
+    private function fetchShopTagNames(string $shopId, array $tagTypes, string $masterTable): array
+    {
+        $schema = DB::getSchemaBuilder();
+        if (!$schema->hasTable($masterTable)) {
+            return [];
+        }
+
+        $tagIds = DB::table('shop_tag_relations')
+            ->where('shop_id', $shopId)
+            ->whereIn('tag_type', $tagTypes)
+            ->pluck('tag_id')
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($tagIds)) {
+            return [];
+        }
+
+        return DB::table($masterTable)
+            ->whereIn('id', $tagIds)
+            ->orderBy('id')
+            ->pluck('name')
+            ->filter()
+            ->values()
+            ->all();
     }
 }

@@ -241,16 +241,291 @@
         font-size: 0.73rem;
         color: #bdaaaa;
     }
+    .shop-info-tag-group {
+        margin-top: 12px;
+    }
+    .shop-info-tag-label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 0.72rem;
+        color: #c8b8a0;
+    }
+    .shop-info-tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .shop-info-tag-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(212, 175, 55, 0.35);
+        background: rgba(212, 175, 55, 0.1);
+        color: #f4e2b3;
+        font-size: 0.72rem;
+        line-height: 1.4;
+        font-weight: 600;
+    }
+
+    /* --- マイページ v2：セクション見出しは控えめ・開閉なし --- */
+    .shop-mypage-v2 .shop-mypage-section {
+        margin-top: 32px;
+    }
+    .shop-mypage-v2 .shop-mypage-section:first-of-type {
+        margin-top: 20px;
+    }
+    .shop-mypage-section-label {
+        margin: 0 0 12px 4px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        font-style: italic;
+        font-family: var(--font-serif);
+        color: rgba(180, 170, 160, 0.75);
+        letter-spacing: 0.12em;
+        text-transform: none;
+    }
+    .shop-mypage-section-head-row {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+        padding: 0 4px;
+    }
+    .shop-mypage-section-head-row .shop-mypage-section-label {
+        margin-bottom: 0;
+    }
+    .shop-mypage-section-hint {
+        font-size: 0.62rem;
+        color: rgba(160, 150, 145, 0.85);
+        white-space: nowrap;
+    }
+    .shop-mypage-store-title {
+        color: var(--gold);
+        font-weight: 800;
+    }
+    .shop-mypage-stat-sub {
+        font-size: 0.68rem;
+        font-weight: 600;
+        color: rgba(180, 170, 165, 0.9);
+        margin-left: 2px;
+    }
+
+    .shop-mypage-job-primary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        border-radius: 14px;
+        border: 1px solid rgba(212, 175, 55, 0.42);
+        background: linear-gradient(90deg, rgba(40, 28, 12, 0.95), rgba(14, 10, 8, 0.98));
+        color: #f0d78a;
+        text-decoration: none;
+        font-size: 0.88rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        box-shadow: 0 4px 22px rgba(0, 0, 0, 0.35);
+    }
+    .shop-mypage-job-primary:hover {
+        filter: brightness(1.06);
+    }
+    .shop-mypage-job-primary-inner {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .shop-mypage-link-stack {
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(12, 10, 9, 0.85);
+        overflow: hidden;
+    }
+    .shop-mypage-link-stack a {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+        color: #e4d8d0;
+        text-decoration: none;
+        font-size: 0.84rem;
+        font-weight: 600;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        transition: background 0.15s ease;
+    }
+    .shop-mypage-link-stack a:last-child {
+        border-bottom: none;
+    }
+    .shop-mypage-link-stack a:hover {
+        background: rgba(255, 255, 255, 0.04);
+    }
+    .shop-mypage-link-stack a i.fa-chevron-right {
+        color: rgba(140, 130, 125, 0.85);
+        font-size: 0.75rem;
+    }
+
+    .shop-mypage-edit-link {
+        font-size: 0.62rem;
+        font-weight: 700;
+        color: var(--gold);
+        border: 1px solid rgba(212, 175, 55, 0.45);
+        background: transparent;
+        padding: 4px 10px;
+        border-radius: 999px;
+        cursor: pointer;
+    }
+    .shop-mypage-edit-link:hover {
+        background: rgba(212, 175, 55, 0.1);
+    }
+
+    .shop-mypage-info-card {
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(14, 11, 10, 0.92);
+        overflow: hidden;
+    }
+    .shop-mypage-info-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .shop-mypage-info-row:last-child {
+        border-bottom: none;
+    }
+    .shop-mypage-info-row .k {
+        flex: 0 0 88px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: rgba(160, 150, 145, 0.95);
+    }
+    .shop-mypage-info-row .v {
+        flex: 1;
+        min-width: 0;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #f2e8e4;
+        line-height: 1.45;
+        word-break: break-word;
+    }
+
+    .shop-mypage-tags-block {
+        padding: 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .shop-mypage-tags-block-title {
+        margin: 0 0 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: rgba(170, 160, 152, 0.95);
+    }
+    .shop-mypage-tag-group-row {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 14px;
+    }
+    .shop-mypage-tag-group-row:last-child {
+        margin-bottom: 0;
+    }
+    .shop-mypage-tag-group-label {
+        font-size: 0.62rem;
+        font-weight: 800;
+        color: rgba(212, 175, 55, 0.95);
+        letter-spacing: 0.02em;
+    }
+    .shop-mypage-tag-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .shop-mypage-tag-pills span {
+        display: inline-flex;
+        padding: 5px 9px;
+        border-radius: 8px;
+        border: 1px solid rgba(70, 65, 62, 0.85);
+        background: rgba(8, 8, 10, 0.65);
+        font-size: 0.68rem;
+        font-weight: 600;
+        color: #d8cec8;
+    }
+
+    .shop-mypage-concept {
+        padding: 14px;
+    }
+    .shop-mypage-concept .label {
+        margin: 0 0 8px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: rgba(170, 160, 152, 0.95);
+    }
+    .shop-mypage-concept .body {
+        margin: 0;
+        padding: 12px;
+        font-size: 0.82rem;
+        line-height: 1.65;
+        color: #ddd4cf;
+        border-radius: 10px;
+        border: 1px solid rgba(55, 48, 42, 0.85);
+        background: rgba(6, 6, 8, 0.65);
+    }
+
+    .shop-mypage-license-card {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(212, 175, 55, 0.18);
+        background: rgba(12, 10, 9, 0.88);
+        cursor: pointer;
+        text-align: left;
+        font: inherit;
+        margin-bottom: 10px;
+        transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .shop-mypage-license-card:hover {
+        border-color: rgba(212, 175, 55, 0.35);
+    }
+    .shop-mypage-license-card.is-missing {
+        border-style: dashed;
+        border-color: rgba(180, 70, 70, 0.45);
+        background: rgba(40, 18, 20, 0.35);
+    }
+    .shop-mypage-license-card-icon {
+        flex-shrink: 0;
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--gold);
+        font-size: 0.95rem;
+    }
+    .shop-mypage-license-card.is-missing .shop-mypage-license-card-icon {
+        color: #9ca3af;
+        border: 1px solid rgba(120, 60, 60, 0.35);
+    }
+    .shop-mypage-license-card-body {
+        flex: 1;
+        min-width: 0;
+    }
 </style>
 @endpush
 
 @section('content')
-<div class="mypage-page contents inner animate-fadeIn">
+<div class="mypage-page contents inner animate-fadeIn shop-mypage-v2">
     <section class="mypage-area">
-        {{-- ヒーロー：店舗名 --}}
-        <h1 class="mypage-shop-name serif-font gold-gradient">{{ $shopData['shop_name'] }}</h1>
+        <h1 class="mypage-shop-name serif-font shop-mypage-store-title">{{ $shopData['shop_name'] }}</h1>
 
-        {{-- アイコン＋ひとこと（モーダルで編集） --}}
         <div class="mypage-hero">
             <div class="shop-icon-wrapper">
                 <img src="{{ (isset($subImages[0]) ? $subImages[0]['url'] : null) ?? asset('assets/images/common/no-image.png') }}" class="shop-icon-main" id="main-icon-display" alt="">
@@ -266,7 +541,6 @@
             </div>
         </div>
 
-        {{-- 優良店バッヂ・評価（2列アイコン） --}}
         @php $hasGoodPayerBadge = !empty($shopData['badges']['good_payer']); @endphp
         <div class="mypage-stats-row mypage-stats-row--cols-2" aria-label="統計">
             <button type="button"
@@ -275,14 +549,14 @@
                 aria-haspopup="dialog"
                 aria-controls="modal-good-payer-badge"
                 aria-label="安心バッヂの説明を開く">
-                <span class="mypage-stat-icon" aria-hidden="true"><i class="fas fa-shield-heart"></i></span>
-                <span class="mypage-stat-label">バッヂ</span>
-                <span class="mypage-stat-value">{{ $hasGoodPayerBadge ? '優良店' : '未付与' }}</span>
+                <span class="mypage-stat-icon" aria-hidden="true"><i class="fas fa-award"></i></span>
+                <span class="mypage-stat-label">優良店バッヂ</span>
+                <span class="mypage-stat-value">{{ $hasGoodPayerBadge ? '取得済み' : '未付与' }}</span>
             </button>
             <a href="{{ route('shop.mypage.review.index') }}" class="mypage-stat-panel mypage-stat-panel-link">
                 <span class="mypage-stat-icon"><i class="fas fa-star"></i></span>
                 <span class="mypage-stat-label">評価</span>
-                <span class="mypage-stat-value">{{ $shopData['review_avg'] }}</span>
+                <span class="mypage-stat-value">{{ number_format($shopData['review_avg'], 1) }}<span class="shop-mypage-stat-sub">({{ $shopData['review_count'] }}件)</span></span>
             </a>
         </div>
         @if(isset($todoList) && count($todoList) > 0)
@@ -297,133 +571,155 @@
             <p class="dashboard-task-empty">未済タスクはありません。</p>
         @endif
 
-        <div class="mypage-detail-box">
-            <div class="mypage-collapsible mypage-section mypage-quick-actions cast-mypage-menu-buttons" data-collapsible>
-                <button type="button" class="mypage-collapsible-toggle" data-collapsible-toggle>
-                    <span>Job Management</span><i class="fas fa-chevron-up"></i>
-                </button>
-                <div class="mypage-collapsible-content">
-                    <div class="status-menu-grid">
-                        <a href="{{ route('shop.recruits.status') }}" class="menu-btn job">
-                            <div class="menu-btn-content">
-                                <div class="menu-btn-icon"><i class="far fa-folder-open"></i></div>
-                                <div class="menu-btn-text"><p class="menu-btn-title">採用管理へ移動</p></div>
+        <div class="shop-mypage-section">
+            <h3 class="shop-mypage-section-label">Job Management</h3>
+            <a href="{{ route('shop.jobdescription') }}" class="shop-mypage-job-primary">
+                <span class="shop-mypage-job-primary-inner">
+                    <i class="far fa-file-alt"></i>
+                    <span>求人票へ</span>
+                </span>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            <div class="shop-mypage-link-stack">
+                <a href="{{ route('shop.recruits.status') }}">
+                    <span>採用管理ページへ</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                <a href="{{ route('shop.mypage.payment.index') }}">
+                    <span>入金管理ページへ</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="shop-mypage-section gallery-edit-section">
+            <div class="shop-mypage-section-head-row">
+                <h3 class="shop-mypage-section-label">Image Library</h3>
+                <span class="shop-mypage-section-hint">ドラッグで並び替え</span>
+            </div>
+            <ul class="responsive-gallery gallery-grid" id="gallery-list" data-sort-save-url="{{ route('shop.profile.images.order') }}" data-empty-image-url="{{ asset('assets/images/common/no-image.png') }}">
+                @for($i = 0; $i < 8; $i++)
+                @php $img = $subImages[$i] ?? null; @endphp
+                <li class="gallery-grid-item" data-slot-index="{{ $i }}">
+                    <div class="photo-slot {{ $img ? 'has-img' : '' }}" data-image-id="{{ $img['id'] ?? '' }}" data-image-url="{{ $img['url'] ?? '' }}">
+                        @if($img)
+                            <img src="{{ $img['url'] }}" alt="" loading="lazy">
+                            @if($i === 0)<span class="photo-slot-badge">MAIN</span>@endif
+                        @else
+                            <span class="photo-slot-empty"><i class="fas fa-image"></i></span>
+                        @endif
+                    </div>
+                </li>
+                @endfor
+            </ul>
+        </div>
+
+        <div class="shop-mypage-section profile-info-section">
+            <div class="shop-mypage-section-head-row">
+                <h3 class="shop-mypage-section-label">Shop Information</h3>
+                <button type="button" class="shop-mypage-edit-link" id="open-profile-edit-btn">編集</button>
+            </div>
+            <div class="shop-mypage-info-card">
+                <div class="shop-mypage-info-row">
+                    <span class="k">店舗名</span>
+                    <span class="v">{{ $shopInfo['shop_name'] ?: '—' }}</span>
+                </div>
+                <div class="shop-mypage-info-row">
+                    <span class="k">業種</span>
+                    <span class="v">{{ $shopInfo['industry'] ?? '未設定' }}</span>
+                </div>
+                <div class="shop-mypage-info-row">
+                    <span class="k">郵便番号</span>
+                    <span class="v">{{ $shopInfo['zip'] ?: '—' }}</span>
+                </div>
+                <div class="shop-mypage-info-row">
+                    <span class="k">住所</span>
+                    <span class="v">{{ trim(($shopInfo['pref'] ?? '') . ($shopInfo['city'] ?? '') . ($shopInfo['addr1'] ?? '')) ?: '—' }}</span>
+                </div>
+                @if(!empty($shopInfo['nearest_station'] ?? null))
+                    <div class="shop-mypage-info-row">
+                        <span class="k">最寄り</span>
+                        <span class="v">{{ $shopInfo['nearest_station'] }}</span>
+                    </div>
+                @endif
+                @if(!empty($shopInfo['working_hours'] ?? null) || !empty($shopInfo['working_days'] ?? null) || !empty($shopInfo['regular_holiday'] ?? null))
+                    <div class="shop-mypage-info-row">
+                        <span class="k">勤務・休日</span>
+                        <span class="v">
+                            @if(!empty($shopInfo['working_hours'])){{ $shopInfo['working_hours'] }}@else時間未設定@endif
+                            ／
+                            @if(!empty($shopInfo['working_days'])){{ $shopInfo['working_days'] }}@else勤務日未設定@endif
+                            @if(!empty($shopInfo['regular_holiday']))
+                                <br>定休: {{ $shopInfo['regular_holiday'] }}
+                            @endif
+                        </span>
+                    </div>
+                @endif
+
+                @php $tagGroups = $shopInfo['tag_groups'] ?? []; @endphp
+                @if(!empty($tagGroups))
+                    <div class="shop-mypage-tags-block">
+                        <p class="shop-mypage-tags-block-title">特徴・アピールタグ（マスタ）</p>
+                        @foreach($tagGroups as $group)
+                            <div class="shop-mypage-tag-group-row">
+                                <span class="shop-mypage-tag-group-label">{{ $group['label'] }}</span>
+                                <div class="shop-mypage-tag-pills">
+                                    @foreach($group['tags'] as $t)
+                                        <span>{{ $t }}</span>
+                                    @endforeach
+                                </div>
                             </div>
-                            <div class="menu-btn-arrow"><i class="fas fa-chevron-right"></i></div>
-                        </a>
-                        <a href="{{ route('shop.mypage.payment.index') }}" class="menu-btn manage">
-                            <div class="menu-btn-content">
-                                <div class="menu-btn-icon"><i class="far fa-credit-card"></i></div>
-                                <div class="menu-btn-text"><p class="menu-btn-title">入金管理へ移動</p></div>
-                            </div>
-                            <div class="menu-btn-arrow"><i class="fas fa-chevron-right"></i></div>
-                        </a>
-                        <a href="{{ route('shop.jobdescription') }}" class="jobdescription-button">
-                            <span>求人票へ移動</span><i class="fas fa-chevron-right"></i>
-                        </a>
+                        @endforeach
+                    </div>
+                @endif
+
+                <div class="shop-mypage-concept">
+                    <p class="label">お店の紹介文</p>
+                    <div class="body">
+                        @if(!empty(trim($shopInfo['concept'] ?? '')))
+                            {!! nl2br(e($shopInfo['concept'])) !!}
+                        @else
+                            <span style="opacity:0.65;">プロフィール編集から入力すると、求人票などに反映されます。</span>
+                        @endif
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="mypage-collapsible mypage-section gallery-edit-section" data-collapsible>
-                <button type="button" class="mypage-collapsible-toggle" data-collapsible-toggle>
-                    <span>Image Library</span><i class="fas fa-chevron-up"></i>
-                </button>
-                <div class="mypage-collapsible-content">
-                    <div class="gallery-section-header"><p class="gallery-section-hint">ドラッグで並び替え（スマホは長押し）</p></div>
-                    <ul class="responsive-gallery gallery-grid" id="gallery-list" data-sort-save-url="{{ route('shop.profile.images.order') }}" data-empty-image-url="{{ asset('assets/images/common/no-image.png') }}">
-                        @for($i = 0; $i < 8; $i++)
-                        @php $img = $subImages[$i] ?? null; @endphp
-                        <li class="gallery-grid-item" data-slot-index="{{ $i }}">
-                            <div class="photo-slot {{ $img ? 'has-img' : '' }}" data-image-id="{{ $img['id'] ?? '' }}" data-image-url="{{ $img['url'] ?? '' }}">
-                                @if($img)
-                                    <img src="{{ $img['url'] }}" alt="" loading="lazy">
-                                    @if($i === 0)<span class="photo-slot-badge">MAIN</span>@endif
-                                @else
-                                    <span class="photo-slot-empty"><i class="fas fa-image"></i></span>
-                                @endif
-                            </div>
-                        </li>
-                        @endfor
-                    </ul>
-                </div>
-            </div>
-
-            <div class="mypage-collapsible mypage-section profile-info-section" data-collapsible>
-                <button type="button" class="mypage-collapsible-toggle" data-collapsible-toggle>
-                    <span>Shop Information</span><i class="fas fa-chevron-up"></i>
-                </button>
-                <div class="mypage-collapsible-content">
-                    <div class="section-title-row">
-                        <h2 class="section-title">Shop Information</h2>
-                        <button type="button" class="btn-outline-gold" id="open-profile-edit-btn">編集</button>
+        <div class="shop-mypage-section document-section">
+            <h3 class="shop-mypage-section-label">Licenses</h3>
+            @php
+                $submittedDocs = collect($documents ?? [])->filter(fn ($doc) => ($doc['status'] ?? null) !== 'not_submitted')->values();
+                $missingDocs = collect($documents ?? [])->filter(fn ($doc) => ($doc['status'] ?? null) === 'not_submitted')->values();
+            @endphp
+            @foreach($submittedDocs as $doc)
+                @php $s = $doc['status']; $record = $doc['record'] ?? null; @endphp
+                <button type="button" class="shop-mypage-license-card js-license-card"
+                    data-doc-key="{{ $doc['key'] }}" data-doc-name="{{ $doc['name'] }}"
+                    data-doc-status="{{ $s }}" data-doc-url="{{ $record['file_url'] ?? '' }}"
+                    data-doc-updated="{{ $record['updated_at_label'] ?? '' }}">
+                    <div class="shop-mypage-license-card-icon"><i class="fas fa-search"></i></div>
+                    <div class="shop-mypage-license-card-body">
+                        <p class="document-upload-name">{{ $doc['name'] }}</p>
+                        <span class="document-status-chip is-{{ str_replace('_', '-', $s) }}">{{ $s === 'approved' ? '承認済み' : ($s === 'rejected' ? '差し戻し' : '提出済み（審査中）') }}</span>
+                        <p class="document-upload-meta">最終更新: {{ $record['updated_at_label'] ?? '- -' }}</p>
                     </div>
-                    <p class="shop-access-text"><i class="fas fa-store"></i> 店舗名: {{ $shopInfo['shop_name'] ?? '-' }}</p>
-                    <p class="shop-access-text"><i class="fas fa-quote-left"></i> ひとこと: {{ $shopInfo['word'] ?? '-' }}</p>
-                    <p class="shop-access-text"><i class="fas fa-tags"></i> 業種: {{ $shopInfo['industry'] ?? '未設定' }}</p>
-                    <p class="shop-access-text"><i class="fas fa-map-pin"></i> 郵便番号: {{ $shopInfo['zip'] ?? '-' }}</p>
-                    <p class="shop-access-text"><i class="fas fa-map-marker-alt"></i> 住所: {{ ($shopInfo['pref'] ?? '') . ($shopInfo['city'] ?? '') . ($shopInfo['addr1'] ?? '') }}</p>
-                    @if(!empty($shopInfo['nearest_station'] ?? null))
-                        <p class="shop-access-text"><i class="fas fa-train-subway"></i> {{ $shopInfo['nearest_station'] }}</p>
-                    @endif
-                    @if(!empty($shopInfo['working_hours'] ?? null) || !empty($shopInfo['working_days'] ?? null))
-                        <p class="shop-access-text"><i class="fas fa-clock"></i> 営業時間 {{ $shopInfo['working_hours'] ?: '未設定' }} / 勤務日 {{ $shopInfo['working_days'] ?: '未設定' }}</p>
-                    @endif
-                    @if(!empty($shopInfo['concept'] ?? null))
-                        <p class="shop-overview-text">{!! nl2br(e($shopInfo['concept'])) !!}</p>
-                    @endif
-                </div>
-            </div>
-
-            <div class="mypage-collapsible mypage-section document-section" data-collapsible>
-                <button type="button" class="mypage-collapsible-toggle" data-collapsible-toggle>
-                    <span>Licenses</span><i class="fas fa-chevron-up"></i>
+                    <i class="fas fa-chevron-right" style="color:rgba(140,130,125,0.8);font-size:0.8rem;"></i>
                 </button>
-                <div class="mypage-collapsible-content">
-                    @php
-                        $submittedDocs = collect($documents)->filter(fn ($doc) => ($doc['status'] ?? null) !== 'not_submitted')->values();
-                        $missingDocs = collect($documents)->filter(fn ($doc) => ($doc['status'] ?? null) === 'not_submitted')->values();
-                    @endphp
-                    @if($submittedDocs->isNotEmpty())
-                        <div class="document-upload-group">
-                            <h3 class="document-upload-group-title">Submitted</h3>
-                            <div class="document-upload-list">
-                                @foreach($submittedDocs as $doc)
-                                    @php $s = $doc['status']; $record = $doc['record'] ?? null; @endphp
-                                    <button type="button" class="document-upload-card js-license-card"
-                                        data-doc-key="{{ $doc['key'] }}" data-doc-name="{{ $doc['name'] }}"
-                                        data-doc-status="{{ $s }}" data-doc-url="{{ $record['file_url'] ?? '' }}"
-                                        data-doc-updated="{{ $record['updated_at_label'] ?? '' }}">
-                                        <div>
-                                            <p class="document-upload-name">{{ $doc['name'] }}</p>
-                                            <span class="document-status-chip is-{{ str_replace('_', '-', $s) }}">{{ $s === 'approved' ? '承認済み' : ($s === 'rejected' ? '差し戻し' : '提出済み（審査中）') }}</span>
-                                            <p class="document-upload-meta">最終更新: {{ $record['updated_at_label'] ?? '- -' }}</p>
-                                        </div>
-                                    </button>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
-                    @if($missingDocs->isNotEmpty())
-                        <div class="document-upload-group">
-                            <h3 class="document-upload-group-title">Missing</h3>
-                            <div class="document-upload-list">
-                                @foreach($missingDocs as $doc)
-                                    <button type="button" class="document-upload-card is-missing js-license-card"
-                                        data-doc-key="{{ $doc['key'] }}" data-doc-name="{{ $doc['name'] }}"
-                                        data-doc-status="not_submitted" data-doc-url="" data-doc-updated="">
-                                        <div>
-                                            <p class="document-upload-name">{{ $doc['name'] }}</p>
-                                            <span class="document-status-chip is-not-submitted">未提出</span>
-                                            <p class="document-upload-meta">提出データがありません。アップロードして提出してください。</p>
-                                        </div>
-                                    </button>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
-                </div>
-            </div>
+            @endforeach
+            @foreach($missingDocs as $doc)
+                <button type="button" class="shop-mypage-license-card is-missing js-license-card"
+                    data-doc-key="{{ $doc['key'] }}" data-doc-name="{{ $doc['name'] }}"
+                    data-doc-status="not_submitted" data-doc-url="" data-doc-updated="">
+                    <div class="shop-mypage-license-card-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="shop-mypage-license-card-body">
+                        <p class="document-upload-name">{{ $doc['name'] }}</p>
+                        <span class="document-status-chip is-not-submitted">未提出</span>
+                        <p class="document-upload-meta">タップして提出してください</p>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color:rgba(100,90,88,0.85);font-size:0.8rem;"></i>
+                </button>
+            @endforeach
         </div>
     </section>
 </div>
@@ -611,16 +907,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     if (closeBadgeModal) closeBadgeModal.addEventListener('click', hideBadgeModal);
     if (closeBadgeModalTop) closeBadgeModalTop.addEventListener('click', hideBadgeModal);
-
-    document.querySelectorAll('[data-collapsible]').forEach(function(section) {
-        var toggle = section.querySelector('[data-collapsible-toggle]');
-        if (!toggle) return;
-        toggle.addEventListener('click', function() {
-            section.classList.toggle('is-collapsed');
-            var icon = toggle.querySelector('i');
-            if (icon) icon.className = section.classList.contains('is-collapsed') ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
-        });
-    });
 });
 </script>
 <script>
