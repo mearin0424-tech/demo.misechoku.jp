@@ -347,6 +347,18 @@
         color: rgba(140, 130, 125, 0.85);
         font-size: 0.75rem;
     }
+    .shop-mypage-link-stack-inner {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .shop-mypage-link-stack-inner i {
+        width: 16px;
+        text-align: center;
+        font-size: 0.82rem;
+        color: rgba(180, 165, 155, 0.85);
+        flex-shrink: 0;
+    }
 
     .shop-mypage-edit-link {
         font-size: 0.62rem;
@@ -618,17 +630,23 @@
             <a href="{{ route('shop.jobdescription') }}" class="shop-mypage-job-primary">
                 <span class="shop-mypage-job-primary-inner">
                     <i class="far fa-file-alt"></i>
-                    <span>求人票へ</span>
+                    <span>求人票の管理</span>
                 </span>
                 <i class="fas fa-chevron-right"></i>
             </a>
             <div class="shop-mypage-link-stack">
                 <a href="{{ route('shop.recruits.status') }}">
-                    <span>採用管理ページへ</span>
+                    <span class="shop-mypage-link-stack-inner">
+                        <i class="fas fa-users" aria-hidden="true"></i>
+                        採用管理
+                    </span>
                     <i class="fas fa-chevron-right"></i>
                 </a>
                 <a href="{{ route('shop.mypage.payment.index') }}">
-                    <span>入金管理ページへ</span>
+                    <span class="shop-mypage-link-stack-inner">
+                        <i class="far fa-credit-card" aria-hidden="true"></i>
+                        入金管理
+                    </span>
                     <i class="fas fa-chevron-right"></i>
                 </a>
             </div>
@@ -679,8 +697,9 @@
                 @php $tagGroups = $shopInfo['tag_groups'] ?? []; @endphp
                 @if(!empty($tagGroups))
                     <div class="shop-mypage-tags-block">
-                        <p class="shop-mypage-tags-block-title">特徴・アピールタグ（マスタ）</p>
+                        <p class="shop-mypage-tags-block-title">特徴・アピールタグ</p>
                         @foreach($tagGroups as $group)
+                            @if(!empty($group['tags']))
                             <div class="shop-mypage-tag-group-row">
                                 <span class="shop-mypage-tag-group-label">{{ $group['label'] }}</span>
                                 <div class="shop-mypage-tag-pills">
@@ -689,20 +708,10 @@
                                     @endforeach
                                 </div>
                             </div>
+                            @endif
                         @endforeach
                     </div>
                 @endif
-
-                <div class="shop-mypage-concept">
-                    <p class="label">ひとこと（Shop Information）</p>
-                    <div class="body">
-                        @if(!empty(trim($shopInfo['word'] ?? '')))
-                            {!! nl2br(e($shopInfo['word'])) !!}
-                        @else
-                            <span style="opacity:0.65;">ページ上部の吹き出しから入力できます。検索タイムラインにも表示されます。</span>
-                        @endif
-                    </div>
-                </div>
             </div>
         </div>
 
