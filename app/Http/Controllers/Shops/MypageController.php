@@ -64,7 +64,10 @@ class MypageController extends Controller
 
         $shopPost = DB::table('shop_posts')
             ->where('shop_id', $shopId)
-            ->where('type', 2)
+            ->when(
+                Schema::hasColumn('shop_posts', 'type'),
+                fn ($q) => $q->where('type', 2)
+            )
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->first();
@@ -203,13 +206,16 @@ class MypageController extends Controller
         $word = is_string($word) ? trim($word) : '';
 
         $now = Carbon::now();
-        DB::table('shop_posts')->insert([
+        $insertRow = [
             'shop_id'    => $shopId,
-            'type'       => 2,
             'body'       => $word,
             'created_at' => $now,
             'updated_at' => $now,
-        ]);
+        ];
+        if (Schema::hasColumn('shop_posts', 'type')) {
+            $insertRow['type'] = 2;
+        }
+        DB::table('shop_posts')->insert($insertRow);
 
         return response()->json([
             'success' => true,

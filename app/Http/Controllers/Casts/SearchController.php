@@ -40,7 +40,10 @@ class SearchController extends BaseSearchController
         $rows = DB::table('shop_posts')
             ->join('shops', 'shops.id', '=', 'shop_posts.shop_id')
             ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
-            ->where('shop_posts.type', 2)
+            ->when(
+                Schema::hasColumn('shop_posts', 'type'),
+                fn ($q) => $q->where('shop_posts.type', 2)
+            )
             ->whereNotNull('shop_posts.body')
             ->where('shop_posts.body', '<>', '')
             ->orderByDesc('shop_posts.created_at')
@@ -92,8 +95,10 @@ class SearchController extends BaseSearchController
             ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
             ->leftJoin('shop_jobs', 'shops.id', '=', 'shop_jobs.shop_id')
             ->leftJoin('shop_posts', function ($join) {
-                $join->on('shops.id', '=', 'shop_posts.shop_id')
-                    ->where('shop_posts.type', 2);
+                $join->on('shops.id', '=', 'shop_posts.shop_id');
+                if (Schema::hasColumn('shop_posts', 'type')) {
+                    $join->where('shop_posts.type', 2);
+                }
             })
             ->select(
                 'shops.id',

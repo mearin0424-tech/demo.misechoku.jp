@@ -658,7 +658,10 @@ class RecruitmentController extends Controller
 
         $shopPost = DB::table('shop_posts')
             ->where('shop_id', $shopId)
-            ->where('type', 2)
+            ->when(
+                Schema::hasColumn('shop_posts', 'type'),
+                fn ($q) => $q->where('type', 2)
+            )
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->first();

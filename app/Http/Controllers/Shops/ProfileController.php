@@ -9,6 +9,7 @@ use App\Http\Requests\Shops\UploadImageRequest;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 
 class ProfileController extends Controller
 {
@@ -100,9 +101,7 @@ class ProfileController extends Controller
      */
     private function syncShopProfileTags(string $shopId, string $category, array $tagIds): void
     {
-        if (!\Illuminate\Support\Facades\Schema::hasTable('shop_tag_relations')
-            || !\Illuminate\Support\Facades\Schema::hasTable('shop_tags')
-        ) {
+        if (!Schema::hasTable('shop_tag_relations') || !Schema::hasTable('shop_tags')) {
             return;
         }
 
@@ -354,7 +353,10 @@ class ProfileController extends Controller
 
         $shopPost = DB::table('shop_posts')
             ->where('shop_id', $shopId)
-            ->where('type', 2)
+            ->when(
+                Schema::hasColumn('shop_posts', 'type'),
+                fn ($q) => $q->where('type', 2)
+            )
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->first();
@@ -396,7 +398,10 @@ class ProfileController extends Controller
 
         $shopPost = DB::table('shop_posts')
             ->where('shop_id', $shopId)
-            ->where('type', 2)
+            ->when(
+                Schema::hasColumn('shop_posts', 'type'),
+                fn ($q) => $q->where('type', 2)
+            )
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->first();
@@ -425,9 +430,7 @@ class ProfileController extends Controller
     private function fetchSelectedShopTagIds(string $shopId): array
     {
         $result = ['atmosphere' => [], 'facility' => []];
-        if (!\Illuminate\Support\Facades\Schema::hasTable('shop_tag_relations')
-            || !\Illuminate\Support\Facades\Schema::hasTable('shop_tags')
-        ) {
+        if (!Schema::hasTable('shop_tag_relations') || !Schema::hasTable('shop_tags')) {
             return $result;
         }
 

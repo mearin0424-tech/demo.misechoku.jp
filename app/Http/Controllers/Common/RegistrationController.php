@@ -263,13 +263,16 @@ class RegistrationController extends Controller
                 $hitokoto = $request->filled('word')
                     ? (string) $request->input('word')
                     : $this->mapBusinessTypeLabel((string) $request->input('business_type'));
-                DB::table('shop_posts')->insert([
+                $shopPostRow = [
                     'shop_id'    => $shopId,
-                    'type'       => 2,
                     'body'       => $hitokoto,
                     'created_at' => now(),
                     'updated_at' => now(),
-                ]);
+                ];
+                if (Schema::hasColumn('shop_posts', 'type')) {
+                    $shopPostRow['type'] = 2;
+                }
+                DB::table('shop_posts')->insert($shopPostRow);
             }
 
             DB::table('shop_managers')->insert([
