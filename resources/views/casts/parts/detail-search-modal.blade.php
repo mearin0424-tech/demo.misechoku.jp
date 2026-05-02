@@ -4,19 +4,17 @@
     $areas = $options['areas'] ?? collect();
     $hourlyWages = $options['hourly_wages'] ?? collect();
     $rewards = $options['rewards'] ?? collect();
-    $salaryTags = $options['salary'] ?? collect();
-    $howtoTags = $options['howto'] ?? collect();
-    $meritTags = $options['merit'] ?? collect();
-    $featureTags = $options['feature'] ?? collect();
+    $workStyleTags = $options['work_style'] ?? collect();
+    $welcomeTags = $options['welcome'] ?? collect();
+    $benefitTags = $options['benefit'] ?? collect();
     $facilityTags = $options['facility'] ?? collect();
     $atmosphereTags = $options['atmosphere'] ?? collect();
 
     $selectedIndustries = array_values((array) request('industry', []));
     $selectedAreas = array_values((array) request('area', []));
-    $selectedSalaryTags = array_map('intval', (array) request('salary_tag_ids', []));
-    $selectedHowtoTags = array_map('intval', (array) request('howto_tag_ids', []));
-    $selectedMeritTags = array_map('intval', (array) request('merit_tag_ids', []));
-    $selectedFeatureTags = array_map('intval', (array) request('feature_tag_ids', []));
+    $selectedWorkStyleTags = array_map('intval', (array) request('work_style_tag_ids', []));
+    $selectedWelcomeTags = array_map('intval', (array) request('welcome_tag_ids', []));
+    $selectedBenefitTags = array_map('intval', (array) request('benefit_tag_ids', []));
     $selectedFacilityTags = array_map('intval', (array) request('facility_tag_ids', []));
     $selectedAtmosphereTags = array_map('intval', (array) request('atmosphere_tag_ids', []));
     $selectedHourlyWage = (string) request('hourly_wage', '');
@@ -124,16 +122,16 @@
                     </div>
                 </div>
 
-                <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="給与・待遇">
+                <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="働き方・給与">
                     <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="false">
-                        <span>給与・待遇</span>
+                        <span>働き方・給与</span>
                         <span class="detail-search-accordion__icon">+</span>
                     </button>
                     <div class="detail-search-accordion__body" hidden>
                         <div class="detail-search-chips detail-search-chips--search">
-                            @foreach($salaryTags as $tag)
+                            @foreach($workStyleTags as $tag)
                                 <label class="detail-search-chip detail-search-chip--search">
-                                    <input type="checkbox" name="salary_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, $selectedSalaryTags, true) ? 'checked' : '' }}>
+                                    <input type="checkbox" name="work_style_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, $selectedWorkStyleTags, true) ? 'checked' : '' }}>
                                     <span>{{ $tag->name }}</span>
                                 </label>
                             @endforeach
@@ -141,16 +139,16 @@
                     </div>
                 </div>
 
-                <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="働き方">
+                <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="歓迎条件">
                     <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="false">
-                        <span>働き方</span>
+                        <span>歓迎条件</span>
                         <span class="detail-search-accordion__icon">+</span>
                     </button>
                     <div class="detail-search-accordion__body" hidden>
                         <div class="detail-search-chips detail-search-chips--search">
-                            @foreach($howtoTags as $tag)
+                            @foreach($welcomeTags as $tag)
                                 <label class="detail-search-chip detail-search-chip--search">
-                                    <input type="checkbox" name="howto_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, $selectedHowtoTags, true) ? 'checked' : '' }}>
+                                    <input type="checkbox" name="welcome_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, $selectedWelcomeTags, true) ? 'checked' : '' }}>
                                     <span>{{ $tag->name }}</span>
                                 </label>
                             @endforeach
@@ -158,16 +156,16 @@
                     </div>
                 </div>
 
-                <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="メリット">
+                <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="待遇・サポート">
                     <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="false">
-                        <span>メリット</span>
+                        <span>待遇・サポート</span>
                         <span class="detail-search-accordion__icon">+</span>
                     </button>
                     <div class="detail-search-accordion__body" hidden>
                         <div class="detail-search-chips detail-search-chips--search">
-                            @foreach($meritTags as $tag)
+                            @foreach($benefitTags as $tag)
                                 <label class="detail-search-chip detail-search-chip--search">
-                                    <input type="checkbox" name="merit_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, $selectedMeritTags, true) ? 'checked' : '' }}>
+                                    <input type="checkbox" name="benefit_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, $selectedBenefitTags, true) ? 'checked' : '' }}>
                                     <span>{{ $tag->name }}</span>
                                 </label>
                             @endforeach
@@ -175,28 +173,22 @@
                     </div>
                 </div>
 
-                <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="こだわり条件" data-open="true">
+                <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="店舗の雰囲気・設備" data-open="true">
                     <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="true">
-                        <span>こだわり条件</span>
+                        <span>店舗の雰囲気・設備</span>
                         <span class="detail-search-accordion__icon">−</span>
                     </button>
                     <div class="detail-search-accordion__body">
                         <div class="detail-search-chips detail-search-chips--search">
-                            @foreach($featureTags as $tag)
+                            @foreach($atmosphereTags as $tag)
                                 <label class="detail-search-chip detail-search-chip--search">
-                                    <input type="checkbox" name="feature_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, $selectedFeatureTags, true) ? 'checked' : '' }}>
+                                    <input type="checkbox" name="atmosphere_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, $selectedAtmosphereTags, true) ? 'checked' : '' }}>
                                     <span>{{ $tag->name }}</span>
                                 </label>
                             @endforeach
                             @foreach($facilityTags as $tag)
                                 <label class="detail-search-chip detail-search-chip--search">
                                     <input type="checkbox" name="facility_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, $selectedFacilityTags, true) ? 'checked' : '' }}>
-                                    <span>{{ $tag->name }}</span>
-                                </label>
-                            @endforeach
-                            @foreach($atmosphereTags as $tag)
-                                <label class="detail-search-chip detail-search-chip--search">
-                                    <input type="checkbox" name="atmosphere_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, $selectedAtmosphereTags, true) ? 'checked' : '' }}>
                                     <span>{{ $tag->name }}</span>
                                 </label>
                             @endforeach

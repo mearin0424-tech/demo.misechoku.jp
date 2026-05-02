@@ -2,9 +2,9 @@
     $vHasTrial = !empty($rv['trial_hourly_wage']);
     $vHasHelp = !empty($rv['help_hourly_wage']);
     $vRegularWage = (int) ($rv['hourly_wage_regular'] ?? 0);
-    $vSalaryTags = collect($rv['store_features']['報酬'] ?? [])->values();
-    $vOtherTags = collect($rv['store_features'] ?? [])->except('報酬')->flatten()->filter()->unique()->values();
-    $vPillTags = $vSalaryTags->merge($vOtherTags)->unique()->values();
+    $vWorkStyleTags = collect($rv['store_features']['働き方・給与'] ?? [])->values();
+    $vOtherTags = collect($rv['store_features'] ?? [])->except('働き方・給与')->flatten()->filter()->unique()->values();
+    $vPillTags = $vWorkStyleTags->merge($vOtherTags)->unique()->values();
 @endphp
 
 @if(!empty($rv['catch_copy']))

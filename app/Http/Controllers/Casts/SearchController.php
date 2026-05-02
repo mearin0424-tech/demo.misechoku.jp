@@ -40,27 +40,28 @@ class SearchController extends BaseSearchController
         $rows = DB::table('shop_posts')
             ->join('shops', 'shops.id', '=', 'shop_posts.shop_id')
             ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
+            ->where('shop_posts.type', 2)
             ->whereNotNull('shop_posts.body')
             ->where('shop_posts.body', '<>', '')
-            ->orderByDesc('shop_posts.updated_at')
-            ->orderByDesc('shops.id')
+            ->orderByDesc('shop_posts.created_at')
+            ->orderByDesc('shop_posts.id')
             ->select(
                 'shops.id',
                 'shop_profiles.shop_name',
                 'shop_posts.body',
-                'shop_posts.updated_at',
+                'shop_posts.created_at',
                 'shop_profiles.main_image_path'
             )
             ->limit(20)
             ->get();
 
         return $rows->map(function ($row) {
-            $updatedAt = $row->updated_at ? Carbon::parse($row->updated_at) : null;
+            $createdAt = $row->created_at ? Carbon::parse($row->created_at) : null;
 
             return [
                 'name' => (string) ($row->shop_name ?: 'ショップ'),
                 'img' => $this->getShopImages((string) $row->id)[0] ?? asset('assets/images/common/no-image.png'),
-                'time' => $updatedAt ? $updatedAt->locale('ja')->diffForHumans() : '',
+                'time' => $createdAt ? $createdAt->locale('ja')->diffForHumans() : '',
                 'text' => (string) $row->body,
             ];
         })->all();
@@ -77,21 +78,26 @@ class SearchController extends BaseSearchController
         $areas = is_array($areas) ? array_values(array_filter($areas, 'is_string')) : (is_string($areas) ? [$areas] : []);
         $hourlyWage = (int) $request->query('hourly_wage', 0);
         $reward = (int) $request->query('reward', 0);
-        $tagFilters = [
-            'salary' => $this->normalizeIdFilters($request->query('salary_tag_ids', [])),
-            'howto' => $this->normalizeIdFilters($request->query('howto_tag_ids', [])),
-            'merit' => $this->normalizeIdFilters($request->query('merit_tag_ids', [])),
-            'feature' => $this->normalizeIdFilters($request->query('feature_tag_ids', [])),
-            'facility' => $this->normalizeIdFilters($request->query('facility_tag_ids', [])),
+        $jobTagFilters = [
+            'work_style' => $this->normalizeIdFilters($request->query('work_style_tag_ids', [])),
+            'welcome'    => $this->normalizeIdFilters($request->query('welcome_tag_ids', [])),
+            'benefit'    => $this->normalizeIdFilters($request->query('benefit_tag_ids', [])),
+        ];
+        $shopTagFilters = [
             'atmosphere' => $this->normalizeIdFilters($request->query('atmosphere_tag_ids', [])),
+            'facility'   => $this->normalizeIdFilters($request->query('facility_tag_ids', [])),
         ];
 
         $rows = DB::table('shops')
             ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
             ->leftJoin('shop_jobs', 'shops.id', '=', 'shop_jobs.shop_id')
-            ->leftJoin('shop_posts', 'shops.id', '=', 'shop_posts.shop_id')
+            ->leftJoin('shop_posts', function ($join) {
+                $join->on('shops.id', '=', 'shop_posts.shop_id')
+                    ->where('shop_posts.type', 2);
+            })
             ->select(
                 'shops.id',
+                'shop_jobs.id as shop_job_id',
                 'shop_profiles.shop_name',
                 'shop_profiles.pref',
                 'shop_profiles.city',
@@ -119,7 +125,7 @@ class SearchController extends BaseSearchController
         }
 
         return $rows->get()
-            ->filter(function ($row) use ($normalizedKeyword, $areas, $hourlyWage, $reward, $tagFilters) {
+            ->filter(function ($row) use ($normalizedKeyword, $areas, $hourlyWage, $reward, $jobTagFilters, $shopTagFilters) {
                 if ($normalizedKeyword === '') {
                     $matchesKeyword = true;
                 } else {
@@ -150,9 +156,15 @@ class SearchController extends BaseSearchController
                     return false;
                 }
 
-                $meta = $this->decodeMeta($row->noruma_cond ?? null);
+                if (!$this->matchesShopJobTagFilters((int) ($row->shop_job_id ?? 0), $jobTagFilters)) {
+                    return false;
+                }
 
-                return $this->matchesTagFilters($meta['tag_ids'] ?? [], $tagFilters);
+                if (!$this->matchesShopProfileTagFilters((string) $row->id, $shopTagFilters)) {
+                    return false;
+                }
+
+                return true;
             })
             ->map(function ($row) {
                 return [
@@ -175,16 +187,15 @@ class SearchController extends BaseSearchController
         $profileMasters = $this->adminMasterService->getShopProfileMasters();
 
         return [
-            'industries' => $profileMasters['industries'] ?? collect(),
-            'areas' => $this->fetchAreaOptions(),
+            'industries'   => $profileMasters['industries'] ?? collect(),
+            'areas'        => $this->fetchAreaOptions(),
             'hourly_wages' => $this->fetchNumericOptions('hourly_wage_regular'),
-            'rewards' => $this->fetchNumericOptions('noruma_reward'),
-            'salary' => $recruitmentMasters['salary'] ?? collect(),
-            'howto' => $recruitmentMasters['howto'] ?? collect(),
-            'merit' => $recruitmentMasters['merit'] ?? collect(),
-            'feature' => $recruitmentMasters['feature'] ?? collect(),
-            'facility' => $recruitmentMasters['facility'] ?? collect(),
-            'atmosphere' => $recruitmentMasters['atmosphere'] ?? collect(),
+            'rewards'      => $this->fetchNumericOptions('noruma_reward'),
+            'work_style'   => $recruitmentMasters['work_style'] ?? collect(),
+            'welcome'      => $recruitmentMasters['welcome'] ?? collect(),
+            'benefit'      => $recruitmentMasters['benefit'] ?? collect(),
+            'atmosphere'   => $profileMasters['atmosphere'] ?? collect(),
+            'facility'     => $profileMasters['facility'] ?? collect(),
         ];
     }
 
@@ -259,19 +270,77 @@ class SearchController extends BaseSearchController
         return is_array($decoded) ? $decoded : [];
     }
 
-    private function matchesTagFilters(array $tagIds, array $filters): bool
+    /**
+     * 求人票のタグ（shop_job_tag_relations）でフィルタリング.
+     *
+     * @param array<string, array<int,int>> $filters
+     */
+    private function matchesShopJobTagFilters(int $shopJobId, array $filters): bool
     {
-        foreach ($filters as $key => $ids) {
+        $hasFilter = false;
+        foreach ($filters as $ids) {
+            if (!empty($ids)) {
+                $hasFilter = true;
+                break;
+            }
+        }
+        if (!$hasFilter) {
+            return true;
+        }
+
+        if ($shopJobId <= 0 || !Schema::hasTable('shop_job_tag_relations')) {
+            return false;
+        }
+
+        foreach ($filters as $category => $ids) {
             if (empty($ids)) {
                 continue;
             }
+            $hit = DB::table('shop_job_tag_relations')
+                ->where('shop_job_id', $shopJobId)
+                ->where('tag_type', $category)
+                ->whereIn('tag_id', $ids)
+                ->exists();
+            if (!$hit) {
+                return false;
+            }
+        }
 
-            $selected = collect($tagIds[$key] ?? [])
-                ->map(fn ($value) => (int) $value)
-                ->filter()
-                ->all();
+        return true;
+    }
 
-            if (empty(array_intersect($ids, $selected))) {
+    /**
+     * 店舗プロフィールのタグ（shop_tag_relations）でフィルタリング.
+     *
+     * @param array<string, array<int,int>> $filters
+     */
+    private function matchesShopProfileTagFilters(string $shopId, array $filters): bool
+    {
+        $hasFilter = false;
+        foreach ($filters as $ids) {
+            if (!empty($ids)) {
+                $hasFilter = true;
+                break;
+            }
+        }
+        if (!$hasFilter) {
+            return true;
+        }
+
+        if (!Schema::hasTable('shop_tag_relations')) {
+            return false;
+        }
+
+        foreach ($filters as $category => $ids) {
+            if (empty($ids)) {
+                continue;
+            }
+            $hit = DB::table('shop_tag_relations')
+                ->where('shop_id', $shopId)
+                ->where('tag_type', $category)
+                ->whereIn('tag_id', $ids)
+                ->exists();
+            if (!$hit) {
                 return false;
             }
         }

@@ -53,6 +53,10 @@ class ProfileController extends Controller
             'city' => 'nullable|string|max:100',
             'addr1' => 'nullable|string|max:255',
             'industry_id' => 'nullable|integer|exists:industries,id',
+            'atmosphere_tag_ids'   => 'nullable|array',
+            'atmosphere_tag_ids.*' => 'integer|exists:shop_tags,id',
+            'facility_tag_ids'     => 'nullable|array',
+            'facility_tag_ids.*'   => 'integer|exists:shop_tags,id',
         ], [
             'zip.regex' => '郵便番号は 7 桁、または 123-4567 形式で入力してください。',
         ]);
@@ -83,9 +87,60 @@ class ProfileController extends Controller
             ]
         );
 
+        $this->syncShopProfileTags($shopId, 'atmosphere', $request->input('atmosphere_tag_ids', []));
+        $this->syncShopProfileTags($shopId, 'facility',   $request->input('facility_tag_ids', []));
+
         return redirect()
             ->route('shop.profile.store.edit')
             ->with('message', 'プロフィールを更新しました');
+    }
+
+    /**
+     * shop_tag_relations を新スキーマ (shop_tags target='shop') と同期する.
+     */
+    private function syncShopProfileTags(string $shopId, string $category, array $tagIds): void
+    {
+        if (!\Illuminate\Support\Facades\Schema::hasTable('shop_tag_relations')
+            || !\Illuminate\Support\Facades\Schema::hasTable('shop_tags')
+        ) {
+            return;
+        }
+
+        DB::table('shop_tag_relations')
+            ->where('shop_id', $shopId)
+            ->where('tag_type', $category)
+            ->delete();
+
+        $ids = collect($tagIds)
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+        if (empty($ids)) {
+            return;
+        }
+
+        $validIds = DB::table('shop_tags')
+            ->where('target', 'shop')
+            ->where('category', $category)
+            ->where('del_flg', 0)
+            ->whereIn('id', $ids)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+        if (empty($validIds)) {
+            return;
+        }
+
+        $rows = array_map(fn ($tagId) => [
+            'shop_id'    => $shopId,
+            'tag_id'     => $tagId,
+            'tag_type'   => $category,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ], $validIds);
+        DB::table('shop_tag_relations')->insert($rows);
     }
 
     /**
@@ -297,7 +352,12 @@ class ProfileController extends Controller
             )
             ->first();
 
-        $shopPost = DB::table('shop_posts')->where('shop_id', $shopId)->first();
+        $shopPost = DB::table('shop_posts')
+            ->where('shop_id', $shopId)
+            ->where('type', 2)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->first();
         $hitokoto = $shopPost && isset($shopPost->body) ? (string) $shopPost->body : '';
 
         $subImages = DB::table('shop_images')
@@ -334,7 +394,14 @@ class ProfileController extends Controller
             ->select('shop_name', 'zip', 'pref', 'city', 'addr2', 'addr3', 'industry_id')
             ->first();
 
-        $shopPost = DB::table('shop_posts')->where('shop_id', $shopId)->first();
+        $shopPost = DB::table('shop_posts')
+            ->where('shop_id', $shopId)
+            ->where('type', 2)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->first();
+
+        $shopTagIds = $this->fetchSelectedShopTagIds($shopId);
 
         return [
             'shop_name' => $row->shop_name ?? '',
@@ -345,7 +412,44 @@ class ProfileController extends Controller
             'city' => $row->city ?? '',
             'addr1' => trim(implode(' ', array_filter([$row->addr2 ?? null, $row->addr3 ?? null]))),
             'industry_id' => $row->industry_id ?? null,
+            'atmosphere_tag_ids' => $shopTagIds['atmosphere'],
+            'facility_tag_ids'   => $shopTagIds['facility'],
         ];
+    }
+
+    /**
+     * 店舗プロフィール用に選択中の shop_tag_relations を新スキーマで取得.
+     *
+     * @return array{atmosphere: array<int,int>, facility: array<int,int>}
+     */
+    private function fetchSelectedShopTagIds(string $shopId): array
+    {
+        $result = ['atmosphere' => [], 'facility' => []];
+        if (!\Illuminate\Support\Facades\Schema::hasTable('shop_tag_relations')
+            || !\Illuminate\Support\Facades\Schema::hasTable('shop_tags')
+        ) {
+            return $result;
+        }
+
+        $rows = DB::table('shop_tag_relations as r')
+            ->join('shop_tags as t', 'r.tag_id', '=', 't.id')
+            ->where('r.shop_id', $shopId)
+            ->where('t.target', 'shop')
+            ->whereIn('t.category', ['atmosphere', 'facility'])
+            ->where('t.del_flg', 0)
+            ->orderBy('t.sort_order')
+            ->orderBy('t.id')
+            ->select('t.id', 't.category')
+            ->get();
+
+        foreach ($rows as $r) {
+            $cat = (string) $r->category;
+            if (isset($result[$cat])) {
+                $result[$cat][] = (int) $r->id;
+            }
+        }
+
+        return $result;
     }
 
     private function currentShopId(): string

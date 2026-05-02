@@ -163,9 +163,9 @@ class ProfileController extends Controller
             'night_work_exp' => 'nullable|string|max:20',
             'industry_id'   => 'nullable|integer|exists:industries,id',
             'look_tag_ids' => 'nullable|array',
-            'look_tag_ids.*' => 'integer|exists:tags_cast_looks,id',
+            'look_tag_ids.*' => 'integer|exists:cast_tags,id',
             'personality_tag_ids' => 'nullable|array',
-            'personality_tag_ids.*' => 'integer|exists:tags_cast_personality,id',
+            'personality_tag_ids.*' => 'integer|exists:cast_tags,id',
         ], [
             'zip.regex' => '郵便番号は 7 桁、または 123-4567 形式で入力してください。',
         ]);

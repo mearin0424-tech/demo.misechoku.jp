@@ -2,26 +2,72 @@
 
 namespace App\Services;
 
-use App\Models\Master\AtmosphereTag;
-use App\Models\Master\CastLookTag;
-use App\Models\Master\CastPersonalityTag;
+use App\Models\Master\CastTag;
 use App\Models\Master\ColumnCategory;
-use App\Models\Master\ColumnTag;
-use App\Models\Master\FacilityTag;
-use App\Models\Master\FeatureTag;
-use App\Models\Master\HowtoTag;
 use App\Models\Master\Industry;
-use App\Models\Master\MeritTag;
 use App\Models\Master\NgWord;
 use App\Models\Master\ReviewContent;
-use App\Models\Master\SalaryTag;
+use App\Models\Master\ShopTag;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * 運営マスタ管理サービス.
+ *
+ * - cast_tags / shop_tags への統合に追従
+ *   - cast_tags  : category = looks / personality
+ *   - shop_tags  : target = shop (atmosphere / facility)
+ *                  target = job  (work_style / welcome / benefit)
+ */
 class AdminMasterService
 {
+    /**
+     * @return array<string, array{label: string, target?: string, category: string}>
+     */
+    private const CAST_TAG_CATEGORIES = [
+        'cast_looks' => [
+            'label'    => 'ルックス',
+            'category' => 'looks',
+        ],
+        'cast_personality' => [
+            'label'    => 'パーソナリティ',
+            'category' => 'personality',
+        ],
+    ];
+
+    /**
+     * @return array<string, array{label: string, target: string, category: string}>
+     */
+    private const SHOP_TAG_CATEGORIES = [
+        'shop_atmosphere' => [
+            'label'    => '店内の雰囲気・客層',
+            'target'   => 'shop',
+            'category' => 'atmosphere',
+        ],
+        'shop_facility' => [
+            'label'    => '設備・アクセス',
+            'target'   => 'shop',
+            'category' => 'facility',
+        ],
+        'job_work_style' => [
+            'label'    => '働き方・給与',
+            'target'   => 'job',
+            'category' => 'work_style',
+        ],
+        'job_welcome' => [
+            'label'    => '歓迎条件',
+            'target'   => 'job',
+            'category' => 'welcome',
+        ],
+        'job_benefit' => [
+            'label'    => '待遇・サポート',
+            'target'   => 'job',
+            'category' => 'benefit',
+        ],
+    ];
+
     public function getMasterIndexData(?string $selectedCatalogKey = null, ?int $editingRecordId = null, string $selectedSort = 'created_desc'): array
     {
         try {
@@ -35,16 +81,11 @@ class AdminMasterService
             $ngWords = $this->fetchNgWords();
             $profileCatalogKeys = collect([
                 'industries',
-                'tags_cast_looks',
-                'tags_cast_personality',
+                'cast_tags',
+                'shop_profile_tags',
             ]);
             $recruitCatalogKeys = collect([
-                'tags_salary',
-                'tags_howto',
-                'tags_merit',
-                'tags_feature',
-                'tags_facility',
-                'tags_atmosphere',
+                'shop_job_tags',
             ]);
             $selectedCatalog = $selectedCatalogKey
                 ? $catalogs->firstWhere('key', $selectedCatalogKey)
@@ -127,6 +168,12 @@ class AdminMasterService
             $payload[$field['column']] = $data[$field['input']] ?? null;
         }
 
+        if (!empty($catalog['fixed_attributes'])) {
+            foreach ($catalog['fixed_attributes'] as $col => $val) {
+                $payload[$col] = $val;
+            }
+        }
+
         if (!empty($catalog['uses_del_flg'])) {
             $payload['del_flg'] = 0;
         }
@@ -134,7 +181,7 @@ class AdminMasterService
             $payload['is_active'] = 1;
         }
         if (!empty($catalog['uses_sort_order'])) {
-            $max = (int) DB::table($catalog['table'])->max('id');
+            $max = (int) DB::table($catalog['table'])->max('sort_order');
             $payload['sort_order'] = $max + 1;
         }
 
@@ -152,9 +199,14 @@ class AdminMasterService
             return null;
         }
 
-        return DB::table($catalog['table'])
-            ->where('id', $recordId)
-            ->first();
+        $query = DB::table($catalog['table'])->where('id', $recordId);
+        if (!empty($catalog['fixed_attributes'])) {
+            foreach ($catalog['fixed_attributes'] as $col => $val) {
+                $query->where($col, $val);
+            }
+        }
+
+        return $query->first();
     }
 
     public function updateCatalogRecord(string $key, int $recordId, array $data): void
@@ -188,47 +240,104 @@ class AdminMasterService
     {
         $catalog = $this->getCatalogDefinition($key);
 
-        if (!$catalog || empty($catalog['model'])) {
+        if (!$catalog) {
             return;
         }
 
-        /** @var class-string<\App\Models\Master\BaseMaster> $modelClass */
-        $modelClass = $catalog['model'];
-        $record = $modelClass::query()->find($recordId);
+        if (!empty($catalog['model'])) {
+            /** @var class-string<\App\Models\Master\BaseMaster> $modelClass */
+            $modelClass = $catalog['model'];
+            $record = $modelClass::query()->find($recordId);
+            if ($record) {
+                $record->logicalDelete();
+            }
 
-        if (!$record) {
             return;
         }
 
-        $record->logicalDelete();
+        $update = [];
+        if (Schema::hasColumn($catalog['table'], 'del_flg')) {
+            $update['del_flg'] = 1;
+        } elseif (Schema::hasColumn($catalog['table'], 'is_active')) {
+            $update['is_active'] = 0;
+        }
+        if (!empty($update)) {
+            $update['updated_at'] = now();
+            DB::table($catalog['table'])
+                ->where('id', $recordId)
+                ->update($update);
+        }
     }
 
+    /**
+     * キャストプロフィール画面で使うマスタ.
+     *
+     * @return array{industries: \Illuminate\Support\Collection, looks: \Illuminate\Support\Collection, personalities: \Illuminate\Support\Collection}
+     */
     public function getCastProfileMasters(): array
     {
         return [
-            'industries' => Industry::query()->active()->orderBy('id')->get(['id', 'name']),
-            'looks' => CastLookTag::query()->active()->orderBy('id')->get(['id', 'name']),
-            'personalities' => CastPersonalityTag::query()->active()->orderBy('id')->get(['id', 'name']),
+            'industries'    => Industry::query()->active()->orderBy('id')->get(['id', 'name']),
+            'looks'         => $this->fetchCastTags('looks'),
+            'personalities' => $this->fetchCastTags('personality'),
         ];
     }
 
+    /**
+     * 店舗プロフィール画面で使うマスタ.
+     *
+     * @return array{industries: \Illuminate\Support\Collection, atmosphere: \Illuminate\Support\Collection, facility: \Illuminate\Support\Collection}
+     */
     public function getShopProfileMasters(): array
     {
         return [
             'industries' => Industry::query()->active()->orderBy('id')->get(['id', 'name']),
+            'atmosphere' => $this->fetchShopTags('shop', 'atmosphere'),
+            'facility'   => $this->fetchShopTags('shop', 'facility'),
         ];
     }
 
+    /**
+     * 求人票画面で使うマスタ.
+     *
+     * @return array{work_style: \Illuminate\Support\Collection, welcome: \Illuminate\Support\Collection, benefit: \Illuminate\Support\Collection}
+     */
     public function getRecruitmentMasters(): array
     {
         return [
-            'salary' => SalaryTag::query()->active()->orderBy('id')->get(['id', 'name']),
-            'howto' => HowtoTag::query()->active()->orderBy('id')->get(['id', 'name']),
-            'merit' => MeritTag::query()->active()->orderBy('id')->get(['id', 'name']),
-            'feature' => FeatureTag::query()->active()->orderBy('id')->get(['id', 'name']),
-            'facility' => FacilityTag::query()->active()->orderBy('id')->get(['id', 'name']),
-            'atmosphere' => AtmosphereTag::query()->active()->orderBy('id')->get(['id', 'name']),
+            'work_style' => $this->fetchShopTags('job', 'work_style'),
+            'welcome'    => $this->fetchShopTags('job', 'welcome'),
+            'benefit'    => $this->fetchShopTags('job', 'benefit'),
         ];
+    }
+
+    private function fetchCastTags(string $category): Collection
+    {
+        if (!Schema::hasTable('cast_tags')) {
+            return collect();
+        }
+
+        return CastTag::query()
+            ->active()
+            ->category($category)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get(['id', 'name']);
+    }
+
+    private function fetchShopTags(string $target, string $category): Collection
+    {
+        if (!Schema::hasTable('shop_tags')) {
+            return collect();
+        }
+
+        return ShopTag::query()
+            ->active()
+            ->target($target)
+            ->category($category)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get(['id', 'name']);
     }
 
     private function catalogDefinitions(): array
@@ -272,124 +381,116 @@ class AdminMasterService
                 ],
                 'uses_del_flg' => true,
             ],
-            [
-                'key' => 'tags_cast_looks',
-                'table' => 'tags_cast_looks',
-                'model' => CastLookTag::class,
-                'title' => 'キャストルックスマスタ',
-                'description' => 'スレンダー、ギャル、顔出しOK など',
+            ...$this->castTagCatalogDefinitions(),
+            ...$this->shopTagCatalogDefinitions(),
+        ];
+    }
+
+    /**
+     * cast_tags（looks / personality）をカテゴリごとに 1 件のカタログとして公開する.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function castTagCatalogDefinitions(): array
+    {
+        $defs = [];
+        foreach (self::CAST_TAG_CATEGORIES as $key => $meta) {
+            $defs[] = [
+                'key' => $key,
+                'table' => 'cast_tags',
+                'model' => CastTag::class,
+                'title' => 'キャストタグ：' . $meta['label'],
+                'description' => 'cast_tags (category = ' . $meta['category'] . ')',
                 'group' => 'プロフィール',
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: スレンダー'],
                 ],
-            ],
-            [
-                'key' => 'tags_cast_personality',
-                'table' => 'tags_cast_personality',
-                'model' => CastPersonalityTag::class,
-                'title' => 'キャスト性格マスタ',
-                'description' => '社交的、お酒飲める人、連絡マメ など',
-                'group' => 'プロフィール',
-                'fields' => [
-                    ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 明るい'],
+                'uses_del_flg' => true,
+                'uses_sort_order' => true,
+                'fixed_attributes' => [
+                    'category' => $meta['category'],
                 ],
-            ],
-            [
-                'key' => 'tags_salary',
-                'table' => 'tags_salary',
-                'model' => SalaryTag::class,
-                'title' => '給与・各種バックマスタ',
-                'description' => '全額日払い、高額時給、売上バック有り など',
-                'group' => '求人',
-                'fields' => [
-                    ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 交通費支給'],
-                ],
-            ],
-            [
-                'key' => 'tags_howto',
-                'table' => 'tags_shop_working_styles',
-                'model' => HowtoTag::class,
-                'title' => '働き方・シフトマスタ',
-                'description' => '週1からOK、1日3h以内、終電上がりOK など',
-                'group' => '求人',
-                'fields' => [
-                    ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 週1からOK'],
-                ],
-            ],
-            [
-                'key' => 'tags_merit',
-                'table' => 'tags_shop_benefits',
-                'model' => MeritTag::class,
-                'title' => '待遇・サポートマスタ',
-                'description' => '服装自由、レンタル衣装、寮有り、ノルマ無し など',
-                'group' => '求人',
-                'fields' => [
-                    ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 送り有り'],
-                ],
-            ],
-            [
-                'key' => 'tags_feature',
-                'table' => 'tags_shop_conditions',
-                'model' => FeatureTag::class,
-                'title' => '店舗営業情報マスタ',
-                'description' => '新規オープン、日曜営業、定休日無し など',
-                'group' => '求人',
-                'fields' => [
-                    ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 未経験'],
-                ],
-            ],
-            [
-                'key' => 'tags_facility',
-                'table' => 'tags_shop_facilities',
-                'model' => FacilityTag::class,
-                'title' => '設備・空間マスタ',
-                'description' => '個人ロッカー有り、カラオケ有り、禁煙店 など',
-                'group' => '求人',
-                'fields' => [
-                    ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: 駐車場有り'],
-                ],
-            ],
-            [
-                'key' => 'tags_atmosphere',
-                'table' => 'tags_shop_atmospheres',
-                'model' => AtmosphereTag::class,
-                'title' => 'お店の雰囲気・規模マスタ',
-                'description' => 'わいわい、大型店、派閥無し、アットホーム など',
-                'group' => '求人',
+            ];
+        }
+
+        return $defs;
+    }
+
+    /**
+     * shop_tags を target × category 単位の 5 つのカタログとして公開する.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function shopTagCatalogDefinitions(): array
+    {
+        $defs = [];
+        foreach (self::SHOP_TAG_CATEGORIES as $key => $meta) {
+            $group = $meta['target'] === 'shop' ? '店舗プロフィール' : '求人票';
+            $defs[] = [
+                'key' => $key,
+                'table' => 'shop_tags',
+                'model' => ShopTag::class,
+                'title' => '店舗タグ：' . $meta['label'] . '（' . ($meta['target'] === 'shop' ? '店舗' : '求人') . '用）',
+                'description' => 'shop_tags (target = ' . $meta['target'] . ', category = ' . $meta['category'] . ')',
+                'group' => $group,
                 'fields' => [
                     ['input' => 'name', 'column' => 'name', 'label' => 'タグ名', 'placeholder' => '例: アットホーム'],
                 ],
-            ],
-        ];
+                'uses_del_flg' => true,
+                'uses_sort_order' => true,
+                'fixed_attributes' => [
+                    'target'   => $meta['target'],
+                    'category' => $meta['category'],
+                ],
+            ];
+        }
+
+        return $defs;
     }
 
     private function countCatalogRecords(array $catalog): int
     {
-        $modelClass = $catalog['model'] ?? null;
-
-        if (!$modelClass) {
+        if (empty($catalog['model']) || !Schema::hasTable($catalog['table'])) {
             return 0;
         }
 
-        /** @var \App\Models\Master\BaseMaster $modelClass */
-        return (int) $modelClass::query()->active()->count();
+        /** @var class-string<\App\Models\Master\BaseMaster> $modelClass */
+        $modelClass = $catalog['model'];
+        $query = $modelClass::query()->active();
+
+        if (!empty($catalog['fixed_attributes'])) {
+            foreach ($catalog['fixed_attributes'] as $col => $val) {
+                $query->where($col, $val);
+            }
+        }
+
+        return (int) $query->count();
     }
 
     private function fetchCatalogRecords(array $catalog, string $sort = 'created_desc'): Collection
     {
-        $modelClass = $catalog['model'] ?? null;
-
-        if (!$modelClass) {
+        if (empty($catalog['model']) || !Schema::hasTable($catalog['table'])) {
             return collect();
         }
 
-        /** @var \App\Models\Master\BaseMaster $modelClass */
+        /** @var class-string<\App\Models\Master\BaseMaster> $modelClass */
+        $modelClass = $catalog['model'];
         $query = $modelClass::query()
             ->active()
             ->select('id', DB::raw($this->nameExpressionFor($catalog['key']) . ' as name'), 'created_at');
 
+        if (!empty($catalog['fixed_attributes'])) {
+            foreach ($catalog['fixed_attributes'] as $col => $val) {
+                $query->where($col, $val);
+            }
+        }
+
         if (Schema::hasColumn($catalog['table'], 'directory')) {
             $query->addSelect('directory');
+        }
+
+        if (Schema::hasColumn($catalog['table'], 'sort_order')) {
+            $query->addSelect('sort_order');
         }
 
         if (Schema::hasColumn($catalog['table'], 'del_flg')) {
@@ -402,6 +503,14 @@ class AdminMasterService
             return $query
                 ->orderBy('name')
                 ->orderBy('id')
+                ->get();
+        }
+
+        if (Schema::hasColumn($catalog['table'], 'sort_order')) {
+            return $query
+                ->orderBy('sort_order')
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
                 ->get();
         }
 

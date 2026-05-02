@@ -76,11 +76,9 @@ class RegistrationController extends Controller
         if (Schema::hasTable('industries')) {
             $rules['industry_id'][] = 'exists:industries,id';
         }
-        if (Schema::hasTable('tags_cast_looks')) {
-            $rules['look_tag_ids.*'][] = 'exists:tags_cast_looks,id';
-        }
-        if (Schema::hasTable('tags_cast_personality')) {
-            $rules['personality_tag_ids.*'][] = 'exists:tags_cast_personality,id';
+        if (Schema::hasTable('cast_tags')) {
+            $rules['look_tag_ids.*'][] = 'exists:cast_tags,id';
+            $rules['personality_tag_ids.*'][] = 'exists:cast_tags,id';
         }
 
         $request->validate($rules, [
@@ -266,8 +264,9 @@ class RegistrationController extends Controller
                     ? (string) $request->input('word')
                     : $this->mapBusinessTypeLabel((string) $request->input('business_type'));
                 DB::table('shop_posts')->insert([
-                    'shop_id' => $shopId,
-                    'body' => $hitokoto,
+                    'shop_id'    => $shopId,
+                    'type'       => 2,
+                    'body'       => $hitokoto,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);

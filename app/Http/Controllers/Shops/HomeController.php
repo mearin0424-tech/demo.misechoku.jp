@@ -302,9 +302,15 @@ class HomeController extends Controller
 
     private function getHomeShops(): array
     {
+        $latestPostSub = DB::table('shop_posts')
+            ->select('shop_id', DB::raw('MAX(id) as latest_id'))
+            ->where('type', 2)
+            ->groupBy('shop_id');
+
         $rows = DB::table('shops')
             ->leftJoin('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
-            ->leftJoin('shop_posts', 'shops.id', '=', 'shop_posts.shop_id')
+            ->leftJoinSub($latestPostSub, 'sp_latest', 'shops.id', '=', 'sp_latest.shop_id')
+            ->leftJoin('shop_posts', 'shop_posts.id', '=', 'sp_latest.latest_id')
             ->select(
                 'shops.id',
                 'shop_profiles.shop_name',

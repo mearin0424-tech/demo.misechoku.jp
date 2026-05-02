@@ -374,7 +374,7 @@
 
         <p class="job-edit-v2__notice">
             <strong style="color:#e8dcc8;">Shop Information</strong> で登録：店舗名・業種・住所・最寄り・営業時間・定休・写真・<strong>設備／店内の雰囲気タグ</strong> など。<br>
-            <strong style="color:#e8dcc8;">この画面（求人票）</strong> で登録：キャッチ・店長からのメッセージ・時給・ボーナス・勤務の書き方・<strong>給与／働き方／待遇／募集条件タグ</strong>・仕事内容・応募資格。
+            <strong style="color:#e8dcc8;">この画面（求人票）</strong> で登録：キャッチ・店長からのメッセージ・時給・ボーナス・勤務の書き方・<strong>働き方／歓迎条件／待遇タグ</strong>・応募資格。
             @if(!empty($usesJobTypes) && $usesJobTypes)
                 <br><span style="color:#b4a99a;">求人票の編集は<strong>体験入店</strong>と<strong>ヘルプ</strong>の2種類です。本入の正式条件は体験後の面談で調整し、体験入店側では本入の時給・待遇を参考程度に書いてください。</span>
             @endif
@@ -563,17 +563,6 @@
                 <section aria-labelledby="job-sec-detail">
                     <h2 id="job-sec-detail" class="job-edit-v2__sec-title"><i class="fas fa-briefcase"></i> Recruitment</h2>
                     <div class="job-edit-v2__field">
-                        <label class="job-edit-v2__label" for="job_content">
-                            @if(!empty($usesJobTypes) && $usesJobTypes && $rt === 'help')
-                                ヘルプの仕事内容
-                            @else
-                                仕事内容
-                            @endif
-                            <span class="job-edit-v2__req">必須</span>
-                        </label>
-                        <textarea id="job_content" name="job_content" rows="4" class="job-edit-v2__textarea recruit-textarea" placeholder="具体的な業務内容">{{ old('job_content', $recruit['job_content']) }}</textarea>
-                    </div>
-                    <div class="job-edit-v2__field">
                         <label class="job-edit-v2__label" for="qualification">応募資格 <span class="job-edit-v2__req">必須</span></label>
                         <input type="text" id="qualification" name="qualification" class="job-edit-v2__input" value="{{ old('qualification', $recruit['qualification']) }}" placeholder="18歳以上（高校生不可）">
                     </div>
@@ -584,44 +573,33 @@
                     <p class="job-edit-v2__hint" style="margin:-8px 0 16px 4px;">求人票向けのタグです。<strong>設備・店内の雰囲気</strong>のタグはプロフィール（Shop Information）で選んでください。</p>
 
                     <div style="margin-bottom:22px;">
-                        <p class="job-edit-v2__tag-cat">給与・支払い（tags_salary）</p>
+                        <p class="job-edit-v2__tag-cat">働き方・給与</p>
                         <div class="job-edit-v2__chips">
-                            @foreach(($masters['salary'] ?? []) as $tag)
+                            @foreach(($masters['work_style'] ?? []) as $tag)
                                 <label class="job-edit-v2__chip">
-                                    <input type="checkbox" name="salary_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, old('salary_tag_ids', $recruit['salary_tag_ids'] ?? []), true) ? 'checked' : '' }}>
+                                    <input type="checkbox" name="work_style_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, old('work_style_tag_ids', $recruit['work_style_tag_ids'] ?? []), true) ? 'checked' : '' }}>
                                     <span>{{ $tag->name }}</span>
                                 </label>
                             @endforeach
                         </div>
                     </div>
                     <div style="margin-bottom:22px;">
-                        <p class="job-edit-v2__tag-cat">働き方（tags_shop_working_styles）</p>
+                        <p class="job-edit-v2__tag-cat">歓迎条件</p>
                         <div class="job-edit-v2__chips">
-                            @foreach(($masters['howto'] ?? []) as $tag)
+                            @foreach(($masters['welcome'] ?? []) as $tag)
                                 <label class="job-edit-v2__chip">
-                                    <input type="checkbox" name="howto_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, old('howto_tag_ids', $recruit['howto_tag_ids'] ?? []), true) ? 'checked' : '' }}>
-                                    <span>{{ $tag->name }}</span>
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
-                    <div style="margin-bottom:22px;">
-                        <p class="job-edit-v2__tag-cat">待遇・サポート（tags_shop_benefits）</p>
-                        <div class="job-edit-v2__chips">
-                            @foreach(($masters['merit'] ?? []) as $tag)
-                                <label class="job-edit-v2__chip">
-                                    <input type="checkbox" name="merit_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, old('merit_tag_ids', $recruit['merit_tag_ids'] ?? []), true) ? 'checked' : '' }}>
+                                    <input type="checkbox" name="welcome_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, old('welcome_tag_ids', $recruit['welcome_tag_ids'] ?? []), true) ? 'checked' : '' }}>
                                     <span>{{ $tag->name }}</span>
                                 </label>
                             @endforeach
                         </div>
                     </div>
                     <div>
-                        <p class="job-edit-v2__tag-cat">店舗・募集の特徴（tags_shop_conditions）</p>
+                        <p class="job-edit-v2__tag-cat">待遇・サポート</p>
                         <div class="job-edit-v2__chips">
-                            @foreach(($masters['feature'] ?? []) as $tag)
+                            @foreach(($masters['benefit'] ?? []) as $tag)
                                 <label class="job-edit-v2__chip">
-                                    <input type="checkbox" name="feature_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, old('feature_tag_ids', $recruit['feature_tag_ids'] ?? []), true) ? 'checked' : '' }}>
+                                    <input type="checkbox" name="benefit_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, old('benefit_tag_ids', $recruit['benefit_tag_ids'] ?? []), true) ? 'checked' : '' }}>
                                     <span>{{ $tag->name }}</span>
                                 </label>
                             @endforeach

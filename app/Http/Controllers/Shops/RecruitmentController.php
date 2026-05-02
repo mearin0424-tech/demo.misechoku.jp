@@ -134,14 +134,7 @@ class RecruitmentController extends Controller
 
         $recruit = $recruitData['recruit'];
         if ($usesJobTypes) {
-            if ($type === 'help') {
-                $recruit = $recruitData['recruit_help'];
-                if (!empty($recruit['help_job_content'])) {
-                    $recruit['job_content'] = $recruit['help_job_content'];
-                }
-            } else {
-                $recruit = $recruitData['recruit_trial'];
-            }
+            $recruit = $type === 'help' ? $recruitData['recruit_help'] : $recruitData['recruit_trial'];
         } else {
             if ($type === 'trial') {
                 $recruit['hourly_wage_regular'] = $recruit['trial_hourly_wage'] ?? null;
@@ -224,16 +217,13 @@ class RecruitmentController extends Controller
             'working_hours' => 'required|string|max:255',
             'working_days' => 'required|string|max:255',
             'regular_holiday' => 'nullable|string|max:255',
-            'job_content' => 'required|string|max:2000',
             'qualification' => 'required|string|max:255',
-            'salary_tag_ids' => 'nullable|array',
-            'salary_tag_ids.*' => 'integer|exists:tags_salary,id',
-            'howto_tag_ids' => 'nullable|array',
-            'howto_tag_ids.*' => 'integer|exists:tags_shop_working_styles,id',
-            'merit_tag_ids' => 'nullable|array',
-            'merit_tag_ids.*' => 'integer|exists:tags_shop_benefits,id',
-            'feature_tag_ids' => 'nullable|array',
-            'feature_tag_ids.*' => 'integer|exists:tags_shop_conditions,id',
+            'work_style_tag_ids' => 'nullable|array',
+            'work_style_tag_ids.*' => 'integer|exists:shop_tags,id',
+            'welcome_tag_ids' => 'nullable|array',
+            'welcome_tag_ids.*' => 'integer|exists:shop_tags,id',
+            'benefit_tag_ids' => 'nullable|array',
+            'benefit_tag_ids.*' => 'integer|exists:shop_tags,id',
         ], $wageRules));
 
         $shopId = $this->currentShopId();
@@ -248,7 +238,6 @@ class RecruitmentController extends Controller
         $bonusOther = trim((string) ($request->input('bonus_other_conditions', $data['bonus_condition'] ?? '')));
         $payload = array_merge($meta, [
             'catch_copy' => $data['catch_copy'],
-            'job_content' => $data['job_content'],
             'bonus_condition' => $bonusOther,
             'bonus_total_working_days' => $request->filled('bonus_total_working_days') ? (int) $request->input('bonus_total_working_days') : null,
             'bonus_total_working_hours' => $request->filled('bonus_total_working_hours') ? (int) $request->input('bonus_total_working_hours') : null,
@@ -257,22 +246,19 @@ class RecruitmentController extends Controller
             'working_days' => $data['working_days'],
             'regular_holiday' => $data['regular_holiday'] ?? '',
             'qualification' => $data['qualification'],
-            // 設備・雰囲気は Shop Information で管理。DB の shop_tag_relations と同期してメタに反映する。
-            'tag_ids' => [
-                'salary' => array_values(array_map('intval', $request->input('salary_tag_ids', []))),
-                'howto' => array_values(array_map('intval', $request->input('howto_tag_ids', []))),
-                'merit' => array_values(array_map('intval', $request->input('merit_tag_ids', []))),
-                'feature' => array_values(array_map('intval', $request->input('feature_tag_ids', []))),
-                'facility' => $this->mergeShopManagedTagIds($shopId, 'facility', $meta['tag_ids']['facility'] ?? []),
-                'atmosphere' => $this->mergeShopManagedTagIds($shopId, 'atmosphere', $meta['tag_ids']['atmosphere'] ?? []),
-            ],
         ]);
-        unset($payload['message']);
+        // 旧スキーマ由来のフィールドはメタから除去
+        unset($payload['message'], $payload['job_content'], $payload['tag_ids']);
 
         $jobPayload = $this->buildJobPayloadFromValidated($request, $shopId, $data, $payload);
+        $jobTagsPayload = [
+            'work_style' => $request->input('work_style_tag_ids', []),
+            'welcome'    => $request->input('welcome_tag_ids', []),
+            'benefit'    => $request->input('benefit_tag_ids', []),
+        ];
 
         if ($this->shopJobsUseMultipleTypes() && $jobKind === 'trial') {
-            $this->upsertShopJobRow($shopId, 2, $jobPayload, $data, 'trial');
+            $jobId = $this->upsertShopJobRow($shopId, 2, $jobPayload, $data, 'trial');
             $mainSync = [
                 'has_trial' => 1,
                 'trial_hourly_wage' => (string) $data['trial_hourly_wage'],
@@ -286,12 +272,9 @@ class RecruitmentController extends Controller
                 ->where('job_type', 1)
                 ->update($mainSync);
 
-            $this->syncShopTags($shopId, 'salary', $request->input('salary_tag_ids', []));
-            $this->syncShopTags($shopId, 'howto', $request->input('howto_tag_ids', []));
-            $this->syncShopTags($shopId, 'merit', $request->input('merit_tag_ids', []));
-            $this->syncShopTags($shopId, 'feature', $request->input('feature_tag_ids', []));
+            $this->syncShopJobTags($jobId, $jobTagsPayload);
         } elseif ($this->shopJobsUseMultipleTypes() && $jobKind === 'help') {
-            $this->upsertShopJobRow($shopId, 3, $jobPayload, $data, 'help');
+            $jobId = $this->upsertShopJobRow($shopId, 3, $jobPayload, $data, 'help');
             DB::table('shop_jobs')
                 ->where('shop_id', $shopId)
                 ->where('job_type', 1)
@@ -301,30 +284,26 @@ class RecruitmentController extends Controller
                     'updated_at' => now(),
                 ]);
 
-            $this->syncShopTags($shopId, 'salary', $request->input('salary_tag_ids', []));
-            $this->syncShopTags($shopId, 'howto', $request->input('howto_tag_ids', []));
-            $this->syncShopTags($shopId, 'merit', $request->input('merit_tag_ids', []));
-            $this->syncShopTags($shopId, 'feature', $request->input('feature_tag_ids', []));
+            $this->syncShopJobTags($jobId, $jobTagsPayload);
         } else {
             $existingQ = DB::table('shop_jobs')->where('shop_id', $shopId);
             $this->scopeShopJobPrimaryRow($existingQ);
+            $existingId = (int) $existingQ->value('id');
 
-            if ($existingQ->exists()) {
+            if ($existingId > 0) {
                 $upd = DB::table('shop_jobs')->where('shop_id', $shopId);
                 $this->scopeShopJobPrimaryRow($upd);
                 $upd->update($jobPayload);
+                $jobId = $existingId;
             } else {
-                DB::table('shop_jobs')->insert(array_merge(
+                $jobId = (int) DB::table('shop_jobs')->insertGetId(array_merge(
                     $jobPayload,
                     $this->shopJobPrimaryTypeInsertAttributes(),
                     ['created_at' => now()]
                 ));
             }
 
-            $this->syncShopTags($shopId, 'salary', $request->input('salary_tag_ids', []));
-            $this->syncShopTags($shopId, 'howto', $request->input('howto_tag_ids', []));
-            $this->syncShopTags($shopId, 'merit', $request->input('merit_tag_ids', []));
-            $this->syncShopTags($shopId, 'feature', $request->input('feature_tag_ids', []));
+            $this->syncShopJobTags($jobId, $jobTagsPayload);
         }
 
         $redirectType = '';
@@ -447,7 +426,7 @@ class RecruitmentController extends Controller
         return $base;
     }
 
-    private function upsertShopJobRow(string $shopId, int $jobType, array $jobPayload, array $data, string $kind): void
+    private function upsertShopJobRow(string $shopId, int $jobType, array $jobPayload, array $data, string $kind): int
     {
         $payload = $jobPayload;
         if ($kind === 'trial') {
@@ -465,22 +444,23 @@ class RecruitmentController extends Controller
             $payload['hourly_wage_regular'] = (string) $data['help_hourly_wage'];
         }
 
-        $existing = DB::table('shop_jobs')
+        $existingId = (int) DB::table('shop_jobs')
             ->where('shop_id', $shopId)
             ->where('job_type', $jobType)
-            ->exists();
+            ->value('id');
 
-        if ($existing) {
+        if ($existingId > 0) {
             DB::table('shop_jobs')
-                ->where('shop_id', $shopId)
-                ->where('job_type', $jobType)
+                ->where('id', $existingId)
                 ->update($payload);
-        } else {
-            DB::table('shop_jobs')->insert(array_merge($payload, [
-                'job_type' => $jobType,
-                'created_at' => now(),
-            ]));
+
+            return $existingId;
         }
+
+        return (int) DB::table('shop_jobs')->insertGetId(array_merge($payload, [
+            'job_type' => $jobType,
+            'created_at' => now(),
+        ]));
     }
 
     /**
@@ -500,10 +480,7 @@ class RecruitmentController extends Controller
             }
         }
         if (Schema::hasColumn('shop_jobs', 'pr')) {
-            $pr = (string) ($variantRow->pr ?? '');
-            $out['message'] = $pr !== '' ? $pr : (string) ($meta['message'] ?? '');
-        } elseif (array_key_exists('message', $meta) && $meta['message'] !== null && (string) $meta['message'] !== '') {
-            $out['message'] = (string) $meta['message'];
+            $out['message'] = (string) ($variantRow->pr ?? '');
         }
         foreach (['bonus_total_working_days', 'bonus_total_working_hours'] as $bk) {
             if (array_key_exists($bk, $meta) && $meta[$bk] !== null && $meta[$bk] !== '') {
@@ -520,39 +497,26 @@ class RecruitmentController extends Controller
         if (array_key_exists('noruma_reward', $meta) && $meta['noruma_reward'] !== null && $meta['noruma_reward'] !== '') {
             $out['noruma_reward'] = (int) $meta['noruma_reward'];
         }
-        if (!empty($meta['tag_ids']) && is_array($meta['tag_ids'])) {
-            $tagMap = $this->resolveRecruitTagNames($meta['tag_ids']);
+        if (isset($variantRow->id)) {
+            $jobTagIds = $this->getShopJobTagIdsByCategory((int) $variantRow->id);
+            $jobTagNames = $this->resolveShopJobTagNames($jobTagIds);
             $out['store_features'] = [
-                '報酬' => $tagMap['salary'],
-                '働き方' => $tagMap['howto'],
-                'メリット' => $tagMap['merit'],
-                '特徴' => $tagMap['feature'],
-                '設備' => $tagMap['facility'],
-                'お店の雰囲気' => $tagMap['atmosphere'],
+                '働き方・給与' => $jobTagNames['work_style'],
+                '歓迎条件'     => $jobTagNames['welcome'],
+                '待遇・サポート' => $jobTagNames['benefit'],
             ];
-            $out['salary_tag_ids'] = $this->normalizeTagIds($meta['tag_ids']['salary'] ?? []);
-            $out['howto_tag_ids'] = $this->normalizeTagIds($meta['tag_ids']['howto'] ?? []);
-            $out['merit_tag_ids'] = $this->normalizeTagIds($meta['tag_ids']['merit'] ?? []);
-            $out['feature_tag_ids'] = $this->normalizeTagIds($meta['tag_ids']['feature'] ?? []);
-            $out['facility_tag_ids'] = $this->normalizeTagIds($meta['tag_ids']['facility'] ?? []);
-            $out['atmosphere_tag_ids'] = $this->normalizeTagIds($meta['tag_ids']['atmosphere'] ?? []);
+            $out['work_style_tag_ids'] = $jobTagIds['work_style'];
+            $out['welcome_tag_ids']    = $jobTagIds['welcome'];
+            $out['benefit_tag_ids']    = $jobTagIds['benefit'];
         }
         if ($kind === 'trial') {
             if (!empty($variantRow->trial_hourly_wage)) {
                 $out['trial_hourly_wage'] = (int) $variantRow->trial_hourly_wage;
             }
-            $jc = $this->jobContentFromMeta($variantRow->noruma_cond ?? null);
-            if ($jc !== '') {
-                $out['job_content'] = $jc;
-            }
             $out['status'] = ((int) ($variantRow->status ?? 1)) === 1 ? 'active' : 'inactive';
         } elseif ($kind === 'help') {
             if (!empty($variantRow->help_hourly_wage)) {
                 $out['help_hourly_wage'] = (int) $variantRow->help_hourly_wage;
-            }
-            $hjc = $this->jobContentFromMeta($variantRow->noruma_cond ?? null);
-            if ($hjc !== '') {
-                $out['help_job_content'] = $hjc;
             }
             $out['status'] = ((int) ($variantRow->status ?? 1)) === 1 ? 'active' : 'inactive';
         }
@@ -579,7 +543,7 @@ class RecruitmentController extends Controller
         }
 
         $row = $q->where('shops.id', $shopId)
-            ->select('shops.id', 'shop_profiles.*', 'shop_jobs.*')
+            ->select('shops.id', 'shop_profiles.*', 'shop_jobs.*', 'shop_jobs.id as primary_job_id')
             ->first();
 
         $trialRow = null;
@@ -604,7 +568,9 @@ class RecruitmentController extends Controller
         $shopTagGroups = $this->resolveShopInfoTagGroups($shopId);
 
         $meta = $this->decodeMeta($row->noruma_cond ?? null);
-        $tagMap = $this->resolveRecruitTagNames($meta['tag_ids'] ?? []);
+        $primaryJobId = isset($row->primary_job_id) ? (int) $row->primary_job_id : 0;
+        $primaryJobTagIds = $primaryJobId ? $this->getShopJobTagIdsByCategory($primaryJobId) : ['work_style' => [], 'welcome' => [], 'benefit' => []];
+        $primaryJobTagNames = $this->resolveShopJobTagNames($primaryJobTagIds);
         $subImages = DB::table('shop_images')
             ->where('shop_id', $shopId)
             ->orderByRaw('main_order IS NULL')
@@ -658,7 +624,7 @@ class RecruitmentController extends Controller
                     $helpRow && !empty($helpRow->help_hourly_wage)
                         ? (int) $helpRow->help_hourly_wage
                         : null,
-                'help_job_content' => $helpRow ? $this->jobContentFromMeta($helpRow->noruma_cond ?? null) : '',
+                'help_job_content' => '',
                 'noruma_reward' => isset($row->noruma_reward) ? (int) $row->noruma_reward : 0,
                 'bonus_condition' => $bonusExtraCondition,
                 'bonus_other_conditions' => $bonusExtraCondition,
@@ -670,33 +636,32 @@ class RecruitmentController extends Controller
                 'working_hours' => $workingHours,
                 'working_days' => $workingDays,
                 'regular_holiday' => $regularHoliday,
-                'job_content' => $this->jobContentFromMeta($row->noruma_cond ?? null),
+                'job_content' => '',
                 'store_atmosphere' => $row->atmosphere ?? '',
                 'qualification' => $qualification ?: '18歳以上（高校生不可）',
                 'catch_copy' => $meta['catch_copy'] ?? '',
                 'message' => Schema::hasColumn('shop_jobs', 'pr')
-                    ? ((string) ($row->pr ?? '') !== '' ? (string) ($row->pr ?? '') : (string) ($meta['message'] ?? ''))
-                    : (string) ($meta['message'] ?? ''),
-                'selected_benefits' => $tagMap['merit'],
+                    ? (string) ($row->pr ?? '')
+                    : '',
+                'selected_benefits' => $primaryJobTagNames['benefit'],
                 'store_features' => [
-                    '報酬' => $tagMap['salary'],
-                    '働き方' => $tagMap['howto'],
-                    'メリット' => $tagMap['merit'],
-                    '特徴' => $tagMap['feature'],
-                    '設備' => $tagMap['facility'],
-                    'お店の雰囲気' => $tagMap['atmosphere'],
+                    '働き方・給与'   => $primaryJobTagNames['work_style'],
+                    '歓迎条件'       => $primaryJobTagNames['welcome'],
+                    '待遇・サポート' => $primaryJobTagNames['benefit'],
                 ],
-                'salary_tag_ids' => $this->normalizeTagIds($meta['tag_ids']['salary'] ?? []),
-                'howto_tag_ids' => $this->normalizeTagIds($meta['tag_ids']['howto'] ?? []),
-                'merit_tag_ids' => $this->normalizeTagIds($meta['tag_ids']['merit'] ?? []),
-                'feature_tag_ids' => $this->normalizeTagIds($meta['tag_ids']['feature'] ?? []),
-                'facility_tag_ids' => $this->normalizeTagIds($meta['tag_ids']['facility'] ?? []),
-                'atmosphere_tag_ids' => $this->normalizeTagIds($meta['tag_ids']['atmosphere'] ?? []),
+                'work_style_tag_ids' => $primaryJobTagIds['work_style'],
+                'welcome_tag_ids'    => $primaryJobTagIds['welcome'],
+                'benefit_tag_ids'    => $primaryJobTagIds['benefit'],
                 'status' => ((int) ($row->status ?? 1)) === 1 ? 'active' : 'inactive',
                 'updated_at' => !empty($row->updated_at) ? date('Y.m.d', strtotime($row->updated_at)) : null,
             ];
 
-        $shopPost = DB::table('shop_posts')->where('shop_id', $shopId)->first();
+        $shopPost = DB::table('shop_posts')
+            ->where('shop_id', $shopId)
+            ->where('type', 2)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->first();
         $shopHitokoto = $shopPost && isset($shopPost->body) ? (string) $shopPost->body : '';
 
         return [
@@ -725,70 +690,44 @@ class RecruitmentController extends Controller
     }
 
     /**
-     * マイページと同様、shop_tag_relations からマスタタグをグループ表示用に取得する。
+     * 店舗プロフィール側で選んだ shop_tag_relations を新スキーマ (shop_tags target=shop) で
+     * カテゴリごとにグループ化して返す。
      *
      * @return array<int, array{label: string, tags: array<int, string>}>
      */
     private function resolveShopInfoTagGroups(string $shopId): array
     {
         $schema = DB::getSchemaBuilder();
-        if (!$schema->hasTable('shop_tag_relations')) {
+        if (!$schema->hasTable('shop_tag_relations') || !$schema->hasTable('shop_tags')) {
             return [];
         }
 
         $definitions = [
-            ['label' => '給与・支払い', 'types' => ['salary'], 'table' => 'tags_salary'],
-            ['label' => '働き方', 'types' => ['howto'], 'table' => 'tags_shop_working_styles'],
-            ['label' => '待遇・サポート', 'types' => ['merit'], 'table' => 'tags_shop_benefits'],
-            ['label' => '店舗特徴・条件', 'types' => ['feature'], 'table' => 'tags_shop_conditions'],
-            ['label' => '設備・空間', 'types' => ['facility'], 'table' => 'tags_shop_facilities'],
-            ['label' => 'お店の雰囲気・客層', 'types' => ['atmosphere'], 'table' => 'tags_shop_atmospheres'],
+            ['label' => '店内の雰囲気・客層', 'category' => 'atmosphere'],
+            ['label' => '設備・アクセス',     'category' => 'facility'],
         ];
 
         $groups = [];
         foreach ($definitions as $def) {
-            if (!$schema->hasTable($def['table'])) {
-                continue;
-            }
-            $names = $this->fetchShopTagNamesForRelations($shopId, $def['types'], $def['table']);
+            $names = DB::table('shop_tag_relations as r')
+                ->join('shop_tags as t', 'r.tag_id', '=', 't.id')
+                ->where('r.shop_id', $shopId)
+                ->where('r.tag_type', $def['category'])
+                ->where('t.target', 'shop')
+                ->where('t.category', $def['category'])
+                ->where('t.del_flg', 0)
+                ->orderBy('t.sort_order')
+                ->orderBy('t.id')
+                ->pluck('t.name')
+                ->filter()
+                ->values()
+                ->all();
             if (!empty($names)) {
                 $groups[] = ['label' => $def['label'], 'tags' => $names];
             }
         }
 
-        if ($schema->hasTable('tags_shop_accesses')) {
-            $accessNames = $this->fetchShopTagNamesForRelations($shopId, ['access', 'shop_access'], 'tags_shop_accesses');
-            if (!empty($accessNames)) {
-                $groups[] = ['label' => '通勤・アクセス', 'tags' => $accessNames];
-            }
-        }
-
         return $groups;
-    }
-
-    private function fetchShopTagNamesForRelations(string $shopId, array $tagTypes, string $masterTable): array
-    {
-        $tagIds = DB::table('shop_tag_relations')
-            ->where('shop_id', $shopId)
-            ->whereIn('tag_type', $tagTypes)
-            ->pluck('tag_id')
-            ->map(fn ($id) => (int) $id)
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
-
-        if (empty($tagIds)) {
-            return [];
-        }
-
-        return DB::table($masterTable)
-            ->whereIn('id', $tagIds)
-            ->orderBy('id')
-            ->pluck('name')
-            ->filter()
-            ->values()
-            ->all();
     }
 
     private function getRecruitMeta(string $shopId): array
@@ -811,34 +750,63 @@ class RecruitmentController extends Controller
         return is_array($decoded) ? $decoded : [];
     }
 
-    private function jobContentFromMeta(?string $norumaCond): string
+    /**
+     * shop_job_tag_relations + shop_tags(target='job') から、求人票用の3カテゴリ別タグID一覧を取得。
+     *
+     * @return array{work_style: array<int,int>, welcome: array<int,int>, benefit: array<int,int>}
+     */
+    private function getShopJobTagIdsByCategory(int $shopJobId): array
     {
-        $m = $this->decodeMeta($norumaCond);
+        $result = ['work_style' => [], 'welcome' => [], 'benefit' => []];
+        if ($shopJobId <= 0
+            || !Schema::hasTable('shop_job_tag_relations')
+            || !Schema::hasTable('shop_tags')
+        ) {
+            return $result;
+        }
 
-        return (string) ($m['job_content'] ?? '');
+        $rows = DB::table('shop_job_tag_relations as r')
+            ->join('shop_tags as t', 'r.tag_id', '=', 't.id')
+            ->where('r.shop_job_id', $shopJobId)
+            ->where('t.target', 'job')
+            ->where('t.del_flg', 0)
+            ->whereIn('t.category', ['work_style', 'welcome', 'benefit'])
+            ->orderBy('t.sort_order')
+            ->orderBy('t.id')
+            ->select('t.id', 't.category')
+            ->get();
+
+        foreach ($rows as $r) {
+            $cat = (string) $r->category;
+            if (isset($result[$cat])) {
+                $result[$cat][] = (int) $r->id;
+            }
+        }
+
+        return $result;
     }
 
-    private function resolveRecruitTagNames(array $tagIds): array
+    /**
+     * @param array{work_style: array<int,int>, welcome: array<int,int>, benefit: array<int,int>} $idsByCategory
+     * @return array{work_style: array<int,string>, welcome: array<int,string>, benefit: array<int,string>}
+     */
+    private function resolveShopJobTagNames(array $idsByCategory): array
     {
-        $tables = [
-            'salary'     => 'tags_salary',
-            'howto'      => 'tags_shop_working_styles',
-            'merit'      => 'tags_shop_benefits',
-            'feature'    => 'tags_shop_conditions',
-            'facility'   => 'tags_shop_facilities',
-            'atmosphere' => 'tags_shop_atmospheres',
-        ];
+        $resolved = ['work_style' => [], 'welcome' => [], 'benefit' => []];
+        if (!Schema::hasTable('shop_tags')) {
+            return $resolved;
+        }
 
-        $resolved = [];
-        foreach ($tables as $key => $table) {
-            $ids = $this->normalizeTagIds($tagIds[$key] ?? []);
-            if (empty($ids) || !Schema::hasTable($table)) {
-                $resolved[$key] = [];
+        foreach ($resolved as $cat => $_) {
+            $ids = $this->normalizeTagIds($idsByCategory[$cat] ?? []);
+            if (empty($ids)) {
                 continue;
             }
-
-            $resolved[$key] = DB::table($table)
+            $resolved[$cat] = DB::table('shop_tags')
+                ->where('target', 'job')
+                ->where('category', $cat)
                 ->whereIn('id', $ids)
+                ->orderBy('sort_order')
                 ->orderBy('id')
                 ->pluck('name')
                 ->all();
@@ -858,70 +826,55 @@ class RecruitmentController extends Controller
     }
 
     /**
-     * Shop Information で選んだ設備・雰囲気タグなどを求人メタに載せるため、リレーションから取得する。
+     * 求人票（shop_jobs.id 単位）に紐づくタグを shop_job_tag_relations で同期する。
      *
-     * @return array<int, int>
-     */
-    private function getShopRelationTagIds(string $shopId, string $tagType): array
-    {
-        if (!DB::getSchemaBuilder()->hasTable('shop_tag_relations')) {
-            return [];
-        }
-
-        return DB::table('shop_tag_relations')
-            ->where('shop_id', $shopId)
-            ->where('tag_type', $tagType)
-            ->orderBy('tag_id')
-            ->pluck('tag_id')
-            ->map(fn ($id) => (int) $id)
-            ->filter()
-            ->values()
-            ->all();
-    }
-
-    /**
-     * 設備・雰囲気は店舗側が DB で管理する想定。リレーションをメタに反映しつつ、未移行でメタのみにある ID は失わないようマージする。
+     * - tag_type には category 名（work_style / welcome / benefit）をそのまま入れる
+     * - 渡された tag_id が shop_tags(target='job') に該当するもののみ採用する
      *
-     * @param array<mixed> $previousMetaIds
-     * @return array<int, int>
+     * @param array<string, array<int, mixed>> $tagIdsByCategory
      */
-    private function mergeShopManagedTagIds(string $shopId, string $tagType, array $previousMetaIds): array
+    private function syncShopJobTags(int $shopJobId, array $tagIdsByCategory): void
     {
-        $fromDb = $this->getShopRelationTagIds($shopId, $tagType);
-        $fromMeta = $this->normalizeTagIds($previousMetaIds);
-        $merged = array_values(array_unique(array_merge($fromDb, $fromMeta)));
-        sort($merged);
-
-        return $merged;
-    }
-
-    private function syncShopTags(string $shopId, string $tagType, array $tagIds): void
-    {
-        if (!DB::getSchemaBuilder()->hasTable('shop_tag_relations')) {
+        if ($shopJobId <= 0 || !Schema::hasTable('shop_job_tag_relations')) {
             return;
         }
 
-        DB::table('shop_tag_relations')
-            ->where('shop_id', $shopId)
-            ->where('tag_type', $tagType)
+        DB::table('shop_job_tag_relations')
+            ->where('shop_job_id', $shopJobId)
+            ->whereIn('tag_type', ['work_style', 'welcome', 'benefit'])
             ->delete();
 
-        $rows = collect($tagIds)
-            ->map(fn ($id) => (int) $id)
-            ->filter()
-            ->unique()
-            ->values()
-            ->map(fn ($tagId) => [
-                'shop_id'    => $shopId,
-                'tag_id'     => $tagId,
-                'tag_type'   => $tagType,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ])
-            ->all();
+        if (!Schema::hasTable('shop_tags')) {
+            return;
+        }
 
-        if (!empty($rows)) {
-            DB::table('shop_tag_relations')->insert($rows);
+        $insertRows = [];
+        foreach (['work_style', 'welcome', 'benefit'] as $category) {
+            $ids = $this->normalizeTagIds($tagIdsByCategory[$category] ?? []);
+            if (empty($ids)) {
+                continue;
+            }
+            $validIds = DB::table('shop_tags')
+                ->where('target', 'job')
+                ->where('category', $category)
+                ->where('del_flg', 0)
+                ->whereIn('id', $ids)
+                ->pluck('id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
+            foreach ($validIds as $tagId) {
+                $insertRows[] = [
+                    'shop_job_id' => $shopJobId,
+                    'tag_id'      => $tagId,
+                    'tag_type'    => $category,
+                    'created_at'  => now(),
+                    'updated_at'  => now(),
+                ];
+            }
+        }
+
+        if (!empty($insertRows)) {
+            DB::table('shop_job_tag_relations')->insert($insertRows);
         }
     }
 

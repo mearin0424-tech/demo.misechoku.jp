@@ -324,9 +324,9 @@
     $bonusConditionsText = implode('、', $bonusCondParts);
     $showBonusMain = $noruma > 0 || $bonusConditionsText !== '';
 
-    $salaryTags = collect($recruit['store_features']['報酬'] ?? [])->values();
-    $otherTags = collect($recruit['store_features'] ?? [])->except('報酬')->flatten()->filter()->unique()->values();
-    $pillTags = $salaryTags->merge($otherTags)->unique()->values();
+    $workStyleTags = collect($recruit['store_features']['働き方・給与'] ?? [])->values();
+    $otherTags = collect($recruit['store_features'] ?? [])->except('働き方・給与')->flatten()->filter()->unique()->values();
+    $pillTags = $workStyleTags->merge($otherTags)->unique()->values();
 
     $subImages = $shop['sub_images'] ?? [];
     $thumbMore = max(0, count($subImages) - 2);
@@ -356,12 +356,11 @@
 
     $storeFeatures = $recruit['store_features'] ?? [];
     $matrixLabels = [
-        '報酬' => '給与・支払い',
-        '働き方' => '働き方',
-        'メリット' => '待遇・サポート',
-        '特徴' => '店舗特徴・条件',
-        '設備' => '設備・空間',
-        'お店の雰囲気' => 'お店の雰囲気・客層',
+        '働き方・給与'   => '働き方・給与',
+        '歓迎条件'       => '歓迎条件',
+        '待遇・サポート' => '待遇・サポート',
+        '店内の雰囲気・客層' => '店内の雰囲気・客層',
+        '設備・アクセス' => '設備・アクセス',
     ];
     $messageBody = trim((string) ($recruit['message'] ?? ''));
     if ($messageBody === '') {

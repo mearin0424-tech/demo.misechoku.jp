@@ -62,9 +62,16 @@ class MypageController extends Controller
             )
             ->first();
 
-        $shopPost = DB::table('shop_posts')->where('shop_id', $shopId)->first();
+        $shopPost = DB::table('shop_posts')
+            ->where('shop_id', $shopId)
+            ->where('type', 2)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->first();
         $hitokotoBody = $shopPost && isset($shopPost->body) ? (string) $shopPost->body : '';
-        $hitokotoUpdated = $shopPost && !empty($shopPost->updated_at) ? $shopPost->updated_at : null;
+        $hitokotoUpdated = $shopPost && !empty($shopPost->updated_at)
+            ? $shopPost->updated_at
+            : ($shopPost && !empty($shopPost->created_at) ? $shopPost->created_at : null);
 
         $documentData = $this->documentReviewService->getShopLicensePageData($shopId);
         $badges = $this->billingManagementService->getShopBadges($shopId);
@@ -196,20 +203,13 @@ class MypageController extends Controller
         $word = is_string($word) ? trim($word) : '';
 
         $now = Carbon::now();
-        $exists = DB::table('shop_posts')->where('shop_id', $shopId)->exists();
-        if ($exists) {
-            DB::table('shop_posts')->where('shop_id', $shopId)->update([
-                'body' => $word,
-                'updated_at' => $now,
-            ]);
-        } else {
-            DB::table('shop_posts')->insert([
-                'shop_id' => $shopId,
-                'body' => $word,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ]);
-        }
+        DB::table('shop_posts')->insert([
+            'shop_id'    => $shopId,
+            'type'       => 2,
+            'body'       => $word,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
 
         return response()->json([
             'success' => true,
@@ -460,72 +460,49 @@ class MypageController extends Controller
     }
 
     /**
-     * 店舗プロフィールに紐づくマスタタグを、求人編集と同じ区分でグループ化して返す。
+     * 店舗プロフィールに紐づく shop_tag_relations を、新スキーマ (shop_tags target=shop) で
+     * カテゴリごとにグループ化して返す。
      *
      * @return array<int, array{label: string, tags: array<int, string>}>
      */
     private function resolveShopInfoTagGroups(string $shopId): array
     {
         $schema = DB::getSchemaBuilder();
-        if (!$schema->hasTable('shop_tag_relations')) {
+        if (!$schema->hasTable('shop_tag_relations') || !$schema->hasTable('shop_tags')) {
             return [];
         }
 
         $definitions = [
-            ['label' => '給与・支払い', 'types' => ['salary'], 'table' => 'tags_salary'],
-            ['label' => '働き方', 'types' => ['howto'], 'table' => 'tags_shop_working_styles'],
-            ['label' => '待遇・サポート', 'types' => ['merit'], 'table' => 'tags_shop_benefits'],
-            ['label' => '店舗特徴・条件', 'types' => ['feature'], 'table' => 'tags_shop_conditions'],
-            ['label' => '設備・空間', 'types' => ['facility'], 'table' => 'tags_shop_facilities'],
-            ['label' => 'お店の雰囲気・客層', 'types' => ['atmosphere'], 'table' => 'tags_shop_atmospheres'],
+            ['label' => '店内の雰囲気・客層', 'category' => 'atmosphere'],
+            ['label' => '設備・アクセス',     'category' => 'facility'],
         ];
 
         $groups = [];
         foreach ($definitions as $def) {
-            if (!$schema->hasTable($def['table'])) {
-                continue;
-            }
-            $names = $this->fetchShopTagNames($shopId, $def['types'], $def['table']);
+            $names = $this->fetchShopTagNames($shopId, $def['category']);
             if (!empty($names)) {
                 $groups[] = ['label' => $def['label'], 'tags' => $names];
-            }
-        }
-
-        if ($schema->hasTable('tags_shop_accesses')) {
-            $accessNames = $this->fetchShopTagNames($shopId, ['access', 'shop_access'], 'tags_shop_accesses');
-            if (!empty($accessNames)) {
-                $groups[] = ['label' => '通勤・アクセス', 'tags' => $accessNames];
             }
         }
 
         return $groups;
     }
 
-    private function fetchShopTagNames(string $shopId, array $tagTypes, string $masterTable): array
+    /**
+     * shop_tag_relations -> shop_tags(target='shop') から名前のみ取得する。
+     */
+    private function fetchShopTagNames(string $shopId, string $category): array
     {
-        $schema = DB::getSchemaBuilder();
-        if (!$schema->hasTable($masterTable)) {
-            return [];
-        }
-
-        $tagIds = DB::table('shop_tag_relations')
-            ->where('shop_id', $shopId)
-            ->whereIn('tag_type', $tagTypes)
-            ->pluck('tag_id')
-            ->map(fn ($id) => (int) $id)
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
-
-        if (empty($tagIds)) {
-            return [];
-        }
-
-        return DB::table($masterTable)
-            ->whereIn('id', $tagIds)
-            ->orderBy('id')
-            ->pluck('name')
+        return DB::table('shop_tag_relations as r')
+            ->join('shop_tags as t', 'r.tag_id', '=', 't.id')
+            ->where('r.shop_id', $shopId)
+            ->where('r.tag_type', $category)
+            ->where('t.target', 'shop')
+            ->where('t.category', $category)
+            ->where('t.del_flg', 0)
+            ->orderBy('t.sort_order')
+            ->orderBy('t.id')
+            ->pluck('t.name')
             ->filter()
             ->values()
             ->all();

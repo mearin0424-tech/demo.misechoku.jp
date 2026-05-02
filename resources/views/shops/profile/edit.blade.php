@@ -475,6 +475,41 @@
                     >
                 </div>
             </section>
+
+            <section aria-labelledby="spe-sec-tags">
+                <h2 id="spe-sec-tags" class="shop-profile-edit__section-title">
+                    <i class="fas fa-check-circle" aria-hidden="true"></i>
+                    Shop Tags
+                </h2>
+
+                <div class="shop-profile-edit__field">
+                    <span class="shop-profile-edit__label">店内の雰囲気・客層</span>
+                    <div class="shop-profile-edit__chips">
+                        @foreach(($masters['atmosphere'] ?? []) as $tag)
+                            <label class="shop-profile-edit__chip">
+                                <input type="checkbox" name="atmosphere_tag_ids[]" value="{{ $tag->id }}"
+                                    {{ in_array((int) $tag->id, old('atmosphere_tag_ids', $shopData['atmosphere_tag_ids'] ?? []), true) ? 'checked' : '' }}>
+                                <span>{{ $tag->name }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    <p class="shop-profile-edit__hint">来店客やお店のムードを表すタグを選択してください。</p>
+                </div>
+
+                <div class="shop-profile-edit__field">
+                    <span class="shop-profile-edit__label">設備・アクセス</span>
+                    <div class="shop-profile-edit__chips">
+                        @foreach(($masters['facility'] ?? []) as $tag)
+                            <label class="shop-profile-edit__chip">
+                                <input type="checkbox" name="facility_tag_ids[]" value="{{ $tag->id }}"
+                                    {{ in_array((int) $tag->id, old('facility_tag_ids', $shopData['facility_tag_ids'] ?? []), true) ? 'checked' : '' }}>
+                                <span>{{ $tag->name }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    <p class="shop-profile-edit__hint">店舗設備や駅からのアクセス等を表すタグを選択してください。</p>
+                </div>
+            </section>
         </form>
 
         <div class="shop-profile-edit__actions">

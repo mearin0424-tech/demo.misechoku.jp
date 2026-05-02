@@ -61,6 +61,7 @@ class RecruitmentController extends Controller
                 'shop_profiles.addr2',
                 'shop_profiles.addr3',
                 'shop_profiles.station1',
+                'shop_jobs.id as shop_job_id',
                 'shop_jobs.hourly_wage_regular',
                 'shop_jobs.has_trial',
                 'shop_jobs.trial_hourly_wage',
@@ -88,11 +89,12 @@ class RecruitmentController extends Controller
 
         $address = trim(($row->pref ?? '') . ($row->city ?? '') . ($row->addr2 ?? '') . ' ' . ($row->addr3 ?? ''));
         $meta = $this->decodeMeta($row->noruma_cond ?? null);
-        $tagMap = $this->resolveRecruitTagNames($meta['tag_ids'] ?? []);
-        $jobContent = (string) ($meta['job_content'] ?? '');
+        $shopJobId = isset($row->shop_job_id) ? (int) $row->shop_job_id : 0;
+        $jobTagNames = $this->resolveJobTagNames($shopJobId);
+        $shopTagNames = $this->resolveShopTagNames($shopId);
         $managerMessage = Schema::hasColumn('shop_jobs', 'pr')
-            ? ((string) ($row->pr ?? '') !== '' ? (string) ($row->pr ?? '') : (string) ($meta['message'] ?? ''))
-            : (string) ($meta['message'] ?? '');
+            ? (string) ($row->pr ?? '')
+            : '';
 
         $recruit = [
             'store_name'         => $row->shop_name,
@@ -108,20 +110,19 @@ class RecruitmentController extends Controller
             'working_hours'      => Schema::hasColumn('shop_jobs', 'working_hours') ? ($row->working_hours ?? null) : ($meta['working_hours'] ?? null),
             'working_days'       => Schema::hasColumn('shop_jobs', 'working_day') ? ($row->working_day ?? null) : ($meta['working_days'] ?? null),
             'regular_holiday'    => Schema::hasColumn('shop_jobs', 'regular_holiday') ? ($row->regular_holiday ?? null) : ($meta['regular_holiday'] ?? null),
-            'job_content'        => $jobContent,
+            'job_content'        => '',
             'store_atmosphere'   => $row->atmosphere ?? '',
             'qualification'      => Schema::hasColumn('shop_jobs', 'qualification') ? ($row->qualification ?? '18歳以上（高校生不可）') : ($meta['qualification'] ?? '18歳以上（高校生不可）'),
             'catch_copy'         => $meta['catch_copy'] ?? '',
             'message'            => $managerMessage,
             'benefits'           => [],
-            'selected_benefits'  => $tagMap['merit'],
+            'selected_benefits'  => $jobTagNames['benefit'],
             'store_features'     => [
-                '報酬' => $tagMap['salary'],
-                '働き方' => $tagMap['howto'],
-                'メリット' => $tagMap['merit'],
-                '特徴' => $tagMap['feature'],
-                '設備' => $tagMap['facility'],
-                'お店の雰囲気' => $tagMap['atmosphere'],
+                '働き方・給与'   => $jobTagNames['work_style'],
+                '歓迎条件'       => $jobTagNames['welcome'],
+                '待遇・サポート' => $jobTagNames['benefit'],
+                '店内の雰囲気・客層' => $shopTagNames['atmosphere'],
+                '設備・アクセス' => $shopTagNames['facility'],
             ],
         ];
 
@@ -150,7 +151,12 @@ class RecruitmentController extends Controller
             }
         }
 
-        $shopPost = DB::table('shop_posts')->where('shop_id', $shopId)->first();
+        $shopPost = DB::table('shop_posts')
+            ->where('shop_id', $shopId)
+            ->where('type', 2)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->first();
         $shopHitokoto = $shopPost && isset($shopPost->body) ? (string) $shopPost->body : '';
 
         $shop = [
@@ -222,36 +228,70 @@ class RecruitmentController extends Controller
         return is_array($decoded) ? $decoded : [];
     }
 
-    private function resolveRecruitTagNames(array $tagIds): array
+    /**
+     * 求人票（shop_jobs.id）に紐づく shop_tags(target='job') を category 別に名前で取得.
+     *
+     * @return array{work_style: array<int,string>, welcome: array<int,string>, benefit: array<int,string>}
+     */
+    private function resolveJobTagNames(int $shopJobId): array
     {
-        $tables = [
-            'salary'     => 'tags_salary',
-            'howto'      => 'tags_shop_working_styles',
-            'merit'      => 'tags_shop_benefits',
-            'feature'    => 'tags_shop_conditions',
-            'facility'   => 'tags_shop_facilities',
-            'atmosphere' => 'tags_shop_atmospheres',
-        ];
+        $resolved = ['work_style' => [], 'welcome' => [], 'benefit' => []];
+        if ($shopJobId <= 0
+            || !Schema::hasTable('shop_job_tag_relations')
+            || !Schema::hasTable('shop_tags')
+        ) {
+            return $resolved;
+        }
 
-        $resolved = [];
-        foreach ($tables as $key => $table) {
-            $ids = collect($tagIds[$key] ?? [])
-                ->map(fn ($id) => (int) $id)
-                ->filter()
-                ->unique()
-                ->values()
-                ->all();
+        $rows = DB::table('shop_job_tag_relations as r')
+            ->join('shop_tags as t', 'r.tag_id', '=', 't.id')
+            ->where('r.shop_job_id', $shopJobId)
+            ->where('t.target', 'job')
+            ->where('t.del_flg', 0)
+            ->whereIn('t.category', ['work_style', 'welcome', 'benefit'])
+            ->orderBy('t.sort_order')
+            ->orderBy('t.id')
+            ->select('t.category', 't.name')
+            ->get();
 
-            if (empty($ids) || !Schema::hasTable($table)) {
-                $resolved[$key] = [];
-                continue;
+        foreach ($rows as $r) {
+            $cat = (string) $r->category;
+            if (isset($resolved[$cat])) {
+                $resolved[$cat][] = (string) $r->name;
             }
+        }
 
-            $resolved[$key] = DB::table($table)
-                ->whereIn('id', $ids)
-                ->orderBy('id')
-                ->pluck('name')
-                ->all();
+        return $resolved;
+    }
+
+    /**
+     * 店舗（shops.id）に紐づく shop_tags(target='shop') を category 別に名前で取得.
+     *
+     * @return array{atmosphere: array<int,string>, facility: array<int,string>}
+     */
+    private function resolveShopTagNames(string $shopId): array
+    {
+        $resolved = ['atmosphere' => [], 'facility' => []];
+        if (!Schema::hasTable('shop_tag_relations') || !Schema::hasTable('shop_tags')) {
+            return $resolved;
+        }
+
+        $rows = DB::table('shop_tag_relations as r')
+            ->join('shop_tags as t', 'r.tag_id', '=', 't.id')
+            ->where('r.shop_id', $shopId)
+            ->where('t.target', 'shop')
+            ->where('t.del_flg', 0)
+            ->whereIn('t.category', ['atmosphere', 'facility'])
+            ->orderBy('t.sort_order')
+            ->orderBy('t.id')
+            ->select('t.category', 't.name')
+            ->get();
+
+        foreach ($rows as $r) {
+            $cat = (string) $r->category;
+            if (isset($resolved[$cat])) {
+                $resolved[$cat][] = (string) $r->name;
+            }
         }
 
         return $resolved;
