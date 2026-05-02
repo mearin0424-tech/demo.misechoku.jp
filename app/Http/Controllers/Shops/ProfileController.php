@@ -92,7 +92,7 @@ class ProfileController extends Controller
         $this->syncShopProfileTags($shopId, 'facility',   $request->input('facility_tag_ids', []));
 
         return redirect()
-            ->route('shop.profile.store.edit')
+            ->route('shop.mypage.index')
             ->with('message', 'プロフィールを更新しました');
     }
 

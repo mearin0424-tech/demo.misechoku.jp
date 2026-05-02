@@ -979,7 +979,7 @@ a.btn-outline-gold {
 }
 
 .gallery-grid-item {
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 16 / 9;
     cursor: grab;
 }
 .gallery-grid-item:active {
@@ -1148,9 +1148,9 @@ a.btn-outline-gold {
 .image-edit-frame {
     position: relative;
     width: 100%;
-    max-width: 480px;
+    max-width: 540px;
     margin: 0 auto;
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 16 / 9;
     border-radius: 14px;
     overflow: hidden;
     background: #000;

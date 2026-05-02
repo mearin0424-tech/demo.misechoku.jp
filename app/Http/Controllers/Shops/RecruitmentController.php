@@ -146,6 +146,8 @@ class RecruitmentController extends Controller
         return view('shops.recruit.edit', [
             'pageId' => 'job_edit',
             'recruit' => $recruit,
+            'recruitTrial' => $usesJobTypes ? $recruitData['recruit_trial'] : null,
+            'recruitHelp'  => $usesJobTypes ? $recruitData['recruit_help']  : null,
             'recruitType' => $type,
             'usesJobTypes' => $usesJobTypes,
             'masters' => $this->adminMasterService->getRecruitmentMasters(),

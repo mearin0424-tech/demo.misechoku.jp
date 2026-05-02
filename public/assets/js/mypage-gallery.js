@@ -139,8 +139,8 @@
                 reader.onload = function(e) {
                     var img = new Image();
                     img.onload = function() {
-                        var ASPECT_W = 3;
-                        var ASPECT_H = 4;
+                        var ASPECT_W = 16;
+                        var ASPECT_H = 9;
                         var aspect = ASPECT_W / ASPECT_H;
 
                         // 元画像から 3:4 にクロップする（中央基準）
@@ -161,7 +161,7 @@
                             sy = (img.height - sh) / 2;
                         }
 
-                        // 出力サイズを決定（3:4を維持しつつ、maxWidth/maxHeight以内 & おおよそ 2MP 以下）
+                        // 出力サイズを決定（16:9を維持しつつ、maxWidth/maxHeight以内 & おおよそ 2MP 以下）
                         var MAX_PIXELS = 2000000; // 約 2MP
                         var outWidth = Math.min(img.width, maxWidth || img.width);
                         var outHeight = Math.round(outWidth * ASPECT_H / ASPECT_W);
@@ -272,7 +272,7 @@
                 }
                 if (window.Cropper) {
                     _cropper = new Cropper(editPreviewImg, {
-                        aspectRatio: 3 / 4,
+                        aspectRatio: 16 / 9,
                         viewMode: 1,
                         dragMode: 'move',
                         autoCropArea: 1,
@@ -320,9 +320,9 @@
                 var btn = editConfirmBtn;
                 if (btn.disabled) return;
                 btn.disabled = true;
-                // 3:4（約 1200x1600）でトリミング
-                var MAX_WIDTH = 1200;
-                var MAX_HEIGHT = 1600;
+                // 16:9（約 1600x900）でトリミング
+                var MAX_WIDTH = 1600;
+                var MAX_HEIGHT = 900;
 
                 var cropAndUpload = function() {
                     if (_cropper && typeof _cropper.getCroppedCanvas === 'function') {

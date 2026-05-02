@@ -320,43 +320,47 @@
     }
 
     .shop-mypage-link-stack {
-        border-radius: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        background: rgba(12, 10, 9, 0.85);
-        overflow: hidden;
+        padding: 0 6px;
     }
     .shop-mypage-link-stack a {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 12px 14px;
-        color: #e4d8d0;
+        padding: 14px 4px;
+        color: #a09690;
         text-decoration: none;
-        font-size: 0.84rem;
-        font-weight: 600;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        transition: background 0.15s ease;
+        font-size: 0.76rem;
+        font-weight: 300;
+        letter-spacing: 0.18em;
+        border-bottom: 1px solid rgba(31, 26, 20, 0.9);
+        transition: color 0.15s ease, border-color 0.15s ease;
     }
     .shop-mypage-link-stack a:last-child {
         border-bottom: none;
     }
     .shop-mypage-link-stack a:hover {
-        background: rgba(255, 255, 255, 0.04);
+        color: #e4d8d0;
+        border-bottom-color: rgba(212, 175, 55, 0.28);
     }
     .shop-mypage-link-stack a i.fa-chevron-right {
-        color: rgba(140, 130, 125, 0.85);
-        font-size: 0.75rem;
+        color: rgba(90, 80, 75, 0.9);
+        font-size: 0.68rem;
+        transition: color 0.15s ease, transform 0.15s ease;
+        transform: translateX(-4px);
+    }
+    .shop-mypage-link-stack a:hover i.fa-chevron-right {
+        color: rgba(212, 175, 55, 0.85);
+        transform: translateX(0);
     }
     .shop-mypage-link-stack-inner {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
     }
     .shop-mypage-link-stack-inner i {
         width: 16px;
         text-align: center;
         font-size: 0.82rem;
-        color: rgba(180, 165, 155, 0.85);
         flex-shrink: 0;
     }
 
@@ -410,41 +414,39 @@
         padding: 14px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
-    .shop-mypage-tags-block-title {
-        margin: 0 0 12px;
-        font-size: 0.72rem;
-        font-weight: 700;
-        color: rgba(170, 160, 152, 0.95);
-    }
     .shop-mypage-tag-group-row {
         display: flex;
-        flex-direction: column;
-        gap: 6px;
-        margin-bottom: 14px;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 10px;
     }
     .shop-mypage-tag-group-row:last-child {
         margin-bottom: 0;
     }
     .shop-mypage-tag-group-label {
+        flex-shrink: 0;
+        width: 76px;
         font-size: 0.62rem;
         font-weight: 800;
-        color: rgba(212, 175, 55, 0.95);
+        color: rgba(212, 175, 55, 0.9);
         letter-spacing: 0.02em;
+        padding-top: 4px;
     }
     .shop-mypage-tag-pills {
         display: flex;
         flex-wrap: wrap;
-        gap: 6px;
+        gap: 5px;
+        flex: 1;
     }
     .shop-mypage-tag-pills span {
         display: inline-flex;
-        padding: 5px 9px;
-        border-radius: 8px;
-        border: 1px solid rgba(70, 65, 62, 0.85);
+        padding: 4px 8px;
+        border-radius: 6px;
+        border: 1px solid rgba(60, 56, 52, 0.9);
         background: rgba(8, 8, 10, 0.65);
-        font-size: 0.68rem;
+        font-size: 0.66rem;
         font-weight: 600;
-        color: #d8cec8;
+        color: #d0c6c0;
     }
 
     .shop-mypage-concept {
@@ -697,7 +699,6 @@
                 @php $tagGroups = $shopInfo['tag_groups'] ?? []; @endphp
                 @if(!empty($tagGroups))
                     <div class="shop-mypage-tags-block">
-                        <p class="shop-mypage-tags-block-title">特徴・アピールタグ</p>
                         @foreach($tagGroups as $group)
                             @if(!empty($group['tags']))
                             <div class="shop-mypage-tag-group-row">
@@ -789,8 +790,8 @@
         <div class="image-edit-header">
             <h3 class="mypage-modal-title serif-font">画像を調整してアップロード</h3>
             <p class="image-edit-guide">
-                推奨サイズは <strong>3:4（例：1200×1600px、縦長）</strong> です。<br>
-                画面に表示されている範囲で中央を基準に自動トリミングし、スマホ表示でも粗くなりすぎないよう約2MPまでサイズ調整してアップロードします。
+                推奨サイズは <strong>16:9（例：1600×900px、横長）</strong> です。<br>
+                画面に表示されている範囲で中央を基準に自動トリミングし、求人票のギャラリー表示に最適化してアップロードします。
             </p>
         </div>
         <div class="image-edit-preview-wrapper">
