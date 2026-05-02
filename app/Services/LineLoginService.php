@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class LineLoginService
 {
@@ -27,14 +28,17 @@ class LineLoginService
 
     /**
      * LINE認証画面へのURLを生成（state に role を入れてコールバックで識別）
+     *
+     * @param  string|null  $redirectUri  null のとき config の redirect（認可とトークン交換で同一文字列が必要）
      */
-    public function getAuthorizationUrl(string $state): string
+    public function getAuthorizationUrl(string $state, ?string $redirectUri = null): string
     {
+        $redirectUri = $redirectUri ?? $this->redirectUri;
         // openid を付ける場合は nonce 必須（未指定だと LINE 側が 400 を返す）。/v2/profile は profile のみで可。
         $params = http_build_query([
             'response_type' => 'code',
             'client_id' => $this->clientId,
-            'redirect_uri' => $this->redirectUri,
+            'redirect_uri' => $redirectUri,
             'state' => $state,
             'scope' => 'profile',
         ]);
@@ -47,17 +51,22 @@ class LineLoginService
      *
      * @return array{access_token: string, id_token?: string, ...}
      */
-    public function exchangeCode(string $code): array
+    public function exchangeCode(string $code, ?string $redirectUri = null): array
     {
+        $redirectUri = $redirectUri ?? $this->redirectUri;
         $response = Http::asForm()->post($this->tokenUrl, [
             'grant_type' => 'authorization_code',
             'code' => $code,
-            'redirect_uri' => $this->redirectUri,
+            'redirect_uri' => $redirectUri,
             'client_id' => $this->clientId,
             'client_secret' => $this->clientSecret,
         ]);
 
         if (!$response->successful()) {
+            Log::warning('LINE token exchange failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
             throw new \RuntimeException('LINE token exchange failed: ' . $response->body());
         }
 

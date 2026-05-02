@@ -34,6 +34,12 @@ return [
     'line' => [
         'client_id' => env('LINE_CLIENT_ID'),
         'client_secret' => env('LINE_CLIENT_SECRET'),
+        // LINE_REDIRECT_URI を明示した場合のみ true（コールバックURLは env の値をそのまま使う）
+        'redirect_is_explicit' => (function () {
+            $explicit = env('LINE_REDIRECT_URI');
+
+            return $explicit !== null && trim((string) $explicit) !== '';
+        })(),
         // LINE Login のコールバック。未設定時は APP_URL と一致させる（登録URLとズレると invalid redirect_uri になる）
         'redirect' => (function () {
             $explicit = env('LINE_REDIRECT_URI');

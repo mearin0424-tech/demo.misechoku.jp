@@ -30,7 +30,12 @@ class LineLoginController extends Controller
         $state = $role . '.' . Str::random(32);
         session()->put('line_login_state', $state);
 
-        $url = $this->lineLogin->getAuthorizationUrl($state);
+        $redirectUri = $this->resolveLineRedirectUri($request);
+        if (!config('services.line.redirect_is_explicit')) {
+            session()->put('line_oauth_redirect_uri', $redirectUri);
+        }
+
+        $url = $this->lineLogin->getAuthorizationUrl($state, $redirectUri);
 
         return redirect()->away($url);
     }
@@ -52,7 +57,12 @@ class LineLoginController extends Controller
         session()->put('line_link_guard', $guard);
         session()->put('line_link_user_id', $userId);
 
-        $url = $this->lineLogin->getAuthorizationUrl($state);
+        $redirectUri = $this->resolveLineRedirectUri($request);
+        if (!config('services.line.redirect_is_explicit')) {
+            session()->put('line_oauth_redirect_uri', $redirectUri);
+        }
+
+        $url = $this->lineLogin->getAuthorizationUrl($state, $redirectUri);
 
         return redirect()->away($url);
     }
@@ -89,8 +99,12 @@ class LineLoginController extends Controller
                 ->withErrors(['line' => '不正なリクエストです。']);
         }
 
+        $redirectUri = config('services.line.redirect_is_explicit')
+            ? config('services.line.redirect')
+            : (session()->pull('line_oauth_redirect_uri') ?: config('services.line.redirect'));
+
         try {
-            $tokenData = $this->lineLogin->exchangeCode($code);
+            $tokenData = $this->lineLogin->exchangeCode($code, $redirectUri);
             $accessToken = $tokenData['access_token'] ?? null;
             if (!$accessToken) {
                 throw new \RuntimeException('No access_token in response');
@@ -208,5 +222,20 @@ class LineLoginController extends Controller
         return redirect()
             ->route('shop.home')
             ->with('message', 'LINEでログインしました。');
+    }
+
+    /**
+     * LINE に渡す redirect_uri（認可URLとトークン交換で完全一致させる）
+     * LINE_REDIRECT_URI 未設定時は実リクエストのスキーム・ホストに合わせる（APP_URL ずれによる 400 対策）
+     */
+    private function resolveLineRedirectUri(Request $request): string
+    {
+        if (config('services.line.redirect_is_explicit')) {
+            return config('services.line.redirect');
+        }
+
+        $root = rtrim($request->getSchemeAndHttpHost() . $request->getBasePath(), '/');
+
+        return $root . '/login/line/callback';
     }
 }

@@ -148,6 +148,9 @@ class RecruitmentController extends Controller
             'help_hourly_wage' => 'nullable|integer|min:0',
             'noruma_reward' => 'nullable|integer|min:0',
             'bonus_condition' => 'nullable|string|max:1000',
+            'bonus_total_working_days' => 'nullable|integer|min:0',
+            'bonus_total_working_hours' => 'nullable|integer|min:0',
+            'bonus_other_conditions' => 'nullable|string|max:1000',
             'salary_text' => 'nullable|string|max:1000',
             'working_hours' => 'required|string|max:255',
             'working_days' => 'required|string|max:255',
@@ -172,10 +175,14 @@ class RecruitmentController extends Controller
         $shopId = $this->currentShopId();
         $meta = $this->getRecruitMeta($shopId);
         $currentStatus = $this->getCurrentRecruitStatus($shopId);
+        $bonusOther = trim((string) ($request->input('bonus_other_conditions', $data['bonus_condition'] ?? '')));
         $payload = array_merge($meta, [
             'catch_copy' => $data['catch_copy'],
             'message' => $data['message'],
-            'bonus_condition' => trim((string) ($data['bonus_condition'] ?? '')),
+            'bonus_condition' => $bonusOther,
+            'bonus_total_working_days' => $request->filled('bonus_total_working_days') ? (int) $request->input('bonus_total_working_days') : null,
+            'bonus_total_working_hours' => $request->filled('bonus_total_working_hours') ? (int) $request->input('bonus_total_working_hours') : null,
+            'bonus_other_conditions' => $bonusOther,
             'working_days' => $data['working_days'],
             'regular_holiday' => $data['regular_holiday'] ?? '',
             'qualification' => $data['qualification'],
@@ -278,7 +285,7 @@ class RecruitmentController extends Controller
         }
 
         return redirect()
-            ->route('shop.recruits.status')
+            ->back()
             ->with('message', $nextStatus === 1 ? '求人を公開しました' : '求人を非公開にしました');
     }
 
@@ -305,6 +312,14 @@ class RecruitmentController extends Controller
             ->where('job_type', 3)
             ->first();
 
+        $industryName = null;
+        if (!empty($row?->industry_id)) {
+            $industryName = DB::table('industries')
+                ->where('id', $row->industry_id)
+                ->value('name');
+        }
+        $shopTagGroups = $this->resolveShopInfoTagGroups($shopId);
+
         $meta = $this->decodeMeta($row->noruma_cond ?? null);
         $tagMap = $this->resolveRecruitTagNames($meta['tag_ids'] ?? []);
         $subImages = DB::table('shop_images')
@@ -328,10 +343,12 @@ class RecruitmentController extends Controller
         $regularHoliday = Schema::hasColumn('shop_jobs', 'regular_holiday') ? ($row->regular_holiday ?? '') : ($meta['regular_holiday'] ?? '');
         $qualification = Schema::hasColumn('shop_jobs', 'qualification') ? ($row->qualification ?? '') : ($meta['qualification'] ?? '');
 
-        // 達成条件の構造化（勤務日数／勤務時間／その他条件）
-        $bonusWorkingDays = (string) ($meta['working_days'] ?? $workingDays ?? '');
-        $bonusWorkingHours = (string) ($meta['working_hours'] ?? $workingHours ?? '');
-        $bonusExtraCondition = trim((string) ($meta['bonus_condition'] ?? ''));
+        // 達成条件（編集画面の bonus_* と旧キーの両方を参照）
+        $bonusWorkingDaysRaw = $meta['bonus_total_working_days'] ?? $meta['bonus_working_days'] ?? null;
+        $bonusWorkingHoursRaw = $meta['bonus_total_working_hours'] ?? $meta['bonus_working_hours'] ?? null;
+        $bonusWorkingDays = $bonusWorkingDaysRaw === null || $bonusWorkingDaysRaw === '' ? '' : (string) $bonusWorkingDaysRaw;
+        $bonusWorkingHours = $bonusWorkingHoursRaw === null || $bonusWorkingHoursRaw === '' ? '' : (string) $bonusWorkingHoursRaw;
+        $bonusExtraCondition = trim((string) ($meta['bonus_other_conditions'] ?? $meta['bonus_condition'] ?? ''));
 
         return [
             'recruit' => [
@@ -342,15 +359,21 @@ class RecruitmentController extends Controller
                 'nearest_station' => $row->station1 ?? '',
                 'hourly_wage_regular' => isset($row->hourly_wage_regular) ? (int) $row->hourly_wage_regular : 0,
                 'trial_hourly_wage' =>
-                    $trialRow && !empty($trialRow->status) && !empty($trialRow->trial_hourly_wage)
+                    $trialRow && !empty($trialRow->trial_hourly_wage)
                         ? (int) $trialRow->trial_hourly_wage
                         : null,
                 'help_hourly_wage' =>
-                    $helpRow && !empty($helpRow->status) && !empty($helpRow->help_hourly_wage)
+                    $helpRow && !empty($helpRow->help_hourly_wage)
                         ? (int) $helpRow->help_hourly_wage
                         : null,
+                'help_job_content' => $helpRow && Schema::hasColumn('shop_jobs', 'job_description')
+                    ? (string) ($helpRow->job_description ?? '')
+                    : '',
                 'noruma_reward' => isset($row->noruma_reward) ? (int) $row->noruma_reward : 0,
                 'bonus_condition' => $bonusExtraCondition,
+                'bonus_other_conditions' => $bonusExtraCondition,
+                'bonus_total_working_days' => $bonusWorkingDays,
+                'bonus_total_working_hours' => $bonusWorkingHours,
                 'bonus_working_days' => $bonusWorkingDays,
                 'bonus_working_hours' => $bonusWorkingHours,
                 'salary_text' => $row->salary ?? '',
@@ -389,8 +412,82 @@ class RecruitmentController extends Controller
                 'review_avg' => 0,
                 'review_cnt' => 0,
                 'sub_images' => $subImages,
+                'zip' => $row->zip ?? '',
+                'pref' => $row->pref ?? '',
+                'city' => $row->city ?? '',
+                'addr1' => trim(($row->addr2 ?? '') . ' ' . ($row->addr3 ?? '')),
+                'industry_name' => $industryName,
+                'nearest_station' => $row->station1 ?? '',
+                'tag_groups' => $shopTagGroups,
             ],
         ];
+    }
+
+    /**
+     * マイページと同様、shop_tag_relations からマスタタグをグループ表示用に取得する。
+     *
+     * @return array<int, array{label: string, tags: array<int, string>}>
+     */
+    private function resolveShopInfoTagGroups(string $shopId): array
+    {
+        $schema = DB::getSchemaBuilder();
+        if (!$schema->hasTable('shop_tag_relations')) {
+            return [];
+        }
+
+        $definitions = [
+            ['label' => '給与・支払い', 'types' => ['salary'], 'table' => 'tags_salary'],
+            ['label' => '働き方', 'types' => ['howto'], 'table' => 'tags_shop_working_styles'],
+            ['label' => '待遇・サポート', 'types' => ['merit'], 'table' => 'tags_shop_benefits'],
+            ['label' => '店舗特徴・条件', 'types' => ['feature'], 'table' => 'tags_shop_conditions'],
+            ['label' => '設備・空間', 'types' => ['facility'], 'table' => 'tags_shop_facilities'],
+            ['label' => 'お店の雰囲気・客層', 'types' => ['atmosphere'], 'table' => 'tags_shop_atmospheres'],
+        ];
+
+        $groups = [];
+        foreach ($definitions as $def) {
+            if (!$schema->hasTable($def['table'])) {
+                continue;
+            }
+            $names = $this->fetchShopTagNamesForRelations($shopId, $def['types'], $def['table']);
+            if (!empty($names)) {
+                $groups[] = ['label' => $def['label'], 'tags' => $names];
+            }
+        }
+
+        if ($schema->hasTable('tags_shop_accesses')) {
+            $accessNames = $this->fetchShopTagNamesForRelations($shopId, ['access', 'shop_access'], 'tags_shop_accesses');
+            if (!empty($accessNames)) {
+                $groups[] = ['label' => '通勤・アクセス', 'tags' => $accessNames];
+            }
+        }
+
+        return $groups;
+    }
+
+    private function fetchShopTagNamesForRelations(string $shopId, array $tagTypes, string $masterTable): array
+    {
+        $tagIds = DB::table('shop_tag_relations')
+            ->where('shop_id', $shopId)
+            ->whereIn('tag_type', $tagTypes)
+            ->pluck('tag_id')
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($tagIds)) {
+            return [];
+        }
+
+        return DB::table($masterTable)
+            ->whereIn('id', $tagIds)
+            ->orderBy('id')
+            ->pluck('name')
+            ->filter()
+            ->values()
+            ->all();
     }
 
     private function getRecruitMeta(string $shopId): array
