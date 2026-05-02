@@ -206,16 +206,18 @@ class MypageController extends Controller
         $word = is_string($word) ? trim($word) : '';
 
         $now = Carbon::now();
-        $insertRow = [
-            'shop_id'    => $shopId,
-            'body'       => $word,
-            'created_at' => $now,
-            'updated_at' => $now,
-        ];
+        $matchKey = ['shop_id' => $shopId];
         if (Schema::hasColumn('shop_posts', 'type')) {
-            $insertRow['type'] = 2;
+            $matchKey['type'] = 2;
         }
-        DB::table('shop_posts')->insert($insertRow);
+        DB::table('shop_posts')->updateOrInsert(
+            $matchKey,
+            [
+                'body'       => $word,
+                'updated_at' => $now,
+                'created_at' => $now,
+            ]
+        );
 
         return response()->json([
             'success' => true,
