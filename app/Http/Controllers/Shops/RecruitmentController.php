@@ -156,7 +156,6 @@ class RecruitmentController extends Controller
             'working_days' => 'required|string|max:255',
             'regular_holiday' => 'nullable|string|max:255',
             'job_content' => 'required|string|max:2000',
-            'store_atmosphere' => 'nullable|string|max:2000',
             'qualification' => 'required|string|max:255',
             'salary_tag_ids' => 'nullable|array',
             'salary_tag_ids.*' => 'integer|exists:tags_salary,id',
@@ -166,15 +165,10 @@ class RecruitmentController extends Controller
             'merit_tag_ids.*' => 'integer|exists:tags_shop_benefits,id',
             'feature_tag_ids' => 'nullable|array',
             'feature_tag_ids.*' => 'integer|exists:tags_shop_conditions,id',
-            'facility_tag_ids' => 'nullable|array',
-            'facility_tag_ids.*' => 'integer|exists:tags_shop_facilities,id',
-            'atmosphere_tag_ids' => 'nullable|array',
-            'atmosphere_tag_ids.*' => 'integer|exists:tags_shop_atmospheres,id',
         ]);
 
         $shopId = $this->currentShopId();
         $meta = $this->getRecruitMeta($shopId);
-        $currentStatus = $this->getCurrentRecruitStatus($shopId);
         $bonusOther = trim((string) ($request->input('bonus_other_conditions', $data['bonus_condition'] ?? '')));
         $payload = array_merge($meta, [
             'catch_copy' => $data['catch_copy'],
@@ -186,19 +180,20 @@ class RecruitmentController extends Controller
             'working_days' => $data['working_days'],
             'regular_holiday' => $data['regular_holiday'] ?? '',
             'qualification' => $data['qualification'],
+            // 設備・雰囲気は Shop Information で管理。DB の shop_tag_relations と同期してメタに反映する。
             'tag_ids' => [
                 'salary' => array_values(array_map('intval', $request->input('salary_tag_ids', []))),
                 'howto' => array_values(array_map('intval', $request->input('howto_tag_ids', []))),
                 'merit' => array_values(array_map('intval', $request->input('merit_tag_ids', []))),
                 'feature' => array_values(array_map('intval', $request->input('feature_tag_ids', []))),
-                'facility' => array_values(array_map('intval', $request->input('facility_tag_ids', []))),
-                'atmosphere' => array_values(array_map('intval', $request->input('atmosphere_tag_ids', []))),
+                'facility' => $this->mergeShopManagedTagIds($shopId, 'facility', $meta['tag_ids']['facility'] ?? []),
+                'atmosphere' => $this->mergeShopManagedTagIds($shopId, 'atmosphere', $meta['tag_ids']['atmosphere'] ?? []),
             ],
         ]);
 
         $jobPayload = [
             'shop_id' => $shopId,
-            'status' => $currentStatus,
+            'status' => $request->boolean('published') ? 1 : 0,
             'hourly_wage_regular' => (string) $data['hourly_wage_regular'],
             'trial_hourly_wage' => $request->filled('trial_hourly_wage') ? (string) $data['trial_hourly_wage'] : null,
             'has_trial' => $request->filled('trial_hourly_wage') ? 1 : 0,
@@ -207,7 +202,6 @@ class RecruitmentController extends Controller
             'noruma_reward' => $request->filled('noruma_reward') ? (string) $data['noruma_reward'] : null,
             'job_description' => $data['job_content'],
             'salary' => $data['salary_text'] ?? '',
-            'atmosphere' => $data['store_atmosphere'] ?? '',
             'noruma_cond' => json_encode($payload, JSON_UNESCAPED_UNICODE),
             'updated_at' => now(),
         ];
@@ -243,13 +237,11 @@ class RecruitmentController extends Controller
             ]));
         }
 
-        // 店舗タグを中間テーブル shop_tag_relations で同期
+        // 求人票で選ぶタグのみ同期（設備・雰囲気は Shop Information で管理）
         $this->syncShopTags($shopId, 'salary', $request->input('salary_tag_ids', []));
         $this->syncShopTags($shopId, 'howto', $request->input('howto_tag_ids', []));
         $this->syncShopTags($shopId, 'merit', $request->input('merit_tag_ids', []));
         $this->syncShopTags($shopId, 'feature', $request->input('feature_tag_ids', []));
-        $this->syncShopTags($shopId, 'facility', $request->input('facility_tag_ids', []));
-        $this->syncShopTags($shopId, 'atmosphere', $request->input('atmosphere_tag_ids', []));
 
         return redirect()
             ->route('shop.recruits.edit')
@@ -548,6 +540,44 @@ class RecruitmentController extends Controller
             ->unique()
             ->values()
             ->all();
+    }
+
+    /**
+     * Shop Information で選んだ設備・雰囲気タグなどを求人メタに載せるため、リレーションから取得する。
+     *
+     * @return array<int, int>
+     */
+    private function getShopRelationTagIds(string $shopId, string $tagType): array
+    {
+        if (!DB::getSchemaBuilder()->hasTable('shop_tag_relations')) {
+            return [];
+        }
+
+        return DB::table('shop_tag_relations')
+            ->where('shop_id', $shopId)
+            ->where('tag_type', $tagType)
+            ->orderBy('tag_id')
+            ->pluck('tag_id')
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * 設備・雰囲気は店舗側が DB で管理する想定。リレーションをメタに反映しつつ、未移行でメタのみにある ID は失わないようマージする。
+     *
+     * @param array<mixed> $previousMetaIds
+     * @return array<int, int>
+     */
+    private function mergeShopManagedTagIds(string $shopId, string $tagType, array $previousMetaIds): array
+    {
+        $fromDb = $this->getShopRelationTagIds($shopId, $tagType);
+        $fromMeta = $this->normalizeTagIds($previousMetaIds);
+        $merged = array_values(array_unique(array_merge($fromDb, $fromMeta)));
+        sort($merged);
+
+        return $merged;
     }
 
     private function syncShopTags(string $shopId, string $tagType, array $tagIds): void

@@ -13,6 +13,7 @@ use App\Http\Controllers\Common\BankLookupController;
 use App\Http\Controllers\Common\RegistrationController;
 use App\Http\Controllers\Auth\Cast\LoginController as CastLogin;
 use App\Http\Controllers\Auth\LineLoginController as LineLogin;
+use App\Http\Controllers\LineWebhookController;
 use App\Http\Controllers\Common\TalkController as TalkController;
 
 // 邂｡逅・・ｼ医ヰ繝・け繧ｪ繝輔ぅ繧ｹ・・
@@ -212,6 +213,9 @@ Route::post('/login', [DemoLoginController::class, 'login'])->name('login.demo.p
 // LINE繝ｭ繧ｰ繧､繝ｳ
 Route::get('/login/line', [LineLogin::class, 'redirect'])->name('login.line.redirect');
 Route::get('/login/line/callback', [LineLogin::class, 'callback'])->name('login.line.callback');
+
+// Messaging API Webhook（LINE Login のコールバックとは別。検証は同一チャネルの Channel secret が .env と一致している必要あり）
+Route::post('/line/webhook', LineWebhookController::class)->name('line.webhook');
 
 Route::name('pages.')->group(function () {
     Route::get('/about', [PageController::class, 'about'])->name('official.about');

@@ -1,485 +1,606 @@
 @extends('layouts.app')
 
-@section('title', '求人情報の編集')
-@section('header_title', '求人情報の編集')
-@section('guide_message', '求人票は、最初に目に入る条件とお店らしさが伝わるほど、応募につながりやすくなります。上から順にご入力いただければ、そのまま見やすい求人票になるよう整えております。')
+@section('title', '求人票の編集')
+
+@section('guide_message')
+    求人票は応募者向けのオファーです。店舗名・住所・写真・設備・店内の雰囲気などは「Shop Information（プロフィール編集）」で登録し、この画面では募集の訴求・給与・シフトの書き方・求人タグを編集してください。
+@endsection
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/recruitment.css') }}">
 <style>
-    .recruit-chip-grid {
+    .job-edit-v2 {
+        --je-bg: #050505;
+        --je-panel: #0a0a0a;
+        --je-field: #110f0d;
+        --je-border: #2a2015;
+        --je-gold: #d4af37;
+        background: var(--je-bg);
+        margin: 0 calc(-1 * var(--content-padding-x, 16px));
+        padding-bottom: calc(var(--footer-height, 75px) + 96px + env(safe-area-inset-bottom, 0px));
+    }
+    .job-edit-v2__shell {
+        max-width: 28rem;
+        margin: 0 auto;
+        min-height: 100%;
+        background: var(--je-panel);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+    }
+    .job-edit-v2__top {
+        position: sticky;
+        top: 0;
+        z-index: 40;
         display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    .recruit-chip {
-        position: relative;
-        display: inline-flex;
         align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 16px;
+        background: rgba(10, 10, 10, 0.95);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid #1f1a14;
     }
-    .recruit-chip input {
-        position: absolute;
-        opacity: 0;
-        pointer-events: none;
+    .job-edit-v2__back {
+        color: #a1a1aa;
+        padding: 4px;
+        margin-left: -4px;
+        font-size: 1.25rem;
+        text-decoration: none;
+        line-height: 1;
     }
-    .recruit-chip span {
-        display: inline-flex;
-        align-items: center;
-        min-height: 38px;
-        padding: 8px 14px;
-        border-radius: 999px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: rgba(255,255,255,0.04);
+    .job-edit-v2__back:hover { color: var(--je-gold); }
+    .job-edit-v2__title-wrap { text-align: center; flex: 1; min-width: 0; }
+    .job-edit-v2__title-en {
+        margin: 0;
+        font-size: 0.875rem;
+        font-weight: 800;
         color: #fff;
-        font-size: 0.85rem;
+        letter-spacing: 0.18em;
+        font-family: var(--font-serif, "Shippori Mincho", serif);
     }
-    .recruit-chip input:checked + span {
-        border-color: var(--gold);
-        background: rgba(212, 175, 55, 0.18);
-        color: #f8e7b0;
-    }
+    .job-edit-v2__title-sub { margin: 2px 0 0; font-size: 9px; font-weight: 700; color: var(--je-gold); letter-spacing: 0.06em; }
+    .job-edit-v2__spacer { width: 2rem; flex-shrink: 0; }
 
-    .recruit-input-with-unit {
-        display: flex;
-        align-items: center;
-        border: 1px solid rgba(255,255,255,0.14);
-        border-radius: 12px;
-        overflow: hidden;
-        background: rgba(0,0,0,0.25);
+    .job-edit-v2__notice {
+        margin: 12px 16px 0;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid rgba(212, 175, 55, 0.28);
+        background: rgba(42, 34, 16, 0.35);
+        font-size: 0.72rem;
+        line-height: 1.65;
+        color: #c4b8ae;
     }
-
-    .recruit-input-with-unit .recruit-input {
-        flex-grow: 1;
-        border: none;
-        border-radius: 0;
-        background: transparent;
-    }
-
-    .recruit-input-with-unit .unit {
-        padding: 10px 14px;
-        background: rgba(255,255,255,0.06);
-        color: #e9dede;
-        font-size: 0.85rem;
+    .job-edit-v2__notice a {
+        color: var(--je-gold);
         font-weight: 700;
         white-space: nowrap;
     }
 
-    .recruit-publish-bar {
+    .job-edit-v2__status {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 16px;
-        padding: 8px 2px 20px;
-        margin-bottom: 4px;
+        gap: 14px;
+        padding: 16px 20px;
+        background: #110f0d;
+        border-bottom: 1px solid var(--je-border);
     }
-    .recruit-publish-label {
-        font-size: 0.62rem;
-        font-weight: 700;
-        color: rgba(255,255,255,0.45);
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        margin: 0 0 6px;
-    }
-    .recruit-publish-title-row {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .recruit-publish-title {
-        margin: 0;
-        font-size: 1.35rem;
-        font-weight: 800;
-        letter-spacing: 0.02em;
-        color: #fff;
-    }
-    .recruit-publish-title.is-off {
-        color: rgba(255,255,255,0.35);
-    }
-    .recruit-publish-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--gold);
-        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.25);
-    }
-    .recruit-publish-switch-wrap {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 6px;
-    }
-    .recruit-publish-switch {
+    .job-edit-v2__status-label { margin: 0 0 2px; font-size: 0.75rem; font-weight: 800; color: #fafafa; }
+    .job-edit-v2__status-hint { margin: 0; font-size: 9px; color: #71717a; }
+    .job-edit-v2__status-right { display: flex; align-items: center; gap: 10px; }
+    .job-edit-v2__pub-label { font-size: 10px; font-weight: 800; color: #71717a; }
+    .job-edit-v2__pub-label.is-on { color: var(--je-gold); }
+
+    .job-edit-v2__switch {
         position: relative;
-        display: inline-block;
-        width: 64px;
-        height: 36px;
+        width: 48px;
+        height: 26px;
+        flex-shrink: 0;
         cursor: pointer;
     }
-    .recruit-publish-switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-        position: absolute;
-    }
-    .recruit-publish-switch-track {
+    .job-edit-v2__switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .job-edit-v2__switch-track {
         position: absolute;
         inset: 0;
         border-radius: 999px;
-        background: rgba(255,255,255,0.12);
+        background: #52525b;
         transition: background 0.25s ease;
     }
-    .recruit-publish-switch input:checked + .recruit-publish-switch-track {
-        background: rgba(212, 175, 55, 0.95);
-    }
-    .recruit-publish-switch-knob {
+    .job-edit-v2__switch input:checked + .job-edit-v2__switch-track { background: var(--je-gold); }
+    .job-edit-v2__switch-knob {
         position: absolute;
         top: 3px;
         left: 4px;
-        width: 30px;
-        height: 30px;
+        width: 20px;
+        height: 20px;
         border-radius: 50%;
         background: #fff;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
         transition: transform 0.25s ease;
     }
-    .recruit-publish-switch input:checked + .recruit-publish-switch-track .recruit-publish-switch-knob {
-        transform: translateX(26px);
+    .job-edit-v2__switch input:checked + .job-edit-v2__switch-track .job-edit-v2__switch-knob { transform: translateX(22px); }
+
+    .job-edit-v2__form { padding: 20px; display: flex; flex-direction: column; gap: 40px; }
+
+    .job-edit-v2__sec-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 20px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #1f1a14;
+        font-size: 0.875rem;
+        font-style: italic;
+        font-family: var(--font-serif, "Shippori Mincho", serif);
+        font-weight: 600;
+        color: rgba(161, 161, 170, 0.95);
+        letter-spacing: 0.06em;
     }
-    .recruit-publish-switch-hint {
-        font-size: 0.58rem;
-        font-weight: 700;
-        color: rgba(255,255,255,0.38);
-        letter-spacing: 0.04em;
+    .job-edit-v2__sec-title i { font-size: 0.9rem; color: #52525b; font-style: normal; }
+
+    .job-edit-v2__field { margin-bottom: 22px; }
+    .job-edit-v2__field:last-child { margin-bottom: 0; }
+    .job-edit-v2__label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 10px;
+        font-weight: 800;
+        color: var(--je-gold);
+        margin: 0 0 6px 4px;
+    }
+    .job-edit-v2__req {
+        font-size: 8px;
+        font-weight: 800;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: rgba(212, 175, 55, 0.15);
+        border: 1px solid rgba(212, 175, 55, 0.35);
+        color: var(--je-gold);
+        line-height: 1.2;
+    }
+    .job-edit-v2__input,
+    .job-edit-v2__textarea {
+        width: 100%;
+        box-sizing: border-box;
+        background: var(--je-field);
+        border: 1px solid var(--je-border);
+        border-radius: 8px;
+        padding: 12px 14px;
+        font-size: 0.875rem;
+        color: #fafafa;
+        transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .job-edit-v2__textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+    .job-edit-v2__input:focus,
+    .job-edit-v2__textarea:focus {
+        outline: none;
+        border-color: rgba(212, 175, 55, 0.5);
+        background: #161311;
+    }
+    .job-edit-v2__hint { margin: 6px 0 0 4px; font-size: 9px; line-height: 1.55; color: #52525b; }
+
+    .job-edit-v2__grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .job-edit-v2__unit-wrap { position: relative; }
+    .job-edit-v2__unit-wrap .job-edit-v2__input { padding-right: 2.25rem; }
+    .job-edit-v2__unit-suffix {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.75rem;
+        color: #71717a;
+        pointer-events: none;
     }
 
-    .recruit-edit-footer-fixed {
+    .job-edit-v2__card {
+        background: #110f0d;
+        border: 1px solid var(--je-border);
+        border-radius: 12px;
+        padding: 16px;
+    }
+    .job-edit-v2__card--accent {
+        border-color: #1f1a14;
+        position: relative;
+        overflow: hidden;
+    }
+    .job-edit-v2__card--accent::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: rgba(212, 175, 55, 0.45);
+    }
+    .job-edit-v2__card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+    .job-edit-v2__card-head label { margin: 0; font-size: 0.75rem; font-weight: 800; color: var(--je-gold); }
+
+    .job-edit-v2__help-switch { width: 40px; height: 22px; }
+    .job-edit-v2__help-switch .job-edit-v2__switch-knob { width: 16px; height: 16px; top: 3px; }
+    .job-edit-v2__help-switch input:checked + .job-edit-v2__switch-track .job-edit-v2__switch-knob { transform: translateX(18px); }
+
+    .job-edit-v2__chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .job-edit-v2__chip {
+        position: relative;
+        display: inline-flex;
+        cursor: pointer;
+    }
+    .job-edit-v2__chip input { position: absolute; opacity: 0; pointer-events: none; }
+    .job-edit-v2__chip span {
+        display: inline-flex;
+        align-items: center;
+        min-height: 32px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--je-border);
+        background: #141210;
+        color: #a1a1aa;
+        font-size: 10px;
+        font-weight: 600;
+        transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .job-edit-v2__chip input:checked + span {
+        border-color: var(--je-gold);
+        background: #2a2210;
+        color: var(--je-gold);
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.1);
+    }
+    .job-edit-v2__tag-cat { margin: 0 0 8px; font-size: 0.75rem; font-weight: 800; color: var(--je-gold); }
+
+    .job-edit-v2__shop-note {
+        margin-top: 10px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px dashed rgba(255, 255, 255, 0.12);
+        font-size: 0.68rem;
+        line-height: 1.6;
+        color: #9ca3af;
+    }
+
+    .job-edit-v2__footer {
         position: fixed;
         left: 0;
         right: 0;
-        bottom: var(--footer-height);
-        z-index: 30;
+        bottom: var(--footer-height, 75px);
+        z-index: 35;
         display: flex;
-        gap: 10px;
-        padding: 12px 16px;
-        background: linear-gradient(180deg, rgba(18, 6, 8, 0.92), rgba(12, 4, 6, 0.98));
-        border-top: 1px solid rgba(230, 208, 128, 0.18);
+        justify-content: center;
+        padding: 16px;
+        padding-left: max(16px, env(safe-area-inset-left, 0px));
+        padding-right: max(16px, env(safe-area-inset-right, 0px));
+        padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+        background: rgba(10, 10, 10, 0.95);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid #1f1a14;
         box-sizing: border-box;
     }
-    .recruit-edit-footer-fixed .recruit-edit-footer-btn {
-        flex: 1;
-        justify-content: center;
-        min-height: 48px;
-        margin: 0;
+    .job-edit-v2__footer-inner {
+        display: flex;
+        gap: 12px;
+        width: 100%;
+        max-width: 28rem;
     }
-    .recruit-edit-footer-primary {
-        flex: 1;
-        min-height: 48px;
+    .job-edit-v2__btn-cancel {
+        flex: 0 0 auto;
+        padding: 12px 18px;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #a1a1aa;
+        text-decoration: none;
         border: none;
-        border-radius: 14px;
-        background: linear-gradient(135deg, #d4af37, #b8922a);
-        color: #1a0a0c;
-        font-size: 0.85rem;
-        font-weight: 800;
+        background: transparent;
         cursor: pointer;
+        font-family: inherit;
+    }
+    .job-edit-v2__btn-cancel:hover { color: #fff; background: #18181b; }
+    .job-edit-v2__btn-save {
+        flex: 1;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
-        box-shadow: 0 8px 24px rgba(212, 175, 55, 0.2);
+        padding: 12px 16px;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 800;
+        cursor: pointer;
+        color: #141210;
+        background: linear-gradient(to right, #d4af37, #b8942b);
+        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.15);
+        font-family: inherit;
     }
-    .recruit-edit-footer-primary:hover {
-        filter: brightness(1.05);
-    }
+    .job-edit-v2__btn-save:hover { opacity: 0.92; }
 
-    .recruit-edit-page {
-        padding-bottom: calc(var(--footer-height) + 88px);
-    }
+    .profile-edit-flash,
+    .recruit-error-summary { margin: 12px 16px 0; }
 </style>
 @endpush
 
 @section('content')
-<div class="contents inner recruit-edit-page animate-fadeIn p-4">
-    @php
-        $isActive = ($recruit['status'] ?? 'active') === 'active';
-    @endphp
+@php
+    $isActive = ($recruit['status'] ?? 'active') === 'active';
+@endphp
 
-    @if(session('message'))
-        <p class="profile-edit-flash" style="margin-bottom:16px;">{{ session('message') }}</p>
-    @endif
+<div class="job-edit-v2 animate-fadeIn">
+    <div class="job-edit-v2__shell">
+        <header class="job-edit-v2__top">
+            <a href="{{ route('shop.jobdescription') }}" class="job-edit-v2__back" aria-label="戻る"><i class="fas fa-chevron-left"></i></a>
+            <div class="job-edit-v2__title-wrap">
+                <h1 class="job-edit-v2__title-en">EDIT JOB</h1>
+                <p class="job-edit-v2__title-sub">求人票の編集</p>
+            </div>
+            <div class="job-edit-v2__spacer" aria-hidden="true"></div>
+        </header>
 
-    @if($errors->any())
-        <div class="recruit-error-summary">
-            <p class="recruit-error-summary-title">入力内容を確認してください</p>
-            <ul>
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+        <p class="job-edit-v2__notice">
+            <strong style="color:#e8dcc8;">Shop Information</strong> で登録：店舗名・業種・住所・最寄り・営業時間・定休・写真・<strong>設備／店内の雰囲気タグ</strong> など。<br>
+            <strong style="color:#e8dcc8;">この画面（求人票）</strong> で登録：キャッチ・メッセージ・時給・ボーナス・勤務の書き方・<strong>給与／働き方／待遇／募集条件タグ</strong>・仕事内容・応募資格。
+            <a href="{{ route('shop.profile.store.edit') }}">プロフィールを編集</a>
+        </p>
 
-    <nav class="recruit-anchor-nav" aria-label="編集セクション">
-        <a href="#recruit-appeal" class="recruit-anchor-link">訴求内容</a>
-        <a href="#recruit-salary" class="recruit-anchor-link">給与</a>
-        <a href="#recruit-work" class="recruit-anchor-link">勤務条件</a>
-        <a href="#recruit-detail" class="recruit-anchor-link">募集要項</a>
-        <a href="#recruit-tags" class="recruit-anchor-link">タグ選択</a>
-        <a href="#recruit-save" class="recruit-anchor-link">保存</a>
-    </nav>
+        @if(session('message'))
+            <p class="profile-edit-flash" style="margin-top:12px;">{{ session('message') }}</p>
+        @endif
 
-    <form id="recruit-form" action="{{ route('shop.recruits.update') }}" method="POST">
-        @csrf
-        @method('PUT')
+        @if($errors->any())
+            <div class="recruit-error-summary" style="margin-top:12px;">
+                <p class="recruit-error-summary-title">入力内容を確認してください</p>
+                <ul>
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-        <div class="recruit-publish-bar">
-            <div>
-                <p class="recruit-publish-label">ステータス</p>
-                <div class="recruit-publish-title-row">
-                    <h2 class="recruit-publish-title {{ $isActive ? '' : 'is-off' }}">{{ $isActive ? '公開中' : '公開停止中' }}</h2>
-                    @if($isActive)
-                        <span class="recruit-publish-dot" aria-hidden="true"></span>
-                    @endif
+        <form id="recruit-form" action="{{ route('shop.recruits.update') }}" method="POST">
+            @csrf
+            @method('PUT')
+
+            <div class="job-edit-v2__status">
+                <div>
+                    <p class="job-edit-v2__status-label">ステータス</p>
+                    <p class="job-edit-v2__status-hint">オフにすると求人票が非公開になります</p>
                 </div>
-            </div>
-            <div class="recruit-publish-switch-wrap">
-                <label class="recruit-publish-switch" for="publish-toggle">
-                    <input type="checkbox" id="publish-toggle" name="status" value="active" {{ $isActive ? 'checked' : '' }}>
-                    <span class="recruit-publish-switch-track"><span class="recruit-publish-switch-knob"></span></span>
-                </label>
-                <span class="recruit-publish-switch-hint">{{ $isActive ? 'オフにすると非公開' : 'オンにすると公開' }}</span>
-            </div>
-        </div>
-
-        <div class="recruit-section" id="recruit-appeal">
-            <div class="recruit-section-head">
-                <div class="recruit-section-icon"><i class="fas fa-bullhorn"></i></div>
-                <h3 class="recruit-section-title">訴求内容</h3>
-            </div>
-            <p class="recruit-section-copy">一覧や詳細の冒頭で目に入る文章です。短くても、お店らしさと魅力が分かる言葉を入れると伝わりやすくなります。</p>
-            <div class="recruit-form-group">
-                <label class="recruit-label">キャッチコピー <span class="recruit-field-required">必須</span></label>
-                <input type="text" name="catch_copy" class="recruit-input" value="{{ old('catch_copy', $recruit['catch_copy']) }}" placeholder="例: 六本木で一番稼げるお店です！">
-                <p class="recruit-helper-text">30〜60文字くらいで、エリア・雰囲気・強みが入ると見やすくなります。</p>
-            </div>
-            <div class="recruit-form-group">
-                <label class="recruit-label">お店からのメッセージ <span class="recruit-field-required">必須</span></label>
-                <textarea name="message" rows="3" class="recruit-textarea" placeholder="お店の魅力や募集メッセージ">{{ old('message', $recruit['message']) }}</textarea>
-                <p class="recruit-helper-text">未経験歓迎、客層、サポート体制などを入れると応募前の不安を減らせます。</p>
-            </div>
-        </div>
-
-        <div class="recruit-section" id="recruit-salary">
-            <div class="recruit-section-head">
-                <div class="recruit-section-icon"><i class="fas fa-yen-sign"></i></div>
-                <h3 class="recruit-section-title">給与</h3>
-            </div>
-            <p class="recruit-section-copy">もっとも比較されやすい項目です。通常時給、体験時給、ボーナス条件が一目で分かるようにそろえておくと、プレビューでも見やすくなります。</p>
-            <div class="recruit-info-grid" style="margin-bottom: 16px;">
-                <div class="recruit-form-group" style="margin-bottom: 0;">
-                    <label class="recruit-label">
-                        @if(($recruitType ?? 'fulltime') === 'trial')
-                            体入時給 <span class="recruit-field-required">必須</span>
-                        @elseif(($recruitType ?? 'fulltime') === 'help')
-                            ヘルプ時給 <span class="recruit-field-required">必須</span>
-                        @else
-                            通常時給 <span class="recruit-field-required">必須</span>
-                        @endif
-                    </label>
-                    <div class="recruit-input-with-unit">
-                        <input type="text" name="hourly_wage_regular" class="recruit-input" value="{{ old('hourly_wage_regular', number_format((float) ($recruit['hourly_wage_regular'] ?? 0))) }}" placeholder="5,000" inputmode="numeric" pattern="[0-9]*" data-type="currency">
-                        <span class="unit">円</span>
-                    </div>
-                </div>
-                <div class="recruit-form-group" style="margin-bottom: 0;">
-                    <label class="recruit-label">体験時給</label>
-                    <div class="recruit-input-with-unit">
-                        <input type="text" name="trial_hourly_wage" class="recruit-input" value="{{ old('trial_hourly_wage', number_format((float) ($recruit['trial_hourly_wage'] ?? 0))) }}" placeholder="4,000" inputmode="numeric" pattern="[0-9]*" data-type="currency">
-                        <span class="unit">円</span>
-                    </div>
-                </div>
-            </div>
-            <div class="recruit-info-grid" style="margin-bottom: 16px;">
-                <div class="recruit-form-group" style="margin-bottom: 0;">
-                    <label class="recruit-label">ヘルプ時給</label>
-                    <div class="recruit-input-with-unit">
-                        <input type="text" name="help_hourly_wage" class="recruit-input" value="{{ old('help_hourly_wage', number_format((float) ($recruit['help_hourly_wage'] ?? 0))) }}" placeholder="3,500" inputmode="numeric" pattern="[0-9]*" data-type="currency">
-                        <span class="unit">円</span>
-                    </div>
-                </div>
-                <div class="recruit-form-group" style="margin-bottom: 0; align-self: flex-end;">
-                    <label class="recruit-label">
-                        <input type="checkbox" name="has_help" value="1" {{ old('has_help', !empty($recruit['help_hourly_wage'])) ? 'checked' : '' }}>
-                        ヘルプ求人を公開する
+                <div class="job-edit-v2__status-right">
+                    <span class="job-edit-v2__pub-label {{ $isActive ? 'is-on' : '' }}" id="published-label">{{ $isActive ? '公開中' : '非公開' }}</span>
+                    <label class="job-edit-v2__switch">
+                        <input type="checkbox" name="published" value="1" {{ $isActive ? 'checked' : '' }} id="published-toggle" aria-labelledby="published-label">
+                        <span class="job-edit-v2__switch-track"><span class="job-edit-v2__switch-knob"></span></span>
                     </label>
                 </div>
             </div>
-            <div class="recruit-form-group">
-                <label class="recruit-label">給与備考</label>
-                <textarea name="salary_text" rows="2" class="recruit-textarea" placeholder="指名手当・日払いなど">{{ old('salary_text', $recruit['salary_text']) }}</textarea>
-                <p class="recruit-helper-text">バック率、日払い、送迎、ノルマ有無など補足条件をここにまとめると伝わりやすいです。</p>
-            </div>
-            <div class="recruit-info-grid" style="margin-bottom: 16px;">
-                <div class="recruit-form-group" style="margin-bottom: 0;">
-                    <label class="recruit-label">ボーナス金額</label>
-                    <div class="recruit-input-with-unit">
-                        <input type="text" name="noruma_reward" class="recruit-input" value="{{ old('noruma_reward', number_format((float) ($recruit['noruma_reward'] ?? 0))) }}" placeholder="30,000" inputmode="numeric" pattern="[0-9]*" data-type="currency">
-                        <span class="unit">円</span>
+
+            <div class="job-edit-v2__form">
+
+                <section aria-labelledby="job-sec-basic">
+                    <h2 id="job-sec-basic" class="job-edit-v2__sec-title"><i class="fas fa-file-alt"></i> Basic Information</h2>
+                    <div class="job-edit-v2__field">
+                        <label class="job-edit-v2__label" for="catch_copy">キャッチコピー <span class="job-edit-v2__req">必須</span></label>
+                        <input type="text" id="catch_copy" name="catch_copy" class="job-edit-v2__input recruit-input" value="{{ old('catch_copy', $recruit['catch_copy']) }}" placeholder="例: 未経験でも時給5000円スタート！" maxlength="100">
+                        <p class="job-edit-v2__hint">一覧・求人票の冒頭で目立つ短い一文です（店舗名・住所はプロフィール側）。</p>
                     </div>
-                </div>
-                <div class="recruit-form-group" style="margin-bottom: 0;">
-                    <label class="recruit-label">合計勤務日数</label>
-                    <input type="number" name="bonus_total_working_days" class="recruit-input" value="{{ old('bonus_total_working_days', $recruit['bonus_total_working_days'] ?? '') }}" placeholder="例: 10">
-                </div>
-                <div class="recruit-form-group" style="margin-bottom: 0;">
-                    <label class="recruit-label">合計勤務時間</label>
-                    <input type="number" name="bonus_total_working_hours" class="recruit-input" value="{{ old('bonus_total_working_hours', $recruit['bonus_total_working_hours'] ?? '') }}" placeholder="例: 40">
-                </div>
+                    <div class="job-edit-v2__field">
+                        <label class="job-edit-v2__label" for="message">お店からのメッセージ <span class="job-edit-v2__req">必須</span></label>
+                        <textarea id="message" name="message" rows="5" class="job-edit-v2__textarea recruit-textarea" placeholder="未経験歓迎、サポート体制など">{{ old('message', $recruit['message']) }}</textarea>
+                        <p class="job-edit-v2__hint">採用向けの紹介文です。客層やサポートはこちら／店舗の固定スペックはプロフィールとあわせて書くと伝わりやすいです。</p>
+                    </div>
+                </section>
+
+                <section aria-labelledby="job-sec-salary">
+                    <h2 id="job-sec-salary" class="job-edit-v2__sec-title"><i class="fas fa-wallet"></i> Salary &amp; Bonus</h2>
+                    <div class="job-edit-v2__grid2">
+                        <div class="job-edit-v2__field">
+                            <label class="job-edit-v2__label" for="trial_hourly_wage">体入時給 <span class="job-edit-v2__req">必須</span></label>
+                            <div class="job-edit-v2__unit-wrap">
+                                <input type="text" id="trial_hourly_wage" name="trial_hourly_wage" class="job-edit-v2__input recruit-input" value="{{ old('trial_hourly_wage', $recruit['trial_hourly_wage'] ? number_format((float) $recruit['trial_hourly_wage']) : '') }}" placeholder="5,000" inputmode="numeric" data-type="currency">
+                                <span class="job-edit-v2__unit-suffix">円</span>
+                            </div>
+                        </div>
+                        <div class="job-edit-v2__field">
+                            <label class="job-edit-v2__label" for="hourly_wage_regular">本入時給 <span class="job-edit-v2__req">必須</span></label>
+                            <div class="job-edit-v2__unit-wrap">
+                                <input type="text" id="hourly_wage_regular" name="hourly_wage_regular" class="job-edit-v2__input recruit-input" value="{{ old('hourly_wage_regular', number_format((float) ($recruit['hourly_wage_regular'] ?? 0))) }}" placeholder="5,000" inputmode="numeric" data-type="currency">
+                                <span class="job-edit-v2__unit-suffix">円</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="job-edit-v2__card" style="margin-top:8px;">
+                        <div class="job-edit-v2__card-head">
+                            <label for="has-help-toggle">ヘルプ求人を公開する</label>
+                            <label class="job-edit-v2__switch job-edit-v2__help-switch">
+                                <input type="checkbox" name="has_help" value="1" id="has-help-toggle" {{ old('has_help', !empty($recruit['help_hourly_wage'])) ? 'checked' : '' }}>
+                                <span class="job-edit-v2__switch-track"><span class="job-edit-v2__switch-knob"></span></span>
+                            </label>
+                        </div>
+                        <div class="job-edit-v2__field" id="help-wage-field">
+                            <label class="job-edit-v2__label" for="help_hourly_wage">ヘルプ時給</label>
+                            <div class="job-edit-v2__unit-wrap">
+                                <input type="text" id="help_hourly_wage" name="help_hourly_wage" class="job-edit-v2__input recruit-input" value="{{ old('help_hourly_wage', !empty($recruit['help_hourly_wage']) ? number_format((float) $recruit['help_hourly_wage']) : '') }}" placeholder="4,000" inputmode="numeric" data-type="currency">
+                                <span class="job-edit-v2__unit-suffix">円</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="job-edit-v2__field">
+                        <label class="job-edit-v2__label" for="salary_text">給与備考</label>
+                        <textarea id="salary_text" name="salary_text" rows="3" class="job-edit-v2__textarea recruit-textarea" placeholder="バック詳細・日払い・昇給など">{{ old('salary_text', $recruit['salary_text']) }}</textarea>
+                        <p class="job-edit-v2__hint">バック率・各種手当・ノルマの有無など、応募者が比較しやすい条件をまとめます。</p>
+                    </div>
+
+                    <div class="job-edit-v2__card job-edit-v2__card--accent" style="padding-left:18px;">
+                        <p style="margin:0 0 14px;font-size:0.75rem;font-weight:800;color:#e4e4e7;">入店ボーナス設定</p>
+                        <div class="job-edit-v2__field">
+                            <label class="job-edit-v2__label" for="noruma_reward">ボーナス金額</label>
+                            <div class="job-edit-v2__unit-wrap">
+                                <input type="text" id="noruma_reward" name="noruma_reward" class="job-edit-v2__input recruit-input" value="{{ old('noruma_reward', number_format((float) ($recruit['noruma_reward'] ?? 0))) }}" placeholder="50,000" inputmode="numeric" data-type="currency">
+                                <span class="job-edit-v2__unit-suffix">円</span>
+                            </div>
+                        </div>
+                        <div class="job-edit-v2__grid2">
+                            <div class="job-edit-v2__field">
+                                <label class="job-edit-v2__label" for="bonus_total_working_days">合計勤務回数</label>
+                                <div class="job-edit-v2__unit-wrap">
+                                    <input type="number" id="bonus_total_working_days" name="bonus_total_working_days" class="job-edit-v2__input" value="{{ old('bonus_total_working_days', $recruit['bonus_total_working_days'] ?? '') }}" placeholder="10" min="0">
+                                    <span class="job-edit-v2__unit-suffix">回</span>
+                                </div>
+                            </div>
+                            <div class="job-edit-v2__field">
+                                <label class="job-edit-v2__label" for="bonus_total_working_hours">合計勤務時間</label>
+                                <div class="job-edit-v2__unit-wrap">
+                                    <input type="number" id="bonus_total_working_hours" name="bonus_total_working_hours" class="job-edit-v2__input" value="{{ old('bonus_total_working_hours', $recruit['bonus_total_working_hours'] ?? '') }}" placeholder="40" min="0">
+                                    <span class="job-edit-v2__unit-suffix">h</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="job-edit-v2__field">
+                            <label class="job-edit-v2__label" for="bonus_other_conditions">その他条件（フリーテキスト）</label>
+                            <input type="text" id="bonus_other_conditions" name="bonus_other_conditions" class="job-edit-v2__input" value="{{ old('bonus_other_conditions', $recruit['bonus_other_conditions'] ?? '') }}" placeholder="例: 無遅刻無欠勤">
+                        </div>
+                    </div>
+                </section>
+
+                <section aria-labelledby="job-sec-work">
+                    <h2 id="job-sec-work" class="job-edit-v2__sec-title"><i class="fas fa-clock"></i> Working Conditions</h2>
+                    <div class="job-edit-v2__field">
+                        <label class="job-edit-v2__label" for="working_hours">勤務時間 <span class="job-edit-v2__req">必須</span></label>
+                        <input type="text" id="working_hours" name="working_hours" class="job-edit-v2__input" value="{{ old('working_hours', $recruit['working_hours']) }}" placeholder="20:00 〜 翌1:00">
+                    </div>
+                    <div class="job-edit-v2__field">
+                        <label class="job-edit-v2__label" for="working_days">勤務日数・シフト <span class="job-edit-v2__req">必須</span></label>
+                        <input type="text" id="working_days" name="working_days" class="job-edit-v2__input" value="{{ old('working_days', $recruit['working_days']) }}" placeholder="週1日からOK">
+                    </div>
+                    <div class="job-edit-v2__field">
+                        <label class="job-edit-v2__label" for="regular_holiday">定休日・休みの書き方</label>
+                        <input type="text" id="regular_holiday" name="regular_holiday" class="job-edit-v2__input" value="{{ old('regular_holiday', $recruit['regular_holiday']) }}" placeholder="不定休 / 店舗の定休と異なる場合は記載">
+                    </div>
+                    <p class="job-edit-v2__shop-note">
+                        店舗としての<strong>営業時間・定休日</strong>は Shop Information（プロフィール）で登録してください。この欄は<strong>この求人のシフト・休みの伝え方</strong>用です。
+                    </p>
+                </section>
+
+                <section aria-labelledby="job-sec-detail">
+                    <h2 id="job-sec-detail" class="job-edit-v2__sec-title"><i class="fas fa-briefcase"></i> Recruitment</h2>
+                    <div class="job-edit-v2__field">
+                        <label class="job-edit-v2__label" for="job_content">仕事内容 <span class="job-edit-v2__req">必須</span></label>
+                        <textarea id="job_content" name="job_content" rows="4" class="job-edit-v2__textarea recruit-textarea" placeholder="具体的な業務内容">{{ old('job_content', $recruit['job_content']) }}</textarea>
+                    </div>
+                    <div class="job-edit-v2__field">
+                        <label class="job-edit-v2__label" for="qualification">応募資格 <span class="job-edit-v2__req">必須</span></label>
+                        <input type="text" id="qualification" name="qualification" class="job-edit-v2__input" value="{{ old('qualification', $recruit['qualification']) }}" placeholder="18歳以上（高校生不可）">
+                    </div>
+                </section>
+
+                <section aria-labelledby="job-sec-tags">
+                    <h2 id="job-sec-tags" class="job-edit-v2__sec-title"><i class="fas fa-check-circle"></i> Tags &amp; Appeals</h2>
+                    <p class="job-edit-v2__hint" style="margin:-8px 0 16px 4px;">求人票向けのタグです。<strong>設備・店内の雰囲気</strong>のタグはプロフィール（Shop Information）で選んでください。</p>
+
+                    <div style="margin-bottom:22px;">
+                        <p class="job-edit-v2__tag-cat">給与・支払い（tags_salary）</p>
+                        <div class="job-edit-v2__chips">
+                            @foreach(($masters['salary'] ?? []) as $tag)
+                                <label class="job-edit-v2__chip">
+                                    <input type="checkbox" name="salary_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, old('salary_tag_ids', $recruit['salary_tag_ids'] ?? []), true) ? 'checked' : '' }}>
+                                    <span>{{ $tag->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                    <div style="margin-bottom:22px;">
+                        <p class="job-edit-v2__tag-cat">働き方（tags_shop_working_styles）</p>
+                        <div class="job-edit-v2__chips">
+                            @foreach(($masters['howto'] ?? []) as $tag)
+                                <label class="job-edit-v2__chip">
+                                    <input type="checkbox" name="howto_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, old('howto_tag_ids', $recruit['howto_tag_ids'] ?? []), true) ? 'checked' : '' }}>
+                                    <span>{{ $tag->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                    <div style="margin-bottom:22px;">
+                        <p class="job-edit-v2__tag-cat">待遇・サポート（tags_shop_benefits）</p>
+                        <div class="job-edit-v2__chips">
+                            @foreach(($masters['merit'] ?? []) as $tag)
+                                <label class="job-edit-v2__chip">
+                                    <input type="checkbox" name="merit_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, old('merit_tag_ids', $recruit['merit_tag_ids'] ?? []), true) ? 'checked' : '' }}>
+                                    <span>{{ $tag->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                    <div>
+                        <p class="job-edit-v2__tag-cat">店舗・募集の特徴（tags_shop_conditions）</p>
+                        <div class="job-edit-v2__chips">
+                            @foreach(($masters['feature'] ?? []) as $tag)
+                                <label class="job-edit-v2__chip">
+                                    <input type="checkbox" name="feature_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, old('feature_tag_ids', $recruit['feature_tag_ids'] ?? []), true) ? 'checked' : '' }}>
+                                    <span>{{ $tag->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                </section>
             </div>
-            <div class="recruit-form-group">
-                <label class="recruit-label">その他条件（フリーテキスト）</label>
-                <textarea name="bonus_other_conditions" rows="2" class="recruit-textarea" placeholder="例: 無断欠勤なし">{{ old('bonus_other_conditions', $recruit['bonus_other_conditions'] ?? '') }}</textarea>
-            </div>
-            <div class="recruit-form-group">
-                <label class="recruit-label">給与・待遇タグ</label>
-                <div class="recruit-chip-grid">
-                    @foreach(($masters['salary'] ?? []) as $tag)
-                        <label class="recruit-chip">
-                            <input
-                                type="checkbox"
-                                name="salary_tag_ids[]"
-                                value="{{ $tag->id }}"
-                                {{ in_array((int) $tag->id, old('salary_tag_ids', $recruit['salary_tag_ids'] ?? []), true) ? 'checked' : '' }}
-                            >
-                            <span>{{ $tag->name }}</span>
-                        </label>
-                    @endforeach
-                </div>
+        </form>
+
+        <div class="job-edit-v2__footer">
+            <div class="job-edit-v2__footer-inner">
+                <a href="{{ route('shop.jobdescription') }}" class="job-edit-v2__btn-cancel">キャンセル</a>
+                <button type="submit" form="recruit-form" class="job-edit-v2__btn-save">
+                    <i class="fas fa-check"></i> 保存する
+                </button>
             </div>
         </div>
-
-        <div class="recruit-section" id="recruit-work">
-            <div class="recruit-section-head">
-                <div class="recruit-section-icon"><i class="fas fa-calendar-clock"></i></div>
-                <h3 class="recruit-section-title">勤務条件</h3>
-            </div>
-            <p class="recruit-section-copy">勤務のしやすさが伝わるように、時間・日数・休みの情報を具体的に入れてください。</p>
-            <div class="recruit-form-group">
-                <label class="recruit-label">勤務時間 <span class="recruit-field-required">必須</span></label>
-                <input type="text" name="working_hours" class="recruit-input" value="{{ old('working_hours', $recruit['working_hours']) }}" placeholder="20:00〜翌1:00">
-            </div>
-            <div class="recruit-form-group">
-                <label class="recruit-label">勤務日数 <span class="recruit-field-required">必須</span></label>
-                <input type="text" name="working_days" class="recruit-input" value="{{ old('working_days', $recruit['working_days']) }}" placeholder="週1日からOK">
-            </div>
-            <div class="recruit-form-group">
-                <label class="recruit-label">定休日</label>
-                <input type="text" name="regular_holiday" class="recruit-input" value="{{ old('regular_holiday', $recruit['regular_holiday']) }}" placeholder="不定休">
-            </div>
-            <div class="recruit-form-group">
-                <label class="recruit-label">働き方タグ</label>
-                <div class="recruit-chip-grid">
-                    @foreach(($masters['howto'] ?? []) as $tag)
-                        <label class="recruit-chip">
-                            <input
-                                type="checkbox"
-                                name="howto_tag_ids[]"
-                                value="{{ $tag->id }}"
-                                {{ in_array((int) $tag->id, old('howto_tag_ids', $recruit['howto_tag_ids'] ?? []), true) ? 'checked' : '' }}
-                            >
-                            <span>{{ $tag->name }}</span>
-                        </label>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
-        <div class="recruit-section" id="recruit-detail">
-            <div class="recruit-section-head">
-                <div class="recruit-section-icon"><i class="fas fa-file-lines"></i></div>
-                <h3 class="recruit-section-title">募集要項</h3>
-            </div>
-            <p class="recruit-section-copy">仕事内容や雰囲気は、応募するか迷っている人の判断材料になります。働くイメージが湧く説明を意識してください。</p>
-            <div class="recruit-form-group">
-                <label class="recruit-label">仕事内容 <span class="recruit-field-required">必須</span></label>
-                <textarea name="job_content" rows="4" class="recruit-textarea" placeholder="仕事内容">{{ old('job_content', $recruit['job_content']) }}</textarea>
-            </div>
-            <div class="recruit-form-group">
-                <label class="recruit-label">お店の雰囲気・補足</label>
-                <textarea name="store_atmosphere" rows="3" class="recruit-textarea" placeholder="お店の雰囲気">{{ old('store_atmosphere', $recruit['store_atmosphere']) }}</textarea>
-            </div>
-            <div class="recruit-form-group">
-                <label class="recruit-label">応募資格 <span class="recruit-field-required">必須</span></label>
-                <input type="text" name="qualification" class="recruit-input" value="{{ old('qualification', $recruit['qualification']) }}" placeholder="18歳以上（高校生不可）">
-            </div>
-        </div>
-
-        <div class="recruit-section" id="recruit-tags">
-            <div class="recruit-section-head">
-                <div class="recruit-section-icon"><i class="fas fa-gift"></i></div>
-                <h3 class="recruit-section-title">タグ選択</h3>
-            </div>
-            <p class="recruit-section-copy">詳細画面で条件をざっと見てもらうための補助情報です。該当するものだけ選ぶと、読みやすい求人票になります。</p>
-            <div class="recruit-form-group">
-                <label class="recruit-label">メリット・待遇</label>
-                <div class="recruit-chip-grid">
-                    @foreach(($masters['merit'] ?? []) as $tag)
-                        <label class="recruit-chip">
-                            <input type="checkbox" name="merit_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, old('merit_tag_ids', $recruit['merit_tag_ids'] ?? []), true) ? 'checked' : '' }}>
-                            <span>{{ $tag->name }}</span>
-                        </label>
-                    @endforeach
-                </div>
-            </div>
-            <div class="recruit-form-group">
-                <label class="recruit-label">店舗特徴</label>
-                <div class="recruit-chip-grid">
-                    @foreach(($masters['feature'] ?? []) as $tag)
-                        <label class="recruit-chip">
-                            <input type="checkbox" name="feature_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, old('feature_tag_ids', $recruit['feature_tag_ids'] ?? []), true) ? 'checked' : '' }}>
-                            <span>{{ $tag->name }}</span>
-                        </label>
-                    @endforeach
-                </div>
-            </div>
-            <div class="recruit-form-group">
-                <label class="recruit-label">設備</label>
-                <div class="recruit-chip-grid">
-                    @foreach(($masters['facility'] ?? []) as $tag)
-                        <label class="recruit-chip">
-                            <input type="checkbox" name="facility_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, old('facility_tag_ids', $recruit['facility_tag_ids'] ?? []), true) ? 'checked' : '' }}>
-                            <span>{{ $tag->name }}</span>
-                        </label>
-                    @endforeach
-                </div>
-            </div>
-            <div class="recruit-form-group">
-                <label class="recruit-label">お店の雰囲気</label>
-                <div class="recruit-chip-grid">
-                    @foreach(($masters['atmosphere'] ?? []) as $tag)
-                        <label class="recruit-chip">
-                            <input type="checkbox" name="atmosphere_tag_ids[]" value="{{ $tag->id }}" {{ in_array((int) $tag->id, old('atmosphere_tag_ids', $recruit['atmosphere_tag_ids'] ?? []), true) ? 'checked' : '' }}>
-                            <span>{{ $tag->name }}</span>
-                        </label>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
-        <div class="recruit-bottom-actions" id="recruit-save">
-            <div class="recruit-bottom-actions-copy">
-                <p class="recruit-bottom-actions-title">このあと保存できます</p>
-                <p class="recruit-bottom-actions-text">画面下のボタンからプレビュー確認・保存ができます。</p>
-            </div>
-        </div>
-    </form>
-
-    <footer class="recruit-edit-footer-fixed" aria-label="求人編集の固定操作">
-        <a href="{{ route('shop.jobdescription') }}" class="recruit-ghost-btn recruit-edit-footer-btn">
-            <i class="fas fa-eye"></i> プレビューを見る
-        </a>
-        <button type="submit" form="recruit-form" class="recruit-edit-footer-primary">
-            <i class="fas fa-save"></i> 更新内容を保存
-        </button>
-    </footer>
+    </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var form = document.getElementById('recruit-form');
+    var pubToggle = document.getElementById('published-toggle');
+    var pubLabel = document.getElementById('published-label');
+    if (pubToggle && pubLabel) {
+        pubToggle.addEventListener('change', function () {
+            pubLabel.textContent = pubToggle.checked ? '公開中' : '非公開';
+            pubLabel.classList.toggle('is-on', pubToggle.checked);
+        });
+    }
+
+    var helpToggle = document.getElementById('has-help-toggle');
+    var helpField = document.getElementById('help-wage-field');
+    function syncHelpField() {
+        if (!helpField) return;
+        helpField.style.opacity = helpToggle && helpToggle.checked ? '1' : '0.45';
+        helpField.querySelectorAll('input').forEach(function (inp) {
+            inp.disabled = !(helpToggle && helpToggle.checked);
+        });
+    }
+    if (helpToggle) {
+        helpToggle.addEventListener('change', syncHelpField);
+        syncHelpField();
+    }
+
+    if (form) {
+        form.addEventListener('submit', function () {
+            form.querySelectorAll('[data-type="currency"]').forEach(function (el) {
+                el.value = String(el.value).replace(/[^\d]/g, '');
+            });
+        });
+    }
+});
+</script>
+@endpush
