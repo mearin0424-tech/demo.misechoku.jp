@@ -7,6 +7,7 @@ use App\Models\ShopLicenseDocument;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class DocumentReviewService
@@ -62,32 +63,69 @@ class DocumentReviewService
 
     public function getShopLicensePageData(string $shopId): array
     {
-        $documents = ShopLicenseDocument::query()
+        $definitions = [
+            ['key' => 'business', 'name' => '営業許可証'],
+            ['key' => 'entertainment', 'name' => '風営許可証'],
+        ];
+
+        if (!Schema::hasTable('shop_license_documents')) {
+            $documents = [];
+            foreach ($definitions as $def) {
+                $status = 'not_submitted';
+                $documents[] = [
+                    'key' => $def['key'],
+                    'name' => $def['name'],
+                    'status' => $status,
+                    'status_label' => $this->shopDocumentStatusLabel($status),
+                    'record' => null,
+                ];
+            }
+
+            return [
+                'documents' => $documents,
+                'all_approved' => false,
+            ];
+        }
+
+        $byType = ShopLicenseDocument::query()
             ->where('shop_id', $shopId)
             ->orderByDesc('updated_at')
             ->orderByDesc('id')
             ->get()
             ->keyBy('type');
 
-        $mapped = collect([
-            'business' => '営業許可証',
-            'entertainment' => '風営許可証',
-        ])->map(function (string $label, string $type) use ($documents) {
+        $mapped = [];
+        foreach ($definitions as $def) {
+            $type = $def['key'];
             /** @var ShopLicenseDocument|null $document */
-            $document = $documents->get($type);
-
-            return [
+            $document = $byType->get($type);
+            $status = $this->shopStatusKey($document);
+            $mapped[] = [
                 'key' => $type,
-                'name' => $label,
-                'status' => $this->shopStatusKey($document),
+                'name' => $def['name'],
+                'status' => $status,
+                'status_label' => $this->shopDocumentStatusLabel($status),
                 'record' => $document ? $this->mapShopDocument($document) : null,
             ];
-        })->values();
+        }
 
         return [
-            'documents' => $mapped->all(),
-            'all_approved' => $mapped->every(fn (array $document) => $document['status'] === 'approved'),
+            'documents' => $mapped,
+            'all_approved' => collect($mapped)->every(fn (array $row) => $row['status'] === 'approved'),
         ];
+    }
+
+    /**
+     * マイページのカード・モーダルで共通利用する表示ラベル。
+     */
+    private function shopDocumentStatusLabel(string $statusKey): string
+    {
+        return match ($statusKey) {
+            'approved' => '承認済み',
+            'rejected' => '差し戻し',
+            'pending' => '審査中',
+            default => '未提出',
+        };
     }
 
     public function uploadShopLicenseDocument(
