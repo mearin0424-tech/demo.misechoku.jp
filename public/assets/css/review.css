@@ -55,7 +55,7 @@
 
 .rev-comment { font-size: 0.9rem; color: var(--color-text); line-height: 1.6; margin-bottom: 15px; }
 
-/* 詳細項目（マスタ質問ごとのスコア一覧） */
+/* 詳細項目（マスタ設問ごとのスコア一覧） */
 .rev-toggle-row {
     display: flex;
     justify-content: flex-end;
@@ -68,28 +68,61 @@
     color: var(--color-gold);
     cursor: pointer;
 }
-.rev-details-list {
-    margin-top: 12px;
-    padding-top: 10px;
+.rev-details-block {
+    margin-top: 14px;
+    padding-top: 12px;
     border-top: 1px dashed var(--color-border);
+}
+.rev-details-heading {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--color-gold);
+    margin: 0 0 10px;
+}
+.rev-details-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.rev-details-list--open {
+    display: block;
 }
 .detail-row {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: flex-start;
+    gap: 10px;
     font-size: 0.8rem;
-    margin-bottom: 4px;
-    color: #aaa;
+    margin-bottom: 8px;
+    color: #c4b8b8;
+}
+.detail-row:last-child {
+    margin-bottom: 0;
 }
 .detail-label {
     flex: 1;
     min-width: 0;
-    margin-right: 12px;
+    line-height: 1.45;
+}
+.detail-score-cell {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-align: right;
+}
+.detail-stars {
+    color: var(--color-gold);
+    font-size: 0.68rem;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
 }
 .detail-val {
-    flex-shrink: 0;
-    font-weight: 600;
+    min-width: 2rem;
+    font-weight: 700;
     color: var(--color-gold);
+    font-size: 0.82rem;
 }
 
 /* 管理アクション */

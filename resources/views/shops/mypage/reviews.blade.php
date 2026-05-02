@@ -10,9 +10,6 @@
 @section('content')
 <div class="content-wrapper animate-fadeIn">
     <section class="mypage-area">
-        <a href="{{ route('shop.mypage.index') }}" class="cast-mypage-back-link">
-            <i class="fas fa-chevron-left"></i> マイページへ戻る
-        </a>
         <h1 class="mypage-page-title serif-font">レビュー一覧</h1>
 
         <section class="review-list-area">
@@ -72,22 +69,38 @@
                                 <div class="rev-comment">
                                     {!! nl2br(e($rev['text'])) !!}
                                 </div>
-                                
-                                {{-- 詳細の開閉エリア --}}
-                                <div class="rev-toggle-row">
-                                    <span class="toggle-btn" onclick="toggleDetails(this)">
-                                        詳細 <i class="fas fa-caret-down"></i>
-                                    </span>
-                                </div>
 
-                                <div class="rev-details-list" style="display:none;">
-                                    @foreach($rev['details'] as $det)
-                                    <div class="detail-row">
-                                        <span class="detail-label">{{ $det['content'] }}</span>
-                                        <span class="detail-val">★ {{ number_format($det['score'], 1) }}</span>
+                                @if(!empty($rev['details']))
+                                    <div class="rev-details-block">
+                                        <div class="rev-details-heading">設問別の評価</div>
+                                        <ul class="rev-details-list rev-details-list--open">
+                                            @foreach($rev['details'] as $det)
+                                                @php
+                                                    $qLabel = $det['content'] ?? $det['name'] ?? '';
+                                                    $qScore = (float) ($det['score'] ?? 0);
+                                                    $qStars = round($qScore * 2) / 2;
+                                                @endphp
+                                                <li class="detail-row">
+                                                    <span class="detail-label">{{ $qLabel !== '' ? $qLabel : '（設問）' }}</span>
+                                                    <span class="detail-score-cell">
+                                                        <span class="detail-stars" aria-hidden="true">
+                                                            @for($i = 1; $i <= 5; $i++)
+                                                                @if($i <= $qStars)
+                                                                    <i class="fas fa-star"></i>
+                                                                @elseif($i - 0.5 <= $qStars)
+                                                                    <i class="fas fa-star-half-alt"></i>
+                                                                @else
+                                                                    <i class="far fa-star"></i>
+                                                                @endif
+                                                            @endfor
+                                                        </span>
+                                                        <span class="detail-val">{{ number_format($qScore, 1) }}</span>
+                                                    </span>
+                                                </li>
+                                            @endforeach
+                                        </ul>
                                     </div>
-                                    @endforeach
-                                </div>
+                                @endif
                             </div>
                         </div>
 
@@ -116,25 +129,7 @@
 
 @push('scripts')
 <script>
-    /**
-     * 旧 reviews.js からの完全移植
-     */
-
-    // 1. 詳細の開閉制御
-    function toggleDetails(btn) {
-        const list = btn.parentElement.nextElementSibling;
-        const isOpen = list.style.display !== 'none';
-        
-        if (isOpen) {
-            list.style.display = 'none';
-            btn.innerHTML = '詳細 <i class="fas fa-caret-down"></i>';
-        } else {
-            list.style.display = 'block';
-            btn.innerHTML = '閉じる <i class="fas fa-caret-up"></i>';
-        }
-    }
-
-    // 2. レビュー公開・非公開の切り替え処理
+    // レビュー公開・非公開の切り替え処理
     function toggleReviewStatus(btn, id, currentRelease) {
         const nextRelease = currentRelease === 1 ? 0 : 1;
         const actionText = nextRelease === 0 ? '非表示に' : '表示に';

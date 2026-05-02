@@ -126,25 +126,6 @@
         border: 1px solid rgba(156, 163, 175, 0.25);
         color: #d1d5db;
     }
-    .dashboard-task-list {
-        margin: 10px 0 0;
-        display: grid;
-        gap: 8px;
-    }
-    .dashboard-task-item {
-        padding: 10px 12px;
-        border-radius: 10px;
-        border: 1px solid rgba(212, 175, 55, 0.2);
-        background: rgba(255,255,255,0.03);
-        font-size: 0.82rem;
-        color: #f0e5d2;
-        line-height: 1.6;
-    }
-    .dashboard-task-empty {
-        margin-top: 10px;
-        font-size: 0.8rem;
-        color: #aaa;
-    }
     .status-menu-grid {
         display: grid;
         gap: 10px;
@@ -631,17 +612,6 @@
                 <span class="mypage-stat-value">{{ number_format($shopData['review_avg'], 1) }}<span class="shop-mypage-stat-sub">({{ $shopData['review_count'] }}件)</span></span>
             </a>
         </div>
-        @if(isset($todoList) && count($todoList) > 0)
-            <div class="dashboard-task-list">
-                @foreach($todoList as $todo)
-                    <div class="dashboard-task-item">
-                        <i class="fas fa-exclamation-circle"></i> {{ $todo['text'] }}
-                    </div>
-                @endforeach
-            </div>
-        @else
-            <p class="dashboard-task-empty">未済タスクはありません。</p>
-        @endif
 
         <div class="shop-mypage-section">
             <h3 class="shop-mypage-section-label">Job Management</h3>
@@ -662,28 +632,6 @@
                     <i class="fas fa-chevron-right"></i>
                 </a>
             </div>
-        </div>
-
-        <div class="shop-mypage-section gallery-edit-section">
-            <div class="shop-mypage-section-head-row">
-                <h3 class="shop-mypage-section-label">Image Library</h3>
-                <span class="shop-mypage-section-hint">ドラッグで並び替え</span>
-            </div>
-            <ul class="responsive-gallery gallery-grid" id="gallery-list" data-sort-save-url="{{ route('shop.profile.images.order') }}" data-empty-image-url="{{ asset('assets/images/common/no-image.png') }}">
-                @for($i = 0; $i < 8; $i++)
-                @php $img = $subImages[$i] ?? null; @endphp
-                <li class="gallery-grid-item" data-slot-index="{{ $i }}">
-                    <div class="photo-slot {{ $img ? 'has-img' : '' }}" data-image-id="{{ $img['id'] ?? '' }}" data-image-url="{{ $img['url'] ?? '' }}">
-                        @if($img)
-                            <img src="{{ $img['url'] }}" alt="" loading="lazy">
-                            @if($i === 0)<span class="photo-slot-badge">MAIN</span>@endif
-                        @else
-                            <span class="photo-slot-empty"><i class="fas fa-image"></i></span>
-                        @endif
-                    </div>
-                </li>
-                @endfor
-            </ul>
         </div>
 
         <div class="shop-mypage-section profile-info-section">
@@ -746,16 +694,38 @@
                 @endif
 
                 <div class="shop-mypage-concept">
-                    <p class="label">お店の紹介文</p>
+                    <p class="label">ひとこと（Shop Information）</p>
                     <div class="body">
-                        @if(!empty(trim($shopInfo['concept'] ?? '')))
-                            {!! nl2br(e($shopInfo['concept'])) !!}
+                        @if(!empty(trim($shopInfo['word'] ?? '')))
+                            {!! nl2br(e($shopInfo['word'])) !!}
                         @else
-                            <span style="opacity:0.65;">プロフィール編集から入力すると、求人票などに反映されます。</span>
+                            <span style="opacity:0.65;">ページ上部の吹き出しから入力できます。検索タイムラインにも表示されます。</span>
                         @endif
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class="shop-mypage-section gallery-edit-section">
+            <div class="shop-mypage-section-head-row">
+                <h3 class="shop-mypage-section-label">Image Library</h3>
+                <span class="shop-mypage-section-hint">ドラッグで並び替え</span>
+            </div>
+            <ul class="responsive-gallery gallery-grid" id="gallery-list" data-sort-save-url="{{ route('shop.profile.images.order') }}" data-empty-image-url="{{ asset('assets/images/common/no-image.png') }}">
+                @for($i = 0; $i < 8; $i++)
+                @php $img = $subImages[$i] ?? null; @endphp
+                <li class="gallery-grid-item" data-slot-index="{{ $i }}">
+                    <div class="photo-slot {{ $img ? 'has-img' : '' }}" data-image-id="{{ $img['id'] ?? '' }}" data-image-url="{{ $img['url'] ?? '' }}">
+                        @if($img)
+                            <img src="{{ $img['url'] }}" alt="" loading="lazy">
+                            @if($i === 0)<span class="photo-slot-badge">MAIN</span>@endif
+                        @else
+                            <span class="photo-slot-empty"><i class="fas fa-image"></i></span>
+                        @endif
+                    </div>
+                </li>
+                @endfor
+            </ul>
         </div>
 
         <div class="shop-mypage-section document-section">

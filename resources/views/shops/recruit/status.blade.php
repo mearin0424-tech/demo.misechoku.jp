@@ -136,7 +136,8 @@
 
             <h4 class="recruit-block-title" style="margin-top:24px;"><i class="fas fa-coins"></i> 現在の募集条件</h4>
             <div class="recruit-job-types">
-                {{-- 本入店 --}}
+                @if(empty($usesJobTypes) || !$usesJobTypes)
+                {{-- 本入店（レガシー：job_type 未使用環境） --}}
                 <div class="recruit-type-card recruit-type-card-new is-main">
                     <div class="recruit-type-main">
                         <span class="recruit-type-label recruit-type-badge-new">本入店</span>
@@ -153,14 +154,15 @@
                         <p class="bonus-note">{{ $recruit['regular_holiday'] ?: '' }}</p>
                     </div>
                     <div class="recruit-type-actions">
-                        <a href="{{ route('shop.recruits.edit', ['type' => 'fulltime']) }}" class="recruit-btn recruit-btn-edit-sm">
+                        <a href="{{ route('shop.recruits.edit') }}" class="recruit-btn recruit-btn-edit-sm">
                             <i class="fas fa-pen"></i> 編集
                         </a>
                     </div>
                 </div>
+                @endif
 
-                {{-- 体入 --}}
-                <div class="recruit-type-card recruit-type-card-new">
+                {{-- 体験入店 --}}
+                <div class="recruit-type-card recruit-type-card-new {{ !empty($usesJobTypes) && $usesJobTypes ? 'is-main' : '' }}">
                     <div class="recruit-type-main">
                         <span class="recruit-type-label recruit-type-badge-new">体験入店</span>
                         <div class="recruit-type-wage-row">
@@ -176,12 +178,24 @@
                                 <span class="unit">円〜</span>
                             @endif
                         </div>
+                        @if(!empty($usesJobTypes) && $usesJobTypes && (int) ($recruit['hourly_wage_regular'] ?? 0) > 0)
+                            <p class="recruit-type-status text-xs mt-1" style="color:#a1a1aa;">
+                                本入参考: ¥{{ number_format((int) $recruit['hourly_wage_regular']) }}〜
+                            </p>
+                        @endif
                         <p class="recruit-type-status text-xs mt-1">
                             {{ !empty($recruit['trial_hourly_wage']) ? '公開中' : '非公開' }}
                         </p>
                     </div>
+                    @if(empty($usesJobTypes) || !$usesJobTypes)
+                    <div class="recruit-type-bonus-box">
+                        <p class="bonus-label">勤務条件</p>
+                        <p class="bonus-amount">{{ $recruit['working_days'] ?: '未設定' }}</p>
+                        <p class="bonus-meta">（{{ $recruit['working_hours'] ?: '勤務時間未設定' }}）</p>
+                    </div>
+                    @endif
                     <div class="recruit-type-actions">
-                        <a href="{{ route('shop.recruits.edit', ['type' => 'trial']) }}" class="recruit-btn recruit-btn-edit-sm">
+                        <a href="{{ route('shop.recruits.edit') }}{{ (!empty($usesJobTypes) && $usesJobTypes) ? '' : '?type=trial' }}" class="recruit-btn recruit-btn-edit-sm">
                             <i class="fas fa-pen"></i> 編集
                         </a>
                     </div>

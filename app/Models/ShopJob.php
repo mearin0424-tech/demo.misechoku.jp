@@ -26,7 +26,7 @@ class ShopJob extends Model
         'trial_hourly_wage',
         'has_help',
         'help_hourly_wage',
-        'job_description',
+        'pr',
         'salary',
         'atmosphere',
         'working_day',

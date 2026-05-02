@@ -116,6 +116,34 @@ class DocumentReviewService
     }
 
     /**
+     * 店舗ポータルヘッダー「やること」用（未提出・差し戻しのみ）。
+     *
+     * @return array<int, array{text: string}>
+     */
+    public function getShopPortalTodoMessages(string $shopId): array
+    {
+        $data = $this->getShopLicensePageData($shopId);
+        $out = [];
+        foreach ($data['documents'] as $doc) {
+            if (($doc['status'] ?? '') === 'not_submitted') {
+                $out[] = [
+                    'text' => ($doc['name'] ?? '許可証') . 'の提出が未完了です。マイページの Licenses からアップロードしてください。',
+                ];
+                continue;
+            }
+            if (($doc['status'] ?? '') === 'rejected') {
+                $reason = trim((string) ($doc['record']['ng_reason'] ?? ''));
+                $suffix = $reason !== '' ? '（差し戻し理由: ' . $reason . '）' : '';
+                $out[] = [
+                    'text' => ($doc['name'] ?? '許可証') . 'が差し戻されています' . $suffix . '。内容を確認のうえ再提出してください。',
+                ];
+            }
+        }
+
+        return $out;
+    }
+
+    /**
      * マイページのカード・モーダルで共通利用する表示ラベル。
      */
     private function shopDocumentStatusLabel(string $statusKey): string
@@ -134,7 +162,8 @@ class DocumentReviewService
         UploadedFile $file,
         ?string $expiredAt = null
     ): ShopLicenseDocument {
-        $path = $file->store('public/shops/documents');
+        // storage/app/public 配下（/storage シンボリックリンクで公開可）。旧データは public/ 接頭辞で保存されていた。
+        $path = $file->store('shops/documents', 'public');
 
         $document = ShopLicenseDocument::query()->updateOrCreate(
             [
@@ -398,7 +427,8 @@ class DocumentReviewService
             'expired_at' => optional($document->expired_at)->format('Y-m-d'),
             'approved_at' => optional($document->approved_at)->format('Y-m-d H:i'),
             'updated_at_label' => optional($document->updated_at)->format('Y-m-d H:i'),
-            'file_url' => $this->documentUrl($document->image_path),
+            // マイページは認証付きルートで表示（シンボリックリンク未作成環境でも閲覧可）
+            'file_url' => route('shop.mypage.documents.show', ['type' => $document->type]),
         ];
     }
 
@@ -496,15 +526,31 @@ class DocumentReviewService
         };
     }
 
-    private function documentUrl(?string $path): ?string
+    /**
+     * DB に保存されている image_path を、public ディスク上の相対パスに正規化する。
+     */
+    public function shopLicenseRelativePublicPath(?string $storedPath): ?string
     {
-        if (empty($path)) {
+        if (empty($storedPath)) {
             return null;
         }
 
-        return str_starts_with($path, 'public/')
-            ? Storage::url($path)
-            : asset(ltrim($path, '/'));
+        $path = str_replace('\\', '/', $storedPath);
+        if (str_starts_with($path, 'public/')) {
+            return substr($path, strlen('public/'));
+        }
+
+        return ltrim($path, '/');
+    }
+
+    private function documentUrl(?string $path): ?string
+    {
+        $relative = $this->shopLicenseRelativePublicPath($path);
+        if ($relative === null) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($relative);
     }
 
     private function formatDateTime($value): ?string

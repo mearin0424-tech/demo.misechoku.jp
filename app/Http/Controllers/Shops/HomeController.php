@@ -304,13 +304,14 @@ class HomeController extends Controller
     {
         $rows = DB::table('shops')
             ->leftJoin('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
+            ->leftJoin('shop_posts', 'shops.id', '=', 'shop_posts.shop_id')
             ->select(
                 'shops.id',
                 'shop_profiles.shop_name',
                 'shop_profiles.pref',
                 'shop_profiles.city',
-                'shop_profiles.message',
-                'shop_profiles.main_image_path'
+                'shop_profiles.main_image_path',
+                'shop_posts.body as shop_post_body'
             )
             ->orderBy('shops.id')
             ->limit(20)
@@ -410,8 +411,9 @@ class HomeController extends Controller
         if (!empty($row->city)) {
             $tags[] = $row->city;
         }
-        if (!empty($row->message)) {
-            $tags[] = mb_strimwidth(trim((string) $row->message), 0, 18, '…');
+        $hitokoto = $row->shop_post_body ?? null;
+        if (!empty($hitokoto)) {
+            $tags[] = mb_strimwidth(trim((string) $hitokoto), 0, 18, '…');
         }
 
         return !empty($tags) ? array_slice($tags, 0, 3) : ['店舗情報登録中'];

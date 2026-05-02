@@ -391,19 +391,7 @@
                     >
                 </div>
 
-                <div class="shop-profile-edit__field">
-                    <label class="shop-profile-edit__label" for="word">キャッチコピー（ひとこと）</label>
-                    <input
-                        id="word"
-                        type="text"
-                        name="word"
-                        class="shop-profile-edit__input"
-                        value="{{ old('word', $shopData['word']) }}"
-                        placeholder="例：最高級の夜を、あなたに。"
-                        maxlength="50"
-                    >
-                    <p class="shop-profile-edit__hint">※一覧画面やマイページ上部に表示される短い紹介文です。</p>
-                </div>
+                <p class="shop-profile-edit__hint" style="margin:0 0 16px;">店舗の「ひとこと」はマイページから編集できます。</p>
 
                 <div class="shop-profile-edit__field">
                     <span class="shop-profile-edit__label">業種</span>
@@ -421,24 +409,6 @@
                         @endforeach
                     </div>
                     <p class="shop-profile-edit__hint">※1つだけ選択できます。未選択でも保存できます。</p>
-                </div>
-            </section>
-
-            <section aria-labelledby="spe-sec-intro">
-                <h2 id="spe-sec-intro" class="shop-profile-edit__section-title">
-                    <i class="fas fa-file-alt" aria-hidden="true"></i>
-                    Detailed Intro
-                </h2>
-
-                <div class="shop-profile-edit__field">
-                    <label class="shop-profile-edit__label" for="overview">お店の紹介文</label>
-                    <textarea
-                        id="overview"
-                        name="overview"
-                        rows="6"
-                        class="shop-profile-edit__textarea"
-                        placeholder="お店のコンセプト、雰囲気、客層などを詳しく入力してください。（マイページ「Shop Information」の紹介文と同じ内容です）"
-                    >{{ old('overview', $shopData['overview']) }}</textarea>
                 </div>
             </section>
 

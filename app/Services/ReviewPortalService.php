@@ -107,29 +107,49 @@ class ReviewPortalService
             return [];
         }
 
+        if (!Schema::hasTable('review_details') || !Schema::hasTable('review_contents')) {
+            return [];
+        }
+
         $contentColumn = $this->reviewContentColumn();
         $detailColumn = $this->reviewDetailContentColumn();
 
-        return DB::table('review_details')
+        if (!Schema::hasColumn('review_details', $detailColumn)) {
+            return [];
+        }
+
+        $labelSql = 'review_contents.' . $contentColumn;
+
+        $rows = DB::table('review_details')
             ->join('review_contents', 'review_details.' . $detailColumn, '=', 'review_contents.id')
             ->whereIn('review_details.review_id', $reviewIds)
             ->orderBy('review_details.review_id')
             ->when(
-                Schema::hasTable('review_contents') && Schema::hasColumn('review_contents', 'sort_order'),
+                Schema::hasColumn('review_contents', 'sort_order'),
                 fn ($query) => $query->orderBy('review_contents.sort_order')
             )
             ->orderBy('review_contents.id')
             ->get([
                 'review_details.review_id',
-                DB::raw('review_contents.' . $contentColumn . ' as name'),
+                DB::raw($labelSql . ' as question_label'),
                 'review_details.score',
-            ])
-            ->groupBy('review_id')
-            ->map(fn ($rows) => collect($rows)->map(fn ($row) => [
-                'name' => (string) $row->name,
-                'score' => (float) $row->score,
-            ])->all())
-            ->all();
+            ]);
+
+        $out = [];
+        foreach ($rows as $row) {
+            $rid = (int) $row->review_id;
+            $label = trim((string) ($row->question_label ?? ''));
+            if (!isset($out[$rid])) {
+                $out[$rid] = [];
+            }
+            $out[$rid][] = [
+                'name' => $label,
+                'content' => $label,
+                'score' => (float) ($row->score ?? 0),
+            ];
+        }
+
+        return $out;
     }
 
     private function resolveCastAvatar(string $castId): string

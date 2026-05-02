@@ -25,10 +25,6 @@ class ShopProfile extends Model
         'station3',
         'station4',
         'station5',
-        'catch',
-        'overview',
-        'message',
-        'memo',
         'latitude',
         'longitude',
     ];

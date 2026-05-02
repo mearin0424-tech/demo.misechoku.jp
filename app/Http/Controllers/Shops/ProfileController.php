@@ -48,8 +48,6 @@ class ProfileController extends Controller
     public function update(Request $request) {
         $request->validate([
             'shop_name' => 'required|string|max:100',
-            'overview' => 'nullable|string',
-            'word' => 'nullable|string|max:50',
             'zip' => ['nullable', 'regex:/^\d{3}-?\d{4}$/'],
             'pref' => 'required|string|max:50',
             'city' => 'nullable|string|max:100',
@@ -79,9 +77,6 @@ class ProfileController extends Controller
                 'pref' => $request->input('pref'),
                 'city' => $request->input('city'),
                 'addr2' => $request->input('addr1'),
-                'catch' => $request->input('word'),
-                'overview' => $request->input('overview'),
-                'message' => $request->input('overview'),
                 'industry_id' => $request->input('industry_id') ?: null,
                 'updated_at' => now(),
                 'created_at' => now(),
@@ -287,9 +282,6 @@ class ProfileController extends Controller
                 'shop_profiles.city',
                 'shop_profiles.addr2',
                 'shop_profiles.addr3',
-                'shop_profiles.catch',
-                'shop_profiles.overview',
-                'shop_profiles.message',
                 'shop_profiles.main_image_path',
                 DB::raw('AVG(reviews.eva) as avg_eva'),
                 DB::raw('COUNT(reviews.id) as review_count')
@@ -301,12 +293,12 @@ class ProfileController extends Controller
                 'shop_profiles.city',
                 'shop_profiles.addr2',
                 'shop_profiles.addr3',
-                'shop_profiles.catch',
-                'shop_profiles.overview',
-                'shop_profiles.message',
                 'shop_profiles.main_image_path'
             )
             ->first();
+
+        $shopPost = DB::table('shop_posts')->where('shop_id', $shopId)->first();
+        $hitokoto = $shopPost && isset($shopPost->body) ? (string) $shopPost->body : '';
 
         $subImages = DB::table('shop_images')
             ->where('shop_id', $shopId)
@@ -325,10 +317,10 @@ class ProfileController extends Controller
 
         return [
             'name' => $row->shop_name ?? 'ショップ',
-            'word' => $row->catch ?? ($row->message ?? ''),
+            'word' => $hitokoto,
             'main_img' => $mainImage ?: asset('assets/images/common/no-image.png'),
             'area' => trim(implode('', array_filter([$row->pref ?? null, $row->city ?? null, $row->addr2 ?? null, $row->addr3 ?? null]))),
-            'concept' => $row->overview ?? ($row->message ?? ''),
+            'concept' => '',
             'review_avg' => $row && $row->avg_eva ? round((float) $row->avg_eva, 1) : 0,
             'review_cnt' => $row ? (int) $row->review_count : 0,
             'sub_images' => $subImages,
@@ -339,13 +331,15 @@ class ProfileController extends Controller
     {
         $row = DB::table('shop_profiles')
             ->where('shop_id', $shopId)
-            ->select('shop_name', 'catch', 'overview', 'zip', 'pref', 'city', 'addr2', 'addr3', 'industry_id')
+            ->select('shop_name', 'zip', 'pref', 'city', 'addr2', 'addr3', 'industry_id')
             ->first();
+
+        $shopPost = DB::table('shop_posts')->where('shop_id', $shopId)->first();
 
         return [
             'shop_name' => $row->shop_name ?? '',
-            'word' => $row->catch ?? '',
-            'overview' => $row->overview ?? '',
+            'word' => $shopPost && isset($shopPost->body) ? (string) $shopPost->body : '',
+            'overview' => '',
             'zip' => $row->zip ?? '',
             'pref' => $row->pref ?? '東京都',
             'city' => $row->city ?? '',

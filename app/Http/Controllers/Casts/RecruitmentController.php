@@ -46,7 +46,7 @@ class RecruitmentController extends Controller
     {
         $shopId = 's' . str_pad((string) $shopNumericId, 8, '0', STR_PAD_LEFT);
 
-        $row = DB::table('shops')
+        $q = DB::table('shops')
             ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
             ->leftJoin('shop_jobs', 'shops.id', '=', 'shop_jobs.shop_id')
             ->where('shops.id', $shopId)
@@ -61,14 +61,10 @@ class RecruitmentController extends Controller
                 'shop_profiles.addr2',
                 'shop_profiles.addr3',
                 'shop_profiles.station1',
-                'shop_profiles.catch',
-                'shop_profiles.overview',
-                'shop_profiles.message',
                 'shop_jobs.hourly_wage_regular',
                 'shop_jobs.has_trial',
                 'shop_jobs.trial_hourly_wage',
                 'shop_jobs.noruma_reward',
-                'shop_jobs.job_description',
                 'shop_jobs.atmosphere',
                 'shop_jobs.working_day',
                 'shop_jobs.working_hours',
@@ -77,8 +73,11 @@ class RecruitmentController extends Controller
                 'shop_jobs.status as recruit_status',
                 'shop_jobs.salary',
                 'shop_jobs.noruma_cond'
-            )
-            ->first();
+            );
+        if (Schema::hasColumn('shop_jobs', 'pr')) {
+            $q->addSelect('shop_jobs.pr');
+        }
+        $row = $q->first();
 
         if (!$row || ($publishedOnly && (int) ($row->recruit_status ?? 0) !== 1)) {
             return [
@@ -90,6 +89,10 @@ class RecruitmentController extends Controller
         $address = trim(($row->pref ?? '') . ($row->city ?? '') . ($row->addr2 ?? '') . ' ' . ($row->addr3 ?? ''));
         $meta = $this->decodeMeta($row->noruma_cond ?? null);
         $tagMap = $this->resolveRecruitTagNames($meta['tag_ids'] ?? []);
+        $jobContent = (string) ($meta['job_content'] ?? '');
+        $managerMessage = Schema::hasColumn('shop_jobs', 'pr')
+            ? ((string) ($row->pr ?? '') !== '' ? (string) ($row->pr ?? '') : (string) ($meta['message'] ?? ''))
+            : (string) ($meta['message'] ?? '');
 
         $recruit = [
             'store_name'         => $row->shop_name,
@@ -105,11 +108,11 @@ class RecruitmentController extends Controller
             'working_hours'      => Schema::hasColumn('shop_jobs', 'working_hours') ? ($row->working_hours ?? null) : ($meta['working_hours'] ?? null),
             'working_days'       => Schema::hasColumn('shop_jobs', 'working_day') ? ($row->working_day ?? null) : ($meta['working_days'] ?? null),
             'regular_holiday'    => Schema::hasColumn('shop_jobs', 'regular_holiday') ? ($row->regular_holiday ?? null) : ($meta['regular_holiday'] ?? null),
-            'job_content'        => $row->job_description ?? '',
+            'job_content'        => $jobContent,
             'store_atmosphere'   => $row->atmosphere ?? '',
             'qualification'      => Schema::hasColumn('shop_jobs', 'qualification') ? ($row->qualification ?? '18歳以上（高校生不可）') : ($meta['qualification'] ?? '18歳以上（高校生不可）'),
-            'catch_copy'         => $meta['catch_copy'] ?? ($row->catch ?? ''),
-            'message'            => $meta['message'] ?? ($row->message ?? ''),
+            'catch_copy'         => $meta['catch_copy'] ?? '',
+            'message'            => $managerMessage,
             'benefits'           => [],
             'selected_benefits'  => $tagMap['merit'],
             'store_features'     => [
@@ -137,15 +140,29 @@ class RecruitmentController extends Controller
             $subImages[] = $mainImg;
         }
 
+        $galleryImages = [];
+        if ($mainImg) {
+            $galleryImages[] = $mainImg;
+        }
+        foreach ($subImages as $path) {
+            if ($path && !in_array($path, $galleryImages, true)) {
+                $galleryImages[] = $path;
+            }
+        }
+
+        $shopPost = DB::table('shop_posts')->where('shop_id', $shopId)->first();
+        $shopHitokoto = $shopPost && isset($shopPost->body) ? (string) $shopPost->body : '';
+
         $shop = [
             'name'       => $row->shop_name,
-            'word'       => $row->catch ?? '',
+            'word'       => $shopHitokoto,
             'main_img'   => $mainImg,
             'area'       => trim(($row->pref ?? '') . ' ' . ($row->city ?? '')),
-            'concept'    => $row->overview ?? '',
+            'concept'    => '',
             'review_avg' => 0,
             'review_cnt' => 0,
             'sub_images' => $subImages,
+            'gallery_images' => $galleryImages,
         ];
 
         return [
@@ -167,6 +184,9 @@ class RecruitmentController extends Controller
         return [
             'pageId' => 'job_info',
             'recruit' => $data['recruit'],
+            'recruit_trial' => $data['recruit'],
+            'recruit_help' => $data['recruit'],
+            'usesJobTypes' => false,
             'shop' => $data['shop'],
             'forCast' => $forCast,
             'isPublicShare' => $isPublicShare,

@@ -37,18 +37,19 @@ class SearchController extends BaseSearchController
 
     private function buildTimelineData(): array
     {
-        $rows = DB::table('shops')
+        $rows = DB::table('shop_posts')
+            ->join('shops', 'shops.id', '=', 'shop_posts.shop_id')
             ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
-            ->whereNotNull('shop_profiles.catch')
-            ->where('shop_profiles.catch', '<>', '')
-            ->orderByDesc('shop_profiles.updated_at')
+            ->whereNotNull('shop_posts.body')
+            ->where('shop_posts.body', '<>', '')
+            ->orderByDesc('shop_posts.updated_at')
             ->orderByDesc('shops.id')
             ->select(
                 'shops.id',
                 'shop_profiles.shop_name',
-                'shop_profiles.catch',
-                'shop_profiles.main_image_path',
-                'shop_profiles.updated_at'
+                'shop_posts.body',
+                'shop_posts.updated_at',
+                'shop_profiles.main_image_path'
             )
             ->limit(20)
             ->get();
@@ -60,7 +61,7 @@ class SearchController extends BaseSearchController
                 'name' => (string) ($row->shop_name ?: 'ショップ'),
                 'img' => $this->getShopImages((string) $row->id)[0] ?? asset('assets/images/common/no-image.png'),
                 'time' => $updatedAt ? $updatedAt->locale('ja')->diffForHumans() : '',
-                'text' => (string) $row->catch,
+                'text' => (string) $row->body,
             ];
         })->all();
     }
@@ -88,17 +89,17 @@ class SearchController extends BaseSearchController
         $rows = DB::table('shops')
             ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
             ->leftJoin('shop_jobs', 'shops.id', '=', 'shop_jobs.shop_id')
+            ->leftJoin('shop_posts', 'shops.id', '=', 'shop_posts.shop_id')
             ->select(
                 'shops.id',
                 'shop_profiles.shop_name',
                 'shop_profiles.pref',
                 'shop_profiles.city',
-                'shop_profiles.catch',
-                'shop_profiles.overview',
                 'shop_profiles.main_image_path',
                 'shop_jobs.hourly_wage_regular',
                 'shop_jobs.noruma_reward',
-                'shop_jobs.noruma_cond'
+                'shop_jobs.noruma_cond',
+                'shop_posts.body as shop_post_body'
             )
             ->orderByDesc('shop_profiles.updated_at')
             ->orderByDesc('shops.id');
@@ -126,8 +127,7 @@ class SearchController extends BaseSearchController
                         $row->shop_name,
                         $row->pref,
                         $row->city,
-                        $row->catch,
-                        $row->overview,
+                        $row->shop_post_body ?? null,
                     ]));
 
                     $matchesKeyword = str_contains($this->normalizeSearchText($haystack), $normalizedKeyword);
@@ -160,8 +160,8 @@ class SearchController extends BaseSearchController
                     'shop_name' => (string) ($row->shop_name ?: 'ショップ'),
                     'pref' => $row->pref ?? '',
                     'city' => $row->city ?? '',
-                    'catch' => (string) ($row->catch ?? ''),
-                    'overview' => (string) ($row->overview ?? ''),
+                    'catch' => (string) ($row->shop_post_body ?? ''),
+                    'overview' => '',
                     'main_img' => $this->getShopImages((string) $row->id)[0] ?? asset('assets/images/common/no-image.png'),
                 ];
             })

@@ -253,10 +253,6 @@ class RegistrationController extends Controller
                 'city' => $request->input('city'),
                 'addr2' => $request->input('address'),
                 'tel' => $request->input('phone'),
-                'catch' => $request->filled('word') ? $request->input('word') : $this->mapBusinessTypeLabel((string) $request->input('business_type')),
-                'overview' => $request->filled('overview') ? $request->input('overview') : $request->input('company_name'),
-                'message' => $request->filled('overview') ? $request->input('overview') : ('ご利用プラン: ' . $this->mapPlanLabel((string) $request->input('plan'))),
-                'memo' => '運営会社名: ' . $request->input('company_name'),
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -264,6 +260,18 @@ class RegistrationController extends Controller
                 $shopProfilePayload['industry_id'] = $request->input('industry_id') ?: null;
             }
             DB::table('shop_profiles')->insert($shopProfilePayload);
+
+            if (Schema::hasTable('shop_posts')) {
+                $hitokoto = $request->filled('word')
+                    ? (string) $request->input('word')
+                    : $this->mapBusinessTypeLabel((string) $request->input('business_type'));
+                DB::table('shop_posts')->insert([
+                    'shop_id' => $shopId,
+                    'body' => $hitokoto,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
 
             DB::table('shop_managers')->insert([
                 'id' => $managerId,
@@ -281,7 +289,7 @@ class RegistrationController extends Controller
             // 店舗登録と同時に、求人票（本入・体入・ヘルプを想定したベースレコード）を1件作成しておく
             // 各勤務形態は時給やフラグの設定有無で任意に利用可能
             if (DB::getSchemaBuilder()->hasTable('shop_jobs')) {
-                DB::table('shop_jobs')->insert([
+                $jobRow = [
                     'shop_id' => $shopId,
                     'status' => 0,                 // 初期状態は非公開
                     'hourly_wage_regular' => null, // 本入の時給（未設定）
@@ -290,10 +298,16 @@ class RegistrationController extends Controller
                     'trial_hourly_wage' => null,
                     'has_help' => 0,               // ヘルプは未設定
                     'help_hourly_wage' => null,
-                    'job_description' => null,
                     'created_at' => now(),
                     'updated_at' => now(),
-                ]);
+                ];
+                if (Schema::hasColumn('shop_jobs', 'job_type')) {
+                    $jobRow['job_type'] = 1;
+                }
+                if (Schema::hasColumn('shop_jobs', 'pr')) {
+                    $jobRow['pr'] = null;
+                }
+                DB::table('shop_jobs')->insert($jobRow);
             }
 
             // 店舗プロフィール画像（必須1枚）を保存

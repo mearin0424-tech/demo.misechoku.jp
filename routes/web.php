@@ -351,6 +351,7 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
         Route::post('/word', [ShopMypage::class, 'updateWord'])->name('word');
         Route::get('/payment', [ShopMypage::class, 'payment'])->name('payment.index');
         Route::get('/reviews', [ShopReview::class, 'index'])->name('review.index');
+        Route::get('/documents/{type}', [ShopMypage::class, 'viewLicenseDocument'])->name('documents.show')->whereIn('type', ['business', 'entertainment']);
         Route::post('/documents/upload', [ShopMypage::class, 'uploadDocument'])->name('documents.upload');
         Route::post('/payment/bank', [ShopMypage::class, 'updateBank'])->name('payment.bank.update');
         Route::post('/deposit/approve', [ShopMypage::class, 'approveDeposit'])->name('deposit.approve');

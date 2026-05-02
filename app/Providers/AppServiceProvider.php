@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
 use App\Services\AdminOperationalSummaryService;
+use App\Services\DocumentReviewService;
 use App\Services\ReviewPortalService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
@@ -43,15 +44,18 @@ class AppServiceProvider extends ServiceProvider
             $notifications = [];
             $unreadNewsCount = 0;
 
+            $todoList = [];
             if (request()->is('shop/*') && Auth::guard('shop')->check()) {
                 $shopId = (string) Auth::guard('shop')->user()->shop_id;
                 $reviewPortalService = app(ReviewPortalService::class);
                 $notifications = $reviewPortalService->getShopReviewNotifications($shopId);
                 $unreadNewsCount = count($notifications);
+                $todoList = app(DocumentReviewService::class)->getShopPortalTodoMessages($shopId);
             }
 
             $view->with('notifications', $notifications);
             $view->with('unreadNewsCount', $unreadNewsCount);
+            $view->with('todoList', $todoList);
         });
 
         View::composer('layouts.admin', function ($view) {

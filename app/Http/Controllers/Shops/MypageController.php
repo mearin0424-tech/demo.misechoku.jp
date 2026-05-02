@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shops;
 
+use App\Models\ShopLicenseDocument;
 use App\Rules\KouzaMeig;
 use App\Services\BillingManagementService;
 use App\Services\DocumentReviewService;
@@ -9,6 +10,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 
 class MypageController extends Controller
@@ -40,9 +42,6 @@ class MypageController extends Controller
                 'shop_profiles.addr3',
                 'shop_profiles.station1',
                 'shop_profiles.industry_id',
-                'shop_profiles.catch',
-                'shop_profiles.overview',
-                'shop_profiles.message',
                 'shop_profiles.updated_at as profile_updated_at',
                 DB::raw('AVG(reviews.eva) as avg_eva'),
                 DB::raw('COUNT(reviews.id) as review_count')
@@ -59,12 +58,13 @@ class MypageController extends Controller
                 'shop_profiles.addr3',
                 'shop_profiles.station1',
                 'shop_profiles.industry_id',
-                'shop_profiles.catch',
-                'shop_profiles.overview',
-                'shop_profiles.message',
                 'shop_profiles.updated_at'
             )
             ->first();
+
+        $shopPost = DB::table('shop_posts')->where('shop_id', $shopId)->first();
+        $hitokotoBody = $shopPost && isset($shopPost->body) ? (string) $shopPost->body : '';
+        $hitokotoUpdated = $shopPost && !empty($shopPost->updated_at) ? $shopPost->updated_at : null;
 
         $documentData = $this->documentReviewService->getShopLicensePageData($shopId);
         $badges = $this->billingManagementService->getShopBadges($shopId);
@@ -93,17 +93,18 @@ class MypageController extends Controller
                 ->count();
         }
 
-        $jobStatus = DB::table('shop_jobs')
-            ->where('shop_id', $shopId)
-            ->where('job_type', 1)
-            ->value('status');
+        $jobStatusQ = DB::table('shop_jobs')->where('shop_id', $shopId);
+        if (Schema::hasColumn('shop_jobs', 'job_type')) {
+            $jobStatusQ->where('job_type', 1);
+        }
+        $jobStatus = $jobStatusQ->value('status');
         if ($jobStatus !== null) {
             $recruitStatus = ((int) $jobStatus) === 1 ? '掲載中' : '掲載停止中';
         }
 
         $shopData = [
             'shop_name'    => $row->shop_name ?? 'ショップ',
-            'word'         => $row->catch ?? ($row->message ?? '最高級の空間で、最高の出会いを。'),
+            'word'         => $hitokotoBody !== '' ? $hitokotoBody : '最高級の空間で、最高の出会いを。',
             'review_avg'   => $row && $row->avg_eva ? round((float)$row->avg_eva, 1) : 0.0,
             'review_count' => $row ? (int)$row->review_count : 0,
             'applicant_count' => $applicantCount,
@@ -111,10 +112,12 @@ class MypageController extends Controller
             'pref'         => $row->pref ?? '',
             'city'         => $row->city ?? '',
             'addr1'        => trim(($row->addr2 ?? '') . ' ' . ($row->addr3 ?? '')),
-            'overview'     => $row->overview ?? '',
-            'appeal_updated_at' => !empty($row?->profile_updated_at)
-                ? Carbon::parse($row->profile_updated_at)->format('Y/m/d H:i')
-                : null,
+            'overview'     => '',
+            'appeal_updated_at' => $hitokotoUpdated
+                ? Carbon::parse($hitokotoUpdated)->format('Y/m/d H:i')
+                : (!empty($row?->profile_updated_at)
+                    ? Carbon::parse($row->profile_updated_at)->format('Y/m/d H:i')
+                    : null),
             'approval'     => $documentData['all_approved'] ? 1 : 0,
             'badges'       => [
                 'good_payer' => !empty($badges['good_payer']),
@@ -135,11 +138,13 @@ class MypageController extends Controller
             $subImages = [];
         }
 
-        $jobRow = DB::table('shop_jobs')
+        $jobRowQ = DB::table('shop_jobs')
             ->where('shop_id', $shopId)
-            ->where('job_type', 1)
-            ->select('working_hours', 'working_day', 'regular_holiday')
-            ->first();
+            ->select('working_hours', 'working_day', 'regular_holiday');
+        if (Schema::hasColumn('shop_jobs', 'job_type')) {
+            $jobRowQ->where('job_type', 1);
+        }
+        $jobRow = $jobRowQ->first();
         $industryName = null;
         if (!empty($row?->industry_id)) {
             $industryName = DB::table('industries')
@@ -156,7 +161,7 @@ class MypageController extends Controller
             'allDocumentsApproved' => $documentData['all_approved'],
             'shopInfo' => [
                 'shop_name' => $row->shop_name ?? '',
-                'word' => $row->catch ?? '',
+                'word' => $hitokotoBody,
                 'industry' => $industryName,
                 'zip' => $row->zip ?? '',
                 'pref' => $row->pref ?? '',
@@ -166,7 +171,7 @@ class MypageController extends Controller
                 'working_hours' => $jobRow?->working_hours ?? '',
                 'working_days' => $jobRow?->working_day ?? '',
                 'regular_holiday' => $jobRow?->regular_holiday ?? '',
-                'concept' => $row->overview ?? '',
+                'concept' => '',
                 'tag_groups' => $shopTagGroups,
             ],
             'menuData' => [
@@ -190,15 +195,25 @@ class MypageController extends Controller
         $word = $request->input('word', '');
         $word = is_string($word) ? trim($word) : '';
 
-        DB::table('shop_profiles')->where('shop_id', $shopId)->update([
-            'catch' => $word,
-            'message' => $word,
-            'updated_at' => Carbon::now(),
-        ]);
+        $now = Carbon::now();
+        $exists = DB::table('shop_posts')->where('shop_id', $shopId)->exists();
+        if ($exists) {
+            DB::table('shop_posts')->where('shop_id', $shopId)->update([
+                'body' => $word,
+                'updated_at' => $now,
+            ]);
+        } else {
+            DB::table('shop_posts')->insert([
+                'shop_id' => $shopId,
+                'body' => $word,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }
 
         return response()->json([
             'success' => true,
-            'appeal_updated_at' => Carbon::now()->format('Y/m/d H:i'),
+            'appeal_updated_at' => $now->format('Y/m/d H:i'),
         ]);
     }
 
@@ -270,6 +285,39 @@ class MypageController extends Controller
     }
 
     /**
+     * 自店の許可証ファイルを閲覧（ログイン店舗のみ・storage 直 URL に依存しない）
+     */
+    public function viewLicenseDocument(string $type)
+    {
+        if (!in_array($type, ['business', 'entertainment'], true)) {
+            abort(404);
+        }
+
+        $shopId = $this->currentShopId();
+        $document = ShopLicenseDocument::query()
+            ->where('shop_id', $shopId)
+            ->where('type', $type)
+            ->first();
+
+        if (!$document || empty($document->image_path)) {
+            abort(404, '書類が見つかりません。');
+        }
+
+        $relative = $this->documentReviewService->shopLicenseRelativePublicPath($document->image_path);
+        if ($relative === null || !Storage::disk('public')->exists($relative)) {
+            abort(404, 'ファイルが見つかりません。');
+        }
+
+        $absolute = Storage::disk('public')->path($relative);
+        $mime = @mime_content_type($absolute) ?: 'application/octet-stream';
+
+        return response()->file($absolute, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'inline; filename*=UTF-8\'\'' . rawurlencode(basename($relative)),
+        ]);
+    }
+
+    /**
      * 営業許可証・風営許可証のアップロード
      * ※ 現段階ではモックとしてストレージに保存し、審査・承認は別途運営画面で行う想定
      */
@@ -293,8 +341,8 @@ class MypageController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => '書類をアップロードしました。運営による確認・承認をお待ちください。',
-                'type'    => $type,
-                'path'    => Storage::url($document->image_path),
+                'type' => $type,
+                'view_url' => route('shop.mypage.documents.show', ['type' => $type]),
             ]);
         }
 
