@@ -69,9 +69,14 @@
     {{-- 検索パネル：タイムライン＋一覧を統合した画面 --}}
     <div id="pane-search" class="tab-pane {{ $activeTab === 'pane-search' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-search' ? 'display:none' : '' }}">
         <div class="search-filter-box">
-            {{-- 役割に応じたフィルター（検索窓・並び替え・詳細検索ボタン） --}}
+            {{-- 役割に応じたフィルター（検索窓・並び替え）／詳細検索は FAB --}}
             @include($partsView . '.filter')
         </div>
+
+        <button type="button" id="open-detail-search" class="search-detail-fab" aria-controls="detail-search-modal" aria-expanded="false" aria-label="詳細検索">
+            <i class="fas fa-sliders-h" aria-hidden="true"></i>
+            <span id="detail-search-badge" class="search-detail-fab__badge" style="display: none;" aria-hidden="true">0</span>
+        </button>
 
         <ul class="connection-list connection-list--search">
             @forelse($items as $item)

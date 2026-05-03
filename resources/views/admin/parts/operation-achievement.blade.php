@@ -27,7 +27,7 @@
         <h2 class="admin-panel-title">{{ $copy[$key]['title'] }}</h2>
         <p class="admin-description" style="margin: 0;">
             {{ $copy[$key]['body'] }}
-            <strong style="color: var(--admin-gold); margin-left: 6px;">{{ number_format($n) }}件</strong>
+            <strong style="color: var(--admin-gold-strong); margin-left: 6px;">{{ number_format($n) }}件</strong>
         </p>
     </section>
 @endif

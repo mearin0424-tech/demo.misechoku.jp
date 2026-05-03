@@ -266,19 +266,16 @@
 
     <style>
         .admin-card {
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 0;
             border-radius: 20px;
-            background: rgba(255, 255, 255, 0.03);
-            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16);
+            background: var(--admin-card);
+            box-shadow: var(--admin-shadow-lg);
+            padding: 20px;
         }
 
         .admin-grid {
             display: grid;
             gap: 16px;
-        }
-
-        .admin-card {
-            padding: 20px;
         }
 
         .admin-card-wide {
@@ -299,7 +296,7 @@
 
         .admin-card-head p {
             margin: 0;
-            color: rgba(255, 255, 255, 0.68);
+            color: var(--admin-muted);
             line-height: 1.7;
         }
 
@@ -309,15 +306,15 @@
             min-height: 36px;
             padding: 0 12px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.06);
-            color: rgba(255, 255, 255, 0.78);
+            background: rgba(62, 44, 38, 0.06);
+            color: var(--admin-text);
             font-size: 0.8rem;
             font-weight: 700;
             white-space: nowrap;
         }
 
         .admin-master-link {
-            color: #f6d98b;
+            color: var(--admin-gold-strong);
             text-decoration: none;
             white-space: nowrap;
         }
@@ -332,7 +329,7 @@
             flex-direction: column;
             gap: 6px;
             font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.76);
+            color: var(--admin-sub);
         }
 
         .admin-master-select-row {
@@ -347,9 +344,10 @@
             max-width: 100%;
             padding: 8px 10px;
             border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            background: rgba(255, 255, 255, 0.02);
-            color: #fff;
+            border: 0;
+            background: #fff;
+            box-shadow: var(--admin-shadow);
+            color: var(--admin-text);
             font-size: 0.8rem;
             outline: none;
         }
@@ -367,22 +365,25 @@
         }
 
         .admin-alert-error {
-            background: rgba(127, 29, 29, 0.3);
-            border: 1px solid rgba(248, 113, 113, 0.4);
-            color: #fee2e2;
+            background: rgba(194, 65, 60, 0.1);
+            border: 0;
+            box-shadow: var(--admin-shadow);
+            color: #7f1d1d;
         }
 
         .admin-alert-success {
-            background: rgba(20, 83, 45, 0.3);
-            border: 1px solid rgba(74, 222, 128, 0.32);
-            color: #dcfce7;
+            background: rgba(16, 185, 129, 0.12);
+            border: 0;
+            box-shadow: var(--admin-shadow);
+            color: #14532d;
         }
 
         .admin-master-form {
             padding: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            border: 0;
             border-radius: 18px;
-            background: rgba(255, 255, 255, 0.025);
+            background: rgba(255, 255, 255, 0.65);
+            box-shadow: var(--admin-shadow);
         }
 
         .admin-master-layout {
@@ -412,13 +413,13 @@
 
         .admin-master-form-header p {
             margin: 0;
-            color: rgba(255, 255, 255, 0.64);
+            color: var(--admin-muted);
             font-size: 0.8rem;
             line-height: 1.6;
         }
 
         .admin-master-cancel {
-            color: #f6d98b;
+            color: var(--admin-gold-strong);
             text-decoration: none;
             white-space: nowrap;
             font-size: 0.8rem;
@@ -440,7 +441,7 @@
 
         .admin-master-field span {
             font-size: 0.83rem;
-            color: rgba(255, 255, 255, 0.76);
+            color: var(--admin-sub);
         }
 
         .admin-master-field input {
@@ -448,9 +449,10 @@
             min-height: 44px;
             padding: 10px 12px;
             border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.04);
-            color: #fff;
+            border: 0;
+            background: #fff;
+            box-shadow: var(--admin-shadow);
+            color: var(--admin-text);
         }
 
         .admin-master-submit {
@@ -480,13 +482,13 @@
         .admin-records-title {
             font-size: 0.9rem;
             font-weight: 700;
-            color: rgba(255, 255, 255, 0.86);
+            color: var(--admin-text);
         }
 
         .admin-records-copy {
             margin-top: 4px;
             font-size: 0.76rem;
-            color: rgba(255, 255, 255, 0.58);
+            color: var(--admin-muted);
         }
 
         .admin-records-toolbar {
@@ -507,7 +509,7 @@
         .admin-search-box i {
             position: absolute;
             left: 12px;
-            color: rgba(255, 255, 255, 0.42);
+            color: var(--admin-muted);
             font-size: 0.78rem;
         }
 
@@ -516,16 +518,16 @@
             min-height: 38px;
             padding: 0 12px 0 34px;
             border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(255, 255, 255, 0.04);
-            color: #fff;
+            border: 0;
+            background: #fff;
+            box-shadow: var(--admin-shadow);
+            color: var(--admin-text);
             font-size: 0.8rem;
             outline: none;
         }
 
         .admin-search-box input:focus {
-            border-color: rgba(230, 208, 128, 0.32);
-            box-shadow: 0 0 0 3px rgba(230, 208, 128, 0.06);
+            box-shadow: 0 0 0 2px rgba(185, 140, 36, 0.22);
         }
 
         .admin-sort-switch {
@@ -533,8 +535,9 @@
             gap: 4px;
             padding: 4px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(62, 44, 38, 0.05);
+            border: 0;
+            box-shadow: var(--admin-shadow);
         }
 
         .admin-sort-link {
@@ -544,7 +547,7 @@
             min-height: 32px;
             padding: 0 12px;
             border-radius: 999px;
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--admin-muted);
             text-decoration: none;
             font-size: 0.76rem;
             font-weight: 700;
@@ -569,12 +572,13 @@
             width: 32px;
             height: 32px;
             border-radius: 10px;
-            border: 1px solid rgba(230, 208, 128, 0.22);
-            background: rgba(230, 208, 128, 0.08);
-            color: #f6d98b;
+            border: 0;
+            background: rgba(185, 140, 36, 0.12);
+            color: var(--admin-gold-strong);
             text-decoration: none;
             font-size: 0.72rem;
             cursor: pointer;
+            box-shadow: var(--admin-shadow);
         }
 
         .admin-row-icon-btn.is-active {
@@ -584,9 +588,9 @@
         }
 
         .admin-row-icon-delete {
-            border-color: rgba(248, 113, 113, 0.4);
-            background: rgba(127, 29, 29, 0.4);
-            color: #fecaca;
+            border: 0;
+            background: rgba(194, 65, 60, 0.12);
+            color: var(--admin-red);
         }
 
         .detail-row {
@@ -602,7 +606,7 @@
         .detail-label {
             display: inline-block;
             margin-right: 6px;
-            color: rgba(255, 255, 255, 0.6);
+            color: var(--admin-muted);
         }
 
         .detail-value {
@@ -675,7 +679,7 @@
             .admin-table tbody tr {
                 display: block;
                 margin-bottom: 10px;
-                border-top: 1px solid rgba(255, 255, 255, 0.06);
+                border-top: 1px solid var(--admin-line-soft);
                 cursor: pointer;
             }
 
@@ -695,7 +699,7 @@
             .admin-table tbody tr .cell-detail {
                 display: none;
                 padding: 8px 14px 10px;
-                border-top: 1px solid rgba(255, 255, 255, 0.06);
+                border-top: 1px solid var(--admin-line-soft);
                 font-size: 0.7rem;
             }
 
@@ -704,7 +708,7 @@
             }
 
             .admin-table tbody tr.is-open {
-                background: rgba(255, 255, 255, 0.02);
+                background: var(--admin-card-hover);
             }
         }
     </style>

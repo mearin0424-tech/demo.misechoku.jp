@@ -52,9 +52,10 @@
         }
 
         .admin-alert-error {
-            background: rgba(127, 29, 29, 0.3);
-            border: 1px solid rgba(248, 113, 113, 0.4);
-            color: #fee2e2;
+            background: rgba(194, 65, 60, 0.1);
+            border: 0;
+            box-shadow: var(--admin-shadow);
+            color: #7f1d1d;
         }
     </style>
 @endsection

@@ -127,7 +127,7 @@
                                         <polygon points="{{ $series['area'] }}" fill="url(#grad-{{ $series['key'] }})"></polygon>
                                         <polyline points="{{ $series['polyline'] }}" fill="none" stroke="{{ $series['color'] }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
                                         @foreach ($series['points'] as $point)
-                                            <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="3" fill="#150A0B" stroke="{{ $series['color'] }}" stroke-width="1.5"></circle>
+                                            <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="3" fill="#fffcf7" stroke="{{ $series['color'] }}" stroke-width="1.5"></circle>
                                         @endforeach
                                     @endforeach
                                 </svg>
@@ -182,7 +182,7 @@
                                         <polygon points="{{ $countChart['series'][0]['area'] }}" fill="url(#grad-count)"></polygon>
                                         <polyline points="{{ $countChart['series'][0]['polyline'] }}" fill="none" stroke="#60A5FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
                                         @foreach ($countChart['series'][0]['points'] as $point)
-                                            <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="3" fill="#150A0B" stroke="#60A5FA" stroke-width="1.5"></circle>
+                                            <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="3" fill="#fffcf7" stroke="#60A5FA" stroke-width="1.5"></circle>
                                         @endforeach
                                     </svg>
                                     <div class="dashboard-chart-labels">
@@ -214,7 +214,7 @@
                                         <polygon points="{{ $amountChart['series'][0]['area'] }}" fill="url(#grad-amount)"></polygon>
                                         <polyline points="{{ $amountChart['series'][0]['polyline'] }}" fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
                                         @foreach ($amountChart['series'][0]['points'] as $point)
-                                            <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="3" fill="#150A0B" stroke="#34D399" stroke-width="1.5"></circle>
+                                            <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="3" fill="#fffcf7" stroke="#34D399" stroke-width="1.5"></circle>
                                         @endforeach
                                     </svg>
                                     <div class="dashboard-chart-labels">
@@ -317,9 +317,10 @@
         .dashboard-alert {
             padding: 12px 14px;
             border-radius: 14px;
-            background: rgba(230, 208, 128, 0.08);
-            border: 1px solid rgba(230, 208, 128, 0.18);
-            color: #f6ead6;
+            background: rgba(185, 140, 36, 0.1);
+            border: 0;
+            box-shadow: var(--admin-shadow);
+            color: var(--admin-text);
             font-size: 0.88rem;
         }
         .dashboard-section {
@@ -344,6 +345,7 @@
             margin: 0;
             font-size: 1.2rem;
             font-weight: 700;
+            color: var(--admin-text);
         }
         .dashboard-date-chip,
         .dashboard-export-button {
@@ -353,47 +355,48 @@
             min-height: 34px;
             padding: 0 12px;
             border-radius: 10px;
-            border: 1px solid rgba(230, 208, 128, 0.14);
-            background: #150a0b;
-            color: #bfaeaf;
+            border: 0;
+            background: rgba(255, 255, 255, 0.75);
+            box-shadow: var(--admin-shadow);
+            color: var(--admin-sub);
             font-size: 0.72rem;
             font-weight: 700;
         }
         .dashboard-date-chip {
-            color: #e6d080;
+            color: var(--admin-gold-strong);
         }
         .dashboard-export-button {
             cursor: pointer;
         }
         .dashboard-export-button:hover {
-            color: #e6d080;
-            background: #1a0c0e;
+            color: var(--admin-gold-strong);
+            background: rgba(185, 140, 36, 0.12);
         }
         .bi-panel,
         .task-panel {
-            background: #150a0b;
-            border: 1px solid rgba(230, 208, 128, 0.1);
+            background: var(--admin-card);
+            border: 0;
             border-radius: 18px;
             overflow: hidden;
-            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.26);
+            box-shadow: var(--admin-shadow-lg);
         }
         .bi-tabs {
             display: flex;
-            border-bottom: 1px solid rgba(230, 208, 128, 0.08);
+            border-bottom: 1px solid var(--admin-line-soft);
         }
         .bi-tab-button {
             border: 0;
             border-bottom: 2px solid transparent;
             background: transparent;
-            color: #8a7577;
+            color: var(--admin-muted);
             padding: 14px 16px;
             font-size: 0.82rem;
             font-weight: 700;
             cursor: pointer;
         }
         .bi-tab-button.is-active {
-            border-bottom-color: #e6d080;
-            color: #e6d080;
+            border-bottom-color: var(--admin-gold);
+            color: var(--admin-gold-strong);
         }
         .bi-tab-panel {
             display: none;
@@ -410,9 +413,10 @@
         }
         .dashboard-kpi-card,
         .dashboard-chart-card {
-            background: #150a0b;
-            border: 1px solid rgba(230, 208, 128, 0.1);
+            background: var(--admin-card);
+            border: 0;
             border-radius: 16px;
+            box-shadow: var(--admin-shadow);
         }
         .dashboard-kpi-card {
             padding: 14px;
@@ -429,12 +433,12 @@
             margin-bottom: 8px;
         }
         .dashboard-kpi-head i {
-            color: rgba(230, 208, 128, 0.6);
+            color: var(--admin-gold);
         }
         .dashboard-kpi-title {
             font-size: 0.72rem;
             font-weight: 700;
-            color: #8a7577;
+            color: var(--admin-muted);
         }
         .dashboard-kpi-main {
             display: flex;
@@ -447,16 +451,16 @@
         .dashboard-kpi-sub-value {
             font-size: 1.35rem;
             font-weight: 800;
-            color: #f5e6e6;
+            color: var(--admin-text);
             letter-spacing: 0.02em;
         }
         .dashboard-kpi-sub-value {
-            color: #e6d080;
+            color: var(--admin-gold-strong);
         }
         .dashboard-kpi-unit {
             font-size: 0.62rem;
             font-weight: 700;
-            color: #8a7577;
+            color: var(--admin-muted);
         }
         .dashboard-kpi-trend {
             display: inline-flex;
@@ -481,6 +485,7 @@
             margin: 0;
             font-size: 0.86rem;
             font-weight: 700;
+            color: var(--admin-text);
         }
         .dashboard-chart-legend {
             display: flex;
@@ -489,7 +494,7 @@
             flex-wrap: wrap;
             font-size: 0.66rem;
             font-weight: 700;
-            color: #bfaeaf;
+            color: var(--admin-sub);
         }
         .dashboard-chart-legend span {
             display: inline-flex;
@@ -520,7 +525,7 @@
             overflow: visible;
         }
         .dashboard-chart-grid {
-            stroke: #2a1518;
+            stroke: rgba(62, 44, 38, 0.12);
             stroke-dasharray: 3 3;
             stroke-width: 1;
         }
@@ -533,7 +538,7 @@
             justify-content: space-between;
             padding: 0 20px;
             font-size: 0.62rem;
-            color: #8a7577;
+            color: var(--admin-muted);
         }
         .dashboard-subchart-grid {
             display: grid;
@@ -545,8 +550,8 @@
             flex-wrap: wrap;
             gap: 8px;
             padding: 14px 16px;
-            border-bottom: 1px solid rgba(230, 208, 128, 0.08);
-            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--admin-line-soft);
+            background: rgba(62, 44, 38, 0.03);
         }
         .task-filter-chip {
             display: inline-flex;
@@ -554,9 +559,9 @@
             gap: 8px;
             padding: 8px 12px;
             border-radius: 10px;
-            border: 1px solid transparent;
+            border: 0;
             background: transparent;
-            color: #8a7577;
+            color: var(--admin-muted);
             font-size: 0.72rem;
             font-weight: 700;
             cursor: pointer;
@@ -565,18 +570,19 @@
             min-width: 20px;
             padding: 2px 6px;
             border-radius: 999px;
-            background: #2a1518;
-            color: #f5e6e6;
+            background: rgba(62, 44, 38, 0.08);
+            color: var(--admin-text);
             font-size: 0.62rem;
             text-align: center;
         }
         .task-filter-chip.is-active {
-            color: #e6d080;
-            border-color: rgba(230, 208, 128, 0.26);
-            background: rgba(230, 208, 128, 0.08);
+            color: var(--admin-gold-strong);
+            border: 0;
+            background: rgba(185, 140, 36, 0.12);
+            box-shadow: var(--admin-shadow);
         }
         .task-filter-chip.is-active strong {
-            background: #e6d080;
+            background: linear-gradient(135deg, #e5c158, #b38a22);
             color: #120405;
         }
         .task-table-wrap {
@@ -592,18 +598,19 @@
             text-align: left;
             font-size: 0.64rem;
             font-weight: 700;
-            color: #8a7577;
-            background: rgba(255, 255, 255, 0.02);
-            border-bottom: 1px solid rgba(230, 208, 128, 0.08);
+            color: var(--admin-muted);
+            background: rgba(62, 44, 38, 0.04);
+            border-bottom: 1px solid var(--admin-line-soft);
         }
         .task-table tbody td {
             padding: 12px 16px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-top: 1px solid var(--admin-line-soft);
             vertical-align: middle;
             font-size: 0.78rem;
+            color: var(--admin-text);
         }
         .task-row:hover {
-            background: #1a0c0e;
+            background: var(--admin-card-hover);
         }
         .task-category-badge {
             display: inline-flex;
@@ -643,8 +650,8 @@
             width: 24px;
             height: 24px;
             border-radius: 8px;
-            background: #2a1518;
-            color: #e6d080;
+            background: rgba(185, 140, 36, 0.18);
+            color: var(--admin-gold-strong);
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -658,7 +665,7 @@
         }
         .task-target-meta {
             font-size: 0.62rem;
-            color: #8a7577;
+            color: var(--admin-muted);
         }
         .task-status {
             display: inline-flex;
@@ -666,7 +673,7 @@
             gap: 6px;
             font-size: 0.72rem;
             font-weight: 700;
-            color: #f5e6e6;
+            color: var(--admin-text);
         }
         .task-status.is-high {
             color: #fbbf24;
@@ -679,7 +686,7 @@
             letter-spacing: 0.02em;
         }
         .task-date {
-            color: #bfaeaf;
+            color: var(--admin-sub);
             font-size: 0.72rem;
         }
         .text-right {
@@ -688,12 +695,13 @@
         .task-action-button {
             padding: 8px 12px;
             border-radius: 10px;
-            border: 1px solid rgba(230, 208, 128, 0.26);
-            background: rgba(230, 208, 128, 0.08);
-            color: #e6d080;
+            border: 0;
+            background: rgba(185, 140, 36, 0.14);
+            color: var(--admin-gold-strong);
             font-size: 0.72rem;
             font-weight: 700;
             cursor: pointer;
+            box-shadow: var(--admin-shadow);
         }
         .task-action-button:hover {
             background: #e6d080;
@@ -714,7 +722,7 @@
             flex-direction: column;
             align-items: center;
             gap: 10px;
-            color: #bfaeaf;
+            color: var(--admin-sub);
             font-weight: 700;
         }
         .task-empty i {
@@ -767,10 +775,11 @@
             .task-table tbody tr {
                 display: block;
                 margin-bottom: 12px;
-                border: 1px solid rgba(230, 208, 128, 0.1);
+                border: 0;
                 border-radius: 14px;
                 overflow: hidden;
-                background: rgba(255, 255, 255, 0.02);
+                background: var(--admin-card);
+                box-shadow: var(--admin-shadow);
             }
             .task-table tbody td {
                 display: grid;
@@ -783,7 +792,7 @@
                 content: attr(data-label);
                 font-size: 0.64rem;
                 font-weight: 700;
-                color: #8a7577;
+                color: var(--admin-muted);
             }
             .text-right {
                 text-align: left;

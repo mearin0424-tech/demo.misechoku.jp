@@ -97,9 +97,10 @@
         }
 
         .admin-alert-success {
-            background: rgba(20, 83, 45, 0.3);
-            border: 1px solid rgba(74, 222, 128, 0.32);
-            color: #dcfce7;
+            background: rgba(16, 185, 129, 0.12);
+            border: 0;
+            box-shadow: var(--admin-shadow);
+            color: #14532d;
         }
 
         .admin-status-badge {
@@ -113,24 +114,25 @@
         }
 
         .admin-status-badge.is-active {
-            background: rgba(16, 185, 129, 0.16);
-            color: #a7f3d0;
-            border: 1px solid rgba(16, 185, 129, 0.32);
+            background: rgba(16, 185, 129, 0.14);
+            color: #047857;
+            border: 0;
         }
 
         .admin-status-badge.is-inactive {
-            background: rgba(148, 163, 184, 0.14);
-            color: #cbd5e1;
-            border: 1px solid rgba(148, 163, 184, 0.28);
+            background: rgba(62, 44, 38, 0.06);
+            color: var(--admin-muted);
+            border: 0;
         }
 
         .admin-toggle-button {
             min-height: 36px;
             padding: 0 12px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 0;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.04);
-            color: #fff;
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: var(--admin-shadow);
+            color: var(--admin-text);
             cursor: pointer;
             white-space: nowrap;
         }

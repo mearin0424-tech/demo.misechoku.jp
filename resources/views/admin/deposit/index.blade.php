@@ -29,8 +29,9 @@
     .billing-meta-item {
         padding: 12px 14px;
         border-radius: 14px;
-        background: #171a20;
-        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255, 255, 255, 0.9);
+        border: 0;
+        box-shadow: var(--admin-shadow);
     }
     .billing-meta-label {
         font-size: 0.72rem;
@@ -40,22 +41,24 @@
     .billing-meta-value {
         font-size: 0.92rem;
         font-weight: 700;
+        color: var(--admin-text);
     }
     .billing-status-chip {
         display: inline-flex;
         align-items: center;
         padding: 5px 10px;
         border-radius: 999px;
-        background: rgba(96, 165, 250, 0.15);
-        color: #dbeafe;
+        background: rgba(37, 99, 235, 0.1);
+        color: #1d4ed8;
         font-size: 0.75rem;
         font-weight: 700;
     }
     .billing-action-box {
         padding: 16px;
         border-radius: 16px;
-        background: #171a20;
-        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255, 255, 255, 0.85);
+        border: 0;
+        box-shadow: var(--admin-shadow);
     }
     .billing-action-box + .billing-action-box {
         margin-top: 12px;
@@ -64,6 +67,7 @@
         margin: 0 0 10px;
         font-size: 0.92rem;
         font-weight: 700;
+        color: var(--admin-text);
     }
     .billing-check-grid {
         display: grid;
@@ -91,13 +95,15 @@
         margin-top: 14px;
         padding: 14px;
         border-radius: 14px;
-        background: #171a20;
-        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255, 255, 255, 0.85);
+        border: 0;
+        box-shadow: var(--admin-shadow);
     }
     .billing-review-title {
         margin: 0 0 8px;
         font-size: 0.84rem;
         font-weight: 700;
+        color: var(--admin-text);
     }
     .billing-review-text {
         font-size: 0.82rem;
@@ -116,7 +122,7 @@
         gap: 12px;
         padding: 9px 12px;
         border-radius: 12px;
-        background: rgba(255,255,255,0.04);
+        background: rgba(62, 44, 38, 0.04);
         font-size: 0.8rem;
     }
     .billing-alert-unconfirmed {
@@ -137,12 +143,13 @@
         padding: 6px 10px;
         font-size: 0.75rem;
         border-radius: 8px;
-        background: rgba(96, 165, 250, 0.2);
-        border: 1px solid rgba(96, 165, 250, 0.4);
-        color: #93c5fd;
+        background: rgba(37, 99, 235, 0.1);
+        border: 0;
+        color: #1d4ed8;
         cursor: pointer;
+        box-shadow: var(--admin-shadow);
     }
-    .btn-copy:hover { background: rgba(96, 165, 250, 0.3); }
+    .btn-copy:hover { background: rgba(37, 99, 235, 0.16); }
     @media (max-width: 980px) {
         .billing-detail-card {
             grid-template-columns: 1fr;
@@ -167,19 +174,19 @@
         @endif
 
         @if(session('error'))
-            <div class="admin-alert" style="background: rgba(248, 113, 113, 0.12); border-color: rgba(248, 113, 113, 0.3); color: #fee2e2;">
+            <div class="admin-alert" style="background: rgba(194, 65, 60, 0.1); border: 0; color: #7f1d1d;">
                 {{ session('error') }}
             </div>
         @endif
 
         @if(!empty($summary['unconfirmed_cast_over_7days']))
-            <div class="admin-alert" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fecaca;">
+            <div class="admin-alert" style="background: rgba(239, 68, 68, 0.1); border: 0; color: #7f1d1d;">
                 <strong>要確認：</strong> 振込済みのうち、キャストの入金確認が7日以上ない案件が {{ $summary['unconfirmed_cast_over_7days'] }} 件あります。個別フォローを推奨します。
             </div>
         @endif
 
         @if($errors->any())
-            <div class="admin-alert" style="background: rgba(248, 113, 113, 0.12); border-color: rgba(248, 113, 113, 0.3); color: #fee2e2;">
+            <div class="admin-alert" style="background: rgba(194, 65, 60, 0.1); border: 0; color: #7f1d1d;">
                 {{ $errors->first() }}
             </div>
         @endif

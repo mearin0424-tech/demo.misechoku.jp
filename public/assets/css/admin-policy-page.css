@@ -43,9 +43,9 @@
     font-weight: 600;
     padding: 0.2rem 0.5rem;
     border-radius: 6px;
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px solid rgba(230, 208, 128, 0.2);
-    color: var(--admin-sub);
+    background: rgba(62, 44, 38, 0.06);
+    border: 0;
+    color: var(--admin-muted);
 }
 
 .policy-doc-admin__actions {
@@ -55,14 +55,14 @@
     align-items: center;
 }
 
-/* アコーディオン（ダーク枠） */
+/* アコーディオン（履歴・本文外枠） */
 .policy-acc {
     border-radius: 14px;
-    border: 1px solid rgba(107, 41, 56, 0.45);
+    border: 0;
     background: var(--admin-card);
     overflow: hidden;
     margin-bottom: 1rem;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+    box-shadow: var(--admin-shadow-lg);
 }
 
 .policy-acc__head {
@@ -72,7 +72,7 @@
     gap: 0.75rem;
     padding: 0.95rem 1.1rem;
     cursor: pointer;
-    background: rgba(0, 0, 0, 0.22);
+    background: rgba(62, 44, 38, 0.04);
     border: 0;
     width: 100%;
     text-align: left;
@@ -82,7 +82,7 @@
 }
 
 .policy-acc__head:hover {
-    background: rgba(0, 0, 0, 0.32);
+    background: rgba(62, 44, 38, 0.07);
 }
 
 .policy-acc__head-left {
@@ -98,9 +98,9 @@
     align-items: center;
     justify-content: center;
     border-radius: 10px;
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    color: var(--admin-muted);
+    background: rgba(185, 140, 36, 0.12);
+    border: 0;
+    color: var(--admin-gold-strong);
     font-size: 0.85rem;
 }
 
@@ -108,7 +108,7 @@
     margin: 0;
     font-size: 0.95rem;
     font-weight: 700;
-    color: #fff4f2;
+    color: var(--admin-text);
 }
 
 .policy-acc__meta {
@@ -129,7 +129,7 @@
 
 .policy-acc__body {
     display: none;
-    border-top: 1px solid rgba(107, 41, 56, 0.45);
+    border-top: 1px solid var(--admin-line-soft);
     background: var(--admin-card);
 }
 
@@ -140,11 +140,11 @@
 /* ライト本文パネル */
 .policy-light {
     background: #f7f3ee;
-    border: 1px solid rgba(226, 188, 79, 0.28);
+    border: 0;
     border-radius: 14px;
     overflow: hidden;
     margin-bottom: 1rem;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+    box-shadow: var(--admin-shadow-lg);
 }
 
 .policy-light__head {
@@ -435,8 +435,9 @@
     gap: 0.45rem;
     padding: 0.55rem 1rem;
     border-radius: 10px;
-    border: 1px solid rgba(223, 210, 210, 0.35);
-    background: transparent;
+    border: 0;
+    background: rgba(255, 255, 255, 0.75);
+    box-shadow: var(--admin-shadow);
     color: var(--admin-text);
     font-size: 0.82rem;
     font-weight: 600;
@@ -445,5 +446,5 @@
 }
 
 .btn-policy-ghost:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.95);
 }

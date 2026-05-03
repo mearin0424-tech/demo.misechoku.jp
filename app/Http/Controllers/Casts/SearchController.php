@@ -144,7 +144,7 @@ class SearchController extends BaseSearchController
             }
         }
 
-        return $rows->get()
+        $items = $rows->get()
             ->filter(function ($row) use ($normalizedKeyword, $areas, $hourlyWage, $reward, $jobTagFilters, $shopTagFilters) {
                 if ($normalizedKeyword === '') {
                     $matchesKeyword = true;
@@ -207,6 +207,121 @@ class SearchController extends BaseSearchController
             })
             ->values()
             ->all();
+
+        return $this->enrichCastSearchShopCards($items);
+    }
+
+    /**
+     * 一覧カード用に業種・レビュー評価・優良店フラグを付与する。
+     *
+     * @param  array<int, array<string, mixed>>  $items
+     * @return array<int, array<string, mixed>>
+     */
+    private function enrichCastSearchShopCards(array $items): array
+    {
+        if ($items === []) {
+            return [];
+        }
+
+        $ids = [];
+        foreach ($items as $item) {
+            if (!empty($item['id'])) {
+                $ids[] = (string) $item['id'];
+            }
+        }
+        $ids = array_values(array_unique($ids));
+
+        $industryByShop = $this->fetchShopIndustryLabelsByIds($ids);
+        $ratingByShop = $this->fetchShopRatingAggregatesByIds($ids);
+
+        foreach ($items as &$item) {
+            $id = (string) ($item['id'] ?? '');
+            $item['industry_label'] = $industryByShop[$id] ?? '';
+            $agg = $ratingByShop[$id] ?? ['avg' => null, 'cnt' => 0];
+            $item['rating_avg'] = $agg['avg'];
+            $item['rating_display'] = $agg['avg'] !== null ? number_format((float) $agg['avg'], 1) : null;
+            $item['is_excellent'] = $agg['avg'] !== null
+                && (float) $agg['avg'] >= 4.5
+                && (int) $agg['cnt'] >= 2;
+        }
+        unset($item);
+
+        return $items;
+    }
+
+    /**
+     * @param  array<int, string>  $shopIds
+     * @return array<string, string> shop_id => 代表業種名（先頭の1件）
+     */
+    private function fetchShopIndustryLabelsByIds(array $shopIds): array
+    {
+        if ($shopIds === []) {
+            return [];
+        }
+
+        $out = [];
+
+        if (Schema::hasTable('industry_shop') && Schema::hasTable('industries')) {
+            $rows = DB::table('industry_shop')
+                ->join('industries', 'industry_shop.industry_id', '=', 'industries.id')
+                ->whereIn('industry_shop.shop_id', $shopIds)
+                ->orderBy('industries.id')
+                ->get(['industry_shop.shop_id as shop_id', 'industries.name as name']);
+        } elseif (Schema::hasTable('shop_industries') && Schema::hasTable('industries')) {
+            $rows = DB::table('shop_industries')
+                ->join('industries', 'shop_industries.industry_id', '=', 'industries.id')
+                ->whereIn('shop_industries.shop_id', $shopIds)
+                ->orderBy('industries.id')
+                ->get(['shop_industries.shop_id as shop_id', 'industries.name as name']);
+        } else {
+            return [];
+        }
+
+        foreach ($rows as $r) {
+            $sid = (string) $r->shop_id;
+            if (!isset($out[$sid])) {
+                $out[$sid] = (string) $r->name;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param  array<int, string>  $shopIds
+     * @return array<string, array{avg: ?float, cnt: int}>
+     */
+    private function fetchShopRatingAggregatesByIds(array $shopIds): array
+    {
+        if ($shopIds === [] || !Schema::hasTable('reviews') || !Schema::hasTable('review_details')) {
+            return [];
+        }
+
+        if (!Schema::hasColumn('reviews', 'shop_id')) {
+            return [];
+        }
+
+        $rows = DB::table('reviews')
+            ->join('review_details', 'reviews.id', '=', 'review_details.review_id')
+            ->whereIn('reviews.shop_id', $shopIds)
+            ->whereNotNull('reviews.shop_id')
+            ->groupBy('reviews.shop_id')
+            ->select(
+                'reviews.shop_id',
+                DB::raw('AVG(review_details.score) as avg_score'),
+                DB::raw('COUNT(review_details.id) as detail_count')
+            )
+            ->get();
+
+        $out = [];
+        foreach ($rows as $r) {
+            $out[(string) $r->shop_id] = [
+                'avg' => $r->avg_score !== null ? round((float) $r->avg_score, 2) : null,
+                'cnt' => (int) $r->detail_count,
+            ];
+        }
+
+        return $out;
     }
 
     /**

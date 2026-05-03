@@ -103,24 +103,26 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --admin-bg: #0d0405;
-            --admin-sidebar: #080203;
-            --admin-card: #150a0b;
-            --admin-card-hover: #1a0c0e;
-            --admin-header: rgba(13, 4, 5, 0.9);
-            --admin-line: #2a1518;
-            --admin-line-soft: rgba(230, 208, 128, 0.12);
-            --admin-blue: #60a5fa;
-            --admin-purple: #a78bfa;
-            --admin-green: #34d399;
-            --admin-yellow: #fbbf24;
-            --admin-red: #f87171;
-            --admin-gold: #e6d080;
-            --admin-gold-strong: #c99b2e;
-            --admin-text: #f5e6e6;
-            --admin-sub: #bfaeaf;
-            --admin-muted: #8a7577;
-            --admin-accent: #f5e6e6;
+            --admin-bg: #f3efe8;
+            --admin-sidebar: #ebe4d9;
+            --admin-card: #fffcf7;
+            --admin-card-hover: #f5efe6;
+            --admin-header: rgba(255, 252, 247, 0.92);
+            --admin-line: rgba(62, 44, 38, 0.1);
+            --admin-line-soft: rgba(62, 44, 38, 0.06);
+            --admin-shadow: 0 2px 14px rgba(44, 36, 32, 0.05);
+            --admin-shadow-lg: 0 8px 28px rgba(44, 36, 32, 0.07);
+            --admin-blue: #2563eb;
+            --admin-purple: #7c3aed;
+            --admin-green: #059669;
+            --admin-yellow: #b45309;
+            --admin-red: #c2413c;
+            --admin-gold: #a67c1a;
+            --admin-gold-strong: #6b4a12;
+            --admin-text: #2a221d;
+            --admin-sub: #5a5048;
+            --admin-muted: #8a7f76;
+            --admin-accent: #2a221d;
         }
         * {
             box-sizing: border-box;
@@ -142,7 +144,7 @@
             background: transparent;
         }
         ::-webkit-scrollbar-thumb {
-            background: #2a1518;
+            background: rgba(62, 44, 38, 0.22);
             border-radius: 999px;
         }
         a {
@@ -157,7 +159,8 @@
             width: 224px;
             flex: 0 0 224px;
             background: var(--admin-sidebar);
-            border-right: 1px solid var(--admin-line-soft);
+            border-right: 0;
+            box-shadow: 4px 0 24px rgba(44, 36, 32, 0.04);
             display: flex;
             flex-direction: column;
             position: fixed;
@@ -169,7 +172,7 @@
         .admin-sidebar-header {
             min-height: 52px;
             padding: 14px 16px;
-            border-bottom: 1px solid var(--admin-line-soft);
+            border-bottom: 0;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -220,16 +223,17 @@
             padding: 10px 12px;
             border-radius: 12px;
             text-decoration: none;
-            background: rgba(230, 208, 128, 0.08);
-            border: 1px solid rgba(230, 208, 128, 0.18);
-            color: var(--admin-gold);
+            background: rgba(255, 255, 255, 0.55);
+            border: 0;
+            box-shadow: var(--admin-shadow);
+            color: var(--admin-gold-strong);
             margin-bottom: 18px;
             font-size: 0.82rem;
             font-weight: 700;
         }
         .admin-home-link.is-active {
-            background: rgba(230, 208, 128, 0.12);
-            border-color: rgba(230, 208, 128, 0.26);
+            background: rgba(185, 140, 36, 0.14);
+            box-shadow: 0 0 0 1px rgba(185, 140, 36, 0.2);
         }
         .admin-nav-group {
             margin-bottom: 16px;
@@ -256,7 +260,7 @@
             flex: 1;
             min-width: 12px;
             height: 1px;
-            background: rgba(138, 117, 119, 0.35);
+            background: var(--admin-line-soft);
             border-radius: 1px;
         }
         .admin-nav-list {
@@ -273,14 +277,14 @@
             border-radius: 10px;
             text-decoration: none;
             color: var(--admin-muted);
-            transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
-            border: 1px solid transparent;
+            transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+            border: 0;
         }
         .admin-nav-link:hover,
         .admin-nav-link.is-active {
-            background: var(--admin-card);
-            color: var(--admin-gold);
-            border-color: rgba(230, 208, 128, 0.12);
+            background: rgba(255, 255, 255, 0.75);
+            color: var(--admin-gold-strong);
+            box-shadow: var(--admin-shadow);
         }
         .admin-nav-link-main {
             display: flex;
@@ -306,7 +310,7 @@
             line-height: 1.25;
         }
         .admin-nav-link.is-active .admin-nav-link-achievement {
-            color: rgba(230, 208, 128, 0.75);
+            color: var(--admin-gold);
         }
         .admin-badge {
             font-size: 0.56rem;
@@ -319,15 +323,16 @@
             color: #120405;
         }
         .badge-red {
-            background: rgba(248, 113, 113, 0.2);
-            color: #fff;
+            background: rgba(194, 65, 60, 0.14);
+            color: var(--admin-red);
         }
         .admin-sidebar-user {
             margin: 14px 4px 0;
             padding: 14px;
             border-radius: 14px;
-            background: var(--admin-card);
-            border: 1px solid var(--admin-line-soft);
+            background: rgba(255, 255, 255, 0.6);
+            border: 0;
+            box-shadow: var(--admin-shadow);
         }
         .admin-sidebar-user-row {
             display: flex;
@@ -361,8 +366,8 @@
             width: 100%;
             padding: 9px 12px;
             border-radius: 12px;
-            border: 1px solid var(--admin-line);
-            background: transparent;
+            border: 0;
+            background: rgba(62, 44, 38, 0.06);
             color: var(--admin-text);
             display: flex;
             align-items: center;
@@ -373,8 +378,8 @@
             font-weight: 700;
         }
         .admin-logout-btn:hover {
-            background: rgba(248, 113, 113, 0.12);
-            border-color: rgba(248, 113, 113, 0.45);
+            background: rgba(194, 65, 60, 0.1);
+            color: var(--admin-red);
         }
         .admin-main {
             flex: 1;
@@ -388,8 +393,9 @@
             top: 0;
             z-index: 15;
             background: var(--admin-header);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--admin-line-soft);
+            backdrop-filter: blur(12px);
+            border-bottom: 0;
+            box-shadow: 0 1px 0 rgba(62, 44, 38, 0.06);
             padding: 0 16px 0 18px;
             min-height: 52px;
             display: flex;
@@ -415,7 +421,7 @@
             color: var(--admin-muted);
         }
         .admin-breadcrumb-current {
-            color: var(--admin-gold);
+            color: var(--admin-gold-strong);
         }
         .admin-header-right {
             display: flex;
@@ -437,15 +443,16 @@
         .admin-search-input {
             width: 100%;
             padding: 8px 12px 8px 30px;
-            border-radius: 8px;
-            border: 1px solid var(--admin-line);
-            background: var(--admin-card);
+            border-radius: 10px;
+            border: 0;
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: var(--admin-shadow);
             color: var(--admin-text);
             font-size: 0.75rem;
             outline: none;
         }
         .admin-search-input:focus {
-            border-color: rgba(230, 208, 128, 0.4);
+            box-shadow: 0 0 0 2px rgba(185, 140, 36, 0.25);
         }
         .admin-search-input::placeholder {
             color: var(--admin-muted);
@@ -455,16 +462,16 @@
             width: 36px;
             height: 36px;
             border-radius: 999px;
-            border: 1px solid transparent;
+            border: 0;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             font-size: 0.95rem;
         }
         .admin-header-icon:hover {
-            background: var(--admin-card);
-            border-color: rgba(230, 208, 128, 0.12);
-            color: var(--admin-gold);
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: var(--admin-shadow);
+            color: var(--admin-gold-strong);
         }
         .admin-header-dot {
             position: absolute;
@@ -474,7 +481,7 @@
             height: 10px;
             border-radius: 999px;
             background: var(--admin-red);
-            border: 2px solid var(--admin-bg);
+            border: 2px solid var(--admin-card);
         }
         .admin-header-notification-count {
             position: absolute;
@@ -490,7 +497,7 @@
             font-weight: 800;
             line-height: 16px;
             text-align: center;
-            border: 2px solid var(--admin-bg);
+            border: 2px solid var(--admin-card);
         }
         .admin-task-popover {
             position: absolute;
@@ -498,9 +505,9 @@
             right: 0;
             width: 288px;
             background: var(--admin-card);
-            border: 1px solid rgba(230, 208, 128, 0.24);
+            border: 0;
             border-radius: 16px;
-            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+            box-shadow: var(--admin-shadow-lg);
             overflow: hidden;
             display: none;
             z-index: 80;
@@ -515,12 +522,15 @@
             justify-content: space-between;
             gap: 10px;
             padding: 12px 14px;
-            background: rgba(0, 0, 0, 0.16);
-            border-bottom: 1px solid var(--admin-line);
+            background: rgba(62, 44, 38, 0.04);
+            border-bottom: 0;
         }
         .admin-task-popover-foot {
-            border-top: 1px solid var(--admin-line);
+            border-top: 1px solid var(--admin-line-soft);
             border-bottom: 0;
+        }
+        .admin-task-popover-head {
+            border-bottom: 1px solid var(--admin-line-soft);
         }
         .admin-task-popover-title {
             font-size: 0.72rem;
@@ -550,7 +560,7 @@
             gap: 12px;
             padding: 12px 14px;
             text-decoration: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            border-bottom: 1px solid var(--admin-line-soft);
         }
         .admin-task-item:hover {
             background: var(--admin-card-hover);
@@ -591,7 +601,7 @@
             width: 100%;
             border: 0;
             background: transparent;
-            color: var(--admin-gold);
+            color: var(--admin-gold-strong);
             font-size: 0.72rem;
             font-weight: 700;
             cursor: pointer;
@@ -639,17 +649,18 @@
         .admin-alert {
             padding: 12px 14px;
             border-radius: 14px;
-            background: rgba(230, 208, 128, 0.08);
-            border: 1px solid rgba(230, 208, 128, 0.2);
-            color: #f6ead6;
+            background: rgba(185, 140, 36, 0.1);
+            border: 0;
+            box-shadow: var(--admin-shadow);
+            color: var(--admin-text);
             font-size: 0.88rem;
         }
         .admin-panel {
             border-radius: 18px;
-            border: 1px solid rgba(230, 208, 128, 0.1);
+            border: 0;
             background: var(--admin-card);
             overflow: hidden;
-            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            box-shadow: var(--admin-shadow-lg);
             padding: 18px;
         }
         .admin-panel-title {
@@ -661,9 +672,9 @@
         .table-wrapper {
             overflow-x: auto;
             border-radius: 18px;
-            border: 1px solid rgba(230, 208, 128, 0.1);
+            border: 0;
             background: var(--admin-card);
-            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+            box-shadow: var(--admin-shadow-lg);
         }
         .admin-table {
             width: 100%;
@@ -677,14 +688,14 @@
             font-size: 0.68rem;
             font-weight: 700;
             color: var(--admin-muted);
-            background: rgba(255, 255, 255, 0.02);
-            border-bottom: 1px solid rgba(230, 208, 128, 0.08);
+            background: rgba(62, 44, 38, 0.04);
+            border-bottom: 1px solid var(--admin-line-soft);
             white-space: nowrap;
         }
         .admin-table tbody td {
             padding: 10px 14px;
             color: var(--admin-text);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-top: 1px solid var(--admin-line-soft);
             white-space: nowrap;
             vertical-align: middle;
             font-size: 0.78rem;
@@ -710,8 +721,8 @@
             padding: 16px;
             border-radius: 16px;
             background: var(--admin-card);
-            border: 1px solid rgba(230, 208, 128, 0.1);
-            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+            border: 0;
+            box-shadow: var(--admin-shadow-lg);
         }
         .admin-card h2,
         .sales-card h2 {
@@ -731,7 +742,7 @@
             margin-top: 10px;
             font-size: 1.5rem;
             font-weight: 800;
-            color: #f3f4f6;
+            color: var(--admin-text);
             letter-spacing: 0.02em;
         }
         .admin-form-row {
@@ -748,15 +759,15 @@
             width: 100%;
             padding: 10px 12px;
             border-radius: 12px;
-            border: 1px solid var(--admin-line);
-            background: rgba(255, 255, 255, 0.03);
+            border: 0;
+            background: #fff;
+            box-shadow: var(--admin-shadow);
             color: var(--admin-text);
             font-size: 0.88rem;
             outline: none;
         }
         .admin-input:focus {
-            border-color: rgba(230, 208, 128, 0.3);
-            box-shadow: 0 0 0 3px rgba(230, 208, 128, 0.07);
+            box-shadow: 0 0 0 2px rgba(185, 140, 36, 0.28);
         }
         select.admin-input {
             color: var(--admin-text);
@@ -792,15 +803,16 @@
             gap: 8px;
             padding: 9px 14px;
             border-radius: 12px;
-            border: 1px solid rgba(230, 208, 128, 0.22);
-            background: rgba(230, 208, 128, 0.08);
-            color: var(--admin-gold);
+            border: 0;
+            background: rgba(185, 140, 36, 0.14);
+            color: var(--admin-gold-strong);
             font-size: 0.8rem;
             font-weight: 700;
             cursor: pointer;
+            box-shadow: var(--admin-shadow);
         }
         .btn-action.manage:hover {
-            background: var(--admin-gold);
+            background: linear-gradient(135deg, #e5c158, #b38a22);
             color: #120405;
         }
         .text-xs {
@@ -813,8 +825,8 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(3px);
+            background: rgba(42, 34, 29, 0.35);
+            backdrop-filter: blur(4px);
             z-index: 50;
         }
         .admin-mobile-overlay.is-open {

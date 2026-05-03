@@ -12,8 +12,9 @@
         gap: 16px;
         padding: 20px;
         border-radius: 18px;
-        background: linear-gradient(135deg, rgba(230, 208, 128, 0.08), rgba(230, 208, 128, 0.02));
-        border: 1px solid rgba(230, 208, 128, 0.18);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(245, 239, 230, 0.95));
+        border: 0;
+        box-shadow: var(--admin-shadow);
         margin-bottom: 20px;
     }
     .invoice-issue-hero-title {
@@ -68,7 +69,8 @@
         padding: 14px 18px;
         border-radius: 14px;
         background: var(--admin-card);
-        border: 1px solid rgba(230, 208, 128, 0.1);
+        border: 0;
+        box-shadow: var(--admin-shadow);
     }
     .invoice-pending-card-info {
         flex: 1;
@@ -100,8 +102,9 @@
         color: var(--admin-muted);
         font-size: 0.9rem;
         border-radius: 14px;
-        background: rgba(255,255,255,0.02);
-        border: 1px dashed rgba(230, 208, 128, 0.15);
+        background: rgba(255, 255, 255, 0.6);
+        border: 0;
+        box-shadow: var(--admin-shadow);
     }
     .invoice-link-deposits {
         display: inline-flex;
@@ -109,28 +112,30 @@
         gap: 8px;
         padding: 10px 16px;
         border-radius: 12px;
-        background: rgba(230, 208, 128, 0.08);
-        border: 1px solid rgba(230, 208, 128, 0.2);
-        color: var(--admin-gold);
+        background: rgba(185, 140, 36, 0.12);
+        border: 0;
+        box-shadow: var(--admin-shadow);
+        color: var(--admin-gold-strong);
         text-decoration: none;
         font-weight: 700;
         font-size: 0.86rem;
     }
     .invoice-link-deposits:hover {
-        background: rgba(230, 208, 128, 0.14);
-        color: var(--admin-gold);
+        background: rgba(185, 140, 36, 0.18);
+        color: var(--admin-gold-strong);
     }
     .invoice-manual-warning {
         padding: 16px 18px;
         border-radius: 14px;
-        background: rgba(251, 191, 36, 0.12);
-        border: 1px solid rgba(251, 191, 36, 0.35);
-        color: #fef3c7;
+        background: rgba(251, 191, 36, 0.14);
+        border: 0;
+        box-shadow: var(--admin-shadow);
+        color: #78350f;
         font-size: 0.88rem;
         line-height: 1.7;
         margin-bottom: 16px;
     }
-    .invoice-manual-warning strong { color: #fcd34d; }
+    .invoice-manual-warning strong { color: #92400e; }
     .invoice-manual-list { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; }
     .invoice-manual-row {
         display: flex;
@@ -138,8 +143,9 @@
         gap: 12px;
         padding: 12px 14px;
         border-radius: 12px;
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(255,255,255,0.06);
+        background: rgba(255, 255, 255, 0.85);
+        border: 0;
+        box-shadow: var(--admin-shadow);
     }
     .invoice-manual-row input[type="radio"] { flex-shrink: 0; }
     .invoice-manual-row label { flex: 1; min-width: 0; cursor: pointer; margin: 0; }
@@ -154,8 +160,9 @@
     .invoice-admin-bank .billing-meta-item {
         padding: 12px 14px;
         border-radius: 14px;
-        background: #171a20;
-        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255, 255, 255, 0.9);
+        border: 0;
+        box-shadow: var(--admin-shadow);
     }
     .invoice-admin-bank .billing-meta-label {
         font-size: 0.72rem;
@@ -167,10 +174,11 @@
         font-weight: 700;
     }
     .invoice-manual-template-wrap {
-        border: 1px solid rgba(230, 208, 128, 0.18);
+        border: 0;
         border-radius: 16px;
         padding: 18px;
-        background: rgba(0, 0, 0, 0.18);
+        background: rgba(255, 255, 255, 0.65);
+        box-shadow: var(--admin-shadow);
         margin-bottom: 16px;
     }
     .invoice-manual-paper {
@@ -178,7 +186,8 @@
         padding: 18px;
         border-radius: 14px;
         background: var(--admin-card);
-        border: 1px solid rgba(255, 255, 255, 0.06);
+        border: 0;
+        box-shadow: var(--admin-shadow);
     }
     .invoice-manual-paper-title {
         margin: 0 0 14px;
@@ -225,7 +234,7 @@
         @endif
 
         @if(session('error'))
-            <div class="admin-alert" style="background: rgba(248, 113, 113, 0.12); border-color: rgba(248, 113, 113, 0.3); color: #fee2e2;">
+            <div class="admin-alert" style="background: rgba(194, 65, 60, 0.1); border: 0; color: #7f1d1d;">
                 {{ session('error') }}
             </div>
         @endif

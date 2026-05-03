@@ -1,11 +1,12 @@
 /**
- * 検索フィルタ：詳細検索モーダル・並び替え・条件サマリ
- * cast/search と shop/search のタイムライン＋一覧統合画面で使用
+ * 検索：ミニマルバー・並び替えパネル・詳細検索（FAB）・条件サマリ
  */
 (function () {
     var keywordInput = document.getElementById('search-keyword');
     var simpleSubmitBtn = document.getElementById('search-keyword-submit');
-    var sortSelect = document.querySelector('[data-search-sort]');
+    var sortTrigger = document.getElementById('search-sort-trigger');
+    var sortPanel = document.getElementById('search-sort-panel');
+    var sortCurrent = document.getElementById('search-sort-current');
     var modal = document.getElementById('detail-search-modal');
     var openBtn = document.getElementById('open-detail-search');
     var form = modal ? document.getElementById('detail-search-form') : null;
@@ -16,8 +17,48 @@
     var distanceSlider = modal ? modal.querySelector('#search-distance-km') : null;
     var distanceValueEl = modal ? modal.querySelector('#search-distance-value') : null;
 
+    function closeSortPanel() {
+        if (!sortPanel || !sortTrigger) return;
+        sortPanel.hidden = true;
+        sortTrigger.setAttribute('aria-expanded', 'false');
+    }
+
+    function toggleSortPanel() {
+        if (!sortPanel || !sortTrigger) return;
+        var open = sortPanel.hidden;
+        sortPanel.hidden = !open;
+        sortTrigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
+    if (sortTrigger && sortPanel) {
+        sortTrigger.addEventListener('click', function (e) {
+            e.stopPropagation();
+            toggleSortPanel();
+        });
+        document.addEventListener('click', function (e) {
+            if (sortPanel.hidden) return;
+            if (sortTrigger.contains(e.target) || sortPanel.contains(e.target)) return;
+            closeSortPanel();
+        });
+    }
+
+    if (sortPanel) {
+        sortPanel.querySelectorAll('[data-search-sort-value]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var v = btn.getAttribute('data-search-sort-value');
+                if (sortCurrent) sortCurrent.value = v || '';
+                sortPanel.querySelectorAll('[data-search-sort-value]').forEach(function (b) {
+                    b.classList.toggle('is-active', b.getAttribute('data-search-sort-value') === v);
+                });
+                closeSortPanel();
+                doSearch(buildSearchParams());
+            });
+        });
+    }
+
     function openModal() {
         if (!modal) return;
+        closeSortPanel();
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
         if (openBtn) openBtn.setAttribute('aria-expanded', 'true');
@@ -41,7 +82,12 @@
             if (e.target === modal) closeModal();
         });
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+            if (e.key !== 'Escape') return;
+            if (modal.classList.contains('is-open')) {
+                closeModal();
+                return;
+            }
+            if (sortPanel && !sortPanel.hidden) closeSortPanel();
         });
     }
 
@@ -205,8 +251,8 @@
         if (keywordInput && keywordInput.value.trim()) {
             params.push('keyword=' + encodeURIComponent(keywordInput.value.trim()));
         }
-        if (sortSelect && sortSelect.value) {
-            params.push('sort=' + encodeURIComponent(sortSelect.value));
+        if (sortCurrent && sortCurrent.value) {
+            params.push('sort=' + encodeURIComponent(sortCurrent.value));
         }
         if (form) {
             form.querySelectorAll('input[type="radio"]:checked').forEach(function (r) {
@@ -233,16 +279,11 @@
         return params;
     }
 
-    /**
-     * タイムライン/一覧の旧パスから新しい統合検索画面のパスへ変換する。
-     */
     function getSearchUrl() {
         var pathname = window.location.pathname;
-        // /cast/search/ai のように現在のタブを保持。
         if (/\/search\/ai$/.test(pathname)) {
             return pathname.replace(/\/ai$/, '/search');
         }
-        // /shop/search/(timeline|list) のような旧 URL は親パスへ戻す。
         if (/\/search\/(timeline|list)$/.test(pathname)) {
             return pathname.replace(/\/(timeline|list)$/, '');
         }
@@ -267,12 +308,6 @@
                 e.preventDefault();
                 doSearch(buildSearchParams());
             }
-        });
-    }
-
-    if (sortSelect) {
-        sortSelect.addEventListener('change', function () {
-            doSearch(buildSearchParams());
         });
     }
 
