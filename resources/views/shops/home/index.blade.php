@@ -22,7 +22,7 @@
     <div class="main-swiper swiper">
         <div class="swiper-wrapper">
             @foreach($items as $item)
-            <div class="swiper-slide cast-card glass-card">
+            <div class="swiper-slide cast-card glass-card {{ $isRecruit ? 'cast-card--recruit' : '' }}">
                 @php
                     $images = $item['images'] ?? [];
                     if (empty($images)) {
@@ -83,33 +83,58 @@
                 {{-- プロフィール情報（キャスト） / 求人票情報（キャスト側ホーム） --}}
                 <div class="card-bottom-info">
                     @if($isRecruit)
-                    <div class="card-recruit-bonus-head" role="group" aria-label="採用形態別ボーナス">
-                        @foreach($item['recruit_bonus_lines'] ?? [] as $line)
-                        <div class="card-recruit-bonus-line {{ empty($line['offered']) ? 'is-muted' : '' }}">
-                            <span class="card-recruit-bonus-label">{{ $line['label'] }}</span>
-                            <span class="card-recruit-bonus-amount numeric-font">
-                                @if(!empty($line['offered']))
-                                    ¥{{ number_format((int) ($line['amount'] ?? 0)) }}
-                                @else
-                                    —
-                                @endif
-                            </span>
+                    {{-- 優良店バッヂ + 評価 --}}
+                    <div class="card-recruit-badges">
+                        @if(!empty($item['is_premium']))
+                        <span class="badge-premium"><i class="fas fa-shield-alt"></i> 優良店</span>
+                        @endif
+                        @if(!empty($item['rating']) && $item['rating'] > 0)
+                        <div class="card-rating-inline">
+                            <span class="card-rating-star">★</span>
+                            <span class="card-rating-val numeric-font">{{ number_format((float)$item['rating'], 1) }}</span>
+                            @if(!empty($item['review_count']))
+                            <span class="card-rating-cnt">({{ $item['review_count'] }})</span>
+                            @endif
                         </div>
-                        @endforeach
-                    </div>
-                    <p class="card-shop-name-sub serif-font">{{ $item['name'] }}</p>
-                    @else
-                    <h2 class="cast-name serif-font">{{ $item['name'] }}@if(!$isShop && isset($item['age'])) <span class="age">{{ $item['age'] }}</span>@endif</h2>
-                    @endif
-                    <div class="card-location"><i class="fas fa-map-marker-alt"></i> {{ $isRecruit ? (trim(($item['pref'] ?? '') . ' ' . ($item['city'] ?? '')) ?: '六本木') : '六本木' }}</div>
-                    @if($isRecruit)
-                    <div class="card-recruit-summary">
-                        <span class="card-recruit-wage">時給 ¥{{ number_format($item['hourly_wage_regular'] ?? 0) }}〜</span>
-                        @if(!empty($item['trial_hourly_wage']))
-                        <span class="card-recruit-trial">体験 ¥{{ number_format($item['trial_hourly_wage']) }}〜</span>
                         @endif
                     </div>
-                    @elseif($isShop && isset($item['rating']))
+                    {{-- 店舗名 --}}
+                    <p class="card-shop-name-main serif-font">{{ $item['name'] }}</p>
+                    {{-- 業種 + 場所 --}}
+                    <div class="card-shop-meta">
+                        @if(!empty($item['industry_name']))
+                        <span class="card-industry-label">{{ $item['industry_name'] }}</span>
+                        <span class="card-meta-dot">·</span>
+                        @endif
+                        <span class="card-location-label"><i class="fas fa-map-marker-alt"></i> {{ trim(($item['pref'] ?? '') . ' ' . ($item['city'] ?? '')) ?: '六本木' }}</span>
+                    </div>
+                    {{-- 公開求人情報：体入・ヘルプ --}}
+                    <div class="card-recruit-wages">
+                        <div class="card-wage-row">
+                            <span class="card-wage-type">体入</span>
+                            @if(!empty($item['trial_hourly_wage']))
+                            <span class="card-wage-hourly numeric-font">¥{{ number_format($item['trial_hourly_wage']) }}〜</span>
+                            @else
+                            <span class="card-wage-none">—</span>
+                            @endif
+                            @if(!empty($item['recruit_bonus_lines'][0]['offered']) && !empty($item['recruit_bonus_lines'][0]['amount']))
+                            <span class="card-wage-bonus numeric-font">ボーナス ¥{{ number_format((int)$item['recruit_bonus_lines'][0]['amount']) }}</span>
+                            @endif
+                        </div>
+                        <div class="card-wage-row">
+                            <span class="card-wage-type">ヘルプ</span>
+                            @if(!empty($item['help_hourly_wage']))
+                            <span class="card-wage-hourly numeric-font">¥{{ number_format($item['help_hourly_wage']) }}〜</span>
+                            @else
+                            <span class="card-wage-none">—</span>
+                            @endif
+                        </div>
+                    </div>
+                    @else
+                    {{-- キャスト・店舗カード（既存レイアウト） --}}
+                    <h2 class="cast-name serif-font">{{ $item['name'] }}@if(!$isShop && isset($item['age'])) <span class="age">{{ $item['age'] }}</span>@endif</h2>
+                    <div class="card-location"><i class="fas fa-map-marker-alt"></i> 六本木</div>
+                    @if($isShop && isset($item['rating']))
                     <div class="card-rating">
                         <span class="card-rating-stars" aria-label="評価 {{ $item['rating'] }}">
                             @for($i = 1; $i <= 5; $i++)
@@ -124,6 +149,7 @@
                             <span class="tag-pill">#{{ $tag }}</span>
                         @endforeach
                     </div>
+                    @endif
                 </div>
             </div>
             @endforeach

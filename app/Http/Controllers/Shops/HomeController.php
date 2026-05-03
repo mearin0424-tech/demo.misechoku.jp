@@ -99,16 +99,24 @@ class HomeController extends Controller
     private function getHomeRecruits(): array
     {
         $useJobType = Schema::hasColumn('shop_jobs', 'job_type');
+        $hasReviews = Schema::hasTable('reviews');
 
         $q = DB::table('shops')
             ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
             ->join('shop_jobs', 'shops.id', '=', 'shop_jobs.shop_id')
+            ->leftJoin('industries', 'industries.id', '=', 'shop_profiles.industry_id')
             ->where('shop_jobs.status', 1);
         if ($useJobType) {
             $q->where('shop_jobs.job_type', 1);
         }
+        if ($hasReviews) {
+            $q->leftJoin(
+                DB::raw('(SELECT shop_id, ROUND(AVG(eva), 1) AS avg_rating, COUNT(*) AS review_count FROM reviews GROUP BY shop_id) AS shop_reviews'),
+                'shop_reviews.shop_id', '=', 'shops.id'
+            );
+        }
 
-        $rows = $q->select(
+        $selectFields = [
             'shops.id',
             'shop_profiles.shop_name',
             'shop_profiles.pref',
@@ -120,8 +128,15 @@ class HomeController extends Controller
             'shop_jobs.trial_hourly_wage',
             'shop_jobs.help_hourly_wage',
             'shop_jobs.noruma_reward',
-            'shop_jobs.noruma_cond'
-        )
+            'shop_jobs.noruma_cond',
+            'industries.name as industry_name',
+        ];
+        if ($hasReviews) {
+            $selectFields[] = DB::raw('COALESCE(shop_reviews.avg_rating, 0) AS avg_rating');
+            $selectFields[] = DB::raw('COALESCE(shop_reviews.review_count, 0) AS review_count');
+        }
+
+        $rows = $q->select($selectFields)
             ->orderBy('shops.id')
             ->limit(20)
             ->get();
@@ -129,6 +144,38 @@ class HomeController extends Controller
         $shopIds = $rows->pluck('id')->unique()->values()->all();
         $trialByShop = collect();
         $helpByShop = collect();
+
+        // 優良店バッヂ：過去3ヶ月の請求がすべて確認済みかつ10日以内に入金された店舗
+        $premiumShopIds = [];
+        if ($shopIds !== [] && Schema::hasTable('application_deposits') && Schema::hasTable('shop_job_applications')) {
+            $threeMonthsAgo = now()->subMonths(3);
+            $disqualified = DB::table('application_deposits')
+                ->join('shop_job_applications', 'application_deposits.shop_job_application_id', '=', 'shop_job_applications.id')
+                ->join('shop_jobs as sj_badge', 'shop_job_applications.shop_job_id', '=', 'sj_badge.id')
+                ->whereIn('sj_badge.shop_id', $shopIds)
+                ->where('application_deposits.created_at', '>=', $threeMonthsAgo)
+                ->where('application_deposits.status', '<', 5)
+                ->pluck('sj_badge.shop_id')
+                ->unique()
+                ->flip()
+                ->all();
+            $confirmed = DB::table('application_deposits')
+                ->join('shop_job_applications', 'application_deposits.shop_job_application_id', '=', 'shop_job_applications.id')
+                ->join('shop_jobs as sj_badge', 'shop_job_applications.shop_job_id', '=', 'sj_badge.id')
+                ->whereIn('sj_badge.shop_id', $shopIds)
+                ->where('application_deposits.created_at', '>=', $threeMonthsAgo)
+                ->where('application_deposits.status', '>=', 5)
+                ->pluck('sj_badge.shop_id')
+                ->unique()
+                ->flip()
+                ->all();
+            foreach ($confirmed as $sid => $v) {
+                if (!isset($disqualified[$sid])) {
+                    $premiumShopIds[$sid] = true;
+                }
+            }
+        }
+
         if ($useJobType && $shopIds !== []) {
             $trialByShop = DB::table('shop_jobs')
                 ->whereIn('shop_id', $shopIds)
@@ -197,6 +244,7 @@ class HomeController extends Controller
                 'images' => $images,
                 'hourly_wage_regular' => isset($row->hourly_wage_regular) ? (int) $row->hourly_wage_regular : 0,
                 'trial_hourly_wage' => $trialHourly,
+                'help_hourly_wage' => $helpHourly,
                 'noruma_reward' => $mainBonus,
                 'bonus_condition' => $meta['bonus_condition'] ?? '',
                 'catch_copy' => $meta['catch_copy'] ?? '',
@@ -204,6 +252,10 @@ class HomeController extends Controller
                 'pref' => $row->pref ?? '',
                 'city' => $row->city ?? '',
                 'like_count' => $likeCounts[$row->id] ?? 0,
+                'industry_name' => $row->industry_name ?? null,
+                'rating' => $hasReviews ? (float) ($row->avg_rating ?? 0) : 0.0,
+                'review_count' => $hasReviews ? (int) ($row->review_count ?? 0) : 0,
+                'is_premium' => isset($premiumShopIds[$row->id]),
                 'recruit_bonus_lines' => [
                     ['label' => '体入', 'amount' => $bonusTrial, 'offered' => $offerTrial],
                     ['label' => 'ヘルプ', 'amount' => $bonusHelp, 'offered' => $offerHelp],
@@ -223,6 +275,7 @@ class HomeController extends Controller
                 'images' => [asset('storage/mock/shops/out-1.png')],
                 'hourly_wage_regular' => 3500,
                 'trial_hourly_wage' => 3000,
+                'help_hourly_wage' => 2800,
                 'noruma_reward' => 50000,
                 'bonus_condition' => '',
                 'catch_copy' => '未経験歓迎',
@@ -230,6 +283,10 @@ class HomeController extends Controller
                 'pref' => '東京都',
                 'city' => '港区',
                 'like_count' => 0,
+                'industry_name' => 'キャバクラ',
+                'rating' => 4.5,
+                'review_count' => 12,
+                'is_premium' => true,
                 'recruit_bonus_lines' => [
                     ['label' => '体入', 'amount' => 50000, 'offered' => true],
                     ['label' => 'ヘルプ', 'amount' => 50000, 'offered' => true],
@@ -242,6 +299,7 @@ class HomeController extends Controller
                 'images' => [asset('storage/mock/shops/out-2.png')],
                 'hourly_wage_regular' => 3200,
                 'trial_hourly_wage' => null,
+                'help_hourly_wage' => null,
                 'noruma_reward' => 0,
                 'bonus_condition' => '',
                 'catch_copy' => 'ノルマなし',
@@ -249,6 +307,10 @@ class HomeController extends Controller
                 'pref' => '東京都',
                 'city' => '港区',
                 'like_count' => 0,
+                'industry_name' => 'クラブ',
+                'rating' => 4.2,
+                'review_count' => 5,
+                'is_premium' => false,
                 'recruit_bonus_lines' => [
                     ['label' => '体入', 'amount' => 0, 'offered' => false],
                     ['label' => 'ヘルプ', 'amount' => 0, 'offered' => false],

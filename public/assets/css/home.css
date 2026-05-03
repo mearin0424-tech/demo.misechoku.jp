@@ -237,6 +237,19 @@ body.no-scroll main#main-content .content-wrapper {
     border-radius: var(--home-card-radius);
     background-color: #1a1a1a;
 }
+
+/* 求人カード：画像をカード全体に cover で表示（店舗登録画像のアスペクト比に依存せず美しく表示） */
+.cast-card--recruit .photo-swiper .swiper-slide img,
+.cast-card--recruit .home-photo {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    object-fit: cover;
+    object-position: center top;
+    border-radius: 0;
+    background-color: #111;
+}
 .home-photo[src=""],
 .home-photo:not([src]) {
     background-color: #2a2a2a;
@@ -276,14 +289,169 @@ body.no-scroll main#main-content .content-wrapper {
     width: 100%;
     max-width: 100%;
     z-index: 30;
-    padding: 48px var(--home-info-padding-x) var(--home-info-padding-bottom);
-    background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.6) 45%, transparent);
+    padding: 64px var(--home-info-padding-x) var(--home-info-padding-bottom);
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.75) 50%, transparent);
     color: #fff;
     border-bottom-left-radius: var(--home-card-radius);
     border-bottom-right-radius: var(--home-card-radius);
     overflow: hidden;
-    min-height: 100px;
+    min-height: 120px;
     box-sizing: border-box;
+}
+
+/* ========== 求人カード専用情報レイアウト ========== */
+
+/* 優良店バッヂ + 評価 行 */
+.card-recruit-badges {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+}
+
+.badge-premium {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #d4af37, #f5d060);
+    color: #1a1000;
+    font-size: clamp(0.62rem, 1.9vw, 0.72rem);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.45);
+    white-space: nowrap;
+}
+
+.badge-premium i {
+    font-size: 0.6em;
+}
+
+.card-rating-inline {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 3px;
+}
+
+.card-rating-star {
+    color: #f5c542;
+    font-size: clamp(0.75rem, 2.4vw, 0.88rem);
+    text-shadow: 0 0 6px rgba(245, 197, 66, 0.5);
+    line-height: 1;
+}
+
+.card-rating-val {
+    font-size: clamp(0.78rem, 2.5vw, 0.9rem);
+    font-weight: 700;
+    color: #f5c542;
+    line-height: 1;
+}
+
+.card-rating-cnt {
+    font-size: clamp(0.62rem, 1.9vw, 0.72rem);
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1;
+}
+
+/* 店舗名（大） */
+.card-shop-name-main {
+    font-size: clamp(1.05rem, 4vw, 1.45rem);
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 5px;
+    line-height: 1.25;
+    word-break: break-word;
+    letter-spacing: 0.01em;
+}
+
+/* 業種 + 場所 行 */
+.card-shop-meta {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    font-size: clamp(0.72rem, 2.3vw, 0.82rem);
+    color: rgba(255, 255, 255, 0.72);
+    line-height: 1.3;
+}
+
+.card-industry-label {
+    color: rgba(255, 220, 160, 0.9);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.card-meta-dot {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 0.85em;
+}
+
+.card-location-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.card-location-label i {
+    font-size: 0.8em;
+    color: rgba(255, 180, 120, 0.8);
+}
+
+/* 求人情報：体入・ヘルプ 時給行 */
+.card-recruit-wages {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    pointer-events: auto;
+}
+
+.card-wage-row {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    flex-wrap: wrap;
+    line-height: 1.3;
+}
+
+.card-wage-type {
+    font-size: clamp(0.65rem, 2vw, 0.75rem);
+    font-weight: 700;
+    color: #e8d5a3;
+    min-width: 28px;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(232, 213, 163, 0.25);
+    line-height: 1.6;
+}
+
+.card-wage-hourly {
+    font-size: clamp(0.88rem, 2.8vw, 1.0rem);
+    font-weight: 700;
+    color: #fff;
+}
+
+.card-wage-none {
+    font-size: clamp(0.72rem, 2.2vw, 0.82rem);
+    color: rgba(255, 255, 255, 0.35);
+    font-weight: 400;
+}
+
+.card-wage-bonus {
+    font-size: clamp(0.68rem, 2.1vw, 0.78rem);
+    font-weight: 600;
+    color: #f8e7b0;
+    background: rgba(248, 231, 176, 0.12);
+    padding: 1px 7px;
+    border-radius: 4px;
+    border: 1px solid rgba(248, 231, 176, 0.2);
+    white-space: nowrap;
+    text-shadow: 0 0 6px rgba(248, 231, 176, 0.3);
 }
 
 .cast-name {
@@ -467,6 +635,11 @@ body.no-scroll main#main-content .content-wrapper {
     gap: var(--home-action-gap);
     max-width: calc(100% - 20px);
     box-sizing: border-box;
+}
+
+/* 求人カード：情報量が増えたので少し上に位置調整 */
+.cast-card--recruit .card-actions-overlay {
+    bottom: 38%;
 }
 
 .action-circle-btn {
@@ -678,7 +851,7 @@ body.no-scroll main#main-content .content-wrapper {
         border-radius: 18px;
     }
     .card-bottom-info {
-        padding-top: 40px;
+        padding-top: 48px;
     }
     .cast-name { font-size: 1.05rem; }
     .card-location { font-size: 0.75rem; }
@@ -687,6 +860,14 @@ body.no-scroll main#main-content .content-wrapper {
         right: 8px;
         bottom: 24%;
     }
+    .cast-card--recruit .card-actions-overlay {
+        bottom: 36%;
+    }
+    .card-shop-name-main { font-size: 1.0rem; }
+    .card-shop-meta { font-size: 0.68rem; margin-bottom: 8px; }
+    .card-wage-type { font-size: 0.62rem; }
+    .card-wage-hourly { font-size: 0.84rem; }
+    .card-wage-bonus { font-size: 0.62rem; }
     .home-onboarding-body {
         padding: 14px;
         border-radius: 18px;
@@ -712,6 +893,9 @@ body.no-scroll main#main-content .content-wrapper {
         right: 16px;
         bottom: 28%;
     }
+    .cast-card--recruit .card-actions-overlay {
+        bottom: 40%;
+    }
 }
 
 /* デスクトップ（1025px〜） */
@@ -736,6 +920,9 @@ body.no-scroll main#main-content .content-wrapper {
     .card-actions-overlay {
         right: 20px;
         bottom: 30%;
+    }
+    .cast-card--recruit .card-actions-overlay {
+        bottom: 42%;
     }
     .action-circle-btn:hover { transform: scale(1.08); }
     .action-btn-message:hover { transform: scale(1.05); }
