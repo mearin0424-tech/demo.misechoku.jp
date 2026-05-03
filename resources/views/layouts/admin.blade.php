@@ -895,7 +895,7 @@
                                     $navRouteParams = $item['route_params'] ?? [];
                                     $navHref = route($item['route'], $navRouteParams);
                                     $navActive = isset($item['route_params']['key'])
-                                        ? request()->routeIs('admin.policies.show', 'admin.policies.edit') && (string) request()->route('key') === (string) $item['route_params']['key']
+                                        ? request()->routeIs('admin.policies.show') && (string) request()->route('key') === (string) $item['route_params']['key']
                                         : request()->routeIs($item['route']);
                                 @endphp
                                 <a href="{{ $navHref }}" class="admin-nav-link {{ $navActive ? 'is-active' : '' }}">

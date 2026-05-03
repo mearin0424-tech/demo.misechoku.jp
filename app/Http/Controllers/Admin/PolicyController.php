@@ -24,7 +24,7 @@ class PolicyController extends Controller
         ['key' => PolicyDocument::KEY_PRIVACY, 'title' => 'プライバシーポリシー', 'lead_title' => null,                       'with_meta' => false],
     ];
 
-    public function show(string $key): View
+    public function show(Request $request, string $key): View
     {
         $document = $this->resolveDocument($key);
         $document->load([
@@ -35,18 +35,13 @@ class PolicyController extends Controller
         return view('admin.policies.show', [
             'document' => $document,
             'metaSchema' => PolicyDocument::defaultMetaSchema(),
+            'isEditing' => $request->boolean('edit'),
         ]);
     }
 
-    public function edit(string $key): View
+    public function edit(string $key): RedirectResponse
     {
-        $document = $this->resolveDocument($key);
-        $document->load('chapters');
-
-        return view('admin.policies.edit', [
-            'document' => $document,
-            'metaSchema' => PolicyDocument::defaultMetaSchema(),
-        ]);
+        return redirect()->route('admin.policies.show', ['key' => $key, 'edit' => 1]);
     }
 
     public function update(UpdatePolicyRequest $request, string $key): RedirectResponse

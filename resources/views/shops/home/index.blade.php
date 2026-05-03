@@ -5,7 +5,7 @@
 @section('guide_message', '') {{-- ホームのスワイプ画面ではオコジョを表示しない --}}
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260503-rc-footer-bar">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260503-shop-cast-swipe">
 @endpush
 
 @php

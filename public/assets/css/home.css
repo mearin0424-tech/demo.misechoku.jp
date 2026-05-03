@@ -255,6 +255,51 @@ body.no-scroll main#main-content .content-wrapper {
     background-color: #2a2a2a;
 }
 
+/* 店舗ホーム：キャストスワイプ（縦長写真向け・上寄せ cover／下部は浅めの黒グラデ） */
+.cast-card:not(.cast-card--recruit) .home-photo-wrap {
+    border-radius: var(--home-card-radius) var(--home-card-radius) 0 0;
+}
+
+.cast-card:not(.cast-card--recruit) .photo-swiper .swiper-wrapper {
+    align-items: stretch;
+}
+
+.cast-card:not(.cast-card--recruit) .photo-swiper .swiper-slide {
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.cast-card:not(.cast-card--recruit) .photo-swiper .swiper-slide img,
+.cast-card:not(.cast-card--recruit) .home-photo {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    object-fit: cover;
+    object-position: center top;
+    border-radius: var(--home-card-radius) var(--home-card-radius) 0 0;
+    background-color: #111;
+}
+
+/* 写真エリア下端のみ弱いスクリム（縦長で足元を潰しすぎない） */
+.cast-card:not(.cast-card--recruit) .home-photo-wrap::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 36%;
+    z-index: 3;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(
+        to top,
+        rgba(5, 5, 5, 0.52) 0%,
+        rgba(5, 5, 5, 0.2) 45%,
+        transparent 100%
+    );
+}
+
 .photo-pagination.swiper-pagination-bullets {
     bottom: auto !important;
     top: 12px !important;
@@ -297,6 +342,18 @@ body.no-scroll main#main-content .content-wrapper {
     overflow: hidden;
     min-height: 120px;
     box-sizing: border-box;
+}
+
+.cast-card:not(.cast-card--recruit) .card-bottom-info {
+    padding-top: 56px;
+    min-height: 108px;
+    background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.82) 0%,
+        rgba(0, 0, 0, 0.42) 42%,
+        rgba(0, 0, 0, 0.12) 72%,
+        transparent 100%
+    );
 }
 
 /* ========== 求人カード専用情報レイアウト ========== */
@@ -845,8 +902,24 @@ body.no-scroll main#main-content .content-wrapper {
     .card-bottom-info {
         border-radius: 18px;
     }
+    .cast-card:not(.cast-card--recruit) .home-photo-wrap,
+    .cast-card:not(.cast-card--recruit) .home-photo {
+        border-radius: 18px 18px 0 0;
+    }
+    .cast-card:not(.cast-card--recruit) .home-photo-wrap::after {
+        height: 32%;
+        background: linear-gradient(
+            to top,
+            rgba(5, 5, 5, 0.46) 0%,
+            rgba(5, 5, 5, 0.16) 48%,
+            transparent 100%
+        );
+    }
     .card-bottom-info {
         padding-top: 48px;
+    }
+    .cast-card:not(.cast-card--recruit) .card-bottom-info {
+        padding-top: 44px;
     }
     .cast-name { font-size: 1.05rem; }
     .card-location { font-size: 0.75rem; }
