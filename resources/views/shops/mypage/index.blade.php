@@ -700,11 +700,21 @@
                 @if(!empty($tagGroups))
                     <div class="shop-mypage-tags-block">
                         @foreach($tagGroups as $group)
-                            @if(!empty($group['tags']))
+                            @php
+                                $gLabel = (string) ($group['label'] ?? '');
+                                if (str_contains($gLabel, 'ご利用プラン')) {
+                                    continue;
+                                }
+                                $gTags = array_values(array_filter(
+                                    (array) ($group['tags'] ?? []),
+                                    static fn ($t) => ! str_contains((string) $t, 'ご利用プラン')
+                                ));
+                            @endphp
+                            @if($gTags !== [])
                             <div class="shop-mypage-tag-group-row">
-                                <span class="shop-mypage-tag-group-label">{{ $group['label'] }}</span>
+                                <span class="shop-mypage-tag-group-label">{{ $gLabel }}</span>
                                 <div class="shop-mypage-tag-pills">
-                                    @foreach($group['tags'] as $t)
+                                    @foreach($gTags as $t)
                                         <span>{{ $t }}</span>
                                     @endforeach
                                 </div>

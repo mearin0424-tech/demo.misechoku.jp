@@ -376,8 +376,22 @@ class HomeController extends Controller
 
         $bonusTxt = trim((string) ($meta['bonus_other_conditions'] ?? $meta['bonus_condition'] ?? ''));
         $badge = $bonusTxt !== '' ? mb_strimwidth($bonusTxt, 0, 56, '…') : '';
+        if ($badge !== '' && (str_contains($badge, 'ご利用プラン') || str_contains($badge, '利用プラン'))) {
+            $badge = '';
+        }
         if ($badge === '' && $norumaReward > 0) {
             $badge = '💰 入店祝い金 ¥' . number_format($norumaReward) . '〜';
+        }
+
+        if ($line2 !== '' && str_contains($line2, 'ご利用プラン')) {
+            $line2 = '';
+        }
+        if ($line1 !== '' && str_contains($line1, 'ご利用プラン')) {
+            $line1 = '';
+        }
+        if ($line1 === '' && $line2 !== '') {
+            $line1 = $line2;
+            $line2 = '';
         }
 
         $show = $line1 !== '' || $line2 !== '' || $badge !== '';

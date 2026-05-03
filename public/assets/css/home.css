@@ -989,22 +989,38 @@ body.no-scroll main#main-content .content-wrapper {
     z-index: 6;
 }
 
-/* 画像中央：店長からのメッセージ（catch_copy / pr / 条件バッジ） */
+/* 画像上部：店長からのメッセージ（文字ブロックのみ黒グラデ背景） */
 .cast-card--recruit .rc-manager-msg {
     position: absolute;
-    inset: 0;
+    left: 0;
+    right: 0;
+    top: 0;
     z-index: 5;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: 12px 14px 18%;
+    padding: 44px 12px 0;
     pointer-events: none;
     box-sizing: border-box;
 }
 
+.cast-card--recruit .rc-manager-msg__backdrop {
+    display: block;
+    max-width: 96%;
+    padding: 10px 14px 12px;
+    border-radius: 12px;
+    text-align: center;
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.92) 0%,
+        rgba(0, 0, 0, 0.78) 45%,
+        rgba(0, 0, 0, 0.52) 100%
+    );
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
 .cast-card--recruit .rc-manager-msg__inner {
     max-width: 100%;
-    text-align: center;
 }
 
 .cast-card--recruit .rc-manager-msg__line1,
@@ -1014,9 +1030,7 @@ body.no-scroll main#main-content .content-wrapper {
     color: #fff;
     letter-spacing: 0.02em;
     line-height: 1.35;
-    text-shadow:
-        0 1px 2px rgba(0, 0, 0, 0.9),
-        0 2px 14px rgba(0, 0, 0, 0.55);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
 .cast-card--recruit .rc-manager-msg__line1 {
@@ -1037,13 +1051,13 @@ body.no-scroll main#main-content .content-wrapper {
 
 .cast-card--recruit .rc-manager-msg__badge {
     display: inline-block;
-    margin: 10px 0 0;
-    padding: 6px 14px;
-    font-size: 0.62rem;
+    margin: 8px 0 0;
+    padding: 5px 12px;
+    font-size: 0.58rem;
     font-weight: 700;
     color: rgba(255, 255, 255, 0.96);
-    background: rgba(0, 0, 0, 0.58);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.22);
     border-radius: 9999px;
     line-height: 1.35;
     max-width: 100%;
@@ -1054,7 +1068,7 @@ body.no-scroll main#main-content .content-wrapper {
 /* --- 情報エリア --- */
 .rc-info {
     position: absolute;
-    bottom: 58px;
+    bottom: calc(56px + 64px);
     left: 0;
     right: 58px;
     max-width: 82%;
@@ -1065,6 +1079,106 @@ body.no-scroll main#main-content .content-wrapper {
     gap: 6px;
     pointer-events: none;
     min-width: 0;
+}
+
+/* 下部：入店ボーナス＋時給（左）／求人詳細（右） */
+.cast-card--recruit .rc-bottom-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 56px;
+    z-index: 22;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 0 12px 8px;
+    padding-right: 58px;
+    box-sizing: border-box;
+    pointer-events: none;
+}
+
+.cast-card--recruit .rc-bottom-bar__left {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    pointer-events: none;
+}
+
+.cast-card--recruit .rc-join-bonus-badge {
+    display: inline-flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.56rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: #d4af37;
+    background: linear-gradient(135deg, rgba(42, 34, 16, 0.95), rgba(20, 18, 16, 0.92));
+    border: 1px solid rgba(212, 175, 55, 0.42);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.cast-card--recruit .rc-join-bonus-badge__k {
+    color: #e8d9a8;
+}
+
+.cast-card--recruit .rc-join-bonus-badge__v {
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 800;
+}
+
+.cast-card--recruit .rc-bottom-bar__wages {
+    margin: 0;
+    font-size: 0.58rem;
+    font-weight: 700;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.88);
+    max-width: 100%;
+}
+
+.cast-card--recruit .rc-bottom-bar__wages .numeric-font {
+    color: #f4f4f5;
+    font-weight: 800;
+}
+
+.cast-card--recruit .rc-bottom-bar__dash {
+    color: rgba(255, 255, 255, 0.35);
+    font-weight: 600;
+}
+
+.cast-card--recruit .rc-bottom-bar__detail {
+    flex-shrink: 0;
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    min-height: 40px;
+    border-radius: 999px;
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-decoration: none;
+    white-space: nowrap;
+    color: #2a1e00;
+    background: linear-gradient(145deg, #e8d08e, #d4af37 50%, #a37e1a);
+    border: 1px solid rgba(252, 238, 204, 0.45);
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.28), 0 4px 12px rgba(0, 0, 0, 0.35);
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.cast-card--recruit .rc-bottom-bar__detail:active {
+    transform: scale(0.96);
+    filter: brightness(0.95);
 }
 
 /* 評価 | 優良認定店 */
@@ -1321,44 +1435,11 @@ body.no-scroll main#main-content .content-wrapper {
 /* --- アクションボタン（求人カード用レイアウト） --- */
 .cast-card--recruit .rc-actions {
     right: 12px;
-    bottom: 7rem;
-    gap: 14px;
+    top: calc(65% + 10px);
+    bottom: auto !important;
+    gap: 12px;
     align-items: center;
     z-index: 41;
-}
-
-/* 求人詳細：大型ゴールドボタン */
-.rc-detail-btn {
-    pointer-events: auto;
-    width: 56px;
-    height: 56px;
-    min-width: 56px;
-    min-height: 56px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    background: linear-gradient(145deg, #e8d08e, #d4af37 50%, #a37e1a);
-    border: 1px solid rgba(252, 238, 204, 0.45);
-    box-shadow: 0 0 16px rgba(212, 175, 55, 0.32), 0 6px 16px rgba(0, 0, 0, 0.35);
-    transition: transform 0.2s ease, filter 0.2s ease;
-    -webkit-tap-highlight-color: transparent;
-}
-
-.rc-detail-btn:active {
-    transform: scale(0.94);
-}
-
-.rc-detail-btn__text {
-    display: block;
-    text-align: center;
-    font-size: 0.56rem;
-    font-weight: 900;
-    line-height: 1.15;
-    letter-spacing: 0.14em;
-    color: #2a1e00;
-    padding-left: 1px;
 }
 
 .rc-action-item {
@@ -1366,10 +1447,6 @@ body.no-scroll main#main-content .content-wrapper {
     flex-direction: column;
     align-items: center;
     gap: 4px;
-}
-
-.rc-action-item--detail {
-    margin-top: 6px;
 }
 
 .rc-action-label {
@@ -1436,17 +1513,15 @@ body.no-scroll main#main-content .content-wrapper {
 /* --- 小画面調整 --- */
 @media (max-width: 380px) {
     .rc-shop-name { font-size: 1.05rem; }
-    .rc-wage-card__num { font-size: 1.45rem; }
-    .rc-info { right: 50px; max-width: 86%; padding: 0 12px; bottom: 52px; }
-    .cast-card--recruit .rc-actions { right: 6px; bottom: 6.25rem; gap: 12px; }
+    .rc-info { right: 50px; max-width: 86%; padding: 0 12px; bottom: calc(56px + 58px); }
+    .cast-card--recruit .rc-bottom-bar { padding-right: 52px; }
+    .cast-card--recruit .rc-actions { right: 6px; top: calc(65% + 8px); gap: 10px; }
     .cast-card--recruit .action-circle-btn { width: 36px; height: 36px; min-width: 36px; min-height: 36px; font-size: 0.88rem; }
-    .rc-detail-btn { width: 50px; height: 50px; min-width: 50px; min-height: 50px; }
-    .rc-detail-btn__text { font-size: 0.5rem; }
+    .cast-card--recruit .rc-bottom-bar__detail { padding: 8px 12px; font-size: 0.56rem; min-height: 36px; }
 }
 
 @media (min-width: 768px) {
     .rc-shop-name { font-size: 1.45rem; }
-    .rc-wage-card__num { font-size: 2rem; }
-    .rc-info { right: 68px; padding: 0 22px; bottom: 64px; max-width: 78%; }
-    .cast-card--recruit .rc-actions { right: 16px; bottom: 7.5rem; }
+    .rc-info { right: 68px; padding: 0 22px; bottom: calc(56px + 70px); max-width: 78%; }
+    .cast-card--recruit .rc-actions { right: 16px; top: calc(65% + 14px); }
 }

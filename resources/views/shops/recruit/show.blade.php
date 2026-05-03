@@ -662,14 +662,26 @@
 
                 @if(!empty($tagGroups))
                     @foreach($tagGroups as $group)
+                        @php
+                            $gLabel = (string) ($group['label'] ?? '');
+                            if (str_contains($gLabel, 'ご利用プラン')) {
+                                continue;
+                            }
+                            $gTags = array_values(array_filter(
+                                (array) ($group['tags'] ?? []),
+                                static fn ($t) => ! str_contains((string) $t, 'ご利用プラン')
+                            ));
+                        @endphp
+                        @if($gTags !== [])
                         <div style="margin-top:14px;padding-top:14px;border-top:1px solid #1f1a14;">
-                            <p style="margin:0 0 8px;font-size:11px;font-weight:800;color:#d4af37;">{{ $group['label'] }}</p>
+                            <p style="margin:0 0 8px;font-size:11px;font-weight:800;color:#d4af37;">{{ $gLabel }}</p>
                             <div class="recruit-ref-tag-matrix-pills">
-                                @foreach($group['tags'] as $t)
+                                @foreach($gTags as $t)
                                     <span>{{ $t }}</span>
                                 @endforeach
                             </div>
                         </div>
+                        @endif
                     @endforeach
                 @endif
 
