@@ -33,6 +33,7 @@ use App\Http\Controllers\Admin\TaskController as AdminTask;
 use App\Http\Controllers\Admin\AdminAccountController as AdminAccount;
 use App\Http\Controllers\Admin\VerificationController as AdminVerification;
 use App\Http\Controllers\Admin\BankController as AdminBank;
+use App\Http\Controllers\Admin\PolicyController as AdminPolicy;
 
 // 蠎苓・蛛ｴ
 use App\Http\Controllers\Shops\HomeController as ShopHome;
@@ -198,6 +199,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // 驕句霧蜿｣蠎ｧ諠・ｱ
         Route::get('/bank', [AdminBank::class, 'index'])->name('bank.index');
         Route::post('/bank', [AdminBank::class, 'store'])->name('bank.store');
+
+        // 規約管理（運営協会／利用規約／プライバシーポリシー）
+        Route::get('/policies', [AdminPolicy::class, 'index'])->name('policies.index');
+        Route::get('/policies/{key}', [AdminPolicy::class, 'show'])
+            ->where('key', 'about|terms|privacy')
+            ->name('policies.show');
+        Route::get('/policies/{key}/edit', [AdminPolicy::class, 'edit'])
+            ->where('key', 'about|terms|privacy')
+            ->name('policies.edit');
+        Route::put('/policies/{key}', [AdminPolicy::class, 'update'])
+            ->where('key', 'about|terms|privacy')
+            ->name('policies.update');
+        Route::post('/policies/{key}/toggle-lock', [AdminPolicy::class, 'toggleLock'])
+            ->where('key', 'about|terms|privacy')
+            ->name('policies.toggle-lock');
     });
 });
 
@@ -298,8 +314,8 @@ Route::prefix('shop')->name('shop.')->group(function () {
 Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function () {
 
     Route::get('/home', [ShopHome::class, 'index'])->name('home');
-    Route::get('/search', fn () => redirect()->route('shop.search.index', ['tab' => 'timeline']));
-    Route::get('/search/{tab}', [ShopSearch::class, 'index'])->name('search.index')->where('tab', 'timeline|list');
+    Route::get('/search', [ShopSearch::class, 'index'])->name('search.index');
+    Route::get('/search/{tab}', fn ($tab) => redirect()->route('shop.search.index'))->where('tab', 'timeline|list');
 
     // 繝医・繧ｯ
     Route::prefix('talk')->name('talk.')->group(function () {
@@ -385,8 +401,8 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
     Route::post('/profile/personality-type', [CastProfile::class, 'updatePersonalityType'])->name('profile.personality-type');
     Route::get('/shopprofileview/{id}', [CastProfile::class, 'show'])->name('shopprofileview.show');
     Route::redirect('/profile/{id}', '/cast/shopprofileview/{id}')->name('profile.show.redirect');
-    Route::get('/search', fn () => redirect()->route('cast.search.index', ['tab' => 'timeline']));
-    Route::get('/search/{tab}', [CastSearch::class, 'index'])->name('search.index')->where('tab', 'timeline|list|ai');
+    Route::get('/search', fn () => redirect()->route('cast.search.index', ['tab' => 'search']));
+    Route::get('/search/{tab}', [CastSearch::class, 'index'])->name('search.index')->where('tab', 'search|ai|timeline|list');
     Route::get('/recruit/{id}', [CastRecruit::class, 'show'])->name('recruit.show');
     
     Route::get('/interaction', [ShopInteraction::class, 'index'])->name('interaction.index');

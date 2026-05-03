@@ -1,7 +1,8 @@
 /* prj/resources/css/search.css */
 
 /* SEARCH：サブヘッダーと横幅を揃える（content-wrapper の padding を打ち消して幅いっぱいに） */
-.contents.tab-page-body {
+.contents.tab-page-body,
+.contents.search-page-body {
     margin-left: calc(-1 * var(--content-padding-x));
     margin-right: calc(-1 * var(--content-padding-x));
     width: calc(100% + 2 * var(--content-padding-x));
@@ -9,6 +10,17 @@
     box-sizing: border-box;
     padding-left: var(--content-padding-x);
     padding-right: var(--content-padding-x);
+    min-width: 0;
+}
+
+/* SEARCH（タブなし）：サブヘッダーが無い場合の上余白を抑える */
+.contents.search-page-body {
+    padding: 0 0 calc(var(--footer-height) + 16px);
+    padding-left: var(--content-padding-x);
+    padding-right: var(--content-padding-x);
+    margin-top: 0;
+    min-height: 200px;
+    width: 100%;
     min-width: 0;
 }
 
@@ -114,6 +126,60 @@
     color: var(--color-gold);
     font-size: 0.8rem;
     opacity: 0.8;
+    flex-shrink: 0;
+    align-self: center;
+}
+
+/* 統合検索：タイムライン＋一覧の合成カード */
+.connection-item--search .connection-item__link {
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 15px;
+}
+.connection-item--search .conn-thumb {
+    width: 56px;
+    height: 56px;
+    margin-right: 0;
+}
+.connection-item--search .conn-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.conn-info__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+}
+.conn-info__head .conn-name {
+    flex: 1;
+    min-width: 0;
+}
+.conn-info__time {
+    font-size: 0.72rem;
+    color: #888;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+.conn-info__meta {
+    font-size: 0.75rem;
+    color: #999;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.conn-info__hitokoto {
+    margin-top: 4px;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: var(--color-text);
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 /* タブコンテンツ制御 */
@@ -208,7 +274,59 @@
 .search-filter-submit-btn:hover {
     filter: brightness(1.06);
 }
-/* 詳細検索ボタン（その下に並べる） */
+/* 並び替え＋詳細検索ボタンの行 */
+.search-filter-controls-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+.search-filter-sort {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+.search-filter-sort__label {
+    font-size: 0.78rem;
+    color: var(--color-gold);
+    flex-shrink: 0;
+}
+.search-filter-sort__select-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 140px;
+}
+.search-filter-sort__select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 9px 32px 9px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(230, 208, 128, 0.4);
+    background: var(--surface);
+    color: var(--color-text-header);
+    font-size: 0.85rem;
+    cursor: pointer;
+    outline: none;
+}
+.search-filter-sort__select:focus {
+    border-color: var(--color-gold);
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.15);
+}
+.search-filter-sort__icon {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    color: var(--color-gold);
+    font-size: 0.75rem;
+    pointer-events: none;
+}
+
+/* 旧クラス（後方互換）：今は controls-row に統合 */
 .search-filter-detail-row {
     width: 100%;
 }

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 {{-- 各ページから渡されるオコジョのメッセージをセット --}}
-@section('guide_message', ($activeTab ?? 'pane-timeline') === 'pane-ai'
+@section('guide_message', ($activeTab ?? 'pane-search') === 'pane-ai'
     ? '登録済みの接客タイプ診断結果をもとに、ぴったりのお店をご案内いたします'
     : ($guideMessage ?? '気になるお相手をお探しください。'))
 
@@ -18,19 +18,20 @@
     // 現在のプレフィックス（shop または cast）を取得
     $prefix = request()->is('cast/*') ? 'cast' : 'shop';
     $showAiTab = $prefix === 'cast';
-    $routeName = $prefix . '.search.index';
     $partsView = $prefix === 'cast' ? 'casts.parts' : 'shops.search.parts';
-    $listTabLabel = $prefix === 'cast' ? '求人検索' : '一覧・検索';
-    $activeTab = $activeTab ?? 'pane-timeline';
-    $searchTab = $searchTab ?? 'timeline';
-    $tabsForHeader = [
-        ['id' => 'pane-timeline', 'label' => 'タイムライン', 'url' => route($routeName, ['tab' => 'timeline']), 'active' => $activeTab === 'pane-timeline'],
-        ['id' => 'pane-list', 'label' => $listTabLabel, 'url' => route($routeName, ['tab' => 'list']), 'active' => $activeTab === 'pane-list'],
-    ];
+    $activeTab = $activeTab ?? 'pane-search';
+    $searchTab = $searchTab ?? 'search';
+
+    // タブ：cast は「検索／AIレコメンド」の 2 タブ、shop はタブなし。
+    $tabsForHeader = [];
     if ($showAiTab) {
-        $tabsForHeader[] = ['id' => 'pane-ai', 'label' => 'AIレコメンド', 'url' => route($routeName, ['tab' => 'ai']), 'active' => $activeTab === 'pane-ai'];
+        $tabsForHeader = [
+            ['id' => 'pane-search', 'label' => '検索', 'url' => route('cast.search.index', ['tab' => 'search']), 'active' => $activeTab === 'pane-search'],
+            ['id' => 'pane-ai', 'label' => 'AIレコメンド', 'url' => route('cast.search.index', ['tab' => 'ai']), 'active' => $activeTab === 'pane-ai'],
+        ];
     }
-    $aiTabUrl = $showAiTab ? route($routeName, ['tab' => 'ai']) : null;
+
+    $aiTabUrl = $showAiTab ? route('cast.search.index', ['tab' => 'ai']) : null;
     $aiPersonalityTestUrl = $showAiTab
         ? asset('personality-test') . '?' . http_build_query(['return_to' => $aiTabUrl])
         : null;
@@ -58,70 +59,62 @@
     })->values()->all() : [];
 @endphp
 
+@if(!empty($tabsForHeader))
 <div class="has-sub-header">
     @include('layouts.parts.sub-header', ['tabs' => $tabsForHeader])
 </div>
+@endif
 
-<div class="contents tab-page-body">
-    {{-- パネル1：タイムライン --}}
-    <div id="pane-timeline" class="tab-pane {{ $activeTab === 'pane-timeline' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-timeline' ? 'display:none' : '' }}">
-            @forelse($timelineData as $post)
-                {{-- 役割に応じたタイムラインカードを読み込む --}}
-                @include($partsView . '.timeline-card', ['post' => $post])
+<div class="contents {{ !empty($tabsForHeader) ? 'tab-page-body' : 'search-page-body' }}">
+    {{-- 検索パネル：タイムライン＋一覧を統合した画面 --}}
+    <div id="pane-search" class="tab-pane {{ $activeTab === 'pane-search' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-search' ? 'display:none' : '' }}">
+        <div class="search-filter-box">
+            {{-- 役割に応じたフィルター（検索窓・並び替え・詳細検索ボタン） --}}
+            @include($partsView . '.filter')
+        </div>
+
+        <ul class="connection-list connection-list--search">
+            @forelse($items as $item)
+                {{-- 役割に応じたリストアイテム（キャスト用/店舗用） --}}
+                @include($partsView . '.list-item', ['item' => $item])
             @empty
-                <div class="text-center py-20 text-sm opacity-40">投稿はありません。</div>
+                <div class="text-center py-20 text-sm opacity-40">該当する相手は見つかりませんでした。</div>
             @endforelse
-        </div>
+        </ul>
+    </div>
 
-        {{-- パネル2：一覧・検索 / 求人検索（cast時） --}}
-        <div id="pane-list" class="tab-pane {{ $activeTab === 'pane-list' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-list' ? 'display:none' : '' }}">
-            <div class="search-filter-box">
-                {{-- 役割に応じたフィルター（検索窓）を読み込む --}}
-                @include($partsView . '.filter')
-            </div>
-            
-            <ul class="connection-list">
-                @forelse($items as $item)
-                    {{-- 役割に応じたリストアイテム（キャスト用/店舗用）を読み込む --}}
-                    @include($partsView . '.list-item', ['item' => $item])
-                @empty
-                    <div class="text-center py-20 text-sm opacity-40">該当する相手は見つかりませんでした。</div>
-                @endforelse
-            </ul>
-        </div>
-
-        @if($showAiTab)
-            {{-- パネル3：AI --}}
-            <div id="pane-ai" class="tab-pane {{ $activeTab === 'pane-ai' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-ai' ? 'display:none' : '' }}">
-                @if(empty($personalityType))
-                    <div class="ai-recommend__intro-card">
-                        <div class="ai-recommend__intro-title">接客タイプ診断結果をご利用いただくと、おすすめの精度を高められます</div>
-                        <p class="ai-recommend__intro-text">
-                            AIレコメンドでは診断ロジックは実行せず、保存済みの診断結果のみを読み込みます。<br>
-                            まだ未登録の場合は、先に接客タイプ診断をご実施ください。
-                        </p>
-                        <a href="{{ $aiPersonalityTestUrl }}" target="_blank" rel="noopener noreferrer" class="ai-recommend__intro-link">
-                            接客タイプ診断を開く
-                        </a>
-                    </div>
-                @endif
-                <div
-                    class="ai-recommend"
-                    data-ai-recommend-root
-                    data-role="{{ $prefix }}"
-                    data-avatar="{{ asset('assets/images/guide/guide-character.png') }}"
-                >
-                    <div class="ai-recommend__chat" data-ai-chat aria-live="polite"></div>
+    @if($showAiTab)
+        {{-- パネル：AI --}}
+        <div id="pane-ai" class="tab-pane {{ $activeTab === 'pane-ai' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-ai' ? 'display:none' : '' }}">
+            @if(empty($personalityType))
+                <div class="ai-recommend__intro-card">
+                    <div class="ai-recommend__intro-title">接客タイプ診断結果をご利用いただくと、おすすめの精度を高められます</div>
+                    <p class="ai-recommend__intro-text">
+                        AIレコメンドでは診断ロジックは実行せず、保存済みの診断結果のみを読み込みます。<br>
+                        まだ未登録の場合は、先に接客タイプ診断をご実施ください。
+                    </p>
+                    <a href="{{ $aiPersonalityTestUrl }}" target="_blank" rel="noopener noreferrer" class="ai-recommend__intro-link">
+                        接客タイプ診断を開く
+                    </a>
                 </div>
-
-                <script type="application/json" id="ai-recommend-data">{!! json_encode([
-                    'role' => $prefix,
-                    'items' => $aiRecommendItems,
-                    'personalityType' => $personalityType ?? null,
-                    'personalityTestUrl' => $aiPersonalityTestUrl,
-                ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+            @endif
+            <div
+                class="ai-recommend"
+                data-ai-recommend-root
+                data-role="{{ $prefix }}"
+                data-avatar="{{ asset('assets/images/guide/guide-character.png') }}"
+            >
+                <div class="ai-recommend__chat" data-ai-chat aria-live="polite"></div>
             </div>
-        @endif
+
+            <script type="application/json" id="ai-recommend-data">{!! json_encode([
+                'role' => $prefix,
+                'items' => $aiRecommendItems,
+                'personalityType' => $personalityType ?? null,
+                'personalityTestUrl' => $aiPersonalityTestUrl,
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+        </div>
+    @endif
 </div>
 @endsection
 

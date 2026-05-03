@@ -19,8 +19,8 @@
         <span>SWIPE</span>
     </a>
 
-    {{-- さがす（タイムラインタブへ） --}}
-    <a href="{{ route($prefix . '.search.index', ['tab' => 'timeline']) }}" class="nav-item {{ $isSearch ? 'active' : '' }}">
+    {{-- さがす（統合検索画面へ） --}}
+    <a href="{{ $prefix === 'cast' ? route('cast.search.index', ['tab' => 'search']) : route('shop.search.index') }}" class="nav-item {{ $isSearch ? 'active' : '' }}">
         <i class="fas fa-search"></i>
         <span>SEARCH</span>
     </a>

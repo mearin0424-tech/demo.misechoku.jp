@@ -6,60 +6,39 @@ use App\Http\Controllers\Common\SearchController as BaseSearchController;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class SearchController extends BaseSearchController
 {
-    public function index(Request $request, ?string $tab = 'timeline')
+    private const SORT_OPTIONS = [
+        'hitokoto' => 'ひとこと最終更新が新しい順',
+        'new'      => '新着登録順',
+        'name'     => '名前（あいうえお順）',
+        'age_asc'  => '年齢が若い順',
+        'age_desc' => '年齢が高い順',
+    ];
+
+    public function index(Request $request)
     {
-        $searchTab = in_array($tab, ['timeline', 'list'], true) ? $tab : 'timeline';
-        $timelineData = $this->buildTimelineData();
-        $items = $this->buildSearchItems($request);
-        $activeTab = 'pane-' . $searchTab;
-        $guideMessage = $searchTab === 'list'
-            ? "ここでは気になるキャストを条件で絞り込んで探せるよ！\n詳細検索でぴったりの相手を見つけてみてね。"
-            : "ここでは新着のキャストをチェックできるよ！\n気になる相手を見つけたら詳細も見てみてね。";
+        $sort = (string) $request->query('sort', 'hitokoto');
+        if (!array_key_exists($sort, self::SORT_OPTIONS)) {
+            $sort = 'hitokoto';
+        }
+
+        $items = $this->buildSearchItems($request, $sort);
 
         return $this->renderIndex([
-            'guideMessage' => $guideMessage,
-            'timelineData' => $timelineData,
+            'guideMessage' => "気になるキャストを探そう！\nひとこと更新が新しい順に並んでいるよ。",
             'items'        => $items,
-            'activeTab'    => $activeTab,
-            'searchTab'    => $searchTab,
+            'sort'         => $sort,
+            'sortOptions'  => self::SORT_OPTIONS,
         ]);
     }
 
-    private function buildTimelineData(): array
-    {
-        $rows = DB::table('casts')
-            ->join('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id')
-            ->whereNotNull('cast_profiles.pr')
-            ->where('cast_profiles.pr', '<>', '')
-            ->orderByDesc('cast_profiles.updated_at')
-            ->orderByDesc('casts.id')
-            ->select(
-                'casts.id',
-                'cast_profiles.nickname',
-                'cast_profiles.name',
-                'cast_profiles.pr',
-                'cast_profiles.main_image_path',
-                'cast_profiles.updated_at'
-            )
-            ->limit(20)
-            ->get();
-
-        return $rows->map(function ($row) {
-            $updatedAt = $row->updated_at ? Carbon::parse($row->updated_at) : null;
-
-            return [
-                'name' => $this->castDisplayName($row),
-                'img' => $this->getCastImages((string) $row->id)[0] ?? asset('assets/images/common/no-image.png'),
-                'time' => $updatedAt ? $updatedAt->locale('ja')->diffForHumans() : '',
-                'text' => (string) $row->pr,
-            ];
-        })->all();
-    }
-
-    private function buildSearchItems(Request $request): array
+    /**
+     * 統合済み検索結果（タイムライン＋一覧）を生成する。
+     */
+    private function buildSearchItems(Request $request, string $sort): array
     {
         $keyword = $request->query('keyword');
         $keyword = is_string($keyword) ? trim($keyword) : '';
@@ -67,20 +46,41 @@ class SearchController extends BaseSearchController
         $industries = $request->query('industry', []);
         $industries = is_array($industries) ? array_values(array_filter($industries, 'is_string')) : (is_string($industries) ? [$industries] : []);
 
+        $hasCastPostsTable = Schema::hasTable('cast_posts');
+
         $rows = DB::table('casts')
-            ->join('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id')
-            ->select(
-                'casts.id',
-                'cast_profiles.nickname',
-                'cast_profiles.name',
-                'cast_profiles.birthday',
-                'cast_profiles.pref',
-                'cast_profiles.city',
-                'cast_profiles.pr',
-                'cast_profiles.main_image_path'
-            )
-            ->orderByDesc('cast_profiles.updated_at')
-            ->orderByDesc('casts.id');
+            ->join('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id');
+
+        if ($hasCastPostsTable) {
+            $rows->leftJoin('cast_posts', 'casts.id', '=', 'cast_posts.cast_id');
+        }
+
+        $select = [
+            'casts.id',
+            'casts.created_at as cast_created_at',
+            'cast_profiles.nickname',
+            'cast_profiles.name',
+            'cast_profiles.birthday',
+            'cast_profiles.pref',
+            'cast_profiles.city',
+            'cast_profiles.pr',
+            'cast_profiles.main_image_path',
+            'cast_profiles.updated_at as profile_updated_at',
+        ];
+
+        if ($hasCastPostsTable) {
+            $select[] = 'cast_posts.body as hitokoto_body';
+            $select[] = 'cast_posts.updated_at as hitokoto_updated_at';
+            $select[] = 'cast_posts.created_at as hitokoto_created_at';
+        } else {
+            $select[] = DB::raw('NULL as hitokoto_body');
+            $select[] = DB::raw('NULL as hitokoto_updated_at');
+            $select[] = DB::raw('NULL as hitokoto_created_at');
+        }
+
+        $rows->select($select);
+
+        $this->applySort($rows, $sort, $hasCastPostsTable);
 
         if (!empty($industries) && DB::getSchemaBuilder()->hasTable('cast_industry')) {
             $rows->join('cast_industry', 'casts.id', '=', 'cast_industry.cast_id')
@@ -101,25 +101,66 @@ class SearchController extends BaseSearchController
                     $row->pref,
                     $row->city,
                     $row->pr,
+                    $row->hitokoto_body ?? null,
                 ]));
 
                 return str_contains($this->normalizeSearchText($haystack), $normalizedKeyword);
             })
             ->map(function ($row) {
                 $birthday = $row->birthday ? Carbon::parse($row->birthday) : null;
+                $hitokotoUpdatedAt = $row->hitokoto_updated_at
+                    ? Carbon::parse($row->hitokoto_updated_at)
+                    : ($row->hitokoto_created_at ? Carbon::parse($row->hitokoto_created_at) : null);
+                $hitokotoBody = (string) ($row->hitokoto_body ?? '');
+                if ($hitokotoBody === '') {
+                    $hitokotoBody = (string) ($row->pr ?? '');
+                }
 
                 return [
-                    'id' => $row->id,
-                    'name' => $this->castDisplayName($row),
-                    'age' => $birthday?->age,
-                    'img' => $this->getCastImages((string) $row->id)[0] ?? asset('assets/images/common/no-image.png'),
-                    'pref' => $row->pref ?? '',
-                    'city' => $row->city ?? '',
-                    'pr' => (string) ($row->pr ?? ''),
+                    'id'                  => $row->id,
+                    'name'                => $this->castDisplayName($row),
+                    'age'                 => $birthday?->age,
+                    'img'                 => $this->getCastImages((string) $row->id)[0] ?? asset('assets/images/common/no-image.png'),
+                    'pref'                => $row->pref ?? '',
+                    'city'                => $row->city ?? '',
+                    'pr'                  => (string) ($row->pr ?? ''),
+                    'hitokoto'            => $hitokotoBody,
+                    'hitokoto_updated_at' => $hitokotoUpdatedAt?->locale('ja')->diffForHumans(),
                 ];
             })
             ->values()
             ->all();
+    }
+
+    private function applySort($rows, string $sort, bool $hasCastPostsTable): void
+    {
+        switch ($sort) {
+            case 'new':
+                $rows->orderByDesc('casts.created_at')->orderByDesc('casts.id');
+                break;
+            case 'name':
+                $rows->orderByRaw('COALESCE(cast_profiles.nickname, cast_profiles.name)')
+                    ->orderBy('casts.id');
+                break;
+            case 'age_asc':
+                $rows->orderByDesc('cast_profiles.birthday')->orderByDesc('casts.id');
+                break;
+            case 'age_desc':
+                $rows->orderBy('cast_profiles.birthday')->orderByDesc('casts.id');
+                break;
+            case 'hitokoto':
+            default:
+                if ($hasCastPostsTable) {
+                    // ひとこと最終更新が新しい順。未投稿のキャストは最後に回す。
+                    $rows->orderByRaw('cast_posts.updated_at IS NULL')
+                        ->orderByDesc('cast_posts.updated_at')
+                        ->orderByDesc('cast_profiles.updated_at')
+                        ->orderByDesc('casts.id');
+                } else {
+                    $rows->orderByDesc('cast_profiles.updated_at')->orderByDesc('casts.id');
+                }
+                break;
+        }
     }
 
     private function getCastImages(string $castId): array

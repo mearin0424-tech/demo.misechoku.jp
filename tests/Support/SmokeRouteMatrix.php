@@ -46,8 +46,7 @@ final class SmokeRouteMatrix
     {
         return [
             'shop home' => ['shop.home', [], 200],
-            'shop search timeline' => ['shop.search.index', ['tab' => 'timeline'], 200],
-            'shop search list' => ['shop.search.index', ['tab' => 'list'], 200],
+            'shop search' => ['shop.search.index', [], 200],
             'shop interaction index' => ['shop.interaction.index', [], 200],
             'shop interaction keep' => ['shop.interaction.keep', [], 200],
             'shop interaction like' => ['shop.interaction.like', [], 200],
@@ -66,8 +65,7 @@ final class SmokeRouteMatrix
     {
         return [
             'cast home' => ['cast.home', [], 200],
-            'cast search timeline' => ['cast.search.index', ['tab' => 'timeline'], 200],
-            'cast search list' => ['cast.search.index', ['tab' => 'list'], 200],
+            'cast search' => ['cast.search.index', ['tab' => 'search'], 200],
             'cast search ai' => ['cast.search.index', ['tab' => 'ai'], 200],
             'cast profile edit' => ['cast.profile.edit', [], 200],
             'cast mypage index' => ['cast.mypage.index', [], 200],

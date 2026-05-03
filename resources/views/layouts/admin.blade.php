@@ -39,6 +39,12 @@
                 ['label' => '運営アカウント管理', 'route' => 'admin.admin-accounts.index', 'icon' => 'fa-user-gear', 'badge' => null, 'badge_class' => ''],
             ],
         ],
+        [
+            'title' => '規約管理',
+            'items' => [
+                ['label' => '規約・ポリシー一覧', 'route' => 'admin.policies.index', 'icon' => 'fa-file-shield', 'badge' => null, 'badge_class' => ''],
+            ],
+        ],
     ];
     $opBadges = $adminOperationBadges ?? [];
     $opAchievements = $adminOperationAchievements ?? [];
@@ -74,6 +80,7 @@
         'admin.casts.*' => 'アカウント管理',
         'admin.admin-accounts.*' => 'アカウント管理',
         'admin.bank.*' => 'アカウント管理',
+        'admin.policies.*' => '規約管理',
     ];
     $headerSection = '管理画面';
     foreach ($sectionMap as $pattern => $label) {

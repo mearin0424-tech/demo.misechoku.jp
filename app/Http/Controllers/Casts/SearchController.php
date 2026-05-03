@@ -12,65 +12,47 @@ use Illuminate\Support\Facades\Schema;
 
 class SearchController extends BaseSearchController
 {
+    private const SORT_OPTIONS = [
+        'hitokoto' => 'ひとこと最終更新が新しい順',
+        'new'      => '新着登録順',
+        'name'     => '店舗名（あいうえお順）',
+        'wage'     => '時給が高い順',
+        'reward'   => '採用報酬が高い順',
+    ];
+
     public function __construct(private readonly AdminMasterService $adminMasterService)
     {
     }
 
-    public function index(Request $request, ?string $tab = 'timeline')
+    public function index(Request $request, ?string $tab = 'search')
     {
-        $timelineData = $this->buildTimelineData();
-        $items = $this->buildSearchItems($request);
+        $tab = in_array($tab, ['search', 'ai'], true) ? $tab : 'search';
+        $activeTab = 'pane-' . $tab;
+
+        $sort = (string) $request->query('sort', 'hitokoto');
+        if (!array_key_exists($sort, self::SORT_OPTIONS)) {
+            $sort = 'hitokoto';
+        }
+
+        $items = $this->buildSearchItems($request, $sort);
         $personalityType = $this->currentCastPersonalityType();
 
-        $activeTab = 'pane-' . (in_array($tab, ['timeline', 'list', 'ai'], true) ? $tab : 'timeline');
-
         return $this->renderIndex([
-            'guideMessage' => "あなたの希望に合うお店を探そう！\n条件を絞り込んで検索してみてね。",
-            'timelineData' => $timelineData,
-            'items'        => $items,
-            'personalityType' => $personalityType,
-            'activeTab'    => $activeTab,
-            'searchTab'    => $tab,
+            'guideMessage'        => "あなたの希望に合うお店を探そう！\nひとこと更新が新しい順に並んでいるよ。",
+            'items'               => $items,
+            'personalityType'     => $personalityType,
+            'activeTab'           => $activeTab,
+            'searchTab'           => $tab,
+            'sort'                => $sort,
+            'sortOptions'         => self::SORT_OPTIONS,
             'detailSearchOptions' => $this->buildDetailSearchOptions(),
         ]);
     }
 
-    private function buildTimelineData(): array
-    {
-        $rows = DB::table('shop_posts')
-            ->join('shops', 'shops.id', '=', 'shop_posts.shop_id')
-            ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
-            ->when(
-                Schema::hasColumn('shop_posts', 'type'),
-                fn ($q) => $q->where('shop_posts.type', 2)
-            )
-            ->whereNotNull('shop_posts.body')
-            ->where('shop_posts.body', '<>', '')
-            ->orderByDesc('shop_posts.created_at')
-            ->orderByDesc('shop_posts.id')
-            ->select(
-                'shops.id',
-                'shop_profiles.shop_name',
-                'shop_posts.body',
-                'shop_posts.created_at',
-                'shop_profiles.main_image_path'
-            )
-            ->limit(20)
-            ->get();
-
-        return $rows->map(function ($row) {
-            $createdAt = $row->created_at ? Carbon::parse($row->created_at) : null;
-
-            return [
-                'name' => (string) ($row->shop_name ?: 'ショップ'),
-                'img' => $this->getShopImages((string) $row->id)[0] ?? asset('assets/images/common/no-image.png'),
-                'time' => $createdAt ? $createdAt->locale('ja')->diffForHumans() : '',
-                'text' => (string) $row->body,
-            ];
-        })->all();
-    }
-
-    private function buildSearchItems(Request $request): array
+    /**
+     * 統合済み検索結果（タイムライン＋一覧）を生成する。
+     */
+    private function buildSearchItems(Request $request, string $sort): array
     {
         $keyword = $request->query('keyword');
         $keyword = is_string($keyword) ? trim($keyword) : '';
@@ -91,15 +73,26 @@ class SearchController extends BaseSearchController
             'facility'   => $this->normalizeIdFilters($request->query('facility_tag_ids', [])),
         ];
 
+        // 各ショップごとに「ひとこと」の最新行（id 最大）を 1 件だけ参照する。
+        // shop_posts は (shop_id, type=2) の組み合わせで updateOrInsert されているので
+        // 実質ユニークだが、安全のため MAX(id) でサブクエリ化している。
+        $latestShopPost = DB::table('shop_posts')
+            ->select('shop_id', DB::raw('MAX(id) as latest_id'))
+            ->when(
+                Schema::hasColumn('shop_posts', 'type'),
+                fn ($q) => $q->where('type', 2)
+            )
+            ->whereNotNull('body')
+            ->where('body', '<>', '')
+            ->groupBy('shop_id');
+
         $rows = DB::table('shops')
             ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
             ->leftJoin('shop_jobs', 'shops.id', '=', 'shop_jobs.shop_id')
-            ->leftJoin('shop_posts', function ($join) {
-                $join->on('shops.id', '=', 'shop_posts.shop_id');
-                if (Schema::hasColumn('shop_posts', 'type')) {
-                    $join->where('shop_posts.type', 2);
-                }
+            ->leftJoinSub($latestShopPost, 'latest_post', function ($join) {
+                $join->on('shops.id', '=', 'latest_post.shop_id');
             })
+            ->leftJoin('shop_posts', 'shop_posts.id', '=', 'latest_post.latest_id')
             ->select(
                 'shops.id',
                 'shop_jobs.id as shop_job_id',
@@ -107,13 +100,17 @@ class SearchController extends BaseSearchController
                 'shop_profiles.pref',
                 'shop_profiles.city',
                 'shop_profiles.main_image_path',
+                'shop_profiles.updated_at as profile_updated_at',
+                'shops.created_at as shop_created_at',
                 'shop_jobs.hourly_wage_regular',
                 'shop_jobs.noruma_reward',
                 'shop_jobs.noruma_cond',
-                'shop_posts.body as shop_post_body'
-            )
-            ->orderByDesc('shop_profiles.updated_at')
-            ->orderByDesc('shops.id');
+                'shop_posts.body as shop_post_body',
+                'shop_posts.updated_at as shop_post_updated_at',
+                'shop_posts.created_at as shop_post_created_at'
+            );
+
+        $this->applySort($rows, $sort);
 
         if (!empty($industries)) {
             if (DB::getSchemaBuilder()->hasTable('industry_shop')) {
@@ -172,18 +169,57 @@ class SearchController extends BaseSearchController
                 return true;
             })
             ->map(function ($row) {
+                $hitokotoUpdatedAt = $row->shop_post_updated_at
+                    ? Carbon::parse($row->shop_post_updated_at)
+                    : ($row->shop_post_created_at ? Carbon::parse($row->shop_post_created_at) : null);
+
                 return [
-                    'id' => $row->id,
-                    'shop_name' => (string) ($row->shop_name ?: 'ショップ'),
-                    'pref' => $row->pref ?? '',
-                    'city' => $row->city ?? '',
-                    'catch' => (string) ($row->shop_post_body ?? ''),
-                    'overview' => '',
-                    'main_img' => $this->getShopImages((string) $row->id)[0] ?? asset('assets/images/common/no-image.png'),
+                    'id'                  => $row->id,
+                    'shop_name'           => (string) ($row->shop_name ?: 'ショップ'),
+                    'pref'                => $row->pref ?? '',
+                    'city'                => $row->city ?? '',
+                    'catch'               => (string) ($row->shop_post_body ?? ''),
+                    'overview'            => '',
+                    'main_img'            => $this->getShopImages((string) $row->id)[0] ?? asset('assets/images/common/no-image.png'),
+                    'hitokoto'            => (string) ($row->shop_post_body ?? ''),
+                    'hitokoto_updated_at' => $hitokotoUpdatedAt?->locale('ja')->diffForHumans(),
+                    'hourly_wage'         => (int) ($row->hourly_wage_regular ?? 0),
+                    'reward'              => (int) ($row->noruma_reward ?? 0),
                 ];
             })
             ->values()
             ->all();
+    }
+
+    /**
+     * 並び替え条件をクエリに反映する。
+     */
+    private function applySort($rows, string $sort): void
+    {
+        switch ($sort) {
+            case 'new':
+                $rows->orderByDesc('shops.created_at')->orderByDesc('shops.id');
+                break;
+            case 'name':
+                $rows->orderBy('shop_profiles.shop_name')->orderBy('shops.id');
+                break;
+            case 'wage':
+                $rows->orderByRaw('COALESCE(shop_jobs.hourly_wage_regular, 0) DESC')
+                    ->orderByDesc('shops.id');
+                break;
+            case 'reward':
+                $rows->orderByRaw('COALESCE(shop_jobs.noruma_reward, 0) DESC')
+                    ->orderByDesc('shops.id');
+                break;
+            case 'hitokoto':
+            default:
+                // ひとこと最終更新が新しい順。未投稿のショップは最後に回す。
+                $rows->orderByRaw('shop_posts.updated_at IS NULL')
+                    ->orderByDesc('shop_posts.updated_at')
+                    ->orderByDesc('shop_profiles.updated_at')
+                    ->orderByDesc('shops.id');
+                break;
+        }
     }
 
     private function buildDetailSearchOptions(): array

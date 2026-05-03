@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             SystemAccountSeeder::class,
             BankAccountSeeder::class,
+            PolicyDocumentSeeder::class,
         ]);
     }
 }

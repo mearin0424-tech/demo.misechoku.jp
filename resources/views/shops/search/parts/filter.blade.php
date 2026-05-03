@@ -1,3 +1,7 @@
+@php
+    $sortOptions = $sortOptions ?? [];
+    $sort = $sort ?? 'hitokoto';
+@endphp
 <div class="search-filter-inner">
     <div class="search-filter-simple">
         <label class="search-filter-simple__label">簡単キーワード検索</label>
@@ -10,7 +14,18 @@
         </div>
         <div class="search-filter-simple__note">ひらがな・カタカナ、全角・半角の違いを吸収して検索します。</div>
     </div>
-    <div class="search-filter-detail-row">
+    <div class="search-filter-controls-row">
+        <div class="search-filter-sort">
+            <label class="search-filter-sort__label" for="search-sort">並び替え</label>
+            <div class="search-filter-sort__select-wrap">
+                <select id="search-sort" class="search-filter-sort__select" data-search-sort>
+                    @foreach($sortOptions as $value => $label)
+                        <option value="{{ $value }}" {{ $sort === $value ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+                <span class="search-filter-sort__icon" aria-hidden="true"><i class="fas fa-chevron-down"></i></span>
+            </div>
+        </div>
         <button type="button" class="search-filter-detail-btn" id="open-detail-search" aria-controls="detail-search-modal" aria-expanded="false">
             <i class="fas fa-sliders-h"></i>
             <span>詳細検索</span>

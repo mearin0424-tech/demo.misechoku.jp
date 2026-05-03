@@ -1,19 +1,23 @@
 /**
- * 詳細検索モーダルの開閉・アコーディオン・条件サマリ
- * cast/search と shop/search の「一覧・検索」で使用
+ * 検索フィルタ：詳細検索モーダル・並び替え・条件サマリ
+ * cast/search と shop/search のタイムライン＋一覧統合画面で使用
  */
 (function () {
+    var keywordInput = document.getElementById('search-keyword');
+    var simpleSubmitBtn = document.getElementById('search-keyword-submit');
+    var sortSelect = document.querySelector('[data-search-sort]');
     var modal = document.getElementById('detail-search-modal');
     var openBtn = document.getElementById('open-detail-search');
-    if (!modal || !openBtn) return;
-
-    var form = document.getElementById('detail-search-form');
-    var keywordInput = document.getElementById('search-keyword');
+    var form = modal ? document.getElementById('detail-search-form') : null;
     var badgeEl = document.getElementById('detail-search-badge');
     var summaryEl = document.getElementById('search-condition-summary');
     var summaryTextEl = document.getElementById('search-condition-summary-text');
+    var locationOptions = modal ? modal.querySelectorAll('.detail-search-location-option') : [];
+    var distanceSlider = modal ? modal.querySelector('#search-distance-km') : null;
+    var distanceValueEl = modal ? modal.querySelector('#search-distance-value') : null;
 
     function openModal() {
+        if (!modal) return;
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
         if (openBtn) openBtn.setAttribute('aria-expanded', 'true');
@@ -21,27 +25,26 @@
     }
 
     function closeModal() {
+        if (!modal) return;
         modal.classList.remove('is-open');
         modal.setAttribute('aria-hidden', 'true');
         if (openBtn) openBtn.setAttribute('aria-expanded', 'false');
         document.body.style.overflow = '';
     }
 
-    openBtn.addEventListener('click', openModal);
-    modal.querySelectorAll('[data-close-modal]').forEach(function (el) {
-        el.addEventListener('click', closeModal);
-    });
+    if (modal && openBtn) {
+        openBtn.addEventListener('click', openModal);
+        modal.querySelectorAll('[data-close-modal]').forEach(function (el) {
+            el.addEventListener('click', closeModal);
+        });
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) closeModal();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+        });
+    }
 
-    modal.addEventListener('click', function (e) {
-        if (e.target === modal) closeModal();
-    });
-
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
-    });
-
-    // 現在地・位置情報セグメント：選択状態の見た目を同期
-    var locationOptions = modal.querySelectorAll('.detail-search-location-option');
     locationOptions.forEach(function (label) {
         var radio = label.querySelector('input[type="radio"]');
         if (!radio) return;
@@ -53,9 +56,6 @@
         syncSelected();
     });
 
-    // 距離スライダー：表示値と進捗を更新
-    var distanceSlider = modal.querySelector('#search-distance-km');
-    var distanceValueEl = modal.querySelector('#search-distance-value');
     if (distanceSlider && distanceValueEl) {
         function updateDistanceOutput() {
             var v = distanceSlider.value;
@@ -69,28 +69,26 @@
         updateDistanceOutput();
     }
 
-    // アコーディオン
-    modal.querySelectorAll('[data-accordion]').forEach(function (block) {
-        var head = block.querySelector('[data-accordion-trigger]');
-        var body = block.querySelector('.detail-search-accordion__body');
-        var icon = block.querySelector('.detail-search-accordion__icon');
-        if (!head || !body) return;
+    if (modal) {
+        modal.querySelectorAll('[data-accordion]').forEach(function (block) {
+            var head = block.querySelector('[data-accordion-trigger]');
+            var body = block.querySelector('.detail-search-accordion__body');
+            var icon = block.querySelector('.detail-search-accordion__icon');
+            if (!head || !body) return;
 
-        function syncAccordion(isOpen) {
-            body.hidden = !isOpen;
-            block.setAttribute('data-open', isOpen ? 'true' : 'false');
-            head.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-            if (icon) {
-                icon.textContent = isOpen ? '−' : '+';
+            function syncAccordion(isOpen) {
+                body.hidden = !isOpen;
+                block.setAttribute('data-open', isOpen ? 'true' : 'false');
+                head.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                if (icon) icon.textContent = isOpen ? '−' : '+';
             }
-        }
 
-        syncAccordion(block.getAttribute('data-open') === 'true');
-
-        head.addEventListener('click', function () {
-            syncAccordion(body.hidden);
+            syncAccordion(block.getAttribute('data-open') === 'true');
+            head.addEventListener('click', function () {
+                syncAccordion(body.hidden);
+            });
         });
-    });
+    }
 
     function countConditions() {
         if (!form) return 0;
@@ -174,34 +172,41 @@
         updateBadgeAndSummary();
     }
 
-    // 条件をクリア
-    modal.querySelector('[data-detail-search-reset]').addEventListener('click', function () {
-        if (!form) return;
-        form.querySelectorAll('input[type="checkbox"]').forEach(function (c) { c.checked = false; });
-        form.querySelectorAll('input[type="text"]').forEach(function (i) { i.value = ''; });
-        form.querySelectorAll('input[type="radio"]').forEach(function (r) {
-            r.checked = r.value === 'current';
-        });
-        form.querySelectorAll('select').forEach(function (select) {
-            select.value = '';
-        });
-        var distanceInput = form.querySelector('input[name="distance_km"]');
-        if (distanceInput) {
-            distanceInput.value = 20;
-            if (distanceValueEl) distanceValueEl.textContent = '20km';
-            distanceInput.dispatchEvent(new Event('input'));
+    if (modal) {
+        var resetBtn = modal.querySelector('[data-detail-search-reset]');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function () {
+                if (!form) return;
+                form.querySelectorAll('input[type="checkbox"]').forEach(function (c) { c.checked = false; });
+                form.querySelectorAll('input[type="text"]').forEach(function (i) { i.value = ''; });
+                form.querySelectorAll('input[type="radio"]').forEach(function (r) {
+                    r.checked = r.value === 'current';
+                });
+                form.querySelectorAll('select').forEach(function (select) {
+                    select.value = '';
+                });
+                var distanceInput = form.querySelector('input[name="distance_km"]');
+                if (distanceInput) {
+                    distanceInput.value = 20;
+                    if (distanceValueEl) distanceValueEl.textContent = '20km';
+                    distanceInput.dispatchEvent(new Event('input'));
+                }
+                locationOptions.forEach(function (l) { l.classList.remove('is-selected'); });
+                var firstLocation = modal.querySelector('.detail-search-location-option input[value="current"]');
+                if (firstLocation) firstLocation.closest('.detail-search-location-option').classList.add('is-selected');
+                if (keywordInput) keywordInput.value = '';
+                updateBadgeAndSummary();
+            });
         }
-        locationOptions.forEach(function (l) { l.classList.remove('is-selected'); });
-        var firstLocation = modal.querySelector('.detail-search-location-option input[value="current"]');
-        if (firstLocation) firstLocation.closest('.detail-search-location-option').classList.add('is-selected');
-        if (keywordInput) keywordInput.value = '';
-        updateBadgeAndSummary();
-    });
+    }
 
-    function buildSearchParams() {
+    function buildSearchParams(extraParams) {
         var params = [];
         if (keywordInput && keywordInput.value.trim()) {
             params.push('keyword=' + encodeURIComponent(keywordInput.value.trim()));
+        }
+        if (sortSelect && sortSelect.value) {
+            params.push('sort=' + encodeURIComponent(sortSelect.value));
         }
         if (form) {
             form.querySelectorAll('input[type="radio"]:checked').forEach(function (r) {
@@ -218,33 +223,44 @@
                 if (select.name && select.value) params.push(select.name + '=' + encodeURIComponent(select.value));
             });
         }
+        if (extraParams && typeof extraParams === 'object') {
+            Object.keys(extraParams).forEach(function (key) {
+                if (extraParams[key] !== null && extraParams[key] !== undefined && extraParams[key] !== '') {
+                    params.push(key + '=' + encodeURIComponent(extraParams[key]));
+                }
+            });
+        }
         return params;
     }
 
-    function getListUrl() {
+    /**
+     * タイムライン/一覧の旧パスから新しい統合検索画面のパスへ変換する。
+     */
+    function getSearchUrl() {
         var pathname = window.location.pathname;
-        if (/\/search\/(timeline|list|ai)$/.test(pathname)) {
-            return pathname.replace(/\/[^/]+$/, '') + '/list';
+        // /cast/search/ai のように現在のタブを保持。
+        if (/\/search\/ai$/.test(pathname)) {
+            return pathname.replace(/\/ai$/, '/search');
         }
-        if (pathname.endsWith('/search')) {
-            return pathname + '/list';
+        // /shop/search/(timeline|list) のような旧 URL は親パスへ戻す。
+        if (/\/search\/(timeline|list)$/.test(pathname)) {
+            return pathname.replace(/\/(timeline|list)$/, '');
         }
-        return pathname.replace(/\/$/, '') + '/list';
+        return pathname;
     }
 
     function doSearch(params) {
-        var listUrl = getListUrl();
+        var listUrl = getSearchUrl();
         var query = params.length ? '?' + params.join('&') : '';
         window.location.href = listUrl + query;
     }
 
-    // 簡単キーワード検索ボタン（入力欄横の「検索」）
-    var simpleSubmitBtn = document.getElementById('search-keyword-submit');
     if (simpleSubmitBtn && keywordInput) {
         simpleSubmitBtn.addEventListener('click', function () {
             doSearch(buildSearchParams());
         });
     }
+
     if (keywordInput) {
         keywordInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') {
@@ -254,9 +270,19 @@
         });
     }
 
-    // この条件で検索（詳細検索モーダル内の「この条件で検索」）
-    modal.querySelector('[data-detail-search-submit]').addEventListener('click', function () {
-        closeModal();
-        doSearch(buildSearchParams());
-    });
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function () {
+            doSearch(buildSearchParams());
+        });
+    }
+
+    if (modal) {
+        var submitBtn = modal.querySelector('[data-detail-search-submit]');
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function () {
+                closeModal();
+                doSearch(buildSearchParams());
+            });
+        }
+    }
 })();
