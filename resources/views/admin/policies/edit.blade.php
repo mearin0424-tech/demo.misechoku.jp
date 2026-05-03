@@ -5,8 +5,10 @@
 
 @section('content')
     @php
-        $oldChapters = old('chapters', $document->chapters->map(fn ($c) => ['title' => $c->title, 'body' => $c->body])->all());
-        if (! is_array($oldChapters) || count($oldChapters) === 0) {
+        $oldChapters = $document->isAbout()
+            ? []
+            : old('chapters', $document->chapters->map(fn ($c) => ['title' => $c->title, 'body' => $c->body])->all());
+        if (! $document->isAbout() && (! is_array($oldChapters) || count($oldChapters) === 0)) {
             $oldChapters = [['title' => '', 'body' => '']];
         }
         $oldMeta = old('meta', $document->meta ?? []);
@@ -17,8 +19,11 @@
             <div>
                 <h1 class="admin-title" style="margin-bottom:4px;">{{ $document->title }} を編集</h1>
                 <p class="admin-description" style="margin:0;">
-                    章タイトル＋本文の組み合わせで編集します。リード本文・各章の本文は<strong>Markdown</strong>（見出し・箇条書き・太字など）で記述できます。<br>
-                    @if($document->isAbout())運営協会のみ「協会概要」（資本金など）も入力できます（概要欄も Markdown 可）。@endif
+                    @if($document->isAbout())
+                        リード見出し・リード本文・協会概要を編集します。リード本文・概要の各欄は<strong>Markdown</strong>（見出し・箇条書き・太字など）で記述できます。
+                    @else
+                        章タイトル＋本文の組み合わせで編集します。リード本文・各章の本文は<strong>Markdown</strong>（見出し・箇条書き・太字など）で記述できます。
+                    @endif
                 </p>
             </div>
             <div style="display:flex;gap:8px;">
@@ -107,58 +112,60 @@
                 </div>
             @endif
 
-            <div class="admin-panel" id="policy-chapters-panel">
-                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
-                    <h2 class="admin-panel-title" style="margin:0;">章コンテンツ</h2>
-                    <button type="button" class="btn-action manage" id="add-chapter-btn">
-                        <i class="fas fa-plus"></i> 章を追加
-                    </button>
-                </div>
-                <p class="admin-note" style="margin-bottom:12px;">
-                    「章を追加」で枠を増やせます。各章は<strong>章タイトル（プレーンテキスト）</strong>と<strong>本文（Markdown）</strong>です。タイトルも本文も空の枠は保存時に除外されます。
-                </p>
+            @unless($document->isAbout())
+                <div class="admin-panel" id="policy-chapters-panel">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
+                        <h2 class="admin-panel-title" style="margin:0;">章コンテンツ</h2>
+                        <button type="button" class="btn-action manage" id="add-chapter-btn">
+                            <i class="fas fa-plus"></i> 章を追加
+                        </button>
+                    </div>
+                    <p class="admin-note" style="margin-bottom:12px;">
+                        「章を追加」で枠を増やせます。各章は<strong>章タイトル（プレーンテキスト）</strong>と<strong>本文（Markdown）</strong>です。タイトルも本文も空の枠は保存時に除外されます。
+                    </p>
 
-                <div id="chapters-list">
-                    @foreach($oldChapters as $i => $ch)
+                    <div id="chapters-list">
+                        @foreach($oldChapters as $i => $ch)
+                            <div class="policy-chapter-row" style="border:1px solid var(--admin-line);border-radius:14px;padding:14px;margin-bottom:14px;background:rgba(255,255,255,0.02);">
+                                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;">
+                                    <span style="color:var(--admin-gold);font-size:.78rem;font-weight:700;letter-spacing:.06em;">第<span class="policy-chapter-no">{{ $i + 1 }}</span>章</span>
+                                    <button type="button" class="policy-chapter-remove" style="background:none;border:0;cursor:pointer;color:var(--admin-red);font-size:.78rem;">
+                                        <i class="fas fa-trash"></i> 削除
+                                    </button>
+                                </div>
+                                <div class="admin-form-row">
+                                    <label class="admin-label">章タイトル</label>
+                                    <input type="text" name="chapters[{{ $i }}][title]" class="admin-input"
+                                        value="{{ is_array($ch) ? ($ch['title'] ?? '') : '' }}" maxlength="200">
+                                </div>
+                                <div class="admin-form-row" style="margin-bottom:0;">
+                                    <label class="admin-label">本文（Markdown）</label>
+                                    <textarea name="chapters[{{ $i }}][body]" class="admin-input" rows="8" placeholder="見出し・箇条書き・太字など">{{ is_array($ch) ? ($ch['body'] ?? '') : '' }}</textarea>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <template id="chapter-template">
                         <div class="policy-chapter-row" style="border:1px solid var(--admin-line);border-radius:14px;padding:14px;margin-bottom:14px;background:rgba(255,255,255,0.02);">
                             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;">
-                                <span style="color:var(--admin-gold);font-size:.78rem;font-weight:700;letter-spacing:.06em;">第<span class="policy-chapter-no">{{ $i + 1 }}</span>章</span>
+                                <span style="color:var(--admin-gold);font-size:.78rem;font-weight:700;letter-spacing:.06em;">第<span class="policy-chapter-no">__NO__</span>章</span>
                                 <button type="button" class="policy-chapter-remove" style="background:none;border:0;cursor:pointer;color:var(--admin-red);font-size:.78rem;">
                                     <i class="fas fa-trash"></i> 削除
                                 </button>
                             </div>
                             <div class="admin-form-row">
                                 <label class="admin-label">章タイトル</label>
-                                <input type="text" name="chapters[{{ $i }}][title]" class="admin-input"
-                                    value="{{ is_array($ch) ? ($ch['title'] ?? '') : '' }}" maxlength="200">
+                                <input type="text" name="chapters[__INDEX__][title]" class="admin-input" maxlength="200">
                             </div>
                             <div class="admin-form-row" style="margin-bottom:0;">
                                 <label class="admin-label">本文（Markdown）</label>
-                                <textarea name="chapters[{{ $i }}][body]" class="admin-input" rows="8" placeholder="見出し・箇条書き・太字など">{{ is_array($ch) ? ($ch['body'] ?? '') : '' }}</textarea>
+                                <textarea name="chapters[__INDEX__][body]" class="admin-input" rows="8" placeholder="見出し・箇条書き・太字など"></textarea>
                             </div>
                         </div>
-                    @endforeach
+                    </template>
                 </div>
-
-                <template id="chapter-template">
-                    <div class="policy-chapter-row" style="border:1px solid var(--admin-line);border-radius:14px;padding:14px;margin-bottom:14px;background:rgba(255,255,255,0.02);">
-                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;">
-                            <span style="color:var(--admin-gold);font-size:.78rem;font-weight:700;letter-spacing:.06em;">第<span class="policy-chapter-no">__NO__</span>章</span>
-                            <button type="button" class="policy-chapter-remove" style="background:none;border:0;cursor:pointer;color:var(--admin-red);font-size:.78rem;">
-                                <i class="fas fa-trash"></i> 削除
-                            </button>
-                        </div>
-                        <div class="admin-form-row">
-                            <label class="admin-label">章タイトル</label>
-                            <input type="text" name="chapters[__INDEX__][title]" class="admin-input" maxlength="200">
-                        </div>
-                        <div class="admin-form-row" style="margin-bottom:0;">
-                            <label class="admin-label">本文（Markdown）</label>
-                            <textarea name="chapters[__INDEX__][body]" class="admin-input" rows="8" placeholder="見出し・箇条書き・太字など"></textarea>
-                        </div>
-                    </div>
-                </template>
-            </div>
+            @endunless
 
             <div class="admin-panel" style="border-color: rgba(230,208,128,.3);">
                 <h2 class="admin-panel-title">更新者情報（必須）</h2>

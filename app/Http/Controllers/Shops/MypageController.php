@@ -104,10 +104,14 @@ class MypageController extends Controller
         }
 
         $jobStatusQ = DB::table('shop_jobs')->where('shop_id', $shopId);
-        if (Schema::hasColumn('shop_jobs', 'job_type')) {
+        if (Schema::hasColumn('shop_jobs', 'job_type') && !Schema::hasColumn('shop_jobs', 'regular_status')) {
             $jobStatusQ->where('job_type', 1);
         }
-        $jobStatus = $jobStatusQ->value('status');
+        if (Schema::hasColumn('shop_jobs', 'regular_status')) {
+            $jobStatus = $jobStatusQ->value('regular_status');
+        } else {
+            $jobStatus = $jobStatusQ->value('status');
+        }
         if ($jobStatus !== null) {
             $recruitStatus = ((int) $jobStatus) === 1 ? '掲載中' : '掲載停止中';
         }
@@ -151,7 +155,7 @@ class MypageController extends Controller
         $jobRowQ = DB::table('shop_jobs')
             ->where('shop_id', $shopId)
             ->select('working_hours', 'working_day', 'regular_holiday');
-        if (Schema::hasColumn('shop_jobs', 'job_type')) {
+        if (Schema::hasColumn('shop_jobs', 'job_type') && !Schema::hasColumn('shop_jobs', 'regular_status')) {
             $jobRowQ->where('job_type', 1);
         }
         $jobRow = $jobRowQ->first();

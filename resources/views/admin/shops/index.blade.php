@@ -56,12 +56,27 @@
                                 @endif
                             </td>
                             <td>
+                                @if(!empty($shop['recruit_schema_horizontal']))
+                                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                                        @foreach($shop['admin_recruit_toggles'] as $t)
+                                            <form action="{{ route('admin.shops.toggle-recruit-status', $shop['id']) }}" method="POST" style="margin:0;">
+                                                @csrf
+                                                <input type="hidden" name="job_type" value="{{ $t['job_type'] }}">
+                                                <button type="submit" class="admin-toggle-button" style="font-size:0.72rem;padding:6px 10px;">
+                                                    {{ $t['label'] }} {{ $t['is_on'] ? '→非公開' : '→公開' }}
+                                                </button>
+                                            </form>
+                                        @endforeach
+                                    </div>
+                                @else
                                 <form action="{{ route('admin.shops.toggle-recruit-status', $shop['id']) }}" method="POST">
                                     @csrf
+                                    <input type="hidden" name="job_type" value="1">
                                     <button type="submit" class="admin-toggle-button">
                                         {{ $shop['job_status_key'] === 'active' ? '非公開にする' : '公開にする' }}
                                     </button>
                                 </form>
+                                @endif
                             </td>
                         </tr>
                     @empty

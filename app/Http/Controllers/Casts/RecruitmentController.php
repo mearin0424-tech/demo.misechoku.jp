@@ -66,19 +66,58 @@ class RecruitmentController extends Controller
                 'shop_profiles.addr3',
                 'shop_profiles.station1',
                 'shop_jobs.id as shop_job_id',
-                'shop_jobs.hourly_wage_regular',
-                'shop_jobs.has_trial',
-                'shop_jobs.trial_hourly_wage',
-                'shop_jobs.noruma_reward',
-                'shop_jobs.atmosphere',
                 'shop_jobs.working_day',
                 'shop_jobs.working_hours',
                 'shop_jobs.regular_holiday',
                 'shop_jobs.qualification',
-                'shop_jobs.status as recruit_status',
                 'shop_jobs.salary',
-                'shop_jobs.noruma_cond'
             );
+
+        if (Schema::hasColumn('shop_jobs', 'regular_status')) {
+            $q->addSelect('shop_jobs.regular_status');
+        }
+        if (Schema::hasColumn('shop_jobs', 'trial_status')) {
+            $q->addSelect('shop_jobs.trial_status');
+        }
+        if (Schema::hasColumn('shop_jobs', 'help_status')) {
+            $q->addSelect('shop_jobs.help_status');
+        }
+        if (Schema::hasColumn('shop_jobs', 'status')) {
+            $q->addSelect('shop_jobs.status as recruit_status');
+        }
+        if (Schema::hasColumn('shop_jobs', 'hourly_wage_regular')) {
+            $q->addSelect('shop_jobs.hourly_wage_regular');
+        }
+        if (Schema::hasColumn('shop_jobs', 'regular_hourly_wage')) {
+            $q->addSelect('shop_jobs.regular_hourly_wage');
+        }
+        if (Schema::hasColumn('shop_jobs', 'has_trial')) {
+            $q->addSelect('shop_jobs.has_trial');
+        }
+        if (Schema::hasColumn('shop_jobs', 'trial_hourly_wage')) {
+            $q->addSelect('shop_jobs.trial_hourly_wage');
+        }
+        if (Schema::hasColumn('shop_jobs', 'bonus_reward')) {
+            $q->addSelect('shop_jobs.bonus_reward');
+        }
+        if (Schema::hasColumn('shop_jobs', 'noruma_reward')) {
+            $q->addSelect('shop_jobs.noruma_reward');
+        }
+        if (Schema::hasColumn('shop_jobs', 'noruma_cond')) {
+            $q->addSelect('shop_jobs.noruma_cond');
+        }
+        if (Schema::hasColumn('shop_jobs', 'catch_copy')) {
+            $q->addSelect('shop_jobs.catch_copy');
+        }
+        if (Schema::hasColumn('shop_jobs', 'job_content')) {
+            $q->addSelect('shop_jobs.job_content');
+        }
+        if (Schema::hasColumn('shop_jobs', 'bonus_condition')) {
+            $q->addSelect('shop_jobs.bonus_condition');
+        }
+        if (Schema::hasColumn('shop_jobs', 'atmosphere')) {
+            $q->addSelect('shop_jobs.atmosphere');
+        }
         if (Schema::hasColumn('shop_jobs', 'has_help')) {
             $q->addSelect('shop_jobs.has_help');
         }
@@ -88,9 +127,27 @@ class RecruitmentController extends Controller
         if (Schema::hasColumn('shop_jobs', 'pr')) {
             $q->addSelect('shop_jobs.pr');
         }
+
         $row = $q->first();
 
-        if (!$row || ($publishedOnly && (int) ($row->recruit_status ?? 0) !== 1)) {
+        if (!$row) {
+            return [
+                'recruit' => [],
+                'shop'    => null,
+            ];
+        }
+
+        $horizontal = Schema::hasColumn('shop_jobs', 'regular_status');
+        $publishedGate = true;
+        if ($publishedOnly) {
+            if ($horizontal) {
+                $publishedGate = (int) ($row->regular_status ?? 0) === 1;
+            } else {
+                $publishedGate = (int) ($row->recruit_status ?? 0) === 1;
+            }
+        }
+
+        if (!$publishedGate) {
             return [
                 'recruit' => [],
                 'shop'    => null,
@@ -106,13 +163,42 @@ class RecruitmentController extends Controller
             ? (string) ($row->pr ?? '')
             : '';
 
-        $trialWage = !empty($row->has_trial) && isset($row->trial_hourly_wage)
-            ? (int) $row->trial_hourly_wage : null;
+        $trialWage = null;
+        if ($horizontal) {
+            if (isset($row->trial_hourly_wage) && $row->trial_hourly_wage !== null && $row->trial_hourly_wage !== '') {
+                $trialWage = (int) $row->trial_hourly_wage;
+            }
+        } elseif (!empty($row->has_trial) && isset($row->trial_hourly_wage)) {
+            $trialWage = (int) $row->trial_hourly_wage;
+        }
+
         $helpWage = null;
-        if (Schema::hasColumn('shop_jobs', 'has_help') && Schema::hasColumn('shop_jobs', 'help_hourly_wage')) {
+        if ($horizontal) {
+            if (isset($row->help_hourly_wage) && $row->help_hourly_wage !== null && $row->help_hourly_wage !== '') {
+                $helpWage = (int) $row->help_hourly_wage;
+            }
+        } elseif (Schema::hasColumn('shop_jobs', 'has_help') && Schema::hasColumn('shop_jobs', 'help_hourly_wage')) {
             $helpWage = !empty($row->has_help) && isset($row->help_hourly_wage)
                 ? (int) $row->help_hourly_wage : null;
         }
+
+        $regularWage = 0;
+        if (isset($row->regular_hourly_wage) && $row->regular_hourly_wage !== null && $row->regular_hourly_wage !== '') {
+            $regularWage = (int) $row->regular_hourly_wage;
+        } elseif (isset($row->hourly_wage_regular) && $row->hourly_wage_regular !== null && $row->hourly_wage_regular !== '') {
+            $regularWage = (int) $row->hourly_wage_regular;
+        }
+
+        $bonusReward = 0;
+        if (isset($row->bonus_reward) && $row->bonus_reward !== null && $row->bonus_reward !== '') {
+            $bonusReward = (int) $row->bonus_reward;
+        } elseif (isset($row->noruma_reward) && $row->noruma_reward !== null && $row->noruma_reward !== '') {
+            $bonusReward = (int) $row->noruma_reward;
+        }
+
+        $catchFromCol = Schema::hasColumn('shop_jobs', 'catch_copy') ? trim((string) ($row->catch_copy ?? '')) : '';
+        $jobContentCol = Schema::hasColumn('shop_jobs', 'job_content') ? trim((string) ($row->job_content ?? '')) : '';
+        $bonusCondCol = Schema::hasColumn('shop_jobs', 'bonus_condition') ? trim((string) ($row->bonus_condition ?? '')) : '';
 
         $recruit = [
             'store_name'         => $row->shop_name,
@@ -120,20 +206,28 @@ class RecruitmentController extends Controller
             'address'            => $address,
             'map_embed_src'      => null,
             'nearest_station'    => $row->station1,
-            'hourly_wage_regular'=> $row->hourly_wage_regular ? (int) $row->hourly_wage_regular : 0,
+            'hourly_wage_regular'=> $regularWage,
+            'regular_hourly_wage'=> $regularWage,
             'trial_hourly_wage'  => $trialWage,
             'help_hourly_wage'   => $helpWage,
-            'noruma_reward'      => $row->noruma_reward ? (int) $row->noruma_reward : 0,
-            'bonus_condition'    => $meta['bonus_condition'] ?? '',
+            'noruma_reward'      => $bonusReward,
+            'bonus_reward'       => $bonusReward,
+            'bonus_condition'    => $bonusCondCol !== '' ? $bonusCondCol : ($meta['bonus_condition'] ?? ''),
             'salary_text'        => $row->salary ?? '',
             'working_hours'      => Schema::hasColumn('shop_jobs', 'working_hours') ? ($row->working_hours ?? null) : ($meta['working_hours'] ?? null),
             'working_days'       => Schema::hasColumn('shop_jobs', 'working_day') ? ($row->working_day ?? null) : ($meta['working_days'] ?? null),
             'regular_holiday'    => Schema::hasColumn('shop_jobs', 'regular_holiday') ? ($row->regular_holiday ?? null) : ($meta['regular_holiday'] ?? null),
-            'job_content'        => '',
-            'store_atmosphere'   => $row->atmosphere ?? '',
+            'job_content'        => $jobContentCol !== '' ? $jobContentCol : ($meta['job_content'] ?? ''),
+            'store_atmosphere'   => Schema::hasColumn('shop_jobs', 'atmosphere') ? ($row->atmosphere ?? '') : '',
             'qualification'      => Schema::hasColumn('shop_jobs', 'qualification') ? ($row->qualification ?? '18歳以上（高校生不可）') : ($meta['qualification'] ?? '18歳以上（高校生不可）'),
-            'catch_copy'         => $meta['catch_copy'] ?? '',
+            'catch_copy'         => $catchFromCol !== '' ? $catchFromCol : ($meta['catch_copy'] ?? ''),
             'message'            => $managerMessage,
+            'regular_status'     => $horizontal ? (int) ($row->regular_status ?? 0) : null,
+            'trial_status'       => $horizontal ? (int) ($row->trial_status ?? 0) : null,
+            'help_status'        => $horizontal ? (int) ($row->help_status ?? 0) : null,
+            'status'             => $horizontal
+                ? ((int) ($row->regular_status ?? 0) === 1 ? 'active' : 'inactive')
+                : (((int) ($row->recruit_status ?? 0) === 1) ? 'active' : 'inactive'),
             'benefits'           => [],
             'selected_benefits'  => $jobTagNames['benefit'],
             'store_features'     => [
@@ -209,12 +303,15 @@ class RecruitmentController extends Controller
             $shareText = 'ミセチョクの求人情報です。';
         }
 
+        $hSchema = Schema::hasColumn('shop_jobs', 'regular_status');
+
         return [
             'pageId' => 'job_info',
             'recruit' => $data['recruit'],
             'recruit_trial' => $data['recruit'],
             'recruit_help' => $data['recruit'],
-            'usesJobTypes' => false,
+            'usesJobTypes' => $hSchema || Schema::hasColumn('shop_jobs', 'job_type'),
+            'horizontalShopJobs' => $hSchema,
             'initial_job_panel' => $initialJobPanel,
             'shop' => $data['shop'],
             'forCast' => $forCast,

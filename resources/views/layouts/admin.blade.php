@@ -42,7 +42,9 @@
         [
             'title' => '規約管理',
             'items' => [
-                ['label' => '規約・ポリシー一覧', 'route' => 'admin.policies.index', 'icon' => 'fa-file-shield', 'badge' => null, 'badge_class' => ''],
+                ['label' => '運営協会', 'route' => 'admin.policies.show', 'route_params' => ['key' => 'about'], 'icon' => 'fa-landmark', 'badge' => null, 'badge_class' => ''],
+                ['label' => '利用規約', 'route' => 'admin.policies.show', 'route_params' => ['key' => 'terms'], 'icon' => 'fa-file-contract', 'badge' => null, 'badge_class' => ''],
+                ['label' => 'プライバシーポリシー', 'route' => 'admin.policies.show', 'route_params' => ['key' => 'privacy'], 'icon' => 'fa-user-shield', 'badge' => null, 'badge_class' => ''],
             ],
         ],
     ];
@@ -889,7 +891,14 @@
                         </div>
                         <nav class="admin-nav-list">
                             @foreach ($group['items'] as $item)
-                                <a href="{{ route($item['route']) }}" class="admin-nav-link {{ request()->routeIs($item['route']) ? 'is-active' : '' }}">
+                                @php
+                                    $navRouteParams = $item['route_params'] ?? [];
+                                    $navHref = route($item['route'], $navRouteParams);
+                                    $navActive = isset($item['route_params']['key'])
+                                        ? request()->routeIs('admin.policies.show', 'admin.policies.edit') && (string) request()->route('key') === (string) $item['route_params']['key']
+                                        : request()->routeIs($item['route']);
+                                @endphp
+                                <a href="{{ $navHref }}" class="admin-nav-link {{ $navActive ? 'is-active' : '' }}">
                                     <span class="admin-nav-link-main">
                                         <i class="fas {{ $item['icon'] }}"></i>
                                         @if(($group['title'] ?? '') === 'オペレーション')

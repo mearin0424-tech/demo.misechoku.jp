@@ -8,6 +8,9 @@
 @endpush
 
 @section('content')
+@php
+    $horizontal = !empty($horizontalShopJobs);
+@endphp
 <div class="recruit-status-page recruit-detail-page animate-fadeIn">
     <header class="recruit-status-header">
         <a href="{{ route('shop.mypage.index') }}" class="recruit-status-back">
@@ -93,11 +96,23 @@
         <article class="recruit-status-card">
             <div class="recruit-status-card-head">
                 <div class="recruit-status-card-info">
-                    <span class="status-badge {{ ($recruit['status'] ?? 'active') === 'active' ? 'status-active' : 'status-inactive' }}">
-                        {{ ($recruit['status'] ?? 'active') === 'active' ? '求人公開中' : '公開停止中' }}
-                    </span>
+                    @if($horizontal)
+                        @php
+                            $rReg = (int) ($recruit['regular_status'] ?? 0);
+                            $rTrial = (int) ($recruit['trial_status'] ?? 0);
+                            $rHelp = (int) ($recruit['help_status'] ?? 0);
+                            $hourlyHead = (int) ($recruit['regular_hourly_wage'] ?? $recruit['hourly_wage_regular'] ?? 0);
+                        @endphp
+                        <span class="status-badge {{ $rReg === 1 ? 'status-active' : 'status-inactive' }}">
+                            本入 {{ $rReg === 1 ? '公開' : '非公開' }} · 体験 {{ $rTrial === 1 ? '公開' : '非公開' }} · ヘルプ {{ $rHelp === 1 ? '公開' : '非公開' }}
+                        </span>
+                    @else
+                        <span class="status-badge {{ ($recruit['status'] ?? 'active') === 'active' ? 'status-active' : 'status-inactive' }}">
+                            {{ ($recruit['status'] ?? 'active') === 'active' ? '求人公開中' : '公開停止中' }}
+                        </span>
+                    @endif
                     <h3 class="recruit-status-card-title">{{ $recruit['catch_copy'] ?: '求人情報を設定してください' }}</h3>
-                    <p class="recruit-status-card-meta">時給: ¥{{ number_format($recruit['hourly_wage_regular'] ?? 0) }}〜</p>
+                    <p class="recruit-status-card-meta">本入時給: ¥{{ number_format($horizontal ? $hourlyHead : ($recruit['hourly_wage_regular'] ?? 0)) }}〜</p>
                     @if(!empty($recruit['updated_at']))
                         <p class="recruit-status-card-meta">更新日: {{ $recruit['updated_at'] }}</p>
                     @endif
@@ -108,6 +123,31 @@
                         <i class="fas fa-share-nodes"></i>
                     </button>
                     @endif
+                    @if($horizontal)
+                        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+                            @foreach ([1 => '本入', 2 => '体験', 3 => 'ヘルプ'] as $jt => $jtLabel)
+                                @php
+                                    $on = match ((int) $jt) {
+                                        2 => $rTrial === 1,
+                                        3 => $rHelp === 1,
+                                        default => $rReg === 1,
+                                    };
+                                @endphp
+                                <form action="{{ route('shop.recruits.toggle-status') }}" method="POST" style="margin:0;">
+                                    @csrf
+                                    <input type="hidden" name="job_type" value="{{ $jt }}">
+                                    <button
+                                        type="submit"
+                                        class="toggle-btn {{ $on ? 'active' : '' }}"
+                                        aria-label="{{ $jtLabel }}求人の公開を切り替え"
+                                    >
+                                        <span style="font-size:10px;margin-right:6px;min-width:2.5em;display:inline-block;text-align:left;">{{ $jtLabel }}</span>
+                                        <div class="toggle-circle"></div>
+                                    </button>
+                                </form>
+                            @endforeach
+                        </div>
+                    @else
                     <form action="{{ route('shop.recruits.toggle-status') }}" method="POST">
                         @csrf
                         <button
@@ -118,6 +158,7 @@
                             <div class="toggle-circle"></div>
                         </button>
                     </form>
+                    @endif
                 </div>
             </div>
 
@@ -143,7 +184,7 @@
                         <span class="recruit-type-label recruit-type-badge-new">本入店</span>
                         <div class="recruit-type-wage-row">
                             <span class="label">時給</span>
-                            <span class="value">{{ number_format($recruit['hourly_wage_regular'] ?? 0) }}</span>
+                            <span class="value">{{ number_format($recruit['regular_hourly_wage'] ?? $recruit['hourly_wage_regular'] ?? 0) }}</span>
                             <span class="unit">円〜</span>
                         </div>
                     </div>
@@ -161,8 +202,35 @@
                 </div>
                 @endif
 
+                @if($horizontal)
+                <div class="recruit-type-card recruit-type-card-new is-main">
+                    <div class="recruit-type-main">
+                        <span class="recruit-type-label recruit-type-badge-new">本入店</span>
+                        <div class="recruit-type-wage-row">
+                            <span class="label">時給</span>
+                            <span class="value">{{ number_format($recruit['regular_hourly_wage'] ?? $recruit['hourly_wage_regular'] ?? 0) }}</span>
+                            <span class="unit">円〜</span>
+                        </div>
+                        <p class="recruit-type-status text-xs mt-1">
+                            {{ (int) ($recruit['regular_status'] ?? 0) === 1 ? '公開中' : '非公開' }}
+                        </p>
+                    </div>
+                    <div class="recruit-type-bonus-box">
+                        <p class="bonus-label">勤務条件</p>
+                        <p class="bonus-amount">{{ $recruit['working_days'] ?: '未設定' }}</p>
+                        <p class="bonus-meta">（{{ $recruit['working_hours'] ?: '勤務時間未設定' }}）</p>
+                        <p class="bonus-note">{{ $recruit['regular_holiday'] ?: '' }}</p>
+                    </div>
+                    <div class="recruit-type-actions">
+                        <a href="{{ route('shop.recruits.edit') }}?type=fulltime" class="recruit-btn recruit-btn-edit-sm">
+                            <i class="fas fa-pen"></i> 編集
+                        </a>
+                    </div>
+                </div>
+                @endif
+
                 {{-- 体験入店 --}}
-                <div class="recruit-type-card recruit-type-card-new {{ !empty($usesJobTypes) && $usesJobTypes ? 'is-main' : '' }}">
+                <div class="recruit-type-card recruit-type-card-new {{ !empty($usesJobTypes) && $usesJobTypes && !$horizontal ? 'is-main' : '' }}">
                     <div class="recruit-type-main">
                         <span class="recruit-type-label recruit-type-badge-new">体験入店</span>
                         <div class="recruit-type-wage-row">
@@ -178,13 +246,17 @@
                                 <span class="unit">円〜</span>
                             @endif
                         </div>
-                        @if(!empty($usesJobTypes) && $usesJobTypes && (int) ($recruit['hourly_wage_regular'] ?? 0) > 0)
+                        @if(!empty($usesJobTypes) && $usesJobTypes && (int) ($recruit['regular_hourly_wage'] ?? $recruit['hourly_wage_regular'] ?? 0) > 0)
                             <p class="recruit-type-status text-xs mt-1" style="color:#a1a1aa;">
-                                本入参考: ¥{{ number_format((int) $recruit['hourly_wage_regular']) }}〜
+                                本入参考: ¥{{ number_format((int) ($recruit['regular_hourly_wage'] ?? $recruit['hourly_wage_regular'] ?? 0)) }}〜
                             </p>
                         @endif
                         <p class="recruit-type-status text-xs mt-1">
-                            {{ !empty($recruit['trial_hourly_wage']) ? '公開中' : '非公開' }}
+                            @if($horizontal)
+                                {{ (int) ($recruit['trial_status'] ?? 0) === 1 ? '公開中' : '非公開' }}
+                            @else
+                                {{ !empty($recruit['trial_hourly_wage']) ? '公開中' : '非公開' }}
+                            @endif
                         </p>
                     </div>
                     @if(empty($usesJobTypes) || !$usesJobTypes)
@@ -195,7 +267,7 @@
                     </div>
                     @endif
                     <div class="recruit-type-actions">
-                        <a href="{{ route('shop.recruits.edit') }}{{ (!empty($usesJobTypes) && $usesJobTypes) ? '' : '?type=trial' }}" class="recruit-btn recruit-btn-edit-sm">
+                        <a href="{{ route('shop.recruits.edit') }}{{ $horizontal ? '?type=trial' : ((empty($usesJobTypes) || !$usesJobTypes) ? '?type=trial' : '') }}" class="recruit-btn recruit-btn-edit-sm">
                             <i class="fas fa-pen"></i> 編集
                         </a>
                     </div>
@@ -219,11 +291,15 @@
                             @endif
                         </div>
                         <p class="recruit-type-status text-xs mt-1">
-                            {{ !empty($recruit['help_hourly_wage']) ? '公開中' : '非公開' }}
+                            @if($horizontal)
+                                {{ (int) ($recruit['help_status'] ?? 0) === 1 ? '公開中' : '非公開' }}
+                            @else
+                                {{ !empty($recruit['help_hourly_wage']) ? '公開中' : '非公開' }}
+                            @endif
                         </p>
                     </div>
                     <div class="recruit-type-actions">
-                        <a href="{{ route('shop.recruits.edit', ['type' => 'help']) }}" class="recruit-btn recruit-btn-edit-sm">
+                        <a href="{{ route('shop.recruits.edit') }}?type=help" class="recruit-btn recruit-btn-edit-sm">
                             <i class="fas fa-pen"></i> 編集
                         </a>
                     </div>

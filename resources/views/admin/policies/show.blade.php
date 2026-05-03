@@ -28,16 +28,21 @@
             <div>
                 <h1 class="admin-title" style="margin-bottom:4px;">{{ $document->title }}</h1>
                 <p class="admin-description" style="margin:0;">
-                    キー: <code>{{ $document->key }}</code>　章数: {{ $document->chapters->count() }}章
+                    キー: <code>{{ $document->key }}</code>
+                    @unless($document->isAbout())
+                        　章数: {{ $document->chapters->count() }}章
+                    @endunless
                 </p>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <a href="{{ route('admin.policies.index') }}" class="btn-action manage" style="background:transparent;border-color:var(--admin-line);color:var(--admin-text);">
-                    <i class="fas fa-arrow-left"></i> 一覧へ
+                <a href="{{ route('admin.dashboard') }}" class="btn-action manage" style="background:transparent;border-color:var(--admin-line);color:var(--admin-text);">
+                    <i class="fas fa-arrow-left"></i> ダッシュボード
                 </a>
-                <a href="{{ route('admin.policies.edit', ['key' => $document->key]) }}#policy-chapters-panel" class="btn-action manage" style="background:transparent;border-color:rgba(230,208,128,0.35);color:var(--admin-gold);">
-                    <i class="fas fa-plus"></i> 章を追加
-                </a>
+                @unless($document->isAbout())
+                    <a href="{{ route('admin.policies.edit', ['key' => $document->key]) }}#policy-chapters-panel" class="btn-action manage" style="background:transparent;border-color:rgba(230,208,128,0.35);color:var(--admin-gold);">
+                        <i class="fas fa-plus"></i> 章を追加
+                    </a>
+                @endunless
                 <a href="{{ route('admin.policies.edit', ['key' => $document->key]) }}" class="btn-action manage">
                     <i class="fas fa-pen"></i> 編集する
                 </a>
@@ -142,20 +147,22 @@
             </div>
         @endif
 
-        @forelse($document->chapters as $chapter)
-            <div class="admin-panel" style="border-style:dashed;border-color:rgba(230,208,128,0.15);">
-                <h2 class="admin-panel-title" style="margin-bottom:10px;">
-                    <span style="color:var(--admin-gold);font-size:.78rem;letter-spacing:.06em;">第{{ $loop->iteration }}章</span>
-                    　{{ $chapter->title }}
-                </h2>
-                <div class="policy-md-preview">
-                    {!! MarkdownRenderer::toHtml($chapter->body) !!}
+        @unless($document->isAbout())
+            @forelse($document->chapters as $chapter)
+                <div class="admin-panel" style="border-style:dashed;border-color:rgba(230,208,128,0.15);">
+                    <h2 class="admin-panel-title" style="margin-bottom:10px;">
+                        <span style="color:var(--admin-gold);font-size:.78rem;letter-spacing:.06em;">第{{ $loop->iteration }}章</span>
+                        　{{ $chapter->title }}
+                    </h2>
+                    <div class="policy-md-preview">
+                        {!! MarkdownRenderer::toHtml($chapter->body) !!}
+                    </div>
                 </div>
-            </div>
-        @empty
-            <div class="admin-panel">
-                <p class="admin-note">章がまだ登録されていません。「章を追加」または「編集する」から章を追加してください。</p>
-            </div>
-        @endforelse
+            @empty
+                <div class="admin-panel">
+                    <p class="admin-note">章がまだ登録されていません。「章を追加」または「編集する」から章を追加してください。</p>
+                </div>
+            @endforelse
+        @endunless
     </div>
 @endsection

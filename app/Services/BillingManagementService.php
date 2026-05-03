@@ -1121,27 +1121,100 @@ class BillingManagementService
                     'application_deposits.updated_at',
                 ],
                 $this->optionalDepositSelects(),
-                [
-                    'shop_job_applications.id as application_id',
-                    'shop_job_applications.cast_id',
-                    'shop_job_applications.result_date',
-                    'shop_jobs.shop_id',
-                    'shop_jobs.hourly_wage_regular',
-                    'shop_jobs.noruma_reward',
-                    'shop_jobs.noruma_cond',
-                    'shops.email as shop_email',
-                    'shop_profiles.shop_name',
-                    'shop_profiles.pref as shop_pref',
-                    'shop_profiles.city as shop_city',
-                    'shop_profiles.addr2 as shop_addr2',
-                    'shop_profiles.addr3 as shop_addr3',
-                    'cast_profiles.nickname as cast_nickname',
-                    'cast_profiles.name as cast_full_name',
-                    'casts.email as cast_email',
-                    DB::raw('cast_bank_accounts.id as cast_bank_id'),
-                    DB::raw('shop_bank_accounts.id as shop_bank_id'),
-                ]
+                $this->shopJobJoinSelectsForBilling(),
             ));
+    }
+
+    /**
+     * shop_jobs JOIN 時に取得するボーナス・時給関連カラム（存在するもののみ）
+     *
+     * @return list<string>
+     */
+    private function shopJobExtraColumnsForApplicationBilling(): array
+    {
+        $cols = ['shop_jobs.shop_id'];
+        foreach ([
+            'regular_hourly_wage',
+            'hourly_wage_regular',
+            'bonus_reward',
+            'noruma_reward',
+            'noruma_cond',
+            'bonus_condition',
+            'norma_day',
+            'normal_time',
+            'norma_hours',
+            'hours_day',
+        ] as $c) {
+            if (Schema::hasColumn('shop_jobs', $c)) {
+                $cols[] = 'shop_jobs.' . $c;
+            }
+        }
+
+        return $cols;
+    }
+
+    /**
+     * @return array<int, string|\Illuminate\Database\Query\Expression>
+     */
+    private function shopJobJoinSelectsForBilling(): array
+    {
+        return array_merge(
+            [
+                'shop_job_applications.id as application_id',
+                'shop_job_applications.cast_id',
+                'shop_job_applications.result_date',
+                'shops.email as shop_email',
+                'shop_profiles.shop_name',
+                'shop_profiles.pref as shop_pref',
+                'shop_profiles.city as shop_city',
+                'shop_profiles.addr2 as shop_addr2',
+                'shop_profiles.addr3 as shop_addr3',
+                'cast_profiles.nickname as cast_nickname',
+                'cast_profiles.name as cast_full_name',
+                'casts.email as cast_email',
+                DB::raw('cast_bank_accounts.id as cast_bank_id'),
+                DB::raw('shop_bank_accounts.id as shop_bank_id'),
+            ],
+            $this->shopJobExtraColumnsForApplicationBilling()
+        );
+    }
+
+    /**
+     * @param  array<string, mixed>  $meta
+     * @return array<string, mixed>
+     */
+    private function mergeShopJobBonusMetaFromRow(object $row, array $meta): array
+    {
+        if (Schema::hasColumn('shop_jobs', 'bonus_condition') && property_exists($row, 'bonus_condition')) {
+            $bc = trim((string) ($row->bonus_condition ?? ''));
+            if ($bc !== '') {
+                $meta['bonus_condition'] = $bc;
+            }
+        }
+
+        $days = null;
+        if (Schema::hasColumn('shop_jobs', 'norma_day') && property_exists($row, 'norma_day') && $row->norma_day !== null && $row->norma_day !== '') {
+            $days = (int) $row->norma_day;
+        } elseif (Schema::hasColumn('shop_jobs', 'normal_time') && property_exists($row, 'normal_time') && $row->normal_time !== null && $row->normal_time !== '') {
+            $days = (int) $row->normal_time;
+        }
+        if ($days !== null) {
+            $meta['working_days'] = (string) $days;
+            $meta['bonus_total_working_days'] = (string) $days;
+        }
+
+        $hours = null;
+        if (Schema::hasColumn('shop_jobs', 'norma_hours') && property_exists($row, 'norma_hours') && $row->norma_hours !== null && $row->norma_hours !== '') {
+            $hours = (int) $row->norma_hours;
+        } elseif (Schema::hasColumn('shop_jobs', 'hours_day') && property_exists($row, 'hours_day') && $row->hours_day !== null && $row->hours_day !== '') {
+            $hours = (int) $row->hours_day;
+        }
+        if ($hours !== null) {
+            $meta['working_hours'] = (string) $hours;
+            $meta['bonus_total_working_hours'] = (string) $hours;
+        }
+
+        return $meta;
     }
 
     private function findDepositById(int $depositId): ?object
@@ -1176,14 +1249,11 @@ class BillingManagementService
             ->where('shop_job_applications.cast_id', $castId)
             ->where('shop_job_applications.status', 4)
             ->orderByDesc('shop_job_applications.id')
-            ->select(
-                'shop_job_applications.*',
-                'shop_jobs.shop_id',
-                'shop_jobs.noruma_reward',
-                'shop_jobs.hourly_wage_regular',
-                'shop_jobs.noruma_cond',
-                'shop_profiles.shop_name'
-            )
+            ->select(array_merge(
+                ['shop_job_applications.*'],
+                $this->shopJobExtraColumnsForApplicationBilling(),
+                ['shop_profiles.shop_name']
+            ))
             ->first();
     }
 
@@ -1199,14 +1269,11 @@ class BillingManagementService
             ->where('shop_job_applications.id', $applicationId)
             ->where('shop_job_applications.cast_id', $castId)
             ->where('shop_job_applications.status', 4)
-            ->select(
-                'shop_job_applications.*',
-                'shop_jobs.shop_id',
-                'shop_jobs.noruma_reward',
-                'shop_jobs.hourly_wage_regular',
-                'shop_jobs.noruma_cond',
-                'shop_profiles.shop_name'
-            )
+            ->select(array_merge(
+                ['shop_job_applications.*'],
+                $this->shopJobExtraColumnsForApplicationBilling(),
+                ['shop_profiles.shop_name']
+            ))
             ->first();
 
         return $row ?: null;
@@ -1234,14 +1301,11 @@ class BillingManagementService
             ->where('shop_jobs.shop_id', $shopId)
             ->where('shop_job_applications.status', 4)
             ->orderByDesc('shop_job_applications.id')
-            ->select(
-                'shop_job_applications.*',
-                'shop_jobs.shop_id',
-                'shop_jobs.noruma_reward',
-                'shop_jobs.hourly_wage_regular',
-                'shop_jobs.noruma_cond',
-                'shop_profiles.shop_name'
-            )
+            ->select(array_merge(
+                ['shop_job_applications.*'],
+                $this->shopJobExtraColumnsForApplicationBilling(),
+                ['shop_profiles.shop_name']
+            ))
             ->first();
         return $application ? $this->buildCastDepositRequestTarget($application) : null;
     }
@@ -1286,6 +1350,7 @@ class BillingManagementService
             ->all();
 
         $meta = $this->decodeJobMeta($application->noruma_cond ?? null);
+        $meta = $this->mergeShopJobBonusMetaFromRow($application, $meta);
         $bonusAmount = $this->resolveApplicationBonusAmount($application);
         $bonusCondition = $this->resolveApplicationBonusCondition($application, $meta);
         $bonusMeta = [
@@ -1343,7 +1408,13 @@ class BillingManagementService
         if (isset($application->hired_bonus_amount) && $application->hired_bonus_amount !== null && $application->hired_bonus_amount !== '') {
             return (int) $application->hired_bonus_amount;
         }
-        return (int) ($application->noruma_reward ?? $application->hourly_wage_regular ?? 0);
+        return (int) (
+            $application->bonus_reward
+            ?? $application->noruma_reward
+            ?? $application->regular_hourly_wage
+            ?? $application->hourly_wage_regular
+            ?? 0
+        );
     }
 
     /** 採用時点の焼き付けがあればそれを、なければ求人metaから取得 */
@@ -1387,13 +1458,14 @@ class BillingManagementService
         }
 
         $meta = $this->decodeJobMeta($deposit['noruma_cond'] ?? null);
+        $bonusConditionLine = trim((string) ($deposit['bonus_condition'] ?? $meta['bonus_condition'] ?? ''));
 
         return [
             'review_id' => $review->id ?? null,
             'application_id' => $deposit['application_id'],
             'cast_name' => $deposit['cast_name'],
             'bonus_amount' => (int) ($deposit['bonus_amount'] ?? 0),
-            'bonus_condition' => trim((string) ($meta['bonus_condition'] ?? '')),
+            'bonus_condition' => $bonusConditionLine,
             'requested_at' => $deposit['updated_at_label'] ?? null,
             'review_comment' => $review->contents ?? '',
             'review_average' => isset($review->eva) ? (float) $review->eva : null,
@@ -1462,6 +1534,7 @@ class BillingManagementService
         $amounts = $this->calculateAmounts($row);
         $status = (int) $row->status;
         $meta = $this->decodeJobMeta($row->noruma_cond ?? null);
+        $meta = $this->mergeShopJobBonusMetaFromRow($row, $meta);
         $review = $this->findLatestReviewForCastShop((string) $row->cast_id, (string) $row->shop_id);
         $reviewDetails = [];
 
@@ -1536,7 +1609,9 @@ class BillingManagementService
     {
         $bonusAmount = (int) ($row->bonus_amount
             ?? $row->hired_bonus_amount
+            ?? $row->bonus_reward
             ?? $row->noruma_reward
+            ?? $row->regular_hourly_wage
             ?? $row->hourly_wage_regular
             ?? 0);
 

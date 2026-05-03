@@ -55,15 +55,17 @@
             @endif
         @endif
 
-        @forelse ($document->chapters as $chapter)
-            <article class="policy-doc-chapter">
-                <h2 class="policy-doc-chapter-title">{{ $chapter->title }}</h2>
-                <div class="policy-md">
-                    {!! MarkdownRenderer::toHtml($chapter->body) !!}
-                </div>
-            </article>
-        @empty
-            <p style="color: var(--policy-text-muted, #5c524d); font-size: 0.88rem;">本文は準備中です。</p>
-        @endforelse
+        @unless ($document->isAbout())
+            @forelse ($document->chapters as $chapter)
+                <article class="policy-doc-chapter">
+                    <h2 class="policy-doc-chapter-title">{{ $chapter->title }}</h2>
+                    <div class="policy-md">
+                        {!! MarkdownRenderer::toHtml($chapter->body) !!}
+                    </div>
+                </article>
+            @empty
+                <p style="color: var(--policy-text-muted, #5c524d); font-size: 0.88rem;">本文は準備中です。</p>
+            @endforelse
+        @endunless
     </div>
 @endsection

@@ -311,8 +311,8 @@
 
     $hasHelp = !empty($recruit['help_hourly_wage']);
     $hasTrial = !empty($recruit['trial_hourly_wage']);
-    $regularWage = (int) ($recruit['hourly_wage_regular'] ?? 0);
-    $noruma = (int) ($recruit['noruma_reward'] ?? 0);
+    $regularWage = (int) ($recruit['regular_hourly_wage'] ?? $recruit['hourly_wage_regular'] ?? 0);
+    $noruma = (int) ($recruit['bonus_reward'] ?? $recruit['noruma_reward'] ?? 0);
     $bonusDays = trim((string) ($recruit['bonus_total_working_days'] ?? $recruit['bonus_working_days'] ?? ''));
     $bonusHours = trim((string) ($recruit['bonus_total_working_hours'] ?? $recruit['bonus_working_hours'] ?? ''));
     $bonusExtra = trim((string) ($recruit['bonus_other_conditions'] ?? $recruit['bonus_condition'] ?? ''));
@@ -388,6 +388,9 @@
                 <div class="recruit-ref-preview-row">
                     <form method="post" action="{{ route('shop.recruits.toggle-status') }}" class="recruit-ref-publish-form">
                         @csrf
+                        @if(!empty($horizontalShopJobs))
+                            <input type="hidden" name="job_type" value="1">
+                        @endif
                         <button type="submit" class="recruit-ref-switch" title="タップで公開／非公開を切り替えます" aria-label="{{ $isPublishActive ? '公開中。クリックで非公開にします' : '非公開。クリックで公開します' }}">
                             <span class="recruit-ref-switch-track {{ $isPublishActive ? 'is-on' : '' }}">
                                 <span class="recruit-ref-switch-knob"></span>

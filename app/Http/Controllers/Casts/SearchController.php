@@ -92,8 +92,27 @@ class SearchController extends BaseSearchController
             ->leftJoinSub($latestShopPost, 'latest_post', function ($join) {
                 $join->on('shops.id', '=', 'latest_post.shop_id');
             })
-            ->leftJoin('shop_posts', 'shop_posts.id', '=', 'latest_post.latest_id')
-            ->select(
+            ->leftJoin('shop_posts', 'shop_posts.id', '=', 'latest_post.latest_id');
+
+        $jobSelect = [];
+        if (Schema::hasColumn('shop_jobs', 'hourly_wage_regular')) {
+            $jobSelect[] = 'shop_jobs.hourly_wage_regular';
+        }
+        if (Schema::hasColumn('shop_jobs', 'regular_hourly_wage')) {
+            $jobSelect[] = 'shop_jobs.regular_hourly_wage';
+        }
+        if (Schema::hasColumn('shop_jobs', 'noruma_reward')) {
+            $jobSelect[] = 'shop_jobs.noruma_reward';
+        }
+        if (Schema::hasColumn('shop_jobs', 'bonus_reward')) {
+            $jobSelect[] = 'shop_jobs.bonus_reward';
+        }
+        if (Schema::hasColumn('shop_jobs', 'noruma_cond')) {
+            $jobSelect[] = 'shop_jobs.noruma_cond';
+        }
+
+        $rows = $rows->select(array_merge(
+            [
                 'shops.id',
                 'shop_jobs.id as shop_job_id',
                 'shop_profiles.shop_name',
@@ -102,13 +121,12 @@ class SearchController extends BaseSearchController
                 'shop_profiles.main_image_path',
                 'shop_profiles.updated_at as profile_updated_at',
                 'shops.created_at as shop_created_at',
-                'shop_jobs.hourly_wage_regular',
-                'shop_jobs.noruma_reward',
-                'shop_jobs.noruma_cond',
                 'shop_posts.body as shop_post_body',
                 'shop_posts.updated_at as shop_post_updated_at',
-                'shop_posts.created_at as shop_post_created_at'
-            );
+                'shop_posts.created_at as shop_post_created_at',
+            ],
+            $jobSelect
+        ));
 
         $this->applySort($rows, $sort);
 
@@ -150,11 +168,11 @@ class SearchController extends BaseSearchController
                     return false;
                 }
 
-                if ($hourlyWage > 0 && (int) ($row->hourly_wage_regular ?? 0) < $hourlyWage) {
+                if ($hourlyWage > 0 && $this->searchRowHourlyWage($row) < $hourlyWage) {
                     return false;
                 }
 
-                if ($reward > 0 && (int) ($row->noruma_reward ?? 0) < $reward) {
+                if ($reward > 0 && $this->searchRowReward($row) < $reward) {
                     return false;
                 }
 
@@ -183,8 +201,8 @@ class SearchController extends BaseSearchController
                     'main_img'            => $this->getShopImages((string) $row->id)[0] ?? asset('assets/images/common/no-image.png'),
                     'hitokoto'            => (string) ($row->shop_post_body ?? ''),
                     'hitokoto_updated_at' => $hitokotoUpdatedAt?->locale('ja')->diffForHumans(),
-                    'hourly_wage'         => (int) ($row->hourly_wage_regular ?? 0),
-                    'reward'              => (int) ($row->noruma_reward ?? 0),
+                    'hourly_wage'         => $this->searchRowHourlyWage($row),
+                    'reward'              => $this->searchRowReward($row),
                 ];
             })
             ->values()
@@ -204,12 +222,34 @@ class SearchController extends BaseSearchController
                 $rows->orderBy('shop_profiles.shop_name')->orderBy('shops.id');
                 break;
             case 'wage':
-                $rows->orderByRaw('COALESCE(shop_jobs.hourly_wage_regular, 0) DESC')
-                    ->orderByDesc('shops.id');
+                $wageCols = [];
+                if (Schema::hasColumn('shop_jobs', 'regular_hourly_wage')) {
+                    $wageCols[] = 'shop_jobs.regular_hourly_wage';
+                }
+                if (Schema::hasColumn('shop_jobs', 'hourly_wage_regular')) {
+                    $wageCols[] = 'shop_jobs.hourly_wage_regular';
+                }
+                if ($wageCols !== []) {
+                    $rows->orderByRaw('COALESCE(' . implode(', ', $wageCols) . ', 0) DESC')
+                        ->orderByDesc('shops.id');
+                } else {
+                    $rows->orderByDesc('shops.id');
+                }
                 break;
             case 'reward':
-                $rows->orderByRaw('COALESCE(shop_jobs.noruma_reward, 0) DESC')
-                    ->orderByDesc('shops.id');
+                $rewardCols = [];
+                if (Schema::hasColumn('shop_jobs', 'bonus_reward')) {
+                    $rewardCols[] = 'shop_jobs.bonus_reward';
+                }
+                if (Schema::hasColumn('shop_jobs', 'noruma_reward')) {
+                    $rewardCols[] = 'shop_jobs.noruma_reward';
+                }
+                if ($rewardCols !== []) {
+                    $rows->orderByRaw('COALESCE(' . implode(', ', $rewardCols) . ', 0) DESC')
+                        ->orderByDesc('shops.id');
+                } else {
+                    $rows->orderByDesc('shops.id');
+                }
                 break;
             case 'hitokoto':
             default:
@@ -230,8 +270,12 @@ class SearchController extends BaseSearchController
         return [
             'industries'   => $profileMasters['industries'] ?? collect(),
             'areas'        => $this->fetchAreaOptions(),
-            'hourly_wages' => $this->fetchNumericOptions('hourly_wage_regular'),
-            'rewards'      => $this->fetchNumericOptions('noruma_reward'),
+            'hourly_wages' => $this->fetchNumericOptions(
+                Schema::hasColumn('shop_jobs', 'regular_hourly_wage') ? 'regular_hourly_wage' : 'hourly_wage_regular'
+            ),
+            'rewards'      => $this->fetchNumericOptions(
+                Schema::hasColumn('shop_jobs', 'bonus_reward') ? 'bonus_reward' : 'noruma_reward'
+            ),
             'work_style'   => $recruitmentMasters['work_style'] ?? collect(),
             'welcome'      => $recruitmentMasters['welcome'] ?? collect(),
             'benefit'      => $recruitmentMasters['benefit'] ?? collect(),
@@ -275,6 +319,24 @@ class SearchController extends BaseSearchController
             ->unique()
             ->sort()
             ->values();
+    }
+
+    private function searchRowHourlyWage(object $row): int
+    {
+        if (property_exists($row, 'regular_hourly_wage') && $row->regular_hourly_wage !== null && $row->regular_hourly_wage !== '') {
+            return (int) $row->regular_hourly_wage;
+        }
+
+        return (int) ($row->hourly_wage_regular ?? 0);
+    }
+
+    private function searchRowReward(object $row): int
+    {
+        if (property_exists($row, 'bonus_reward') && $row->bonus_reward !== null && $row->bonus_reward !== '') {
+            return (int) $row->bonus_reward;
+        }
+
+        return (int) ($row->noruma_reward ?? 0);
     }
 
     private function formatAreaLabel(?string $pref, ?string $city): string

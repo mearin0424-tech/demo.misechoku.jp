@@ -37,6 +37,7 @@ class RecruitmentController extends Controller
             'pageId' => 'job_status',
             'recruit' => $recruitData['recruit'],
             'usesJobTypes' => $this->shopJobsUseMultipleTypes(),
+            'horizontalShopJobs' => $this->shopJobsHorizontalSchema(),
             'applications' => $applications,
             'applicationStatusLabels' => self::APPLICATION_STATUS_LABELS,
             'previewRoute' => route('shop.jobdescription'),
@@ -106,6 +107,7 @@ class RecruitmentController extends Controller
             'recruit_trial' => $recruitData['recruit_trial'],
             'recruit_help' => $recruitData['recruit_help'],
             'usesJobTypes' => $this->shopJobsUseMultipleTypes(),
+            'horizontalShopJobs' => $this->shopJobsHorizontalSchema(),
             'shop'   => $recruitData['shop'],
             'shareUrl' => $numericShopId ? route('share.recruit.show', ['id' => $numericShopId]) : null,
             'shareTitle' => (($recruitData['shop']['name'] ?? null) ?: ($recruitData['recruit']['store_name'] ?? '店舗')) . 'の求人情報',
@@ -122,19 +124,28 @@ class RecruitmentController extends Controller
         $shopId = $this->currentShopId();
         $recruitData = $this->getRecruitData($shopId);
         $usesJobTypes = $this->shopJobsUseMultipleTypes();
+        $horizontal = $this->shopJobsHorizontalSchema();
 
-        $defaultType = $usesJobTypes ? 'trial' : 'fulltime';
+        $defaultType = $horizontal ? 'fulltime' : ($usesJobTypes ? 'trial' : 'fulltime');
         $type = (string) request()->query('type', $defaultType);
         if (!in_array($type, ['fulltime', 'trial', 'help'], true)) {
             $type = $defaultType;
         }
-        if ($usesJobTypes && $type === 'fulltime') {
+        if ($usesJobTypes && !$horizontal && $type === 'fulltime') {
             $type = 'trial';
         }
 
         $recruit = $recruitData['recruit'];
         if ($usesJobTypes) {
-            $recruit = $type === 'help' ? $recruitData['recruit_help'] : $recruitData['recruit_trial'];
+            if ($horizontal) {
+                $recruit = match ($type) {
+                    'help' => $recruitData['recruit_help'],
+                    'trial' => $recruitData['recruit_trial'],
+                    default => $recruitData['recruit'],
+                };
+            } else {
+                $recruit = $type === 'help' ? $recruitData['recruit_help'] : $recruitData['recruit_trial'];
+            }
         } else {
             if ($type === 'trial') {
                 $recruit['hourly_wage_regular'] = $recruit['trial_hourly_wage'] ?? null;
@@ -150,6 +161,7 @@ class RecruitmentController extends Controller
             'recruitHelp'  => $usesJobTypes ? $recruitData['recruit_help']  : null,
             'recruitType' => $type,
             'usesJobTypes' => $usesJobTypes,
+            'horizontalShopJobs' => $horizontal,
             'masters' => $this->adminMasterService->getRecruitmentMasters(),
         ]);
     }
@@ -159,6 +171,10 @@ class RecruitmentController extends Controller
      */
     public function update(Request $request)
     {
+        if ($this->shopJobsHorizontalSchema()) {
+            return $this->updateHorizontal($request);
+        }
+
         $jobKind = (string) $request->input(
             'recruit_job_kind',
             $this->shopJobsUseMultipleTypes() ? 'trial' : 'fulltime'
@@ -323,6 +339,35 @@ class RecruitmentController extends Controller
     public function toggleStatus(Request $request)
     {
         $shopId = $this->currentShopId();
+        if ($this->shopJobsHorizontalSchema()) {
+            $jt = (int) $request->input('job_type', 1);
+            if (!in_array($jt, [1, 2, 3], true)) {
+                $jt = 1;
+            }
+            $col = match ($jt) {
+                2 => 'trial_status',
+                3 => 'help_status',
+                default => 'regular_status',
+            };
+            if (!Schema::hasColumn('shop_jobs', $col)) {
+                return redirect()->back()->with('message', '求人設定を更新できません。');
+            }
+            $row = DB::table('shop_jobs')->where('shop_id', $shopId)->first();
+            if (!$row) {
+                return redirect()->back()->with('message', '求人情報が見つかりません。');
+            }
+            $cur = (int) ($row->{$col} ?? 0);
+            $next = $cur === 1 ? 0 : 1;
+            DB::table('shop_jobs')->where('shop_id', $shopId)->update([
+                $col => $next,
+                'updated_at' => now(),
+            ]);
+
+            return redirect()
+                ->back()
+                ->with('message', $next === 1 ? '求人を公開しました' : '求人を非公開にしました');
+        }
+
         $currentStatus = $this->getCurrentRecruitStatus($shopId);
         $nextStatus = $currentStatus === 1 ? 0 : 1;
         $existingQ = DB::table('shop_jobs')->where('shop_id', $shopId);
@@ -349,9 +394,21 @@ class RecruitmentController extends Controller
             ->with('message', $nextStatus === 1 ? '求人を公開しました' : '求人を非公開にしました');
     }
 
+    private function shopJobsHorizontalSchema(): bool
+    {
+        return Schema::hasTable('shop_jobs') && Schema::hasColumn('shop_jobs', 'regular_status');
+    }
+
     private function shopJobsUseMultipleTypes(): bool
     {
-        return Schema::hasTable('shop_jobs') && Schema::hasColumn('shop_jobs', 'job_type');
+        if (!Schema::hasTable('shop_jobs')) {
+            return false;
+        }
+        if ($this->shopJobsHorizontalSchema()) {
+            return true;
+        }
+
+        return Schema::hasColumn('shop_jobs', 'job_type');
     }
 
     /**
@@ -380,6 +437,11 @@ class RecruitmentController extends Controller
 
     private function getRecruitMetaForJobType(string $shopId, int $jobType): array
     {
+        if ($this->shopJobsHorizontalSchema()) {
+            $raw = DB::table('shop_jobs')->where('shop_id', $shopId)->value('noruma_cond');
+
+            return $this->decodeMeta($raw);
+        }
         if (!$this->shopJobsUseMultipleTypes()) {
             return $this->getRecruitMeta($shopId);
         }
@@ -531,6 +593,10 @@ class RecruitmentController extends Controller
 
     private function getRecruitData(string $shopId): array
     {
+        if ($this->shopJobsHorizontalSchema()) {
+            return $this->getRecruitDataHorizontal($shopId);
+        }
+
         $multi = $this->shopJobsUseMultipleTypes();
 
         $q = DB::table('shops')
@@ -910,6 +976,390 @@ class RecruitmentController extends Controller
         $status = $q->value('status');
 
         return $status === null ? 1 : (int) $status;
+    }
+
+    /**
+     * shop_jobs 横持ちスキーマ（1店舗1行）用の求人データ取得
+     *
+     * @return array{recruit: array, recruit_trial: array, recruit_help: array, shop: array}
+     */
+    private function getRecruitDataHorizontal(string $shopId): array
+    {
+        $row = DB::table('shops')
+            ->leftJoin('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
+            ->leftJoin('shop_jobs', 'shops.id', '=', 'shop_jobs.shop_id')
+            ->where('shops.id', $shopId)
+            ->select('shops.id', 'shop_profiles.*', 'shop_jobs.*', 'shop_jobs.id as primary_job_id')
+            ->first();
+
+        $meta = [];
+        if ($row && Schema::hasColumn('shop_jobs', 'noruma_cond') && !empty($row->noruma_cond)) {
+            $meta = $this->decodeMeta($row->noruma_cond);
+        }
+
+        $industryName = null;
+        if (!empty($row?->industry_id)) {
+            $industryName = DB::table('industries')
+                ->where('id', $row->industry_id)
+                ->value('name');
+        }
+        $shopTagGroups = $this->resolveShopInfoTagGroups($shopId);
+
+        $catchCopy = Schema::hasColumn('shop_jobs', 'catch_copy')
+            ? (string) ($row->catch_copy ?? '')
+            : (string) ($meta['catch_copy'] ?? '');
+        $jobContent = Schema::hasColumn('shop_jobs', 'job_content')
+            ? (string) ($row->job_content ?? '')
+            : (string) ($meta['job_content'] ?? '');
+
+        $regularWage = 0;
+        if (Schema::hasColumn('shop_jobs', 'regular_hourly_wage')) {
+            $regularWage = (int) ($row->regular_hourly_wage ?? 0);
+        } elseif ($row && isset($row->hourly_wage_regular)) {
+            $regularWage = (int) $row->hourly_wage_regular;
+        }
+
+        $bonusReward = 0;
+        if (Schema::hasColumn('shop_jobs', 'bonus_reward')) {
+            $bonusReward = (int) ($row->bonus_reward ?? 0);
+        } elseif ($row && isset($row->noruma_reward)) {
+            $bonusReward = (int) $row->noruma_reward;
+        }
+
+        $bonusRemarks = Schema::hasColumn('shop_jobs', 'bonus_remarks')
+            ? (string) ($row->bonus_remarks ?? '')
+            : (string) ($row->noruma_reward2 ?? '');
+
+        $normaDayVal = null;
+        if (Schema::hasColumn('shop_jobs', 'norma_day') && $row && $row->norma_day !== null) {
+            $normaDayVal = (int) $row->norma_day;
+        } elseif ($row && Schema::hasColumn('shop_jobs', 'normal_time') && $row->normal_time !== null) {
+            $normaDayVal = (int) $row->normal_time;
+        }
+        $normaHoursVal = null;
+        if (Schema::hasColumn('shop_jobs', 'norma_hours') && $row && $row->norma_hours !== null) {
+            $normaHoursVal = (int) $row->norma_hours;
+        } elseif ($row && Schema::hasColumn('shop_jobs', 'hours_day') && $row->hours_day !== null) {
+            $normaHoursVal = (int) $row->hours_day;
+        }
+
+        $bonusWorkingDays = $normaDayVal !== null ? (string) $normaDayVal : (string) ($meta['bonus_total_working_days'] ?? $meta['bonus_working_days'] ?? '');
+        $bonusWorkingHours = $normaHoursVal !== null ? (string) $normaHoursVal : (string) ($meta['bonus_total_working_hours'] ?? $meta['bonus_working_hours'] ?? '');
+
+        $bonusExtraCondition = '';
+        if (Schema::hasColumn('shop_jobs', 'bonus_condition') && $row) {
+            $bonusExtraCondition = trim((string) ($row->bonus_condition ?? ''));
+        }
+        if ($bonusExtraCondition === '') {
+            $bonusExtraCondition = trim((string) ($meta['bonus_other_conditions'] ?? $meta['bonus_condition'] ?? ''));
+        }
+
+        $regStat = Schema::hasColumn('shop_jobs', 'regular_status')
+            ? (int) ($row->regular_status ?? 0)
+            : ($row ? ((int) ($row->status ?? 0) === 1 ? 1 : 0) : 0);
+        $trialStat = Schema::hasColumn('shop_jobs', 'trial_status')
+            ? (int) ($row->trial_status ?? 0)
+            : 0;
+        $helpStat = Schema::hasColumn('shop_jobs', 'help_status')
+            ? (int) ($row->help_status ?? 0)
+            : 0;
+
+        $workingHours = Schema::hasColumn('shop_jobs', 'working_hours') ? ($row->working_hours ?? '') : ($meta['working_hours'] ?? '');
+        $workingDays = Schema::hasColumn('shop_jobs', 'working_day') ? ($row->working_day ?? '') : ($meta['working_days'] ?? '');
+        $regularHoliday = Schema::hasColumn('shop_jobs', 'regular_holiday') ? ($row->regular_holiday ?? '') : ($meta['regular_holiday'] ?? '');
+        $qualification = Schema::hasColumn('shop_jobs', 'qualification') ? ($row->qualification ?? '') : ($meta['qualification'] ?? '');
+
+        $message = Schema::hasColumn('shop_jobs', 'pr') && $row
+            ? (string) ($row->pr ?? '')
+            : '';
+
+        $primaryJobId = isset($row->primary_job_id) ? (int) $row->primary_job_id : 0;
+        $primaryJobTagIds = $primaryJobId ? $this->getShopJobTagIdsByCategory($primaryJobId) : ['work_style' => [], 'welcome' => [], 'benefit' => []];
+        $primaryJobTagNames = $this->resolveShopJobTagNames($primaryJobTagIds);
+
+        $subImages = DB::table('shop_images')
+            ->where('shop_id', $shopId)
+            ->orderByRaw('main_order IS NULL')
+            ->orderBy('main_order')
+            ->orderBy('id')
+            ->pluck('image_path')
+            ->map(fn ($path) => $this->assetPathForStored($path))
+            ->filter()
+            ->values()
+            ->all();
+
+        $mainImage = $this->assetPathForStored($row->main_image_path ?? null);
+        if (empty($subImages) && $mainImage) {
+            $subImages[] = $mainImage;
+        }
+
+        $galleryImages = [];
+        if ($mainImage) {
+            $galleryImages[] = $mainImage;
+        }
+        foreach ($subImages as $path) {
+            if ($path && !in_array($path, $galleryImages, true)) {
+                $galleryImages[] = $path;
+            }
+        }
+
+        $trialWage = ($row && !empty($row->trial_hourly_wage)) ? (int) $row->trial_hourly_wage : null;
+        $helpWage = ($row && !empty($row->help_hourly_wage)) ? (int) $row->help_hourly_wage : null;
+
+        $base = [
+            'store_name' => $row->shop_name ?? '店舗',
+            'open_date' => !empty($row->opened_on) ? date('Y年n月j日', strtotime($row->opened_on)) : null,
+            'address' => trim(implode(' ', array_filter([$row->pref ?? null, $row->city ?? null, $row->addr2 ?? null, $row->addr3 ?? null]))),
+            'map_embed_src' => null,
+            'nearest_station' => $row->station1 ?? '',
+            'hourly_wage_regular' => $regularWage,
+            'regular_hourly_wage' => $regularWage,
+            'trial_hourly_wage' => $trialWage,
+            'help_hourly_wage' => $helpWage,
+            'help_job_content' => '',
+            'noruma_reward' => $bonusReward,
+            'bonus_reward' => $bonusReward,
+            'bonus_remarks' => $bonusRemarks,
+            'bonus_condition' => $bonusExtraCondition,
+            'bonus_other_conditions' => $bonusExtraCondition,
+            'bonus_total_working_days' => $bonusWorkingDays,
+            'bonus_total_working_hours' => $bonusWorkingHours,
+            'bonus_working_days' => $bonusWorkingDays,
+            'bonus_working_hours' => $bonusWorkingHours,
+            'salary_text' => $row->salary ?? '',
+            'working_hours' => $workingHours,
+            'working_days' => $workingDays,
+            'regular_holiday' => $regularHoliday,
+            'job_content' => $jobContent,
+            'store_atmosphere' => '',
+            'qualification' => $qualification ?: '18歳以上（高校生不可）',
+            'catch_copy' => $catchCopy,
+            'message' => $message,
+            'regular_status' => $regStat,
+            'trial_status' => $trialStat,
+            'help_status' => $helpStat,
+            'selected_benefits' => $primaryJobTagNames['benefit'],
+            'store_features' => [
+                '働き方・給与'   => $primaryJobTagNames['work_style'],
+                '歓迎条件'       => $primaryJobTagNames['welcome'],
+                '待遇・サポート' => $primaryJobTagNames['benefit'],
+            ],
+            'work_style_tag_ids' => $primaryJobTagIds['work_style'],
+            'welcome_tag_ids'    => $primaryJobTagIds['welcome'],
+            'benefit_tag_ids'    => $primaryJobTagIds['benefit'],
+            'status' => $regStat === 1 ? 'active' : 'inactive',
+            'updated_at' => $row && !empty($row->updated_at) ? date('Y.m.d', strtotime($row->updated_at)) : null,
+        ];
+
+        $trialOut = $base;
+        $trialOut['status'] = $trialStat === 1 ? 'active' : 'inactive';
+        $helpOut = $base;
+        $helpOut['status'] = $helpStat === 1 ? 'active' : 'inactive';
+
+        $shopPost = DB::table('shop_posts')
+            ->where('shop_id', $shopId)
+            ->when(
+                Schema::hasColumn('shop_posts', 'type'),
+                fn ($q) => $q->where('type', 2)
+            )
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->first();
+        $shopHitokoto = $shopPost && isset($shopPost->body) ? (string) $shopPost->body : '';
+
+        return [
+            'recruit' => $base,
+            'recruit_trial' => $trialOut,
+            'recruit_help' => $helpOut,
+            'shop' => [
+                'name' => $row->shop_name ?? '店舗',
+                'word' => $shopHitokoto,
+                'main_img' => $mainImage,
+                'area' => trim(implode(' ', array_filter([$row->pref ?? null, $row->city ?? null]))),
+                'concept' => '',
+                'review_avg' => 0,
+                'review_cnt' => 0,
+                'sub_images' => $subImages,
+                'gallery_images' => $galleryImages,
+                'zip' => $row->zip ?? '',
+                'pref' => $row->pref ?? '',
+                'city' => $row->city ?? '',
+                'addr1' => trim(($row->addr2 ?? '') . ' ' . ($row->addr3 ?? '')),
+                'industry_name' => $industryName,
+                'nearest_station' => $row->station1 ?? '',
+                'tag_groups' => $shopTagGroups,
+            ],
+        ];
+    }
+
+    private function updateHorizontal(Request $request)
+    {
+        $jobKind = (string) $request->input('recruit_job_kind', 'fulltime');
+        if (!in_array($jobKind, ['fulltime', 'trial', 'help'], true)) {
+            $jobKind = 'fulltime';
+        }
+
+        $wageRules = match ($jobKind) {
+            'fulltime' => [
+                'regular_hourly_wage' => 'required|integer|min:0',
+                'trial_hourly_wage' => 'sometimes|nullable|integer|min:0',
+                'help_hourly_wage' => 'sometimes|nullable|integer|min:0',
+            ],
+            'trial' => [
+                'regular_hourly_wage' => 'sometimes|nullable|integer|min:0',
+                'trial_hourly_wage' => 'required|integer|min:0',
+                'help_hourly_wage' => 'sometimes|nullable|integer|min:0',
+            ],
+            default => [
+                'regular_hourly_wage' => 'sometimes|nullable|integer|min:0',
+                'trial_hourly_wage' => 'sometimes|nullable|integer|min:0',
+                'help_hourly_wage' => 'required|integer|min:0',
+            ],
+        };
+
+        $data = $request->validate(array_merge([
+            'recruit_job_kind' => 'nullable|string|in:fulltime,trial,help',
+            'catch_copy' => 'required|string|max:100',
+            'message' => 'required|string|max:1000',
+            'job_content' => 'required|string|max:2000',
+            'bonus_reward' => 'nullable|integer|min:0',
+            'noruma_reward' => 'nullable|integer|min:0',
+            'bonus_condition' => 'nullable|string|max:1000',
+            'bonus_total_working_days' => 'nullable|integer|min:0',
+            'bonus_total_working_hours' => 'nullable|integer|min:0',
+            'bonus_other_conditions' => 'nullable|string|max:1000',
+            'bonus_remarks' => 'nullable|string|max:255',
+            'salary_text' => 'nullable|string|max:1000',
+            'working_hours' => 'required|string|max:255',
+            'working_days' => 'required|string|max:255',
+            'regular_holiday' => 'nullable|string|max:255',
+            'qualification' => 'required|string|max:255',
+            'work_style_tag_ids' => 'nullable|array',
+            'work_style_tag_ids.*' => 'integer|exists:shop_tags,id',
+            'welcome_tag_ids' => 'nullable|array',
+            'welcome_tag_ids.*' => 'integer|exists:shop_tags,id',
+            'benefit_tag_ids' => 'nullable|array',
+            'benefit_tag_ids.*' => 'integer|exists:shop_tags,id',
+        ], $wageRules));
+
+        $shopId = $this->currentShopId();
+        $bonusAmt = (int) ($data['bonus_reward'] ?? $data['noruma_reward'] ?? 0);
+        $normaDay = $request->filled('bonus_total_working_days') ? (int) $data['bonus_total_working_days'] : null;
+        $normaHours = $request->filled('bonus_total_working_hours') ? (int) $data['bonus_total_working_hours'] : null;
+        $bonusCondText = trim((string) ($request->input('bonus_other_conditions', $data['bonus_condition'] ?? '')));
+
+        $patch = ['updated_at' => now()];
+
+        if (Schema::hasColumn('shop_jobs', 'catch_copy')) {
+            $patch['catch_copy'] = $data['catch_copy'];
+        }
+        if (Schema::hasColumn('shop_jobs', 'job_content')) {
+            $patch['job_content'] = (string) ($data['job_content'] ?? '');
+        }
+        if (Schema::hasColumn('shop_jobs', 'pr')) {
+            $patch['pr'] = (string) $data['message'];
+        }
+        if (Schema::hasColumn('shop_jobs', 'salary')) {
+            $patch['salary'] = $data['salary_text'] ?? '';
+        }
+        if (Schema::hasColumn('shop_jobs', 'working_hours')) {
+            $patch['working_hours'] = $data['working_hours'];
+        }
+        if (Schema::hasColumn('shop_jobs', 'working_day')) {
+            $patch['working_day'] = $data['working_days'];
+        }
+        if (Schema::hasColumn('shop_jobs', 'regular_holiday')) {
+            $patch['regular_holiday'] = $data['regular_holiday'] ?? '';
+        }
+        if (Schema::hasColumn('shop_jobs', 'qualification')) {
+            $patch['qualification'] = $data['qualification'];
+        }
+
+        if (Schema::hasColumn('shop_jobs', 'bonus_reward')) {
+            $patch['bonus_reward'] = $bonusAmt;
+        } elseif (Schema::hasColumn('shop_jobs', 'noruma_reward')) {
+            $patch['noruma_reward'] = (string) $bonusAmt;
+        }
+
+        if (Schema::hasColumn('shop_jobs', 'bonus_condition')) {
+            $patch['bonus_condition'] = $bonusCondText;
+        }
+        if (Schema::hasColumn('shop_jobs', 'bonus_remarks') && $request->has('bonus_remarks')) {
+            $patch['bonus_remarks'] = (string) ($data['bonus_remarks'] ?? '');
+        }
+        if (Schema::hasColumn('shop_jobs', 'norma_day')) {
+            $patch['norma_day'] = $normaDay;
+        } elseif (Schema::hasColumn('shop_jobs', 'normal_time')) {
+            $patch['normal_time'] = $normaDay;
+        }
+        if (Schema::hasColumn('shop_jobs', 'norma_hours')) {
+            $patch['norma_hours'] = $normaHours;
+        } elseif (Schema::hasColumn('shop_jobs', 'hours_day')) {
+            $patch['hours_day'] = $normaHours;
+        }
+
+        $pub = $request->boolean('published') ? 1 : 0;
+
+        if ($jobKind === 'fulltime') {
+            if (Schema::hasColumn('shop_jobs', 'regular_hourly_wage')) {
+                $patch['regular_hourly_wage'] = (string) $data['regular_hourly_wage'];
+            }
+            if (Schema::hasColumn('shop_jobs', 'regular_status')) {
+                $patch['regular_status'] = $pub;
+            } elseif (Schema::hasColumn('shop_jobs', 'status')) {
+                $patch['status'] = $pub;
+            }
+            if (array_key_exists('trial_hourly_wage', $data) && Schema::hasColumn('shop_jobs', 'trial_hourly_wage')) {
+                $patch['trial_hourly_wage'] = $data['trial_hourly_wage'] !== null ? (string) $data['trial_hourly_wage'] : null;
+            }
+            if (array_key_exists('help_hourly_wage', $data) && Schema::hasColumn('shop_jobs', 'help_hourly_wage')) {
+                $patch['help_hourly_wage'] = $data['help_hourly_wage'] !== null ? (string) $data['help_hourly_wage'] : null;
+            }
+        } elseif ($jobKind === 'trial') {
+            if (Schema::hasColumn('shop_jobs', 'trial_hourly_wage')) {
+                $patch['trial_hourly_wage'] = (string) $data['trial_hourly_wage'];
+            }
+            if (Schema::hasColumn('shop_jobs', 'trial_status')) {
+                $patch['trial_status'] = $pub;
+            }
+        } else {
+            if (Schema::hasColumn('shop_jobs', 'help_hourly_wage')) {
+                $patch['help_hourly_wage'] = (string) $data['help_hourly_wage'];
+            }
+            if (Schema::hasColumn('shop_jobs', 'help_status')) {
+                $patch['help_status'] = $pub;
+            }
+        }
+
+        $existing = DB::table('shop_jobs')->where('shop_id', $shopId)->first();
+        if (!$existing) {
+            $insert = array_merge($patch, [
+                'shop_id' => $shopId,
+                'created_at' => now(),
+            ]);
+            $jobId = (int) DB::table('shop_jobs')->insertGetId($insert);
+        } else {
+            DB::table('shop_jobs')->where('shop_id', $shopId)->update($patch);
+            $jobId = (int) $existing->id;
+        }
+
+        if ($jobKind === 'fulltime') {
+            $this->syncShopJobTags($jobId, [
+                'work_style' => $request->input('work_style_tag_ids', []),
+                'welcome'    => $request->input('welcome_tag_ids', []),
+                'benefit'    => $request->input('benefit_tag_ids', []),
+            ]);
+        }
+
+        $redirectType = match ($jobKind) {
+            'help' => '?type=help',
+            'trial' => '?type=trial',
+            default => '?type=fulltime',
+        };
+
+        return redirect()
+            ->to(route('shop.recruits.edit') . $redirectType)
+            ->with('message', '求人情報を保存しました');
     }
 
     private function normalizeShopId(string|int $value): string

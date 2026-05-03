@@ -24,26 +24,6 @@ class PolicyController extends Controller
         ['key' => PolicyDocument::KEY_PRIVACY, 'title' => 'プライバシーポリシー', 'lead_title' => null,                       'with_meta' => false],
     ];
 
-    public function index(): View
-    {
-        // 既定の3ドキュメントを未生成ならば作成
-        foreach (self::DOCUMENTS as $def) {
-            $this->ensureDocument($def);
-        }
-
-        $orderMap = collect(self::DOCUMENTS)->pluck('key')->flip();
-        $documents = PolicyDocument::query()
-            ->withCount('chapters')
-            ->whereIn('key', array_column(self::DOCUMENTS, 'key'))
-            ->get()
-            ->sortBy(fn (PolicyDocument $doc) => $orderMap[$doc->key] ?? PHP_INT_MAX)
-            ->values();
-
-        return view('admin.policies.index', [
-            'documents' => $documents,
-        ]);
-    }
-
     public function show(string $key): View
     {
         $document = $this->resolveDocument($key);
@@ -88,7 +68,10 @@ class PolicyController extends Controller
             ? $this->normalizeMeta($validated['meta'] ?? [])
             : null;
 
-        $chapterPayload = $this->normalizeChapters($validated['chapters'] ?? []);
+        // 運営協会（about）は章を扱わない
+        $chapterPayload = $document->isAbout()
+            ? []
+            : $this->normalizeChapters($validated['chapters'] ?? []);
 
         $titleValue = $validated['title'];
         $leadTitleValue = $validated['lead_title'] ?? null;
@@ -108,12 +91,14 @@ class PolicyController extends Controller
             ])->save();
 
             $document->chapters()->delete();
-            foreach ($chapterPayload as $sortOrder => $chapter) {
-                $document->chapters()->create([
-                    'sort_order' => $sortOrder,
-                    'title' => $chapter['title'],
-                    'body' => $chapter['body'],
-                ]);
+            if (! $document->isAbout()) {
+                foreach ($chapterPayload as $sortOrder => $chapter) {
+                    $document->chapters()->create([
+                        'sort_order' => $sortOrder,
+                        'title' => $chapter['title'],
+                        'body' => $chapter['body'],
+                    ]);
+                }
             }
 
             PolicyRevision::create([

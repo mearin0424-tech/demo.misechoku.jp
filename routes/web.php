@@ -201,7 +201,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/bank', [AdminBank::class, 'store'])->name('bank.store');
 
         // 規約管理（運営協会／利用規約／プライバシーポリシー）
-        Route::get('/policies', [AdminPolicy::class, 'index'])->name('policies.index');
         Route::get('/policies/{key}', [AdminPolicy::class, 'show'])
             ->where('key', 'about|terms|privacy')
             ->name('policies.show');
