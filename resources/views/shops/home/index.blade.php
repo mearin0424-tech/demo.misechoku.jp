@@ -5,7 +5,7 @@
 @section('guide_message', '') {{-- ホームのスワイプ画面ではオコジョを表示しない --}}
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260503-discovery-v3">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260503-manager-msg">
 @endpush
 
 @php
@@ -32,11 +32,11 @@
 
                 @if($isRecruit)
                 {{-- ============================================================ --}}
-                {{-- 求人カード（新デザイン：上部60%=画像 / 下部=黒背景+求人情報） --}}
+                {{-- 求人カード（上部65%画像 / コンパクト情報 / タグなし） --}}
                 {{-- ============================================================ --}}
 
-                {{-- 1. 画像エリア（上部 60%） --}}
-                <div class="rc-img-wrap home-photo-wrap" data-detail-url="{{ route('cast.recruit.show', $item['id']) }}?job=fulltime">
+                {{-- 1. 画像エリア（上部 65%） --}}
+                <div class="rc-img-wrap home-photo-wrap" data-detail-url="{{ route('cast.recruit.show', $item['id']) }}">
                     <div class="photo-swiper swiper {{ $imageCount <= 1 ? 'photo-swiper--single' : '' }}">
                         <div class="swiper-wrapper">
                             @foreach($images as $index => $imgPath)
@@ -54,6 +54,22 @@
                         <div class="photo-pagination swiper-pagination"></div>
                         @endif
                     </div>
+                    @php $mo = $item['manager_overlay'] ?? ['show' => false]; @endphp
+                    @if(!empty($mo['show']))
+                    <div class="rc-manager-msg" aria-label="店長からのメッセージ">
+                        <div class="rc-manager-msg__inner">
+                            @if(!empty($mo['line1_html']))
+                            <p class="rc-manager-msg__line1">{!! $mo['line1_html'] !!}</p>
+                            @endif
+                            @if(!empty($mo['line2']))
+                            <p class="rc-manager-msg__line2">{{ $mo['line2'] }}</p>
+                            @endif
+                            @if(!empty($mo['badge']))
+                            <p class="rc-manager-msg__badge">{{ $mo['badge'] }}</p>
+                            @endif
+                        </div>
+                    </div>
+                    @endif
                     {{-- 画像下端を黒に溶け込ませるグラデーション --}}
                     <div class="rc-img-gradient" aria-hidden="true"></div>
                 </div>
@@ -82,50 +98,16 @@
                         </a>
                         <span class="rc-action-label">メッセージ</span>
                     </div>
-                    <div class="rc-action-item">
-                        <a href="{{ route('cast.recruit.show', $item['id']) }}?job=fulltime" class="card-recruit-btn stop-propagation">求人詳細</a>
+                    <div class="rc-action-item rc-action-item--detail">
+                        <a href="{{ route('cast.recruit.show', $item['id']) }}" class="rc-detail-btn stop-propagation" aria-label="求人詳細">
+                            <span class="rc-detail-btn__text">求人<br>詳細</span>
+                        </a>
                     </div>
                 </div>
 
-                {{-- 3. 店舗・求人情報エリア（下部黒背景に重ねて表示） --}}
+                {{-- 3. 店舗・求人情報エリア --}}
                 <div class="rc-info" aria-label="店舗情報">
 
-                    {{-- 評価 + 優良認定店バッヂ --}}
-                    <div class="rc-badges">
-                        @if(!empty($item['rating']) && $item['rating'] > 0)
-                        <div class="rc-rating-chip">
-                            <span class="rc-star">★</span>
-                            <span class="rc-rating-val numeric-font">{{ number_format((float)$item['rating'], 1) }}</span>
-                            @if(isset($item['review_count']) && (int)$item['review_count'] > 0)
-                            <span class="rc-review-cnt">({{ (int)$item['review_count'] }})</span>
-                            @endif
-                        </div>
-                        @endif
-                        @if(!empty($item['is_premium']))
-                        <span class="rc-badge-premium">優良認定店</span>
-                        @endif
-                    </div>
-
-                    {{-- 店舗名 --}}
-                    <h2 class="rc-shop-name serif-font">{{ $item['name'] }}</h2>
-
-                    {{-- 業種 + 場所 --}}
-                    <div class="rc-meta">
-                        @if(!empty($item['industry_name']))
-                        <span class="rc-genre">{{ $item['industry_name'] }}</span>
-                        <span class="rc-meta-sep">·</span>
-                        @endif
-                        <i class="fas fa-map-marker-alt rc-mappin"></i>
-                        <span>{{ trim(($item['pref'] ?? '') . ' ' . ($item['city'] ?? '')) ?: '六本木' }}</span>
-                    </div>
-
-                    {{-- 入店求人 / ヘルプ求人 への導線 --}}
-                    <div class="rc-job-links">
-                        <a href="{{ route('cast.recruit.show', $item['id']) }}?job=fulltime" class="rc-job-link stop-propagation">入店求人</a>
-                        <a href="{{ route('cast.recruit.show', $item['id']) }}?job=help" class="rc-job-link stop-propagation{{ empty($item['help_hourly_wage']) ? ' is-muted' : '' }}">ヘルプ求人</a>
-                    </div>
-
-                    {{-- 時給ハイライト --}}
                     @php
                         $trialW = $item['trial_hourly_wage'] ?? null;
                         $mainW  = (int)($item['hourly_wage_regular'] ?? 0);
@@ -135,62 +117,90 @@
                         $bonusTrial = $rb[0] ?? [];
                         $bonusHelp  = $rb[1] ?? [];
                         $bonusMain  = $rb[2] ?? [];
+                        $amtTrial = (!empty($bonusTrial['offered']) && (int)($bonusTrial['amount'] ?? 0) > 0) ? (int)$bonusTrial['amount'] : 0;
+                        $amtHelp  = (!empty($bonusHelp['offered']) && (int)($bonusHelp['amount'] ?? 0) > 0) ? (int)$bonusHelp['amount'] : 0;
+                        $amtMain  = (!empty($bonusMain['offered']) && (int)($bonusMain['amount'] ?? 0) > 0) ? (int)$bonusMain['amount'] : 0;
+                        $hasRating = !empty($item['rating']) && $item['rating'] > 0;
+                        $hasPremium = !empty($item['is_premium']);
                     @endphp
-                    <div class="rc-wages-block">
-                        <span class="rc-wages-label">{{ $trialW ? '体入時給' : '時給' }}</span>
-                        <div class="rc-wages-primary">
-                            <span class="rc-yen">¥</span>
-                            <span class="rc-wages-num numeric-font">{{ number_format($primaryW) }}</span>
-                            <span class="rc-wages-tilde">〜</span>
-                        </div>
-                        <div class="rc-wages-secondary">
-                            @if($trialW && $mainW > 0)
-                            <span>本入 <span class="numeric-font">¥{{ number_format($mainW) }}〜</span></span>
-                            @endif
-                            @if($helpW)
-                            <span>ヘルプ <span class="numeric-font">¥{{ number_format($helpW) }}〜</span></span>
+
+                    {{-- 評価 | 優良認定店 --}}
+                    @if($hasRating || $hasPremium)
+                    <div class="rc-badges">
+                        @if($hasRating)
+                        <div class="rc-rating-inline">
+                            <span class="rc-star" aria-hidden="true">★</span>
+                            <span class="rc-rating-val numeric-font">{{ number_format((float)$item['rating'], 1) }}</span>
+                            @if(isset($item['review_count']) && (int)$item['review_count'] > 0)
+                            <span class="rc-review-cnt">({{ (int)$item['review_count'] }})</span>
                             @endif
                         </div>
-                    </div>
-
-                    <div class="rc-bonus-block" aria-label="ボーナス金">
-                        <div class="rc-bonus-head">ボーナス金</div>
-                        <div class="rc-bonus-lines">
-                            <div class="rc-bonus-row">
-                                <span class="rc-bonus-kind">体入</span>
-                                @if(!empty($bonusTrial['offered']) && (int)($bonusTrial['amount'] ?? 0) > 0)
-                                <span class="numeric-font">¥{{ number_format((int)$bonusTrial['amount']) }}</span>
-                                @else
-                                <span class="rc-bonus-dash">—</span>
-                                @endif
-                            </div>
-                            <div class="rc-bonus-row">
-                                <span class="rc-bonus-kind">ヘルプ</span>
-                                @if(!empty($bonusHelp['offered']) && (int)($bonusHelp['amount'] ?? 0) > 0)
-                                <span class="numeric-font">¥{{ number_format((int)$bonusHelp['amount']) }}</span>
-                                @else
-                                <span class="rc-bonus-dash">—</span>
-                                @endif
-                            </div>
-                            <div class="rc-bonus-row">
-                                <span class="rc-bonus-kind">本入</span>
-                                @if(!empty($bonusMain['offered']) && (int)($bonusMain['amount'] ?? 0) > 0)
-                                <span class="numeric-font">¥{{ number_format((int)$bonusMain['amount']) }}</span>
-                                @else
-                                <span class="rc-bonus-dash">—</span>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- 特徴タグ（求人・店舗タグ／最大6個） --}}
-                    @if(!empty($item['tags']))
-                    <div class="rc-tags">
-                        @foreach(array_slice($item['tags'], 0, 6) as $tag)
-                        <span class="rc-tag">#{{ $tag }}</span>
-                        @endforeach
+                        @endif
+                        @if($hasRating && $hasPremium)
+                        <span class="rc-badge-sep" aria-hidden="true">|</span>
+                        @endif
+                        @if($hasPremium)
+                        <span class="rc-badge-premium">優良認定店</span>
+                        @endif
                     </div>
                     @endif
+
+                    <h2 class="rc-shop-name serif-font">{{ $item['name'] }}</h2>
+
+                    <div class="rc-meta">
+                        @if(!empty($item['industry_name']))
+                        <span class="rc-genre">{{ $item['industry_name'] }}</span>
+                        @endif
+                        <i class="fas fa-map-marker-alt rc-mappin" aria-hidden="true"></i>
+                        <span>{{ trim(($item['pref'] ?? '') . ' ' . ($item['city'] ?? '')) ?: '六本木' }}</span>
+                    </div>
+
+                    {{-- ボーナス：横並び細長バッジ --}}
+                    @if($amtTrial > 0 || $amtHelp > 0 || $amtMain > 0)
+                    <div class="rc-bonus-strip" aria-label="ボーナス">
+                        @if($amtTrial > 0)
+                        <div class="rc-bonus-pill-grad">
+                            <span class="rc-bonus-pill-grad__k">体入祝い金</span>
+                            <span class="rc-bonus-pill-grad__v numeric-font">¥{{ number_format($amtTrial) }}</span>
+                        </div>
+                        @endif
+                        @if($amtHelp > 0)
+                        <div class="rc-bonus-pill-grad">
+                            <span class="rc-bonus-pill-grad__k">ヘルプ祝い金</span>
+                            <span class="rc-bonus-pill-grad__v numeric-font">¥{{ number_format($amtHelp) }}</span>
+                        </div>
+                        @endif
+                        @if($amtMain > 0)
+                        <div class="rc-bonus-pill-grad">
+                            <span class="rc-bonus-pill-grad__k">本入祝い金</span>
+                            <span class="rc-bonus-pill-grad__v numeric-font">¥{{ number_format($amtMain) }}</span>
+                        </div>
+                        @endif
+                    </div>
+                    @endif
+
+                    {{-- 時給：半透明＋ぼかしカード --}}
+                    <div class="rc-wage-card">
+                        <div class="rc-wage-card__main">
+                            <span class="rc-wage-card__label">{{ $trialW ? '体入時給' : '時給' }}</span>
+                            <div class="rc-wage-card__amount">
+                                <span class="rc-wage-card__yen">¥</span>
+                                <span class="rc-wage-card__num numeric-font">{{ number_format($primaryW) }}</span>
+                                <span class="rc-wage-card__tilde">〜</span>
+                            </div>
+                        </div>
+                        <div class="rc-wage-card__sub">
+                            <div class="rc-wage-card__col">
+                                <span class="rc-wage-card__sub-l">本入</span>
+                                <span class="rc-wage-card__sub-v numeric-font">@if($mainW > 0)¥{{ number_format($mainW) }}<span class="rc-wage-card__sub-tilde">~</span>@else<span class="rc-wage-card__dash">—</span>@endif</span>
+                            </div>
+                            <div class="rc-wage-card__divider" role="presentation"></div>
+                            <div class="rc-wage-card__col rc-wage-card__col--help">
+                                <span class="rc-wage-card__help-pill">ヘルプ</span>
+                                <span class="rc-wage-card__sub-v numeric-font">@if($helpW)¥{{ number_format($helpW) }}<span class="rc-wage-card__sub-tilde">~</span>@else<span class="rc-wage-card__dash">—</span>@endif</span>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
 

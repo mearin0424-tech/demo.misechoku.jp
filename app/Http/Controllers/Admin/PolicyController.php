@@ -47,7 +47,10 @@ class PolicyController extends Controller
     public function show(string $key): View
     {
         $document = $this->resolveDocument($key);
-        $document->load(['chapters', 'revisions']);
+        $document->load([
+            'chapters',
+            'revisions' => fn ($q) => $q->orderByDesc('created_at')->limit(50),
+        ]);
 
         return view('admin.policies.show', [
             'document' => $document,

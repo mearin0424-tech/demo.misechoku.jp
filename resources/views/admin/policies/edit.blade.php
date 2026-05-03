@@ -17,7 +17,8 @@
             <div>
                 <h1 class="admin-title" style="margin-bottom:4px;">{{ $document->title }} を編集</h1>
                 <p class="admin-description" style="margin:0;">
-                    章タイトル＋本文の組み合わせで編集します。@if($document->isAbout())<br>運営協会のみ「協会概要」（資本金など）を入力できます。@endif
+                    章タイトル＋本文の組み合わせで編集します。リード本文・各章の本文は<strong>Markdown</strong>（見出し・箇条書き・太字など）で記述できます。<br>
+                    @if($document->isAbout())運営協会のみ「協会概要」（資本金など）も入力できます（概要欄も Markdown 可）。@endif
                 </p>
             </div>
             <div style="display:flex;gap:8px;">
@@ -79,9 +80,9 @@
                 </div>
 
                 <div class="admin-form-row">
-                    <label class="admin-label">リード本文（任意）</label>
-                    <textarea name="lead_body" class="admin-input" rows="8"
-                        placeholder="ページ冒頭に表示する本文（運営協会の挨拶文など）">{{ old('lead_body', $document->lead_body) }}</textarea>
+                    <label class="admin-label">リード本文（任意・Markdown）</label>
+                    <textarea name="lead_body" class="admin-input" rows="10"
+                        placeholder="例: ## 見出し&#10;本文。 **太字** や箇条書き `- 項目` も利用できます。">{{ old('lead_body', $document->lead_body) }}</textarea>
                 </div>
             </div>
 
@@ -89,7 +90,7 @@
                 <div class="admin-panel">
                     <h2 class="admin-panel-title">OVERVIEW / 協会概要（運営協会のみ）</h2>
                     <p class="admin-note" style="margin-bottom:12px;">
-                        会社概要情報（協会名・資本金など）はここで管理します。表示順は下記の通りです。
+                        会社概要情報（協会名・資本金など）はここで管理します。各欄は Markdown 可（改行のみでも表示されます）。
                     </p>
                     @foreach($metaSchema as $row)
                         @php
@@ -106,7 +107,7 @@
                 </div>
             @endif
 
-            <div class="admin-panel">
+            <div class="admin-panel" id="policy-chapters-panel">
                 <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
                     <h2 class="admin-panel-title" style="margin:0;">章コンテンツ</h2>
                     <button type="button" class="btn-action manage" id="add-chapter-btn">
@@ -114,7 +115,7 @@
                     </button>
                 </div>
                 <p class="admin-note" style="margin-bottom:12px;">
-                    各章は「章タイトル」と「本文」の組み合わせです。空のままにした章は登録時に除外されます。
+                    「章を追加」で枠を増やせます。各章は<strong>章タイトル（プレーンテキスト）</strong>と<strong>本文（Markdown）</strong>です。タイトルも本文も空の枠は保存時に除外されます。
                 </p>
 
                 <div id="chapters-list">
@@ -132,8 +133,8 @@
                                     value="{{ is_array($ch) ? ($ch['title'] ?? '') : '' }}" maxlength="200">
                             </div>
                             <div class="admin-form-row" style="margin-bottom:0;">
-                                <label class="admin-label">本文</label>
-                                <textarea name="chapters[{{ $i }}][body]" class="admin-input" rows="6">{{ is_array($ch) ? ($ch['body'] ?? '') : '' }}</textarea>
+                                <label class="admin-label">本文（Markdown）</label>
+                                <textarea name="chapters[{{ $i }}][body]" class="admin-input" rows="8" placeholder="見出し・箇条書き・太字など">{{ is_array($ch) ? ($ch['body'] ?? '') : '' }}</textarea>
                             </div>
                         </div>
                     @endforeach
@@ -152,8 +153,8 @@
                             <input type="text" name="chapters[__INDEX__][title]" class="admin-input" maxlength="200">
                         </div>
                         <div class="admin-form-row" style="margin-bottom:0;">
-                            <label class="admin-label">本文</label>
-                            <textarea name="chapters[__INDEX__][body]" class="admin-input" rows="6"></textarea>
+                            <label class="admin-label">本文（Markdown）</label>
+                            <textarea name="chapters[__INDEX__][body]" class="admin-input" rows="8" placeholder="見出し・箇条書き・太字など"></textarea>
                         </div>
                     </div>
                 </template>

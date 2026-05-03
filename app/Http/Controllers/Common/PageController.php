@@ -3,22 +3,41 @@
 namespace App\Http\Controllers\Common;
 
 use App\Http\Controllers\Controller;
+use App\Models\PolicyDocument;
+use Illuminate\View\View;
 
 class PageController extends Controller
 {
-    public function about()
+    public function about(): View
     {
-        return view('common.maintenance');
+        return $this->policyDocumentView(PolicyDocument::KEY_ABOUT);
     }
 
-    public function terms()
+    public function terms(): View
     {
-        return view('common.maintenance');
+        return $this->policyDocumentView(PolicyDocument::KEY_TERMS);
     }
 
-    public function privacy()
+    public function privacy(): View
     {
-        return view('common.maintenance');
+        return $this->policyDocumentView(PolicyDocument::KEY_PRIVACY);
+    }
+
+    private function policyDocumentView(string $key): View
+    {
+        $document = PolicyDocument::query()
+            ->with(['chapters' => fn ($q) => $q->orderBy('sort_order')->orderBy('id')])
+            ->where('key', $key)
+            ->first();
+
+        if ($document === null) {
+            return view('common.maintenance');
+        }
+
+        return view('common.policy-document', [
+            'document' => $document,
+            'metaSchema' => PolicyDocument::defaultMetaSchema(),
+        ]);
     }
 
     /**

@@ -136,6 +136,9 @@ class HomeController extends Controller
             $selectFields[] = DB::raw('COALESCE(shop_reviews.avg_rating, 0) AS avg_rating');
             $selectFields[] = DB::raw('COALESCE(shop_reviews.review_count, 0) AS review_count');
         }
+        if (Schema::hasColumn('shop_jobs', 'pr')) {
+            $selectFields[] = 'shop_jobs.pr';
+        }
 
         $rows = $q->select($selectFields)
             ->orderBy('shops.id')
@@ -237,6 +240,8 @@ class HomeController extends Controller
             $offerHelp = $helpHourly !== null && $helpHourly > 0;
 
             $shopJobId = isset($row->shop_job_id) ? (int) $row->shop_job_id : 0;
+            $pr = Schema::hasColumn('shop_jobs', 'pr') ? trim((string) ($row->pr ?? '')) : '';
+            $managerOverlay = $this->buildManagerImageOverlay($meta, $pr, $mainBonus);
 
             $items[] = [
                 // ルート用には文字列ID（例: s00000001）をそのまま渡す
@@ -265,6 +270,7 @@ class HomeController extends Controller
                     ['label' => 'ヘルプ', 'amount' => $bonusHelp, 'offered' => $offerHelp],
                     ['label' => '本入', 'amount' => $mainBonus, 'offered' => $offerFulltime],
                 ],
+                'manager_overlay' => $managerOverlay,
             ];
         }
 
@@ -272,7 +278,7 @@ class HomeController extends Controller
             return $items;
         }
 
-        return [
+        $mockRows = [
             [
                 'id' => 1,
                 'numeric_id' => 1,
@@ -283,8 +289,8 @@ class HomeController extends Controller
                 'trial_hourly_wage' => 3000,
                 'help_hourly_wage' => 2800,
                 'noruma_reward' => 50000,
-                'bonus_condition' => '',
-                'catch_copy' => '未経験歓迎',
+                'bonus_condition' => '💰 全額日払い / 帰りに3万円保証',
+                'catch_copy' => "ノルマ・罰金**一切なし**！\n未経験だけのゆるふわ店 🎀",
                 'tags' => ['高時給', 'ボーナスあり', '六本木'],
                 'pref' => '東京都',
                 'city' => '港区',
@@ -326,6 +332,89 @@ class HomeController extends Controller
                 ],
             ],
         ];
+
+        return array_map(function (array $it) {
+            $meta = [
+                'catch_copy' => $it['catch_copy'] ?? '',
+                'bonus_condition' => $it['bonus_condition'] ?? '',
+                'bonus_other_conditions' => $it['bonus_other_conditions'] ?? '',
+            ];
+            $it['manager_overlay'] = $this->buildManagerImageOverlay(
+                $meta,
+                trim((string) ($it['pr'] ?? '')),
+                (int) ($it['noruma_reward'] ?? 0)
+            );
+
+            return $it;
+        }, $mockRows);
+    }
+
+    /**
+     * 画像中央「店長からのメッセージ」用（catch_copy / pr / ボーナス条件）
+     *
+     * @return array{show: bool, line1_html: string, line2: string, badge: string}
+     */
+    private function buildManagerImageOverlay(array $meta, string $pr, int $norumaReward): array
+    {
+        $catch = trim((string) ($meta['catch_copy'] ?? ''));
+        $line1 = '';
+        $line2 = '';
+        if ($catch !== '') {
+            $parts = preg_split("/\r\n|\r|\n/u", $catch, 2);
+            $line1 = trim((string) ($parts[0] ?? ''));
+            $line2 = trim((string) ($parts[1] ?? ''));
+        }
+        if ($line2 === '' && $pr !== '') {
+            $line2 = $pr;
+        }
+        if ($line1 === '' && $line2 !== '') {
+            $line1 = $line2;
+            $line2 = '';
+        }
+        $line1 = mb_strimwidth($line1, 0, 80, '…');
+        $line2 = $line2 !== '' ? mb_strimwidth($line2, 0, 72, '…') : '';
+
+        $bonusTxt = trim((string) ($meta['bonus_other_conditions'] ?? $meta['bonus_condition'] ?? ''));
+        $badge = $bonusTxt !== '' ? mb_strimwidth($bonusTxt, 0, 56, '…') : '';
+        if ($badge === '' && $norumaReward > 0) {
+            $badge = '💰 入店祝い金 ¥' . number_format($norumaReward) . '〜';
+        }
+
+        $show = $line1 !== '' || $line2 !== '' || $badge !== '';
+
+        return [
+            'show' => $show,
+            'line1_html' => $this->formatCatchCopyHighlights($line1),
+            'line2' => $line2,
+            'badge' => $badge,
+        ];
+    }
+
+    /**
+     * catch_copy 内の **強調** を黄色表示用の span に変換（Blade で {!! !!} 利用前提）
+     */
+    private function formatCatchCopyHighlights(string $line): string
+    {
+        if ($line === '') {
+            return '';
+        }
+        if (!preg_match('/\*\*.+?\*\*/us', $line)) {
+            return e($line);
+        }
+        $segments = preg_split('/(\*\*.+?\*\*)/us', $line, -1, PREG_SPLIT_DELIM_CAPTURE);
+        $out = '';
+        foreach ($segments as $seg) {
+            if ($seg === '') {
+                continue;
+            }
+            if (preg_match('/^\*\*(.+)\*\*$/us', $seg, $m)) {
+                $out .= '<span class="rc-msg-em">' . e($m[1]) . '</span>';
+            } else {
+                $out .= e($seg);
+            }
+        }
+
+        return $out;
     }
 
     private function toNumericShopId(string $shopId): int
