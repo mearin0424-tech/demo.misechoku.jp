@@ -470,6 +470,10 @@ class MypageController extends Controller
             return response()->json(['success' => false, 'message' => 'cast_posts テーブルが存在しません。'], 500);
         }
 
+        if (!Schema::hasColumn('cast_posts', 'body')) {
+            return response()->json(['success' => false, 'message' => 'cast_posts.body がありません。php artisan migrate を実行してください。'], 500);
+        }
+
         $now = Carbon::now();
         $exists = DB::table('cast_posts')->where('cast_id', $castId)->exists();
         if ($exists) {
@@ -608,10 +612,10 @@ class MypageController extends Controller
         // ひとこと：cast_posts テーブルから取得（店舗の catch と同様）
         $word = '';
         $appealUpdatedAt = null;
-        if (Schema::hasTable('cast_posts')) {
+        if (Schema::hasTable('cast_posts') && Schema::hasColumn('cast_posts', 'body')) {
             $post = DB::table('cast_posts')->where('cast_id', $castId)->first();
-            if ($post && $post->body !== null && trim($post->body) !== '') {
-                $word = trim($post->body);
+            if ($post && isset($post->body) && $post->body !== null && trim((string) $post->body) !== '') {
+                $word = trim((string) $post->body);
                 $appealUpdatedAt = !empty($post->updated_at)
                     ? Carbon::parse($post->updated_at)->format('Y/m/d H:i')
                     : null;

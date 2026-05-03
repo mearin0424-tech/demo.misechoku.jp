@@ -47,11 +47,15 @@ class SearchController extends BaseSearchController
         $industries = is_array($industries) ? array_values(array_filter($industries, 'is_string')) : (is_string($industries) ? [$industries] : []);
 
         $hasCastPostsTable = Schema::hasTable('cast_posts');
+        $castPostsHasBody = $hasCastPostsTable && Schema::hasColumn('cast_posts', 'body');
+        $castPostsHasUpdatedAt = $hasCastPostsTable && Schema::hasColumn('cast_posts', 'updated_at');
+        $castPostsHasCreatedAt = $hasCastPostsTable && Schema::hasColumn('cast_posts', 'created_at');
+        $useCastPostsForHitokoto = $hasCastPostsTable && ($castPostsHasBody || $castPostsHasUpdatedAt || $castPostsHasCreatedAt);
 
         $rows = DB::table('casts')
             ->join('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id');
 
-        if ($hasCastPostsTable) {
+        if ($useCastPostsForHitokoto) {
             $rows->leftJoin('cast_posts', 'casts.id', '=', 'cast_posts.cast_id');
         }
 
@@ -68,19 +72,25 @@ class SearchController extends BaseSearchController
             'cast_profiles.updated_at as profile_updated_at',
         ];
 
-        if ($hasCastPostsTable) {
+        if ($castPostsHasBody) {
             $select[] = 'cast_posts.body as hitokoto_body';
-            $select[] = 'cast_posts.updated_at as hitokoto_updated_at';
-            $select[] = 'cast_posts.created_at as hitokoto_created_at';
         } else {
             $select[] = DB::raw('NULL as hitokoto_body');
+        }
+        if ($castPostsHasUpdatedAt) {
+            $select[] = 'cast_posts.updated_at as hitokoto_updated_at';
+        } else {
             $select[] = DB::raw('NULL as hitokoto_updated_at');
+        }
+        if ($castPostsHasCreatedAt) {
+            $select[] = 'cast_posts.created_at as hitokoto_created_at';
+        } else {
             $select[] = DB::raw('NULL as hitokoto_created_at');
         }
 
         $rows->select($select);
 
-        $this->applySort($rows, $sort, $hasCastPostsTable);
+        $this->applySort($rows, $sort, $castPostsHasUpdatedAt);
 
         if (!empty($industries) && DB::getSchemaBuilder()->hasTable('cast_industry')) {
             $rows->join('cast_industry', 'casts.id', '=', 'cast_industry.cast_id')
@@ -132,7 +142,7 @@ class SearchController extends BaseSearchController
             ->all();
     }
 
-    private function applySort($rows, string $sort, bool $hasCastPostsTable): void
+    private function applySort($rows, string $sort, bool $castPostsHasUpdatedAt): void
     {
         switch ($sort) {
             case 'new':
@@ -150,7 +160,7 @@ class SearchController extends BaseSearchController
                 break;
             case 'hitokoto':
             default:
-                if ($hasCastPostsTable) {
+                if ($castPostsHasUpdatedAt) {
                     // ひとこと最終更新が新しい順。未投稿のキャストは最後に回す。
                     $rows->orderByRaw('cast_posts.updated_at IS NULL')
                         ->orderByDesc('cast_posts.updated_at')

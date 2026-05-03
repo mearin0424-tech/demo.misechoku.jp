@@ -98,17 +98,24 @@ class HomeController extends Controller
      */
     private function getHomeRecruits(): array
     {
-        $useJobType = Schema::hasColumn('shop_jobs', 'job_type');
+        $horizontal = Schema::hasTable('shop_jobs') && Schema::hasColumn('shop_jobs', 'regular_status');
+        $useJobType = Schema::hasColumn('shop_jobs', 'job_type') && !$horizontal;
         $hasReviews = Schema::hasTable('reviews');
 
         $q = DB::table('shops')
             ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
             ->join('shop_jobs', 'shops.id', '=', 'shop_jobs.shop_id')
-            ->leftJoin('industries', 'industries.id', '=', 'shop_profiles.industry_id')
-            ->where('shop_jobs.status', 1);
-        if ($useJobType) {
-            $q->where('shop_jobs.job_type', 1);
+            ->leftJoin('industries', 'industries.id', '=', 'shop_profiles.industry_id');
+
+        if ($horizontal) {
+            $q->where('shop_jobs.regular_status', 1);
+        } else {
+            $q->where('shop_jobs.status', 1);
+            if ($useJobType) {
+                $q->where('shop_jobs.job_type', 1);
+            }
         }
+
         if ($hasReviews) {
             $q->leftJoin(
                 DB::raw('(SELECT shop_id, ROUND(AVG(eva), 1) AS avg_rating, COUNT(*) AS review_count FROM reviews GROUP BY shop_id) AS shop_reviews'),
@@ -123,15 +130,47 @@ class HomeController extends Controller
             'shop_profiles.pref',
             'shop_profiles.city',
             'shop_profiles.main_image_path',
-            'shop_jobs.hourly_wage_regular',
-            'shop_jobs.has_trial',
-            'shop_jobs.has_help',
-            'shop_jobs.trial_hourly_wage',
-            'shop_jobs.help_hourly_wage',
-            'shop_jobs.noruma_reward',
-            'shop_jobs.noruma_cond',
             'industries.name as industry_name',
         ];
+        if (Schema::hasColumn('shop_jobs', 'hourly_wage_regular')) {
+            $selectFields[] = 'shop_jobs.hourly_wage_regular';
+        }
+        if (Schema::hasColumn('shop_jobs', 'regular_hourly_wage')) {
+            $selectFields[] = 'shop_jobs.regular_hourly_wage';
+        }
+        if (Schema::hasColumn('shop_jobs', 'has_trial')) {
+            $selectFields[] = 'shop_jobs.has_trial';
+        }
+        if (Schema::hasColumn('shop_jobs', 'has_help')) {
+            $selectFields[] = 'shop_jobs.has_help';
+        }
+        if (Schema::hasColumn('shop_jobs', 'trial_hourly_wage')) {
+            $selectFields[] = 'shop_jobs.trial_hourly_wage';
+        }
+        if (Schema::hasColumn('shop_jobs', 'help_hourly_wage')) {
+            $selectFields[] = 'shop_jobs.help_hourly_wage';
+        }
+        if (Schema::hasColumn('shop_jobs', 'trial_status')) {
+            $selectFields[] = 'shop_jobs.trial_status';
+        }
+        if (Schema::hasColumn('shop_jobs', 'help_status')) {
+            $selectFields[] = 'shop_jobs.help_status';
+        }
+        if (Schema::hasColumn('shop_jobs', 'noruma_reward')) {
+            $selectFields[] = 'shop_jobs.noruma_reward';
+        }
+        if (Schema::hasColumn('shop_jobs', 'bonus_reward')) {
+            $selectFields[] = 'shop_jobs.bonus_reward';
+        }
+        if (Schema::hasColumn('shop_jobs', 'noruma_cond')) {
+            $selectFields[] = 'shop_jobs.noruma_cond';
+        }
+        if (Schema::hasColumn('shop_jobs', 'catch_copy')) {
+            $selectFields[] = 'shop_jobs.catch_copy';
+        }
+        if (Schema::hasColumn('shop_jobs', 'bonus_condition')) {
+            $selectFields[] = 'shop_jobs.bonus_condition';
+        }
         if ($hasReviews) {
             $selectFields[] = DB::raw('COALESCE(shop_reviews.avg_rating, 0) AS avg_rating');
             $selectFields[] = DB::raw('COALESCE(shop_reviews.review_count, 0) AS review_count');
@@ -214,28 +253,70 @@ class HomeController extends Controller
             // 画面からは「DBの店舗ID（例: s00000001）」でアクセスできるようにする
             $numericId = $this->toNumericShopId($row->id);
             $images = $this->getShopImages($row->id, $row->main_image_path);
-            $meta = $this->decodeRecruitMeta($row->noruma_cond ?? null);
+            $norumaRaw = Schema::hasColumn('shop_jobs', 'noruma_cond') ? ($row->noruma_cond ?? null) : null;
+            $meta = $this->decodeRecruitMeta($norumaRaw);
+            if (Schema::hasColumn('shop_jobs', 'catch_copy') && trim((string) ($row->catch_copy ?? '')) !== '') {
+                $meta['catch_copy'] = trim((string) $row->catch_copy);
+            }
+            if (Schema::hasColumn('shop_jobs', 'bonus_condition') && trim((string) ($row->bonus_condition ?? '')) !== '') {
+                $meta['bonus_condition'] = trim((string) $row->bonus_condition);
+            }
 
             $trialRow = $useJobType ? ($trialByShop[$row->id] ?? null) : null;
             $helpRow = $useJobType ? ($helpByShop[$row->id] ?? null) : null;
 
-            $trialHourly = $trialRow && !empty($trialRow->status) && !empty($trialRow->trial_hourly_wage)
-                ? (int) $trialRow->trial_hourly_wage
-                : (!empty($row->has_trial) && isset($row->trial_hourly_wage) ? (int) $row->trial_hourly_wage : null);
+            if ($horizontal) {
+                $trialHourly = null;
+                if (isset($row->trial_hourly_wage) && $row->trial_hourly_wage !== null && $row->trial_hourly_wage !== '' && (int) $row->trial_hourly_wage > 0) {
+                    $ts = Schema::hasColumn('shop_jobs', 'trial_status') ? (int) ($row->trial_status ?? 0) : 1;
+                    if ($ts === 1) {
+                        $trialHourly = (int) $row->trial_hourly_wage;
+                    }
+                }
+                $helpHourly = null;
+                if (isset($row->help_hourly_wage) && $row->help_hourly_wage !== null && $row->help_hourly_wage !== '' && (int) $row->help_hourly_wage > 0) {
+                    $hs = Schema::hasColumn('shop_jobs', 'help_status') ? (int) ($row->help_status ?? 0) : 1;
+                    if ($hs === 1) {
+                        $helpHourly = (int) $row->help_hourly_wage;
+                    }
+                }
+            } else {
+                $trialHourly = $trialRow && !empty($trialRow->status) && !empty($trialRow->trial_hourly_wage)
+                    ? (int) $trialRow->trial_hourly_wage
+                    : (!empty($row->has_trial) && isset($row->trial_hourly_wage) ? (int) $row->trial_hourly_wage : null);
 
-            $helpHourly = $helpRow && !empty($helpRow->status) && !empty($helpRow->help_hourly_wage)
-                ? (int) $helpRow->help_hourly_wage
-                : (!empty($row->has_help) && isset($row->help_hourly_wage) ? (int) $row->help_hourly_wage : null);
+                $helpHourly = $helpRow && !empty($helpRow->status) && !empty($helpRow->help_hourly_wage)
+                    ? (int) $helpRow->help_hourly_wage
+                    : (!empty($row->has_help) && isset($row->help_hourly_wage) ? (int) $row->help_hourly_wage : null);
+            }
 
-            $mainBonus = isset($row->noruma_reward) ? (int) $row->noruma_reward : 0;
-            $bonusTrial = ($trialRow && isset($trialRow->noruma_reward) && (int) $trialRow->noruma_reward > 0)
-                ? (int) $trialRow->noruma_reward
-                : $mainBonus;
-            $bonusHelp = ($helpRow && isset($helpRow->noruma_reward) && (int) $helpRow->noruma_reward > 0)
-                ? (int) $helpRow->noruma_reward
-                : $mainBonus;
+            $mainBonus = 0;
+            if (isset($row->bonus_reward) && $row->bonus_reward !== null && $row->bonus_reward !== '') {
+                $mainBonus = (int) $row->bonus_reward;
+            } elseif (isset($row->noruma_reward) && $row->noruma_reward !== null && $row->noruma_reward !== '') {
+                $mainBonus = (int) $row->noruma_reward;
+            }
 
-            $offerFulltime = isset($row->hourly_wage_regular) && (int) $row->hourly_wage_regular > 0;
+            if ($horizontal) {
+                $bonusTrial = $mainBonus;
+                $bonusHelp = $mainBonus;
+            } else {
+                $bonusTrial = ($trialRow && isset($trialRow->noruma_reward) && (int) $trialRow->noruma_reward > 0)
+                    ? (int) $trialRow->noruma_reward
+                    : $mainBonus;
+                $bonusHelp = ($helpRow && isset($helpRow->noruma_reward) && (int) $helpRow->noruma_reward > 0)
+                    ? (int) $helpRow->noruma_reward
+                    : $mainBonus;
+            }
+
+            $regularWage = 0;
+            if (isset($row->regular_hourly_wage) && $row->regular_hourly_wage !== null && $row->regular_hourly_wage !== '') {
+                $regularWage = (int) $row->regular_hourly_wage;
+            } elseif (isset($row->hourly_wage_regular) && $row->hourly_wage_regular !== null && $row->hourly_wage_regular !== '') {
+                $regularWage = (int) $row->hourly_wage_regular;
+            }
+
+            $offerFulltime = $regularWage > 0;
             $offerTrial = $trialHourly !== null && $trialHourly > 0;
             $offerHelp = $helpHourly !== null && $helpHourly > 0;
 
@@ -251,7 +332,7 @@ class HomeController extends Controller
                 'shop_job_id' => $shopJobId,
                 'name' => $row->shop_name ?: '店舗',
                 'images' => $images,
-                'hourly_wage_regular' => isset($row->hourly_wage_regular) ? (int) $row->hourly_wage_regular : 0,
+                'hourly_wage_regular' => $regularWage,
                 'trial_hourly_wage' => $trialHourly,
                 'help_hourly_wage' => $helpHourly,
                 'noruma_reward' => $mainBonus,
@@ -520,10 +601,22 @@ class HomeController extends Controller
         if (!empty($row->city)) {
             $tags[] = $row->city;
         }
-        if (isset($row->hourly_wage_regular) && (int) $row->hourly_wage_regular >= 3000) {
+        $wage = 0;
+        if (isset($row->regular_hourly_wage) && $row->regular_hourly_wage !== null && $row->regular_hourly_wage !== '') {
+            $wage = (int) $row->regular_hourly_wage;
+        } elseif (isset($row->hourly_wage_regular) && $row->hourly_wage_regular !== null && $row->hourly_wage_regular !== '') {
+            $wage = (int) $row->hourly_wage_regular;
+        }
+        if ($wage >= 3000) {
             $tags[] = '高時給';
         }
-        if (isset($row->noruma_reward) && (int) $row->noruma_reward > 0) {
+        $bonus = 0;
+        if (isset($row->bonus_reward) && $row->bonus_reward !== null && $row->bonus_reward !== '') {
+            $bonus = (int) $row->bonus_reward;
+        } elseif (isset($row->noruma_reward) && $row->noruma_reward !== null && $row->noruma_reward !== '') {
+            $bonus = (int) $row->noruma_reward;
+        }
+        if ($bonus > 0) {
             $tags[] = 'ボーナスあり';
         }
         $catch = $meta['catch_copy'] ?? '';
