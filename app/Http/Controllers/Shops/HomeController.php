@@ -118,6 +118,7 @@ class HomeController extends Controller
 
         $selectFields = [
             'shops.id',
+            'shop_jobs.id as shop_job_id',
             'shop_profiles.shop_name',
             'shop_profiles.pref',
             'shop_profiles.city',
@@ -235,11 +236,14 @@ class HomeController extends Controller
             $offerTrial = $trialHourly !== null && $trialHourly > 0;
             $offerHelp = $helpHourly !== null && $helpHourly > 0;
 
+            $shopJobId = isset($row->shop_job_id) ? (int) $row->shop_job_id : 0;
+
             $items[] = [
                 // ルート用には文字列ID（例: s00000001）をそのまま渡す
                 'id' => $row->id,
                 // 必要に応じて数値IDを併用したい場合に備えて保持
                 'numeric_id' => $numericId,
+                'shop_job_id' => $shopJobId,
                 'name' => $row->shop_name ?: '店舗',
                 'images' => $images,
                 'hourly_wage_regular' => isset($row->hourly_wage_regular) ? (int) $row->hourly_wage_regular : 0,
@@ -248,7 +252,7 @@ class HomeController extends Controller
                 'noruma_reward' => $mainBonus,
                 'bonus_condition' => $meta['bonus_condition'] ?? '',
                 'catch_copy' => $meta['catch_copy'] ?? '',
-                'tags' => $this->buildRecruitCardTags($row, $meta),
+                'tags' => $this->buildHomeRecruitDiscoveryTags($row->id, $shopJobId),
                 'pref' => $row->pref ?? '',
                 'city' => $row->city ?? '',
                 'like_count' => $likeCounts[$row->id] ?? 0,
@@ -271,6 +275,8 @@ class HomeController extends Controller
         return [
             [
                 'id' => 1,
+                'numeric_id' => 1,
+                'shop_job_id' => 0,
                 'name' => 'CLUB ETERNITY',
                 'images' => [asset('storage/mock/shops/out-1.png')],
                 'hourly_wage_regular' => 3500,
@@ -295,6 +301,8 @@ class HomeController extends Controller
             ],
             [
                 'id' => 2,
+                'numeric_id' => 2,
+                'shop_job_id' => 0,
                 'name' => 'THE GOLDSTONE',
                 'images' => [asset('storage/mock/shops/out-2.png')],
                 'hourly_wage_regular' => 3200,
@@ -337,6 +345,67 @@ class HomeController extends Controller
         $decoded = json_decode($raw, true);
 
         return is_array($decoded) ? $decoded : [];
+    }
+
+    /**
+     * 求人タグ・店舗タグ（DB登録の shop_tags 系）だけを並べる。一覧で最大 {@see $max} 件まで。
+     */
+    private function buildHomeRecruitDiscoveryTags(string $shopId, int $shopJobId, int $max = 6): array
+    {
+        $merged = [];
+
+        if ($shopJobId > 0 && Schema::hasTable('shop_job_tag_relations') && Schema::hasTable('shop_tags')) {
+            $qj = DB::table('shop_job_tag_relations as r')
+                ->join('shop_tags as t', 'r.tag_id', '=', 't.id')
+                ->where('r.shop_job_id', $shopJobId)
+                ->where('t.target', 'job')
+                ->whereIn('t.category', ['work_style', 'welcome', 'benefit'])
+                ->orderBy('t.sort_order')
+                ->orderBy('t.id');
+            if (Schema::hasColumn('shop_tags', 'del_flg')) {
+                $qj->where('t.del_flg', 0);
+            }
+            foreach ($qj->pluck('t.name') as $n) {
+                $this->pushUniqueDiscoveryTag($merged, (string) $n, $max);
+                if (count($merged) >= $max) {
+                    return $merged;
+                }
+            }
+        }
+
+        if (Schema::hasTable('shop_tag_relations') && Schema::hasTable('shop_tags')) {
+            $qs = DB::table('shop_tag_relations as r')
+                ->join('shop_tags as t', 'r.tag_id', '=', 't.id')
+                ->where('r.shop_id', $shopId)
+                ->where('t.target', 'shop')
+                ->whereIn('t.category', ['atmosphere', 'facility'])
+                ->orderBy('t.sort_order')
+                ->orderBy('t.id');
+            if (Schema::hasColumn('shop_tags', 'del_flg')) {
+                $qs->where('t.del_flg', 0);
+            }
+            foreach ($qs->pluck('t.name') as $n) {
+                $this->pushUniqueDiscoveryTag($merged, (string) $n, $max);
+                if (count($merged) >= $max) {
+                    return $merged;
+                }
+            }
+        }
+
+        return $merged;
+    }
+
+    /** @param list<string> $merged */
+    private function pushUniqueDiscoveryTag(array &$merged, string $name, int $max): void
+    {
+        $t = trim($name);
+        if ($t === '' || count($merged) >= $max) {
+            return;
+        }
+        if (in_array($t, $merged, true)) {
+            return;
+        }
+        $merged[] = $t;
     }
 
     private function buildRecruitCardTags(object $row, array $meta): array

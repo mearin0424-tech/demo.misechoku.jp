@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Casts;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -17,13 +18,16 @@ class RecruitmentController extends Controller
      * - 数値ID (1, 2, 3, ...)
      * - 店舗ID文字列 (s00000001 など)
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $numericId = $this->normalizeRouteIdToNumeric($id);
         $data = $this->getRecruitDataFromDatabase($numericId, true);
         abort_if(empty($data['recruit']), 404);
 
-        return view('shops.recruit.show', $this->buildRecruitViewData($data, $numericId, true, false));
+        $initialJobPanel = $request->query('job', '');
+        $initialJobPanel = in_array($initialJobPanel, ['fulltime', 'help'], true) ? $initialJobPanel : '';
+
+        return view('shops.recruit.show', $this->buildRecruitViewData($data, $numericId, true, false, $initialJobPanel));
     }
 
     /**
@@ -75,6 +79,12 @@ class RecruitmentController extends Controller
                 'shop_jobs.salary',
                 'shop_jobs.noruma_cond'
             );
+        if (Schema::hasColumn('shop_jobs', 'has_help')) {
+            $q->addSelect('shop_jobs.has_help');
+        }
+        if (Schema::hasColumn('shop_jobs', 'help_hourly_wage')) {
+            $q->addSelect('shop_jobs.help_hourly_wage');
+        }
         if (Schema::hasColumn('shop_jobs', 'pr')) {
             $q->addSelect('shop_jobs.pr');
         }
@@ -96,6 +106,14 @@ class RecruitmentController extends Controller
             ? (string) ($row->pr ?? '')
             : '';
 
+        $trialWage = !empty($row->has_trial) && isset($row->trial_hourly_wage)
+            ? (int) $row->trial_hourly_wage : null;
+        $helpWage = null;
+        if (Schema::hasColumn('shop_jobs', 'has_help') && Schema::hasColumn('shop_jobs', 'help_hourly_wage')) {
+            $helpWage = !empty($row->has_help) && isset($row->help_hourly_wage)
+                ? (int) $row->help_hourly_wage : null;
+        }
+
         $recruit = [
             'store_name'         => $row->shop_name,
             'open_date'          => $row->opened_on ? date('Y年n月j日', strtotime($row->opened_on)) : null,
@@ -103,7 +121,8 @@ class RecruitmentController extends Controller
             'map_embed_src'      => null,
             'nearest_station'    => $row->station1,
             'hourly_wage_regular'=> $row->hourly_wage_regular ? (int) $row->hourly_wage_regular : 0,
-            'trial_hourly_wage'  => !empty($row->has_trial) ? (int) $row->trial_hourly_wage : null,
+            'trial_hourly_wage'  => $trialWage,
+            'help_hourly_wage'   => $helpWage,
             'noruma_reward'      => $row->noruma_reward ? (int) $row->noruma_reward : 0,
             'bonus_condition'    => $meta['bonus_condition'] ?? '',
             'salary_text'        => $row->salary ?? '',
@@ -180,7 +199,7 @@ class RecruitmentController extends Controller
         ];
     }
 
-    private function buildRecruitViewData(array $data, int $id, bool $forCast, bool $isPublicShare): array
+    private function buildRecruitViewData(array $data, int $id, bool $forCast, bool $isPublicShare, string $initialJobPanel = ''): array
     {
         $shopName = $data['shop']['name'] ?? $data['recruit']['store_name'] ?? '店舗';
         $shareUrl = route('share.recruit.show', ['id' => $id]);
@@ -196,6 +215,7 @@ class RecruitmentController extends Controller
             'recruit_trial' => $data['recruit'],
             'recruit_help' => $data['recruit'],
             'usesJobTypes' => false,
+            'initial_job_panel' => $initialJobPanel,
             'shop' => $data['shop'],
             'forCast' => $forCast,
             'isPublicShare' => $isPublicShare,

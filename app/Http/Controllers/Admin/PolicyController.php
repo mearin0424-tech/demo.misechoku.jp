@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdatePolicyRequest;
-use App\Models\PolicyChapter;
 use App\Models\PolicyDocument;
 use App\Models\PolicyRevision;
 use Illuminate\Http\RedirectResponse;
@@ -88,11 +87,15 @@ class PolicyController extends Controller
 
         $chapterPayload = $this->normalizeChapters($validated['chapters'] ?? []);
 
-        DB::transaction(function () use ($document, $validated, $metaPayload, $chapterPayload, $updaterId, $updaterName, $summary) {
+        $titleValue = $validated['title'];
+        $leadTitleValue = $validated['lead_title'] ?? null;
+        $leadBodyValue = $validated['lead_body'] ?? null;
+
+        DB::transaction(function () use ($document, $titleValue, $leadTitleValue, $leadBodyValue, $metaPayload, $chapterPayload, $updaterId, $updaterName, $summary) {
             $document->fill([
-                'title' => $validated['title'],
-                'lead_title' => $validated['lead_title'] ?? null,
-                'lead_body' => $validated['lead_body'] ?? null,
+                'title' => $titleValue,
+                'lead_title' => $leadTitleValue,
+                'lead_body' => $leadBodyValue,
                 'meta' => $metaPayload,
                 'updated_by_id' => $updaterId,
                 'updated_by_name' => $updaterName,

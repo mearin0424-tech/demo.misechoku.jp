@@ -723,6 +723,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var usesJobTypes = @json($usesJobTypes ?? false);
+    var initialJobPanel = @json($initial_job_panel ?? '');
     var heroCarousel = document.getElementById('recruit-hero-carousel');
     if (heroCarousel && heroCarousel.children.length > 1) {
         var heroSlides = heroCarousel.querySelectorAll('.recruit-ref-hero-slide');
@@ -786,6 +787,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
         });
+        if (initialJobPanel === 'fulltime' || initialJobPanel === 'help') {
+            var targetType = usesJobTypes
+                ? (initialJobPanel === 'help' ? 'help' : 'trial')
+                : (initialJobPanel === 'help' ? 'help' : 'main');
+            var autoBtn = jobToggle.querySelector('button[data-job-type="' + targetType + '"]');
+            if (autoBtn) {
+                autoBtn.click();
+            }
+        }
     }
 
     var shareUrl = @json($shareUrlResolved ?? '');

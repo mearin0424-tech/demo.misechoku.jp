@@ -5,7 +5,7 @@
 @section('guide_message', '') {{-- ホームのスワイプ画面ではオコジョを表示しない --}}
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260503-rc-redesign">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260503-discovery-v3">
 @endpush
 
 @php
@@ -36,7 +36,7 @@
                 {{-- ============================================================ --}}
 
                 {{-- 1. 画像エリア（上部 60%） --}}
-                <div class="rc-img-wrap home-photo-wrap" data-detail-url="{{ route($detailRoute, $item['id']) }}">
+                <div class="rc-img-wrap home-photo-wrap" data-detail-url="{{ route('cast.recruit.show', $item['id']) }}?job=fulltime">
                     <div class="photo-swiper swiper {{ $imageCount <= 1 ? 'photo-swiper--single' : '' }}">
                         <div class="swiper-wrapper">
                             @foreach($images as $index => $imgPath)
@@ -58,22 +58,8 @@
                     <div class="rc-img-gradient" aria-hidden="true"></div>
                 </div>
 
-                {{-- 2. アクションボタン（右側） --}}
+                {{-- 2. アクションボタン（右側）※いいねは非表示 --}}
                 <div class="card-actions-overlay rc-actions">
-                    {{-- いいね --}}
-                    <div class="rc-action-item">
-                        <button
-                            type="button"
-                            class="action-circle-btn like stop-propagation"
-                            data-item-id="{{ $item['id'] }}"
-                            data-item-type="shop"
-                            data-action="like"
-                        >
-                            <i class="fas fa-heart"></i>
-                            <span class="action-btn-count">{{ $item['like_count'] ?? 0 }}</span>
-                        </button>
-                    </div>
-                    {{-- キープ --}}
                     <div class="rc-action-item">
                         <button
                             type="button"
@@ -86,20 +72,18 @@
                         </button>
                         <span class="rc-action-label">キープ</span>
                     </div>
-                    {{-- メッセージ --}}
                     <div class="rc-action-item">
                         <a
                             href="{{ route($talkRoute, $item['id']) }}"
-                            class="action-circle-btn stop-propagation"
+                            class="action-circle-btn message stop-propagation"
                             aria-label="メッセージを送る"
                         >
-                            <i class="fas fa-paper-plane"></i>
+                            <i class="fas fa-comment-dots"></i>
                         </a>
                         <span class="rc-action-label">メッセージ</span>
                     </div>
-                    {{-- 求人詳細 --}}
                     <div class="rc-action-item">
-                        <a href="{{ route('cast.recruit.show', $item['id']) }}" class="card-recruit-btn stop-propagation">求人詳細</a>
+                        <a href="{{ route('cast.recruit.show', $item['id']) }}?job=fulltime" class="card-recruit-btn stop-propagation">求人詳細</a>
                     </div>
                 </div>
 
@@ -111,7 +95,10 @@
                         @if(!empty($item['rating']) && $item['rating'] > 0)
                         <div class="rc-rating-chip">
                             <span class="rc-star">★</span>
-                            <span class="numeric-font">{{ number_format((float)$item['rating'], 1) }}</span>
+                            <span class="rc-rating-val numeric-font">{{ number_format((float)$item['rating'], 1) }}</span>
+                            @if(isset($item['review_count']) && (int)$item['review_count'] > 0)
+                            <span class="rc-review-cnt">({{ (int)$item['review_count'] }})</span>
+                            @endif
                         </div>
                         @endif
                         @if(!empty($item['is_premium']))
@@ -132,14 +119,22 @@
                         <span>{{ trim(($item['pref'] ?? '') . ' ' . ($item['city'] ?? '')) ?: '六本木' }}</span>
                     </div>
 
+                    {{-- 入店求人 / ヘルプ求人 への導線 --}}
+                    <div class="rc-job-links">
+                        <a href="{{ route('cast.recruit.show', $item['id']) }}?job=fulltime" class="rc-job-link stop-propagation">入店求人</a>
+                        <a href="{{ route('cast.recruit.show', $item['id']) }}?job=help" class="rc-job-link stop-propagation{{ empty($item['help_hourly_wage']) ? ' is-muted' : '' }}">ヘルプ求人</a>
+                    </div>
+
                     {{-- 時給ハイライト --}}
                     @php
                         $trialW = $item['trial_hourly_wage'] ?? null;
                         $mainW  = (int)($item['hourly_wage_regular'] ?? 0);
                         $helpW  = $item['help_hourly_wage'] ?? null;
                         $primaryW = $trialW ?? $mainW;
-                        $bonusAmt = ($item['recruit_bonus_lines'][0]['offered'] ?? false)
-                            ? ($item['recruit_bonus_lines'][0]['amount'] ?? 0) : 0;
+                        $rb = $item['recruit_bonus_lines'] ?? [];
+                        $bonusTrial = $rb[0] ?? [];
+                        $bonusHelp  = $rb[1] ?? [];
+                        $bonusMain  = $rb[2] ?? [];
                     @endphp
                     <div class="rc-wages-block">
                         <span class="rc-wages-label">{{ $trialW ? '体入時給' : '時給' }}</span>
@@ -155,13 +150,40 @@
                             @if($helpW)
                             <span>ヘルプ <span class="numeric-font">¥{{ number_format($helpW) }}〜</span></span>
                             @endif
-                            @if($bonusAmt > 0)
-                            <span class="rc-bonus-pill">ボーナス ¥{{ number_format($bonusAmt) }}</span>
-                            @endif
                         </div>
                     </div>
 
-                    {{-- 特徴タグ（最大6個） --}}
+                    <div class="rc-bonus-block" aria-label="ボーナス金">
+                        <div class="rc-bonus-head">ボーナス金</div>
+                        <div class="rc-bonus-lines">
+                            <div class="rc-bonus-row">
+                                <span class="rc-bonus-kind">体入</span>
+                                @if(!empty($bonusTrial['offered']) && (int)($bonusTrial['amount'] ?? 0) > 0)
+                                <span class="numeric-font">¥{{ number_format((int)$bonusTrial['amount']) }}</span>
+                                @else
+                                <span class="rc-bonus-dash">—</span>
+                                @endif
+                            </div>
+                            <div class="rc-bonus-row">
+                                <span class="rc-bonus-kind">ヘルプ</span>
+                                @if(!empty($bonusHelp['offered']) && (int)($bonusHelp['amount'] ?? 0) > 0)
+                                <span class="numeric-font">¥{{ number_format((int)$bonusHelp['amount']) }}</span>
+                                @else
+                                <span class="rc-bonus-dash">—</span>
+                                @endif
+                            </div>
+                            <div class="rc-bonus-row">
+                                <span class="rc-bonus-kind">本入</span>
+                                @if(!empty($bonusMain['offered']) && (int)($bonusMain['amount'] ?? 0) > 0)
+                                <span class="numeric-font">¥{{ number_format((int)$bonusMain['amount']) }}</span>
+                                @else
+                                <span class="rc-bonus-dash">—</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- 特徴タグ（求人・店舗タグ／最大6個） --}}
                     @if(!empty($item['tags']))
                     <div class="rc-tags">
                         @foreach(array_slice($item['tags'], 0, 6) as $tag)
