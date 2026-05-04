@@ -118,9 +118,17 @@ class SearchController extends BaseSearchController
             })
             ->map(function ($row) {
                 $birthday = $row->birthday ? Carbon::parse($row->birthday) : null;
-                $hitokotoUpdatedAt = $row->hitokoto_updated_at
-                    ? Carbon::parse($row->hitokoto_updated_at)
-                    : ($row->hitokoto_created_at ? Carbon::parse($row->hitokoto_created_at) : null);
+                $hitokotoTs = null;
+                if (!empty($row->hitokoto_updated_at)) {
+                    $hitokotoTs = Carbon::parse($row->hitokoto_updated_at);
+                } elseif (!empty($row->hitokoto_created_at)) {
+                    $hitokotoTs = Carbon::parse($row->hitokoto_created_at);
+                }
+                // cast_posts が無い／本文が空で PR を表示している場合は、一覧の「最終更新」にプロフィール更新を使う
+                if ($hitokotoTs === null && !empty($row->profile_updated_at)) {
+                    $hitokotoTs = Carbon::parse($row->profile_updated_at);
+                }
+
                 $hitokotoBody = (string) ($row->hitokoto_body ?? '');
                 if ($hitokotoBody === '') {
                     $hitokotoBody = (string) ($row->pr ?? '');
@@ -135,7 +143,7 @@ class SearchController extends BaseSearchController
                     'city'                => $row->city ?? '',
                     'pr'                  => (string) ($row->pr ?? ''),
                     'hitokoto'            => $hitokotoBody,
-                    'hitokoto_updated_at' => $hitokotoUpdatedAt?->locale('ja')->diffForHumans(),
+                    'hitokoto_updated_at' => $hitokotoTs?->locale('ja')->diffForHumans(),
                 ];
             })
             ->values()

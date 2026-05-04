@@ -125,13 +125,25 @@ document.addEventListener('DOMContentLoaded', function() {
         photoSwipers.push(swiper);
     });
 
-    // 写真エリアは「Swiperでスワイプ / clickで詳細遷移」
+    // 写真エリアは「Swiperでスワイプ / clickで詳細遷移」（求人スワイプカードはカード全体で求人へ）
     document.querySelectorAll('.home-photo-wrap').forEach((wrap) => {
         const detailUrl = wrap.getAttribute('data-detail-url');
         if (!detailUrl) return;
+        if (wrap.closest('.cast-card--recruit')) return;
         wrap.addEventListener('click', function () {
             if (isPhotoSwiping) return;
             window.location.href = detailUrl;
+        });
+    });
+
+    document.querySelectorAll('.cast-card--recruit[data-detail-url]').forEach(function (card) {
+        var recruitUrl = card.getAttribute('data-detail-url');
+        if (!recruitUrl) return;
+        card.addEventListener('click', function (e) {
+            if (e.target.closest('.stop-propagation')) return;
+            if (e.target.closest('.photo-pagination')) return;
+            if (isPhotoSwiping) return;
+            window.location.href = recruitUrl;
         });
     });
 

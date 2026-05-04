@@ -127,7 +127,7 @@
                                         <polygon points="{{ $series['area'] }}" fill="url(#grad-{{ $series['key'] }})"></polygon>
                                         <polyline points="{{ $series['polyline'] }}" fill="none" stroke="{{ $series['color'] }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
                                         @foreach ($series['points'] as $point)
-                                            <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="3" fill="#fffcf7" stroke="{{ $series['color'] }}" stroke-width="1.5"></circle>
+                                            <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="3" fill="#241116" stroke="{{ $series['color'] }}" stroke-width="1.5"></circle>
                                         @endforeach
                                     @endforeach
                                 </svg>
@@ -182,7 +182,7 @@
                                         <polygon points="{{ $countChart['series'][0]['area'] }}" fill="url(#grad-count)"></polygon>
                                         <polyline points="{{ $countChart['series'][0]['polyline'] }}" fill="none" stroke="#60A5FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
                                         @foreach ($countChart['series'][0]['points'] as $point)
-                                            <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="3" fill="#fffcf7" stroke="#60A5FA" stroke-width="1.5"></circle>
+                                            <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="3" fill="#241116" stroke="#60A5FA" stroke-width="1.5"></circle>
                                         @endforeach
                                     </svg>
                                     <div class="dashboard-chart-labels">
@@ -214,7 +214,7 @@
                                         <polygon points="{{ $amountChart['series'][0]['area'] }}" fill="url(#grad-amount)"></polygon>
                                         <polyline points="{{ $amountChart['series'][0]['polyline'] }}" fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
                                         @foreach ($amountChart['series'][0]['points'] as $point)
-                                            <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="3" fill="#fffcf7" stroke="#34D399" stroke-width="1.5"></circle>
+                                            <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="3" fill="#241116" stroke="#34D399" stroke-width="1.5"></circle>
                                         @endforeach
                                     </svg>
                                     <div class="dashboard-chart-labels">
@@ -317,8 +317,8 @@
         .dashboard-alert {
             padding: 12px 14px;
             border-radius: 14px;
-            background: rgba(185, 140, 36, 0.1);
-            border: 0;
+            background: rgba(229, 193, 88, 0.1);
+            border: 1px solid rgba(229, 193, 88, 0.28);
             box-shadow: var(--admin-shadow);
             color: var(--admin-text);
             font-size: 0.88rem;
@@ -344,8 +344,10 @@
         .dashboard-section-title {
             margin: 0;
             font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--admin-text);
+            font-weight: 600;
+            font-family: "Noto Serif JP", "Yu Mincho", serif;
+            color: var(--admin-accent);
+            letter-spacing: 0.04em;
         }
         .dashboard-date-chip,
         .dashboard-export-button {
@@ -355,27 +357,28 @@
             min-height: 34px;
             padding: 0 12px;
             border-radius: 10px;
-            border: 0;
-            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(229, 193, 88, 0.28);
+            background: rgba(255, 255, 255, 0.05);
             box-shadow: var(--admin-shadow);
             color: var(--admin-sub);
             font-size: 0.72rem;
             font-weight: 700;
         }
         .dashboard-date-chip {
-            color: var(--admin-gold-strong);
+            color: var(--admin-gold);
         }
         .dashboard-export-button {
             cursor: pointer;
         }
         .dashboard-export-button:hover {
-            color: var(--admin-gold-strong);
-            background: rgba(185, 140, 36, 0.12);
+            color: var(--admin-gold);
+            background: rgba(229, 193, 88, 0.12);
+            border-color: rgba(229, 193, 88, 0.45);
         }
         .bi-panel,
         .task-panel {
             background: var(--admin-card);
-            border: 0;
+            border: 1px solid rgba(229, 193, 88, 0.18);
             border-radius: 18px;
             overflow: hidden;
             box-shadow: var(--admin-shadow-lg);
@@ -413,8 +416,8 @@
         }
         .dashboard-kpi-card,
         .dashboard-chart-card {
-            background: var(--admin-card);
-            border: 0;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(229, 193, 88, 0.12);
             border-radius: 16px;
             box-shadow: var(--admin-shadow);
         }
@@ -484,8 +487,9 @@
         .dashboard-chart-head h3 {
             margin: 0;
             font-size: 0.86rem;
-            font-weight: 700;
-            color: var(--admin-text);
+            font-weight: 600;
+            font-family: "Noto Serif JP", "Yu Mincho", serif;
+            color: var(--admin-accent);
         }
         .dashboard-chart-legend {
             display: flex;
@@ -525,7 +529,7 @@
             overflow: visible;
         }
         .dashboard-chart-grid {
-            stroke: rgba(62, 44, 38, 0.12);
+            stroke: rgba(255, 255, 255, 0.1);
             stroke-dasharray: 3 3;
             stroke-width: 1;
         }
@@ -551,7 +555,7 @@
             gap: 8px;
             padding: 14px 16px;
             border-bottom: 1px solid var(--admin-line-soft);
-            background: rgba(62, 44, 38, 0.03);
+            background: rgba(255, 255, 255, 0.04);
         }
         .task-filter-chip {
             display: inline-flex;
@@ -570,20 +574,20 @@
             min-width: 20px;
             padding: 2px 6px;
             border-radius: 999px;
-            background: rgba(62, 44, 38, 0.08);
+            background: rgba(255, 255, 255, 0.08);
             color: var(--admin-text);
             font-size: 0.62rem;
             text-align: center;
         }
         .task-filter-chip.is-active {
-            color: var(--admin-gold-strong);
-            border: 0;
-            background: rgba(185, 140, 36, 0.12);
+            color: var(--admin-gold);
+            border: 1px solid rgba(229, 193, 88, 0.35);
+            background: rgba(229, 193, 88, 0.1);
             box-shadow: var(--admin-shadow);
         }
         .task-filter-chip.is-active strong {
             background: linear-gradient(135deg, #e5c158, #b38a22);
-            color: #120405;
+            color: #190509;
         }
         .task-table-wrap {
             overflow-x: auto;
@@ -599,7 +603,7 @@
             font-size: 0.64rem;
             font-weight: 700;
             color: var(--admin-muted);
-            background: rgba(62, 44, 38, 0.04);
+            background: rgba(255, 255, 255, 0.04);
             border-bottom: 1px solid var(--admin-line-soft);
         }
         .task-table tbody td {
@@ -650,8 +654,8 @@
             width: 24px;
             height: 24px;
             border-radius: 8px;
-            background: rgba(185, 140, 36, 0.18);
-            color: var(--admin-gold-strong);
+            background: rgba(229, 193, 88, 0.16);
+            color: var(--admin-gold);
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -695,17 +699,18 @@
         .task-action-button {
             padding: 8px 12px;
             border-radius: 10px;
-            border: 0;
-            background: rgba(185, 140, 36, 0.14);
-            color: var(--admin-gold-strong);
+            border: 1px solid rgba(229, 193, 88, 0.35);
+            background: rgba(229, 193, 88, 0.12);
+            color: var(--admin-gold);
             font-size: 0.72rem;
             font-weight: 700;
             cursor: pointer;
             box-shadow: var(--admin-shadow);
         }
         .task-action-button:hover {
-            background: #e6d080;
-            color: #120405;
+            background: linear-gradient(135deg, #e5c158, #b38a22);
+            color: #190509;
+            border-color: transparent;
         }
         .task-action-button.is-critical {
             border-color: rgba(248, 113, 113, 0.3);

@@ -324,6 +324,12 @@ class HomeController extends Controller
             $pr = Schema::hasColumn('shop_jobs', 'pr') ? trim((string) ($row->pr ?? '')) : '';
             $managerOverlay = $this->buildManagerImageOverlay($meta, $pr, $mainBonus);
 
+            $bonusLines = [
+                ['label' => '体入', 'amount' => $bonusTrial, 'offered' => $offerTrial],
+                ['label' => 'ヘルプ', 'amount' => $bonusHelp, 'offered' => $offerHelp],
+                ['label' => '本入', 'amount' => $mainBonus, 'offered' => $offerFulltime],
+            ];
+
             $items[] = [
                 // ルート用には文字列ID（例: s00000001）をそのまま渡す
                 'id' => $row->id,
@@ -346,11 +352,10 @@ class HomeController extends Controller
                 'rating' => $hasReviews ? (float) ($row->avg_rating ?? 0) : 0.0,
                 'review_count' => $hasReviews ? (int) ($row->review_count ?? 0) : 0,
                 'is_premium' => isset($premiumShopIds[$row->id]),
-                'recruit_bonus_lines' => [
-                    ['label' => '体入', 'amount' => $bonusTrial, 'offered' => $offerTrial],
-                    ['label' => 'ヘルプ', 'amount' => $bonusHelp, 'offered' => $offerHelp],
-                    ['label' => '本入', 'amount' => $mainBonus, 'offered' => $offerFulltime],
-                ],
+                'recruit_bonus_lines' => $bonusLines,
+                'signup_bonus_range' => $this->discoverySignupBonusRange($bonusLines),
+                'trial_hourly_range' => $this->discoveryHourlyPair($trialHourly, $meta, 'trial'),
+                'help_hourly_range' => $this->discoveryHourlyPair($helpHourly, $meta, 'help'),
                 'manager_overlay' => $managerOverlay,
             ];
         }
@@ -381,10 +386,14 @@ class HomeController extends Controller
                 'review_count' => 12,
                 'is_premium' => true,
                 'recruit_bonus_lines' => [
-                    ['label' => '体入', 'amount' => 50000, 'offered' => true],
+                    ['label' => '体入', 'amount' => 35000, 'offered' => true],
                     ['label' => 'ヘルプ', 'amount' => 50000, 'offered' => true],
-                    ['label' => '本入', 'amount' => 50000, 'offered' => true],
+                    ['label' => '本入', 'amount' => 200000, 'offered' => true],
                 ],
+                'trial_hourly_min' => 4500,
+                'trial_hourly_max' => 5000,
+                'help_hourly_min' => 4000,
+                'help_hourly_max' => 4200,
             ],
             [
                 'id' => 2,
@@ -420,6 +429,18 @@ class HomeController extends Controller
                 'bonus_condition' => $it['bonus_condition'] ?? '',
                 'bonus_other_conditions' => $it['bonus_other_conditions'] ?? '',
             ];
+            foreach (['trial_hourly_min', 'trial_hourly_max', 'help_hourly_min', 'help_hourly_max'] as $wk) {
+                if (array_key_exists($wk, $it) && $it[$wk] !== null && $it[$wk] !== '') {
+                    $meta[$wk] = $it[$wk];
+                }
+            }
+            $trialW = isset($it['trial_hourly_wage']) && $it['trial_hourly_wage'] !== null && $it['trial_hourly_wage'] !== ''
+                ? (int) $it['trial_hourly_wage'] : null;
+            $helpW = isset($it['help_hourly_wage']) && $it['help_hourly_wage'] !== null && $it['help_hourly_wage'] !== ''
+                ? (int) $it['help_hourly_wage'] : null;
+            $it['trial_hourly_range'] = $this->discoveryHourlyPair($trialW, $meta, 'trial');
+            $it['help_hourly_range'] = $this->discoveryHourlyPair($helpW, $meta, 'help');
+            $it['signup_bonus_range'] = $this->discoverySignupBonusRange($it['recruit_bonus_lines'] ?? []);
             $it['manager_overlay'] = $this->buildManagerImageOverlay(
                 $meta,
                 trim((string) ($it['pr'] ?? '')),
@@ -428,6 +449,51 @@ class HomeController extends Controller
 
             return $it;
         }, $mockRows);
+    }
+
+    /**
+     * 求人スワイプ用：体入／ヘルプ時給の表示レンジ（noruma_cond JSON に trial_hourly_min 等があれば優先）
+     *
+     * @return array{lo: int, hi: int}|null
+     */
+    private function discoveryHourlyPair(?int $baseWage, array $meta, string $role): ?array
+    {
+        if ($baseWage === null || $baseWage <= 0) {
+            return null;
+        }
+        $minKey = $role . '_hourly_min';
+        $maxKey = $role . '_hourly_max';
+        $lo = (isset($meta[$minKey]) && (int) $meta[$minKey] > 0) ? (int) $meta[$minKey] : $baseWage;
+        $hi = (isset($meta[$maxKey]) && (int) $meta[$maxKey] > 0) ? (int) $meta[$maxKey] : $baseWage;
+        if ($hi < $lo) {
+            [$lo, $hi] = [$hi, $lo];
+        }
+
+        return ['lo' => $lo, 'hi' => $hi];
+    }
+
+    /**
+     * 入店祝い金レンジ（体入・ヘルプ・本入で提示している金額の min〜max）
+     *
+     * @param array<int, array{label: string, amount: int, offered: bool}> $lines
+     *
+     * @return array{lo: int, hi: int}|null
+     */
+    private function discoverySignupBonusRange(array $lines): ?array
+    {
+        $amounts = [];
+        foreach ($lines as $ln) {
+            if (!empty($ln['offered']) && (int) ($ln['amount'] ?? 0) > 0) {
+                $amounts[] = (int) $ln['amount'];
+            }
+        }
+        if ($amounts === []) {
+            return null;
+        }
+        $lo = min($amounts);
+        $hi = max($amounts);
+
+        return ['lo' => $lo, 'hi' => $hi];
     }
 
     /**

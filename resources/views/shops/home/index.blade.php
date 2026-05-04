@@ -5,7 +5,7 @@
 @section('guide_message', '') {{-- ホームのスワイプ画面ではオコジョを表示しない --}}
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260503-shop-cast-swipe">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260503-recruit-swipe-v2">
 @endpush
 
 @php
@@ -21,7 +21,12 @@
     <div class="main-swiper swiper">
         <div class="swiper-wrapper">
             @foreach($items as $item)
-            <div class="swiper-slide cast-card glass-card {{ $isRecruit ? 'cast-card--recruit' : '' }}">
+            <div
+                class="swiper-slide cast-card glass-card {{ $isRecruit ? 'cast-card--recruit' : '' }}"
+                @if($isRecruit)
+                data-detail-url="{{ route('cast.recruit.show', $item['id']) }}"
+                @endif
+            >
                 @php
                     $images = $item['images'] ?? [];
                     if (empty($images)) {
@@ -36,7 +41,7 @@
                 {{-- ============================================================ --}}
 
                 {{-- 1. 画像エリア（上部 65%） --}}
-                <div class="rc-img-wrap home-photo-wrap" data-detail-url="{{ route('cast.recruit.show', $item['id']) }}">
+                <div class="rc-img-wrap home-photo-wrap">
                     <div class="photo-swiper swiper {{ $imageCount <= 1 ? 'photo-swiper--single' : '' }}">
                         <div class="swiper-wrapper">
                             @foreach($images as $index => $imgPath)
@@ -51,7 +56,7 @@
                             @endforeach
                         </div>
                         @if($imageCount > 1)
-                        <div class="photo-pagination swiper-pagination"></div>
+                        <div class="photo-pagination swiper-pagination stop-propagation"></div>
                         @endif
                     </div>
                     @php $mo = $item['manager_overlay'] ?? ['show' => false]; @endphp
@@ -77,8 +82,8 @@
                 </div>
 
                 {{-- 2. アクションボタン（右側）※いいねは非表示 --}}
-                <div class="card-actions-overlay rc-actions">
-                    <div class="rc-action-item">
+                <div class="card-actions-overlay rc-actions stop-propagation">
+                    <div class="rc-action-item stop-propagation">
                         <button
                             type="button"
                             class="action-circle-btn keep stop-propagation"
@@ -90,7 +95,7 @@
                         </button>
                         <span class="rc-action-label">キープ</span>
                     </div>
-                    <div class="rc-action-item">
+                    <div class="rc-action-item stop-propagation">
                         <a
                             href="{{ route($talkRoute, $item['id']) }}"
                             class="action-circle-btn message stop-propagation"
@@ -106,11 +111,9 @@
                 <div class="rc-info" aria-label="店舗情報">
 
                     @php
-                        $trialW = $item['trial_hourly_wage'] ?? null;
-                        $helpW  = $item['help_hourly_wage'] ?? null;
-                        $rb = $item['recruit_bonus_lines'] ?? [];
-                        $bonusMain  = $rb[2] ?? [];
-                        $amtMain  = (!empty($bonusMain['offered']) && (int)($bonusMain['amount'] ?? 0) > 0) ? (int)$bonusMain['amount'] : 0;
+                        $trialR = $item['trial_hourly_range'] ?? null;
+                        $helpR  = $item['help_hourly_range'] ?? null;
+                        $bonusRg = $item['signup_bonus_range'] ?? null;
                         $hasRating = !empty($item['rating']) && $item['rating'] > 0;
                         $hasPremium = !empty($item['is_premium']);
                     @endphp
@@ -148,31 +151,52 @@
 
                 </div>
 
-                {{-- 下部バー：左＝入店ボーナス＋体入/ヘルプ時給、右＝求人詳細（横並び） --}}
-                <div class="rc-bottom-bar" aria-label="給与・ボーナス・求人詳細">
-                    <div class="rc-bottom-bar__left">
-                        @if($amtMain > 0)
-                        <span class="rc-join-bonus-badge">
-                            <span class="rc-join-bonus-badge__k">入店ボーナス</span>
-                            <span class="rc-join-bonus-badge__v numeric-font">¥{{ number_format($amtMain) }}〜</span>
-                        </span>
+                {{-- 下部：入店祝い金バッヂ＋体入時給（大）／ヘルプ時給（タップで求人へはカード全体） --}}
+                <div class="rc-bottom-bar" aria-label="給与・ボーナス">
+                    <div class="rc-bottom-bar__stack">
+                        @if(!empty($bonusRg))
+                        <div class="rc-signup-bonus-pill">
+                            <span class="rc-signup-bonus-pill__label">入店祝い金</span>
+                            <span class="rc-signup-bonus-pill__nums numeric-font">
+                                @if((int)$bonusRg['hi'] > (int)$bonusRg['lo'])
+                                ¥{{ number_format((int)$bonusRg['lo']) }}〜¥{{ number_format((int)$bonusRg['hi']) }}円
+                                @else
+                                ¥{{ number_format((int)$bonusRg['lo']) }}円
+                                @endif
+                            </span>
+                        </div>
                         @endif
-                        <p class="rc-bottom-bar__wages">
-                            体入時給
-                            @if($trialW !== null && (int)$trialW > 0)
-                            <span class="numeric-font">¥{{ number_format((int)$trialW) }}〜</span>
-                            @else
-                            <span class="rc-bottom-bar__dash">—</span>
-                            @endif
-                            ／ヘルプ時給
-                            @if($helpW !== null && (int)$helpW > 0)
-                            <span class="numeric-font">¥{{ number_format((int)$helpW) }}〜</span>
-                            @else
-                            <span class="rc-bottom-bar__dash">—</span>
-                            @endif
-                        </p>
+                        <div class="rc-wage-panel">
+                            <div class="rc-wage-panel__trial">
+                                <span class="rc-wage-panel__trial-label">体入時給</span>
+                                <div class="rc-wage-panel__trial-amount numeric-font">
+                                    @if(!empty($trialR))
+                                        @if((int)$trialR['hi'] > (int)$trialR['lo'])
+                                        ¥{{ number_format((int)$trialR['lo']) }}~¥{{ number_format((int)$trialR['hi']) }}
+                                        @else
+                                        ¥{{ number_format((int)$trialR['lo']) }}〜
+                                        @endif
+                                    @else
+                                        <span class="rc-wage-panel__dash">—</span>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="rc-wage-panel__help">
+                                <span class="rc-wage-panel__help-label">ヘルプ時給</span>
+                                <span class="rc-wage-panel__help-amount numeric-font">
+                                    @if(!empty($helpR))
+                                        @if((int)$helpR['hi'] > (int)$helpR['lo'])
+                                        ¥{{ number_format((int)$helpR['lo']) }}~¥{{ number_format((int)$helpR['hi']) }}
+                                        @else
+                                        ¥{{ number_format((int)$helpR['lo']) }}〜
+                                        @endif
+                                    @else
+                                        <span class="rc-wage-panel__dash">—</span>
+                                    @endif
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <a href="{{ route('cast.recruit.show', $item['id']) }}" class="rc-bottom-bar__detail stop-propagation" aria-label="求人詳細へ">求人詳細</a>
                 </div>
 
                 {{-- 4. スワイプアフォーダンス --}}
@@ -292,5 +316,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/home.js') }}?v=20260503-rc-redesign"></script>
+<script src="{{ asset('assets/js/home.js') }}?v=20260503-recruit-card-tap"></script>
 @endpush
