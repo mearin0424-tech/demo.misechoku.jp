@@ -22,12 +22,12 @@
 @endphp
 
 <div id="detail-search-modal" class="detail-search-modal" aria-hidden="true">
-    <div class="detail-search-modal__overlay" data-close-modal></div>
+    <div class="detail-search-modal__overlay" aria-hidden="true"></div>
     <div class="detail-search-modal__window detail-search-modal__window--search">
         <div class="detail-search-modal__header detail-search-modal__header--search">
             <div class="detail-search-modal__header-line" aria-hidden="true"></div>
             <h2 class="detail-search-modal__title">詳細検索</h2>
-            <button type="button" class="detail-search-modal__close" data-close-modal aria-label="閉じる">&times;</button>
+            <button type="button" class="detail-search-modal__close" data-close-modal aria-label="詳細検索を閉じる">&times;</button>
         </div>
 
         <div class="detail-search-modal__body detail-search-modal__body--search">

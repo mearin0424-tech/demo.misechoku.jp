@@ -61,7 +61,10 @@
         closeSortPanel();
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
-        if (openBtn) openBtn.setAttribute('aria-expanded', 'true');
+        if (openBtn) {
+            openBtn.setAttribute('aria-expanded', 'true');
+            openBtn.setAttribute('aria-label', '詳細検索を閉じる');
+        }
         document.body.style.overflow = 'hidden';
     }
 
@@ -69,17 +72,23 @@
         if (!modal) return;
         modal.classList.remove('is-open');
         modal.setAttribute('aria-hidden', 'true');
-        if (openBtn) openBtn.setAttribute('aria-expanded', 'false');
+        if (openBtn) {
+            openBtn.setAttribute('aria-expanded', 'false');
+            openBtn.setAttribute('aria-label', '詳細検索');
+        }
         document.body.style.overflow = '';
     }
 
     if (modal && openBtn) {
-        openBtn.addEventListener('click', openModal);
+        openBtn.addEventListener('click', function () {
+            if (modal.classList.contains('is-open')) {
+                closeModal();
+            } else {
+                openModal();
+            }
+        });
         modal.querySelectorAll('[data-close-modal]').forEach(function (el) {
             el.addEventListener('click', closeModal);
-        });
-        modal.addEventListener('click', function (e) {
-            if (e.target === modal) closeModal();
         });
         document.addEventListener('keydown', function (e) {
             if (e.key !== 'Escape') return;

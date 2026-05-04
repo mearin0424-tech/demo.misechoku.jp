@@ -397,6 +397,12 @@ body.page-search-ai .ai-recommend {
     z-index: 95;
     transition: transform 0.15s, filter 0.15s;
 }
+
+/* 詳細検索モーダル(1100)より前面で、開いたあとも FAB で開閉できる */
+body.page-search .search-detail-fab,
+body.page-search-ai .search-detail-fab {
+    z-index: 1110;
+}
 .search-detail-fab:hover {
     filter: brightness(1.05);
     transform: scale(1.04);
@@ -922,7 +928,7 @@ body.page-search-ai .ai-recommend {
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.6);
-    cursor: pointer;
+    cursor: default;
 }
 .detail-search-modal__window {
     position: relative;

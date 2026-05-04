@@ -2,11 +2,10 @@
     $bodyClass = trim($__env->yieldContent('body-class'));
     $resolvedGuideMessage = '';
 
-    // オコジョガイドは SEARCH と LIKES（つながり / interaction）の画面でのみ表示。ホームのスワイプ画面では表示しない
+    // オコジョガイドは LIKES（つながり / interaction）のみ。SEARCH は FAB と干渉するため非表示。ホームでは表示しない
     $isHome = str_contains($bodyClass, 'page-home');
-    $isSearch = str_contains($bodyClass, 'page-search') || request()->is('*/search*');
     $isLikes = str_contains($bodyClass, 'page-interaction') || request()->is('*/interaction*');
-    if (!$isHome && ($isSearch || $isLikes)) {
+    if (!$isHome && $isLikes) {
         // オコジョガイド：詳細は店舗マイページのバッヂ（モーダル）で案内（キャスト向けは一言に短縮）
         $resolvedGuideMessage = '「優良店」バッヂは、直近の請求・入金がスムーズな店舗に付く信頼の目印です。';
     }
