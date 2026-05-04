@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Shops;
 
 use App\Http\Controllers\Controller;
 use App\Services\AdminMasterService;
+use App\Support\RecruitCatchOverlay;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\ValidationException;
 
 class RecruitmentController extends Controller
 {
@@ -98,7 +100,10 @@ class RecruitmentController extends Controller
     {
         $shopId = $id ? $this->normalizeShopId($id) : $this->currentShopId();
         $recruitData = $this->getRecruitData($shopId);
-        $shareText = trim((string) ($recruitData['recruit']['catch_copy'] ?? $recruitData['recruit']['message'] ?? ''));
+        $shareText = trim((string) ($recruitData['recruit']['catch_copy'] ?? ''));
+        if ($shareText === '') {
+            $shareText = trim((string) ($recruitData['recruit']['message'] ?? ''));
+        }
         $numericShopId = $this->toNumericShopId($shopId);
 
         return view('shops.recruit.show', [
@@ -126,40 +131,13 @@ class RecruitmentController extends Controller
         $usesJobTypes = $this->shopJobsUseMultipleTypes();
         $horizontal = $this->shopJobsHorizontalSchema();
 
-        $defaultType = $horizontal ? 'fulltime' : ($usesJobTypes ? 'trial' : 'fulltime');
-        $type = (string) request()->query('type', $defaultType);
-        if (!in_array($type, ['fulltime', 'trial', 'help'], true)) {
-            $type = $defaultType;
-        }
-        if ($usesJobTypes && !$horizontal && $type === 'fulltime') {
-            $type = 'trial';
-        }
-
         $recruit = $recruitData['recruit'];
-        if ($usesJobTypes) {
-            if ($horizontal) {
-                $recruit = match ($type) {
-                    'help' => $recruitData['recruit_help'],
-                    'trial' => $recruitData['recruit_trial'],
-                    default => $recruitData['recruit'],
-                };
-            } else {
-                $recruit = $type === 'help' ? $recruitData['recruit_help'] : $recruitData['recruit_trial'];
-            }
-        } else {
-            if ($type === 'trial') {
-                $recruit['hourly_wage_regular'] = $recruit['trial_hourly_wage'] ?? null;
-            } elseif ($type === 'help') {
-                $recruit['hourly_wage_regular'] = $recruit['help_hourly_wage'] ?? null;
-            }
-        }
 
         return view('shops.recruit.edit', [
             'pageId' => 'job_edit',
             'recruit' => $recruit,
             'recruitTrial' => $usesJobTypes ? $recruitData['recruit_trial'] : null,
             'recruitHelp'  => $usesJobTypes ? $recruitData['recruit_help']  : null,
-            'recruitType' => $type,
             'usesJobTypes' => $usesJobTypes,
             'horizontalShopJobs' => $horizontal,
             'masters' => $this->adminMasterService->getRecruitmentMasters(),
@@ -175,18 +153,13 @@ class RecruitmentController extends Controller
             return $this->updateHorizontal($request);
         }
 
-        $jobKind = (string) $request->input(
-            'recruit_job_kind',
-            $this->shopJobsUseMultipleTypes() ? 'trial' : 'fulltime'
-        );
-        if (!$this->shopJobsUseMultipleTypes()) {
-            if (!in_array($jobKind, ['fulltime', 'trial', 'help'], true)) {
-                $jobKind = 'fulltime';
-            }
-        } else {
-            if ($jobKind === 'fulltime' || !in_array($jobKind, ['trial', 'help'], true)) {
-                $jobKind = 'trial';
-            }
+        if ($this->shopJobsUseMultipleTypes()) {
+            return $this->updateVerticalMultiTypes($request);
+        }
+
+        $jobKind = (string) $request->input('recruit_job_kind', 'fulltime');
+        if (!in_array($jobKind, ['fulltime', 'trial', 'help'], true)) {
+            $jobKind = 'fulltime';
         }
 
         $wageRules = [
@@ -194,21 +167,7 @@ class RecruitmentController extends Controller
             'trial_hourly_wage' => 'nullable|integer|min:0',
             'help_hourly_wage' => 'nullable|integer|min:0',
         ];
-        if ($this->shopJobsUseMultipleTypes()) {
-            if ($jobKind === 'trial') {
-                $wageRules = [
-                    'hourly_wage_regular' => 'nullable|integer|min:0',
-                    'trial_hourly_wage' => 'required|integer|min:0',
-                    'help_hourly_wage' => 'nullable|integer|min:0',
-                ];
-            } else {
-                $wageRules = [
-                    'hourly_wage_regular' => 'nullable|integer|min:0',
-                    'trial_hourly_wage' => 'nullable|integer|min:0',
-                    'help_hourly_wage' => 'required|integer|min:0',
-                ];
-            }
-        } elseif ($jobKind === 'trial') {
+        if ($jobKind === 'trial') {
             $wageRules = [
                 'hourly_wage_regular' => 'nullable|integer|min:0',
                 'trial_hourly_wage' => 'required|integer|min:0',
@@ -226,13 +185,19 @@ class RecruitmentController extends Controller
             'recruit_job_kind' => 'nullable|string|in:fulltime,trial,help',
             'catch_copy' => 'required|string|max:100',
             'message' => 'required|string|max:1000',
+            'job_content' => 'nullable|string|max:2000',
             'noruma_reward' => 'nullable|integer|min:0',
             'bonus_condition' => 'nullable|string|max:1000',
             'bonus_total_working_days' => 'nullable|integer|min:0',
             'bonus_total_working_hours' => 'nullable|integer|min:0',
             'bonus_other_conditions' => 'nullable|string|max:1000',
             'salary_text' => 'nullable|string|max:1000',
-            'working_hours' => 'required|string|max:255',
+            'shift_time_start' => ['required', 'regex:/^\d{2}:\d{2}$/'],
+            'shift_time_end' => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
+            'shift_end_is_last' => 'nullable|boolean',
+            'regular_hourly_wage_max' => 'nullable|integer|min:0',
+            'trial_hourly_wage_max' => 'nullable|integer|min:0',
+            'help_hourly_wage_max' => 'nullable|integer|min:0',
             'working_days' => 'required|string|max:255',
             'regular_holiday' => 'nullable|string|max:255',
             'qualification' => 'required|string|max:255',
@@ -244,18 +209,22 @@ class RecruitmentController extends Controller
             'benefit_tag_ids.*' => 'integer|exists:shop_tags,id',
         ], $wageRules));
 
+        $this->assertShiftEndValid($request);
+        $data['working_hours'] = $this->composeWorkingHoursFromShiftRequest($request);
+
         $shopId = $this->currentShopId();
         $metaJobType = match ($jobKind) {
             'trial' => 2,
             'help' => 3,
             default => 1,
         };
-        $meta = $this->shopJobsUseMultipleTypes() && $metaJobType !== 1
+        $meta = $metaJobType !== 1
             ? $this->getRecruitMetaForJobType($shopId, $metaJobType)
             : $this->getRecruitMeta($shopId);
         $bonusOther = trim((string) ($request->input('bonus_other_conditions', $data['bonus_condition'] ?? '')));
         $payload = array_merge($meta, [
             'catch_copy' => $data['catch_copy'],
+            'job_content' => trim((string) ($data['job_content'] ?? '')),
             'bonus_condition' => $bonusOther,
             'bonus_total_working_days' => $request->filled('bonus_total_working_days') ? (int) $request->input('bonus_total_working_days') : null,
             'bonus_total_working_hours' => $request->filled('bonus_total_working_hours') ? (int) $request->input('bonus_total_working_hours') : null,
@@ -265,74 +234,39 @@ class RecruitmentController extends Controller
             'regular_holiday' => $data['regular_holiday'] ?? '',
             'qualification' => $data['qualification'],
         ]);
-        // 旧スキーマ由来のフィールドはメタから除去
-        unset($payload['message'], $payload['job_content'], $payload['tag_ids']);
+        // 旧スキーマ由来のフィールドはメタから除去（job_content は JSON メタに残す）
+        unset($payload['message'], $payload['tag_ids']);
 
         $jobPayload = $this->buildJobPayloadFromValidated($request, $shopId, $data, $payload);
+        $this->applyShiftColumnsToPatch($jobPayload, $request);
+        $this->applyHourlyWageMaxToPatch($jobPayload, $data);
         $jobTagsPayload = [
             'work_style' => $request->input('work_style_tag_ids', []),
             'welcome'    => $request->input('welcome_tag_ids', []),
             'benefit'    => $request->input('benefit_tag_ids', []),
         ];
 
-        if ($this->shopJobsUseMultipleTypes() && $jobKind === 'trial') {
-            $jobId = $this->upsertShopJobRow($shopId, 2, $jobPayload, $data, 'trial');
-            $mainSync = [
-                'has_trial' => 1,
-                'trial_hourly_wage' => (string) $data['trial_hourly_wage'],
-                'updated_at' => now(),
-            ];
-            if (array_key_exists('hourly_wage_regular', $data) && $data['hourly_wage_regular'] !== null && (int) $data['hourly_wage_regular'] > 0) {
-                $mainSync['hourly_wage_regular'] = (string) $data['hourly_wage_regular'];
-            }
-            DB::table('shop_jobs')
-                ->where('shop_id', $shopId)
-                ->where('job_type', 1)
-                ->update($mainSync);
+        $existingQ = DB::table('shop_jobs')->where('shop_id', $shopId);
+        $this->scopeShopJobPrimaryRow($existingQ);
+        $existingId = (int) $existingQ->value('id');
 
-            $this->syncShopJobTags($jobId, $jobTagsPayload);
-        } elseif ($this->shopJobsUseMultipleTypes() && $jobKind === 'help') {
-            $jobId = $this->upsertShopJobRow($shopId, 3, $jobPayload, $data, 'help');
-            DB::table('shop_jobs')
-                ->where('shop_id', $shopId)
-                ->where('job_type', 1)
-                ->update([
-                    'has_help' => 1,
-                    'help_hourly_wage' => (string) $data['help_hourly_wage'],
-                    'updated_at' => now(),
-                ]);
-
-            $this->syncShopJobTags($jobId, $jobTagsPayload);
+        if ($existingId > 0) {
+            $upd = DB::table('shop_jobs')->where('shop_id', $shopId);
+            $this->scopeShopJobPrimaryRow($upd);
+            $upd->update($jobPayload);
+            $jobId = $existingId;
         } else {
-            $existingQ = DB::table('shop_jobs')->where('shop_id', $shopId);
-            $this->scopeShopJobPrimaryRow($existingQ);
-            $existingId = (int) $existingQ->value('id');
-
-            if ($existingId > 0) {
-                $upd = DB::table('shop_jobs')->where('shop_id', $shopId);
-                $this->scopeShopJobPrimaryRow($upd);
-                $upd->update($jobPayload);
-                $jobId = $existingId;
-            } else {
-                $jobId = (int) DB::table('shop_jobs')->insertGetId(array_merge(
-                    $jobPayload,
-                    $this->shopJobPrimaryTypeInsertAttributes(),
-                    ['created_at' => now()]
-                ));
-            }
-
-            $this->syncShopJobTags($jobId, $jobTagsPayload);
+            $jobId = (int) DB::table('shop_jobs')->insertGetId(array_merge(
+                $jobPayload,
+                $this->shopJobPrimaryTypeInsertAttributes(),
+                ['created_at' => now()]
+            ));
         }
 
-        $redirectType = '';
-        if ($this->shopJobsUseMultipleTypes()) {
-            $redirectType = '?type=' . $jobKind;
-        } elseif ($jobKind !== 'fulltime') {
-            $redirectType = '?type=' . $jobKind;
-        }
+        $this->syncShopJobTags($jobId, $jobTagsPayload);
 
         return redirect()
-            ->to(route('shop.recruits.edit') . $redirectType)
+            ->to(route('shop.recruits.edit'))
             ->with('message', '求人情報を保存しました');
     }
 
@@ -454,11 +388,12 @@ class RecruitmentController extends Controller
         return $this->decodeMeta($raw);
     }
 
-    private function buildJobPayloadFromValidated(Request $request, string $shopId, array $data, array $payload): array
+    private function buildJobPayloadFromValidated(Request $request, string $shopId, array $data, array $payload, ?bool $published = null): array
     {
+        $pub = $published ?? $request->boolean('published');
         $base = [
             'shop_id' => $shopId,
-            'status' => $request->boolean('published') ? 1 : 0,
+            'status' => $pub ? 1 : 0,
             'hourly_wage_regular' => (string) ($data['hourly_wage_regular'] ?? 0),
             'trial_hourly_wage' => $request->filled('trial_hourly_wage') ? (string) $data['trial_hourly_wage'] : null,
             'has_trial' => $request->filled('trial_hourly_wage') ? 1 : 0,
@@ -472,6 +407,10 @@ class RecruitmentController extends Controller
 
         if (Schema::hasColumn('shop_jobs', 'pr')) {
             $base['pr'] = (string) ($data['message'] ?? '');
+        }
+
+        if (Schema::hasColumn('shop_jobs', 'job_content')) {
+            $base['job_content'] = trim((string) ($request->input('job_content', $data['job_content'] ?? '')));
         }
 
         if (Schema::hasColumn('shop_jobs', 'working_hours')) {
@@ -543,6 +482,23 @@ class RecruitmentController extends Controller
                 $out[$k] = (string) $meta[$k];
             }
         }
+        if (Schema::hasColumn('shop_jobs', 'catch_copy')) {
+            $ccCol = trim((string) ($variantRow->catch_copy ?? ''));
+            if ($ccCol !== '') {
+                $out['catch_copy'] = $ccCol;
+            }
+        }
+        if (Schema::hasColumn('shop_jobs', 'job_content')) {
+            $jcCol = trim((string) ($variantRow->job_content ?? ''));
+            if ($jcCol !== '') {
+                $out['job_content'] = $jcCol;
+            }
+        }
+        foreach (['trial_hourly_wage_max', 'help_hourly_wage_max'] as $wm) {
+            if (Schema::hasColumn('shop_jobs', $wm) && isset($variantRow->{$wm}) && $variantRow->{$wm} !== null && $variantRow->{$wm} !== '') {
+                $out[$wm] = (int) $variantRow->{$wm};
+            }
+        }
         if (Schema::hasColumn('shop_jobs', 'pr')) {
             $out['message'] = (string) ($variantRow->pr ?? '');
         }
@@ -588,7 +544,25 @@ class RecruitmentController extends Controller
             $out['salary_text'] = (string) $variantRow->salary;
         }
 
-        return $out;
+        return $this->attachCatchHeroOverlay($out);
+    }
+
+    /**
+     * @param  array<string, mixed>  $recruit
+     * @return array<string, mixed>
+     */
+    private function attachCatchHeroOverlay(array $recruit): array
+    {
+        $recruit['catch_hero_overlay'] = RecruitCatchOverlay::buildFromMeta(
+            [
+                'catch_copy' => $recruit['catch_copy'] ?? '',
+                'bonus_condition' => $recruit['bonus_condition'] ?? '',
+                'bonus_other_conditions' => $recruit['bonus_other_conditions'] ?? '',
+            ],
+            (int) ($recruit['noruma_reward'] ?? 0)
+        );
+
+        return $recruit;
     }
 
     private function getRecruitData(string $shopId): array
@@ -636,6 +610,16 @@ class RecruitmentController extends Controller
         $shopTagGroups = $this->resolveShopInfoTagGroups($shopId);
 
         $meta = $this->decodeMeta($row->noruma_cond ?? null);
+        if ($row && Schema::hasColumn('shop_jobs', 'catch_copy') && trim((string) ($row->catch_copy ?? '')) !== '') {
+            $meta['catch_copy'] = trim((string) $row->catch_copy);
+        }
+        $jobContentResolved = '';
+        if ($row && Schema::hasColumn('shop_jobs', 'job_content')) {
+            $jobContentResolved = trim((string) ($row->job_content ?? ''));
+        }
+        if ($jobContentResolved === '') {
+            $jobContentResolved = trim((string) ($meta['job_content'] ?? ''));
+        }
         $primaryJobId = isset($row->primary_job_id) ? (int) $row->primary_job_id : 0;
         $primaryJobTagIds = $primaryJobId ? $this->getShopJobTagIdsByCategory($primaryJobId) : ['work_style' => [], 'welcome' => [], 'benefit' => []];
         $primaryJobTagNames = $this->resolveShopJobTagNames($primaryJobTagIds);
@@ -704,7 +688,7 @@ class RecruitmentController extends Controller
                 'working_hours' => $workingHours,
                 'working_days' => $workingDays,
                 'regular_holiday' => $regularHoliday,
-                'job_content' => '',
+                'job_content' => $jobContentResolved,
                 'store_atmosphere' => $row->atmosphere ?? '',
                 'qualification' => $qualification ?: '18歳以上（高校生不可）',
                 'catch_copy' => $meta['catch_copy'] ?? '',
@@ -723,6 +707,19 @@ class RecruitmentController extends Controller
                 'status' => ((int) ($row->status ?? 1)) === 1 ? 'active' : 'inactive',
                 'updated_at' => !empty($row->updated_at) ? date('Y.m.d', strtotime($row->updated_at)) : null,
             ];
+        $shiftWage = $this->shiftAndWageMaxFromShopJobRow($row);
+        if ($multi) {
+            if ($trialRow && Schema::hasColumn('shop_jobs', 'trial_hourly_wage_max')
+                && isset($trialRow->trial_hourly_wage_max) && $trialRow->trial_hourly_wage_max !== null && $trialRow->trial_hourly_wage_max !== '') {
+                $shiftWage['trial_hourly_wage_max'] = (int) $trialRow->trial_hourly_wage_max;
+            }
+            if ($helpRow && Schema::hasColumn('shop_jobs', 'help_hourly_wage_max')
+                && isset($helpRow->help_hourly_wage_max) && $helpRow->help_hourly_wage_max !== null && $helpRow->help_hourly_wage_max !== '') {
+                $shiftWage['help_hourly_wage_max'] = (int) $helpRow->help_hourly_wage_max;
+            }
+        }
+        $recruitBase = array_merge($recruitBase, $shiftWage);
+        $recruitBase = $this->attachCatchHeroOverlay($recruitBase);
 
         $shopPost = DB::table('shop_posts')
             ->where('shop_id', $shopId)
@@ -1150,6 +1147,8 @@ class RecruitmentController extends Controller
             'status' => $regStat === 1 ? 'active' : 'inactive',
             'updated_at' => $row && !empty($row->updated_at) ? date('Y.m.d', strtotime($row->updated_at)) : null,
         ];
+        $base = array_merge($base, $this->shiftAndWageMaxFromShopJobRow($row));
+        $base = $this->attachCatchHeroOverlay($base);
 
         $trialOut = $base;
         $trialOut['status'] = $trialStat === 1 ? 'active' : 'inactive';
@@ -1192,36 +1191,245 @@ class RecruitmentController extends Controller
         ];
     }
 
-    private function updateHorizontal(Request $request)
+    private function formatTimeHhmm(mixed $value): string
     {
-        $jobKind = (string) $request->input('recruit_job_kind', 'fulltime');
-        if (!in_array($jobKind, ['fulltime', 'trial', 'help'], true)) {
-            $jobKind = 'fulltime';
+        if ($value === null || $value === '') {
+            return '';
+        }
+        $s = (string) $value;
+
+        return preg_match('/^(\d{2}:\d{2})/', $s, $m) ? $m[1] : '';
+    }
+
+    /**
+     * @return array{
+     *   regular_hourly_wage_max: int|null,
+     *   trial_hourly_wage_max: int|null,
+     *   help_hourly_wage_max: int|null,
+     *   shift_time_start: string,
+     *   shift_time_end: string,
+     *   shift_end_is_last: bool
+     * }
+     */
+    private function shiftAndWageMaxFromShopJobRow(?object $row): array
+    {
+        $out = [
+            'regular_hourly_wage_max' => null,
+            'trial_hourly_wage_max' => null,
+            'help_hourly_wage_max' => null,
+            'shift_time_start' => '',
+            'shift_time_end' => '',
+            'shift_end_is_last' => false,
+        ];
+        if (!$row) {
+            return $out;
+        }
+        foreach (['regular_hourly_wage_max', 'trial_hourly_wage_max', 'help_hourly_wage_max'] as $c) {
+            if (Schema::hasColumn('shop_jobs', $c) && isset($row->{$c}) && $row->{$c} !== null && $row->{$c} !== '') {
+                $out[$c] = (int) $row->{$c};
+            }
+        }
+        if (Schema::hasColumn('shop_jobs', 'shift_time_start')) {
+            $out['shift_time_start'] = $this->formatTimeHhmm($row->shift_time_start ?? null);
+        }
+        if (Schema::hasColumn('shop_jobs', 'shift_time_end')) {
+            $out['shift_time_end'] = $this->formatTimeHhmm($row->shift_time_end ?? null);
+        }
+        if (Schema::hasColumn('shop_jobs', 'shift_end_is_last')) {
+            $out['shift_end_is_last'] = (bool) (int) ($row->shift_end_is_last ?? 0);
         }
 
-        $wageRules = match ($jobKind) {
-            'fulltime' => [
-                'regular_hourly_wage' => 'required|integer|min:0',
-                'trial_hourly_wage' => 'sometimes|nullable|integer|min:0',
-                'help_hourly_wage' => 'sometimes|nullable|integer|min:0',
-            ],
-            'trial' => [
-                'regular_hourly_wage' => 'sometimes|nullable|integer|min:0',
-                'trial_hourly_wage' => 'required|integer|min:0',
-                'help_hourly_wage' => 'sometimes|nullable|integer|min:0',
-            ],
-            default => [
-                'regular_hourly_wage' => 'sometimes|nullable|integer|min:0',
-                'trial_hourly_wage' => 'sometimes|nullable|integer|min:0',
-                'help_hourly_wage' => 'required|integer|min:0',
-            ],
-        };
+        return $out;
+    }
 
-        $data = $request->validate(array_merge([
-            'recruit_job_kind' => 'nullable|string|in:fulltime,trial,help',
+    private function composeWorkingHoursFromShiftRequest(Request $request): string
+    {
+        $start = trim((string) $request->input('shift_time_start', ''));
+        $endLast = $request->boolean('shift_end_is_last');
+        $end = trim((string) $request->input('shift_time_end', ''));
+        if (!preg_match('/^\d{2}:\d{2}$/', $start)) {
+            return '';
+        }
+        $endPart = $endLast ? 'LAST' : (preg_match('/^\d{2}:\d{2}$/', $end) ? $end : '');
+
+        return trim($start . ' 〜 ' . $endPart);
+    }
+
+    private function assertShiftEndValid(Request $request): void
+    {
+        if ($request->boolean('shift_end_is_last')) {
+            return;
+        }
+        $end = trim((string) $request->input('shift_time_end', ''));
+        if ($end === '' || !preg_match('/^\d{2}:\d{2}$/', $end)) {
+            throw ValidationException::withMessages([
+                'shift_time_end' => '終了時刻を入力するか、LAST を選択してください。',
+            ]);
+        }
+    }
+
+    private function applyShiftColumnsToPatch(array &$patch, Request $request): void
+    {
+        if (!Schema::hasColumn('shop_jobs', 'shift_time_start')) {
+            return;
+        }
+        $start = trim((string) $request->input('shift_time_start', ''));
+        $endLast = $request->boolean('shift_end_is_last') ? 1 : 0;
+        $end = trim((string) $request->input('shift_time_end', ''));
+        $patch['shift_time_start'] = preg_match('/^\d{2}:\d{2}$/', $start) ? ($start . ':00') : null;
+        $patch['shift_end_is_last'] = $endLast;
+        $patch['shift_time_end'] = (!$endLast && preg_match('/^\d{2}:\d{2}$/', $end)) ? ($end . ':00') : null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $patch
+     * @param  array<string, mixed>  $data
+     */
+    private function applyHourlyWageMaxToPatch(array &$patch, array $data): void
+    {
+        $map = [
+            'regular_hourly_wage_max' => 'regular_hourly_wage_max',
+            'trial_hourly_wage_max' => 'trial_hourly_wage_max',
+            'help_hourly_wage_max' => 'help_hourly_wage_max',
+        ];
+        foreach ($map as $col => $key) {
+            if (!Schema::hasColumn('shop_jobs', $col)) {
+                continue;
+            }
+            $raw = $data[$key] ?? null;
+            if ($raw === null || $raw === '') {
+                $patch[$col] = null;
+            } else {
+                $patch[$col] = (string) (int) $raw;
+            }
+        }
+    }
+
+    private function updateVerticalMultiTypes(Request $request)
+    {
+        $shopId = $this->currentShopId();
+
+        $data = $request->validate([
             'catch_copy' => 'required|string|max:100',
             'message' => 'required|string|max:1000',
-            'job_content' => 'required|string|max:2000',
+            'job_content' => 'nullable|string|max:2000',
+            'noruma_reward' => 'nullable|integer|min:0',
+            'bonus_condition' => 'nullable|string|max:1000',
+            'bonus_total_working_days' => 'nullable|integer|min:0',
+            'bonus_total_working_hours' => 'nullable|integer|min:0',
+            'bonus_other_conditions' => 'nullable|string|max:1000',
+            'salary_text' => 'nullable|string|max:1000',
+            'working_days' => 'required|string|max:255',
+            'regular_holiday' => 'nullable|string|max:255',
+            'qualification' => 'required|string|max:255',
+            'hourly_wage_regular' => 'nullable|integer|min:0',
+            'trial_hourly_wage' => 'required|integer|min:0',
+            'trial_hourly_wage_max' => 'nullable|integer|min:0',
+            'help_hourly_wage' => 'required|integer|min:0',
+            'help_hourly_wage_max' => 'nullable|integer|min:0',
+            'shift_time_start' => ['required', 'regex:/^\d{2}:\d{2}$/'],
+            'shift_time_end' => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
+            'shift_end_is_last' => 'nullable|boolean',
+            'work_style_tag_ids' => 'nullable|array',
+            'work_style_tag_ids.*' => 'integer|exists:shop_tags,id',
+            'welcome_tag_ids' => 'nullable|array',
+            'welcome_tag_ids.*' => 'integer|exists:shop_tags,id',
+            'benefit_tag_ids' => 'nullable|array',
+            'benefit_tag_ids.*' => 'integer|exists:shop_tags,id',
+        ]);
+
+        $this->assertShiftEndValid($request);
+        $data['working_hours'] = $this->composeWorkingHoursFromShiftRequest($request);
+
+        $bonusOther = trim((string) ($request->input('bonus_other_conditions', $data['bonus_condition'] ?? '')));
+        $payloadCommon = array_merge($this->getRecruitMeta($shopId), [
+            'catch_copy' => $data['catch_copy'],
+            'job_content' => trim((string) ($data['job_content'] ?? '')),
+            'bonus_condition' => $bonusOther,
+            'bonus_total_working_days' => $request->filled('bonus_total_working_days') ? (int) $request->input('bonus_total_working_days') : null,
+            'bonus_total_working_hours' => $request->filled('bonus_total_working_hours') ? (int) $request->input('bonus_total_working_hours') : null,
+            'bonus_other_conditions' => $bonusOther,
+            'working_hours' => $data['working_hours'],
+            'working_days' => $data['working_days'],
+            'regular_holiday' => $data['regular_holiday'] ?? '',
+            'qualification' => $data['qualification'],
+        ]);
+        unset($payloadCommon['message'], $payloadCommon['tag_ids']);
+
+        $jobTagsPayload = [
+            'work_style' => $request->input('work_style_tag_ids', []),
+            'welcome'    => $request->input('welcome_tag_ids', []),
+            'benefit'    => $request->input('benefit_tag_ids', []),
+        ];
+
+        $payloadTrial = array_merge($this->getRecruitMetaForJobType($shopId, 2), $payloadCommon);
+        $jobPayloadTrial = $this->buildJobPayloadFromValidated($request, $shopId, $data, $payloadTrial, $request->boolean('published_trial'));
+        $this->applyShiftColumnsToPatch($jobPayloadTrial, $request);
+        $this->applyHourlyWageMaxToPatch($jobPayloadTrial, $data);
+        $trialJobId = $this->upsertShopJobRow($shopId, 2, $jobPayloadTrial, $data, 'trial');
+
+        $payloadHelp = array_merge($this->getRecruitMetaForJobType($shopId, 3), $payloadCommon);
+        $jobPayloadHelp = $this->buildJobPayloadFromValidated($request, $shopId, $data, $payloadHelp, $request->boolean('published_help'));
+        $this->applyShiftColumnsToPatch($jobPayloadHelp, $request);
+        $this->applyHourlyWageMaxToPatch($jobPayloadHelp, $data);
+        $helpJobId = $this->upsertShopJobRow($shopId, 3, $jobPayloadHelp, $data, 'help');
+
+        $this->syncShopJobTags($trialJobId, $jobTagsPayload);
+        $this->syncShopJobTags($helpJobId, $jobTagsPayload);
+
+        $mainSync = [
+            'has_trial' => 1,
+            'has_help' => 1,
+            'trial_hourly_wage' => (string) $data['trial_hourly_wage'],
+            'help_hourly_wage' => (string) $data['help_hourly_wage'],
+            'updated_at' => now(),
+        ];
+        if (array_key_exists('hourly_wage_regular', $data) && $data['hourly_wage_regular'] !== null && (int) $data['hourly_wage_regular'] > 0) {
+            $mainSync['hourly_wage_regular'] = (string) $data['hourly_wage_regular'];
+        }
+        if (Schema::hasColumn('shop_jobs', 'trial_hourly_wage_max')) {
+            $mainSync['trial_hourly_wage_max'] = isset($data['trial_hourly_wage_max']) && $data['trial_hourly_wage_max'] !== null && $data['trial_hourly_wage_max'] !== ''
+                ? (string) (int) $data['trial_hourly_wage_max'] : null;
+        }
+        if (Schema::hasColumn('shop_jobs', 'help_hourly_wage_max')) {
+            $mainSync['help_hourly_wage_max'] = isset($data['help_hourly_wage_max']) && $data['help_hourly_wage_max'] !== null && $data['help_hourly_wage_max'] !== ''
+                ? (string) (int) $data['help_hourly_wage_max'] : null;
+        }
+        $this->applyShiftColumnsToPatch($mainSync, $request);
+        if (Schema::hasColumn('shop_jobs', 'working_hours')) {
+            $mainSync['working_hours'] = $data['working_hours'];
+        }
+        if (Schema::hasColumn('shop_jobs', 'working_day')) {
+            $mainSync['working_day'] = $data['working_days'];
+        }
+
+        DB::table('shop_jobs')
+            ->where('shop_id', $shopId)
+            ->where('job_type', 1)
+            ->update($mainSync);
+
+        return redirect()
+            ->to(route('shop.recruits.edit'))
+            ->with('message', '求人情報を保存しました');
+    }
+
+    private function updateHorizontal(Request $request)
+    {
+        $usesMulti = $this->shopJobsUseMultipleTypes();
+
+        $wageRules = [
+            'regular_hourly_wage' => 'required|integer|min:0',
+            'regular_hourly_wage_max' => 'nullable|integer|min:0',
+            'trial_hourly_wage' => $usesMulti ? 'nullable|integer|min:0' : 'nullable|integer|min:0',
+            'trial_hourly_wage_max' => 'nullable|integer|min:0',
+            'help_hourly_wage' => $usesMulti ? 'nullable|integer|min:0' : 'nullable|integer|min:0',
+            'help_hourly_wage_max' => 'nullable|integer|min:0',
+        ];
+
+        $data = $request->validate(array_merge([
+            'catch_copy' => 'required|string|max:100',
+            'message' => 'required|string|max:1000',
+            'job_content' => 'nullable|string|max:2000',
             'bonus_reward' => 'nullable|integer|min:0',
             'noruma_reward' => 'nullable|integer|min:0',
             'bonus_condition' => 'nullable|string|max:1000',
@@ -1230,10 +1438,12 @@ class RecruitmentController extends Controller
             'bonus_other_conditions' => 'nullable|string|max:1000',
             'bonus_remarks' => 'nullable|string|max:255',
             'salary_text' => 'nullable|string|max:1000',
-            'working_hours' => 'required|string|max:255',
             'working_days' => 'required|string|max:255',
             'regular_holiday' => 'nullable|string|max:255',
             'qualification' => 'required|string|max:255',
+            'shift_time_start' => ['required', 'regex:/^\d{2}:\d{2}$/'],
+            'shift_time_end' => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
+            'shift_end_is_last' => 'nullable|boolean',
             'work_style_tag_ids' => 'nullable|array',
             'work_style_tag_ids.*' => 'integer|exists:shop_tags,id',
             'welcome_tag_ids' => 'nullable|array',
@@ -1241,6 +1451,9 @@ class RecruitmentController extends Controller
             'benefit_tag_ids' => 'nullable|array',
             'benefit_tag_ids.*' => 'integer|exists:shop_tags,id',
         ], $wageRules));
+
+        $this->assertShiftEndValid($request);
+        $data['working_hours'] = $this->composeWorkingHoursFromShiftRequest($request);
 
         $shopId = $this->currentShopId();
         $bonusAmt = (int) ($data['bonus_reward'] ?? $data['noruma_reward'] ?? 0);
@@ -1298,37 +1511,29 @@ class RecruitmentController extends Controller
             $patch['hours_day'] = $normaHours;
         }
 
-        $pub = $request->boolean('published') ? 1 : 0;
+        if (Schema::hasColumn('shop_jobs', 'regular_hourly_wage')) {
+            $patch['regular_hourly_wage'] = (string) $data['regular_hourly_wage'];
+        }
+        if (Schema::hasColumn('shop_jobs', 'trial_hourly_wage')) {
+            $patch['trial_hourly_wage'] = isset($data['trial_hourly_wage']) && $data['trial_hourly_wage'] !== null && (string) $data['trial_hourly_wage'] !== ''
+                ? (string) (int) $data['trial_hourly_wage'] : null;
+        }
+        if (Schema::hasColumn('shop_jobs', 'help_hourly_wage')) {
+            $patch['help_hourly_wage'] = isset($data['help_hourly_wage']) && $data['help_hourly_wage'] !== null && (string) $data['help_hourly_wage'] !== ''
+                ? (string) (int) $data['help_hourly_wage'] : null;
+        }
 
-        if ($jobKind === 'fulltime') {
-            if (Schema::hasColumn('shop_jobs', 'regular_hourly_wage')) {
-                $patch['regular_hourly_wage'] = (string) $data['regular_hourly_wage'];
-            }
-            if (Schema::hasColumn('shop_jobs', 'regular_status')) {
-                $patch['regular_status'] = $pub;
-            } elseif (Schema::hasColumn('shop_jobs', 'status')) {
-                $patch['status'] = $pub;
-            }
-            if (array_key_exists('trial_hourly_wage', $data) && Schema::hasColumn('shop_jobs', 'trial_hourly_wage')) {
-                $patch['trial_hourly_wage'] = $data['trial_hourly_wage'] !== null ? (string) $data['trial_hourly_wage'] : null;
-            }
-            if (array_key_exists('help_hourly_wage', $data) && Schema::hasColumn('shop_jobs', 'help_hourly_wage')) {
-                $patch['help_hourly_wage'] = $data['help_hourly_wage'] !== null ? (string) $data['help_hourly_wage'] : null;
-            }
-        } elseif ($jobKind === 'trial') {
-            if (Schema::hasColumn('shop_jobs', 'trial_hourly_wage')) {
-                $patch['trial_hourly_wage'] = (string) $data['trial_hourly_wage'];
-            }
-            if (Schema::hasColumn('shop_jobs', 'trial_status')) {
-                $patch['trial_status'] = $pub;
-            }
-        } else {
-            if (Schema::hasColumn('shop_jobs', 'help_hourly_wage')) {
-                $patch['help_hourly_wage'] = (string) $data['help_hourly_wage'];
-            }
-            if (Schema::hasColumn('shop_jobs', 'help_status')) {
-                $patch['help_status'] = $pub;
-            }
+        $this->applyHourlyWageMaxToPatch($patch, $data);
+        $this->applyShiftColumnsToPatch($patch, $request);
+
+        if (Schema::hasColumn('shop_jobs', 'regular_status')) {
+            $patch['regular_status'] = $request->boolean('published_regular') ? 1 : 0;
+        }
+        if (Schema::hasColumn('shop_jobs', 'trial_status')) {
+            $patch['trial_status'] = $request->boolean('published_trial') ? 1 : 0;
+        }
+        if (Schema::hasColumn('shop_jobs', 'help_status')) {
+            $patch['help_status'] = $request->boolean('published_help') ? 1 : 0;
         }
 
         $existing = DB::table('shop_jobs')->where('shop_id', $shopId)->first();
@@ -1343,22 +1548,14 @@ class RecruitmentController extends Controller
             $jobId = (int) $existing->id;
         }
 
-        if ($jobKind === 'fulltime') {
-            $this->syncShopJobTags($jobId, [
-                'work_style' => $request->input('work_style_tag_ids', []),
-                'welcome'    => $request->input('welcome_tag_ids', []),
-                'benefit'    => $request->input('benefit_tag_ids', []),
-            ]);
-        }
-
-        $redirectType = match ($jobKind) {
-            'help' => '?type=help',
-            'trial' => '?type=trial',
-            default => '?type=fulltime',
-        };
+        $this->syncShopJobTags($jobId, [
+            'work_style' => $request->input('work_style_tag_ids', []),
+            'welcome'    => $request->input('welcome_tag_ids', []),
+            'benefit'    => $request->input('benefit_tag_ids', []),
+        ]);
 
         return redirect()
-            ->to(route('shop.recruits.edit') . $redirectType)
+            ->to(route('shop.recruits.edit'))
             ->with('message', '求人情報を保存しました');
     }
 

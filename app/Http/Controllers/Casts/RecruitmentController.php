@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Casts;
 
 use App\Http\Controllers\Controller;
+use App\Support\RecruitCatchOverlay;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -306,6 +307,14 @@ class RecruitmentController extends Controller
                 '設備・アクセス' => $shopTagNames['facility'],
             ],
         ];
+        $recruit['catch_hero_overlay'] = RecruitCatchOverlay::buildFromMeta(
+            [
+                'catch_copy' => $recruit['catch_copy'] ?? '',
+                'bonus_condition' => $recruit['bonus_condition'] ?? '',
+                'bonus_other_conditions' => $recruit['bonus_other_conditions'] ?? '',
+            ],
+            (int) ($recruit['noruma_reward'] ?? 0)
+        );
 
         $mainImg = $this->imageUrl($row->main_image_path);
         $subImagesRows = DB::table('shop_images')
@@ -382,7 +391,10 @@ class RecruitmentController extends Controller
     {
         $shopName = $data['shop']['name'] ?? $data['recruit']['store_name'] ?? '店舗';
         $shareUrl = route('share.recruit.show', ['id' => $id]);
-        $shareText = trim((string) ($data['recruit']['catch_copy'] ?? $data['recruit']['message'] ?? ''));
+        $shareText = trim((string) ($data['recruit']['catch_copy'] ?? ''));
+        if ($shareText === '') {
+            $shareText = trim((string) ($data['recruit']['message'] ?? ''));
+        }
 
         if ($shareText === '') {
             $shareText = 'ミセチョクの求人情報です。';
@@ -702,6 +714,14 @@ class RecruitmentController extends Controller
             'status' => $regStat === 1 ? 'active' : 'inactive',
             'updated_at' => $row && !empty($row->updated_at) ? date('Y.m.d', strtotime($row->updated_at)) : null,
         ];
+        $base['catch_hero_overlay'] = RecruitCatchOverlay::buildFromMeta(
+            [
+                'catch_copy' => $base['catch_copy'] ?? '',
+                'bonus_condition' => $base['bonus_condition'] ?? '',
+                'bonus_other_conditions' => $base['bonus_other_conditions'] ?? '',
+            ],
+            (int) ($base['noruma_reward'] ?? 0)
+        );
 
         $trialOut = $base;
         $trialOut['status'] = $trialStat === 1 ? 'active' : 'inactive';

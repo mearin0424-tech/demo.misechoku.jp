@@ -4,8 +4,19 @@
 @section('body-class', $bodyClass)
 @section('guide_message', $guideMessage)
 
+@if ($role === 'cast')
+@push('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+<link rel="stylesheet" href="{{ asset('assets/css/register-cast-profile-crop.css') }}">
+@endpush
+@endif
+
 @push('scripts')
     <script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
+    @if ($role === 'cast')
+    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+    <script src="{{ asset('assets/js/register-cast-profile-crop.js') }}"></script>
+    @endif
 @endpush
 
 @section('content')
@@ -266,8 +277,8 @@
                     </div>
                     <label class="register-field">
                         <span>メイン画像 <em>必須</em></span>
-                        <input type="file" name="profile_image" accept="image/jpeg,image/png,image/gif,image/webp" required>
-                        <small class="register-field-hint">顔が分かる画像を1枚アップロードしてください。（JPEG / PNG / GIF / WebP、最大2MB）</small>
+                        <input type="file" id="cast-register-profile-image" name="profile_image" accept="image/jpeg,image/png,image/gif,image/webp" required>
+                        <small class="register-field-hint">顔が分かる画像を1枚選び、次の画面で<strong>縦長（3:4）</strong>の範囲を調整してから登録してください。（JPEG / PNG / GIF / WebP、最大2MB）</small>
                     </label>
                 </section>
             @else
@@ -461,6 +472,24 @@
             </div>
         </form>
     </div>
+
+    @if ($role === 'cast')
+    <div id="register-cast-crop-modal" class="register-cast-crop-overlay" role="dialog" aria-modal="true" aria-labelledby="register-cast-crop-title" style="display:none;">
+        <div class="register-cast-crop-inner">
+            <div>
+                <h3 id="register-cast-crop-title">プロフィール画像の調整</h3>
+                <p class="register-cast-crop-guide">表示枠は縦長（3:4）です。ズームや位置を調整し、「この画像で続ける」を押すと登録フォームに反映されます。</p>
+            </div>
+            <div class="register-cast-crop-frame">
+                <img id="register-cast-crop-preview" src="" alt="">
+            </div>
+            <div class="register-cast-crop-actions">
+                <button type="button" class="register-cast-crop-btn-secondary" id="register-cast-crop-cancel">別の画像を選ぶ</button>
+                <button type="button" class="register-cast-crop-btn-primary" id="register-cast-crop-confirm">この画像で続ける</button>
+            </div>
+        </div>
+    </div>
+    @endif
 
     <style>
         body.page-auth-register #bottom-nav,

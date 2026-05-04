@@ -22,16 +22,14 @@
         }
     }
     $vMessageBody = trim((string) ($rv['message'] ?? ''));
-    if ($vMessageBody === '') {
-        $vMessageBody = trim((string) ($rv['catch_copy'] ?? ''));
-    }
+    $vJobSupplement = trim((string) ($rv['job_content'] ?? ''));
     $vSalaryNotes = trim((string) ($rv['salary_text'] ?? ''));
     $vHelpNotes = trim((string) ($rv['help_job_content'] ?? ''));
 @endphp
 
 <section id="section-message-{{ $vk }}">
-    <h2 class="recruit-ref-h2"><i class="fas fa-comment-dots"></i> お店からのメッセージ</h2>
-    <div class="recruit-ref-msg">{{ $vMessageBody !== '' ? $vMessageBody : 'メッセージは求人編集から入力できます。' }}</div>
+    <h2 class="recruit-ref-h2"><i class="fas fa-comment-dots"></i> 店長からのメッセージ</h2>
+    <div class="recruit-ref-msg">{{ $vMessageBody !== '' ? $vMessageBody : '店長からのメッセージは求人編集から入力できます。' }}</div>
 
     @if(!empty($shareUrlResolved ?? null))
         <div class="recruit-ref-share-row">
@@ -123,3 +121,10 @@
         @endif
     </div>
 </section>
+
+@if($vJobSupplement !== '')
+<section id="section-job-supplement-{{ $vk }}" class="recruit-ref-job-supplement">
+    <h2 class="recruit-ref-h2"><i class="fas fa-briefcase"></i> お仕事内容について補足</h2>
+    <div class="recruit-ref-msg recruit-ref-msg--pre">{!! nl2br(e($vJobSupplement)) !!}</div>
+</section>
+@endif

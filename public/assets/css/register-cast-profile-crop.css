@@ -1,0 +1,88 @@
+/* キャスト新規登録：プロフィール画像の縦長（3:4）トリミングモーダル */
+#register-cast-crop-modal.register-cast-crop-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 4000;
+    background: rgba(0, 0, 0, 0.88);
+    justify-content: center;
+    align-items: center;
+    padding: max(12px, 16px);
+    box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.register-cast-crop-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 95%;
+}
+
+.register-cast-crop-inner h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #fff4d6;
+}
+
+.register-cast-crop-guide {
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: rgba(246, 217, 139, 0.88);
+    margin: 0;
+}
+
+.register-cast-crop-frame {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+    aspect-ratio: 3 / 4;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+}
+
+#register-cast-crop-preview {
+    display: block;
+    max-width: 100%;
+}
+
+.register-cast-crop-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.register-cast-crop-actions button {
+    min-width: 120px;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+}
+
+.register-cast-crop-btn-secondary {
+    border: 1px solid rgba(229, 193, 88, 0.26);
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff4d6;
+}
+
+.register-cast-crop-btn-primary {
+    background: linear-gradient(135deg, #f4df9c, #c99722);
+    color: #2a1208;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+}
+
+.register-cast-crop-btn-primary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}

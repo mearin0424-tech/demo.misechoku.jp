@@ -92,6 +92,59 @@
     .recruit-ref-hero { position: relative; margin: 0; height: 16rem; overflow: hidden; background: #18181b; }
     .recruit-ref-hero img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
     .recruit-ref-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, #0a0a0a 0%, rgba(10,10,10,.4) 50%, transparent 100%); pointer-events: none; z-index: 2; }
+
+    /* メイン画像上：キャッチコピー（ホーム求人カードと同系統） */
+    .recruit-ref-catch-hero {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        z-index: 5;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 36px 12px 0;
+        pointer-events: none;
+        box-sizing: border-box;
+    }
+    .recruit-ref-catch-hero__backdrop {
+        display: block;
+        max-width: 96%;
+        padding: 10px 14px 12px;
+        border-radius: 12px;
+        text-align: center;
+        background: linear-gradient(180deg, rgba(0,0,0,.92) 0%, rgba(0,0,0,.78) 45%, rgba(0,0,0,.52) 100%);
+        box-shadow: 0 4px 20px rgba(0,0,0,.35);
+    }
+    .recruit-ref-catch-hero__line1,
+    .recruit-ref-catch-hero__line2 {
+        margin: 0;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: 0.02em;
+        line-height: 1.35;
+        text-shadow: 0 1px 2px rgba(0,0,0,.45);
+    }
+    .recruit-ref-catch-hero__line1 { font-size: clamp(0.82rem, 3.6vw, 1.05rem); }
+    .recruit-ref-catch-hero__line2 { margin-top: 6px; font-size: clamp(0.72rem, 3.1vw, 0.92rem); font-weight: 700; opacity: 0.98; }
+    .recruit-ref-catch-hero .rc-msg-em { color: #f5e042; font-weight: 900; }
+    .recruit-ref-catch-hero__badge {
+        display: inline-block;
+        margin: 8px 0 0;
+        padding: 5px 12px;
+        font-size: 0.58rem;
+        font-weight: 700;
+        color: rgba(255,255,255,.96);
+        background: rgba(255,255,255,.1);
+        border: 1px solid rgba(255,255,255,.22);
+        border-radius: 9999px;
+        line-height: 1.35;
+        max-width: 100%;
+        box-sizing: border-box;
+        word-break: break-word;
+    }
+    .recruit-ref-job-supplement { margin-top: 8px; }
+    .recruit-ref-msg--pre { white-space: normal; }
     .recruit-ref-hero-carousel {
         display: flex;
         flex-flow: row nowrap;
@@ -312,6 +365,12 @@
     $hasHelp = !empty($recruit['help_hourly_wage']);
     $hasTrial = !empty($recruit['trial_hourly_wage']);
     $regularWage = (int) ($recruit['regular_hourly_wage'] ?? $recruit['hourly_wage_regular'] ?? 0);
+    $regularWageMax = isset($recruit['regular_hourly_wage_max']) && $recruit['regular_hourly_wage_max'] !== null && (int) $recruit['regular_hourly_wage_max'] > 0
+        ? (int) $recruit['regular_hourly_wage_max'] : null;
+    $trialWageMax = isset($recruit['trial_hourly_wage_max']) && $recruit['trial_hourly_wage_max'] !== null && (int) $recruit['trial_hourly_wage_max'] > 0
+        ? (int) $recruit['trial_hourly_wage_max'] : null;
+    $helpWageMax = isset($recruit['help_hourly_wage_max']) && $recruit['help_hourly_wage_max'] !== null && (int) $recruit['help_hourly_wage_max'] > 0
+        ? (int) $recruit['help_hourly_wage_max'] : null;
     $noruma = (int) ($recruit['bonus_reward'] ?? $recruit['noruma_reward'] ?? 0);
     $bonusDays = trim((string) ($recruit['bonus_total_working_days'] ?? $recruit['bonus_working_days'] ?? ''));
     $bonusHours = trim((string) ($recruit['bonus_total_working_hours'] ?? $recruit['bonus_working_hours'] ?? ''));
@@ -350,7 +409,9 @@
 
     $shareUrlResolved = $shareUrl ?? url()->current();
     $shareTitleResolved = ($shareTitle ?? (($recruit['store_name'] ?? ($shop['name'] ?? '店舗')) . 'の求人情報'));
-    $shareTextResolved = $shareText ?? ($recruit['message'] ?? '');
+    $shareTextResolved = $shareText ?? (trim((string) ($recruit['catch_copy'] ?? '')) !== ''
+        ? trim((string) $recruit['catch_copy'])
+        : trim((string) ($recruit['message'] ?? '')));
     $xShareUrl = 'https://twitter.com/intent/tweet?url=' . rawurlencode($shareUrlResolved) . '&text=' . rawurlencode(trim($shareTitleResolved . ' ' . $shareTextResolved));
     $lineShareUrl = 'https://social-plugins.line.me/lineit/share?url=' . rawurlencode($shareUrlResolved);
 
@@ -363,9 +424,7 @@
         '設備・アクセス' => '設備・アクセス',
     ];
     $messageBody = trim((string) ($recruit['message'] ?? ''));
-    if ($messageBody === '') {
-        $messageBody = trim((string) ($recruit['catch_copy'] ?? ''));
-    }
+    $jobSupplementMain = trim((string) ($recruit['job_content'] ?? ''));
 
     $salaryNotesMain = trim((string) ($recruit['salary_text'] ?? ''));
     $jobNotesHelp = trim((string) ($recruit['help_job_content'] ?? ''));
@@ -427,6 +486,47 @@
                         </div>
                     </div>
                 @endif
+                @if(!empty($usesJobTypes))
+                    @foreach(['trial' => $recruit_trial, 'help' => $recruit_help] as $vkHero => $rvHero)
+                        @php $coh = $rvHero['catch_hero_overlay'] ?? ['show' => false]; @endphp
+                        <div class="recruit-ref-catch-hero" data-recruit-catch-hero="{{ $vkHero }}" @if($vkHero !== 'trial') hidden @endif aria-label="キャッチコピー">
+                            @if(!empty($coh['show']))
+                                <div class="recruit-ref-catch-hero__backdrop">
+                                    <div>
+                                        @if(!empty($coh['line1_html']))
+                                            <p class="recruit-ref-catch-hero__line1">{!! $coh['line1_html'] !!}</p>
+                                        @endif
+                                        @if(!empty($coh['line2']))
+                                            <p class="recruit-ref-catch-hero__line2">{{ $coh['line2'] }}</p>
+                                        @endif
+                                        @if(!empty($coh['badge']))
+                                            <p class="recruit-ref-catch-hero__badge">{{ $coh['badge'] }}</p>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                @else
+                    @php $coh = $recruit['catch_hero_overlay'] ?? ['show' => false]; @endphp
+                    <div class="recruit-ref-catch-hero" data-recruit-catch-hero="single" aria-label="キャッチコピー">
+                        @if(!empty($coh['show']))
+                            <div class="recruit-ref-catch-hero__backdrop">
+                                <div>
+                                    @if(!empty($coh['line1_html']))
+                                        <p class="recruit-ref-catch-hero__line1">{!! $coh['line1_html'] !!}</p>
+                                    @endif
+                                    @if(!empty($coh['line2']))
+                                        <p class="recruit-ref-catch-hero__line2">{{ $coh['line2'] }}</p>
+                                    @endif
+                                    @if(!empty($coh['badge']))
+                                        <p class="recruit-ref-catch-hero__badge">{{ $coh['badge'] }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                @endif
                 <div class="recruit-ref-hero-overlay"></div>
                 @if(count($galleryImages) > 1)
                     <div class="recruit-ref-dots" id="recruit-hero-dots" role="tablist" aria-label="店舗写真の切り替え">
@@ -468,10 +568,6 @@
                     </div>
                 @endforeach
             @else
-                @if(!empty($recruit['catch_copy']))
-                    <p class="recruit-ref-catch">{{ $recruit['catch_copy'] }}</p>
-                @endif
-
                 @if($hasHelp)
                     <div class="recruit-job-toggle" id="recruit-job-toggle" role="tablist" aria-label="募集枠">
                         <button type="button" class="is-active" data-job-type="main">体験入店・本入店</button>
@@ -484,9 +580,20 @@
                         <span class="label">{{ $regularWage > 0 ? '本入時給' : ($hasTrial ? '体験時給' : '本入時給') }}</span>
                         <div class="line">
                             @if($regularWage > 0)
-                                <span class="yen">¥</span><span class="num">{{ number_format($regularWage) }}</span><span class="tilde">〜</span>
+                                <span class="yen">¥</span><span class="num">{{ number_format($regularWage) }}</span>
+                                @if($regularWageMax !== null && $regularWageMax > $regularWage)
+                                    <span class="tilde">〜</span><span class="yen">¥</span><span class="num">{{ number_format($regularWageMax) }}</span>
+                                @else
+                                    <span class="tilde">〜</span>
+                                @endif
                             @elseif($hasTrial)
-                                <span class="yen">¥</span><span class="num">{{ number_format((int) $recruit['trial_hourly_wage']) }}</span><span class="tilde">〜</span>
+                                @php $tw = (int) $recruit['trial_hourly_wage']; @endphp
+                                <span class="yen">¥</span><span class="num">{{ number_format($tw) }}</span>
+                                @if($trialWageMax !== null && $trialWageMax > $tw)
+                                    <span class="tilde">〜</span><span class="yen">¥</span><span class="num">{{ number_format($trialWageMax) }}</span>
+                                @else
+                                    <span class="tilde">〜</span>
+                                @endif
                             @else
                                 <span style="font-size:0.9rem;color:#71717a;font-weight:700;">求人編集で入力してください</span>
                             @endif
@@ -499,7 +606,13 @@
                         <div class="recruit-ref-pay-highlight">
                             <span class="label">ヘルプ時給</span>
                             <div class="line">
-                                <span class="yen">¥</span><span class="num">{{ number_format((int) $recruit['help_hourly_wage']) }}</span><span class="tilde">〜</span>
+                                @php $hw = (int) $recruit['help_hourly_wage']; @endphp
+                                <span class="yen">¥</span><span class="num">{{ number_format($hw) }}</span>
+                                @if($helpWageMax !== null && $helpWageMax > $hw)
+                                    <span class="tilde">〜</span><span class="yen">¥</span><span class="num">{{ number_format($helpWageMax) }}</span>
+                                @else
+                                    <span class="tilde">〜</span>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -524,8 +637,8 @@
                 @endforeach
             @else
                 <section id="section-message">
-                    <h2 class="recruit-ref-h2"><i class="fas fa-comment-dots"></i> お店からのメッセージ</h2>
-                    <div class="recruit-ref-msg">{{ $messageBody !== '' ? $messageBody : 'メッセージは求人編集から入力できます。' }}</div>
+                    <h2 class="recruit-ref-h2"><i class="fas fa-comment-dots"></i> 店長からのメッセージ</h2>
+                    <div class="recruit-ref-msg">{{ $messageBody !== '' ? $messageBody : '店長からのメッセージは求人編集から入力できます。' }}</div>
 
                     @if(!empty($shareUrlResolved ?? null))
                         <div class="recruit-ref-share-row">
@@ -649,6 +762,13 @@
                             @endif
                         </div>
                     @endif
+                </section>
+            @endif
+
+            @if(empty($usesJobTypes) && $jobSupplementMain !== '')
+                <section id="section-job-supplement" class="recruit-ref-job-supplement">
+                    <h2 class="recruit-ref-h2"><i class="fas fa-briefcase"></i> お仕事内容について補足</h2>
+                    <div class="recruit-ref-msg recruit-ref-msg--pre">{!! nl2br(e($jobSupplementMain)) !!}</div>
                 </section>
             @endif
 
@@ -785,6 +905,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
                     document.querySelectorAll('[data-variant-body]').forEach(function(el) {
                         el.hidden = el.getAttribute('data-variant-body') !== t;
+                    });
+                    document.querySelectorAll('[data-recruit-catch-hero]').forEach(function(el) {
+                        el.hidden = el.getAttribute('data-recruit-catch-hero') !== t;
                     });
                 } else {
                     document.querySelectorAll('[data-job-panel]').forEach(function(panel) {

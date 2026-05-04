@@ -166,7 +166,7 @@
             <div class="recruit-store-message">
                 <div class="recruit-store-message-head">
                     <div class="recruit-store-message-icon" aria-hidden="true"><i class="fas fa-quote-left"></i></div>
-                    <span class="recruit-store-message-label">お店からのひとこと</span>
+                    <span class="recruit-store-message-label">店長からのメッセージ</span>
                 </div>
                 <div class="recruit-store-message-inner">
                     <p class="recruit-store-message-text">{{ $recruit['message'] }}</p>

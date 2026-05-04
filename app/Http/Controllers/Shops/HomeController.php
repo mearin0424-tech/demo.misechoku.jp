@@ -4,6 +4,7 @@
 namespace App\Http\Controllers\Shops;
 
 use App\Http\Controllers\Controller;
+use App\Support\RecruitCatchOverlay;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -321,8 +322,7 @@ class HomeController extends Controller
             $offerHelp = $helpHourly !== null && $helpHourly > 0;
 
             $shopJobId = isset($row->shop_job_id) ? (int) $row->shop_job_id : 0;
-            $pr = Schema::hasColumn('shop_jobs', 'pr') ? trim((string) ($row->pr ?? '')) : '';
-            $managerOverlay = $this->buildManagerImageOverlay($meta, $pr, $mainBonus);
+            $managerOverlay = $this->buildManagerImageOverlay($meta, $mainBonus);
 
             $bonusLines = [
                 ['label' => '体入', 'amount' => $bonusTrial, 'offered' => $offerTrial],
@@ -443,7 +443,6 @@ class HomeController extends Controller
             $it['signup_bonus_range'] = $this->discoverySignupBonusRange($it['recruit_bonus_lines'] ?? []);
             $it['manager_overlay'] = $this->buildManagerImageOverlay(
                 $meta,
-                trim((string) ($it['pr'] ?? '')),
                 (int) ($it['noruma_reward'] ?? 0)
             );
 
@@ -497,85 +496,13 @@ class HomeController extends Controller
     }
 
     /**
-     * 画像中央「店長からのメッセージ」用（catch_copy / pr / ボーナス条件）
+     * 求人カード画像上のキャッチ表示（ディスカバリー用：catch_copy のみ。pr・ボーナス条件バッジは出さない）
      *
      * @return array{show: bool, line1_html: string, line2: string, badge: string}
      */
-    private function buildManagerImageOverlay(array $meta, string $pr, int $norumaReward): array
+    private function buildManagerImageOverlay(array $meta, int $norumaReward): array
     {
-        $catch = trim((string) ($meta['catch_copy'] ?? ''));
-        $line1 = '';
-        $line2 = '';
-        if ($catch !== '') {
-            $parts = preg_split("/\r\n|\r|\n/u", $catch, 2);
-            $line1 = trim((string) ($parts[0] ?? ''));
-            $line2 = trim((string) ($parts[1] ?? ''));
-        }
-        if ($line2 === '' && $pr !== '') {
-            $line2 = $pr;
-        }
-        if ($line1 === '' && $line2 !== '') {
-            $line1 = $line2;
-            $line2 = '';
-        }
-        $line1 = mb_strimwidth($line1, 0, 80, '…');
-        $line2 = $line2 !== '' ? mb_strimwidth($line2, 0, 72, '…') : '';
-
-        $bonusTxt = trim((string) ($meta['bonus_other_conditions'] ?? $meta['bonus_condition'] ?? ''));
-        $badge = $bonusTxt !== '' ? mb_strimwidth($bonusTxt, 0, 56, '…') : '';
-        if ($badge !== '' && (str_contains($badge, 'ご利用プラン') || str_contains($badge, '利用プラン'))) {
-            $badge = '';
-        }
-        if ($badge === '' && $norumaReward > 0) {
-            $badge = '💰 入店祝い金 ¥' . number_format($norumaReward) . '〜';
-        }
-
-        if ($line2 !== '' && str_contains($line2, 'ご利用プラン')) {
-            $line2 = '';
-        }
-        if ($line1 !== '' && str_contains($line1, 'ご利用プラン')) {
-            $line1 = '';
-        }
-        if ($line1 === '' && $line2 !== '') {
-            $line1 = $line2;
-            $line2 = '';
-        }
-
-        $show = $line1 !== '' || $line2 !== '' || $badge !== '';
-
-        return [
-            'show' => $show,
-            'line1_html' => $this->formatCatchCopyHighlights($line1),
-            'line2' => $line2,
-            'badge' => $badge,
-        ];
-    }
-
-    /**
-     * catch_copy 内の **強調** を黄色表示用の span に変換（Blade で {!! !!} 利用前提）
-     */
-    private function formatCatchCopyHighlights(string $line): string
-    {
-        if ($line === '') {
-            return '';
-        }
-        if (!preg_match('/\*\*.+?\*\*/us', $line)) {
-            return e($line);
-        }
-        $segments = preg_split('/(\*\*.+?\*\*)/us', $line, -1, PREG_SPLIT_DELIM_CAPTURE);
-        $out = '';
-        foreach ($segments as $seg) {
-            if ($seg === '') {
-                continue;
-            }
-            if (preg_match('/^\*\*(.+)\*\*$/us', $seg, $m)) {
-                $out .= '<span class="rc-msg-em">' . e($m[1]) . '</span>';
-            } else {
-                $out .= e($seg);
-            }
-        }
-
-        return $out;
+        return RecruitCatchOverlay::buildFromMeta($meta, $norumaReward, true);
     }
 
     private function toNumericShopId(string $shopId): int

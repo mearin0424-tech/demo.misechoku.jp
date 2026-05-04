@@ -95,6 +95,16 @@
         color: var(--je-gold);
         line-height: 1.2;
     }
+    .job-edit-v2__opt {
+        font-size: 8px;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: rgba(113, 113, 122, 0.2);
+        border: 1px solid rgba(113, 113, 122, 0.45);
+        color: #a1a1aa;
+        line-height: 1.2;
+    }
     .job-edit-v2__input,
     .job-edit-v2__textarea {
         width: 100%;
@@ -190,32 +200,73 @@
         color: #9ca3af;
     }
 
-    /* ── タブ ─────────────────────────────── */
-    .job-edit-v2__kind-tabs {
-        display: flex;
-        gap: 0;
-        padding: 16px 16px 0;
-        background: var(--je-panel);
-        border-bottom: 1px solid var(--je-border);
+    /* ── 本入・体験・ヘルプ（開閉メニュー） ─ */
+    .job-edit-v2__kind-details {
+        margin: 24px 16px 0;
+        border: 1px solid var(--je-border);
+        border-radius: 12px;
+        background: #0c0c0c;
+        overflow: hidden;
     }
-    .job-edit-v2__kind-tabs a {
-        flex: 1;
-        text-align: center;
-        padding: 10px 6px;
-        font-size: 0.78rem;
+    .job-edit-v2__kind-summary {
+        list-style: none;
+        padding: 14px 16px;
+        cursor: pointer;
+        font-size: 0.8125rem;
         font-weight: 800;
-        text-decoration: none;
+        color: #e4e4e7;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        user-select: none;
+    }
+    .job-edit-v2__kind-summary::-webkit-details-marker { display: none; }
+    .job-edit-v2__kind-summary::after {
+        content: '\f078';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        font-size: 0.65rem;
         color: #71717a;
-        border-bottom: 2px solid transparent;
-        letter-spacing: 0.04em;
-        transition: color 0.15s ease, border-color 0.15s ease;
+        transition: transform 0.2s ease;
     }
-    .job-edit-v2__kind-tabs a.is-active {
+    .job-edit-v2__kind-details[open] .job-edit-v2__kind-summary::after {
+        transform: rotate(180deg);
+    }
+    .job-edit-v2__kind-body {
+        padding: 0 20px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+        border-top: 1px solid #1f1a14;
+    }
+    .job-edit-v2__kind-subtitle {
+        margin: 0 0 10px;
+        font-size: 0.7rem;
+        font-weight: 800;
         color: var(--je-gold);
-        border-bottom-color: var(--je-gold);
+        letter-spacing: 0.08em;
     }
+    .job-edit-v2__shift-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        align-items: end;
+    }
+    @media (max-width: 360px) {
+        .job-edit-v2__shift-grid { grid-template-columns: 1fr; }
+    }
+    .job-edit-v2__shift-last {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+        font-size: 0.75rem;
+        color: #a1a1aa;
+        cursor: pointer;
+    }
+    .job-edit-v2__shift-last input { width: auto; accent-color: var(--je-gold); }
 
-    /* ── タブパネル（タブごとの内容） ─────── */
+    /* ── タブパネル相当（旧クラス互換） ───── */
     .job-edit-v2__tab-panel {
         padding: 0 20px;
         display: flex;
@@ -377,16 +428,20 @@
 @section('content')
 @php
     $horizontal = !empty($horizontalShopJobs);
-    $isTrialActive = ($recruitTrial['status'] ?? 'active') === 'active';
-    $isHelpActive  = ($recruitHelp['status']  ?? 'active') === 'active';
-    $rt = $recruitType ?? (!empty($usesJobTypes) && $usesJobTypes ? ($horizontal ? 'fulltime' : 'trial') : 'fulltime');
-    if (!empty($usesJobTypes) && $usesJobTypes && !$horizontal && $rt === 'fulltime') {
-        $rt = 'trial';
+    $isTrialActive = (($recruitTrial ?? [])['status'] ?? 'active') === 'active';
+    $isHelpActive  = (($recruitHelp ?? [])['status']  ?? 'active') === 'active';
+    if ($horizontal) {
+        $pubReg = ((int) ($recruit['regular_status'] ?? 0)) === 1;
+        $pubTrial = ((int) ($recruit['trial_status'] ?? 0)) === 1;
+        $pubHelp = ((int) ($recruit['help_status'] ?? 0)) === 1;
+    } else {
+        $pubReg = (($recruit['status'] ?? 'inactive') === 'active');
+        $pubTrial = $isTrialActive;
+        $pubHelp = $isHelpActive;
     }
-    // ヘルプタブで「コピー元」として使う体験入店タグID（横持ち時は本入と同一行のタグ）
-    $trialWorkStyleIds = array_map('intval', $recruitTrial['work_style_tag_ids'] ?? []);
-    $trialWelcomeIds   = array_map('intval', $recruitTrial['welcome_tag_ids'] ?? []);
-    $trialBenefitIds   = array_map('intval', $recruitTrial['benefit_tag_ids'] ?? []);
+    $trialWorkStyleIds = array_map('intval', ($recruitTrial ?? [])['work_style_tag_ids'] ?? []);
+    $trialWelcomeIds   = array_map('intval', ($recruitTrial ?? [])['welcome_tag_ids'] ?? []);
+    $trialBenefitIds   = array_map('intval', ($recruitTrial ?? [])['benefit_tag_ids'] ?? []);
 @endphp
 
 <div class="job-edit-v2 animate-fadeIn">
@@ -420,10 +475,6 @@
         <form id="recruit-form" action="{{ route('shop.recruits.update') }}" method="POST">
             @csrf
             @method('PUT')
-            @if(!empty($usesJobTypes) && $usesJobTypes)
-                <input type="hidden" name="recruit_job_kind" value="{{ $horizontal ? ($rt === 'help' ? 'help' : ($rt === 'trial' ? 'trial' : 'fulltime')) : ($rt === 'help' ? 'help' : 'trial') }}">
-            @endif
-
             {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
                  Basic Information（体験入店・ヘルプ共通）
             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
@@ -443,202 +494,271 @@
                                   placeholder="未経験歓迎、サポート体制など">{{ old('message', $recruit['message']) }}</textarea>
                     </div>
                     <div class="job-edit-v2__field">
-                        <label class="job-edit-v2__label" for="job_content">お仕事内容 <span class="job-edit-v2__req">必須</span></label>
+                        <label class="job-edit-v2__label" for="job_content">お仕事内容について補足 <span class="job-edit-v2__opt">任意</span></label>
                         <textarea id="job_content" name="job_content" rows="4" class="job-edit-v2__textarea recruit-textarea"
-                                  placeholder="具体的な業務内容など">{{ old('job_content', $recruit['job_content'] ?? '') }}</textarea>
+                                  placeholder="業務内容の補足・備考があれば入力（未入力でも保存できます）">{{ old('job_content', $recruit['job_content'] ?? '') }}</textarea>
                     </div>
                 </section>
             </div>
 
             @if(!empty($usesJobTypes) && $usesJobTypes)
 
-                {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                     タブ（体験入店 / ヘルプ）
-                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
-                <nav class="job-edit-v2__kind-tabs" aria-label="求人の種類" style="margin-top:24px;">
-                    @if($horizontal)
-                        <a href="{{ route('shop.recruits.edit') }}?type=fulltime" class="{{ $rt === 'fulltime' ? 'is-active' : '' }}">本入店</a>
-                        <a href="{{ route('shop.recruits.edit') }}?type=trial" class="{{ $rt === 'trial' ? 'is-active' : '' }}">体験入店</a>
-                        <a href="{{ route('shop.recruits.edit') }}?type=help" class="{{ $rt === 'help' ? 'is-active' : '' }}">ヘルプ</a>
-                    @else
-                        <a href="{{ route('shop.recruits.edit') }}" class="{{ $rt !== 'help' ? 'is-active' : '' }}">体験入店</a>
-                        <a href="{{ route('shop.recruits.edit') }}?type=help" class="{{ $rt === 'help' ? 'is-active' : '' }}">ヘルプ</a>
-                    @endif
-                </nav>
+                <details class="job-edit-v2__kind-details" @if($errors->any()) open @endif open>
+                    <summary class="job-edit-v2__kind-summary">本入店・体験入店・ヘルプの設定</summary>
+                    <div class="job-edit-v2__kind-body" style="padding-top:12px;">
 
-                {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                     タブパネル
-                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
-                <div class="job-edit-v2__tab-panel" style="padding-top:4px;">
-
-                    {{-- ステータス --}}
-                    @php
-                        if ($horizontal) {
-                            $isActive = match ($rt) {
-                                'help' => $isHelpActive,
-                                'trial' => $isTrialActive,
-                                default => ($recruit['status'] ?? 'inactive') === 'active',
-                            };
-                        } else {
-                            $isActive = $rt === 'help' ? $isHelpActive : $isTrialActive;
-                        }
-                    @endphp
-                    <div class="job-edit-v2__status">
-                        <div>
-                            <p class="job-edit-v2__status-label">公開ステータス</p>
-                            <p class="job-edit-v2__status-hint">オフにすると非公開になります</p>
-                        </div>
-                        <div class="job-edit-v2__status-right">
-                            <span class="job-edit-v2__pub-label {{ $isActive ? 'is-on' : '' }}" id="published-label">{{ $isActive ? '公開中' : '非公開' }}</span>
-                            <label class="job-edit-v2__switch">
-                                <input type="checkbox" name="published" value="1" {{ $isActive ? 'checked' : '' }} id="published-toggle" aria-labelledby="published-label">
-                                <span class="job-edit-v2__switch-track"><span class="job-edit-v2__switch-knob"></span></span>
-                            </label>
-                        </div>
-                    </div>
-
-                    {{-- プレビューリンク --}}
-                    <div class="job-edit-v2__preview-row">
-                        <a href="{{ route('shop.jobdescription') }}" class="job-edit-v2__preview-link" target="_blank" rel="noopener">
-                            <i class="fas fa-eye"></i>
-                            求職者からの見え方を確認
-                        </a>
-                    </div>
-
-                    {{-- 給与 --}}
-                    <section aria-labelledby="job-sec-salary">
-                        <h2 id="job-sec-salary" class="job-edit-v2__sec-title"><i class="fas fa-wallet"></i> Salary &amp; Bonus</h2>
-
-                        @if($horizontal)
-                            @if($rt !== 'fulltime')
-                                <input type="hidden" name="regular_hourly_wage" value="{{ (int)($recruit['regular_hourly_wage'] ?? $recruit['hourly_wage_regular'] ?? 0) }}">
-                            @endif
-                            @if($rt !== 'trial')
-                                <input type="hidden" name="trial_hourly_wage" value="{{ ($recruit['trial_hourly_wage'] ?? '') !== '' && $recruit['trial_hourly_wage'] !== null ? (int)$recruit['trial_hourly_wage'] : '' }}">
-                            @endif
-                            @if($rt !== 'help')
-                                <input type="hidden" name="help_hourly_wage" value="{{ ($recruit['help_hourly_wage'] ?? '') !== '' && $recruit['help_hourly_wage'] !== null ? (int)$recruit['help_hourly_wage'] : '' }}">
-                            @endif
-                        @endif
-
-                        @if($horizontal && $rt === 'fulltime')
-                            <div class="job-edit-v2__field">
-                                <label class="job-edit-v2__label" for="regular_hourly_wage">本入店時給 <span class="job-edit-v2__req">必須</span></label>
-                                <div class="job-edit-v2__unit-wrap">
-                                    <input type="text" id="regular_hourly_wage" name="regular_hourly_wage" class="job-edit-v2__input recruit-input"
-                                           value="{{ old('regular_hourly_wage', number_format((float)($recruit['regular_hourly_wage'] ?? $recruit['hourly_wage_regular'] ?? 0))) }}"
-                                           placeholder="5,000" inputmode="numeric" data-type="currency">
-                                    <span class="job-edit-v2__unit-suffix">円</span>
-                                </div>
-                            </div>
-                        @elseif($horizontal && $rt === 'trial')
-                            <div class="job-edit-v2__field">
-                                <label class="job-edit-v2__label" for="trial_hourly_wage">体験入店時給 <span class="job-edit-v2__req">必須</span></label>
-                                <div class="job-edit-v2__unit-wrap">
-                                    <input type="text" id="trial_hourly_wage" name="trial_hourly_wage" class="job-edit-v2__input recruit-input"
-                                           value="{{ old('trial_hourly_wage', !empty($recruit['trial_hourly_wage']) ? number_format((float) $recruit['trial_hourly_wage']) : '') }}"
-                                           placeholder="5,000" inputmode="numeric" data-type="currency">
-                                    <span class="job-edit-v2__unit-suffix">円</span>
-                                </div>
-                            </div>
-                        @elseif($horizontal && $rt === 'help')
-                            <div class="job-edit-v2__field">
-                                <label class="job-edit-v2__label" for="help_hourly_wage">ヘルプ時給 <span class="job-edit-v2__req">必須</span></label>
-                                <div class="job-edit-v2__unit-wrap">
-                                    <input type="text" id="help_hourly_wage" name="help_hourly_wage" class="job-edit-v2__input recruit-input"
-                                           value="{{ old('help_hourly_wage', !empty($recruit['help_hourly_wage']) ? number_format((float) $recruit['help_hourly_wage']) : '') }}"
-                                           placeholder="4,000" inputmode="numeric" data-type="currency">
-                                    <span class="job-edit-v2__unit-suffix">円</span>
-                                </div>
-                            </div>
-                        @elseif($rt === 'help')
-                            <div class="job-edit-v2__field">
-                                <label class="job-edit-v2__label" for="help_hourly_wage">ヘルプ時給 <span class="job-edit-v2__req">必須</span></label>
-                                <div class="job-edit-v2__unit-wrap">
-                                    <input type="text" id="help_hourly_wage" name="help_hourly_wage" class="job-edit-v2__input recruit-input"
-                                           value="{{ old('help_hourly_wage', !empty($recruit['help_hourly_wage']) ? number_format((float) $recruit['help_hourly_wage']) : '') }}"
-                                           placeholder="4,000" inputmode="numeric" data-type="currency">
-                                    <span class="job-edit-v2__unit-suffix">円</span>
-                                </div>
-                            </div>
-                            <input type="hidden" name="has_help" value="1">
-                        @else
-                            <div class="job-edit-v2__field">
-                                <label class="job-edit-v2__label" for="trial_hourly_wage">体験入店時給 <span class="job-edit-v2__req">必須</span></label>
-                                <div class="job-edit-v2__unit-wrap">
-                                    <input type="text" id="trial_hourly_wage" name="trial_hourly_wage" class="job-edit-v2__input recruit-input"
-                                           value="{{ old('trial_hourly_wage', !empty($recruit['trial_hourly_wage']) ? number_format((float) $recruit['trial_hourly_wage']) : '') }}"
-                                           placeholder="5,000" inputmode="numeric" data-type="currency">
-                                    <span class="job-edit-v2__unit-suffix">円</span>
-                                </div>
-                            </div>
-                        @endif
-
-                        <div class="job-edit-v2__field">
-                            <label class="job-edit-v2__label" for="salary_text">給与備考</label>
-                            <textarea id="salary_text" name="salary_text" rows="3" class="job-edit-v2__textarea recruit-textarea"
-                                      placeholder="バック詳細・日払い・昇給など">{{ old('salary_text', $recruit['salary_text']) }}</textarea>
+                        <div class="job-edit-v2__preview-row" style="margin-top:0;">
+                            <a href="{{ route('shop.jobdescription') }}" class="job-edit-v2__preview-link" target="_blank" rel="noopener">
+                                <i class="fas fa-eye"></i>
+                                求職者からの見え方を確認
+                            </a>
                         </div>
 
-                        @if(!$horizontal || $rt === 'fulltime')
-                        <div class="job-edit-v2__card job-edit-v2__card--accent" style="padding-left:18px;">
-                            <p style="margin:0 0 14px;font-size:0.75rem;font-weight:800;color:#e4e4e7;">入店ボーナス設定</p>
-                            <div class="job-edit-v2__field">
-                                <label class="job-edit-v2__label" for="bonus_reward">ボーナス金額</label>
-                                <div class="job-edit-v2__unit-wrap">
-                                    <input type="text" id="bonus_reward" name="bonus_reward" class="job-edit-v2__input recruit-input"
-                                           value="{{ old('bonus_reward', old('noruma_reward', number_format((float)($recruit['bonus_reward'] ?? $recruit['noruma_reward'] ?? 0)))) }}"
-                                           placeholder="50,000" inputmode="numeric" data-type="currency">
-                                    <span class="job-edit-v2__unit-suffix">円</span>
-                                </div>
-                            </div>
+                        <section aria-labelledby="job-sec-salary">
+                            <h2 id="job-sec-salary" class="job-edit-v2__sec-title"><i class="fas fa-wallet"></i> Salary &amp; Bonus</h2>
+
                             @if($horizontal)
-                            <div class="job-edit-v2__field">
-                                <label class="job-edit-v2__label" for="bonus_remarks">ボーナス補足</label>
-                                <input type="text" id="bonus_remarks" name="bonus_remarks" class="job-edit-v2__input"
-                                       value="{{ old('bonus_remarks', $recruit['bonus_remarks'] ?? '') }}"
-                                       placeholder="補足があれば入力">
-                            </div>
-                            @endif
-                            <div class="job-edit-v2__grid2">
-                                <div class="job-edit-v2__field">
-                                    <label class="job-edit-v2__label" for="bonus_total_working_days">合計勤務回数</label>
-                                    <div class="job-edit-v2__unit-wrap">
-                                        <input type="number" id="bonus_total_working_days" name="bonus_total_working_days" class="job-edit-v2__input"
-                                               value="{{ old('bonus_total_working_days', $recruit['bonus_total_working_days'] ?? '') }}"
-                                               placeholder="10" min="0">
-                                        <span class="job-edit-v2__unit-suffix">回</span>
+                                <p class="job-edit-v2__kind-subtitle">本入店</p>
+                                <div class="job-edit-v2__status">
+                                    <div>
+                                        <p class="job-edit-v2__status-label">本入店を公開</p>
+                                        <p class="job-edit-v2__status-hint">オフにすると非公開になります</p>
+                                    </div>
+                                    <div class="job-edit-v2__status-right">
+                                        <span class="job-edit-v2__pub-label {{ $pubReg ? 'is-on' : '' }}" id="published-reg-label">{{ $pubReg ? '公開中' : '非公開' }}</span>
+                                        <label class="job-edit-v2__switch">
+                                            <input type="checkbox" name="published_regular" value="1" class="js-kind-pub" data-label-id="published-reg-label" @checked($pubReg)>
+                                            <span class="job-edit-v2__switch-track"><span class="job-edit-v2__switch-knob"></span></span>
+                                        </label>
                                     </div>
                                 </div>
-                                <div class="job-edit-v2__field">
-                                    <label class="job-edit-v2__label" for="bonus_total_working_hours">合計勤務時間</label>
-                                    <div class="job-edit-v2__unit-wrap">
-                                        <input type="number" id="bonus_total_working_hours" name="bonus_total_working_hours" class="job-edit-v2__input"
-                                               value="{{ old('bonus_total_working_hours', $recruit['bonus_total_working_hours'] ?? '') }}"
-                                               placeholder="40" min="0">
-                                        <span class="job-edit-v2__unit-suffix">h</span>
+                                <div class="job-edit-v2__grid2">
+                                    <div class="job-edit-v2__field">
+                                        <label class="job-edit-v2__label" for="regular_hourly_wage">時給（下限） <span class="job-edit-v2__req">必須</span></label>
+                                        <div class="job-edit-v2__unit-wrap">
+                                            <input type="text" id="regular_hourly_wage" name="regular_hourly_wage" class="job-edit-v2__input recruit-input"
+                                                   value="{{ old('regular_hourly_wage', number_format((float)($recruit['regular_hourly_wage'] ?? $recruit['hourly_wage_regular'] ?? 0))) }}"
+                                                   placeholder="5,000" inputmode="numeric" data-type="currency">
+                                            <span class="job-edit-v2__unit-suffix">円</span>
+                                        </div>
+                                    </div>
+                                    <div class="job-edit-v2__field">
+                                        <label class="job-edit-v2__label" for="regular_hourly_wage_max">時給（上限）</label>
+                                        <div class="job-edit-v2__unit-wrap">
+                                            <input type="text" id="regular_hourly_wage_max" name="regular_hourly_wage_max" class="job-edit-v2__input recruit-input"
+                                                   value="{{ old('regular_hourly_wage_max', isset($recruit['regular_hourly_wage_max']) && $recruit['regular_hourly_wage_max'] !== null ? number_format((float) $recruit['regular_hourly_wage_max']) : '') }}"
+                                                   placeholder="任意" inputmode="numeric" data-type="currency" data-optional-currency>
+                                            <span class="job-edit-v2__unit-suffix">円</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="job-edit-v2__field">
-                                <label class="job-edit-v2__label" for="bonus_other_conditions">その他条件</label>
-                                <input type="text" id="bonus_other_conditions" name="bonus_other_conditions" class="job-edit-v2__input"
-                                       value="{{ old('bonus_other_conditions', $recruit['bonus_other_conditions'] ?? '') }}"
-                                       placeholder="例: 無遅刻無欠勤">
-                            </div>
-                        </div>
-                        @endif
-                    </section>
 
-                    {{-- 勤務条件 --}}
+                                <p class="job-edit-v2__kind-subtitle">体験入店</p>
+                                <div class="job-edit-v2__status">
+                                    <div>
+                                        <p class="job-edit-v2__status-label">体験入店を公開</p>
+                                        <p class="job-edit-v2__status-hint">オフにすると非公開になります</p>
+                                    </div>
+                                    <div class="job-edit-v2__status-right">
+                                        <span class="job-edit-v2__pub-label {{ $pubTrial ? 'is-on' : '' }}" id="published-trial-label">{{ $pubTrial ? '公開中' : '非公開' }}</span>
+                                        <label class="job-edit-v2__switch">
+                                            <input type="checkbox" name="published_trial" value="1" class="js-kind-pub" data-label-id="published-trial-label" @checked($pubTrial)>
+                                            <span class="job-edit-v2__switch-track"><span class="job-edit-v2__switch-knob"></span></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="job-edit-v2__grid2">
+                                    <div class="job-edit-v2__field">
+                                        <label class="job-edit-v2__label" for="trial_hourly_wage">時給（下限）</label>
+                                        <div class="job-edit-v2__unit-wrap">
+                                            <input type="text" id="trial_hourly_wage" name="trial_hourly_wage" class="job-edit-v2__input recruit-input"
+                                                   value="{{ old('trial_hourly_wage', !empty($recruit['trial_hourly_wage']) ? number_format((float) $recruit['trial_hourly_wage']) : '') }}"
+                                                   placeholder="5,000" inputmode="numeric" data-type="currency">
+                                            <span class="job-edit-v2__unit-suffix">円</span>
+                                        </div>
+                                    </div>
+                                    <div class="job-edit-v2__field">
+                                        <label class="job-edit-v2__label" for="trial_hourly_wage_max">時給（上限）</label>
+                                        <div class="job-edit-v2__unit-wrap">
+                                            <input type="text" id="trial_hourly_wage_max" name="trial_hourly_wage_max" class="job-edit-v2__input recruit-input"
+                                                   value="{{ old('trial_hourly_wage_max', isset($recruit['trial_hourly_wage_max']) && $recruit['trial_hourly_wage_max'] !== null ? number_format((float) $recruit['trial_hourly_wage_max']) : '') }}"
+                                                   placeholder="任意" inputmode="numeric" data-type="currency" data-optional-currency>
+                                            <span class="job-edit-v2__unit-suffix">円</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p class="job-edit-v2__kind-subtitle">ヘルプ</p>
+                                <div class="job-edit-v2__status">
+                                    <div>
+                                        <p class="job-edit-v2__status-label">ヘルプを公開</p>
+                                        <p class="job-edit-v2__status-hint">オフにすると非公開になります</p>
+                                    </div>
+                                    <div class="job-edit-v2__status-right">
+                                        <span class="job-edit-v2__pub-label {{ $pubHelp ? 'is-on' : '' }}" id="published-help-label">{{ $pubHelp ? '公開中' : '非公開' }}</span>
+                                        <label class="job-edit-v2__switch">
+                                            <input type="checkbox" name="published_help" value="1" class="js-kind-pub" data-label-id="published-help-label" @checked($pubHelp)>
+                                            <span class="job-edit-v2__switch-track"><span class="job-edit-v2__switch-knob"></span></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="job-edit-v2__grid2">
+                                    <div class="job-edit-v2__field">
+                                        <label class="job-edit-v2__label" for="help_hourly_wage">時給（下限）</label>
+                                        <div class="job-edit-v2__unit-wrap">
+                                            <input type="text" id="help_hourly_wage" name="help_hourly_wage" class="job-edit-v2__input recruit-input"
+                                                   value="{{ old('help_hourly_wage', !empty($recruit['help_hourly_wage']) ? number_format((float) $recruit['help_hourly_wage']) : '') }}"
+                                                   placeholder="4,000" inputmode="numeric" data-type="currency">
+                                            <span class="job-edit-v2__unit-suffix">円</span>
+                                        </div>
+                                    </div>
+                                    <div class="job-edit-v2__field">
+                                        <label class="job-edit-v2__label" for="help_hourly_wage_max">時給（上限）</label>
+                                        <div class="job-edit-v2__unit-wrap">
+                                            <input type="text" id="help_hourly_wage_max" name="help_hourly_wage_max" class="job-edit-v2__input recruit-input"
+                                                   value="{{ old('help_hourly_wage_max', isset($recruit['help_hourly_wage_max']) && $recruit['help_hourly_wage_max'] !== null ? number_format((float) $recruit['help_hourly_wage_max']) : '') }}"
+                                                   placeholder="任意" inputmode="numeric" data-type="currency" data-optional-currency>
+                                            <span class="job-edit-v2__unit-suffix">円</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            @else
+                                <p class="job-edit-v2__kind-subtitle">体験入店</p>
+                                <div class="job-edit-v2__status">
+                                    <div>
+                                        <p class="job-edit-v2__status-label">体験入店を公開</p>
+                                        <p class="job-edit-v2__status-hint">オフにすると非公開になります</p>
+                                    </div>
+                                    <div class="job-edit-v2__status-right">
+                                        <span class="job-edit-v2__pub-label {{ $pubTrial ? 'is-on' : '' }}" id="published-trial-label">{{ $pubTrial ? '公開中' : '非公開' }}</span>
+                                        <label class="job-edit-v2__switch">
+                                            <input type="checkbox" name="published_trial" value="1" class="js-kind-pub" data-label-id="published-trial-label" @checked($pubTrial)>
+                                            <span class="job-edit-v2__switch-track"><span class="job-edit-v2__switch-knob"></span></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="job-edit-v2__grid2">
+                                    <div class="job-edit-v2__field">
+                                        <label class="job-edit-v2__label" for="trial_hourly_wage">時給（下限） <span class="job-edit-v2__req">必須</span></label>
+                                        <div class="job-edit-v2__unit-wrap">
+                                            <input type="text" id="trial_hourly_wage" name="trial_hourly_wage" class="job-edit-v2__input recruit-input"
+                                                   value="{{ old('trial_hourly_wage', !empty($recruit['trial_hourly_wage']) ? number_format((float) $recruit['trial_hourly_wage']) : '') }}"
+                                                   placeholder="5,000" inputmode="numeric" data-type="currency">
+                                            <span class="job-edit-v2__unit-suffix">円</span>
+                                        </div>
+                                    </div>
+                                    <div class="job-edit-v2__field">
+                                        <label class="job-edit-v2__label" for="trial_hourly_wage_max">時給（上限）</label>
+                                        <div class="job-edit-v2__unit-wrap">
+                                            <input type="text" id="trial_hourly_wage_max" name="trial_hourly_wage_max" class="job-edit-v2__input recruit-input"
+                                                   value="{{ old('trial_hourly_wage_max', isset($recruit['trial_hourly_wage_max']) && $recruit['trial_hourly_wage_max'] !== null ? number_format((float) $recruit['trial_hourly_wage_max']) : '') }}"
+                                                   placeholder="任意" inputmode="numeric" data-type="currency" data-optional-currency>
+                                            <span class="job-edit-v2__unit-suffix">円</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p class="job-edit-v2__kind-subtitle">ヘルプ</p>
+                                <button type="button" class="job-edit-v2__copy-btn" id="copy-trial-tags-btn" style="margin-bottom:12px;">
+                                    <i class="fas fa-copy"></i>
+                                    体験入店と同じタグをコピー
+                                </button>
+                                <div class="job-edit-v2__status">
+                                    <div>
+                                        <p class="job-edit-v2__status-label">ヘルプを公開</p>
+                                        <p class="job-edit-v2__status-hint">オフにすると非公開になります</p>
+                                    </div>
+                                    <div class="job-edit-v2__status-right">
+                                        <span class="job-edit-v2__pub-label {{ $pubHelp ? 'is-on' : '' }}" id="published-help-label">{{ $pubHelp ? '公開中' : '非公開' }}</span>
+                                        <label class="job-edit-v2__switch">
+                                            <input type="checkbox" name="published_help" value="1" class="js-kind-pub" data-label-id="published-help-label" @checked($pubHelp)>
+                                            <span class="job-edit-v2__switch-track"><span class="job-edit-v2__switch-knob"></span></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="has_help" value="1">
+                                <div class="job-edit-v2__grid2">
+                                    <div class="job-edit-v2__field">
+                                        <label class="job-edit-v2__label" for="help_hourly_wage">時給（下限） <span class="job-edit-v2__req">必須</span></label>
+                                        <div class="job-edit-v2__unit-wrap">
+                                            <input type="text" id="help_hourly_wage" name="help_hourly_wage" class="job-edit-v2__input recruit-input"
+                                                   value="{{ old('help_hourly_wage', !empty($recruit['help_hourly_wage']) ? number_format((float) $recruit['help_hourly_wage']) : '') }}"
+                                                   placeholder="4,000" inputmode="numeric" data-type="currency">
+                                            <span class="job-edit-v2__unit-suffix">円</span>
+                                        </div>
+                                    </div>
+                                    <div class="job-edit-v2__field">
+                                        <label class="job-edit-v2__label" for="help_hourly_wage_max">時給（上限）</label>
+                                        <div class="job-edit-v2__unit-wrap">
+                                            <input type="text" id="help_hourly_wage_max" name="help_hourly_wage_max" class="job-edit-v2__input recruit-input"
+                                                   value="{{ old('help_hourly_wage_max', isset($recruit['help_hourly_wage_max']) && $recruit['help_hourly_wage_max'] !== null ? number_format((float) $recruit['help_hourly_wage_max']) : '') }}"
+                                                   placeholder="任意" inputmode="numeric" data-type="currency" data-optional-currency>
+                                            <span class="job-edit-v2__unit-suffix">円</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <div class="job-edit-v2__field">
+                                <label class="job-edit-v2__label" for="salary_text">給与備考</label>
+                                <textarea id="salary_text" name="salary_text" rows="3" class="job-edit-v2__textarea recruit-textarea"
+                                          placeholder="バック詳細・日払い・昇給など">{{ old('salary_text', $recruit['salary_text']) }}</textarea>
+                            </div>
+
+                            <div class="job-edit-v2__card job-edit-v2__card--accent" style="padding-left:18px;">
+                                <p style="margin:0 0 14px;font-size:0.75rem;font-weight:800;color:#e4e4e7;">入店ボーナス設定</p>
+                                <div class="job-edit-v2__field">
+                                    <label class="job-edit-v2__label" for="bonus_reward">ボーナス金額</label>
+                                    <div class="job-edit-v2__unit-wrap">
+                                        <input type="text" id="bonus_reward" name="bonus_reward" class="job-edit-v2__input recruit-input"
+                                               value="{{ old('bonus_reward', old('noruma_reward', number_format((float)($recruit['bonus_reward'] ?? $recruit['noruma_reward'] ?? 0)))) }}"
+                                               placeholder="50,000" inputmode="numeric" data-type="currency">
+                                        <span class="job-edit-v2__unit-suffix">円</span>
+                                    </div>
+                                </div>
+                                @if($horizontal)
+                                <div class="job-edit-v2__field">
+                                    <label class="job-edit-v2__label" for="bonus_remarks">ボーナス補足</label>
+                                    <input type="text" id="bonus_remarks" name="bonus_remarks" class="job-edit-v2__input"
+                                           value="{{ old('bonus_remarks', $recruit['bonus_remarks'] ?? '') }}"
+                                           placeholder="補足があれば入力">
+                                </div>
+                                @endif
+                                <div class="job-edit-v2__grid2">
+                                    <div class="job-edit-v2__field">
+                                        <label class="job-edit-v2__label" for="bonus_total_working_days">合計勤務回数</label>
+                                        <div class="job-edit-v2__unit-wrap">
+                                            <input type="number" id="bonus_total_working_days" name="bonus_total_working_days" class="job-edit-v2__input"
+                                                   value="{{ old('bonus_total_working_days', $recruit['bonus_total_working_days'] ?? '') }}"
+                                                   placeholder="10" min="0">
+                                            <span class="job-edit-v2__unit-suffix">回</span>
+                                        </div>
+                                    </div>
+                                    <div class="job-edit-v2__field">
+                                        <label class="job-edit-v2__label" for="bonus_total_working_hours">合計勤務時間</label>
+                                        <div class="job-edit-v2__unit-wrap">
+                                            <input type="number" id="bonus_total_working_hours" name="bonus_total_working_hours" class="job-edit-v2__input"
+                                                   value="{{ old('bonus_total_working_hours', $recruit['bonus_total_working_hours'] ?? '') }}"
+                                                   placeholder="40" min="0">
+                                            <span class="job-edit-v2__unit-suffix">h</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="job-edit-v2__field">
+                                    <label class="job-edit-v2__label" for="bonus_other_conditions">その他条件</label>
+                                    <input type="text" id="bonus_other_conditions" name="bonus_other_conditions" class="job-edit-v2__input"
+                                           value="{{ old('bonus_other_conditions', $recruit['bonus_other_conditions'] ?? '') }}"
+                                           placeholder="例: 無遅刻無欠勤">
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </details>
+
+                <div class="job-edit-v2__tab-panel" style="padding-top:4px;">
                     <section aria-labelledby="job-sec-work">
                         <h2 id="job-sec-work" class="job-edit-v2__sec-title"><i class="fas fa-clock"></i> Working Conditions</h2>
-                        <div class="job-edit-v2__field">
-                            <label class="job-edit-v2__label" for="working_hours">勤務時間 <span class="job-edit-v2__req">必須</span></label>
-                            <input type="text" id="working_hours" name="working_hours" class="job-edit-v2__input"
-                                   value="{{ old('working_hours', $recruit['working_hours']) }}"
-                                   placeholder="20:00 〜 翌1:00">
-                        </div>
+                        @include('shops.recruit.parts.shift-time-fields')
                         <div class="job-edit-v2__field">
                             <label class="job-edit-v2__label" for="working_days">勤務日数・シフト <span class="job-edit-v2__req">必須</span></label>
                             <input type="text" id="working_days" name="working_days" class="job-edit-v2__input"
@@ -653,7 +773,6 @@
                         </div>
                     </section>
 
-                    {{-- 応募資格 --}}
                     <section aria-labelledby="job-sec-detail">
                         <h2 id="job-sec-detail" class="job-edit-v2__sec-title"><i class="fas fa-briefcase"></i> Recruitment</h2>
                         <div class="job-edit-v2__field">
@@ -664,19 +783,8 @@
                         </div>
                     </section>
 
-                    {{-- タグ --}}
-                    {{-- タグ（横持ちスキーマでは本入店タブのみ） --}}
-                    @if(!$horizontal || $rt === 'fulltime')
                     <section aria-labelledby="job-sec-tags">
                         <h2 id="job-sec-tags" class="job-edit-v2__sec-title"><i class="fas fa-check-circle"></i> Tags &amp; Appeals</h2>
-
-                        @if($rt === 'help')
-                            <button type="button" class="job-edit-v2__copy-btn" id="copy-trial-tags-btn">
-                                <i class="fas fa-copy"></i>
-                                体験入店と同じタグをコピー
-                            </button>
-                        @endif
-
                         <div style="margin-bottom:22px;">
                             <p class="job-edit-v2__tag-cat">働き方・給与</p>
                             <div class="job-edit-v2__chips" id="chips-work-style">
@@ -717,9 +825,7 @@
                             </div>
                         </div>
                     </section>
-                    @endif
-
-                </div>{{-- /.job-edit-v2__tab-panel --}}
+                </div>
 
             @else
                 {{-- usesJobTypes = false の場合（シンプルモード）--}}
@@ -748,9 +854,10 @@
 
                     <section aria-labelledby="job-sec-salary-s">
                         <h2 id="job-sec-salary-s" class="job-edit-v2__sec-title"><i class="fas fa-wallet"></i> Salary &amp; Bonus</h2>
+                        <input type="hidden" name="recruit_job_kind" value="fulltime">
                         <div class="job-edit-v2__grid2">
                             <div class="job-edit-v2__field">
-                                <label class="job-edit-v2__label" for="trial_hourly_wage">体入時給 <span class="job-edit-v2__req">必須</span></label>
+                                <label class="job-edit-v2__label" for="trial_hourly_wage">体入時給（下限） <span class="job-edit-v2__req">必須</span></label>
                                 <div class="job-edit-v2__unit-wrap">
                                     <input type="text" id="trial_hourly_wage" name="trial_hourly_wage" class="job-edit-v2__input recruit-input"
                                            value="{{ old('trial_hourly_wage', $recruit['trial_hourly_wage'] ? number_format((float) $recruit['trial_hourly_wage']) : '') }}"
@@ -759,11 +866,31 @@
                                 </div>
                             </div>
                             <div class="job-edit-v2__field">
-                                <label class="job-edit-v2__label" for="hourly_wage_regular">本入時給 <span class="job-edit-v2__req">必須</span></label>
+                                <label class="job-edit-v2__label" for="trial_hourly_wage_max">体入時給（上限）</label>
+                                <div class="job-edit-v2__unit-wrap">
+                                    <input type="text" id="trial_hourly_wage_max" name="trial_hourly_wage_max" class="job-edit-v2__input recruit-input"
+                                           value="{{ old('trial_hourly_wage_max', isset($recruit['trial_hourly_wage_max']) && $recruit['trial_hourly_wage_max'] !== null ? number_format((float) $recruit['trial_hourly_wage_max']) : '') }}"
+                                           placeholder="任意" inputmode="numeric" data-type="currency" data-optional-currency>
+                                    <span class="job-edit-v2__unit-suffix">円</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="job-edit-v2__grid2">
+                            <div class="job-edit-v2__field">
+                                <label class="job-edit-v2__label" for="hourly_wage_regular">本入時給（下限） <span class="job-edit-v2__req">必須</span></label>
                                 <div class="job-edit-v2__unit-wrap">
                                     <input type="text" id="hourly_wage_regular" name="hourly_wage_regular" class="job-edit-v2__input recruit-input"
                                            value="{{ old('hourly_wage_regular', number_format((float) ($recruit['hourly_wage_regular'] ?? 0))) }}"
                                            placeholder="5,000" inputmode="numeric" data-type="currency">
+                                    <span class="job-edit-v2__unit-suffix">円</span>
+                                </div>
+                            </div>
+                            <div class="job-edit-v2__field">
+                                <label class="job-edit-v2__label" for="regular_hourly_wage_max">本入時給（上限）</label>
+                                <div class="job-edit-v2__unit-wrap">
+                                    <input type="text" id="regular_hourly_wage_max" name="regular_hourly_wage_max" class="job-edit-v2__input recruit-input"
+                                           value="{{ old('regular_hourly_wage_max', isset($recruit['regular_hourly_wage_max']) && $recruit['regular_hourly_wage_max'] !== null ? number_format((float) $recruit['regular_hourly_wage_max']) : '') }}"
+                                           placeholder="任意" inputmode="numeric" data-type="currency" data-optional-currency>
                                     <span class="job-edit-v2__unit-suffix">円</span>
                                 </div>
                             </div>
@@ -813,11 +940,7 @@
 
                     <section aria-labelledby="job-sec-work-s">
                         <h2 id="job-sec-work-s" class="job-edit-v2__sec-title"><i class="fas fa-clock"></i> Working Conditions</h2>
-                        <div class="job-edit-v2__field">
-                            <label class="job-edit-v2__label" for="working_hours">勤務時間 <span class="job-edit-v2__req">必須</span></label>
-                            <input type="text" id="working_hours" name="working_hours" class="job-edit-v2__input"
-                                   value="{{ old('working_hours', $recruit['working_hours']) }}" placeholder="20:00 〜 翌1:00">
-                        </div>
+                        @include('shops.recruit.parts.shift-time-fields')
                         <div class="job-edit-v2__field">
                             <label class="job-edit-v2__label" for="working_days">勤務日数・シフト <span class="job-edit-v2__req">必須</span></label>
                             <input type="text" id="working_days" name="working_days" class="job-edit-v2__input"
@@ -900,7 +1023,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     var form = document.getElementById('recruit-form');
 
-    // 公開ステータストグル
+    // 公開ステータストグル（シンプルモード or 単一）
     var pubToggle = document.getElementById('published-toggle');
     var pubLabel  = document.getElementById('published-label');
     if (pubToggle && pubLabel) {
@@ -909,11 +1032,42 @@ document.addEventListener('DOMContentLoaded', function () {
             pubLabel.classList.toggle('is-on', pubToggle.checked);
         });
     }
+    document.querySelectorAll('.js-kind-pub').forEach(function (cb) {
+        var lid = cb.getAttribute('data-label-id');
+        var lbl = lid ? document.getElementById(lid) : null;
+        if (!lbl) return;
+        function sync() {
+            lbl.textContent = cb.checked ? '公開中' : '非公開';
+            lbl.classList.toggle('is-on', cb.checked);
+        }
+        cb.addEventListener('change', sync);
+        sync();
+    });
 
-    // 通貨フォーマット（送信時にカンマ除去）
+    var lastCb = document.querySelector('.js-shift-end-last');
+    var endInp = document.querySelector('.js-shift-end-time');
+    if (lastCb && endInp) {
+        function syncEnd() {
+            endInp.disabled = lastCb.checked;
+            if (lastCb.checked) endInp.value = '';
+        }
+        lastCb.addEventListener('change', syncEnd);
+        syncEnd();
+    }
+
+    // 通貨フォーマット（送信時にカンマ除去・任意上限は空なら送信しない）
     if (form) {
         form.addEventListener('submit', function () {
+            if (endInp && endInp.disabled) {
+                endInp.disabled = false;
+                endInp.value = '';
+            }
+            form.querySelectorAll('[data-optional-currency]').forEach(function (el) {
+                el.value = String(el.value).replace(/[^\d]/g, '');
+                if (el.value === '') el.disabled = true;
+            });
             form.querySelectorAll('[data-type="currency"]').forEach(function (el) {
+                if (el.disabled) return;
                 el.value = String(el.value).replace(/[^\d]/g, '');
             });
         });

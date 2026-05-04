@@ -170,7 +170,7 @@
             </p>
         </div>
         <div class="image-edit-preview-wrapper">
-            <div class="image-edit-frame">
+            <div class="image-edit-frame image-edit-frame--portrait">
                 <img id="image-edit-preview" src="" alt="編集プレビュー" class="image-edit-preview-img">
                 <div class="image-edit-frame-mask"></div>
             </div>
@@ -206,7 +206,11 @@
 window.MYPAGE_GALLERY_CONFIG = {
     csrfToken: @json(csrf_token()),
     uploadUrl: @json(route('cast.mypage.images.upload')),
-    deleteUrlTemplate: @json(route('cast.mypage.images.delete', ['id' => '__ID__']))
+    deleteUrlTemplate: @json(route('cast.mypage.images.delete', ['id' => '__ID__'])),
+    cropAspectW: 3,
+    cropAspectH: 4,
+    cropMaxWidth: 1200,
+    cropMaxHeight: 1600
 };
 </script>
 <script src="{{ asset('assets/js/mypage-gallery.js') }}"></script>

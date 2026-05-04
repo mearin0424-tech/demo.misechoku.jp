@@ -7,16 +7,22 @@
     $vPillTags = $vWorkStyleTags->merge($vOtherTags)->unique()->values();
 @endphp
 
-@if(!empty($rv['catch_copy']))
-    <p class="recruit-ref-catch">{{ $rv['catch_copy'] }}</p>
-@endif
-
 @if($vk === 'trial')
+    @php
+        $trialMinV = (int) ($rv['trial_hourly_wage'] ?? 0);
+        $trialMaxV = isset($rv['trial_hourly_wage_max']) && $rv['trial_hourly_wage_max'] !== null && (int) $rv['trial_hourly_wage_max'] > 0
+            ? (int) $rv['trial_hourly_wage_max'] : null;
+    @endphp
     <div class="recruit-ref-pay-highlight">
         <span class="label">体験入店時給</span>
         <div class="line">
             @if($vHasTrial)
-                <span class="yen">¥</span><span class="num">{{ number_format((int) $rv['trial_hourly_wage']) }}</span><span class="tilde">〜</span>
+                <span class="yen">¥</span><span class="num">{{ number_format($trialMinV) }}</span>
+                @if($trialMaxV !== null && $trialMaxV > $trialMinV)
+                    <span class="tilde">〜</span><span class="yen">¥</span><span class="num">{{ number_format($trialMaxV) }}</span>
+                @else
+                    <span class="tilde">〜</span>
+                @endif
             @else
                 <span style="font-size:0.9rem;color:#71717a;font-weight:700;">体験入店求人で入力してください</span>
             @endif
@@ -29,11 +35,21 @@
         </p>
     @endif
 @else
+    @php
+        $helpMinV = (int) ($rv['help_hourly_wage'] ?? 0);
+        $helpMaxV = isset($rv['help_hourly_wage_max']) && $rv['help_hourly_wage_max'] !== null && (int) $rv['help_hourly_wage_max'] > 0
+            ? (int) $rv['help_hourly_wage_max'] : null;
+    @endphp
     <div class="recruit-ref-pay-highlight">
         <span class="label">ヘルプ時給</span>
         <div class="line">
             @if($vHasHelp)
-                <span class="yen">¥</span><span class="num">{{ number_format((int) $rv['help_hourly_wage']) }}</span><span class="tilde">〜</span>
+                <span class="yen">¥</span><span class="num">{{ number_format($helpMinV) }}</span>
+                @if($helpMaxV !== null && $helpMaxV > $helpMinV)
+                    <span class="tilde">〜</span><span class="yen">¥</span><span class="num">{{ number_format($helpMaxV) }}</span>
+                @else
+                    <span class="tilde">〜</span>
+                @endif
             @else
                 <span style="font-size:0.9rem;color:#71717a;font-weight:700;">ヘルプ求人で入力してください</span>
             @endif

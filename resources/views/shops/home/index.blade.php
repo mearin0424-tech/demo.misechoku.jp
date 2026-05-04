@@ -5,7 +5,7 @@
 @section('guide_message', '') {{-- ホームのスワイプ画面ではオコジョを表示しない --}}
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260503-recruit-swipe-v2">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260503-recruit-swipe-v3">
 @endpush
 
 @php
@@ -61,17 +61,11 @@
                     </div>
                     @php $mo = $item['manager_overlay'] ?? ['show' => false]; @endphp
                     @if(!empty($mo['show']))
-                    <div class="rc-manager-msg" aria-label="店長からのメッセージ">
+                    <div class="rc-manager-msg" aria-label="キャッチコピー">
                         <div class="rc-manager-msg__backdrop">
                             <div class="rc-manager-msg__inner">
                                 @if(!empty($mo['line1_html']))
                                 <p class="rc-manager-msg__line1">{!! $mo['line1_html'] !!}</p>
-                                @endif
-                                @if(!empty($mo['line2']))
-                                <p class="rc-manager-msg__line2">{{ $mo['line2'] }}</p>
-                                @endif
-                                @if(!empty($mo['badge']))
-                                <p class="rc-manager-msg__badge">{{ $mo['badge'] }}</p>
                                 @endif
                             </div>
                         </div>

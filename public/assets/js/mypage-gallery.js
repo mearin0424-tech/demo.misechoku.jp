@@ -6,6 +6,12 @@
     var config = window.MYPAGE_GALLERY_CONFIG;
     if (!config || !config.uploadUrl) return;
 
+    var cropAspectW = typeof config.cropAspectW === 'number' && config.cropAspectW > 0 ? config.cropAspectW : 16;
+    var cropAspectH = typeof config.cropAspectH === 'number' && config.cropAspectH > 0 ? config.cropAspectH : 9;
+    var cropAspectRatio = cropAspectW / cropAspectH;
+    var cropMaxWidth = typeof config.cropMaxWidth === 'number' && config.cropMaxWidth > 0 ? config.cropMaxWidth : 1600;
+    var cropMaxHeight = typeof config.cropMaxHeight === 'number' && config.cropMaxHeight > 0 ? config.cropMaxHeight : 900;
+
     var _galleryPreviewImageId = null;
     var _galleryPreviewLi = null;
     var _galleryUploadSlotIndex = null;
@@ -139,11 +145,11 @@
                 reader.onload = function(e) {
                     var img = new Image();
                     img.onload = function() {
-                        var ASPECT_W = 16;
-                        var ASPECT_H = 9;
+                        var ASPECT_W = cropAspectW;
+                        var ASPECT_H = cropAspectH;
                         var aspect = ASPECT_W / ASPECT_H;
 
-                        // 元画像から 3:4 にクロップする（中央基準）
+                        // 元画像から指定アスペクト比にクロップする（中央基準）
                         var srcRatio = img.width / img.height;
                         var targetRatio = aspect;
                         var sx, sy, sw, sh;
@@ -161,7 +167,7 @@
                             sy = (img.height - sh) / 2;
                         }
 
-                        // 出力サイズを決定（16:9を維持しつつ、maxWidth/maxHeight以内 & おおよそ 2MP 以下）
+                        // 出力サイズを決定（指定アスペクト比を維持しつつ、maxWidth/maxHeight以内 & おおよそ 2MP 以下）
                         var MAX_PIXELS = 2000000; // 約 2MP
                         var outWidth = Math.min(img.width, maxWidth || img.width);
                         var outHeight = Math.round(outWidth * ASPECT_H / ASPECT_W);
@@ -272,7 +278,7 @@
                 }
                 if (window.Cropper) {
                     _cropper = new Cropper(editPreviewImg, {
-                        aspectRatio: 16 / 9,
+                        aspectRatio: cropAspectRatio,
                         viewMode: 1,
                         dragMode: 'move',
                         autoCropArea: 1,
@@ -320,9 +326,8 @@
                 var btn = editConfirmBtn;
                 if (btn.disabled) return;
                 btn.disabled = true;
-                // 16:9（約 1600x900）でトリミング
-                var MAX_WIDTH = 1600;
-                var MAX_HEIGHT = 900;
+                var MAX_WIDTH = cropMaxWidth;
+                var MAX_HEIGHT = cropMaxHeight;
 
                 var cropAndUpload = function() {
                     if (_cropper && typeof _cropper.getCroppedCanvas === 'function') {
