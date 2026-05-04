@@ -267,19 +267,14 @@ class HomeController extends Controller
             $helpRow = $useJobType ? ($helpByShop[$row->id] ?? null) : null;
 
             if ($horizontal) {
+                // 店舗プレビューと同様：trial_status / help_status が 0 でも登録時給は表示（スワイプ用）
                 $trialHourly = null;
                 if (isset($row->trial_hourly_wage) && $row->trial_hourly_wage !== null && $row->trial_hourly_wage !== '' && (int) $row->trial_hourly_wage > 0) {
-                    $ts = Schema::hasColumn('shop_jobs', 'trial_status') ? (int) ($row->trial_status ?? 0) : 1;
-                    if ($ts === 1) {
-                        $trialHourly = (int) $row->trial_hourly_wage;
-                    }
+                    $trialHourly = (int) $row->trial_hourly_wage;
                 }
                 $helpHourly = null;
                 if (isset($row->help_hourly_wage) && $row->help_hourly_wage !== null && $row->help_hourly_wage !== '' && (int) $row->help_hourly_wage > 0) {
-                    $hs = Schema::hasColumn('shop_jobs', 'help_status') ? (int) ($row->help_status ?? 0) : 1;
-                    if ($hs === 1) {
-                        $helpHourly = (int) $row->help_hourly_wage;
-                    }
+                    $helpHourly = (int) $row->help_hourly_wage;
                 }
             } else {
                 $trialHourly = $trialRow && !empty($trialRow->status) && !empty($trialRow->trial_hourly_wage)

@@ -255,6 +255,9 @@
         }
 
         function openEditModal(file, slotIndex) {
+            if (editConfirmBtn) {
+                editConfirmBtn.disabled = false;
+            }
             if (!editModal || !editPreviewImg) {
                 // フォールバック：そのままアップロード
                 var fallbackIndex = slotIndex != null ? slotIndex : resolveSlotIndex();
@@ -311,6 +314,9 @@
                     _cropper.destroy();
                     _cropper = null;
                 }
+                if (editConfirmBtn) {
+                    editConfirmBtn.disabled = false;
+                }
                 try {
                     document.body.classList.remove('is-image-editing');
                 } catch (e) {}
@@ -350,6 +356,7 @@
                                 document.body.classList.remove('is-image-editing');
                             } catch (e) {}
                             performUpload(blob, _pendingUploadFile.name, _pendingUploadSlotIndex);
+                            btn.disabled = false;
                         }, 'image/jpeg', 0.9);
                     } else {
                         // フォールバック：従来の中央トリミング

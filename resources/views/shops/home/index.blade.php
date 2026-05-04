@@ -5,7 +5,7 @@
 @section('guide_message', '') {{-- ホームのスワイプ画面ではオコジョを表示しない --}}
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260503-recruit-swipe-v3">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260503-recruit-swipe-v4">
 @endpush
 
 @php
@@ -101,53 +101,49 @@
                     </div>
                 </div>
 
-                {{-- 3. 店舗・求人情報エリア --}}
-                <div class="rc-info" aria-label="店舗情報">
-
-                    @php
-                        $trialR = $item['trial_hourly_range'] ?? null;
-                        $helpR  = $item['help_hourly_range'] ?? null;
-                        $bonusRg = $item['signup_bonus_range'] ?? null;
-                        $hasRating = !empty($item['rating']) && $item['rating'] > 0;
-                        $hasPremium = !empty($item['is_premium']);
-                    @endphp
-
-                    {{-- 評価 | 優良認定店 --}}
-                    @if($hasRating || $hasPremium)
-                    <div class="rc-badges">
-                        @if($hasRating)
-                        <div class="rc-rating-inline">
-                            <span class="rc-star" aria-hidden="true">★</span>
-                            <span class="rc-rating-val numeric-font">{{ number_format((float)$item['rating'], 1) }}</span>
-                            @if(isset($item['review_count']) && (int)$item['review_count'] > 0)
-                            <span class="rc-review-cnt">({{ (int)$item['review_count'] }})</span>
-                            @endif
-                        </div>
-                        @endif
-                        @if($hasRating && $hasPremium)
-                        <span class="rc-badge-sep" aria-hidden="true">|</span>
-                        @endif
-                        @if($hasPremium)
-                        <span class="rc-badge-premium">優良認定店</span>
-                        @endif
-                    </div>
-                    @endif
-
-                    <h2 class="rc-shop-name serif-font">{{ $item['name'] }}</h2>
-
-                    <div class="rc-meta">
-                        @if(!empty($item['industry_name']))
-                        <span class="rc-genre">{{ $item['industry_name'] }}</span>
-                        @endif
-                        <i class="fas fa-map-marker-alt rc-mappin" aria-hidden="true"></i>
-                        <span>{{ trim(($item['pref'] ?? '') . ' ' . ($item['city'] ?? '')) ?: '六本木' }}</span>
-                    </div>
-
-                </div>
-
-                {{-- 下部：入店祝い金バッヂ＋体入時給（大）／ヘルプ時給（タップで求人へはカード全体） --}}
+                {{-- 3. 下部スタック：店名等 → 入店祝い金 → 時給（店名はバッジ直上） --}}
                 <div class="rc-bottom-bar" aria-label="給与・ボーナス">
                     <div class="rc-bottom-bar__stack">
+                        @php
+                            $trialR = $item['trial_hourly_range'] ?? null;
+                            $helpR  = $item['help_hourly_range'] ?? null;
+                            $bonusRg = $item['signup_bonus_range'] ?? null;
+                            $hasRating = !empty($item['rating']) && $item['rating'] > 0;
+                            $hasPremium = !empty($item['is_premium']);
+                        @endphp
+
+                        <div class="rc-info" aria-label="店舗情報">
+                            @if($hasRating || $hasPremium)
+                            <div class="rc-badges">
+                                @if($hasRating)
+                                <div class="rc-rating-inline">
+                                    <span class="rc-star" aria-hidden="true">★</span>
+                                    <span class="rc-rating-val numeric-font">{{ number_format((float)$item['rating'], 1) }}</span>
+                                    @if(isset($item['review_count']) && (int)$item['review_count'] > 0)
+                                    <span class="rc-review-cnt">({{ (int)$item['review_count'] }})</span>
+                                    @endif
+                                </div>
+                                @endif
+                                @if($hasRating && $hasPremium)
+                                <span class="rc-badge-sep" aria-hidden="true">|</span>
+                                @endif
+                                @if($hasPremium)
+                                <span class="rc-badge-premium">優良認定店</span>
+                                @endif
+                            </div>
+                            @endif
+
+                            <h2 class="rc-shop-name serif-font">{{ $item['name'] }}</h2>
+
+                            <div class="rc-meta">
+                                @if(!empty($item['industry_name']))
+                                <span class="rc-genre">{{ $item['industry_name'] }}</span>
+                                @endif
+                                <i class="fas fa-map-marker-alt rc-mappin" aria-hidden="true"></i>
+                                <span>{{ trim(($item['pref'] ?? '') . ' ' . ($item['city'] ?? '')) ?: '六本木' }}</span>
+                            </div>
+                        </div>
+
                         @if(!empty($bonusRg))
                         <div class="rc-signup-bonus-pill">
                             <span class="rc-signup-bonus-pill__label">入店祝い金</span>
