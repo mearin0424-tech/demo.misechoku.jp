@@ -53,8 +53,8 @@
                             >
                                 <div class="shop-review-item__head">
                                     <div class="shop-review-item__user">
-                                        @if(!$isAnonymous)
-                                            <div class="shop-review-item__avatar-wrap">
+                                        <div class="shop-review-item__avatar-wrap">
+                                            @if(!$isAnonymous)
                                                 <img
                                                     src="{{ $rev['user_img'] ?: asset('assets/images/common/user-default.svg') }}"
                                                     alt=""
@@ -63,8 +63,12 @@
                                                     height="48"
                                                     loading="lazy"
                                                 >
-                                            </div>
-                                        @endif
+                                            @else
+                                                <span class="shop-review-item__avatar-fallback" aria-hidden="true">
+                                                    <i class="fas fa-user"></i>
+                                                </span>
+                                            @endif
+                                        </div>
                                         <div class="shop-review-item__user-text">
                                             <span class="shop-review-item__name">{{ $displayName }}</span>
                                             <div class="shop-review-item__meta-row">
@@ -82,9 +86,7 @@
                                     <span class="badge-hidden shop-review-item__badge-hidden">非表示設定中</span>
                                 @endif
 
-                                <div class="shop-review-item__comment">
-                                    {!! nl2br(e($rev['text'])) !!}
-                                </div>
+                                <div class="shop-review-item__comment">{!! nl2br(e($rev['text'])) !!}</div>
 
                                 @if($hasDetails)
                                     <button

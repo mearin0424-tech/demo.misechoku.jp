@@ -370,6 +370,8 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
         Route::get('/reviews', [ShopReview::class, 'index'])->name('review.index');
         Route::get('/documents/{type}', [ShopMypage::class, 'viewLicenseDocument'])->name('documents.show')->whereIn('type', ['business', 'entertainment']);
         Route::post('/documents/upload', [ShopMypage::class, 'uploadDocument'])->name('documents.upload');
+        Route::post('/documents/request-review', [ShopMypage::class, 'requestDocumentReview'])->name('documents.request-review');
+        Route::post('/documents/withdraw-review', [ShopMypage::class, 'withdrawDocumentReview'])->name('documents.withdraw-review');
         Route::post('/payment/bank', [ShopMypage::class, 'updateBank'])->name('payment.bank.update');
         Route::post('/deposit/approve', [ShopMypage::class, 'approveDeposit'])->name('deposit.approve');
         Route::post('/deposit/pay', [ShopMypage::class, 'payToPlatform'])->name('deposit.pay');

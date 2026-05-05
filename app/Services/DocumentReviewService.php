@@ -161,6 +161,7 @@ class DocumentReviewService
             'approved' => '承認済み',
             'rejected' => '差し戻し',
             'pending' => '審査中',
+            'draft' => 'アップロード済み',
             default => '未提出',
         };
     }
@@ -181,12 +182,61 @@ class DocumentReviewService
             ],
             [
                 'image_path' => $path,
-                'status' => ShopLicenseDocument::STATUS_PENDING,
+                'status' => ShopLicenseDocument::STATUS_DRAFT,
                 'ng_reason' => null,
                 'expired_at' => $expiredAt ?: null,
                 'approved_at' => null,
             ]
         );
+
+        $this->syncShopLegacyStatus($shopId);
+
+        return $document->fresh();
+    }
+
+    public function requestShopDocumentReview(string $shopId, string $type): ShopLicenseDocument
+    {
+        $document = ShopLicenseDocument::query()
+            ->where('shop_id', $shopId)
+            ->where('type', $type)
+            ->firstOrFail();
+
+        if (empty($document->image_path)) {
+            throw new \RuntimeException('ファイルが未アップロードです。');
+        }
+        if ((int) $document->status === ShopLicenseDocument::STATUS_APPROVED) {
+            throw new \RuntimeException('承認済みのため再審査依頼はできません。差し替え後に審査依頼してください。');
+        }
+        if ((int) $document->status === ShopLicenseDocument::STATUS_PENDING) {
+            throw new \RuntimeException('すでに審査依頼中です。');
+        }
+
+        $document->update([
+            'status' => ShopLicenseDocument::STATUS_PENDING,
+            'ng_reason' => null,
+            'approved_at' => null,
+        ]);
+
+        $this->syncShopLegacyStatus($shopId);
+
+        return $document->fresh();
+    }
+
+    public function withdrawShopDocumentReview(string $shopId, string $type): ShopLicenseDocument
+    {
+        $document = ShopLicenseDocument::query()
+            ->where('shop_id', $shopId)
+            ->where('type', $type)
+            ->firstOrFail();
+        if ((int) $document->status !== ShopLicenseDocument::STATUS_PENDING) {
+            throw new \RuntimeException('審査中の書類のみ取り下げできます。');
+        }
+
+        $document->update([
+            'status' => ShopLicenseDocument::STATUS_DRAFT,
+            'ng_reason' => null,
+            'approved_at' => null,
+        ]);
 
         $this->syncShopLegacyStatus($shopId);
 
@@ -206,6 +256,11 @@ class DocumentReviewService
 
         $shopDocuments = ShopLicenseDocument::query()
             ->leftJoin('shop_profiles', 'shop_license_documents.shop_id', '=', 'shop_profiles.shop_id')
+            ->whereIn('shop_license_documents.status', [
+                ShopLicenseDocument::STATUS_PENDING,
+                ShopLicenseDocument::STATUS_APPROVED,
+                ShopLicenseDocument::STATUS_REJECTED,
+            ])
             ->select('shop_license_documents.*', 'shop_profiles.shop_name')
             ->orderByRaw('CASE WHEN shop_license_documents.status = 1 THEN 0 WHEN shop_license_documents.status = 3 THEN 1 ELSE 2 END')
             ->orderByDesc('shop_license_documents.updated_at')
@@ -368,7 +423,14 @@ class DocumentReviewService
             return 1;
         }
 
-        return $document->status === ShopLicenseDocument::STATUS_APPROVED ? 3 : 2;
+        if ((int) $document->status === ShopLicenseDocument::STATUS_APPROVED) {
+            return 3;
+        }
+        if ((int) $document->status === ShopLicenseDocument::STATUS_PENDING) {
+            return 2;
+        }
+
+        return 1;
     }
 
     private function castStatusKey(Collection $documents): string
@@ -395,6 +457,7 @@ class DocumentReviewService
         }
 
         return match ((int) $document->status) {
+            ShopLicenseDocument::STATUS_DRAFT => 'draft',
             ShopLicenseDocument::STATUS_APPROVED => 'approved',
             ShopLicenseDocument::STATUS_REJECTED => 'rejected',
             default => 'pending',
@@ -440,6 +503,8 @@ class DocumentReviewService
             'updated_at_label' => optional($document->updated_at)->format('Y-m-d H:i'),
             'expiring_soon' => $expiringSoon,
             'expiration_notice_label' => $expiringSoon ? '更新期限半年以内' : null,
+            'can_request_review' => in_array((int) $document->status, [ShopLicenseDocument::STATUS_DRAFT, ShopLicenseDocument::STATUS_REJECTED], true),
+            'can_withdraw_review' => (int) $document->status === ShopLicenseDocument::STATUS_PENDING,
             // マイページは認証付きルートで表示（シンボリックリンク未作成環境でも閲覧可）
             'file_url' => route('shop.mypage.documents.show', ['type' => $document->type]),
         ];
@@ -486,6 +551,11 @@ class DocumentReviewService
 
     private function mapShopDocumentRecord(object $document): array
     {
+        $expiryFilterKey = $this->shopDocumentExpiryFilterKey(
+            (string) ($document->type ?? ''),
+            $document->expired_at ?? null
+        );
+
         return [
             'id' => (int) $document->id,
             'target_id' => $document->shop_id,
@@ -503,8 +573,28 @@ class DocumentReviewService
             'approved_at_label' => $this->formatDateTime($document->approved_at),
             'updated_at_label' => $this->formatDateTime($document->updated_at),
             'updated_at_sort' => $document->updated_at ? strtotime((string) $document->updated_at) : 0,
+            'expiry_filter_key' => $expiryFilterKey,
             'file_url' => $this->documentUrl($document->image_path),
         ];
+    }
+
+    private function shopDocumentExpiryFilterKey(string $type, mixed $expiredAtRaw): string
+    {
+        if ($type !== 'business' || empty($expiredAtRaw)) {
+            return 'none';
+        }
+
+        $today = Carbon::today();
+        $expiredAt = Carbon::parse((string) $expiredAtRaw)->startOfDay();
+
+        if ($expiredAt->lt($today)) {
+            return 'expired';
+        }
+        if ($expiredAt->lte($today->copy()->addMonthsNoOverflow(3))) {
+            return 'within_3_months';
+        }
+
+        return 'valid';
     }
 
     private function castTypeLabel(string $type): string
@@ -527,6 +617,7 @@ class DocumentReviewService
     private function statusLabel(int $status): string
     {
         return match ($status) {
+            0 => 'アップロード済み',
             2 => '承認済み',
             3 => '不備・却下',
             default => '未承認',
@@ -536,6 +627,7 @@ class DocumentReviewService
     private function statusKey(int $status): string
     {
         return match ($status) {
+            0 => 'draft',
             2 => 'approved',
             3 => 'rejected',
             default => 'pending',
@@ -545,6 +637,7 @@ class DocumentReviewService
     private function statusSortRank(int $status): int
     {
         return match ($status) {
+            0 => 0,
             1 => 0,
             3 => 1,
             2 => 2,

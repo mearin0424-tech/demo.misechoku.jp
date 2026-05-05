@@ -112,16 +112,20 @@ class ReviewPortalService
         }
 
         $contentColumn = $this->reviewContentColumn();
-        $detailColumn = $this->reviewDetailContentColumn();
-
-        if (!Schema::hasColumn('review_details', $detailColumn)) {
+        $hasReviewContentId = Schema::hasColumn('review_details', 'review_content_id');
+        $hasVal = Schema::hasColumn('review_details', 'val');
+        if (!$hasReviewContentId && !$hasVal) {
             return [];
         }
 
         $labelSql = 'review_contents.' . $contentColumn;
+        $joinColumnExpr = $this->reviewDetailJoinColumnExpression($hasReviewContentId, $hasVal);
+        if ($joinColumnExpr === null) {
+            return [];
+        }
 
         $rows = DB::table('review_details')
-            ->join('review_contents', 'review_details.' . $detailColumn, '=', 'review_contents.id')
+            ->join('review_contents', DB::raw($joinColumnExpr), '=', 'review_contents.id')
             ->whereIn('review_details.review_id', $reviewIds)
             ->orderBy('review_details.review_id')
             ->when(
@@ -201,6 +205,24 @@ class ReviewPortalService
         }
 
         return 'review_content_id';
+    }
+
+    private function reviewDetailJoinColumnExpression(bool $hasReviewContentId, bool $hasVal): ?string
+    {
+        if ($hasReviewContentId && $hasVal) {
+            // 互換対応: 新旧どちらの列に設問IDが入っていても参照できるようにする
+            return 'COALESCE(review_details.review_content_id, review_details.val)';
+        }
+
+        if ($hasReviewContentId) {
+            return 'review_details.review_content_id';
+        }
+
+        if ($hasVal) {
+            return 'review_details.val';
+        }
+
+        return null;
     }
 
     private function reviewReleaseExpression(): string

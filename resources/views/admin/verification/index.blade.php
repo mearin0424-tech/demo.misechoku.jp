@@ -152,6 +152,14 @@
                     <span>検索</span>
                     <input type="text" class="verification-filter" data-target-table="shop-verification-table" data-filter-key="keyword" placeholder="店舗名 / ID / 書類種別" value="{{ request('shop_keyword', '') }}">
                 </label>
+                <label>
+                    <span>有効期限</span>
+                    <select class="verification-filter" data-target-table="shop-verification-table" data-filter-key="expiry">
+                        <option value="all">すべて</option>
+                        <option value="expired">期限切れ</option>
+                        <option value="within_3_months">3か月以内</option>
+                    </select>
+                </label>
                 <div class="verification-filter-count">表示件数: <strong data-count-for="shop-verification-table">{{ count($shopDocuments) }}</strong></div>
                 <div class="verification-filter-links">
                     <a href="{{ route('admin.verification.index', ['shop_status' => 'pending', 'focus' => 'shop']) }}">未承認だけ表示</a>
@@ -172,7 +180,7 @@
                 </thead>
                 <tbody id="shop-verification-table">
                     @forelse($shopDocuments as $document)
-                        <tr data-status="{{ $document['status_key'] }}" data-sort-rank="{{ $document['sort_rank'] }}" data-updated-at="{{ $document['updated_at_sort'] }}" data-keyword="{{ strtolower($document['target_name'].' '.$document['target_id'].' '.$document['type_label']) }}">
+                        <tr data-status="{{ $document['status_key'] }}" data-expiry="{{ $document['expiry_filter_key'] ?? 'none' }}" data-sort-rank="{{ $document['sort_rank'] }}" data-updated-at="{{ $document['updated_at_sort'] }}" data-keyword="{{ strtolower($document['target_name'].' '.$document['target_id'].' '.$document['type_label']) }}">
                             <td>{{ $document['target_name'] }}<br><span class="text-xs text-gray-400">{{ $document['target_id'] }}</span></td>
                             <td>
                                 {{ $document['type_label'] }}
@@ -471,7 +479,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!tbody) return;
 
         var filters = document.querySelectorAll('.verification-filter[data-target-table="' + tableId + '"]');
-        var values = { status: '', keyword: '' };
+        var values = { status: '', keyword: '', expiry: '' };
         filters.forEach(function (filter) {
             values[filter.dataset.filterKey] = (filter.value || '').toLowerCase().trim();
         });
@@ -482,7 +490,8 @@ document.addEventListener('DOMContentLoaded', function () {
             var matchesStatus = !values.status || values.status === 'all' || row.dataset.status === values.status;
             var keyword = row.dataset.keyword || '';
             var matchesKeyword = !values.keyword || keyword.indexOf(values.keyword) !== -1;
-            var show = matchesStatus && matchesKeyword;
+            var matchesExpiry = !values.expiry || values.expiry === 'all' || row.dataset.expiry === values.expiry;
+            var show = matchesStatus && matchesKeyword && matchesExpiry;
             row.hidden = !show;
             if (show) visible++;
         });

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ShopLicenseDocument extends Model
 {
+    public const STATUS_DRAFT = 0;
     public const STATUS_PENDING = 1;
     public const STATUS_APPROVED = 2;
     public const STATUS_REJECTED = 3;

@@ -414,14 +414,26 @@ class MypageController extends Controller
         $request->validate([
             'type' => 'required|string|in:business,entertainment',
             'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:8192',
-            'expired_at' => 'nullable|date|required_if:type,business',
+            'expired_at' => 'nullable|date|required_if:type,business|after_or_equal:today',
         ], [
             'expired_at.required_if' => '営業許可証を提出する場合は有効期限を入力してください。',
             'expired_at.date' => '有効期限は日付形式で入力してください。',
+            'expired_at.after_or_equal' => '営業許可証の有効期限には本日以降の日付を入力してください。',
         ]);
 
         if ($request->hasFile('file')) {
             $type = (string) $request->input('type');
+            $current = ShopLicenseDocument::query()
+                ->where('shop_id', $this->currentShopId())
+                ->where('type', $type)
+                ->first();
+            if ($current && (int) $current->status === ShopLicenseDocument::STATUS_PENDING) {
+                return response()->json([
+                    'success' => false,
+                    'message' => '審査中のため差し替えできません。先に「審査取り下げ」を行ってください。',
+                ], 422);
+            }
+
             $document = $this->documentReviewService->uploadShopLicenseDocument(
                 $this->currentShopId(),
                 $type,
@@ -431,7 +443,7 @@ class MypageController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => '書類をアップロードしました。運営による確認・承認をお待ちください。',
+                'message' => '書類をアップロードしました。続けて「審査依頼」を押してください。',
                 'type' => $type,
                 'view_url' => route('shop.mypage.documents.show', ['type' => $type]),
             ]);
@@ -441,6 +453,48 @@ class MypageController extends Controller
             'success' => false,
             'message' => 'ファイルが選択されていません。',
         ], 400);
+    }
+
+    public function requestDocumentReview(Request $request)
+    {
+        $data = $request->validate([
+            'type' => 'required|string|in:business,entertainment',
+        ]);
+
+        try {
+            $this->documentReviewService->requestShopDocumentReview($this->currentShopId(), (string) $data['type']);
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => '審査依頼を送信しました。運営の確認をお待ちください。',
+        ]);
+    }
+
+    public function withdrawDocumentReview(Request $request)
+    {
+        $data = $request->validate([
+            'type' => 'required|string|in:business,entertainment',
+        ]);
+
+        try {
+            $this->documentReviewService->withdrawShopDocumentReview($this->currentShopId(), (string) $data['type']);
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => '審査依頼を取り下げました。ファイルを再アップロードできます。',
+        ]);
     }
 
     /**
