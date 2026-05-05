@@ -4,7 +4,11 @@
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
-      "Bash(gh pr *)"
+      "Bash(gh pr *)",
+      "Bash(git credential *)",
+      "Bash(git stash *)",
+      "Bash(git checkout *)",
+      "Bash(git cherry-pick *)"
     ]
   }
 }
