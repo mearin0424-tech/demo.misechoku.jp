@@ -7,6 +7,7 @@ use App\Rules\KouzaMeig;
 use App\Services\BillingManagementService;
 use App\Services\DocumentReviewService;
 use App\Http\Controllers\Controller;
+use App\Support\ShopBusinessHours;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -167,6 +168,38 @@ class MypageController extends Controller
         }
         $shopTagGroups = $this->resolveShopInfoTagGroups($shopId);
 
+        $profileRow = DB::table('shop_profiles')->where('shop_id', $shopId)->first();
+        $businessHoursShop = '';
+        if ($profileRow && Schema::hasColumn('shop_profiles', 'open_time')) {
+            $businessHoursShop = ShopBusinessHours::formatDisplay(
+                $profileRow->open_time ?? null,
+                (int) ($profileRow->close_is_last ?? 0),
+                $profileRow->close_time ?? null
+            );
+        }
+        $stationLines = [];
+        if (Schema::hasTable('shop_stations')) {
+            $stationLines = DB::table('shop_stations')
+                ->where('shop_id', $shopId)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->pluck('station_name')
+                ->map(fn ($n) => trim((string) $n))
+                ->filter()
+                ->values()
+                ->all();
+        }
+        $addrStreetOnly = '';
+        if ($profileRow && Schema::hasColumn('shop_profiles', 'addr')) {
+            $addrStreetOnly = trim(implode(' ', array_filter([
+                $profileRow->addr ?? '',
+                $profileRow->building ?? '',
+            ])));
+        }
+        if ($addrStreetOnly === '' && $row) {
+            $addrStreetOnly = trim(($row->addr2 ?? '') . ' ' . ($row->addr3 ?? ''));
+        }
+
         return view('shops.mypage.index', [
             'pageId'    => 'mypage',
             'shopData'  => $shopData,
@@ -180,8 +213,11 @@ class MypageController extends Controller
                 'zip' => $row->zip ?? '',
                 'pref' => $row->pref ?? '',
                 'city' => $row->city ?? '',
-                'addr1' => trim(($row->addr2 ?? '') . ' ' . ($row->addr3 ?? '')),
+                'addr1' => $addrStreetOnly,
                 'nearest_station' => $row->station1 ?? '',
+                'nearest_stations' => $stationLines,
+                'business_hours_shop' => $businessHoursShop,
+                'tel' => ($profileRow && Schema::hasColumn('shop_profiles', 'tel')) ? (string) ($profileRow->tel ?? '') : '',
                 'working_hours' => $jobRow?->working_hours ?? '',
                 'working_days' => $jobRow?->working_day ?? '',
                 'regular_holiday' => $jobRow?->regular_holiday ?? '',
@@ -193,6 +229,21 @@ class MypageController extends Controller
                 'hired_count' => $hiredCount,
                 'payment_pending_count' => $paymentPendingCount,
             ],
+        ]);
+    }
+
+    /**
+     * 新規登録直後など：許可証2種の提出に誘導する画面
+     */
+    public function documentsOnboarding()
+    {
+        $shopId = $this->currentShopId();
+        $documentData = $this->documentReviewService->getShopLicensePageData($shopId);
+
+        return view('shops.mypage.documents-onboarding', [
+            'pageId' => 'documents_onboarding',
+            'documents' => $documentData['documents'],
+            'allDocumentsApproved' => $documentData['all_approved'],
         ]);
     }
 
@@ -338,7 +389,10 @@ class MypageController extends Controller
         $request->validate([
             'type' => 'required|string|in:business,entertainment',
             'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:8192',
-            'expired_at' => 'nullable|date',
+            'expired_at' => 'nullable|date|required_if:type,business',
+        ], [
+            'expired_at.required_if' => '営業許可証を提出する場合は有効期限を入力してください。',
+            'expired_at.date' => '有効期限は日付形式で入力してください。',
         ]);
 
         if ($request->hasFile('file')) {

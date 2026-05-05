@@ -6,12 +6,13 @@
 @endphp
 @section('guide_message')
     @if($showLicenseGuide)
-        営業許可証または風営許可証が、まだそろっていないようです。両方がそろいますと、面談日設定などの機能もご利用いただけますので、先にこちらをご準備ください。
+        営業許可証と風営許可証の両方を提出し、運営の承認がおりるまで求人を公開できません。面談日設定などの機能も、書類が整い承認後にご利用いただけます。
     @endif
 @endsection
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/shop-license-documents.css') }}?v=20260505">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
 <style>
     /* 安心バッヂパネル（ボタン化・未付与はグレー） */
@@ -165,62 +166,6 @@
     }
     .mypage-collapsible.is-collapsed .mypage-collapsible-content {
         display: none;
-    }
-    .document-upload-group {
-        margin-bottom: 14px;
-    }
-    .document-upload-group-title {
-        margin: 0 0 8px;
-        font-size: 0.72rem;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: #bdaaaa;
-    }
-    .document-upload-list {
-        display: grid;
-        gap: 10px;
-    }
-    .document-upload-card {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 12px;
-        border-radius: 14px;
-        border: 1px solid rgba(212, 175, 55, 0.2);
-        background: rgba(255,255,255,0.02);
-        cursor: pointer;
-        text-align: left;
-        font: inherit;
-    }
-    .document-upload-card.is-missing {
-        border-style: dashed;
-        border-color: rgba(224, 108, 108, 0.45);
-        background: rgba(64, 22, 24, 0.28);
-    }
-    .document-upload-name {
-        margin: 0 0 6px;
-        font-size: 0.9rem;
-        font-weight: 700;
-        color: #fff8ea;
-    }
-    .document-status-chip {
-        display: inline-flex;
-        align-items: center;
-        padding: 4px 10px;
-        border-radius: 999px;
-        font-size: 0.7rem;
-        font-weight: 700;
-    }
-    .document-status-chip.is-approved { color: #dcfce7; background: rgba(34, 197, 94, 0.14); border: 1px solid rgba(34, 197, 94, 0.24); }
-    .document-status-chip.is-pending { color: #f6e7af; background: rgba(212, 175, 55, 0.12); border: 1px solid rgba(212, 175, 55, 0.22); }
-    .document-status-chip.is-rejected { color: #fee2e2; background: rgba(248, 113, 113, 0.12); border: 1px solid rgba(248, 113, 113, 0.24); }
-    .document-status-chip.is-not-submitted { color: #ffd4d4; background: rgba(128, 30, 35, 0.28); border: 1px solid rgba(224, 108, 108, 0.35); }
-    .document-upload-meta {
-        margin-top: 6px;
-        font-size: 0.73rem;
-        color: #bdaaaa;
     }
     .shop-info-tag-group {
         margin-top: 12px;
@@ -468,123 +413,6 @@
         border: 1px solid rgba(55, 48, 42, 0.85);
         background: rgba(6, 6, 8, 0.65);
     }
-
-    .shop-mypage-license-card {
-        width: 100%;
-        display: block;
-        padding: 14px 16px;
-        border-radius: 12px;
-        border: 1px solid rgba(212, 175, 55, 0.18);
-        background: rgba(12, 10, 9, 0.88);
-        cursor: pointer;
-        text-align: left;
-        font: inherit;
-        margin-bottom: 10px;
-        transition: background 0.15s ease, border-color 0.15s ease;
-    }
-    .shop-mypage-license-card:hover {
-        border-color: rgba(212, 175, 55, 0.35);
-    }
-    .shop-mypage-license-card.is-missing {
-        border-style: dashed;
-        border-color: rgba(180, 70, 70, 0.45);
-        background: rgba(40, 18, 20, 0.35);
-    }
-    .shop-mypage-license-card-body {
-        width: 100%;
-        min-width: 0;
-    }
-    .license-upload-modal {
-        position: relative;
-        max-width: 420px;
-        width: 100%;
-        padding: 0 0 20px;
-    }
-    .license-upload-modal__head {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 18px 20px 12px;
-        border-bottom: 1px solid rgba(90, 78, 68, 0.45);
-    }
-    .license-upload-modal__head .mypage-modal-title {
-        margin: 0;
-        font-size: 1rem;
-    }
-    .license-upload-modal__close {
-        flex-shrink: 0;
-        width: 36px;
-        height: 36px;
-        margin: -6px -8px 0 0;
-        border: none;
-        border-radius: 10px;
-        background: rgba(255,255,255,0.06);
-        color: #c4b5a8;
-        font-size: 1.35rem;
-        line-height: 1;
-        cursor: pointer;
-    }
-    .license-upload-modal__close:hover {
-        background: rgba(255,255,255,0.1);
-        color: #fff;
-    }
-    .license-upload-modal__body {
-        padding: 16px 20px 0;
-    }
-    .license-upload-modal__doc-name {
-        margin: 0 0 10px;
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #fff8ea;
-    }
-    .license-upload-modal__status-row {
-        margin-bottom: 8px;
-    }
-    .license-upload-modal__ng {
-        margin: 0 0 10px;
-        padding: 10px 12px;
-        border-radius: 10px;
-        font-size: 0.78rem;
-        line-height: 1.55;
-        color: #fecaca;
-        background: rgba(127, 29, 29, 0.28);
-        border: 1px solid rgba(248, 113, 113, 0.25);
-    }
-    .license-upload-modal__meta {
-        margin: 0 0 14px;
-        font-size: 0.74rem;
-        color: #bdaaaa;
-    }
-    .license-upload-dropzone {
-        margin-top: 4px;
-        padding: 16px 14px;
-        border-radius: 12px;
-        border: 1px dashed rgba(212, 175, 55, 0.28);
-        background: rgba(8, 8, 10, 0.55);
-        transition: border-color 0.15s ease, background 0.15s ease;
-    }
-    .license-upload-dropzone.is-dragover {
-        border-color: rgba(212, 175, 55, 0.65);
-        background: rgba(212, 175, 55, 0.06);
-    }
-    .license-upload-dropzone__hint {
-        margin: 0 0 14px;
-        font-size: 0.76rem;
-        line-height: 1.55;
-        color: #a8988c;
-    }
-    .license-upload-modal__actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    .license-upload-modal__filename {
-        margin: 12px 20px 0;
-        font-size: 0.72rem;
-        color: #8a7d72;
-        min-height: 1.2em;
-    }
 </style>
 @endpush
 
@@ -676,7 +504,24 @@
                     <span class="k">住所</span>
                     <span class="v">{{ trim(($shopInfo['pref'] ?? '') . ($shopInfo['city'] ?? '') . ($shopInfo['addr1'] ?? '')) ?: '—' }}</span>
                 </div>
-                @if(!empty($shopInfo['nearest_station'] ?? null))
+                @if(!empty($shopInfo['tel'] ?? null))
+                    <div class="shop-mypage-info-row">
+                        <span class="k">電話</span>
+                        <span class="v">{{ $shopInfo['tel'] }}</span>
+                    </div>
+                @endif
+                @if(!empty($shopInfo['business_hours_shop'] ?? null))
+                    <div class="shop-mypage-info-row">
+                        <span class="k">店舗の営業時間</span>
+                        <span class="v">{{ $shopInfo['business_hours_shop'] }}</span>
+                    </div>
+                @endif
+                @if(!empty($shopInfo['nearest_stations'] ?? []))
+                    <div class="shop-mypage-info-row">
+                        <span class="k">最寄り駅</span>
+                        <span class="v">{!! nl2br(e(implode("\n", $shopInfo['nearest_stations']))) !!}</span>
+                    </div>
+                @elseif(!empty($shopInfo['nearest_station'] ?? null))
                     <div class="shop-mypage-info-row">
                         <span class="k">最寄り</span>
                         <span class="v">{{ $shopInfo['nearest_station'] }}</span>
@@ -748,38 +593,7 @@
             </ul>
         </div>
 
-        <div class="shop-mypage-section document-section">
-            <h3 class="shop-mypage-section-label">Licenses</h3>
-            @foreach(($documents ?? []) as $doc)
-                @php
-                    $s = $doc['status'] ?? 'not_submitted';
-                    $record = $doc['record'] ?? null;
-                    $label = $doc['status_label'] ?? ($s === 'approved' ? '承認済み' : ($s === 'rejected' ? '差し戻し' : ($s === 'pending' ? '審査中' : '未提出')));
-                    $isMissing = $s === 'not_submitted';
-                @endphp
-                <button type="button"
-                    class="shop-mypage-license-card js-license-card {{ $isMissing ? 'is-missing' : '' }}"
-                    data-doc-key="{{ $doc['key'] }}"
-                    data-doc-name="{{ $doc['name'] }}"
-                    data-doc-status="{{ $s }}"
-                    data-doc-status-label="{{ $label }}"
-                    data-doc-url="{{ $record['file_url'] ?? '' }}"
-                    data-doc-updated="{{ $record['updated_at_label'] ?? '' }}"
-                    data-ng-reason="{{ $record['ng_reason'] ?? '' }}">
-                    <div class="shop-mypage-license-card-body">
-                        <p class="document-upload-name">{{ $doc['name'] }}</p>
-                        <span class="document-status-chip is-{{ str_replace('_', '-', $s) }}">{{ $label }}</span>
-                        <p class="document-upload-meta">
-                            @if($isMissing)
-                                タップしてファイルを提出してください
-                            @else
-                                最終更新: {{ $record['updated_at_label'] ?? '—' }}
-                            @endif
-                        </p>
-                    </div>
-                </button>
-            @endforeach
-        </div>
+        @include('shops.mypage.partials.shop-license-documents', ['documents' => $documents ?? []])
     </section>
 </div>
 
@@ -856,33 +670,6 @@
             <button type="button" class="btn-action btn-action-secondary" id="word-edit-cancel-btn">戻る</button>
             <button type="button" class="btn-action btn-action-primary" id="word-edit-save-btn">保存</button>
         </div>
-    </div>
-</div>
-
-<div id="modal-license-detail" class="mypage-modal-overlay modal-word-edit" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="license-detail-title">
-    <div class="mypage-modal-panel glass-panel license-upload-modal">
-        <div class="license-upload-modal__head">
-            <h3 id="license-detail-title" class="mypage-modal-title serif-font">許可証の提出</h3>
-            <button type="button" class="license-upload-modal__close" id="license-detail-close-btn" aria-label="閉じる">×</button>
-        </div>
-        <div class="license-upload-modal__body">
-            <p id="license-detail-name" class="license-upload-modal__doc-name"></p>
-            <div class="license-upload-modal__status-row">
-                <span id="license-detail-status-chip" class="document-status-chip is-not-submitted" role="status"></span>
-            </div>
-            <p id="license-detail-ng" class="license-upload-modal__ng" style="display:none;"></p>
-            <p id="license-detail-updated" class="license-upload-modal__meta"></p>
-            <div id="license-detail-dropzone" class="license-upload-dropzone">
-                <p class="license-upload-dropzone__hint">PDF、JPEG、PNG（最大 8MB）をドラッグ＆ドロップするか、「ファイルを選択」からアップロードしてください。</p>
-                <input type="hidden" id="license-detail-type" value="">
-                <input type="file" id="license-detail-file" class="sr-only" accept=".pdf,.png,.jpg,.jpeg,image/*,application/pdf">
-                <div class="license-upload-modal__actions">
-                    <button type="button" class="btn-action btn-action-primary" id="license-detail-pick-btn">ファイルを選択</button>
-                    <a id="license-detail-view-link" href="#" target="_blank" rel="noopener" class="btn-action btn-action-secondary" style="display:none;">書類を表示</a>
-                </div>
-            </div>
-        </div>
-        <p id="license-detail-file-hint" class="license-upload-modal__filename" aria-live="polite"></p>
     </div>
 </div>
 
@@ -976,151 +763,5 @@ document.addEventListener('DOMContentLoaded', function() {
     if (closeBadgeModal) closeBadgeModal.addEventListener('click', hideBadgeModal);
     if (closeBadgeModalTop) closeBadgeModalTop.addEventListener('click', hideBadgeModal);
 });
-</script>
-<script>
-(function() {
-    var cards = document.querySelectorAll('.js-license-card');
-    var detailModal = document.getElementById('modal-license-detail');
-    if (!cards.length || !detailModal) return;
-
-    var detailName = document.getElementById('license-detail-name');
-    var detailChip = document.getElementById('license-detail-status-chip');
-    var detailNg = document.getElementById('license-detail-ng');
-    var detailUpdated = document.getElementById('license-detail-updated');
-    var detailType = document.getElementById('license-detail-type');
-    var detailFile = document.getElementById('license-detail-file');
-    var detailPickBtn = document.getElementById('license-detail-pick-btn');
-    var detailViewLink = document.getElementById('license-detail-view-link');
-    var detailCloseBtn = document.getElementById('license-detail-close-btn');
-    var detailDropzone = document.getElementById('license-detail-dropzone');
-    var detailFileHint = document.getElementById('license-detail-file-hint');
-
-    function setChip(chipEl, statusKey, labelText) {
-        if (!chipEl) return;
-        var sk = (statusKey || 'not_submitted').replace(/_/g, '-');
-        chipEl.className = 'document-status-chip is-' + sk;
-        chipEl.textContent = labelText || '';
-    }
-
-    function closeModal() {
-        detailModal.style.display = 'none';
-        if (detailFile) detailFile.value = '';
-        if (detailFileHint) detailFileHint.textContent = '';
-        if (detailDropzone) detailDropzone.classList.remove('is-dragover');
-    }
-
-    function uploadFile(file) {
-        if (!file || !detailType) return;
-        var formData = new FormData();
-        formData.append('_token', '{{ csrf_token() }}');
-        formData.append('type', detailType.value || '');
-        formData.append('file', file);
-
-        if (detailPickBtn) detailPickBtn.disabled = true;
-        if (detailFileHint) detailFileHint.textContent = 'アップロード中…';
-
-        fetch('{{ route("shop.mypage.documents.upload") }}', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: formData
-        }).then(function(r) {
-            return r.json().then(function(json) {
-                if (!r.ok) throw json;
-                return json;
-            });
-        }).then(function(res) {
-            alert(res.message || '書類をアップロードしました。');
-            window.location.reload();
-        }).catch(function(error) {
-            var messages = error && error.errors ? Object.values(error.errors).flat() : [];
-            alert(messages[0] || (error && error.message) || 'アップロードに失敗しました。');
-            if (detailFileHint) detailFileHint.textContent = '';
-        }).finally(function() {
-            if (detailPickBtn) detailPickBtn.disabled = false;
-            if (detailFile) detailFile.value = '';
-        });
-    }
-
-    cards.forEach(function(card) {
-        card.addEventListener('click', function() {
-            var docStatus = card.getAttribute('data-doc-status') || 'not_submitted';
-            var docUrl = card.getAttribute('data-doc-url') || '';
-            var statusLabel = card.getAttribute('data-doc-status-label') || '';
-            var ngReason = card.getAttribute('data-ng-reason') || '';
-
-            if (detailName) detailName.textContent = card.getAttribute('data-doc-name') || '書類';
-            if (detailType) detailType.value = card.getAttribute('data-doc-key') || '';
-
-            setChip(detailChip, docStatus, statusLabel);
-
-            if (detailNg) {
-                if (docStatus === 'rejected' && ngReason) {
-                    detailNg.style.display = 'block';
-                    detailNg.textContent = '差し戻し理由: ' + ngReason;
-                } else {
-                    detailNg.style.display = 'none';
-                    detailNg.textContent = '';
-                }
-            }
-
-            if (detailUpdated) {
-                if (docStatus === 'not_submitted') {
-                    detailUpdated.textContent = 'まだファイルが提出されていません。';
-                } else {
-                    detailUpdated.textContent = '最終更新: ' + (card.getAttribute('data-doc-updated') || '—');
-                }
-            }
-
-            if (detailViewLink) {
-                if (docUrl && docStatus !== 'not_submitted') {
-                    detailViewLink.href = docUrl;
-                    detailViewLink.style.display = 'inline-flex';
-                } else {
-                    detailViewLink.style.display = 'none';
-                }
-            }
-
-            if (detailFileHint) detailFileHint.textContent = '';
-
-            detailModal.style.display = 'flex';
-        });
-    });
-
-    detailModal.addEventListener('click', function(e) { if (e.target === detailModal) closeModal(); });
-    if (detailCloseBtn) detailCloseBtn.addEventListener('click', closeModal);
-    if (detailPickBtn && detailFile) {
-        detailPickBtn.addEventListener('click', function() { detailFile.click(); });
-    }
-
-    if (detailFile) {
-        detailFile.addEventListener('change', function() {
-            if (!detailFile.files || !detailFile.files.length) return;
-            uploadFile(detailFile.files[0]);
-        });
-    }
-
-    if (detailDropzone && detailFile) {
-        detailDropzone.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            detailDropzone.classList.add('is-dragover');
-        });
-        detailDropzone.addEventListener('dragleave', function(e) {
-            e.preventDefault();
-            if (e.target === detailDropzone) detailDropzone.classList.remove('is-dragover');
-        });
-        detailDropzone.addEventListener('drop', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            detailDropzone.classList.remove('is-dragover');
-            var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-            if (f) uploadFile(f);
-        });
-    }
-})();
 </script>
 @endpush

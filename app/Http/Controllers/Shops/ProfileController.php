@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Shops;
 use App\Consts\CommonConsts;
 use App\Http\Controllers\Controller;
 use App\Services\AdminMasterService;
+use App\Services\ShopProfileLocationSyncService;
+use App\Support\ShopBusinessHours;
 use Illuminate\Http\Request;
 use App\Http\Requests\Shops\UploadImageRequest;
 use Illuminate\Support\Facades\Storage;
@@ -13,8 +15,10 @@ use Illuminate\Support\Facades\Schema;
 
 class ProfileController extends Controller
 {
-    public function __construct(private readonly AdminMasterService $adminMasterService)
-    {
+    public function __construct(
+        private readonly AdminMasterService $adminMasterService,
+        private readonly ShopProfileLocationSyncService $shopProfileLocationSyncService,
+    ) {
     }
 
     /**
@@ -39,6 +43,10 @@ class ProfileController extends Controller
             'shopData' => $this->buildShopEditData($this->currentShopId()),
             'masters' => $this->adminMasterService->getShopProfileMasters(),
             'prefOptions' => CommonConsts::PREFS,
+            'hasProfileAddr' => Schema::hasColumn('shop_profiles', 'addr'),
+            'hasProfileBusinessHours' => Schema::hasColumn('shop_profiles', 'open_time'),
+            'hasShopStationsTable' => Schema::hasTable('shop_stations'),
+            'hasProfileTel' => Schema::hasColumn('shop_profiles', 'tel'),
         ]);
     }
 
@@ -47,18 +55,27 @@ class ProfileController extends Controller
      * (旧 api/update_mypage.php, api/update_shop.php の機能を統合)
      */
     public function update(Request $request) {
-        $request->validate([
+        $rules = [
             'shop_name' => 'required|string|max:100',
             'zip' => ['nullable', 'regex:/^\d{3}-?\d{4}$/'],
             'pref' => 'required|string|max:50',
             'city' => 'nullable|string|max:100',
             'addr1' => 'nullable|string|max:255',
+            'addr' => 'nullable|string|max:255',
+            'building' => 'nullable|string|max:255',
+            'tel' => 'nullable|string|max:30',
             'industry_id' => 'nullable|integer|exists:industries,id',
             'atmosphere_tag_ids'   => 'nullable|array',
             'atmosphere_tag_ids.*' => 'integer|exists:shop_tags,id',
             'facility_tag_ids'     => 'nullable|array',
             'facility_tag_ids.*'   => 'integer|exists:shop_tags,id',
-        ], [
+            'business_open' => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
+            'business_close' => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
+            'business_close_last' => 'nullable|boolean',
+            'stations' => 'nullable|array',
+            'stations.*' => 'nullable|string|max:255',
+        ];
+        $request->validate($rules, [
             'zip.regex' => '郵便番号は 7 桁、または 123-4567 形式で入力してください。',
         ]);
 
@@ -74,19 +91,65 @@ class ProfileController extends Controller
             ], 422);
         }
 
+        $existingProfile = DB::table('shop_profiles')->where('shop_id', $shopId)->first();
+        $addressChanged = $this->profileAddressChanged($existingProfile, $request);
+
+        $profileRow = [
+            'shop_name' => $request->input('shop_name'),
+            'zip' => $this->normalizeZip($request->input('zip')),
+            'pref' => $request->input('pref'),
+            'city' => $request->input('city'),
+            'industry_id' => $request->input('industry_id') ?: null,
+            'updated_at' => now(),
+            'created_at' => now(),
+        ];
+
+        if (Schema::hasColumn('shop_profiles', 'addr')) {
+            $profileRow['addr'] = trim((string) $request->input('addr', ''));
+            $profileRow['building'] = trim((string) $request->input('building', ''));
+        } elseif (Schema::hasColumn('shop_profiles', 'addr2')) {
+            $profileRow['addr2'] = $request->input('addr1');
+        }
+
+        if (Schema::hasColumn('shop_profiles', 'tel')) {
+            $profileRow['tel'] = trim((string) $request->input('tel', '')) ?: null;
+        }
+
+        if (Schema::hasColumn('shop_profiles', 'open_time')) {
+            $bh = ShopBusinessHours::normalizeFromRequest(
+                (string) $request->input('business_open', ''),
+                $request->boolean('business_close_last'),
+                (string) $request->input('business_close', '')
+            );
+            $profileRow['open_time'] = $bh['open_time'];
+            $profileRow['close_is_last'] = $bh['close_is_last'];
+            $profileRow['close_time'] = $bh['close_time'];
+        }
+
+        $stationsFilledFromApi = false;
+        if (
+            $addressChanged
+            && Schema::hasColumn('shop_profiles', 'latitude')
+            && Schema::hasColumn('shop_profiles', 'longitude')
+        ) {
+            $fullAddress = $this->shopProfileLocationSyncService->buildFullAddressLineForGeocode($request);
+            $resolved = $this->shopProfileLocationSyncService->resolveFromAddressLine($fullAddress);
+            $profileRow['latitude'] = $resolved['latitude'];
+            $profileRow['longitude'] = $resolved['longitude'];
+            if (Schema::hasTable('shop_stations')) {
+                $this->shopProfileLocationSyncService->replaceShopStationsRows($shopId, $resolved['station_rows']);
+                $stationsFilledFromApi = true;
+            }
+        }
+
         DB::table('shop_profiles')->updateOrInsert(
             ['shop_id' => $shopId],
-            [
-                'shop_name' => $request->input('shop_name'),
-                'zip' => $this->normalizeZip($request->input('zip')),
-                'pref' => $request->input('pref'),
-                'city' => $request->input('city'),
-                'addr2' => $request->input('addr1'),
-                'industry_id' => $request->input('industry_id') ?: null,
-                'updated_at' => now(),
-                'created_at' => now(),
-            ]
+            $profileRow
         );
+
+        if (Schema::hasTable('shop_stations') && !$stationsFilledFromApi) {
+            $this->syncShopStations($shopId, $request->input('stations', []));
+        }
 
         $this->syncShopProfileTags($shopId, 'atmosphere', $request->input('atmosphere_tag_ids', []));
         $this->syncShopProfileTags($shopId, 'facility',   $request->input('facility_tag_ids', []));
@@ -99,6 +162,52 @@ class ProfileController extends Controller
     /**
      * shop_tag_relations を新スキーマ (shop_tags target='shop') と同期する.
      */
+
+    private function profileAddressChanged(?object $existing, Request $request): bool
+    {
+        if (!$existing) {
+            return true;
+        }
+        $pref = trim((string) $request->input('pref', ''));
+        $city = trim((string) $request->input('city', ''));
+        $p0 = trim((string) ($existing->pref ?? ''));
+        $c0 = trim((string) ($existing->city ?? ''));
+        if ($p0 !== $pref || $c0 !== $city) {
+            return true;
+        }
+        if (Schema::hasColumn('shop_profiles', 'addr')) {
+            return trim((string) ($existing->addr ?? '')) !== trim((string) $request->input('addr', ''))
+                || trim((string) ($existing->building ?? '')) !== trim((string) $request->input('building', ''));
+        }
+        $incoming = trim((string) $request->input('addr1', ''));
+        $existingStreet = trim(trim((string) ($existing->addr2 ?? '')) . ' ' . trim((string) ($existing->addr3 ?? '')));
+
+        return $existingStreet !== $incoming;
+    }
+
+    /**
+     * @param  array<int, mixed>  $lines
+     */
+    private function syncShopStations(string $shopId, array $lines): void
+    {
+        DB::table('shop_stations')->where('shop_id', $shopId)->delete();
+        $order = 0;
+        foreach ($lines as $line) {
+            $t = is_string($line) ? trim($line) : '';
+            if ($t === '') {
+                continue;
+            }
+            DB::table('shop_stations')->insert([
+                'shop_id' => $shopId,
+                'station_name' => $t,
+                'sort_order' => $order,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            $order++;
+        }
+    }
+
     private function syncShopProfileTags(string $shopId, string $category, array $tagIds): void
     {
         if (!Schema::hasTable('shop_tag_relations') || !Schema::hasTable('shop_tags')) {
@@ -393,7 +502,6 @@ class ProfileController extends Controller
     {
         $row = DB::table('shop_profiles')
             ->where('shop_id', $shopId)
-            ->select('shop_name', 'zip', 'pref', 'city', 'addr2', 'addr3', 'industry_id')
             ->first();
 
         $shopPost = DB::table('shop_posts')
@@ -408,18 +516,58 @@ class ProfileController extends Controller
 
         $shopTagIds = $this->fetchSelectedShopTagIds($shopId);
 
-        return [
-            'shop_name' => $row->shop_name ?? '',
+        $addrOut = '';
+        $addrStreet = '';
+        $building = '';
+        if ($row && Schema::hasColumn('shop_profiles', 'addr')) {
+            $addrStreet = (string) ($row->addr ?? '');
+            $building = (string) ($row->building ?? '');
+            $addrOut = trim(implode(' ', array_filter([$addrStreet, $building])));
+        } elseif ($row) {
+            $addrOut = trim(implode(' ', array_filter([$row->addr2 ?? null, $row->addr3 ?? null])));
+        }
+
+        $stations = [''];
+        if (Schema::hasTable('shop_stations')) {
+            $names = DB::table('shop_stations')
+                ->where('shop_id', $shopId)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->pluck('station_name')
+                ->map(fn ($n) => trim((string) $n))
+                ->filter()
+                ->values()
+                ->all();
+            $stations = !empty($names) ? $names : [''];
+        }
+
+        $data = [
+            'shop_name' => $row ? ($row->shop_name ?? '') : '',
             'word' => $shopPost && isset($shopPost->body) ? (string) $shopPost->body : '',
             'overview' => '',
-            'zip' => $row->zip ?? '',
-            'pref' => $row->pref ?? '東京都',
-            'city' => $row->city ?? '',
-            'addr1' => trim(implode(' ', array_filter([$row->addr2 ?? null, $row->addr3 ?? null]))),
-            'industry_id' => $row->industry_id ?? null,
+            'zip' => $row ? ($row->zip ?? '') : '',
+            'pref' => $row ? (($row->pref ?? '') !== '' ? (string) $row->pref : '東京都') : '東京都',
+            'city' => $row ? ($row->city ?? '') : '',
+            'addr1' => $addrOut,
+            'addr' => $addrStreet,
+            'building' => $building,
+            'tel' => ($row && Schema::hasColumn('shop_profiles', 'tel')) ? (string) ($row->tel ?? '') : '',
+            'industry_id' => $row ? ($row->industry_id ?? null) : null,
             'atmosphere_tag_ids' => $shopTagIds['atmosphere'],
             'facility_tag_ids'   => $shopTagIds['facility'],
+            'stations' => $stations,
+            'business_open' => '',
+            'business_close' => '',
+            'business_close_last' => false,
         ];
+
+        if ($row && Schema::hasColumn('shop_profiles', 'open_time')) {
+            $data['business_open'] = ShopBusinessHours::formatTimeHhmm($row->open_time ?? null);
+            $data['business_close_last'] = (bool) (int) ($row->close_is_last ?? 0);
+            $data['business_close'] = ShopBusinessHours::formatTimeHhmm($row->close_time ?? null);
+        }
+
+        return $data;
     }
 
     /**

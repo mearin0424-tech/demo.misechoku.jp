@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Cast;
 use App\Models\ShopManager;
 use App\Services\AdminMasterService;
+use App\Services\ShopProfileLocationSyncService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -17,8 +18,10 @@ use Illuminate\View\View;
 
 class RegistrationController extends Controller
 {
-    public function __construct(private readonly AdminMasterService $adminMasterService)
-    {
+    public function __construct(
+        private readonly AdminMasterService $adminMasterService,
+        private readonly ShopProfileLocationSyncService $shopProfileLocationSyncService,
+    ) {
     }
 
     public function showCast(): View
@@ -259,6 +262,11 @@ class RegistrationController extends Controller
             }
             DB::table('shop_profiles')->insert($shopProfilePayload);
 
+            if (Schema::hasColumn('shop_profiles', 'latitude')) {
+                $fullAddr = $this->shopProfileLocationSyncService->buildFullAddressLineForGeocode($request);
+                $this->shopProfileLocationSyncService->persistResolvedLocation($shopId, $fullAddr);
+            }
+
             if (Schema::hasTable('shop_posts')) {
                 $hitokoto = $request->filled('word')
                     ? (string) $request->input('word')
@@ -346,8 +354,8 @@ class RegistrationController extends Controller
         $request->session()->regenerate();
 
         return redirect()
-            ->route('shop.home')
-            ->with('message', '店舗アカウントを登録しました。');
+            ->route('shop.mypage.documents.onboarding')
+            ->with('message', '店舗アカウントを登録しました。続いて許可証の提出をお願いします。');
     }
 
     private function buildViewData(string $role): array

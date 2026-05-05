@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\CastIdentityDocument;
 use App\Models\ShopLicenseDocument;
+use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -113,6 +114,14 @@ class DocumentReviewService
             'documents' => $mapped,
             'all_approved' => collect($mapped)->every(fn (array $row) => $row['status'] === 'approved'),
         ];
+    }
+
+    /**
+     * 営業・風営の両書類が承認済みか（求人の公開可否に利用）。
+     */
+    public function shopLicenseFullyApproved(string $shopId): bool
+    {
+        return $this->getShopLicensePageData($shopId)['all_approved'];
     }
 
     /**
@@ -416,6 +425,8 @@ class DocumentReviewService
 
     private function mapShopDocument(ShopLicenseDocument $document): array
     {
+        $expiringSoon = $this->isBusinessLicenseExpiringSoon($document);
+
         return [
             'id' => $document->id,
             'type' => $document->type,
@@ -427,9 +438,24 @@ class DocumentReviewService
             'expired_at' => optional($document->expired_at)->format('Y-m-d'),
             'approved_at' => optional($document->approved_at)->format('Y-m-d H:i'),
             'updated_at_label' => optional($document->updated_at)->format('Y-m-d H:i'),
+            'expiring_soon' => $expiringSoon,
+            'expiration_notice_label' => $expiringSoon ? '更新期限半年以内' : null,
             // マイページは認証付きルートで表示（シンボリックリンク未作成環境でも閲覧可）
             'file_url' => route('shop.mypage.documents.show', ['type' => $document->type]),
         ];
+    }
+
+    private function isBusinessLicenseExpiringSoon(ShopLicenseDocument $document): bool
+    {
+        if ($document->type !== 'business' || !$document->expired_at) {
+            return false;
+        }
+
+        $today = Carbon::today();
+        $expiredAt = Carbon::parse($document->expired_at)->startOfDay();
+        $alertStart = $expiredAt->copy()->subMonthsNoOverflow(6);
+
+        return $today->gte($alertStart) && $today->lte($expiredAt);
     }
 
     private function mapCastDocumentRecord(object $document): array

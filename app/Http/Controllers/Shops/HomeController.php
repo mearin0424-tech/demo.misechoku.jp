@@ -759,41 +759,45 @@ class HomeController extends Controller
 
     private function cleanupStaleImageReferences(): void
     {
-        DB::table('cast_profiles')
-            ->whereNotNull('main_image_path')
-            ->get(['cast_id'])
-            ->each(function ($row) {
-                $hasImages = DB::table('cast_images')
-                    ->where('cast_id', $row->cast_id)
-                    ->where('type', 1)
-                    ->exists();
-
-                if (!$hasImages) {
-                    DB::table('cast_profiles')
+        if (Schema::hasColumn('cast_profiles', 'main_image_path')) {
+            DB::table('cast_profiles')
+                ->whereNotNull('main_image_path')
+                ->get(['cast_id'])
+                ->each(function ($row) {
+                    $hasImages = DB::table('cast_images')
                         ->where('cast_id', $row->cast_id)
-                        ->update([
-                            'main_image_path' => null,
-                            'updated_at' => now(),
-                        ]);
-                }
-            });
+                        ->where('type', 1)
+                        ->exists();
 
-        DB::table('shop_profiles')
-            ->whereNotNull('main_image_path')
-            ->get(['shop_id'])
-            ->each(function ($row) {
-                $hasImages = DB::table('shop_images')
-                    ->where('shop_id', $row->shop_id)
-                    ->exists();
+                    if (!$hasImages) {
+                        DB::table('cast_profiles')
+                            ->where('cast_id', $row->cast_id)
+                            ->update([
+                                'main_image_path' => null,
+                                'updated_at' => now(),
+                            ]);
+                    }
+                });
+        }
 
-                if (!$hasImages) {
-                    DB::table('shop_profiles')
+        if (Schema::hasColumn('shop_profiles', 'main_image_path')) {
+            DB::table('shop_profiles')
+                ->whereNotNull('main_image_path')
+                ->get(['shop_id'])
+                ->each(function ($row) {
+                    $hasImages = DB::table('shop_images')
                         ->where('shop_id', $row->shop_id)
-                        ->update([
-                            'main_image_path' => null,
-                            'updated_at' => now(),
-                        ]);
-                }
-            });
+                        ->exists();
+
+                    if (!$hasImages) {
+                        DB::table('shop_profiles')
+                            ->where('shop_id', $row->shop_id)
+                            ->update([
+                                'main_image_path' => null,
+                                'updated_at' => now(),
+                            ]);
+                    }
+                });
+        }
     }
 }

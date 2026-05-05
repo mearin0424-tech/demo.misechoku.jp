@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Shops;
 
 use App\Http\Controllers\Controller;
 use App\Services\AdminMasterService;
+use App\Services\DocumentReviewService;
 use App\Support\RecruitCatchOverlay;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,8 +13,12 @@ use Illuminate\Validation\ValidationException;
 
 class RecruitmentController extends Controller
 {
-    public function __construct(private readonly AdminMasterService $adminMasterService)
-    {
+    private const MSG_LICENSE_REQUIRED_FOR_PUBLISH = '求人を公開するには、営業許可証と風営許可証の両方を提出し、運営の承認が必要です。';
+
+    public function __construct(
+        private readonly AdminMasterService $adminMasterService,
+        private readonly DocumentReviewService $documentReviewService,
+    ) {
     }
 
     /** 採用ステータスラベル（shop_job_applications.status） */
@@ -133,6 +138,8 @@ class RecruitmentController extends Controller
 
         $recruit = $recruitData['recruit'];
 
+        $licenseData = $this->documentReviewService->getShopLicensePageData($shopId);
+
         return view('shops.recruit.edit', [
             'pageId' => 'job_edit',
             'recruit' => $recruit,
@@ -141,6 +148,7 @@ class RecruitmentController extends Controller
             'usesJobTypes' => $usesJobTypes,
             'horizontalShopJobs' => $horizontal,
             'masters' => $this->adminMasterService->getRecruitmentMasters(),
+            'canPublishJobs' => $licenseData['all_approved'],
         ]);
     }
 
@@ -238,6 +246,11 @@ class RecruitmentController extends Controller
         unset($payload['message'], $payload['tag_ids']);
 
         $jobPayload = $this->buildJobPayloadFromValidated($request, $shopId, $data, $payload);
+        $publishSquashed = false;
+        if (!$this->documentReviewService->shopLicenseFullyApproved($shopId) && $request->boolean('published')) {
+            $jobPayload['status'] = 0;
+            $publishSquashed = true;
+        }
         $this->applyShiftColumnsToPatch($jobPayload, $request);
         $this->applyHourlyWageMaxToPatch($jobPayload, $data);
         $jobTagsPayload = [
@@ -265,9 +278,14 @@ class RecruitmentController extends Controller
 
         $this->syncShopJobTags($jobId, $jobTagsPayload);
 
+        $msg = '求人情報を保存しました';
+        if ($publishSquashed) {
+            $msg .= ' ' . self::MSG_LICENSE_REQUIRED_FOR_PUBLISH . 'そのため公開設定はオフのままにしました。';
+        }
+
         return redirect()
             ->to(route('shop.recruits.edit'))
-            ->with('message', '求人情報を保存しました');
+            ->with('message', $msg);
     }
 
     public function toggleStatus(Request $request)
@@ -292,6 +310,11 @@ class RecruitmentController extends Controller
             }
             $cur = (int) ($row->{$col} ?? 0);
             $next = $cur === 1 ? 0 : 1;
+            if ($next === 1 && !$this->documentReviewService->shopLicenseFullyApproved($shopId)) {
+                return redirect()
+                    ->back()
+                    ->with('message', self::MSG_LICENSE_REQUIRED_FOR_PUBLISH);
+            }
             DB::table('shop_jobs')->where('shop_id', $shopId)->update([
                 $col => $next,
                 'updated_at' => now(),
@@ -304,6 +327,11 @@ class RecruitmentController extends Controller
 
         $currentStatus = $this->getCurrentRecruitStatus($shopId);
         $nextStatus = $currentStatus === 1 ? 0 : 1;
+        if ($nextStatus === 1 && !$this->documentReviewService->shopLicenseFullyApproved($shopId)) {
+            return redirect()
+                ->back()
+                ->with('message', self::MSG_LICENSE_REQUIRED_FOR_PUBLISH);
+        }
         $existingQ = DB::table('shop_jobs')->where('shop_id', $shopId);
         $this->scopeShopJobPrimaryRow($existingQ);
 
@@ -666,7 +694,7 @@ class RecruitmentController extends Controller
                 'open_date' => !empty($row->opened_on) ? date('Y年n月j日', strtotime($row->opened_on)) : null,
                 'address' => trim(implode(' ', array_filter([$row->pref ?? null, $row->city ?? null, $row->addr2 ?? null, $row->addr3 ?? null]))),
                 'map_embed_src' => null,
-                'nearest_station' => $row->station1 ?? '',
+                'nearest_station' => $this->resolveNearestStationForProfile($shopId, $row),
                 'hourly_wage_regular' => isset($row->hourly_wage_regular) ? (int) $row->hourly_wage_regular : 0,
                 'trial_hourly_wage' =>
                     $trialRow && !empty($trialRow->trial_hourly_wage)
@@ -751,7 +779,7 @@ class RecruitmentController extends Controller
                 'city' => $row->city ?? '',
                 'addr1' => trim(($row->addr2 ?? '') . ' ' . ($row->addr3 ?? '')),
                 'industry_name' => $industryName,
-                'nearest_station' => $row->station1 ?? '',
+                'nearest_station' => $this->resolveNearestStationForProfile($shopId, $row),
                 'tag_groups' => $shopTagGroups,
             ],
         ];
@@ -1108,7 +1136,7 @@ class RecruitmentController extends Controller
             'open_date' => !empty($row->opened_on) ? date('Y年n月j日', strtotime($row->opened_on)) : null,
             'address' => trim(implode(' ', array_filter([$row->pref ?? null, $row->city ?? null, $row->addr2 ?? null, $row->addr3 ?? null]))),
             'map_embed_src' => null,
-            'nearest_station' => $row->station1 ?? '',
+            'nearest_station' => $this->resolveNearestStationForProfile($shopId, $row),
             'hourly_wage_regular' => $regularWage,
             'regular_hourly_wage' => $regularWage,
             'trial_hourly_wage' => $trialWage,
@@ -1185,7 +1213,7 @@ class RecruitmentController extends Controller
                 'city' => $row->city ?? '',
                 'addr1' => trim(($row->addr2 ?? '') . ' ' . ($row->addr3 ?? '')),
                 'industry_name' => $industryName,
-                'nearest_station' => $row->station1 ?? '',
+                'nearest_station' => $this->resolveNearestStationForProfile($shopId, $row),
                 'tag_groups' => $shopTagGroups,
             ],
         ];
@@ -1362,14 +1390,19 @@ class RecruitmentController extends Controller
             'benefit'    => $request->input('benefit_tag_ids', []),
         ];
 
+        $licenseOk = $this->documentReviewService->shopLicenseFullyApproved($shopId);
+        $pubTrialReq = $request->boolean('published_trial');
+        $pubHelpReq = $request->boolean('published_help');
+        $publishSquashed = !$licenseOk && ($pubTrialReq || $pubHelpReq);
+
         $payloadTrial = array_merge($this->getRecruitMetaForJobType($shopId, 2), $payloadCommon);
-        $jobPayloadTrial = $this->buildJobPayloadFromValidated($request, $shopId, $data, $payloadTrial, $request->boolean('published_trial'));
+        $jobPayloadTrial = $this->buildJobPayloadFromValidated($request, $shopId, $data, $payloadTrial, $licenseOk && $pubTrialReq);
         $this->applyShiftColumnsToPatch($jobPayloadTrial, $request);
         $this->applyHourlyWageMaxToPatch($jobPayloadTrial, $data);
         $trialJobId = $this->upsertShopJobRow($shopId, 2, $jobPayloadTrial, $data, 'trial');
 
         $payloadHelp = array_merge($this->getRecruitMetaForJobType($shopId, 3), $payloadCommon);
-        $jobPayloadHelp = $this->buildJobPayloadFromValidated($request, $shopId, $data, $payloadHelp, $request->boolean('published_help'));
+        $jobPayloadHelp = $this->buildJobPayloadFromValidated($request, $shopId, $data, $payloadHelp, $licenseOk && $pubHelpReq);
         $this->applyShiftColumnsToPatch($jobPayloadHelp, $request);
         $this->applyHourlyWageMaxToPatch($jobPayloadHelp, $data);
         $helpJobId = $this->upsertShopJobRow($shopId, 3, $jobPayloadHelp, $data, 'help');
@@ -1408,9 +1441,14 @@ class RecruitmentController extends Controller
             ->where('job_type', 1)
             ->update($mainSync);
 
+        $msg = '求人情報を保存しました';
+        if ($publishSquashed) {
+            $msg .= ' ' . self::MSG_LICENSE_REQUIRED_FOR_PUBLISH . 'そのため体験入店・ヘルプの公開設定はオフにしました。';
+        }
+
         return redirect()
             ->to(route('shop.recruits.edit'))
-            ->with('message', '求人情報を保存しました');
+            ->with('message', $msg);
     }
 
     private function updateHorizontal(Request $request)
@@ -1526,14 +1564,20 @@ class RecruitmentController extends Controller
         $this->applyHourlyWageMaxToPatch($patch, $data);
         $this->applyShiftColumnsToPatch($patch, $request);
 
+        $pubReg = $request->boolean('published_regular');
+        $pubTrial = $request->boolean('published_trial');
+        $pubHelp = $request->boolean('published_help');
+        $licenseOk = $this->documentReviewService->shopLicenseFullyApproved($shopId);
+        $publishSquashed = !$licenseOk && ($pubReg || $pubTrial || $pubHelp);
+
         if (Schema::hasColumn('shop_jobs', 'regular_status')) {
-            $patch['regular_status'] = $request->boolean('published_regular') ? 1 : 0;
+            $patch['regular_status'] = ($licenseOk && $pubReg) ? 1 : 0;
         }
         if (Schema::hasColumn('shop_jobs', 'trial_status')) {
-            $patch['trial_status'] = $request->boolean('published_trial') ? 1 : 0;
+            $patch['trial_status'] = ($licenseOk && $pubTrial) ? 1 : 0;
         }
         if (Schema::hasColumn('shop_jobs', 'help_status')) {
-            $patch['help_status'] = $request->boolean('published_help') ? 1 : 0;
+            $patch['help_status'] = ($licenseOk && $pubHelp) ? 1 : 0;
         }
 
         $existing = DB::table('shop_jobs')->where('shop_id', $shopId)->first();
@@ -1554,9 +1598,38 @@ class RecruitmentController extends Controller
             'benefit'    => $request->input('benefit_tag_ids', []),
         ]);
 
+        $msg = '求人情報を保存しました';
+        if ($publishSquashed) {
+            $msg .= ' ' . self::MSG_LICENSE_REQUIRED_FOR_PUBLISH . 'そのため公開にしていた種別はオフに戻しました。';
+        }
+
         return redirect()
             ->to(route('shop.recruits.edit'))
-            ->with('message', '求人情報を保存しました');
+            ->with('message', $msg);
+    }
+
+    /**
+     * station1（レガシー）または shop_stations の複数行を「最寄り」表示用に解決する。
+     */
+    private function resolveNearestStationForProfile(string $shopId, ?object $profileRow): string
+    {
+        if ($profileRow && !empty($profileRow->station1)) {
+            return (string) $profileRow->station1;
+        }
+        if (!Schema::hasTable('shop_stations')) {
+            return '';
+        }
+        $names = DB::table('shop_stations')
+            ->where('shop_id', $shopId)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->pluck('station_name')
+            ->map(fn ($n) => trim((string) $n))
+            ->filter()
+            ->values()
+            ->all();
+
+        return $names === [] ? '' : implode(' / ', $names);
     }
 
     private function normalizeShopId(string|int $value): string

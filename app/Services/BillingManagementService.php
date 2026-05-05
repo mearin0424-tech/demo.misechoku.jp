@@ -1167,16 +1167,43 @@ class BillingManagementService
                 'shop_profiles.shop_name',
                 'shop_profiles.pref as shop_pref',
                 'shop_profiles.city as shop_city',
-                'shop_profiles.addr2 as shop_addr2',
-                'shop_profiles.addr3 as shop_addr3',
                 'cast_profiles.nickname as cast_nickname',
                 'cast_profiles.name as cast_full_name',
                 'casts.email as cast_email',
                 DB::raw('cast_bank_accounts.id as cast_bank_id'),
                 DB::raw('shop_bank_accounts.id as shop_bank_id'),
             ],
+            $this->shopProfileAddressSelectsForBilling(),
             $this->shopJobExtraColumnsForApplicationBilling()
         );
+    }
+
+    /**
+     * shop_profiles の住所列差分（addr/building or addr2/addr3）を吸収する。
+     *
+     * @return array<int, string|\Illuminate\Database\Query\Expression>
+     */
+    private function shopProfileAddressSelectsForBilling(): array
+    {
+        $selects = [];
+
+        if (Schema::hasColumn('shop_profiles', 'addr')) {
+            $selects[] = 'shop_profiles.addr as shop_addr2';
+            $selects[] = Schema::hasColumn('shop_profiles', 'building')
+                ? 'shop_profiles.building as shop_addr3'
+                : DB::raw("'' as shop_addr3");
+
+            return $selects;
+        }
+
+        $selects[] = Schema::hasColumn('shop_profiles', 'addr2')
+            ? 'shop_profiles.addr2 as shop_addr2'
+            : DB::raw("'' as shop_addr2");
+        $selects[] = Schema::hasColumn('shop_profiles', 'addr3')
+            ? 'shop_profiles.addr3 as shop_addr3'
+            : DB::raw("'' as shop_addr3");
+
+        return $selects;
     }
 
     /**

@@ -461,6 +461,14 @@
             <p class="profile-edit-flash" style="margin-top:12px;">{{ session('message') }}</p>
         @endif
 
+        @php $canPublishJobs = $canPublishJobs ?? true; @endphp
+        @if(!$canPublishJobs)
+            <p class="profile-edit-flash" style="margin-top:8px; border:1px solid rgba(234,179,8,0.35); color:#fde68a;">
+                求人を公開するには、営業許可証と風営許可証の両方を提出し、運営の承認が必要です。審査が完了するまで「公開」にできません。
+                <a href="{{ route('shop.mypage.documents.onboarding') }}" style="color:#fcd34d; font-weight:700;">許可証の提出画面へ</a>
+            </p>
+        @endif
+
         @if($errors->any())
             <div class="recruit-error-summary" style="margin-top:12px;">
                 <p class="recruit-error-summary-title">入力内容を確認してください</p>

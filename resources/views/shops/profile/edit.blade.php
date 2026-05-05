@@ -198,6 +198,72 @@
         gap: 12px;
     }
 
+    .shop-profile-edit__ref-table-wrap {
+        margin: 0 0 16px;
+        padding: 12px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid #1f1a14;
+        overflow-x: auto;
+    }
+    .shop-profile-edit__ref-title {
+        margin: 0 0 8px;
+        font-size: 10px;
+        font-weight: 800;
+        color: var(--spe-hint);
+        letter-spacing: 0.04em;
+    }
+    .shop-profile-edit__ref-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 10px;
+        color: #a1a1aa;
+    }
+    .shop-profile-edit__ref-table th,
+    .shop-profile-edit__ref-table td {
+        border: 1px solid #2a2015;
+        padding: 8px 6px;
+        text-align: left;
+        line-height: 1.4;
+    }
+    .shop-profile-edit__ref-table th {
+        background: #141210;
+        color: var(--spe-gold);
+        font-weight: 800;
+    }
+    .shop-profile-edit__shift-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        align-items: end;
+    }
+    @media (max-width: 360px) {
+        .shop-profile-edit__shift-grid { grid-template-columns: 1fr; }
+    }
+    .shop-profile-edit__check-line {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+        font-size: 0.75rem;
+        color: #a1a1aa;
+        cursor: pointer;
+    }
+    .shop-profile-edit__check-line input { width: auto; accent-color: var(--spe-gold); }
+    .shop-profile-edit__station-list { display: flex; flex-direction: column; gap: 10px; }
+    .shop-profile-edit__station-add {
+        align-self: flex-start;
+        margin-top: 4px;
+        padding: 8px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--spe-gold);
+        background: transparent;
+        border: 1px dashed rgba(212, 175, 55, 0.35);
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
     .shop-profile-edit__select-wrap {
         position: relative;
     }
@@ -336,6 +402,43 @@
 
 @push('scripts')
 <script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var lastCb = document.querySelector('.js-biz-close-last');
+    var closeInp = document.querySelector('.js-biz-close-time');
+    if (lastCb && closeInp) {
+        function syncBizClose() {
+            closeInp.disabled = lastCb.checked;
+            if (lastCb.checked) closeInp.value = '';
+        }
+        lastCb.addEventListener('change', syncBizClose);
+        syncBizClose();
+    }
+    var form = document.getElementById('shop-profile-edit-form');
+    if (form && closeInp) {
+        form.addEventListener('submit', function () {
+            if (closeInp.disabled) {
+                closeInp.disabled = false;
+                closeInp.value = '';
+            }
+        });
+    }
+    var stAdd = document.getElementById('shop-station-add');
+    var stList = document.getElementById('shop-stations-list');
+    if (stAdd && stList) {
+        stAdd.addEventListener('click', function () {
+            var n = stList.querySelectorAll('input[name="stations[]"]').length + 1;
+            var wrap = document.createElement('div');
+            wrap.className = 'shop-profile-edit__field';
+            wrap.style.marginBottom = '10px';
+            wrap.innerHTML =
+                '<label class="shop-profile-edit__label" for="station-new-' + n + '">最寄り ' + n + '</label>' +
+                '<input id="station-new-' + n + '" type="text" name="stations[]" class="shop-profile-edit__input" placeholder="例：六本木駅 徒歩3分">';
+            stList.appendChild(wrap);
+        });
+    }
+});
+</script>
 @endpush
 
 @section('content')
@@ -462,19 +565,149 @@
                     </div>
                 </div>
 
-                <div class="shop-profile-edit__field">
-                    <label class="shop-profile-edit__label" for="addr1">以降の住所・ビル名</label>
-                    <input
-                        id="addr1"
-                        type="text"
-                        name="addr1"
-                        class="shop-profile-edit__input p-street-address"
-                        value="{{ old('addr1', $shopData['addr1']) }}"
-                        autocomplete="address-line1"
-                        placeholder="例：7-12-34 〇〇ビル 2F"
-                    >
-                </div>
+                @if(!empty($hasProfileAddr))
+                    <div class="shop-profile-edit__field">
+                        <label class="shop-profile-edit__label" for="addr">番地・丁目</label>
+                        <input
+                            id="addr"
+                            type="text"
+                            name="addr"
+                            class="shop-profile-edit__input p-street-address"
+                            value="{{ old('addr', $shopData['addr'] ?? '') }}"
+                            autocomplete="street-address"
+                            placeholder="例：7-12-34"
+                        >
+                    </div>
+                    <div class="shop-profile-edit__field">
+                        <label class="shop-profile-edit__label" for="building">建物名・部屋番号</label>
+                        <input
+                            id="building"
+                            type="text"
+                            name="building"
+                            class="shop-profile-edit__input"
+                            value="{{ old('building', $shopData['building'] ?? '') }}"
+                            placeholder="例：〇〇ビル 2F"
+                        >
+                    </div>
+                @else
+                    <div class="shop-profile-edit__field">
+                        <label class="shop-profile-edit__label" for="addr1">以降の住所・ビル名</label>
+                        <input
+                            id="addr1"
+                            type="text"
+                            name="addr1"
+                            class="shop-profile-edit__input p-street-address"
+                            value="{{ old('addr1', $shopData['addr1']) }}"
+                            autocomplete="address-line1"
+                            placeholder="例：7-12-34 〇〇ビル 2F"
+                        >
+                    </div>
+                @endif
+
+                @if(!empty($hasProfileTel))
+                    <div class="shop-profile-edit__field">
+                        <label class="shop-profile-edit__label" for="tel">電話番号</label>
+                        <input
+                            id="tel"
+                            type="tel"
+                            name="tel"
+                            class="shop-profile-edit__input shop-profile-edit__input--mono"
+                            value="{{ old('tel', $shopData['tel'] ?? '') }}"
+                            autocomplete="tel"
+                            placeholder="例：03-1234-5678"
+                        >
+                    </div>
+                @endif
             </section>
+
+            @if(!empty($hasProfileBusinessHours))
+            <section aria-labelledby="spe-sec-hours">
+                <h2 id="spe-sec-hours" class="shop-profile-edit__section-title">
+                    <i class="fas fa-clock" aria-hidden="true"></i>
+                    Business Hours（店舗の営業時間）
+                </h2>
+                <p class="shop-profile-edit__hint" style="margin-top:0;">求人のシフト時間とは別に、店舗の営業時間を登録できます（未設定の場合は表示されません）。</p>
+
+                <div class="shop-profile-edit__ref-table-wrap">
+                    <p class="shop-profile-edit__ref-title">登録イメージ（DBの保存値）</p>
+                    <table class="shop-profile-edit__ref-table">
+                        <thead>
+                            <tr>
+                                <th>パターン</th>
+                                <th>open_time</th>
+                                <th>close_is_last</th>
+                                <th>close_time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>20:00～翌4:00</td>
+                                <td>20:00:00</td>
+                                <td>0</td>
+                                <td>04:00:00</td>
+                            </tr>
+                            <tr>
+                                <td>20:00～LAST</td>
+                                <td>20:00:00</td>
+                                <td>1</td>
+                                <td>NULL</td>
+                            </tr>
+                            <tr>
+                                <td>未設定</td>
+                                <td>NULL</td>
+                                <td>0</td>
+                                <td>NULL</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                @php
+                    $bizOpen = old('business_open', $shopData['business_open'] ?? '');
+                    $bizClose = old('business_close', $shopData['business_close'] ?? '');
+                    $bizLastRaw = old('business_close_last', !empty($shopData['business_close_last']) ? '1' : '0');
+                    $bizLast = $bizLastRaw === '1' || $bizLastRaw === 1 || $bizLastRaw === true;
+                @endphp
+                <div class="shop-profile-edit__shift-grid">
+                    <div class="shop-profile-edit__field">
+                        <label class="shop-profile-edit__label" for="business_open">開店（open_time）</label>
+                        <input type="time" step="60" name="business_open" id="business_open" class="shop-profile-edit__input js-biz-open"
+                               value="{{ $bizOpen }}">
+                    </div>
+                    <div class="shop-profile-edit__field">
+                        <label class="shop-profile-edit__label" for="business_close">閉店（close_time）</label>
+                        <input type="time" step="60" name="business_close" id="business_close" class="shop-profile-edit__input js-biz-close-time"
+                               value="{{ $bizClose }}" @if($bizLast) disabled @endif>
+                        <label class="shop-profile-edit__check-line">
+                            <input type="checkbox" name="business_close_last" value="1" class="js-biz-close-last" id="business_close_last" {{ $bizLast ? 'checked' : '' }}>
+                            <span>LAST（終電まで）</span>
+                        </label>
+                    </div>
+                </div>
+                <p class="shop-profile-edit__hint">※閉店が翌日にまたがる場合は、翌日の時刻で入力してください（例：開店 20:00／閉店 04:00）。「LAST」のときは閉店時刻は保存されません。</p>
+            </section>
+            @endif
+
+            @if(!empty($hasShopStationsTable))
+            <section aria-labelledby="spe-sec-st">
+                <h2 id="spe-sec-st" class="shop-profile-edit__section-title">
+                    <i class="fas fa-train" aria-hidden="true"></i>
+                    最寄り駅
+                </h2>
+                <p class="shop-profile-edit__hint" style="margin-top:0;">複数行で登録できます（例：六本木駅 徒歩3分）。</p>
+                <div class="shop-profile-edit__station-list" id="shop-stations-list">
+                    @foreach(old('stations', $shopData['stations'] ?? ['']) as $i => $stLine)
+                        <div class="shop-profile-edit__field" style="margin-bottom:10px;">
+                            <label class="shop-profile-edit__label" for="station-{{ $i }}">最寄り {{ $i + 1 }}</label>
+                            <input id="station-{{ $i }}" type="text" name="stations[]" class="shop-profile-edit__input"
+                                   value="{{ $stLine }}" placeholder="例：六本木駅 徒歩3分">
+                        </div>
+                    @endforeach
+                </div>
+                <button type="button" class="shop-profile-edit__station-add" id="shop-station-add" aria-label="最寄り駅の行を追加">＋ 行を追加</button>
+            </section>
+            @endif
+
 
             <section aria-labelledby="spe-sec-tags">
                 <h2 id="spe-sec-tags" class="shop-profile-edit__section-title">
