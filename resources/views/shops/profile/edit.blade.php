@@ -230,6 +230,11 @@
         border-radius: 8px;
         cursor: pointer;
     }
+    .shop-profile-edit__station-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
 
     .shop-profile-edit__select-wrap {
         position: relative;
@@ -398,7 +403,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var addrInput = document.getElementById('addr');
     var buildingInput = document.getElementById('building');
     var addr1Input = document.getElementById('addr1');
-    var suggestTimer = null;
+    var stationFetchBtn = document.getElementById('shop-station-fetch');
     var suggestSeq = 0;
     function collectAddressPayload() {
         return {
@@ -427,12 +432,12 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     function suggestStations() {
-        if (!stList || !suggestUrl) return;
+        if (!stList || !suggestUrl) return Promise.resolve();
         var payload = collectAddressPayload();
         var fullAddress = [payload.pref, payload.city, payload.addr, payload.building, payload.addr1].join('').trim();
-        if (fullAddress === '') return;
+        if (fullAddress === '') return Promise.resolve();
         var seq = ++suggestSeq;
-        fetch(suggestUrl, {
+        return fetch(suggestUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -448,15 +453,19 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .catch(function () {});
     }
-    function queueSuggestStations() {
-        if (suggestTimer) clearTimeout(suggestTimer);
-        suggestTimer = setTimeout(suggestStations, 700);
+    if (stationFetchBtn) {
+        stationFetchBtn.addEventListener('click', function () {
+            if (stationFetchBtn.disabled) return;
+            stationFetchBtn.disabled = true;
+            stationFetchBtn.textContent = '取得中...';
+            Promise.resolve()
+                .then(suggestStations)
+                .finally(function () {
+                    stationFetchBtn.disabled = false;
+                    stationFetchBtn.textContent = '住所から取得';
+                });
+        });
     }
-    [prefInput, cityInput, addrInput, buildingInput, addr1Input].forEach(function (el) {
-        if (!el) return;
-        el.addEventListener('input', queueSuggestStations);
-        el.addEventListener('change', queueSuggestStations);
-    });
 
     if (stAdd && stList) {
         stAdd.addEventListener('click', function () {
@@ -701,7 +710,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         </div>
                     @endforeach
                 </div>
-                <button type="button" class="shop-profile-edit__station-add" id="shop-station-add" aria-label="最寄り駅の行を追加">＋ 行を追加</button>
+                <div class="shop-profile-edit__station-actions">
+                    <button type="button" class="shop-profile-edit__station-add" id="shop-station-fetch" aria-label="住所から最寄り駅を取得">住所から取得</button>
+                    <button type="button" class="shop-profile-edit__station-add" id="shop-station-add" aria-label="最寄り駅の行を追加">＋ 行を追加</button>
+                </div>
             </section>
             @endif
 

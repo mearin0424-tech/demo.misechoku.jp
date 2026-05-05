@@ -55,6 +55,7 @@
         <div class="license-upload-modal__body">
             <p id="license-detail-ng" class="license-upload-modal__ng" style="display:none;"></p>
             <p id="license-detail-updated" class="license-upload-modal__meta"></p>
+            <p id="license-detail-expired-current" class="license-upload-modal__meta" style="display:none;"></p>
             <a id="license-detail-preview-link" class="license-upload-preview" href="#" target="_blank" rel="noopener" style="display:none;">
                 <img id="license-detail-preview-image" class="license-upload-preview__image" src="" alt="書類サムネイル">
                 <canvas id="license-detail-preview-canvas" class="license-upload-preview__canvas" style="display:none;"></canvas>
@@ -77,8 +78,8 @@
                 <p class="license-upload-modal__expired-hint">営業許可証の有効期限を年月日で入力してください（本日以降）。</p>
             </div>
             <div id="license-detail-dropzone" class="license-upload-dropzone">
-                <p class="license-upload-dropzone__hint">PDF、JPEG、PNG（最大 8MB）をドラッグ＆ドロップするか、「ファイルを選択」からアップロードしてください。</p>
-                <p class="license-upload-dropzone__note">※ 許可証の審査を通過しないと求人を表示できません。</p>
+                <p id="license-detail-upload-hint" class="license-upload-dropzone__hint">PDF、JPEG、PNG（最大 8MB）をドラッグ＆ドロップするか、「ファイルを選択」からアップロードしてください。</p>
+                <p id="license-detail-upload-note" class="license-upload-dropzone__note">※ 許可証の審査を通過しないと求人を表示できません。</p>
                 <input type="hidden" id="license-detail-type" value="">
                 <input type="file" id="license-detail-file" class="sr-only" accept=".pdf,.png,.jpg,.jpeg,image/*,application/pdf">
                 <div class="license-upload-modal__actions">
@@ -118,9 +119,12 @@
     var withdrawBtn = document.getElementById('license-detail-withdraw-btn');
     var detailExpiredWrap = document.getElementById('license-detail-expired-wrap');
     var detailExpiredAt = document.getElementById('license-detail-expired-at');
+    var detailExpiredCurrent = document.getElementById('license-detail-expired-current');
     var detailExpYear = document.getElementById('license-detail-exp-year');
     var detailExpMonth = document.getElementById('license-detail-exp-month');
     var detailExpDay = document.getElementById('license-detail-exp-day');
+    var detailUploadHint = document.getElementById('license-detail-upload-hint');
+    var detailUploadNote = document.getElementById('license-detail-upload-note');
     var pdfRenderToken = 0;
     var pdfJsLoadingPromise = null;
 
@@ -133,10 +137,10 @@
         }
         pdfJsLoadingPromise = new Promise(function(resolve, reject) {
             var script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/legacy/build/pdf.min.js';
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
             script.onload = function() {
                 if (window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions) {
-                    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/legacy/build/pdf.worker.min.js';
+                    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
                     resolve(window.pdfjsLib);
                     return;
                 }
@@ -285,6 +289,12 @@
         syncExpiredAtHidden();
     }
 
+    function formatYmd(ymd) {
+        if (!ymd || !/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return '';
+        var p = ymd.split('-');
+        return String(Number(p[0])) + '年' + String(Number(p[1])) + '月' + String(Number(p[2])) + '日';
+    }
+
     function setChip(chipEl, statusKey, labelText) {
         if (!chipEl) return;
         var sk = (statusKey || 'not_submitted').replace(/_/g, '-');
@@ -297,6 +307,13 @@
         if (detailFile) detailFile.value = '';
         if (detailFileHint) detailFileHint.textContent = '';
         if (detailDropzone) detailDropzone.classList.remove('is-dragover');
+    }
+
+    function toggleUploadArea(submitted) {
+        if (detailPickBtn) detailPickBtn.style.display = submitted ? 'none' : 'inline-flex';
+        if (detailUploadHint) detailUploadHint.style.display = submitted ? 'none' : 'block';
+        if (detailUploadNote) detailUploadNote.style.display = submitted ? 'none' : 'block';
+        if (requestBtn) requestBtn.style.display = submitted ? 'none' : requestBtn.style.display;
     }
 
     function uploadFile(file) {
@@ -455,21 +472,33 @@
             }
 
             if (detailFileHint) detailFileHint.textContent = '';
+            var submitted = canWithdrawReview;
+            toggleUploadArea(submitted);
             if (detailPickBtn) {
-                detailPickBtn.disabled = docStatus === 'pending';
+                detailPickBtn.disabled = submitted;
             }
-            if (docStatus === 'pending' && detailFileHint) {
-                detailFileHint.textContent = '審査中は差し替えできません。再アップロードする場合は「提出取り下げ」を押してください。';
+            if (requestBtn) requestBtn.style.display = (!submitted && canRequestReview) ? 'inline-flex' : 'none';
+            if (withdrawBtn) withdrawBtn.style.display = submitted ? 'inline-flex' : 'none';
+            if (submitted && detailFileHint) {
+                detailFileHint.textContent = '提出済みです。再アップロードする場合は「提出取り下げ」を押してください。';
             }
-            if (requestBtn) requestBtn.style.display = canRequestReview ? 'inline-flex' : 'none';
-            if (withdrawBtn) withdrawBtn.style.display = canWithdrawReview ? 'inline-flex' : 'none';
             if (detailExpiredWrap && detailExpiredAt) {
                 if (docKey === 'business') {
                     detailExpiredWrap.style.display = 'block';
                     setExpireSelectorsFromDate(docExpiredAt);
+                    if (detailExpiredCurrent) {
+                        detailExpiredCurrent.style.display = 'block';
+                        detailExpiredCurrent.textContent = docExpiredAt
+                            ? ('登録済み有効期限: ' + formatYmd(docExpiredAt))
+                            : '登録済み有効期限: 未登録';
+                    }
                 } else {
                     detailExpiredWrap.style.display = 'none';
                     setExpireSelectorsFromDate('');
+                    if (detailExpiredCurrent) {
+                        detailExpiredCurrent.style.display = 'none';
+                        detailExpiredCurrent.textContent = '';
+                    }
                 }
             }
 
