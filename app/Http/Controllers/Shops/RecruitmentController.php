@@ -9,6 +9,7 @@ use App\Support\RecruitCatchOverlay;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 
 class RecruitmentController extends Controller
@@ -25,11 +26,13 @@ class RecruitmentController extends Controller
 
     /** 採用ステータスラベル（shop_job_applications.status） */
     private const APPLICATION_STATUS_LABELS = [
-        1 => '書類選考中',
-        2 => '面談設定済',
-        3 => '面談予定',
+        1 => 'やり取り中',
+        2 => '日程調整中',
+        3 => '面談日決定',
         4 => '採用',
         5 => '不採用',
+        6 => '本採用',
+        7 => '体験後不採用',
     ];
 
     /**
@@ -67,7 +70,7 @@ class RecruitmentController extends Controller
             return [];
         }
 
-        return DB::table('shop_job_applications')
+        $query = DB::table('shop_job_applications')
             ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
             ->join('cast_profiles', 'shop_job_applications.cast_id', '=', 'cast_profiles.cast_id')
             ->whereIn('shop_job_applications.shop_job_id', $jobIds)
@@ -83,21 +86,67 @@ class RecruitmentController extends Controller
                 'cast_profiles.name'
             )
             ->orderBy('shop_job_applications.status')
-            ->orderByDesc('shop_job_applications.updated_at')
+            ->orderByDesc('shop_job_applications.updated_at');
+
+        if (Schema::hasColumn('shop_jobs', 'job_type')) {
+            $query->addSelect('shop_jobs.job_type');
+        }
+
+        return $query
             ->get()
             ->map(function ($row) {
+                $status = (int) $row->status;
+                $jobType = isset($row->job_type) ? (int) $row->job_type : 1;
+                $pattern = $jobType === 3 ? 'P2' : 'P1';
+                $patternLabel = $pattern === 'P2' ? 'ヘルプ' : '新規採用';
+                $statusLabel = match ($status) {
+                    4 => $pattern === 'P2' ? 'ヘルプ採用' : '体験採用',
+                    default => self::APPLICATION_STATUS_LABELS[$status] ?? '未設定',
+                };
+                $delayMessage = $this->resolveDelayMessage($status, $row->created_at, $row->result_date);
+
                 return [
                     'id' => $row->id,
                     'cast_id' => $row->cast_id,
-                    'status' => (int) $row->status,
-                    'status_label' => self::APPLICATION_STATUS_LABELS[(int) $row->status] ?? '未設定',
+                    'status' => $status,
+                    'status_label' => $statusLabel,
+                    'pattern' => $pattern,
+                    'pattern_label' => $patternLabel,
                     'result_date' => $row->result_date ? date('Y/m/d', strtotime($row->result_date)) : null,
                     'real_start_date' => $row->real_start_date ? date('Y/m/d', strtotime($row->real_start_date)) : null,
                     'created_at' => $row->created_at ? date('Y/m/d', strtotime($row->created_at)) : null,
                     'cast_name' => $row->nickname ?: $row->name ?: 'キャスト',
+                    'is_delayed' => $delayMessage !== '',
+                    'delay_message' => $delayMessage,
                 ];
             })
             ->all();
+    }
+
+    private function resolveDelayMessage(int $status, mixed $createdAt, mixed $resultDate): string
+    {
+        $now = Carbon::now();
+        if ($status === 3 && !empty($resultDate)) {
+            try {
+                $deadline = Carbon::parse((string) $resultDate);
+                if ($deadline->lt($now)) {
+                    return '採否連絡の期限超過';
+                }
+            } catch (\Throwable) {
+            }
+        }
+
+        if (in_array($status, [1, 2], true) && !empty($createdAt)) {
+            try {
+                $created = Carbon::parse((string) $createdAt);
+                if ($created->diffInDays($now) >= 7) {
+                    return '面接オファー期限超過';
+                }
+            } catch (\Throwable) {
+            }
+        }
+
+        return '';
     }
 
     /**
