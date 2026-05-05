@@ -37,7 +37,7 @@ class InteractionController extends Controller
                         'shop_profiles.shop_name as name',
                         'shop_profiles.pref',
                         'shop_profiles.city',
-                        'shop_profiles.main_image_path',
+                        DB::raw("(SELECT si.image_path FROM shop_images si WHERE si.shop_id = shops.id ORDER BY si.is_main DESC, si.main_order IS NULL, si.main_order, si.id LIMIT 1) as main_image_path"),
                         'favorites.created_at'
                     )
                     ->get();
@@ -64,7 +64,7 @@ class InteractionController extends Controller
                         'shop_profiles.shop_name as name',
                         'shop_profiles.pref',
                         'shop_profiles.city',
-                        'shop_profiles.main_image_path',
+                        DB::raw("(SELECT si.image_path FROM shop_images si WHERE si.shop_id = shops.id ORDER BY si.is_main DESC, si.main_order IS NULL, si.main_order, si.id LIMIT 1) as main_image_path"),
                         'favorites.created_at'
                     )
                     ->get();
@@ -92,7 +92,7 @@ class InteractionController extends Controller
                         'shop_profiles.shop_name as name',
                         'shop_profiles.pref',
                         'shop_profiles.city',
-                        'shop_profiles.main_image_path',
+                        DB::raw("(SELECT si.image_path FROM shop_images si WHERE si.shop_id = shops.id ORDER BY si.is_main DESC, si.main_order IS NULL, si.main_order, si.id LIMIT 1) as main_image_path"),
                         'favorites.created_at'
                     )
                     ->get();

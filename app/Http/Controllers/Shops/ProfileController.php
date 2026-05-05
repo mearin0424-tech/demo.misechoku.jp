@@ -445,7 +445,6 @@ class ProfileController extends Controller
                 'shop_profiles.city',
                 'shop_profiles.addr2',
                 'shop_profiles.addr3',
-                'shop_profiles.main_image_path',
                 DB::raw('AVG(reviews.eva) as avg_eva'),
                 DB::raw('COUNT(reviews.id) as review_count')
             )
@@ -455,8 +454,7 @@ class ProfileController extends Controller
                 'shop_profiles.pref',
                 'shop_profiles.city',
                 'shop_profiles.addr2',
-                'shop_profiles.addr3',
-                'shop_profiles.main_image_path'
+                'shop_profiles.addr3'
             )
             ->first();
 
@@ -480,7 +478,7 @@ class ProfileController extends Controller
             ->map(fn ($path) => $this->assetPathForStored($path))
             ->all();
 
-        $mainImage = $subImages[0] ?? $this->assetPathForStored($row->main_image_path ?? null);
+        $mainImage = $subImages[0] ?? asset('assets/images/common/no-image.png');
 
         if (empty($subImages) && $mainImage) {
             $subImages = [$mainImage];

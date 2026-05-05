@@ -81,19 +81,23 @@ class RecruitmentController extends Controller
                 'shops.id',
                 'shops.status as shop_status',
                 'shop_profiles.shop_name',
-                'shop_profiles.main_image_path',
+                DB::raw("(SELECT si.image_path FROM shop_images si WHERE si.shop_id = shops.id ORDER BY si.is_main DESC, si.main_order IS NULL, si.main_order, si.id LIMIT 1) as main_image_path"),
                 'shop_profiles.opened_on',
                 'shop_profiles.pref',
                 'shop_profiles.city',
                 'shop_profiles.addr2',
                 'shop_profiles.addr3',
-                'shop_profiles.station1',
                 'shop_jobs.id as shop_job_id',
                 'shop_jobs.working_day',
                 'shop_jobs.working_hours',
                 'shop_jobs.regular_holiday',
                 'shop_jobs.qualification',
             );
+        if (Schema::hasColumn('shop_profiles', 'station1')) {
+            $q->addSelect('shop_profiles.station1');
+        } else {
+            $q->addSelect(DB::raw("'' as station1"));
+        }
 
         if (Schema::hasColumn('shop_jobs', 'salary')) {
             $q->addSelect('shop_jobs.salary');
@@ -268,7 +272,7 @@ class RecruitmentController extends Controller
             'open_date'          => $row->opened_on ? date('Y年n月j日', strtotime($row->opened_on)) : null,
             'address'            => $address,
             'map_embed_src'      => null,
-            'nearest_station'    => $row->station1,
+            'nearest_station'    => $this->resolveNearestStation($shopId, $row->station1 ?? null),
             'hourly_wage_regular'=> $regularWage,
             'regular_hourly_wage'=> $regularWage,
             'trial_hourly_wage'  => $trialWage,
@@ -375,7 +379,7 @@ class RecruitmentController extends Controller
             'city' => $row->city ?? '',
             'addr1' => trim(($row->addr2 ?? '') . ' ' . ($row->addr3 ?? '')),
             'industry_name' => $industryName,
-            'nearest_station' => $row->station1 ?? '',
+            'nearest_station' => $this->resolveNearestStation($shopId, $row->station1 ?? null),
             'tag_groups' => $shopTagGroups,
         ];
 
@@ -675,7 +679,7 @@ class RecruitmentController extends Controller
             'open_date' => !empty($row->opened_on) ? date('Y年n月j日', strtotime($row->opened_on)) : null,
             'address' => trim(implode(' ', array_filter([$row->pref ?? null, $row->city ?? null, $row->addr2 ?? null, $row->addr3 ?? null]))),
             'map_embed_src' => null,
-            'nearest_station' => $row->station1 ?? '',
+            'nearest_station' => $this->resolveNearestStation($shopId, $row->station1 ?? null),
             'hourly_wage_regular' => $regularWage,
             'regular_hourly_wage' => $regularWage,
             'trial_hourly_wage' => $trialWage,
@@ -758,10 +762,27 @@ class RecruitmentController extends Controller
                 'city' => $row->city ?? '',
                 'addr1' => trim(($row->addr2 ?? '') . ' ' . ($row->addr3 ?? '')),
                 'industry_name' => $industryName,
-                'nearest_station' => $row->station1 ?? '',
+                'nearest_station' => $this->resolveNearestStation($shopId, $row->station1 ?? null),
                 'tag_groups' => $shopTagGroups,
             ],
         ];
+    }
+
+    private function resolveNearestStation(string $shopId, ?string $legacyStation): string
+    {
+        if (Schema::hasTable('shop_stations')) {
+            $name = DB::table('shop_stations')
+                ->where('shop_id', $shopId)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->value('station_name');
+            $name = trim((string) $name);
+            if ($name !== '') {
+                return $name;
+            }
+        }
+
+        return trim((string) $legacyStation);
     }
 
     /**

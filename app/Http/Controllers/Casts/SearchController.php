@@ -118,7 +118,7 @@ class SearchController extends BaseSearchController
                 'shop_profiles.shop_name',
                 'shop_profiles.pref',
                 'shop_profiles.city',
-                'shop_profiles.main_image_path',
+                DB::raw("(SELECT si.image_path FROM shop_images si WHERE si.shop_id = shops.id ORDER BY si.is_main DESC, si.main_order IS NULL, si.main_order, si.id LIMIT 1) as main_image_path"),
                 'shop_profiles.updated_at as profile_updated_at',
                 'shops.created_at as shop_created_at',
                 'shop_posts.body as shop_post_body',

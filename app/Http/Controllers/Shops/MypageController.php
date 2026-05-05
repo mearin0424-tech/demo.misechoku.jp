@@ -41,7 +41,6 @@ class MypageController extends Controller
                 'shop_profiles.city',
                 'shop_profiles.addr2',
                 'shop_profiles.addr3',
-                'shop_profiles.station1',
                 'shop_profiles.industry_id',
                 'shop_profiles.updated_at as profile_updated_at',
                 DB::raw('AVG(reviews.eva) as avg_eva'),
@@ -57,11 +56,16 @@ class MypageController extends Controller
                 'shop_profiles.city',
                 'shop_profiles.addr2',
                 'shop_profiles.addr3',
-                'shop_profiles.station1',
                 'shop_profiles.industry_id',
                 'shop_profiles.updated_at'
-            )
-            ->first();
+            );
+        if (Schema::hasColumn('shop_profiles', 'station1')) {
+            $rowQ->addSelect('shop_profiles.station1');
+            $rowQ->groupBy('shop_profiles.station1');
+        } else {
+            $rowQ->addSelect(DB::raw("'' as station1"));
+        }
+        $row = $rowQ->first();
 
         $shopPost = DB::table('shop_posts')
             ->where('shop_id', $shopId)
@@ -214,7 +218,7 @@ class MypageController extends Controller
                 'pref' => $row->pref ?? '',
                 'city' => $row->city ?? '',
                 'addr1' => $addrStreetOnly,
-                'nearest_station' => $row->station1 ?? '',
+                'nearest_station' => $stationLines[0] ?? ($row->station1 ?? ''),
                 'nearest_stations' => $stationLines,
                 'business_hours_shop' => $businessHoursShop,
                 'tel' => ($profileRow && Schema::hasColumn('shop_profiles', 'tel')) ? (string) ($profileRow->tel ?? '') : '',
