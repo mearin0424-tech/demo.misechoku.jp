@@ -223,7 +223,7 @@
                 <div class="card-actions-overlay">
                     <button
                         type="button"
-                        class="action-circle-btn like stop-propagation"
+                        class="action-circle-btn like stop-propagation {{ !empty($item['is_liked']) ? 'is-active' : '' }}"
                         data-item-id="{{ $item['id'] }}"
                         data-item-type="{{ $itemType === 'recruit' ? 'shop' : 'cast' }}"
                         data-action="like"

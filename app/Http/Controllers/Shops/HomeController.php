@@ -56,6 +56,7 @@ class HomeController extends Controller
 
         // LIKE数は favorites テーブルから集計（存在しない環境でも動くようにガード）
         $likeCounts = [];
+        $likedTodayCastIds = [];
         if (Schema::hasTable('favorites')) {
             $likeRows = DB::table('favorites')
                 ->select('cast_id', DB::raw('COUNT(*) as cnt'))
@@ -68,7 +69,21 @@ class HomeController extends Controller
                     $likeCounts[$lr->cast_id] = (int) $lr->cnt;
                 }
             }
+
+            if (auth()->guard('shop')->check()) {
+                $shopId = (string) (auth()->guard('shop')->user()->shop_id ?? '');
+                if ($shopId !== '') {
+                    $likedTodayCastIds = DB::table('favorites')
+                        ->where('shop_id', $shopId)
+                        ->whereNotNull('cast_id')
+                        ->where('action_type', 3)
+                        ->whereDate('created_at', now()->toDateString())
+                        ->pluck('cast_id')
+                        ->all();
+                }
+            }
         }
+        $likedTodayCastMap = array_fill_keys($likedTodayCastIds, true);
 
         $keptCastIds = [];
         if (Schema::hasTable('favorites') && auth()->guard('shop')->check()) {
@@ -94,6 +109,7 @@ class HomeController extends Controller
                 'age' => $birthday ? $birthday->age : null,
                 'tags' => $this->buildCastTags($row),
                 'like_count' => $likeCounts[$row->id] ?? 0,
+                'is_liked' => isset($likedTodayCastMap[$row->id]),
                 'images' => $images,
                 'is_kept' => isset($keptCastMap[$row->id]),
             ];
@@ -104,10 +120,10 @@ class HomeController extends Controller
         }
 
         return [
-            ['id' => 1, 'name' => 'みさき', 'age' => 23, 'tags' => ['モデル系', 'お酒強い'], 'like_count' => 12, 'images' => [asset('storage/mock/casts/1-1.png'), asset('storage/mock/casts/1-2.png'), asset('storage/mock/casts/1-3.png')], 'is_kept' => false],
-            ['id' => 2, 'name' => '愛華', 'age' => 21, 'tags' => ['癒やし系', '聞き上手'], 'like_count' => 8, 'images' => [asset('storage/mock/casts/2-1.png'), asset('storage/mock/casts/2-2.png'), asset('storage/mock/casts/2-3.png')], 'is_kept' => false],
-            ['id' => 3, 'name' => 'さくら', 'age' => 25, 'tags' => ['元気系', 'トーク上手'], 'like_count' => 24, 'images' => [asset('storage/mock/casts/3-1.png')], 'is_kept' => false],
-            ['id' => 4, 'name' => 'ナナ', 'age' => 22, 'tags' => ['清楚系', 'お酒弱い'], 'like_count' => 5, 'images' => [asset('storage/mock/casts/4-1.png')], 'is_kept' => false],
+            ['id' => 1, 'name' => 'みさき', 'age' => 23, 'tags' => ['モデル系', 'お酒強い'], 'like_count' => 12, 'images' => [asset('storage/mock/casts/1-1.png'), asset('storage/mock/casts/1-2.png'), asset('storage/mock/casts/1-3.png')], 'is_liked' => false, 'is_kept' => false],
+            ['id' => 2, 'name' => '愛華', 'age' => 21, 'tags' => ['癒やし系', '聞き上手'], 'like_count' => 8, 'images' => [asset('storage/mock/casts/2-1.png'), asset('storage/mock/casts/2-2.png'), asset('storage/mock/casts/2-3.png')], 'is_liked' => false, 'is_kept' => false],
+            ['id' => 3, 'name' => 'さくら', 'age' => 25, 'tags' => ['元気系', 'トーク上手'], 'like_count' => 24, 'images' => [asset('storage/mock/casts/3-1.png')], 'is_liked' => false, 'is_kept' => false],
+            ['id' => 4, 'name' => 'ナナ', 'age' => 22, 'tags' => ['清楚系', 'お酒弱い'], 'like_count' => 5, 'images' => [asset('storage/mock/casts/4-1.png')], 'is_liked' => false, 'is_kept' => false],
         ];
     }
 

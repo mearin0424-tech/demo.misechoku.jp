@@ -57,25 +57,27 @@
                 @endif
             </section>
 
-            {{-- 受け取ったLIKE --}}
-            <section class="like-area" data-like-area="received">
-                <h3 class="like-area-title">受け取ったLIKE</h3>
-                <div class="like-list-container like-list-compact {{ !empty($receivedLikeCasts) && count($receivedLikeCasts) >= 3 ? 'like-list-collapsed' : '' }}">
-                    @if (empty($receivedLikeCasts))
-                        <div class="no-data-wrapper">
-                            <i class="fas fa-heart opacity-10 text-5xl mb-3 block"></i>
-                            <p class="no-data-msg">受け取ったいいねはまだありません。</p>
-                        </div>
-                    @else
-                        @foreach($receivedLikeCasts as $c)
-                            @include('shops.interaction.like', ['c' => $c, 'profileRoute' => $profileRoute ?? 'shop.castprofileview.show'])
-                        @endforeach
+            @if (!isset($showReceivedLike) || $showReceivedLike)
+                {{-- 受け取ったLIKE --}}
+                <section class="like-area" data-like-area="received">
+                    <h3 class="like-area-title">受け取ったLIKE</h3>
+                    <div class="like-list-container like-list-compact {{ !empty($receivedLikeCasts) && count($receivedLikeCasts) >= 3 ? 'like-list-collapsed' : '' }}">
+                        @if (empty($receivedLikeCasts))
+                            <div class="no-data-wrapper">
+                                <i class="fas fa-heart opacity-10 text-5xl mb-3 block"></i>
+                                <p class="no-data-msg">受け取ったいいねはまだありません。</p>
+                            </div>
+                        @else
+                            @foreach($receivedLikeCasts as $c)
+                                @include('shops.interaction.like', ['c' => $c, 'profileRoute' => $profileRoute ?? 'shop.castprofileview.show'])
+                            @endforeach
+                        @endif
+                    </div>
+                    @if (!empty($receivedLikeCasts) && count($receivedLikeCasts) >= 3)
+                        <button type="button" class="like-expand-btn" data-target="received" aria-expanded="false">広げて閲覧する</button>
                     @endif
-                </div>
-                @if (!empty($receivedLikeCasts) && count($receivedLikeCasts) >= 3)
-                    <button type="button" class="like-expand-btn" data-target="received" aria-expanded="false">広げて閲覧する</button>
-                @endif
-            </section>
+                </section>
+            @endif
         </div>
 
         {{-- タブ３：足あと (FOOTPRINT) --}}

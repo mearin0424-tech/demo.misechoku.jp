@@ -56,34 +56,6 @@ class InteractionController extends Controller
                     ];
                 }
 
-                // 自分が送ったLIKE（cast -> shop, action_type=3）
-                $sentRows = DB::table('favorites')
-                    ->join('shops', 'favorites.shop_id', '=', 'shops.id')
-                    ->leftJoin('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
-                    ->where('favorites.cast_id', $castId)
-                    ->where('favorites.action_type', self::ACTION_TYPE_LIKE)
-                    ->orderByDesc('favorites.created_at')
-                    ->select(
-                        'shops.id',
-                        'shop_profiles.shop_name as name',
-                        'shop_profiles.pref',
-                        'shop_profiles.city',
-                        DB::raw("(SELECT si.image_path FROM shop_images si WHERE si.shop_id = shops.id ORDER BY si.is_main DESC, si.main_order IS NULL, si.main_order, si.id LIMIT 1) as main_image_path"),
-                        'favorites.created_at'
-                    )
-                    ->get();
-                foreach ($sentRows as $row) {
-                    $sentLikeCasts[] = [
-                        'id' => $row->id,
-                        'name' => $row->name ?: '店舗',
-                        'pref' => $row->pref ?? '',
-                        'city' => $row->city ?? '',
-                        'img' => $row->main_image_path ? asset($row->main_image_path) : asset('storage/mock/shops/out-1.png'),
-                        'created_at' => optional($row->created_at)->format('Y-m-d H:i'),
-                        'is_match' => false,
-                    ];
-                }
-
                 // 受け取ったLIKE（shop -> cast, action_type=3）
                 $receivedRows = DB::table('favorites')
                     ->join('shops', 'favorites.shop_id', '=', 'shops.id')
@@ -140,6 +112,7 @@ class InteractionController extends Controller
             }
 
             $profileRoute = 'cast.shopprofileview.show';
+            $showReceivedLike = true;
         } else {
             // お店側：キャストのキープ・ライク・足あと（キャスト画像は storage/mock/casts/{id}-1.png、存在しない場合はビュー側でデフォルト表示）
             $shopUser = Auth::guard('shop')->user();
@@ -216,39 +189,6 @@ class InteractionController extends Controller
                     ];
                 }
 
-                // キャストから受け取ったLIKE（cast -> shop, action_type=3）
-                $receivedRows = DB::table('favorites')
-                    ->join('casts', 'favorites.cast_id', '=', 'casts.id')
-                    ->leftJoin('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id')
-                    ->where('favorites.shop_id', $shopId)
-                    ->where('favorites.action_type', self::ACTION_TYPE_LIKE)
-                    ->orderByDesc('favorites.created_at')
-                    ->select(
-                        'casts.id',
-                        'cast_profiles.nickname as name',
-                        'cast_profiles.birthday',
-                        'cast_profiles.pref',
-                        'cast_profiles.city',
-                        'cast_profiles.profession',
-                        'cast_profiles.main_image_path',
-                        'favorites.created_at'
-                    )
-                    ->get();
-                foreach ($receivedRows as $row) {
-                    $age = $row->birthday ? \Carbon\Carbon::parse($row->birthday)->age : null;
-                    $receivedLikeCasts[] = [
-                        'id' => $row->id,
-                        'name' => $row->name ?: 'ゲスト',
-                        'age' => $age,
-                        'profession' => $row->profession ?? '',
-                        'pref' => $row->pref ?? '',
-                        'city' => $row->city ?? '',
-                        'img' => $row->main_image_path ? asset($row->main_image_path) : asset('storage/mock/casts/'.$row->id.'-1.png'),
-                        'created_at' => optional($row->created_at)->format('Y-m-d H:i'),
-                        'is_match' => false,
-                    ];
-                }
-
                 $footprintRows = DB::table('favorites')
                     ->join('casts', 'favorites.cast_id', '=', 'casts.id')
                     ->leftJoin('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id')
@@ -282,6 +222,7 @@ class InteractionController extends Controller
             }
 
             $profileRoute = 'shop.castprofileview.show';
+            $showReceivedLike = false;
         }
 
         return view('shops.interaction.index', [
@@ -291,6 +232,7 @@ class InteractionController extends Controller
             'sentLikeCasts' => $sentLikeCasts,
             'footprintCasts' => $footprintCasts,
             'profileRoute' => $profileRoute,
+            'showReceivedLike' => $showReceivedLike,
         ]);
     }
 }

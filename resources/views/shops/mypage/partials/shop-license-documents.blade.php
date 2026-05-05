@@ -46,16 +46,20 @@
 <div id="modal-license-detail" class="mypage-modal-overlay modal-word-edit" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="license-detail-title">
     <div class="mypage-modal-panel glass-panel license-upload-modal">
         <div class="license-upload-modal__head">
-            <h3 id="license-detail-title" class="mypage-modal-title serif-font">許可証の提出</h3>
+            <h3 id="license-detail-title" class="mypage-modal-title serif-font license-upload-modal__title-row">
+                <span id="license-detail-name">許可証の提出</span>
+                <span id="license-detail-status-chip" class="document-status-chip is-not-submitted" role="status"></span>
+            </h3>
             <button type="button" class="license-upload-modal__close" id="license-detail-close-btn" aria-label="閉じる">×</button>
         </div>
         <div class="license-upload-modal__body">
-            <p id="license-detail-name" class="license-upload-modal__doc-name"></p>
-            <div class="license-upload-modal__status-row">
-                <span id="license-detail-status-chip" class="document-status-chip is-not-submitted" role="status"></span>
-            </div>
             <p id="license-detail-ng" class="license-upload-modal__ng" style="display:none;"></p>
             <p id="license-detail-updated" class="license-upload-modal__meta"></p>
+            <a id="license-detail-preview-link" class="license-upload-preview" href="#" target="_blank" rel="noopener" style="display:none;">
+                <img id="license-detail-preview-image" class="license-upload-preview__image" src="" alt="書類サムネイル">
+                <canvas id="license-detail-preview-canvas" class="license-upload-preview__canvas" style="display:none;"></canvas>
+                <span id="license-detail-preview-fallback" class="license-upload-preview__fallback" style="display:none;">PDFを表示</span>
+            </a>
             <div id="license-detail-expired-wrap" class="license-upload-modal__expired-wrap" style="display:none;">
                 <label class="license-upload-modal__expired-label">営業許可証の有効期限</label>
                 <div class="license-upload-modal__expired-grid">
@@ -74,15 +78,15 @@
             </div>
             <div id="license-detail-dropzone" class="license-upload-dropzone">
                 <p class="license-upload-dropzone__hint">PDF、JPEG、PNG（最大 8MB）をドラッグ＆ドロップするか、「ファイルを選択」からアップロードしてください。</p>
+                <p class="license-upload-dropzone__note">※ 許可証の審査を通過しないと求人を表示できません。</p>
                 <input type="hidden" id="license-detail-type" value="">
                 <input type="file" id="license-detail-file" class="sr-only" accept=".pdf,.png,.jpg,.jpeg,image/*,application/pdf">
                 <div class="license-upload-modal__actions">
                     <button type="button" class="btn-action btn-action-primary" id="license-detail-pick-btn">ファイルを選択</button>
-                    <a id="license-detail-view-link" href="#" target="_blank" rel="noopener" class="btn-action btn-action-secondary" style="display:none;">書類を表示</a>
                 </div>
                 <div class="license-upload-modal__actions" style="margin-top:10px;">
                     <button type="button" class="btn-action btn-action-primary" id="license-detail-request-btn" style="display:none;">審査依頼</button>
-                    <button type="button" class="btn-action btn-action-secondary" id="license-detail-withdraw-btn" style="display:none;">審査取り下げ</button>
+                    <button type="button" class="btn-action btn-action-secondary" id="license-detail-withdraw-btn" style="display:none;">提出取り下げ</button>
                 </div>
             </div>
         </div>
@@ -103,7 +107,10 @@
     var detailType = document.getElementById('license-detail-type');
     var detailFile = document.getElementById('license-detail-file');
     var detailPickBtn = document.getElementById('license-detail-pick-btn');
-    var detailViewLink = document.getElementById('license-detail-view-link');
+    var detailPreviewLink = document.getElementById('license-detail-preview-link');
+    var detailPreviewImage = document.getElementById('license-detail-preview-image');
+    var detailPreviewCanvas = document.getElementById('license-detail-preview-canvas');
+    var detailPreviewFallback = document.getElementById('license-detail-preview-fallback');
     var detailCloseBtn = document.getElementById('license-detail-close-btn');
     var detailDropzone = document.getElementById('license-detail-dropzone');
     var detailFileHint = document.getElementById('license-detail-file-hint');
@@ -114,6 +121,81 @@
     var detailExpYear = document.getElementById('license-detail-exp-year');
     var detailExpMonth = document.getElementById('license-detail-exp-month');
     var detailExpDay = document.getElementById('license-detail-exp-day');
+    var pdfRenderToken = 0;
+    var pdfJsLoadingPromise = null;
+
+    function ensurePdfJsLoaded() {
+        if (window.pdfjsLib && window.pdfjsLib.getDocument) {
+            return Promise.resolve(window.pdfjsLib);
+        }
+        if (pdfJsLoadingPromise) {
+            return pdfJsLoadingPromise;
+        }
+        pdfJsLoadingPromise = new Promise(function(resolve, reject) {
+            var script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/legacy/build/pdf.min.js';
+            script.onload = function() {
+                if (window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions) {
+                    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.6.82/legacy/build/pdf.worker.min.js';
+                    resolve(window.pdfjsLib);
+                    return;
+                }
+                reject(new Error('pdf.js の初期化に失敗しました。'));
+            };
+            script.onerror = function() {
+                reject(new Error('pdf.js の読み込みに失敗しました。'));
+            };
+            document.head.appendChild(script);
+        }).catch(function(err) {
+            pdfJsLoadingPromise = null;
+            throw err;
+        });
+        return pdfJsLoadingPromise;
+    }
+
+    function renderPdfThumbnail(url) {
+        if (!detailPreviewCanvas || !detailPreviewFallback || !detailPreviewImage) return;
+        var currentToken = ++pdfRenderToken;
+        detailPreviewImage.style.display = 'none';
+        detailPreviewImage.src = '';
+        detailPreviewCanvas.style.display = 'none';
+        detailPreviewFallback.style.display = 'flex';
+        detailPreviewFallback.textContent = 'PDFサムネイルを生成中…';
+
+        ensurePdfJsLoaded()
+            .then(function(pdfjsLib) {
+                return pdfjsLib.getDocument({ url: url }).promise;
+            })
+            .then(function(pdf) {
+                return pdf.getPage(1);
+            })
+            .then(function(page) {
+                if (currentToken !== pdfRenderToken) return;
+                var viewport = page.getViewport({ scale: 1 });
+                var targetWidth = 720;
+                var deviceScale = Math.min(window.devicePixelRatio || 1, 2);
+                var scale = (targetWidth / viewport.width) * deviceScale;
+                var scaledViewport = page.getViewport({ scale: scale });
+                var canvas = detailPreviewCanvas;
+                var context = canvas.getContext('2d');
+                canvas.width = Math.ceil(scaledViewport.width);
+                canvas.height = Math.ceil(scaledViewport.height);
+                return page.render({
+                    canvasContext: context,
+                    viewport: scaledViewport
+                }).promise.then(function() {
+                    if (currentToken !== pdfRenderToken) return;
+                    canvas.style.display = 'block';
+                    detailPreviewFallback.style.display = 'none';
+                });
+            })
+            .catch(function() {
+                if (currentToken !== pdfRenderToken) return;
+                detailPreviewCanvas.style.display = 'none';
+                detailPreviewFallback.style.display = 'flex';
+                detailPreviewFallback.textContent = 'PDFを表示';
+            });
+    }
 
     function pad2(value) {
         var n = Number(value || 0);
@@ -341,12 +423,34 @@
                 }
             }
 
-            if (detailViewLink) {
+            if (detailPreviewLink && detailPreviewImage && detailPreviewFallback) {
                 if (docUrl && docStatus !== 'not_submitted') {
-                    detailViewLink.href = docUrl;
-                    detailViewLink.style.display = 'inline-flex';
+                    detailPreviewLink.href = docUrl;
+                    detailPreviewLink.style.display = 'block';
+                    var isPdf = /\.pdf(\?|$)/i.test(docUrl);
+                    if (isPdf) {
+                        detailPreviewImage.style.display = 'none';
+                        detailPreviewImage.src = '';
+                        if (detailPreviewCanvas) {
+                            detailPreviewCanvas.style.display = 'none';
+                        }
+                        detailPreviewFallback.style.display = 'flex';
+                        renderPdfThumbnail(docUrl);
+                    } else {
+                        detailPreviewImage.style.display = 'block';
+                        detailPreviewImage.src = docUrl;
+                        if (detailPreviewCanvas) {
+                            detailPreviewCanvas.style.display = 'none';
+                        }
+                        detailPreviewFallback.style.display = 'none';
+                    }
                 } else {
-                    detailViewLink.style.display = 'none';
+                    detailPreviewLink.style.display = 'none';
+                    detailPreviewImage.src = '';
+                    if (detailPreviewCanvas) {
+                        detailPreviewCanvas.style.display = 'none';
+                    }
+                    detailPreviewFallback.style.display = 'none';
                 }
             }
 
@@ -355,7 +459,7 @@
                 detailPickBtn.disabled = docStatus === 'pending';
             }
             if (docStatus === 'pending' && detailFileHint) {
-                detailFileHint.textContent = '審査中は差し替えできません。再アップロードする場合は「審査取り下げ」を押してください。';
+                detailFileHint.textContent = '審査中は差し替えできません。再アップロードする場合は「提出取り下げ」を押してください。';
             }
             if (requestBtn) requestBtn.style.display = canRequestReview ? 'inline-flex' : 'none';
             if (withdrawBtn) withdrawBtn.style.display = canWithdrawReview ? 'inline-flex' : 'none';
@@ -385,7 +489,7 @@
     }
     if (withdrawBtn && detailType) {
         withdrawBtn.addEventListener('click', function() {
-            postReviewAction('{{ route("shop.mypage.documents.withdraw-review") }}', detailType.value || '', '審査依頼を取り下げました。');
+            postReviewAction('{{ route("shop.mypage.documents.withdraw-review") }}', detailType.value || '', '提出を取り下げました。再アップロードしてから審査依頼してください。');
         });
     }
 

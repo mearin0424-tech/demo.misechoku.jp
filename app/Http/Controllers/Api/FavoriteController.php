@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\DB;
 
 class FavoriteController extends Controller
 {
+    private const ACTION_TYPE_KEEP = 1;
+    private const ACTION_TYPE_FOOTPRINT = 2;
+    private const ACTION_TYPE_LIKE = 3;
+
     /**
      * スワイプ画面からの「いいね」「キープ」をトグルする簡易API
      *
@@ -55,12 +59,17 @@ class FavoriteController extends Controller
             return response()->json(['error' => 'Invalid target combination'], 422);
         }
 
+        // キャスト -> 店舗 LIKE は廃止
+        if ($action === 'like' && Auth::guard('member')->check() && $itemType === 'shop') {
+            return response()->json(['error' => 'Cast to shop like is disabled'], 422);
+        }
+
         // action_type の割り当て
         // 1: KEEP, 2: FOOTPRINT, 3: LIKE
         $actionType = match ($action) {
-            'keep' => 1,
-            'footprint' => 2,
-            default => 3,
+            'keep' => self::ACTION_TYPE_KEEP,
+            'footprint' => self::ACTION_TYPE_FOOTPRINT,
+            default => self::ACTION_TYPE_LIKE,
         };
 
         $query = DB::table('favorites')->where('action_type', $actionType);
@@ -76,7 +85,28 @@ class FavoriteController extends Controller
         $now = now();
         $isActive = false;
 
-        if ($existing && $action !== 'footprint') {
+        if ($action === 'like') {
+            $todayLikeQuery = DB::table('favorites')
+                ->where('action_type', self::ACTION_TYPE_LIKE)
+                ->whereDate('created_at', $now->toDateString());
+            if (!empty($castId)) {
+                $todayLikeQuery->where('cast_id', $castId);
+            }
+            if (!empty($shopId)) {
+                $todayLikeQuery->where('shop_id', $shopId);
+            }
+            $hasLikedToday = $todayLikeQuery->exists();
+
+            if (!$hasLikedToday) {
+                DB::table('favorites')->insert([
+                    'cast_id' => $castId,
+                    'shop_id' => $shopId,
+                    'action_type' => self::ACTION_TYPE_LIKE,
+                    'created_at' => $now,
+                ]);
+            }
+            $isActive = true;
+        } elseif ($existing && $action !== 'footprint') {
             DB::table('favorites')->where('id', $existing->id)->delete();
             $isActive = false;
         } elseif ($existing && $action === 'footprint') {
@@ -100,12 +130,12 @@ class FavoriteController extends Controller
             if ($itemType === 'cast') {
                 $likeCount = (int) DB::table('favorites')
                     ->where('cast_id', $itemId)
-                    ->where('action_type', 3)
+                    ->where('action_type', self::ACTION_TYPE_LIKE)
                     ->count();
             } else {
                 $likeCount = (int) DB::table('favorites')
                     ->where('shop_id', $itemId)
-                    ->where('action_type', 3)
+                    ->where('action_type', self::ACTION_TYPE_LIKE)
                     ->count();
             }
         }

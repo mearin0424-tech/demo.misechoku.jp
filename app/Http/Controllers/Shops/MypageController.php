@@ -493,7 +493,7 @@ class MypageController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => '審査依頼を取り下げました。ファイルを再アップロードできます。',
+            'message' => '提出を取り下げました。ファイルを再アップロードしてから審査依頼してください。',
         ]);
     }
 
