@@ -14,6 +14,19 @@ class InteractionController extends Controller
     private const ACTION_TYPE_FOOTPRINT = 2;
     private const ACTION_TYPE_LIKE = 3;
 
+    private function formatInteractionAt(mixed $value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        try {
+            return \Carbon\Carbon::parse($value)->format('Y-m-d H:i');
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
     public function index()
     {
         $isCastPortal = request()->is('cast/*');
@@ -52,7 +65,7 @@ class InteractionController extends Controller
                         'pref' => $row->pref ?? '',
                         'city' => $row->city ?? '',
                         'img' => $row->main_image_path ? asset($row->main_image_path) : asset('storage/mock/shops/out-1.png'),
-                        'updated_at' => optional($row->created_at)->format('Y-m-d H:i'),
+                        'updated_at' => $this->formatInteractionAt($row->created_at),
                     ];
                 }
 
@@ -79,7 +92,7 @@ class InteractionController extends Controller
                         'pref' => $row->pref ?? '',
                         'city' => $row->city ?? '',
                         'img' => $row->main_image_path ? asset($row->main_image_path) : asset('storage/mock/shops/out-2.png'),
-                        'created_at' => optional($row->created_at)->format('Y-m-d H:i'),
+                        'created_at' => $this->formatInteractionAt($row->created_at),
                         'is_match' => false,
                     ];
                 }
@@ -106,7 +119,7 @@ class InteractionController extends Controller
                         'pref' => $row->pref ?? '',
                         'city' => $row->city ?? '',
                         'img' => $row->main_image_path ? asset($row->main_image_path) : asset('storage/mock/shops/out-1.png'),
-                        'visited_at' => optional($row->created_at)->format('Y-m-d H:i'),
+                        'visited_at' => $this->formatInteractionAt($row->created_at),
                     ];
                 }
             }
@@ -152,7 +165,7 @@ class InteractionController extends Controller
                         'pref' => $row->pref ?? '',
                         'city' => $row->city ?? '',
                         'img' => $row->main_image_path ? asset($row->main_image_path) : asset('storage/mock/casts/'.$row->id.'-1.png'),
-                        'updated_at' => optional($row->created_at)->format('Y-m-d H:i'),
+                        'updated_at' => $this->formatInteractionAt($row->created_at),
                     ];
                 }
 
@@ -184,7 +197,7 @@ class InteractionController extends Controller
                         'pref' => $row->pref ?? '',
                         'city' => $row->city ?? '',
                         'img' => $row->main_image_path ? asset($row->main_image_path) : asset('storage/mock/casts/'.$row->id.'-1.png'),
-                        'created_at' => optional($row->created_at)->format('Y-m-d H:i'),
+                        'created_at' => $this->formatInteractionAt($row->created_at),
                         'is_match' => false,
                     ];
                 }
@@ -216,7 +229,7 @@ class InteractionController extends Controller
                         'pref' => $row->pref ?? '',
                         'city' => $row->city ?? '',
                         'img' => $row->main_image_path ? asset($row->main_image_path) : asset('storage/mock/casts/'.$row->id.'-1.png'),
-                        'visited_at' => optional($row->created_at)->format('Y-m-d H:i'),
+                        'visited_at' => $this->formatInteractionAt($row->created_at),
                     ];
                 }
             }
