@@ -194,7 +194,7 @@ class DocumentReviewService
         return $document->fresh();
     }
 
-    public function requestShopDocumentReview(string $shopId, string $type): ShopLicenseDocument
+    public function requestShopDocumentReview(string $shopId, string $type, ?string $expiredAt = null): ShopLicenseDocument
     {
         $document = ShopLicenseDocument::query()
             ->where('shop_id', $shopId)
@@ -210,11 +210,15 @@ class DocumentReviewService
         if ((int) $document->status === ShopLicenseDocument::STATUS_PENDING) {
             throw new \RuntimeException('すでに審査依頼中です。');
         }
+        if ($type === 'business' && empty($expiredAt) && !$document->expired_at) {
+            throw new \RuntimeException('営業許可証の有効期限を入力してください。');
+        }
 
         $document->update([
             'status' => ShopLicenseDocument::STATUS_PENDING,
             'ng_reason' => null,
             'approved_at' => null,
+            'expired_at' => $type === 'business' ? ($expiredAt ?: optional($document->expired_at)->format('Y-m-d')) : null,
         ]);
 
         $this->syncShopLegacyStatus($shopId);
@@ -228,8 +232,8 @@ class DocumentReviewService
             ->where('shop_id', $shopId)
             ->where('type', $type)
             ->firstOrFail();
-        if ((int) $document->status !== ShopLicenseDocument::STATUS_PENDING) {
-            throw new \RuntimeException('審査中の書類のみ取り下げできます。');
+        if (!in_array((int) $document->status, [ShopLicenseDocument::STATUS_PENDING, ShopLicenseDocument::STATUS_APPROVED], true)) {
+            throw new \RuntimeException('提出済みの書類のみ取り下げできます。');
         }
 
         $document->update([
@@ -504,7 +508,7 @@ class DocumentReviewService
             'expiring_soon' => $expiringSoon,
             'expiration_notice_label' => $expiringSoon ? '更新期限半年以内' : null,
             'can_request_review' => in_array((int) $document->status, [ShopLicenseDocument::STATUS_DRAFT, ShopLicenseDocument::STATUS_REJECTED], true),
-            'can_withdraw_review' => (int) $document->status === ShopLicenseDocument::STATUS_PENDING,
+            'can_withdraw_review' => in_array((int) $document->status, [ShopLicenseDocument::STATUS_PENDING, ShopLicenseDocument::STATUS_APPROVED], true),
             // マイページは認証付きルートで表示（シンボリックリンク未作成環境でも閲覧可）
             'file_url' => route('shop.mypage.documents.show', ['type' => $document->type]),
         ];

@@ -414,9 +414,8 @@ class MypageController extends Controller
         $request->validate([
             'type' => 'required|string|in:business,entertainment',
             'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:8192',
-            'expired_at' => 'nullable|date|required_if:type,business|after_or_equal:today',
+            'expired_at' => 'nullable|date|after_or_equal:today',
         ], [
-            'expired_at.required_if' => '営業許可証を提出する場合は有効期限を入力してください。',
             'expired_at.date' => '有効期限は日付形式で入力してください。',
             'expired_at.after_or_equal' => '営業許可証の有効期限には本日以降の日付を入力してください。',
         ]);
@@ -427,10 +426,10 @@ class MypageController extends Controller
                 ->where('shop_id', $this->currentShopId())
                 ->where('type', $type)
                 ->first();
-            if ($current && (int) $current->status === ShopLicenseDocument::STATUS_PENDING) {
+            if ($current && in_array((int) $current->status, [ShopLicenseDocument::STATUS_PENDING, ShopLicenseDocument::STATUS_APPROVED], true)) {
                 return response()->json([
                     'success' => false,
-                    'message' => '審査中のため差し替えできません。先に「審査取り下げ」を行ってください。',
+                    'message' => '提出済みのため差し替えできません。先に「提出取り下げ」を行ってください。',
                 ], 422);
             }
 
@@ -443,7 +442,7 @@ class MypageController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => '書類をアップロードしました。続けて「審査依頼」を押してください。',
+                'message' => '書類をアップロードしました。内容を確認して「提出」を押してください。',
                 'type' => $type,
                 'view_url' => route('shop.mypage.documents.show', ['type' => $type]),
             ]);
@@ -459,10 +458,19 @@ class MypageController extends Controller
     {
         $data = $request->validate([
             'type' => 'required|string|in:business,entertainment',
+            'expired_at' => 'nullable|date|required_if:type,business|after_or_equal:today',
+        ], [
+            'expired_at.required_if' => '営業許可証の有効期限を入力してください。',
+            'expired_at.date' => '有効期限は日付形式で入力してください。',
+            'expired_at.after_or_equal' => '営業許可証の有効期限には本日以降の日付を入力してください。',
         ]);
 
         try {
-            $this->documentReviewService->requestShopDocumentReview($this->currentShopId(), (string) $data['type']);
+            $this->documentReviewService->requestShopDocumentReview(
+                $this->currentShopId(),
+                (string) $data['type'],
+                isset($data['expired_at']) ? (string) $data['expired_at'] : null
+            );
         } catch (\RuntimeException $e) {
             return response()->json([
                 'success' => false,
@@ -472,7 +480,7 @@ class MypageController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => '審査依頼を送信しました。運営の確認をお待ちください。',
+            'message' => '提出が完了しました。運営の審査をお待ちください。',
         ]);
     }
 

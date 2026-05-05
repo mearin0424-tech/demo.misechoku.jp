@@ -63,30 +63,19 @@
             </a>
             <div id="license-detail-expired-wrap" class="license-upload-modal__expired-wrap" style="display:none;">
                 <label class="license-upload-modal__expired-label">営業許可証の有効期限</label>
-                <div class="license-upload-modal__expired-grid">
-                    <select id="license-detail-exp-year" class="license-upload-modal__expired-input">
-                        <option value="">年</option>
-                    </select>
-                    <select id="license-detail-exp-month" class="license-upload-modal__expired-input">
-                        <option value="">月</option>
-                    </select>
-                    <select id="license-detail-exp-day" class="license-upload-modal__expired-input">
-                        <option value="">日</option>
-                    </select>
-                </div>
-                <input type="hidden" id="license-detail-expired-at" value="">
+                <input type="date" id="license-detail-expired-at" class="license-upload-modal__expired-input" value="">
                 <p class="license-upload-modal__expired-hint">営業許可証の有効期限を年月日で入力してください（本日以降）。</p>
             </div>
             <div id="license-detail-dropzone" class="license-upload-dropzone">
-                <p id="license-detail-upload-hint" class="license-upload-dropzone__hint">PDF、JPEG、PNG（最大 8MB）をドラッグ＆ドロップするか、「ファイルを選択」からアップロードしてください。</p>
-                <p id="license-detail-upload-note" class="license-upload-dropzone__note">※ 許可証の審査を通過しないと求人を表示できません。</p>
+                <p id="license-detail-upload-hint" class="license-upload-dropzone__hint" style="display:none;">PDF、JPEG、PNG（最大 8MB）をドラッグ＆ドロップするか、「ファイルを選択」からアップロードしてください。</p>
+                <p id="license-detail-upload-note" class="license-upload-dropzone__note" style="display:none;">※ 許可証の審査を通過しないと求人を表示できません。</p>
                 <input type="hidden" id="license-detail-type" value="">
                 <input type="file" id="license-detail-file" class="sr-only" accept=".pdf,.png,.jpg,.jpeg,image/*,application/pdf">
                 <div class="license-upload-modal__actions">
                     <button type="button" class="btn-action btn-action-primary" id="license-detail-pick-btn">ファイルを選択</button>
                 </div>
                 <div class="license-upload-modal__actions" style="margin-top:10px;">
-                    <button type="button" class="btn-action btn-action-primary" id="license-detail-request-btn" style="display:none;">審査依頼</button>
+                    <button type="button" class="btn-action btn-action-primary" id="license-detail-request-btn" style="display:none;">提出</button>
                     <button type="button" class="btn-action btn-action-secondary" id="license-detail-withdraw-btn" style="display:none;">提出取り下げ</button>
                 </div>
             </div>
@@ -120,9 +109,6 @@
     var detailExpiredWrap = document.getElementById('license-detail-expired-wrap');
     var detailExpiredAt = document.getElementById('license-detail-expired-at');
     var detailExpiredCurrent = document.getElementById('license-detail-expired-current');
-    var detailExpYear = document.getElementById('license-detail-exp-year');
-    var detailExpMonth = document.getElementById('license-detail-exp-month');
-    var detailExpDay = document.getElementById('license-detail-exp-day');
     var detailUploadHint = document.getElementById('license-detail-upload-hint');
     var detailUploadNote = document.getElementById('license-detail-upload-note');
     var pdfRenderToken = 0;
@@ -201,92 +187,9 @@
             });
     }
 
-    function pad2(value) {
-        var n = Number(value || 0);
-        return n < 10 ? '0' + n : String(n);
-    }
-
-    function isLeapYear(year) {
-        return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
-    }
-
-    function daysInMonth(year, month) {
-        if (!year || !month) return 31;
-        if ([1, 3, 5, 7, 8, 10, 12].indexOf(month) !== -1) return 31;
-        if ([4, 6, 9, 11].indexOf(month) !== -1) return 30;
-        return isLeapYear(year) ? 29 : 28;
-    }
-
-    function syncExpiredAtHidden() {
-        if (!detailExpiredAt || !detailExpYear || !detailExpMonth || !detailExpDay) return;
-        var y = detailExpYear.value;
-        var m = detailExpMonth.value;
-        var d = detailExpDay.value;
-        if (!y || !m || !d) {
-            detailExpiredAt.value = '';
-            return;
-        }
-        detailExpiredAt.value = y + '-' + pad2(m) + '-' + pad2(d);
-    }
-
-    function refillDayOptions() {
-        if (!detailExpYear || !detailExpMonth || !detailExpDay) return;
-        var prev = detailExpDay.value;
-        var year = Number(detailExpYear.value || 0);
-        var month = Number(detailExpMonth.value || 0);
-        var maxDays = daysInMonth(year, month);
-        detailExpDay.innerHTML = '<option value="">日</option>';
-        for (var d = 1; d <= maxDays; d++) {
-            var option = document.createElement('option');
-            option.value = String(d);
-            option.textContent = String(d);
-            detailExpDay.appendChild(option);
-        }
-        if (prev && Number(prev) <= maxDays) {
-            detailExpDay.value = prev;
-        }
-        syncExpiredAtHidden();
-    }
-
-    function initExpireSelectors() {
-        if (!detailExpYear || !detailExpMonth || !detailExpDay) return;
-        if (detailExpYear.options.length <= 1) {
-            var currentYear = new Date().getFullYear();
-            for (var y = currentYear; y <= currentYear + 20; y++) {
-                var yOpt = document.createElement('option');
-                yOpt.value = String(y);
-                yOpt.textContent = String(y);
-                detailExpYear.appendChild(yOpt);
-            }
-        }
-        if (detailExpMonth.options.length <= 1) {
-            for (var m = 1; m <= 12; m++) {
-                var mOpt = document.createElement('option');
-                mOpt.value = String(m);
-                mOpt.textContent = String(m);
-                detailExpMonth.appendChild(mOpt);
-            }
-        }
-        refillDayOptions();
-    }
-
     function setExpireSelectorsFromDate(ymd) {
-        initExpireSelectors();
-        if (!detailExpYear || !detailExpMonth || !detailExpDay || !detailExpiredAt) return;
-        if (!ymd || !/^\d{4}-\d{2}-\d{2}$/.test(ymd)) {
-            detailExpYear.value = '';
-            detailExpMonth.value = '';
-            refillDayOptions();
-            detailExpDay.value = '';
-            detailExpiredAt.value = '';
-            return;
-        }
-        var parts = ymd.split('-');
-        detailExpYear.value = String(Number(parts[0]));
-        detailExpMonth.value = String(Number(parts[1]));
-        refillDayOptions();
-        detailExpDay.value = String(Number(parts[2]));
-        syncExpiredAtHidden();
+        if (!detailExpiredAt) return;
+        detailExpiredAt.value = (/^\d{4}-\d{2}-\d{2}$/.test(ymd || '')) ? ymd : '';
     }
 
     function formatYmd(ymd) {
@@ -309,10 +212,10 @@
         if (detailDropzone) detailDropzone.classList.remove('is-dragover');
     }
 
-    function toggleUploadArea(submitted) {
+    function toggleUploadArea(submitted, showNotes) {
         if (detailPickBtn) detailPickBtn.style.display = submitted ? 'none' : 'inline-flex';
-        if (detailUploadHint) detailUploadHint.style.display = submitted ? 'none' : 'block';
-        if (detailUploadNote) detailUploadNote.style.display = submitted ? 'none' : 'block';
+        if (detailUploadHint) detailUploadHint.style.display = (!submitted && showNotes) ? 'block' : 'none';
+        if (detailUploadNote) detailUploadNote.style.display = (!submitted && showNotes) ? 'block' : 'none';
         if (requestBtn) requestBtn.style.display = submitted ? 'none' : requestBtn.style.display;
     }
 
@@ -326,14 +229,13 @@
         if (docType === 'business' && detailExpiredAt) {
             if (!detailExpiredAt.value) {
                 alert('営業許可証の有効期限を入力してください。');
-                if (detailExpYear && detailExpYear.focus) detailExpYear.focus();
+                if (detailExpiredAt.focus) detailExpiredAt.focus();
                 return;
             }
-            var today = new Date();
-            var todayYmd = today.getFullYear() + '-' + pad2(today.getMonth() + 1) + '-' + pad2(today.getDate());
+            var todayYmd = new Date().toISOString().slice(0, 10);
             if (detailExpiredAt.value < todayYmd) {
                 alert('営業許可証の有効期限には本日以降の日付を入力してください。');
-                if (detailExpYear && detailExpYear.focus) detailExpYear.focus();
+                if (detailExpiredAt.focus) detailExpiredAt.focus();
                 return;
             }
             formData.append('expired_at', detailExpiredAt.value || '');
@@ -372,12 +274,16 @@
         });
     }
 
-    function postReviewAction(url, type, successMessage) {
+    function postReviewAction(url, type, successMessage, expiredAt) {
         if (!type) return;
         if (detailPickBtn) detailPickBtn.disabled = true;
         if (requestBtn) requestBtn.disabled = true;
         if (withdrawBtn) withdrawBtn.disabled = true;
         if (detailFileHint) detailFileHint.textContent = '送信中…';
+        var payload = { type: type };
+        if (expiredAt) {
+            payload.expired_at = expiredAt;
+        }
         fetch(url, {
             method: 'POST',
             headers: {
@@ -386,7 +292,7 @@
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            body: JSON.stringify({ type: type })
+            body: JSON.stringify(payload)
         }).then(function(r) {
             return r.json().then(function(json) {
                 if (!r.ok) throw json;
@@ -472,8 +378,9 @@
             }
 
             if (detailFileHint) detailFileHint.textContent = '';
-            var submitted = canWithdrawReview;
-            toggleUploadArea(submitted);
+            var submitted = (docStatus === 'pending' || docStatus === 'approved');
+            var showNotes = !docUrl;
+            toggleUploadArea(submitted, showNotes);
             if (detailPickBtn) {
                 detailPickBtn.disabled = submitted;
             }
@@ -486,6 +393,8 @@
                 if (docKey === 'business') {
                     detailExpiredWrap.style.display = 'block';
                     setExpireSelectorsFromDate(docExpiredAt);
+                    detailExpiredAt.readOnly = submitted;
+                    detailExpiredAt.disabled = submitted;
                     if (detailExpiredCurrent) {
                         detailExpiredCurrent.style.display = 'block';
                         detailExpiredCurrent.textContent = docExpiredAt
@@ -495,6 +404,8 @@
                 } else {
                     detailExpiredWrap.style.display = 'none';
                     setExpireSelectorsFromDate('');
+                    detailExpiredAt.readOnly = false;
+                    detailExpiredAt.disabled = false;
                     if (detailExpiredCurrent) {
                         detailExpiredCurrent.style.display = 'none';
                         detailExpiredCurrent.textContent = '';
@@ -513,7 +424,13 @@
     }
     if (requestBtn && detailType) {
         requestBtn.addEventListener('click', function() {
-            postReviewAction('{{ route("shop.mypage.documents.request-review") }}', detailType.value || '', '審査依頼を送信しました。');
+            var t = detailType.value || '';
+            postReviewAction(
+                '{{ route("shop.mypage.documents.request-review") }}',
+                t,
+                '提出が完了しました。運営の審査をお待ちください。',
+                t === 'business' ? (detailExpiredAt ? detailExpiredAt.value : '') : ''
+            );
         });
     }
     if (withdrawBtn && detailType) {
@@ -528,23 +445,6 @@
             uploadFile(detailFile.files[0]);
         });
     }
-    if (detailExpYear) {
-        detailExpYear.addEventListener('change', function() {
-            refillDayOptions();
-            syncExpiredAtHidden();
-        });
-    }
-    if (detailExpMonth) {
-        detailExpMonth.addEventListener('change', function() {
-            refillDayOptions();
-            syncExpiredAtHidden();
-        });
-    }
-    if (detailExpDay) {
-        detailExpDay.addEventListener('change', syncExpiredAtHidden);
-    }
-    initExpireSelectors();
-
     if (detailDropzone && detailFile) {
         detailDropzone.addEventListener('dragover', function(e) {
             e.preventDefault();

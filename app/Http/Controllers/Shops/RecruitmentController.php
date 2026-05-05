@@ -660,6 +660,7 @@ class RecruitmentController extends Controller
         $primaryJobTagNames = $this->resolveShopJobTagNames($primaryJobTagIds);
         $subImages = DB::table('shop_images')
             ->where('shop_id', $shopId)
+            ->orderByRaw('is_main DESC')
             ->orderByRaw('main_order IS NULL')
             ->orderBy('main_order')
             ->orderBy('id')
@@ -669,7 +670,7 @@ class RecruitmentController extends Controller
             ->values()
             ->all();
 
-        $mainImage = $this->assetPathForStored($row->main_image_path ?? null);
+        $mainImage = $subImages[0] ?? $this->assetPathForStored($row->main_image_path ?? null);
         if (empty($subImages) && $mainImage) {
             $subImages[] = $mainImage;
         }
@@ -1112,6 +1113,7 @@ class RecruitmentController extends Controller
 
         $subImages = DB::table('shop_images')
             ->where('shop_id', $shopId)
+            ->orderByRaw('is_main DESC')
             ->orderByRaw('main_order IS NULL')
             ->orderBy('main_order')
             ->orderBy('id')
@@ -1121,7 +1123,7 @@ class RecruitmentController extends Controller
             ->values()
             ->all();
 
-        $mainImage = $this->assetPathForStored($row->main_image_path ?? null);
+        $mainImage = $subImages[0] ?? $this->assetPathForStored($row->main_image_path ?? null);
         if (empty($subImages) && $mainImage) {
             $subImages[] = $mainImage;
         }

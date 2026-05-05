@@ -235,6 +235,16 @@
         gap: 8px;
         flex-wrap: wrap;
     }
+    .shop-profile-edit__section-title-actions {
+        margin-left: auto;
+        display: inline-flex;
+        align-items: center;
+    }
+    .shop-profile-edit__section-title-actions .shop-profile-edit__station-add {
+        margin-top: 0;
+        padding: 6px 10px;
+        font-size: 0.66rem;
+    }
 
     .shop-profile-edit__select-wrap {
         position: relative;
@@ -699,6 +709,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 <h2 id="spe-sec-st" class="shop-profile-edit__section-title">
                     <i class="fas fa-train" aria-hidden="true"></i>
                     最寄り駅
+                    <span class="shop-profile-edit__section-title-actions">
+                        <button type="button" class="shop-profile-edit__station-add" id="shop-station-fetch" aria-label="住所から最寄り駅を取得">住所から取得</button>
+                    </span>
                 </h2>
                 <p class="shop-profile-edit__hint" style="margin-top:0;">複数行で登録できます（例：六本木駅 徒歩3分）。</p>
                 <div class="shop-profile-edit__station-list" id="shop-stations-list">
@@ -711,7 +724,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     @endforeach
                 </div>
                 <div class="shop-profile-edit__station-actions">
-                    <button type="button" class="shop-profile-edit__station-add" id="shop-station-fetch" aria-label="住所から最寄り駅を取得">住所から取得</button>
                     <button type="button" class="shop-profile-edit__station-add" id="shop-station-add" aria-label="最寄り駅の行を追加">＋ 行を追加</button>
                 </div>
             </section>
