@@ -143,6 +143,29 @@
     flex-wrap: wrap;
     gap: 8px;
 }
+.license-upload-flow-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+.license-upload-flow-status.is-unsubmitted {
+    color: #bfb8b3;
+    background: rgba(120, 120, 120, 0.18);
+}
+.license-upload-flow-status.is-selecting {
+    color: #fde7b6;
+    background: rgba(161, 98, 7, 0.25);
+    border: 1px solid rgba(251, 191, 36, 0.28);
+}
+.license-upload-flow-status.is-submitted {
+    color: #f5e2b4;
+    background: rgba(120, 53, 15, 0.35);
+    border: 1px solid rgba(212, 175, 55, 0.34);
+}
 .license-upload-modal__close {
     flex-shrink: 0;
     width: 36px;
@@ -267,6 +290,10 @@
     padding: 8px 10px;
     font-size: 0.88rem;
 }
+.license-upload-modal__expired-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
 .license-upload-modal__expired-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -306,6 +333,11 @@
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
+}
+.license-upload-modal__actions .btn-action.is-disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 .license-upload-modal__filename {
     margin: 12px 20px 0;
