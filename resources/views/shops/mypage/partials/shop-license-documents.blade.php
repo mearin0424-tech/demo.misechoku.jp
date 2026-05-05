@@ -25,6 +25,11 @@
             data-can-withdraw-review="{{ !empty($record['can_withdraw_review']) ? '1' : '0' }}">
             <div class="shop-mypage-license-card-body">
                 <p class="document-upload-name">{{ $doc['name'] }}</p>
+                @if(in_array($s, ['pending', 'approved'], true))
+                    <div class="document-strong-state-badge {{ $s === 'approved' ? 'is-approved' : 'is-pending' }}">
+                        {{ $s === 'approved' ? '承認済み' : '審査待ち' }}
+                    </div>
+                @endif
                 <div class="document-status-row">
                     <span class="document-status-chip is-{{ str_replace('_', '-', $s) }}">{{ $label }}</span>
                     @if(!empty($record['expiring_soon']))
@@ -57,6 +62,7 @@
             <p id="license-detail-updated" class="license-upload-modal__meta"></p>
             <p id="license-detail-expired-current" class="license-upload-modal__meta" style="display:none;"></p>
             <a id="license-detail-preview-link" class="license-upload-preview" href="#" target="_blank" rel="noopener" style="display:none;">
+                <span id="license-detail-preview-state-badge" class="license-upload-preview__state-badge" style="display:none;"></span>
                 <img id="license-detail-preview-image" class="license-upload-preview__image" src="" alt="書類サムネイル">
                 <canvas id="license-detail-preview-canvas" class="license-upload-preview__canvas" style="display:none;"></canvas>
                 <span id="license-detail-preview-fallback" class="license-upload-preview__fallback" style="display:none;">PDFを表示</span>
@@ -73,6 +79,7 @@
                 <input type="file" id="license-detail-file" class="sr-only" accept=".pdf,.png,.jpg,.jpeg,image/*,application/pdf">
                 <div class="license-upload-modal__actions">
                     <button type="button" class="btn-action btn-action-primary" id="license-detail-pick-btn">ファイルを選択</button>
+                    <button type="button" class="btn-action btn-action-secondary" id="license-detail-repick-btn" style="display:none;">ファイルを変更</button>
                 </div>
                 <div class="license-upload-modal__actions" style="margin-top:10px;">
                     <button type="button" class="btn-action btn-action-primary" id="license-detail-request-btn" style="display:none;">提出</button>
@@ -81,6 +88,21 @@
             </div>
         </div>
         <p id="license-detail-file-hint" class="license-upload-modal__filename" aria-live="polite"></p>
+    </div>
+</div>
+
+<div id="license-detail-toast" class="license-upload-toast" style="display:none;">
+    提出が完了しました。審査をお待ちください。
+</div>
+
+<div id="license-detail-confirm-overlay" class="license-upload-confirm-overlay" style="display:none;">
+    <div class="license-upload-confirm-panel">
+        <h4>提出の取り下げ</h4>
+        <p>提出を取り下げると、未提出状態に戻ります。取り下げますか？</p>
+        <div class="license-upload-confirm-actions">
+            <button type="button" class="btn-action btn-action-secondary" id="license-detail-confirm-cancel">キャンセル</button>
+            <button type="button" class="btn-action" id="license-detail-confirm-ok">取り下げる</button>
+        </div>
     </div>
 </div>
 
@@ -97,7 +119,9 @@
     var detailType = document.getElementById('license-detail-type');
     var detailFile = document.getElementById('license-detail-file');
     var detailPickBtn = document.getElementById('license-detail-pick-btn');
+    var detailRepickBtn = document.getElementById('license-detail-repick-btn');
     var detailPreviewLink = document.getElementById('license-detail-preview-link');
+    var detailPreviewStateBadge = document.getElementById('license-detail-preview-state-badge');
     var detailPreviewImage = document.getElementById('license-detail-preview-image');
     var detailPreviewCanvas = document.getElementById('license-detail-preview-canvas');
     var detailPreviewFallback = document.getElementById('license-detail-preview-fallback');
@@ -111,8 +135,19 @@
     var detailExpiredCurrent = document.getElementById('license-detail-expired-current');
     var detailUploadHint = document.getElementById('license-detail-upload-hint');
     var detailUploadNote = document.getElementById('license-detail-upload-note');
+    var toast = document.getElementById('license-detail-toast');
+    var confirmOverlay = document.getElementById('license-detail-confirm-overlay');
+    var confirmOk = document.getElementById('license-detail-confirm-ok');
+    var confirmCancel = document.getElementById('license-detail-confirm-cancel');
     var pdfRenderToken = 0;
     var pdfJsLoadingPromise = null;
+    var selectedFile = null;
+    var selectedFileUrl = '';
+    var modalState = 'unsubmitted'; // unsubmitted | selecting | submitted
+    var currentDocStatus = 'not_submitted';
+    var currentDocUrl = '';
+    var currentDocType = '';
+    var currentDocExpiredAt = '';
 
     function ensurePdfJsLoaded() {
         if (window.pdfjsLib && window.pdfjsLib.getDocument) {
@@ -210,43 +245,113 @@
         if (detailFile) detailFile.value = '';
         if (detailFileHint) detailFileHint.textContent = '';
         if (detailDropzone) detailDropzone.classList.remove('is-dragover');
+        resetSelectedFile();
     }
 
-    function toggleUploadArea(submitted, showNotes) {
-        if (detailPickBtn) detailPickBtn.style.display = submitted ? 'none' : 'inline-flex';
-        if (detailUploadHint) detailUploadHint.style.display = (!submitted && showNotes) ? 'block' : 'none';
-        if (detailUploadNote) detailUploadNote.style.display = (!submitted && showNotes) ? 'block' : 'none';
-        if (requestBtn) requestBtn.style.display = submitted ? 'none' : requestBtn.style.display;
+    function showToast(message) {
+        if (!toast) return;
+        toast.textContent = message;
+        toast.style.display = 'block';
+        setTimeout(function() { toast.style.display = 'none'; }, 3000);
+    }
+
+    function resetSelectedFile() {
+        if (selectedFileUrl) {
+            URL.revokeObjectURL(selectedFileUrl);
+        }
+        selectedFile = null;
+        selectedFileUrl = '';
+        if (detailFile) detailFile.value = '';
+    }
+
+    function renderPreview(url, isPdf, fallbackText) {
+        if (!detailPreviewLink || !detailPreviewImage || !detailPreviewFallback) return;
+        if (!url) {
+            detailPreviewLink.style.display = 'none';
+            if (detailPreviewStateBadge) detailPreviewStateBadge.style.display = 'none';
+            detailPreviewImage.src = '';
+            if (detailPreviewCanvas) detailPreviewCanvas.style.display = 'none';
+            detailPreviewFallback.style.display = 'none';
+            return;
+        }
+        detailPreviewLink.href = url;
+        detailPreviewLink.style.display = 'block';
+        if (detailPreviewStateBadge) {
+            if (currentDocStatus === 'pending' || currentDocStatus === 'approved') {
+                detailPreviewStateBadge.style.display = 'inline-flex';
+                detailPreviewStateBadge.textContent = currentDocStatus === 'approved' ? '承認済み' : '審査待ち';
+                detailPreviewStateBadge.className = 'license-upload-preview__state-badge ' + (currentDocStatus === 'approved' ? 'is-approved' : 'is-pending');
+            } else {
+                detailPreviewStateBadge.style.display = 'none';
+            }
+        }
+        if (isPdf) {
+            detailPreviewImage.style.display = 'none';
+            detailPreviewImage.src = '';
+            if (detailPreviewCanvas) detailPreviewCanvas.style.display = 'none';
+            detailPreviewFallback.style.display = 'flex';
+            detailPreviewFallback.textContent = fallbackText || 'PDFを表示';
+            renderPdfThumbnail(url);
+        } else {
+            detailPreviewImage.style.display = 'block';
+            detailPreviewImage.src = url;
+            if (detailPreviewCanvas) detailPreviewCanvas.style.display = 'none';
+            detailPreviewFallback.style.display = 'none';
+        }
+    }
+
+    function setUiByState() {
+        var submitted = modalState === 'submitted';
+        var selecting = modalState === 'selecting';
+        var unsubmitted = modalState === 'unsubmitted';
+        var isBusiness = currentDocType === 'business';
+
+        if (detailPickBtn) detailPickBtn.style.display = unsubmitted ? 'inline-flex' : 'none';
+        if (detailRepickBtn) detailRepickBtn.style.display = selecting ? 'inline-flex' : 'none';
+        if (requestBtn) requestBtn.style.display = selecting ? 'inline-flex' : 'none';
+        if (withdrawBtn) withdrawBtn.style.display = submitted ? 'inline-flex' : 'none';
+        if (detailUploadHint) detailUploadHint.style.display = unsubmitted ? 'block' : 'none';
+        if (detailUploadNote) detailUploadNote.style.display = unsubmitted ? 'block' : 'none';
+
+        if (detailExpiredWrap && detailExpiredAt) {
+            if (isBusiness && (selecting || submitted)) {
+                detailExpiredWrap.style.display = 'block';
+                detailExpiredAt.readOnly = submitted;
+                detailExpiredAt.disabled = submitted;
+            } else {
+                detailExpiredWrap.style.display = 'none';
+            }
+        }
+        if (detailExpiredCurrent) {
+            detailExpiredCurrent.style.display = (isBusiness && (selecting || submitted)) ? 'block' : 'none';
+            detailExpiredCurrent.textContent = isBusiness
+                ? ('登録済み有効期限: ' + (currentDocExpiredAt ? formatYmd(currentDocExpiredAt) : '未登録'))
+                : '';
+        }
+        if (detailFileHint) {
+            if (submitted) {
+                detailFileHint.textContent = '現在、審査待ちです。承認されるまでしばらくお待ちください。ファイルを再アップロードする場合は、一度提出を取り下げてください。';
+            } else if (selecting) {
+                detailFileHint.textContent = '有効期限を入力して「提出」を押してください。';
+            } else {
+                detailFileHint.textContent = '';
+            }
+        }
     }
 
     function uploadFile(file) {
-        if (!file || !detailType) return;
         var formData = new FormData();
-        var docType = detailType.value || '';
         formData.append('_token', '{{ csrf_token() }}');
-        formData.append('type', docType);
+        formData.append('type', currentDocType);
         formData.append('file', file);
-        if (docType === 'business' && detailExpiredAt) {
-            if (!detailExpiredAt.value) {
-                alert('営業許可証の有効期限を入力してください。');
-                if (detailExpiredAt.focus) detailExpiredAt.focus();
-                return;
-            }
-            var todayYmd = new Date().toISOString().slice(0, 10);
-            if (detailExpiredAt.value < todayYmd) {
-                alert('営業許可証の有効期限には本日以降の日付を入力してください。');
-                if (detailExpiredAt.focus) detailExpiredAt.focus();
-                return;
-            }
-            formData.append('expired_at', detailExpiredAt.value || '');
-        }
 
         if (detailPickBtn) detailPickBtn.disabled = true;
+        if (detailRepickBtn) detailRepickBtn.disabled = true;
         if (requestBtn) requestBtn.disabled = true;
         if (withdrawBtn) withdrawBtn.disabled = true;
         if (detailFileHint) detailFileHint.textContent = 'アップロード中…';
 
-        fetch('{{ route("shop.mypage.documents.upload") }}', {
+        return fetch('{{ route("shop.mypage.documents.upload") }}', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -254,23 +359,16 @@
                 'X-Requested-With': 'XMLHttpRequest'
             },
             body: formData
-        }).then(function(r) {
+        }).then(function (r) {
             return r.json().then(function(json) {
                 if (!r.ok) throw json;
                 return json;
             });
-        }).then(function(res) {
-            alert(res.message || '書類をアップロードしました。');
-            window.location.reload();
-        }).catch(function(error) {
-            var messages = error && error.errors ? Object.values(error.errors).flat() : [];
-            alert(messages[0] || (error && error.message) || 'アップロードに失敗しました。');
-            if (detailFileHint) detailFileHint.textContent = '';
         }).finally(function() {
             if (detailPickBtn) detailPickBtn.disabled = false;
+            if (detailRepickBtn) detailRepickBtn.disabled = false;
             if (requestBtn) requestBtn.disabled = false;
             if (withdrawBtn) withdrawBtn.disabled = false;
-            if (detailFile) detailFile.value = '';
         });
     }
 
@@ -284,7 +382,7 @@
         if (expiredAt) {
             payload.expired_at = expiredAt;
         }
-        fetch(url, {
+        return fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -299,12 +397,18 @@
                 return json;
             });
         }).then(function(res) {
-            alert(res.message || successMessage);
-            window.location.reload();
+            if (detailFileHint) detailFileHint.textContent = '';
+            if (res && res.message) {
+                alert(res.message);
+            } else if (successMessage) {
+                alert(successMessage);
+            }
+            return res;
         }).catch(function(error) {
             var messages = error && error.errors ? Object.values(error.errors).flat() : [];
             alert(messages[0] || (error && error.message) || '処理に失敗しました。');
             if (detailFileHint) detailFileHint.textContent = '';
+            throw error;
         }).finally(function() {
             if (detailPickBtn) detailPickBtn.disabled = false;
             if (requestBtn) requestBtn.disabled = false;
@@ -314,22 +418,22 @@
 
     cards.forEach(function(card) {
         card.addEventListener('click', function() {
-            var docStatus = card.getAttribute('data-doc-status') || 'not_submitted';
-            var docUrl = card.getAttribute('data-doc-url') || '';
+            currentDocStatus = card.getAttribute('data-doc-status') || 'not_submitted';
+            currentDocUrl = card.getAttribute('data-doc-url') || '';
             var statusLabel = card.getAttribute('data-doc-status-label') || '';
             var ngReason = card.getAttribute('data-ng-reason') || '';
-            var docKey = card.getAttribute('data-doc-key') || '';
-            var docExpiredAt = card.getAttribute('data-doc-expired-at') || '';
+            currentDocType = card.getAttribute('data-doc-key') || '';
+            currentDocExpiredAt = card.getAttribute('data-doc-expired-at') || '';
             var canRequestReview = card.getAttribute('data-can-request-review') === '1';
             var canWithdrawReview = card.getAttribute('data-can-withdraw-review') === '1';
 
             if (detailName) detailName.textContent = card.getAttribute('data-doc-name') || '書類';
-            if (detailType) detailType.value = docKey;
+            if (detailType) detailType.value = currentDocType;
 
-            setChip(detailChip, docStatus, statusLabel);
+            setChip(detailChip, currentDocStatus, statusLabel);
 
             if (detailNg) {
-                if (docStatus === 'rejected' && ngReason) {
+                if (currentDocStatus === 'rejected' && ngReason) {
                     detailNg.style.display = 'block';
                     detailNg.textContent = '差し戻し理由: ' + ngReason;
                 } else {
@@ -339,79 +443,28 @@
             }
 
             if (detailUpdated) {
-                if (docStatus === 'not_submitted') {
+                if (currentDocStatus === 'not_submitted') {
                     detailUpdated.textContent = 'まだファイルが提出されていません。';
                 } else {
                     detailUpdated.textContent = '最終更新: ' + (card.getAttribute('data-doc-updated') || '—');
                 }
             }
 
-            if (detailPreviewLink && detailPreviewImage && detailPreviewFallback) {
-                if (docUrl && docStatus !== 'not_submitted') {
-                    detailPreviewLink.href = docUrl;
-                    detailPreviewLink.style.display = 'block';
-                    var isPdf = /\.pdf(\?|$)/i.test(docUrl);
-                    if (isPdf) {
-                        detailPreviewImage.style.display = 'none';
-                        detailPreviewImage.src = '';
-                        if (detailPreviewCanvas) {
-                            detailPreviewCanvas.style.display = 'none';
-                        }
-                        detailPreviewFallback.style.display = 'flex';
-                        renderPdfThumbnail(docUrl);
-                    } else {
-                        detailPreviewImage.style.display = 'block';
-                        detailPreviewImage.src = docUrl;
-                        if (detailPreviewCanvas) {
-                            detailPreviewCanvas.style.display = 'none';
-                        }
-                        detailPreviewFallback.style.display = 'none';
-                    }
-                } else {
-                    detailPreviewLink.style.display = 'none';
-                    detailPreviewImage.src = '';
-                    if (detailPreviewCanvas) {
-                        detailPreviewCanvas.style.display = 'none';
-                    }
-                    detailPreviewFallback.style.display = 'none';
-                }
+            resetSelectedFile();
+            setExpireSelectorsFromDate(currentDocExpiredAt);
+            if (currentDocStatus === 'pending' || currentDocStatus === 'approved') {
+                modalState = 'submitted';
+                renderPreview(currentDocUrl, /\.pdf(\?|$)/i.test(currentDocUrl), 'PDFを表示');
+            } else if (currentDocUrl && canRequestReview) {
+                modalState = 'selecting';
+                renderPreview(currentDocUrl, /\.pdf(\?|$)/i.test(currentDocUrl), 'PDFを表示');
+            } else {
+                modalState = 'unsubmitted';
+                renderPreview('', false, '');
             }
-
-            if (detailFileHint) detailFileHint.textContent = '';
-            var submitted = (docStatus === 'pending' || docStatus === 'approved');
-            var showNotes = !docUrl;
-            toggleUploadArea(submitted, showNotes);
-            if (detailPickBtn) {
-                detailPickBtn.disabled = submitted;
-            }
-            if (requestBtn) requestBtn.style.display = (!submitted && canRequestReview) ? 'inline-flex' : 'none';
-            if (withdrawBtn) withdrawBtn.style.display = submitted ? 'inline-flex' : 'none';
-            if (submitted && detailFileHint) {
-                detailFileHint.textContent = '提出済みです。再アップロードする場合は「提出取り下げ」を押してください。';
-            }
-            if (detailExpiredWrap && detailExpiredAt) {
-                if (docKey === 'business') {
-                    detailExpiredWrap.style.display = 'block';
-                    setExpireSelectorsFromDate(docExpiredAt);
-                    detailExpiredAt.readOnly = submitted;
-                    detailExpiredAt.disabled = submitted;
-                    if (detailExpiredCurrent) {
-                        detailExpiredCurrent.style.display = 'block';
-                        detailExpiredCurrent.textContent = docExpiredAt
-                            ? ('登録済み有効期限: ' + formatYmd(docExpiredAt))
-                            : '登録済み有効期限: 未登録';
-                    }
-                } else {
-                    detailExpiredWrap.style.display = 'none';
-                    setExpireSelectorsFromDate('');
-                    detailExpiredAt.readOnly = false;
-                    detailExpiredAt.disabled = false;
-                    if (detailExpiredCurrent) {
-                        detailExpiredCurrent.style.display = 'none';
-                        detailExpiredCurrent.textContent = '';
-                    }
-                }
-            }
+            setUiByState();
+            if (!canRequestReview) requestBtn.style.display = 'none';
+            if (!canWithdrawReview) withdrawBtn.style.display = 'none';
 
             detailModal.style.display = 'flex';
         });
@@ -419,34 +472,97 @@
 
     detailModal.addEventListener('click', function(e) { if (e.target === detailModal) closeModal(); });
     if (detailCloseBtn) detailCloseBtn.addEventListener('click', closeModal);
-    if (detailPickBtn && detailFile) {
-        detailPickBtn.addEventListener('click', function() { detailFile.click(); });
-    }
+    if (detailPickBtn && detailFile) detailPickBtn.addEventListener('click', function() { detailFile.click(); });
+    if (detailRepickBtn && detailFile) detailRepickBtn.addEventListener('click', function() { detailFile.click(); });
     if (requestBtn && detailType) {
         requestBtn.addEventListener('click', function() {
             var t = detailType.value || '';
+            if (t === 'business' && (!detailExpiredAt || !detailExpiredAt.value)) {
+                alert('営業許可証の有効期限を入力してください。');
+                if (detailExpiredAt && detailExpiredAt.focus) detailExpiredAt.focus();
+                return;
+            }
+            if (!selectedFile && !currentDocUrl) {
+                alert('ファイルを選択してください。');
+                return;
+            }
+            var submitAction = function() {
+                postReviewAction(
+                    '{{ route("shop.mypage.documents.request-review") }}',
+                    t,
+                    '提出が完了しました。運営の審査をお待ちください。',
+                    t === 'business' ? (detailExpiredAt ? detailExpiredAt.value : '') : ''
+                ).then(function() {
+                    modalState = 'submitted';
+                    currentDocStatus = 'pending';
+                    currentDocExpiredAt = detailExpiredAt ? detailExpiredAt.value : currentDocExpiredAt;
+                    setUiByState();
+                    showToast('提出が完了しました。審査をお待ちください。');
+                });
+            };
+
+            if (selectedFile) {
+                uploadFile(selectedFile).then(function(res) {
+                    currentDocUrl = res.view_url || currentDocUrl;
+                    renderPreview(currentDocUrl, /\.pdf(\?|$)/i.test(currentDocUrl), 'PDFを表示');
+                    submitAction();
+                }).catch(function(error) {
+                    var messages = error && error.errors ? Object.values(error.errors).flat() : [];
+                    alert(messages[0] || (error && error.message) || 'アップロードに失敗しました。');
+                });
+                return;
+            }
+
             postReviewAction(
-                '{{ route("shop.mypage.documents.request-review") }}',
-                t,
-                '提出が完了しました。運営の審査をお待ちください。',
-                t === 'business' ? (detailExpiredAt ? detailExpiredAt.value : '') : ''
-            );
+                    '{{ route("shop.mypage.documents.request-review") }}',
+                    t,
+                    '提出が完了しました。運営の審査をお待ちください。',
+                    t === 'business' ? (detailExpiredAt ? detailExpiredAt.value : '') : ''
+                ).then(function() {
+                    modalState = 'submitted';
+                    currentDocStatus = 'pending';
+                    setUiByState();
+                    showToast('提出が完了しました。審査をお待ちください。');
+                });
         });
     }
     if (withdrawBtn && detailType) {
         withdrawBtn.addEventListener('click', function() {
-            postReviewAction('{{ route("shop.mypage.documents.withdraw-review") }}', detailType.value || '', '提出を取り下げました。再アップロードしてから審査依頼してください。');
+            if (confirmOverlay) {
+                confirmOverlay.style.display = 'flex';
+            } else {
+                postReviewAction('{{ route("shop.mypage.documents.withdraw-review") }}', detailType.value || '', '提出を取り下げました。再アップロードしてから審査依頼してください。')
+                    .then(function() {
+                        modalState = 'unsubmitted';
+                        currentDocStatus = 'not_submitted';
+                        currentDocUrl = '';
+                        currentDocExpiredAt = '';
+                        renderPreview('', false, '');
+                        setExpireSelectorsFromDate('');
+                        setUiByState();
+                    });
+            }
         });
     }
 
     if (detailFile) {
         detailFile.addEventListener('change', function() {
             if (!detailFile.files || !detailFile.files.length) return;
-            uploadFile(detailFile.files[0]);
+            resetSelectedFile();
+            selectedFile = detailFile.files[0];
+            selectedFileUrl = URL.createObjectURL(selectedFile);
+            modalState = 'selecting';
+            if (detailExpiredAt && currentDocType === 'business') {
+                detailExpiredAt.readOnly = false;
+                detailExpiredAt.disabled = false;
+            }
+            renderPreview(selectedFileUrl, selectedFile.type === 'application/pdf' || /\.pdf$/i.test(selectedFile.name), 'PDFを表示');
+            setUiByState();
         });
     }
     if (detailDropzone && detailFile) {
         detailDropzone.addEventListener('dragover', function(e) {
+            if (modalState === 'submitted') return;
             e.preventDefault();
             e.stopPropagation();
             detailDropzone.classList.add('is-dragover');
@@ -456,11 +572,39 @@
             if (e.target === detailDropzone) detailDropzone.classList.remove('is-dragover');
         });
         detailDropzone.addEventListener('drop', function(e) {
+            if (modalState === 'submitted') return;
             e.preventDefault();
             e.stopPropagation();
             detailDropzone.classList.remove('is-dragover');
             var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-            if (f) uploadFile(f);
+            if (!f) return;
+            resetSelectedFile();
+            selectedFile = f;
+            selectedFileUrl = URL.createObjectURL(f);
+            modalState = 'selecting';
+            renderPreview(selectedFileUrl, f.type === 'application/pdf' || /\.pdf$/i.test(f.name), 'PDFを表示');
+            setUiByState();
+        });
+    }
+
+    if (confirmCancel && confirmOverlay) {
+        confirmCancel.addEventListener('click', function() {
+            confirmOverlay.style.display = 'none';
+        });
+    }
+    if (confirmOk && confirmOverlay) {
+        confirmOk.addEventListener('click', function() {
+            confirmOverlay.style.display = 'none';
+            postReviewAction('{{ route("shop.mypage.documents.withdraw-review") }}', detailType.value || '', '提出を取り下げました。')
+                .then(function() {
+                    modalState = 'unsubmitted';
+                    currentDocStatus = 'not_submitted';
+                    currentDocUrl = '';
+                    currentDocExpiredAt = '';
+                    renderPreview('', false, '');
+                    setExpireSelectorsFromDate('');
+                    setUiByState();
+                });
         });
     }
 })();
