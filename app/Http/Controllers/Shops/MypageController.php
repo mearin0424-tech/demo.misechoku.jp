@@ -27,7 +27,7 @@ class MypageController extends Controller
     {
         $shopId = $this->currentShopId();
 
-        $row = DB::table('shops')
+        $rowQ = DB::table('shops')
             ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
             ->leftJoin('reviews', 'shops.id', '=', 'reviews.shop_id')
             ->where('shops.id', $shopId)

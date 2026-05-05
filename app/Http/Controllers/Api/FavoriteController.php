@@ -20,7 +20,7 @@ class FavoriteController extends Controller
     public function toggle(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'action' => 'required|string|in:like,keep',
+            'action' => 'required|string|in:like,keep,footprint',
             'item_type' => 'required|string|in:cast,shop',
             'item_id' => 'required|string|max:20',
         ]);
@@ -55,9 +55,13 @@ class FavoriteController extends Controller
             return response()->json(['error' => 'Invalid target combination'], 422);
         }
 
-        // action_type の割り当て（今後 Footprint 等を拡張する余地を残す）
-        // 1: KEEP, 3: LIKE
-        $actionType = $action === 'like' ? 3 : 1;
+        // action_type の割り当て
+        // 1: KEEP, 2: FOOTPRINT, 3: LIKE
+        $actionType = match ($action) {
+            'keep' => 1,
+            'footprint' => 2,
+            default => 3,
+        };
 
         $query = DB::table('favorites')->where('action_type', $actionType);
         if (!empty($castId)) {
@@ -72,9 +76,14 @@ class FavoriteController extends Controller
         $now = now();
         $isActive = false;
 
-        if ($existing) {
+        if ($existing && $action !== 'footprint') {
             DB::table('favorites')->where('id', $existing->id)->delete();
             $isActive = false;
+        } elseif ($existing && $action === 'footprint') {
+            DB::table('favorites')->where('id', $existing->id)->update([
+                'created_at' => $now,
+            ]);
+            $isActive = true;
         } else {
             DB::table('favorites')->insert([
                 'cast_id' => $castId,
