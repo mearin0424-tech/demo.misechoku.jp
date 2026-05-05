@@ -153,18 +153,24 @@
     letter-spacing: 0.02em;
 }
 .license-upload-flow-status.is-unsubmitted {
-    color: #bfb8b3;
-    background: rgba(120, 120, 120, 0.18);
+    color: #8f98a6;
+    background: transparent;
+    padding-left: 0;
+    padding-right: 0;
 }
 .license-upload-flow-status.is-selecting {
-    color: #fde7b6;
-    background: rgba(161, 98, 7, 0.25);
-    border: 1px solid rgba(251, 191, 36, 0.28);
+    color: #2d9cff;
+    background: transparent;
+    padding-left: 0;
+    padding-right: 0;
+    border: none;
 }
 .license-upload-flow-status.is-submitted {
     color: #f5e2b4;
-    background: rgba(120, 53, 15, 0.35);
-    border: 1px solid rgba(212, 175, 55, 0.34);
+    background: transparent;
+    padding-left: 0;
+    padding-right: 0;
+    border: none;
 }
 .license-upload-modal__close {
     flex-shrink: 0;
@@ -208,7 +214,7 @@
 .license-upload-modal__meta {
     margin: 0 0 14px;
     font-size: 0.74rem;
-    color: #bdaaaa;
+    color: #9ab1c9;
 }
 .license-upload-preview {
     position: relative;
@@ -220,6 +226,15 @@
     overflow: hidden;
     background: rgba(255, 255, 255, 0.03);
     text-decoration: none;
+}
+.license-upload-preview.is-selecting {
+    width: 108px;
+    min-height: 150px;
+}
+.license-upload-preview.is-selecting .license-upload-preview__image,
+.license-upload-preview.is-selecting .license-upload-preview__canvas,
+.license-upload-preview.is-selecting .license-upload-preview__fallback {
+    height: 150px;
 }
 .license-upload-preview__state-badge {
     position: absolute;
@@ -312,6 +327,18 @@
     background: rgba(8, 8, 10, 0.55);
     transition: border-color 0.15s ease, background 0.15s ease;
 }
+.license-upload-dropzone__icon {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 12px;
+    border-radius: 10px;
+    align-items: center;
+    justify-content: center;
+    color: #d4af37;
+    font-size: 1.6rem;
+    font-weight: 700;
+    opacity: 0.75;
+}
 .license-upload-dropzone.is-dragover {
     border-color: rgba(212, 175, 55, 0.65);
     background: rgba(212, 175, 55, 0.06);
@@ -344,6 +371,56 @@
     font-size: 0.72rem;
     color: #8a7d72;
     min-height: 1.2em;
+}
+.license-upload-toast {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1400;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(212, 175, 55, 0.5);
+    background: rgba(22, 20, 18, 0.95);
+    color: #f5ead5;
+    font-size: 0.8rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.license-upload-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(2px);
+}
+.license-upload-confirm-panel {
+    width: 100%;
+    max-width: 360px;
+    border-radius: 14px;
+    border: 1px solid rgba(212, 175, 55, 0.24);
+    background: #15120f;
+    color: #f4ede5;
+    padding: 16px;
+    box-shadow: 0 18px 34px rgba(0, 0, 0, 0.4);
+}
+.license-upload-confirm-panel h4 {
+    margin: 0 0 10px;
+    font-size: 1rem;
+    color: #ffd883;
+}
+.license-upload-confirm-panel p {
+    margin: 0 0 14px;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: #c5b8ac;
+}
+.license-upload-confirm-actions {
+    display: flex;
+    gap: 10px;
 }
 
 /* 登録直後の書類案内 */

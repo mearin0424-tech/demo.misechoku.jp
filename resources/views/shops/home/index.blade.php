@@ -5,7 +5,7 @@
 @section('guide_message', '') {{-- ホームのスワイプ画面ではオコジョを表示しない --}}
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260503-recruit-swipe-v4">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260505-home-cast-swipe-v1">
 @endpush
 
 @php
@@ -241,7 +241,7 @@
                         <i class="fas fa-bookmark"></i>
                     </button>
                     <a href="{{ route($talkRoute, $item['id']) }}" class="action-btn-message stop-propagation" aria-label="メッセージを送る">
-                        <i class="fas fa-paper-plane"></i>
+                        <i class="fas fa-comment-dots"></i>
                     </a>
                     @if($isShop)
                     <a href="{{ route('cast.recruit.show', $item['id']) }}" class="card-recruit-btn stop-propagation">求人</a>
@@ -267,6 +267,10 @@
                             <span class="tag-pill">#{{ $tag }}</span>
                         @endforeach
                     </div>
+                </div>
+                <div class="card-swipe-hint" aria-hidden="true">
+                    <i class="fas fa-chevron-up card-chevron-anim"></i>
+                    <i class="fas fa-chevron-down card-chevron-anim"></i>
                 </div>
 
                 @endif

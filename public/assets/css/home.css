@@ -288,14 +288,14 @@ body.no-scroll main#main-content .content-wrapper {
     left: 0;
     right: 0;
     bottom: 0;
-    height: 36%;
+    height: 20%;
     z-index: 3;
     pointer-events: none;
     border-radius: inherit;
     background: linear-gradient(
         to top,
-        rgba(5, 5, 5, 0.52) 0%,
-        rgba(5, 5, 5, 0.2) 45%,
+        rgba(5, 5, 5, 0.88) 0%,
+        rgba(5, 5, 5, 0.38) 52%,
         transparent 100%
     );
 }
@@ -354,6 +354,33 @@ body.no-scroll main#main-content .content-wrapper {
         rgba(0, 0, 0, 0.12) 72%,
         transparent 100%
     );
+}
+
+.cast-card:not(.cast-card--recruit) .card-swipe-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 8px;
+    transform: translateX(-50%);
+    z-index: 42;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: rgba(255, 255, 255, 0.42);
+    pointer-events: none;
+}
+
+.cast-card:not(.cast-card--recruit) .card-chevron-anim {
+    font-size: 0.76rem;
+    animation: cardChevronBlink 1.5s ease-in-out infinite;
+}
+
+.cast-card:not(.cast-card--recruit) .card-chevron-anim:last-child {
+    animation-delay: 0.22s;
+}
+
+@keyframes cardChevronBlink {
+    0%, 100% { opacity: 0.35; transform: translateY(0); }
+    50% { opacity: 0.9; transform: translateY(-1px); }
 }
 
 /* ========== 求人カード専用情報レイアウト ========== */
@@ -512,7 +539,7 @@ body.no-scroll main#main-content .content-wrapper {
 }
 
 .cast-name {
-    font-size: clamp(1.1rem, 4.5vw, 1.6rem);
+    font-size: clamp(1.22rem, 5.2vw, 1.72rem);
     margin-bottom: 2px;
     font-weight: 600;
     line-height: 1.3;
@@ -569,7 +596,7 @@ body.no-scroll main#main-content .content-wrapper {
 }
 
 .card-location {
-    font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+    font-size: clamp(0.86rem, 3.1vw, 0.98rem);
     margin-bottom: 8px;
     color: #ccc;
     display: flex;
@@ -588,7 +615,7 @@ body.no-scroll main#main-content .content-wrapper {
 .card-rating-stars {
     display: inline-flex;
     gap: 1px;
-    font-size: clamp(0.85rem, 2.8vw, 1rem);
+    font-size: clamp(0.95rem, 3.2vw, 1.08rem);
     line-height: 1;
 }
 .card-rating-stars .star.filled {
@@ -599,7 +626,7 @@ body.no-scroll main#main-content .content-wrapper {
     color: rgba(255,255,255,0.25);
 }
 .card-rating-num {
-    font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+    font-size: clamp(0.9rem, 2.9vw, 1rem);
     font-weight: 700;
     color: #f5c542;
 }
@@ -644,7 +671,7 @@ body.no-scroll main#main-content .content-wrapper {
     backdrop-filter: blur(8px);
     padding: 2px 8px;
     border-radius: 10px;
-    font-size: clamp(0.65rem, 2vw, 0.75rem);
+    font-size: clamp(0.74rem, 2.4vw, 0.84rem);
     border: 1px solid rgba(255,255,255,0.1);
 }
 
@@ -916,11 +943,11 @@ body.no-scroll main#main-content .content-wrapper {
         border-radius: 18px 18px 0 0;
     }
     .cast-card:not(.cast-card--recruit) .home-photo-wrap::after {
-        height: 32%;
+        height: 20%;
         background: linear-gradient(
             to top,
-            rgba(5, 5, 5, 0.46) 0%,
-            rgba(5, 5, 5, 0.16) 48%,
+            rgba(5, 5, 5, 0.88) 0%,
+            rgba(5, 5, 5, 0.34) 52%,
             transparent 100%
         );
     }
@@ -930,9 +957,9 @@ body.no-scroll main#main-content .content-wrapper {
     .cast-card:not(.cast-card--recruit) .card-bottom-info {
         padding-top: 44px;
     }
-    .cast-name { font-size: 1.05rem; }
-    .card-location { font-size: 0.75rem; }
-    .tag-pill { font-size: 0.65rem; padding: 2px 6px; }
+    .cast-name { font-size: 1.16rem; }
+    .card-location { font-size: 0.82rem; }
+    .tag-pill { font-size: 0.72rem; padding: 2px 6px; }
     .card-actions-overlay {
         right: 8px;
         bottom: 24%;
