@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Schema;
 
 class HomeController extends Controller
 {
+    private const ACTION_TYPE_KEEP = 1;
+
     public function index()
     {
         $this->cleanupStaleImageReferences();
@@ -68,6 +70,20 @@ class HomeController extends Controller
             }
         }
 
+        $keptCastIds = [];
+        if (Schema::hasTable('favorites') && auth()->guard('shop')->check()) {
+            $shopId = (string) (auth()->guard('shop')->user()->shop_id ?? '');
+            if ($shopId !== '') {
+                $keptCastIds = DB::table('favorites')
+                    ->where('shop_id', $shopId)
+                    ->where('action_type', self::ACTION_TYPE_KEEP)
+                    ->whereNotNull('cast_id')
+                    ->pluck('cast_id')
+                    ->all();
+            }
+        }
+        $keptCastMap = array_fill_keys($keptCastIds, true);
+
         $items = [];
         foreach ($rows as $row) {
             $birthday = $row->birthday ? Carbon::parse($row->birthday) : null;
@@ -79,6 +95,7 @@ class HomeController extends Controller
                 'tags' => $this->buildCastTags($row),
                 'like_count' => $likeCounts[$row->id] ?? 0,
                 'images' => $images,
+                'is_kept' => isset($keptCastMap[$row->id]),
             ];
         }
 
@@ -87,10 +104,10 @@ class HomeController extends Controller
         }
 
         return [
-            ['id' => 1, 'name' => 'みさき', 'age' => 23, 'tags' => ['モデル系', 'お酒強い'], 'like_count' => 12, 'images' => [asset('storage/mock/casts/1-1.png'), asset('storage/mock/casts/1-2.png'), asset('storage/mock/casts/1-3.png')]],
-            ['id' => 2, 'name' => '愛華', 'age' => 21, 'tags' => ['癒やし系', '聞き上手'], 'like_count' => 8, 'images' => [asset('storage/mock/casts/2-1.png'), asset('storage/mock/casts/2-2.png'), asset('storage/mock/casts/2-3.png')]],
-            ['id' => 3, 'name' => 'さくら', 'age' => 25, 'tags' => ['元気系', 'トーク上手'], 'like_count' => 24, 'images' => [asset('storage/mock/casts/3-1.png')]],
-            ['id' => 4, 'name' => 'ナナ', 'age' => 22, 'tags' => ['清楚系', 'お酒弱い'], 'like_count' => 5, 'images' => [asset('storage/mock/casts/4-1.png')]],
+            ['id' => 1, 'name' => 'みさき', 'age' => 23, 'tags' => ['モデル系', 'お酒強い'], 'like_count' => 12, 'images' => [asset('storage/mock/casts/1-1.png'), asset('storage/mock/casts/1-2.png'), asset('storage/mock/casts/1-3.png')], 'is_kept' => false],
+            ['id' => 2, 'name' => '愛華', 'age' => 21, 'tags' => ['癒やし系', '聞き上手'], 'like_count' => 8, 'images' => [asset('storage/mock/casts/2-1.png'), asset('storage/mock/casts/2-2.png'), asset('storage/mock/casts/2-3.png')], 'is_kept' => false],
+            ['id' => 3, 'name' => 'さくら', 'age' => 25, 'tags' => ['元気系', 'トーク上手'], 'like_count' => 24, 'images' => [asset('storage/mock/casts/3-1.png')], 'is_kept' => false],
+            ['id' => 4, 'name' => 'ナナ', 'age' => 22, 'tags' => ['清楚系', 'お酒弱い'], 'like_count' => 5, 'images' => [asset('storage/mock/casts/4-1.png')], 'is_kept' => false],
         ];
     }
 
@@ -249,6 +266,20 @@ class HomeController extends Controller
             }
         }
 
+        $keptShopIds = [];
+        if (Schema::hasTable('favorites') && auth()->guard('member')->check()) {
+            $castId = (string) auth()->guard('member')->id();
+            if ($castId !== '') {
+                $keptShopIds = DB::table('favorites')
+                    ->where('cast_id', $castId)
+                    ->where('action_type', self::ACTION_TYPE_KEEP)
+                    ->whereNotNull('shop_id')
+                    ->pluck('shop_id')
+                    ->all();
+            }
+        }
+        $keptShopMap = array_fill_keys($keptShopIds, true);
+
         $items = [];
         foreach ($rows as $row) {
             // 画面からは「DBの店舗ID（例: s00000001）」でアクセスできるようにする
@@ -347,6 +378,7 @@ class HomeController extends Controller
                 'rating' => $hasReviews ? (float) ($row->avg_rating ?? 0) : 0.0,
                 'review_count' => $hasReviews ? (int) ($row->review_count ?? 0) : 0,
                 'is_premium' => isset($premiumShopIds[$row->id]),
+                'is_kept' => isset($keptShopMap[$row->id]),
                 'recruit_bonus_lines' => $bonusLines,
                 'signup_bonus_range' => $this->discoverySignupBonusRange($bonusLines),
                 'trial_hourly_range' => $this->discoveryHourlyPair($trialHourly, $meta, 'trial'),
@@ -440,6 +472,9 @@ class HomeController extends Controller
                 $meta,
                 (int) ($it['noruma_reward'] ?? 0)
             );
+            if (!array_key_exists('is_kept', $it)) {
+                $it['is_kept'] = false;
+            }
 
             return $it;
         }, $mockRows);

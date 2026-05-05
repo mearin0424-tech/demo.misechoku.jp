@@ -1106,6 +1106,11 @@
     transition: border-color 0.2s, transform 0.2s;
 }
 .recruit-cta-heart:hover { border-color: var(--gold); transform: scale(1.05); }
+.recruit-cta-heart.is-active {
+    background: linear-gradient(135deg, #E5C158, #FDF0B2, #B38A22);
+    color: #1A0B0E;
+    border-color: #F5D77B;
+}
 .recruit-cta-btn {
     flex: 1;
     padding: 16px 20px;

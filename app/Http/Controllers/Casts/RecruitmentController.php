@@ -85,14 +85,31 @@ class RecruitmentController extends Controller
                 'shop_profiles.opened_on',
                 'shop_profiles.pref',
                 'shop_profiles.city',
-                'shop_profiles.addr2',
-                'shop_profiles.addr3',
                 'shop_jobs.id as shop_job_id',
                 'shop_jobs.working_day',
                 'shop_jobs.working_hours',
                 'shop_jobs.regular_holiday',
                 'shop_jobs.qualification',
             );
+        if (Schema::hasColumn('shop_profiles', 'addr')) {
+            $q->addSelect('shop_profiles.addr as addr2');
+            if (Schema::hasColumn('shop_profiles', 'building')) {
+                $q->addSelect('shop_profiles.building as addr3');
+            } else {
+                $q->addSelect(DB::raw("'' as addr3"));
+            }
+        } else {
+            if (Schema::hasColumn('shop_profiles', 'addr2')) {
+                $q->addSelect('shop_profiles.addr2');
+            } else {
+                $q->addSelect(DB::raw("'' as addr2"));
+            }
+            if (Schema::hasColumn('shop_profiles', 'addr3')) {
+                $q->addSelect('shop_profiles.addr3');
+            } else {
+                $q->addSelect(DB::raw("'' as addr3"));
+            }
+        }
         if (Schema::hasColumn('shop_profiles', 'station1')) {
             $q->addSelect('shop_profiles.station1');
         } else {
@@ -200,7 +217,7 @@ class RecruitmentController extends Controller
             ];
         }
 
-        $address = trim(($row->pref ?? '') . ($row->city ?? '') . ($row->addr2 ?? '') . ' ' . ($row->addr3 ?? ''));
+        $address = trim(($row->pref ?? '') . ($row->city ?? '') . $this->streetAddressFromProfileRow($row));
         $meta = Schema::hasColumn('shop_jobs', 'noruma_cond')
             ? $this->decodeMeta($row->noruma_cond ?? null)
             : [];
@@ -377,7 +394,7 @@ class RecruitmentController extends Controller
             'zip' => $row->zip ?? '',
             'pref' => $row->pref ?? '',
             'city' => $row->city ?? '',
-            'addr1' => trim(($row->addr2 ?? '') . ' ' . ($row->addr3 ?? '')),
+            'addr1' => $this->streetAddressFromProfileRow($row),
             'industry_name' => $industryName,
             'nearest_station' => $this->resolveNearestStation($shopId, $row->station1 ?? null),
             'tag_groups' => $shopTagGroups,
@@ -677,7 +694,7 @@ class RecruitmentController extends Controller
         $base = [
             'store_name' => $row->shop_name ?? '店舗',
             'open_date' => !empty($row->opened_on) ? date('Y年n月j日', strtotime($row->opened_on)) : null,
-            'address' => trim(implode(' ', array_filter([$row->pref ?? null, $row->city ?? null, $row->addr2 ?? null, $row->addr3 ?? null]))),
+            'address' => trim(implode(' ', array_filter([$row->pref ?? null, $row->city ?? null, $this->streetAddressFromProfileRow($row)]))),
             'map_embed_src' => null,
             'nearest_station' => $this->resolveNearestStation($shopId, $row->station1 ?? null),
             'hourly_wage_regular' => $regularWage,
@@ -760,7 +777,7 @@ class RecruitmentController extends Controller
                 'zip' => $row->zip ?? '',
                 'pref' => $row->pref ?? '',
                 'city' => $row->city ?? '',
-                'addr1' => trim(($row->addr2 ?? '') . ' ' . ($row->addr3 ?? '')),
+                'addr1' => $this->streetAddressFromProfileRow($row),
                 'industry_name' => $industryName,
                 'nearest_station' => $this->resolveNearestStation($shopId, $row->station1 ?? null),
                 'tag_groups' => $shopTagGroups,
@@ -783,6 +800,21 @@ class RecruitmentController extends Controller
         }
 
         return trim((string) $legacyStation);
+    }
+
+    private function streetAddressFromProfileRow(?object $row): string
+    {
+        if (!$row) {
+            return '';
+        }
+
+        $addr = trim((string) ($row->addr ?? ''));
+        $building = trim((string) ($row->building ?? ''));
+        if ($addr !== '' || $building !== '') {
+            return trim($addr . ' ' . $building);
+        }
+
+        return trim((string) ($row->addr2 ?? '') . ' ' . (string) ($row->addr3 ?? ''));
     }
 
     /**

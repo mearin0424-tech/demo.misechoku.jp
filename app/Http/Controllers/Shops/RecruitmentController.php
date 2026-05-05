@@ -15,6 +15,7 @@ class RecruitmentController extends Controller
 {
     private const MSG_LICENSE_REQUIRED_FOR_PUBLISH = '求人を公開するには、営業許可証と風営許可証の両方を提出し、運営の承認が必要です。';
     private const ACTION_TYPE_FOOTPRINT = 2;
+    private const ACTION_TYPE_KEEP = 1;
 
     public function __construct(
         private readonly AdminMasterService $adminMasterService,
@@ -107,6 +108,10 @@ class RecruitmentController extends Controller
         $shopId = $id ? $this->normalizeShopId($id) : $this->currentShopId();
         $this->recordCastFootprintForShop($shopId);
         $recruitData = $this->getRecruitData($shopId);
+        $isKeptByCurrentCast = $this->isKeptByCurrentCast($shopId);
+        $recruitData['recruit']['is_kept'] = $isKeptByCurrentCast;
+        $recruitData['recruit_trial']['is_kept'] = $isKeptByCurrentCast;
+        $recruitData['recruit_help']['is_kept'] = $isKeptByCurrentCast;
         $shareText = trim((string) ($recruitData['recruit']['catch_copy'] ?? ''));
         if ($shareText === '') {
             $shareText = trim((string) ($recruitData['recruit']['message'] ?? ''));
@@ -694,7 +699,7 @@ class RecruitmentController extends Controller
         $recruitBase = [
                 'store_name' => $row->shop_name ?? '店舗',
                 'open_date' => !empty($row->opened_on) ? date('Y年n月j日', strtotime($row->opened_on)) : null,
-                'address' => trim(implode(' ', array_filter([$row->pref ?? null, $row->city ?? null, $row->addr2 ?? null, $row->addr3 ?? null]))),
+                'address' => trim(implode(' ', array_filter([$row->pref ?? null, $row->city ?? null, $this->streetAddressFromProfileRow($row)]))),
                 'map_embed_src' => null,
                 'nearest_station' => $this->resolveNearestStationForProfile($shopId, $row),
                 'hourly_wage_regular' => isset($row->hourly_wage_regular) ? (int) $row->hourly_wage_regular : 0,
@@ -767,6 +772,7 @@ class RecruitmentController extends Controller
             'recruit_trial' => $multi ? $this->applyJobVariantToRecruit($recruitBase, $trialRow, 'trial') : $recruitBase,
             'recruit_help' => $multi ? $this->applyJobVariantToRecruit($recruitBase, $helpRow, 'help') : $recruitBase,
             'shop' => [
+                'id' => $shopId,
                 'name' => $row->shop_name ?? '店舗',
                 'word' => $shopHitokoto,
                 'main_img' => $mainImage,
@@ -779,7 +785,7 @@ class RecruitmentController extends Controller
                 'zip' => $row->zip ?? '',
                 'pref' => $row->pref ?? '',
                 'city' => $row->city ?? '',
-                'addr1' => trim(($row->addr2 ?? '') . ' ' . ($row->addr3 ?? '')),
+                'addr1' => $this->streetAddressFromProfileRow($row),
                 'industry_name' => $industryName,
                 'nearest_station' => $this->resolveNearestStationForProfile($shopId, $row),
                 'tag_groups' => $shopTagGroups,
@@ -1136,7 +1142,7 @@ class RecruitmentController extends Controller
         $base = [
             'store_name' => $row->shop_name ?? '店舗',
             'open_date' => !empty($row->opened_on) ? date('Y年n月j日', strtotime($row->opened_on)) : null,
-            'address' => trim(implode(' ', array_filter([$row->pref ?? null, $row->city ?? null, $row->addr2 ?? null, $row->addr3 ?? null]))),
+            'address' => trim(implode(' ', array_filter([$row->pref ?? null, $row->city ?? null, $this->streetAddressFromProfileRow($row)]))),
             'map_embed_src' => null,
             'nearest_station' => $this->resolveNearestStationForProfile($shopId, $row),
             'hourly_wage_regular' => $regularWage,
@@ -1201,6 +1207,7 @@ class RecruitmentController extends Controller
             'recruit_trial' => $trialOut,
             'recruit_help' => $helpOut,
             'shop' => [
+                'id' => $shopId,
                 'name' => $row->shop_name ?? '店舗',
                 'word' => $shopHitokoto,
                 'main_img' => $mainImage,
@@ -1213,7 +1220,7 @@ class RecruitmentController extends Controller
                 'zip' => $row->zip ?? '',
                 'pref' => $row->pref ?? '',
                 'city' => $row->city ?? '',
-                'addr1' => trim(($row->addr2 ?? '') . ' ' . ($row->addr3 ?? '')),
+                'addr1' => $this->streetAddressFromProfileRow($row),
                 'industry_name' => $industryName,
                 'nearest_station' => $this->resolveNearestStationForProfile($shopId, $row),
                 'tag_groups' => $shopTagGroups,
@@ -1634,6 +1641,21 @@ class RecruitmentController extends Controller
         return $names === [] ? '' : implode(' / ', $names);
     }
 
+    private function streetAddressFromProfileRow(?object $row): string
+    {
+        if (!$row) {
+            return '';
+        }
+
+        $addr = trim((string) ($row->addr ?? ''));
+        $building = trim((string) ($row->building ?? ''));
+        if ($addr !== '' || $building !== '') {
+            return trim($addr . ' ' . $building);
+        }
+
+        return trim((string) ($row->addr2 ?? '') . ' ' . (string) ($row->addr3 ?? ''));
+    }
+
     private function normalizeShopId(string|int $value): string
     {
         return str_starts_with((string) $value, 's')
@@ -1674,5 +1696,26 @@ class RecruitmentController extends Controller
                 'created_at' => now(),
             ]
         );
+    }
+
+    private function isKeptByCurrentCast(string $shopId): bool
+    {
+        if (!auth()->guard('member')->check()) {
+            return false;
+        }
+        if (!Schema::hasTable('favorites')) {
+            return false;
+        }
+
+        $castId = (string) auth()->guard('member')->id();
+        if ($castId === '' || $shopId === '') {
+            return false;
+        }
+
+        return DB::table('favorites')
+            ->where('cast_id', $castId)
+            ->where('shop_id', $shopId)
+            ->where('action_type', self::ACTION_TYPE_KEEP)
+            ->exists();
     }
 }

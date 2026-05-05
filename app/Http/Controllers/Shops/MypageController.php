@@ -39,8 +39,6 @@ class MypageController extends Controller
                 'shop_profiles.zip',
                 'shop_profiles.pref',
                 'shop_profiles.city',
-                'shop_profiles.addr2',
-                'shop_profiles.addr3',
                 'shop_profiles.industry_id',
                 'shop_profiles.updated_at as profile_updated_at',
                 DB::raw('AVG(reviews.eva) as avg_eva'),
@@ -54,11 +52,34 @@ class MypageController extends Controller
                 'shop_profiles.zip',
                 'shop_profiles.pref',
                 'shop_profiles.city',
-                'shop_profiles.addr2',
-                'shop_profiles.addr3',
                 'shop_profiles.industry_id',
                 'shop_profiles.updated_at'
             );
+        if (Schema::hasColumn('shop_profiles', 'addr')) {
+            $rowQ->addSelect('shop_profiles.addr as addr2');
+            if (Schema::hasColumn('shop_profiles', 'building')) {
+                $rowQ->addSelect('shop_profiles.building as addr3');
+            } else {
+                $rowQ->addSelect(DB::raw("'' as addr3"));
+            }
+            $rowQ->groupBy('shop_profiles.addr');
+            if (Schema::hasColumn('shop_profiles', 'building')) {
+                $rowQ->groupBy('shop_profiles.building');
+            }
+        } else {
+            if (Schema::hasColumn('shop_profiles', 'addr2')) {
+                $rowQ->addSelect('shop_profiles.addr2');
+                $rowQ->groupBy('shop_profiles.addr2');
+            } else {
+                $rowQ->addSelect(DB::raw("'' as addr2"));
+            }
+            if (Schema::hasColumn('shop_profiles', 'addr3')) {
+                $rowQ->addSelect('shop_profiles.addr3');
+                $rowQ->groupBy('shop_profiles.addr3');
+            } else {
+                $rowQ->addSelect(DB::raw("'' as addr3"));
+            }
+        }
         if (Schema::hasColumn('shop_profiles', 'station1')) {
             $rowQ->addSelect('shop_profiles.station1');
             $rowQ->groupBy('shop_profiles.station1');

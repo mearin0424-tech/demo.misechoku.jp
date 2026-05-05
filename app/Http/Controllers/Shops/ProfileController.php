@@ -434,7 +434,7 @@ class ProfileController extends Controller
 
     private function buildShopViewData(string $shopId): array
     {
-        $row = DB::table('shops')
+        $rowQ = DB::table('shops')
             ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
             ->leftJoin('reviews', 'shops.id', '=', 'reviews.shop_id')
             ->where('shops.id', $shopId)
@@ -443,8 +443,6 @@ class ProfileController extends Controller
                 'shop_profiles.shop_name',
                 'shop_profiles.pref',
                 'shop_profiles.city',
-                'shop_profiles.addr2',
-                'shop_profiles.addr3',
                 DB::raw('AVG(reviews.eva) as avg_eva'),
                 DB::raw('COUNT(reviews.id) as review_count')
             )
@@ -452,11 +450,34 @@ class ProfileController extends Controller
                 'shops.id',
                 'shop_profiles.shop_name',
                 'shop_profiles.pref',
-                'shop_profiles.city',
-                'shop_profiles.addr2',
-                'shop_profiles.addr3'
-            )
-            ->first();
+                'shop_profiles.city'
+            );
+        if (Schema::hasColumn('shop_profiles', 'addr')) {
+            $rowQ->addSelect('shop_profiles.addr as addr2');
+            if (Schema::hasColumn('shop_profiles', 'building')) {
+                $rowQ->addSelect('shop_profiles.building as addr3');
+            } else {
+                $rowQ->addSelect(DB::raw("'' as addr3"));
+            }
+            $rowQ->groupBy('shop_profiles.addr');
+            if (Schema::hasColumn('shop_profiles', 'building')) {
+                $rowQ->groupBy('shop_profiles.building');
+            }
+        } else {
+            if (Schema::hasColumn('shop_profiles', 'addr2')) {
+                $rowQ->addSelect('shop_profiles.addr2');
+                $rowQ->groupBy('shop_profiles.addr2');
+            } else {
+                $rowQ->addSelect(DB::raw("'' as addr2"));
+            }
+            if (Schema::hasColumn('shop_profiles', 'addr3')) {
+                $rowQ->addSelect('shop_profiles.addr3');
+                $rowQ->groupBy('shop_profiles.addr3');
+            } else {
+                $rowQ->addSelect(DB::raw("'' as addr3"));
+            }
+        }
+        $row = $rowQ->first();
 
         $shopPost = DB::table('shop_posts')
             ->where('shop_id', $shopId)

@@ -838,7 +838,14 @@
 
             @if(!empty($forCast))
                 <div class="recruit-footer-cta">
-                    <button type="button" class="recruit-cta-heart" aria-label="キープ"><i class="far fa-heart"></i></button>
+                    <button
+                        type="button"
+                        class="recruit-cta-heart {{ !empty($recruit['is_kept']) ? 'is-active' : '' }}"
+                        aria-label="キープ"
+                        data-item-id="{{ $shop['id'] ?? '' }}"
+                        data-item-type="shop"
+                        data-action="keep"
+                    ><i class="fas fa-bookmark"></i></button>
                     <a href="#" class="recruit-cta-btn"><i class="fas fa-paper-plane"></i> 応募する</a>
                 </div>
             @endif
@@ -948,6 +955,47 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    var keepBtn = document.querySelector('.recruit-cta-heart[data-action="keep"]');
+    if (keepBtn) {
+        var csrfTokenEl = document.querySelector('meta[name="csrf-token"]');
+        var csrfToken = csrfTokenEl ? csrfTokenEl.getAttribute('content') : null;
+        keepBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            var itemId = keepBtn.getAttribute('data-item-id');
+            var itemType = keepBtn.getAttribute('data-item-type');
+            var action = keepBtn.getAttribute('data-action');
+            if (!itemId || !itemType || !action) {
+                return;
+            }
+
+            fetch('/api/favorites/toggle', {
+                method: 'POST',
+                headers: Object.assign({
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }, csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
+                body: JSON.stringify({
+                    action: action,
+                    item_id: itemId,
+                    item_type: itemType
+                }),
+                credentials: 'same-origin'
+            })
+                .then(function (res) {
+                    return res.ok ? res.json() : Promise.reject(res);
+                })
+                .then(function (data) {
+                    if (!data || !data.ok) {
+                        return;
+                    }
+                    keepBtn.classList.toggle('is-active', !!data.is_active);
+                })
+                .catch(function () {
+                    // noop
+                });
+        });
+    }
 
     var overlay = document.getElementById('lightbox-overlay');
     var img = document.getElementById('lightbox-image');

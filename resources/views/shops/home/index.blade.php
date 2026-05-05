@@ -80,7 +80,7 @@
                     <div class="rc-action-item stop-propagation">
                         <button
                             type="button"
-                            class="action-circle-btn keep stop-propagation"
+                            class="action-circle-btn keep stop-propagation {{ !empty($item['is_kept']) ? 'is-active' : '' }}"
                             data-item-id="{{ $item['id'] }}"
                             data-item-type="shop"
                             data-action="keep"
@@ -233,7 +233,7 @@
                     </button>
                     <button
                         type="button"
-                        class="action-circle-btn keep stop-propagation"
+                        class="action-circle-btn keep stop-propagation {{ !empty($item['is_kept']) ? 'is-active' : '' }}"
                         data-item-id="{{ $item['id'] }}"
                         data-item-type="{{ $itemType === 'recruit' ? 'shop' : 'cast' }}"
                         data-action="keep"
