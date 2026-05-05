@@ -44,7 +44,8 @@ class StationService
                 $name = trim((string) ($s['name'] ?? ''));
                 $dist = isset($s['distance']) ? (int) round((float) $s['distance']) : null;
                 $label = $name !== '' && !str_ends_with($name, '駅') ? $name . '駅' : $name;
-                $suffix = $dist !== null ? ' 徒歩約' . $dist . 'm' : '';
+                $walkMinutes = $dist !== null ? max(1, (int) ceil($dist / 80)) : null;
+                $suffix = $walkMinutes !== null ? ' 徒歩' . $walkMinutes . '分' : '';
 
                 return ['station_name' => $label . $suffix];
             })

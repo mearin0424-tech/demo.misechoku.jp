@@ -198,39 +198,6 @@
         gap: 12px;
     }
 
-    .shop-profile-edit__ref-table-wrap {
-        margin: 0 0 16px;
-        padding: 12px;
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid #1f1a14;
-        overflow-x: auto;
-    }
-    .shop-profile-edit__ref-title {
-        margin: 0 0 8px;
-        font-size: 10px;
-        font-weight: 800;
-        color: var(--spe-hint);
-        letter-spacing: 0.04em;
-    }
-    .shop-profile-edit__ref-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 10px;
-        color: #a1a1aa;
-    }
-    .shop-profile-edit__ref-table th,
-    .shop-profile-edit__ref-table td {
-        border: 1px solid #2a2015;
-        padding: 8px 6px;
-        text-align: left;
-        line-height: 1.4;
-    }
-    .shop-profile-edit__ref-table th {
-        background: #141210;
-        color: var(--spe-gold);
-        font-weight: 800;
-    }
     .shop-profile-edit__shift-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -425,6 +392,72 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     var stAdd = document.getElementById('shop-station-add');
     var stList = document.getElementById('shop-stations-list');
+    var suggestUrl = @json(route('shop.profile.store.suggest-stations'));
+    var prefInput = document.getElementById('pref');
+    var cityInput = document.getElementById('city');
+    var addrInput = document.getElementById('addr');
+    var buildingInput = document.getElementById('building');
+    var addr1Input = document.getElementById('addr1');
+    var suggestTimer = null;
+    var suggestSeq = 0;
+    function collectAddressPayload() {
+        return {
+            pref: prefInput ? prefInput.value : '',
+            city: cityInput ? cityInput.value : '',
+            addr: addrInput ? addrInput.value : '',
+            building: buildingInput ? buildingInput.value : '',
+            addr1: addr1Input ? addr1Input.value : ''
+        };
+    }
+    function renderStationRows(lines) {
+        if (!stList) return;
+        var rows = Array.isArray(lines) ? lines.filter(function (v) { return (v || '').trim() !== ''; }) : [];
+        if (rows.length === 0) return;
+        stList.innerHTML = '';
+        rows.forEach(function (line, i) {
+            var wrap = document.createElement('div');
+            wrap.className = 'shop-profile-edit__field';
+            wrap.style.marginBottom = '10px';
+            wrap.innerHTML =
+                '<label class="shop-profile-edit__label" for="station-auto-' + i + '">最寄り ' + (i + 1) + '</label>' +
+                '<input id="station-auto-' + i + '" type="text" name="stations[]" class="shop-profile-edit__input" placeholder="例：六本木駅 徒歩3分">';
+            var input = wrap.querySelector('input[name="stations[]"]');
+            if (input) input.value = line;
+            stList.appendChild(wrap);
+        });
+    }
+    function suggestStations() {
+        if (!stList || !suggestUrl) return;
+        var payload = collectAddressPayload();
+        var fullAddress = [payload.pref, payload.city, payload.addr, payload.building, payload.addr1].join('').trim();
+        if (fullAddress === '') return;
+        var seq = ++suggestSeq;
+        fetch(suggestUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': @json(csrf_token())
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(function (res) { return res.ok ? res.json() : null; })
+        .then(function (json) {
+            if (!json || seq !== suggestSeq) return;
+            renderStationRows(json.stations || []);
+        })
+        .catch(function () {});
+    }
+    function queueSuggestStations() {
+        if (suggestTimer) clearTimeout(suggestTimer);
+        suggestTimer = setTimeout(suggestStations, 700);
+    }
+    [prefInput, cityInput, addrInput, buildingInput, addr1Input].forEach(function (el) {
+        if (!el) return;
+        el.addEventListener('input', queueSuggestStations);
+        el.addEventListener('change', queueSuggestStations);
+    });
+
     if (stAdd && stList) {
         stAdd.addEventListener('click', function () {
             var n = stList.querySelectorAll('input[name="stations[]"]').length + 1;
@@ -498,18 +531,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 <div class="shop-profile-edit__field">
                     <span class="shop-profile-edit__label">業種</span>
-                    <div class="shop-profile-edit__chips" role="radiogroup" aria-label="業種（1つのみ）">
-                        @foreach(($masters['industries'] ?? []) as $industry)
-                            <label class="shop-profile-edit__chip">
-                                <input
-                                    type="radio"
-                                    name="industry_id"
-                                    value="{{ $industry->id }}"
-                                    {{ (int) old('industry_id', $shopData['industry_id'] ?? 0) === (int) $industry->id ? 'checked' : '' }}
-                                >
-                                <span>{{ $industry->name }}</span>
-                            </label>
-                        @endforeach
+                    <div class="shop-profile-edit__select-wrap">
+                        <select id="industry_id" name="industry_id" class="shop-profile-edit__select">
+                            <option value="">未選択</option>
+                            @foreach(($masters['industries'] ?? []) as $industry)
+                                <option value="{{ $industry->id }}"
+                                    {{ (int) old('industry_id', $shopData['industry_id'] ?? 0) === (int) $industry->id ? 'selected' : '' }}>
+                                    {{ $industry->name }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
                     <p class="shop-profile-edit__hint">※1つだけ選択できます。未選択でも保存できます。</p>
                 </div>
@@ -627,40 +658,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     Business Hours（店舗の営業時間）
                 </h2>
                 <p class="shop-profile-edit__hint" style="margin-top:0;">求人のシフト時間とは別に、店舗の営業時間を登録できます（未設定の場合は表示されません）。</p>
-
-                <div class="shop-profile-edit__ref-table-wrap">
-                    <p class="shop-profile-edit__ref-title">登録イメージ（DBの保存値）</p>
-                    <table class="shop-profile-edit__ref-table">
-                        <thead>
-                            <tr>
-                                <th>パターン</th>
-                                <th>open_time</th>
-                                <th>close_is_last</th>
-                                <th>close_time</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>20:00～翌4:00</td>
-                                <td>20:00:00</td>
-                                <td>0</td>
-                                <td>04:00:00</td>
-                            </tr>
-                            <tr>
-                                <td>20:00～LAST</td>
-                                <td>20:00:00</td>
-                                <td>1</td>
-                                <td>NULL</td>
-                            </tr>
-                            <tr>
-                                <td>未設定</td>
-                                <td>NULL</td>
-                                <td>0</td>
-                                <td>NULL</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
 
                 @php
                     $bizOpen = old('business_open', $shopData['business_open'] ?? '');

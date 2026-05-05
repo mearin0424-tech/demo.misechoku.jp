@@ -34,7 +34,8 @@
                     @foreach($reviews as $rev)
                         @php
                             $hasDetails = !empty($rev['details']);
-                            $displayName = $rev['anonymous'] == 1 ? '匿名' : $rev['user_name'];
+                            $isAnonymous = (int) ($rev['anonymous'] ?? 0) === 1;
+                            $displayName = $isAnonymous ? '匿名' : $rev['user_name'];
                         @endphp
                         <article
                             id="review-{{ $rev['id'] }}"
@@ -52,26 +53,28 @@
                             >
                                 <div class="shop-review-item__head">
                                     <div class="shop-review-item__user">
-                                        <div class="shop-review-item__avatar-wrap">
-                                            <img
-                                                src="{{ $rev['user_img'] ?: asset('assets/images/common/user-default.svg') }}"
-                                                alt=""
-                                                class="shop-review-item__avatar"
-                                                width="48"
-                                                height="48"
-                                                loading="lazy"
-                                            >
-                                        </div>
+                                        @if(!$isAnonymous)
+                                            <div class="shop-review-item__avatar-wrap">
+                                                <img
+                                                    src="{{ $rev['user_img'] ?: asset('assets/images/common/user-default.svg') }}"
+                                                    alt=""
+                                                    class="shop-review-item__avatar"
+                                                    width="48"
+                                                    height="48"
+                                                    loading="lazy"
+                                                >
+                                            </div>
+                                        @endif
                                         <div class="shop-review-item__user-text">
                                             <span class="shop-review-item__name">{{ $displayName }}</span>
-                                            @if(!empty($rev['created_at_label']))
-                                                <p class="shop-review-item__date">{{ $rev['created_at_label'] }}</p>
-                                            @endif
+                                            <div class="shop-review-item__meta-row">
+                                                @include('partials.review_stars', ['score' => (float) $rev['avg_score'], 'size' => 'sm'])
+                                                <span class="shop-review-item__meta-score">{{ number_format($rev['avg_score'], 1) }}</span>
+                                                @if(!empty($rev['created_at_label']))
+                                                    <p class="shop-review-item__date">{{ $rev['created_at_label'] }}</p>
+                                                @endif
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="shop-review-item__overall">
-                                        @include('partials.review_stars', ['score' => (float) $rev['avg_score'], 'size' => 'sm'])
-                                        <span class="shop-review-item__overall-num">{{ number_format($rev['avg_score'], 1) }}</span>
                                     </div>
                                 </div>
 
@@ -84,10 +87,16 @@
                                 </div>
 
                                 @if($hasDetails)
-                                    <div class="shop-review-item__chevron" aria-hidden="true">
-                                        <i class="fas fa-chevron-down shop-review-item__chevron-icon shop-review-item__chevron-icon--down"></i>
-                                        <i class="fas fa-chevron-up shop-review-item__chevron-icon shop-review-item__chevron-icon--up"></i>
-                                    </div>
+                                    <button
+                                        type="button"
+                                        class="shop-review-item__details-toggle"
+                                        aria-expanded="false"
+                                        aria-controls="shop-review-breakdown-{{ $rev['id'] }}"
+                                    >
+                                        <span>設問別スコアを表示</span>
+                                        <i class="fas fa-chevron-down shop-review-item__chevron-icon shop-review-item__chevron-icon--down" aria-hidden="true"></i>
+                                        <i class="fas fa-chevron-up shop-review-item__chevron-icon shop-review-item__chevron-icon--up" aria-hidden="true"></i>
+                                    </button>
 
                                     <div
                                         id="shop-review-breakdown-{{ $rev['id'] }}"
@@ -144,12 +153,14 @@
         document.querySelectorAll('[data-shop-review-accordion]').forEach(function (article) {
             var surface = article.querySelector('.shop-review-item__surface--interactive');
             var panel = article.querySelector('.shop-review-item__breakdown');
-            if (!surface || !panel) return;
+            var toggleBtn = article.querySelector('.shop-review-item__details-toggle');
+            if (!surface || !panel || !toggleBtn) return;
 
             function toggle() {
                 var open = article.classList.toggle('is-open');
                 surface.setAttribute('aria-expanded', open ? 'true' : 'false');
                 panel.setAttribute('aria-hidden', open ? 'false' : 'true');
+                toggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
             }
 
             surface.addEventListener('click', toggle);
@@ -158,6 +169,11 @@
                     e.preventDefault();
                     toggle();
                 }
+            });
+            toggleBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                toggle();
             });
         });
     })();

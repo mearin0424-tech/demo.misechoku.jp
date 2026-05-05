@@ -160,6 +160,31 @@ class ProfileController extends Controller
     }
 
     /**
+     * 住所入力中の最寄り駅候補を非同期で返す（保存はしない）
+     */
+    public function suggestStations(Request $request)
+    {
+        if (!Schema::hasTable('shop_stations')) {
+            return response()->json(['stations' => []]);
+        }
+
+        $fullAddress = $this->shopProfileLocationSyncService->buildFullAddressLineForGeocode($request);
+        if ($fullAddress === '') {
+            return response()->json(['stations' => []]);
+        }
+
+        $resolved = $this->shopProfileLocationSyncService->resolveFromAddressLine($fullAddress);
+        $stations = collect($resolved['station_rows'] ?? [])
+            ->pluck('station_name')
+            ->map(fn ($s) => trim((string) $s))
+            ->filter()
+            ->values()
+            ->all();
+
+        return response()->json(['stations' => $stations]);
+    }
+
+    /**
      * shop_tag_relations を新スキーマ (shop_tags target='shop') と同期する.
      */
 

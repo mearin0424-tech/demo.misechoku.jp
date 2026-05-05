@@ -343,6 +343,7 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
         Route::post('/update', [CastProfile::class, 'update'])->name('update');
         Route::get('/store/edit', [ShopProfile::class, 'edit'])->name('store.edit');
         Route::post('/store/update', [ShopProfile::class, 'update'])->name('store.update');
+        Route::post('/store/suggest-stations', [ShopProfile::class, 'suggestStations'])->name('store.suggest-stations');
         Route::post('/upload-image', [ShopProfile::class, 'uploadImage'])->name('upload.image');
         Route::post('/images/order', [ShopProfile::class, 'updateOrder'])->name('images.order');
         Route::delete('/image/{id}', [ShopProfile::class, 'deleteImage'])->name('image.delete');
