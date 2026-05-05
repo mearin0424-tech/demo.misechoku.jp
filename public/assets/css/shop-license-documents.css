@@ -429,6 +429,35 @@
     gap: 10px;
 }
 
+/* 取り下げ確認（インライン） */
+.license-withdraw-confirm {
+    padding: 20px 4px 4px;
+}
+.license-withdraw-confirm__title {
+    margin: 0 0 10px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #ffd883;
+}
+.license-withdraw-confirm__text {
+    margin: 0 0 20px;
+    font-size: 0.82rem;
+    line-height: 1.65;
+    color: #c5b8ac;
+}
+.license-withdraw-confirm__actions {
+    display: flex;
+    gap: 10px;
+}
+.license-withdraw-confirm__ok-btn {
+    background: rgba(127, 29, 29, 0.35);
+    color: #fca5a5;
+    border: 1px solid rgba(248, 113, 113, 0.35);
+}
+.license-withdraw-confirm__ok-btn:hover {
+    background: rgba(127, 29, 29, 0.55);
+}
+
 /* 登録直後の書類案内 */
 .shop-doc-onboarding-intro {
     margin: 0 0 20px;

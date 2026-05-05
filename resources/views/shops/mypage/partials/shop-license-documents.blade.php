@@ -58,35 +58,51 @@
             </h3>
             <button type="button" class="license-upload-modal__close" id="license-detail-close-btn" aria-label="閉じる">×</button>
         </div>
+
         <div class="license-upload-modal__body">
-            <p id="license-detail-ng" class="license-upload-modal__ng" style="display:none;"></p>
-            <p id="license-detail-updated" class="license-upload-modal__meta" style="display:none;"></p>
 
-            {{-- サムネイルプレビュー --}}
-            <div id="license-detail-preview" class="license-upload-preview" style="display:none;"></div>
+            {{-- メインビュー --}}
+            <div id="license-detail-main-view">
+                <p id="license-detail-ng" class="license-upload-modal__ng" style="display:none;"></p>
+                <p id="license-detail-updated" class="license-upload-modal__meta" style="display:none;"></p>
 
-            {{-- 有効期限（未提出以外 × 営業許可証で表示、提出済みは readonly） --}}
-            <div id="license-detail-expired-wrap" class="license-upload-modal__expired-wrap" style="display:none;">
-                <label class="license-upload-modal__expired-label" for="license-detail-expired-at">営業許可証の有効期限</label>
-                <input type="date" id="license-detail-expired-at" class="license-upload-modal__expired-input" value="" style="color-scheme: dark;">
-                <p id="license-detail-expired-hint" class="license-upload-modal__expired-hint">営業許可証の有効期限を年月日で入力してください（本日以降）。</p>
+                {{-- サムネイルプレビュー --}}
+                <div id="license-detail-preview" class="license-upload-preview" style="display:none;"></div>
+
+                {{-- 有効期限（営業許可証 × 選択中 or 提出済みで表示） --}}
+                <div id="license-detail-expired-wrap" class="license-upload-modal__expired-wrap" style="display:none;">
+                    <label class="license-upload-modal__expired-label" for="license-detail-expired-at">営業許可証の有効期限</label>
+                    <input type="date" id="license-detail-expired-at" class="license-upload-modal__expired-input" value="" style="color-scheme: dark;">
+                    <p id="license-detail-expired-hint" class="license-upload-modal__expired-hint">営業許可証の有効期限を年月日で入力してください（本日以降）。</p>
+                </div>
+
+                <div id="license-detail-dropzone" class="license-upload-dropzone">
+                    <div id="license-detail-upload-icon" class="license-upload-dropzone__icon" style="display:none;">⇪</div>
+                    <p id="license-detail-upload-hint" class="license-upload-dropzone__hint" style="display:none;">PDF、JPEG、PNG（最大 8MB）をドラッグ＆ドロップするか、「ファイルを選択」からアップロードしてください。</p>
+                    <p id="license-detail-upload-note" class="license-upload-dropzone__note" style="display:none;">※ 許可証の審査を通過しないと求人を表示できません。</p>
+                    <input type="hidden" id="license-detail-type" value="">
+                    <input type="file" id="license-detail-file" class="sr-only" accept=".pdf,.png,.jpg,.jpeg,image/*,application/pdf">
+                    <div class="license-upload-modal__actions">
+                        <button type="button" class="btn-action btn-action-primary" id="license-detail-pick-btn">ファイルを選択</button>
+                        <button type="button" class="btn-action btn-action-secondary" id="license-detail-repick-btn" style="display:none;">ファイルを変更</button>
+                    </div>
+                    <div class="license-upload-modal__actions" style="margin-top:10px;">
+                        <button type="button" class="btn-action btn-action-primary" id="license-detail-request-btn" style="display:none;">提出</button>
+                        <button type="button" class="btn-action btn-action-secondary" id="license-detail-withdraw-btn" style="display:none;">提出取り下げ</button>
+                    </div>
+                </div>
             </div>
 
-            <div id="license-detail-dropzone" class="license-upload-dropzone">
-                <div id="license-detail-upload-icon" class="license-upload-dropzone__icon" style="display:none;">⇪</div>
-                <p id="license-detail-upload-hint" class="license-upload-dropzone__hint" style="display:none;">PDF、JPEG、PNG（最大 8MB）をドラッグ＆ドロップするか、「ファイルを選択」からアップロードしてください。</p>
-                <p id="license-detail-upload-note" class="license-upload-dropzone__note" style="display:none;">※ 許可証の審査を通過しないと求人を表示できません。</p>
-                <input type="hidden" id="license-detail-type" value="">
-                <input type="file" id="license-detail-file" class="sr-only" accept=".pdf,.png,.jpg,.jpeg,image/*,application/pdf">
-                <div class="license-upload-modal__actions">
-                    <button type="button" class="btn-action btn-action-primary" id="license-detail-pick-btn">ファイルを選択</button>
-                    <button type="button" class="btn-action btn-action-secondary" id="license-detail-repick-btn" style="display:none;">ファイルを変更</button>
-                </div>
-                <div class="license-upload-modal__actions" style="margin-top:10px;">
-                    <button type="button" class="btn-action btn-action-primary" id="license-detail-request-btn" style="display:none;">提出</button>
-                    <button type="button" class="btn-action btn-action-secondary" id="license-detail-withdraw-btn" style="display:none;">提出取り下げ</button>
+            {{-- 取り下げ確認（インライン・同画面内） --}}
+            <div id="license-detail-withdraw-confirm" class="license-withdraw-confirm" style="display:none;" role="alertdialog" aria-labelledby="withdraw-confirm-title">
+                <p id="withdraw-confirm-title" class="license-withdraw-confirm__title">提出の取り下げ</p>
+                <p class="license-withdraw-confirm__text">提出を取り下げると未提出状態に戻ります。よろしいですか？</p>
+                <div class="license-withdraw-confirm__actions">
+                    <button type="button" class="btn-action btn-action-secondary" id="license-detail-confirm-cancel">キャンセル</button>
+                    <button type="button" class="btn-action license-withdraw-confirm__ok-btn" id="license-detail-confirm-ok">取り下げる</button>
                 </div>
             </div>
+
         </div>
         <p id="license-detail-file-hint" class="license-upload-modal__filename" aria-live="polite"></p>
     </div>
@@ -94,17 +110,6 @@
 
 <div id="license-detail-toast" class="license-upload-toast" style="display:none;">
     提出が完了しました。審査をお待ちください。
-</div>
-
-<div id="license-detail-confirm-overlay" class="license-upload-confirm-overlay" style="display:none;">
-    <div class="license-upload-confirm-panel">
-        <h4>提出の取り下げ</h4>
-        <p>提出を取り下げると、未提出状態に戻ります。取り下げますか？</p>
-        <div class="license-upload-confirm-actions">
-            <button type="button" class="btn-action btn-action-secondary" id="license-detail-confirm-cancel">キャンセル</button>
-            <button type="button" class="btn-action" id="license-detail-confirm-ok">取り下げる</button>
-        </div>
-    </div>
 </div>
 
 <script>
@@ -135,7 +140,8 @@
     var detailUploadHint  = document.getElementById('license-detail-upload-hint');
     var detailUploadNote  = document.getElementById('license-detail-upload-note');
     var toast             = document.getElementById('license-detail-toast');
-    var confirmOverlay    = document.getElementById('license-detail-confirm-overlay');
+    var mainView          = document.getElementById('license-detail-main-view');
+    var withdrawConfirm   = document.getElementById('license-detail-withdraw-confirm');
     var confirmOk         = document.getElementById('license-detail-confirm-ok');
     var confirmCancel     = document.getElementById('license-detail-confirm-cancel');
 
@@ -189,14 +195,24 @@
         chipEl.textContent = labelText || '';
     }
 
+    // ---- 確認パネルの表示切り替え ----
+
+    function showWithdrawConfirm() {
+        if (mainView)       mainView.style.display = 'none';
+        if (withdrawConfirm) withdrawConfirm.style.display = 'block';
+        if (detailFileHint) detailFileHint.textContent = '';
+    }
+
+    function hideWithdrawConfirm() {
+        if (withdrawConfirm) withdrawConfirm.style.display = 'none';
+        if (mainView)        mainView.style.display = 'block';
+    }
+
     // ---- プレビュー描画 ----
 
     function renderPreview(url, isPdf, fileName, badgeStatusKey) {
         if (!detailPreview) return;
-        if (!url) {
-            clearPreview();
-            return;
-        }
+        if (!url) { clearPreview(); return; }
 
         var badgeHtml = '';
         if (badgeStatusKey === 'pending') {
@@ -228,7 +244,10 @@
         var unsubmitted = modalState === 'unsubmitted';
         var isBusiness  = currentDocType === 'business';
 
-        // ボタン表示制御
+        // 確認パネルを閉じてメインビューを表示
+        hideWithdrawConfirm();
+
+        // ボタン表示
         if (detailPickBtn)   detailPickBtn.style.display   = unsubmitted ? 'inline-flex' : 'none';
         if (detailRepickBtn) detailRepickBtn.style.display = selecting   ? 'inline-flex' : 'none';
         if (requestBtn)      requestBtn.style.display      = (selecting && currentCanRequestReview) ? 'inline-flex' : 'none';
@@ -239,7 +258,7 @@
         if (detailUploadHint) detailUploadHint.style.display = unsubmitted ? 'block' : 'none';
         if (detailUploadNote) detailUploadNote.style.display = 'none';
 
-        // ステータスチップ（ヘッダー内 chip は非表示で flow-status テキストのみ使用）
+        // ステータスチップは非表示（flow-status テキストのみ使用）
         if (detailChip) detailChip.style.display = 'none';
 
         // フロー表示テキスト
@@ -262,13 +281,10 @@
             detailUpdated.textContent = '最終更新: ' + (currentDocUpdatedAt || '----/--/-- --:--');
         }
 
-        // 有効期限入力欄
-        // - 営業許可証かつ（選択中 or 提出済み）で表示
-        // - 提出済みは readonly
+        // 有効期限入力欄（営業許可証かつ選択中 or 提出済みで表示、提出済みは readonly）
         if (detailExpiredWrap && detailExpiredAt) {
             if (isBusiness && (selecting || submitted)) {
                 detailExpiredWrap.style.display = 'block';
-                detailExpiredAt.readOnly = submitted;
                 if (submitted) {
                     detailExpiredAt.setAttribute('readonly', '');
                 } else {
@@ -337,7 +353,7 @@
         });
     }
 
-    function postReviewAction(url, type, successMessage, expiredAt) {
+    function postReviewAction(url, type, expiredAt) {
         if (!type) return Promise.reject(new Error('type is empty'));
         setButtonsDisabled(true);
         if (detailFileHint) detailFileHint.textContent = '送信中…';
@@ -357,14 +373,6 @@
                 if (!r.ok) throw json;
                 return json;
             });
-        }).then(function(res) {
-            if (detailFileHint) detailFileHint.textContent = '';
-            if (res && res.message) {
-                alert(res.message);
-            } else if (successMessage) {
-                alert(successMessage);
-            }
-            return res;
         }).catch(function(error) {
             var messages = error && error.errors ? Object.values(error.errors).flat() : [];
             alert(messages[0] || (error && error.message) || '処理に失敗しました。');
@@ -372,11 +380,12 @@
             throw error;
         }).finally(function() {
             setButtonsDisabled(false);
+            if (detailFileHint) detailFileHint.textContent = '';
         });
     }
 
     function setButtonsDisabled(disabled) {
-        [detailPickBtn, detailRepickBtn, requestBtn, withdrawBtn].forEach(function(btn) {
+        [detailPickBtn, detailRepickBtn, requestBtn, withdrawBtn, confirmOk, confirmCancel].forEach(function(btn) {
             if (btn) btn.disabled = disabled;
         });
     }
@@ -385,6 +394,7 @@
 
     function closeModal() {
         detailModal.style.display = 'none';
+        hideWithdrawConfirm();
         if (detailFile) detailFile.value = '';
         if (detailFileHint) detailFileHint.textContent = '';
         if (detailDropzone) detailDropzone.classList.remove('is-dragover');
@@ -405,6 +415,9 @@
         currentDocStatus = 'not_submitted';
         currentDocUrl = '';
         currentDocExpiredAt = '';
+        // 状態遷移後のフラグ更新（取り下げ後は提出可・取り下げ不可）
+        currentCanRequestReview  = true;
+        currentCanWithdrawReview = false;
         revokeObjectUrl();
         selectedFile = null;
         if (detailFile) detailFile.value = '';
@@ -417,11 +430,11 @@
 
     cards.forEach(function(card) {
         card.addEventListener('click', function() {
-            currentDocStatus       = card.getAttribute('data-doc-status') || 'not_submitted';
-            currentDocUrl          = card.getAttribute('data-doc-url') || '';
-            currentDocType         = card.getAttribute('data-doc-key') || '';
-            currentDocExpiredAt    = card.getAttribute('data-doc-expired-at') || '';
-            currentDocUpdatedAt    = card.getAttribute('data-doc-updated') || '';
+            currentDocStatus         = card.getAttribute('data-doc-status') || 'not_submitted';
+            currentDocUrl            = card.getAttribute('data-doc-url') || '';
+            currentDocType           = card.getAttribute('data-doc-key') || '';
+            currentDocExpiredAt      = card.getAttribute('data-doc-expired-at') || '';
+            currentDocUpdatedAt      = card.getAttribute('data-doc-updated') || '';
             currentCanRequestReview  = card.getAttribute('data-can-request-review') === '1';
             currentCanWithdrawReview = card.getAttribute('data-can-withdraw-review') === '1';
 
@@ -451,12 +464,7 @@
             if (currentDocStatus === 'pending' || currentDocStatus === 'approved') {
                 modalState = 'submitted';
                 if (currentDocUrl) {
-                    renderPreview(
-                        currentDocUrl,
-                        isPdfByUrl(currentDocUrl),
-                        fileNameFromUrl(currentDocUrl),
-                        currentDocStatus // 'pending' or 'approved'
-                    );
+                    renderPreview(currentDocUrl, isPdfByUrl(currentDocUrl), fileNameFromUrl(currentDocUrl), currentDocStatus);
                 }
             } else if (currentDocUrl && currentCanRequestReview) {
                 // ファイルはあるが未提出（差し戻し後など）
@@ -503,6 +511,7 @@
 
     if (detailExpiredAt) {
         detailExpiredAt.addEventListener('change', updateSubmitButtonState);
+        detailExpiredAt.addEventListener('input', updateSubmitButtonState);
     }
 
     // ---- 提出ボタン ----
@@ -526,17 +535,21 @@
                 postReviewAction(
                     '{{ route("shop.mypage.documents.request-review") }}',
                     t,
-                    '提出が完了しました。運営の審査をお待ちください。',
                     expiredAtValue
                 ).then(function() {
+                    // 提出成功: フラグ更新（提出不可・取り下げ可に切り替え）
                     modalState = 'submitted';
                     currentDocStatus = 'pending';
                     currentDocExpiredAt = expiredAtValue || currentDocExpiredAt;
-                    // プレビューに「審査待ち」バッジを追加
-                    var previewUrl = objectUrlToRevoke || currentDocUrl;
+                    currentCanRequestReview  = false;
+                    currentCanWithdrawReview = true;
+
+                    // プレビューに「審査待ち」バッジを付与
+                    var previewUrl  = objectUrlToRevoke || currentDocUrl;
                     var previewIsPdf = selectedFile ? selectedFile.type === 'application/pdf' : isPdfByUrl(currentDocUrl);
-                    var previewName = selectedFile ? selectedFile.name : fileNameFromUrl(currentDocUrl);
+                    var previewName  = selectedFile ? selectedFile.name : fileNameFromUrl(currentDocUrl);
                     renderPreview(previewUrl, previewIsPdf, previewName, 'pending');
+
                     setUiByState();
                     showToast('提出が完了しました。審査をお待ちください。');
                 });
@@ -557,31 +570,34 @@
         });
     }
 
-    // ---- 提出取り下げボタン ----
+    // ---- 提出取り下げボタン → インライン確認表示 ----
 
-    if (withdrawBtn && detailType) {
+    if (withdrawBtn) {
         withdrawBtn.addEventListener('click', function() {
-            if (confirmOverlay) {
-                confirmOverlay.style.display = 'flex';
-            } else {
-                postReviewAction('{{ route("shop.mypage.documents.withdraw-review") }}', detailType.value || '', '提出を取り下げました。')
-                    .then(function() { resetToUnsubmitted(); });
-            }
+            showWithdrawConfirm();
         });
     }
 
-    // ---- 取り下げ確認モーダル ----
+    // ---- 取り下げ確認: キャンセル ----
 
-    if (confirmCancel && confirmOverlay) {
+    if (confirmCancel) {
         confirmCancel.addEventListener('click', function() {
-            confirmOverlay.style.display = 'none';
+            hideWithdrawConfirm();
         });
     }
-    if (confirmOk && confirmOverlay) {
+
+    // ---- 取り下げ確認: 取り下げる ----
+
+    if (confirmOk && detailType) {
         confirmOk.addEventListener('click', function() {
-            confirmOverlay.style.display = 'none';
-            postReviewAction('{{ route("shop.mypage.documents.withdraw-review") }}', detailType ? detailType.value : '', '提出を取り下げました。')
-                .then(function() { resetToUnsubmitted(); });
+            postReviewAction(
+                '{{ route("shop.mypage.documents.withdraw-review") }}',
+                detailType.value || '',
+                ''
+            ).then(function() {
+                resetToUnsubmitted();
+                showToast('提出を取り下げました。');
+            });
         });
     }
 
