@@ -68,3 +68,20 @@
 body.is-image-editing #bottom-nav {
     display: none !important;
 }
+
+@media (min-width: 375px) and (max-width: 430px) {
+    body:not(.page-home) #bottom-nav {
+        height: 72px;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    body:not(.page-home) #bottom-nav .nav-item i {
+        font-size: 1.25rem;
+        margin-bottom: 3px;
+    }
+
+    body:not(.page-home) #bottom-nav .nav-item span {
+        font-size: 9px;
+    }
+}

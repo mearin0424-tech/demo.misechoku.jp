@@ -436,8 +436,21 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
     Route::get('/column/{slug}', [ColumnArticleController::class, 'show'])->name('column.show');
 });
 
-/* 蜀・Κ繧ｭ繝｣繝・す繝･繧ｯ繝ｪ繧｢逕ｨ */
+/* 内部キャッシュクリア用 */
 Route::get('/clear-route', function() {
     \Artisan::call('route:clear');
     return "Route cache cleared!";
 });
+
+/* ============================================================
+ * 開発用プレビュー（ローカル環境のみ・認証スキップ・DB不要）
+ * 用途: blade を編集してすぐブラウザで確認するため
+ * URL: /dev/preview/shop-management?tab=recruit|payment
+ * ============================================================ */
+if (app()->environment('local', 'development')) {
+    Route::prefix('dev/preview')->name('dev.preview.')->group(function () {
+        Route::get('/shop-management', function (\Illuminate\Http\Request $request) {
+            return view('shops.mypage.management', \App\Support\Dev\ManagementPreviewData::shop($request));
+        })->name('shop-management');
+    });
+}

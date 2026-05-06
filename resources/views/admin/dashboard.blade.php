@@ -60,8 +60,7 @@
                     <h2 class="dashboard-section-title">プラットフォーム分析</h2>
                     <div class="dashboard-date-chip">
                         <i class="fas fa-calendar"></i>
-                        <span>今月 (Oct 2026)</span>
-                        <i class="fas fa-chevron-down"></i>
+                        <span>今月 ({{ $currentPeriodLabel }})</span>
                     </div>
                 </div>
                 <button type="button" class="dashboard-export-button">
@@ -516,12 +515,13 @@
             padding-top: 14px;
         }
         .dashboard-chart-canvas {
-            min-width: 600px;
+            min-width: 0;
+            width: 100%;
             position: relative;
             height: 210px;
         }
         .dashboard-chart-canvas.is-compact {
-            min-width: 400px;
+            min-width: 0;
         }
         .dashboard-chart-svg {
             width: 100%;
@@ -819,16 +819,68 @@
             .task-filter-chip {
                 width: 100%;
             }
-            .dashboard-chart-canvas,
-            .dashboard-chart-canvas.is-compact {
-                min-width: 360px;
-            }
             .task-filter-chip {
                 width: 100%;
             }
             .task-table tbody td {
                 grid-template-columns: 1fr;
                 gap: 5px;
+            }
+        }
+        @media (min-width: 375px) and (max-width: 430px) {
+            .dashboard-page {
+                gap: 16px;
+            }
+            .bi-tab-button {
+                flex: 1 1 0;
+                padding: 12px 8px;
+                font-size: 0.75rem;
+                text-align: center;
+            }
+            .dashboard-kpi-card {
+                padding: 12px;
+                min-height: 96px;
+            }
+            .dashboard-kpi-value,
+            .dashboard-kpi-sub-value {
+                font-size: 1.2rem;
+            }
+            .dashboard-chart-card {
+                padding: 12px;
+            }
+            .dashboard-chart-head {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 8px;
+            }
+            .dashboard-chart-canvas {
+                height: 192px;
+            }
+            .dashboard-chart-svg {
+                height: 160px;
+            }
+            .dashboard-chart-labels {
+                padding: 0 10px;
+                font-size: 0.58rem;
+            }
+            .task-summary-row {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding: 10px;
+                gap: 6px;
+            }
+            .task-filter-chip {
+                width: auto;
+                flex: 0 0 auto;
+                padding: 7px 10px;
+                font-size: 0.68rem;
+                white-space: nowrap;
+            }
+            .task-table tbody {
+                padding: 10px;
+            }
+            .task-table tbody td {
+                padding: 10px;
             }
         }
     </style>

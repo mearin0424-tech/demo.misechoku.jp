@@ -174,23 +174,46 @@ class RecruitmentController extends Controller
                 $status = (int) $row->status;
                 $jobType = isset($row->job_type) ? (int) $row->job_type : 1;
                 $pattern = $jobType === 3 ? 'P2' : 'P1';
-                $patternLabel = $pattern === 'P2' ? 'ヘルプ' : '新規採用';
+                $patternLabel = match ($jobType) {
+                    3 => 'ヘルプ',
+                    2 => '新規採用（体験入店）',
+                    default => '新規採用（本入店）',
+                };
                 $jobKindLabel = match ($jobType) {
                     3 => 'ヘルプ',
                     2 => '体験入店',
                     default => '本入店',
                 };
                 $statusLabel = match ($status) {
-                    4 => $pattern === 'P2' ? 'ヘルプ採用' : '体験採用',
+                    4 => match ($jobType) {
+                        3 => 'ヘルプ採用',
+                        1 => '本入採用',
+                        default => '体験採用',
+                    },
+                    5 => match ($jobType) {
+                        3 => 'ヘルプ不採用',
+                        1 => '本入不採用',
+                        default => '不採用',
+                    },
+                    6 => '本入採用',
+                    7 => '体験後不採用',
                     default => self::APPLICATION_STATUS_LABELS[$status] ?? '未設定',
                 };
                 $statusDisplayLabel = match ($status) {
                     1 => 'やり取り中',
                     2 => '面談日調整中',
                     3 => '面談日決定',
-                    4 => $pattern === 'P2' ? 'ヘルプ採用' : '体験採用',
-                    5 => '不採用',
-                    6 => '本採用',
+                    4 => match ($jobType) {
+                        3 => 'ヘルプ採用',
+                        1 => '本入採用',
+                        default => '体験採用',
+                    },
+                    5 => match ($jobType) {
+                        3 => 'ヘルプ不採用',
+                        1 => '本入不採用',
+                        default => '不採用',
+                    },
+                    6 => '本入採用',
                     7 => '体験後不採用',
                     default => '未設定',
                 };

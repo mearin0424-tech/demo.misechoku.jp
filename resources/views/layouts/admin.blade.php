@@ -946,6 +946,49 @@
                 width: min(88vw, 288px);
             }
         }
+        @media (min-width: 375px) and (max-width: 430px) {
+            .admin-header {
+                min-height: 52px;
+                gap: 10px;
+                padding: 0 10px;
+            }
+            .admin-header-left {
+                gap: 10px;
+                min-width: 0;
+                flex: 1;
+            }
+            .admin-breadcrumb {
+                gap: 6px;
+                font-size: 0.62rem;
+                min-width: 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .admin-header-right {
+                gap: 8px;
+            }
+            .admin-header-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 0.86rem;
+            }
+            .admin-content {
+                padding: 10px;
+            }
+            .admin-panel {
+                padding: 14px;
+                border-radius: 14px;
+            }
+            .admin-table tbody td,
+            .admin-table thead th {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            .admin-task-popover {
+                width: min(94vw, 360px);
+            }
+        }
     </style>
     @stack('admin-styles')
 </head>
