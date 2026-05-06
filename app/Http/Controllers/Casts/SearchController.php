@@ -24,9 +24,12 @@ class SearchController extends BaseSearchController
     {
     }
 
-    public function index(Request $request, ?string $tab = 'search')
+    public function index(Request $request, ?string $tab = 'list')
     {
-        $tab = in_array($tab, ['search', 'ai'], true) ? $tab : 'search';
+        if ($tab === 'search') {
+            $tab = 'list';
+        }
+        $tab = in_array($tab, ['list', 'ai'], true) ? $tab : 'list';
         $activeTab = 'pane-' . $tab;
 
         $sort = (string) $request->query('sort', 'hitokoto');

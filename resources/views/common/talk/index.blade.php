@@ -45,6 +45,9 @@
                             </div>
                             <div class="flex justify-between items-center mt-1">
                                 <span class="talk-status">{{ $talk['status_label'] ?? 'やり取り中' }}</span>
+                                @if(!empty($talk['has_fulltime_request_badge']))
+                                    <span class="unread-badge" style="background:linear-gradient(135deg,#f59e0b,#f97316);">本入店希望</span>
+                                @endif
                             </div>
                         </div>
                     </a>
@@ -77,6 +80,9 @@
                                 </div>
                                 <div class="request-meta-row">
                                     <span class="request-status">{{ $talk['status_label'] ?? $requestTabText }}</span>
+                                    @if(!empty($talk['has_fulltime_request_badge']))
+                                        <span class="unread-badge" style="margin-left:8px; background:linear-gradient(135deg,#f59e0b,#f97316);">本入店希望</span>
+                                    @endif
                                 </div>
                                 <div class="request-msg-preview">{{ $talk['last_message'] }}</div>
                             </div>

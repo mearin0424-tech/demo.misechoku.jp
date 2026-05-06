@@ -52,7 +52,7 @@ body.page-search .contents.search-page-body {
     margin-top: 0;
 }
 
-body.page-search #pane-search.tab-pane.active {
+body.page-search #pane-list.tab-pane.active {
     flex: 1 1 auto;
     min-height: 0;
     display: flex;
@@ -432,44 +432,56 @@ body.page-search-ai .search-detail-fab {
     padding-bottom: calc(var(--footer-height) + 88px);
 }
 
+body.page-search .connection-list--search {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 /* ---------- 店舗カード（キャスト側検索・リッチ） ---------- */
 .connection-item--shop-rich {
     padding: 0;
-    background: #1c1514;
-    border-bottom-color: rgba(74, 54, 51, 0.55);
+    background: linear-gradient(145deg, #6a0834 0%, #540529 52%, #43031f 100%);
+    border: 1px solid rgba(255, 156, 205, 0.14);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
 }
 .connection-item--shop-rich .connection-item__link {
     align-items: stretch;
-    padding: 18px 14px 16px;
-    gap: 14px;
+    padding: 10px 10px 12px;
+    gap: 10px;
 }
 .connection-item--shop-rich .connection-item__link:hover {
-    background: rgba(38, 29, 27, 0.65);
+    background: rgba(255, 255, 255, 0.04);
 }
 .shop-search-card__aside {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    width: 72px;
+    gap: 6px;
+    width: 86px;
     flex-shrink: 0;
-    padding-top: 2px;
+    padding-top: 0;
 }
 .shop-search-card__thumb-ring {
-    width: 64px;
+    width: 86px;
     height: 64px;
-    border-radius: 50%;
-    padding: 2px;
-    background: linear-gradient(145deg, rgba(220, 181, 104, 0.45), rgba(184, 134, 11, 0.2));
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+    border-radius: 9px;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
 }
 .shop-search-card__thumb {
     width: 100%;
     height: 100%;
-    border-radius: 50%;
+    border-radius: 9px;
     object-fit: cover;
     display: block;
-    background: #0d0a09;
+    background: #2c1b23;
 }
 .shop-search-card__badge {
     display: inline-flex;
@@ -478,17 +490,17 @@ body.page-search-ai .search-detail-fab {
     gap: 3px;
     width: 100%;
     max-width: 72px;
-    padding: 3px 6px;
-    border-radius: 4px;
-    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    font-size: 10px;
     font-weight: 800;
     letter-spacing: 0.02em;
-    color: #161110;
+    color: #2e1300;
     background: linear-gradient(90deg, #dcb568, #b8860b);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
 }
 .shop-search-card__badge-icon {
-    font-size: 9px;
+    font-size: 10px;
 }
 .shop-search-card__body {
     flex: 1;
@@ -500,11 +512,11 @@ body.page-search-ai .search-detail-fab {
 .shop-search-card__name {
     margin: 0;
     font-family: 'Shippori Mincho', var(--font-serif, 'Noto Serif JP', serif);
-    font-size: 1.05rem;
-    font-weight: 600;
+    font-size: 1.38rem;
+    font-weight: 700;
     letter-spacing: 0.04em;
-    color: #e8d4b0;
-    line-height: 1.35;
+    color: #fff6f8;
+    line-height: 1.2;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -515,16 +527,16 @@ body.page-search-ai .search-detail-fab {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 6px 10px;
+    gap: 5px 8px;
     font-size: 11px;
-    color: #9a8f8c;
+    color: #f9d6e5;
 }
 .shop-search-card__industry {
-    color: #dcb568;
-    border: 1px solid rgba(220, 181, 104, 0.35);
-    background: rgba(220, 181, 104, 0.06);
-    padding: 2px 7px;
-    border-radius: 4px;
+    color: #ffde8f;
+    border: none;
+    background: rgba(255, 195, 82, 0.12);
+    padding: 2px 8px;
+    border-radius: 999px;
     font-weight: 600;
 }
 .shop-search-card__rating {
@@ -542,16 +554,19 @@ body.page-search-ai .search-detail-fab {
     display: inline-flex;
     align-items: center;
     gap: 3px;
+    color: #f9d6e5;
+    font-weight: 600;
 }
 .shop-search-card__location .fa-map-marker-alt {
     font-size: 10px;
-    opacity: 0.85;
+    opacity: 1;
+    color: #ffd9ea;
 }
 .shop-search-card__message {
     margin: 4px 0 0;
-    font-size: 0.84rem;
-    line-height: 1.55;
-    color: #c4bab6;
+    font-size: 1.02rem;
+    line-height: 1.45;
+    color: #ffeef6;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -568,22 +583,13 @@ body.page-search-ai .search-detail-fab {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.04em;
-    color: rgba(220, 181, 104, 0.55);
+    color: #ffcfdf;
 }
 .shop-search-card__time .fa-clock {
     font-size: 10px;
-}
-.shop-search-card__chev {
-    align-self: center;
-    color: #4a3633;
-    font-size: 1rem;
-    opacity: 1;
-}
-.connection-item--shop-rich .connection-item__link:hover .shop-search-card__chev {
-    color: #dcb568;
 }
 
 /* 店舗側キャスト一覧：サムネ丸＋時間右下 */

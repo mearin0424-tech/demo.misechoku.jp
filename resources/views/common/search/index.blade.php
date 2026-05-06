@@ -19,14 +19,14 @@
     $prefix = request()->is('cast/*') ? 'cast' : 'shop';
     $showAiTab = $prefix === 'cast';
     $partsView = $prefix === 'cast' ? 'casts.parts' : 'shops.search.parts';
-    $activeTab = $activeTab ?? 'pane-search';
-    $searchTab = $searchTab ?? 'search';
+    $activeTab = $activeTab ?? 'pane-list';
+    $searchTab = $searchTab ?? 'list';
 
     // タブ：cast は「検索／AIレコメンド」の 2 タブ、shop はタブなし。
     $tabsForHeader = [];
     if ($showAiTab) {
         $tabsForHeader = [
-            ['id' => 'pane-search', 'label' => '検索', 'url' => route('cast.search.index', ['tab' => 'search']), 'active' => $activeTab === 'pane-search'],
+            ['id' => 'pane-list', 'label' => '検索', 'url' => route('cast.search.index', ['tab' => 'list']), 'active' => $activeTab === 'pane-list'],
             ['id' => 'pane-ai', 'label' => 'AIレコメンド', 'url' => route('cast.search.index', ['tab' => 'ai']), 'active' => $activeTab === 'pane-ai'],
         ];
     }
@@ -67,7 +67,7 @@
 
 <div class="contents {{ !empty($tabsForHeader) ? 'tab-page-body' : 'search-page-body' }}">
     {{-- 検索パネル：タイムライン＋一覧を統合した画面 --}}
-    <div id="pane-search" class="tab-pane {{ $activeTab === 'pane-search' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-search' ? 'display:none' : '' }}">
+    <div id="pane-list" class="tab-pane {{ $activeTab === 'pane-list' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-list' ? 'display:none' : '' }}">
         <div class="search-filter-box">
             {{-- 役割に応じたフィルター（検索窓・並び替え）／詳細検索は FAB --}}
             @include($partsView . '.filter')

@@ -62,7 +62,7 @@ final class SmokeRouteMatrix
     {
         return [
             'cast home' => ['cast.home', [], 200],
-            'cast search' => ['cast.search.index', ['tab' => 'search'], 200],
+            'cast search' => ['cast.search.index', ['tab' => 'list'], 200],
             'cast search ai' => ['cast.search.index', ['tab' => 'ai'], 200],
             'cast profile edit' => ['cast.profile.edit', [], 200],
             'cast mypage index' => ['cast.mypage.index', [], 200],

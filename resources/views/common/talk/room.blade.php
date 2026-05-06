@@ -314,6 +314,21 @@
         </div>
     @endif
 
+    @if($isCast && !empty($canRequestFulltime))
+        <div class="talk-result-panel">
+            <div class="talk-result-panel-copy">
+                <span class="talk-result-panel-title">本入店リクエスト</span>
+                <p>体験採用後に、本入店希望を店舗へ送信できます。</p>
+            </div>
+            <div class="talk-result-panel-actions">
+                <button type="button" id="send-fulltime-request" class="btn-interview btn-interview-result">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>本入店をリクエスト</span>
+                </button>
+            </div>
+        </div>
+    @endif
+
     {{-- 入力エリア --}}
     @if(!empty($canSend))
         <div class="chat-input-area">
@@ -399,6 +414,7 @@
         <div id="hired-hourly-wage-wrap" class="hired-wage-field-wrap" aria-hidden="true">
             <label for="hired-hourly-wage-input">採用時給（円・確定）</label>
             <input type="text" id="hired-hourly-wage-input" inputmode="numeric" placeholder="例: 5000" autocomplete="off">
+            <p style="margin-top:6px; font-size:12px; color:#d4c4a4;">採用確定時は入力必須です。</p>
         </div>
         <div id="result-employment-kind-wrap" class="hired-wage-field-wrap is-visible" aria-hidden="false">
             <label for="result-employment-kind">採用区分</label>

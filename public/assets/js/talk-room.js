@@ -456,7 +456,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         payload.employment_kind = resultEmploymentKind.value;
                     }
                     if (currentResultAction === 'hired' && hiredHourlyWageInput) {
-                        payload.hired_regular_hourly_wage = hiredHourlyWageInput.value.trim();
+                        const hiredWage = hiredHourlyWageInput.value.trim();
+                        if (!hiredWage) {
+                            window.alert('採用時給（確定）を入力してください。');
+                            resultSubmitBtn.disabled = false;
+                            return;
+                        }
+                        payload.hired_regular_hourly_wage = hiredWage;
                     }
                     await postJson(actionUrl, token, payload);
                     window.location.reload();
@@ -545,6 +551,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (isCastRoom && chatForm) {
         const actionUrl = chatForm.getAttribute('data-action-url');
         const token = chatForm.querySelector('input[name="_token"]').value;
+        const fulltimeRequestBtn = document.getElementById('send-fulltime-request');
         const confirmOverlay = document.getElementById('interview-confirm-overlay');
         const confirmSelected = document.getElementById('interview-confirm-selected');
         const confirmSubmitBtn = document.getElementById('interview-confirm-submit');
@@ -630,6 +637,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 } catch (error) {
                     window.alert(error.message || '面談日の確定に失敗しました。');
                     confirmSubmitBtn.disabled = false;
+                }
+            });
+        }
+
+        if (fulltimeRequestBtn) {
+            fulltimeRequestBtn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                if (!window.confirm('本入店リクエストを送信しますか？')) return;
+                fulltimeRequestBtn.disabled = true;
+                try {
+                    await postJson(actionUrl, token, {
+                        partner_id: partnerId,
+                        action_type: 'fulltime_request'
+                    });
+                    window.location.reload();
+                } catch (error) {
+                    window.alert(error.message || '本入店リクエストの送信に失敗しました。');
+                    fulltimeRequestBtn.disabled = false;
                 }
             });
         }

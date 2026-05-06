@@ -398,7 +398,7 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
     Route::post('/profile/personality-type', [CastProfile::class, 'updatePersonalityType'])->name('profile.personality-type');
     Route::get('/shopprofileview/{id}', [CastProfile::class, 'show'])->name('shopprofileview.show');
     Route::redirect('/profile/{id}', '/cast/shopprofileview/{id}')->name('profile.show.redirect');
-    Route::get('/search', fn () => redirect()->route('cast.search.index', ['tab' => 'search']));
+    Route::get('/search', fn () => redirect()->route('cast.search.index', ['tab' => 'list']));
     Route::get('/search/{tab}', [CastSearch::class, 'index'])->name('search.index')->where('tab', 'search|ai|timeline|list');
     Route::get('/recruit/{id}', [CastRecruit::class, 'show'])->name('recruit.show');
     

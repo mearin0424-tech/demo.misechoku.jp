@@ -48,6 +48,5 @@
                 </div>
             @endif
         </div>
-        <span class="connection-item__arrow shop-search-card__chev" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>
     </a>
 </li>

@@ -147,10 +147,19 @@ class RecruitmentController extends Controller
                 $query->addSelect('shop_job_applications.' . $col);
             }
         }
+        $fulltimeRequestCastIds = DB::table('messages')
+            ->where('shop_id', $shopId)
+            ->where('sender_type', 1)
+            ->where('type', 1)
+            ->where('is_read', false)
+            ->where('content', '本入店を希望します。ご確認をお願いします。')
+            ->pluck('cast_id')
+            ->map(fn ($id) => (string) $id)
+            ->all();
 
         return $query
             ->get()
-            ->map(function ($row) {
+            ->map(function ($row) use ($fulltimeRequestCastIds) {
                 $status = (int) $row->status;
                 $resolvedTalkJobKind = in_array((string) ($row->talk_job_kind ?? ''), ['fulltime', 'trial', 'help'], true)
                     ? (string) $row->talk_job_kind
@@ -204,6 +213,13 @@ class RecruitmentController extends Controller
                     7 => '体験後不採用',
                     default => '未設定',
                 };
+                $hasFulltimeRequest = $status === 4
+                    && $jobType === 2
+                    && in_array((string) $row->cast_id, $fulltimeRequestCastIds, true);
+                if ($hasFulltimeRequest) {
+                    $statusLabel = '本入店希望（体験採用）';
+                    $statusDisplayLabel = '本入店希望（体験採用）';
+                }
                 $mainImagePath = Schema::hasColumn('cast_profiles', 'main_image_path')
                     ? ($row->main_image_path ?? null)
                     : null;
@@ -267,6 +283,7 @@ class RecruitmentController extends Controller
                     'pattern_label' => $patternLabel,
                     'job_kind_label' => $jobKindLabel,
                     'status_display_label' => $statusDisplayLabel,
+                    'has_fulltime_request' => $hasFulltimeRequest,
                     'result_date' => $row->result_date ? date('Y/m/d', strtotime($row->result_date)) : null,
                     'real_start_date' => $row->real_start_date ? date('Y/m/d', strtotime($row->real_start_date)) : null,
                     'created_at' => $row->created_at ? date('Y/m/d', strtotime($row->created_at)) : null,
