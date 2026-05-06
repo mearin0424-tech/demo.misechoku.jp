@@ -6,6 +6,7 @@
 
 @section('title', ($partnerName ?? 'トーク') . ' 様')
 @section('header_title', $partnerName . ' 様')
+@section('header_avatar', $partnerAvatar ?? asset('assets/images/common/no-image.png'))
 @section('body-class', 'page-talk page-talk-room')
 
 @push('styles')
@@ -94,12 +95,7 @@
 @endphp
 
 <div id="talk-room-container" class="flex flex-col h-full bg-[#120505]">
-    {{-- LINE風：相手のアイコンと名前（上部バー） --}}
     <div class="talk-room-header">
-        <div class="talk-room-header-inner">
-            <img src="{{ $partnerAvatar }}" alt="" class="talk-room-header-avatar">
-            <span class="talk-room-header-name">{{ $partnerName }}</span>
-        </div>
         <div class="talk-room-shop-badges">
                 <span class="talk-status-label">
                     <span class="talk-status-dot"></span>
@@ -120,27 +116,21 @@
                         <span id="talk-job-kind-current" class="talk-job-kind-value">{{ $currentTalkJobKindLabel }}</span>
                     </span>
                 @endif
+                @if(empty($blockState['blocked_by_other']))
+                    <form action="{{ $blockUrl }}" method="POST" class="talk-block-inline-form">
+                        @csrf
+                        <input type="hidden" name="partner_id" value="{{ $partnerId }}">
+                        <button
+                            type="submit"
+                            class="talk-block-icon-btn"
+                            title="{{ !empty($blockState['blocked_by_me']) ? 'ブロック解除' : 'ブロック' }}"
+                            aria-label="{{ !empty($blockState['blocked_by_me']) ? 'ブロック解除' : 'ブロック' }}"
+                        >
+                            <i class="fas fa-ban"></i>
+                        </button>
+                    </form>
+                @endif
         </div>
-        @if(empty($blockState['blocked_by_other']))
-        <div class="talk-room-header-block">
-            <form action="{{ $blockUrl }}" method="POST">
-                @csrf
-                <input type="hidden" name="partner_id" value="{{ $partnerId }}">
-                <button type="submit" class="btn-interview {{ !empty($blockState['blocked_by_me']) ? 'btn-interview-result' : 'btn-interview-result--negative' }}">
-                    <i class="fas {{ !empty($blockState['blocked_by_me']) ? 'fa-unlock' : 'fa-ban' }}"></i>
-                    <span>{{ !empty($blockState['blocked_by_me']) ? 'ブロック解除' : 'ブロック' }}</span>
-                </button>
-            </form>
-        </div>
-        <div class="talk-room-header-actions">
-            @if($isCast && !empty($reviewApplicationId))
-                <button type="button" class="btn-interview btn-review-post" data-application-id="{{ $reviewApplicationId }}" title="レビュー投稿">
-                    <i class="fas fa-check-circle"></i>
-                    <span>{{ $currentTalkJobKindValue === 'fulltime' ? 'ボーナス達成報告' : '勤務完了報告' }}</span>
-                </button>
-            @endif
-        </div>
-        @endif
     </div>
 
     @if(session('message'))

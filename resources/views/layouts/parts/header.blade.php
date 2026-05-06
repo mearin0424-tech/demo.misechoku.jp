@@ -30,6 +30,8 @@
     $headerTitleCustom = trim((string) ($__env->yieldContent('header_title') ?? ''));
     $headerTitleFromPage = isset($headerTitle) ? trim((string) $headerTitle) : '';
     $displayTitle = $headerTitleCustom !== '' ? $headerTitleCustom : ($headerTitleFromPage !== '' ? $headerTitleFromPage : $currentEngTitle);
+    $headerAvatar = trim((string) ($__env->yieldContent('header_avatar') ?? ''));
+    $isTalkRoomPage = request()->is('cast/talk/room/*', 'shop/talk/room/*');
 
     $isCast = request()->is('cast/*');
 @endphp
@@ -42,13 +44,21 @@
                 <i class="fas fa-chevron-left"></i>
             </a>
         @endif
+        @if($isTalkRoomPage && $headerAvatar !== '')
+            <div class="header-talk-identity">
+                <img src="{{ $headerAvatar }}" alt="" class="header-talk-avatar">
+                <span class="header-talk-name">{{ $displayTitle }}</span>
+            </div>
+        @endif
     </div>
 
     {{-- 中央：ページタイトル表示（明朝・セリフで上品に） --}}
     <div class="header-center-title">
-        <span class="header-title-main header-title-serif">
-            {{ $displayTitle }}
-        </span>
+        @if(!$isTalkRoomPage)
+            <span class="header-title-main header-title-serif">
+                {{ $displayTitle }}
+            </span>
+        @endif
     </div>
 
     {{-- 右側：タスク / 通知 / ハンバーガーメニュー --}}

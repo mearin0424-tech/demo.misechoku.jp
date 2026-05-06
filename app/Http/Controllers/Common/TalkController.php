@@ -97,7 +97,10 @@ class TalkController extends Controller
         $blockState = $this->getBlockState($castId, $shopId, $isCastPortal);
         $currentApplicationStatus = $this->getCurrentApplicationStatus($castId, $shopId);
         $selectedTalkJobKind = $this->getSelectedTalkJobKind($castId, $shopId);
-        $applicationForReview = $isCastPortal && $currentApplicationStatus === self::APPLICATION_STATUS_HIRED
+        $applicationForReview = $isCastPortal && in_array($currentApplicationStatus, [
+            self::APPLICATION_STATUS_HIRED,
+            self::APPLICATION_STATUS_HIRED_FULLTIME,
+        ], true)
             ? $this->findApplicationForTalk($castId, $shopId)
             : null;
 
