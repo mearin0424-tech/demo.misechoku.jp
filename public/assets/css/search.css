@@ -452,11 +452,17 @@ body.page-search .connection-list--search {
 }
 .connection-item--shop-rich .connection-item__link {
     align-items: stretch;
+    flex-direction: column;
     padding: 10px 10px 12px;
-    gap: 10px;
+    gap: 8px;
 }
 .connection-item--shop-rich .connection-item__link:hover {
     background: rgba(255, 255, 255, 0.04);
+}
+.shop-search-card__top {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
 }
 .shop-search-card__aside {
     display: flex;
@@ -563,7 +569,7 @@ body.page-search .connection-list--search {
     color: #ffd9ea;
 }
 .shop-search-card__message {
-    margin: 4px 0 0;
+    margin: 0;
     font-size: 1.02rem;
     line-height: 1.45;
     color: #ffeef6;

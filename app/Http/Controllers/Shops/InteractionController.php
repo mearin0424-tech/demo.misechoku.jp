@@ -124,7 +124,7 @@ class InteractionController extends Controller
                 }
             }
 
-            $profileRoute = 'cast.shopprofileview.show';
+            $profileRoute = 'cast.recruit.show';
             $showReceivedLike = true;
         } else {
             // お店側：キャストのキープ・ライク・足あと

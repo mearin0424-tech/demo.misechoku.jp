@@ -184,10 +184,10 @@
                             $selectedOption = $msg->selected_option ? \Carbon\Carbon::parse($msg->selected_option) : null;
                             $isInvalidatedOffer = !empty($msg->is_invalidated);
                         @endphp
-                        <div class="message-bubble message-bubble-interview">
+                        <div class="message-bubble message-bubble-interview message-bubble-auto">
                             <div class="interview-card-head">
                                 <div class="interview-title">
-                                    <i class="far fa-calendar-alt"></i>
+                                    <i class="fas fa-robot"></i>
                                     <span>【自動送信】面談候補日をお送りします</span>
                                 </div>
                                 <span class="interview-badge">日程調整</span>
@@ -247,9 +247,42 @@
                             @endif
                         </div>
                     @elseif($msg->type === 3)
-                        <div class="message-bubble message-bubble-interview message-bubble-confirmed">
-                            <p class="interview-body-copy">【自動送信】以下の日時で面談日が確定しました。</p>
+                        <div class="message-bubble message-bubble-interview message-bubble-confirmed message-bubble-auto">
+                            <div class="interview-card-head">
+                                <div class="interview-title">
+                                    <i class="fas fa-robot"></i>
+                                    <span>【自動送信】面談日が確定しました。</span>
+                                </div>
+                            </div>
+                            <p class="interview-body-copy">以下の日時で面談日が確定しました。</p>
                             <p class="interview-confirmed-date">{{ \Carbon\Carbon::parse($msg->selected_option)->format('Y年n月j日 H:i') }}</p>
+                            @if(!$isCast && !empty($canSelectResult))
+                                <p class="interview-body-copy" style="margin-top:10px;">
+                                    面談結果が確定したら、以下から採用／不採用を送信してください。
+                                </p>
+                                <div class="talk-result-panel-actions" style="margin-top:8px; gap:8px;">
+                                    <button type="button" class="btn-interview btn-interview-result js-open-result-action" data-result-action="hired">
+                                        <i class="fas fa-circle-check"></i>
+                                        <span>採用を送る</span>
+                                    </button>
+                                    <button type="button" class="btn-interview btn-interview-result--negative js-open-result-action" data-result-action="rejected">
+                                        <i class="fas fa-circle-xmark"></i>
+                                        <span>不採用を送る</span>
+                                    </button>
+                                </div>
+                            @endif
+                            @if($isCast && !empty($reviewApplicationId) && in_array(($currentStatusCode ?? ''), ['hired'], true))
+                                <p class="interview-body-copy" style="margin-top:10px;">
+                                    勤務が完了したら、以下から{{ $currentTalkJobKindValue === 'fulltime' ? 'ボーナス達成' : '勤務完了' }}を報告してください。
+                                </p>
+                                <button
+                                    type="button"
+                                    class="interview-change-schedule-btn js-work-complete-trigger"
+                                    data-application-id="{{ $reviewApplicationId }}"
+                                >
+                                    {{ $currentTalkJobKindValue === 'fulltime' ? 'ボーナス達成報告' : '勤務完了報告' }}
+                                </button>
+                            @endif
                             @if($msg->is_mine)
                                 <span class="message-bubble-tail" aria-hidden="true">
                                     <svg viewBox="0 0 8 12" fill="currentColor"><path d="M0 0V12C3 12 8 8 8 0H0Z"/></svg>
@@ -268,10 +301,10 @@
                             @endif
                         </div>
                     @elseif($msg->type === 7)
-                        <div class="message-bubble message-bubble-interview message-bubble-cancel-request">
+                        <div class="message-bubble message-bubble-interview message-bubble-cancel-request message-bubble-auto">
                             <div class="interview-card-head">
                                 <div class="interview-title">
-                                    <i class="fas fa-rotate-left"></i>
+                                    <i class="fas fa-robot"></i>
                                     <span>【自動送信】面談キャンセル依頼</span>
                                 </div>
                                 <span class="interview-badge">確認待ち</span>
@@ -286,8 +319,21 @@
                             $displayContent = trim((string) $msg->content);
                             $displayContent = str_replace(["\r\n", "\r"], "\n", $displayContent);
                             $displayContent = preg_replace('/\n{2,}/', "\n", $displayContent);
+                            $isAutoMessage = \Illuminate\Support\Str::startsWith($displayContent, '【自動送信】');
+                            $autoMessageBody = $isAutoMessage ? trim(mb_substr($displayContent, mb_strlen('【自動送信】'))) : $displayContent;
                         @endphp
-                        <div class="message-bubble"><p class="m-0">{!! nl2br(e($displayContent)) !!}</p>@if($msg->is_mine)<span class="message-bubble-tail" aria-hidden="true"><svg viewBox="0 0 8 12" fill="currentColor"><path d="M0 0V12C3 12 8 8 8 0H0Z"/></svg></span>@endif</div>
+                        @if($isAutoMessage)
+                            <div class="message-bubble message-bubble-auto">
+                                <div class="interview-title">
+                                    <i class="fas fa-robot"></i>
+                                    <span>【自動送信】</span>
+                                </div>
+                                <p class="m-0">{!! nl2br(e($autoMessageBody)) !!}</p>
+                                @if($msg->is_mine)<span class="message-bubble-tail" aria-hidden="true"><svg viewBox="0 0 8 12" fill="currentColor"><path d="M0 0V12C3 12 8 8 8 0H0Z"/></svg></span>@endif
+                            </div>
+                        @else
+                            <div class="message-bubble"><p class="m-0">{!! nl2br(e($displayContent)) !!}</p>@if($msg->is_mine)<span class="message-bubble-tail" aria-hidden="true"><svg viewBox="0 0 8 12" fill="currentColor"><path d="M0 0V12C3 12 8 8 8 0H0Z"/></svg></span>@endif</div>
+                        @endif
                     @endif
                         @if(!$msg->is_mine)
                             <div class="msg-meta">
@@ -370,6 +416,12 @@
                 <span class="talk-action-icon"><i class="far fa-file-alt"></i></span>
                 <span>定型文を使う</span>
             </button>
+            @if($isCast && !empty($reviewApplicationId))
+                <button type="button" id="open-work-complete-report-menu" class="talk-action-item js-work-complete-trigger" data-application-id="{{ $reviewApplicationId }}">
+                    <span class="talk-action-icon"><i class="fas fa-circle-check"></i></span>
+                    <span>{{ $currentTalkJobKindValue === 'fulltime' ? 'ボーナス達成報告' : '勤務完了報告' }}</span>
+                </button>
+            @endif
             @if(!empty($canSelectResult))
                 <button type="button" id="open-hire-modal-menu" class="talk-action-item">
                     <span class="talk-action-icon"><i class="fas fa-circle-check"></i></span>
@@ -773,7 +825,7 @@
         bonusModal.setAttribute('hidden', '');
         document.body.style.overflow = '';
     }
-    document.querySelectorAll('.btn-review-post').forEach(function (btn) {
+    document.querySelectorAll('.btn-review-post, .js-work-complete-trigger').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var id = this.getAttribute('data-application-id');
             if (id) openWorkCompleteFlow(id);

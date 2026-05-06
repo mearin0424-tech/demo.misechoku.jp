@@ -12,7 +12,7 @@
     $itemType = $itemType ?? 'cast';
     $isShop = ($itemType === 'shop');
     $isRecruit = ($itemType === 'recruit');
-    $detailRoute = $isRecruit ? 'cast.recruit.show' : ($isShop ? 'cast.shopprofileview.show' : 'shop.castprofileview.show');
+    $detailRoute = $isRecruit ? 'cast.recruit.show' : ($isShop ? 'cast.recruit.show' : 'shop.castprofileview.show');
     $talkRoute = ($isRecruit || $isShop) ? 'cast.talk.room' : 'shop.talk.room';
 @endphp
 @section('content')

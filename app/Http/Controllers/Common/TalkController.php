@@ -48,7 +48,7 @@ class TalkController extends Controller
         $isCastPortal = request()->is('cast/*');
 
         if ($isCastPortal) {
-            $profileRoute = 'cast.shopprofileview.show';
+            $profileRoute = 'cast.recruit.show';
         } else {
             $profileRoute = 'shop.castprofileview.show';
         }
@@ -472,14 +472,18 @@ class TalkController extends Controller
             'hired' => [
                 self::MESSAGE_TYPE_HIRED,
                 $this->buildHiredMessageForCast(
-                    (string) $this->resolveResultMessage((string) $actionType, (string) $request->input('message')),
+                    $this->ensureAutoPrefix(
+                        (string) $this->resolveResultMessage((string) $actionType, (string) $request->input('message'))
+                    ),
                     (string) $hiredWageNormalized,
                     (string) $selectedEmploymentKind
                 ),
             ],
             'rejected' => [
                 self::MESSAGE_TYPE_REJECTED,
-                $this->resolveResultMessage((string) $actionType, ''),
+                $this->ensureAutoPrefix(
+                    $this->resolveResultMessage((string) $actionType, '')
+                ),
             ],
             'cancel_status' => [
                 self::MESSAGE_TYPE_TEXT,
@@ -1252,6 +1256,19 @@ class TalkController extends Controller
             '【確定情報】' . "\n" .
             '採用区分: ' . $kindLabel . "\n" .
             '時給: ¥' . number_format((int) $hourlyWage);
+    }
+
+    private function ensureAutoPrefix(string $message): string
+    {
+        $trimmed = trim($message);
+        if ($trimmed === '') {
+            return '【自動送信】';
+        }
+        if (Str::startsWith($trimmed, '【自動送信】')) {
+            return $trimmed;
+        }
+
+        return '【自動送信】' . $trimmed;
     }
 
     /**

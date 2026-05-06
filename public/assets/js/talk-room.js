@@ -291,6 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const closeJobKindButtons = document.querySelectorAll('.js-job-kind-close');
         const openImageSendMenu = document.getElementById('open-image-send-menu');
         const openTemplateSendMenu = document.getElementById('open-template-send-menu');
+        const openWorkCompleteReportMenu = document.getElementById('open-work-complete-report-menu');
         const templateMenuOverlay = document.getElementById('talk-template-menu-overlay');
         const templateMenuList = document.getElementById('talk-template-menu-list');
         const templateMenuCloseButtons = document.querySelectorAll('.js-talk-template-close');
@@ -677,6 +678,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 openResultModal('rejected');
             });
         }
+        chatMessages.querySelectorAll('.js-open-result-action').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const actionType = btn.getAttribute('data-result-action');
+                if (actionType === 'hired' || actionType === 'rejected') {
+                    openResultModal(actionType);
+                }
+            });
+        });
 
         if (resultSubmitBtn && resultTextarea) {
             resultSubmitBtn.addEventListener('click', async function(e) {
@@ -955,6 +965,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
                 closeTalkActionMenu();
                 openTemplateMenu();
+            });
+        }
+        if (openWorkCompleteReportMenu) {
+            openWorkCompleteReportMenu.addEventListener('click', function () {
+                closeTalkActionMenu();
             });
         }
         if (talkRoomJobKindSelect && saveTalkJobKindBtn && canSelectTalkJobKind) {

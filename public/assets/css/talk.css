@@ -1415,6 +1415,35 @@ button.interview-option-btn:hover {
     border: 1px solid rgba(251, 191, 36, 0.4);
 }
 
+.message-bubble-auto {
+    border: 1px solid rgba(180, 176, 168, 0.55);
+}
+
+.msg-right .message-bubble-auto {
+    background: linear-gradient(180deg, #f8f6f1 0%, #f2eee7 100%);
+    color: #3f3f3f;
+}
+
+.msg-left .message-bubble-auto {
+    background: linear-gradient(180deg, #f8f6f1 0%, #f2eee7 100%);
+    color: #3f3f3f;
+}
+
+.message-bubble-auto .interview-title {
+    color: inherit;
+}
+
+.message-bubble-auto .interview-body-copy {
+    color: inherit;
+    opacity: 0.95;
+}
+
+.message-bubble-auto .interview-badge {
+    background: rgba(63, 63, 63, 0.08);
+    border-color: rgba(63, 63, 63, 0.2);
+    color: inherit;
+}
+
 .interview-change-schedule-wrap {
     margin: 4px 0 0;
 }
