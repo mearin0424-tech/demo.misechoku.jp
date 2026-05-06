@@ -275,7 +275,7 @@ class TalkController extends Controller
         $isCastPortal = request()->is('cast/*');
         $request->validate([
             'partner_id' => ['required', 'string'],
-            'action_type' => ['required', 'string', 'in:interview_offer,interview_confirm,hired,rejected,cancel_status,set_job_kind,fulltime_request'],
+            'action_type' => ['required', 'string', 'in:interview_offer,interview_confirm,hired,rejected,cancel_status,set_job_kind,fulltime_request,work_complete_report,bonus_achievement_report'],
             'options' => ['nullable', 'array'],
             'options.*' => ['nullable', 'string'],
             'offer_token' => ['nullable', 'string'],
@@ -291,7 +291,7 @@ class TalkController extends Controller
         $this->abortIfBlocked($partnerId, $isCastPortal);
 
         $actionType = $request->input('action_type');
-        abort_if($isCastPortal && !in_array($actionType, ['interview_confirm', 'set_job_kind', 'fulltime_request'], true), 403);
+        abort_if($isCastPortal && !in_array($actionType, ['interview_confirm', 'set_job_kind', 'fulltime_request', 'work_complete_report', 'bonus_achievement_report'], true), 403);
         abort_if(!$isCastPortal && $actionType === 'interview_confirm', 403);
         $castId = $isCastPortal ? $this->currentCastId() : $partnerId;
         $shopId = $isCastPortal ? $partnerId : $this->currentShopId();
@@ -345,6 +345,18 @@ class TalkController extends Controller
                 422,
                 '面談日は「面談日調整中」の候補に対してのみ確定できます。'
             );
+        }
+
+        if ($actionType === 'work_complete_report') {
+            abort_if(!$isCastPortal, 403);
+            $talkKind = $this->getSelectedTalkJobKind($castId, $shopId);
+            abort_if(!in_array($talkKind, ['trial', 'help'], true), 422, '本入店では勤務完了報告は利用できません。');
+        }
+
+        if ($actionType === 'bonus_achievement_report') {
+            abort_if(!$isCastPortal, 403);
+            $talkKind = $this->getSelectedTalkJobKind($castId, $shopId);
+            abort_if($talkKind !== 'fulltime', 422, 'ボーナス達成報告は本入店でのみ利用できます。');
         }
 
         if (in_array($actionType, ['hired', 'rejected'], true)) {
@@ -402,6 +414,14 @@ class TalkController extends Controller
             'fulltime_request' => [
                 self::MESSAGE_TYPE_TEXT,
                 '本入店を希望します。ご確認をお願いします。',
+            ],
+            'work_complete_report' => [
+                self::MESSAGE_TYPE_TEXT,
+                '勤務完了報告を送信しました。ご確認をお願いします。',
+            ],
+            'bonus_achievement_report' => [
+                self::MESSAGE_TYPE_TEXT,
+                'ボーナス達成報告を送信しました。内容確認後に承認をお願いします。',
             ],
         };
 
@@ -463,6 +483,12 @@ class TalkController extends Controller
             actionType: (string) $actionType,
             content: (string) $content
         );
+        if ($actionType === 'work_complete_report') {
+            $this->notifyOperationTransferInstruction($castId, $shopId, 'work_complete');
+        }
+        if ($actionType === 'bonus_achievement_report') {
+            $this->notifyOperationTransferInstruction($castId, $shopId, 'bonus_achievement');
+        }
 
         return response()->json([
             'success' => true,
@@ -927,6 +953,8 @@ class TalkController extends Controller
             $updates['status'] = self::APPLICATION_STATUS_CHATTING;
             $updates['result_date'] = null;
             $updates['reason_rejection'] = null;
+        } elseif ($actionType === 'work_complete_report') {
+            $updates['status'] = self::APPLICATION_STATUS_HIRED;
         }
 
         DB::table('shop_job_applications')
@@ -1381,6 +1409,12 @@ class TalkController extends Controller
         } elseif ($actionType === 'fulltime_request') {
             $title = '本入店リクエスト';
             $body = 'キャストから本入店リクエストが届きました。';
+        } elseif ($actionType === 'work_complete_report') {
+            $title = '勤務完了報告';
+            $body = 'キャストから勤務完了報告が届きました。';
+        } elseif ($actionType === 'bonus_achievement_report') {
+            $title = 'ボーナス達成報告';
+            $body = 'キャストからボーナス達成報告が届きました。承認をご確認ください。';
         }
 
         $this->notifyConversationPartner(
@@ -1424,5 +1458,38 @@ class TalkController extends Controller
         } catch (\Throwable $e) {
             Log::warning('Talk push notify failed: ' . $e->getMessage());
         }
+    }
+
+    private function notifyOperationTransferInstruction(string $castId, string $shopId, string $flowType): void
+    {
+        $application = $this->findApplicationForTalk($castId, $shopId);
+        if (!$application) {
+            return;
+        }
+
+        if ($flowType === 'work_complete') {
+            $hourly = 0;
+            if (property_exists($application, 'hired_regular_hourly_wage') && $application->hired_regular_hourly_wage !== null) {
+                $hourly = (int) $application->hired_regular_hourly_wage;
+            } elseif (property_exists($application, 'applied_regular_hourly_wage') && $application->applied_regular_hourly_wage !== null) {
+                $hourly = (int) $application->applied_regular_hourly_wage;
+            }
+            $amount = (int) floor($hourly * 0.23);
+            $title = '運営への振込指示';
+            $body = '勤務完了報告を受領しました。指示額: ¥' . number_format($amount);
+            $this->notifyConversationPartner($castId, $shopId, true, $title, $body, url('/shop/talk/room/' . $castId));
+            return;
+        }
+
+        $bonus = 0;
+        if (property_exists($application, 'hired_bonus_amount') && $application->hired_bonus_amount !== null) {
+            $bonus = (int) $application->hired_bonus_amount;
+        } elseif (property_exists($application, 'applied_bonus_reward') && $application->applied_bonus_reward !== null) {
+            $bonus = (int) $application->applied_bonus_reward;
+        }
+        $amount = (int) floor($bonus * 1.23);
+        $title = '運営への振込指示';
+        $body = 'ボーナス達成報告を受領しました。指示額: ¥' . number_format($amount);
+        $this->notifyConversationPartner($castId, $shopId, true, $title, $body, url('/shop/talk/room/' . $castId));
     }
 }

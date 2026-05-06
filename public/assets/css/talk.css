@@ -1125,6 +1125,11 @@
     color: #1a0a0a;
 }
 
+.talk-action-item-disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
 .talk-job-kind-save-status {
     margin: 8px 2px 0;
     font-size: 0.72rem;
@@ -1135,6 +1140,24 @@
     margin: 6px 0 0;
     font-size: 0.76rem;
     color: #a1a1aa;
+}
+
+.talk-template-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.talk-template-item {
+    width: 100%;
+    text-align: left;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #efe2e2;
+    padding: 12px;
+    font-size: 0.82rem;
+    line-height: 1.5;
 }
 
 .interview-confirm-modal {

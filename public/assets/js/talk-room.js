@@ -290,6 +290,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const closeJobKindButtons = document.querySelectorAll('.js-job-kind-close');
         const openImageSendMenu = document.getElementById('open-image-send-menu');
         const openTemplateSendMenu = document.getElementById('open-template-send-menu');
+        const templateMenuOverlay = document.getElementById('talk-template-menu-overlay');
+        const templateMenuList = document.getElementById('talk-template-menu-list');
+        const templateMenuCloseButtons = document.querySelectorAll('.js-talk-template-close');
         const overlay = document.getElementById('interview-modal-overlay');
         const interviewForm = overlay ? overlay.querySelector('#interview-form') : null;
         const closeBtn = overlay ? overlay.querySelector('.interview-modal-close') : null;
@@ -317,6 +320,28 @@ document.addEventListener('DOMContentLoaded', function() {
             '承知しました。よろしくお願いします。',
             '本日はご連絡ありがとうございます。'
         ];
+        const closeTemplateMenu = () => {
+            if (templateMenuOverlay) templateMenuOverlay.setAttribute('aria-hidden', 'true');
+        };
+        const openTemplateMenu = () => {
+            if (!templateMenuOverlay || !templateMenuList) return;
+            templateMenuList.innerHTML = '';
+            quickTemplates.forEach(function (text) {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'talk-template-item';
+                button.textContent = text;
+                button.addEventListener('click', function () {
+                    if (!messageInput) return;
+                    closeTemplateMenu();
+                    messageInput.value = text;
+                    messageInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    chatForm.requestSubmit();
+                });
+                templateMenuList.appendChild(button);
+            });
+            templateMenuOverlay.setAttribute('aria-hidden', 'false');
+        };
         let currentResultAction = null;
         const renderResultDescByKind = () => {
             if (!resultDesc || !resultEmploymentKind) return;
@@ -535,16 +560,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
+        templateMenuCloseButtons.forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                closeTemplateMenu();
+            });
+        });
+        if (templateMenuOverlay) {
+            templateMenuOverlay.addEventListener('click', function (e) {
+                if (e.target === templateMenuOverlay) closeTemplateMenu();
+            });
+        }
         if (openTemplateSendMenu && messageInput) {
             openTemplateSendMenu.addEventListener('click', function(e) {
                 e.preventDefault();
                 closeTalkActionMenu();
-                const selected = window.prompt('送信する定型文の番号を入力してください:\n1. ' + quickTemplates[0] + '\n2. ' + quickTemplates[1] + '\n3. ' + quickTemplates[2], '1');
-                const index = Number(selected) - 1;
-                if (!Number.isInteger(index) || index < 0 || index >= quickTemplates.length) return;
-                messageInput.value = quickTemplates[index];
-                messageInput.dispatchEvent(new Event('input', { bubbles: true }));
-                chatForm.requestSubmit();
+                openTemplateMenu();
             });
         }
 
@@ -754,11 +785,36 @@ document.addEventListener('DOMContentLoaded', function() {
         const talkActionMenuCloseButtons = document.querySelectorAll('.js-talk-action-menu-close');
         const openImageSendMenu = document.getElementById('open-image-send-menu');
         const openTemplateSendMenu = document.getElementById('open-template-send-menu');
+        const templateMenuOverlay = document.getElementById('talk-template-menu-overlay');
+        const templateMenuList = document.getElementById('talk-template-menu-list');
+        const templateMenuCloseButtons = document.querySelectorAll('.js-talk-template-close');
         const quickTemplates = [
             '本日はよろしくお願いします。',
             'ご確認ありがとうございます。承知しました。',
             '問題なければこの内容で進めさせてください。'
         ];
+        const closeTemplateMenu = () => {
+            if (templateMenuOverlay) templateMenuOverlay.setAttribute('aria-hidden', 'true');
+        };
+        const openTemplateMenu = () => {
+            if (!templateMenuOverlay || !templateMenuList) return;
+            templateMenuList.innerHTML = '';
+            quickTemplates.forEach(function (text) {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'talk-template-item';
+                button.textContent = text;
+                button.addEventListener('click', function () {
+                    if (!messageInput) return;
+                    closeTemplateMenu();
+                    messageInput.value = text;
+                    messageInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    chatForm.requestSubmit();
+                });
+                templateMenuList.appendChild(button);
+            });
+            templateMenuOverlay.setAttribute('aria-hidden', 'false');
+        };
         const fulltimeRequestBtn = document.getElementById('send-fulltime-request');
         const confirmOverlay = document.getElementById('interview-confirm-overlay');
         const confirmSelected = document.getElementById('interview-confirm-selected');
@@ -831,16 +887,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
+        templateMenuCloseButtons.forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                closeTemplateMenu();
+            });
+        });
+        if (templateMenuOverlay) {
+            templateMenuOverlay.addEventListener('click', function (e) {
+                if (e.target === templateMenuOverlay) closeTemplateMenu();
+            });
+        }
         if (openTemplateSendMenu && messageInput) {
             openTemplateSendMenu.addEventListener('click', function(e) {
                 e.preventDefault();
                 closeTalkActionMenu();
-                const selected = window.prompt('送信する定型文の番号を入力してください:\n1. ' + quickTemplates[0] + '\n2. ' + quickTemplates[1] + '\n3. ' + quickTemplates[2], '1');
-                const index = Number(selected) - 1;
-                if (!Number.isInteger(index) || index < 0 || index >= quickTemplates.length) return;
-                messageInput.value = quickTemplates[index];
-                messageInput.dispatchEvent(new Event('input', { bubbles: true }));
-                chatForm.requestSubmit();
+                openTemplateMenu();
             });
         }
         if (talkRoomJobKindSelect && saveTalkJobKindBtn && canSelectTalkJobKind) {

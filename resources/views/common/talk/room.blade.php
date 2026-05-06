@@ -89,6 +89,7 @@
     $talkJobKindLabelMap = ['trial' => '体験入店', 'fulltime' => '本入店', 'help' => 'ヘルプ'];
     $currentTalkJobKindValue = $selectedTalkJobKind ?? $initialTalkJobKind ?? null;
     $currentTalkJobKindLabel = $talkJobKindLabelMap[$currentTalkJobKindValue] ?? '未選択';
+    $isInterviewOfferLocked = in_array(($currentStatusCode ?? ''), ['hired', 'rejected'], true);
 @endphp
 
 <div id="talk-room-container" class="flex flex-col h-full bg-[#120505]">
@@ -124,7 +125,7 @@
             @if($isCast && !empty($reviewApplicationId))
                 <button type="button" class="btn-interview btn-review-post" data-application-id="{{ $reviewApplicationId }}" title="レビュー投稿">
                     <i class="fas fa-check-circle"></i>
-                    <span>勤務完了</span>
+                    <span>{{ $currentTalkJobKindValue === 'fulltime' ? 'ボーナス達成報告' : '勤務完了報告' }}</span>
                 </button>
             @endif
             <form action="{{ $blockUrl }}" method="POST">
@@ -338,15 +339,15 @@
             <button type="button" class="interview-modal-close js-talk-action-menu-close" aria-label="閉じる">&times;</button>
         </div>
         <div class="talk-action-grid">
-            @if(!empty($canOfferInterview))
-                <button type="button" id="open-interview-modal" class="talk-action-item talk-action-item-primary">
+            @if(!$isCast)
+                <button type="button" id="open-interview-modal" class="talk-action-item talk-action-item-primary {{ $isInterviewOfferLocked ? 'talk-action-item-disabled' : '' }}" @if($isInterviewOfferLocked) disabled @endif>
                     <span class="talk-action-icon"><i class="far fa-calendar-alt"></i></span>
-                    <span>面談候補日を送る</span>
+                    <span>面談候補日を送信</span>
                 </button>
             @endif
-            <button type="button" id="open-image-send-menu" class="talk-action-item">
+            <button type="button" id="open-image-send-menu" class="talk-action-item talk-action-item-disabled" disabled>
                 <span class="talk-action-icon"><i class="far fa-image"></i></span>
-                <span>画像を送る</span>
+                <span>現在実装中</span>
             </button>
             <button type="button" id="open-template-send-menu" class="talk-action-item">
                 <span class="talk-action-icon"><i class="far fa-file-alt"></i></span>
@@ -369,6 +370,16 @@
                 </button>
             @endif
         </div>
+    </div>
+</div>
+
+<div id="talk-template-menu-overlay" class="interview-modal-overlay interview-modal-overlay-sheet" aria-hidden="true">
+    <div class="interview-modal interview-menu-sheet">
+        <div class="interview-modal-header">
+            <h2>定型文を選択</h2>
+            <button type="button" class="interview-modal-close js-talk-template-close" aria-label="閉じる">&times;</button>
+        </div>
+        <div id="talk-template-menu-list" class="talk-template-list"></div>
     </div>
 </div>
 
@@ -434,6 +445,20 @@
 @endif
 
 @if($isCast)
+<div id="work-complete-confirm-overlay" class="interview-modal-overlay" aria-hidden="true">
+    <div class="interview-modal interview-confirm-modal">
+        <div class="interview-modal-header">
+            <h2 id="work-complete-confirm-title">勤務完了報告</h2>
+            <button type="button" class="interview-modal-close js-work-complete-close" aria-label="閉じる">&times;</button>
+        </div>
+        <p id="work-complete-confirm-desc" class="interview-modal-desc">完了しますか？</p>
+        <div class="interview-modal-footer">
+            <button type="button" class="btn-interview-cancel js-work-complete-close">いいえ</button>
+            <button type="button" id="work-complete-confirm-submit" class="btn-interview-submit">はい</button>
+        </div>
+    </div>
+</div>
+
 <div id="interview-confirm-overlay" class="interview-modal-overlay" aria-hidden="true">
     <div class="interview-modal interview-confirm-modal">
         <div class="interview-modal-header">
@@ -562,6 +587,14 @@
     var requestTargetUrl = '{{ route("cast.mypage.deposit.request-target") }}';
     var reviewPostUrl = '{{ route("cast.mypage.deposit.review") }}';
     var depositRequestUrl = '{{ route("cast.mypage.deposit.request") }}';
+    var chatForm = document.getElementById('chat-form');
+    var actionUrl = chatForm ? chatForm.getAttribute('data-action-url') : '';
+    var csrfToken = chatForm ? chatForm.querySelector('input[name="_token"]').value : '';
+    var selectedTalkJobKind = window.selectedTalkJobKind || '';
+    var workCompleteOverlay = document.getElementById('work-complete-confirm-overlay');
+    var workCompleteTitle = document.getElementById('work-complete-confirm-title');
+    var workCompleteDesc = document.getElementById('work-complete-confirm-desc');
+    var workCompleteSubmitBtn = document.getElementById('work-complete-confirm-submit');
 
     var pendingReviewApplicationId = null;
     var pendingReviewTarget = null;
@@ -584,6 +617,20 @@
     }
 
     function openWorkCompleteFlow(applicationId) {
+        if (selectedTalkJobKind === 'trial' || selectedTalkJobKind === 'help') {
+            bonusFlowMode = 'work_complete';
+            if (workCompleteTitle) {
+                workCompleteTitle.textContent = '勤務完了報告';
+            }
+            if (workCompleteDesc) {
+                workCompleteDesc.textContent = '完了しますか？';
+            }
+            if (workCompleteOverlay) {
+                workCompleteOverlay.setAttribute('aria-hidden', 'false');
+            }
+            pendingReviewApplicationId = applicationId;
+            return;
+        }
         fetch(requestTargetUrl + '?application_id=' + encodeURIComponent(applicationId), {
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
         })
@@ -595,7 +642,7 @@
             }
             pendingReviewApplicationId = applicationId;
             pendingReviewTarget = data.request_target;
-            bonusFlowMode = 'review';
+            bonusFlowMode = 'bonus_then_review';
             showBonusConfirmModal(applicationId, pendingReviewTarget);
         })
         .catch(function () {
@@ -718,6 +765,47 @@
             if (id) openWorkCompleteFlow(id);
         });
     });
+    document.querySelectorAll('.js-work-complete-close').forEach(function (el) {
+        el.addEventListener('click', function () {
+            if (workCompleteOverlay) workCompleteOverlay.setAttribute('aria-hidden', 'true');
+        });
+    });
+    if (workCompleteOverlay) {
+        workCompleteOverlay.addEventListener('click', function (e) {
+            if (e.target === workCompleteOverlay) {
+                workCompleteOverlay.setAttribute('aria-hidden', 'true');
+            }
+        });
+    }
+    if (workCompleteSubmitBtn) {
+        workCompleteSubmitBtn.addEventListener('click', function () {
+            if (!actionUrl || !csrfToken || !chatForm) return;
+            if (workCompleteOverlay) workCompleteOverlay.setAttribute('aria-hidden', 'true');
+            var partnerId = chatForm.getAttribute('data-partner-id');
+            fetch(actionUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    partner_id: partnerId,
+                    action_type: 'work_complete_report'
+                })
+            })
+            .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, json: j }; }); })
+            .then(function (res) {
+                if (!res.ok || !res.json.success) {
+                    throw new Error((res.json && res.json.message) || '勤務完了報告に失敗しました。');
+                }
+                window.location.reload();
+            })
+            .catch(function (err) {
+                window.alert(err.message || '勤務完了報告に失敗しました。');
+            });
+        });
+    }
     document.querySelectorAll('[data-close-review-modal]').forEach(function (el) { el.addEventListener('click', closeReviewModal); });
     document.querySelectorAll('[data-close-bonus-modal]').forEach(function (el) { el.addEventListener('click', closeBonusModal); });
     reviewModal.addEventListener('click', function (e) { if (e.target === reviewModal) closeReviewModal(); });
@@ -760,7 +848,7 @@
             errEl.style.display = 'block';
             return;
         }
-        if (bonusFlowMode === 'review') {
+        if (bonusFlowMode === 'bonus_then_review') {
             closeBonusModal();
             if (pendingReviewApplicationId && pendingReviewTarget) {
                 if (pendingReviewTarget.review_exists) {
@@ -784,8 +872,36 @@
         .then(function (res) {
             if (btn) btn.disabled = false;
             if (res.success) {
-                closeBonusModal();
-                window.location.href = '{{ route("cast.mypage.management") }}';
+                if (!actionUrl || !csrfToken || !chatForm) {
+                    closeBonusModal();
+                    return;
+                }
+                var partnerId = chatForm.getAttribute('data-partner-id');
+                fetch(actionUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        partner_id: partnerId,
+                        action_type: 'bonus_achievement_report'
+                    })
+                })
+                .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, json: j }; }); })
+                .then(function (reportRes) {
+                    if (!reportRes.ok || !reportRes.json.success) {
+                        throw new Error((reportRes.json && reportRes.json.message) || 'ボーナス達成報告に失敗しました。');
+                    }
+                    closeBonusModal();
+                    showReviewModalWithTarget(pendingReviewApplicationId, pendingReviewTarget || { review_contents: [] });
+                })
+                .catch(function (reportErr) {
+                    errEl.textContent = reportErr.message || 'ボーナス達成報告に失敗しました。';
+                    errEl.style.display = 'block';
+                    if (btn) btn.disabled = false;
+                });
             } else {
                 errEl.textContent = res.message || '申請に失敗しました。';
                 errEl.style.display = 'block';
