@@ -9,11 +9,11 @@
     .payment-mobile-shell {
         width: 100%;
         margin: 0 auto 28px;
-        background: #110C0A;
-        border: 1px solid #2A221E;
-        border-radius: 24px;
-        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
-        overflow: hidden;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        overflow: visible;
         color: #EAE0D5;
     }
     .payment-mobile-body { padding: 16px; }

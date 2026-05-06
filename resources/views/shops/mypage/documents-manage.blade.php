@@ -2,6 +2,9 @@
 
 @section('title', '許可証の管理')
 @section('body-class', 'page-shop-mypage shop-mypage-v2 page-shop-documents-manage')
+@section('guide_message')
+{{ ($document['key'] ?? '') === 'business' ? '営業許可証の提出' : '風営許可証の提出' }}
+@endsection
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
@@ -27,12 +30,12 @@
 
     $flowHeaderClass = 'license-manage-flow is-unsubmitted';
     $flowHeaderText = '未提出';
-    if ($uiWithdraw) {
-        $flowHeaderClass = $s === 'approved' ? 'license-manage-flow is-approved-flow' : 'license-manage-flow is-uploaded-flow';
-        $flowHeaderText = $s === 'approved' ? '承認済み' : 'アップロード済み';
-    } elseif ($uiSelectingServer) {
-        $flowHeaderClass = 'license-manage-flow is-selecting';
-        $flowHeaderText = 'ファイル選択中';
+    if ($s === 'approved') {
+        $flowHeaderClass = 'license-manage-flow is-approved-flow';
+        $flowHeaderText = '承認済み';
+    } elseif ($s === 'pending') {
+        $flowHeaderClass = 'license-manage-flow is-uploaded-flow';
+        $flowHeaderText = '提出済み（審査中）';
     }
 @endphp
 
@@ -73,16 +76,11 @@
                         <h1 class="license-manage-title">{{ $isBusiness ? '営業許可証の提出' : '風営許可証の提出' }}</h1>
                         <span id="license-doc-flow" class="{{ $flowHeaderClass }}">{{ $flowHeaderText }}</span>
                     </div>
-                    <a href="{{ route('shop.mypage.index') }}" class="license-manage-back-link">マイページへ戻る</a>
                 </header>
 
                 <div class="license-manage-body">
                     @if($s === 'rejected' && !empty($record['ng_reason']))
                         <p class="license-manage-ng">差し戻し理由: {{ $record['ng_reason'] }}</p>
-                    @endif
-
-                    @if(!empty($record['expiring_soon']))
-                        <p class="license-manage-expiring-chip">{{ $record['expiration_notice_label'] ?? '更新期限半年以内' }}</p>
                     @endif
 
                     <div id="license-doc-meta" class="license-manage-meta" @if(!$uiSelectingServer && !$uiWithdraw) style="display:none;" @endif>
@@ -122,6 +120,9 @@
                             <p id="license-doc-expiry-hint" class="license-manage-hint" @if($uiWithdraw) style="display:none;" @endif>
                                 営業許可証の有効期限を年月日形式で入力してください（本日以降）。
                             </p>
+                            @if(!empty($record['expiring_soon']))
+                                <p class="license-manage-expiring-chip">{{ $record['expiration_notice_label'] ?? '更新期限半年以内' }}</p>
+                            @endif
                         </div>
                     @endif
 
@@ -195,10 +196,6 @@
             </div>
         </div>
 
-        <div class="shop-doc-onboarding-actions">
-            <a href="{{ route('shop.mypage.index') }}" class="is-muted">マイページへ戻る</a>
-        </div>
-
         @unless($uiWithdraw)
         <script>
         (function () {
@@ -240,8 +237,8 @@
             }
             function setFlowSelecting() {
                 if (!flowEl) return;
-                flowEl.className = 'license-manage-flow is-selecting';
-                flowEl.textContent = 'ファイル選択中';
+                flowEl.className = 'license-manage-flow is-unsubmitted';
+                flowEl.textContent = '未提出';
             }
 
             function revokePreview() {
