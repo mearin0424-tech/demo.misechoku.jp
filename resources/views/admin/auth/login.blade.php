@@ -50,17 +50,17 @@
             align-items: center;
             justify-content: center;
             min-height: 42px;
-            border: 1px solid rgba(148, 163, 184, 0.45);
+            border: 1px solid rgba(220, 181, 104, 0.24);
             border-radius: 14px;
-            background: rgba(15, 23, 42, 0.72);
-            color: #cbd5e1;
+            background: rgba(74, 18, 42, 0.72);
+            color: #f0b4c6;
             text-decoration: none;
             font-size: 0.82rem;
             font-weight: 700;
         }
         .admin-role-link.is-active {
-            border-color: rgba(251, 191, 36, 0.65);
-            color: #fef3c7;
+            border-color: rgba(220, 181, 104, 0.62);
+            color: #ffe2a3;
         }
         .admin-title {
             font-size: 1.4rem;
@@ -76,9 +76,9 @@
             text-align: center;
         }
         .admin-alert {
-            background: rgba(56, 189, 248, 0.12);
-            border: 1px solid rgba(56, 189, 248, 0.7);
-            color: #e0f2fe;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(220, 181, 104, 0.3);
+            color: #f9efcf;
             padding: 10px 14px;
             border-radius: 8px;
             margin-bottom: 16px;
@@ -94,10 +94,10 @@
             margin: 0;
         }
         .admin-form {
-            background: rgba(15, 23, 42, 0.9);
+            background: rgba(74, 18, 42, 0.9);
             border-radius: 16px;
             padding: 20px 18px;
-            border: 1px solid rgba(148, 163, 184, 0.5);
+            border: 1px solid rgba(220, 181, 104, 0.3);
         }
         .form-group {
             margin-bottom: 14px;
@@ -105,22 +105,22 @@
         .form-group label {
             display: block;
             font-size: 0.85rem;
-            color: #e5e7eb;
+            color: #f0b4c6;
             margin-bottom: 6px;
         }
         .form-group input {
             width: 100%;
             padding: 8px 10px;
             border-radius: 10px;
-            border: 1px solid rgba(148, 163, 184, 0.7);
-            background: rgba(15, 23, 42, 0.9);
-            color: #e5e7eb;
+            border: 1px solid rgba(220, 181, 104, 0.28);
+            background: rgba(56, 13, 31, 0.9);
+            color: #fff0f5;
             font-size: 0.9rem;
         }
         .form-group input:focus {
             outline: none;
-            border-color: rgba(96, 165, 250, 0.9);
-            box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.7);
+            border-color: rgba(220, 181, 104, 0.6);
+            box-shadow: 0 0 0 1px rgba(220, 181, 104, 0.45);
         }
         .btn-primary {
             width: 100%;
@@ -128,8 +128,8 @@
             padding: 10px 0;
             border-radius: 999px;
             border: none;
-            background: linear-gradient(90deg, #fbbf24, #f97316);
-            color: #111827;
+            background: linear-gradient(145deg, #dcb568, #b8860b);
+            color: #2a1406;
             font-weight: 700;
             font-size: 0.95rem;
             cursor: pointer;

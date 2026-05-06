@@ -22,27 +22,31 @@
     align-items: center;
     gap: 10px;
     background: var(--color-accent);
-    color: #fff;
+    color: #2a1406;
     padding: 12px 15px;
-    border-radius: 8px;
+    border-radius: 10px;
     text-decoration: none;
     font-weight: bold;
     margin-bottom: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    border: 1px solid rgba(255, 240, 197, 0.45);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 245, 214, 0.55),
+        inset 0 -1px 0 rgba(112, 72, 10, 0.55),
+        0 6px 16px rgba(0,0,0,0.35);
 }
 
 /* サブメニュー */
 .sidebar-sub-menu { list-style: none; padding-left: 10px; margin: 10px 0 20px 0; }
 .sidebar-sub-menu li { margin-bottom: 12px; }
 .sidebar-sub-menu a { color: var(--color-text); text-decoration: none; font-size: 0.9rem; opacity: 0.8; transition: 0.2s; }
-.sidebar-sub-menu a:hover { opacity: 1; color: var(--color-gold); }
+.sidebar-sub-menu a:hover { opacity: 1; color: var(--gold-light); }
 
 /* アコーディオン (details/summary) */
 summary {
     list-style: none;
     cursor: pointer;
     font-weight: bold;
-    color: var(--color-gold);
+    color: var(--color-accent);
     display: flex;
     justify-content: space-between;
     align-items: center;

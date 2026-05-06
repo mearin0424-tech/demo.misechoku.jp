@@ -173,16 +173,18 @@
         }
 
         body.page-demo-login {
-            background: #120405;
-            color: #f5e6e6;
+            background:
+                radial-gradient(circle at top, rgba(255, 166, 201, 0.16), transparent 36%),
+                linear-gradient(180deg, var(--color-main) 0%, var(--dark-bg) 100%);
+            color: var(--color-text);
             font-family: "Helvetica Neue", Arial, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
         }
 
         body.page-demo-login #bg-layer {
             background:
-                radial-gradient(circle at 22% 20%, rgba(230, 208, 128, 0.12), transparent 26%),
-                radial-gradient(circle at 80% 72%, rgba(179, 138, 34, 0.18), transparent 30%),
-                linear-gradient(180deg, rgba(18, 4, 5, 0.6), rgba(18, 4, 5, 0.95));
+                radial-gradient(circle at 22% 20%, rgba(220, 181, 104, 0.14), transparent 26%),
+                radial-gradient(circle at 80% 72%, rgba(220, 181, 104, 0.16), transparent 30%),
+                linear-gradient(180deg, rgba(74, 18, 42, 0.66), rgba(56, 13, 31, 0.95));
         }
 
         body.page-demo-login main {
@@ -228,7 +230,7 @@
         }
 
         .demo-login-bg-overlay {
-            background: linear-gradient(180deg, rgba(18, 4, 5, 0.62) 0%, rgba(18, 4, 5, 0.82) 45%, #120405 100%);
+            background: linear-gradient(180deg, rgba(74, 18, 42, 0.62) 0%, rgba(56, 13, 31, 0.84) 45%, rgba(56, 13, 31, 0.98) 100%);
         }
 
         .demo-login-bg-glow {
@@ -303,9 +305,9 @@
 
         .demo-login-card {
             overflow: hidden;
-            border: 1px solid rgba(230, 208, 128, 0.2);
+            border: 1px solid rgba(220, 181, 104, 0.24);
             border-radius: 30px;
-            background: rgba(26, 11, 14, 0.8);
+            background: linear-gradient(155deg, rgba(255, 240, 245, 0.06), rgba(92, 23, 53, 0.88));
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
@@ -316,7 +318,7 @@
         .demo-login-tabs {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            border-bottom: 1px solid rgba(230, 208, 128, 0.1);
+            border-bottom: 1px solid rgba(220, 181, 104, 0.18);
         }
 
         .demo-login-tab {
@@ -333,7 +335,7 @@
         }
 
         .demo-login-tab.is-active {
-            color: #e6d080;
+            color: var(--gold-light);
         }
 
         .demo-login-tab.is-active::after {
@@ -343,7 +345,7 @@
             right: 0;
             bottom: 0;
             height: 2px;
-            background: linear-gradient(90deg, #e5c158, #b38a22);
+            background: linear-gradient(90deg, var(--gold), var(--gold-deep));
             box-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
         }
 
@@ -384,8 +386,8 @@
         }
 
         .demo-role-chip.is-active {
-            border-color: rgba(230, 208, 128, 0.42);
-            color: #e6d080;
+            border-color: rgba(220, 181, 104, 0.45);
+            color: var(--gold-light);
             background: rgba(35, 15, 18, 0.95);
         }
 
@@ -463,7 +465,7 @@
         .demo-login-field > span,
         .demo-login-label-row span {
             margin-left: 2px;
-            color: #e6d080;
+            color: var(--gold-light);
             font-size: 0.72rem;
             font-weight: 600;
             letter-spacing: 0.14em;
@@ -504,8 +506,8 @@
         .demo-login-select:focus,
         .demo-login-input-wrap input:focus {
             outline: none;
-            border-color: rgba(230, 208, 128, 0.5);
-            box-shadow: 0 0 0 3px rgba(230, 208, 128, 0.12);
+            border-color: rgba(220, 181, 104, 0.56);
+            box-shadow: 0 0 0 3px rgba(220, 181, 104, 0.16);
         }
 
         .demo-login-input-wrap input[readonly] {
@@ -521,8 +523,8 @@
 
         .demo-login-submit {
             margin-top: 18px;
-            background: linear-gradient(90deg, #e5c158 0%, #fdf0b2 50%, #b38a22 100%);
-            color: #120405;
+            background: linear-gradient(145deg, var(--gold), var(--gold-deep));
+            color: #2a1406;
             box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
         }
 
