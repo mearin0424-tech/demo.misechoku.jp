@@ -248,17 +248,8 @@
                         </div>
                     @elseif($msg->type === 3)
                         <div class="message-bubble message-bubble-interview message-bubble-confirmed">
-                            <div class="interview-card-head">
-                                <div class="interview-title">
-                                    <i class="far fa-calendar-check"></i>
-                                    <span>面談日が確定しました</span>
-                                </div>
-                                <span class="interview-badge">確定</span>
-                            </div>
-                            <p class="interview-body-copy">以下の日時で確定しました。</p>
-                            <div class="interview-confirmed-slot">
-                                <span class="interview-option-date">{{ \Carbon\Carbon::parse($msg->selected_option)->format('Y年n月j日') }}</span><span class="interview-option-time">{{ \Carbon\Carbon::parse($msg->selected_option)->format(' H:i') }}</span>
-                            </div>
+                            <p class="interview-body-copy">以下の日時で面談日が確定しました。</p>
+                            <p class="interview-confirmed-date">{{ \Carbon\Carbon::parse($msg->selected_option)->format('Y年n月j日 H:i') }}</p>
                             @if($msg->is_mine)
                                 <span class="message-bubble-tail" aria-hidden="true">
                                     <svg viewBox="0 0 8 12" fill="currentColor"><path d="M0 0V12C3 12 8 8 8 0H0Z"/></svg>

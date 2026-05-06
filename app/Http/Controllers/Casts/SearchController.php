@@ -631,7 +631,9 @@ class SearchController extends BaseSearchController
                 Schema::hasColumn('cast_profiles', 'personality_type')
                     ? 'personality_type'
                     : DB::raw('NULL as personality_type'),
-                'memo'
+                Schema::hasColumn('cast_profiles', 'memo')
+                    ? 'memo'
+                    : DB::raw('NULL as memo')
             )
             ->first();
 

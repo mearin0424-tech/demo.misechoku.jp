@@ -1222,6 +1222,7 @@
     min-width: min(240px, 100%);
     padding: 10px 10px 10px;
     border-radius: 16px;
+    white-space: normal;
 }
 .msg-right .message-bubble-interview {
     background: linear-gradient(180deg, #d7923f 0%, #c27b2f 100%);
@@ -1253,6 +1254,7 @@
     font-weight: 700;
     margin-bottom: 0;
     color: inherit;
+    white-space: normal;
 }
 
 .interview-title i {
@@ -1315,18 +1317,21 @@
     align-items: center;
     gap: 8px;
     flex: 1;
+    white-space: normal;
 }
 
 .interview-option-date {
     font-size: 0.95rem;
     font-weight: 700;
     color: #1f130e;
+    white-space: nowrap;
 }
 
 .interview-option-time {
     font-size: 0.8rem;
     color: rgba(31, 19, 14, 0.7);
     font-weight: 700;
+    white-space: nowrap;
 }
 
 .interview-option-action {

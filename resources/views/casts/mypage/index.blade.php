@@ -182,8 +182,8 @@
                                 接客タイプ診断を開く
                             </a>
                         </div>
-                        <div class="cast-row"><div class="cast-k">ご自分の系統</div><div class="cast-v {{ empty($cast['my_field'] ?? '') ? 'muted' : '' }}">{{ $cast['my_field'] ?? '--' }}</div></div>
-                        <div class="cast-row"><div class="cast-k">ご自分の内面・特技</div><div class="cast-v {{ empty($cast['my_inner_skills'] ?? '') ? 'muted' : '' }}">{{ $cast['my_inner_skills'] ?? '--' }}</div></div>
+                        <div class="cast-row"><div class="cast-k">ルックス</div><div class="cast-v {{ empty($cast['my_field'] ?? '') ? 'muted' : '' }}">{{ $cast['my_field'] ?? '--' }}</div></div>
+                        <div class="cast-row"><div class="cast-k">性格・内面</div><div class="cast-v {{ empty($cast['my_inner_skills'] ?? '') ? 'muted' : '' }}">{{ $cast['my_inner_skills'] ?? '--' }}</div></div>
                     </div>
                 </div>
 

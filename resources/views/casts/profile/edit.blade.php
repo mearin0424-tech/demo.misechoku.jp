@@ -104,7 +104,7 @@
             </div>
 
             <div class="field">
-                <label>ご自分の系統</label>
+                <label>ルックス</label>
                 <div class="tag-grid">
                     @foreach(($masters['looks'] ?? []) as $look)
                         <label class="tag-chip tag-looks">
@@ -116,7 +116,7 @@
             </div>
 
             <div class="field">
-                <label>ご自分の内面・特技</label>
+                <label>性格・内面</label>
                 <div class="tag-grid">
                     @foreach(($masters['personalities'] ?? []) as $personality)
                         <label class="tag-chip tag-personality">

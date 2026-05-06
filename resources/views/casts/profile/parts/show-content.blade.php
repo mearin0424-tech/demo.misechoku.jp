@@ -113,18 +113,10 @@
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">ルックス</span>
-                    <span class="detail-value">{{ !empty($cast['looks_tags']) ? implode(' / ', (array) $cast['looks_tags']) : '--' }}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">ご自分の系統</span>
                     <span class="detail-value">{{ $cast['my_field'] ?? '--' }}</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">性格・内面</span>
-                    <span class="detail-value">{{ !empty($cast['personality_tags']) ? implode(' / ', (array) $cast['personality_tags']) : '--' }}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">ご自分の内面・特技</span>
                     <span class="detail-value">{{ $cast['my_inner_skills'] ?? '--' }}</span>
                 </div>
                 <div class="detail-row">

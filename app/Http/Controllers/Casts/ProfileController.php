@@ -323,7 +323,20 @@ class ProfileController extends Controller
             4 => ['name' => 'BAR STELLA', 'word' => '落ち着いた大人の空間', 'main_img' => asset('storage/mock/shops/out-2.png'), 'area' => '東京都渋谷区', 'concept' => "カジュアルな雰囲気でリラックスして働けます。", 'review_avg' => 4.3, 'review_cnt' => 56, 'sub_images' => [asset('storage/mock/shops/inside-1.png'), asset('storage/mock/shops/inside-2.png'), asset('storage/mock/shops/inside-3.png')]],
         ];
         $key = is_numeric($id) ? (int) $id : 1;
-        return $shops[$key] ?? $shops[1];
+        $shop = $shops[$key] ?? $shops[1];
+
+        return array_merge([
+            'industry' => '',
+            'zip' => '',
+            'address' => '',
+            'tel' => '',
+            'business_hours_shop' => '',
+            'nearest_stations' => [],
+            'tag_groups' => [],
+            'sub_images' => [],
+        ], $shop, [
+            'address' => (string) ($shop['address'] ?? $shop['area'] ?? ''),
+        ]);
     }
 
     private function currentCastId(): string

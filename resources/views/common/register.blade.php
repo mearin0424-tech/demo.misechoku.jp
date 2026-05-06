@@ -193,7 +193,7 @@
 
                     @if(!empty($masters['looks']) && $masters['looks']->isNotEmpty())
                     <div class="register-field">
-                        <span>ご自分の系統</span>
+                        <span>ルックス</span>
                         <div class="register-chip-grid">
                             @foreach($masters['looks'] as $look)
                                 <label class="register-chip">
@@ -207,7 +207,7 @@
 
                     @if(!empty($masters['personalities']) && $masters['personalities']->isNotEmpty())
                     <div class="register-field">
-                        <span>ご自分の内面・特技</span>
+                        <span>性格・内面</span>
                         <div class="register-chip-grid">
                             @foreach($masters['personalities'] as $personality)
                                 <label class="register-chip">
