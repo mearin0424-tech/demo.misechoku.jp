@@ -94,6 +94,9 @@ class RecruitmentController extends Controller
         if (Schema::hasColumn('cast_profiles', 'main_image_path')) {
             $query->addSelect('cast_profiles.main_image_path');
         }
+        if (Schema::hasColumn('shop_job_applications', 'reason_rejection')) {
+            $query->addSelect('shop_job_applications.reason_rejection');
+        }
         if (Schema::hasColumn('shop_job_applications', 'rejection_reason')) {
             $query->addSelect('shop_job_applications.rejection_reason');
         }
@@ -135,23 +138,27 @@ class RecruitmentController extends Controller
                     4 => $pattern === 'P2' ? 'ヘルプ採用' : '体験採用',
                     default => self::APPLICATION_STATUS_LABELS[$status] ?? '未設定',
                 };
-                $statusWithCodeLabel = match ($status) {
-                    1 => 'やり取り中(1)',
-                    2 => '面談日調整中(2)',
-                    3 => '面談日決定(3)',
-                    4 => '採用(4)',
-                    5 => '不採用(5)',
-                    6 => '本採用(6)',
-                    7 => '体験後不採用(7)',
+                $statusDisplayLabel = match ($status) {
+                    1 => 'やり取り中',
+                    2 => '面談日調整中',
+                    3 => '面談日決定',
+                    4 => $pattern === 'P2' ? 'ヘルプ採用' : '体験採用',
+                    5 => '不採用',
+                    6 => '本採用',
+                    7 => '体験後不採用',
                     default => '未設定',
                 };
                 $mainImagePath = Schema::hasColumn('cast_profiles', 'main_image_path')
                     ? ($row->main_image_path ?? null)
                     : null;
                 $castAvatarUrl = $mainImagePath ? $this->assetPathForStored((string) $mainImagePath) : null;
-                $rejectionReason = Schema::hasColumn('shop_job_applications', 'rejection_reason')
-                    ? trim((string) ($row->rejection_reason ?? ''))
-                    : '';
+                $rejectionReason = '';
+                if (Schema::hasColumn('shop_job_applications', 'reason_rejection')) {
+                    $rejectionReason = trim((string) ($row->reason_rejection ?? ''));
+                }
+                if ($rejectionReason === '' && Schema::hasColumn('shop_job_applications', 'rejection_reason')) {
+                    $rejectionReason = trim((string) ($row->rejection_reason ?? ''));
+                }
                 $appliedSummaryLines = ShopJobApplicationView::appliedJobSummaryLines($row);
                 $hiredWage = ShopJobApplicationView::wageAtHire($row);
                 $hiredWageInput = $hiredWage ?? '';
@@ -164,7 +171,7 @@ class RecruitmentController extends Controller
                     'pattern' => $pattern,
                     'pattern_label' => $patternLabel,
                     'job_kind_label' => $jobKindLabel,
-                    'status_with_code_label' => $statusWithCodeLabel,
+                    'status_display_label' => $statusDisplayLabel,
                     'result_date' => $row->result_date ? date('Y/m/d', strtotime($row->result_date)) : null,
                     'real_start_date' => $row->real_start_date ? date('Y/m/d', strtotime($row->real_start_date)) : null,
                     'created_at' => $row->created_at ? date('Y/m/d', strtotime($row->created_at)) : null,

@@ -56,7 +56,6 @@
                             </div>
                         </div>
                         <div class="rsm-side">
-                            <span class="rsm-status"></span>
                             <a class="rsm-talk-link" href="{{ route('shop.talk.index') }}" aria-label="トークルームへ">
                                 <i class="fas fa-comment-dots"></i>
                             </a>
@@ -70,7 +69,7 @@
                             </div>
                             <div class="rsm-meta-item">
                                 <span class="rsm-meta-key">ステータス</span>
-                                <span class="rsm-meta-val" data-field="statusWithCode"></span>
+                                <span class="rsm-meta-val" data-field="statusDisplay"></span>
                             </div>
                         </div>
                         <div class="rsm-detail-row">
@@ -121,15 +120,6 @@ window.recruitStatusCsrf = @json(csrf_token());
 window.recruitStatusHiredWageUrl = @json(route('shop.recruits.application-hired-wage'));
 (function() {
     var data = @json($applications ?? []);
-    var statusDef = {
-        1: { label: 'やり取り中', className: 'is-status-1' },
-        2: { label: '面談日調整中', className: 'is-status-2' },
-        3: { label: '面談日決定', className: 'is-status-3' },
-        4: { label: '採用', className: 'is-status-4' },
-        5: { label: '不採用', className: 'is-status-5' },
-        6: { label: '本採用', className: 'is-status-6' },
-        7: { label: '体験後不採用', className: 'is-status-7' }
-    };
 
     var listEl = document.getElementById('recruit-status-card-list');
     var emptyEl = document.getElementById('recruit-status-empty-mobile');
@@ -152,13 +142,6 @@ window.recruitStatusHiredWageUrl = @json(route('shop.recruits.application-hired-
         return true;
     }
 
-    function getStatusLabel(item) {
-        if (item.status === 4) {
-            return item.pattern === 'P2' ? 'ヘルプ採用' : '体験採用';
-        }
-        return item.status_label || (statusDef[item.status] ? statusDef[item.status].label : '未設定');
-    }
-
     function render() {
         var rows = data.filter(function(item) {
             var hitTab = inStatusTab(item, state.tab);
@@ -173,14 +156,22 @@ window.recruitStatusHiredWageUrl = @json(route('shop.recruits.application-hired-
 
         rows.forEach(function(item) {
             var node = template.content.firstElementChild.cloneNode(true);
-            var statusNode = node.querySelector('.rsm-status');
             var talkNode = node.querySelector('.rsm-talk-link');
 
             node.querySelector('.rsm-name').textContent = item.cast_name || 'キャスト';
             var jobKindEl = node.querySelector('[data-field="jobKind"]');
-            var statusCodeEl = node.querySelector('[data-field="statusWithCode"]');
+            var statusDisplayEl = node.querySelector('[data-field="statusDisplay"]');
             if (jobKindEl) jobKindEl.textContent = item.job_kind_label || '本入店';
-            if (statusCodeEl) statusCodeEl.textContent = item.status_with_code_label || '';
+            if (statusDisplayEl) {
+                statusDisplayEl.textContent = item.status_display_label || '';
+                statusDisplayEl.classList.remove('rsm-meta-status-hired', 'rsm-meta-status-rejected');
+                var st = item.status;
+                if (st === 4 || st === 6) {
+                    statusDisplayEl.classList.add('rsm-meta-status-hired');
+                } else if (st === 5 || st === 7) {
+                    statusDisplayEl.classList.add('rsm-meta-status-rejected');
+                }
+            }
 
             var avatarImg = node.querySelector('[data-field="avatarImg"]');
             var avatarFb = node.querySelector('[data-field="avatarFallback"]');
@@ -200,9 +191,6 @@ window.recruitStatusHiredWageUrl = @json(route('shop.recruits.application-hired-
                 avatarImg.hidden = true;
                 if (avatarFb) avatarFb.hidden = false;
             }
-
-            statusNode.textContent = getStatusLabel(item);
-            statusNode.classList.add((statusDef[item.status] || { className: 'is-status-1' }).className);
 
             if (talkNode && item.cast_id) {
                 talkNode.href = '{{ route('shop.talk.room', ['id' => '__CAST_ID__']) }}'.replace('__CAST_ID__', item.cast_id);

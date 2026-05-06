@@ -5,7 +5,7 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/css/shop-license-documents.css') }}?v=20260511">
+<link rel="stylesheet" href="{{ asset('assets/css/shop-license-documents.css') }}?v=20260512">
 @endpush
 
 @section('content')
@@ -72,10 +72,7 @@
         >
             <div class="license-manage-card">
                 <header class="license-manage-header license-manage-header--status-only">
-                    <p class="license-manage-status-kv">
-                        <span class="license-manage-status-kv__key">status</span><span class="license-manage-status-kv__colon">:</span>
-                        <span id="license-doc-flow" class="{{ $flowHeaderClass }}">{{ $flowHeaderText }}</span>
-                    </p>
+                    <span id="license-doc-flow" class="{{ $flowHeaderClass }}">{{ $flowHeaderText }}</span>
                 </header>
 
                 <div class="license-manage-body">
@@ -85,15 +82,17 @@
 
                     <div id="license-doc-file-row" class="license-manage-file-row" @if(!$uiSelectingServer && !$uiWithdraw) style="display:none;" @endif>
                         <div class="license-manage-file-stack">
-                            <span class="license-manage-file-icon" aria-hidden="true">
-                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                            </span>
-                            <div id="license-doc-preview-inner" class="license-manage-filename-area">
-                                @if($uiSelectingServer || $uiWithdraw)
-                                    <div class="license-manage-filename-box">
-                                        <a href="{{ $serverFileUrl }}" target="_blank" rel="noopener noreferrer" class="license-manage-filename-link">{{ $serverFileName !== '' ? $serverFileName : 'アップロード済みファイル' }}</a>
-                                    </div>
-                                @endif
+                            <div class="license-manage-file-inline">
+                                <span class="license-manage-file-icon" aria-hidden="true">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                </span>
+                                <div id="license-doc-preview-inner" class="license-manage-filename-area">
+                                    @if($uiSelectingServer || $uiWithdraw)
+                                        <div class="license-manage-filename-box">
+                                            <a href="{{ $serverFileUrl }}" target="_blank" rel="noopener noreferrer" class="license-manage-filename-link">{{ $serverFileName !== '' ? $serverFileName : 'アップロード済みファイル' }}</a>
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
                             <div id="license-doc-meta" class="license-manage-preview-meta license-manage-preview-meta--stacked">
                                 <p class="license-manage-meta-updated">最終更新: <span id="license-meta-updated">{{ $uiWithdraw || $uiSelectingServer ? ($updatedLabel !== '' ? $updatedLabel : '----/--/-- --:--') : '----/--/-- --:--' }}</span></p>
