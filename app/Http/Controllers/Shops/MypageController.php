@@ -272,6 +272,26 @@ class MypageController extends Controller
         ]);
     }
 
+    public function manageLicenseDocument(string $type)
+    {
+        if (!in_array($type, ['business', 'entertainment'], true)) {
+            abort(404);
+        }
+
+        $shopId = $this->currentShopId();
+        $documentData = $this->documentReviewService->getShopLicensePageData($shopId);
+        $document = collect($documentData['documents'])->firstWhere('key', $type);
+
+        if (!$document) {
+            abort(404);
+        }
+
+        return view('shops.mypage.documents-manage', [
+            'pageId' => 'documents_manage',
+            'document' => $document,
+        ]);
+    }
+
     /**
      * ひとこと（キャッチコピー）をモーダルから更新
      */
@@ -427,6 +447,12 @@ class MypageController extends Controller
                 ->where('type', $type)
                 ->first();
             if ($current && in_array((int) $current->status, [ShopLicenseDocument::STATUS_PENDING, ShopLicenseDocument::STATUS_APPROVED], true)) {
+                if (!$request->expectsJson()) {
+                    return redirect()
+                        ->route('shop.mypage.documents.manage', ['type' => $type])
+                        ->withErrors(['file' => '提出済みのため差し替えできません。先に「提出取り下げ」を行ってください。']);
+                }
+
                 return response()->json([
                     'success' => false,
                     'message' => '提出済みのため差し替えできません。先に「提出取り下げ」を行ってください。',
@@ -439,6 +465,12 @@ class MypageController extends Controller
                 $request->file('file'),
                 $request->input('expired_at')
             );
+
+            if (!$request->expectsJson()) {
+                return redirect()
+                    ->route('shop.mypage.documents.manage', ['type' => $type])
+                    ->with('message', '書類をアップロードしました。内容を確認して「提出」を押してください。');
+            }
 
             return response()->json([
                 'success' => true,
@@ -472,10 +504,22 @@ class MypageController extends Controller
                 isset($data['expired_at']) ? (string) $data['expired_at'] : null
             );
         } catch (\RuntimeException $e) {
+            if (!$request->expectsJson()) {
+                return redirect()
+                    ->route('shop.mypage.documents.manage', ['type' => (string) $data['type']])
+                    ->withErrors(['document' => $e->getMessage()]);
+            }
+
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
             ], 422);
+        }
+
+        if (!$request->expectsJson()) {
+            return redirect()
+                ->route('shop.mypage.documents.manage', ['type' => (string) $data['type']])
+                ->with('message', '提出が完了しました。運営の審査をお待ちください。');
         }
 
         return response()->json([
@@ -493,10 +537,22 @@ class MypageController extends Controller
         try {
             $this->documentReviewService->withdrawShopDocumentReview($this->currentShopId(), (string) $data['type']);
         } catch (\RuntimeException $e) {
+            if (!$request->expectsJson()) {
+                return redirect()
+                    ->route('shop.mypage.documents.manage', ['type' => (string) $data['type']])
+                    ->withErrors(['document' => $e->getMessage()]);
+            }
+
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
             ], 422);
+        }
+
+        if (!$request->expectsJson()) {
+            return redirect()
+                ->route('shop.mypage.documents.manage', ['type' => (string) $data['type']])
+                ->with('message', '提出を取り下げました。ファイルを再アップロードしてから審査依頼してください。');
         }
 
         return response()->json([
