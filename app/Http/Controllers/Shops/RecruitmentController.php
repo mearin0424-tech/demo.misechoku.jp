@@ -221,9 +221,21 @@ class RecruitmentController extends Controller
                 $confirmedSummaryLines = [];
                 if (in_array($status, [4, 6], true)) {
                     $confirmedSummaryLines[] = '確定種別: ' . $jobKindLabel;
-                    if ($hiredWage !== null && $hiredWage !== '') {
-                        $confirmedSummaryLines[] = '採用時給（確定）: ' . $hiredWage . '円';
+                    $confirmedWage = $hiredWage;
+                    if ($confirmedWage === null || $confirmedWage === '') {
+                        $confirmedWage = match ($jobType) {
+                            2 => (property_exists($row, 'applied_trial_hourly_wage') && $row->applied_trial_hourly_wage !== null
+                                ? trim((string) $row->applied_trial_hourly_wage)
+                                : ''),
+                            3 => (property_exists($row, 'applied_help_hourly_wage') && $row->applied_help_hourly_wage !== null
+                                ? trim((string) $row->applied_help_hourly_wage)
+                                : ''),
+                            default => (property_exists($row, 'applied_regular_hourly_wage') && $row->applied_regular_hourly_wage !== null
+                                ? trim((string) $row->applied_regular_hourly_wage)
+                                : ''),
+                        };
                     }
+                    $confirmedSummaryLines[] = '時給（確定）: ' . (($confirmedWage !== null && $confirmedWage !== '') ? ($confirmedWage . '円') : '未設定');
                     $confirmedBonusAmount = property_exists($row, 'hired_bonus_amount') && $row->hired_bonus_amount !== null
                         ? (int) $row->hired_bonus_amount
                         : null;

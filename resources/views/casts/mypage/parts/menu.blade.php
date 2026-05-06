@@ -4,7 +4,7 @@
 @endphp
 <div class="cast-mypage-menu-section {{ $fullWidth ? 'cast-mypage-menu-section--full-width' : '' }}">
     <div class="mypage-section mypage-quick-actions cast-mypage-menu-buttons">
-        <a href="{{ route('cast.mypage.employment') }}" class="menu-btn job {{ $current === 'employment' ? 'is-current' : '' }}">
+        <a href="{{ route('cast.mypage.management') }}" class="menu-btn job {{ $current === 'management' ? 'is-current' : '' }}">
             <div class="menu-btn-shine"></div>
             <div class="menu-btn-content">
                 <div class="menu-btn-icon">

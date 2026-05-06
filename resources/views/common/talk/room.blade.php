@@ -711,7 +711,7 @@
             if (btn) btn.disabled = false;
             if (res.success) {
                 closeBonusModal();
-                window.location.href = '{{ route("cast.mypage.employment") }}';
+                window.location.href = '{{ route("cast.mypage.management") }}';
             } else {
                 errEl.textContent = res.message || '申請に失敗しました。';
                 errEl.style.display = 'block';

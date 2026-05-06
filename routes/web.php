@@ -405,7 +405,7 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
     Route::get('/interaction', [ShopInteraction::class, 'index'])->name('interaction.index');
     Route::get('/mypage', [CastMypage::class, 'index'])->name('mypage.index');
     Route::post('/mypage/word', [CastMypage::class, 'updateWord'])->name('mypage.word');
-    Route::get('/mypage/employment', [CastMypage::class, 'employment'])->name('mypage.employment');
+    Route::get('/mypage/management', [CastMypage::class, 'employment'])->name('mypage.management');
     Route::get('/mypage/reviews', [CastMypage::class, 'reviews'])->name('mypage.reviews');
     Route::post('/mypage/payment/bank', [CastMypage::class, 'updateBank'])->name('mypage.payment.bank.update');
     Route::get('/mypage/identity', [CastMypage::class, 'identity'])->name('mypage.identity');

@@ -330,7 +330,7 @@ class MypageController extends Controller
         }
 
         $redirect = redirect()
-            ->route('cast.mypage.employment')
+            ->route('cast.mypage.management')
             ->with($result['success'] ? 'status' : 'error', $result['message']);
 
         return $result['success'] ? $redirect : $redirect->withInput();
@@ -382,7 +382,7 @@ class MypageController extends Controller
         $result = $this->billingManagementService->confirmCastReceipt($this->currentCastId());
 
         return redirect()
-            ->route('cast.mypage.employment')
+            ->route('cast.mypage.management')
             ->with($result['success'] ? 'status' : 'error', $result['message']);
     }
 

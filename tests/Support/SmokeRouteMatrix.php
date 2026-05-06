@@ -66,7 +66,7 @@ final class SmokeRouteMatrix
             'cast search ai' => ['cast.search.index', ['tab' => 'ai'], 200],
             'cast profile edit' => ['cast.profile.edit', [], 200],
             'cast mypage index' => ['cast.mypage.index', [], 200],
-            'cast mypage employment' => ['cast.mypage.employment', [], 200],
+            'cast mypage management' => ['cast.mypage.management', [], 200],
             'cast mypage reviews' => ['cast.mypage.reviews', [], 200],
             'cast mypage identity' => ['cast.mypage.identity', [], 200],
             'cast interaction index' => ['cast.interaction.index', [], 200],
