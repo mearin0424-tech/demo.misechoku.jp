@@ -45,8 +45,8 @@ class ProfileController extends Controller
                 'cast_profiles.bust',
                 'cast_profiles.waist',
                 'cast_profiles.hip',
-                'cast_profiles.shift',
-                'cast_profiles.where_work',
+                'cast_profiles.work_time',
+                'cast_profiles.work_where',
                 'cast_profiles.profession',
                 'cast_profiles.exp',
                 Schema::hasColumn('cast_profiles', 'personality_type')
@@ -64,7 +64,7 @@ class ProfileController extends Controller
         $looksTags = $this->getCastTagNamesByType($castId, 'looks');
         $personalityTags = $this->getCastTagNamesByType($castId, 'personality');
         $desiredJob = $this->resolveDesiredJobByIndustries($castId, $row->industry_id ?? null);
-        $workTime = $this->workTimeKeyFromShift($row->shift);
+        $workTime = $this->workTimeKeyFromShift($row->work_time);
 
         return [
             'nickname'       => $row->nickname ?? '',
@@ -86,8 +86,8 @@ class ProfileController extends Controller
             'desired_job'    => '',
             'my_field'       => '',
             'my_inner_skills'=> '',
-            'shift_hope'     => (string) ($row->where_work ?? ''),
-            'work_time'      => $this->workTimeKeyFromShift($row->shift),
+            'shift_hope'     => (string) ($row->work_where ?? ''),
+            'work_time'      => $this->workTimeKeyFromShift($row->work_time),
             'current_job'    => $row->profession ?? '',
             'night_work_exp' => $nightWorkExp,
             'industry_ids'   => $this->resolveCastIndustryIds($castId, $row->industry_id ?? null),
@@ -219,8 +219,8 @@ class ProfileController extends Controller
                 'bust' => $request->filled('bust') ? (int) $request->input('bust') : null,
                 'waist' => $request->filled('waist') ? (int) $request->input('waist') : null,
                 'hip' => $request->filled('hip') ? (int) $request->input('hip') : null,
-                'shift' => $this->workTimeShiftCode($request->input('work_time')),
-                'where_work' => $request->input('shift_hope'),
+                'work_time' => $this->workTimeShiftCode($request->input('work_time')),
+                'work_where' => $request->input('shift_hope'),
                 'profession' => $request->input('current_job'),
                 'exp' => $request->input('night_work_exp') === 'yes' ? 1 : 0,
                 'industry_id' => $industryIds[0] ?? null,
@@ -393,8 +393,8 @@ class ProfileController extends Controller
                 'cast_profiles.bust',
                 'cast_profiles.waist',
                 'cast_profiles.hip',
-                'cast_profiles.shift',
-                'cast_profiles.where_work',
+                'cast_profiles.work_time',
+                'cast_profiles.work_where',
                 'cast_profiles.profession',
                 'cast_profiles.exp',
                 'cast_profiles.pr',
@@ -475,7 +475,7 @@ class ProfileController extends Controller
             'looks_tags' => $looksTags,
             'personality_tags' => $personalityTags,
             'personality_type' => $this->resolvePersonalityType($row->personality_type ?? null),
-            'shift_hope' => (string) ($row->where_work ?? ''),
+            'shift_hope' => (string) ($row->work_where ?? ''),
             'work_time' => $workTime,
             'work_time_label' => $this->workTimeLabel($workTime),
             'current_job' => $row->profession ?? '',

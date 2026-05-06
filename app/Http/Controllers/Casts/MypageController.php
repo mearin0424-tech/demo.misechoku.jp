@@ -567,8 +567,8 @@ class MypageController extends Controller
                 'cast_profiles.bust',
                 'cast_profiles.waist',
                 'cast_profiles.hip',
-                'cast_profiles.shift',
-                'cast_profiles.where_work',
+                'cast_profiles.work_time',
+                'cast_profiles.work_where',
                 'cast_profiles.profession',
                 'cast_profiles.exp',
                 'cast_profiles.pr',
@@ -586,8 +586,8 @@ class MypageController extends Controller
 
         $birthday = $castRow->birthday ? Carbon::parse($castRow->birthday) : null;
         $age = $birthday ? $birthday->age : null;
-        $shiftHope = (string) ($castRow->where_work ?? '');
-        $workTime = $this->workTimeKeyFromShift($castRow->shift);
+        $shiftHope = (string) ($castRow->work_where ?? '');
+        $workTime = $this->workTimeKeyFromShift($castRow->work_time);
         $nightWorkExp = ((int) ($castRow->exp ?? 0) === 1 ? 'yes' : 'none');
         $looksTags = $this->getCastTagNamesByType($castId, 'looks');
         $personalityTags = $this->getCastTagNamesByType($castId, 'personality');

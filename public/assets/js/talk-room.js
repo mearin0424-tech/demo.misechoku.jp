@@ -336,7 +336,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     closeTemplateMenu();
                     messageInput.value = text;
                     messageInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    chatForm.requestSubmit();
+                    messageInput.focus();
                 });
                 templateMenuList.appendChild(button);
             });
@@ -809,7 +809,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     closeTemplateMenu();
                     messageInput.value = text;
                     messageInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    chatForm.requestSubmit();
+                    messageInput.focus();
                 });
                 templateMenuList.appendChild(button);
             });

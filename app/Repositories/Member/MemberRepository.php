@@ -1288,11 +1288,11 @@ class MemberRepository implements MemberRepositoryInterface
             'bust' => $payload['bust'] ?? ($payload['b'] ?? null),
             'waist' => $payload['waist'] ?? ($payload['w'] ?? null),
             'hip' => $payload['hip'] ?? ($payload['h'] ?? null),
-            'shift' => $payload['shift'] ?? null,
+            'work_time' => $payload['work_time'] ?? ($payload['shift'] ?? null),
             'profession' => $payload['profession'] ?? null,
             'exp' => $payload['exp'] ?? null,
             'years_exp' => $payload['years_exp'] ?? null,
-            'where_work' => $payload['where_work'] ?? null,
+            'work_where' => $payload['work_where'] ?? ($payload['where_work'] ?? null),
             'pr' => $payload['pr'] ?? null,
             'charm_point' => $payload['charm_point'] ?? null,
             'memo' => $payload['memo'] ?? null,
@@ -1360,11 +1360,11 @@ class MemberRepository implements MemberRepositoryInterface
             $cast->setAttribute('b', $profile->bust);
             $cast->setAttribute('w', $profile->waist);
             $cast->setAttribute('h', $profile->hip);
-            $cast->setAttribute('shift', $profile->shift);
+            $cast->setAttribute('shift', $profile->work_time);
             $cast->setAttribute('profession', $profile->profession);
             $cast->setAttribute('exp', $profile->exp);
             $cast->setAttribute('years_exp', $profile->years_exp);
-            $cast->setAttribute('where_work', $profile->where_work);
+            $cast->setAttribute('where_work', $profile->work_where);
             $cast->setAttribute('pr', $profile->pr);
             $cast->setAttribute('charm_point', $profile->charm_point);
             $cast->setAttribute('memo', $profile->memo);

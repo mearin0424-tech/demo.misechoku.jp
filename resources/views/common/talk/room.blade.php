@@ -363,12 +363,6 @@
                     <span>不採用を送る</span>
                 </button>
             @endif
-            @if(!empty($canCancelStatus))
-                <button type="button" id="open-cancel-status-menu" class="talk-action-item">
-                    <span class="talk-action-icon"><i class="fas fa-rotate-left"></i></span>
-                    <span>ステータスを戻す</span>
-                </button>
-            @endif
         </div>
     </div>
 </div>
@@ -849,14 +843,42 @@
             return;
         }
         if (bonusFlowMode === 'bonus_then_review') {
-            closeBonusModal();
-            if (pendingReviewApplicationId && pendingReviewTarget) {
-                if (pendingReviewTarget.review_exists) {
-                    window.alert('レビュー投稿は完了しています。');
-                    return;
-                }
-                showReviewModalWithTarget(pendingReviewApplicationId, pendingReviewTarget);
+            if (!actionUrl || !csrfToken || !chatForm) {
+                errEl.textContent = '送信先の設定が不足しています。';
+                errEl.style.display = 'block';
+                return;
             }
+            var partnerIdForBonus = chatForm.getAttribute('data-partner-id');
+            fetch(actionUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    partner_id: partnerIdForBonus,
+                    action_type: 'bonus_achievement_report'
+                })
+            })
+            .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, json: j }; }); })
+            .then(function (reportRes) {
+                if (!reportRes.ok || !reportRes.json.success) {
+                    throw new Error((reportRes.json && reportRes.json.message) || 'ボーナス達成報告に失敗しました。');
+                }
+                closeBonusModal();
+                if (pendingReviewApplicationId && pendingReviewTarget) {
+                    if (pendingReviewTarget.review_exists) {
+                        window.alert('レビュー投稿は完了しています。');
+                        return;
+                    }
+                    showReviewModalWithTarget(pendingReviewApplicationId, pendingReviewTarget);
+                }
+            })
+            .catch(function (reportErr) {
+                errEl.textContent = reportErr.message || 'ボーナス達成報告に失敗しました。';
+                errEl.style.display = 'block';
+            });
             return;
         }
         var fd = new FormData(form);
@@ -872,36 +894,8 @@
         .then(function (res) {
             if (btn) btn.disabled = false;
             if (res.success) {
-                if (!actionUrl || !csrfToken || !chatForm) {
-                    closeBonusModal();
-                    return;
-                }
-                var partnerId = chatForm.getAttribute('data-partner-id');
-                fetch(actionUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        partner_id: partnerId,
-                        action_type: 'bonus_achievement_report'
-                    })
-                })
-                .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, json: j }; }); })
-                .then(function (reportRes) {
-                    if (!reportRes.ok || !reportRes.json.success) {
-                        throw new Error((reportRes.json && reportRes.json.message) || 'ボーナス達成報告に失敗しました。');
-                    }
-                    closeBonusModal();
-                    showReviewModalWithTarget(pendingReviewApplicationId, pendingReviewTarget || { review_contents: [] });
-                })
-                .catch(function (reportErr) {
-                    errEl.textContent = reportErr.message || 'ボーナス達成報告に失敗しました。';
-                    errEl.style.display = 'block';
-                    if (btn) btn.disabled = false;
-                });
+                closeBonusModal();
+                window.location.href = '{{ route("cast.mypage.management") }}';
             } else {
                 errEl.textContent = res.message || '申請に失敗しました。';
                 errEl.style.display = 'block';
