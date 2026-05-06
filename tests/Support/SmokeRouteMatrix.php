@@ -14,9 +14,7 @@ final class SmokeRouteMatrix
             'support column' => ['pages.support.column', [], 200],
             'support form' => ['pages.support.form', [], 200],
             'setting notification' => ['setting.notification', [], 200],
-            'setting account email' => ['setting.account.email', [], 200],
-            'setting account password' => ['setting.account.password', [], 200],
-            'setting account withdraw' => ['setting.account.withdraw', [], 200],
+            'setting account' => ['setting.account', [], 200],
             'subscription' => ['subscription', [], 200],
             'maintenance' => ['maintenance', [], 200],
         ];

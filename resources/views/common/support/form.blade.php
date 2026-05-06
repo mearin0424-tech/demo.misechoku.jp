@@ -46,6 +46,48 @@
             </button>
         </form>
     </div>
+
+    <div class="support-form-faq">
+        <h2 class="support-form-faq-title">よくある質問</h2>
+        <div class="support-faq-list">
+            <details class="support-faq-item">
+                <summary class="support-faq-question">
+                    <span>ログインできない場合はどうすれば良いですか？</span>
+                    <i class="fas fa-chevron-down"></i>
+                </summary>
+                <div class="support-faq-answer">
+                    メールアドレス・パスワードに誤りがないかをご確認ください。デモ環境では再設定機能は画面イメージのみです。
+                </div>
+            </details>
+            <details class="support-faq-item">
+                <summary class="support-faq-question">
+                    <span>{{ $isCast ? 'お店からのオファーはどこで確認できますか？' : 'キャストからの応募やメッセージはどこで確認できますか？' }}</span>
+                    <i class="fas fa-chevron-down"></i>
+                </summary>
+                <div class="support-faq-answer">
+                    つながり（LIKES）タブとトーク画面から、やりとり中の相手を一覧で確認できます。
+                </div>
+            </details>
+            <details class="support-faq-item">
+                <summary class="support-faq-question">
+                    <span>通知のオン／オフはどこで変更できますか？</span>
+                    <i class="fas fa-chevron-down"></i>
+                </summary>
+                <div class="support-faq-answer">
+                    サイドメニュー内の「SETTING &gt; 通知設定」から、リマインダー通知の受け取り設定を変更できます。
+                </div>
+            </details>
+            <details class="support-faq-item">
+                <summary class="support-faq-question">
+                    <span>退会やアカウント削除はできますか？</span>
+                    <i class="fas fa-chevron-down"></i>
+                </summary>
+                <div class="support-faq-answer">
+                    サイドメニュー内の「SETTING &gt; アカウント設定」から退会手続きへ進めます。
+                </div>
+            </details>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -84,6 +126,15 @@
     padding: 16px 14px 18px;
     border: 1px solid rgba(212, 175, 55, 0.4);
 }
+.support-form-faq { margin-top: 16px; background: rgba(20, 7, 15, 0.9); border-radius: 16px; padding: 14px 12px; border: 1px solid rgba(212, 175, 55, 0.4); }
+.support-form-faq-title { font-size: 1rem; margin-bottom: 8px; color: #f9f5f5; }
+.support-faq-list { display: flex; flex-direction: column; gap: 10px; }
+.support-faq-item { background: rgba(8, 4, 6, 0.75); border-radius: 12px; border: 1px solid rgba(212, 175, 55, 0.24); padding: 4px 8px; }
+.support-faq-question { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 0.88rem; padding: 10px 6px; cursor: pointer; }
+.support-faq-question::-webkit-details-marker { display: none; }
+.support-faq-question i { font-size: 0.8rem; opacity: 0.7; transition: transform 0.2s ease; }
+.support-faq-item[open] .support-faq-question i { transform: rotate(180deg); }
+.support-faq-answer { padding: 0 6px 10px; font-size: 0.82rem; line-height: 1.7; color: #efe3e3; }
 @media (min-width: 768px) {
     .support-form-card {
         padding: 18px 20px 22px;

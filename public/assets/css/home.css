@@ -711,8 +711,10 @@ body.no-scroll main#main-content .content-wrapper {
 /* --- アクションボタン（右側・タッチしやすいサイズ） --- */
 .card-actions-overlay {
     position: absolute;
-    right: 10px;
-    bottom: 26%;
+    right: clamp(8px, 2.2vw, 20px);
+    top: clamp(84px, 50%, calc(100% - 132px));
+    bottom: auto;
+    transform: translateY(-50%);
     z-index: 40;
     display: flex;
     flex-direction: column;
@@ -962,7 +964,6 @@ body.no-scroll main#main-content .content-wrapper {
     .tag-pill { font-size: 0.72rem; padding: 2px 6px; }
     .card-actions-overlay {
         right: 8px;
-        bottom: 24%;
     }
     .card-shop-name-main { font-size: 1.0rem; }
     .card-shop-meta { font-size: 0.68rem; margin-bottom: 8px; }
@@ -992,7 +993,6 @@ body.no-scroll main#main-content .content-wrapper {
     }
     .card-actions-overlay {
         right: 16px;
-        bottom: 28%;
     }
 }
 
@@ -1017,7 +1017,6 @@ body.no-scroll main#main-content .content-wrapper {
     }
     .card-actions-overlay {
         right: 20px;
-        bottom: 30%;
     }
     .action-circle-btn:hover { transform: scale(1.08); }
     .action-btn-message:hover { transform: scale(1.05); }
@@ -1568,8 +1567,8 @@ body.no-scroll main#main-content .content-wrapper {
 
 /* --- アクションボタン（求人カード用レイアウト） --- */
 .cast-card--recruit .rc-actions {
-    right: 12px;
-    top: 50%;
+    right: clamp(8px, 2.2vw, 16px);
+    top: clamp(90px, 50%, calc(100% - 110px));
     bottom: auto !important;
     transform: translateY(-50%);
     gap: 12px;
@@ -1649,7 +1648,7 @@ body.no-scroll main#main-content .content-wrapper {
 @media (max-width: 380px) {
     .rc-shop-name { font-size: 1.05rem; }
     .cast-card--recruit .rc-info { padding-right: 68px; padding-bottom: 8px; }
-    .cast-card--recruit .rc-actions { right: 8px; top: 50%; transform: translateY(-50%); gap: 10px; }
+    .cast-card--recruit .rc-actions { right: 8px; top: clamp(86px, 50%, calc(100% - 104px)); transform: translateY(-50%); gap: 10px; }
     .cast-card--recruit .action-circle-btn { width: 36px; height: 36px; min-width: 36px; min-height: 36px; font-size: 0.88rem; }
     .cast-card--recruit .rc-bottom-bar { padding: 0 12px 8px; }
 }
@@ -1657,5 +1656,5 @@ body.no-scroll main#main-content .content-wrapper {
 @media (min-width: 768px) {
     .rc-shop-name { font-size: 1.45rem; }
     .cast-card--recruit .rc-info { padding-right: 84px; }
-    .cast-card--recruit .rc-actions { right: 16px; top: 50%; transform: translateY(-50%); }
+    .cast-card--recruit .rc-actions { right: 16px; top: clamp(94px, 50%, calc(100% - 116px)); transform: translateY(-50%); }
 }

@@ -13,7 +13,6 @@
     @include('layouts.parts.sub-header', [
         'tabs' => [
             ['id' => 'pane-keep', 'label' => 'キープ', 'active' => true],
-            ['id' => 'pane-like', 'label' => 'ライク', 'active' => false],
             ['id' => 'pane-footprint', 'label' => '足あと', 'active' => false]
         ]
     ])
@@ -35,52 +34,7 @@
             @endif
         </div>
 
-        {{-- タブ２：ライク (LIKE/MATCH) — 送ったLIKE / 受け取ったLIKE の2エリア表示 --}}
-        <div id="pane-like" class="tab-pane">
-            {{-- 送ったLIKE（先に表示） --}}
-            <section class="like-area" data-like-area="sent">
-                <h3 class="like-area-title">送ったLIKE</h3>
-                <div class="like-list-container like-list-compact {{ !empty($sentLikeCasts) && count($sentLikeCasts) >= 3 ? 'like-list-collapsed' : '' }}">
-                    @if (empty($sentLikeCasts))
-                        <div class="no-data-wrapper">
-                            <i class="fas fa-heart opacity-10 text-5xl mb-3 block"></i>
-                            <p class="no-data-msg">送ったいいねはまだありません。</p>
-                        </div>
-                    @else
-                        @foreach($sentLikeCasts as $c)
-                            @include('shops.interaction.like', ['c' => $c, 'profileRoute' => $profileRoute ?? 'shop.castprofileview.show'])
-                        @endforeach
-                    @endif
-                </div>
-                @if (!empty($sentLikeCasts) && count($sentLikeCasts) >= 3)
-                    <button type="button" class="like-expand-btn" data-target="sent" aria-expanded="false">広げて閲覧する</button>
-                @endif
-            </section>
-
-            @if (!isset($showReceivedLike) || $showReceivedLike)
-                {{-- 受け取ったLIKE --}}
-                <section class="like-area" data-like-area="received">
-                    <h3 class="like-area-title">受け取ったLIKE</h3>
-                    <div class="like-list-container like-list-compact {{ !empty($receivedLikeCasts) && count($receivedLikeCasts) >= 3 ? 'like-list-collapsed' : '' }}">
-                        @if (empty($receivedLikeCasts))
-                            <div class="no-data-wrapper">
-                                <i class="fas fa-heart opacity-10 text-5xl mb-3 block"></i>
-                                <p class="no-data-msg">受け取ったいいねはまだありません。</p>
-                            </div>
-                        @else
-                            @foreach($receivedLikeCasts as $c)
-                                @include('shops.interaction.like', ['c' => $c, 'profileRoute' => $profileRoute ?? 'shop.castprofileview.show'])
-                            @endforeach
-                        @endif
-                    </div>
-                    @if (!empty($receivedLikeCasts) && count($receivedLikeCasts) >= 3)
-                        <button type="button" class="like-expand-btn" data-target="received" aria-expanded="false">広げて閲覧する</button>
-                    @endif
-                </section>
-            @endif
-        </div>
-
-        {{-- タブ３：足あと (FOOTPRINT) --}}
+        {{-- タブ２：足あと (FOOTPRINT) --}}
         <div id="pane-footprint" class="tab-pane">
             @if (empty($footprintCasts))
                 <div class="no-data-wrapper">
@@ -99,18 +53,4 @@
 @push('scripts')
 {{-- 共通タブ切り替えJSの読み込み --}}
 <script src="{{ asset('assets/js/sub-header.js') }}"></script>
-<script>
-(function() {
-    document.querySelectorAll('.like-expand-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var area = this.closest('.like-area');
-            var list = area.querySelector('.like-list-container');
-            var isExpanded = area.classList.toggle('expanded');
-            list.classList.toggle('like-list-collapsed', !isExpanded);
-            this.setAttribute('aria-expanded', isExpanded);
-            this.textContent = isExpanded ? '閉じる' : '広げて閲覧する';
-        });
-    });
-})();
-</script>
 @endpush

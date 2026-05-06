@@ -3,9 +3,7 @@
 @section('title', 'お知らせ')
 
 @php
-    $showRoute = $isGuest
-        ? 'pages.support.notices.show'
-        : ($isCast ? 'cast.notices.show' : 'shop.notices.show');
+    $showRoute = 'pages.support.notices.show';
 @endphp
 
 @section('content')

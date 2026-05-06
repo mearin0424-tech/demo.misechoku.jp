@@ -3,9 +3,7 @@
 @section('title', $notice->title)
 
 @php
-    $indexRoute = $isGuest
-        ? 'pages.support.notices'
-        : ($isCast ? 'cast.notices.index' : 'shop.notices.index');
+    $indexRoute = 'pages.support.notices';
 @endphp
 
 @section('content')

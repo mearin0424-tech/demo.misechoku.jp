@@ -253,9 +253,7 @@ Route::prefix('setting')->name('setting.')->group(function () {
     Route::get('/notification', [SettingController::class, 'notification'])->name('notification');
     Route::post('/notification', [SettingController::class, 'updateNotification'])->name('notification.update');
     Route::get('/line/link', [LineLogin::class, 'redirectLink'])->name('line.link');
-    Route::get('/account/email', [SettingController::class, 'accountEmail'])->name('account.email');
-    Route::get('/account/password', [SettingController::class, 'accountPassword'])->name('account.password');
-    Route::get('/account/withdraw', [SettingController::class, 'accountWithdraw'])->name('account.withdraw');
+    Route::get('/account', [SettingController::class, 'account'])->name('account');
 });
 
 // 繝励Λ繝ｳ險ｭ螳夲ｼ亥ｺ苓・蟆ら畑繝ｻ繝・Δ逕ｨ・・
@@ -383,15 +381,10 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
     Route::post('/mypage/review/update', [ShopReview::class, 'updateStatus'])->name('review.update');
 
     // SUPPORT 繝壹・繧ｸ・亥ｺ苓・蜷代￠・・
-    Route::get('/feature', [PageController::class, 'feature'])->name('feature');
     Route::get('/htu', [PageController::class, 'htu'])->name('htu');
-    Route::get('/faq', [PageController::class, 'faq'])->name('faq');
 
     Route::get('/column', [ColumnArticleController::class, 'index'])->name('column.index');
     Route::get('/column/{slug}', [ColumnArticleController::class, 'show'])->name('column.show');
-
-    Route::get('/notices', [SupportNoticeController::class, 'index'])->name('notices.index');
-    Route::get('/notices/{slug}', [SupportNoticeController::class, 'show'])->name('notices.show');
 });
 
 /*
@@ -436,15 +429,10 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
     });
 
     // SUPPORT 繝壹・繧ｸ・医く繝｣繧ｹ繝亥髄縺托ｼ・
-    Route::get('/feature', [PageController::class, 'feature'])->name('feature');
     Route::get('/htu', [PageController::class, 'htu'])->name('htu');
-    Route::get('/faq', [PageController::class, 'faq'])->name('faq');
 
     Route::get('/column', [ColumnArticleController::class, 'index'])->name('column.index');
     Route::get('/column/{slug}', [ColumnArticleController::class, 'show'])->name('column.show');
-
-    Route::get('/notices', [SupportNoticeController::class, 'index'])->name('notices.index');
-    Route::get('/notices/{slug}', [SupportNoticeController::class, 'show'])->name('notices.show');
 });
 
 /* 蜀・Κ繧ｭ繝｣繝・す繝･繧ｯ繝ｪ繧｢逕ｨ */

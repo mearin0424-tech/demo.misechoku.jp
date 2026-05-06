@@ -27,26 +27,11 @@
         <div class="sidebar-section">
             <div class="menu-label-header">SETTING</div>
             <ul class="sidebar-sub-menu">
-                <li>
-                    <details class="sidebar-details">
-                        <summary class="menu-summary">
-                            <span><i class="fas fa-cog"></i> アカウント設定</span>
-                            <i class="fas fa-chevron-down arrow"></i>
-                        </summary>
-                        <ul class="sidebar-nested-menu">
-                            <li><a href="{{ url('/setting/account/email') }}"><i class="fas fa-envelope"></i> メールアドレス変更</a></li>
-                            <li><a href="{{ url('/setting/account/password') }}"><i class="fas fa-key"></i> パスワード変更</a></li>
-                            @if($isCast)
-                                <li><a href="{{ route('cast.mypage.identity') }}"><i class="fas fa-id-card"></i> 本人確認</a></li>
-                            @endif
-                            <li><a href="{{ url('/setting/account/withdraw') }}" class="text-danger"><i class="fas fa-user-slash"></i> 退会手続き</a></li>
-                        </ul>
-                    </details>
-                </li>
-                @if(!$isCast)
-                    <li><a href="{{ url('/subscription') }}"><i class="fas fa-crown"></i> プラン設定</a></li>
-                @endif
+                <li><a href="{{ route('setting.account') }}"><i class="fas fa-cog"></i> アカウント設定</a></li>
                 <li><a href="{{ url('/setting/notification') }}"><i class="fas fa-bell"></i> 通知設定</a></li>
+                @if(!$isCast)
+                    <li><a href="{{ url('/subscription') }}"><i class="fas fa-crown"></i> プラン選択</a></li>
+                @endif
             </ul>
         </div>
 
@@ -54,12 +39,9 @@
         <div class="sidebar-section">
             <div class="menu-label-header">SUPPORT</div>
             <ul class="sidebar-sub-menu">
-                <li><a href="{{ url("/$typePath/feature") }}"><i class="fas fa-star"></i> サービスの特徴</a></li>
-                <li><a href="{{ url("/$typePath/htu") }}"><i class="fas fa-book"></i> ご利用ガイド</a></li>
-                <li><a href="{{ url("/$typePath/faq") }}"><i class="fas fa-question-circle"></i> よくある質問（FAQ）</a></li>
                 <li><a href="{{ url("/{$typePath}/column") }}"><i class="fas fa-lightbulb"></i> お役立ちコラム</a></li>
-                <li><a href="{{ url("/{$typePath}/notices") }}"><i class="fas fa-bullhorn"></i> お知らせ</a></li>
-                <li><a href="{{ url('/support/form') }}"><i class="fas fa-paper-plane"></i> 問い合わせ窓口</a></li>
+                <li><a href="{{ url("/$typePath/htu") }}"><i class="fas fa-book"></i> ご利用ガイド</a></li>
+                <li><a href="{{ url('/support/form') }}"><i class="fas fa-paper-plane"></i> 問い合わせ</a></li>
             </ul>
         </div>
 
@@ -67,10 +49,9 @@
         <div class="sidebar-section">
             <div class="menu-label-header">OFFICIAL</div>
             <ul class="sidebar-sub-menu">
-                <li><a href="{{ url('/about') }}"><i class="fas fa-building"></i> 運営協会</a></li>
+                <li><a href="{{ url('/about') }}"><i class="fas fa-building"></i> 運営会社</a></li>
                 <li><a href="{{ url('/terms') }}"><i class="fas fa-file-contract"></i> 利用規約</a></li>
                 <li><a href="{{ url('/privacy') }}"><i class="fas fa-shield-alt"></i> プライバシーポリシー</a></li>
-                <li><a href="{{ route('pages.official.privacy') }}"><i class="fas fa-lock"></i> 安全な個人情報の取り扱いについて</a></li>
             </ul>
         </div>
     </div>

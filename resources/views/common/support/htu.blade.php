@@ -17,6 +17,29 @@
         </p>
     </div>
 
+    <div class="support-htu-feature-grid">
+        <section class="support-htu-feature-card">
+            <h2 class="support-htu-feature-title"><i class="fas fa-bolt"></i> 直感的にさがせる検索体験</h2>
+            <p class="support-htu-feature-body">
+                タイムライン形式の検索画面で、雰囲気や条件を直感的に比較できます。
+                {{ $isCast ? '自分に合いそうなお店を感覚的に見つけやすい設計です。' : '理想のキャスト像に近い人をスムーズに探せるUIです。' }}
+            </p>
+        </section>
+        <section class="support-htu-feature-card">
+            <h2 class="support-htu-feature-title"><i class="fas fa-comments"></i> アプリ内で完結するやりとり</h2>
+            <p class="support-htu-feature-body">
+                トーク機能を使って、個人の連絡先を教えずにやりとりできます。
+                {{ $isCast ? 'お店とのやりとり履歴も1つの画面で確認できます。' : '複数キャストとの候補調整もアプリ内で完結できます。' }}
+            </p>
+        </section>
+        <section class="support-htu-feature-card">
+            <h2 class="support-htu-feature-title"><i class="fas fa-shield-alt"></i> 使い方ガイドとサポート</h2>
+            <p class="support-htu-feature-body">
+                ご利用ガイド・問い合わせ窓口・お役立ちコラムを通じて、利用中の不明点を確認できます。
+            </p>
+        </section>
+    </div>
+
     <ol class="support-htu-steps">
         <li class="support-htu-step">
             <div class="support-htu-step-header">
@@ -113,11 +136,19 @@
 .support-htu-steps {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: 18px 0 0;
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
+.support-htu-feature-grid { display: flex; flex-direction: column; gap: 12px; }
+@media (min-width: 768px) {
+    .support-htu-feature-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+}
+.support-htu-feature-card { background: rgba(20, 7, 15, 0.9); border-radius: 16px; padding: 14px 12px; border: 1px solid rgba(212, 175, 55, 0.4); }
+.support-htu-feature-title { font-size: 0.95rem; display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.support-htu-feature-title i { color: var(--color-gold, #d4af37); }
+.support-htu-feature-body { font-size: 0.82rem; line-height: 1.7; color: #efe3e3; }
 
 .support-htu-step {
     background: rgba(20, 7, 15, 0.9);

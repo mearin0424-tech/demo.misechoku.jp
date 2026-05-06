@@ -7,6 +7,7 @@ use Illuminate\Pagination\Paginator;
 use App\Services\AdminOperationalSummaryService;
 use App\Services\DocumentReviewService;
 use App\Services\ReviewPortalService;
+use App\Models\Notice;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\View;
@@ -42,6 +43,7 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer('*', function ($view) {
             $notifications = [];
+            $operationalNotices = [];
             $unreadNewsCount = 0;
 
             $todoList = [];
@@ -53,7 +55,36 @@ class AppServiceProvider extends ServiceProvider
                 $todoList = app(DocumentReviewService::class)->getShopPortalTodoMessages($shopId);
             }
 
+            try {
+                $noticeQuery = Notice::query()
+                    ->published()
+                    ->orderByDesc('published_at')
+                    ->orderByDesc('id');
+
+                if (request()->is('cast/*')) {
+                    $noticeQuery->forCast();
+                } elseif (request()->is('shop/*')) {
+                    $noticeQuery->forShop();
+                } else {
+                    $noticeQuery->forGuest();
+                }
+
+                $operationalNotices = $noticeQuery
+                    ->limit(5)
+                    ->get(['title', 'slug', 'body', 'published_at'])
+                    ->map(fn (Notice $notice) => [
+                        'title' => $notice->title,
+                        'body' => $notice->body,
+                        'url' => route('pages.support.notices.show', ['slug' => $notice->slug]),
+                        'published_at' => optional($notice->published_at)->format('Y/m/d'),
+                    ])
+                    ->all();
+            } catch (\Throwable $e) {
+                $operationalNotices = [];
+            }
+
             $view->with('notifications', $notifications);
+            $view->with('operationalNotices', $operationalNotices);
             $view->with('unreadNewsCount', $unreadNewsCount);
             $view->with('todoList', $todoList);
         });

@@ -6,7 +6,7 @@
 <div class="setting-page">
     <div class="setting-header">
         <h1 class="setting-title">通知設定</h1>
-        <p class="setting-lead">ミセチョクからのお知らせやリマインダーの受け取り方法を設定します。</p>
+        <p class="setting-lead">ミセチョクからのリマインダー通知の受け取り方法を設定します。</p>
     </div>
 
     @if (session('message'))
@@ -19,26 +19,6 @@
     @endif
 
     @if ($isLoggedIn ?? false)
-    <section class="setting-section">
-        <h2 class="setting-section-title">LINE連携</h2>
-        <div class="setting-row">
-            <div class="setting-row-main">
-                <div class="setting-row-label">LINEでログイン・通知</div>
-                <div class="setting-row-desc">
-                    LINEと連携すると、LINEでログインでき、リマインダー通知をLINEにも送れます。
-                    @if ($lineLinked ?? false)
-                        <strong class="setting-linked">連携済み</strong>
-                    @endif
-                </div>
-            </div>
-            @if ($lineLinked ?? false)
-                <span class="setting-badge">連携済み</span>
-            @else
-                <a href="{{ $lineLinkUrl ?? '#' }}" class="setting-btn setting-btn-line">LINEと連携</a>
-            @endif
-        </div>
-    </section>
-
     <section class="setting-section">
         <h2 class="setting-section-title">ホーム追加（PWA）</h2>
         <div class="setting-row">
@@ -130,11 +110,8 @@
 .setting-alert { padding: 12px 14px; border-radius: 12px; margin-bottom: 16px; }
 .setting-alert-success { background: rgba(22,163,74,0.2); border: 1px solid rgba(22,163,74,0.5); color: #bbf7d0; }
 .setting-alert-error { background: rgba(185,28,28,0.2); border: 1px solid rgba(248,113,113,0.5); color: #fecaca; }
-.setting-linked { color: var(--color-gold, #d4af37); }
-.setting-badge { font-size: 0.8rem; padding: 6px 12px; border-radius: 999px; background: rgba(22,163,74,0.3); color: #bbf7d0; }
 .setting-btn { display: inline-block; padding: 10px 18px; border-radius: 12px; font-size: 0.88rem; font-weight: 600; text-decoration: none; border: none; transition: opacity 0.2s; cursor: pointer; }
 .setting-btn:hover { opacity: 0.9; }
-.setting-btn-line { background: #06c755; color: #fff; }
 .setting-btn-install { background: #8b5cf6; color: #fff; }
 .setting-btn-push { background: #1f2937; color: #f9f5f5; border: 1px solid rgba(212,175,55,0.55); }
 .setting-btn-test { background: #065f46; color: #ecfdf5; border: 1px solid rgba(52,211,153,0.65); }

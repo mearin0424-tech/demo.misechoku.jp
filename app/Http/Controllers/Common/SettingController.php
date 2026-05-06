@@ -19,21 +19,8 @@ class SettingController extends Controller
     public function notification()
     {
         $isCast = request()->is('cast/*');
-        $lineLinked = false;
-        $lineLinkUrl = route('setting.line.link');
 
         [$actorType, $actorId] = $this->resolveActor();
-
-        if (auth()->guard('member')->check()) {
-            $user = auth()->guard('member')->user();
-            $lineLinked = CastProvider::query()
-                ->where('cast_id', $user->getAuthIdentifier())
-                ->where('provider', 'line')
-                ->exists();
-        } elseif (auth()->guard('shop')->check()) {
-            $user = auth()->guard('shop')->user();
-            $lineLinked = !empty($user->line_user_id);
-        }
 
         $prefs = ($actorType && $actorId)
             ? $this->preferenceService->get($actorType, $actorId)
@@ -46,8 +33,6 @@ class SettingController extends Controller
 
         return view('common.setting.notification', [
             'isCast' => $isCast,
-            'lineLinked' => $lineLinked,
-            'lineLinkUrl' => $lineLinkUrl,
             'isLoggedIn' => auth()->guard('member')->check() || auth()->guard('shop')->check(),
             'notificationPrefs' => $prefs,
         ]);
@@ -75,22 +60,24 @@ class SettingController extends Controller
         return redirect()->route('setting.notification')->with('message', '通知設定を更新しました。');
     }
 
-    public function accountEmail()
+    public function account()
     {
         $isCast = request()->is('cast/*');
-        return view('common.setting.account-email', compact('isCast'));
-    }
+        $lineLinked = false;
+        $lineLinkUrl = route('setting.line.link');
 
-    public function accountPassword()
-    {
-        $isCast = request()->is('cast/*');
-        return view('common.setting.account-password', compact('isCast'));
-    }
+        if (auth()->guard('member')->check()) {
+            $user = auth()->guard('member')->user();
+            $lineLinked = CastProvider::query()
+                ->where('cast_id', $user->getAuthIdentifier())
+                ->where('provider', 'line')
+                ->exists();
+        } elseif (auth()->guard('shop')->check()) {
+            $user = auth()->guard('shop')->user();
+            $lineLinked = !empty($user->line_user_id);
+        }
 
-    public function accountWithdraw()
-    {
-        $isCast = request()->is('cast/*');
-        return view('common.setting.account-withdraw', compact('isCast'));
+        return view('common.setting.account', compact('isCast', 'lineLinked', 'lineLinkUrl'));
     }
 
     public function subscription()
