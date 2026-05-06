@@ -2,162 +2,6 @@
 
 @section('title', '入金・振込管理')
 
-@push('admin-styles')
-<style>
-    .billing-summary-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 14px;
-    }
-    .billing-summary-value {
-        margin-top: 10px;
-        font-size: 1.6rem;
-        font-weight: 800;
-    }
-    .billing-detail-card {
-        display: grid;
-        grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr);
-        gap: 18px;
-    }
-    .billing-meta-list,
-    .billing-amount-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 10px;
-        margin: 12px 0 0;
-    }
-    .billing-meta-item {
-        padding: 12px 14px;
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.9);
-        border: 0;
-        box-shadow: var(--admin-shadow);
-    }
-    .billing-meta-label {
-        font-size: 0.72rem;
-        color: var(--admin-muted);
-        margin-bottom: 6px;
-    }
-    .billing-meta-value {
-        font-size: 0.92rem;
-        font-weight: 700;
-        color: var(--admin-text);
-    }
-    .billing-status-chip {
-        display: inline-flex;
-        align-items: center;
-        padding: 5px 10px;
-        border-radius: 999px;
-        background: rgba(37, 99, 235, 0.1);
-        color: #1d4ed8;
-        font-size: 0.75rem;
-        font-weight: 700;
-    }
-    .billing-action-box {
-        padding: 16px;
-        border-radius: 16px;
-        background: rgba(255, 255, 255, 0.85);
-        border: 0;
-        box-shadow: var(--admin-shadow);
-    }
-    .billing-action-box + .billing-action-box {
-        margin-top: 12px;
-    }
-    .billing-action-title {
-        margin: 0 0 10px;
-        font-size: 0.92rem;
-        font-weight: 700;
-        color: var(--admin-text);
-    }
-    .billing-check-grid {
-        display: grid;
-        gap: 10px;
-        margin-top: 12px;
-    }
-    .billing-check-item {
-        display: flex;
-        gap: 10px;
-        align-items: flex-start;
-        font-size: 0.84rem;
-        color: var(--admin-sub);
-    }
-    .billing-inline-form {
-        display: grid;
-        gap: 12px;
-    }
-    .billing-note {
-        margin-top: 10px;
-        color: var(--admin-muted);
-        font-size: 0.78rem;
-        line-height: 1.6;
-    }
-    .billing-review-box {
-        margin-top: 14px;
-        padding: 14px;
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.85);
-        border: 0;
-        box-shadow: var(--admin-shadow);
-    }
-    .billing-review-title {
-        margin: 0 0 8px;
-        font-size: 0.84rem;
-        font-weight: 700;
-        color: var(--admin-text);
-    }
-    .billing-review-text {
-        font-size: 0.82rem;
-        line-height: 1.7;
-        color: var(--admin-sub);
-        white-space: pre-wrap;
-    }
-    .billing-review-grid {
-        display: grid;
-        gap: 8px;
-        margin-top: 10px;
-    }
-    .billing-review-item {
-        display: flex;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 9px 12px;
-        border-radius: 12px;
-        background: rgba(62, 44, 38, 0.04);
-        font-size: 0.8rem;
-    }
-    .billing-alert-unconfirmed {
-        border-color: rgba(239, 68, 68, 0.5);
-        background: linear-gradient(135deg, rgba(239, 68, 68, 0.06) 0%, transparent 50%);
-    }
-    .billing-copy-wrap {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .billing-copy-wrap .billing-meta-value { flex: 1; }
-    .billing-amount-readonly {
-        user-select: none;
-        -webkit-user-select: none;
-    }
-    .btn-copy {
-        padding: 6px 10px;
-        font-size: 0.75rem;
-        border-radius: 8px;
-        background: rgba(37, 99, 235, 0.1);
-        border: 0;
-        color: #1d4ed8;
-        cursor: pointer;
-        box-shadow: var(--admin-shadow);
-    }
-    .btn-copy:hover { background: rgba(37, 99, 235, 0.16); }
-    @media (max-width: 980px) {
-        .billing-detail-card {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
-@endpush
-
 @section('content')
     <div class="admin-page">
         <h1 class="admin-title">入金・振込管理</h1>
@@ -174,19 +18,19 @@
         @endif
 
         @if(session('error'))
-            <div class="admin-alert" style="background: rgba(194, 65, 60, 0.1); border: 0; color: #7f1d1d;">
+            <div class="admin-alert admin-alert-error">
                 {{ session('error') }}
             </div>
         @endif
 
         @if(!empty($summary['unconfirmed_cast_over_7days']))
-            <div class="admin-alert" style="background: rgba(239, 68, 68, 0.1); border: 0; color: #7f1d1d;">
+            <div class="admin-alert admin-alert-error">
                 <strong>要確認：</strong> 振込済みのうち、キャストの入金確認が7日以上ない案件が {{ $summary['unconfirmed_cast_over_7days'] }} 件あります。個別フォローを推奨します。
             </div>
         @endif
 
         @if($errors->any())
-            <div class="admin-alert" style="background: rgba(194, 65, 60, 0.1); border: 0; color: #7f1d1d;">
+            <div class="admin-alert admin-alert-error">
                 {{ $errors->first() }}
             </div>
         @endif
@@ -219,7 +63,7 @@
             <section class="admin-panel {{ $isUnconfirmedOver7 ? 'billing-alert-unconfirmed' : '' }}" id="deposit-{{ $deposit['id'] }}">
                 <div class="billing-detail-card">
                     <div>
-                        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                        <div class="billing-detail-row">
                             <div>
                                 <h2 class="admin-panel-title" style="margin-bottom:6px;">
                                     #{{ $deposit['id'] }} {{ $deposit['shop_name'] }} / {{ $deposit['cast_name'] }}
@@ -405,7 +249,7 @@
                                     </form>
                                     <form method="POST" action="{{ route('admin.deposits.payment-task.invalidate', $deposit['id']) }}" class="billing-inline-form" style="margin-top:10px;" onsubmit="return confirm('振込タスクを無効にしますか？口座修正後は別タスクで再発行してください。');">
                                         @csrf
-                                        <button type="submit" class="btn-action" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5;">
+                                        <button type="submit" class="btn-action danger">
                                             <i class="fas fa-ban"></i> 振込タスクを無効にする（組戻し・口座誤り時）
                                         </button>
                                     </form>
@@ -438,7 +282,7 @@
                                     </form>
                                     <form method="POST" action="{{ route('admin.deposits.payment-task.invalidate', $deposit['id']) }}" class="billing-inline-form" style="margin-top:10px;" onsubmit="return confirm('振込タスクを無効にしますか？');">
                                         @csrf
-                                        <button type="submit" class="btn-action" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5;">
+                                        <button type="submit" class="btn-action danger">
                                             <i class="fas fa-ban"></i> 振込タスクを無効にする
                                         </button>
                                     </form>
@@ -455,12 +299,12 @@
                                         @if(empty($task->refund_required))
                                             <form method="POST" action="{{ route('admin.deposits.payment-task.refund-flag', $deposit['id']) }}" style="margin-top:10px;" onsubmit="return confirm('要返金フラグを立てますか？（支払後にレビュー不正等が判明した場合）');">
                                                 @csrf
-                                                <button type="submit" class="btn-action" style="background: rgba(245, 158, 11, 0.15); color: #fcd34d;">
+                                                <button type="submit" class="btn-action warning">
                                                     <i class="fas fa-flag"></i> 要返金フラグを立てる
                                                 </button>
                                             </form>
                                         @else
-                                            <span class="admin-note" style="display:block; margin-top:8px; color: #f59e0b;">要返金フラグが立っています。</span>
+                                            <span class="admin-status-badge is-warning" style="margin-top:8px;">要返金フラグが立っています。</span>
                                         @endif
                                     @else
                                         この振込タスクは無効です。口座修正後は別タスクで再発行してください。

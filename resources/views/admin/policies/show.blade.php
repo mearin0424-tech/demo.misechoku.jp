@@ -53,12 +53,12 @@
         </div>
 
         @if (session('status'))
-            <div class="admin-alert" style="margin-bottom:1rem;">{{ session('status') }}</div>
+            <div class="admin-alert admin-alert-success" style="margin-bottom:1rem;">{{ session('status') }}</div>
         @endif
 
         @if ($errors->any())
-            <div class="admin-alert" style="margin-bottom:1rem;border-color:var(--admin-red);">
-                <ul style="margin:0;padding-left:1.2em;">
+            <div class="admin-alert admin-alert-error" style="margin-bottom:1rem;">
+                <ul>
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach

@@ -2,86 +2,6 @@
 
 @section('title', '請求・振込タスク管理')
 
-@push('admin-styles')
-<style>
-    .task-card-list {
-        display: grid;
-        gap: 16px;
-    }
-    .task-card {
-        padding: 18px;
-        border-radius: 18px;
-        border: 0;
-        background: var(--admin-card);
-        box-shadow: var(--admin-shadow-lg);
-    }
-    .task-card-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        flex-wrap: wrap;
-        margin-bottom: 12px;
-    }
-    .task-card-id {
-        font-size: 0.78rem;
-        color: var(--admin-muted);
-    }
-    .task-card-title {
-        margin: 4px 0 0;
-        font-size: 1rem;
-        font-weight: 800;
-        color: var(--admin-text);
-    }
-    .task-card-chip {
-        display: inline-flex;
-        align-items: center;
-        padding: 5px 10px;
-        border-radius: 999px;
-        background: rgba(37, 99, 235, 0.1);
-        color: #1d4ed8;
-        font-size: 0.74rem;
-        font-weight: 700;
-    }
-    .task-card-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 10px;
-        margin-bottom: 12px;
-    }
-    .task-card-item {
-        padding: 12px 14px;
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.85);
-        border: 0;
-        box-shadow: var(--admin-shadow);
-    }
-    .task-card-label {
-        font-size: 0.72rem;
-        color: var(--admin-muted);
-        margin-bottom: 6px;
-    }
-    .task-card-value {
-        font-size: 0.88rem;
-        font-weight: 700;
-        line-height: 1.6;
-        color: var(--admin-text);
-    }
-    .task-card-text {
-        margin-top: 10px;
-        font-size: 0.83rem;
-        line-height: 1.7;
-        color: var(--admin-sub);
-        white-space: pre-wrap;
-    }
-    .task-card-actions {
-        margin-top: 14px;
-        display: flex;
-        justify-content: flex-end;
-    }
-</style>
-@endpush
-
 @section('content')
     <div class="admin-page">
         <h1 class="admin-title">請求・振込タスク管理</h1>
@@ -97,7 +17,7 @@
         @endif
 
         @if(session('error'))
-            <div class="admin-alert" style="background: rgba(194, 65, 60, 0.1); border: 0; color: #7f1d1d;">
+            <div class="admin-alert admin-alert-error">
                 {{ session('error') }}
             </div>
         @endif

@@ -57,11 +57,11 @@
                                 @endif
                             </td>
                             <td class="text-right">
-                                <a href="{{ route('admin.notices.edit', $notice) }}" style="color:var(--admin-blue);margin-right:8px;">編集</a>
+                                <a href="{{ route('admin.notices.edit', $notice) }}" class="row-action-link">編集</a>
                                 <form action="{{ route('admin.notices.destroy', $notice) }}" method="post" onsubmit="return confirm('削除しますか？');" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" style="background:none;border:none;cursor:pointer;color:var(--admin-red);padding:0;font:inherit;">削除</button>
+                                    <button type="submit" class="row-action-link is-danger">削除</button>
                                 </form>
                             </td>
                         </tr>

@@ -5,8 +5,8 @@
     <h2 class="admin-panel-title">{{ $isEdit ? 'お知らせを編集' : 'お知らせを新規作成' }}</h2>
 
     @if ($errors->any())
-        <div class="admin-alert" style="border-color: var(--admin-red);">
-            <ul style="margin:0;padding-left:1.2em;">
+        <div class="admin-alert admin-alert-error">
+            <ul>
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -32,7 +32,7 @@
 
         <div class="admin-form-row">
             <label class="admin-label">公開する</label>
-            <label style="display:flex;align-items:center;gap:8px;">
+            <label class="admin-check-row">
                 <input type="checkbox" name="is_published" value="1" {{ old('is_published', optional($notice)->is_published) ? 'checked' : '' }}>
                 <span>公開（オフの場合は下書き扱い）</span>
             </label>
@@ -42,21 +42,21 @@
             <label class="admin-label">公開日時</label>
             <input type="datetime-local" name="published_at" class="admin-input"
                 value="{{ old('published_at', optional($notice)->published_at ? optional($notice)->published_at->format('Y-m-d\TH:i') : '') }}">
-            <small style="display:block; margin-top:6px; color:#7c8ba3;">公開ONかつ日時が未来の場合、予約公開として扱います。</small>
+            <small class="admin-note u-block u-mt-8">公開ONかつ日時が未来の場合、予約公開として扱います。</small>
         </div>
 
         <div class="admin-form-row">
             <label class="admin-label">配信対象</label>
-            <div style="display:flex;flex-direction:column;gap:8px;">
-                <label style="display:flex;align-items:center;gap:8px;">
+            <div class="admin-checks-stack">
+                <label class="admin-check-row">
                     <input type="checkbox" name="visible_to_cast" value="1" {{ old('visible_to_cast', optional($notice)->visible_to_cast ?? true) ? 'checked' : '' }}>
                     <span>キャストアプリ内</span>
                 </label>
-                <label style="display:flex;align-items:center;gap:8px;">
+                <label class="admin-check-row">
                     <input type="checkbox" name="visible_to_shop" value="1" {{ old('visible_to_shop', optional($notice)->visible_to_shop ?? true) ? 'checked' : '' }}>
                     <span>店舗アプリ内</span>
                 </label>
-                <label style="display:flex;align-items:center;gap:8px;">
+                <label class="admin-check-row">
                     <input type="checkbox" name="visible_to_guest" value="1" {{ old('visible_to_guest', optional($notice)->visible_to_guest ?? false) ? 'checked' : '' }}>
                     <span>未ログイン（/support/notices）</span>
                 </label>
@@ -64,10 +64,10 @@
         </div>
 
         <div class="admin-form-actions">
+            <a href="{{ route('admin.notices.index') }}" class="btn-action btn-action-secondary">一覧へ戻る</a>
             <button type="submit" class="btn-action manage">
                 <i class="fas fa-save"></i> {{ $isEdit ? '更新する' : '登録する' }}
             </button>
-            <a href="{{ route('admin.notices.index') }}" class="btn-action" style="margin-left:8px;text-decoration:none;display:inline-flex;align-items:center;">一覧へ戻る</a>
         </div>
     </form>
 </div>

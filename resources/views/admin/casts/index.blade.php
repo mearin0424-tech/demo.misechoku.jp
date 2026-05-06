@@ -29,12 +29,12 @@
                             <td>{{ number_format($cast['fee']) }} 円</td>
                             <td>{{ optional($cast['published_at'])->format('Y-m-d') }}</td>
                             <td>{{ $cast['identity_status'] }}</td>
-                            <td style="min-width: 340px;">
+                            <td class="u-min-w-340">
                                 @php($summary = $cast['operation_summary'] ?? null)
                                 @if($summary)
-                                    <div style="font-size: .8rem; line-height: 1.7;">
+                                    <div class="u-text-pre">
                                         <div>請求書送付: <strong>{{ number_format($summary['invoice_issued']) }}</strong> 件 / 振込実行: <strong>{{ number_format($summary['cast_transferred']) }}</strong> 件 / 完了: <strong>{{ number_format($summary['completed']) }}</strong> 件</div>
-                                        <div style="color: var(--admin-muted);">最新: {{ $summary['latest_status_label'] }}{{ !empty($summary['latest_updated_at']) ? '（' . $summary['latest_updated_at'] . '）' : '' }}</div>
+                                        <div class="text-muted text-xs u-mt-4">最新: {{ $summary['latest_status_label'] }}{{ !empty($summary['latest_updated_at']) ? '（' . $summary['latest_updated_at'] . '）' : '' }}</div>
                                     </div>
                                 @else
                                     <span class="text-muted">請求・振込フロー実績なし</span>

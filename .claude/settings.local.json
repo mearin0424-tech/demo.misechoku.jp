@@ -10,7 +10,10 @@
       "Bash(git checkout *)",
       "Bash(git cherry-pick *)",
       "Bash(php -l app/Http/Controllers/Shops/RecruitmentController.php)",
-      "Bash(php artisan *)"
+      "Bash(php artisan *)",
+      "Bash(composer install *)",
+      "Bash(php -d error_reporting=\"E_ALL & ~E_DEPRECATED & ~E_STRICT\" artisan view:clear)",
+      "Bash(php -d error_reporting=\"E_ALL & ~E_DEPRECATED & ~E_STRICT\" artisan view:cache)"
     ]
   }
 }

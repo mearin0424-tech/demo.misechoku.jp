@@ -2,222 +2,6 @@
 
 @section('title', '請求書発行')
 
-@push('admin-styles')
-<style>
-    .invoice-issue-hero {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-        padding: 20px;
-        border-radius: 18px;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(245, 239, 230, 0.95));
-        border: 0;
-        box-shadow: var(--admin-shadow);
-        margin-bottom: 20px;
-    }
-    .invoice-issue-hero-title {
-        margin: 0 0 6px;
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: var(--admin-text);
-    }
-    .invoice-issue-hero-desc {
-        margin: 0;
-        font-size: 0.84rem;
-        color: var(--admin-sub);
-        line-height: 1.5;
-    }
-    .invoice-template-dl {
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        padding: 12px 18px;
-        border-radius: 14px;
-        background: var(--admin-gold);
-        color: #120405;
-        text-decoration: none;
-        font-weight: 700;
-        font-size: 0.9rem;
-        border: none;
-        cursor: pointer;
-        transition: opacity 0.2s, transform 0.12s;
-    }
-    .invoice-template-dl:hover {
-        opacity: 0.95;
-        transform: translateY(-1px);
-        color: #120405;
-    }
-    .invoice-pending-count {
-        font-size: 1.5rem;
-        font-weight: 800;
-        color: var(--admin-gold);
-        margin: 0 0 4px;
-    }
-    .invoice-pending-list {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-    .invoice-pending-card {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 14px 18px;
-        border-radius: 14px;
-        background: var(--admin-card);
-        border: 0;
-        box-shadow: var(--admin-shadow);
-    }
-    .invoice-pending-card-info {
-        flex: 1;
-        min-width: 0;
-    }
-    .invoice-pending-card-title {
-        margin: 0 0 4px;
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: var(--admin-text);
-    }
-    .invoice-pending-card-meta {
-        font-size: 0.8rem;
-        color: var(--admin-muted);
-    }
-    .invoice-pending-card-amount {
-        font-size: 1rem;
-        font-weight: 700;
-        color: var(--admin-gold);
-    }
-    .invoice-pending-card-actions {
-        display: flex;
-        gap: 10px;
-        flex-shrink: 0;
-    }
-    .invoice-empty-note {
-        padding: 24px;
-        text-align: center;
-        color: var(--admin-muted);
-        font-size: 0.9rem;
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.6);
-        border: 0;
-        box-shadow: var(--admin-shadow);
-    }
-    .invoice-link-deposits {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 16px;
-        border-radius: 12px;
-        background: rgba(185, 140, 36, 0.12);
-        border: 0;
-        box-shadow: var(--admin-shadow);
-        color: var(--admin-gold-strong);
-        text-decoration: none;
-        font-weight: 700;
-        font-size: 0.86rem;
-    }
-    .invoice-link-deposits:hover {
-        background: rgba(185, 140, 36, 0.18);
-        color: var(--admin-gold-strong);
-    }
-    .invoice-manual-warning {
-        padding: 16px 18px;
-        border-radius: 14px;
-        background: rgba(251, 191, 36, 0.14);
-        border: 0;
-        box-shadow: var(--admin-shadow);
-        color: #78350f;
-        font-size: 0.88rem;
-        line-height: 1.7;
-        margin-bottom: 16px;
-    }
-    .invoice-manual-warning strong { color: #92400e; }
-    .invoice-manual-list { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; }
-    .invoice-manual-row {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 14px;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.85);
-        border: 0;
-        box-shadow: var(--admin-shadow);
-    }
-    .invoice-manual-row input[type="radio"] { flex-shrink: 0; }
-    .invoice-manual-row label { flex: 1; min-width: 0; cursor: pointer; margin: 0; }
-    .invoice-manual-check { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
-    .invoice-manual-check label { display: flex; gap: 10px; align-items: flex-start; font-size: 0.86rem; color: var(--admin-sub); cursor: pointer; }
-    .invoice-admin-bank .billing-meta-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 10px;
-        margin: 12px 0 0;
-    }
-    .invoice-admin-bank .billing-meta-item {
-        padding: 12px 14px;
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.9);
-        border: 0;
-        box-shadow: var(--admin-shadow);
-    }
-    .invoice-admin-bank .billing-meta-label {
-        font-size: 0.72rem;
-        color: var(--admin-muted);
-        margin-bottom: 6px;
-    }
-    .invoice-admin-bank .billing-meta-value {
-        font-size: 0.92rem;
-        font-weight: 700;
-    }
-    .invoice-manual-template-wrap {
-        border: 0;
-        border-radius: 16px;
-        padding: 18px;
-        background: rgba(255, 255, 255, 0.65);
-        box-shadow: var(--admin-shadow);
-        margin-bottom: 16px;
-    }
-    .invoice-manual-paper {
-        margin-top: 16px;
-        padding: 18px;
-        border-radius: 14px;
-        background: var(--admin-card);
-        border: 0;
-        box-shadow: var(--admin-shadow);
-    }
-    .invoice-manual-paper-title {
-        margin: 0 0 14px;
-        font-size: 0.88rem;
-        font-weight: 700;
-        color: var(--admin-gold);
-        letter-spacing: 0.06em;
-    }
-    .invoice-manual-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-    }
-    .invoice-manual-amounts {
-        margin-top: 8px;
-    }
-    .invoice-manual-field { margin-bottom: 0; }
-    .invoice-manual-hint {
-        display: block;
-        margin-top: 6px;
-        font-size: 0.72rem;
-        color: var(--admin-muted);
-        line-height: 1.4;
-    }
-    @media (max-width: 720px) {
-        .invoice-manual-grid { grid-template-columns: 1fr; }
-    }
-</style>
-@endpush
-
 @section('content')
     <div class="admin-page">
         <h1 class="admin-title">請求書発行</h1>
@@ -234,34 +18,32 @@
         @endif
 
         @if(session('error'))
-            <div class="admin-alert" style="background: rgba(194, 65, 60, 0.1); border: 0; color: #7f1d1d;">
+            <div class="admin-alert admin-alert-error">
                 {{ session('error') }}
             </div>
         @endif
 
         {{-- 帳票テンプレートのダウンロード・設定 --}}
-        <section class="admin-panel">
-            <div class="invoice-issue-hero">
-                <div>
-                    <h2 class="invoice-issue-hero-title">請求書 帳票テンプレート</h2>
-                    <p class="invoice-issue-hero-desc">
-                        発行元名・ロゴ・備考文は「テンプレートを設定」で変更できます。ダウンロードする帳票はレイアウト確認用で、金額・宛先・日付の数字は含みません（お振込先もプレースホルダー表示です）。
-                    </p>
-                </div>
-                <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-                    <a href="{{ route('admin.invoices.template-settings') }}" class="btn-action manage">
-                        <i class="fas fa-cog"></i> テンプレートを設定
-                    </a>
-                    <a href="{{ route('admin.deposits.invoice-template.download') }}" class="invoice-template-dl" target="_blank" rel="noopener">
-                        <i class="fas fa-file-pdf"></i> 帳票テンプレートをダウンロード（PDF）
-                    </a>
-                </div>
+        <section class="invoice-issue-hero">
+            <div>
+                <h2 class="invoice-issue-hero-title">請求書 帳票テンプレート</h2>
+                <p class="invoice-issue-hero-desc">
+                    発行元名・ロゴ・備考文は「テンプレートを設定」で変更できます。ダウンロードする帳票はレイアウト確認用で、金額・宛先・日付の数字は含みません（お振込先もプレースホルダー表示です）。
+                </p>
+            </div>
+            <div class="invoice-issue-hero-actions">
+                <a href="{{ route('admin.invoices.template-settings') }}" class="btn-action">
+                    <i class="fas fa-cog"></i> テンプレートを設定
+                </a>
+                <a href="{{ route('admin.deposits.invoice-template.download') }}" class="invoice-template-dl" target="_blank" rel="noopener">
+                    <i class="fas fa-file-pdf"></i> 帳票テンプレートをダウンロード（PDF）
+                </a>
             </div>
         </section>
 
         {{-- 運営口座（請求書記載の振込先） --}}
         <section class="admin-panel invoice-admin-bank">
-            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px;">
+            <div class="billing-detail-row" style="margin-bottom: 14px;">
                 <h2 class="admin-panel-title" style="margin-bottom: 0;">運営口座</h2>
                 <a href="{{ route('admin.bank.index') }}" class="btn-action manage">
                     <i class="fas fa-university"></i> 口座登録・編集
@@ -321,7 +103,7 @@
                             <div class="invoice-pending-card-amount">¥{{ number_format($deposit['invoice_amount'] ?? 0) }}</div>
                             <div class="invoice-pending-card-actions">
                                 @if($isCastRequestOnly)
-                                    <span class="admin-note" style="margin:0; align-self:center;">店舗承認後に発行できます</span>
+                                    <span class="admin-note">店舗承認後に発行できます</span>
                                 @elseif($adminBank)
                                     <a href="{{ route('admin.deposits.invoice.show', $deposit['id']) }}" class="btn-action manage">
                                         <i class="fas fa-file-invoice"></i> 発行する

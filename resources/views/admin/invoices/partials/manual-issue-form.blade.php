@@ -6,7 +6,7 @@
     @csrf
 
     @if($errors->any())
-        <div class="admin-alert" style="background: rgba(194, 65, 60, 0.1); border: 0; color: #7f1d1d; margin-bottom: 14px;">
+        <div class="admin-alert admin-alert-error" style="margin-bottom: 14px;">
             {{ $errors->first() }}
         </div>
     @endif

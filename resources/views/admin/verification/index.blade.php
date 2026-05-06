@@ -13,26 +13,26 @@
         @endif
 
         @if($errors->any())
-            <div class="admin-alert" style="background:#fff1f2; color:#b91c1c;">
+            <div class="admin-alert admin-alert-error">
                 {{ $errors->first() }}
             </div>
         @endif
 
         <section class="admin-panel">
             <h2 class="admin-panel-title">サマリー</h2>
-            <div style="display:flex; gap:16px; flex-wrap:wrap;">
+            <div class="admin-grid">
                 <div class="admin-card">
                     <div class="text-xs text-gray-400">本人確認の未処理</div>
-                    <div style="font-size:1.5rem; font-weight:700;">{{ $summary['cast_pending'] ?? 0 }}件</div>
+                    <div class="sales-amount">{{ $summary['cast_pending'] ?? 0 }}件</div>
                 </div>
                 <div class="admin-card">
                     <div class="text-xs text-gray-400">店舗書類の未処理</div>
-                    <div style="font-size:1.5rem; font-weight:700;">{{ $summary['shop_pending'] ?? 0 }}件</div>
+                    <div class="sales-amount">{{ $summary['shop_pending'] ?? 0 }}件</div>
                 </div>
                 <div class="admin-card">
                     <div class="text-xs text-gray-400">審査完了（実績・累計）</div>
-                    <div style="font-size:1.5rem; font-weight:700;">{{ number_format((int) (($adminOperationAchievements ?? [])['admin.verification.index'] ?? 0)) }}件</div>
-                    <p class="text-xs text-gray-400" style="margin:8px 0 0; line-height:1.5;">承認・却下まで完了した本人確認・書類の合計です。</p>
+                    <div class="sales-amount">{{ number_format((int) (($adminOperationAchievements ?? [])['admin.verification.index'] ?? 0)) }}件</div>
+                    <p class="text-xs text-gray-400" style="margin:8px 0 0;">承認・却下まで完了した本人確認・書類の合計です。</p>
                 </div>
             </div>
         </section>
@@ -273,125 +273,7 @@
     </div>
 @endsection
 
-@push('styles')
-<style>
-    .verification-filters {
-        display: flex;
-        gap: 12px;
-        align-items: end;
-        flex-wrap: wrap;
-        margin-bottom: 16px;
-    }
-    .verification-filters label {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        min-width: 220px;
-    }
-    .verification-filters select,
-    .verification-filters input {
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        padding: 10px 12px;
-        background: #fff;
-    }
-    .verification-filter-count {
-        color: #6b7280;
-        padding-bottom: 10px;
-    }
-    .verification-filter-links {
-        display: flex;
-        gap: 12px;
-        padding-bottom: 10px;
-    }
-    .verification-filter-links a {
-        color: #8b5e00;
-        text-decoration: none;
-        font-size: 0.9rem;
-    }
-    .verification-comment {
-        white-space: pre-wrap;
-        line-height: 1.5;
-    }
-    .verification-modal-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(15, 23, 42, 0.55);
-        z-index: 999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 24px;
-    }
-    .verification-modal {
-        width: min(100%, 560px);
-        background: #fff;
-        border-radius: 16px;
-        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
-        overflow: hidden;
-    }
-    .verification-modal-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 16px 20px;
-        border-bottom: 1px solid #e5e7eb;
-    }
-    .verification-modal-body {
-        padding: 20px;
-    }
-    .verification-modal-close {
-        border: 0;
-        background: transparent;
-        font-size: 1.5rem;
-        line-height: 1;
-        cursor: pointer;
-        color: #6b7280;
-    }
-    .verification-modal-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 12px;
-        margin-top: 16px;
-    }
-    .verification-template-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-bottom: 12px;
-    }
-    .verification-template-button {
-        border: 1px solid #d1d5db;
-        background: #f8fafc;
-        border-radius: 999px;
-        padding: 6px 10px;
-        font-size: 0.85rem;
-        cursor: pointer;
-    }
-    .verification-status {
-        display: inline-flex;
-        align-items: center;
-        padding: 4px 10px;
-        border-radius: 999px;
-        font-size: 0.85rem;
-        font-weight: 700;
-    }
-    .verification-status-pending {
-        background: #fff7ed;
-        color: #c2410c;
-    }
-    .verification-status-rejected {
-        background: #fef2f2;
-        color: #b91c1c;
-    }
-    .verification-status-approved {
-        background: #ecfdf5;
-        color: #047857;
-    }
-</style>
-@endpush
-
-@push('scripts')
+@push('admin-scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var rejectTemplates = @json($rejectTemplates ?? []);

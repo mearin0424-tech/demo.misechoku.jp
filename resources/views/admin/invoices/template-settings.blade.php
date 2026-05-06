@@ -16,8 +16,8 @@
         @endif
 
         @if($errors->any())
-            <div class="admin-alert" style="background: rgba(194, 65, 60, 0.1); border: 0; color: #7f1d1d;">
-                <ul style="margin: 0; padding-left: 1.2em;">
+            <div class="admin-alert admin-alert-error">
+                <ul>
                     @foreach($errors->all() as $e)
                         <li>{{ $e }}</li>
                     @endforeach
@@ -49,10 +49,10 @@
                     <p class="admin-note" style="margin-top: 6px;">請求書の「備考」欄に表示する文言。未入力の場合は既定の説明文を表示します。</p>
                 </div>
                 <div class="admin-form-actions">
+                    <a href="{{ route('admin.invoices.index') }}" class="btn-action btn-action-secondary">請求書発行画面へ戻る</a>
                     <button type="submit" class="btn-action manage">
                         <i class="fas fa-save"></i> 設定を保存
                     </button>
-                    <a href="{{ route('admin.invoices.index') }}" class="btn-action manage" style="background:#374151;">請求書発行画面へ戻る</a>
                 </div>
             </form>
         </section>

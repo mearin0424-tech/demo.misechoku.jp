@@ -31,7 +31,11 @@
                         <tr>
                             <td>{{ $word->id }}</td>
                             <td>{{ $word->word }}</td>
-                            <td>{{ $word->is_active ? '有効' : '無効' }}</td>
+                            <td>
+                                <span class="admin-status-badge {{ $word->is_active ? 'is-success' : 'is-inactive' }}">
+                                    {{ $word->is_active ? '有効' : '無効' }}
+                                </span>
+                            </td>
                             <td>{{ $word->created_at ? \Illuminate\Support\Carbon::parse($word->created_at)->format('Y-m-d') : '-' }}</td>
                         </tr>
                     @empty
@@ -43,20 +47,5 @@
             </table>
         </div>
     </div>
-
-    <style>
-        .admin-alert {
-            margin-bottom: 18px;
-            padding: 12px 14px;
-            border-radius: 14px;
-        }
-
-        .admin-alert-error {
-            background: rgba(194, 65, 60, 0.1);
-            border: 0;
-            box-shadow: var(--admin-shadow);
-            color: #7f1d1d;
-        }
-    </style>
 @endsection
 

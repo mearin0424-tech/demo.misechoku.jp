@@ -44,12 +44,12 @@
                                     {{ $shop['job_status'] }}
                                 </span>
                             </td>
-                            <td style="min-width: 360px;">
+                            <td class="u-min-w-360">
                                 @php($summary = $shop['operation_summary'] ?? null)
                                 @if($summary)
-                                    <div style="font-size: .8rem; line-height: 1.7;">
+                                    <div class="u-text-pre">
                                         <div>請求書送付: <strong>{{ number_format($summary['invoice_issued']) }}</strong> 件 / 入金確認: <strong>{{ number_format($summary['payment_confirmed']) }}</strong> 件 / 振込実行: <strong>{{ number_format($summary['cast_transferred']) }}</strong> 件 / 完了: <strong>{{ number_format($summary['completed']) }}</strong> 件</div>
-                                        <div style="color: var(--admin-muted);">最新: {{ $summary['latest_status_label'] }}{{ !empty($summary['latest_updated_at']) ? '（' . $summary['latest_updated_at'] . '）' : '' }}</div>
+                                        <div class="text-muted text-xs u-mt-4">最新: {{ $summary['latest_status_label'] }}{{ !empty($summary['latest_updated_at']) ? '（' . $summary['latest_updated_at'] . '）' : '' }}</div>
                                     </div>
                                 @else
                                     <span class="text-muted">請求・振込フロー実績なし</span>
@@ -57,12 +57,12 @@
                             </td>
                             <td>
                                 @if(!empty($shop['recruit_schema_horizontal']))
-                                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                                    <div class="u-flex u-flex-wrap u-gap-6">
                                         @foreach($shop['admin_recruit_toggles'] as $t)
                                             <form action="{{ route('admin.shops.toggle-recruit-status', $shop['id']) }}" method="POST" style="margin:0;">
                                                 @csrf
                                                 <input type="hidden" name="job_type" value="{{ $t['job_type'] }}">
-                                                <button type="submit" class="admin-toggle-button" style="font-size:0.72rem;padding:6px 10px;">
+                                                <button type="submit" class="admin-toggle-button">
                                                     {{ $t['label'] }} {{ $t['is_on'] ? '→非公開' : '→公開' }}
                                                 </button>
                                             </form>
