@@ -494,6 +494,8 @@ class DocumentReviewService
     {
         $expiringSoon = $this->isBusinessLicenseExpiringSoon($document);
 
+        $imagePath = (string) ($document->image_path ?? '');
+
         return [
             'id' => $document->id,
             'type' => $document->type,
@@ -509,6 +511,7 @@ class DocumentReviewService
             'expiration_notice_label' => $expiringSoon ? '更新期限半年以内' : null,
             'can_request_review' => in_array((int) $document->status, [ShopLicenseDocument::STATUS_DRAFT, ShopLicenseDocument::STATUS_REJECTED], true),
             'can_withdraw_review' => in_array((int) $document->status, [ShopLicenseDocument::STATUS_PENDING, ShopLicenseDocument::STATUS_APPROVED], true),
+            'file_is_pdf' => $imagePath !== '' && str_ends_with(strtolower($imagePath), '.pdf'),
             // マイページは認証付きルートで表示（シンボリックリンク未作成環境でも閲覧可）
             'file_url' => route('shop.mypage.documents.show', ['type' => $document->type]),
         ];

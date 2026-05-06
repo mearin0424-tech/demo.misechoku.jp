@@ -262,14 +262,9 @@ class MypageController extends Controller
      */
     public function documentsOnboarding()
     {
-        $shopId = $this->currentShopId();
-        $documentData = $this->documentReviewService->getShopLicensePageData($shopId);
-
-        return view('shops.mypage.documents-onboarding', [
-            'pageId' => 'documents_onboarding',
-            'documents' => $documentData['documents'],
-            'allDocumentsApproved' => $documentData['all_approved'],
-        ]);
+        return redirect()
+            ->route('shop.mypage.index')
+            ->with('message', '許可証の提出はマイページから操作してください。');
     }
 
     public function manageLicenseDocument(string $type)

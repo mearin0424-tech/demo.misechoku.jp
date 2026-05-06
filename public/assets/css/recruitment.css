@@ -1744,7 +1744,7 @@
 
 /* Recruit Status mobile card UI */
 .recruit-status-mobile-shell {
-    max-width: 410px;
+    width: 100%;
     margin: 0 auto 28px;
     background: #110C0A;
     border: 1px solid #2A221E;

@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', '請求・入金管理')
+@section('title', 'Payment')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/management.css') }}">
 <style>
     .payment-mobile-shell {
-        max-width: 410px;
+        width: 100%;
         margin: 0 auto 28px;
         background: #110C0A;
         border: 1px solid #2A221E;
@@ -15,25 +15,6 @@
         box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
         overflow: hidden;
         color: #EAE0D5;
-    }
-    .payment-mobile-header {
-        height: 56px;
-        background: #1A1412;
-        border-bottom: 1px solid #2A221E;
-        padding: 0 12px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-    .payment-mobile-title { margin: 0; color: #C8A951; font-size: 0.92rem; font-weight: 700; letter-spacing: 0.08em; }
-    .payment-mobile-actions { display: flex; align-items: center; gap: 2px; }
-    .payment-mobile-icon {
-        width: 30px; height: 30px; border: none; border-radius: 8px; background: transparent; color: #C8A951;
-        display: inline-flex; align-items: center; justify-content: center; text-decoration: none; position: relative; cursor: pointer;
-    }
-    .payment-mobile-unread {
-        position: absolute; top: -1px; right: -1px; width: 14px; height: 14px; border-radius: 999px; background: #ef4444;
-        color: #fff; font-size: 9px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #1A1412;
     }
     .payment-mobile-body { padding: 16px; }
     .payment-summary-card {
@@ -144,25 +125,6 @@
 @endphp
 <div class="management-page contents animate-fadeIn">
     <section class="payment-mobile-shell">
-        <header class="payment-mobile-header">
-            <a href="{{ route('shop.mypage.index') }}" class="payment-mobile-icon" aria-label="戻る">
-                <i class="fas fa-chevron-left"></i>
-            </a>
-            <h1 class="payment-mobile-title serif-font">Payment</h1>
-            <div class="payment-mobile-actions">
-                <button type="button" class="payment-mobile-icon" aria-label="完了">
-                    <i class="fas fa-check-circle"></i>
-                </button>
-                <button type="button" class="payment-mobile-icon" aria-label="通知">
-                    <i class="fas fa-bell"></i>
-                    <span class="payment-mobile-unread">3</span>
-                </button>
-                <button type="button" class="payment-mobile-icon" aria-label="メニュー">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-        </header>
-
         <div class="payment-mobile-body">
             <div class="payment-summary-card {{ $unpaidCount > 0 ? 'is-alert' : '' }}">
                 <p class="payment-summary-label">入金待ちのタスク</p>

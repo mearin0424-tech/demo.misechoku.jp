@@ -354,8 +354,8 @@ class RegistrationController extends Controller
         $request->session()->regenerate();
 
         return redirect()
-            ->route('shop.mypage.documents.onboarding')
-            ->with('message', '店舗アカウントを登録しました。続いて許可証の提出をお願いします。');
+            ->route('shop.mypage.index')
+            ->with('message', '店舗アカウントを登録しました。許可証の提出はマイページからお願いします。');
     }
 
     private function buildViewData(string $role): array
