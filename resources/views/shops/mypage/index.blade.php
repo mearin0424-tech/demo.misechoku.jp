@@ -10,6 +10,32 @@
     @endif
 @endsection
 
+@section('header')
+<header id="global-header" class="shop-mypage-custom-header">
+    <div class="header-left">
+        <a href="javascript:history.back()" class="btn-back" aria-label="戻る">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+    </div>
+    <div class="header-center-title">
+        <span class="header-title-main header-title-serif">MyPage</span>
+    </div>
+    <div class="header-right">
+        <button id="btn-header-notification" class="header-icon-btn" aria-label="通知">
+            <i class="fas fa-bell"></i>
+            @if(isset($unreadNewsCount) && $unreadNewsCount > 0)
+                <span class="badge-notify">{{ $unreadNewsCount }}</span>
+            @else
+                <span class="badge-notify">1</span>
+            @endif
+        </button>
+        <button id="btn-header-menu" class="header-icon-btn" aria-label="メニュー">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+</header>
+@endsection
+
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/shop-license-documents.css') }}?v=20260505">
@@ -413,6 +439,215 @@
         border: 1px solid rgba(55, 48, 42, 0.85);
         background: rgba(6, 6, 8, 0.65);
     }
+
+    .shop-mypage-custom-header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .shop-mypage-custom-header .header-title-main,
+    .shop-mypage-custom-header .btn-back,
+    .shop-mypage-custom-header .header-icon-btn {
+        color: #c8a951;
+    }
+    .shop-mypage-custom-header #btn-header-notification .badge-notify {
+        background: #ef4444;
+        color: #fff;
+    }
+
+    .shop-mypage-v2 .mypage-area {
+        padding-top: 8px;
+    }
+    .shop-mypage-v2 .shop-mypage-store-title {
+        color: #c8a951;
+        font-size: clamp(1.65rem, 6vw, 2rem);
+        letter-spacing: 0.04em;
+    }
+    .shop-mypage-v2 .mypage-hero {
+        align-items: flex-start;
+        gap: 14px;
+    }
+    .shop-mypage-v2 .shop-icon-wrapper {
+        width: 84px;
+        height: 84px;
+        border-radius: 12px;
+        background: #080808;
+        border: 1px solid rgba(200, 169, 81, 0.28);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+    }
+    .shop-mypage-v2 .shop-icon-main {
+        border: 0;
+        border-radius: 12px;
+        box-shadow: none;
+    }
+    .shop-mypage-v2 .shop-word-bubble {
+        border: 0;
+        border-radius: 12px;
+        background: #f5ebd6;
+        color: #3a2f2b;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    .shop-mypage-v2 .shop-word-bubble::after {
+        left: -8px;
+        top: 14px;
+        margin-top: 0;
+        width: 0;
+        height: 0;
+        border-top: 6px solid transparent;
+        border-right: 8px solid #f5ebd6;
+        border-bottom: 6px solid transparent;
+        border-left: 0;
+        transform: none;
+        background: transparent;
+    }
+    .shop-mypage-v2 .shop-word-text {
+        color: #3a2f2b;
+        font-weight: 700;
+        font-size: 0.82rem;
+        line-height: 1.55;
+    }
+    .shop-mypage-v2 .shop-word-bubble-updated {
+        color: #8a7c74;
+        font-weight: 700;
+        font-size: 0.7rem;
+    }
+    .shop-mypage-v2 .btn-word-edit {
+        color: #a89050;
+        width: 24px;
+        height: 24px;
+    }
+
+    .shop-mypage-v2 .mypage-stats-row {
+        gap: 10px;
+        margin-bottom: 24px;
+    }
+    .shop-mypage-v2 .mypage-stat-panel {
+        border-radius: 10px;
+        padding: 10px 8px;
+    }
+    .shop-mypage-v2 .mypage-stat-label {
+        font-size: 0.76rem;
+    }
+    .shop-mypage-v2 .mypage-stat-value {
+        font-size: 1rem;
+    }
+    .shop-mypage-v2 .mypage-stat-panel-badge--active {
+        border-color: rgba(248, 231, 173, 0.6);
+        background: linear-gradient(to bottom, #f2d780, #cd9d40);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.7);
+    }
+    .shop-mypage-v2 .mypage-stat-panel-badge--active .mypage-stat-icon,
+    .shop-mypage-v2 .mypage-stat-panel-badge--active .mypage-stat-label,
+    .shop-mypage-v2 .mypage-stat-panel-badge--active .mypage-stat-value {
+        color: #4a1620 !important;
+    }
+    .shop-mypage-v2 .mypage-stat-panel-link {
+        background: rgba(90, 28, 44, 0.8);
+        border-color: rgba(200, 169, 81, 0.3);
+        color: #c8a951;
+    }
+    .shop-mypage-v2 .mypage-stat-panel-link:hover {
+        background: rgba(90, 28, 44, 1);
+    }
+    .shop-mypage-v2 .mypage-stat-panel-link .mypage-stat-icon {
+        color: #c8a951 !important;
+    }
+    .shop-mypage-v2 .mypage-stat-panel-link .mypage-stat-label {
+        color: #d4c3b3;
+    }
+    .shop-mypage-v2 .mypage-stat-panel-link .mypage-stat-value {
+        color: #c8a951;
+        font-size: 0.92rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .shop-mypage-v2 .shop-mypage-stat-sub {
+        color: #d4c3b3;
+        margin-left: 0;
+    }
+
+    .shop-mypage-v2 .shop-mypage-section-label {
+        color: #c8a951;
+        font-size: 0.98rem;
+        font-style: italic;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(200, 169, 81, 0.3);
+    }
+    .shop-mypage-v2 .shop-mypage-job-button {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        padding: 14px 16px;
+        border-radius: 18px;
+        border: 1px solid rgba(166, 58, 92, 0.8);
+        background: linear-gradient(135deg, #8a2542, #5a1628);
+        color: #fff;
+        text-decoration: none;
+        font-size: 1.04rem;
+        font-weight: 800;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.28);
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.15s ease, filter 0.15s ease;
+    }
+    .shop-mypage-v2 .shop-mypage-job-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 42%;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    .shop-mypage-v2 .shop-mypage-job-button:hover {
+        filter: brightness(1.08);
+    }
+    .shop-mypage-v2 .shop-mypage-job-button:active {
+        transform: scale(0.98);
+    }
+    .shop-mypage-v2 .shop-mypage-job-primary-inner {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        position: relative;
+        z-index: 1;
+    }
+    .shop-mypage-v2 .shop-mypage-job-primary-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.2);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .shop-mypage-v2 .shop-mypage-job-button i.fa-chevron-right {
+        color: #f5ebd6;
+        position: relative;
+        z-index: 1;
+    }
+
+    .shop-mypage-v2 .shop-mypage-info-card {
+        border: 1px solid rgba(90, 29, 40, 0.85);
+        background: #2c131a;
+    }
+    .shop-mypage-v2 .shop-mypage-info-row {
+        border-bottom: 1px solid rgba(90, 29, 40, 0.55);
+    }
+    .shop-mypage-v2 .shop-mypage-info-row .k {
+        color: #c8a951;
+        font-size: 0.78rem;
+    }
+    .shop-mypage-v2 .shop-mypage-info-row .v {
+        color: #fff;
+        font-size: 0.88rem;
+    }
+    .shop-mypage-v2 .shop-mypage-edit-link {
+        font-size: 0.72rem;
+    }
 </style>
 @endpush
 
@@ -444,35 +679,33 @@
                 aria-haspopup="dialog"
                 aria-controls="modal-good-payer-badge"
                 aria-label="安心バッヂの説明を開く">
-                <span class="mypage-stat-icon" aria-hidden="true"><i class="fas fa-award"></i></span>
-                <span class="mypage-stat-label">優良店バッヂ</span>
-                <span class="mypage-stat-value">{{ $hasGoodPayerBadge ? '取得済み' : '未付与' }}</span>
+                <span class="mypage-stat-icon" aria-hidden="true"><i class="fas fa-crown"></i></span>
+                <span class="mypage-stat-label">優良店</span>
+                <span class="mypage-stat-value">{{ $hasGoodPayerBadge ? '優良店' : '未付与' }}</span>
             </button>
             <a href="{{ route('shop.mypage.review.index') }}" class="mypage-stat-panel mypage-stat-panel-link">
                 <span class="mypage-stat-icon"><i class="fas fa-star"></i></span>
-                <span class="mypage-stat-label">評価</span>
-                <span class="mypage-stat-value">{{ number_format($shopData['review_avg'], 1) }}<span class="shop-mypage-stat-sub">({{ $shopData['review_count'] }}件)</span></span>
+                <span class="mypage-stat-label">レビュー</span>
+                <span class="mypage-stat-value">{{ number_format($shopData['review_avg'], 1) }}<span class="shop-mypage-stat-sub">レビュー</span><i class="fas fa-chevron-right" aria-hidden="true"></i></span>
             </a>
         </div>
 
         <div class="shop-mypage-section">
             <h3 class="shop-mypage-section-label">Job Management</h3>
-            <a href="{{ route('shop.jobdescription') }}" class="shop-mypage-job-primary">
+            <a href="{{ route('shop.jobdescription') }}" class="shop-mypage-job-button">
                 <span class="shop-mypage-job-primary-inner">
-                    <i class="far fa-file-alt"></i>
+                    <span class="shop-mypage-job-primary-icon"><i class="far fa-file-alt"></i></span>
                     <span>求人票の管理</span>
                 </span>
                 <i class="fas fa-chevron-right"></i>
             </a>
-            <div class="shop-mypage-link-stack">
-                <a href="{{ route('shop.mypage.management') }}">
-                    <span class="shop-mypage-link-stack-inner">
-                        <i class="fas fa-users-cog" aria-hidden="true"></i>
-                        採用・入金管理
-                    </span>
-                    <i class="fas fa-chevron-right"></i>
-                </a>
-            </div>
+            <a href="{{ route('shop.mypage.management') }}" class="shop-mypage-job-button">
+                <span class="shop-mypage-job-primary-inner">
+                    <span class="shop-mypage-job-primary-icon"><i class="fas fa-users-cog" aria-hidden="true"></i></span>
+                    <span>採用・入金管理</span>
+                </span>
+                <i class="fas fa-chevron-right"></i>
+            </a>
         </div>
 
         <div class="shop-mypage-section profile-info-section">

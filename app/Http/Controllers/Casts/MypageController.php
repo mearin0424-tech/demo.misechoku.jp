@@ -555,8 +555,10 @@ class MypageController extends Controller
                 'cast_profiles.nickname',
                 'cast_profiles.name',
                 'cast_profiles.birthday',
+                'cast_profiles.zip',
                 'cast_profiles.pref',
                 'cast_profiles.city',
+                'cast_profiles.addr1',
                 'cast_profiles.height',
                 'cast_profiles.weight',
                 'cast_profiles.bust',
@@ -586,6 +588,8 @@ class MypageController extends Controller
         $shiftHope = $memo['shift_hope'] ?? $this->shiftHopeLabel($castRow->shift);
         $workTime = $memo['work_time'] ?? '';
         $nightWorkExp = $memo['night_work_exp'] ?? ((int) ($castRow->exp ?? 0) === 1 ? 'yes' : 'none');
+        $looksTags = $this->getCastTagNamesByType($castId, 'looks', $memo['look_tag_ids'] ?? []);
+        $personalityTags = $this->getCastTagNamesByType($castId, 'personality', $memo['personality_tag_ids'] ?? []);
         $likeCount = DB::table('favorites')
             ->where('cast_id', $castId)
             ->where('action_type', 3)
@@ -677,8 +681,10 @@ class MypageController extends Controller
             'like_cnt'         => $likeCount,
             'match_cnt'        => $matchCount,
             'bonus_total'      => $bonusTotal,
+            'zip'              => $castRow->zip ?? '',
             'pref'             => $castRow->pref ?? '',
             'city'             => $castRow->city ?? '',
+            'addr1'            => $castRow->addr1 ?? '',
             'height'           => $castRow->height,
             'weight'           => $castRow->weight,
             'bust'             => $castRow->bust,
@@ -692,6 +698,17 @@ class MypageController extends Controller
             'my_field'         => $memo['my_field'] ?? '',
             'my_inner_skills'  => $memo['my_inner_skills'] ?? '',
             'personality_type' => $this->resolvePersonalityType($castRow->personality_type ?? null, $memo),
+            'looks_tags'       => $looksTags,
+            'personality_tags' => $personalityTags,
+            'memo_data'        => [
+                'desired_job' => $memo['desired_job'] ?? '',
+                'my_field' => $memo['my_field'] ?? '',
+                'my_inner_skills' => $memo['my_inner_skills'] ?? '',
+                'shift_hope' => $shiftHope,
+                'work_time' => $workTime,
+                'night_work_exp' => $nightWorkExp,
+                'current_job' => $memo['current_job'] ?? ($castRow->profession ?? ''),
+            ],
             'shift_hope'       => $shiftHope,
             'work_time'        => $workTime,
             'work_time_label'  => $this->workTimeLabel($workTime),
@@ -745,8 +762,10 @@ class MypageController extends Controller
             'like_cnt'         => 0,
             'match_cnt'        => 0,
             'bonus_total'      => 0,
+            'zip'              => '',
             'pref'             => '',
             'city'             => '',
+            'addr1'            => '',
             'height'           => null,
             'weight'           => null,
             'bust'             => null,
@@ -760,6 +779,17 @@ class MypageController extends Controller
             'my_field'         => '',
             'my_inner_skills'  => '',
             'personality_type' => '',
+            'looks_tags'       => [],
+            'personality_tags' => [],
+            'memo_data'        => [
+                'desired_job' => '',
+                'my_field' => '',
+                'my_inner_skills' => '',
+                'shift_hope' => '',
+                'work_time' => '',
+                'night_work_exp' => '',
+                'current_job' => '',
+            ],
             'shift_hope'       => '',
             'work_time'        => '',
             'work_time_label'  => '',
@@ -864,6 +894,55 @@ class MypageController extends Controller
         $type = $columnType ?? ($memo['personality_type'] ?? '');
 
         return is_string($type) && preg_match('/^[LF][CP][IO][HR]$/', $type) ? $type : '';
+    }
+
+    /**
+     * cast_tag_relations からタグ名を取得。なければ memo 内 id から補完。
+     *
+     * @param array<int, mixed> $memoTagIds
+     * @return array<int, string>
+     */
+    private function getCastTagNamesByType(string $castId, string $tagType, array $memoTagIds = []): array
+    {
+        if (!Schema::hasTable('cast_tags')) {
+            return [];
+        }
+
+        $names = [];
+        if (Schema::hasTable('cast_tag_relations')) {
+            $names = DB::table('cast_tag_relations as r')
+                ->join('cast_tags as t', 'r.tag_id', '=', 't.id')
+                ->where('r.cast_id', $castId)
+                ->where('r.tag_type', $tagType)
+                ->orderBy('t.id')
+                ->pluck('t.name')
+                ->map(fn ($name) => trim((string) $name))
+                ->filter()
+                ->values()
+                ->all();
+        }
+
+        if ($names !== []) {
+            return $names;
+        }
+
+        $ids = collect($memoTagIds)
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->values()
+            ->all();
+        if ($ids === []) {
+            return [];
+        }
+
+        return DB::table('cast_tags')
+            ->whereIn('id', $ids)
+            ->orderBy('id')
+            ->pluck('name')
+            ->map(fn ($name) => trim((string) $name))
+            ->filter()
+            ->values()
+            ->all();
     }
 
     private function shiftHopeLabel($shift): string

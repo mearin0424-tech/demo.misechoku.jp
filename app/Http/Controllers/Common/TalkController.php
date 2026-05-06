@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Common;
 
 use App\Http\Controllers\Controller;
 use App\Services\MessageTemplateService;
+use App\Services\NotificationPreferenceService;
+use App\Services\PushNotificationService;
 use App\Services\ShopJobApplicationJobSnapshotService;
 use App\Support\ShopJobApplicationView;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 
 class TalkController extends Controller
@@ -27,6 +30,8 @@ class TalkController extends Controller
 
     public function __construct(
         private readonly MessageTemplateService $messageTemplateService,
+        private readonly NotificationPreferenceService $notificationPreferenceService,
+        private readonly PushNotificationService $pushNotificationService,
         private readonly ShopJobApplicationJobSnapshotService $shopJobApplicationJobSnapshotService,
     ) {
     }
@@ -187,6 +192,16 @@ class TalkController extends Controller
             );
         }
         $messageId = DB::table('messages')->insertGetId($payload);
+        $this->notifyConversationPartner(
+            castId: (string) $payload['cast_id'],
+            shopId: (string) $payload['shop_id'],
+            isCastPortal: $isCastPortal,
+            title: '新着メッセージ',
+            body: $isCastPortal
+                ? 'キャストからメッセージが届きました。'
+                : '店舗からメッセージが届きました。内容を確認してください。',
+            url: $isCastPortal ? url('/shop/talk/room/' . $payload['cast_id']) : url('/cast/talk/room/' . $payload['shop_id'])
+        );
 
         return response()->json([
             'success' => true,
@@ -424,6 +439,13 @@ class TalkController extends Controller
         if ($selectedEmploymentKind !== null) {
             $this->syncApplicationEmploymentKindFromTalkAction($partnerId, $isCastPortal, $selectedEmploymentKind, $actionType);
         }
+        $this->notifyTalkAction(
+            castId: (string) ($isCastPortal ? $this->currentCastId() : $partnerId),
+            shopId: (string) ($isCastPortal ? $partnerId : $this->currentShopId()),
+            isCastPortal: $isCastPortal,
+            actionType: (string) $actionType,
+            content: (string) $content
+        );
 
         return response()->json([
             'success' => true,
@@ -1303,5 +1325,85 @@ class TalkController extends Controller
     {
         $v = trim($value);
         return in_array($v, ['fulltime', 'trial', 'help'], true) ? $v : null;
+    }
+
+    private function notifyTalkAction(
+        string $castId,
+        string $shopId,
+        bool $isCastPortal,
+        string $actionType,
+        string $content
+    ): void {
+        $meta = json_decode($content, true);
+        $meta = is_array($meta) ? $meta : [];
+        $title = 'トーク更新';
+        $body = 'トーク内容が更新されました。';
+
+        if ($actionType === 'interview_offer') {
+            $title = '面談候補日が届きました';
+            $body = '候補日時を確認して、都合のよい日程を選択してください。';
+        } elseif ($actionType === 'interview_confirm') {
+            $selected = isset($meta['selected_option']) && $meta['selected_option'] !== ''
+                ? Carbon::parse((string) $meta['selected_option'])->format('Y/m/d H:i')
+                : null;
+            $title = $isCastPortal ? '面談日時が確定しました' : '面談日が確定しました';
+            $body = $selected ? ('確定日時: ' . $selected) : 'トーク画面で確定内容をご確認ください。';
+        } elseif ($actionType === 'hired') {
+            $title = '選考結果: 採用';
+            $body = '店舗から採用連絡が届いています。';
+        } elseif ($actionType === 'rejected') {
+            $title = '選考結果: 不採用';
+            $body = '店舗から結果連絡が届いています。';
+        } elseif ($actionType === 'cancel_status') {
+            $title = '面談ステータスが変更されました';
+            $body = $isCastPortal
+                ? '面談日程がキャンセルされました。再提案をお願いします。'
+                : '面談日程が再調整になりました。トークをご確認ください。';
+        } elseif ($actionType === 'fulltime_request') {
+            $title = '本入店リクエスト';
+            $body = 'キャストから本入店リクエストが届きました。';
+        }
+
+        $this->notifyConversationPartner(
+            castId: $castId,
+            shopId: $shopId,
+            isCastPortal: $isCastPortal,
+            title: $title,
+            body: $body,
+            url: $isCastPortal ? url('/shop/talk/room/' . $castId) : url('/cast/talk/room/' . $shopId)
+        );
+    }
+
+    private function notifyConversationPartner(
+        string $castId,
+        string $shopId,
+        bool $isCastPortal,
+        string $title,
+        string $body,
+        string $url
+    ): void {
+        try {
+            if ($isCastPortal) {
+                $managerIds = DB::table('shop_managers')
+                    ->where('shop_id', $shopId)
+                    ->pluck('id');
+                foreach ($managerIds as $managerId) {
+                    $prefs = $this->notificationPreferenceService->get('shop_manager', (string) $managerId);
+                    if (!($prefs['push_enabled'] ?? true)) {
+                        continue;
+                    }
+                    $this->pushNotificationService->sendToUser('shop_manager', (string) $managerId, $title, $body, $url);
+                }
+                return;
+            }
+
+            $prefs = $this->notificationPreferenceService->get('cast', $castId);
+            if (!($prefs['push_enabled'] ?? true)) {
+                return;
+            }
+            $this->pushNotificationService->sendToUser('cast', $castId, $title, $body, $url);
+        } catch (\Throwable $e) {
+            Log::warning('Talk push notify failed: ' . $e->getMessage());
+        }
     }
 }

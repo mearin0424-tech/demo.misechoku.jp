@@ -19,7 +19,6 @@ class SendInterviewDeadlineReminders extends Command
         PushNotificationService $push
     ): int {
         $dryRun = (bool) $this->option('dry-run');
-        $line = class_exists('LINE\\LINEBot') ? app(\App\Services\LineNotificationService::class) : null;
         $now = Carbon::now();
         $count = 0;
 
@@ -59,9 +58,6 @@ class SendInterviewDeadlineReminders extends Command
                     if ($castPref['push_enabled']) {
                         $push->sendToUser('cast', (string) $row->cast_id, '面接リマインド', $text, url('/cast/interaction'));
                     }
-                    if ($line && $castPref['line_enabled']) {
-                        $line->sendToCast((string) $row->cast_id, $text);
-                    }
                 }
                 $count++;
             }
@@ -73,9 +69,6 @@ class SendInterviewDeadlineReminders extends Command
                 } else {
                     if ($shopPref['push_enabled']) {
                         $push->sendToUser('shop_manager', (string) $row->manager_id, '面接リマインド', $text, url('/shop/interaction'));
-                    }
-                    if ($line && $shopPref['line_enabled']) {
-                        $line->sendToShopManager((string) $row->manager_id, $text);
                     }
                 }
                 $count++;
@@ -120,9 +113,6 @@ class SendInterviewDeadlineReminders extends Command
             } else {
                 if ($shopPref['push_enabled']) {
                     $push->sendToUser('shop_manager', (string) $row->manager_id, '支払期限リマインド', $text, url('/shop/payment'));
-                }
-                if ($line && $shopPref['line_enabled']) {
-                    $line->sendToShopManager((string) $row->manager_id, $text);
                 }
             }
             $count++;

@@ -86,10 +86,8 @@
                 @endif
             </main>
 
-            {{-- ボトムナビ（モバイル用固定）※店舗 / キャスト画面のみ表示 --}}
-            @if (request()->is('shop/*') || request()->is('cast/*'))
-                @include('layouts.parts.footer')
-            @endif
+            {{-- ボトムナビ（モバイル用固定）：全画面で表示 --}}
+            @include('layouts.parts.footer')
         </div>
         {{-- サイドバー --}}
         @include('layouts.parts.sidebar')

@@ -3,26 +3,109 @@
 @section('title', 'マイページ - プロフィール確認')
 @section('body-class', 'page-cast-mypage')
 
+@section('header')
+<header id="global-header" class="cast-mypage-custom-header">
+    <div class="header-left">
+        <a href="javascript:history.back()" class="btn-back" aria-label="戻る">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+    </div>
+    <div class="header-center-title">
+        <span class="header-title-main header-title-serif">MyPage</span>
+    </div>
+    <div class="header-right">
+        <button id="btn-header-notification" class="header-icon-btn" aria-label="通知">
+            <i class="fas fa-bell"></i>
+            @if(isset($unreadNewsCount) && $unreadNewsCount > 0)
+                <span class="badge-notify">{{ $unreadNewsCount }}</span>
+            @else
+                <span class="badge-notify">1</span>
+            @endif
+        </button>
+        <button id="btn-header-menu" class="header-icon-btn" aria-label="メニュー">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+</header>
+@endsection
+
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/cast_profile.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+<style>
+    .cast-mypage-custom-header .header-title-main,
+    .cast-mypage-custom-header .btn-back,
+    .cast-mypage-custom-header .header-icon-btn { color: #c8a951; }
+    .cast-mypage-custom-header #btn-header-notification .badge-notify { background: #ef4444; color: #fff; }
+    .cast-mypage-v2 .mypage-shop-name { color: #fff; letter-spacing: 0.08em; font-size: clamp(1.7rem, 6.4vw, 2.1rem); }
+    .cast-mypage-v2 .mypage-hero { align-items: flex-start; gap: 14px; margin-bottom: 20px; }
+    .cast-mypage-v2 .shop-icon-wrapper { width: 84px; height: 84px; border-radius: 999px; background: #000; overflow: hidden; border: 3px solid rgba(200,169,81,0.8); box-shadow: 0 6px 16px rgba(0,0,0,0.35); }
+    .cast-mypage-v2 .shop-icon-main { border: 0; border-radius: 999px; box-shadow: none; }
+    .cast-mypage-v2 .btn-add-icon { display: none !important; }
+    .cast-mypage-v2 .shop-word-bubble { border: 0; border-radius: 12px; background: #f5ebd6; color: #3a2f2b; box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
+    .cast-mypage-v2 .shop-word-bubble::after { left: -8px; top: 50%; margin-top: -6px; width: 0; height: 0; border-top: 6px solid transparent; border-right: 10px solid #f5ebd6; border-bottom: 6px solid transparent; border-left: 0; background: transparent; transform: none; }
+    .cast-mypage-v2 .shop-word-text { color: #3a2f2b; font-weight: 700; font-size: 0.82rem; line-height: 1.55; }
+    .cast-mypage-v2 .shop-word-bubble-updated { color: #8a7c74; font-size: 0.7rem; font-weight: 700; }
+    .cast-mypage-v2 .btn-word-edit { width: 24px; height: 24px; color: #a89050; }
+    .cast-flat-stats { display: flex; align-items: center; gap: 10px; margin: 4px 0 24px; padding: 0 6px; }
+    .cast-bonus-panel { flex: 1; min-width: 0; }
+    .cast-bonus-label { color: #c8a951; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 4px; }
+    .cast-bonus-value { display: flex; align-items: baseline; gap: 2px; }
+    .cast-bonus-value .yen { color: #34d399; font-size: 18px; font-weight: 700; }
+    .cast-bonus-value .amount { color: #fff; font-size: 32px; font-weight: 800; line-height: 1; }
+    .cast-like-panel { width: 66px; flex-shrink: 0; text-align: center; opacity: 0.88; }
+    .cast-like-panel i { color: rgba(244, 114, 182, 0.82); font-size: 16px; margin-bottom: 4px; }
+    .cast-like-panel .n { color: #c9b6ae; font-size: 17px; font-weight: 700; line-height: 1; }
+    .cast-profile-head { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(200, 169, 81, 0.2); padding-bottom: 9px; margin-bottom: 16px; }
+    .cast-profile-head h2 { margin: 0; color: #c8a951; font-size: 1.08rem; font-style: italic; font-family: var(--font-serif); letter-spacing: 0.05em; }
+    .cast-profile-card { background: rgba(26,10,14,0.6); border: 1px solid rgba(74,29,40,0.4); border-radius: 12px; overflow: hidden; }
+    .cast-block { margin-bottom: 20px; }
+    .cast-block-title { color: #c8a951; font-size: 0.92rem; font-weight: 700; margin: 0 0 9px; display: flex; align-items: center; gap: 6px; }
+    .cast-block-title .lucide-icon { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+    .cast-row { display: flex; gap: 10px; padding: 12px 14px; border-bottom: 1px solid rgba(74,29,40,0.4); }
+    .cast-row:last-child { border-bottom: 0; }
+    .cast-row.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0; padding: 0; }
+    .cast-row.two-col > div { display: flex; gap: 8px; padding: 12px 14px; }
+    .cast-row.two-col > div:first-child { border-right: 1px solid rgba(74,29,40,0.4); }
+    .cast-k { width: 104px; flex-shrink: 0; color: #b5a69d; font-size: 0.8rem; }
+    .cast-k.mini { width: 42px; }
+    .cast-v { color: #fff; font-weight: 700; font-size: 0.86rem; line-height: 1.55; word-break: break-word; }
+    .cast-v.muted { color: #7e6f69; font-weight: 600; }
+    .cast-zip { margin-top: 2px; color: #8a7c74; font-size: 0.72rem; }
+    .cast-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+    .cast-badge { display: inline-flex; padding: 6px 11px; border-radius: 6px; background: rgba(17, 12, 10, 0.8); border: 1px solid rgba(255,255,255,0.1); color: #eae0d5; font-size: 0.76rem; font-weight: 700; }
+    .cast-inline-action { margin-left: auto; font-size: 0.7rem; color: #c8a951; border: 1px solid rgba(200,169,81,0.35); border-radius: 999px; padding: 5px 9px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+    .cast-inline-action .lucide-icon { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+</style>
 @endpush
 
 @section('content')
 @php $subImages = $subImages ?? []; @endphp
-<div class="mypage-page contents inner animate-fadeIn">
+<div class="mypage-page contents inner animate-fadeIn cast-mypage-v2">
     <section class="mypage-area">
-        {{-- ヒーロー：キャスト名（お店マイページと同じ位置） --}}
-        <h1 class="mypage-shop-name serif-font gold-gradient">{{ $cast['nickname'] ?? $cast['name'] }}</h1>
+        @php
+            $displayName = $cast['nickname'] ?? $cast['name'] ?? '--';
+            $birthdayText = (!empty($cast['birth_year']) && !empty($cast['birth_month']) && !empty($cast['birth_day']))
+                ? $cast['birth_year'] . '年' . $cast['birth_month'] . '月' . $cast['birth_day'] . '日'
+                : '--';
+            $heightText = !empty($cast['height']) ? ((string) $cast['height'] . ' cm') : '--';
+            $weightText = !empty($cast['weight']) ? ((string) $cast['weight'] . ' kg') : '--';
+            $bodyText = trim(implode(' / ', [
+                $cast['bust'] ?: '--',
+                $cast['waist'] ?: '--',
+                $cast['hip'] ?: '--',
+            ]));
+            $addressText = trim((string) ($cast['pref'] ?? '') . (string) ($cast['city'] ?? '') . (string) ($cast['addr1'] ?? ''));
+            $addressText = $addressText !== '' ? $addressText : '--';
+            $zipText = !empty($cast['zip']) ? ('〒' . $cast['zip']) : '--';
+        @endphp
+        <h1 class="mypage-shop-name serif-font">{{ $displayName }}</h1>
 
         {{-- アイコン＋アピール（お店同様・編集可能） --}}
         <div class="mypage-hero">
             <div class="shop-icon-wrapper">
                 <img src="{{ (isset($subImages[0]) ? $subImages[0]['url'] : null) ?? $cast['img'] ?? asset('assets/images/common/no-image.png') }}" class="shop-icon-main" id="main-icon-display" alt="">
-                <button type="button" class="btn-add-icon" onclick="document.getElementById('gallery-upload').click()" aria-label="写真を追加">
-                    <i class="fas fa-plus"></i>
-                </button>
             </div>
             <div class="shop-word-bubble glass-panel">
                 <p id="display-word" class="shop-word-text {{ empty(trim($cast['word'] ?? '')) ? 'is-placeholder' : '' }}" data-placeholder="ひとことを入力すると、タイムラインに表示されます。">{{ !empty(trim($cast['word'] ?? '')) ? $cast['word'] : 'ひとことを入力すると、タイムラインに表示されます。' }}</p>
@@ -35,22 +118,17 @@
             </div>
         </div>
 
-        {{-- LIKE・マッチ件数・ボーナス金合計 --}}
-        <div class="mypage-stats-row" aria-label="統計">
-            <div class="mypage-stat-panel">
-                <span class="mypage-stat-icon"><i class="fas fa-heart"></i></span>
-                <span class="mypage-stat-label">LIKE</span>
-                <span class="mypage-stat-value">{{ number_format((int) ($cast['like_cnt'] ?? 0)) }}</span>
+        <div class="cast-flat-stats" aria-label="統計">
+            <div class="cast-bonus-panel">
+                <div class="cast-bonus-label">獲得したボーナス金合計</div>
+                <div class="cast-bonus-value">
+                    <span class="yen">¥</span>
+                    <span class="amount">{{ number_format((int) ($cast['bonus_total'] ?? 0)) }}</span>
+                </div>
             </div>
-            <div class="mypage-stat-panel">
-                <span class="mypage-stat-icon"><i class="fas fa-handshake"></i></span>
-                <span class="mypage-stat-label">マッチ件数</span>
-                <span class="mypage-stat-value">{{ number_format((int) ($cast['match_cnt'] ?? 0)) }}</span>
-            </div>
-            <div class="mypage-stat-panel">
-                <span class="mypage-stat-icon"><i class="fas fa-yen-sign"></i></span>
-                <span class="mypage-stat-label">ボーナス金合計</span>
-                <span class="mypage-stat-value">¥{{ number_format((int) ($cast['bonus_total'] ?? 0)) }}</span>
+            <div class="cast-like-panel">
+                <i class="fas fa-heart"></i>
+                <div class="n">{{ number_format((int) ($cast['like_cnt'] ?? 0)) }}</div>
             </div>
         </div>
 
@@ -60,60 +138,76 @@
 
             {{-- プロフィール情報：編集ボタン＋5カテゴリ --}}
             <div class="mypage-section profile-info-section">
-                <div class="section-title-row">
-                    <h2 class="section-title">プロフィール情報</h2>
+                <div class="cast-profile-head">
+                    <h2>Profile Information</h2>
                     <a href="{{ route('cast.profile.edit') }}" class="btn-outline-gold">編集</a>
                 </div>
-                <p class="shop-access-text">
-                    <i class="fas fa-map-marker-alt"></i> @if(!empty($cast['pref']) || !empty($cast['city'])){{ implode(' ', array_filter([$cast['pref'] ?? null, $cast['city'] ?? null])) }} / @endifキャスト
-                </p>
 
-                {{-- 基本情報（生年月日、身長体重、サイズ） --}}
-                <div class="mypage-profile-block">
-                    <h3 class="section-title section-title-gold">基本情報</h3>
-                    <div class="mypage-cast-other other-info-detail-body">
-                        @if(!empty($cast['birth_year']) && !empty($cast['birth_month']) && !empty($cast['birth_day']))
-                            <div class="detail-row"><span class="detail-label">生年月日</span><span class="detail-value">{{ $cast['birth_year'] }}年{{ $cast['birth_month'] }}月{{ $cast['birth_day'] }}日</span></div>
-                        @endif
-                        <div class="detail-row"><span class="detail-label">身長</span><span class="detail-value">{{ $cast['height'] ?? '--' }}cm</span></div>
-                        <div class="detail-row"><span class="detail-label">体重</span><span class="detail-value">{{ $cast['weight'] ?? '--' }}kg</span></div>
-                        <div class="detail-row"><span class="detail-label">B / W / H</span><span class="detail-value">{{ $cast['bust'] ?? '--' }} / {{ $cast['waist'] ?? '--' }} / {{ $cast['hip'] ?? '--' }}</span></div>
-                    </div>
-                </div>
-
-                {{-- 接客タイプ・系統 --}}
-                <div class="mypage-profile-block">
-                    <h3 class="section-title section-title-gold">接客タイプ・系統</h3>
-                    <div class="mypage-cast-other other-info-detail-body">
-                        <div class="detail-row" id="personality-type-row" style="{{ !empty($cast['personality_type']) ? '' : 'display:none;' }}">
-                            <span class="detail-label">接客タイプ診断結果</span>
-                            <span class="detail-value" id="personality-type-display">{{ $cast['personality_type'] ?? '' }}</span>
+                <div class="cast-block">
+                    <h3 class="cast-block-title">
+                        <svg class="lucide-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        基本情報
+                    </h3>
+                    <div class="cast-profile-card">
+                        <div class="cast-row"><div class="cast-k">生年月日</div><div class="cast-v {{ $birthdayText === '--' ? 'muted' : '' }}">{{ $birthdayText }}</div></div>
+                        <div class="cast-row two-col">
+                            <div><div class="cast-k mini">身長</div><div class="cast-v {{ $heightText === '--' ? 'muted' : '' }}">{{ $heightText }}</div></div>
+                            <div><div class="cast-k mini">体重</div><div class="cast-v {{ $weightText === '--' ? 'muted' : '' }}">{{ $weightText }}</div></div>
                         </div>
-                        <div class="detail-row"><span class="detail-label">ご自分の系統</span><span class="detail-value">{{ $cast['my_field'] ?? '--' }}</span></div>
-                        <div class="detail-row"><span class="detail-label">ご自分の内面・特技</span><span class="detail-value">{{ $cast['my_inner_skills'] ?? '--' }}</span></div>
-                    </div>
-                    <a href="{{ asset('personality-test') }}" target="_blank" rel="noopener noreferrer" class="btn-personality-test">
-                        <i class="fas fa-up-right-from-square"></i>
-                        <span>接客タイプ診断を開く</span>
-                    </a>
-                </div>
-
-                {{-- 経歴・スキル --}}
-                <div class="mypage-profile-block">
-                    <h3 class="section-title section-title-gold">経歴・スキル</h3>
-                    <div class="mypage-cast-other other-info-detail-body">
-                        <div class="detail-row"><span class="detail-label">ナイトワーク経験</span><span class="detail-value">{{ $cast['night_work_label'] ?? '--' }}</span></div>
-                        <div class="detail-row detail-row-block"><span class="detail-label">現職業</span><div class="detail-value">@if(!empty($cast['current_job'])){!! nl2br(e($cast['current_job'])) !!}@else—@endif</div></div>
+                        <div class="cast-row"><div class="cast-k">B / W / H</div><div class="cast-v {{ $bodyText === '-- / -- / --' ? 'muted' : '' }}">{{ $bodyText }}</div></div>
+                        <div class="cast-row">
+                            <div class="cast-k">住所</div>
+                            <div class="cast-v {{ $addressText === '--' ? 'muted' : '' }}">
+                                {{ $addressText }}
+                                <div class="cast-zip {{ $zipText === '--' ? 'cast-v muted' : '' }}">{{ $zipText }}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {{-- 希望の職種・働き方 --}}
-                <div class="mypage-profile-block">
-                    <h3 class="section-title section-title-gold">希望の職種・働き方</h3>
-                    <div class="mypage-cast-other other-info-detail-body">
-                        <div class="detail-row"><span class="detail-label">希望職種</span><span class="detail-value">{{ $cast['desired_job'] ?? '--' }}</span></div>
-                        <div class="detail-row"><span class="detail-label">シフト希望</span><span class="detail-value">{{ $cast['shift_hope'] ?? '--' }}</span></div>
-                        <div class="detail-row"><span class="detail-label">勤務時間</span><span class="detail-value">{{ $cast['work_time_label'] ?? '--' }}</span></div>
+                <div class="cast-block">
+                    <h3 class="cast-block-title">
+                        <svg class="lucide-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 4.7L19 9.6l-4.1 2.9 1.6 5L12 14.8 7.5 17.5l1.6-5L5 9.6l5.1-1.9z"></path></svg>
+                        接客タイプ・タグ
+                    </h3>
+                    <div class="cast-profile-card">
+                        <div class="cast-row">
+                            <div class="cast-k">接客タイプ診断</div>
+                            <div class="cast-v">
+                                <span class="cast-badge">{{ !empty($cast['personality_type']) ? $cast['personality_type'] : '--' }}</span>
+                            </div>
+                            <a href="{{ asset('personality-test') }}" target="_blank" rel="noopener noreferrer" class="cast-inline-action">
+                                <svg class="lucide-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7"></path><path d="M10 14L21 3"></path><path d="M21 14v7h-7"></path><path d="M3 10V3h7"></path><path d="M3 21l11-11"></path></svg>
+                                接客タイプ診断を開く
+                            </a>
+                        </div>
+                        <div class="cast-row"><div class="cast-k">ルックス</div><div class="cast-v">@if(!empty($cast['looks_tags']))<div class="cast-badges">@foreach($cast['looks_tags'] as $tag)<span class="cast-badge">{{ $tag }}</span>@endforeach</div>@else<span class="muted">--</span>@endif</div></div>
+                        <div class="cast-row"><div class="cast-k">性格・内面</div><div class="cast-v">@if(!empty($cast['personality_tags']))<div class="cast-badges">@foreach($cast['personality_tags'] as $tag)<span class="cast-badge">{{ $tag }}</span>@endforeach</div>@else<span class="muted">--</span>@endif</div></div>
+                        <div class="cast-row"><div class="cast-k">ご自分の系統</div><div class="cast-v {{ empty($cast['memo_data']['my_field'] ?? '') ? 'muted' : '' }}">{{ $cast['memo_data']['my_field'] ?? '--' }}</div></div>
+                        <div class="cast-row"><div class="cast-k">ご自分の内面・特技</div><div class="cast-v {{ empty($cast['memo_data']['my_inner_skills'] ?? '') ? 'muted' : '' }}">{{ $cast['memo_data']['my_inner_skills'] ?? '--' }}</div></div>
+                    </div>
+                </div>
+
+                <div class="cast-block">
+                    <h3 class="cast-block-title">
+                        <svg class="lucide-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M3 12h18"></path></svg>
+                        経歴・スキル
+                    </h3>
+                    <div class="cast-profile-card">
+                        <div class="cast-row"><div class="cast-k">ナイトワーク経験</div><div class="cast-v {{ empty($cast['night_work_label']) ? 'muted' : '' }}">{{ $cast['night_work_label'] ?: '--' }}</div></div>
+                        <div class="cast-row"><div class="cast-k">現職業</div><div class="cast-v {{ empty($cast['memo_data']['current_job'] ?? '') ? 'muted' : '' }}">{!! !empty($cast['memo_data']['current_job'] ?? '') ? nl2br(e($cast['memo_data']['current_job'])) : '--' !!}</div></div>
+                    </div>
+                </div>
+
+                <div class="cast-block">
+                    <h3 class="cast-block-title">
+                        <svg class="lucide-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path><path d="m9 16 2 2 4-4"></path></svg>
+                        希望の職種・働き方
+                    </h3>
+                    <div class="cast-profile-card">
+                        <div class="cast-row"><div class="cast-k">希望職種</div><div class="cast-v {{ empty($cast['memo_data']['desired_job'] ?? '') ? 'muted' : '' }}">{{ $cast['memo_data']['desired_job'] ?? '--' }}</div></div>
+                        <div class="cast-row"><div class="cast-k">シフト希望</div><div class="cast-v {{ empty($cast['memo_data']['shift_hope'] ?? '') ? 'muted' : '' }}">{{ $cast['memo_data']['shift_hope'] ?? '--' }}</div></div>
+                        <div class="cast-row"><div class="cast-k">勤務時間</div><div class="cast-v {{ empty($cast['work_time_label'] ?? '') ? 'muted' : '' }}">{{ $cast['work_time_label'] ?: '--' }}</div></div>
                     </div>
                 </div>
             </div>
