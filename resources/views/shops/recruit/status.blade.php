@@ -43,7 +43,6 @@
 
             <template id="recruit-status-card-template">
                 <article class="rsm-card">
-                    <div class="rsm-delay-line" hidden></div>
                     <div class="rsm-top">
                         <div class="rsm-main">
                             <div class="rsm-main-inner">
@@ -53,11 +52,6 @@
                                 </div>
                                 <div class="rsm-main-text">
                                     <h3 class="rsm-name"></h3>
-                                    <div class="rsm-pattern"></div>
-                                    <div class="rsm-delay" hidden>
-                                        <i class="fas fa-exclamation-circle"></i>
-                                        <span class="rsm-delay-text"></span>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -69,6 +63,16 @@
                         </div>
                     </div>
                     <div class="rsm-details">
+                        <div class="rsm-meta-row">
+                            <div class="rsm-meta-item">
+                                <span class="rsm-meta-key">種別</span>
+                                <span class="rsm-meta-val" data-field="jobKind"></span>
+                            </div>
+                            <div class="rsm-meta-item">
+                                <span class="rsm-meta-key">ステータス</span>
+                                <span class="rsm-meta-val" data-field="statusWithCode"></span>
+                            </div>
+                        </div>
                         <div class="rsm-detail-row">
                             <span>応募日</span>
                             <strong data-field="appliedAt"></strong>
@@ -119,7 +123,7 @@ window.recruitStatusHiredWageUrl = @json(route('shop.recruits.application-hired-
     var data = @json($applications ?? []);
     var statusDef = {
         1: { label: 'やり取り中', className: 'is-status-1' },
-        2: { label: '日程調整中', className: 'is-status-2' },
+        2: { label: '面談日調整中', className: 'is-status-2' },
         3: { label: '面談日決定', className: 'is-status-3' },
         4: { label: '採用', className: 'is-status-4' },
         5: { label: '不採用', className: 'is-status-5' },
@@ -170,12 +174,13 @@ window.recruitStatusHiredWageUrl = @json(route('shop.recruits.application-hired-
         rows.forEach(function(item) {
             var node = template.content.firstElementChild.cloneNode(true);
             var statusNode = node.querySelector('.rsm-status');
-            var patternNode = node.querySelector('.rsm-pattern');
             var talkNode = node.querySelector('.rsm-talk-link');
 
             node.querySelector('.rsm-name').textContent = item.cast_name || 'キャスト';
-            patternNode.textContent = item.pattern_label || '新規採用';
-            patternNode.classList.add(item.pattern === 'P2' ? 'is-p2' : 'is-p1');
+            var jobKindEl = node.querySelector('[data-field="jobKind"]');
+            var statusCodeEl = node.querySelector('[data-field="statusWithCode"]');
+            if (jobKindEl) jobKindEl.textContent = item.job_kind_label || '本入店';
+            if (statusCodeEl) statusCodeEl.textContent = item.status_with_code_label || '';
 
             var avatarImg = node.querySelector('[data-field="avatarImg"]');
             var avatarFb = node.querySelector('[data-field="avatarFallback"]');
@@ -201,16 +206,6 @@ window.recruitStatusHiredWageUrl = @json(route('shop.recruits.application-hired-
 
             if (talkNode && item.cast_id) {
                 talkNode.href = '{{ route('shop.talk.room', ['id' => '__CAST_ID__']) }}'.replace('__CAST_ID__', item.cast_id);
-            }
-
-            var delayed = !!item.is_delayed;
-            var delayLine = node.querySelector('.rsm-delay-line');
-            var delayWrap = node.querySelector('.rsm-delay');
-            if (delayed) {
-                node.classList.add('is-delayed');
-                delayLine.hidden = false;
-                delayWrap.hidden = false;
-                node.querySelector('.rsm-delay-text').textContent = item.delay_message || '期限超過';
             }
 
             node.querySelector('[data-field="appliedAt"]').textContent = item.created_at || '未設定';

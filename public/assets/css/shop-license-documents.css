@@ -549,45 +549,52 @@
     color: #a3a3a3;
     margin-right: 2px;
 }
-.license-manage-expiry-readout {
-    margin: 0 0 10px;
-    padding: 10px 12px;
-    border-radius: 8px;
-    font-size: 0.88rem;
-    line-height: 1.5;
-    color: #d4d4d4;
-    background: rgba(212, 175, 55, 0.08);
-    border: 1px solid rgba(212, 175, 55, 0.22);
-}
-.license-manage-expiry-readout__key {
-    font-weight: 700;
-    color: #e5e5e5;
-    margin-right: 2px;
-}
-.license-manage-expiry-readout__colon {
-    color: #a3a3a3;
-    margin-right: 6px;
-}
-.license-manage-expiry-readout__val {
-    color: #fef3c7;
-    font-weight: 800;
-}
-.license-manage-expiry-readout__iso {
-    color: #a3a3a3;
-    font-size: 0.82rem;
-    font-weight: 600;
-    margin-left: 4px;
-}
-.license-manage-expiry-readout__none {
-    color: #737373;
-    font-style: italic;
-}
 .license-manage-file-row {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 0;
+    margin-bottom: 18px;
+}
+.license-manage-file-stack {
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 14px;
-    margin-bottom: 16px;
+    width: 100%;
+    max-width: 100%;
+    gap: 12px;
+    box-sizing: border-box;
+}
+.license-manage-file-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #d4af37;
+    line-height: 0;
+    flex-shrink: 0;
+}
+.license-manage-filename-area {
+    width: 100%;
+    min-width: 0;
+}
+.license-manage-filename-box {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(212, 175, 55, 0.28);
+    background: rgba(12, 10, 9, 0.92);
+    text-align: left;
+}
+.license-manage-filename-text {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #e5e5e5;
+    line-height: 1.5;
+    word-break: break-all;
 }
 .license-manage-preview-meta {
     flex: 1;
@@ -596,6 +603,19 @@
     font-size: 0.82rem;
     line-height: 1.55;
     color: #a3a3a3;
+}
+.license-manage-preview-meta--stacked {
+    width: 100%;
+    max-width: 100%;
+    align-self: stretch;
+    text-align: left;
+    padding: 0 2px;
+    box-sizing: border-box;
+}
+.license-manage-meta-updated {
+    margin: 0 0 6px;
+    line-height: 1.5;
+    word-break: break-word;
 }
 .license-manage-preview-meta p {
     margin: 0 0 4px;
@@ -752,28 +772,12 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
-.license-manage-preview-tile--fname-only {
-    width: auto;
-    max-width: 14rem;
-    min-width: 0;
-    height: auto;
-    min-height: auto;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 10px 12px;
-    overflow: visible;
+.license-manage-filename-link {
+    display: block;
+    color: #fde68a;
     font-size: 0.82rem;
     font-weight: 700;
-    color: #e5e5e5;
-    line-height: 1.45;
-    word-break: break-all;
-}
-.license-manage-filename-link {
-    color: #fde68a;
-    font-size: inherit;
-    font-weight: inherit;
-    line-height: inherit;
+    line-height: 1.5;
     word-break: break-all;
     text-decoration: underline;
     text-underline-offset: 2px;
@@ -841,6 +845,13 @@
     width: 100%;
     max-width: 100%;
 }
+.page-shop-documents-manage .license-manage-shell {
+    padding-top: 4px;
+}
+.page-shop-documents-manage .license-manage-header.license-manage-header--status-only {
+    margin-top: 12px;
+    padding-top: 4px;
+}
 .page-shop-documents-manage .license-manage-preview-wrap {
     margin-bottom: 0;
     flex-shrink: 0;
@@ -848,13 +859,9 @@
 .page-shop-documents-manage .license-manage-preview-inner {
     padding-bottom: 0;
 }
-.page-shop-documents-manage .license-manage-preview-tile:not(.license-manage-preview-tile--fname-only) {
+.page-shop-documents-manage .license-manage-preview-tile {
     width: 5.5rem;
     height: 5.5rem;
-    border-radius: 10px;
-}
-.page-shop-documents-manage .license-manage-preview-tile--fname-only {
-    max-width: min(100%, 18rem);
     border-radius: 10px;
 }
 .page-shop-documents-manage .license-manage-preview-tile--pdf {

@@ -1842,15 +1842,6 @@
     padding: 12px;
     overflow: hidden;
 }
-.rsm-card.is-delayed { background: rgba(127, 29, 29, 0.14); }
-.rsm-delay-line {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: rgba(239, 68, 68, 0.9);
-}
 .rsm-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
 .rsm-main { flex: 1; min-width: 0; }
 .rsm-main-inner { display: flex; align-items: flex-start; gap: 10px; }
@@ -1908,18 +1899,6 @@
     justify-content: center;
     text-decoration: none;
 }
-.rsm-delay {
-    margin-top: 8px;
-    color: #fca5a5;
-    font-size: 11px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(127, 29, 29, 0.25);
-    border: 1px solid rgba(127, 29, 29, 0.45);
-    border-radius: 8px;
-    padding: 5px 8px;
-}
 .rsm-details {
     border: 1px solid #2A221E;
     border-radius: 10px;
@@ -1927,6 +1906,36 @@
     padding: 9px;
     display: grid;
     gap: 6px;
+}
+.rsm-meta-row {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 8px;
+    margin-bottom: 2px;
+    border-bottom: 1px solid #2A221E;
+}
+.rsm-meta-item {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+}
+.rsm-meta-key {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #6B5E58;
+    text-transform: uppercase;
+}
+.rsm-meta-val {
+    font-size: 11px;
+    font-weight: 600;
+    color: #D4C8C0;
+    line-height: 1.35;
+    word-break: break-word;
 }
 .rsm-detail-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 11px; }
 .rsm-detail-row span { color: #8A7C74; }
@@ -1944,12 +1953,13 @@
 .rsm-reason-wrap span { color: #8A7C74; font-size: 11px; }
 .rsm-reason-wrap p {
     margin: 0;
-    color: #fca5a5;
-    background: rgba(127, 29, 29, 0.25);
-    border: 1px solid rgba(127, 29, 29, 0.45);
+    color: #B5A69D;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid #2A221E;
     border-radius: 8px;
     font-size: 11px;
     padding: 6px 8px;
+    line-height: 1.45;
 }
 .rsm-applied-block {
     margin-top: 6px;

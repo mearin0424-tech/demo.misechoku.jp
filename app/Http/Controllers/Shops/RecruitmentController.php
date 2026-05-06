@@ -10,7 +10,6 @@ use App\Support\ShopJobApplicationView;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 
 class RecruitmentController extends Controller
@@ -28,7 +27,7 @@ class RecruitmentController extends Controller
     /** 採用ステータスラベル（shop_job_applications.status） */
     private const APPLICATION_STATUS_LABELS = [
         1 => 'やり取り中',
-        2 => '日程調整中',
+        2 => '面談日調整中',
         3 => '面談日決定',
         4 => '採用',
         5 => '不採用',
@@ -127,11 +126,25 @@ class RecruitmentController extends Controller
                 $jobType = isset($row->job_type) ? (int) $row->job_type : 1;
                 $pattern = $jobType === 3 ? 'P2' : 'P1';
                 $patternLabel = $pattern === 'P2' ? 'ヘルプ' : '新規採用';
+                $jobKindLabel = match ($jobType) {
+                    3 => 'ヘルプ',
+                    2 => '体験入店',
+                    default => '本入店',
+                };
                 $statusLabel = match ($status) {
                     4 => $pattern === 'P2' ? 'ヘルプ採用' : '体験採用',
                     default => self::APPLICATION_STATUS_LABELS[$status] ?? '未設定',
                 };
-                $delayMessage = $this->resolveDelayMessage($status, $row->created_at, $row->result_date);
+                $statusWithCodeLabel = match ($status) {
+                    1 => 'やり取り中(1)',
+                    2 => '面談日調整中(2)',
+                    3 => '面談日決定(3)',
+                    4 => '採用(4)',
+                    5 => '不採用(5)',
+                    6 => '本採用(6)',
+                    7 => '体験後不採用(7)',
+                    default => '未設定',
+                };
                 $mainImagePath = Schema::hasColumn('cast_profiles', 'main_image_path')
                     ? ($row->main_image_path ?? null)
                     : null;
@@ -150,14 +163,16 @@ class RecruitmentController extends Controller
                     'status_label' => $statusLabel,
                     'pattern' => $pattern,
                     'pattern_label' => $patternLabel,
+                    'job_kind_label' => $jobKindLabel,
+                    'status_with_code_label' => $statusWithCodeLabel,
                     'result_date' => $row->result_date ? date('Y/m/d', strtotime($row->result_date)) : null,
                     'real_start_date' => $row->real_start_date ? date('Y/m/d', strtotime($row->real_start_date)) : null,
                     'created_at' => $row->created_at ? date('Y/m/d', strtotime($row->created_at)) : null,
                     'cast_name' => $row->nickname ?: $row->name ?: 'キャスト',
                     'cast_avatar_url' => $castAvatarUrl,
                     'rejection_reason' => $rejectionReason !== '' ? $rejectionReason : null,
-                    'is_delayed' => $delayMessage !== '',
-                    'delay_message' => $delayMessage,
+                    'is_delayed' => false,
+                    'delay_message' => '',
                     'applied_summary_lines' => $appliedSummaryLines,
                     'hired_regular_hourly_wage' => $hiredWage,
                     'hired_regular_hourly_wage_input' => $hiredWageInput,
@@ -214,32 +229,6 @@ class RecruitmentController extends Controller
         return redirect()
             ->route('shop.recruits.status')
             ->with('message', '採用時給を保存しました。');
-    }
-
-    private function resolveDelayMessage(int $status, mixed $createdAt, mixed $resultDate): string
-    {
-        $now = Carbon::now();
-        if ($status === 3 && !empty($resultDate)) {
-            try {
-                $deadline = Carbon::parse((string) $resultDate);
-                if ($deadline->lt($now)) {
-                    return '採否連絡の期限超過';
-                }
-            } catch (\Throwable) {
-            }
-        }
-
-        if (in_array($status, [1, 2], true) && !empty($createdAt)) {
-            try {
-                $created = Carbon::parse((string) $createdAt);
-                if ($created->diffInDays($now) >= 7) {
-                    return '面接オファー期限超過';
-                }
-            } catch (\Throwable) {
-            }
-        }
-
-        return '';
     }
 
     /**

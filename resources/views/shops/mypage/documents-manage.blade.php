@@ -5,7 +5,7 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/css/shop-license-documents.css') }}?v=20260510">
+<link rel="stylesheet" href="{{ asset('assets/css/shop-license-documents.css') }}?v=20260511">
 @endpush
 
 @section('content')
@@ -25,16 +25,6 @@
     $serverFileUrl = $rec['file_url'] ?? '';
     $serverFileName = trim((string) ($rec['file_name'] ?? ''));
     $expiryVal = trim((string) ($rec['expired_at'] ?? ''));
-    $expiryDisplayJa = '';
-    if ($expiryVal !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $expiryVal)) {
-        try {
-            $expiryDisplayJa = \Carbon\Carbon::parse($expiryVal)->format('Y年n月j日');
-        } catch (\Throwable $e) {
-            $expiryDisplayJa = $expiryVal;
-        }
-    } elseif ($expiryVal !== '') {
-        $expiryDisplayJa = $expiryVal;
-    }
     $updatedLabel = $rec['updated_at_label'] ?? '';
     $approvedAtLabel = $rec['approved_at'] ?? '';
     $showBusinessExpiryBlock = $isBusiness && (!$uiUnsubmitted || $uiSelectingServer || $uiWithdraw || $expiryVal !== '');
@@ -94,39 +84,29 @@
                     @endif
 
                     <div id="license-doc-file-row" class="license-manage-file-row" @if(!$uiSelectingServer && !$uiWithdraw) style="display:none;" @endif>
-                        <div id="license-doc-preview-wrap" class="license-manage-preview-wrap">
-                            <div id="license-doc-preview-inner" class="license-manage-preview-inner">
+                        <div class="license-manage-file-stack">
+                            <span class="license-manage-file-icon" aria-hidden="true">
+                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            </span>
+                            <div id="license-doc-preview-inner" class="license-manage-filename-area">
                                 @if($uiSelectingServer || $uiWithdraw)
-                                    <div class="license-manage-preview-tile license-manage-preview-tile--fname-only">
+                                    <div class="license-manage-filename-box">
                                         <a href="{{ $serverFileUrl }}" target="_blank" rel="noopener noreferrer" class="license-manage-filename-link">{{ $serverFileName !== '' ? $serverFileName : 'アップロード済みファイル' }}</a>
                                     </div>
                                 @endif
                             </div>
-                        </div>
-                        <div id="license-doc-meta" class="license-manage-preview-meta">
-                            <p>最終更新: <span id="license-meta-updated">{{ $uiWithdraw || $uiSelectingServer ? ($updatedLabel !== '' ? $updatedLabel : '----/--/-- --:--') : '----/--/-- --:--' }}</span></p>
-                            @if($s === 'approved' && $approvedAtLabel !== '')
-                                <p class="license-manage-approved-at">承認日: {{ $approvedAtLabel }}</p>
-                            @endif
+                            <div id="license-doc-meta" class="license-manage-preview-meta license-manage-preview-meta--stacked">
+                                <p class="license-manage-meta-updated">最終更新: <span id="license-meta-updated">{{ $uiWithdraw || $uiSelectingServer ? ($updatedLabel !== '' ? $updatedLabel : '----/--/-- --:--') : '----/--/-- --:--' }}</span></p>
+                                @if($s === 'approved' && $approvedAtLabel !== '')
+                                    <p class="license-manage-approved-at">承認日: {{ $approvedAtLabel }}</p>
+                                @endif
+                            </div>
                         </div>
                     </div>
 
                     @if($isBusiness)
                         <div id="license-doc-expiry-block" class="license-manage-expiry-block" @if(!$showBusinessExpiryBlock) style="display:none;" @endif>
                             <label class="license-manage-label" for="license-doc-expired-at">営業許可証の有効期限</label>
-                            <p class="license-manage-expiry-readout" aria-live="polite">
-                                <span class="license-manage-expiry-readout__key">登録済み</span><span class="license-manage-expiry-readout__colon">:</span>
-                                <span id="license-doc-expiry-readout-body">
-                                    @if($expiryVal !== '')
-                                        <strong class="license-manage-expiry-readout__val">{{ $expiryDisplayJa !== '' ? $expiryDisplayJa : $expiryVal }}</strong>
-                                        @if($expiryDisplayJa !== '' && $expiryDisplayJa !== $expiryVal)
-                                            <span class="license-manage-expiry-readout__iso">（{{ $expiryVal }}）</span>
-                                        @endif
-                                    @else
-                                        <span class="license-manage-expiry-readout__none">未登録</span>
-                                    @endif
-                                </span>
-                            </p>
                             <div class="license-manage-date-wrap">
                                 <input type="date" id="license-doc-expired-at" name="expired_at" class="license-manage-date-input"
                                     value="{{ $expiryVal }}"
@@ -272,10 +252,13 @@
                 revokePreview();
                 previewInner.innerHTML = '';
                 var fname = (file && file.name) ? file.name : '選択したファイル';
-                var wrap = document.createElement('div');
-                wrap.className = 'license-manage-preview-tile license-manage-preview-tile--fname-only';
-                wrap.textContent = fname;
-                previewInner.appendChild(wrap);
+                var box = document.createElement('div');
+                box.className = 'license-manage-filename-box';
+                var span = document.createElement('span');
+                span.className = 'license-manage-filename-text';
+                span.textContent = fname;
+                box.appendChild(span);
+                previewInner.appendChild(box);
             }
 
             function showSelectingUi() {
@@ -318,32 +301,9 @@
             if (pickFirst) pickFirst.addEventListener('click', openPick);
             if (pickAgain) pickAgain.addEventListener('click', openPick);
 
-            var readoutBody = document.getElementById('license-doc-expiry-readout-body');
-            function refreshExpiryReadout() {
-                if (!isBusiness || !readoutBody || !expiryInput) return;
-                var v = (expiryInput.value || '').trim();
-                if (!v) {
-                    readoutBody.innerHTML = '<span class="license-manage-expiry-readout__none">未登録</span>';
-                    return;
-                }
-                var ja = v;
-                if (/^\d{4}-\d{2}-\d{2}$/.test(v)) {
-                    var p = v.split('-');
-                    ja = parseInt(p[0], 10) + '年' + parseInt(p[1], 10) + '月' + parseInt(p[2], 10) + '日';
-                }
-                var iso = /^\d{4}-\d{2}-\d{2}$/.test(v) ? '<span class="license-manage-expiry-readout__iso">（' + v + '）</span>' : '';
-                readoutBody.innerHTML = '<strong class="license-manage-expiry-readout__val">' + ja + '</strong>' + iso;
-            }
-
             if (expiryInput) {
-                expiryInput.addEventListener('input', function () {
-                    refreshExpiryReadout();
-                    updateSubmitEnabled();
-                });
-                expiryInput.addEventListener('change', function () {
-                    refreshExpiryReadout();
-                    updateSubmitEnabled();
-                });
+                expiryInput.addEventListener('input', updateSubmitEnabled);
+                expiryInput.addEventListener('change', updateSubmitEnabled);
             }
 
             if (fileInput) {
