@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\CastIdentityDocument;
 use App\Models\ShopLicenseDocument;
-use App\Support\AdminMockInquiries;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -105,7 +104,11 @@ class AdminOperationalSummaryService
 
     private function countInquiriesResolvedTotal(): int
     {
-        return (int) collect(AdminMockInquiries::all())
+        if (!Schema::hasTable('inquiries')) {
+            return 0;
+        }
+
+        return (int) DB::table('inquiries')
             ->whereIn('status', ['対応済み', '完了', 'クローズ'])
             ->count();
     }
@@ -171,7 +174,13 @@ class AdminOperationalSummaryService
 
     private function getPendingInquiryCount(): int
     {
-        return collect(AdminMockInquiries::all())->where('status', '未対応')->count();
+        if (!Schema::hasTable('inquiries')) {
+            return 0;
+        }
+
+        return (int) DB::table('inquiries')
+            ->where('status', '未対応')
+            ->count();
     }
 
     /**
@@ -179,15 +188,22 @@ class AdminOperationalSummaryService
      */
     private function buildInquiryNotifications(): array
     {
-        return collect(AdminMockInquiries::all())
+        if (!Schema::hasTable('inquiries')) {
+            return [];
+        }
+
+        return DB::table('inquiries')
             ->where('status', '未対応')
-            ->map(function (array $row) {
-                $created = $row['created_at'] instanceof Carbon
-                    ? $row['created_at']
-                    : Carbon::parse($row['created_at']);
+            ->orderByDesc('created_at')
+            ->limit(100)
+            ->get()
+            ->map(function ($row) {
+                $created = Carbon::parse($row->created_at ?? now());
+                $fromName = trim((string) ($row->from_name ?? $row->name ?? $row->user_name ?? ''));
+                $subject = trim((string) ($row->subject ?? $row->title ?? ''));
 
                 return [
-                    'title' => '[問合せ] ' . ($row['from_name'] ?? '') . ' — ' . ($row['subject'] ?? ''),
+                    'title' => '[問合せ] ' . $fromName . ' — ' . $subject,
                     'time_label' => $created->diffForHumans(),
                     'icon' => 'fa-comments',
                     'class' => 'is-warning',

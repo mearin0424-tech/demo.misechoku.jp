@@ -29,6 +29,8 @@ class TalkController extends Controller
     private const APPLICATION_STATUS_INTERVIEW_FIXED = 3;
     private const APPLICATION_STATUS_HIRED = 4;
     private const APPLICATION_STATUS_REJECTED = 5;
+    private const APPLICATION_STATUS_HIRED_FULLTIME = 6;
+    private const APPLICATION_STATUS_REJECTED_TRIAL = 7;
 
     public function __construct(
         private readonly MessageTemplateService $messageTemplateService,
@@ -52,14 +54,30 @@ class TalkController extends Controller
         }
 
         $conversations = $this->buildTalkList($isCastPortal);
-        $requestTalks = $conversations
-            ->filter(fn ($talk) => ($talk['unread_count'] ?? 0) > 0 && ($talk['reply_count'] ?? 0) === 0)
-            ->values()
-            ->all();
-        $ongoingTalks = $conversations
-            ->reject(fn ($talk) => ($talk['unread_count'] ?? 0) > 0 && ($talk['reply_count'] ?? 0) === 0)
-            ->values()
-            ->all();
+        if ($isCastPortal) {
+            $requestTalks = $conversations
+                ->filter(fn ($talk) => ($talk['unread_count'] ?? 0) > 0 && ($talk['reply_count'] ?? 0) === 0)
+                ->values()
+                ->all();
+            $ongoingTalks = $conversations
+                ->reject(fn ($talk) => ($talk['unread_count'] ?? 0) > 0 && ($talk['reply_count'] ?? 0) === 0)
+                ->values()
+                ->all();
+        } else {
+            $pastStatusList = [
+                self::APPLICATION_STATUS_REJECTED,
+                self::APPLICATION_STATUS_HIRED_FULLTIME,
+                self::APPLICATION_STATUS_REJECTED_TRIAL,
+            ];
+            $requestTalks = $conversations
+                ->filter(fn ($talk) => in_array((int) ($talk['application_status'] ?? 0), $pastStatusList, true))
+                ->values()
+                ->all();
+            $ongoingTalks = $conversations
+                ->reject(fn ($talk) => in_array((int) ($talk['application_status'] ?? 0), $pastStatusList, true))
+                ->values()
+                ->all();
+        }
 
         return view('common.talk.index', compact('ongoingTalks', 'requestTalks', 'profileRoute'));
     }
@@ -398,6 +416,28 @@ class TalkController extends Controller
             );
         }
 
+        $hiredWageNormalized = null;
+        $selectedEmploymentKind = null;
+        $internalRejectionReason = null;
+        if (in_array($actionType, ['hired', 'rejected'], true)) {
+            $selectedEmploymentKind = $this->normalizeEmploymentKind((string) $request->input('employment_kind', ''));
+            if ($selectedEmploymentKind === null) {
+                abort(422, '採用区分を選択してください。');
+            }
+            if ($actionType === 'hired') {
+                $hiredWageNormalized = ShopJobApplicationView::normalizeWageDigits(
+                    $request->input('hired_regular_hourly_wage') !== null
+                        ? (string) $request->input('hired_regular_hourly_wage')
+                        : null
+                );
+                if ($hiredWageNormalized === null) {
+                    abort(422, '採用時給（確定）を入力してください。');
+                }
+            } else {
+                $internalRejectionReason = trim((string) $request->input('message', ''));
+            }
+        }
+
         [$messageType, $content] = match ($actionType) {
             'interview_offer' => [
                 self::MESSAGE_TYPE_INTERVIEW_OFFER,
@@ -427,31 +467,35 @@ class TalkController extends Controller
             ],
             'interview_cancel_accept' => [
                 self::MESSAGE_TYPE_TEXT,
-                '面談キャンセルを承諾しました。やり取り中に戻します。',
+                '【自動送信】面談キャンセルを承諾しました。やり取り中に戻します。',
             ],
             'hired' => [
                 self::MESSAGE_TYPE_HIRED,
-                $this->resolveResultMessage((string) $actionType, (string) $request->input('message')),
+                $this->buildHiredMessageForCast(
+                    (string) $this->resolveResultMessage((string) $actionType, (string) $request->input('message')),
+                    (string) $hiredWageNormalized,
+                    (string) $selectedEmploymentKind
+                ),
             ],
             'rejected' => [
                 self::MESSAGE_TYPE_REJECTED,
-                $this->resolveResultMessage((string) $actionType, (string) $request->input('message')),
+                $this->resolveResultMessage((string) $actionType, ''),
             ],
             'cancel_status' => [
                 self::MESSAGE_TYPE_TEXT,
-                '面談ステータスをキャンセルし、やり取り中に戻しました。必要に応じて面談候補日を再設定してください。',
+                '【自動送信】面談ステータスをキャンセルし、やり取り中に戻しました。必要に応じて面談候補日を再設定してください。',
             ],
             'fulltime_request' => [
                 self::MESSAGE_TYPE_TEXT,
-                '本入店を希望します。ご確認をお願いします。',
+                '【自動送信】本入店を希望します。ご確認をお願いします。',
             ],
             'work_complete_report' => [
                 self::MESSAGE_TYPE_TEXT,
-                '勤務完了報告を送信しました。ご確認をお願いします。',
+                '【自動送信】勤務完了報告を送信しました。ご確認をお願いします。',
             ],
             'bonus_achievement_report' => [
                 self::MESSAGE_TYPE_TEXT,
-                'ボーナス達成報告を送信しました。内容確認後に承認をお願いします。',
+                '【自動送信】ボーナス達成報告を送信しました。内容確認後に承認をお願いします。',
             ],
         };
 
@@ -494,33 +538,14 @@ class TalkController extends Controller
             'updated_at' => now(),
         ]);
 
-        $hiredWageNormalized = null;
-        if ($actionType === 'hired') {
-            $hiredWageNormalized = ShopJobApplicationView::normalizeWageDigits(
-                $request->input('hired_regular_hourly_wage') !== null
-                    ? (string) $request->input('hired_regular_hourly_wage')
-                    : null
-            );
-            if ($hiredWageNormalized === null) {
-                abort(422, '採用時給（確定）を入力してください。');
-            }
-        }
-
-        $selectedEmploymentKind = null;
-        if (in_array($actionType, ['hired', 'rejected'], true)) {
-            $selectedEmploymentKind = $this->normalizeEmploymentKind((string) $request->input('employment_kind', ''));
-            if ($selectedEmploymentKind === null) {
-                abort(422, '採用区分を選択してください。');
-            }
-        }
-
         $this->syncApplicationStatusFromTalkAction(
             $partnerId,
             $isCastPortal,
             $actionType,
             $content,
             $hiredWageNormalized,
-            $selectedEmploymentKind
+            $selectedEmploymentKind,
+            $internalRejectionReason
         );
         if ($selectedEmploymentKind !== null) {
             $this->syncApplicationEmploymentKindFromTalkAction($partnerId, $isCastPortal, $selectedEmploymentKind, $actionType);
@@ -649,6 +674,7 @@ class TalkController extends Controller
                     'last_message_by_me' => (int) $latest->sender_type === $mySenderType,
                     'is_read' => (bool) $latest->is_read,
                     'status_code' => $statusCode,
+                    'application_status' => $applicationStatus,
                     'status_label' => $blockState['is_blocked']
                         ? ($blockState['blocked_by_me'] ? 'ブロック中' : '相手がブロック中')
                         : $this->statusLabel($statusCode),
@@ -956,6 +982,8 @@ class TalkController extends Controller
             self::APPLICATION_STATUS_INTERVIEW_FIXED => 'interview_fixed',
             self::APPLICATION_STATUS_HIRED => 'hired',
             self::APPLICATION_STATUS_REJECTED => 'rejected',
+            self::APPLICATION_STATUS_HIRED_FULLTIME => 'hired',
+            self::APPLICATION_STATUS_REJECTED_TRIAL => 'rejected',
             default => 'chatting',
         };
     }
@@ -967,6 +995,7 @@ class TalkController extends Controller
         string $content,
         ?string $hiredRegularHourlyWage = null,
         ?string $selectedEmploymentKind = null,
+        ?string $internalRejectionReason = null,
     ): void {
         $castId = $isCastPortal ? $this->currentCastId() : $partnerId;
         $shopId = $isCastPortal ? $partnerId : $this->currentShopId();
@@ -1001,7 +1030,7 @@ class TalkController extends Controller
             }
         } elseif ($actionType === 'rejected') {
             $updates['status'] = self::APPLICATION_STATUS_REJECTED;
-            $updates['reason_rejection'] = trim($content);
+            $updates['reason_rejection'] = trim((string) $internalRejectionReason);
         } elseif ($actionType === 'cancel_status') {
             $updates['status'] = self::APPLICATION_STATUS_CHATTING;
             $updates['result_date'] = null;
@@ -1081,8 +1110,8 @@ class TalkController extends Controller
         $created = $this->createApplicationForTalk($castId, $shopId, $targetJobType);
         if ($created && in_array($talkTopic, ['new_hire', 'help'], true)) {
             $autoMessage = $talkTopic === 'help'
-                ? 'ヘルプ求人から応募がありました。'
-                : '新規採用求人から応募がありました。';
+                ? '【自動送信】ヘルプ求人から応募がありました。'
+                : '【自動送信】新規採用求人から応募がありました。';
             DB::table('messages')->insert([
                 'cast_id' => $castId,
                 'shop_id' => $shopId,
@@ -1201,7 +1230,7 @@ class TalkController extends Controller
     private function resolveResultMessage(string $actionType, string $customMessage): string
     {
         $message = trim($customMessage);
-        if ($message !== '') {
+        if ($actionType !== 'rejected' && $message !== '') {
             return $message;
         }
 
@@ -1210,6 +1239,19 @@ class TalkController extends Controller
             'rejected' => $this->messageTemplateService->getDefaultBody('talk_rejected'),
             default => '',
         };
+    }
+
+    private function buildHiredMessageForCast(string $baseMessage, string $hourlyWage, string $employmentKind): string
+    {
+        $kindLabel = match ($employmentKind) {
+            'trial' => '体験入店',
+            'help' => 'ヘルプ',
+            default => '本入店',
+        };
+        return trim($baseMessage) . "\n\n" .
+            '【確定情報】' . "\n" .
+            '採用区分: ' . $kindLabel . "\n" .
+            '時給: ¥' . number_format((int) $hourlyWage);
     }
 
     /**

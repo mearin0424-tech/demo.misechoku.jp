@@ -115,16 +115,7 @@ class HomeController extends Controller
             ];
         }
 
-        if (!empty($items)) {
-            return $items;
-        }
-
-        return [
-            ['id' => 1, 'name' => 'みさき', 'age' => 23, 'tags' => ['モデル系', 'お酒強い'], 'like_count' => 12, 'images' => [asset('storage/mock/casts/1-1.png'), asset('storage/mock/casts/1-2.png'), asset('storage/mock/casts/1-3.png')], 'is_liked' => false, 'is_kept' => false],
-            ['id' => 2, 'name' => '愛華', 'age' => 21, 'tags' => ['癒やし系', '聞き上手'], 'like_count' => 8, 'images' => [asset('storage/mock/casts/2-1.png'), asset('storage/mock/casts/2-2.png'), asset('storage/mock/casts/2-3.png')], 'is_liked' => false, 'is_kept' => false],
-            ['id' => 3, 'name' => 'さくら', 'age' => 25, 'tags' => ['元気系', 'トーク上手'], 'like_count' => 24, 'images' => [asset('storage/mock/casts/3-1.png')], 'is_liked' => false, 'is_kept' => false],
-            ['id' => 4, 'name' => 'ナナ', 'age' => 22, 'tags' => ['清楚系', 'お酒弱い'], 'like_count' => 5, 'images' => [asset('storage/mock/casts/4-1.png')], 'is_liked' => false, 'is_kept' => false],
-        ];
+        return $items;
     }
 
     /**
@@ -404,97 +395,7 @@ class HomeController extends Controller
             ];
         }
 
-        if (!empty($items)) {
-            return $items;
-        }
-
-        $mockRows = [
-            [
-                'id' => 1,
-                'numeric_id' => 1,
-                'shop_job_id' => 0,
-                'name' => 'CLUB ETERNITY',
-                'images' => [asset('storage/mock/shops/out-1.png')],
-                'hourly_wage_regular' => 3500,
-                'trial_hourly_wage' => 3000,
-                'help_hourly_wage' => 2800,
-                'noruma_reward' => 50000,
-                'bonus_condition' => '💰 全額日払い / 帰りに3万円保証',
-                'catch_copy' => "ノルマ・罰金**一切なし**！\n未経験だけのゆるふわ店 🎀",
-                'tags' => ['高時給', 'ボーナスあり', '六本木'],
-                'pref' => '東京都',
-                'city' => '港区',
-                'like_count' => 0,
-                'industry_name' => 'キャバクラ',
-                'rating' => 4.5,
-                'review_count' => 12,
-                'is_premium' => true,
-                'recruit_bonus_lines' => [
-                    ['label' => '体入', 'amount' => 35000, 'offered' => true],
-                    ['label' => 'ヘルプ', 'amount' => 50000, 'offered' => true],
-                    ['label' => '本入', 'amount' => 200000, 'offered' => true],
-                ],
-                'trial_hourly_min' => 4500,
-                'trial_hourly_max' => 5000,
-                'help_hourly_min' => 4000,
-                'help_hourly_max' => 4200,
-            ],
-            [
-                'id' => 2,
-                'numeric_id' => 2,
-                'shop_job_id' => 0,
-                'name' => 'THE GOLDSTONE',
-                'images' => [asset('storage/mock/shops/out-2.png')],
-                'hourly_wage_regular' => 3200,
-                'trial_hourly_wage' => null,
-                'help_hourly_wage' => null,
-                'noruma_reward' => 0,
-                'bonus_condition' => '',
-                'catch_copy' => 'ノルマなし',
-                'tags' => ['送りあり', '六本木'],
-                'pref' => '東京都',
-                'city' => '港区',
-                'like_count' => 0,
-                'industry_name' => 'クラブ',
-                'rating' => 4.2,
-                'review_count' => 5,
-                'is_premium' => false,
-                'recruit_bonus_lines' => [
-                    ['label' => '体入', 'amount' => 0, 'offered' => false],
-                    ['label' => 'ヘルプ', 'amount' => 0, 'offered' => false],
-                    ['label' => '本入', 'amount' => 0, 'offered' => true],
-                ],
-            ],
-        ];
-
-        return array_map(function (array $it) {
-            $meta = [
-                'catch_copy' => $it['catch_copy'] ?? '',
-                'bonus_condition' => $it['bonus_condition'] ?? '',
-                'bonus_other_conditions' => $it['bonus_other_conditions'] ?? '',
-            ];
-            foreach (['trial_hourly_min', 'trial_hourly_max', 'help_hourly_min', 'help_hourly_max'] as $wk) {
-                if (array_key_exists($wk, $it) && $it[$wk] !== null && $it[$wk] !== '') {
-                    $meta[$wk] = $it[$wk];
-                }
-            }
-            $trialW = isset($it['trial_hourly_wage']) && $it['trial_hourly_wage'] !== null && $it['trial_hourly_wage'] !== ''
-                ? (int) $it['trial_hourly_wage'] : null;
-            $helpW = isset($it['help_hourly_wage']) && $it['help_hourly_wage'] !== null && $it['help_hourly_wage'] !== ''
-                ? (int) $it['help_hourly_wage'] : null;
-            $it['trial_hourly_range'] = $this->discoveryHourlyPair($trialW, $meta, 'trial');
-            $it['help_hourly_range'] = $this->discoveryHourlyPair($helpW, $meta, 'help');
-            $it['signup_bonus_range'] = $this->discoverySignupBonusRange($it['recruit_bonus_lines'] ?? []);
-            $it['manager_overlay'] = $this->buildManagerImageOverlay(
-                $meta,
-                (int) ($it['noruma_reward'] ?? 0)
-            );
-            if (!array_key_exists('is_kept', $it)) {
-                $it['is_kept'] = false;
-            }
-
-            return $it;
-        }, $mockRows);
+        return $items;
     }
 
     /**
@@ -762,16 +663,7 @@ class HomeController extends Controller
             ];
         }
 
-        if (!empty($items)) {
-            return $items;
-        }
-
-        return [
-            ['id' => 1, 'name' => 'CLUB ETERNITY', 'age' => null, 'tags' => ['高時給', '即日払い'], 'like_count' => 8, 'rating' => 4.5, 'images' => [asset('storage/mock/shops/out-1.png')]],
-            ['id' => 2, 'name' => 'THE GOLDSTONE', 'age' => null, 'tags' => ['ノルマなし', '送りあり'], 'like_count' => 12, 'rating' => 4.8, 'images' => [asset('storage/mock/shops/out-2.png')]],
-            ['id' => 3, 'name' => 'Club Luxurious', 'age' => null, 'tags' => ['六本木', '高級'], 'like_count' => 5, 'rating' => 4.2, 'images' => [asset('storage/mock/shops/out-1.png')]],
-            ['id' => 4, 'name' => 'BAR STELLA', 'age' => null, 'tags' => ['落ち着いた', 'カジュアル'], 'like_count' => 3, 'rating' => 4.0, 'images' => [asset('storage/mock/shops/out-2.png')]],
-        ];
+        return $items;
     }
 
     private function getCastImages(string $castId, ?string $mainImagePath): array

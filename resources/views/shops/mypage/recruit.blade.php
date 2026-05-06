@@ -63,7 +63,7 @@
     @forelse($matchingList as $item)
     <div class="status-card">
         <a href="{{ route('shop.talk.room', $item['id']) }}" class="status-item">
-            <img src="{{ asset('storage/mock/casts/'.$item['id'].'-1.png') }}" class="cast-thumb-sm" onerror="this.src='{{ asset('assets/images/common/user-default.svg') }}'">
+            <img src="{{ $item['img'] ?? asset('assets/images/common/no-image.png') }}" class="cast-thumb-sm" onerror="this.src='{{ asset('assets/images/common/user-default.svg') }}'">
             <div class="status-info">
                 <div class="name-row">
                     <span class="cast-name">{{ $item['cast_name'] }}</span>

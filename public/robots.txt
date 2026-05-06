@@ -8,7 +8,6 @@ Allow: /
 
 システムディレクトリはクロール対象外
 
-Disallow: /storage/mock/
 Disallow: /config/
 Disallow: /includes/
 Disallow: /views/

@@ -11,7 +11,7 @@
 @section('content')
 @php
     $isCast = request()->is('cast/*');
-    $requestTabText = $isCast ? 'オファー' : 'リクエスト';
+    $requestTabText = $isCast ? 'オファー' : '過去のやり取り';
     $targetRoute = $isCast ? 'cast.talk.room' : 'shop.talk.room';
     // $profileRoute はコントローラーから渡される（キャスト→お店詳細、お店→キャスト詳細）
 @endphp
@@ -60,117 +60,81 @@
             @endforelse
         </div>
 
-        {{-- パネル2：リクエスト / オファー --}}
+        {{-- パネル2：オファー / 過去のやり取り --}}
         <div id="pane-requests" class="tab-pane">
             @forelse($requestTalks as $talk)
-                <div class="request-card">
-                    @if(Route::has($profileRoute))
-                        <a href="{{ route($profileRoute, $talk['profile_id'] ?? $talk['partner_id']) }}" class="request-upper-link">
-                    @else
-                        <div class="request-upper-link">
-                    @endif
-                        <div class="request-main">
-                            <img src="{{ $talk['avatar'] }}" class="request-img">
-                            <div class="request-content">
-                                <div class="request-top-row">
-                                    <div class="name">{{ $talk['name'] }}@if(isset($talk['age']) && $talk['age'] !== null) ({{ $talk['age'] }})@endif</div>
-                                    @if(!empty($talk['last_time']))
-                                        <span class="request-time">{{ $talk['last_time'] }}</span>
-                                    @endif
+                @if($isCast)
+                    <div class="request-card">
+                        @if(Route::has($profileRoute))
+                            <a href="{{ route($profileRoute, $talk['profile_id'] ?? $talk['partner_id']) }}" class="request-upper-link">
+                        @else
+                            <div class="request-upper-link">
+                        @endif
+                            <div class="request-main">
+                                <img src="{{ $talk['avatar'] }}" class="request-img">
+                                <div class="request-content">
+                                    <div class="request-top-row">
+                                        <div class="name">{{ $talk['name'] }}@if(isset($talk['age']) && $talk['age'] !== null) ({{ $talk['age'] }})@endif</div>
+                                        @if(!empty($talk['last_time']))
+                                            <span class="request-time">{{ $talk['last_time'] }}</span>
+                                        @endif
+                                    </div>
+                                    <div class="request-meta-row">
+                                        <span class="request-status">{{ $talk['status_label'] ?? $requestTabText }}</span>
+                                        @if(!empty($talk['has_fulltime_request_badge']))
+                                            <span class="unread-badge" style="margin-left:8px; background:linear-gradient(135deg,#f59e0b,#f97316);">本入店希望</span>
+                                        @endif
+                                    </div>
+                                    <div class="request-msg-preview">{{ $talk['last_message'] }}</div>
                                 </div>
-                                <div class="request-meta-row">
-                                    <span class="request-status">{{ $talk['status_label'] ?? $requestTabText }}</span>
-                                    @if(!empty($talk['has_fulltime_request_badge']))
-                                        <span class="unread-badge" style="margin-left:8px; background:linear-gradient(135deg,#f59e0b,#f97316);">本入店希望</span>
-                                    @endif
-                                </div>
-                                <div class="request-msg-preview">{{ $talk['last_message'] }}</div>
                             </div>
+                        @if(Route::has($profileRoute))
+                            </a>
+                        @else
+                            </div>
+                        @endif
+                        <div class="request-actions">
+                            <a href="{{ route($targetRoute, $talk['partner_id']) }}" class="btn-action btn-approve">承認</a>
+                            <button class="btn-action btn-reject js-reject-request">拒否</button>
                         </div>
-                    @if(Route::has($profileRoute))
-                        </a>
-                    @else
-                        </div>
-                    @endif
-                    <div class="request-actions">
-                        <a href="{{ route($targetRoute, $talk['partner_id']) }}" class="btn-action btn-approve">承認</a>
-                        <button class="btn-action btn-reject js-reject-request">拒否</button>
                     </div>
-                </div>
+                @else
+                    <div class="talk-item" data-partner-id="{{ $talk['partner_id'] }}">
+                        <a href="{{ route($targetRoute, $talk['partner_id']) }}" class="talk-item-main">
+                            <img src="{{ $talk['avatar'] }}" class="talk-avatar" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($talk['name']) }}&background=4d1a1a&color=fff';">
+                            <div class="talk-info">
+                                <div class="talk-header">
+                                    <span class="talk-name">{{ $talk['name'] }}</span>
+                                    <span class="talk-time">{{ $talk['last_time'] }}</span>
+                                </div>
+                                <div class="talk-last-msg-row">
+                                    <p class="talk-last-msg">{{ $talk['last_message'] }}</p>
+                                    @if(isset($talk['unread_count']) && $talk['unread_count'] > 0)
+                                        <span class="unread-badge">{{ $talk['unread_count'] }}</span>
+                                    @endif
+                                </div>
+                                <div class="flex justify-between items-center mt-1">
+                                    <span class="talk-status">{{ $talk['status_label'] ?? $requestTabText }}</span>
+                                    @if(!empty($talk['has_fulltime_request_badge']))
+                                        <span class="unread-badge" style="background:linear-gradient(135deg,#f59e0b,#f97316);">本入店希望</span>
+                                    @endif
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                @endif
             @empty
                 <div class="no-messages text-center py-10 opacity-50">{{ $requestTabText }}はありません</div>
             @endforelse
         </div>
 </div>
 
-{{-- オファー拒否確認ポップアップ --}}
-<div id="reject-confirm-overlay" class="reject-confirm-overlay" aria-hidden="true">
-    <div class="reject-confirm-modal">
-        <p class="reject-confirm-text">このキャストからのメッセージを拒否しますか？</p>
-        <div class="reject-confirm-actions">
-            <button type="button" class="btn-action btn-reject-confirm-cancel">キャンセル</button>
-            <button type="button" class="btn-action btn-reject-confirm-ok">OK</button>
-        </div>
-    </div>
-</div>
 @endsection
 
 @push('scripts')
 <script src="{{ asset('assets/js/sub-header.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const overlay = document.getElementById('reject-confirm-overlay');
-    const okBtn = overlay && overlay.querySelector('.btn-reject-confirm-ok');
-    const cancelBtn = overlay && overlay.querySelector('.btn-reject-confirm-cancel');
-
-    function openRejectConfirm(clickedButton) {
-        if (!overlay) return;
-        overlay.setAttribute('aria-hidden', 'false');
-        overlay.classList.add('is-open');
-        overlay.dataset.rejectButtonId = clickedButton ? (clickedButton.id || Math.random()) : '';
-        overlay._rejectButton = clickedButton;
-    }
-
-    function closeRejectConfirm() {
-        if (!overlay) return;
-        overlay.setAttribute('aria-hidden', 'true');
-        overlay.classList.remove('is-open');
-        overlay._rejectButton = null;
-    }
-
-    document.querySelectorAll('.js-reject-request').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            openRejectConfirm(this);
-        });
-    });
-
-    if (okBtn) {
-        okBtn.addEventListener('click', function() {
-            var button = overlay._rejectButton;
-            closeRejectConfirm();
-            if (button) {
-                var card = button.closest('.request-card');
-                if (card) {
-                    card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                    card.style.opacity = '0';
-                    card.style.transform = 'scale(0.95)';
-                    setTimeout(function() { card.style.display = 'none'; }, 300);
-                }
-            }
-        });
-    }
-
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', closeRejectConfirm);
-    }
-
-    if (overlay) {
-        overlay.addEventListener('click', function(e) {
-            if (e.target === overlay) closeRejectConfirm();
-        });
-    }
-
     // ===== トークピン留め（LINEのように上部固定） =====
     const isCastPortal = {!! $isCast ? 'true' : 'false' !!};
     const pinStorageKey = isCastPortal ? 'talk_pins_cast' : 'talk_pins_shop';

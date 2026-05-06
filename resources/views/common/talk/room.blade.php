@@ -188,7 +188,7 @@
                             <div class="interview-card-head">
                                 <div class="interview-title">
                                     <i class="far fa-calendar-alt"></i>
-                                    <span>面談候補日をお送りします</span>
+                                    <span>【自動送信】面談候補日をお送りします</span>
                                 </div>
                                 <span class="interview-badge">日程調整</span>
                             </div>
@@ -248,7 +248,7 @@
                         </div>
                     @elseif($msg->type === 3)
                         <div class="message-bubble message-bubble-interview message-bubble-confirmed">
-                            <p class="interview-body-copy">以下の日時で面談日が確定しました。</p>
+                            <p class="interview-body-copy">【自動送信】以下の日時で面談日が確定しました。</p>
                             <p class="interview-confirmed-date">{{ \Carbon\Carbon::parse($msg->selected_option)->format('Y年n月j日 H:i') }}</p>
                             @if($msg->is_mine)
                                 <span class="message-bubble-tail" aria-hidden="true">
@@ -272,7 +272,7 @@
                             <div class="interview-card-head">
                                 <div class="interview-title">
                                     <i class="fas fa-rotate-left"></i>
-                                    <span>面談キャンセル依頼</span>
+                                    <span>【自動送信】面談キャンセル依頼</span>
                                 </div>
                                 <span class="interview-badge">確認待ち</span>
                             </div>

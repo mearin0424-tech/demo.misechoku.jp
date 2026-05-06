@@ -64,7 +64,7 @@ class InteractionController extends Controller
                         'name' => $row->name ?: '店舗',
                         'pref' => $row->pref ?? '',
                         'city' => $row->city ?? '',
-                        'img' => $row->main_image_path ? asset($row->main_image_path) : asset('storage/mock/shops/out-1.png'),
+                        'img' => $this->assetPathForStored($row->main_image_path ?? null),
                         'updated_at' => $this->formatInteractionAt($row->created_at),
                     ];
                 }
@@ -91,7 +91,7 @@ class InteractionController extends Controller
                         'name' => $row->name ?: '店舗',
                         'pref' => $row->pref ?? '',
                         'city' => $row->city ?? '',
-                        'img' => $row->main_image_path ? asset($row->main_image_path) : asset('storage/mock/shops/out-2.png'),
+                        'img' => $this->assetPathForStored($row->main_image_path ?? null),
                         'created_at' => $this->formatInteractionAt($row->created_at),
                         'is_match' => false,
                     ];
@@ -118,7 +118,7 @@ class InteractionController extends Controller
                         'name' => $row->name ?: '店舗',
                         'pref' => $row->pref ?? '',
                         'city' => $row->city ?? '',
-                        'img' => $row->main_image_path ? asset($row->main_image_path) : asset('storage/mock/shops/out-1.png'),
+                        'img' => $this->assetPathForStored($row->main_image_path ?? null),
                         'visited_at' => $this->formatInteractionAt($row->created_at),
                     ];
                 }
@@ -127,7 +127,7 @@ class InteractionController extends Controller
             $profileRoute = 'cast.shopprofileview.show';
             $showReceivedLike = true;
         } else {
-            // お店側：キャストのキープ・ライク・足あと（キャスト画像は storage/mock/casts/{id}-1.png、存在しない場合はビュー側でデフォルト表示）
+            // お店側：キャストのキープ・ライク・足あと
             $shopUser = Auth::guard('shop')->user();
             $shopId = $shopUser ? (string) $shopUser->shop_id : null;
 
@@ -164,7 +164,7 @@ class InteractionController extends Controller
                         'profession' => $row->profession ?? '',
                         'pref' => $row->pref ?? '',
                         'city' => $row->city ?? '',
-                        'img' => $row->main_image_path ? asset($row->main_image_path) : asset('storage/mock/casts/'.$row->id.'-1.png'),
+                        'img' => $this->assetPathForStored($row->main_image_path ?? null),
                         'updated_at' => $this->formatInteractionAt($row->created_at),
                     ];
                 }
@@ -196,7 +196,7 @@ class InteractionController extends Controller
                         'profession' => $row->profession ?? '',
                         'pref' => $row->pref ?? '',
                         'city' => $row->city ?? '',
-                        'img' => $row->main_image_path ? asset($row->main_image_path) : asset('storage/mock/casts/'.$row->id.'-1.png'),
+                        'img' => $this->assetPathForStored($row->main_image_path ?? null),
                         'created_at' => $this->formatInteractionAt($row->created_at),
                         'is_match' => false,
                     ];
@@ -228,7 +228,7 @@ class InteractionController extends Controller
                         'profession' => $row->profession ?? '',
                         'pref' => $row->pref ?? '',
                         'city' => $row->city ?? '',
-                        'img' => $row->main_image_path ? asset($row->main_image_path) : asset('storage/mock/casts/'.$row->id.'-1.png'),
+                        'img' => $this->assetPathForStored($row->main_image_path ?? null),
                         'visited_at' => $this->formatInteractionAt($row->created_at),
                     ];
                 }
@@ -247,5 +247,22 @@ class InteractionController extends Controller
             'profileRoute' => $profileRoute,
             'showReceivedLike' => $showReceivedLike,
         ]);
+    }
+
+    private function assetPathForStored(?string $path): string
+    {
+        if (empty($path)) {
+            return asset('assets/images/common/no-image.png');
+        }
+
+        if (str_starts_with($path, 'uploads/')) {
+            return asset($path);
+        }
+
+        if (str_starts_with($path, 'public/')) {
+            return asset('storage/' . substr($path, 7));
+        }
+
+        return asset(ltrim($path, '/'));
     }
 }

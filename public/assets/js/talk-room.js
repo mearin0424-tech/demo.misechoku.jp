@@ -684,7 +684,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!currentResultAction) return;
 
                 const message = resultTextarea.value.trim();
-                if (!message) {
+                if (currentResultAction === 'hired' && !message) {
                     window.alert('送信メッセージを入力してください。');
                     return;
                 }
@@ -707,6 +707,9 @@ document.addEventListener('DOMContentLoaded', function() {
                             return;
                         }
                         payload.hired_regular_hourly_wage = hiredWage;
+                    }
+                    if (currentResultAction === 'rejected') {
+                        payload.message = message; // 不採用理由は内部管理用にのみ使用
                     }
                     await postJson(actionUrl, token, payload);
                     window.location.reload();

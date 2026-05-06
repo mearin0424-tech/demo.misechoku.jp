@@ -7,7 +7,7 @@
         <h1 class="admin-title">問合せ管理</h1>
         <p class="admin-description">
             ミセチョク運営への問い合わせ内容を一覧で確認する画面です。<br>
-            ひとまずダミーの問い合わせを表示しており、今後問い合わせテーブルと紐付けます。
+            問い合わせテーブルに登録されたデータを表示します。
         </p>
 
         @include('admin.parts.operation-achievement', ['operationAchievementRoute' => 'admin.inquiries.index'])
