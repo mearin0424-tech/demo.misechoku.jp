@@ -174,7 +174,6 @@ class TalkController extends Controller
             'updated_at' => now(),
         ];
 
-        $messageId = DB::table('messages')->insertGetId($payload);
         if ($isCastPortal) {
             $this->ensureApplicationForTalkStart(
                 (string) $this->currentCastId(),
@@ -183,6 +182,7 @@ class TalkController extends Controller
                 $this->normalizeTalkJobKind((string) $request->input('talk_job_kind', ''))
             );
         }
+        $messageId = DB::table('messages')->insertGetId($payload);
 
         return response()->json([
             'success' => true,
@@ -919,7 +919,22 @@ class TalkController extends Controller
             'help' => 3,
             default => 1,
         };
-        $this->createApplicationForTalk($castId, $shopId, $targetJobType);
+        $created = $this->createApplicationForTalk($castId, $shopId, $targetJobType);
+        if ($created && in_array($talkTopic, ['new_hire', 'help'], true)) {
+            $autoMessage = $talkTopic === 'help'
+                ? 'ヘルプ求人から応募がありました。'
+                : '新規採用求人から応募がありました。';
+            DB::table('messages')->insert([
+                'cast_id' => $castId,
+                'shop_id' => $shopId,
+                'sender_type' => $this->mySenderType(true),
+                'type' => self::MESSAGE_TYPE_TEXT,
+                'content' => $autoMessage,
+                'is_read' => false,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
     }
 
     private function createApplicationForTalk(string $castId, string $shopId, int $preferredJobType): ?object

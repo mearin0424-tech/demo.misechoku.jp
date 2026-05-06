@@ -135,28 +135,30 @@
         </div>
     @endif
 
-    <div class="px-4 pt-3">
-        <div class="talk-result-panel" style="padding: 12px 14px;">
-            <div class="talk-result-panel-copy" style="width:100%;">
-                <span class="talk-result-panel-title">求人種別</span>
-                <p id="talk-job-kind-guidance" style="margin-top:6px;">面談日を送る前に求人種別を確定してください。面談日確定後は変更できません。</p>
-            </div>
-            <div class="talk-result-panel-actions" style="width:100%;">
-                <select id="talk-room-job-kind" style="width:100%; border-radius:10px; border:1px solid rgba(229,193,88,.22); background:rgba(255,255,255,.05); color:#fff; padding:8px 10px;" @if(empty($canSelectTalkJobKind)) disabled @endif>
-                    <option value="">未選択</option>
-                    <option value="trial">体験入店</option>
-                    <option value="fulltime">本入店</option>
-                    <option value="help">ヘルプ</option>
-                </select>
-                @if(!empty($canSelectTalkJobKind))
-                    <button type="button" id="save-talk-job-kind" class="btn-interview btn-interview-result">種別を保存</button>
-                    <span id="talk-job-kind-save-status" style="font-size:12px; color:#d4c4a4;">未保存</span>
-                @else
-                    <span style="font-size:12px; color:#a1a1aa;">面談日確定後は変更不可</span>
-                @endif
+    @if(!$isCast)
+        <div class="px-4 pt-3">
+            <div class="talk-result-panel" style="padding: 12px 14px;">
+                <div class="talk-result-panel-copy" style="width:100%;">
+                    <span class="talk-result-panel-title">求人種別</span>
+                    <p id="talk-job-kind-guidance" style="margin-top:6px;">面談日を送る前に求人種別を確定してください。面談日確定後は変更できません。</p>
+                </div>
+                <div class="talk-result-panel-actions" style="width:100%; display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
+                    <select id="talk-room-job-kind" style="flex:1 1 220px; min-width:180px; border-radius:10px; border:1px solid rgba(229,193,88,.22); background:rgba(255,255,255,.05); color:#fff; padding:8px 10px;" @if(empty($canSelectTalkJobKind)) disabled @endif>
+                        <option value="">未選択</option>
+                        <option value="trial">体験入店</option>
+                        <option value="fulltime">本入店</option>
+                        <option value="help">ヘルプ</option>
+                    </select>
+                    @if(!empty($canSelectTalkJobKind))
+                        <button type="button" id="save-talk-job-kind" class="btn-interview btn-interview-result" style="white-space:nowrap; width:auto; min-width:110px;">種別を保存</button>
+                        <span id="talk-job-kind-save-status" style="font-size:12px; color:#d4c4a4; white-space:nowrap;">未保存</span>
+                    @else
+                        <span style="font-size:12px; color:#a1a1aa;">面談日確定後は変更不可</span>
+                    @endif
+                </div>
             </div>
         </div>
-    </div>
+    @endif
 
     {{-- メッセージ表示エリア --}}
     <div class="chat-messages" id="chat-messages" data-delete-url="{{ $deleteUrl }}">
@@ -319,22 +321,8 @@
                 @csrf
                 <div class="chat-input-row">
                     @if($isCast)
-                        <div style="width:100%; margin-bottom:8px;">
-                            <label for="talk-topic" style="display:block; font-size:12px; color:#d4c4a4; margin-bottom:4px;">相談種別</label>
-                            <select id="talk-topic" name="talk_topic" style="width:100%; border-radius:10px; border:1px solid rgba(229,193,88,.22); background:rgba(255,255,255,.05); color:#fff; padding:8px 10px;">
-                                <option value="new_hire">新規採用</option>
-                                <option value="help">ヘルプ</option>
-                                <option value="other">その他相談</option>
-                            </select>
-                        </div>
-                        <div id="talk-job-kind-wrap" style="width:100%; margin-bottom:8px;">
-                            <label for="talk-job-kind" style="display:block; font-size:12px; color:#d4c4a4; margin-bottom:4px;">応募区分</label>
-                            <select id="talk-job-kind" name="talk_job_kind" style="width:100%; border-radius:10px; border:1px solid rgba(229,193,88,.22); background:rgba(255,255,255,.05); color:#fff; padding:8px 10px;">
-                                <option value="trial">体験入店</option>
-                                <option value="fulltime">本入店</option>
-                                <option value="help">ヘルプ</option>
-                            </select>
-                        </div>
+                        <input type="hidden" name="talk_topic" value="{{ $initialTalkTopic ?? '' }}">
+                        <input type="hidden" name="talk_job_kind" value="{{ $initialTalkJobKind ?? '' }}">
                     @endif
                     <div class="chat-input-wrapper">
                         <textarea name="message" rows="1" placeholder="メッセージを入力..." class="focus:outline-none"></textarea>

@@ -9,8 +9,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!chatMessages) return;
 
     const messageInput = chatForm ? chatForm.querySelector('textarea[name="message"]') : null;
-    const talkTopicSelect = chatForm ? chatForm.querySelector('select[name="talk_topic"]') : null;
-    const talkJobKindSelect = chatForm ? chatForm.querySelector('select[name="talk_job_kind"]') : null;
+    const talkTopicField = chatForm ? chatForm.querySelector('[name="talk_topic"]') : null;
+    const talkJobKindField = chatForm ? chatForm.querySelector('[name="talk_job_kind"]') : null;
     const initialTalkTopic = typeof window.initialTalkTopic !== 'undefined' ? window.initialTalkTopic : null;
     const initialTalkJobKind = typeof window.initialTalkJobKind !== 'undefined' ? window.initialTalkJobKind : null;
     const hasTalkMessages = typeof window.hasTalkMessages !== 'undefined' ? !!window.hasTalkMessages : false;
@@ -63,22 +63,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (chatForm && messageInput) {
-        if (talkTopicSelect && initialTalkTopic) {
-            talkTopicSelect.value = initialTalkTopic;
+        if (talkTopicField && initialTalkTopic) {
+            talkTopicField.value = initialTalkTopic;
         }
-        if (talkJobKindSelect && initialTalkJobKind) {
-            talkJobKindSelect.value = initialTalkJobKind;
+        if (talkJobKindField && initialTalkJobKind) {
+            talkJobKindField.value = initialTalkJobKind;
         }
-        if (talkTopicSelect && talkJobKindSelect) {
+        if (talkTopicField && talkJobKindField && talkTopicField.tagName === 'SELECT') {
             const talkJobKindWrap = document.getElementById('talk-job-kind-wrap');
             const syncTalkJobKindVisibility = () => {
-                const hidden = talkTopicSelect.value === 'other';
-                talkJobKindSelect.disabled = hidden;
+                const hidden = talkTopicField.value === 'other';
+                talkJobKindField.disabled = hidden;
                 if (talkJobKindWrap) {
                     talkJobKindWrap.style.display = hidden ? 'none' : '';
                 }
             };
-            talkTopicSelect.addEventListener('change', syncTalkJobKindVisibility);
+            talkTopicField.addEventListener('change', syncTalkJobKindVisibility);
             syncTalkJobKindVisibility();
         }
         messageInput.addEventListener('input', autoResize);
@@ -114,10 +114,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             try {
                 const payload = { partner_id: partnerId, message: content };
-                if (isCastRoom && !hasTalkMessages && talkTopicSelect) {
-                    payload.talk_topic = talkTopicSelect.value;
-                    if (talkJobKindSelect && !talkJobKindSelect.disabled) {
-                        payload.talk_job_kind = talkJobKindSelect.value;
+                if (isCastRoom && !hasTalkMessages && talkTopicField) {
+                    payload.talk_topic = talkTopicField.value;
+                    if (talkJobKindField && !talkJobKindField.disabled) {
+                        payload.talk_job_kind = talkJobKindField.value;
                     }
                 }
                 const result = await postJson(url, token, payload);
