@@ -1278,6 +1278,7 @@
     font-size: 0.72rem;
     line-height: 1.5;
     color: rgba(31, 19, 14, 0.85);
+    white-space: normal;
 }
 
 .interview-option-list {
@@ -1382,10 +1383,9 @@ button.interview-option-btn:hover {
     border: 1px solid rgba(31, 19, 14, 0.22);
     background: rgba(255, 255, 255, 0.12);
     padding: 10px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+    display: block;
+    text-align: left;
+    white-space: nowrap;
 }
 
 .interview-note {

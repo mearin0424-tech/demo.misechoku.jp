@@ -257,8 +257,7 @@
                             </div>
                             <p class="interview-body-copy">以下の日時で確定しました。</p>
                             <div class="interview-confirmed-slot">
-                                <span class="interview-option-date">{{ \Carbon\Carbon::parse($msg->selected_option)->format('Y年n月j日') }}</span>
-                                <span class="interview-option-time">{{ \Carbon\Carbon::parse($msg->selected_option)->format('H:i') }}</span>
+                                <span class="interview-option-date">{{ \Carbon\Carbon::parse($msg->selected_option)->format('Y年n月j日') }}</span><span class="interview-option-time">{{ \Carbon\Carbon::parse($msg->selected_option)->format(' H:i') }}</span>
                             </div>
                             @if($msg->is_mine)
                                 <span class="message-bubble-tail" aria-hidden="true">
