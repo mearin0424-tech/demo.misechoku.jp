@@ -16,9 +16,8 @@ class ShopJobApplication extends Model
         'status',
         'result_date',
         'real_start_date',
-        'hourly_wage_regular',
-        'normal_time',
         'reason_rejection',
+        'hired_regular_hourly_wage',
     ];
 
     protected function casts(): array

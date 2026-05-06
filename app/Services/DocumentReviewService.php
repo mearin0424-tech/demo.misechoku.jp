@@ -504,7 +504,16 @@ class DocumentReviewService
             'status_key' => $this->shopStatusKey($document),
             'status_label' => $this->statusLabel((int) $document->status),
             'ng_reason' => $document->ng_reason,
-            'expired_at' => optional($document->expired_at)->format('Y-m-d'),
+            'expired_at' => (function () use ($document) {
+                if (!$document->expired_at) {
+                    return '';
+                }
+                try {
+                    return \Illuminate\Support\Carbon::parse($document->expired_at)->format('Y-m-d');
+                } catch (\Throwable) {
+                    return '';
+                }
+            })(),
             'approved_at' => optional($document->approved_at)->format('Y-m-d H:i'),
             'updated_at_label' => optional($document->updated_at)->format('Y-m-d H:i'),
             'expiring_soon' => $expiringSoon,
@@ -512,6 +521,7 @@ class DocumentReviewService
             'can_request_review' => in_array((int) $document->status, [ShopLicenseDocument::STATUS_DRAFT, ShopLicenseDocument::STATUS_REJECTED], true),
             'can_withdraw_review' => in_array((int) $document->status, [ShopLicenseDocument::STATUS_PENDING, ShopLicenseDocument::STATUS_APPROVED], true),
             'file_is_pdf' => $imagePath !== '' && str_ends_with(strtolower($imagePath), '.pdf'),
+            'file_name' => $imagePath !== '' ? basename($imagePath) : '',
             // マイページは認証付きルートで表示（シンボリックリンク未作成環境でも閲覧可）
             'file_url' => route('shop.mypage.documents.show', ['type' => $document->type]),
         ];

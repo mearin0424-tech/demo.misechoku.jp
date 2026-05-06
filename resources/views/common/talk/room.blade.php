@@ -40,6 +40,28 @@
         padding: 14px;
         resize: vertical;
     }
+    .hired-wage-field-wrap {
+        display: none;
+        margin: 12px 0 4px;
+    }
+    .hired-wage-field-wrap.is-visible {
+        display: block;
+    }
+    .hired-wage-field-wrap label {
+        display: block;
+        font-size: 0.82rem;
+        color: #d4c4a4;
+        margin-bottom: 6px;
+    }
+    .hired-wage-field-wrap input {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid rgba(229, 193, 88, 0.22);
+        background: rgba(255, 255, 255, 0.05);
+        color: #fff;
+        padding: 10px 12px;
+        font-size: 0.95rem;
+    }
 </style>
 @endpush
 
@@ -340,6 +362,10 @@
             <button type="button" class="interview-modal-close js-result-message-close" aria-label="閉じる">&times;</button>
         </div>
         <p id="result-message-desc" class="interview-modal-desc">テンプレートを選択し、必要に応じて文面を編集してください。</p>
+        <div id="hired-hourly-wage-wrap" class="hired-wage-field-wrap" aria-hidden="true">
+            <label for="hired-hourly-wage-input">採用時給（円・確定）</label>
+            <input type="text" id="hired-hourly-wage-input" inputmode="numeric" placeholder="例: 5000" autocomplete="off">
+        </div>
         <div class="result-template-list" id="result-template-list"></div>
         <textarea id="result-message-textarea" class="result-message-textarea" placeholder="送信するメッセージを入力"></textarea>
         <div class="interview-modal-footer">

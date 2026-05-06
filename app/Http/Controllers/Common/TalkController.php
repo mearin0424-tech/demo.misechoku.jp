@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Common;
 
 use App\Http\Controllers\Controller;
 use App\Services\MessageTemplateService;
+use App\Services\ShopJobApplicationJobSnapshotService;
+use App\Support\ShopJobApplicationView;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -23,8 +25,10 @@ class TalkController extends Controller
     private const APPLICATION_STATUS_HIRED = 4;
     private const APPLICATION_STATUS_REJECTED = 5;
 
-    public function __construct(private readonly MessageTemplateService $messageTemplateService)
-    {
+    public function __construct(
+        private readonly MessageTemplateService $messageTemplateService,
+        private readonly ShopJobApplicationJobSnapshotService $shopJobApplicationJobSnapshotService,
+    ) {
     }
 
     /**
@@ -218,6 +222,7 @@ class TalkController extends Controller
             'offer_token' => ['nullable', 'string'],
             'selected_option' => ['nullable', 'string'],
             'message' => ['nullable', 'string', 'max:5000'],
+            'hired_regular_hourly_wage' => ['nullable', 'string', 'max:32'],
         ]);
 
         $partnerId = (string) $request->input('partner_id');
@@ -324,7 +329,16 @@ class TalkController extends Controller
             'updated_at' => now(),
         ]);
 
-        $this->syncApplicationStatusFromTalkAction($partnerId, $isCastPortal, $actionType, $content);
+        $hiredWageNormalized = null;
+        if ($actionType === 'hired') {
+            $hiredWageNormalized = ShopJobApplicationView::normalizeWageDigits(
+                $request->input('hired_regular_hourly_wage') !== null
+                    ? (string) $request->input('hired_regular_hourly_wage')
+                    : null
+            );
+        }
+
+        $this->syncApplicationStatusFromTalkAction($partnerId, $isCastPortal, $actionType, $content, $hiredWageNormalized);
 
         return response()->json([
             'success' => true,
@@ -726,8 +740,13 @@ class TalkController extends Controller
         };
     }
 
-    private function syncApplicationStatusFromTalkAction(string $partnerId, bool $isCastPortal, string $actionType, string $content): void
-    {
+    private function syncApplicationStatusFromTalkAction(
+        string $partnerId,
+        bool $isCastPortal,
+        string $actionType,
+        string $content,
+        ?string $hiredRegularHourlyWage = null,
+    ): void {
         $castId = $isCastPortal ? $this->currentCastId() : $partnerId;
         $shopId = $isCastPortal ? $partnerId : $this->currentShopId();
         $application = $this->resolveOrCreateApplicationForTalk($castId, $shopId);
@@ -749,13 +768,15 @@ class TalkController extends Controller
         } elseif ($actionType === 'hired') {
             $updates['status'] = self::APPLICATION_STATUS_HIRED;
             $updates['reason_rejection'] = null;
-            if (Schema::hasTable('shop_job_applications')
-                && Schema::hasColumn('shop_job_applications', 'hired_bonus_amount')) {
-                $snapshot = $this->snapshotHiredBonusForApplication($application->shop_job_id);
-                if ($snapshot !== null) {
-                    $updates['hired_bonus_amount'] = $snapshot['bonus_amount'];
-                    $updates['hired_bonus_condition'] = $snapshot['bonus_condition'];
+            $hiredBonus = $this->resolveHiredBonusForApplicationUpdate($application);
+            if ($hiredBonus !== null) {
+                $updates['hired_bonus_amount'] = $hiredBonus['bonus_amount'];
+                if (Schema::hasColumn('shop_job_applications', 'hired_bonus_condition')) {
+                    $updates['hired_bonus_condition'] = $hiredBonus['bonus_condition'];
                 }
+            }
+            if (Schema::hasColumn('shop_job_applications', 'hired_regular_hourly_wage') && $hiredRegularHourlyWage !== null) {
+                $updates['hired_regular_hourly_wage'] = $hiredRegularHourlyWage;
             }
         } elseif ($actionType === 'rejected') {
             $updates['status'] = self::APPLICATION_STATUS_REJECTED;
@@ -799,16 +820,17 @@ class TalkController extends Controller
             return null;
         }
 
-        $applicationId = DB::table('shop_job_applications')->insertGetId([
+        $row = [
             'cast_id' => $castId,
             'shop_job_id' => $shopJob->id,
             'status' => 1,
             'result_date' => null,
-            'hourly_wage_regular' => $shopJob->hourly_wage_regular,
-            'normal_time' => $shopJob->normal_time,
             'created_at' => now(),
             'updated_at' => now(),
-        ]);
+        ];
+        $row = array_merge($row, $this->shopJobApplicationJobSnapshotService->snapshotColumnsForApplication($shopJob));
+
+        $applicationId = DB::table('shop_job_applications')->insertGetId($row);
 
         return DB::table('shop_job_applications')->where('id', $applicationId)->first();
     }
@@ -839,13 +861,33 @@ class TalkController extends Controller
             }
         }
 
-        $bonusAmount = (int) ($job->noruma_reward ?? $job->hourly_wage_regular ?? 0);
+        if (property_exists($application, 'applied_norma_day') && $application->applied_norma_day !== null && $application->applied_norma_day !== '') {
+            $meta['working_days'] = (string) (int) $application->applied_norma_day;
+        }
+        if (property_exists($application, 'applied_norma_hours') && $application->applied_norma_hours !== null && $application->applied_norma_hours !== '') {
+            $meta['working_hours'] = (string) (int) $application->applied_norma_hours;
+        }
+
+        $extraCondition = ShopJobApplicationView::bonusConditionAtApplication($application);
+        if ($extraCondition === '' && property_exists($job, 'bonus_condition') && $job->bonus_condition !== null && $job->bonus_condition !== '') {
+            $extraCondition = trim((string) $job->bonus_condition);
+        }
+        if ($extraCondition === '' && isset($meta['bonus_condition'])) {
+            $extraCondition = trim((string) $meta['bonus_condition']);
+        }
+
+        $bonusAmount = 0;
+        if (property_exists($application, 'applied_bonus_reward') && $application->applied_bonus_reward !== null) {
+            $bonusAmount = (int) $application->applied_bonus_reward;
+        } else {
+            $bonusAmount = (int) ($job->bonus_reward ?? $job->noruma_reward ?? $job->hourly_wage_regular ?? 0);
+        }
 
         return [
             'bonus_amount' => $bonusAmount,
             'working_days' => isset($meta['working_days']) ? (string) $meta['working_days'] : '',
             'working_hours' => isset($meta['working_hours']) ? (string) $meta['working_hours'] : '',
-            'extra_condition' => isset($meta['bonus_condition']) ? trim((string) $meta['bonus_condition']) : '',
+            'extra_condition' => $extraCondition,
         ];
     }
 
@@ -864,7 +906,7 @@ class TalkController extends Controller
     }
 
     /**
-     * 採用時点のボーナス金・達成条件を求人から取得して返す（焼き付け用）
+     * 採用時点のボーナス金・達成条件を求人から取得して返す（レガシー行・列向け）
      */
     private function snapshotHiredBonusForApplication(int $shopJobId): ?array
     {
@@ -873,16 +915,68 @@ class TalkController extends Controller
             return null;
         }
 
-        $bonusAmount = (int) ($job->noruma_reward ?? $job->hourly_wage_regular ?? 0);
+        $bonusAmount = 0;
+        if (property_exists($job, 'bonus_reward') && $job->bonus_reward !== null) {
+            $bonusAmount = (int) $job->bonus_reward;
+        } elseif (property_exists($job, 'noruma_reward') && $job->noruma_reward !== null) {
+            $bonusAmount = (int) $job->noruma_reward;
+        } elseif (!property_exists($job, 'bonus_reward')
+            && !property_exists($job, 'noruma_reward')
+            && property_exists($job, 'hourly_wage_regular')
+            && $job->hourly_wage_regular !== null) {
+            $bonusAmount = (int) $job->hourly_wage_regular;
+        }
+
         $bonusCondition = '';
-        if (!empty($job->noruma_cond)) {
-            $meta = json_decode($job->noruma_cond, true);
+        if (property_exists($job, 'bonus_condition') && $job->bonus_condition !== null && $job->bonus_condition !== '') {
+            $bonusCondition = trim((string) $job->bonus_condition);
+        } elseif (!empty($job->noruma_cond)) {
+            $meta = json_decode((string) $job->noruma_cond, true);
             $bonusCondition = trim((string) ($meta['bonus_condition'] ?? ''));
         }
 
         return [
             'bonus_amount' => $bonusAmount,
             'bonus_condition' => $bonusCondition,
+        ];
+    }
+
+    /**
+     * @return array{bonus_amount: int, bonus_condition: string}|null
+     */
+    private function resolveHiredBonusForApplicationUpdate(object $application): ?array
+    {
+        if (!Schema::hasColumn('shop_job_applications', 'hired_bonus_amount')) {
+            return null;
+        }
+
+        $fromJob = $this->snapshotHiredBonusForApplication((int) $application->shop_job_id);
+
+        $amount = 0;
+        if (Schema::hasColumn('shop_job_applications', 'applied_bonus_reward')) {
+            if ($application->applied_bonus_reward !== null) {
+                $amount = (int) $application->applied_bonus_reward;
+            } elseif ($fromJob !== null) {
+                $amount = (int) $fromJob['bonus_amount'];
+            }
+        } elseif ($fromJob !== null) {
+            $amount = (int) $fromJob['bonus_amount'];
+        }
+
+        $condition = '';
+        if (Schema::hasColumn('shop_job_applications', 'applied_bonus_condition')) {
+            if ($application->applied_bonus_condition !== null) {
+                $condition = (string) $application->applied_bonus_condition;
+            } elseif ($fromJob !== null) {
+                $condition = (string) $fromJob['bonus_condition'];
+            }
+        } elseif ($fromJob !== null) {
+            $condition = (string) $fromJob['bonus_condition'];
+        }
+
+        return [
+            'bonus_amount' => $amount,
+            'bonus_condition' => $condition,
         ];
     }
 }

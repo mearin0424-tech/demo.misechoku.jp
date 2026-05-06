@@ -46,11 +46,19 @@
                     <div class="rsm-delay-line" hidden></div>
                     <div class="rsm-top">
                         <div class="rsm-main">
-                            <h3 class="rsm-name"></h3>
-                            <div class="rsm-pattern"></div>
-                            <div class="rsm-delay" hidden>
-                                <i class="fas fa-exclamation-circle"></i>
-                                <span class="rsm-delay-text"></span>
+                            <div class="rsm-main-inner">
+                                <div class="rsm-avatar" aria-hidden="true">
+                                    <img class="rsm-avatar-img" alt="" data-field="avatarImg" width="44" height="44" hidden>
+                                    <span class="rsm-avatar-fallback" data-field="avatarFallback"><i class="fas fa-user"></i></span>
+                                </div>
+                                <div class="rsm-main-text">
+                                    <h3 class="rsm-name"></h3>
+                                    <div class="rsm-pattern"></div>
+                                    <div class="rsm-delay" hidden>
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        <span class="rsm-delay-text"></span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="rsm-side">
@@ -77,6 +85,21 @@
                             <span>不採用理由</span>
                             <p data-field="rejectionReason"></p>
                         </div>
+                        <div class="rsm-applied-block" data-field-wrap="appliedSummary" hidden>
+                            <div class="rsm-applied-title">応募時の求人条件</div>
+                            <ul class="rsm-applied-list" data-field="appliedList"></ul>
+                        </div>
+                        <div class="rsm-hired-wage-block" data-field-wrap="hiredWage" hidden>
+                            <form method="post" class="rsm-hired-wage-form" data-field="hiredWageForm">
+                                <input type="hidden" name="_token" value="" data-field="csrfToken" autocomplete="off">
+                                <input type="hidden" name="application_id" value="" data-field="applicationId">
+                                <span class="rsm-hired-wage-label">採用時給（確定）</span>
+                                <div class="rsm-hired-wage-row">
+                                    <input type="text" name="hired_regular_hourly_wage" class="rsm-hired-wage-input" data-field="hiredWageInput" inputmode="numeric" placeholder="例: 5000" autocomplete="off">
+                                    <button type="submit" class="rsm-hired-wage-submit">保存</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </article>
             </template>
@@ -90,6 +113,8 @@
 
 @push('scripts')
 <script>
+window.recruitStatusCsrf = @json(csrf_token());
+window.recruitStatusHiredWageUrl = @json(route('shop.recruits.application-hired-wage'));
 (function() {
     var data = @json($applications ?? []);
     var statusDef = {
@@ -152,6 +177,25 @@
             patternNode.textContent = item.pattern_label || '新規採用';
             patternNode.classList.add(item.pattern === 'P2' ? 'is-p2' : 'is-p1');
 
+            var avatarImg = node.querySelector('[data-field="avatarImg"]');
+            var avatarFb = node.querySelector('[data-field="avatarFallback"]');
+            if (item.cast_avatar_url) {
+                avatarImg.hidden = false;
+                if (avatarFb) avatarFb.hidden = true;
+                avatarImg.src = item.cast_avatar_url;
+                avatarImg.onload = function() {
+                    if (avatarFb) avatarFb.hidden = true;
+                };
+                avatarImg.onerror = function() {
+                    avatarImg.hidden = true;
+                    if (avatarFb) avatarFb.hidden = false;
+                };
+            } else {
+                avatarImg.removeAttribute('src');
+                avatarImg.hidden = true;
+                if (avatarFb) avatarFb.hidden = false;
+            }
+
             statusNode.textContent = getStatusLabel(item);
             statusNode.classList.add((statusDef[item.status] || { className: 'is-status-1' }).className);
 
@@ -188,9 +232,37 @@
             }
 
             var reasonWrap = node.querySelector('[data-field-wrap="rejectionReason"]');
-            if (item.rejection_reason) {
+            var isRejected = item.status === 5 || item.status === 7;
+            if (isRejected && item.rejection_reason) {
                 reasonWrap.hidden = false;
                 node.querySelector('[data-field="rejectionReason"]').textContent = item.rejection_reason;
+            }
+
+            var appliedWrap = node.querySelector('[data-field-wrap="appliedSummary"]');
+            var appliedList = node.querySelector('[data-field="appliedList"]');
+            if (item.applied_summary_lines && item.applied_summary_lines.length) {
+                appliedWrap.hidden = false;
+                appliedList.innerHTML = '';
+                item.applied_summary_lines.forEach(function(line) {
+                    var li = document.createElement('li');
+                    li.textContent = line;
+                    appliedList.appendChild(li);
+                });
+            } else {
+                appliedWrap.hidden = true;
+                appliedList.innerHTML = '';
+            }
+
+            var wageWrap = node.querySelector('[data-field-wrap="hiredWage"]');
+            var wageForm = node.querySelector('[data-field="hiredWageForm"]');
+            if (item.can_edit_hired_wage) {
+                wageWrap.hidden = false;
+                wageForm.action = window.recruitStatusHiredWageUrl || '';
+                node.querySelector('[data-field="csrfToken"]').value = window.recruitStatusCsrf || '';
+                node.querySelector('[data-field="applicationId"]').value = item.id;
+                node.querySelector('[data-field="hiredWageInput"]').value = item.hired_regular_hourly_wage_input || '';
+            } else {
+                wageWrap.hidden = true;
             }
 
             listEl.appendChild(node);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Casts;
 use App\Rules\KouzaMeig;
 use App\Services\BillingManagementService;
 use App\Services\DocumentReviewService;
+use App\Support\ShopJobApplicationView;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -53,7 +54,7 @@ class MypageController extends Controller
     {
         $castId = $this->currentCastId();
 
-        $employments = DB::table('shop_job_applications')
+        $employmentQuery = DB::table('shop_job_applications')
             ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
             ->join('shops', 'shop_jobs.shop_id', '=', 'shops.id')
             ->leftJoin('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
@@ -65,13 +66,50 @@ class MypageController extends Controller
                 'shop_job_applications.result_date',
                 'shops.id as shop_id',
                 'shop_profiles.shop_name'
-            )
+            );
+
+        foreach ([
+            'hired_regular_hourly_wage',
+            'applied_bonus_reward',
+            'applied_bonus_remarks',
+            'applied_bonus_condition',
+            'applied_norma_day',
+            'applied_norma_hours',
+            'applied_regular_hourly_wage',
+        ] as $col) {
+            if (Schema::hasColumn('shop_job_applications', $col)) {
+                $employmentQuery->addSelect('shop_job_applications.' . $col);
+            }
+        }
+
+        $employments = $employmentQuery
             ->get()
             ->map(function ($row) {
                 $status = $this->mapApplicationStatus((int) $row->status);
+                $bonusLines = [];
+                $norma = ShopJobApplicationView::bonusNormaSummaryAtApplication($row);
+                if ($norma !== '') {
+                    $bonusLines[] = 'ボーナス条件（応募時）: ' . $norma;
+                }
+                $br = ShopJobApplicationView::bonusRewardAtApplication($row);
+                if ($br !== null && $br > 0) {
+                    $bonusLines[] = 'ボーナス金額（応募時）: ¥' . number_format($br);
+                }
+                $remarks = property_exists($row, 'applied_bonus_remarks') && $row->applied_bonus_remarks !== null
+                    ? trim((string) $row->applied_bonus_remarks)
+                    : '';
+                if ($remarks !== '') {
+                    $bonusLines[] = '補足: ' . $remarks;
+                }
+                $cond = ShopJobApplicationView::bonusConditionAtApplication($row);
+                if ($cond !== '') {
+                    $bonusLines[] = '達成条件: ' . $cond;
+                }
+                $hiredWage = ShopJobApplicationView::wageAtHire($row);
 
                 return [
                     'application_id' => (int) $row->application_id,
+                    'status_code' => (int) $row->status,
                     'shop_name' => $row->shop_name ?: $row->shop_id,
                     'status_label' => $status['label'],
                     'status_class' => $status['class'],
@@ -79,6 +117,8 @@ class MypageController extends Controller
                         ? Carbon::parse($row->result_date)->format('Y-m-d')
                         : null,
                     'link' => route('cast.talk.room', $row->shop_id),
+                    'bonus_at_apply_lines' => $bonusLines,
+                    'hired_hourly_wage_display' => $hiredWage,
                 ];
             })
             ->all();
@@ -852,6 +892,8 @@ class MypageController extends Controller
             3 => ['label' => '面談日決定', 'class' => 'status-pending'],
             4 => ['label' => '採用', 'class' => 'status-paid'],
             5 => ['label' => '不採用', 'class' => 'status-ng'],
+            6 => ['label' => '本採用', 'class' => 'status-paid'],
+            7 => ['label' => '体験後不採用', 'class' => 'status-ng'],
             default => ['label' => 'やり取り中', 'class' => 'status-pending'],
         };
     }

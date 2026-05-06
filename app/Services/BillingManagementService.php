@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\BankAccount;
+use App\Support\ShopJobApplicationView;
 use App\Models\PaymentTask;
 use App\Models\SystemAccount;
 use Carbon\Carbon;
@@ -1174,8 +1175,30 @@ class BillingManagementService
                 DB::raw('shop_bank_accounts.id as shop_bank_id'),
             ],
             $this->shopProfileAddressSelectsForBilling(),
+            $this->shopJobApplicationColumnsForBilling(),
             $this->shopJobExtraColumnsForApplicationBilling()
         );
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function shopJobApplicationColumnsForBilling(): array
+    {
+        $cols = [];
+        foreach ([
+            'hired_regular_hourly_wage',
+            'applied_bonus_reward',
+            'applied_bonus_condition',
+            'applied_norma_day',
+            'applied_norma_hours',
+        ] as $c) {
+            if (Schema::hasColumn('shop_job_applications', $c)) {
+                $cols[] = 'shop_job_applications.' . $c;
+            }
+        }
+
+        return $cols;
     }
 
     /**
@@ -1239,6 +1262,39 @@ class BillingManagementService
         if ($hours !== null) {
             $meta['working_hours'] = (string) $hours;
             $meta['bonus_total_working_hours'] = (string) $hours;
+        }
+
+        return $meta;
+    }
+
+    /**
+     * 応募時スナップショット（applied_*）でメタを上書き
+     *
+     * @param  array<string, mixed>  $meta
+     * @return array<string, mixed>
+     */
+    private function mergeBonusMetaFromApplicationApplied(object $application, array $meta): array
+    {
+        if (Schema::hasColumn('shop_job_applications', 'applied_norma_day')
+            && property_exists($application, 'applied_norma_day')
+            && $application->applied_norma_day !== null
+            && $application->applied_norma_day !== '') {
+            $d = (int) $application->applied_norma_day;
+            $meta['working_days'] = (string) $d;
+            $meta['bonus_total_working_days'] = (string) $d;
+        }
+        if (Schema::hasColumn('shop_job_applications', 'applied_norma_hours')
+            && property_exists($application, 'applied_norma_hours')
+            && $application->applied_norma_hours !== null
+            && $application->applied_norma_hours !== '') {
+            $h = (int) $application->applied_norma_hours;
+            $meta['working_hours'] = (string) $h;
+            $meta['bonus_total_working_hours'] = (string) $h;
+        }
+        if (Schema::hasColumn('shop_job_applications', 'applied_bonus_condition')
+            && property_exists($application, 'applied_bonus_condition')
+            && trim((string) ($application->applied_bonus_condition ?? '')) !== '') {
+            $meta['bonus_condition'] = trim((string) $application->applied_bonus_condition);
         }
 
         return $meta;
@@ -1378,6 +1434,7 @@ class BillingManagementService
 
         $meta = $this->decodeJobMeta($application->noruma_cond ?? null);
         $meta = $this->mergeShopJobBonusMetaFromRow($application, $meta);
+        $meta = $this->mergeBonusMetaFromApplicationApplied($application, $meta);
         $bonusAmount = $this->resolveApplicationBonusAmount($application);
         $bonusCondition = $this->resolveApplicationBonusCondition($application, $meta);
         $bonusMeta = [
@@ -1421,6 +1478,7 @@ class BillingManagementService
                 : null,
             'review_average' => isset($existingReview->eva) ? (float) $existingReview->eva : null,
             'review_details' => $existingReviewDetails,
+            'hired_hourly_wage' => ShopJobApplicationView::wageAtHire($application),
         ];
     }
 
@@ -1435,11 +1493,14 @@ class BillingManagementService
         if (isset($application->hired_bonus_amount) && $application->hired_bonus_amount !== null && $application->hired_bonus_amount !== '') {
             return (int) $application->hired_bonus_amount;
         }
+        if (property_exists($application, 'applied_bonus_reward') && $application->applied_bonus_reward !== null) {
+            return (int) $application->applied_bonus_reward;
+        }
+
         return (int) (
             $application->bonus_reward
             ?? $application->noruma_reward
             ?? $application->regular_hourly_wage
-            ?? $application->hourly_wage_regular
             ?? 0
         );
     }
@@ -1447,9 +1508,13 @@ class BillingManagementService
     /** 採用時点の焼き付けがあればそれを、なければ求人metaから取得 */
     private function resolveApplicationBonusCondition(object $application, array $meta): string
     {
-        if (isset($application->hired_bonus_condition) && $application->hired_bonus_condition !== null) {
+        if (isset($application->hired_bonus_condition) && $application->hired_bonus_condition !== null && trim((string) $application->hired_bonus_condition) !== '') {
             return trim((string) $application->hired_bonus_condition);
         }
+        if (property_exists($application, 'applied_bonus_condition') && $application->applied_bonus_condition !== null && trim((string) $application->applied_bonus_condition) !== '') {
+            return trim((string) $application->applied_bonus_condition);
+        }
+
         return trim((string) ($meta['bonus_condition'] ?? ''));
     }
 
@@ -1636,6 +1701,7 @@ class BillingManagementService
     {
         $bonusAmount = (int) ($row->bonus_amount
             ?? $row->hired_bonus_amount
+            ?? $row->applied_bonus_reward
             ?? $row->bonus_reward
             ?? $row->noruma_reward
             ?? $row->regular_hourly_wage

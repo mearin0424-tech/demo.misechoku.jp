@@ -184,6 +184,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const resultSubmitBtn = document.getElementById('result-message-submit');
         const resultCloseButtons = document.querySelectorAll('.js-result-message-close');
         const resultTemplates = window.talkResultMessageTemplates || {};
+        const hiredHourlyWageWrap = document.getElementById('hired-hourly-wage-wrap');
+        const hiredHourlyWageInput = document.getElementById('hired-hourly-wage-input');
         let currentResultAction = null;
 
         const openModal = () => {
@@ -223,8 +225,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             if (resultDesc) {
                 resultDesc.textContent = actionType === 'hired'
-                    ? '採用テンプレートを選択し、必要に応じて文面を編集してください。'
+                    ? '採用時給を入力し、採用テンプレートを選択して文面を編集してください。'
                     : '不採用テンプレートを選択し、必要に応じて文面を編集してください。';
+            }
+            if (hiredHourlyWageWrap) {
+                const show = actionType === 'hired';
+                hiredHourlyWageWrap.classList.toggle('is-visible', show);
+                hiredHourlyWageWrap.setAttribute('aria-hidden', show ? 'false' : 'true');
             }
             const defaults = resultTemplates[actionType] || [];
             resultTextarea.value = defaults[0] && defaults[0].body ? defaults[0].body : '';
@@ -238,6 +245,13 @@ document.addEventListener('DOMContentLoaded', function() {
             resultOverlay.setAttribute('aria-hidden', 'true');
             currentResultAction = null;
             resultTextarea.value = '';
+            if (hiredHourlyWageInput) {
+                hiredHourlyWageInput.value = '';
+            }
+            if (hiredHourlyWageWrap) {
+                hiredHourlyWageWrap.classList.remove('is-visible');
+                hiredHourlyWageWrap.setAttribute('aria-hidden', 'true');
+            }
             if (resultSubmitBtn) {
                 resultSubmitBtn.disabled = false;
             }
@@ -312,11 +326,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 resultSubmitBtn.disabled = true;
                 try {
-                    await postJson(actionUrl, token, {
+                    const payload = {
                         partner_id: partnerId,
                         action_type: currentResultAction,
                         message: message
-                    });
+                    };
+                    if (currentResultAction === 'hired' && hiredHourlyWageInput) {
+                        payload.hired_regular_hourly_wage = hiredHourlyWageInput.value.trim();
+                    }
+                    await postJson(actionUrl, token, payload);
                     window.location.reload();
                 } catch (error) {
                     window.alert(error.message || '結果メッセージの送信に失敗しました。');

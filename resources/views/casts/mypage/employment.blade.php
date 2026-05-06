@@ -462,6 +462,13 @@
         transform: scale(0.98);
     }
 
+    .mypage-status-card-note {
+        margin-top: 8px;
+        font-size: 0.78rem;
+        line-height: 1.55;
+        color: #b8a9a9;
+    }
+
     .mypage-status-card-actions {
         display: flex;
         align-items: center;
@@ -503,9 +510,13 @@
                 <div class="mypage-section">
                     @php
                         $employmentCollection = collect($employments ?? []);
-                        $hiredCount = $employmentCollection->where('status_label', '採用')->count();
+                        $hiredCount = $employmentCollection->filter(function ($row) {
+                            return in_array((int) ($row['status_code'] ?? 0), [4, 6], true);
+                        })->count();
                         $pendingCount = $employmentCollection->whereIn('status_label', ['やり取り中', '面談日調整中', '面談日決定'])->count();
-                        $rejectedCount = $employmentCollection->where('status_label', '不採用')->count();
+                        $rejectedCount = $employmentCollection->filter(function ($row) {
+                            return in_array((int) ($row['status_code'] ?? 0), [5, 7], true);
+                        })->count();
                     @endphp
                     <div class="mypage-status-overview">
                         <div class="mypage-status-metric">
@@ -544,9 +555,22 @@
                                         @if(!empty($item['applied_at']))
                                             <span class="mypage-status-card-date numeric-font">更新日: {{ $item['applied_at'] }}</span>
                                         @endif
+                                        @if(!empty($item['bonus_at_apply_lines']))
+                                            <div class="mypage-status-card-note">
+                                                @foreach($item['bonus_at_apply_lines'] as $line)
+                                                    <div class="numeric-font">{{ $line }}</div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                        @php $isHiredEmployment = in_array((int) ($item['status_code'] ?? 0), [4, 6], true); @endphp
+                                        @if($isHiredEmployment && !empty($item['hired_hourly_wage_display']))
+                                            <span class="mypage-status-card-meta numeric-font">採用時給: {{ $item['hired_hourly_wage_display'] }}円</span>
+                                        @elseif($isHiredEmployment)
+                                            <span class="mypage-status-card-meta numeric-font" style="opacity:0.75;">採用時給: 店舗登録待ち</span>
+                                        @endif
                                     </div>
                                     <div class="mypage-status-card-actions">
-                                        @if(($item['status_label'] ?? '') === '採用')
+                                        @if(in_array((int) ($item['status_code'] ?? 0), [4, 6], true))
                                             <button type="button" class="mypage-status-card-action-btn btn-review-post" data-application-id="{{ $item['application_id'] }}" title="レビュー投稿">
                                                 <i class="fas fa-star"></i>
                                                 <span>レビュー投稿</span>
@@ -628,6 +652,9 @@
                                 </div>
                                 <div class="deposit-precheck-meta">
                                     ボーナス金額: ¥{{ number_format((int) ($requestTarget['bonus_amount'] ?? 0)) }}
+                                    @if(!empty($requestTarget['hired_hourly_wage']))
+                                        <br>採用時給: {{ $requestTarget['hired_hourly_wage'] }}円
+                                    @endif
                                 </div>
                                 <div class="deposit-precheck-note">
                                     {!! nl2br(e($requestTarget['bonus_condition'] ?: '求人情報に登録された条件を満たしているか確認してください。')) !!}

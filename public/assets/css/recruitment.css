@@ -1852,6 +1852,30 @@
     background: rgba(239, 68, 68, 0.9);
 }
 .rsm-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.rsm-main { flex: 1; min-width: 0; }
+.rsm-main-inner { display: flex; align-items: flex-start; gap: 10px; }
+.rsm-main-text { flex: 1; min-width: 0; }
+.rsm-avatar {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #2A221E;
+    border: 1px solid #382A25;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8A7C74;
+    font-size: 1.1rem;
+}
+.rsm-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.rsm-avatar-fallback { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
 .rsm-name { margin: 0 0 6px 0; color: #fff; font-size: 14px; font-weight: 700; }
 .rsm-pattern {
     display: inline-block;
@@ -1926,4 +1950,62 @@
     border-radius: 8px;
     font-size: 11px;
     padding: 6px 8px;
+}
+.rsm-applied-block {
+    margin-top: 6px;
+    padding-top: 8px;
+    border-top: 1px solid #2A221E;
+}
+.rsm-applied-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: #C8A951;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+}
+.rsm-applied-list {
+    margin: 0;
+    padding-left: 1.1em;
+    color: #B5A69D;
+    font-size: 11px;
+    line-height: 1.55;
+}
+.rsm-hired-wage-block {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #2A221E;
+}
+.rsm-hired-wage-form {
+    display: grid;
+    gap: 6px;
+}
+.rsm-hired-wage-label {
+    font-size: 10px;
+    color: #8A7C74;
+}
+.rsm-hired-wage-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.rsm-hired-wage-input {
+    flex: 1;
+    min-width: 0;
+    border-radius: 8px;
+    border: 1px solid #3f3a36;
+    background: #0d0a08;
+    color: #e7ddd6;
+    font-size: 12px;
+    padding: 8px 10px;
+}
+.rsm-hired-wage-submit {
+    flex-shrink: 0;
+    border-radius: 8px;
+    border: 1px solid rgba(200, 169, 81, 0.45);
+    background: rgba(200, 169, 81, 0.2);
+    color: #C8A951;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 8px 12px;
+    cursor: pointer;
 }

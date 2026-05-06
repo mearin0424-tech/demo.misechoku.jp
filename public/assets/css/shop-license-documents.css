@@ -526,6 +526,62 @@
 .license-manage-header--status-only {
     justify-content: flex-start;
 }
+.license-manage-status-kv {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 6px;
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #e5e5e5;
+}
+.license-manage-status-kv__key {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.88rem;
+    font-weight: 800;
+    text-transform: lowercase;
+    color: #d4af37;
+}
+.license-manage-status-kv__colon {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    color: #a3a3a3;
+    margin-right: 2px;
+}
+.license-manage-expiry-readout {
+    margin: 0 0 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: #d4d4d4;
+    background: rgba(212, 175, 55, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.22);
+}
+.license-manage-expiry-readout__key {
+    font-weight: 700;
+    color: #e5e5e5;
+    margin-right: 2px;
+}
+.license-manage-expiry-readout__colon {
+    color: #a3a3a3;
+    margin-right: 6px;
+}
+.license-manage-expiry-readout__val {
+    color: #fef3c7;
+    font-weight: 800;
+}
+.license-manage-expiry-readout__iso {
+    color: #a3a3a3;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-left: 4px;
+}
+.license-manage-expiry-readout__none {
+    color: #737373;
+    font-style: italic;
+}
 .license-manage-file-row {
     display: flex;
     flex-direction: row;
@@ -696,6 +752,35 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+.license-manage-preview-tile--fname-only {
+    width: auto;
+    max-width: 14rem;
+    min-width: 0;
+    height: auto;
+    min-height: auto;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 10px 12px;
+    overflow: visible;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #e5e5e5;
+    line-height: 1.45;
+    word-break: break-all;
+}
+.license-manage-filename-link {
+    color: #fde68a;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    word-break: break-all;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.license-manage-filename-link:hover {
+    color: #fef9c3;
+}
 .license-manage-expiry-block {
     margin-bottom: 24px;
 }
@@ -763,9 +848,13 @@
 .page-shop-documents-manage .license-manage-preview-inner {
     padding-bottom: 0;
 }
-.page-shop-documents-manage .license-manage-preview-tile {
+.page-shop-documents-manage .license-manage-preview-tile:not(.license-manage-preview-tile--fname-only) {
     width: 5.5rem;
     height: 5.5rem;
+    border-radius: 10px;
+}
+.page-shop-documents-manage .license-manage-preview-tile--fname-only {
+    max-width: min(100%, 18rem);
     border-radius: 10px;
 }
 .page-shop-documents-manage .license-manage-preview-tile--pdf {

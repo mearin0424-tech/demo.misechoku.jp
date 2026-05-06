@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\AdminMasterService;
 use App\Services\DocumentReviewService;
 use App\Support\RecruitCatchOverlay;
+use App\Support\ShopJobApplicationView;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -91,6 +92,33 @@ class RecruitmentController extends Controller
         if (Schema::hasColumn('shop_jobs', 'job_type')) {
             $query->addSelect('shop_jobs.job_type');
         }
+        if (Schema::hasColumn('cast_profiles', 'main_image_path')) {
+            $query->addSelect('cast_profiles.main_image_path');
+        }
+        if (Schema::hasColumn('shop_job_applications', 'rejection_reason')) {
+            $query->addSelect('shop_job_applications.rejection_reason');
+        }
+        if (Schema::hasColumn('shop_job_applications', 'hired_regular_hourly_wage')) {
+            $query->addSelect('shop_job_applications.hired_regular_hourly_wage');
+        }
+        foreach ([
+            'applied_regular_hourly_wage',
+            'applied_norma_day',
+            'applied_norma_hours',
+            'applied_bonus_reward',
+            'applied_bonus_remarks',
+            'applied_bonus_condition',
+            'applied_trial_hourly_wage',
+            'applied_help_hourly_wage',
+            'applied_working_day',
+            'applied_working_hours',
+            'applied_regular_holiday',
+            'applied_qualification',
+        ] as $col) {
+            if (Schema::hasColumn('shop_job_applications', $col)) {
+                $query->addSelect('shop_job_applications.' . $col);
+            }
+        }
 
         return $query
             ->get()
@@ -104,6 +132,16 @@ class RecruitmentController extends Controller
                     default => self::APPLICATION_STATUS_LABELS[$status] ?? '未設定',
                 };
                 $delayMessage = $this->resolveDelayMessage($status, $row->created_at, $row->result_date);
+                $mainImagePath = Schema::hasColumn('cast_profiles', 'main_image_path')
+                    ? ($row->main_image_path ?? null)
+                    : null;
+                $castAvatarUrl = $mainImagePath ? $this->assetPathForStored((string) $mainImagePath) : null;
+                $rejectionReason = Schema::hasColumn('shop_job_applications', 'rejection_reason')
+                    ? trim((string) ($row->rejection_reason ?? ''))
+                    : '';
+                $appliedSummaryLines = ShopJobApplicationView::appliedJobSummaryLines($row);
+                $hiredWage = ShopJobApplicationView::wageAtHire($row);
+                $hiredWageInput = $hiredWage ?? '';
 
                 return [
                     'id' => $row->id,
@@ -116,11 +154,66 @@ class RecruitmentController extends Controller
                     'real_start_date' => $row->real_start_date ? date('Y/m/d', strtotime($row->real_start_date)) : null,
                     'created_at' => $row->created_at ? date('Y/m/d', strtotime($row->created_at)) : null,
                     'cast_name' => $row->nickname ?: $row->name ?: 'キャスト',
+                    'cast_avatar_url' => $castAvatarUrl,
+                    'rejection_reason' => $rejectionReason !== '' ? $rejectionReason : null,
                     'is_delayed' => $delayMessage !== '',
                     'delay_message' => $delayMessage,
+                    'applied_summary_lines' => $appliedSummaryLines,
+                    'hired_regular_hourly_wage' => $hiredWage,
+                    'hired_regular_hourly_wage_input' => $hiredWageInput,
+                    'can_edit_hired_wage' => in_array($status, [4, 6], true)
+                        && Schema::hasColumn('shop_job_applications', 'hired_regular_hourly_wage'),
                 ];
             })
             ->all();
+    }
+
+    /**
+     * 採用一覧・採用済み応募の「採用時給」を更新
+     */
+    public function updateApplicationHiredWage(Request $request)
+    {
+        $request->validate([
+            'application_id' => ['required', 'integer', 'min:1'],
+            'hired_regular_hourly_wage' => ['nullable', 'string', 'max:32'],
+        ]);
+
+        if (!Schema::hasColumn('shop_job_applications', 'hired_regular_hourly_wage')) {
+            abort(404);
+        }
+
+        $shopId = $this->currentShopId();
+        $applicationId = (int) $request->input('application_id');
+        $wage = ShopJobApplicationView::normalizeWageDigits(
+            $request->input('hired_regular_hourly_wage') !== null
+                ? (string) $request->input('hired_regular_hourly_wage')
+                : null
+        );
+
+        $target = DB::table('shop_job_applications')
+            ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
+            ->where('shop_job_applications.id', $applicationId)
+            ->where('shop_jobs.shop_id', $shopId)
+            ->whereIn('shop_job_applications.status', [4, 6])
+            ->select('shop_job_applications.id')
+            ->first();
+
+        if (!$target) {
+            return redirect()
+                ->route('shop.recruits.status')
+                ->with('message', '対象の応募が見つからないか、採用ステータスではありません。');
+        }
+
+        DB::table('shop_job_applications')
+            ->where('id', $target->id)
+            ->update([
+                'hired_regular_hourly_wage' => $wage,
+                'updated_at' => now(),
+            ]);
+
+        return redirect()
+            ->route('shop.recruits.status')
+            ->with('message', '採用時給を保存しました。');
     }
 
     private function resolveDelayMessage(int $status, mixed $createdAt, mixed $resultDate): string

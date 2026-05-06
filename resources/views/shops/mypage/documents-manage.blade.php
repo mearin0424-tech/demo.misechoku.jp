@@ -5,15 +5,16 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/css/shop-license-documents.css') }}?v=20260508">
+<link rel="stylesheet" href="{{ asset('assets/css/shop-license-documents.css') }}?v=20260510">
 @endpush
 
 @section('content')
 @php
     $s = $document['status'] ?? 'not_submitted';
     $record = $document['record'] ?? null;
-    $canUploadOrSubmit = $record === null || !empty($record['can_request_review']);
-    $canWithdrawReview = !empty($record['can_withdraw_review']);
+    $rec = $record ?? [];
+    $canUploadOrSubmit = $record === null || !empty($rec['can_request_review']);
+    $canWithdrawReview = !empty($rec['can_withdraw_review']);
     $isBusiness = ($document['key'] ?? '') === 'business';
     $licenseDocName = $document['name'] ?? ($isBusiness ? '営業許可証' : '風営許可証');
 
@@ -21,11 +22,21 @@
     $uiSelectingServer = $canUploadOrSubmit && in_array($s, ['draft', 'rejected'], true);
     $uiUnsubmitted = !$uiWithdraw && !$uiSelectingServer && ($s === 'not_submitted' || $record === null);
 
-    $serverFileUrl = $record['file_url'] ?? '';
-    $serverIsPdf = !empty($record['file_is_pdf']);
-    $expiryVal = $record['expired_at'] ?? '';
-    $updatedLabel = $record['updated_at_label'] ?? '';
-    $approvedAtLabel = $record['approved_at'] ?? '';
+    $serverFileUrl = $rec['file_url'] ?? '';
+    $serverFileName = trim((string) ($rec['file_name'] ?? ''));
+    $expiryVal = trim((string) ($rec['expired_at'] ?? ''));
+    $expiryDisplayJa = '';
+    if ($expiryVal !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $expiryVal)) {
+        try {
+            $expiryDisplayJa = \Carbon\Carbon::parse($expiryVal)->format('Y年n月j日');
+        } catch (\Throwable $e) {
+            $expiryDisplayJa = $expiryVal;
+        }
+    } elseif ($expiryVal !== '') {
+        $expiryDisplayJa = $expiryVal;
+    }
+    $updatedLabel = $rec['updated_at_label'] ?? '';
+    $approvedAtLabel = $rec['approved_at'] ?? '';
     $showBusinessExpiryBlock = $isBusiness && (!$uiUnsubmitted || $uiSelectingServer || $uiWithdraw || $expiryVal !== '');
 
     $flowHeaderClass = 'license-manage-flow is-unsubmitted';
@@ -68,32 +79,27 @@
             data-initial-selecting-server="{{ $uiSelectingServer ? '1' : '0' }}"
             data-has-server-file="{{ (($uiSelectingServer || $uiWithdraw) && $serverFileUrl !== '') ? '1' : '0' }}"
             data-server-file-url="{{ $serverFileUrl }}"
-            data-server-is-pdf="{{ $serverIsPdf ? '1' : '0' }}"
         >
             <div class="license-manage-card">
                 <header class="license-manage-header license-manage-header--status-only">
-                    <span id="license-doc-flow" class="{{ $flowHeaderClass }}">{{ $flowHeaderText }}</span>
+                    <p class="license-manage-status-kv">
+                        <span class="license-manage-status-kv__key">status</span><span class="license-manage-status-kv__colon">:</span>
+                        <span id="license-doc-flow" class="{{ $flowHeaderClass }}">{{ $flowHeaderText }}</span>
+                    </p>
                 </header>
 
                 <div class="license-manage-body">
-                    @if($s === 'rejected' && !empty($record['ng_reason']))
-                        <p class="license-manage-ng">差し戻し理由: {{ $record['ng_reason'] }}</p>
+                    @if($s === 'rejected' && !empty($rec['ng_reason']))
+                        <p class="license-manage-ng">差し戻し理由: {{ $rec['ng_reason'] }}</p>
                     @endif
 
                     <div id="license-doc-file-row" class="license-manage-file-row" @if(!$uiSelectingServer && !$uiWithdraw) style="display:none;" @endif>
                         <div id="license-doc-preview-wrap" class="license-manage-preview-wrap">
                             <div id="license-doc-preview-inner" class="license-manage-preview-inner">
                                 @if($uiSelectingServer || $uiWithdraw)
-                                    @if($serverIsPdf)
-                                        <a href="{{ $serverFileUrl }}" target="_blank" rel="noopener noreferrer" class="license-manage-preview-tile license-manage-preview-tile--pdf">
-                                            <svg class="license-manage-preview-tile__doc" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                                            <span class="license-manage-preview-tile__fname">PDFを開く</span>
-                                        </a>
-                                    @else
-                                        <div class="license-manage-preview-tile">
-                                            <img src="{{ $serverFileUrl }}" alt="アップロード済みのプレビュー" class="license-manage-preview-tile__img">
-                                        </div>
-                                    @endif
+                                    <div class="license-manage-preview-tile license-manage-preview-tile--fname-only">
+                                        <a href="{{ $serverFileUrl }}" target="_blank" rel="noopener noreferrer" class="license-manage-filename-link">{{ $serverFileName !== '' ? $serverFileName : 'アップロード済みファイル' }}</a>
+                                    </div>
                                 @endif
                             </div>
                         </div>
@@ -108,10 +114,23 @@
                     @if($isBusiness)
                         <div id="license-doc-expiry-block" class="license-manage-expiry-block" @if(!$showBusinessExpiryBlock) style="display:none;" @endif>
                             <label class="license-manage-label" for="license-doc-expired-at">営業許可証の有効期限</label>
+                            <p class="license-manage-expiry-readout" aria-live="polite">
+                                <span class="license-manage-expiry-readout__key">登録済み</span><span class="license-manage-expiry-readout__colon">:</span>
+                                <span id="license-doc-expiry-readout-body">
+                                    @if($expiryVal !== '')
+                                        <strong class="license-manage-expiry-readout__val">{{ $expiryDisplayJa !== '' ? $expiryDisplayJa : $expiryVal }}</strong>
+                                        @if($expiryDisplayJa !== '' && $expiryDisplayJa !== $expiryVal)
+                                            <span class="license-manage-expiry-readout__iso">（{{ $expiryVal }}）</span>
+                                        @endif
+                                    @else
+                                        <span class="license-manage-expiry-readout__none">未登録</span>
+                                    @endif
+                                </span>
+                            </p>
                             <div class="license-manage-date-wrap">
                                 <input type="date" id="license-doc-expired-at" name="expired_at" class="license-manage-date-input"
                                     value="{{ $expiryVal }}"
-                                    @if(!$uiWithdraw) min="{{ now()->format('Y-m-d') }}" @endif
+                                    @if(!$uiWithdraw && $expiryVal === '') min="{{ now()->format('Y-m-d') }}" @endif
                                     @if($uiWithdraw) readonly @endif
                                     style="color-scheme: dark;">
                                 <span class="license-manage-date-icon" aria-hidden="true">
@@ -121,8 +140,8 @@
                             <p id="license-doc-expiry-hint" class="license-manage-hint" @if($uiWithdraw) style="display:none;" @endif>
                                 営業許可証の有効期限を年月日形式で入力してください（本日以降）。
                             </p>
-                            @if(!empty($record['expiring_soon']))
-                                <p class="license-manage-expiring-chip">{{ $record['expiration_notice_label'] ?? '更新期限半年以内' }}</p>
+                            @if(!empty($rec['expiring_soon']))
+                                <p class="license-manage-expiring-chip">{{ $rec['expiration_notice_label'] ?? '更新期限半年以内' }}</p>
                             @endif
                         </div>
                     @endif
@@ -252,25 +271,10 @@
                 if (!previewInner) return;
                 revokePreview();
                 previewInner.innerHTML = '';
-                if (file.type === 'application/pdf') {
-                    objectUrl = URL.createObjectURL(file);
-                    var tile = document.createElement('a');
-                    tile.className = 'license-manage-preview-tile license-manage-preview-tile--pdf';
-                    tile.href = objectUrl;
-                    tile.target = '_blank';
-                    tile.rel = 'noopener noreferrer';
-                    tile.innerHTML = '<svg class="license-manage-preview-tile__doc" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="license-manage-preview-tile__fname">PDFを開く</span>';
-                    previewInner.appendChild(tile);
-                    return;
-                }
-                objectUrl = URL.createObjectURL(file);
+                var fname = (file && file.name) ? file.name : '選択したファイル';
                 var wrap = document.createElement('div');
-                wrap.className = 'license-manage-preview-tile';
-                var img = document.createElement('img');
-                img.src = objectUrl;
-                img.alt = 'プレビュー';
-                img.className = 'license-manage-preview-tile__img';
-                wrap.appendChild(img);
+                wrap.className = 'license-manage-preview-tile license-manage-preview-tile--fname-only';
+                wrap.textContent = fname;
                 previewInner.appendChild(wrap);
             }
 
@@ -314,9 +318,32 @@
             if (pickFirst) pickFirst.addEventListener('click', openPick);
             if (pickAgain) pickAgain.addEventListener('click', openPick);
 
+            var readoutBody = document.getElementById('license-doc-expiry-readout-body');
+            function refreshExpiryReadout() {
+                if (!isBusiness || !readoutBody || !expiryInput) return;
+                var v = (expiryInput.value || '').trim();
+                if (!v) {
+                    readoutBody.innerHTML = '<span class="license-manage-expiry-readout__none">未登録</span>';
+                    return;
+                }
+                var ja = v;
+                if (/^\d{4}-\d{2}-\d{2}$/.test(v)) {
+                    var p = v.split('-');
+                    ja = parseInt(p[0], 10) + '年' + parseInt(p[1], 10) + '月' + parseInt(p[2], 10) + '日';
+                }
+                var iso = /^\d{4}-\d{2}-\d{2}$/.test(v) ? '<span class="license-manage-expiry-readout__iso">（' + v + '）</span>' : '';
+                readoutBody.innerHTML = '<strong class="license-manage-expiry-readout__val">' + ja + '</strong>' + iso;
+            }
+
             if (expiryInput) {
-                expiryInput.addEventListener('input', updateSubmitEnabled);
-                expiryInput.addEventListener('change', updateSubmitEnabled);
+                expiryInput.addEventListener('input', function () {
+                    refreshExpiryReadout();
+                    updateSubmitEnabled();
+                });
+                expiryInput.addEventListener('change', function () {
+                    refreshExpiryReadout();
+                    updateSubmitEnabled();
+                });
             }
 
             if (fileInput) {

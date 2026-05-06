@@ -352,6 +352,7 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
     // 笘・豎ゆｺｺ逾ｨ (Recruits)
     Route::prefix('recruits')->name('recruits.')->group(function () {
         Route::get('/status', [ShopRecruit::class, 'status'])->name('status');
+        Route::post('/application/hired-wage', [ShopRecruit::class, 'updateApplicationHiredWage'])->name('application-hired-wage');
         Route::get('/edit', [ShopRecruit::class, 'edit'])->name('edit');
         Route::get('/show/{id?}', [ShopRecruit::class, 'show'])->name('show');
         Route::put('/update', [ShopRecruit::class, 'update'])->name('update');
