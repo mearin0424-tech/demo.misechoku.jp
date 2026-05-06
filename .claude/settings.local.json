@@ -11,7 +11,11 @@
       "Bash(git cherry-pick *)",
       "Bash(php -l app/Http/Controllers/Shops/RecruitmentController.php)",
       "Bash(php artisan *)",
-      "Bash(grep -nE 'Auth::user|auth\\\\\\(\\\\\\)->user|\\\\$user ' resources/views/layouts/app.blade.php)"
+      "Bash(grep -nE 'Auth::user|auth\\\\\\(\\\\\\)->user|\\\\$user ' resources/views/layouts/app.blade.php)",
+      "Bash(php -v)",
+      "Bash(php --ini)",
+      "Bash(php -m)",
+      "Bash(php -c ./php.ini -m)"
     ]
   }
 }
