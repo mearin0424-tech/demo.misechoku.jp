@@ -23,7 +23,7 @@
                 <i class="fas fa-chevron-right"></i>
             </div>
         </a>
-        <a href="{{ route('shop.recruits.status') }}" class="menu-btn job {{ $current === 'recruit' ? 'is-current' : '' }}">
+        <a href="{{ route('shop.mypage.management', ['tab' => 'recruit']) }}" class="menu-btn job {{ $current === 'recruit' ? 'is-current' : '' }}">
             <div class="menu-btn-shine"></div>
             <div class="menu-btn-content">
                 <div class="menu-btn-icon">
@@ -38,7 +38,7 @@
                 <i class="fas fa-chevron-right"></i>
             </div>
         </a>
-        <a href="{{ route('shop.mypage.payment.index') }}" class="menu-btn manage {{ $current === 'payment' ? 'is-current' : '' }}">
+        <a href="{{ route('shop.mypage.management', ['tab' => 'payment']) }}" class="menu-btn manage {{ $current === 'payment' ? 'is-current' : '' }}">
             <div class="menu-btn-shine"></div>
             <div class="menu-btn-content">
                 <div class="menu-btn-icon">

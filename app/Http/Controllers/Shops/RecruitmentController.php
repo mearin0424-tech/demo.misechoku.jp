@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Shops;
 
 use App\Http\Controllers\Controller;
 use App\Services\AdminMasterService;
+use App\Services\BillingManagementService;
 use App\Services\DocumentReviewService;
 use App\Support\RecruitCatchOverlay;
 use App\Support\ShopJobApplicationView;
@@ -21,6 +22,7 @@ class RecruitmentController extends Controller
     public function __construct(
         private readonly AdminMasterService $adminMasterService,
         private readonly DocumentReviewService $documentReviewService,
+        private readonly BillingManagementService $billingManagementService,
     ) {
     }
 
@@ -55,6 +57,50 @@ class RecruitmentController extends Controller
             'previewRoute' => route('shop.jobdescription'),
             'publicPreviewRoute' => $numericShopId ? route('share.recruit.show', ['id' => $numericShopId]) : null,
             'shareUrl' => $numericShopId ? route('share.recruit.show', ['id' => $numericShopId]) : null,
+        ]);
+    }
+
+    /**
+     * 採用・入金管理 統合画面
+     */
+    public function management(Request $request)
+    {
+        $shopId = $this->currentShopId();
+        $applications = $this->getApplicationsForShop($shopId);
+        $paymentData = $this->billingManagementService->getShopPaymentPageData($shopId);
+
+        // タブ初期値
+        $tab = $request->query('tab') === 'payment' ? 'payment' : 'recruit';
+
+        // 採用バッジ：面談日超過 × 採用/不採用通知未送信
+        $recruitOverdue = collect($applications)->where('is_decision_overdue', true)->count();
+        $recruitInProgressCount = collect($applications)
+            ->whereIn('status', [1, 2, 3])
+            ->count();
+
+        // 入金バッジ：
+        //  ・キャスト入金依頼（勤務完了+レビュー済）未承認 = STATUS_CAST_REQUESTED
+        //  ・運営からの請求書 未入金 = STATUS_INVOICE_ISSUED / STATUS_SHOP_PAYMENT_REPORTED
+        $deposits = collect($this->billingManagementService->getAllDeposits())
+            ->where('shop_id', $shopId);
+        $paymentPending = $deposits->whereIn('status_code', [
+            BillingManagementService::STATUS_CAST_REQUESTED,
+            BillingManagementService::STATUS_INVOICE_ISSUED,
+            BillingManagementService::STATUS_SHOP_PAYMENT_REPORTED,
+        ])->count();
+
+        return view('shops.mypage.management', [
+            'pageId' => 'management',
+            'tab' => $tab,
+            // 採用
+            'applications' => $applications,
+            'recruitBadge' => $recruitOverdue > 0,
+            'recruitInProgressCount' => $recruitInProgressCount,
+            // 入金
+            'invoices' => $paymentData['invoices'],
+            'summary' => $paymentData['summary'],
+            'paymentBadge' => $paymentPending > 0,
+            'paymentPendingCount' => $paymentPending,
         ]);
     }
 
@@ -163,6 +209,14 @@ class RecruitmentController extends Controller
                 $hiredWage = ShopJobApplicationView::wageAtHire($row);
                 $hiredWageInput = $hiredWage ?? '';
 
+                // 面談日超過 × 採用/不採用通知未送信 (status: 1=やり取り中, 2=面談日調整中, 3=面談日決定)
+                $isDecisionOverdue = false;
+                if (in_array($status, [1, 2, 3], true) && !empty($row->result_date)) {
+                    $resultTs = strtotime((string) $row->result_date);
+                    $todayTs  = strtotime(date('Y-m-d'));
+                    $isDecisionOverdue = $resultTs !== false && $resultTs < $todayTs;
+                }
+
                 return [
                     'id' => $row->id,
                     'cast_id' => $row->cast_id,
@@ -185,6 +239,7 @@ class RecruitmentController extends Controller
                     'hired_regular_hourly_wage_input' => $hiredWageInput,
                     'can_edit_hired_wage' => in_array($status, [4, 6], true)
                         && Schema::hasColumn('shop_job_applications', 'hired_regular_hourly_wage'),
+                    'is_decision_overdue' => $isDecisionOverdue,
                 ];
             })
             ->all();
