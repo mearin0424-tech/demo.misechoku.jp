@@ -349,7 +349,6 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
 
     // 笘・豎ゆｺｺ逾ｨ (Recruits)
     Route::prefix('recruits')->name('recruits.')->group(function () {
-        Route::get('/status', [ShopRecruit::class, 'status'])->name('status');
         Route::post('/application/hired-wage', [ShopRecruit::class, 'updateApplicationHiredWage'])->name('application-hired-wage');
         Route::get('/edit', [ShopRecruit::class, 'edit'])->name('edit');
         Route::get('/show/{id?}', [ShopRecruit::class, 'show'])->name('show');
@@ -367,7 +366,6 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
         Route::get('/documents/{type}/manage', [ShopMypage::class, 'manageLicenseDocument'])->name('documents.manage')->whereIn('type', ['business', 'entertainment']);
         Route::post('/word', [ShopMypage::class, 'updateWord'])->name('word');
         Route::get('/management', [ShopRecruit::class, 'management'])->name('management');
-        Route::get('/payment', [ShopMypage::class, 'payment'])->name('payment.index');
         Route::get('/reviews', [ShopReview::class, 'index'])->name('review.index');
         Route::get('/documents/{type}', [ShopMypage::class, 'viewLicenseDocument'])->name('documents.show')->whereIn('type', ['business', 'entertainment']);
         Route::post('/documents/upload', [ShopMypage::class, 'uploadDocument'])->name('documents.upload');

@@ -1187,7 +1187,10 @@ class BillingManagementService
     {
         $cols = [];
         foreach ([
+            'talk_job_kind',
             'hired_regular_hourly_wage',
+            'hired_bonus_amount',
+            'hired_bonus_condition',
             'applied_bonus_reward',
             'applied_bonus_condition',
             'applied_norma_day',

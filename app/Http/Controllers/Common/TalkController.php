@@ -255,7 +255,7 @@ class TalkController extends Controller
         $this->abortIfBlocked($partnerId, $isCastPortal);
 
         $actionType = $request->input('action_type');
-        abort_if($isCastPortal && $actionType !== 'interview_confirm', 403);
+        abort_if($isCastPortal && !in_array($actionType, ['interview_confirm', 'set_job_kind'], true), 403);
         abort_if(!$isCastPortal && $actionType === 'interview_confirm', 403);
         $castId = $isCastPortal ? $this->currentCastId() : $partnerId;
         $shopId = $isCastPortal ? $partnerId : $this->currentShopId();
@@ -394,7 +394,14 @@ class TalkController extends Controller
             }
         }
 
-        $this->syncApplicationStatusFromTalkAction($partnerId, $isCastPortal, $actionType, $content, $hiredWageNormalized);
+        $this->syncApplicationStatusFromTalkAction(
+            $partnerId,
+            $isCastPortal,
+            $actionType,
+            $content,
+            $hiredWageNormalized,
+            $selectedEmploymentKind
+        );
         if ($selectedEmploymentKind !== null) {
             $this->syncApplicationEmploymentKindFromTalkAction($partnerId, $isCastPortal, $selectedEmploymentKind, $actionType);
         }
@@ -805,6 +812,7 @@ class TalkController extends Controller
         string $actionType,
         string $content,
         ?string $hiredRegularHourlyWage = null,
+        ?string $selectedEmploymentKind = null,
     ): void {
         $castId = $isCastPortal ? $this->currentCastId() : $partnerId;
         $shopId = $isCastPortal ? $partnerId : $this->currentShopId();
@@ -827,7 +835,7 @@ class TalkController extends Controller
         } elseif ($actionType === 'hired') {
             $updates['status'] = self::APPLICATION_STATUS_HIRED;
             $updates['reason_rejection'] = null;
-            $hiredBonus = $this->resolveHiredBonusForApplicationUpdate($application);
+            $hiredBonus = $this->resolveHiredBonusForApplicationUpdate($application, $selectedEmploymentKind);
             if ($hiredBonus !== null) {
                 $updates['hired_bonus_amount'] = $hiredBonus['bonus_amount'];
                 if (Schema::hasColumn('shop_job_applications', 'hired_bonus_condition')) {
@@ -936,6 +944,13 @@ class TalkController extends Controller
             'created_at' => now(),
             'updated_at' => now(),
         ];
+        if (Schema::hasColumn('shop_job_applications', 'talk_job_kind')) {
+            $row['talk_job_kind'] = match ($preferredJobType) {
+                2 => 'trial',
+                3 => 'help',
+                default => 'fulltime',
+            };
+        }
         $row = array_merge($row, $this->shopJobApplicationJobSnapshotService->snapshotColumnsForApplication($shopJob));
         $applicationId = DB::table('shop_job_applications')->insertGetId($row);
 
@@ -947,8 +962,6 @@ class TalkController extends Controller
         $query = DB::table('shop_jobs')->where('shop_id', $shopId);
         if (Schema::hasColumn('shop_jobs', 'job_type')) {
             $query->where('job_type', $jobType);
-        } elseif ($jobType !== 1) {
-            return null;
         }
         $id = $query->orderByDesc('id')->value('id');
 
@@ -1064,33 +1077,57 @@ class TalkController extends Controller
     /**
      * @return array{bonus_amount: int, bonus_condition: string}|null
      */
-    private function resolveHiredBonusForApplicationUpdate(object $application): ?array
+    private function resolveHiredBonusForApplicationUpdate(object $application, ?string $selectedEmploymentKind = null): ?array
     {
         if (!Schema::hasColumn('shop_job_applications', 'hired_bonus_amount')) {
             return null;
         }
 
-        $fromJob = $this->snapshotHiredBonusForApplication((int) $application->shop_job_id);
+        $resolvedKind = $selectedEmploymentKind;
+        if ($resolvedKind === null && Schema::hasColumn('shop_job_applications', 'talk_job_kind')) {
+            $candidate = trim((string) ($application->talk_job_kind ?? ''));
+            if (in_array($candidate, ['fulltime', 'trial', 'help'], true)) {
+                $resolvedKind = $candidate;
+            }
+        }
+        if ($resolvedKind === null) {
+            $resolvedKind = 'fulltime';
+        }
+
+        // ヘルプ採用はボーナス対象外。保存値を明示的に0/空に揃える。
+        if ($resolvedKind === 'help') {
+            return [
+                'bonus_amount' => 0,
+                'bonus_condition' => '',
+            ];
+        }
+
+        $shopId = DB::table('shop_jobs')
+            ->where('id', (int) $application->shop_job_id)
+            ->value('shop_id');
+        if (!$shopId) {
+            $fromJob = $this->snapshotHiredBonusForApplication((int) $application->shop_job_id);
+            return [
+                'bonus_amount' => (int) ($fromJob['bonus_amount'] ?? 0),
+                'bonus_condition' => (string) ($fromJob['bonus_condition'] ?? ''),
+            ];
+        }
+
+        $targetJobType = match ($resolvedKind) {
+            'trial' => 2,
+            default => 1,
+        };
+        $targetShopJobId = $this->resolveShopJobIdByType((string) $shopId, $targetJobType)
+            ?? (int) $application->shop_job_id;
+        $fromJob = $this->snapshotHiredBonusForApplication((int) $targetShopJobId);
 
         $amount = 0;
-        if (Schema::hasColumn('shop_job_applications', 'applied_bonus_reward')) {
-            if ($application->applied_bonus_reward !== null) {
-                $amount = (int) $application->applied_bonus_reward;
-            } elseif ($fromJob !== null) {
-                $amount = (int) $fromJob['bonus_amount'];
-            }
-        } elseif ($fromJob !== null) {
+        if ($fromJob !== null) {
             $amount = (int) $fromJob['bonus_amount'];
         }
 
         $condition = '';
-        if (Schema::hasColumn('shop_job_applications', 'applied_bonus_condition')) {
-            if ($application->applied_bonus_condition !== null) {
-                $condition = (string) $application->applied_bonus_condition;
-            } elseif ($fromJob !== null) {
-                $condition = (string) $fromJob['bonus_condition'];
-            }
-        } elseif ($fromJob !== null) {
+        if ($fromJob !== null) {
             $condition = (string) $fromJob['bonus_condition'];
         }
 
@@ -1119,7 +1156,7 @@ class TalkController extends Controller
             default => 1,
         };
         $targetShopJobId = $this->resolveShopJobIdByType($shopId, $targetJobType);
-        if ($targetShopJobId === null) {
+        if ($targetShopJobId === null && Schema::hasColumn('shop_jobs', 'job_type')) {
             return;
         }
 
@@ -1130,13 +1167,20 @@ class TalkController extends Controller
             $status = $employmentKind === 'trial' ? 7 : self::APPLICATION_STATUS_REJECTED;
         }
 
+        $updates = [
+            'status' => $status,
+            'updated_at' => now(),
+        ];
+        if ($targetShopJobId !== null) {
+            $updates['shop_job_id'] = $targetShopJobId;
+        }
+        if (Schema::hasColumn('shop_job_applications', 'talk_job_kind')) {
+            $updates['talk_job_kind'] = $employmentKind;
+        }
+
         DB::table('shop_job_applications')
             ->where('id', $application->id)
-            ->update([
-                'shop_job_id' => $targetShopJobId,
-                'status' => $status,
-                'updated_at' => now(),
-            ]);
+            ->update($updates);
     }
 
     private function getSelectedTalkJobKind(string $castId, string $shopId): ?string
@@ -1145,14 +1189,22 @@ class TalkController extends Controller
         if (!$application) {
             return null;
         }
-        $jobType = DB::table('shop_jobs')->where('id', $application->shop_job_id)->value('job_type');
-        $jt = $jobType !== null ? (int) $jobType : 1;
-
-        return match ($jt) {
-            2 => 'trial',
-            3 => 'help',
-            default => 'fulltime',
-        };
+        if (Schema::hasColumn('shop_job_applications', 'talk_job_kind')) {
+            $kind = trim((string) ($application->talk_job_kind ?? ''));
+            if (in_array($kind, ['fulltime', 'trial', 'help'], true)) {
+                return $kind;
+            }
+        }
+        if (Schema::hasColumn('shop_jobs', 'job_type')) {
+            $jobType = DB::table('shop_jobs')->where('id', $application->shop_job_id)->value('job_type');
+            $jt = $jobType !== null ? (int) $jobType : 1;
+            return match ($jt) {
+                2 => 'trial',
+                3 => 'help',
+                default => 'fulltime',
+            };
+        }
+        return null;
     }
 
     private function setConversationJobKind(string $castId, string $shopId, string $jobKind): void
@@ -1173,12 +1225,17 @@ class TalkController extends Controller
             return;
         }
 
+        $updates = ['updated_at' => now()];
+        if ($targetShopJobId !== null) {
+            $updates['shop_job_id'] = $targetShopJobId;
+        }
+        if (Schema::hasColumn('shop_job_applications', 'talk_job_kind')) {
+            $updates['talk_job_kind'] = $jobKind;
+        }
+
         DB::table('shop_job_applications')
             ->where('id', $application->id)
-            ->update([
-                'shop_job_id' => $targetShopJobId,
-                'updated_at' => now(),
-            ]);
+            ->update($updates);
     }
 
     private function normalizeTalkTopic(string $value): ?string

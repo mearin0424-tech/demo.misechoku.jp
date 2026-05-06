@@ -197,8 +197,40 @@ document.addEventListener('DOMContentLoaded', function() {
     const partnerId = chatForm ? chatForm.getAttribute('data-partner-id') : null;
     const talkRoomJobKindSelect = document.getElementById('talk-room-job-kind');
     const saveTalkJobKindBtn = document.getElementById('save-talk-job-kind');
+    const talkJobKindSaveStatus = document.getElementById('talk-job-kind-save-status');
+    const talkJobKindGuidance = document.getElementById('talk-job-kind-guidance');
+    let currentSavedTalkJobKind = selectedTalkJobKind || '';
+    const talkKindLabelMap = {
+        trial: '体験入店',
+        fulltime: '本入店',
+        help: 'ヘルプ'
+    };
+    const renderTalkKindGuidance = (kind) => {
+        if (!talkJobKindGuidance) return;
+        if (!kind) {
+            talkJobKindGuidance.textContent = '面談日を送る前に求人種別を確定してください。面談日確定後は変更できません。';
+            return;
+        }
+        const label = talkKindLabelMap[kind] || '未選択';
+        talkJobKindGuidance.textContent = '現在の求人種別: ' + label + '。面談日確定後は変更できません。';
+    };
     if (talkRoomJobKindSelect && selectedTalkJobKind) {
         talkRoomJobKindSelect.value = selectedTalkJobKind;
+        if (talkJobKindSaveStatus) {
+            talkJobKindSaveStatus.textContent = '保存済み';
+        }
+    }
+    renderTalkKindGuidance(talkRoomJobKindSelect ? talkRoomJobKindSelect.value : currentSavedTalkJobKind);
+    if (talkRoomJobKindSelect) {
+        talkRoomJobKindSelect.addEventListener('change', function () {
+            renderTalkKindGuidance(talkRoomJobKindSelect.value);
+            if (!saveTalkJobKindBtn || !canSelectTalkJobKind) return;
+            if (talkRoomJobKindSelect.value && talkRoomJobKindSelect.value === currentSavedTalkJobKind) {
+                if (talkJobKindSaveStatus) talkJobKindSaveStatus.textContent = '保存済み';
+            } else {
+                if (talkJobKindSaveStatus) talkJobKindSaveStatus.textContent = '未保存';
+            }
+        });
     }
 
     if (!isCastRoom && chatForm) {
@@ -225,28 +257,50 @@ document.addEventListener('DOMContentLoaded', function() {
         const hiredHourlyWageInput = document.getElementById('hired-hourly-wage-input');
         const resultEmploymentKind = document.getElementById('result-employment-kind');
         let currentResultAction = null;
-        if (talkRoomJobKindSelect && saveTalkJobKindBtn && canSelectTalkJobKind) {
+        const renderResultDescByKind = () => {
+            if (!resultDesc || !resultEmploymentKind) return;
+            const kind = resultEmploymentKind.value;
+            const kindLabel = talkKindLabelMap[kind] || '未選択';
+            if (currentResultAction === 'hired') {
+                resultDesc.textContent = '選択中の求人種別: ' + kindLabel + '。採用時給を入力し、採用テンプレートを選択して文面を編集してください。';
+            } else if (currentResultAction === 'rejected') {
+                resultDesc.textContent = '選択中の求人種別: ' + kindLabel + '。不採用テンプレートを選択し、必要に応じて文面を編集してください。';
+            }
+        };
+        const bindTalkJobKindSave = () => {
+            if (!(talkRoomJobKindSelect && saveTalkJobKindBtn && canSelectTalkJobKind)) return;
             saveTalkJobKindBtn.addEventListener('click', async function() {
                 const selected = talkRoomJobKindSelect.value;
                 if (!selected) {
                     window.alert('求人種別を選択してください。');
                     return;
                 }
+                if (selected === currentSavedTalkJobKind) {
+                    if (talkJobKindSaveStatus) talkJobKindSaveStatus.textContent = '保存済み';
+                    return;
+                }
                 saveTalkJobKindBtn.disabled = true;
+                if (talkJobKindSaveStatus) talkJobKindSaveStatus.textContent = '保存中...';
                 try {
                     await postJson(actionUrl, token, {
                         partner_id: partnerId,
                         action_type: 'set_job_kind',
                         job_kind: selected
                     });
-                    window.alert('求人種別を保存しました。');
-                    window.location.reload();
+                    currentSavedTalkJobKind = selected;
+                    renderTalkKindGuidance(currentSavedTalkJobKind);
+                    if (talkJobKindSaveStatus) {
+                        talkJobKindSaveStatus.textContent = '保存済み';
+                    }
+                    saveTalkJobKindBtn.disabled = false;
                 } catch (error) {
                     window.alert(error.message || '求人種別の保存に失敗しました。');
+                    if (talkJobKindSaveStatus) talkJobKindSaveStatus.textContent = '保存失敗';
                     saveTalkJobKindBtn.disabled = false;
                 }
             });
-        }
+        };
+        bindTalkJobKindSave();
 
         const openModal = () => {
             if (!overlay) return;
@@ -288,6 +342,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     ? '採用時給を入力し、採用テンプレートを選択して文面を編集してください。'
                     : '不採用テンプレートを選択し、必要に応じて文面を編集してください。';
             }
+            if (resultEmploymentKind && currentSavedTalkJobKind && talkKindLabelMap[currentSavedTalkJobKind]) {
+                resultEmploymentKind.value = currentSavedTalkJobKind;
+            }
+            renderResultDescByKind();
             if (hiredHourlyWageWrap) {
                 const show = actionType === 'hired';
                 hiredHourlyWageWrap.classList.toggle('is-visible', show);
@@ -299,6 +357,9 @@ document.addEventListener('DOMContentLoaded', function() {
             resultSubmitBtn.disabled = false;
             setTimeout(function() { resultTextarea.focus(); }, 0);
         };
+        if (resultEmploymentKind) {
+            resultEmploymentKind.addEventListener('change', renderResultDescByKind);
+        }
 
         const closeResultModal = () => {
             if (!resultOverlay || !resultTextarea) return;
@@ -496,17 +557,26 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.alert('求人種別を選択してください。');
                     return;
                 }
+                if (selected === currentSavedTalkJobKind) {
+                    if (talkJobKindSaveStatus) talkJobKindSaveStatus.textContent = '保存済み';
+                    return;
+                }
                 saveTalkJobKindBtn.disabled = true;
+                if (talkJobKindSaveStatus) talkJobKindSaveStatus.textContent = '保存中...';
                 try {
                     await postJson(actionUrl, token, {
                         partner_id: partnerId,
                         action_type: 'set_job_kind',
                         job_kind: selected
                     });
-                    window.alert('求人種別を保存しました。');
-                    window.location.reload();
+                    currentSavedTalkJobKind = selected;
+                    if (talkJobKindSaveStatus) {
+                        talkJobKindSaveStatus.textContent = '保存済み';
+                    }
+                    saveTalkJobKindBtn.disabled = false;
                 } catch (error) {
                     window.alert(error.message || '求人種別の保存に失敗しました。');
+                    if (talkJobKindSaveStatus) talkJobKindSaveStatus.textContent = '保存失敗';
                     saveTalkJobKindBtn.disabled = false;
                 }
             });

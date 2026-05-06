@@ -38,29 +38,6 @@ class RecruitmentController extends Controller
     ];
 
     /**
-     * 求人ステータス一覧画面
-     */
-    public function status()
-    {
-        $shopId = $this->currentShopId();
-        $recruitData = $this->getRecruitData($shopId);
-        $numericShopId = $this->toNumericShopId($shopId);
-        $applications = $this->getApplicationsForShop($shopId);
-
-        return view('shops.recruit.status', [
-            'pageId' => 'job_status',
-            'recruit' => $recruitData['recruit'],
-            'usesJobTypes' => $this->shopJobsUseMultipleTypes(),
-            'horizontalShopJobs' => $this->shopJobsHorizontalSchema(),
-            'applications' => $applications,
-            'applicationStatusLabels' => self::APPLICATION_STATUS_LABELS,
-            'previewRoute' => route('shop.jobdescription'),
-            'publicPreviewRoute' => $numericShopId ? route('share.recruit.show', ['id' => $numericShopId]) : null,
-            'shareUrl' => $numericShopId ? route('share.recruit.show', ['id' => $numericShopId]) : null,
-        ]);
-    }
-
-    /**
      * 採用・入金管理 統合画面
      */
     public function management(Request $request)
@@ -150,6 +127,9 @@ class RecruitmentController extends Controller
             $query->addSelect('shop_job_applications.hired_regular_hourly_wage');
         }
         foreach ([
+            'talk_job_kind',
+            'hired_bonus_amount',
+            'hired_bonus_condition',
             'applied_regular_hourly_wage',
             'applied_norma_day',
             'applied_norma_hours',
@@ -172,7 +152,14 @@ class RecruitmentController extends Controller
             ->get()
             ->map(function ($row) {
                 $status = (int) $row->status;
-                $jobType = isset($row->job_type) ? (int) $row->job_type : 1;
+                $resolvedTalkJobKind = in_array((string) ($row->talk_job_kind ?? ''), ['fulltime', 'trial', 'help'], true)
+                    ? (string) $row->talk_job_kind
+                    : null;
+                $jobType = match ($resolvedTalkJobKind) {
+                    'trial' => 2,
+                    'help' => 3,
+                    default => (isset($row->job_type) ? (int) $row->job_type : 1),
+                };
                 $pattern = $jobType === 3 ? 'P2' : 'P1';
                 $patternLabel = match ($jobType) {
                     3 => 'ヘルプ',
@@ -231,6 +218,25 @@ class RecruitmentController extends Controller
                 $appliedSummaryLines = ShopJobApplicationView::appliedJobSummaryLines($row);
                 $hiredWage = ShopJobApplicationView::wageAtHire($row);
                 $hiredWageInput = $hiredWage ?? '';
+                $confirmedSummaryLines = [];
+                if (in_array($status, [4, 6], true)) {
+                    $confirmedSummaryLines[] = '確定種別: ' . $jobKindLabel;
+                    if ($hiredWage !== null && $hiredWage !== '') {
+                        $confirmedSummaryLines[] = '採用時給（確定）: ' . $hiredWage . '円';
+                    }
+                    $confirmedBonusAmount = property_exists($row, 'hired_bonus_amount') && $row->hired_bonus_amount !== null
+                        ? (int) $row->hired_bonus_amount
+                        : null;
+                    if ($confirmedBonusAmount !== null) {
+                        $confirmedSummaryLines[] = 'ボーナス金額（確定）: ¥' . number_format($confirmedBonusAmount);
+                    }
+                    $confirmedBonusCondition = property_exists($row, 'hired_bonus_condition') && $row->hired_bonus_condition !== null
+                        ? trim((string) $row->hired_bonus_condition)
+                        : '';
+                    if ($confirmedBonusCondition !== '') {
+                        $confirmedSummaryLines[] = '達成条件（確定）: ' . $confirmedBonusCondition;
+                    }
+                }
 
                 // 面談日超過 × 採用/不採用通知未送信 (status: 1=やり取り中, 2=面談日調整中, 3=面談日決定)
                 $isDecisionOverdue = false;
@@ -258,6 +264,7 @@ class RecruitmentController extends Controller
                     'is_delayed' => false,
                     'delay_message' => '',
                     'applied_summary_lines' => $appliedSummaryLines,
+                    'confirmed_summary_lines' => $confirmedSummaryLines,
                     'hired_regular_hourly_wage' => $hiredWage,
                     'hired_regular_hourly_wage_input' => $hiredWageInput,
                     'can_edit_hired_wage' => in_array($status, [4, 6], true)
@@ -300,7 +307,7 @@ class RecruitmentController extends Controller
 
         if (!$target) {
             return redirect()
-                ->route('shop.recruits.status')
+                ->route('shop.mypage.management', ['tab' => 'recruit'])
                 ->with('message', '対象の応募が見つからないか、採用ステータスではありません。');
         }
 
@@ -312,7 +319,7 @@ class RecruitmentController extends Controller
             ]);
 
         return redirect()
-            ->route('shop.recruits.status')
+            ->route('shop.mypage.management', ['tab' => 'recruit'])
             ->with('message', '採用時給を保存しました。');
     }
 

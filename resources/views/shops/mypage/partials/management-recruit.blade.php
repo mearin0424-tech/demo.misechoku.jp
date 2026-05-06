@@ -83,6 +83,10 @@
                                 <div class="rsm-applied-title">応募時の求人条件</div>
                                 <ul class="rsm-applied-list" data-field="appliedList"></ul>
                             </div>
+                            <div class="rsm-applied-block" data-field-wrap="confirmedSummary" hidden>
+                                <div class="rsm-applied-title">確定条件（採用時）</div>
+                                <ul class="rsm-applied-list" data-field="confirmedList"></ul>
+                            </div>
                             <div class="rsm-hired-wage-block" data-field-wrap="hiredWage" hidden>
                                 <form method="post" class="rsm-hired-wage-form" data-field="hiredWageForm">
                                     <input type="hidden" name="_token" value="" data-field="csrfToken" autocomplete="off">
@@ -229,6 +233,21 @@ window.recruitStatusHiredWageUrl = @json(route('shop.recruits.application-hired-
             } else {
                 appliedWrap.hidden = true;
                 appliedList.innerHTML = '';
+            }
+
+            var confirmedWrap = node.querySelector('[data-field-wrap="confirmedSummary"]');
+            var confirmedList = node.querySelector('[data-field="confirmedList"]');
+            if (item.confirmed_summary_lines && item.confirmed_summary_lines.length) {
+                confirmedWrap.hidden = false;
+                confirmedList.innerHTML = '';
+                item.confirmed_summary_lines.forEach(function(line) {
+                    var li = document.createElement('li');
+                    li.textContent = line;
+                    confirmedList.appendChild(li);
+                });
+            } else {
+                confirmedWrap.hidden = true;
+                confirmedList.innerHTML = '';
             }
 
             var wageWrap = node.querySelector('[data-field-wrap="hiredWage"]');

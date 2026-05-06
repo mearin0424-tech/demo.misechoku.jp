@@ -23,30 +23,15 @@
                 <i class="fas fa-chevron-right"></i>
             </div>
         </a>
-        <a href="{{ route('shop.mypage.management', ['tab' => 'recruit']) }}" class="menu-btn job {{ $current === 'recruit' ? 'is-current' : '' }}">
+        <a href="{{ route('shop.mypage.management') }}" class="menu-btn job {{ $current === 'management' ? 'is-current' : '' }}">
             <div class="menu-btn-shine"></div>
             <div class="menu-btn-content">
                 <div class="menu-btn-icon">
-                    <i class="far fa-folder-open"></i>
+                    <i class="fas fa-users-cog"></i>
                 </div>
                 <div class="menu-btn-text">
-                    <p class="menu-btn-title">採用管理</p>
-                    <p class="menu-btn-meta">採用数: {{ number_format($hiredCount) }}件</p>
-                </div>
-            </div>
-            <div class="menu-btn-arrow">
-                <i class="fas fa-chevron-right"></i>
-            </div>
-        </a>
-        <a href="{{ route('shop.mypage.management', ['tab' => 'payment']) }}" class="menu-btn manage {{ $current === 'payment' ? 'is-current' : '' }}">
-            <div class="menu-btn-shine"></div>
-            <div class="menu-btn-content">
-                <div class="menu-btn-icon">
-                    <i class="far fa-credit-card"></i>
-                </div>
-                <div class="menu-btn-text">
-                    <p class="menu-btn-title">入金管理</p>
-                    <p class="menu-btn-meta">入金待ち: {{ number_format($paymentPendingCount) }}件</p>
+                    <p class="menu-btn-title">採用・入金管理</p>
+                    <p class="menu-btn-meta">採用数: {{ number_format($hiredCount) }}件 / 入金待ち: {{ number_format($paymentPendingCount) }}件</p>
                 </div>
             </div>
             <div class="menu-btn-arrow">

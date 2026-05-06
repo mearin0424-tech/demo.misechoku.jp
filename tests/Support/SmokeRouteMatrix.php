@@ -50,10 +50,9 @@ final class SmokeRouteMatrix
             'shop interaction like' => ['shop.interaction.like', [], 200],
             'shop profile show' => ['shop.profile.show', [], 200],
             'shop profile store edit' => ['shop.profile.store.edit', [], 200],
-            'shop recruits status' => ['shop.recruits.status', [], 200],
             'shop recruits edit' => ['shop.recruits.edit', [], 200],
             'shop mypage index' => ['shop.mypage.index', [], 200],
-            'shop mypage payment' => ['shop.mypage.payment.index', [], 200],
+            'shop mypage management' => ['shop.mypage.management', [], 200],
             'shop mypage reviews' => ['shop.mypage.review.index', [], 200],
             'shop talk index' => ['shop.talk.index', [], 200],
         ];

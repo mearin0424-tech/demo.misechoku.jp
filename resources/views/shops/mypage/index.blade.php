@@ -465,17 +465,10 @@
                 <i class="fas fa-chevron-right"></i>
             </a>
             <div class="shop-mypage-link-stack">
-                <a href="{{ route('shop.recruits.status') }}">
+                <a href="{{ route('shop.mypage.management') }}">
                     <span class="shop-mypage-link-stack-inner">
-                        <i class="fas fa-users" aria-hidden="true"></i>
-                        採用管理
-                    </span>
-                    <i class="fas fa-chevron-right"></i>
-                </a>
-                <a href="{{ route('shop.mypage.payment.index') }}">
-                    <span class="shop-mypage-link-stack-inner">
-                        <i class="far fa-credit-card" aria-hidden="true"></i>
-                        入金管理
+                        <i class="fas fa-users-cog" aria-hidden="true"></i>
+                        採用・入金管理
                     </span>
                     <i class="fas fa-chevron-right"></i>
                 </a>

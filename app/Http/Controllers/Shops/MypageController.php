@@ -321,28 +321,6 @@ class MypageController extends Controller
     }
 
     /**
-     * 請求・入金管理（請求見込・請求書DL・運営口座への入金に特化）
-     * 採用ステータスは recruits/status で管理。店舗口座登録は不要（入金のみのため）。
-     */
-    public function payment()
-    {
-        $shopId = $this->currentShopId();
-        $paymentData = $this->billingManagementService->getShopPaymentPageData($shopId);
-        $currentDeposit = $paymentData['current'] ?? null;
-
-        return view('shops.mypage.payment', [
-            'pageId'           => 'payment',
-            'invoices'         => $paymentData['invoices'],
-            'summary'          => $paymentData['summary'],
-            'depositFlow'      => $paymentData['flow'],
-            'paymentForm'      => $paymentData['payment_form'],
-            'currentDeposit'   => $currentDeposit,
-            'approvalTarget'   => $paymentData['approval_target'],
-            'canReportPayment' => $paymentData['can_report_payment'],
-        ]);
-    }
-
-    /**
      * 店舗側の振込先口座情報登録（デモ用）
      */
     public function updateBank(Request $request)
@@ -567,7 +545,7 @@ class MypageController extends Controller
         );
 
         return redirect()
-            ->route('shop.mypage.payment.index')
+            ->route('shop.mypage.management', ['tab' => 'payment'])
             ->with($result['success'] ? 'status' : 'error', $result['message']);
     }
 
@@ -585,7 +563,7 @@ class MypageController extends Controller
         $result = $this->billingManagementService->reportShopPayment($this->currentShopId(), $payload);
 
         return redirect()
-            ->route('shop.mypage.payment.index')
+            ->route('shop.mypage.management', ['tab' => 'payment'])
             ->with($result['success'] ? 'status' : 'error', $result['message']);
     }
 

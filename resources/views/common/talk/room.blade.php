@@ -139,7 +139,7 @@
         <div class="talk-result-panel" style="padding: 12px 14px;">
             <div class="talk-result-panel-copy" style="width:100%;">
                 <span class="talk-result-panel-title">求人種別</span>
-                <p style="margin-top:6px;">面談日を送る前に求人種別を確定してください。面談日確定後は変更できません。</p>
+                <p id="talk-job-kind-guidance" style="margin-top:6px;">面談日を送る前に求人種別を確定してください。面談日確定後は変更できません。</p>
             </div>
             <div class="talk-result-panel-actions" style="width:100%;">
                 <select id="talk-room-job-kind" style="width:100%; border-radius:10px; border:1px solid rgba(229,193,88,.22); background:rgba(255,255,255,.05); color:#fff; padding:8px 10px;" @if(empty($canSelectTalkJobKind)) disabled @endif>
@@ -150,6 +150,9 @@
                 </select>
                 @if(!empty($canSelectTalkJobKind))
                     <button type="button" id="save-talk-job-kind" class="btn-interview btn-interview-result">種別を保存</button>
+                    <span id="talk-job-kind-save-status" style="font-size:12px; color:#d4c4a4;">未保存</span>
+                @else
+                    <span style="font-size:12px; color:#a1a1aa;">面談日確定後は変更不可</span>
                 @endif
             </div>
         </div>
