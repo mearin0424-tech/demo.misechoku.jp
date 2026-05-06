@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use App\Services\BillingManagementService;
 use App\Services\DocumentReviewService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class DashboardController extends Controller
 {
@@ -21,24 +24,50 @@ class DashboardController extends Controller
      */
     public function index()
     {
+        $now = Carbon::now();
+        $monthStarts = collect(range(6, 0))
+            ->map(fn (int $monthsAgo) => $now->copy()->startOfMonth()->subMonths($monthsAgo))
+            ->push($now->copy()->startOfMonth())
+            ->values();
+
+        $castTimeline = $this->buildMonthlyTimeline('casts', $monthStarts, true);
+        $shopTimeline = $this->buildMonthlyTimeline('shops', $monthStarts, true);
+        $transactionCountTimeline = $this->buildMonthlyTimeline('application_deposits', $monthStarts, false, 'count');
+        $transactionAmountTimeline = $this->buildMonthlyTimeline('application_deposits', $monthStarts, false, 'sum', 'invoice_amount');
+
+        $currentMonthStart = $now->copy()->startOfMonth();
+        $previousMonthStart = $currentMonthStart->copy()->subMonth();
+        $currentMonthKey = $currentMonthStart->format('Y-m');
+        $previousMonthKey = $previousMonthStart->format('Y-m');
+
+        $currentCast = (int) ($castTimeline[$currentMonthKey] ?? 0);
+        $previousCast = (int) ($castTimeline[$previousMonthKey] ?? 0);
+        $currentShop = (int) ($shopTimeline[$currentMonthKey] ?? 0);
+        $previousShop = (int) ($shopTimeline[$previousMonthKey] ?? 0);
+        $currentTransactionCount = (int) ($transactionCountTimeline[$currentMonthKey] ?? 0);
+        $previousTransactionCount = (int) ($transactionCountTimeline[$previousMonthKey] ?? 0);
+        $currentTransactionAmount = (int) ($transactionAmountTimeline[$currentMonthKey] ?? 0);
+        $previousTransactionAmount = (int) ($transactionAmountTimeline[$previousMonthKey] ?? 0);
+        $premiumShopCount = $this->countPremiumShops();
+
         $registrationKpis = [
             [
                 'id' => 'cast',
                 'title' => '登録キャスト数',
-                'value' => '1,452',
+                'value' => number_format($currentCast),
                 'unit' => '名',
-                'trend' => '+12',
-                'is_up' => true,
+                'trend' => $this->formatDiff($currentCast - $previousCast),
+                'is_up' => $currentCast >= $previousCast,
                 'icon' => 'fa-users',
             ],
             [
                 'id' => 'shop',
                 'title' => '登録店舗 (プレミアム)',
-                'value' => '215',
-                'sub_value' => '48',
+                'value' => number_format($currentShop),
+                'sub_value' => number_format($premiumShopCount),
                 'unit' => '店',
-                'trend' => '+3',
-                'is_up' => true,
+                'trend' => $this->formatDiff($currentShop - $previousShop),
+                'is_up' => $currentShop >= $previousShop,
                 'icon' => 'fa-building',
             ],
         ];
@@ -47,32 +76,34 @@ class DashboardController extends Controller
             [
                 'id' => 'trx_count',
                 'title' => '取引件数 (月)',
-                'value' => '4,892',
+                'value' => number_format($currentTransactionCount),
                 'unit' => '件',
-                'trend' => '+124',
-                'is_up' => true,
+                'trend' => $this->formatDiff($currentTransactionCount - $previousTransactionCount),
+                'is_up' => $currentTransactionCount >= $previousTransactionCount,
                 'icon' => 'fa-chart-line',
             ],
             [
                 'id' => 'trx_amount',
                 'title' => '取引金額 (月)',
-                'value' => '18.45',
+                'value' => number_format($currentTransactionAmount / 1000000, 2),
                 'unit' => 'M円',
-                'trend' => '+5.2%',
-                'is_up' => true,
+                'trend' => $this->formatRatio($currentTransactionAmount, $previousTransactionAmount),
+                'is_up' => $currentTransactionAmount >= $previousTransactionAmount,
                 'icon' => 'fa-yen-sign',
             ],
         ];
 
-        $chartData = [
-            ['month' => '4月', 'cast' => 1200, 'shop' => 180, 'amount' => 12.0, 'count' => 3800],
-            ['month' => '5月', 'cast' => 1250, 'shop' => 190, 'amount' => 13.5, 'count' => 4000],
-            ['month' => '6月', 'cast' => 1280, 'shop' => 195, 'amount' => 12.8, 'count' => 3900],
-            ['month' => '7月', 'cast' => 1320, 'shop' => 200, 'amount' => 15.0, 'count' => 4300],
-            ['month' => '8月', 'cast' => 1380, 'shop' => 205, 'amount' => 16.2, 'count' => 4500],
-            ['month' => '9月', 'cast' => 1410, 'shop' => 210, 'amount' => 17.5, 'count' => 4700],
-            ['month' => '10月', 'cast' => 1452, 'shop' => 215, 'amount' => 18.45, 'count' => 4892],
-        ];
+        $chartData = $monthStarts->map(function (Carbon $monthStart) use ($castTimeline, $shopTimeline, $transactionCountTimeline, $transactionAmountTimeline) {
+            $key = $monthStart->format('Y-m');
+
+            return [
+                'month' => $monthStart->format('n月'),
+                'cast' => (int) ($castTimeline[$key] ?? 0),
+                'shop' => (int) ($shopTimeline[$key] ?? 0),
+                'amount' => round(((int) ($transactionAmountTimeline[$key] ?? 0)) / 1000000, 2),
+                'count' => (int) ($transactionCountTimeline[$key] ?? 0),
+            ];
+        })->all();
 
         $documentTasks = $this->documentReviewService->getDashboardTasks();
         $billingTasks = collect($this->billingManagementService->getPendingTasks())
@@ -123,7 +154,116 @@ class DashboardController extends Controller
             ['id' => 'error', 'title' => '振込エラー', 'count' => collect($tasks)->where('cat_id', 'error')->count()],
         ];
 
-        return view('admin.dashboard', compact('registrationKpis', 'transactionKpis', 'chartData', 'taskSummary', 'tasks'));
+        $currentPeriodLabel = $now->format('Y年n月');
+
+        return view('admin.dashboard', compact('registrationKpis', 'transactionKpis', 'chartData', 'taskSummary', 'tasks', 'currentPeriodLabel'));
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    private function buildMonthlyTimeline(
+        string $table,
+        \Illuminate\Support\Collection $monthStarts,
+        bool $cumulative = false,
+        string $aggregate = 'count',
+        ?string $sumColumn = null
+    ): array {
+        if (! Schema::hasTable($table) || ! Schema::hasColumn($table, 'created_at')) {
+            return $monthStarts
+                ->mapWithKeys(fn (Carbon $monthStart) => [$monthStart->format('Y-m') => 0])
+                ->all();
+        }
+
+        if ($aggregate === 'sum' && $sumColumn !== null && ! Schema::hasColumn($table, $sumColumn)) {
+            return $monthStarts
+                ->mapWithKeys(fn (Carbon $monthStart) => [$monthStart->format('Y-m') => 0])
+                ->all();
+        }
+
+        $startDate = $monthStarts->first()->copy()->startOfMonth();
+        $rows = DB::table($table)
+            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as ym")
+            ->selectRaw($aggregate === 'sum' && $sumColumn !== null ? 'COALESCE(SUM(' . $sumColumn . '), 0) as total' : 'COUNT(*) as total')
+            ->where('created_at', '>=', $startDate)
+            ->groupBy('ym')
+            ->pluck('total', 'ym');
+
+        $timeline = [];
+        $runningTotal = $cumulative ? $this->countBeforeDate($table, $startDate) : 0;
+        foreach ($monthStarts as $monthStart) {
+            $key = $monthStart->format('Y-m');
+            $value = (int) ($rows[$key] ?? 0);
+            if ($cumulative) {
+                $runningTotal += $value;
+                $timeline[$key] = $runningTotal;
+            } else {
+                $timeline[$key] = $value;
+            }
+        }
+
+        return $timeline;
+    }
+
+    private function countBeforeDate(string $table, Carbon $startDate): int
+    {
+        if (! Schema::hasTable($table) || ! Schema::hasColumn($table, 'created_at')) {
+            return 0;
+        }
+
+        return (int) DB::table($table)
+            ->where('created_at', '<', $startDate)
+            ->count();
+    }
+
+    private function countPremiumShops(): int
+    {
+        if (! Schema::hasTable('application_deposits') || ! Schema::hasTable('shop_job_applications') || ! Schema::hasTable('shop_jobs')) {
+            return 0;
+        }
+
+        $threeMonthsAgo = Carbon::now()->subMonths(3);
+        $disqualified = DB::table('application_deposits')
+            ->join('shop_job_applications', 'application_deposits.shop_job_application_id', '=', 'shop_job_applications.id')
+            ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
+            ->where('application_deposits.created_at', '>=', $threeMonthsAgo)
+            ->where('application_deposits.status', '<', 5)
+            ->distinct()
+            ->pluck('shop_jobs.shop_id')
+            ->flip()
+            ->all();
+
+        $confirmedShopIds = DB::table('application_deposits')
+            ->join('shop_job_applications', 'application_deposits.shop_job_application_id', '=', 'shop_job_applications.id')
+            ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
+            ->where('application_deposits.created_at', '>=', $threeMonthsAgo)
+            ->where('application_deposits.status', '>=', 5)
+            ->distinct()
+            ->pluck('shop_jobs.shop_id');
+
+        return $confirmedShopIds
+            ->reject(fn ($shopId) => isset($disqualified[$shopId]))
+            ->count();
+    }
+
+    private function formatDiff(int $diff): string
+    {
+        if ($diff === 0) {
+            return '±0';
+        }
+
+        return ($diff > 0 ? '+' : '') . number_format($diff);
+    }
+
+    private function formatRatio(int $current, int $previous): string
+    {
+        if ($previous <= 0) {
+            return $current > 0 ? '+100%' : '±0%';
+        }
+
+        $ratio = (($current - $previous) / $previous) * 100;
+
+        return ($ratio >= 0 ? '+' : '') . number_format($ratio, 1) . '%';
     }
 }
 

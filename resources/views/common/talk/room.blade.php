@@ -69,6 +69,11 @@
 <script>
     window.isCastTalkRoom = {!! request()->is('cast/*') ? 'true' : 'false' !!};
     window.talkResultMessageTemplates = @json($resultMessageTemplates ?? []);
+    window.initialTalkTopic = @json($initialTalkTopic ?? null);
+    window.initialTalkJobKind = @json($initialTalkJobKind ?? null);
+    window.hasTalkMessages = @json($hasMessages ?? false);
+    window.selectedTalkJobKind = @json($selectedTalkJobKind ?? null);
+    window.canSelectTalkJobKind = @json($canSelectTalkJobKind ?? false);
 </script>
 <script src="{{ asset('assets/js/talk-room.js') }}"></script>
 @endpush
@@ -129,6 +134,26 @@
             </div>
         </div>
     @endif
+
+    <div class="px-4 pt-3">
+        <div class="talk-result-panel" style="padding: 12px 14px;">
+            <div class="talk-result-panel-copy" style="width:100%;">
+                <span class="talk-result-panel-title">求人種別</span>
+                <p style="margin-top:6px;">面談日を送る前に求人種別を確定してください。面談日確定後は変更できません。</p>
+            </div>
+            <div class="talk-result-panel-actions" style="width:100%;">
+                <select id="talk-room-job-kind" style="width:100%; border-radius:10px; border:1px solid rgba(229,193,88,.22); background:rgba(255,255,255,.05); color:#fff; padding:8px 10px;" @if(empty($canSelectTalkJobKind)) disabled @endif>
+                    <option value="">未選択</option>
+                    <option value="trial">体験入店</option>
+                    <option value="fulltime">本入店</option>
+                    <option value="help">ヘルプ</option>
+                </select>
+                @if(!empty($canSelectTalkJobKind))
+                    <button type="button" id="save-talk-job-kind" class="btn-interview btn-interview-result">種別を保存</button>
+                @endif
+            </div>
+        </div>
+    </div>
 
     {{-- メッセージ表示エリア --}}
     <div class="chat-messages" id="chat-messages" data-delete-url="{{ $deleteUrl }}">
@@ -290,6 +315,24 @@
             <form id="chat-form" data-url="{{ $sendUrl }}" data-action-url="{{ $actionUrl }}" data-partner-id="{{ $partnerId }}">
                 @csrf
                 <div class="chat-input-row">
+                    @if($isCast)
+                        <div style="width:100%; margin-bottom:8px;">
+                            <label for="talk-topic" style="display:block; font-size:12px; color:#d4c4a4; margin-bottom:4px;">相談種別</label>
+                            <select id="talk-topic" name="talk_topic" style="width:100%; border-radius:10px; border:1px solid rgba(229,193,88,.22); background:rgba(255,255,255,.05); color:#fff; padding:8px 10px;">
+                                <option value="new_hire">新規採用</option>
+                                <option value="help">ヘルプ</option>
+                                <option value="other">その他相談</option>
+                            </select>
+                        </div>
+                        <div id="talk-job-kind-wrap" style="width:100%; margin-bottom:8px;">
+                            <label for="talk-job-kind" style="display:block; font-size:12px; color:#d4c4a4; margin-bottom:4px;">応募区分</label>
+                            <select id="talk-job-kind" name="talk_job_kind" style="width:100%; border-radius:10px; border:1px solid rgba(229,193,88,.22); background:rgba(255,255,255,.05); color:#fff; padding:8px 10px;">
+                                <option value="trial">体験入店</option>
+                                <option value="fulltime">本入店</option>
+                                <option value="help">ヘルプ</option>
+                            </select>
+                        </div>
+                    @endif
                     <div class="chat-input-wrapper">
                         <textarea name="message" rows="1" placeholder="メッセージを入力..." class="focus:outline-none"></textarea>
                     </div>
@@ -365,6 +408,14 @@
         <div id="hired-hourly-wage-wrap" class="hired-wage-field-wrap" aria-hidden="true">
             <label for="hired-hourly-wage-input">採用時給（円・確定）</label>
             <input type="text" id="hired-hourly-wage-input" inputmode="numeric" placeholder="例: 5000" autocomplete="off">
+        </div>
+        <div id="result-employment-kind-wrap" class="hired-wage-field-wrap is-visible" aria-hidden="false">
+            <label for="result-employment-kind">採用区分</label>
+            <select id="result-employment-kind" style="width:100%; border-radius:12px; border:1px solid rgba(229, 193, 88, 0.22); background:rgba(255,255,255,.05); color:#fff; padding:10px 12px;">
+                <option value="trial">体験入店</option>
+                <option value="fulltime">本入店</option>
+                <option value="help">ヘルプ</option>
+            </select>
         </div>
         <div class="result-template-list" id="result-template-list"></div>
         <textarea id="result-message-textarea" class="result-message-textarea" placeholder="送信するメッセージを入力"></textarea>

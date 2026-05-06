@@ -367,3 +367,40 @@ body.page-talk .badge-notify {
         font-size: 0.65rem;
     }
 }
+
+@media (min-width: 375px) and (max-width: 430px) {
+    body:not(.page-home) #global-header {
+        height: 58px;
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    body:not(.page-home) .header-left {
+        min-width: 52px;
+    }
+
+    body:not(.page-home) .header-right {
+        gap: 7px;
+    }
+
+    body:not(.page-home) .header-icon-btn {
+        width: 30px;
+        height: 30px;
+        padding: 5px;
+    }
+
+    body:not(.page-home) .header-icon-btn i {
+        font-size: 0.95rem;
+    }
+
+    body:not(.page-home) .header-title-main {
+        font-size: 0.9rem;
+        letter-spacing: 0.03em;
+    }
+
+    body:not(.page-home) .header-popup {
+        width: min(92vw, 360px) !important;
+        max-width: min(92vw, 360px) !important;
+        right: 4px !important;
+    }
+}
