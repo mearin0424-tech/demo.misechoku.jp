@@ -1,6 +1,6 @@
 /* ========================================
    Cast Profile - キャストプロフィール詳細
-   shopprofileview / castprofileview 共通（レイアウトは app で content-wrapper 未使用に統一）
+   castprofileview 共通（レイアウトは app で content-wrapper 未使用に統一）
    ======================================== */
 
 .cast-profile-wrapper {

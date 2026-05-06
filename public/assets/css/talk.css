@@ -1444,6 +1444,19 @@ button.interview-option-btn:hover {
     color: inherit;
 }
 
+.msg-avatar-auto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f2eee7;
+    color: #3f3f3f;
+    border: 1px solid rgba(180, 176, 168, 0.6);
+}
+
+.msg-avatar-auto i {
+    font-size: 16px;
+}
+
 .interview-change-schedule-wrap {
     margin: 4px 0 0;
 }

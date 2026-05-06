@@ -160,15 +160,28 @@
     {{-- メッセージ表示エリア --}}
     <div class="chat-messages" id="chat-messages" data-delete-url="{{ $deleteUrl }}">
         @forelse($messages as $msg)
-            <div class="message-row {{ $msg->is_mine ? 'msg-right' : 'msg-left' }}" data-message-id="{{ $msg->id }}">
-                @if(!$msg->is_mine)
+            @php
+                $isAutoTypeMessage = in_array((int) $msg->type, [2, 3, 7], true);
+                $isAutoTextMessage = in_array((int) $msg->type, [1, 4, 5], true)
+                    && \Illuminate\Support\Str::startsWith(trim((string) $msg->content), '【自動送信】');
+                $renderAsIncoming = $isAutoTypeMessage || $isAutoTextMessage;
+                $isMineForLayout = $msg->is_mine && !$renderAsIncoming;
+            @endphp
+            <div class="message-row {{ $isMineForLayout ? 'msg-right' : 'msg-left' }}" data-message-id="{{ $msg->id }}">
+                @if(!$isMineForLayout)
                     <div class="msg-avatar-wrap">
-                        <img src="{{ $partnerAvatar }}" alt="" class="msg-avatar">
+                        @if($renderAsIncoming)
+                            <div class="msg-avatar msg-avatar-auto" aria-label="自動送信">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                        @else
+                            <img src="{{ $partnerAvatar }}" alt="" class="msg-avatar">
+                        @endif
                     </div>
                 @endif
                 <div class="message-block">
                     <div class="message-inline">
-                        @if($msg->is_mine)
+                        @if($isMineForLayout)
                             <div class="msg-meta">
                                 @if(!empty($msg->can_delete))
                                     <button type="button" class="msg-delete-btn" data-message-id="{{ $msg->id }}" title="削除" aria-label="メッセージを削除"><i class="fas fa-trash-alt"></i></button>
@@ -187,7 +200,6 @@
                         <div class="message-bubble message-bubble-interview message-bubble-auto">
                             <div class="interview-card-head">
                                 <div class="interview-title">
-                                    <i class="fas fa-robot"></i>
                                     <span>【自動送信】面談候補日をお送りします</span>
                                 </div>
                                 <span class="interview-badge">日程調整</span>
@@ -240,7 +252,7 @@
                                     <button type="button" class="js-interview-change-schedule interview-change-schedule-btn">日程を変更</button>
                                 </p>
                             @endif
-                            @if($msg->is_mine)
+                            @if($isMineForLayout)
                                 <span class="message-bubble-tail" aria-hidden="true">
                                     <svg viewBox="0 0 8 12" fill="currentColor"><path d="M0 0V12C3 12 8 8 8 0H0Z"/></svg>
                                 </span>
@@ -250,7 +262,6 @@
                         <div class="message-bubble message-bubble-interview message-bubble-confirmed message-bubble-auto">
                             <div class="interview-card-head">
                                 <div class="interview-title">
-                                    <i class="fas fa-robot"></i>
                                     <span>【自動送信】面談日が確定しました。</span>
                                 </div>
                             </div>
@@ -283,7 +294,7 @@
                                     {{ $currentTalkJobKindValue === 'fulltime' ? 'ボーナス達成報告' : '勤務完了報告' }}
                                 </button>
                             @endif
-                            @if($msg->is_mine)
+                            @if($isMineForLayout)
                                 <span class="message-bubble-tail" aria-hidden="true">
                                     <svg viewBox="0 0 8 12" fill="currentColor"><path d="M0 0V12C3 12 8 8 8 0H0Z"/></svg>
                                 </span>
@@ -304,7 +315,6 @@
                         <div class="message-bubble message-bubble-interview message-bubble-cancel-request message-bubble-auto">
                             <div class="interview-card-head">
                                 <div class="interview-title">
-                                    <i class="fas fa-robot"></i>
                                     <span>【自動送信】面談キャンセル依頼</span>
                                 </div>
                                 <span class="interview-badge">確認待ち</span>
@@ -324,18 +334,14 @@
                         @endphp
                         @if($isAutoMessage)
                             <div class="message-bubble message-bubble-auto">
-                                <div class="interview-title">
-                                    <i class="fas fa-robot"></i>
-                                    <span>【自動送信】</span>
-                                </div>
-                                <p class="m-0">{!! nl2br(e($autoMessageBody)) !!}</p>
-                                @if($msg->is_mine)<span class="message-bubble-tail" aria-hidden="true"><svg viewBox="0 0 8 12" fill="currentColor"><path d="M0 0V12C3 12 8 8 8 0H0Z"/></svg></span>@endif
+                                <p class="m-0">【自動送信】<br>{!! nl2br(e($autoMessageBody)) !!}</p>
+                                @if($isMineForLayout)<span class="message-bubble-tail" aria-hidden="true"><svg viewBox="0 0 8 12" fill="currentColor"><path d="M0 0V12C3 12 8 8 8 0H0Z"/></svg></span>@endif
                             </div>
                         @else
-                            <div class="message-bubble"><p class="m-0">{!! nl2br(e($displayContent)) !!}</p>@if($msg->is_mine)<span class="message-bubble-tail" aria-hidden="true"><svg viewBox="0 0 8 12" fill="currentColor"><path d="M0 0V12C3 12 8 8 8 0H0Z"/></svg></span>@endif</div>
+                            <div class="message-bubble"><p class="m-0">{!! nl2br(e($displayContent)) !!}</p>@if($isMineForLayout)<span class="message-bubble-tail" aria-hidden="true"><svg viewBox="0 0 8 12" fill="currentColor"><path d="M0 0V12C3 12 8 8 8 0H0Z"/></svg></span>@endif</div>
                         @endif
                     @endif
-                        @if(!$msg->is_mine)
+                        @if(!$isMineForLayout)
                             <div class="msg-meta">
                                 <span class="msg-time">{{ $msg->created_at->format('H:i') }}</span>
                             </div>
