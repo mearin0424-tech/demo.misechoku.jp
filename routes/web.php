@@ -366,6 +366,7 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
         Route::get('/documents/onboarding', [ShopMypage::class, 'documentsOnboarding'])->name('documents.onboarding');
         Route::get('/documents/{type}/manage', [ShopMypage::class, 'manageLicenseDocument'])->name('documents.manage')->whereIn('type', ['business', 'entertainment']);
         Route::post('/word', [ShopMypage::class, 'updateWord'])->name('word');
+        Route::get('/management', [ShopRecruit::class, 'management'])->name('management');
         Route::get('/payment', [ShopMypage::class, 'payment'])->name('payment.index');
         Route::get('/reviews', [ShopReview::class, 'index'])->name('review.index');
         Route::get('/documents/{type}', [ShopMypage::class, 'viewLicenseDocument'])->name('documents.show')->whereIn('type', ['business', 'entertainment']);

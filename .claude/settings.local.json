@@ -8,7 +8,9 @@
       "Bash(git credential *)",
       "Bash(git stash *)",
       "Bash(git checkout *)",
-      "Bash(git cherry-pick *)"
+      "Bash(git cherry-pick *)",
+      "Bash(php -l app/Http/Controllers/Shops/RecruitmentController.php)",
+      "Bash(php artisan *)"
     ]
   }
 }
