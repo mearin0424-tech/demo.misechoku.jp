@@ -873,7 +873,8 @@ class MypageController extends Controller
      */
     private function getCastTagNamesByType(string $castId, string $tagType, array $memoTagIds = []): array
     {
-        if (!Schema::hasTable('cast_tags')) {
+        $tagTable = $this->resolveCastTagMasterTable();
+        if ($tagTable === null) {
             return [];
         }
 
@@ -881,7 +882,7 @@ class MypageController extends Controller
         if (Schema::hasTable('cast_tag_relations')) {
             $tagTypes = array_values(array_unique(array_filter([$tagType, rtrim($tagType, 's')])));
             $names = DB::table('cast_tag_relations as r')
-                ->join('cast_tags as t', 'r.tag_id', '=', 't.id')
+                ->join($tagTable . ' as t', 'r.tag_id', '=', 't.id')
                 ->where('r.cast_id', $castId)
                 ->whereIn('r.tag_type', $tagTypes)
                 ->orderBy('t.id')
@@ -905,7 +906,7 @@ class MypageController extends Controller
             return [];
         }
 
-        return DB::table('cast_tags')
+        return DB::table($tagTable)
             ->whereIn('id', $ids)
             ->orderBy('id')
             ->pluck('name')
@@ -913,6 +914,17 @@ class MypageController extends Controller
             ->filter()
             ->values()
             ->all();
+    }
+
+    private function resolveCastTagMasterTable(): ?string
+    {
+        if (Schema::hasTable('cast_tags')) {
+            return 'cast_tags';
+        }
+        if (Schema::hasTable('tags')) {
+            return 'tags';
+        }
+        return null;
     }
 
     private function shiftHopeLabel($shift): string

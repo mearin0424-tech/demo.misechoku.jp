@@ -457,6 +457,22 @@ class TalkController extends Controller
 
         if ($actionType === 'interview_offer') {
             abort_if(empty(json_decode($content, true)['options'] ?? []), 422);
+            $parsedOptions = collect(json_decode($content, true)['options'] ?? [])
+                ->map(function ($option) {
+                    try {
+                        return Carbon::parse((string) $option);
+                    } catch (\Throwable $e) {
+                        return null;
+                    }
+                })
+                ->filter();
+            abort_if($parsedOptions->isEmpty(), 422, '面談候補日を1件以上入力してください。');
+            $now = Carbon::now();
+            $max = $now->copy()->addMonthsNoOverflow(2);
+            $hasOutOfRange = $parsedOptions->contains(function (Carbon $dt) use ($now, $max) {
+                return $dt->lt($now) || $dt->gt($max);
+            });
+            abort_if($hasOutOfRange, 422, '面談候補日は現在日時〜2か月後まで指定できます。');
             if ($currentApplicationStatus === self::APPLICATION_STATUS_INTERVIEW_PENDING) {
                 $this->invalidateInterviewOffers($castId, $shopId);
             }

@@ -91,8 +91,8 @@ class ProfileController extends Controller
             'current_job'    => $row->profession ?? '',
             'night_work_exp' => $nightWorkExp,
             'industry_ids'   => $this->resolveCastIndustryIds($castId, $row->industry_id ?? null),
-            'look_tag_ids'   => [],
-            'personality_tag_ids' => [],
+            'look_tag_ids'   => $this->getCastTagIdsByType($castId, 'looks'),
+            'personality_tag_ids' => $this->getCastTagIdsByType($castId, 'personality'),
             'personality_type' => $this->resolvePersonalityType($row->personality_type ?? null),
         ];
     }
@@ -175,12 +175,19 @@ class ProfileController extends Controller
             'industry_ids'   => 'nullable|array',
             'industry_ids.*' => 'integer|exists:industries,id',
             'look_tag_ids' => 'nullable|array',
-            'look_tag_ids.*' => 'integer|exists:cast_tags,id',
+            'look_tag_ids.*' => 'integer',
             'personality_tag_ids' => 'nullable|array',
-            'personality_tag_ids.*' => 'integer|exists:cast_tags,id',
+            'personality_tag_ids.*' => 'integer',
         ], [
             'zip.regex' => '郵便番号は 7 桁、または 123-4567 形式で入力してください。',
         ]);
+        $tagTable = $this->resolveCastTagMasterTable();
+        if ($tagTable !== null) {
+            $request->validate([
+                'look_tag_ids.*' => 'integer|exists:' . $tagTable . ',id',
+                'personality_tag_ids.*' => 'integer|exists:' . $tagTable . ',id',
+            ]);
+        }
 
         $castId = $this->currentCastId();
 
@@ -709,13 +716,14 @@ class ProfileController extends Controller
      */
     private function getCastTagNamesByType(string $castId, string $tagType): array
     {
-        if (!Schema::hasTable('cast_tags') || !Schema::hasTable('cast_tag_relations')) {
+        $tagTable = $this->resolveCastTagMasterTable();
+        if ($tagTable === null || !Schema::hasTable('cast_tag_relations')) {
             return [];
         }
 
         $tagTypes = array_values(array_unique(array_filter([$tagType, rtrim($tagType, 's')])));
         return DB::table('cast_tag_relations as r')
-            ->join('cast_tags as t', 'r.tag_id', '=', 't.id')
+            ->join($tagTable . ' as t', 'r.tag_id', '=', 't.id')
             ->where('r.cast_id', $castId)
             ->whereIn('r.tag_type', $tagTypes)
             ->orderBy('t.id')
@@ -724,6 +732,37 @@ class ProfileController extends Controller
             ->filter()
             ->values()
             ->all();
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private function getCastTagIdsByType(string $castId, string $tagType): array
+    {
+        if (!Schema::hasTable('cast_tag_relations')) {
+            return [];
+        }
+        $tagTypes = array_values(array_unique(array_filter([$tagType, rtrim($tagType, 's')])));
+        return DB::table('cast_tag_relations')
+            ->where('cast_id', $castId)
+            ->whereIn('tag_type', $tagTypes)
+            ->pluck('tag_id')
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    private function resolveCastTagMasterTable(): ?string
+    {
+        if (Schema::hasTable('cast_tags')) {
+            return 'cast_tags';
+        }
+        if (Schema::hasTable('tags')) {
+            return 'tags';
+        }
+        return null;
     }
 
     /**

@@ -392,6 +392,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const openModal = () => {
             if (!overlay) return;
+            const now = new Date();
+            const max = new Date(now.getTime());
+            max.setMonth(max.getMonth() + 2);
+            const toDate = (d) => {
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return y + '-' + m + '-' + day;
+            };
+            const minDate = toDate(now);
+            const maxDate = toDate(max);
+            interviewForm && interviewForm.querySelectorAll('input[type="date"]').forEach(function (input) {
+                input.min = minDate;
+                input.max = maxDate;
+            });
             overlay.setAttribute('aria-hidden', 'false');
         };
 
@@ -759,6 +774,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (options.length === 0) {
                     window.alert('面談候補日を1件以上入力してください。');
                     return;
+                }
+                const now = new Date();
+                const max = new Date(now.getTime());
+                max.setMonth(max.getMonth() + 2);
+                for (const option of options) {
+                    const dt = new Date(option.replace(' ', 'T'));
+                    if (Number.isNaN(dt.getTime())) {
+                        window.alert('日時の形式が不正です。');
+                        return;
+                    }
+                    if (dt.getTime() < now.getTime()) {
+                        window.alert('面談候補日は現在日時より後を指定してください。');
+                        return;
+                    }
+                    if (dt.getTime() > max.getTime()) {
+                        window.alert('面談候補日は2か月後まで指定できます。');
+                        return;
+                    }
                 }
 
                 submitBtn.disabled = true;

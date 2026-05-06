@@ -1220,40 +1220,21 @@
    ========================================================================== */
 .message-bubble-interview {
     min-width: min(240px, 100%);
-    padding: 10px 10px 8px;
+    padding: 10px 10px 10px;
     border-radius: 16px;
 }
 .msg-right .message-bubble-interview {
+    background: linear-gradient(180deg, #d7923f 0%, #c27b2f 100%);
+    color: #1f130e;
     border-radius: 16px 16px 4px 16px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
 }
 .msg-left .message-bubble-interview {
     border-radius: 16px 16px 16px 4px;
 }
 
-.msg-right .message-bubble-confirmed {
-    background: linear-gradient(180deg, #f6ead0 0%, #efe0bc 100%);
-    color: #2c1a1d;
-    border-color: rgba(239, 224, 188, 0.9);
-    --bubble-tail-fill: #efe0bc;
-}
-
-.msg-left .message-bubble-confirmed {
-    background: linear-gradient(180deg, rgba(43, 19, 24, 0.98), rgba(30, 12, 16, 0.98));
-    color: #fff3cf;
-}
-
 .message-bubble-confirmed .interview-title {
-    margin-bottom: 3px;
-}
-
-.msg-right .message-bubble-confirmed .interview-title,
-.msg-right .message-bubble-confirmed .interview-confirmed-date {
-    color: #2c1a1d;
-}
-
-.msg-left .message-bubble-confirmed .interview-title,
-.msg-left .message-bubble-confirmed .interview-confirmed-date {
-    color: #fff3cf;
+    margin-bottom: 0;
 }
 
 .interview-card-head {
@@ -1271,6 +1252,7 @@
     font-size: 0.78rem;
     font-weight: 700;
     margin-bottom: 0;
+    color: inherit;
 }
 
 .interview-title i {
@@ -1283,9 +1265,9 @@
     min-height: 20px;
     padding: 0 8px;
     border-radius: 999px;
-    background: rgba(226, 188, 79, 0.14);
-    border: 1px solid rgba(226, 188, 79, 0.35);
-    color: #fff1bc;
+    background: rgba(20, 10, 6, 0.1);
+    border: 1px solid rgba(20, 10, 6, 0.2);
+    color: rgba(31, 19, 14, 0.78);
     font-size: 0.62rem;
     font-weight: 700;
     white-space: nowrap;
@@ -1295,7 +1277,7 @@
     margin: 0 0 6px;
     font-size: 0.72rem;
     line-height: 1.5;
-    color: rgba(247, 237, 237, 0.92);
+    color: rgba(31, 19, 14, 0.85);
 }
 
 .interview-option-list {
@@ -1313,9 +1295,9 @@
     position: relative;
     overflow: hidden;
     border-radius: 11px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 248, 220, 0.06);
-    color: #fff1bc;
+    border: 1px solid rgba(31, 19, 14, 0.22);
+    background: rgba(255, 255, 255, 0.12);
+    color: #1f130e;
     font-size: 0.72rem;
     padding: 8px 10px;
     cursor: pointer;
@@ -1330,19 +1312,20 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     flex: 1;
 }
 
 .interview-option-date {
-    font-size: 0.86rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    color: #fff4cf;
+    color: #1f130e;
 }
 
 .interview-option-time {
-    font-size: 0.72rem;
-    color: rgba(230, 214, 214, 0.8);
+    font-size: 0.8rem;
+    color: rgba(31, 19, 14, 0.7);
+    font-weight: 700;
 }
 
 .interview-option-action {
@@ -1352,16 +1335,16 @@
     min-height: 20px;
     padding: 0 8px;
     border-radius: 999px;
-    background: rgba(226, 188, 79, 0.14);
-    color: #fff1bc;
+    background: rgba(20, 10, 6, 0.08);
+    color: rgba(31, 19, 14, 0.72);
     font-size: 0.58rem;
     font-weight: 700;
     white-space: nowrap;
 }
 
 button.interview-option-btn:hover {
-    background: rgba(226, 188, 79, 0.14);
-    border-color: rgba(226, 188, 79, 0.5);
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(31, 19, 14, 0.35);
     transform: translateY(-1px);
 }
 
@@ -1392,6 +1375,17 @@ button.interview-option-btn:hover {
     font-size: 0.84rem;
     font-weight: 700;
     color: inherit;
+}
+
+.interview-confirmed-slot {
+    border-radius: 11px;
+    border: 1px solid rgba(31, 19, 14, 0.22);
+    background: rgba(255, 255, 255, 0.12);
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
 }
 
 .interview-note {

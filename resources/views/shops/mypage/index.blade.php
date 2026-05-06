@@ -480,6 +480,7 @@
         box-shadow: none;
     }
     .shop-mypage-v2 .shop-word-bubble {
+        position: relative;
         border: 0;
         border-radius: 12px;
         background: #f5ebd6;
@@ -487,6 +488,8 @@
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     }
     .shop-mypage-v2 .shop-word-bubble::after {
+        content: '';
+        position: absolute;
         left: -8px;
         top: 14px;
         margin-top: 0;
@@ -521,49 +524,64 @@
         margin-bottom: 24px;
     }
     .shop-mypage-v2 .mypage-stat-panel {
+        min-height: 48px;
         border-radius: 10px;
-        padding: 10px 8px;
+        padding: 10px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
     }
-    .shop-mypage-v2 .mypage-stat-label {
-        font-size: 0.76rem;
+    .shop-mypage-v2 .mypage-stat-label,
+    .shop-mypage-v2 .shop-mypage-stat-sub {
+        display: none;
     }
     .shop-mypage-v2 .mypage-stat-value {
-        font-size: 1rem;
+        font-size: 0.95rem;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        line-height: 1;
     }
     .shop-mypage-v2 .mypage-stat-panel-badge--active {
-        border-color: rgba(248, 231, 173, 0.6);
-        background: linear-gradient(to bottom, #f2d780, #cd9d40);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.7);
+        border: 1px solid rgba(248, 231, 173, 0.7);
+        background: linear-gradient(180deg, #e7c16d 0%, #d5a74a 100%);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.45);
     }
     .shop-mypage-v2 .mypage-stat-panel-badge--active .mypage-stat-icon,
     .shop-mypage-v2 .mypage-stat-panel-badge--active .mypage-stat-label,
     .shop-mypage-v2 .mypage-stat-panel-badge--active .mypage-stat-value {
         color: #4a1620 !important;
     }
+    .shop-mypage-v2 .mypage-stat-panel-badge--inactive {
+        border: 1px solid rgba(212, 175, 55, 0.35);
+        background: rgba(58, 22, 32, 0.72);
+    }
+    .shop-mypage-v2 .mypage-stat-panel-badge--inactive .mypage-stat-icon,
+    .shop-mypage-v2 .mypage-stat-panel-badge--inactive .mypage-stat-value {
+        color: #e7c16d !important;
+    }
     .shop-mypage-v2 .mypage-stat-panel-link {
-        background: rgba(90, 28, 44, 0.8);
-        border-color: rgba(200, 169, 81, 0.3);
-        color: #c8a951;
+        border: 1px solid rgba(212, 175, 55, 0.35);
+        background: rgba(90, 28, 44, 0.72);
+        color: #e7c16d;
     }
     .shop-mypage-v2 .mypage-stat-panel-link:hover {
         background: rgba(90, 28, 44, 1);
     }
     .shop-mypage-v2 .mypage-stat-panel-link .mypage-stat-icon {
-        color: #c8a951 !important;
-    }
-    .shop-mypage-v2 .mypage-stat-panel-link .mypage-stat-label {
-        color: #d4c3b3;
+        color: #d8ad53 !important;
+        font-size: 0.88rem;
     }
     .shop-mypage-v2 .mypage-stat-panel-link .mypage-stat-value {
-        color: #c8a951;
-        font-size: 0.92rem;
+        color: #d8ad53;
+        font-size: 0.95rem;
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 4px;
     }
-    .shop-mypage-v2 .shop-mypage-stat-sub {
-        color: #d4c3b3;
-        margin-left: 0;
+    .shop-mypage-v2 .mypage-stat-panel-link .mypage-stat-value i {
+        font-size: 0.66rem;
+        opacity: 0.9;
     }
 
     .shop-mypage-v2 .shop-mypage-section-label {
@@ -681,12 +699,12 @@
                 aria-label="安心バッヂの説明を開く">
                 <span class="mypage-stat-icon" aria-hidden="true"><i class="fas fa-crown"></i></span>
                 <span class="mypage-stat-label">優良店</span>
-                <span class="mypage-stat-value">{{ $hasGoodPayerBadge ? '優良店' : '未付与' }}</span>
+                <span class="mypage-stat-value">{{ $hasGoodPayerBadge ? '優良店' : '優良店未付与' }}</span>
             </button>
             <a href="{{ route('shop.mypage.review.index') }}" class="mypage-stat-panel mypage-stat-panel-link">
                 <span class="mypage-stat-icon"><i class="fas fa-star"></i></span>
                 <span class="mypage-stat-label">レビュー</span>
-                <span class="mypage-stat-value">{{ number_format($shopData['review_avg'], 1) }}<span class="shop-mypage-stat-sub">レビュー</span><i class="fas fa-chevron-right" aria-hidden="true"></i></span>
+                <span class="mypage-stat-value">{{ number_format($shopData['review_avg'], 1) }} レビュー <i class="fas fa-chevron-right" aria-hidden="true"></i></span>
             </a>
         </div>
 
