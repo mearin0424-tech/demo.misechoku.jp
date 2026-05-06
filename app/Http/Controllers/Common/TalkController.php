@@ -71,6 +71,7 @@ class TalkController extends Controller
         $shopId = $isCastPortal ? $partnerId : $currentId;
         $blockState = $this->getBlockState($castId, $shopId, $isCastPortal);
         $currentApplicationStatus = $this->getCurrentApplicationStatus($castId, $shopId);
+        $selectedTalkJobKind = $this->getSelectedTalkJobKind($castId, $shopId);
         $applicationForReview = $isCastPortal && $currentApplicationStatus === self::APPLICATION_STATUS_HIRED
             ? $this->findApplicationForTalk($castId, $shopId)
             : null;
@@ -82,6 +83,8 @@ class TalkController extends Controller
             ->orderBy('id')
             ->get();
         $messages = $this->mapRoomMessages($rawMessages, $isCastPortal);
+        $initialTalkTopic = $this->normalizeTalkTopic((string) request()->query('talk_topic', ''));
+        $initialTalkJobKind = $this->normalizeTalkJobKind((string) request()->query('job_kind', ''));
 
         DB::table('messages')
             ->where($isCastPortal ? 'cast_id' : 'shop_id', $currentId)
@@ -106,7 +109,8 @@ class TalkController extends Controller
             'currentStatusLabel' => $this->statusLabel($this->applicationStatusCode($currentApplicationStatus)),
             'canOfferInterview' => !$isCastPortal
                 && !$blockState['is_blocked']
-                && $currentApplicationStatus === self::APPLICATION_STATUS_CHATTING,
+                && $currentApplicationStatus === self::APPLICATION_STATUS_CHATTING
+                && $selectedTalkJobKind !== null,
             'canConfirmInterview' => $isCastPortal
                 && !$blockState['is_blocked']
                 && $currentApplicationStatus === self::APPLICATION_STATUS_INTERVIEW_PENDING,
@@ -126,6 +130,15 @@ class TalkController extends Controller
                 ]
                 : [],
             'reviewApplicationId' => $applicationForReview ? (int) $applicationForReview->id : null,
+            'initialTalkTopic' => $initialTalkTopic,
+            'initialTalkJobKind' => $initialTalkJobKind,
+            'hasMessages' => $messages->isNotEmpty(),
+            'selectedTalkJobKind' => $selectedTalkJobKind,
+            'canSelectTalkJobKind' => !$blockState['is_blocked']
+                && in_array($currentApplicationStatus, [
+                    self::APPLICATION_STATUS_CHATTING,
+                    self::APPLICATION_STATUS_INTERVIEW_PENDING,
+                ], true),
         ]);
     }
 
@@ -138,6 +151,8 @@ class TalkController extends Controller
         $request->validate([
             'partner_id' => ['required', 'string'],
             'message' => ['required', 'string', 'max:5000'],
+            'talk_topic' => ['nullable', 'string', 'in:new_hire,help,other'],
+            'talk_job_kind' => ['nullable', 'string', 'in:fulltime,trial,help'],
         ]);
 
         $partnerId = (string) $request->input('partner_id');
@@ -160,6 +175,14 @@ class TalkController extends Controller
         ];
 
         $messageId = DB::table('messages')->insertGetId($payload);
+        if ($isCastPortal) {
+            $this->ensureApplicationForTalkStart(
+                (string) $this->currentCastId(),
+                (string) $partnerId,
+                $this->normalizeTalkTopic((string) $request->input('talk_topic', '')),
+                $this->normalizeTalkJobKind((string) $request->input('talk_job_kind', ''))
+            );
+        }
 
         return response()->json([
             'success' => true,
@@ -216,13 +239,15 @@ class TalkController extends Controller
         $isCastPortal = request()->is('cast/*');
         $request->validate([
             'partner_id' => ['required', 'string'],
-            'action_type' => ['required', 'string', 'in:interview_offer,interview_confirm,hired,rejected,cancel_status'],
+            'action_type' => ['required', 'string', 'in:interview_offer,interview_confirm,hired,rejected,cancel_status,set_job_kind'],
             'options' => ['nullable', 'array'],
             'options.*' => ['nullable', 'string'],
             'offer_token' => ['nullable', 'string'],
             'selected_option' => ['nullable', 'string'],
             'message' => ['nullable', 'string', 'max:5000'],
             'hired_regular_hourly_wage' => ['nullable', 'string', 'max:32'],
+            'employment_kind' => ['nullable', 'string', 'in:fulltime,trial,help'],
+            'job_kind' => ['nullable', 'string', 'in:fulltime,trial,help'],
         ]);
 
         $partnerId = (string) $request->input('partner_id');
@@ -241,10 +266,33 @@ class TalkController extends Controller
 
         if ($actionType === 'interview_offer') {
             abort_if(
+                $this->getSelectedTalkJobKind($castId, $shopId) === null,
+                422,
+                '面談候補日を送る前に求人種別（体験入店／本入店／ヘルプ）を選択してください。'
+            );
+            abort_if(
                 $currentApplicationStatus !== self::APPLICATION_STATUS_CHATTING,
                 422,
                 '面談候補日は「やり取り中」のときのみ送信できます。再設定する場合は先にキャンセルしてください。'
             );
+        }
+
+        if ($actionType === 'set_job_kind') {
+            abort_if(
+                !in_array($currentApplicationStatus, [
+                    self::APPLICATION_STATUS_CHATTING,
+                    self::APPLICATION_STATUS_INTERVIEW_PENDING,
+                ], true),
+                422,
+                '面談日確定後は求人種別を変更できません。'
+            );
+            $jobKind = $this->normalizeTalkJobKind((string) $request->input('job_kind', ''));
+            if ($jobKind === null) {
+                abort(422, '求人種別を選択してください。');
+            }
+            $this->setConversationJobKind($castId, $shopId, $jobKind);
+
+            return response()->json(['success' => true]);
         }
 
         if ($actionType === 'interview_confirm') {
@@ -338,7 +386,18 @@ class TalkController extends Controller
             );
         }
 
+        $selectedEmploymentKind = null;
+        if (in_array($actionType, ['hired', 'rejected'], true)) {
+            $selectedEmploymentKind = $this->normalizeEmploymentKind((string) $request->input('employment_kind', ''));
+            if ($selectedEmploymentKind === null) {
+                abort(422, '採用区分を選択してください。');
+            }
+        }
+
         $this->syncApplicationStatusFromTalkAction($partnerId, $isCastPortal, $actionType, $content, $hiredWageNormalized);
+        if ($selectedEmploymentKind !== null) {
+            $this->syncApplicationEmploymentKindFromTalkAction($partnerId, $isCastPortal, $selectedEmploymentKind, $actionType);
+        }
 
         return response()->json([
             'success' => true,
@@ -835,6 +894,67 @@ class TalkController extends Controller
         return DB::table('shop_job_applications')->where('id', $applicationId)->first();
     }
 
+    private function ensureApplicationForTalkStart(
+        string $castId,
+        string $shopId,
+        ?string $talkTopic,
+        ?string $talkJobKind,
+    ): void {
+        if ($talkTopic === 'other') {
+            return;
+        }
+        if ($this->findApplicationForTalk($castId, $shopId)) {
+            return;
+        }
+        $targetJobType = match ($talkJobKind) {
+            'trial' => 2,
+            'help' => 3,
+            default => 1,
+        };
+        $this->createApplicationForTalk($castId, $shopId, $targetJobType);
+    }
+
+    private function createApplicationForTalk(string $castId, string $shopId, int $preferredJobType): ?object
+    {
+        $shopJobId = $this->resolveShopJobIdByType($shopId, $preferredJobType);
+        if ($shopJobId === null) {
+            $shopJobId = $this->resolveShopJobIdByType($shopId, 1);
+        }
+        if ($shopJobId === null) {
+            return null;
+        }
+        $shopJob = DB::table('shop_jobs')->where('id', $shopJobId)->first();
+        if (!$shopJob) {
+            return null;
+        }
+
+        $row = [
+            'cast_id' => $castId,
+            'shop_job_id' => $shopJob->id,
+            'status' => 1,
+            'result_date' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+        $row = array_merge($row, $this->shopJobApplicationJobSnapshotService->snapshotColumnsForApplication($shopJob));
+        $applicationId = DB::table('shop_job_applications')->insertGetId($row);
+
+        return DB::table('shop_job_applications')->where('id', $applicationId)->first();
+    }
+
+    private function resolveShopJobIdByType(string $shopId, int $jobType): ?int
+    {
+        $query = DB::table('shop_jobs')->where('shop_id', $shopId);
+        if (Schema::hasColumn('shop_jobs', 'job_type')) {
+            $query->where('job_type', $jobType);
+        } elseif ($jobType !== 1) {
+            return null;
+        }
+        $id = $query->orderByDesc('id')->value('id');
+
+        return $id ? (int) $id : null;
+    }
+
     /**
      * トーク相手との会話コンテキストから、求人票ベースのボーナス条件メタ情報を取得する
      * （ボーナス金額・勤務日数・勤務時間・フリーテキスト条件）。
@@ -978,5 +1098,104 @@ class TalkController extends Controller
             'bonus_amount' => $amount,
             'bonus_condition' => $condition,
         ];
+    }
+
+    private function syncApplicationEmploymentKindFromTalkAction(
+        string $partnerId,
+        bool $isCastPortal,
+        string $employmentKind,
+        string $actionType,
+    ): void {
+        $castId = $isCastPortal ? $this->currentCastId() : $partnerId;
+        $shopId = $isCastPortal ? $partnerId : $this->currentShopId();
+        $application = $this->resolveOrCreateApplicationForTalk($castId, $shopId);
+        if (!$application) {
+            return;
+        }
+
+        $targetJobType = match ($employmentKind) {
+            'trial' => 2,
+            'help' => 3,
+            default => 1,
+        };
+        $targetShopJobId = $this->resolveShopJobIdByType($shopId, $targetJobType);
+        if ($targetShopJobId === null) {
+            return;
+        }
+
+        $status = (int) $application->status;
+        if ($actionType === 'hired') {
+            $status = $employmentKind === 'fulltime' ? 6 : self::APPLICATION_STATUS_HIRED;
+        } elseif ($actionType === 'rejected') {
+            $status = $employmentKind === 'trial' ? 7 : self::APPLICATION_STATUS_REJECTED;
+        }
+
+        DB::table('shop_job_applications')
+            ->where('id', $application->id)
+            ->update([
+                'shop_job_id' => $targetShopJobId,
+                'status' => $status,
+                'updated_at' => now(),
+            ]);
+    }
+
+    private function getSelectedTalkJobKind(string $castId, string $shopId): ?string
+    {
+        $application = $this->findApplicationForTalk($castId, $shopId);
+        if (!$application) {
+            return null;
+        }
+        $jobType = DB::table('shop_jobs')->where('id', $application->shop_job_id)->value('job_type');
+        $jt = $jobType !== null ? (int) $jobType : 1;
+
+        return match ($jt) {
+            2 => 'trial',
+            3 => 'help',
+            default => 'fulltime',
+        };
+    }
+
+    private function setConversationJobKind(string $castId, string $shopId, string $jobKind): void
+    {
+        $targetJobType = match ($jobKind) {
+            'trial' => 2,
+            'help' => 3,
+            default => 1,
+        };
+        $targetShopJobId = $this->resolveShopJobIdByType($shopId, $targetJobType);
+        if ($targetShopJobId === null) {
+            abort(422, '選択した求人種別の求人票が見つかりません。');
+        }
+
+        $application = $this->findApplicationForTalk($castId, $shopId);
+        if (!$application) {
+            $this->createApplicationForTalk($castId, $shopId, $targetJobType);
+            return;
+        }
+
+        DB::table('shop_job_applications')
+            ->where('id', $application->id)
+            ->update([
+                'shop_job_id' => $targetShopJobId,
+                'updated_at' => now(),
+            ]);
+    }
+
+    private function normalizeTalkTopic(string $value): ?string
+    {
+        $v = trim($value);
+        return in_array($v, ['new_hire', 'help', 'other'], true) ? $v : null;
+    }
+
+    private function normalizeTalkJobKind(string $value): ?string
+    {
+        $v = trim($value);
+        return in_array($v, ['fulltime', 'trial', 'help'], true) ? $v : null;
+    }
+
+    private function normalizeEmploymentKind(string $value): ?string
+    {
+        $v = trim($value);
+        return in_array($v, ['fulltime', 'trial', 'help'], true) ? $v : null;
     }
 }

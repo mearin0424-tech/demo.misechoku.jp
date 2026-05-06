@@ -92,6 +92,33 @@
     .management-pane[hidden] { display: none; }
     .rsm-meta-status-overdue { color: #fca5a5 !important; }
     [data-field="interviewDate"].is-overdue { color: #fca5a5 !important; }
+    @media (min-width: 375px) and (max-width: 430px) {
+        .management-head { padding: 12px 12px 0; }
+        .management-page-title { font-size: 1.15rem; margin-bottom: 10px; }
+        .management-tabs { margin: 0 12px 10px; }
+        .management-tab { font-size: 14px; padding: 11px 8px; }
+        .management-tab-count { font-size: 12px; }
+
+        .payment-mobile-body { padding: 12px; }
+        .payment-summary-label { font-size: 12px; }
+        .payment-summary-count { font-size: 46px; }
+        .payment-summary-count span { font-size: 16px; }
+        .payment-summary-total { font-size: 15px; }
+        .payment-summary-note { font-size: 11px; line-height: 1.65; }
+
+        .payment-task-title { font-size: 13px; }
+        .payment-segment button { font-size: 12px; padding: 9px 5px; }
+        .payment-task-empty { font-size: 12px; }
+        .payment-task-name { font-size: 12px; line-height: 1.5; }
+        .payment-task-id { font-size: 10px; }
+        .payment-task-status { font-size: 10px; }
+        .payment-task-alert { font-size: 11px; }
+        .payment-task-middle span { font-size: 11px; }
+        .payment-task-middle strong { font-size: 20px; }
+        .payment-task-date { font-size: 10px; }
+        .payment-invoice-link { font-size: 10px; }
+        .payment-invoice-wait { font-size: 10px; }
+    }
 </style>
 @endpush
 

@@ -9,6 +9,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!chatMessages) return;
 
     const messageInput = chatForm ? chatForm.querySelector('textarea[name="message"]') : null;
+    const talkTopicSelect = chatForm ? chatForm.querySelector('select[name="talk_topic"]') : null;
+    const talkJobKindSelect = chatForm ? chatForm.querySelector('select[name="talk_job_kind"]') : null;
+    const initialTalkTopic = typeof window.initialTalkTopic !== 'undefined' ? window.initialTalkTopic : null;
+    const initialTalkJobKind = typeof window.initialTalkJobKind !== 'undefined' ? window.initialTalkJobKind : null;
+    const hasTalkMessages = typeof window.hasTalkMessages !== 'undefined' ? !!window.hasTalkMessages : false;
+    const selectedTalkJobKind = typeof window.selectedTalkJobKind !== 'undefined' ? window.selectedTalkJobKind : null;
+    const canSelectTalkJobKind = typeof window.canSelectTalkJobKind !== 'undefined' ? !!window.canSelectTalkJobKind : false;
 
     const scrollToBottom = (behavior = 'auto') => {
         chatMessages.scrollTo({
@@ -56,6 +63,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (chatForm && messageInput) {
+        if (talkTopicSelect && initialTalkTopic) {
+            talkTopicSelect.value = initialTalkTopic;
+        }
+        if (talkJobKindSelect && initialTalkJobKind) {
+            talkJobKindSelect.value = initialTalkJobKind;
+        }
+        if (talkTopicSelect && talkJobKindSelect) {
+            const talkJobKindWrap = document.getElementById('talk-job-kind-wrap');
+            const syncTalkJobKindVisibility = () => {
+                const hidden = talkTopicSelect.value === 'other';
+                talkJobKindSelect.disabled = hidden;
+                if (talkJobKindWrap) {
+                    talkJobKindWrap.style.display = hidden ? 'none' : '';
+                }
+            };
+            talkTopicSelect.addEventListener('change', syncTalkJobKindVisibility);
+            syncTalkJobKindVisibility();
+        }
         messageInput.addEventListener('input', autoResize);
 
         let isSubmitting = false;
@@ -88,7 +113,14 @@ document.addEventListener('DOMContentLoaded', function() {
             scrollToBottom('smooth');
 
             try {
-                const result = await postJson(url, token, { partner_id: partnerId, message: content });
+                const payload = { partner_id: partnerId, message: content };
+                if (isCastRoom && !hasTalkMessages && talkTopicSelect) {
+                    payload.talk_topic = talkTopicSelect.value;
+                    if (talkJobKindSelect && !talkJobKindSelect.disabled) {
+                        payload.talk_job_kind = talkJobKindSelect.value;
+                    }
+                }
+                const result = await postJson(url, token, payload);
                 if (!result.success) {
                     throw new Error('Failed');
                 }
@@ -163,6 +195,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // 面談日候補モーダル（店舗側のみ）
     // ===============================
     const partnerId = chatForm ? chatForm.getAttribute('data-partner-id') : null;
+    const talkRoomJobKindSelect = document.getElementById('talk-room-job-kind');
+    const saveTalkJobKindBtn = document.getElementById('save-talk-job-kind');
+    if (talkRoomJobKindSelect && selectedTalkJobKind) {
+        talkRoomJobKindSelect.value = selectedTalkJobKind;
+    }
 
     if (!isCastRoom && chatForm) {
         const actionUrl = chatForm.getAttribute('data-action-url');
@@ -186,7 +223,30 @@ document.addEventListener('DOMContentLoaded', function() {
         const resultTemplates = window.talkResultMessageTemplates || {};
         const hiredHourlyWageWrap = document.getElementById('hired-hourly-wage-wrap');
         const hiredHourlyWageInput = document.getElementById('hired-hourly-wage-input');
+        const resultEmploymentKind = document.getElementById('result-employment-kind');
         let currentResultAction = null;
+        if (talkRoomJobKindSelect && saveTalkJobKindBtn && canSelectTalkJobKind) {
+            saveTalkJobKindBtn.addEventListener('click', async function() {
+                const selected = talkRoomJobKindSelect.value;
+                if (!selected) {
+                    window.alert('求人種別を選択してください。');
+                    return;
+                }
+                saveTalkJobKindBtn.disabled = true;
+                try {
+                    await postJson(actionUrl, token, {
+                        partner_id: partnerId,
+                        action_type: 'set_job_kind',
+                        job_kind: selected
+                    });
+                    window.alert('求人種別を保存しました。');
+                    window.location.reload();
+                } catch (error) {
+                    window.alert(error.message || '求人種別の保存に失敗しました。');
+                    saveTalkJobKindBtn.disabled = false;
+                }
+            });
+        }
 
         const openModal = () => {
             if (!overlay) return;
@@ -331,6 +391,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         action_type: currentResultAction,
                         message: message
                     };
+                    if (resultEmploymentKind) {
+                        payload.employment_kind = resultEmploymentKind.value;
+                    }
                     if (currentResultAction === 'hired' && hiredHourlyWageInput) {
                         payload.hired_regular_hourly_wage = hiredHourlyWageInput.value.trim();
                     }
@@ -426,6 +489,28 @@ document.addEventListener('DOMContentLoaded', function() {
         const confirmSubmitBtn = document.getElementById('interview-confirm-submit');
         const confirmCloseButtons = document.querySelectorAll('.js-interview-confirm-close');
         let pendingInterviewSelection = null;
+        if (talkRoomJobKindSelect && saveTalkJobKindBtn && canSelectTalkJobKind) {
+            saveTalkJobKindBtn.addEventListener('click', async function() {
+                const selected = talkRoomJobKindSelect.value;
+                if (!selected) {
+                    window.alert('求人種別を選択してください。');
+                    return;
+                }
+                saveTalkJobKindBtn.disabled = true;
+                try {
+                    await postJson(actionUrl, token, {
+                        partner_id: partnerId,
+                        action_type: 'set_job_kind',
+                        job_kind: selected
+                    });
+                    window.alert('求人種別を保存しました。');
+                    window.location.reload();
+                } catch (error) {
+                    window.alert(error.message || '求人種別の保存に失敗しました。');
+                    saveTalkJobKindBtn.disabled = false;
+                }
+            });
+        }
 
         const openConfirmModal = (selection) => {
             if (!confirmOverlay || !confirmSelected) return;

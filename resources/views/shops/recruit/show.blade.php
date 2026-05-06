@@ -836,7 +836,7 @@
                 </div>
             </section>
 
-            @if(!empty($forCast))
+            @if(!empty($forCast) && empty($usesJobTypes))
                 <div class="recruit-footer-cta">
                     <button
                         type="button"
@@ -846,7 +846,12 @@
                         data-item-type="shop"
                         data-action="keep"
                     ><i class="fas fa-bookmark"></i></button>
-                    <a href="#" class="recruit-cta-btn"><i class="fas fa-paper-plane"></i> 応募する</a>
+                    @php
+                        $singleTalkJobKind = !empty($hasHelp) ? 'help' : (!empty($hasTrial) ? 'trial' : 'fulltime');
+                        $singleTalkTopic = $singleTalkJobKind === 'help' ? 'help' : 'new_hire';
+                    @endphp
+                    <a href="{{ route('cast.talk.room', ['id' => $shop['id'], 'job_kind' => $singleTalkJobKind, 'talk_topic' => $singleTalkTopic]) }}" class="recruit-cta-btn"><i class="fas fa-paper-plane"></i> 応募する</a>
+                    <a href="{{ route('cast.talk.room', ['id' => $shop['id'], 'talk_topic' => 'other']) }}" class="recruit-cta-btn" style="margin-top:8px; opacity:.88;"><i class="fas fa-comment-dots"></i> 質問・相談</a>
                 </div>
             @endif
         </div>

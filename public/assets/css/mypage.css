@@ -1627,3 +1627,29 @@ a.btn-outline-gold {
         font-size: 0.9rem;
     }
 }
+
+@media (min-width: 375px) and (max-width: 430px) {
+    .mypage-quick-actions .btn-action-card .btn-action-body {
+        padding-top: 14px;
+        padding-bottom: 14px;
+    }
+    .mypage-quick-actions .btn-action-label {
+        font-size: 0.7rem;
+    }
+    .mypage-quick-actions .btn-action-text {
+        font-size: 1rem;
+        line-height: 1.45;
+    }
+    .cast-mypage-menu-buttons .menu-btn-label {
+        font-size: 10px;
+    }
+    .cast-mypage-menu-buttons .menu-btn-title {
+        font-size: 16px;
+        line-height: 1.35;
+        letter-spacing: 0.06em;
+    }
+    .cast-mypage-menu-buttons .menu-btn-meta {
+        font-size: 0.82rem;
+        line-height: 1.55;
+    }
+}

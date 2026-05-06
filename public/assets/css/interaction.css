@@ -314,3 +314,37 @@
 }
 
 .no-data-msg { text-align: center; padding: 50px 0; color: #888; }
+
+@media (min-width: 375px) and (max-width: 430px) {
+    .cast-list-card {
+        padding: 12px;
+        border-radius: 14px;
+    }
+    .card-thumb {
+        width: 56px;
+        height: 56px;
+        margin-right: 12px;
+    }
+    .info-header .name {
+        font-size: 1rem;
+        line-height: 1.35;
+    }
+    .info-sub {
+        font-size: 0.84rem;
+        line-height: 1.5;
+    }
+    .info-specs {
+        font-size: 0.78rem;
+        line-height: 1.45;
+    }
+    #pane-like .like-list-compact .cast-list-card {
+        padding: 9px 11px;
+    }
+    #pane-like .like-list-compact .card-info .info-header .name {
+        font-size: 0.98rem;
+    }
+    #pane-like .like-list-compact .info-sub,
+    #pane-like .like-list-compact .info-specs {
+        font-size: 0.74rem;
+    }
+}

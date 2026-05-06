@@ -91,3 +91,14 @@
 .tab-pane.active {
     display: block;
 }
+
+@media (min-width: 375px) and (max-width: 430px) {
+    .sub-header-tabs .tab-item {
+        font-size: 0.8rem;
+        letter-spacing: 0.04em;
+        padding: 13px 4px;
+    }
+    .tab-page-body {
+        margin-top: calc(var(--sub-header-height) + 6px);
+    }
+}
