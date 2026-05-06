@@ -116,6 +116,7 @@ class RegistrationController extends Controller
                 'building' => null,
                 'tel' => $request->input('phone'),
                 'shift' => $this->workTimeToShiftCode($workTime),
+                'where_work' => $shiftHope,
                 'exp' => $nightWorkExp === 'yes' ? 1 : 0,
                 'pr' => $request->input('intro'),
                 'height' => $request->filled('height') ? (int) $request->input('height') : null,
@@ -430,16 +431,18 @@ class RegistrationController extends Controller
         if (!DB::getSchemaBuilder()->hasTable('cast_tag_relations')) {
             return;
         }
+        $normalizedType = rtrim($tagType, 's');
+        $targetTypes = array_values(array_unique(array_filter([$tagType, $normalizedType])));
         $tagIds = array_values(array_unique(array_filter(array_map('intval', $tagIds))));
         DB::table('cast_tag_relations')
             ->where('cast_id', $castId)
-            ->where('tag_type', $tagType)
+            ->whereIn('tag_type', $targetTypes)
             ->delete();
         foreach ($tagIds as $tagId) {
             DB::table('cast_tag_relations')->insert([
                 'cast_id' => $castId,
                 'tag_id' => $tagId,
-                'tag_type' => $tagType,
+                'tag_type' => $normalizedType,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

@@ -46,6 +46,7 @@ class ProfileController extends Controller
                 'cast_profiles.waist',
                 'cast_profiles.hip',
                 'cast_profiles.shift',
+                'cast_profiles.where_work',
                 'cast_profiles.profession',
                 'cast_profiles.exp',
                 Schema::hasColumn('cast_profiles', 'personality_type')
@@ -85,7 +86,7 @@ class ProfileController extends Controller
             'desired_job'    => '',
             'my_field'       => '',
             'my_inner_skills'=> '',
-            'shift_hope'     => '週1回出勤',
+            'shift_hope'     => (string) ($row->where_work ?? ''),
             'work_time'      => $this->workTimeKeyFromShift($row->shift),
             'current_job'    => $row->profession ?? '',
             'night_work_exp' => $nightWorkExp,
@@ -118,7 +119,7 @@ class ProfileController extends Controller
             'desired_job'    => '',
             'my_field'       => '',
             'my_inner_skills'=> '',
-            'shift_hope'     => '週1回出勤',
+            'shift_hope'     => '',
             'work_time'      => '',
             'current_job'    => '',
             'night_work_exp' => 'none',
@@ -219,6 +220,7 @@ class ProfileController extends Controller
                 'waist' => $request->filled('waist') ? (int) $request->input('waist') : null,
                 'hip' => $request->filled('hip') ? (int) $request->input('hip') : null,
                 'shift' => $this->workTimeShiftCode($request->input('work_time')),
+                'where_work' => $request->input('shift_hope'),
                 'profession' => $request->input('current_job'),
                 'exp' => $request->input('night_work_exp') === 'yes' ? 1 : 0,
                 'industry_id' => $industryIds[0] ?? null,
@@ -392,6 +394,7 @@ class ProfileController extends Controller
                 'cast_profiles.waist',
                 'cast_profiles.hip',
                 'cast_profiles.shift',
+                'cast_profiles.where_work',
                 'cast_profiles.profession',
                 'cast_profiles.exp',
                 'cast_profiles.pr',
@@ -472,7 +475,7 @@ class ProfileController extends Controller
             'looks_tags' => $looksTags,
             'personality_tags' => $personalityTags,
             'personality_type' => $this->resolvePersonalityType($row->personality_type ?? null),
-            'shift_hope' => '',
+            'shift_hope' => (string) ($row->where_work ?? ''),
             'work_time' => $workTime,
             'work_time_label' => $this->workTimeLabel($workTime),
             'current_job' => $row->profession ?? '',
@@ -580,10 +583,12 @@ class ProfileController extends Controller
         if (!DB::getSchemaBuilder()->hasTable('cast_tag_relations')) {
             return;
         }
+        $normalizedType = rtrim($tagType, 's');
+        $targetTypes = array_values(array_unique(array_filter([$tagType, $normalizedType])));
 
         DB::table('cast_tag_relations')
             ->where('cast_id', $castId)
-            ->where('tag_type', $tagType)
+            ->whereIn('tag_type', $targetTypes)
             ->delete();
 
         $rows = collect($tagIds)
@@ -594,7 +599,7 @@ class ProfileController extends Controller
             ->map(fn ($tagId) => [
                 'cast_id'   => $castId,
                 'tag_id'    => $tagId,
-                'tag_type'  => $tagType,
+                'tag_type'  => $normalizedType,
                 'created_at'=> now(),
                 'updated_at'=> now(),
             ])

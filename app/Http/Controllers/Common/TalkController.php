@@ -22,6 +22,7 @@ class TalkController extends Controller
     private const MESSAGE_TYPE_INTERVIEW_CONFIRMED = 3;
     private const MESSAGE_TYPE_HIRED = 4;
     private const MESSAGE_TYPE_REJECTED = 5;
+    private const MESSAGE_TYPE_IMAGE = 6;
     private const APPLICATION_STATUS_CHATTING = 1;
     private const APPLICATION_STATUS_INTERVIEW_PENDING = 2;
     private const APPLICATION_STATUS_INTERVIEW_FIXED = 3;
@@ -159,7 +160,8 @@ class TalkController extends Controller
         $isCastPortal = request()->is('cast/*');
         $request->validate([
             'partner_id' => ['required', 'string'],
-            'message' => ['required', 'string', 'max:5000'],
+            'message' => ['nullable', 'string', 'max:5000'],
+            'image' => ['nullable', 'image', 'max:10240'],
             'talk_topic' => ['nullable', 'string', 'in:new_hire,help,other'],
             'talk_job_kind' => ['nullable', 'string', 'in:fulltime,trial,help'],
         ]);
@@ -171,13 +173,26 @@ class TalkController extends Controller
         $content = trim((string) $request->input('message'));
         $content = str_replace(["\r\n", "\r"], "\n", $content);
         $content = preg_replace('/\n{2,}/', "\n", $content);
+        $hasImage = $request->hasFile('image');
+        abort_if(!$hasImage && $content === '', 422, 'メッセージを入力してください。');
+
+        $messageType = self::MESSAGE_TYPE_TEXT;
+        $storedContent = $content;
+        if ($hasImage) {
+            $storedPath = $request->file('image')->store('public/uploads/messages');
+            $messageType = self::MESSAGE_TYPE_IMAGE;
+            $storedContent = json_encode([
+                'image_path' => $storedPath,
+                'caption' => $content,
+            ], JSON_UNESCAPED_UNICODE);
+        }
 
         $payload = [
             'cast_id' => $isCastPortal ? $this->currentCastId() : $partnerId,
             'shop_id' => $isCastPortal ? $partnerId : $this->currentShopId(),
             'sender_type' => $this->mySenderType($isCastPortal),
-            'type' => self::MESSAGE_TYPE_TEXT,
-            'content' => $content,
+            'type' => $messageType,
+            'content' => $storedContent,
             'is_read' => false,
             'created_at' => now(),
             'updated_at' => now(),
@@ -208,8 +223,10 @@ class TalkController extends Controller
             'message' => '送信しました',
             'data' => [
                 'message_id' => $messageId,
-                'content' => $payload['content'],
-                'time' => Carbon::now()->format('H:i')
+                'message_type' => $messageType,
+                'content' => $content,
+                'image_url' => $hasImage ? $this->assetPathForStored(json_decode((string) $storedContent, true)['image_path'] ?? null) : null,
+                'time' => Carbon::now()->format('H:i'),
             ]
         ]);
     }
@@ -600,13 +617,14 @@ class TalkController extends Controller
                 'type' => $type,
                 'content' => $type === self::MESSAGE_TYPE_TEXT || $type === self::MESSAGE_TYPE_HIRED || $type === self::MESSAGE_TYPE_REJECTED
                     ? $message->content
-                    : ($meta['selected_option'] ?? ''),
+                    : ($type === self::MESSAGE_TYPE_IMAGE ? (string) ($meta['caption'] ?? '') : ($meta['selected_option'] ?? '')),
                 'is_mine' => $isMine,
                 'created_at' => $createdAt,
                 'can_delete' => $canDelete,
                 'interview_options' => $type === self::MESSAGE_TYPE_INTERVIEW_OFFER ? ($meta['options'] ?? []) : [],
                 'offer_token' => $offerToken,
                 'selected_option' => $offerToken ? ($confirmedByToken[$offerToken] ?? null) : ($meta['selected_option'] ?? null),
+                'image_url' => $type === self::MESSAGE_TYPE_IMAGE ? $this->assetPathForStored($meta['image_path'] ?? null) : null,
             ];
         });
     }
@@ -722,6 +740,7 @@ class TalkController extends Controller
             self::MESSAGE_TYPE_REJECTED => $isMine
                 ? '不採用メッセージを送りました'
                 : '不採用メッセージが届いています',
+            self::MESSAGE_TYPE_IMAGE => $isMine ? '画像を送りました' : '画像が届いています',
             default => Str::limit(preg_replace('/\s+/u', ' ', trim((string) $message->content)), 60, '...'),
         };
     }

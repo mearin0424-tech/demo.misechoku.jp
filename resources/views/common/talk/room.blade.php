@@ -123,8 +123,8 @@
         <div class="talk-room-header-actions">
             @if($isCast && !empty($reviewApplicationId))
                 <button type="button" class="btn-interview btn-review-post" data-application-id="{{ $reviewApplicationId }}" title="レビュー投稿">
-                    <i class="fas fa-star"></i>
-                    <span>レビュー投稿</span>
+                    <i class="fas fa-check-circle"></i>
+                    <span>勤務完了</span>
                 </button>
             @endif
             <form action="{{ $blockUrl }}" method="POST">
@@ -252,6 +252,17 @@
                                 </span>
                             @endif
                         </div>
+                    @elseif($msg->type === 6)
+                        <div class="message-bubble message-bubble-image">
+                            @if(!empty($msg->image_url))
+                                <a href="{{ $msg->image_url }}" target="_blank" rel="noopener noreferrer" class="message-image-link">
+                                    <img src="{{ $msg->image_url }}" alt="送信画像" class="message-image">
+                                </a>
+                            @endif
+                            @if(!empty($msg->content))
+                                <p class="message-image-caption">{!! nl2br(e($msg->content)) !!}</p>
+                            @endif
+                        </div>
                     @else
                         @php
                             $displayContent = trim((string) $msg->content);
@@ -305,14 +316,13 @@
                         <input type="hidden" name="talk_topic" value="{{ $initialTalkTopic ?? '' }}">
                         <input type="hidden" name="talk_job_kind" value="{{ $initialTalkJobKind ?? '' }}">
                     @endif
-                    @if(!$isCast)
-                        <button type="button" id="open-talk-action-menu" class="btn-chat-action" aria-label="メニューを開く">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    @endif
+                    <button type="button" id="open-talk-action-menu" class="btn-chat-action" aria-label="メニューを開く">
+                        <i class="fas fa-plus"></i>
+                    </button>
                     <div class="chat-input-wrapper">
                         <textarea name="message" rows="1" placeholder="メッセージを入力..." class="focus:outline-none"></textarea>
                     </div>
+                    <input type="file" id="talk-image-input" name="image" accept="image/*" style="display:none;">
                     <button type="submit" class="btn-send" aria-label="送信"><i class="fas fa-paper-plane"></i></button>
                 </div>
             </form>
@@ -321,7 +331,6 @@
 </div>
 
 {{-- 面談日候補 送信モーダル（店舗側のみ利用） --}}
-@if(!$isCast)
 <div id="talk-action-menu-overlay" class="interview-modal-overlay interview-modal-overlay-sheet" aria-hidden="true">
     <div class="interview-modal interview-menu-sheet">
         <div class="interview-modal-header">
@@ -335,6 +344,14 @@
                     <span>面談候補日を送る</span>
                 </button>
             @endif
+            <button type="button" id="open-image-send-menu" class="talk-action-item">
+                <span class="talk-action-icon"><i class="far fa-image"></i></span>
+                <span>画像を送る</span>
+            </button>
+            <button type="button" id="open-template-send-menu" class="talk-action-item">
+                <span class="talk-action-icon"><i class="far fa-file-alt"></i></span>
+                <span>定型文を使う</span>
+            </button>
             @if(!empty($canSelectResult))
                 <button type="button" id="open-hire-modal-menu" class="talk-action-item">
                     <span class="talk-action-icon"><i class="fas fa-circle-check"></i></span>
@@ -355,6 +372,7 @@
     </div>
 </div>
 
+@if(!$isCast)
 <div id="job-kind-modal-overlay" class="interview-modal-overlay interview-modal-overlay-sheet" aria-hidden="true">
     <div class="interview-modal interview-menu-sheet">
         <div class="interview-modal-header">
@@ -545,7 +563,11 @@
     var reviewPostUrl = '{{ route("cast.mypage.deposit.review") }}';
     var depositRequestUrl = '{{ route("cast.mypage.deposit.request") }}';
 
-    function openReviewModal(applicationId) {
+    var pendingReviewApplicationId = null;
+    var pendingReviewTarget = null;
+    var bonusFlowMode = 'review';
+
+    function showReviewModalWithTarget(applicationId, target) {
         document.getElementById('review-form-application-id').value = applicationId;
         document.getElementById('review-modal-loading').style.display = 'block';
         document.getElementById('review-modal-form-wrap').style.display = 'none';
@@ -553,32 +575,31 @@
         if (errEl) { errEl.textContent = ''; errEl.classList.remove('show'); }
         reviewModal.removeAttribute('hidden');
         document.body.style.overflow = 'hidden';
+        buildReviewRatingCards(target.review_contents || []);
+        var cmtEl = document.getElementById('review-modal-comment');
+        if (cmtEl) cmtEl.value = '';
+        document.getElementById('review-modal-loading').style.display = 'none';
+        document.getElementById('review-modal-form-wrap').style.display = 'block';
+        checkReviewFormReady();
+    }
+
+    function openWorkCompleteFlow(applicationId) {
         fetch(requestTargetUrl + '?application_id=' + encodeURIComponent(applicationId), {
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
         })
         .then(function (r) { return r.json(); })
         .then(function (data) {
-            document.getElementById('review-modal-loading').style.display = 'none';
             if (!data.success || !data.request_target) {
-                if (errEl) { errEl.textContent = data.message || 'データの取得に失敗しました。'; errEl.classList.add('show'); }
+                window.alert(data.message || 'データの取得に失敗しました。');
                 return;
             }
-            var target = data.request_target;
-            if (target.review_exists) {
-                reviewModal.setAttribute('hidden', '');
-                document.body.style.overflow = '';
-                showBonusConfirmModal(applicationId, target);
-                return;
-            }
-            buildReviewRatingCards(target.review_contents || []);
-            var cmtEl = document.getElementById('review-modal-comment');
-            if (cmtEl) cmtEl.value = '';
-            document.getElementById('review-modal-form-wrap').style.display = 'block';
-            checkReviewFormReady();
+            pendingReviewApplicationId = applicationId;
+            pendingReviewTarget = data.request_target;
+            bonusFlowMode = 'review';
+            showBonusConfirmModal(applicationId, pendingReviewTarget);
         })
         .catch(function () {
-            document.getElementById('review-modal-loading').style.display = 'none';
-            if (errEl) { errEl.textContent = '読み込みに失敗しました。'; errEl.classList.add('show'); }
+            window.alert('読み込みに失敗しました。');
         });
     }
 
@@ -694,7 +715,7 @@
     document.querySelectorAll('.btn-review-post').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var id = this.getAttribute('data-application-id');
-            if (id) openReviewModal(id);
+            if (id) openWorkCompleteFlow(id);
         });
     });
     document.querySelectorAll('[data-close-review-modal]').forEach(function (el) { el.addEventListener('click', closeReviewModal); });
@@ -715,9 +736,9 @@
         .then(function (r) { return r.json(); })
         .then(function (res) {
             if (btn) btn.disabled = false;
-            if (res.success && res.request_target) {
+            if (res.success) {
                 closeReviewModal();
-                showBonusConfirmModal(parseInt(form.querySelector('input[name="application_id"]').value, 10), res.request_target);
+                window.location.reload();
             } else {
                 var re = document.getElementById('review-modal-error');
                 if (re) { re.textContent = res.message || '投稿に失敗しました。'; re.classList.add('show'); }
@@ -732,11 +753,28 @@
     document.getElementById('bonus-confirm-form').addEventListener('submit', function (e) {
         e.preventDefault();
         var form = this;
+        var confirmChecked = form.querySelector('input[name="confirm_checked"]');
+        var errEl = document.getElementById('bonus-confirm-error');
+        if (!confirmChecked || !confirmChecked.checked) {
+            errEl.textContent = 'チェックを入れてください。';
+            errEl.style.display = 'block';
+            return;
+        }
+        if (bonusFlowMode === 'review') {
+            closeBonusModal();
+            if (pendingReviewApplicationId && pendingReviewTarget) {
+                if (pendingReviewTarget.review_exists) {
+                    window.alert('レビュー投稿は完了しています。');
+                    return;
+                }
+                showReviewModalWithTarget(pendingReviewApplicationId, pendingReviewTarget);
+            }
+            return;
+        }
         var fd = new FormData(form);
         fd.set('confirm_bonus_condition', '1');
         var btn = document.getElementById('bonus-confirm-submit-btn');
         if (btn) btn.disabled = true;
-        var errEl = document.getElementById('bonus-confirm-error');
         fetch(depositRequestUrl, {
             method: 'POST',
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },

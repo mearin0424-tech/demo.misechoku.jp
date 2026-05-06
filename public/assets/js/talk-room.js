@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!chatMessages) return;
 
     const messageInput = chatForm ? chatForm.querySelector('textarea[name="message"]') : null;
+    const imageInput = chatForm ? chatForm.querySelector('#talk-image-input') : null;
     const talkTopicField = chatForm ? chatForm.querySelector('[name="talk_topic"]') : null;
     const talkJobKindField = chatForm ? chatForm.querySelector('[name="talk_job_kind"]') : null;
     const initialTalkTopic = typeof window.initialTalkTopic !== 'undefined' ? window.initialTalkTopic : null;
@@ -36,6 +37,45 @@ document.addEventListener('DOMContentLoaded', function() {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    function ensureEmptyStateRemoved() {
+        const emptyState = chatMessages.querySelector('.talk-empty-state');
+        if (emptyState) emptyState.remove();
+    }
+
+    function appendImageMessage(url, caption, timeStr) {
+        const safeUrl = escapeHtml(url || '');
+        const safeCaption = escapeHtml((caption || '').trim()).replace(/\n/g, '<br>');
+        const captionHtml = safeCaption ? ('<p class="message-image-caption">' + safeCaption + '</p>') : '';
+        const messageHtml = '<div class="message-row msg-right"><div class="message-block"><div class="message-inline"><div class="msg-meta"><span class="msg-status"><i class="fas fa-check"></i></span><span class="msg-time">' + timeStr + '</span></div><div class="message-bubble message-bubble-image"><a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer" class="message-image-link"><img src="' + safeUrl + '" alt="送信画像" class="message-image"></a>' + captionHtml + '</div></div></div></div>';
+        ensureEmptyStateRemoved();
+        chatMessages.insertAdjacentHTML('beforeend', messageHtml);
+        scrollToBottom('smooth');
+    }
+
+    // 共通フォールバック: どの分岐でも + メニューを開閉できるようにする
+    const globalActionMenuBtn = document.getElementById('open-talk-action-menu');
+    const globalActionMenuOverlay = document.getElementById('talk-action-menu-overlay');
+    const globalActionMenuCloseButtons = document.querySelectorAll('.js-talk-action-menu-close');
+    if (globalActionMenuBtn && globalActionMenuOverlay) {
+        globalActionMenuBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            globalActionMenuOverlay.setAttribute('aria-hidden', 'false');
+        });
+    }
+    globalActionMenuCloseButtons.forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            if (globalActionMenuOverlay) globalActionMenuOverlay.setAttribute('aria-hidden', 'true');
+        });
+    });
+    if (globalActionMenuOverlay) {
+        globalActionMenuOverlay.addEventListener('click', function (e) {
+            if (e.target === globalActionMenuOverlay) {
+                globalActionMenuOverlay.setAttribute('aria-hidden', 'true');
+            }
+        });
     }
 
     async function postJson(url, token, body) {
@@ -105,8 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const normalizedContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n{2,}/g, '\n').trim();
             const bubbleHtml = '<p class="m-0">' + escapeHtml(normalizedContent).replace(/\n/g, '<br>') + '</p><span class="message-bubble-tail" aria-hidden="true"><svg viewBox="0 0 8 12" fill="currentColor"><path d="M0 0V12C3 12 8 8 8 0H0Z"/></svg></span>';
             const messageHtml = '<div class="message-row msg-right" id="' + tempId + '"><div class="message-block"><div class="message-inline"><div class="msg-meta"><span class="msg-status sending"><i class="fas fa-check"></i></span><span class="msg-time">' + timeStr + '</span></div><div class="message-bubble">' + bubbleHtml + '</div></div></div></div>';
-            const emptyState = chatMessages.querySelector('.talk-empty-state');
-            if (emptyState) emptyState.remove();
+            ensureEmptyStateRemoved();
             chatMessages.insertAdjacentHTML('beforeend', messageHtml);
 
             messageInput.value = '';
@@ -249,6 +288,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const openJobKindModalBtn = document.getElementById('open-job-kind-modal');
         const jobKindOverlay = document.getElementById('job-kind-modal-overlay');
         const closeJobKindButtons = document.querySelectorAll('.js-job-kind-close');
+        const openImageSendMenu = document.getElementById('open-image-send-menu');
+        const openTemplateSendMenu = document.getElementById('open-template-send-menu');
         const overlay = document.getElementById('interview-modal-overlay');
         const interviewForm = overlay ? overlay.querySelector('#interview-form') : null;
         const closeBtn = overlay ? overlay.querySelector('.interview-modal-close') : null;
@@ -271,6 +312,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const hiredHourlyWageWrap = document.getElementById('hired-hourly-wage-wrap');
         const hiredHourlyWageInput = document.getElementById('hired-hourly-wage-input');
         const resultEmploymentKind = document.getElementById('result-employment-kind');
+        const quickTemplates = [
+            'ありがとうございます。内容を確認して折り返します。',
+            '承知しました。よろしくお願いします。',
+            '本日はご連絡ありがとうございます。'
+        ];
         let currentResultAction = null;
         const renderResultDescByKind = () => {
             if (!resultDesc || !resultEmploymentKind) return;
@@ -446,6 +492,59 @@ document.addEventListener('DOMContentLoaded', function() {
         if (jobKindOverlay) {
             jobKindOverlay.addEventListener('click', function(e) {
                 if (e.target === jobKindOverlay) closeJobKindModal();
+            });
+        }
+        if (openImageSendMenu && imageInput) {
+            openImageSendMenu.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeTalkActionMenu();
+                imageInput.click();
+            });
+        }
+        if (imageInput) {
+            imageInput.addEventListener('change', async function() {
+                const file = imageInput.files && imageInput.files[0] ? imageInput.files[0] : null;
+                if (!file) return;
+                const formData = new FormData();
+                formData.append('partner_id', partnerId || '');
+                formData.append('image', file);
+                if (isCastRoom && !hasTalkMessages && talkTopicField && talkTopicField.value) {
+                    formData.append('talk_topic', talkTopicField.value);
+                    if (talkJobKindField && !talkJobKindField.disabled && talkJobKindField.value) {
+                        formData.append('talk_job_kind', talkJobKindField.value);
+                    }
+                }
+                try {
+                    const response = await fetch(chatForm.getAttribute('data-url'), {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': token,
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    });
+                    const result = await response.json();
+                    if (!response.ok || !result.success) {
+                        throw new Error((result && result.message) || '画像送信に失敗しました。');
+                    }
+                    appendImageMessage((result.data && result.data.image_url) || '', '', (result.data && result.data.time) || '');
+                } catch (error) {
+                    window.alert(error.message || '画像送信に失敗しました。');
+                } finally {
+                    imageInput.value = '';
+                }
+            });
+        }
+        if (openTemplateSendMenu && messageInput) {
+            openTemplateSendMenu.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeTalkActionMenu();
+                const selected = window.prompt('送信する定型文の番号を入力してください:\n1. ' + quickTemplates[0] + '\n2. ' + quickTemplates[1] + '\n3. ' + quickTemplates[2], '1');
+                const index = Number(selected) - 1;
+                if (!Number.isInteger(index) || index < 0 || index >= quickTemplates.length) return;
+                messageInput.value = quickTemplates[index];
+                messageInput.dispatchEvent(new Event('input', { bubbles: true }));
+                chatForm.requestSubmit();
             });
         }
 
@@ -650,12 +749,100 @@ document.addEventListener('DOMContentLoaded', function() {
     if (isCastRoom && chatForm) {
         const actionUrl = chatForm.getAttribute('data-action-url');
         const token = chatForm.querySelector('input[name="_token"]').value;
+        const openTalkActionMenuBtn = document.getElementById('open-talk-action-menu');
+        const talkActionMenuOverlay = document.getElementById('talk-action-menu-overlay');
+        const talkActionMenuCloseButtons = document.querySelectorAll('.js-talk-action-menu-close');
+        const openImageSendMenu = document.getElementById('open-image-send-menu');
+        const openTemplateSendMenu = document.getElementById('open-template-send-menu');
+        const quickTemplates = [
+            '本日はよろしくお願いします。',
+            'ご確認ありがとうございます。承知しました。',
+            '問題なければこの内容で進めさせてください。'
+        ];
         const fulltimeRequestBtn = document.getElementById('send-fulltime-request');
         const confirmOverlay = document.getElementById('interview-confirm-overlay');
         const confirmSelected = document.getElementById('interview-confirm-selected');
         const confirmSubmitBtn = document.getElementById('interview-confirm-submit');
         const confirmCloseButtons = document.querySelectorAll('.js-interview-confirm-close');
         let pendingInterviewSelection = null;
+        const openTalkActionMenu = () => {
+            if (!talkActionMenuOverlay) return;
+            talkActionMenuOverlay.setAttribute('aria-hidden', 'false');
+        };
+        const closeTalkActionMenu = () => {
+            if (!talkActionMenuOverlay) return;
+            talkActionMenuOverlay.setAttribute('aria-hidden', 'true');
+        };
+        if (openTalkActionMenuBtn && talkActionMenuOverlay) {
+            openTalkActionMenuBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                openTalkActionMenu();
+            });
+        }
+        talkActionMenuCloseButtons.forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeTalkActionMenu();
+            });
+        });
+        if (talkActionMenuOverlay) {
+            talkActionMenuOverlay.addEventListener('click', function (e) {
+                if (e.target === talkActionMenuOverlay) closeTalkActionMenu();
+            });
+        }
+        if (openImageSendMenu && imageInput) {
+            openImageSendMenu.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeTalkActionMenu();
+                imageInput.click();
+            });
+        }
+        if (imageInput) {
+            imageInput.addEventListener('change', async function() {
+                const file = imageInput.files && imageInput.files[0] ? imageInput.files[0] : null;
+                if (!file) return;
+                const formData = new FormData();
+                formData.append('partner_id', partnerId || '');
+                formData.append('image', file);
+                if (!hasTalkMessages && talkTopicField && talkTopicField.value) {
+                    formData.append('talk_topic', talkTopicField.value);
+                    if (talkJobKindField && !talkJobKindField.disabled && talkJobKindField.value) {
+                        formData.append('talk_job_kind', talkJobKindField.value);
+                    }
+                }
+                try {
+                    const response = await fetch(chatForm.getAttribute('data-url'), {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': token,
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    });
+                    const result = await response.json();
+                    if (!response.ok || !result.success) {
+                        throw new Error((result && result.message) || '画像送信に失敗しました。');
+                    }
+                    appendImageMessage((result.data && result.data.image_url) || '', '', (result.data && result.data.time) || '');
+                } catch (error) {
+                    window.alert(error.message || '画像送信に失敗しました。');
+                } finally {
+                    imageInput.value = '';
+                }
+            });
+        }
+        if (openTemplateSendMenu && messageInput) {
+            openTemplateSendMenu.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeTalkActionMenu();
+                const selected = window.prompt('送信する定型文の番号を入力してください:\n1. ' + quickTemplates[0] + '\n2. ' + quickTemplates[1] + '\n3. ' + quickTemplates[2], '1');
+                const index = Number(selected) - 1;
+                if (!Number.isInteger(index) || index < 0 || index >= quickTemplates.length) return;
+                messageInput.value = quickTemplates[index];
+                messageInput.dispatchEvent(new Event('input', { bubbles: true }));
+                chatForm.requestSubmit();
+            });
+        }
         if (talkRoomJobKindSelect && saveTalkJobKindBtn && canSelectTalkJobKind) {
             saveTalkJobKindBtn.addEventListener('click', async function() {
                 const selected = talkRoomJobKindSelect.value;
