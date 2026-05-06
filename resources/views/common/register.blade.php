@@ -222,11 +222,11 @@
                     <div class="register-grid register-grid-two">
                         <label class="register-field">
                             <span>シフト希望</span>
-                            <select name="shift_hope">
+                            <select name="work_where">
                                 <option value="">基本情報の希望シフトに従う</option>
-                                <option value="週1回出勤" @selected(old('shift_hope') === '週1回出勤')>週1回出勤</option>
-                                <option value="週2回出勤" @selected(old('shift_hope') === '週2回出勤')>週2回出勤</option>
-                                <option value="週3回以上" @selected(old('shift_hope') === '週3回以上')>週3回以上</option>
+                                <option value="週1回出勤" @selected(old('work_where', old('shift_hope')) === '週1回出勤')>週1回出勤</option>
+                                <option value="週2回出勤" @selected(old('work_where', old('shift_hope')) === '週2回出勤')>週2回出勤</option>
+                                <option value="週3回以上" @selected(old('work_where', old('shift_hope')) === '週3回以上')>週3回以上</option>
                             </select>
                         </label>
                         <label class="register-field">
@@ -241,14 +241,14 @@
 
                     <label class="register-field">
                         <span>現職業</span>
-                        <textarea name="current_job" rows="2" placeholder="現職業を入力">{{ old('current_job') }}</textarea>
+                        <textarea name="profession" rows="2" placeholder="現職業を入力">{{ old('profession', old('current_job')) }}</textarea>
                     </label>
 
                     <div class="register-field">
                         <span>ナイトワーク経験（詳細）</span>
                         <div class="register-radio-row">
-                            <label class="register-radio"><input type="radio" name="night_work_exp" value="none" @checked(old('night_work_exp', '') === 'none' || old('experience') === 'beginner')> 無し</label>
-                            <label class="register-radio"><input type="radio" name="night_work_exp" value="yes" @checked(old('night_work_exp') === 'yes' || old('experience') === 'experienced')> 有り</label>
+                            <label class="register-radio"><input type="radio" name="exp" value="none" @checked(old('exp', old('night_work_exp', '')) === 'none' || old('experience') === 'beginner')> 無し</label>
+                            <label class="register-radio"><input type="radio" name="exp" value="yes" @checked(old('exp', old('night_work_exp')) === 'yes' || old('experience') === 'experienced')> 有り</label>
                         </div>
                         <small class="register-field-hint">上で選択した「ナイトワーク経験」と同一です。上で未選択の場合はここで指定してください。</small>
                     </div>

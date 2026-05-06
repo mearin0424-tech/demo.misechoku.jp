@@ -63,7 +63,7 @@ class ProfileController extends Controller
         $nightWorkExp = ((int) ($row->exp ?? 0) === 1 ? 'yes' : 'none');
         $looksTags = $this->getCastTagNamesByType($castId, 'looks');
         $personalityTags = $this->getCastTagNamesByType($castId, 'personality');
-        $desiredJob = $this->resolveDesiredJobByIndustries($castId, $row->industry_id ?? null);
+        $industryNames = $this->resolveDesiredJobByIndustries($castId, $row->industry_id ?? null);
         $workTime = $this->workTimeKeyFromShift($row->work_time);
 
         return [
@@ -83,13 +83,17 @@ class ProfileController extends Controller
             'bust'           => $row->bust ? (string) $row->bust : '',
             'waist'          => $row->waist ? (string) $row->waist : '',
             'hip'            => $row->hip ? (string) $row->hip : '',
-            'desired_job'    => '',
+            'industry_names' => $industryNames,
+            'desired_job'    => $industryNames, // backward compatible key
             'my_field'       => '',
             'my_inner_skills'=> '',
-            'shift_hope'     => (string) ($row->work_where ?? ''),
+            'work_where'     => (string) ($row->work_where ?? ''),
+            'shift_hope'     => (string) ($row->work_where ?? ''), // backward compatible key
             'work_time'      => $this->workTimeKeyFromShift($row->work_time),
-            'current_job'    => $row->profession ?? '',
-            'night_work_exp' => $nightWorkExp,
+            'profession'     => $row->profession ?? '',
+            'current_job'    => $row->profession ?? '', // backward compatible key
+            'exp'            => $nightWorkExp,
+            'night_work_exp' => $nightWorkExp, // backward compatible key
             'industry_ids'   => $this->resolveCastIndustryIds($castId, $row->industry_id ?? null),
             'look_tag_ids'   => $this->getCastTagIdsByType($castId, 'looks'),
             'personality_tag_ids' => $this->getCastTagIdsByType($castId, 'personality'),
@@ -116,12 +120,16 @@ class ProfileController extends Controller
             'bust'           => '',
             'waist'          => '',
             'hip'            => '',
+            'industry_names' => '',
             'desired_job'    => '',
             'my_field'       => '',
             'my_inner_skills'=> '',
+            'work_where'     => '',
             'shift_hope'     => '',
             'work_time'      => '',
+            'profession'     => '',
             'current_job'    => '',
+            'exp'            => 'none',
             'night_work_exp' => 'none',
             'industry_ids'   => [],
             'look_tag_ids'   => [],
@@ -165,13 +173,15 @@ class ProfileController extends Controller
             'bust'         => 'nullable|string|max:10',
             'waist'        => 'nullable|string|max:10',
             'hip'          => 'nullable|string|max:10',
-            'desired_job'  => 'nullable|string|max:255',
             'my_field'     => 'nullable|string|max:255',
             'my_inner_skills' => 'nullable|string|max:500',
-            'shift_hope'   => 'nullable|string|max:50',
+            'work_where'   => 'nullable|string|max:50',
+            'shift_hope'   => 'nullable|string|max:50', // backward compatible
             'work_time'    => 'nullable|string|max:20',
-            'current_job'  => 'nullable|string',
-            'night_work_exp' => 'nullable|string|max:20',
+            'profession'   => 'nullable|string',
+            'current_job'  => 'nullable|string', // backward compatible
+            'exp'          => 'nullable|string|max:20',
+            'night_work_exp' => 'nullable|string|max:20', // backward compatible
             'industry_ids'   => 'nullable|array',
             'industry_ids.*' => 'integer|exists:industries,id',
             'look_tag_ids' => 'nullable|array',
@@ -208,6 +218,9 @@ class ProfileController extends Controller
             ->unique()
             ->values()
             ->all();
+        $workWhere = $request->input('work_where', $request->input('shift_hope'));
+        $profession = $request->input('profession', $request->input('current_job'));
+        $exp = $request->input('exp', $request->input('night_work_exp'));
 
         DB::table('cast_profiles')->updateOrInsert(
             ['cast_id' => $castId],
@@ -227,9 +240,9 @@ class ProfileController extends Controller
                 'waist' => $request->filled('waist') ? (int) $request->input('waist') : null,
                 'hip' => $request->filled('hip') ? (int) $request->input('hip') : null,
                 'work_time' => $this->workTimeShiftCode($request->input('work_time')),
-                'work_where' => $request->input('shift_hope'),
-                'profession' => $request->input('current_job'),
-                'exp' => $request->input('night_work_exp') === 'yes' ? 1 : 0,
+                'work_where' => $workWhere,
+                'profession' => $profession,
+                'exp' => $exp === 'yes' ? 1 : 0,
                 'industry_id' => $industryIds[0] ?? null,
                 'updated_at' => now(),
                 'created_at' => now(),
@@ -503,6 +516,10 @@ class ProfileController extends Controller
 
         $birthday = $row->birthday ? Carbon::parse($row->birthday) : null;
         $nightWorkExp = ((int) ($row->exp ?? 0) === 1 ? 'yes' : 'none');
+        $looksTags = $this->getCastTagNamesByType($castId, 'looks');
+        $personalityTags = $this->getCastTagNamesByType($castId, 'personality');
+        $industryNames = $this->resolveDesiredJobByIndustries($castId);
+        $workTime = $this->workTimeKeyFromShift($row->work_time);
 
         $images = DB::table('cast_images')
             ->where('cast_id', $castId)
@@ -562,16 +579,20 @@ class ProfileController extends Controller
             'hip' => $row->hip,
             'pr' => $row->pr ?? '',
             'intro' => $row->pr ?? '',
-            'desired_job' => $desiredJob,
+            'industry_names' => $industryNames,
+            'desired_job' => $industryNames, // backward compatible key
             'my_field' => $looksTags !== [] ? implode(' / ', $looksTags) : '',
             'my_inner_skills' => $personalityTags !== [] ? implode(' / ', $personalityTags) : '',
             'looks_tags' => $looksTags,
             'personality_tags' => $personalityTags,
             'personality_type' => $this->resolvePersonalityType($row->personality_type ?? null),
+            'work_where' => (string) ($row->work_where ?? ''),
             'shift_hope' => (string) ($row->work_where ?? ''),
             'work_time' => $workTime,
             'work_time_label' => $this->workTimeLabel($workTime),
+            'profession' => $row->profession ?? '',
             'current_job' => $row->profession ?? '',
+            'exp' => $nightWorkExp,
             'night_work_exp' => $nightWorkExp,
             'night_work_label' => $nightWorkExp === 'yes' ? '有り' : '無し',
             'reviews' => $reviews,
@@ -627,16 +648,20 @@ class ProfileController extends Controller
             'hip' => null,
             'pr' => '',
             'intro' => '',
+            'industry_names' => '',
             'desired_job' => '',
             'my_field' => '',
             'my_inner_skills' => '',
+            'work_where' => '',
             'looks_tags' => [],
             'personality_tags' => [],
             'personality_type' => '',
             'shift_hope' => '',
             'work_time' => '',
             'work_time_label' => '',
+            'profession' => '',
             'current_job' => '',
+            'exp' => 'none',
             'night_work_exp' => 'none',
             'night_work_label' => '無し',
             'reviews' => [],

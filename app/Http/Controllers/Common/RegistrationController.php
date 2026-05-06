@@ -61,10 +61,13 @@ class RegistrationController extends Controller
             'bust' => ['nullable', 'integer', 'min:50', 'max:120'],
             'waist' => ['nullable', 'integer', 'min:40', 'max:120'],
             'hip' => ['nullable', 'integer', 'min:50', 'max:120'],
-            'shift_hope' => ['nullable', 'string', 'in:週1回出勤,週2回出勤,週3回以上'],
+            'work_where' => ['nullable', 'string', 'in:週1回出勤,週2回出勤,週3回以上'],
+            'shift_hope' => ['nullable', 'string', 'in:週1回出勤,週2回出勤,週3回以上'], // backward compatible
             'work_time' => ['nullable', 'string', 'in:morning,day_night'],
-            'current_job' => ['nullable', 'string', 'max:1000'],
-            'night_work_exp' => ['nullable', 'string', 'in:none,yes'],
+            'profession' => ['nullable', 'string', 'max:1000'],
+            'current_job' => ['nullable', 'string', 'max:1000'], // backward compatible
+            'exp' => ['nullable', 'string', 'in:none,yes'],
+            'night_work_exp' => ['nullable', 'string', 'in:none,yes'], // backward compatible
             'industry_ids' => ['nullable', 'array'],
             'industry_ids.*' => ['integer'],
             'look_tag_ids' => ['nullable', 'array'],
@@ -99,9 +102,13 @@ class RegistrationController extends Controller
                 'updated_at' => now(),
             ]);
 
-            $shiftHope = $request->filled('shift_hope') ? $request->input('shift_hope') : $this->shiftStyleToShiftHope((string) $request->input('shift_style'));
+            $workWhere = $request->filled('work_where')
+                ? $request->input('work_where')
+                : ($request->filled('shift_hope') ? $request->input('shift_hope') : $this->shiftStyleToShiftHope((string) $request->input('shift_style')));
             $workTime = $request->filled('work_time') ? (string) $request->input('work_time') : $this->shiftStyleToWorkTime((string) $request->input('shift_style'));
-            $nightWorkExp = $request->filled('night_work_exp') ? $request->input('night_work_exp') : ($request->input('experience') === 'experienced' ? 'yes' : 'none');
+            $exp = $request->filled('exp')
+                ? $request->input('exp')
+                : ($request->filled('night_work_exp') ? $request->input('night_work_exp') : ($request->input('experience') === 'experienced' ? 'yes' : 'none'));
             $industryIds = array_values(array_unique(array_map('intval', (array) $request->input('industry_ids', []))));
 
             $profilePayload = [
@@ -116,15 +123,15 @@ class RegistrationController extends Controller
                 'building' => null,
                 'tel' => $request->input('phone'),
                 'work_time' => $this->workTimeToShiftCode($workTime),
-                'work_where' => $shiftHope,
-                'exp' => $nightWorkExp === 'yes' ? 1 : 0,
+                'work_where' => $workWhere,
+                'exp' => $exp === 'yes' ? 1 : 0,
                 'pr' => $request->input('intro'),
                 'height' => $request->filled('height') ? (int) $request->input('height') : null,
                 'weight' => $request->filled('weight') ? (int) $request->input('weight') : null,
                 'bust' => $request->filled('bust') ? (int) $request->input('bust') : null,
                 'waist' => $request->filled('waist') ? (int) $request->input('waist') : null,
                 'hip' => $request->filled('hip') ? (int) $request->input('hip') : null,
-                'profession' => $request->input('current_job'),
+                'profession' => $request->input('profession', $request->input('current_job')),
                 'created_at' => now(),
                 'updated_at' => now(),
             ];

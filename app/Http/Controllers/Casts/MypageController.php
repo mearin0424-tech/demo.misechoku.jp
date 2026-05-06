@@ -586,12 +586,12 @@ class MypageController extends Controller
 
         $birthday = $castRow->birthday ? Carbon::parse($castRow->birthday) : null;
         $age = $birthday ? $birthday->age : null;
-        $shiftHope = (string) ($castRow->work_where ?? '');
+        $workWhere = (string) ($castRow->work_where ?? '');
         $workTime = $this->workTimeKeyFromShift($castRow->work_time);
         $nightWorkExp = ((int) ($castRow->exp ?? 0) === 1 ? 'yes' : 'none');
         $looksTags = $this->getCastTagNamesByType($castId, 'looks');
         $personalityTags = $this->getCastTagNamesByType($castId, 'personality');
-        $desiredJob = $this->resolveDesiredJobByIndustries($castId, $castRow->industry_id ?? null);
+        $industryNames = $this->resolveDesiredJobByIndustries($castId, $castRow->industry_id ?? null);
         $looksSummary = $looksTags !== [] ? implode(' / ', $looksTags) : '';
         $personalitySummary = $personalityTags !== [] ? implode(' / ', $personalityTags) : '';
         $likeCount = DB::table('favorites')
@@ -698,25 +698,33 @@ class MypageController extends Controller
             'pr'               => $castRow->pr ?? '',
             'intro'            => $castRow->pr ?? '',
             'appeal_updated_at'=> $appealUpdatedAt,
-            'desired_job'      => $desiredJob,
+            'industry_names'   => $industryNames,
+            'desired_job'      => $industryNames,
             'my_field'         => $looksSummary,
             'my_inner_skills'  => $personalitySummary,
             'personality_type' => $this->resolvePersonalityType($castRow->personality_type ?? null),
             'looks_tags'       => $looksTags,
             'personality_tags' => $personalityTags,
             'memo_data'        => [
-                'desired_job' => $desiredJob,
+                'industry_names' => $industryNames,
+                'desired_job' => $industryNames,
                 'my_field' => $looksSummary,
                 'my_inner_skills' => $personalitySummary,
-                'shift_hope' => $shiftHope,
+                'work_where' => $workWhere,
+                'shift_hope' => $workWhere,
                 'work_time' => $workTime,
+                'exp' => $nightWorkExp,
                 'night_work_exp' => $nightWorkExp,
+                'profession' => $castRow->profession ?? '',
                 'current_job' => $castRow->profession ?? '',
             ],
-            'shift_hope'       => $shiftHope,
+            'work_where'       => $workWhere,
+            'shift_hope'       => $workWhere,
             'work_time'        => $workTime,
             'work_time_label'  => $this->workTimeLabel($workTime),
+            'profession'       => $castRow->profession ?? '',
             'current_job'      => $castRow->profession ?? '',
+            'exp'              => $nightWorkExp,
             'night_work_exp'   => $nightWorkExp,
             'night_work_label' => $nightWorkExp === 'yes' ? '有り' : '無し',
             'reviews'          => $reviews,
@@ -779,6 +787,7 @@ class MypageController extends Controller
             'pr'               => '',
             'intro'            => '',
             'appeal_updated_at'=> null,
+            'industry_names'   => '',
             'desired_job'      => '',
             'my_field'         => '',
             'my_inner_skills'  => '',
@@ -786,18 +795,25 @@ class MypageController extends Controller
             'looks_tags'       => [],
             'personality_tags' => [],
             'memo_data'        => [
+                'industry_names' => '',
                 'desired_job' => '',
                 'my_field' => '',
                 'my_inner_skills' => '',
+                'work_where' => '',
                 'shift_hope' => '',
                 'work_time' => '',
+                'exp' => '',
                 'night_work_exp' => '',
+                'profession' => '',
                 'current_job' => '',
             ],
+            'work_where'       => '',
             'shift_hope'       => '',
             'work_time'        => '',
             'work_time_label'  => '',
+            'profession'       => '',
             'current_job'      => '',
+            'exp'              => '',
             'night_work_exp'   => '',
             'night_work_label' => '',
             'reviews'          => [],

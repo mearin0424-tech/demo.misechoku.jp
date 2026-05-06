@@ -109,7 +109,7 @@
                 @endif
                 <div class="detail-row">
                     <span class="detail-label">希望職種</span>
-                    <span class="detail-value">{{ $cast['desired_job'] ?? '--' }}</span>
+                    <span class="detail-value">{{ $cast['industry_names'] ?? ($cast['desired_job'] ?? '--') }}</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">ルックス</span>
@@ -121,7 +121,7 @@
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">シフト希望</span>
-                    <span class="detail-value">{{ $cast['shift_hope'] ?? '--' }}</span>
+                    <span class="detail-value">{{ $cast['work_where'] ?? ($cast['shift_hope'] ?? '--') }}</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">勤務時間帯</span>
@@ -133,7 +133,7 @@
                 </div>
                 <div class="detail-row detail-row-block">
                     <span class="detail-label">現職業</span>
-                    <div class="detail-value">@if(!empty($cast['current_job'])){!! nl2br(e($cast['current_job'])) !!}@else--@endif</div>
+                    <div class="detail-value">@if(!empty($cast['profession'])){!! nl2br(e($cast['profession'])) !!}@elseif(!empty($cast['current_job'])){!! nl2br(e($cast['current_job'])) !!}@else--@endif</div>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">ナイトワーク経験</span>

@@ -55,10 +55,6 @@ class SearchController extends BaseSearchController
         $rows = DB::table('casts')
             ->join('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id');
 
-        if ($useCastPostsForHitokoto) {
-            $rows->leftJoin('cast_posts', 'casts.id', '=', 'cast_posts.cast_id');
-        }
-
         $select = [
             'casts.id',
             'casts.created_at as cast_created_at',
@@ -72,19 +68,25 @@ class SearchController extends BaseSearchController
             'cast_profiles.updated_at as profile_updated_at',
         ];
 
-        if ($castPostsHasBody) {
-            $select[] = 'cast_posts.body as hitokoto_body';
+        if ($useCastPostsForHitokoto) {
+            if ($castPostsHasBody) {
+                $select[] = DB::raw("(SELECT cp.body FROM cast_posts cp WHERE cp.cast_id = casts.id ORDER BY COALESCE(cp.updated_at, cp.created_at) DESC, cp.id DESC LIMIT 1) as hitokoto_body");
+            } else {
+                $select[] = DB::raw('NULL as hitokoto_body');
+            }
+            if ($castPostsHasUpdatedAt) {
+                $select[] = DB::raw("(SELECT cp.updated_at FROM cast_posts cp WHERE cp.cast_id = casts.id ORDER BY COALESCE(cp.updated_at, cp.created_at) DESC, cp.id DESC LIMIT 1) as hitokoto_updated_at");
+            } else {
+                $select[] = DB::raw('NULL as hitokoto_updated_at');
+            }
+            if ($castPostsHasCreatedAt) {
+                $select[] = DB::raw("(SELECT cp.created_at FROM cast_posts cp WHERE cp.cast_id = casts.id ORDER BY COALESCE(cp.updated_at, cp.created_at) DESC, cp.id DESC LIMIT 1) as hitokoto_created_at");
+            } else {
+                $select[] = DB::raw('NULL as hitokoto_created_at');
+            }
         } else {
             $select[] = DB::raw('NULL as hitokoto_body');
-        }
-        if ($castPostsHasUpdatedAt) {
-            $select[] = 'cast_posts.updated_at as hitokoto_updated_at';
-        } else {
             $select[] = DB::raw('NULL as hitokoto_updated_at');
-        }
-        if ($castPostsHasCreatedAt) {
-            $select[] = 'cast_posts.created_at as hitokoto_created_at';
-        } else {
             $select[] = DB::raw('NULL as hitokoto_created_at');
         }
 
@@ -130,9 +132,6 @@ class SearchController extends BaseSearchController
                 }
 
                 $hitokotoBody = (string) ($row->hitokoto_body ?? '');
-                if ($hitokotoBody === '') {
-                    $hitokotoBody = (string) ($row->pr ?? '');
-                }
 
                 return [
                     'id'                  => $row->id,
@@ -170,8 +169,8 @@ class SearchController extends BaseSearchController
             default:
                 if ($castPostsHasUpdatedAt) {
                     // ひとこと最終更新が新しい順。未投稿のキャストは最後に回す。
-                    $rows->orderByRaw('cast_posts.updated_at IS NULL')
-                        ->orderByDesc('cast_posts.updated_at')
+                    $rows->orderByRaw('(SELECT MAX(cp.updated_at) FROM cast_posts cp WHERE cp.cast_id = casts.id) IS NULL')
+                        ->orderByRaw('(SELECT MAX(cp.updated_at) FROM cast_posts cp WHERE cp.cast_id = casts.id) DESC')
                         ->orderByDesc('cast_profiles.updated_at')
                         ->orderByDesc('casts.id');
                 } else {
