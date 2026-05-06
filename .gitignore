@@ -4,4 +4,7 @@
 /composer.phar
 /phpunit.phar
 /database/*.sqlite
+.env
+.env.*
 .env.testing
+.env.backup
