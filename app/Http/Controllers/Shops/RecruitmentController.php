@@ -114,9 +114,7 @@ class RecruitmentController extends Controller
         if (Schema::hasColumn('shop_jobs', 'job_type')) {
             $query->addSelect('shop_jobs.job_type');
         }
-        if (Schema::hasColumn('cast_profiles', 'main_image_path')) {
-            $query->addSelect('cast_profiles.main_image_path');
-        }
+        $query->addSelect(DB::raw("(SELECT ci.image_path FROM cast_images ci WHERE ci.cast_id = cast_profiles.cast_id AND ci.type = 1 ORDER BY ci.is_main DESC, ci.main_order IS NULL, ci.main_order, ci.id LIMIT 1) as main_image_path"));
         if (Schema::hasColumn('shop_job_applications', 'reason_rejection')) {
             $query->addSelect('shop_job_applications.reason_rejection');
         }
@@ -220,9 +218,7 @@ class RecruitmentController extends Controller
                     $statusLabel = '本入店希望（体験採用）';
                     $statusDisplayLabel = '本入店希望（体験採用）';
                 }
-                $mainImagePath = Schema::hasColumn('cast_profiles', 'main_image_path')
-                    ? ($row->main_image_path ?? null)
-                    : null;
+                $mainImagePath = $row->main_image_path ?? null;
                 $castAvatarUrl = $mainImagePath ? $this->assetPathForStored((string) $mainImagePath) : null;
                 $rejectionReason = '';
                 if (Schema::hasColumn('shop_job_applications', 'reason_rejection')) {
@@ -888,12 +884,7 @@ class RecruitmentController extends Controller
                 ->first();
         }
 
-        $industryName = null;
-        if (!empty($row?->industry_id)) {
-            $industryName = DB::table('industries')
-                ->where('id', $row->industry_id)
-                ->value('name');
-        }
+        $industryName = $this->resolveShopIndustryName($shopId, $row?->industry_id ?? null);
         $shopTagGroups = $this->resolveShopInfoTagGroups($shopId);
 
         $meta = $this->decodeMeta($row->noruma_cond ?? null);
@@ -1283,12 +1274,7 @@ class RecruitmentController extends Controller
             $meta = $this->decodeMeta($row->noruma_cond);
         }
 
-        $industryName = null;
-        if (!empty($row?->industry_id)) {
-            $industryName = DB::table('industries')
-                ->where('id', $row->industry_id)
-                ->value('name');
-        }
+        $industryName = $this->resolveShopIndustryName($shopId, $row?->industry_id ?? null);
         $shopTagGroups = $this->resolveShopInfoTagGroups($shopId);
 
         $catchCopy = Schema::hasColumn('shop_jobs', 'catch_copy')
@@ -1893,6 +1879,58 @@ class RecruitmentController extends Controller
             ->all();
 
         return $names === [] ? '' : implode(' / ', $names);
+    }
+
+    private function resolveShopIndustryName(string $shopId, mixed $fallbackIndustryId = null): ?string
+    {
+        if (!Schema::hasTable('industries')) {
+            return null;
+        }
+
+        $names = [];
+        if (Schema::hasTable('shop_industry')) {
+            $names = DB::table('shop_industry')
+                ->join('industries', 'shop_industry.industry_id', '=', 'industries.id')
+                ->where('shop_industry.shop_id', $shopId)
+                ->orderBy('shop_industry.industry_id')
+                ->pluck('industries.name')
+                ->filter()
+                ->values()
+                ->all();
+        } elseif (Schema::hasTable('industry_shop')) {
+            $names = DB::table('industry_shop')
+                ->join('industries', 'industry_shop.industry_id', '=', 'industries.id')
+                ->where('industry_shop.shop_id', $shopId)
+                ->orderBy('industry_shop.industry_id')
+                ->pluck('industries.name')
+                ->filter()
+                ->values()
+                ->all();
+        } elseif (Schema::hasTable('shop_industries')) {
+            $names = DB::table('shop_industries')
+                ->join('industries', 'shop_industries.industry_id', '=', 'industries.id')
+                ->where('shop_industries.shop_id', $shopId)
+                ->orderBy('shop_industries.industry_id')
+                ->pluck('industries.name')
+                ->filter()
+                ->values()
+                ->all();
+        }
+
+        if ($names === [] && $fallbackIndustryId !== null && $fallbackIndustryId !== '') {
+            $name = DB::table('industries')
+                ->where('id', (int) $fallbackIndustryId)
+                ->value('name');
+            if (!empty($name)) {
+                $names = [$name];
+            }
+        }
+
+        if ($names === []) {
+            return null;
+        }
+
+        return implode(' / ', array_values(array_unique(array_map('strval', $names))));
     }
 
     private function streetAddressFromProfileRow(?object $row): string

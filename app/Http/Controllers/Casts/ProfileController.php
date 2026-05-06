@@ -32,7 +32,12 @@ class ProfileController extends Controller
                 'cast_profiles.zip',
                 'cast_profiles.pref',
                 'cast_profiles.city',
-                'cast_profiles.addr1',
+                Schema::hasColumn('cast_profiles', 'addr')
+                    ? 'cast_profiles.addr'
+                    : DB::raw('NULL as addr'),
+                Schema::hasColumn('cast_profiles', 'building')
+                    ? 'cast_profiles.building'
+                    : DB::raw('NULL as building'),
                 'cast_profiles.pr',
                 'cast_profiles.height',
                 'cast_profiles.weight',
@@ -44,8 +49,7 @@ class ProfileController extends Controller
                 'cast_profiles.exp',
                 Schema::hasColumn('cast_profiles', 'personality_type')
                     ? 'cast_profiles.personality_type'
-                    : DB::raw('NULL as personality_type'),
-                'cast_profiles.memo'
+                    : DB::raw('NULL as personality_type')
             )
             ->first();
 
@@ -54,8 +58,7 @@ class ProfileController extends Controller
         }
 
         $birthday = $row->birthday ? Carbon::parse($row->birthday) : null;
-        $memo = $this->decodeProfileMemo($row->memo ?? null);
-        $nightWorkExp = $memo['night_work_exp'] ?? ((int) ($row->exp ?? 0) === 1 ? 'yes' : 'none');
+        $nightWorkExp = ((int) ($row->exp ?? 0) === 1 ? 'yes' : 'none');
 
         return [
             'nickname'       => $row->nickname ?? '',
@@ -66,24 +69,24 @@ class ProfileController extends Controller
             'zip'            => $row->zip ?? '',
             'pref'           => $row->pref ?? '東京都',
             'city'           => $row->city ?? '中央区',
-            'addr1'          => $row->addr1 ?? '',
+            'addr1'          => trim(implode(' ', array_filter([(string) ($row->addr ?? ''), (string) ($row->building ?? '')]))),
             'intro'          => $row->pr ?? '',
             'height'         => $row->height ? (string) $row->height : '',
             'weight'         => $row->weight ? (string) $row->weight : '',
             'bust'           => $row->bust ? (string) $row->bust : '',
             'waist'          => $row->waist ? (string) $row->waist : '',
             'hip'            => $row->hip ? (string) $row->hip : '',
-            'desired_job'    => $memo['desired_job'] ?? '',
-            'my_field'       => $memo['my_field'] ?? '',
-            'my_inner_skills'=> $memo['my_inner_skills'] ?? '',
-            'shift_hope'     => $memo['shift_hope'] ?? $this->shiftHopeLabel($row->shift),
-            'work_time'      => $memo['work_time'] ?? '',
-            'current_job'    => $memo['current_job'] ?? ($row->profession ?? ''),
+            'desired_job'    => '',
+            'my_field'       => '',
+            'my_inner_skills'=> '',
+            'shift_hope'     => $this->shiftHopeLabel($row->shift),
+            'work_time'      => '',
+            'current_job'    => $row->profession ?? '',
             'night_work_exp' => $nightWorkExp,
-            'industry_id'    => $row->industry_id ?? null,
-            'look_tag_ids'   => collect($memo['look_tag_ids'] ?? [])->map(fn ($id) => (int) $id)->all(),
-            'personality_tag_ids' => collect($memo['personality_tag_ids'] ?? [])->map(fn ($id) => (int) $id)->all(),
-            'personality_type' => $this->resolvePersonalityType($row->personality_type ?? null, $memo),
+            'industry_ids'   => $this->resolveCastIndustryIds($castId, $row->industry_id ?? null),
+            'look_tag_ids'   => [],
+            'personality_tag_ids' => [],
+            'personality_type' => $this->resolvePersonalityType($row->personality_type ?? null),
         ];
     }
 
@@ -112,7 +115,7 @@ class ProfileController extends Controller
             'work_time'      => '',
             'current_job'    => '',
             'night_work_exp' => 'none',
-            'industry_id'    => null,
+            'industry_ids'   => [],
             'look_tag_ids'   => [],
             'personality_tag_ids' => [],
             'personality_type' => '',
@@ -149,7 +152,7 @@ class ProfileController extends Controller
             'zip'          => ['nullable', 'regex:/^\d{3}-?\d{4}$/'],
             'pref'         => 'nullable|string|max:50',
             'city'         => 'nullable|string|max:50',
-            'addr1'        => 'nullable|string|max:100',
+            'addr1'        => 'nullable|string|max:255',
             'intro'        => 'nullable|string',
             'height'       => 'nullable|string|max:10',
             'weight'       => 'nullable|string|max:10',
@@ -163,7 +166,8 @@ class ProfileController extends Controller
             'work_time'    => 'nullable|string|max:20',
             'current_job'  => 'nullable|string',
             'night_work_exp' => 'nullable|string|max:20',
-            'industry_id'   => 'nullable|integer|exists:industries,id',
+            'industry_ids'   => 'nullable|array',
+            'industry_ids.*' => 'integer|exists:industries,id',
             'look_tag_ids' => 'nullable|array',
             'look_tag_ids.*' => 'integer|exists:cast_tags,id',
             'personality_tag_ids' => 'nullable|array',
@@ -195,7 +199,12 @@ class ProfileController extends Controller
                 ->withInput();
         }
 
-        $memo = $this->decodeProfileMemo(DB::table('cast_profiles')->where('cast_id', $castId)->value('memo'));
+        $industryIds = collect($request->input('industry_ids', []))
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
 
         DB::table('cast_profiles')->updateOrInsert(
             ['cast_id' => $castId],
@@ -211,7 +220,8 @@ class ProfileController extends Controller
                 'zip' => $this->normalizeZip($request->input('zip')),
                 'pref' => $request->input('pref'),
                 'city' => $request->input('city'),
-                'addr1' => $request->input('addr1'),
+                'addr' => $request->input('addr1'),
+                'building' => null,
                 'pr' => $request->input('intro'),
                 'height' => $request->filled('height') ? (int) $request->input('height') : null,
                 'weight' => $request->filled('weight') ? (int) $request->input('weight') : null,
@@ -221,18 +231,7 @@ class ProfileController extends Controller
                 'shift' => $this->shiftCode($request->input('shift_hope')),
                 'profession' => $request->input('current_job'),
                 'exp' => $request->input('night_work_exp') === 'yes' ? 1 : 0,
-                'industry_id' => $request->input('industry_id') ?: null,
-                'memo' => json_encode(array_merge($memo, [
-                    'desired_job' => $request->input('desired_job'),
-                    'my_field' => $request->input('my_field'),
-                    'my_inner_skills' => $request->input('my_inner_skills'),
-                    'shift_hope' => $request->input('shift_hope'),
-                    'work_time' => $request->input('work_time'),
-                    'current_job' => $request->input('current_job'),
-                    'night_work_exp' => $request->input('night_work_exp'),
-                    'look_tag_ids' => array_values(array_map('intval', $request->input('look_tag_ids', []))),
-                    'personality_tag_ids' => array_values(array_map('intval', $request->input('personality_tag_ids', []))),
-                ]), JSON_UNESCAPED_UNICODE),
+                'industry_id' => $industryIds[0] ?? null,
                 'updated_at' => now(),
                 'created_at' => now(),
             ]
@@ -241,8 +240,9 @@ class ProfileController extends Controller
         // キャストタグ（ルックス・性格）を中間テーブル cast_tag_relations で同期
         $this->syncCastTags($castId, 'looks', $request->input('look_tag_ids', []));
         $this->syncCastTags($castId, 'personality', $request->input('personality_tag_ids', []));
+        $this->syncCastIndustries($castId, $industryIds);
 
-        return redirect()->route('cast.profile.edit')
+        return redirect()->route('cast.mypage.index')
             ->with('message', 'プロフィールを更新しました')
             ->withInput([]);
     }
@@ -254,15 +254,7 @@ class ProfileController extends Controller
         ]);
 
         $castId = $this->currentCastId();
-        $existingMemo = DB::table('cast_profiles')
-            ->where('cast_id', $castId)
-            ->value('memo');
-
-        $memo = $this->decodeProfileMemo($existingMemo);
-        $memo['personality_type'] = $validated['personality_type'];
-
         $payload = [
-            'memo' => json_encode($memo, JSON_UNESCAPED_UNICODE),
             'updated_at' => now(),
         ];
 
@@ -394,8 +386,6 @@ class ProfileController extends Controller
 
     private function buildCastDetailData(string $castId): array
     {
-        $this->cleanupStaleMainImagePath($castId);
-
         $row = DB::table('casts')
             ->leftJoin('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id')
             ->where('casts.id', $castId)
@@ -417,8 +407,7 @@ class ProfileController extends Controller
                 'cast_profiles.pr',
                 Schema::hasColumn('cast_profiles', 'personality_type')
                     ? 'cast_profiles.personality_type'
-                    : DB::raw('NULL as personality_type'),
-                'cast_profiles.memo'
+                    : DB::raw('NULL as personality_type')
             )
             ->first();
 
@@ -427,8 +416,7 @@ class ProfileController extends Controller
         }
 
         $birthday = $row->birthday ? Carbon::parse($row->birthday) : null;
-        $memo = $this->decodeProfileMemo($row->memo ?? null);
-        $nightWorkExp = $memo['night_work_exp'] ?? ((int) ($row->exp ?? 0) === 1 ? 'yes' : 'none');
+        $nightWorkExp = ((int) ($row->exp ?? 0) === 1 ? 'yes' : 'none');
 
         $images = DB::table('cast_images')
             ->where('cast_id', $castId)
@@ -488,14 +476,14 @@ class ProfileController extends Controller
             'hip' => $row->hip,
             'pr' => $row->pr ?? '',
             'intro' => $row->pr ?? '',
-            'desired_job' => $memo['desired_job'] ?? '',
-            'my_field' => $memo['my_field'] ?? '',
-            'my_inner_skills' => $memo['my_inner_skills'] ?? '',
-            'personality_type' => $this->resolvePersonalityType($row->personality_type ?? null, $memo),
-            'shift_hope' => $memo['shift_hope'] ?? $this->shiftHopeLabel($row->shift),
-            'work_time' => $memo['work_time'] ?? '',
-            'work_time_label' => $this->workTimeLabel($memo['work_time'] ?? ''),
-            'current_job' => $memo['current_job'] ?? ($row->profession ?? ''),
+            'desired_job' => '',
+            'my_field' => '',
+            'my_inner_skills' => '',
+            'personality_type' => $this->resolvePersonalityType($row->personality_type ?? null),
+            'shift_hope' => $this->shiftHopeLabel($row->shift),
+            'work_time' => '',
+            'work_time_label' => '',
+            'current_job' => $row->profession ?? '',
             'night_work_exp' => $nightWorkExp,
             'night_work_label' => $nightWorkExp === 'yes' ? '有り' : '無し',
             'reviews' => $reviews,
@@ -565,24 +553,6 @@ class ProfileController extends Controller
         ];
     }
 
-    private function cleanupStaleMainImagePath(string $castId): void
-    {
-        $hasImages = DB::table('cast_images')
-            ->where('cast_id', $castId)
-            ->where('type', 1)
-            ->exists();
-
-        if (!$hasImages) {
-            DB::table('cast_profiles')
-                ->where('cast_id', $castId)
-                ->whereNotNull('main_image_path')
-                ->update([
-                    'main_image_path' => null,
-                    'updated_at' => now(),
-                ]);
-        }
-    }
-
     private function castExists(string $castId): bool
     {
         return DB::table('casts')
@@ -604,20 +574,9 @@ class ProfileController extends Controller
         return asset(ltrim($path, '/'));
     }
 
-    private function decodeProfileMemo(?string $memo): array
+    private function resolvePersonalityType(?string $columnType): string
     {
-        if (empty($memo)) {
-            return [];
-        }
-
-        $decoded = json_decode($memo, true);
-
-        return is_array($decoded) ? $decoded : [];
-    }
-
-    private function resolvePersonalityType(?string $columnType, array $memo): string
-    {
-        $type = $columnType ?? ($memo['personality_type'] ?? '');
+        $type = $columnType ?? '';
 
         return is_string($type) && preg_match('/^[LF][CP][IO][HR]$/', $type) ? $type : '';
     }
@@ -698,5 +657,46 @@ class ProfileController extends Controller
         }
 
         return substr($digits, 0, 3) . '-' . substr($digits, 3);
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private function resolveCastIndustryIds(string $castId, $fallbackIndustryId = null): array
+    {
+        if (Schema::hasTable('cast_industry')) {
+            $ids = DB::table('cast_industry')
+                ->where('cast_id', $castId)
+                ->orderBy('industry_id')
+                ->pluck('industry_id')
+                ->map(fn ($id) => (int) $id)
+                ->filter()
+                ->values()
+                ->all();
+            if ($ids !== []) {
+                return $ids;
+            }
+        }
+
+        $single = (int) ($fallbackIndustryId ?? 0);
+        return $single > 0 ? [$single] : [];
+    }
+
+    /**
+     * @param array<int, int> $industryIds
+     */
+    private function syncCastIndustries(string $castId, array $industryIds): void
+    {
+        if (!Schema::hasTable('cast_industry')) {
+            return;
+        }
+
+        DB::table('cast_industry')->where('cast_id', $castId)->delete();
+        foreach ($industryIds as $industryId) {
+            DB::table('cast_industry')->insert([
+                'cast_id' => $castId,
+                'industry_id' => (int) $industryId,
+            ]);
+        }
     }
 }

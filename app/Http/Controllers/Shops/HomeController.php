@@ -48,7 +48,7 @@ class HomeController extends Controller
                 'cast_profiles.pref',
                 'cast_profiles.city',
                 'cast_profiles.pr',
-                'cast_profiles.main_image_path'
+                DB::raw("(SELECT ci.image_path FROM cast_images ci WHERE ci.cast_id = casts.id AND ci.type = 1 ORDER BY ci.is_main DESC, ci.main_order IS NULL, ci.main_order, ci.id LIMIT 1) as main_image_path")
             )
             ->orderBy('casts.id')
             ->limit(20)
@@ -138,8 +138,7 @@ class HomeController extends Controller
 
         $q = DB::table('shops')
             ->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
-            ->join('shop_jobs', 'shops.id', '=', 'shop_jobs.shop_id')
-            ->leftJoin('industries', 'industries.id', '=', 'shop_profiles.industry_id');
+            ->join('shop_jobs', 'shops.id', '=', 'shop_jobs.shop_id');
 
         if ($horizontal) {
             $q->where('shop_jobs.regular_status', 1);
@@ -163,8 +162,8 @@ class HomeController extends Controller
             'shop_profiles.shop_name',
             'shop_profiles.pref',
             'shop_profiles.city',
+            'shop_profiles.industry_id',
             DB::raw("(SELECT si.image_path FROM shop_images si WHERE si.shop_id = shops.id ORDER BY si.is_main DESC, si.main_order IS NULL, si.main_order, si.id LIMIT 1) as main_image_path"),
-            'industries.name as industry_name',
         ];
         if (Schema::hasColumn('shop_jobs', 'hourly_wage_regular')) {
             $selectFields[] = 'shop_jobs.hourly_wage_regular';
@@ -217,6 +216,8 @@ class HomeController extends Controller
             ->orderBy('shops.id')
             ->limit(20)
             ->get();
+
+        $industryByShop = $this->resolveIndustryLabelsByShopIds($rows->pluck('id')->unique()->values()->all());
 
         $shopIds = $rows->pluck('id')->unique()->values()->all();
         $trialByShop = collect();
@@ -390,7 +391,7 @@ class HomeController extends Controller
                 'pref' => $row->pref ?? '',
                 'city' => $row->city ?? '',
                 'like_count' => $likeCounts[$row->id] ?? 0,
-                'industry_name' => $row->industry_name ?? null,
+                'industry_name' => $industryByShop[$row->id] ?? null,
                 'rating' => $hasReviews ? (float) ($row->avg_rating ?? 0) : 0.0,
                 'review_count' => $hasReviews ? (int) ($row->review_count ?? 0) : 0,
                 'is_premium' => isset($premiumShopIds[$row->id]),
@@ -568,6 +569,61 @@ class HomeController extends Controller
         $decoded = json_decode($raw, true);
 
         return is_array($decoded) ? $decoded : [];
+    }
+
+    /**
+     * @param array<int, string> $shopIds
+     * @return array<string, string>
+     */
+    private function resolveIndustryLabelsByShopIds(array $shopIds): array
+    {
+        $shopIds = array_values(array_filter($shopIds, fn ($id) => is_string($id) && $id !== ''));
+        if ($shopIds === [] || !Schema::hasTable('industries')) {
+            return [];
+        }
+
+        $rows = collect();
+        if (Schema::hasTable('shop_industry')) {
+            $rows = DB::table('shop_industry')
+                ->join('industries', 'shop_industry.industry_id', '=', 'industries.id')
+                ->whereIn('shop_industry.shop_id', $shopIds)
+                ->orderBy('shop_industry.industry_id')
+                ->get(['shop_industry.shop_id as shop_id', 'industries.name as name']);
+        } elseif (Schema::hasTable('industry_shop')) {
+            $rows = DB::table('industry_shop')
+                ->join('industries', 'industry_shop.industry_id', '=', 'industries.id')
+                ->whereIn('industry_shop.shop_id', $shopIds)
+                ->orderBy('industry_shop.industry_id')
+                ->get(['industry_shop.shop_id as shop_id', 'industries.name as name']);
+        } elseif (Schema::hasTable('shop_industries')) {
+            $rows = DB::table('shop_industries')
+                ->join('industries', 'shop_industries.industry_id', '=', 'industries.id')
+                ->whereIn('shop_industries.shop_id', $shopIds)
+                ->orderBy('shop_industries.industry_id')
+                ->get(['shop_industries.shop_id as shop_id', 'industries.name as name']);
+        } else {
+            $rows = DB::table('shop_profiles')
+                ->leftJoin('industries', 'shop_profiles.industry_id', '=', 'industries.id')
+                ->whereIn('shop_profiles.shop_id', $shopIds)
+                ->get(['shop_profiles.shop_id as shop_id', 'industries.name as name']);
+        }
+
+        $map = [];
+        foreach ($rows as $row) {
+            $shopId = (string) ($row->shop_id ?? '');
+            $name = trim((string) ($row->name ?? ''));
+            if ($shopId === '' || $name === '') {
+                continue;
+            }
+            $map[$shopId] ??= [];
+            if (!in_array($name, $map[$shopId], true)) {
+                $map[$shopId][] = $name;
+            }
+        }
+
+        return collect($map)
+            ->map(fn ($names) => implode(' / ', $names))
+            ->all();
     }
 
     /**

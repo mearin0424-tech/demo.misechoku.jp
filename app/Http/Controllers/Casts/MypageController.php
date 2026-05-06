@@ -541,8 +541,6 @@ class MypageController extends Controller
      */
     private function getCastFromDatabase(string $castId): array
     {
-        $this->cleanupStaleMainImagePath($castId);
-
         $castRow = DB::table('casts')
             ->leftJoin('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id')
             ->where('casts.id', $castId)
@@ -558,7 +556,12 @@ class MypageController extends Controller
                 'cast_profiles.zip',
                 'cast_profiles.pref',
                 'cast_profiles.city',
-                'cast_profiles.addr1',
+                Schema::hasColumn('cast_profiles', 'addr')
+                    ? 'cast_profiles.addr'
+                    : DB::raw('NULL as addr'),
+                Schema::hasColumn('cast_profiles', 'building')
+                    ? 'cast_profiles.building'
+                    : DB::raw('NULL as building'),
                 'cast_profiles.height',
                 'cast_profiles.weight',
                 'cast_profiles.bust',
@@ -571,8 +574,6 @@ class MypageController extends Controller
                 Schema::hasColumn('cast_profiles', 'personality_type')
                     ? 'cast_profiles.personality_type'
                     : DB::raw('NULL as personality_type'),
-                'cast_profiles.memo',
-                'cast_profiles.main_image_path',
                 'cast_profiles.updated_at as profile_updated_at'
             )
             ->first();
@@ -584,12 +585,11 @@ class MypageController extends Controller
 
         $birthday = $castRow->birthday ? Carbon::parse($castRow->birthday) : null;
         $age = $birthday ? $birthday->age : null;
-        $memo = $this->decodeProfileMemo($castRow->memo ?? null);
-        $shiftHope = $memo['shift_hope'] ?? $this->shiftHopeLabel($castRow->shift);
-        $workTime = $memo['work_time'] ?? '';
-        $nightWorkExp = $memo['night_work_exp'] ?? ((int) ($castRow->exp ?? 0) === 1 ? 'yes' : 'none');
-        $looksTags = $this->getCastTagNamesByType($castId, 'looks', $memo['look_tag_ids'] ?? []);
-        $personalityTags = $this->getCastTagNamesByType($castId, 'personality', $memo['personality_tag_ids'] ?? []);
+        $shiftHope = $this->shiftHopeLabel($castRow->shift);
+        $workTime = '';
+        $nightWorkExp = ((int) ($castRow->exp ?? 0) === 1 ? 'yes' : 'none');
+        $looksTags = $this->getCastTagNamesByType($castId, 'looks');
+        $personalityTags = $this->getCastTagNamesByType($castId, 'personality');
         $likeCount = DB::table('favorites')
             ->where('cast_id', $castId)
             ->where('action_type', 3)
@@ -684,7 +684,7 @@ class MypageController extends Controller
             'zip'              => $castRow->zip ?? '',
             'pref'             => $castRow->pref ?? '',
             'city'             => $castRow->city ?? '',
-            'addr1'            => $castRow->addr1 ?? '',
+            'addr1'            => trim(implode(' ', array_filter([(string) ($castRow->addr ?? ''), (string) ($castRow->building ?? '')]))),
             'height'           => $castRow->height,
             'weight'           => $castRow->weight,
             'bust'             => $castRow->bust,
@@ -694,25 +694,25 @@ class MypageController extends Controller
             'pr'               => $castRow->pr ?? '',
             'intro'            => $castRow->pr ?? '',
             'appeal_updated_at'=> $appealUpdatedAt,
-            'desired_job'      => $memo['desired_job'] ?? '',
-            'my_field'         => $memo['my_field'] ?? '',
-            'my_inner_skills'  => $memo['my_inner_skills'] ?? '',
-            'personality_type' => $this->resolvePersonalityType($castRow->personality_type ?? null, $memo),
+            'desired_job'      => '',
+            'my_field'         => '',
+            'my_inner_skills'  => '',
+            'personality_type' => $this->resolvePersonalityType($castRow->personality_type ?? null),
             'looks_tags'       => $looksTags,
             'personality_tags' => $personalityTags,
             'memo_data'        => [
-                'desired_job' => $memo['desired_job'] ?? '',
-                'my_field' => $memo['my_field'] ?? '',
-                'my_inner_skills' => $memo['my_inner_skills'] ?? '',
+                'desired_job' => '',
+                'my_field' => '',
+                'my_inner_skills' => '',
                 'shift_hope' => $shiftHope,
                 'work_time' => $workTime,
                 'night_work_exp' => $nightWorkExp,
-                'current_job' => $memo['current_job'] ?? ($castRow->profession ?? ''),
+                'current_job' => $castRow->profession ?? '',
             ],
             'shift_hope'       => $shiftHope,
             'work_time'        => $workTime,
             'work_time_label'  => $this->workTimeLabel($workTime),
-            'current_job'      => $memo['current_job'] ?? ($castRow->profession ?? ''),
+            'current_job'      => $castRow->profession ?? '',
             'night_work_exp'   => $nightWorkExp,
             'night_work_label' => $nightWorkExp === 'yes' ? '有り' : '無し',
             'reviews'          => $reviews,
@@ -846,52 +846,17 @@ class MypageController extends Controller
                     ]);
             }
 
-            $mainImageId = $orderedIds[0] ?? null;
-            $mainImagePath = $mainImageId
-                ? optional($existingImages->firstWhere('id', $mainImageId))->image_path
-                : null;
-
             DB::table('cast_profiles')
                 ->where('cast_id', $castId)
                 ->update([
-                    'main_image_path' => $mainImagePath,
                     'updated_at' => now(),
                 ]);
         });
     }
 
-    private function cleanupStaleMainImagePath(string $castId): void
+    private function resolvePersonalityType(?string $columnType): string
     {
-        $hasImages = DB::table('cast_images')
-            ->where('cast_id', $castId)
-            ->where('type', 1)
-            ->exists();
-
-        if (!$hasImages) {
-            DB::table('cast_profiles')
-                ->where('cast_id', $castId)
-                ->whereNotNull('main_image_path')
-                ->update([
-                    'main_image_path' => null,
-                    'updated_at' => now(),
-                ]);
-        }
-    }
-
-    private function decodeProfileMemo(?string $memo): array
-    {
-        if (empty($memo)) {
-            return [];
-        }
-
-        $decoded = json_decode($memo, true);
-
-        return is_array($decoded) ? $decoded : [];
-    }
-
-    private function resolvePersonalityType(?string $columnType, array $memo): string
-    {
-        $type = $columnType ?? ($memo['personality_type'] ?? '');
+        $type = $columnType ?? '';
 
         return is_string($type) && preg_match('/^[LF][CP][IO][HR]$/', $type) ? $type : '';
     }

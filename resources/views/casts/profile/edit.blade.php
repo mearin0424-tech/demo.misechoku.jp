@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'プロフィール確認・編集')
-@section('header_title', 'プロフィール確認・編集')
+@section('title', 'Profile Edit')
+@section('header_title', 'Profile Edit')
 @section('guide_message', 'プロフィールを充実させていただくと、よりマッチしやすくなります。公開したくない内容は、無理にご記入いただかなくても問題ございません。')
 
 @push('styles')
@@ -21,342 +21,228 @@
 @endpush
 
 @section('content')
-<div class="edit-container cast-profile-edit">
+<div class="cast-edit-page">
     @if(session('message'))
         <p class="profile-edit-flash">{{ session('message') }}</p>
     @endif
 
-    <form action="{{ route($updateRoute ?? 'cast.profile.update') }}" method="POST" class="profile-edit-form h-adr">
+    @php
+        $selectedIndustryIds = collect(old('industry_ids', $profile['industry_ids'] ?? []))->map(fn ($id) => (int) $id)->all();
+        $selectedLookIds = collect(old('look_tag_ids', $profile['look_tag_ids'] ?? []))->map(fn ($id) => (int) $id)->all();
+        $selectedPersonalityIds = collect(old('personality_tag_ids', $profile['personality_tag_ids'] ?? []))->map(fn ($id) => (int) $id)->all();
+        $selectedWorkTime = old('work_time', $profile['work_time'] ?? 'day_night');
+        $selectedNightExp = old('night_work_exp', $profile['night_work_exp'] ?? 'none');
+    @endphp
+
+    <form action="{{ route($updateRoute ?? 'cast.profile.update') }}" method="POST" class="cast-edit-form h-adr">
         @csrf
         <span class="p-country-name" style="display:none;">Japan</span>
 
-        {{-- ニックネーム --}}
-        <div class="form-section">
-            <label class="edit-label" for="nickname">ニックネーム <span class="required">必須</span></label>
-            <input type="text" id="nickname" name="nickname" class="edit-input" value="{{ old('nickname', $profile['nickname']) }}" placeholder="ニックネーム">
-        </div>
-
-        {{-- 名前 --}}
-        <div class="form-section">
-            <label class="edit-label" for="name">名前</label>
-            <input type="text" id="name" name="name" class="edit-input" value="{{ old('name', $profile['name']) }}" placeholder="名前">
-        </div>
-
-        {{-- 生年月日 --}}
-        <div class="form-section">
-            <label class="edit-label">生年月日 <span class="required">必須</span></label>
-            <div class="birth-row">
-                <select name="birth_year" class="edit-select" aria-label="年">
-                    @foreach(range(date('Y'), 1950) as $y)
-                        <option value="{{ $y }}" {{ old('birth_year', $profile['birth_year']) == $y ? 'selected' : '' }}>{{ $y }}</option>
-                    @endforeach
-                </select>
-                <span class="birth-sep">年</span>
-                <select name="birth_month" class="edit-select" aria-label="月">
-                    @foreach(range(1, 12) as $m)
-                        <option value="{{ $m }}" {{ old('birth_month', $profile['birth_month']) == (string)$m ? 'selected' : '' }}>{{ $m }}</option>
-                    @endforeach
-                </select>
-                <span class="birth-sep">月</span>
-                <select name="birth_day" class="edit-select" aria-label="日">
-                    @foreach(range(1, 31) as $d)
-                        <option value="{{ $d }}" {{ old('birth_day', $profile['birth_day']) == (string)$d ? 'selected' : '' }}>{{ $d }}</option>
-                    @endforeach
-                </select>
-                <span class="birth-sep">日</span>
+        <section class="cast-edit-section">
+            <h3><i class="far fa-user"></i> 基本情報</h3>
+            <div class="field">
+                <label>ニックネーム <span class="required">必須</span></label>
+                <input type="text" name="nickname" value="{{ old('nickname', $profile['nickname']) }}" class="cast-input">
             </div>
-        </div>
-
-        {{-- 居住地 --}}
-        <div class="form-section">
-            <label class="edit-label">居住地</label>
-            <div class="address-item" style="margin-bottom: 12px;">
-                <label class="edit-label sub" for="zip">郵便番号</label>
-                <input
-                    type="text"
-                    id="zip"
-                    name="zip"
-                    class="edit-input p-postal-code"
-                    data-postal-code
-                    maxlength="8"
-                    pattern="[0-9-]*"
-                    value="{{ old('zip', $profile['zip']) }}"
-                    inputmode="numeric"
-                    autocomplete="postal-code"
-                    placeholder="例：160-0021"
-                >
-                <p class="input-hint">半角数字で入力してください。ハイフン有無どちらでも入力でき、住所が自動補完されます。</p>
+            <div class="field">
+                <label>名前</label>
+                <input type="text" name="name" value="{{ old('name', $profile['name']) }}" class="cast-input">
             </div>
-            <div class="address-row">
-                <div class="address-item">
-                    <label class="edit-label sub" for="pref">都道府県</label>
-                    <select id="pref" name="pref" class="edit-select p-region">
-                        <option value="">選択してください</option>
-                        @foreach ($prefOptions as $pref)
-                            <option value="{{ $pref }}" {{ old('pref', $profile['pref']) === $pref ? 'selected' : '' }}>{{ $pref }}</option>
+            <div class="field">
+                <label>生年月日 <span class="required">必須</span></label>
+                <div class="birth-row">
+                    <select name="birth_year" class="cast-select">
+                        @foreach(range(date('Y'), 1950) as $y)
+                            <option value="{{ $y }}" @selected(old('birth_year', $profile['birth_year']) == $y)>{{ $y }}</option>
+                        @endforeach
+                    </select>
+                    <select name="birth_month" class="cast-select">
+                        @foreach(range(1, 12) as $m)
+                            <option value="{{ $m }}" @selected(old('birth_month', $profile['birth_month']) == (string)$m)>{{ $m }}</option>
+                        @endforeach
+                    </select>
+                    <select name="birth_day" class="cast-select">
+                        @foreach(range(1, 31) as $d)
+                            <option value="{{ $d }}" @selected(old('birth_day', $profile['birth_day']) == (string)$d)>{{ $d }}</option>
                         @endforeach
                     </select>
                 </div>
-                <div class="address-item">
-                    <label class="edit-label sub" for="city">市区町村</label>
-                    <input
-                        type="text"
-                        id="city"
-                        name="city"
-                        class="edit-input p-locality"
-                        value="{{ old('city', $profile['city']) }}"
-                        autocomplete="address-level2"
-                        placeholder="例：新宿区"
-                    >
-                </div>
             </div>
-            <div class="address-item" style="margin-top: 12px;">
-                <label class="edit-label sub" for="addr1">町名・番地</label>
-                <input
-                    type="text"
-                    id="addr1"
-                    name="addr1"
-                    class="edit-input p-street-address"
-                    value="{{ old('addr1', $profile['addr1']) }}"
-                    autocomplete="address-line1"
-                    placeholder="例：1-2-3"
-                >
+            <div class="field">
+                <label>郵便番号</label>
+                <input type="text" name="zip" value="{{ old('zip', $profile['zip']) }}" class="cast-input p-postal-code" data-postal-code maxlength="8" pattern="[0-9-]*" inputmode="numeric" autocomplete="postal-code">
             </div>
-        </div>
-
-        <div class="form-section">
-            <label class="edit-label">希望業種</label>
-            <div class="checkbox-chip-grid">
-                @foreach(($masters['industries'] ?? []) as $industry)
-                    <label class="checkbox-chip">
-                        <input
-                            type="radio"
-                            name="industry_id"
-                            value="{{ $industry->id }}"
-                            {{ (int) old('industry_id', $profile['industry_id'] ?? 0) === (int) $industry->id ? 'checked' : '' }}
-                        >
-                        <span>{{ $industry->name }}</span>
-                    </label>
-                @endforeach
-            </div>
-            <p class="input-hint mt-1">※ 1つだけ選択できます。未選択でも保存できます。</p>
-        </div>
-
-        {{-- 自己紹介 --}}
-        <div class="form-section">
-            <label class="edit-label" for="intro">自己紹介</label>
-            <textarea id="intro" name="intro" class="edit-textarea" rows="4" placeholder="自己紹介">{{ old('intro', $profile['intro']) }}</textarea>
-        </div>
-
-        {{-- 身長 --}}
-        <div class="form-section">
-            <label class="edit-label" for="height">身長</label>
-            <div class="number-unit-row">
-                <input type="number" id="height" name="height" class="edit-input with-unit" value="{{ old('height', $profile['height']) }}" placeholder="156" min="100" max="250">
-                <span class="unit">cm</span>
-            </div>
-        </div>
-
-        {{-- 体重 --}}
-        <div class="form-section">
-            <label class="edit-label" for="weight">体重</label>
-            <div class="number-unit-row">
-                <input type="number" id="weight" name="weight" class="edit-input with-unit" value="{{ old('weight', $profile['weight']) }}" placeholder="44" min="30" max="150">
-                <span class="unit">kg</span>
-            </div>
-        </div>
-
-        {{-- 3サイズ --}}
-        <div class="form-section">
-            <label class="edit-label">3サイズ</label>
-            <div class="three-size-row">
-                <div class="size-item">
-                    <input type="number" name="bust" class="edit-input" value="{{ old('bust', $profile['bust']) }}" placeholder="B" min="50" max="120">
-                </div>
-                <div class="size-item">
-                    <input type="number" name="waist" class="edit-input" value="{{ old('waist', $profile['waist']) }}" placeholder="W" min="40" max="120">
-                </div>
-                <div class="size-item">
-                    <input type="number" name="hip" class="edit-input" value="{{ old('hip', $profile['hip']) }}" placeholder="H" min="50" max="120">
-                </div>
-            </div>
-        </div>
-
-        {{-- その他情報（アコーディオン） --}}
-        <div class="form-section other-info-section">
-            <button type="button" class="other-info-header" id="other-info-toggle" aria-expanded="true" aria-controls="other-info-body" onclick="toggleOtherInfo(this)">
-                <span class="other-info-icon" aria-hidden="true"></span>
-                <span class="other-info-title">その他情報</span>
-                <i class="fas fa-minus other-info-chevron" aria-hidden="true"></i>
-            </button>
-            <div class="other-info-body" id="other-info-body" role="region">
-                {{-- 希望職種（展開可能） --}}
-                <div class="accordion-item">
-                    <button type="button" class="accordion-trigger" aria-expanded="false" aria-controls="desired-job-body" onclick="toggleAccordionItem(this)">
-                        <span>希望職種</span>
-                        <i class="fas fa-plus accordion-icon" aria-hidden="true"></i>
-                    </button>
-                    <div class="accordion-content" id="desired-job-body">
-                        <input type="text" name="desired_job" class="edit-input" value="{{ old('desired_job', $profile['desired_job']) }}" placeholder="希望職種を入力">
-                    </div>
-                </div>
-                {{-- ご自分の系統 --}}
-                <div class="accordion-item">
-                    <button type="button" class="accordion-trigger" aria-expanded="false" aria-controls="my-field-body" onclick="toggleAccordionItem(this)">
-                        <span>ご自分の系統</span>
-                        <i class="fas fa-plus accordion-icon" aria-hidden="true"></i>
-                    </button>
-                    <div class="accordion-content" id="my-field-body">
-                        <input type="text" name="my_field" class="edit-input" value="{{ old('my_field', $profile['my_field']) }}" placeholder="ご自分の系統を入力">
-                        <div class="checkbox-chip-grid mt-12">
-                            @foreach(($masters['looks'] ?? []) as $look)
-                                <label class="checkbox-chip">
-                                    <input
-                                        type="checkbox"
-                                        name="look_tag_ids[]"
-                                        value="{{ $look->id }}"
-                                        {{ in_array((int) $look->id, old('look_tag_ids', $profile['look_tag_ids'] ?? []), true) ? 'checked' : '' }}
-                                    >
-                                    <span>{{ $look->name }}</span>
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-                {{-- ご自分の内面・特技 --}}
-                <div class="accordion-item">
-                    <button type="button" class="accordion-trigger" aria-expanded="false" aria-controls="my-inner-body" onclick="toggleAccordionItem(this)">
-                        <span>ご自分の内面・特技</span>
-                        <i class="fas fa-plus accordion-icon" aria-hidden="true"></i>
-                    </button>
-                    <div class="accordion-content" id="my-inner-body">
-                        <input type="text" name="my_inner_skills" class="edit-input" value="{{ old('my_inner_skills', $profile['my_inner_skills']) }}" placeholder="内面・特技を入力">
-                        <div class="checkbox-chip-grid mt-12">
-                            @foreach(($masters['personalities'] ?? []) as $personality)
-                                <label class="checkbox-chip">
-                                    <input
-                                        type="checkbox"
-                                        name="personality_tag_ids[]"
-                                        value="{{ $personality->id }}"
-                                        {{ in_array((int) $personality->id, old('personality_tag_ids', $profile['personality_tag_ids'] ?? []), true) ? 'checked' : '' }}
-                                    >
-                                    <span>{{ $personality->name }}</span>
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-
-                {{-- シフト希望 --}}
-                <div class="form-row">
-                    <label class="edit-label" for="shift_hope">シフト希望</label>
-                    <select id="shift_hope" name="shift_hope" class="edit-select">
-                        <option value="週1回出勤" {{ old('shift_hope', $profile['shift_hope']) === '週1回出勤' ? 'selected' : '' }}>週1回出勤</option>
-                        <option value="週2回出勤" {{ old('shift_hope', $profile['shift_hope']) === '週2回出勤' ? 'selected' : '' }}>週2回出勤</option>
-                        <option value="週3回以上" {{ old('shift_hope', $profile['shift_hope']) === '週3回以上' ? 'selected' : '' }}>週3回以上</option>
+            <div class="two-col">
+                <div class="field">
+                    <label>都道府県</label>
+                    <select name="pref" class="cast-select p-region">
+                        <option value="">選択してください</option>
+                        @foreach ($prefOptions as $pref)
+                            <option value="{{ $pref }}" @selected(old('pref', $profile['pref']) === $pref)>{{ $pref }}</option>
+                        @endforeach
                     </select>
                 </div>
-
-                {{-- 勤務時間 --}}
-                <div class="form-row">
-                    <span class="edit-label">勤務時間</span>
-                    <div class="radio-group">
-                        <label class="radio-label">
-                            <input type="radio" name="work_time" value="morning" class="accent-gold" {{ old('work_time', $profile['work_time']) === 'morning' ? 'checked' : '' }}>
-                            <span>朝</span>
-                        </label>
-                        <label class="radio-label">
-                            <input type="radio" name="work_time" value="day_night" class="accent-gold" {{ old('work_time', $profile['work_time']) === 'day_night' ? 'checked' : '' }}>
-                            <span>昼or夜</span>
-                        </label>
-                    </div>
-                </div>
-
-                {{-- 現職業 --}}
-                <div class="form-row">
-                    <label class="edit-label" for="current_job">現職業</label>
-                    <textarea id="current_job" name="current_job" class="edit-textarea" rows="3" placeholder="現職業を入力">{{ old('current_job', $profile['current_job']) }}</textarea>
-                </div>
-
-                {{-- ナイトワーク経験 --}}
-                <div class="form-row">
-                    <span class="edit-label">ナイトワーク経験</span>
-                    <div class="radio-group">
-                        <label class="radio-label">
-                            <input type="radio" name="night_work_exp" value="none" class="accent-gold" {{ old('night_work_exp', $profile['night_work_exp']) === 'none' ? 'checked' : '' }}>
-                            <span>無し</span>
-                        </label>
-                        <label class="radio-label">
-                            <input type="radio" name="night_work_exp" value="yes" class="accent-gold" {{ old('night_work_exp', $profile['night_work_exp']) === 'yes' ? 'checked' : '' }}>
-                            <span>有り</span>
-                        </label>
-                    </div>
+                <div class="field">
+                    <label>市区町村</label>
+                    <input type="text" name="city" value="{{ old('city', $profile['city']) }}" class="cast-input p-locality" autocomplete="address-level2">
                 </div>
             </div>
-        </div>
+            <div class="field">
+                <label>町名・番地</label>
+                <input type="text" name="addr1" value="{{ old('addr1', $profile['addr1']) }}" class="cast-input p-street-address" autocomplete="address-line1">
+            </div>
+        </section>
 
-        <div class="form-submit-section">
-            <button type="submit" class="btn-gold-submit">保存する</button>
+        <section class="cast-edit-section">
+            <h3><i class="far fa-file-alt"></i> 自己PR</h3>
+            <div class="field">
+                <label>自己PR</label>
+                <textarea name="intro" class="cast-input cast-textarea min-h100">{{ old('intro', $profile['intro']) }}</textarea>
+            </div>
+        </section>
+
+        <section class="cast-edit-section">
+            <h3><i class="fas fa-ruler"></i> 体型・ルックス情報</h3>
+            <div class="two-col">
+                <div class="field">
+                    <label>身長</label>
+                    <div class="unit-field"><input type="number" name="height" value="{{ old('height', $profile['height']) }}" class="cast-input"><span>cm</span></div>
+                </div>
+                <div class="field">
+                    <label>体重</label>
+                    <div class="unit-field"><input type="number" name="weight" value="{{ old('weight', $profile['weight']) }}" class="cast-input"><span>kg</span></div>
+                </div>
+            </div>
+            <div class="three-col">
+                <div class="field bwh"><span>B</span><input type="number" name="bust" value="{{ old('bust', $profile['bust']) }}" class="cast-input pad-left"></div>
+                <div class="field bwh"><span>W</span><input type="number" name="waist" value="{{ old('waist', $profile['waist']) }}" class="cast-input pad-left"></div>
+                <div class="field bwh"><span>H</span><input type="number" name="hip" value="{{ old('hip', $profile['hip']) }}" class="cast-input pad-left"></div>
+            </div>
+
+            <div class="field">
+                <label>ご自分の系統</label>
+                <input type="text" name="my_field" value="{{ old('my_field', $profile['my_field']) }}" class="cast-input">
+                <div class="tag-grid">
+                    @foreach(($masters['looks'] ?? []) as $look)
+                        <label class="tag-chip tag-looks">
+                            <input type="checkbox" name="look_tag_ids[]" value="{{ $look->id }}" @checked(in_array((int)$look->id, $selectedLookIds, true))>
+                            <span>{{ $look->name }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="field">
+                <label>ご自分の内面・特技</label>
+                <input type="text" name="my_inner_skills" value="{{ old('my_inner_skills', $profile['my_inner_skills']) }}" class="cast-input">
+                <div class="tag-grid">
+                    @foreach(($masters['personalities'] ?? []) as $personality)
+                        <label class="tag-chip tag-personality">
+                            <input type="checkbox" name="personality_tag_ids[]" value="{{ $personality->id }}" @checked(in_array((int)$personality->id, $selectedPersonalityIds, true))>
+                            <span>{{ $personality->name }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <section class="cast-edit-section">
+            <h3><i class="fas fa-briefcase"></i> 希望の働き方</h3>
+            <div class="field">
+                <label>希望職種</label>
+                <div class="tag-grid">
+                    @foreach(($masters['industries'] ?? []) as $industry)
+                        <label class="tag-chip tag-looks">
+                            <input type="checkbox" name="industry_ids[]" value="{{ $industry->id }}" @checked(in_array((int)$industry->id, $selectedIndustryIds, true))>
+                            <span>{{ $industry->name }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+            <div class="field">
+                <label>シフト希望</label>
+                <select name="shift_hope" class="cast-select">
+                    <option value="週1回出勤" @selected(old('shift_hope', $profile['shift_hope']) === '週1回出勤')>週1回出勤</option>
+                    <option value="週2回出勤" @selected(old('shift_hope', $profile['shift_hope']) === '週2回出勤')>週2回出勤</option>
+                    <option value="週3回以上" @selected(old('shift_hope', $profile['shift_hope']) === '週3回以上')>週3回以上</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>勤務時間</label>
+                <div class="radio-like-row">
+                    <label class="radio-like">
+                        <input type="radio" name="work_time" value="morning" @checked($selectedWorkTime === 'morning')>
+                        <span class="dot"></span><span>朝〜昼</span>
+                    </label>
+                    <label class="radio-like">
+                        <input type="radio" name="work_time" value="day_night" @checked($selectedWorkTime === 'day_night')>
+                        <span class="dot"></span><span>夜</span>
+                    </label>
+                </div>
+            </div>
+            <div class="field">
+                <label>現職業</label>
+                <input type="text" name="current_job" value="{{ old('current_job', $profile['current_job']) }}" class="cast-input">
+            </div>
+            <div class="field">
+                <label>ナイトワーク経験</label>
+                <div class="radio-like-row">
+                    <label class="radio-like">
+                        <input type="radio" name="night_work_exp" value="none" @checked($selectedNightExp === 'none')>
+                        <span class="dot"></span><span>無し</span>
+                    </label>
+                    <label class="radio-like">
+                        <input type="radio" name="night_work_exp" value="yes" @checked($selectedNightExp === 'yes')>
+                        <span class="dot"></span><span>有り</span>
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <div class="save-bar">
+            <button type="submit" class="save-btn">
+                <i class="far fa-save"></i><span>保存する</span>
+            </button>
         </div>
     </form>
 </div>
 
-<script>
-function toggleOtherInfo(btn) {
-    var body = document.getElementById('other-info-body');
-    var chevron = btn.querySelector('.other-info-chevron');
-    var expanded = btn.getAttribute('aria-expanded') === 'true';
-    body.classList.toggle('is-closed', expanded);
-    btn.setAttribute('aria-expanded', !expanded);
-    chevron.classList.toggle('fa-minus', !expanded);
-    chevron.classList.toggle('fa-plus', expanded);
-}
-function toggleAccordionItem(btn) {
-    var id = btn.getAttribute('aria-controls');
-    var body = id ? document.getElementById(id) : btn.nextElementSibling;
-    if (!body) return;
-    var icon = btn.querySelector('.accordion-icon');
-    var expanded = btn.getAttribute('aria-expanded') === 'true';
-    body.classList.toggle('is-open', !expanded);
-    btn.setAttribute('aria-expanded', !expanded);
-    icon.classList.toggle('fa-plus', !expanded);
-    icon.classList.toggle('fa-minus', expanded);
-}
-</script>
 <style>
-.checkbox-chip-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-.checkbox-chip {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-}
-.checkbox-chip input {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-}
-.checkbox-chip span {
-    display: inline-flex;
-    align-items: center;
-    min-height: 38px;
-    padding: 8px 14px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background: rgba(255, 255, 255, 0.04);
-    color: #fff;
-    font-size: 0.9rem;
-}
-.checkbox-chip input:checked + span {
-    border-color: #d4af37;
-    background: rgba(212, 175, 55, 0.18);
-    color: #f8e7b0;
-}
-.mt-12 {
-    margin-top: 12px;
-}
+.cast-edit-page { padding: 12px 0 0; }
+.cast-edit-form { position: relative; padding: 0 0 108px; }
+.cast-edit-section { margin: 0 0 14px; padding: 14px; border-radius: 14px; background: rgba(26, 10, 14, .8); border: 1px solid rgba(74, 29, 40, .4); }
+.cast-edit-section h3 { margin: 0 0 12px; font-size: 14px; color: #c8a951; font-weight: 700; display: flex; gap: 8px; align-items: center; }
+.field { margin-bottom: 12px; }
+.field:last-child { margin-bottom: 0; }
+.field label { display: block; margin-bottom: 6px; font-size: 11px; font-weight: 700; color: #b5a69d; }
+.required { color: #f87171; margin-left: 4px; }
+.cast-input, .cast-select { width: 100%; background: #110c0a; border: 1px solid #4a1d28; border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 13px; outline: none; }
+.cast-textarea { resize: vertical; }
+.min-h100 { min-height: 100px; }
+.cast-input:focus, .cast-select:focus { border-color: #c8a951; box-shadow: 0 0 0 2px rgba(200, 169, 81, .3); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.birth-row { display: grid; grid-template-columns: 1fr 74px 74px; gap: 8px; }
+.unit-field { display: flex; align-items: center; gap: 8px; }
+.unit-field span { color: #8a7c74; font-size: 12px; font-weight: 700; }
+.bwh { position: relative; }
+.bwh span { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #c8a951; font-size: 11px; font-weight: 700; }
+.pad-left { padding-left: 30px; }
+.tag-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.tag-chip { position: relative; display: inline-flex; }
+.tag-chip input { position: absolute; opacity: 0; pointer-events: none; }
+.tag-chip span { padding: 7px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; border: 1px solid rgba(255, 255, 255, .05); background: rgba(17, 12, 10, .8); color: #8a7c74; }
+.tag-looks input:checked + span { background: rgba(90, 28, 44, .8); border-color: rgba(200, 169, 81, .4); color: #eae0d5; }
+.tag-personality input:checked + span { background: rgba(26, 42, 58, .8); border-color: rgba(74, 144, 226, .4); color: #d0e3f0; }
+.radio-like-row { display: flex; gap: 18px; flex-wrap: wrap; }
+.radio-like { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.radio-like input { position: absolute; opacity: 0; pointer-events: none; }
+.radio-like .dot { width: 16px; height: 16px; border-radius: 50%; border: 1px solid #4a1d28; background: #110c0a; position: relative; }
+.radio-like input:checked + .dot { border-color: #c8a951; }
+.radio-like input:checked + .dot::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #c8a951; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+.radio-like span:last-child { color: #8a7c74; font-size: 12px; font-weight: 600; }
+.radio-like input:checked + .dot + span { color: #fff; }
+.save-bar { position: absolute; left: 0; right: 0; bottom: 0; padding: 24px 16px 16px; background: linear-gradient(to top, #110c0a 35%, rgba(17, 12, 10, .92) 65%, rgba(17, 12, 10, 0)); }
+.save-btn { width: 100%; border: 1px solid #a63253; border-radius: 16px; background: linear-gradient(135deg, #8a2542, #5a1628); color: #fff; font-weight: 700; letter-spacing: .08em; padding: 14px; display: inline-flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, .45); }
 </style>
 @endsection

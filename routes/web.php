@@ -336,12 +336,9 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
 
     // 繝励Ο繝輔ぅ繝ｼ繝ｫ・医く繝｣繧ｹ繝育畑邱ｨ髮・ｼ捏hop/profile/edit縲∝ｺ苓・逕ｨ縺ｯ store 繧ｵ繝悶ヱ繧ｹ・・
     Route::prefix('profile')->name('profile.')->group(function () {
-        Route::get('/', [ShopProfile::class, 'show'])->name('show');
-        Route::get('/edit', [CastProfile::class, 'edit'])->name('edit');
-        Route::post('/update', [CastProfile::class, 'update'])->name('update');
-        Route::get('/store/edit', [ShopProfile::class, 'edit'])->name('store.edit');
-        Route::post('/store/update', [ShopProfile::class, 'update'])->name('store.update');
-        Route::post('/store/suggest-stations', [ShopProfile::class, 'suggestStations'])->name('store.suggest-stations');
+        Route::get('/edit', [ShopProfile::class, 'edit'])->name('edit');
+        Route::post('/update', [ShopProfile::class, 'update'])->name('update');
+        Route::post('/suggest-stations', [ShopProfile::class, 'suggestStations'])->name('suggest-stations');
         Route::post('/upload-image', [ShopProfile::class, 'uploadImage'])->name('upload.image');
         Route::post('/images/order', [ShopProfile::class, 'updateOrder'])->name('images.order');
         Route::delete('/image/{id}', [ShopProfile::class, 'deleteImage'])->name('image.delete');

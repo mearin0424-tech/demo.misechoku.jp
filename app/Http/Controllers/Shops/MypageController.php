@@ -185,12 +185,7 @@ class MypageController extends Controller
             $jobRowQ->where('job_type', 1);
         }
         $jobRow = $jobRowQ->first();
-        $industryName = null;
-        if (!empty($row?->industry_id)) {
-            $industryName = DB::table('industries')
-                ->where('id', $row->industry_id)
-                ->value('name');
-        }
+        $industryNames = $this->resolveShopIndustryNames($shopId, $row?->industry_id ?? null);
         $shopTagGroups = $this->resolveShopInfoTagGroups($shopId);
 
         $profileRow = DB::table('shop_profiles')->where('shop_id', $shopId)->first();
@@ -234,7 +229,7 @@ class MypageController extends Controller
             'shopInfo' => [
                 'shop_name' => $row->shop_name ?? '',
                 'word' => $hitokotoBody,
-                'industry' => $industryName,
+                'industry' => $industryNames === [] ? null : implode(' / ', $industryNames),
                 'zip' => $row->zip ?? '',
                 'pref' => $row->pref ?? '',
                 'city' => $row->city ?? '',
@@ -688,5 +683,64 @@ class MypageController extends Controller
             ->filter()
             ->values()
             ->all();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function resolveShopIndustryNames(string $shopId, $fallbackIndustryId = null): array
+    {
+        if (Schema::hasTable('shop_industry')) {
+            $names = DB::table('shop_industry')
+                ->join('industries', 'shop_industry.industry_id', '=', 'industries.id')
+                ->where('shop_industry.shop_id', $shopId)
+                ->orderBy('shop_industry.industry_id')
+                ->pluck('industries.name')
+                ->map(fn ($name) => trim((string) $name))
+                ->filter()
+                ->values()
+                ->all();
+            if ($names !== []) {
+                return $names;
+            }
+        }
+
+        if (Schema::hasTable('industry_shop')) {
+            $names = DB::table('industry_shop')
+                ->join('industries', 'industry_shop.industry_id', '=', 'industries.id')
+                ->where('industry_shop.shop_id', $shopId)
+                ->orderBy('industry_shop.industry_id')
+                ->pluck('industries.name')
+                ->map(fn ($name) => trim((string) $name))
+                ->filter()
+                ->values()
+                ->all();
+            if ($names !== []) {
+                return $names;
+            }
+        }
+
+        if (Schema::hasTable('shop_industries')) {
+            $names = DB::table('shop_industries')
+                ->join('industries', 'shop_industries.industry_id', '=', 'industries.id')
+                ->where('shop_industries.shop_id', $shopId)
+                ->orderBy('shop_industries.industry_id')
+                ->pluck('industries.name')
+                ->map(fn ($name) => trim((string) $name))
+                ->filter()
+                ->values()
+                ->all();
+            if ($names !== []) {
+                return $names;
+            }
+        }
+
+        $single = (int) ($fallbackIndustryId ?? 0);
+        if ($single > 0) {
+            $name = DB::table('industries')->where('id', $single)->value('name');
+            return $name ? [trim((string) $name)] : [];
+        }
+
+        return [];
     }
 }

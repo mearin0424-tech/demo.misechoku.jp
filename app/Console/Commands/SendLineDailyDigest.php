@@ -19,12 +19,12 @@ class SendLineDailyDigest extends Command
     private array $digest = [];
 
     public function handle(
-        NotificationPreferenceService $prefs,
-        LineNotificationService $line
+        NotificationPreferenceService $prefs
     ): int {
         $dryRun = (bool) $this->option('dry-run');
         $now = Carbon::now();
         $since = $now->copy()->subDay();
+        $line = class_exists('LINE\\LINEBot') ? app(LineNotificationService::class) : null;
 
         $this->collectShopDepositRequested($since);
         $this->collectShopDeposit14DaysReminder($now);
@@ -48,6 +48,10 @@ class SendLineDailyDigest extends Command
                 $this->line('[DRY] ' . $entry['userType'] . ':' . $entry['userId']);
                 $this->line($message);
             } else {
+                if (!$line) {
+                    $this->warn('LINE SDK が未導入のため、LINE送信をスキップしました。');
+                    continue;
+                }
                 if ($entry['userType'] === 'cast') {
                     $line->sendToCast($entry['userId'], $message);
                 } else {

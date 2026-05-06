@@ -134,7 +134,12 @@ class SearchController extends BaseSearchController
         $this->applySort($rows, $sort);
 
         if (!empty($industries)) {
-            if (DB::getSchemaBuilder()->hasTable('industry_shop')) {
+            if (DB::getSchemaBuilder()->hasTable('shop_industry')) {
+                $rows->join('shop_industry', 'shops.id', '=', 'shop_industry.shop_id')
+                    ->join('industries', 'shop_industry.industry_id', '=', 'industries.id')
+                    ->whereIn('industries.name', $industries)
+                    ->distinct();
+            } elseif (DB::getSchemaBuilder()->hasTable('industry_shop')) {
                 $rows->join('industry_shop', 'shops.id', '=', 'industry_shop.shop_id')
                     ->join('industries', 'industry_shop.industry_id', '=', 'industries.id')
                     ->whereIn('industries.name', $industries)
@@ -264,7 +269,13 @@ class SearchController extends BaseSearchController
 
         $out = [];
 
-        if (Schema::hasTable('industry_shop') && Schema::hasTable('industries')) {
+        if (Schema::hasTable('shop_industry') && Schema::hasTable('industries')) {
+            $rows = DB::table('shop_industry')
+                ->join('industries', 'shop_industry.industry_id', '=', 'industries.id')
+                ->whereIn('shop_industry.shop_id', $shopIds)
+                ->orderBy('industries.id')
+                ->get(['shop_industry.shop_id as shop_id', 'industries.name as name']);
+        } elseif (Schema::hasTable('industry_shop') && Schema::hasTable('industries')) {
             $rows = DB::table('industry_shop')
                 ->join('industries', 'industry_shop.industry_id', '=', 'industries.id')
                 ->whereIn('industry_shop.shop_id', $shopIds)

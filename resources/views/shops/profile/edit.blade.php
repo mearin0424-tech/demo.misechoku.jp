@@ -407,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     var stAdd = document.getElementById('shop-station-add');
     var stList = document.getElementById('shop-stations-list');
-    var suggestUrl = @json(route('shop.profile.store.suggest-stations'));
+    var suggestUrl = @json(route('shop.profile.suggest-stations'));
     var prefInput = document.getElementById('pref');
     var cityInput = document.getElementById('city');
     var addrInput = document.getElementById('addr');
@@ -522,7 +522,7 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
         @endif
 
-        <form id="shop-profile-edit-form" action="{{ route('shop.profile.store.update') }}" method="POST" class="h-adr shop-profile-edit__form">
+        <form id="shop-profile-edit-form" action="{{ route('shop.profile.update') }}" method="POST" class="h-adr shop-profile-edit__form">
             @csrf
             <span class="p-country-name" style="display:none;">Japan</span>
 
@@ -550,18 +550,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 <div class="shop-profile-edit__field">
                     <span class="shop-profile-edit__label">業種</span>
-                    <div class="shop-profile-edit__select-wrap">
-                        <select id="industry_id" name="industry_id" class="shop-profile-edit__select">
-                            <option value="">未選択</option>
-                            @foreach(($masters['industries'] ?? []) as $industry)
-                                <option value="{{ $industry->id }}"
-                                    {{ (int) old('industry_id', $shopData['industry_id'] ?? 0) === (int) $industry->id ? 'selected' : '' }}>
-                                    {{ $industry->name }}
-                                </option>
-                            @endforeach
-                        </select>
+                    <div class="shop-profile-edit__chips">
+                        @php
+                            $selectedIndustryIds = collect(old('industry_ids', $shopData['industry_ids'] ?? []))
+                                ->map(fn ($id) => (int) $id)
+                                ->all();
+                        @endphp
+                        @foreach(($masters['industries'] ?? []) as $industry)
+                            <label class="shop-profile-edit__chip">
+                                <input type="checkbox" name="industry_ids[]" value="{{ $industry->id }}"
+                                    {{ in_array((int) $industry->id, $selectedIndustryIds, true) ? 'checked' : '' }}>
+                                <span>{{ $industry->name }}</span>
+                            </label>
+                        @endforeach
                     </div>
-                    <p class="shop-profile-edit__hint">※1つだけ選択できます。未選択でも保存できます。</p>
+                    <p class="shop-profile-edit__hint">※複数選択できます。未選択でも保存できます。</p>
                 </div>
             </section>
 

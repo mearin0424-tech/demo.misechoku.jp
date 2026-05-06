@@ -64,7 +64,8 @@ class ProfileController extends Controller
             'addr' => 'nullable|string|max:255',
             'building' => 'nullable|string|max:255',
             'tel' => 'nullable|string|max:30',
-            'industry_id' => 'nullable|integer|exists:industries,id',
+            'industry_ids' => 'nullable|array',
+            'industry_ids.*' => 'integer|exists:industries,id',
             'atmosphere_tag_ids'   => 'nullable|array',
             'atmosphere_tag_ids.*' => 'integer|exists:shop_tags,id',
             'facility_tag_ids'     => 'nullable|array',
@@ -94,12 +95,19 @@ class ProfileController extends Controller
         $existingProfile = DB::table('shop_profiles')->where('shop_id', $shopId)->first();
         $addressChanged = $this->profileAddressChanged($existingProfile, $request);
 
+        $industryIds = collect($request->input('industry_ids', []))
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
         $profileRow = [
             'shop_name' => $request->input('shop_name'),
             'zip' => $this->normalizeZip($request->input('zip')),
             'pref' => $request->input('pref'),
             'city' => $request->input('city'),
-            'industry_id' => $request->input('industry_id') ?: null,
+            'industry_id' => $industryIds[0] ?? null,
             'updated_at' => now(),
             'created_at' => now(),
         ];
@@ -151,6 +159,7 @@ class ProfileController extends Controller
             $this->syncShopStations($shopId, $request->input('stations', []));
         }
 
+        $this->syncShopIndustries($shopId, $industryIds);
         $this->syncShopProfileTags($shopId, 'atmosphere', $request->input('atmosphere_tag_ids', []));
         $this->syncShopProfileTags($shopId, 'facility',   $request->input('facility_tag_ids', []));
 
@@ -596,7 +605,7 @@ class ProfileController extends Controller
             'addr' => $addrStreet,
             'building' => $building,
             'tel' => ($row && Schema::hasColumn('shop_profiles', 'tel')) ? (string) ($row->tel ?? '') : '',
-            'industry_id' => $row ? ($row->industry_id ?? null) : null,
+            'industry_ids' => $this->resolveShopIndustryIds($shopId, $row ? ($row->industry_id ?? null) : null),
             'atmosphere_tag_ids' => $shopTagIds['atmosphere'],
             'facility_tag_ids'   => $shopTagIds['facility'],
             'stations' => $stations,
@@ -686,5 +695,94 @@ class ProfileController extends Controller
         }
 
         return substr($digits, 0, 3) . '-' . substr($digits, 3);
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private function resolveShopIndustryIds(string $shopId, $fallbackIndustryId = null): array
+    {
+        if (Schema::hasTable('shop_industry')) {
+            $ids = DB::table('shop_industry')
+                ->where('shop_id', $shopId)
+                ->orderBy('industry_id')
+                ->pluck('industry_id')
+                ->map(fn ($id) => (int) $id)
+                ->filter()
+                ->values()
+                ->all();
+            if ($ids !== []) {
+                return $ids;
+            }
+        }
+
+        if (Schema::hasTable('industry_shop')) {
+            $ids = DB::table('industry_shop')
+                ->where('shop_id', $shopId)
+                ->orderBy('industry_id')
+                ->pluck('industry_id')
+                ->map(fn ($id) => (int) $id)
+                ->filter()
+                ->values()
+                ->all();
+            if ($ids !== []) {
+                return $ids;
+            }
+        }
+
+        if (Schema::hasTable('shop_industries')) {
+            $ids = DB::table('shop_industries')
+                ->where('shop_id', $shopId)
+                ->orderBy('industry_id')
+                ->pluck('industry_id')
+                ->map(fn ($id) => (int) $id)
+                ->filter()
+                ->values()
+                ->all();
+            if ($ids !== []) {
+                return $ids;
+            }
+        }
+
+        $single = (int) ($fallbackIndustryId ?? 0);
+        return $single > 0 ? [$single] : [];
+    }
+
+    /**
+     * @param array<int, int> $industryIds
+     */
+    private function syncShopIndustries(string $shopId, array $industryIds): void
+    {
+        if (Schema::hasTable('shop_industry')) {
+            DB::table('shop_industry')->where('shop_id', $shopId)->delete();
+            foreach ($industryIds as $industryId) {
+                DB::table('shop_industry')->insert([
+                    'shop_id' => $shopId,
+                    'industry_id' => (int) $industryId,
+                ]);
+            }
+            return;
+        }
+
+        if (Schema::hasTable('industry_shop')) {
+            DB::table('industry_shop')->where('shop_id', $shopId)->delete();
+            foreach ($industryIds as $industryId) {
+                DB::table('industry_shop')->insert([
+                    'shop_id' => $shopId,
+                    'industry_id' => (int) $industryId,
+                ]);
+            }
+            return;
+        }
+
+        if (Schema::hasTable('shop_industries')) {
+            DB::table('shop_industries')->where('shop_id', $shopId)->delete();
+            foreach ($industryIds as $industryId) {
+                DB::table('shop_industries')->insert([
+                    'shop_id' => $shopId,
+                    'industry_id' => (int) $industryId,
+                ]);
+            }
+        }
     }
 }

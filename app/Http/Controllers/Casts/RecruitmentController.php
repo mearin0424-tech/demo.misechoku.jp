@@ -373,12 +373,7 @@ class RecruitmentController extends Controller
             ->first();
         $shopHitokoto = $shopPost && isset($shopPost->body) ? (string) $shopPost->body : '';
 
-        $industryName = null;
-        if (!empty($row->industry_id)) {
-            $industryName = DB::table('industries')
-                ->where('id', $row->industry_id)
-                ->value('name');
-        }
+        $industryName = $this->resolveShopIndustryName($shopId, $row->industry_id ?? null);
         $shopTagGroups = $this->resolveShopInfoTagGroups($shopId);
 
         $shop = [
@@ -451,6 +446,58 @@ class RecruitmentController extends Controller
         }
 
         return asset(ltrim($path, '/'));
+    }
+
+    private function resolveShopIndustryName(string $shopId, mixed $fallbackIndustryId = null): ?string
+    {
+        if (!Schema::hasTable('industries')) {
+            return null;
+        }
+
+        $names = [];
+        if (Schema::hasTable('shop_industry')) {
+            $names = DB::table('shop_industry')
+                ->join('industries', 'shop_industry.industry_id', '=', 'industries.id')
+                ->where('shop_industry.shop_id', $shopId)
+                ->orderBy('shop_industry.industry_id')
+                ->pluck('industries.name')
+                ->filter()
+                ->values()
+                ->all();
+        } elseif (Schema::hasTable('industry_shop')) {
+            $names = DB::table('industry_shop')
+                ->join('industries', 'industry_shop.industry_id', '=', 'industries.id')
+                ->where('industry_shop.shop_id', $shopId)
+                ->orderBy('industry_shop.industry_id')
+                ->pluck('industries.name')
+                ->filter()
+                ->values()
+                ->all();
+        } elseif (Schema::hasTable('shop_industries')) {
+            $names = DB::table('shop_industries')
+                ->join('industries', 'shop_industries.industry_id', '=', 'industries.id')
+                ->where('shop_industries.shop_id', $shopId)
+                ->orderBy('shop_industries.industry_id')
+                ->pluck('industries.name')
+                ->filter()
+                ->values()
+                ->all();
+        }
+
+        if ($names === [] && $fallbackIndustryId !== null && $fallbackIndustryId !== '') {
+            $name = DB::table('industries')
+                ->where('id', (int) $fallbackIndustryId)
+                ->value('name');
+            if (!empty($name)) {
+                $names = [$name];
+            }
+        }
+
+        if ($names === []) {
+            return null;
+        }
+
+        return implode(' / ', array_values(array_unique(array_map('strval', $names))));
     }
 
     private function decodeMeta(?string $raw): array
@@ -578,12 +625,7 @@ class RecruitmentController extends Controller
             $meta = $this->decodeMeta($row->noruma_cond);
         }
 
-        $industryName = null;
-        if (!empty($row->industry_id)) {
-            $industryName = DB::table('industries')
-                ->where('id', $row->industry_id)
-                ->value('name');
-        }
+        $industryName = $this->resolveShopIndustryName($shopId, $row->industry_id ?? null);
         $shopTagGroups = $this->resolveShopInfoTagGroups($shopId);
 
         $catchCopy = Schema::hasColumn('shop_jobs', 'catch_copy')

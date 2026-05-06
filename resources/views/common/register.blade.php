@@ -168,7 +168,7 @@
                         <div class="register-chip-grid">
                             @foreach($masters['industries'] as $industry)
                                 <label class="register-chip">
-                                    <input type="radio" name="industry_id" value="{{ $industry->id }}" @checked((int)old('industry_id') === (int)$industry->id)>
+                                    <input type="checkbox" name="industry_ids[]" value="{{ $industry->id }}" @checked(in_array((int)$industry->id, old('industry_ids', []), true))>
                                     <span>{{ $industry->name }}</span>
                                 </label>
                             @endforeach
@@ -385,7 +385,7 @@
                         <div class="register-chip-grid">
                             @foreach($masters['industries'] as $industry)
                                 <label class="register-chip">
-                                    <input type="radio" name="industry_id" value="{{ $industry->id }}" @checked((int)old('industry_id') === (int)$industry->id)>
+                                    <input type="checkbox" name="industry_ids[]" value="{{ $industry->id }}" @checked(in_array((int)$industry->id, old('industry_ids', []), true))>
                                     <span>{{ $industry->name }}</span>
                                 </label>
                             @endforeach

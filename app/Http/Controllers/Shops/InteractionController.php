@@ -151,7 +151,7 @@ class InteractionController extends Controller
                         'cast_profiles.pref',
                         'cast_profiles.city',
                         'cast_profiles.profession',
-                        'cast_profiles.main_image_path',
+                        DB::raw("(SELECT ci.image_path FROM cast_images ci WHERE ci.cast_id = casts.id AND ci.type = 1 ORDER BY ci.is_main DESC, ci.main_order IS NULL, ci.main_order, ci.id LIMIT 1) as main_image_path"),
                         'favorites.created_at'
                     )
                     ->get();
@@ -183,7 +183,7 @@ class InteractionController extends Controller
                         'cast_profiles.pref',
                         'cast_profiles.city',
                         'cast_profiles.profession',
-                        'cast_profiles.main_image_path',
+                        DB::raw("(SELECT ci.image_path FROM cast_images ci WHERE ci.cast_id = casts.id AND ci.type = 1 ORDER BY ci.is_main DESC, ci.main_order IS NULL, ci.main_order, ci.id LIMIT 1) as main_image_path"),
                         'favorites.created_at'
                     )
                     ->get();
@@ -215,7 +215,7 @@ class InteractionController extends Controller
                         'cast_profiles.pref',
                         'cast_profiles.city',
                         'cast_profiles.profession',
-                        'cast_profiles.main_image_path',
+                        DB::raw("(SELECT ci.image_path FROM cast_images ci WHERE ci.cast_id = casts.id AND ci.type = 1 ORDER BY ci.is_main DESC, ci.main_order IS NULL, ci.main_order, ci.id LIMIT 1) as main_image_path"),
                         'favorites.created_at'
                     )
                     ->get();

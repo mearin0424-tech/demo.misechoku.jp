@@ -49,7 +49,7 @@ class RegistrationController extends Controller
             'zip' => ['required', 'regex:/^\d{3}-?\d{4}$/'],
             'pref' => ['required', 'string', 'max:20'],
             'city' => ['required', 'string', 'max:100'],
-            'addr1' => ['nullable', 'string', 'max:100'],
+            'addr1' => ['nullable', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:20'],
             'email' => ['required', 'email', 'max:255', 'unique:casts,email'],
             'experience' => ['required', 'in:beginner,experienced'],
@@ -70,14 +70,15 @@ class RegistrationController extends Controller
             'work_time' => ['nullable', 'string', 'in:morning,day_night'],
             'current_job' => ['nullable', 'string', 'max:1000'],
             'night_work_exp' => ['nullable', 'string', 'in:none,yes'],
-            'industry_id' => ['nullable', 'integer'],
+            'industry_ids' => ['nullable', 'array'],
+            'industry_ids.*' => ['integer'],
             'look_tag_ids' => ['nullable', 'array'],
             'look_tag_ids.*' => ['integer'],
             'personality_tag_ids' => ['nullable', 'array'],
             'personality_tag_ids.*' => ['integer'],
         ];
         if (Schema::hasTable('industries')) {
-            $rules['industry_id'][] = 'exists:industries,id';
+            $rules['industry_ids.*'][] = 'exists:industries,id';
         }
         if (Schema::hasTable('cast_tags')) {
             $rules['look_tag_ids.*'][] = 'exists:cast_tags,id';
@@ -115,17 +116,7 @@ class RegistrationController extends Controller
 
             $shiftHope = $request->filled('shift_hope') ? $request->input('shift_hope') : $this->shiftStyleToShiftHope((string) $request->input('shift_style'));
             $nightWorkExp = $request->filled('night_work_exp') ? $request->input('night_work_exp') : ($request->input('experience') === 'experienced' ? 'yes' : 'none');
-            $memo = [
-                'desired_job' => $request->input('desired_job'),
-                'my_field' => $request->input('my_field'),
-                'my_inner_skills' => $request->input('my_inner_skills'),
-                'shift_hope' => $shiftHope,
-                'work_time' => $request->input('work_time'),
-                'current_job' => $request->input('current_job'),
-                'night_work_exp' => $nightWorkExp,
-                'look_tag_ids' => array_values(array_map('intval', $request->input('look_tag_ids', []))),
-                'personality_tag_ids' => array_values(array_map('intval', $request->input('personality_tag_ids', []))),
-            ];
+            $industryIds = array_values(array_unique(array_map('intval', (array) $request->input('industry_ids', []))));
 
             $profilePayload = [
                 'cast_id' => $castId,
@@ -140,7 +131,8 @@ class RegistrationController extends Controller
                 'zip' => $this->normalizeZip($request->input('zip')),
                 'pref' => $request->input('pref'),
                 'city' => $request->input('city'),
-                'addr1' => $request->input('addr1'),
+                'addr' => $request->input('addr1'),
+                'building' => null,
                 'tel' => $request->input('phone'),
                 'shift' => $this->shiftHopeToCode($shiftHope),
                 'exp' => $nightWorkExp === 'yes' ? 1 : 0,
@@ -151,14 +143,14 @@ class RegistrationController extends Controller
                 'waist' => $request->filled('waist') ? (int) $request->input('waist') : null,
                 'hip' => $request->filled('hip') ? (int) $request->input('hip') : null,
                 'profession' => $request->input('current_job'),
-                'memo' => json_encode($memo, JSON_UNESCAPED_UNICODE),
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
             if (Schema::hasColumn('cast_profiles', 'industry_id')) {
-                $profilePayload['industry_id'] = $request->input('industry_id') ?: null;
+                $profilePayload['industry_id'] = $industryIds[0] ?? null;
             }
             DB::table('cast_profiles')->insert($profilePayload);
+            $this->syncCastIndustries($castId, $industryIds);
 
             // プロフィール画像（必須1枚）を保存
             if ($request->hasFile('profile_image')) {
@@ -181,12 +173,6 @@ class RegistrationController extends Controller
                     'updated_at'    => now(),
                 ]);
 
-                // プロフィールのメイン画像パスを同期（カラムが存在する場合）
-                if (DB::getSchemaBuilder()->hasColumn('cast_profiles', 'main_image_path')) {
-                    DB::table('cast_profiles')
-                        ->where('cast_id', $castId)
-                        ->update(['main_image_path' => $path]);
-                }
             }
 
             $this->syncCastTags($castId, 'looks', $request->input('look_tag_ids', []));
@@ -223,10 +209,11 @@ class RegistrationController extends Controller
             'terms' => ['accepted'],
             'word' => ['nullable', 'string', 'max:255'],
             'overview' => ['nullable', 'string', 'max:2000'],
-            'industry_id' => ['nullable', 'integer'],
+            'industry_ids' => ['nullable', 'array'],
+            'industry_ids.*' => ['integer'],
         ];
         if (Schema::hasTable('industries')) {
-            $shopRules['industry_id'][] = 'exists:industries,id';
+            $shopRules['industry_ids.*'][] = 'exists:industries,id';
         }
         $request->validate($shopRules, [
             'zip.required' => '郵便番号を入力してください。',
@@ -246,6 +233,8 @@ class RegistrationController extends Controller
                 'updated_at' => now(),
             ]);
 
+            $industryIds = array_values(array_unique(array_map('intval', (array) $request->input('industry_ids', []))));
+
             $shopProfilePayload = [
                 'shop_id' => $shopId,
                 'shop_name' => $request->input('shop_name'),
@@ -258,9 +247,10 @@ class RegistrationController extends Controller
                 'updated_at' => now(),
             ];
             if (Schema::hasColumn('shop_profiles', 'industry_id')) {
-                $shopProfilePayload['industry_id'] = $request->input('industry_id') ?: null;
+                $shopProfilePayload['industry_id'] = $industryIds[0] ?? null;
             }
             DB::table('shop_profiles')->insert($shopProfilePayload);
+            $this->syncShopIndustries($shopId, $industryIds);
 
             if (Schema::hasColumn('shop_profiles', 'latitude')) {
                 $fullAddr = $this->shopProfileLocationSyncService->buildFullAddressLineForGeocode($request);
@@ -445,6 +435,57 @@ class RegistrationController extends Controller
                 'updated_at' => now(),
             ]);
         }
+    }
+
+    /** @param array<int, int> $industryIds */
+    private function syncCastIndustries(string $castId, array $industryIds): void
+    {
+        $industryIds = array_values(array_unique(array_filter(array_map('intval', $industryIds))));
+        if (!Schema::hasTable('cast_industry')) {
+            return;
+        }
+        DB::table('cast_industry')->where('cast_id', $castId)->delete();
+        if ($industryIds === []) {
+            return;
+        }
+        $now = now();
+        $rows = array_map(fn ($industryId) => [
+            'cast_id' => $castId,
+            'industry_id' => $industryId,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ], $industryIds);
+        DB::table('cast_industry')->insert($rows);
+    }
+
+    /** @param array<int, int> $industryIds */
+    private function syncShopIndustries(string $shopId, array $industryIds): void
+    {
+        $industryIds = array_values(array_unique(array_filter(array_map('intval', $industryIds))));
+        $table = null;
+        if (Schema::hasTable('shop_industry')) {
+            $table = 'shop_industry';
+        } elseif (Schema::hasTable('industry_shop')) {
+            $table = 'industry_shop';
+        } elseif (Schema::hasTable('shop_industries')) {
+            $table = 'shop_industries';
+        }
+        if ($table === null) {
+            return;
+        }
+
+        DB::table($table)->where('shop_id', $shopId)->delete();
+        if ($industryIds === []) {
+            return;
+        }
+        $now = now();
+        $rows = array_map(fn ($industryId) => [
+            'shop_id' => $shopId,
+            'industry_id' => $industryId,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ], $industryIds);
+        DB::table($table)->insert($rows);
     }
 
     private function mapBusinessTypeLabel(string $businessType): string

@@ -966,7 +966,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     var profileEditBtn = document.getElementById('open-profile-edit-btn');
     if (profileEditBtn) profileEditBtn.addEventListener('click', function() {
-        location.href = "{{ route('shop.profile.store.edit') }}";
+        location.href = "{{ route('shop.profile.edit') }}";
     });
 
     var openBadgeModal = document.getElementById('open-good-payer-badge-modal');
