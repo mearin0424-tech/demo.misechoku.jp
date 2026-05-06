@@ -28,6 +28,7 @@ class ProfileController extends Controller
             ->select(
                 'cast_profiles.nickname',
                 'cast_profiles.name',
+                'cast_profiles.industry_id',
                 'cast_profiles.birthday',
                 'cast_profiles.zip',
                 'cast_profiles.pref',
@@ -59,10 +60,15 @@ class ProfileController extends Controller
 
         $birthday = $row->birthday ? Carbon::parse($row->birthday) : null;
         $nightWorkExp = ((int) ($row->exp ?? 0) === 1 ? 'yes' : 'none');
+        $looksTags = $this->getCastTagNamesByType($castId, 'looks');
+        $personalityTags = $this->getCastTagNamesByType($castId, 'personality');
+        $desiredJob = $this->resolveDesiredJobByIndustries($castId, $row->industry_id ?? null);
+        $workTime = $this->workTimeKeyFromShift($row->shift);
 
         return [
             'nickname'       => $row->nickname ?? '',
             'name'           => $row->name ?? '',
+            'birth_date'     => $birthday ? $birthday->format('Y-m-d') : '',
             'birth_year'     => $birthday ? (string) $birthday->year : (string) date('Y'),
             'birth_month'    => $birthday ? (string) $birthday->month : '1',
             'birth_day'      => $birthday ? (string) $birthday->day : '1',
@@ -79,8 +85,8 @@ class ProfileController extends Controller
             'desired_job'    => '',
             'my_field'       => '',
             'my_inner_skills'=> '',
-            'shift_hope'     => $this->shiftHopeLabel($row->shift),
-            'work_time'      => '',
+            'shift_hope'     => '週1回出勤',
+            'work_time'      => $this->workTimeKeyFromShift($row->shift),
             'current_job'    => $row->profession ?? '',
             'night_work_exp' => $nightWorkExp,
             'industry_ids'   => $this->resolveCastIndustryIds($castId, $row->industry_id ?? null),
@@ -95,6 +101,7 @@ class ProfileController extends Controller
         return [
             'nickname'       => '',
             'name'           => '',
+            'birth_date'     => '',
             'birth_year'     => (string) date('Y'),
             'birth_month'    => '1',
             'birth_day'      => '1',
@@ -146,9 +153,7 @@ class ProfileController extends Controller
         $request->validate([
             'nickname'     => 'required|string|max:100',
             'name'         => 'nullable|string|max:100',
-            'birth_year'   => 'required|string|max:4',
-            'birth_month'  => 'required|string|max:2',
-            'birth_day'    => 'required|string|max:2',
+            'birth_date'   => 'required|date',
             'zip'          => ['nullable', 'regex:/^\d{3}-?\d{4}$/'],
             'pref'         => 'nullable|string|max:50',
             'city'         => 'nullable|string|max:50',
@@ -178,16 +183,6 @@ class ProfileController extends Controller
 
         $castId = $this->currentCastId();
 
-        if (!checkdate(
-            (int) $request->input('birth_month'),
-            (int) $request->input('birth_day'),
-            (int) $request->input('birth_year')
-        )) {
-            return redirect()->back()
-                ->withErrors(['birth_day' => '生年月日を正しく入力してください。'])
-                ->withInput();
-        }
-
         $imageCount = (int) DB::table('cast_images')
             ->where('cast_id', $castId)
             ->where('type', 1)
@@ -211,12 +206,7 @@ class ProfileController extends Controller
             [
                 'nickname' => $request->input('nickname'),
                 'name' => $request->input('name'),
-                'birthday' => sprintf(
-                    '%04d-%02d-%02d',
-                    (int) $request->input('birth_year'),
-                    (int) $request->input('birth_month'),
-                    (int) $request->input('birth_day')
-                ),
+                'birthday' => $request->input('birth_date'),
                 'zip' => $this->normalizeZip($request->input('zip')),
                 'pref' => $request->input('pref'),
                 'city' => $request->input('city'),
@@ -228,7 +218,7 @@ class ProfileController extends Controller
                 'bust' => $request->filled('bust') ? (int) $request->input('bust') : null,
                 'waist' => $request->filled('waist') ? (int) $request->input('waist') : null,
                 'hip' => $request->filled('hip') ? (int) $request->input('hip') : null,
-                'shift' => $this->shiftCode($request->input('shift_hope')),
+                'shift' => $this->workTimeShiftCode($request->input('work_time')),
                 'profession' => $request->input('current_job'),
                 'exp' => $request->input('night_work_exp') === 'yes' ? 1 : 0,
                 'industry_id' => $industryIds[0] ?? null,
@@ -476,13 +466,15 @@ class ProfileController extends Controller
             'hip' => $row->hip,
             'pr' => $row->pr ?? '',
             'intro' => $row->pr ?? '',
-            'desired_job' => '',
-            'my_field' => '',
-            'my_inner_skills' => '',
+            'desired_job' => $desiredJob,
+            'my_field' => $looksTags !== [] ? implode(' / ', $looksTags) : '',
+            'my_inner_skills' => $personalityTags !== [] ? implode(' / ', $personalityTags) : '',
+            'looks_tags' => $looksTags,
+            'personality_tags' => $personalityTags,
             'personality_type' => $this->resolvePersonalityType($row->personality_type ?? null),
-            'shift_hope' => $this->shiftHopeLabel($row->shift),
-            'work_time' => '',
-            'work_time_label' => '',
+            'shift_hope' => '',
+            'work_time' => $workTime,
+            'work_time_label' => $this->workTimeLabel($workTime),
             'current_job' => $row->profession ?? '',
             'night_work_exp' => $nightWorkExp,
             'night_work_label' => $nightWorkExp === 'yes' ? '有り' : '無し',
@@ -542,6 +534,8 @@ class ProfileController extends Controller
             'desired_job' => '',
             'my_field' => '',
             'my_inner_skills' => '',
+            'looks_tags' => [],
+            'personality_tags' => [],
             'personality_type' => '',
             'shift_hope' => '',
             'work_time' => '',
@@ -634,8 +628,26 @@ class ProfileController extends Controller
     private function workTimeLabel(string $workTime): string
     {
         return match ($workTime) {
-            'morning' => '朝',
-            'day_night' => '昼or夜',
+            'morning' => '朝〜昼',
+            'day_night' => '夜',
+            default => '',
+        };
+    }
+
+    private function workTimeShiftCode(?string $workTime): ?int
+    {
+        return match ($workTime) {
+            'morning' => 1,
+            'day_night' => 2,
+            default => null,
+        };
+    }
+
+    private function workTimeKeyFromShift($shift): string
+    {
+        return match ((int) ($shift ?? 0)) {
+            1 => 'morning',
+            2 => 'day_night',
             default => '',
         };
     }
@@ -657,6 +669,56 @@ class ProfileController extends Controller
         }
 
         return substr($digits, 0, 3) . '-' . substr($digits, 3);
+    }
+
+    private function resolveDesiredJobByIndustries(string $castId, $fallbackIndustryId = null): string
+    {
+        $names = [];
+        if (Schema::hasTable('cast_industry')) {
+            $names = DB::table('cast_industry')
+                ->join('industries', 'cast_industry.industry_id', '=', 'industries.id')
+                ->where('cast_industry.cast_id', $castId)
+                ->orderBy('cast_industry.industry_id')
+                ->pluck('industries.name')
+                ->map(fn ($name) => trim((string) $name))
+                ->filter()
+                ->values()
+                ->all();
+        }
+
+        if ($names === []) {
+            $single = (int) ($fallbackIndustryId ?? 0);
+            if ($single > 0) {
+                $name = DB::table('industries')->where('id', $single)->value('name');
+                if ($name) {
+                    $names = [trim((string) $name)];
+                }
+            }
+        }
+
+        return implode(' / ', array_values(array_unique($names)));
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function getCastTagNamesByType(string $castId, string $tagType): array
+    {
+        if (!Schema::hasTable('cast_tags') || !Schema::hasTable('cast_tag_relations')) {
+            return [];
+        }
+
+        $tagTypes = array_values(array_unique(array_filter([$tagType, rtrim($tagType, 's')])));
+        return DB::table('cast_tag_relations as r')
+            ->join('cast_tags as t', 'r.tag_id', '=', 't.id')
+            ->where('r.cast_id', $castId)
+            ->whereIn('r.tag_type', $tagTypes)
+            ->orderBy('t.id')
+            ->pluck('t.name')
+            ->map(fn ($name) => trim((string) $name))
+            ->filter()
+            ->values()
+            ->all();
     }
 
     /**

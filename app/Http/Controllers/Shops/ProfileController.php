@@ -512,6 +512,7 @@ class ProfileController extends Controller
             }
         }
         $row = $rowQ->first();
+        $profileRow = DB::table('shop_profiles')->where('shop_id', $shopId)->first();
 
         $shopPost = DB::table('shop_posts')
             ->where('shop_id', $shopId)
@@ -539,12 +540,86 @@ class ProfileController extends Controller
             $subImages = [$mainImage];
         }
 
+        $industryIds = $this->resolveShopIndustryIds($shopId, $profileRow ? ($profileRow->industry_id ?? null) : null);
+        $industryNames = [];
+        if ($industryIds !== [] && Schema::hasTable('industries')) {
+            $industryNames = DB::table('industries')
+                ->whereIn('id', $industryIds)
+                ->orderBy('id')
+                ->pluck('name')
+                ->map(fn ($name) => trim((string) $name))
+                ->filter()
+                ->values()
+                ->all();
+        }
+
+        $nearestStations = [];
+        if (Schema::hasTable('shop_stations')) {
+            $nearestStations = DB::table('shop_stations')
+                ->where('shop_id', $shopId)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->pluck('station_name')
+                ->map(fn ($name) => trim((string) $name))
+                ->filter()
+                ->values()
+                ->all();
+        }
+
+        $tagGroups = [];
+        if (Schema::hasTable('shop_tag_relations') && Schema::hasTable('shop_tags')) {
+            $groupMap = [
+                'atmosphere' => '店内の雰囲気・客層',
+                'facility' => '設備・アクセス',
+            ];
+            foreach ($groupMap as $type => $label) {
+                $names = DB::table('shop_tag_relations as r')
+                    ->join('shop_tags as t', 'r.tag_id', '=', 't.id')
+                    ->where('r.shop_id', $shopId)
+                    ->where('r.tag_type', $type)
+                    ->orderBy('t.id')
+                    ->pluck('t.name')
+                    ->map(fn ($name) => trim((string) $name))
+                    ->filter()
+                    ->values()
+                    ->all();
+                if ($names !== []) {
+                    $tagGroups[] = ['label' => $label, 'tags' => $names];
+                }
+            }
+        }
+
+        $addressText = trim(implode('', array_filter([
+            $profileRow->pref ?? null,
+            $profileRow->city ?? null,
+            $profileRow->addr ?? ($profileRow->addr2 ?? null),
+            $profileRow->building ?? ($profileRow->addr3 ?? null),
+        ])));
+
+        $businessHours = '';
+        if ($profileRow && isset($profileRow->open_time) && Schema::hasColumn('shop_profiles', 'open_time')) {
+            $open = ShopBusinessHours::formatTimeHhmm($profileRow->open_time ?? null);
+            $close = !empty($profileRow->close_is_last)
+                ? 'LAST'
+                : ShopBusinessHours::formatTimeHhmm($profileRow->close_time ?? null);
+            if ($open !== '' || $close !== '') {
+                $businessHours = trim(($open ?: '--') . ' - ' . ($close ?: '--'));
+            }
+        }
+
         return [
             'name' => $row->shop_name ?? 'ショップ',
             'word' => $hitokoto,
             'main_img' => $mainImage ?: asset('assets/images/common/no-image.png'),
             'area' => trim(implode('', array_filter([$row->pref ?? null, $row->city ?? null, $row->addr2 ?? null, $row->addr3 ?? null]))),
             'concept' => '',
+            'industry' => implode(' / ', $industryNames),
+            'zip' => (string) ($profileRow->zip ?? ''),
+            'address' => $addressText,
+            'tel' => (string) ($profileRow->tel ?? ''),
+            'business_hours_shop' => $businessHours,
+            'nearest_stations' => $nearestStations,
+            'tag_groups' => $tagGroups,
             'review_avg' => $row && $row->avg_eva ? round((float) $row->avg_eva, 1) : 0,
             'review_cnt' => $row ? (int) $row->review_count : 0,
             'sub_images' => $subImages,

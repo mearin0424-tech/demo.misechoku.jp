@@ -50,23 +50,7 @@
             </div>
             <div class="field">
                 <label>生年月日 <span class="required">必須</span></label>
-                <div class="birth-row">
-                    <select name="birth_year" class="cast-select">
-                        @foreach(range(date('Y'), 1950) as $y)
-                            <option value="{{ $y }}" @selected(old('birth_year', $profile['birth_year']) == $y)>{{ $y }}</option>
-                        @endforeach
-                    </select>
-                    <select name="birth_month" class="cast-select">
-                        @foreach(range(1, 12) as $m)
-                            <option value="{{ $m }}" @selected(old('birth_month', $profile['birth_month']) == (string)$m)>{{ $m }}</option>
-                        @endforeach
-                    </select>
-                    <select name="birth_day" class="cast-select">
-                        @foreach(range(1, 31) as $d)
-                            <option value="{{ $d }}" @selected(old('birth_day', $profile['birth_day']) == (string)$d)>{{ $d }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <input type="date" name="birth_date" value="{{ old('birth_date', $profile['birth_date'] ?? '') }}" class="cast-input">
             </div>
             <div class="field">
                 <label>郵便番号</label>
@@ -121,7 +105,6 @@
 
             <div class="field">
                 <label>ご自分の系統</label>
-                <input type="text" name="my_field" value="{{ old('my_field', $profile['my_field']) }}" class="cast-input">
                 <div class="tag-grid">
                     @foreach(($masters['looks'] ?? []) as $look)
                         <label class="tag-chip tag-looks">
@@ -134,7 +117,6 @@
 
             <div class="field">
                 <label>ご自分の内面・特技</label>
-                <input type="text" name="my_inner_skills" value="{{ old('my_inner_skills', $profile['my_inner_skills']) }}" class="cast-input">
                 <div class="tag-grid">
                     @foreach(($masters['personalities'] ?? []) as $personality)
                         <label class="tag-chip tag-personality">
@@ -168,7 +150,7 @@
                 </select>
             </div>
             <div class="field">
-                <label>勤務時間</label>
+                <label>勤務時間帯</label>
                 <div class="radio-like-row">
                     <label class="radio-like">
                         <input type="radio" name="work_time" value="morning" @checked($selectedWorkTime === 'morning')>
@@ -217,12 +199,13 @@
 .field label { display: block; margin-bottom: 6px; font-size: 11px; font-weight: 700; color: #b5a69d; }
 .required { color: #f87171; margin-left: 4px; }
 .cast-input, .cast-select { width: 100%; background: #110c0a; border: 1px solid #4a1d28; border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 13px; outline: none; }
+.cast-input[type="date"] { min-height: 42px; color-scheme: dark; }
+.cast-input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(79%) sepia(29%) saturate(566%) hue-rotate(5deg) brightness(91%) contrast(89%); cursor: pointer; }
 .cast-textarea { resize: vertical; }
 .min-h100 { min-height: 100px; }
 .cast-input:focus, .cast-select:focus { border-color: #c8a951; box-shadow: 0 0 0 2px rgba(200, 169, 81, .3); }
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-.birth-row { display: grid; grid-template-columns: 1fr 74px 74px; gap: 8px; }
 .unit-field { display: flex; align-items: center; gap: 8px; }
 .unit-field span { color: #8a7c74; font-size: 12px; font-weight: 700; }
 .bwh { position: relative; }

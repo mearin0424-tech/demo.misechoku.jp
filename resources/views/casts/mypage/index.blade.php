@@ -162,6 +162,7 @@
                                 <div class="cast-zip {{ $zipText === '--' ? 'cast-v muted' : '' }}">{{ $zipText }}</div>
                             </div>
                         </div>
+                        <div class="cast-row"><div class="cast-k">自己PR</div><div class="cast-v {{ empty($cast['pr'] ?? '') ? 'muted' : '' }}">{!! !empty($cast['pr'] ?? '') ? nl2br(e($cast['pr'])) : '--' !!}</div></div>
                     </div>
                 </div>
 
@@ -182,9 +183,9 @@
                             </a>
                         </div>
                         <div class="cast-row"><div class="cast-k">ルックス</div><div class="cast-v">@if(!empty($cast['looks_tags']))<div class="cast-badges">@foreach($cast['looks_tags'] as $tag)<span class="cast-badge">{{ $tag }}</span>@endforeach</div>@else<span class="muted">--</span>@endif</div></div>
+                        <div class="cast-row"><div class="cast-k">ご自分の系統</div><div class="cast-v {{ empty($cast['my_field'] ?? '') ? 'muted' : '' }}">{{ $cast['my_field'] ?? '--' }}</div></div>
                         <div class="cast-row"><div class="cast-k">性格・内面</div><div class="cast-v">@if(!empty($cast['personality_tags']))<div class="cast-badges">@foreach($cast['personality_tags'] as $tag)<span class="cast-badge">{{ $tag }}</span>@endforeach</div>@else<span class="muted">--</span>@endif</div></div>
-                        <div class="cast-row"><div class="cast-k">ご自分の系統</div><div class="cast-v {{ empty($cast['memo_data']['my_field'] ?? '') ? 'muted' : '' }}">{{ $cast['memo_data']['my_field'] ?? '--' }}</div></div>
-                        <div class="cast-row"><div class="cast-k">ご自分の内面・特技</div><div class="cast-v {{ empty($cast['memo_data']['my_inner_skills'] ?? '') ? 'muted' : '' }}">{{ $cast['memo_data']['my_inner_skills'] ?? '--' }}</div></div>
+                        <div class="cast-row"><div class="cast-k">ご自分の内面・特技</div><div class="cast-v {{ empty($cast['my_inner_skills'] ?? '') ? 'muted' : '' }}">{{ $cast['my_inner_skills'] ?? '--' }}</div></div>
                     </div>
                 </div>
 
@@ -195,7 +196,7 @@
                     </h3>
                     <div class="cast-profile-card">
                         <div class="cast-row"><div class="cast-k">ナイトワーク経験</div><div class="cast-v {{ empty($cast['night_work_label']) ? 'muted' : '' }}">{{ $cast['night_work_label'] ?: '--' }}</div></div>
-                        <div class="cast-row"><div class="cast-k">現職業</div><div class="cast-v {{ empty($cast['memo_data']['current_job'] ?? '') ? 'muted' : '' }}">{!! !empty($cast['memo_data']['current_job'] ?? '') ? nl2br(e($cast['memo_data']['current_job'])) : '--' !!}</div></div>
+                        <div class="cast-row"><div class="cast-k">現職業</div><div class="cast-v {{ empty($cast['current_job'] ?? '') ? 'muted' : '' }}">{!! !empty($cast['current_job'] ?? '') ? nl2br(e($cast['current_job'])) : '--' !!}</div></div>
                     </div>
                 </div>
 
@@ -205,9 +206,9 @@
                         希望の職種・働き方
                     </h3>
                     <div class="cast-profile-card">
-                        <div class="cast-row"><div class="cast-k">希望職種</div><div class="cast-v {{ empty($cast['memo_data']['desired_job'] ?? '') ? 'muted' : '' }}">{{ $cast['memo_data']['desired_job'] ?? '--' }}</div></div>
+                        <div class="cast-row"><div class="cast-k">希望職種</div><div class="cast-v {{ empty($cast['desired_job'] ?? '') ? 'muted' : '' }}">{{ $cast['desired_job'] ?? '--' }}</div></div>
                         <div class="cast-row"><div class="cast-k">シフト希望</div><div class="cast-v {{ empty($cast['memo_data']['shift_hope'] ?? '') ? 'muted' : '' }}">{{ $cast['memo_data']['shift_hope'] ?? '--' }}</div></div>
-                        <div class="cast-row"><div class="cast-k">勤務時間</div><div class="cast-v {{ empty($cast['work_time_label'] ?? '') ? 'muted' : '' }}">{{ $cast['work_time_label'] ?: '--' }}</div></div>
+                        <div class="cast-row"><div class="cast-k">勤務時間帯</div><div class="cast-v {{ empty($cast['work_time_label'] ?? '') ? 'muted' : '' }}">{{ $cast['work_time_label'] ?: '--' }}</div></div>
                     </div>
                 </div>
             </div>

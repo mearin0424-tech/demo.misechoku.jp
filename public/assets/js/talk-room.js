@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const hasTalkMessages = typeof window.hasTalkMessages !== 'undefined' ? !!window.hasTalkMessages : false;
     const selectedTalkJobKind = typeof window.selectedTalkJobKind !== 'undefined' ? window.selectedTalkJobKind : null;
     const canSelectTalkJobKind = typeof window.canSelectTalkJobKind !== 'undefined' ? !!window.canSelectTalkJobKind : false;
+    const talkJobKindCurrent = document.getElementById('talk-job-kind-current');
 
     const scrollToBottom = (behavior = 'auto') => {
         chatMessages.scrollTo({
@@ -206,13 +207,18 @@ document.addEventListener('DOMContentLoaded', function() {
         help: 'ヘルプ'
     };
     const renderTalkKindGuidance = (kind) => {
-        if (!talkJobKindGuidance) return;
         if (!kind) {
-            talkJobKindGuidance.textContent = '面談日を送る前に求人種別を確定してください。面談日確定後は変更できません。';
+            if (talkJobKindGuidance) {
+                talkJobKindGuidance.textContent = '面談日を送る前に求人種別を確定してください。面談日確定後は変更できません。';
+            }
+            if (talkJobKindCurrent) talkJobKindCurrent.textContent = '未選択';
             return;
         }
         const label = talkKindLabelMap[kind] || '未選択';
-        talkJobKindGuidance.textContent = '現在の求人種別: ' + label + '。面談日確定後は変更できません。';
+        if (talkJobKindGuidance) {
+            talkJobKindGuidance.textContent = '現在の求人種別: ' + label + '。面談日確定後は変更できません。';
+        }
+        if (talkJobKindCurrent) talkJobKindCurrent.textContent = label;
     };
     if (talkRoomJobKindSelect && selectedTalkJobKind) {
         talkRoomJobKindSelect.value = selectedTalkJobKind;
@@ -237,6 +243,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const actionUrl = chatForm.getAttribute('data-action-url');
         const token = chatForm.querySelector('input[name="_token"]').value;
         const openInterviewBtn = document.getElementById('open-interview-modal');
+        const openTalkActionMenuBtn = document.getElementById('open-talk-action-menu');
+        const talkActionMenuOverlay = document.getElementById('talk-action-menu-overlay');
+        const talkActionMenuCloseButtons = document.querySelectorAll('.js-talk-action-menu-close');
+        const openJobKindModalBtn = document.getElementById('open-job-kind-modal');
+        const jobKindOverlay = document.getElementById('job-kind-modal-overlay');
+        const closeJobKindButtons = document.querySelectorAll('.js-job-kind-close');
         const overlay = document.getElementById('interview-modal-overlay');
         const interviewForm = overlay ? overlay.querySelector('#interview-form') : null;
         const closeBtn = overlay ? overlay.querySelector('.interview-modal-close') : null;
@@ -245,6 +257,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const hireBtn = document.getElementById('send-hire-message');
         const rejectBtn = document.getElementById('send-reject-message');
         const cancelStatusBtn = document.getElementById('send-cancel-status');
+        const openHireModalFromMenu = document.getElementById('open-hire-modal-menu');
+        const openRejectModalFromMenu = document.getElementById('open-reject-modal-menu');
+        const openCancelStatusFromMenu = document.getElementById('open-cancel-status-menu');
         const resultOverlay = document.getElementById('result-message-overlay');
         const resultTitle = document.getElementById('result-message-title');
         const resultDesc = document.getElementById('result-message-desc');
@@ -293,6 +308,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         talkJobKindSaveStatus.textContent = '保存済み';
                     }
                     saveTalkJobKindBtn.disabled = false;
+                    closeJobKindModal();
                 } catch (error) {
                     window.alert(error.message || '求人種別の保存に失敗しました。');
                     if (talkJobKindSaveStatus) talkJobKindSaveStatus.textContent = '保存失敗';
@@ -310,6 +326,26 @@ document.addEventListener('DOMContentLoaded', function() {
         const closeModal = () => {
             if (!overlay) return;
             overlay.setAttribute('aria-hidden', 'true');
+        };
+
+        const openTalkActionMenu = () => {
+            if (!talkActionMenuOverlay) return;
+            talkActionMenuOverlay.setAttribute('aria-hidden', 'false');
+        };
+
+        const closeTalkActionMenu = () => {
+            if (!talkActionMenuOverlay) return;
+            talkActionMenuOverlay.setAttribute('aria-hidden', 'true');
+        };
+
+        const openJobKindModal = () => {
+            if (!jobKindOverlay) return;
+            jobKindOverlay.setAttribute('aria-hidden', 'false');
+        };
+
+        const closeJobKindModal = () => {
+            if (!jobKindOverlay) return;
+            jobKindOverlay.setAttribute('aria-hidden', 'true');
         };
 
         const renderResultTemplates = (actionType) => {
@@ -378,9 +414,45 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         };
 
+        if (openTalkActionMenuBtn && talkActionMenuOverlay) {
+            openTalkActionMenuBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                openTalkActionMenu();
+            });
+        }
+        talkActionMenuCloseButtons.forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeTalkActionMenu();
+            });
+        });
+        if (talkActionMenuOverlay) {
+            talkActionMenuOverlay.addEventListener('click', function (e) {
+                if (e.target === talkActionMenuOverlay) closeTalkActionMenu();
+            });
+        }
+        if (openJobKindModalBtn && jobKindOverlay) {
+            openJobKindModalBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                openJobKindModal();
+            });
+        }
+        closeJobKindButtons.forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeJobKindModal();
+            });
+        });
+        if (jobKindOverlay) {
+            jobKindOverlay.addEventListener('click', function(e) {
+                if (e.target === jobKindOverlay) closeJobKindModal();
+            });
+        }
+
         if (openInterviewBtn && overlay) {
             openInterviewBtn.addEventListener('click', function(e) {
                 e.preventDefault();
+                closeTalkActionMenu();
                 openModal();
             });
         }
@@ -426,10 +498,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 openResultModal('hired');
             });
         }
+        if (openHireModalFromMenu) {
+            openHireModalFromMenu.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeTalkActionMenu();
+                openResultModal('hired');
+            });
+        }
 
         if (rejectBtn) {
             rejectBtn.addEventListener('click', function(e) {
                 e.preventDefault();
+                openResultModal('rejected');
+            });
+        }
+        if (openRejectModalFromMenu) {
+            openRejectModalFromMenu.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeTalkActionMenu();
                 openResultModal('rejected');
             });
         }
@@ -489,6 +575,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
+        if (openCancelStatusFromMenu && cancelStatusBtn) {
+            openCancelStatusFromMenu.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeTalkActionMenu();
+                cancelStatusBtn.click();
+            });
+        }
 
         document.querySelectorAll('.js-interview-change-schedule').forEach(function(btn) {
             btn.addEventListener('click', async function(e) {
@@ -541,6 +634,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (e.key !== 'Escape') return;
             if (overlay && overlay.getAttribute('aria-hidden') === 'false') {
                 closeModal();
+            }
+            if (talkActionMenuOverlay && talkActionMenuOverlay.getAttribute('aria-hidden') === 'false') {
+                closeTalkActionMenu();
+            }
+            if (jobKindOverlay && jobKindOverlay.getAttribute('aria-hidden') === 'false') {
+                closeJobKindModal();
             }
             if (resultOverlay && resultOverlay.getAttribute('aria-hidden') === 'false') {
                 closeResultModal();

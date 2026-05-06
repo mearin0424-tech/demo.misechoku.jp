@@ -69,11 +69,7 @@
 
                     <div class="register-field">
                         <span>生年月日 <em>必須</em></span>
-                        <div class="register-grid register-grid-birth">
-                            <input type="number" name="birth_year" value="{{ old('birth_year') }}" min="1950" max="{{ date('Y') }}" placeholder="1998">
-                            <input type="number" name="birth_month" value="{{ old('birth_month') }}" min="1" max="12" placeholder="6">
-                            <input type="number" name="birth_day" value="{{ old('birth_day') }}" min="1" max="31" placeholder="18">
-                        </div>
+                        <input type="date" name="birth_date" value="{{ old('birth_date') }}">
                     </div>
 
                     <label class="register-field">
@@ -195,17 +191,9 @@
                         </label>
                     </div>
 
-                    <label class="register-field">
-                        <span>希望職種</span>
-                        <input type="text" name="desired_job" value="{{ old('desired_job') }}" placeholder="希望職種を入力">
-                    </label>
-                    <label class="register-field">
-                        <span>ご自分の系統</span>
-                        <input type="text" name="my_field" value="{{ old('my_field') }}" placeholder="ご自分の系統を入力">
-                    </label>
                     @if(!empty($masters['looks']) && $masters['looks']->isNotEmpty())
                     <div class="register-field">
-                        <span>ルックスタグ</span>
+                        <span>ご自分の系統</span>
                         <div class="register-chip-grid">
                             @foreach($masters['looks'] as $look)
                                 <label class="register-chip">
@@ -217,13 +205,9 @@
                     </div>
                     @endif
 
-                    <label class="register-field">
-                        <span>ご自分の内面・特技</span>
-                        <input type="text" name="my_inner_skills" value="{{ old('my_inner_skills') }}" placeholder="内面・特技を入力">
-                    </label>
                     @if(!empty($masters['personalities']) && $masters['personalities']->isNotEmpty())
                     <div class="register-field">
-                        <span>性格タグ</span>
+                        <span>ご自分の内面・特技</span>
                         <div class="register-chip-grid">
                             @foreach($masters['personalities'] as $personality)
                                 <label class="register-chip">
@@ -246,11 +230,11 @@
                             </select>
                         </label>
                         <label class="register-field">
-                            <span>勤務時間</span>
+                            <span>勤務時間帯</span>
                             <select name="work_time">
                                 <option value="">未選択</option>
-                                <option value="morning" @selected(old('work_time') === 'morning')>朝</option>
-                                <option value="day_night" @selected(old('work_time') === 'day_night')>昼or夜</option>
+                                <option value="morning" @selected(old('work_time') === 'morning')>朝〜昼</option>
+                                <option value="day_night" @selected(old('work_time') === 'day_night')>夜</option>
                             </select>
                         </label>
                     </div>
@@ -358,17 +342,29 @@
                         </label>
                     </div>
 
+                    <div class="register-grid register-grid-two">
                     <label class="register-field">
-                        <span>住所・ビル名 <em>必須</em></span>
+                        <span>番地・丁目 <em>必須</em></span>
                         <input
                             type="text"
-                            name="address"
-                            value="{{ old('address') }}"
+                            name="addr"
+                            value="{{ old('addr') }}"
                             class="p-street-address"
                             autocomplete="address-line1"
-                            placeholder="例：7-12-34 ミセチョクビル 5F"
+                            placeholder="例：7-12-34"
                         >
                     </label>
+                    <label class="register-field">
+                        <span>建物名・部屋番号</span>
+                        <input
+                            type="text"
+                            name="building"
+                            value="{{ old('building') }}"
+                            autocomplete="address-line2"
+                            placeholder="例：ミセチョクビル 5F"
+                        >
+                    </label>
+                    </div>
 
                     <label class="register-field">
                         <span>キャッチコピー（ひとこと）</span>
@@ -742,6 +738,16 @@
             background: rgba(255, 255, 255, 0.04);
             color: #fff;
             font-size: 0.94rem;
+        }
+
+        .register-field input[type="date"] {
+            min-height: 46px;
+            color-scheme: dark;
+        }
+
+        .register-field input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(79%) sepia(29%) saturate(566%) hue-rotate(5deg) brightness(91%) contrast(89%);
+            cursor: pointer;
         }
 
         .register-field textarea {

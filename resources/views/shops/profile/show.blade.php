@@ -35,8 +35,24 @@
     </div>
 
     <div class="shop-profile-section">
-        <h3>Concept</h3>
-        <p class="concept-text">{!! nl2br(e($shop['concept'] ?? '')) !!}</p>
+        <h3>Shop Information</h3>
+        <p class="concept-text" style="margin-bottom:10px;">
+            <strong>業種：</strong>{{ $shop['industry'] ?: '—' }}<br>
+            <strong>郵便番号：</strong>{{ $shop['zip'] ?: '—' }}<br>
+            <strong>住所：</strong>{{ $shop['address'] ?: '—' }}
+            @if(!empty($shop['tel']))<br><strong>電話：</strong>{{ $shop['tel'] }}@endif
+            @if(!empty($shop['business_hours_shop']))<br><strong>店舗の営業時間：</strong>{{ $shop['business_hours_shop'] }}@endif
+            @if(!empty($shop['nearest_stations']))
+                <br><strong>最寄り駅：</strong>{!! nl2br(e(implode("\n", (array) $shop['nearest_stations']))) !!}
+            @endif
+        </p>
+        @foreach(($shop['tag_groups'] ?? []) as $group)
+            @if(!empty($group['tags']))
+                <p class="concept-text" style="margin-top:8px;">
+                    <strong>{{ $group['label'] }}：</strong>{{ implode(' / ', (array) $group['tags']) }}
+                </p>
+            @endif
+        @endforeach
     </div>
 
     <div class="shop-profile-section">

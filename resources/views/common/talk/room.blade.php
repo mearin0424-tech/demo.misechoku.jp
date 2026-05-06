@@ -86,6 +86,9 @@
     $actionUrl = $actionUrl ?? ($isCast ? route('cast.talk.action') : route('shop.talk.action'));
     $blockUrl = $blockUrl ?? ($isCast ? route('cast.talk.block') : route('shop.talk.block'));
     $partnerAvatar = $partnerAvatar ?? asset('assets/images/common/no-image.png');
+    $talkJobKindLabelMap = ['trial' => '体験入店', 'fulltime' => '本入店', 'help' => 'ヘルプ'];
+    $currentTalkJobKindValue = $selectedTalkJobKind ?? $initialTalkJobKind ?? null;
+    $currentTalkJobKindLabel = $talkJobKindLabelMap[$currentTalkJobKindValue] ?? '未選択';
 @endphp
 
 <div id="talk-room-container" class="flex flex-col h-full bg-[#120505]">
@@ -95,18 +98,33 @@
             <img src="{{ $partnerAvatar }}" alt="" class="talk-room-header-avatar">
             <span class="talk-room-header-name">{{ $partnerName }}</span>
         </div>
+        <div class="talk-room-shop-badges">
+                <span class="talk-status-label">
+                    <span class="talk-status-dot"></span>
+                    <span class="talk-status-caption">状況:</span>
+                    <span class="talk-status-value">{{ $currentStatusLabel ?? 'やり取り中' }}</span>
+                </span>
+                @if(!$isCast)
+                    <button type="button" id="open-job-kind-modal" class="talk-job-kind-badge" @if(empty($canSelectTalkJobKind)) disabled @endif>
+                        <span class="talk-job-kind-caption">種別:</span>
+                        <span id="talk-job-kind-current" class="talk-job-kind-value">{{ $currentTalkJobKindLabel }}</span>
+                        @if(!empty($canSelectTalkJobKind))
+                            <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                        @endif
+                    </button>
+                @else
+                    <span class="talk-job-kind-badge talk-job-kind-badge-static">
+                        <span class="talk-job-kind-caption">種別:</span>
+                        <span id="talk-job-kind-current" class="talk-job-kind-value">{{ $currentTalkJobKindLabel }}</span>
+                    </span>
+                @endif
+        </div>
         @if(empty($blockState['blocked_by_other']))
         <div class="talk-room-header-actions">
             @if($isCast && !empty($reviewApplicationId))
                 <button type="button" class="btn-interview btn-review-post" data-application-id="{{ $reviewApplicationId }}" title="レビュー投稿">
                     <i class="fas fa-star"></i>
                     <span>レビュー投稿</span>
-                </button>
-            @endif
-            @if(!$isCast && !empty($canOfferInterview))
-                <button type="button" id="open-interview-modal" class="btn-interview">
-                    <i class="far fa-calendar-alt"></i>
-                    <span>面談日を提案</span>
                 </button>
             @endif
             <form action="{{ $blockUrl }}" method="POST">
@@ -131,31 +149,6 @@
         <div class="px-4 pt-3">
             <div class="talk-block-notice">
                 {{ !empty($blockState['blocked_by_me']) ? 'この相手をブロック中です。解除するまでメッセージ送信はできません。' : 'このトークは相手によってブロックされています。' }}
-            </div>
-        </div>
-    @endif
-
-    @if(!$isCast)
-        <div class="px-4 pt-3">
-            <div class="talk-result-panel" style="padding: 12px 14px;">
-                <div class="talk-result-panel-copy" style="width:100%;">
-                    <span class="talk-result-panel-title">求人種別</span>
-                    <p id="talk-job-kind-guidance" style="margin-top:6px;">面談日を送る前に求人種別を確定してください。面談日確定後は変更できません。</p>
-                </div>
-                <div class="talk-result-panel-actions" style="width:100%; display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
-                    <select id="talk-room-job-kind" style="flex:1 1 220px; min-width:180px; border-radius:10px; border:1px solid rgba(229,193,88,.22); background:rgba(255,255,255,.05); color:#fff; padding:8px 10px;" @if(empty($canSelectTalkJobKind)) disabled @endif>
-                        <option value="">未選択</option>
-                        <option value="trial">体験入店</option>
-                        <option value="fulltime">本入店</option>
-                        <option value="help">ヘルプ</option>
-                    </select>
-                    @if(!empty($canSelectTalkJobKind))
-                        <button type="button" id="save-talk-job-kind" class="btn-interview btn-interview-result" style="white-space:nowrap; width:auto; min-width:110px;">種別を保存</button>
-                        <span id="talk-job-kind-save-status" style="font-size:12px; color:#d4c4a4; white-space:nowrap;">未保存</span>
-                    @else
-                        <span style="font-size:12px; color:#a1a1aa;">面談日確定後は変更不可</span>
-                    @endif
-                </div>
             </div>
         </div>
     @endif
@@ -283,35 +276,8 @@
         @endforelse
     </div>
 
-    @if(!empty($canCancelStatus) || !empty($canSelectResult))
-        <div class="talk-result-panel">
-            <div class="talk-result-panel-copy">
-                <span class="talk-result-panel-title">現在のステータス: {{ $currentStatusLabel ?? 'やり取り中' }}</span>
-                @if(!empty($canSelectResult))
-                    <p>面談日が決定しています。結果送信、またはキャンセルしてやり取り中に戻せます。</p>
-                @elseif(!empty($canCancelStatus))
-                    <p>このステータスでは同じ操作を重複実行できません。必要な場合はキャンセルしてやり取り中へ戻してください。</p>
-                @endif
-            </div>
-            <div class="talk-result-panel-actions">
-                @if(!empty($canCancelStatus))
-                    <button type="button" id="send-cancel-status" class="btn-interview btn-interview-result btn-interview-cancel-state">
-                        <i class="fas fa-rotate-left"></i>
-                        <span>キャンセル</span>
-                    </button>
-                @endif
-                @if(!empty($canSelectResult))
-                    <button type="button" id="send-hire-message" class="btn-interview btn-interview-result">
-                        <i class="fas fa-circle-check"></i>
-                        <span>採用</span>
-                    </button>
-                    <button type="button" id="send-reject-message" class="btn-interview btn-interview-result btn-interview-result--negative">
-                        <i class="fas fa-circle-xmark"></i>
-                        <span>不採用</span>
-                    </button>
-                @endif
-            </div>
-        </div>
+    @if($isCast && !empty($canCancelStatus))
+        <input type="hidden" id="send-cancel-status-enabled" value="1">
     @endif
 
     @if($isCast && !empty($canRequestFulltime))
@@ -339,6 +305,11 @@
                         <input type="hidden" name="talk_topic" value="{{ $initialTalkTopic ?? '' }}">
                         <input type="hidden" name="talk_job_kind" value="{{ $initialTalkJobKind ?? '' }}">
                     @endif
+                    @if(!$isCast)
+                        <button type="button" id="open-talk-action-menu" class="btn-chat-action" aria-label="メニューを開く">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    @endif
                     <div class="chat-input-wrapper">
                         <textarea name="message" rows="1" placeholder="メッセージを入力..." class="focus:outline-none"></textarea>
                     </div>
@@ -351,6 +322,67 @@
 
 {{-- 面談日候補 送信モーダル（店舗側のみ利用） --}}
 @if(!$isCast)
+<div id="talk-action-menu-overlay" class="interview-modal-overlay interview-modal-overlay-sheet" aria-hidden="true">
+    <div class="interview-modal interview-menu-sheet">
+        <div class="interview-modal-header">
+            <h2>メニュー</h2>
+            <button type="button" class="interview-modal-close js-talk-action-menu-close" aria-label="閉じる">&times;</button>
+        </div>
+        <div class="talk-action-grid">
+            @if(!empty($canOfferInterview))
+                <button type="button" id="open-interview-modal" class="talk-action-item talk-action-item-primary">
+                    <span class="talk-action-icon"><i class="far fa-calendar-alt"></i></span>
+                    <span>面談候補日を送る</span>
+                </button>
+            @endif
+            @if(!empty($canSelectResult))
+                <button type="button" id="open-hire-modal-menu" class="talk-action-item">
+                    <span class="talk-action-icon"><i class="fas fa-circle-check"></i></span>
+                    <span>採用を送る</span>
+                </button>
+                <button type="button" id="open-reject-modal-menu" class="talk-action-item">
+                    <span class="talk-action-icon"><i class="fas fa-circle-xmark"></i></span>
+                    <span>不採用を送る</span>
+                </button>
+            @endif
+            @if(!empty($canCancelStatus))
+                <button type="button" id="open-cancel-status-menu" class="talk-action-item">
+                    <span class="talk-action-icon"><i class="fas fa-rotate-left"></i></span>
+                    <span>ステータスを戻す</span>
+                </button>
+            @endif
+        </div>
+    </div>
+</div>
+
+<div id="job-kind-modal-overlay" class="interview-modal-overlay interview-modal-overlay-sheet" aria-hidden="true">
+    <div class="interview-modal interview-menu-sheet">
+        <div class="interview-modal-header">
+            <h2>求人種別の設定</h2>
+            <button type="button" class="interview-modal-close js-job-kind-close" aria-label="閉じる">&times;</button>
+        </div>
+        <p id="talk-job-kind-guidance" class="interview-modal-desc">面談日を送る前に求人種別を確定してください。面談日確定後は変更できません。</p>
+        <div class="interview-option-group">
+            <label for="talk-room-job-kind">現在の求人種別</label>
+            <select id="talk-room-job-kind" @if(empty($canSelectTalkJobKind)) disabled @endif>
+                <option value="">未選択</option>
+                <option value="trial">体験入店</option>
+                <option value="fulltime">本入店</option>
+                <option value="help">ヘルプ</option>
+            </select>
+        </div>
+        @if(!empty($canSelectTalkJobKind))
+            <div class="interview-modal-footer">
+                <button type="button" class="btn-interview-cancel js-job-kind-close">閉じる</button>
+                <button type="button" id="save-talk-job-kind" class="btn-interview-submit">この内容で設定する</button>
+            </div>
+            <p id="talk-job-kind-save-status" class="talk-job-kind-save-status">未保存</p>
+        @else
+            <p class="talk-job-kind-lock-note">面談日確定後は変更できません。</p>
+        @endif
+    </div>
+</div>
+
 <div id="interview-modal-overlay" class="interview-modal-overlay" aria-hidden="true">
     <div class="interview-modal">
         <div class="interview-modal-header">

@@ -240,6 +240,87 @@
     flex-wrap: wrap;
 }
 
+.talk-room-shop-badges {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 2px 0 8px;
+    flex-wrap: wrap;
+}
+
+.talk-status-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    color: rgba(245, 230, 230, 0.92);
+}
+
+.talk-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #e5af4f;
+    box-shadow: 0 0 0 0 rgba(229, 175, 79, 0.55);
+    animation: talkStatusPulse 1.8s ease-in-out infinite;
+}
+
+.talk-status-caption {
+    color: rgba(212, 196, 164, 0.9);
+}
+
+.talk-status-value {
+    color: #f4d087;
+    font-weight: 700;
+}
+
+.talk-job-kind-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    background: rgba(255, 255, 255, 0.05);
+    color: #f8e7be;
+    font-size: 0.72rem;
+    cursor: pointer;
+}
+
+.talk-job-kind-badge:disabled {
+    opacity: 0.65;
+    cursor: default;
+}
+
+.talk-job-kind-badge-static {
+    border: none;
+    background: transparent;
+    padding: 0;
+    min-height: auto;
+    color: rgba(245, 230, 230, 0.92);
+}
+
+.talk-job-kind-caption {
+    color: rgba(212, 196, 164, 0.88);
+}
+
+.talk-job-kind-value {
+    font-weight: 700;
+}
+
+@keyframes talkStatusPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(229, 175, 79, 0.55);
+    }
+    70% {
+        box-shadow: 0 0 0 8px rgba(229, 175, 79, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(229, 175, 79, 0);
+    }
+}
+
 .talk-block-notice {
     padding: 12px 14px;
     border-radius: 14px;
@@ -554,6 +635,25 @@
     gap: 10px;
 }
 
+.btn-chat-action {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(31, 11, 15, 0.92);
+    color: #d4c4a4;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.btn-chat-action i {
+    font-size: 0.9rem;
+}
+
 .chat-input-wrapper {
     flex: 1;
     min-width: 0;
@@ -833,6 +933,12 @@
     visibility: visible;
 }
 
+.interview-modal-overlay-sheet {
+    align-items: flex-end;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.6);
+}
+
 .interview-modal {
     background: #1b0a0a;
     border-radius: 18px;
@@ -842,6 +948,19 @@
     width: 100%;
     max-width: 360px;
     color: #f5ecec;
+}
+
+.interview-menu-sheet {
+    max-width: min(100%, var(--max-content-width));
+    border-radius: 22px 22px 0 0;
+    border-bottom: none;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0));
+    transform: translateY(100%);
+    transition: transform 0.25s ease;
+}
+
+.interview-modal-overlay[aria-hidden="false"] .interview-menu-sheet {
+    transform: translateY(0);
 }
 
 .interview-modal-header {
@@ -893,6 +1012,17 @@
     font-size: 0.8rem;
 }
 
+.interview-option-group select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 121, 79, 0.7);
+    background: #120505;
+    color: #f5ecec;
+    font-size: 0.85rem;
+}
+
 .interview-modal-footer {
     display: flex;
     justify-content: flex-end;
@@ -925,6 +1055,61 @@
 .btn-interview-submit:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.talk-action-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.talk-action-item {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    min-height: 92px;
+    color: #e3d6d6;
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.talk-action-item-primary {
+    border-color: rgba(229, 175, 79, 0.45);
+    color: #f4d087;
+}
+
+.talk-action-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.32);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.talk-action-item-primary .talk-action-icon {
+    background: #e5af4f;
+    color: #1a0a0a;
+}
+
+.talk-job-kind-save-status {
+    margin: 8px 2px 0;
+    font-size: 0.72rem;
+    color: #d4c4a4;
+}
+
+.talk-job-kind-lock-note {
+    margin: 6px 0 0;
+    font-size: 0.76rem;
+    color: #a1a1aa;
 }
 
 .interview-confirm-modal {

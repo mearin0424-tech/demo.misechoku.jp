@@ -43,9 +43,7 @@ class RegistrationController extends Controller
         $rules = [
             'nickname' => ['required', 'string', 'max:50'],
             'name' => ['required', 'string', 'max:100'],
-            'birth_year' => ['required', 'integer', 'between:1950,2100'],
-            'birth_month' => ['required', 'integer', 'between:1,12'],
-            'birth_day' => ['required', 'integer', 'between:1,31'],
+            'birth_date' => ['required', 'date'],
             'zip' => ['required', 'regex:/^\d{3}-?\d{4}$/'],
             'pref' => ['required', 'string', 'max:20'],
             'city' => ['required', 'string', 'max:100'],
@@ -63,9 +61,6 @@ class RegistrationController extends Controller
             'bust' => ['nullable', 'integer', 'min:50', 'max:120'],
             'waist' => ['nullable', 'integer', 'min:40', 'max:120'],
             'hip' => ['nullable', 'integer', 'min:50', 'max:120'],
-            'desired_job' => ['nullable', 'string', 'max:255'],
-            'my_field' => ['nullable', 'string', 'max:255'],
-            'my_inner_skills' => ['nullable', 'string', 'max:500'],
             'shift_hope' => ['nullable', 'string', 'in:週1回出勤,週2回出勤,週3回以上'],
             'work_time' => ['nullable', 'string', 'in:morning,day_night'],
             'current_job' => ['nullable', 'string', 'max:1000'],
@@ -90,16 +85,6 @@ class RegistrationController extends Controller
             'zip.regex' => '郵便番号は 7 桁、または 123-4567 形式で入力してください。',
         ]);
 
-        if (!checkdate(
-            (int) $request->input('birth_month'),
-            (int) $request->input('birth_day'),
-            (int) $request->input('birth_year')
-        )) {
-            return back()
-                ->withErrors(['birth_day' => '生年月日を正しく入力してください。'])
-                ->withInput();
-        }
-
         $member = DB::transaction(function () use ($request) {
             $castId = $this->nextSequentialId('casts', 'c');
 
@@ -115,6 +100,7 @@ class RegistrationController extends Controller
             ]);
 
             $shiftHope = $request->filled('shift_hope') ? $request->input('shift_hope') : $this->shiftStyleToShiftHope((string) $request->input('shift_style'));
+            $workTime = $request->filled('work_time') ? (string) $request->input('work_time') : $this->shiftStyleToWorkTime((string) $request->input('shift_style'));
             $nightWorkExp = $request->filled('night_work_exp') ? $request->input('night_work_exp') : ($request->input('experience') === 'experienced' ? 'yes' : 'none');
             $industryIds = array_values(array_unique(array_map('intval', (array) $request->input('industry_ids', []))));
 
@@ -122,19 +108,14 @@ class RegistrationController extends Controller
                 'cast_id' => $castId,
                 'nickname' => $request->input('nickname'),
                 'name' => $request->input('name'),
-                'birthday' => sprintf(
-                    '%04d-%02d-%02d',
-                    (int) $request->input('birth_year'),
-                    (int) $request->input('birth_month'),
-                    (int) $request->input('birth_day')
-                ),
+                'birthday' => $request->input('birth_date'),
                 'zip' => $this->normalizeZip($request->input('zip')),
                 'pref' => $request->input('pref'),
                 'city' => $request->input('city'),
                 'addr' => $request->input('addr1'),
                 'building' => null,
                 'tel' => $request->input('phone'),
-                'shift' => $this->shiftHopeToCode($shiftHope),
+                'shift' => $this->workTimeToShiftCode($workTime),
                 'exp' => $nightWorkExp === 'yes' ? 1 : 0,
                 'pr' => $request->input('intro'),
                 'height' => $request->filled('height') ? (int) $request->input('height') : null,
@@ -199,7 +180,9 @@ class RegistrationController extends Controller
             'zip' => ['required', 'regex:/^\d{3}-?\d{4}$/'],
             'pref' => ['required', 'string', 'max:20'],
             'city' => ['required', 'string', 'max:100'],
-            'address' => ['required', 'string', 'max:255'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'addr' => ['nullable', 'string', 'max:255', 'required_without:address'],
+            'building' => ['nullable', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:20'],
             'email' => ['required', 'email', 'max:255', 'unique:shop_managers,email'],
             'business_type' => ['required', 'in:club,lounge,girls-bar,other'],
@@ -235,13 +218,21 @@ class RegistrationController extends Controller
 
             $industryIds = array_values(array_unique(array_map('intval', (array) $request->input('industry_ids', []))));
 
+            $resolvedAddress = trim(implode(' ', array_filter([
+                (string) $request->input('addr', ''),
+                (string) $request->input('building', ''),
+            ])));
+            if ($resolvedAddress === '') {
+                $resolvedAddress = trim((string) $request->input('address', ''));
+            }
+
             $shopProfilePayload = [
                 'shop_id' => $shopId,
                 'shop_name' => $request->input('shop_name'),
                 'zip' => $this->normalizeZip($request->input('zip')),
                 'pref' => $request->input('pref'),
                 'city' => $request->input('city'),
-                'addr2' => $request->input('address'),
+                'addr2' => $resolvedAddress,
                 'tel' => $request->input('phone'),
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -403,6 +394,24 @@ class RegistrationController extends Controller
             'twice' => '週2回出勤',
             'flex' => '週3回以上',
             default => '週1回出勤',
+        };
+    }
+
+    private function shiftStyleToWorkTime(string $shiftStyle): string
+    {
+        return match ($shiftStyle) {
+            'once' => 'morning',
+            'twice', 'flex' => 'day_night',
+            default => 'day_night',
+        };
+    }
+
+    private function workTimeToShiftCode(?string $workTime): int
+    {
+        return match ($workTime) {
+            'morning' => 1,
+            'day_night' => 2,
+            default => 2,
         };
     }
 

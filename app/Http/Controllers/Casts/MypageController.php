@@ -585,11 +585,14 @@ class MypageController extends Controller
 
         $birthday = $castRow->birthday ? Carbon::parse($castRow->birthday) : null;
         $age = $birthday ? $birthday->age : null;
-        $shiftHope = $this->shiftHopeLabel($castRow->shift);
-        $workTime = '';
+        $shiftHope = '';
+        $workTime = $this->workTimeKeyFromShift($castRow->shift);
         $nightWorkExp = ((int) ($castRow->exp ?? 0) === 1 ? 'yes' : 'none');
         $looksTags = $this->getCastTagNamesByType($castId, 'looks');
         $personalityTags = $this->getCastTagNamesByType($castId, 'personality');
+        $desiredJob = $this->resolveDesiredJobByIndustries($castId, $castRow->industry_id ?? null);
+        $looksSummary = $looksTags !== [] ? implode(' / ', $looksTags) : '';
+        $personalitySummary = $personalityTags !== [] ? implode(' / ', $personalityTags) : '';
         $likeCount = DB::table('favorites')
             ->where('cast_id', $castId)
             ->where('action_type', 3)
@@ -694,16 +697,16 @@ class MypageController extends Controller
             'pr'               => $castRow->pr ?? '',
             'intro'            => $castRow->pr ?? '',
             'appeal_updated_at'=> $appealUpdatedAt,
-            'desired_job'      => '',
-            'my_field'         => '',
-            'my_inner_skills'  => '',
+            'desired_job'      => $desiredJob,
+            'my_field'         => $looksSummary,
+            'my_inner_skills'  => $personalitySummary,
             'personality_type' => $this->resolvePersonalityType($castRow->personality_type ?? null),
             'looks_tags'       => $looksTags,
             'personality_tags' => $personalityTags,
             'memo_data'        => [
-                'desired_job' => '',
-                'my_field' => '',
-                'my_inner_skills' => '',
+                'desired_job' => $desiredJob,
+                'my_field' => $looksSummary,
+                'my_inner_skills' => $personalitySummary,
                 'shift_hope' => $shiftHope,
                 'work_time' => $workTime,
                 'night_work_exp' => $nightWorkExp,
@@ -875,10 +878,11 @@ class MypageController extends Controller
 
         $names = [];
         if (Schema::hasTable('cast_tag_relations')) {
+            $tagTypes = array_values(array_unique(array_filter([$tagType, rtrim($tagType, 's')])));
             $names = DB::table('cast_tag_relations as r')
                 ->join('cast_tags as t', 'r.tag_id', '=', 't.id')
                 ->where('r.cast_id', $castId)
-                ->where('r.tag_type', $tagType)
+                ->whereIn('r.tag_type', $tagTypes)
                 ->orderBy('t.id')
                 ->pluck('t.name')
                 ->map(fn ($name) => trim((string) $name))
@@ -923,10 +927,47 @@ class MypageController extends Controller
     private function workTimeLabel(string $workTime): string
     {
         return match ($workTime) {
-            'morning' => '朝',
-            'day_night' => '昼or夜',
+            'morning' => '朝〜昼',
+            'day_night' => '夜',
             default => '',
         };
+    }
+
+    private function workTimeKeyFromShift($shift): string
+    {
+        return match ((int) ($shift ?? 0)) {
+            1 => 'morning',
+            2 => 'day_night',
+            default => '',
+        };
+    }
+
+    private function resolveDesiredJobByIndustries(string $castId, $fallbackIndustryId = null): string
+    {
+        $names = [];
+        if (Schema::hasTable('cast_industry')) {
+            $names = DB::table('cast_industry')
+                ->join('industries', 'cast_industry.industry_id', '=', 'industries.id')
+                ->where('cast_industry.cast_id', $castId)
+                ->orderBy('cast_industry.industry_id')
+                ->pluck('industries.name')
+                ->map(fn ($name) => trim((string) $name))
+                ->filter()
+                ->values()
+                ->all();
+        }
+
+        if ($names === []) {
+            $single = (int) ($fallbackIndustryId ?? 0);
+            if ($single > 0) {
+                $name = DB::table('industries')->where('id', $single)->value('name');
+                if ($name) {
+                    $names = [trim((string) $name)];
+                }
+            }
+        }
+
+        return implode(' / ', array_values(array_unique($names)));
     }
 
     private function mapApplicationStatus(int $status): array

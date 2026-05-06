@@ -82,7 +82,7 @@
 
         <section class="intro-section" aria-labelledby="intro-heading">
             <button type="button" class="accordion-trigger" id="intro-heading" aria-expanded="true" aria-controls="intro-body" onclick="toggleAccordion(this)">
-                <span>自己紹介 / PR</span>
+                <span>自己PR</span>
                 <i class="fas fa-chevron-down accordion-icon is-open" aria-hidden="true"></i>
             </button>
             <div class="accordion-body" id="intro-body" role="region">
@@ -112,8 +112,16 @@
                     <span class="detail-value">{{ $cast['desired_job'] ?? '--' }}</span>
                 </div>
                 <div class="detail-row">
+                    <span class="detail-label">ルックス</span>
+                    <span class="detail-value">{{ !empty($cast['looks_tags']) ? implode(' / ', (array) $cast['looks_tags']) : '--' }}</span>
+                </div>
+                <div class="detail-row">
                     <span class="detail-label">ご自分の系統</span>
                     <span class="detail-value">{{ $cast['my_field'] ?? '--' }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">性格・内面</span>
+                    <span class="detail-value">{{ !empty($cast['personality_tags']) ? implode(' / ', (array) $cast['personality_tags']) : '--' }}</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">ご自分の内面・特技</span>
@@ -124,8 +132,12 @@
                     <span class="detail-value">{{ $cast['shift_hope'] ?? '--' }}</span>
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">勤務時間</span>
+                    <span class="detail-label">勤務時間帯</span>
                     <span class="detail-value">{{ $cast['work_time_label'] ?? '--' }}</span>
+                </div>
+                <div class="detail-row detail-row-block">
+                    <span class="detail-label">自己PR</span>
+                    <div class="detail-value">@if(!empty($cast['pr'])){!! nl2br(e($cast['pr'])) !!}@else--@endif</div>
                 </div>
                 <div class="detail-row detail-row-block">
                     <span class="detail-label">現職業</span>
