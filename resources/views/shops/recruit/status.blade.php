@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', '求人ステータス管理')
+@section('title', 'Employment')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/recruitment.css') }}">
