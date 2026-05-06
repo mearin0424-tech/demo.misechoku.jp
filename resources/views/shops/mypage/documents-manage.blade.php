@@ -1,14 +1,11 @@
 @extends('layouts.app')
 
-@section('title', '許可証の管理')
+@section('title', ($document['name'] ?? '許可証') . 'の提出')
 @section('body-class', 'page-shop-mypage shop-mypage-v2 page-shop-documents-manage')
-@section('guide_message')
-{{ ($document['key'] ?? '') === 'business' ? '営業許可証の提出' : '風営許可証の提出' }}
-@endsection
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/css/shop-license-documents.css') }}?v=20260506">
+<link rel="stylesheet" href="{{ asset('assets/css/shop-license-documents.css') }}?v=20260508">
 @endpush
 
 @section('content')
@@ -18,6 +15,7 @@
     $canUploadOrSubmit = $record === null || !empty($record['can_request_review']);
     $canWithdrawReview = !empty($record['can_withdraw_review']);
     $isBusiness = ($document['key'] ?? '') === 'business';
+    $licenseDocName = $document['name'] ?? ($isBusiness ? '営業許可証' : '風営許可証');
 
     $uiWithdraw = $canWithdrawReview;
     $uiSelectingServer = $canUploadOrSubmit && in_array($s, ['draft', 'rejected'], true);
@@ -27,6 +25,8 @@
     $serverIsPdf = !empty($record['file_is_pdf']);
     $expiryVal = $record['expired_at'] ?? '';
     $updatedLabel = $record['updated_at_label'] ?? '';
+    $approvedAtLabel = $record['approved_at'] ?? '';
+    $showBusinessExpiryBlock = $isBusiness && (!$uiUnsubmitted || $uiSelectingServer || $uiWithdraw || $expiryVal !== '');
 
     $flowHeaderClass = 'license-manage-flow is-unsubmitted';
     $flowHeaderText = '未提出';
@@ -71,11 +71,8 @@
             data-server-is-pdf="{{ $serverIsPdf ? '1' : '0' }}"
         >
             <div class="license-manage-card">
-                <header class="license-manage-header">
-                    <div class="license-manage-header__titles">
-                        <h1 class="license-manage-title">{{ $isBusiness ? '営業許可証の提出' : '風営許可証の提出' }}</h1>
-                        <span id="license-doc-flow" class="{{ $flowHeaderClass }}">{{ $flowHeaderText }}</span>
-                    </div>
+                <header class="license-manage-header license-manage-header--status-only">
+                    <span id="license-doc-flow" class="{{ $flowHeaderClass }}">{{ $flowHeaderText }}</span>
                 </header>
 
                 <div class="license-manage-body">
@@ -83,34 +80,38 @@
                         <p class="license-manage-ng">差し戻し理由: {{ $record['ng_reason'] }}</p>
                     @endif
 
-                    <div id="license-doc-meta" class="license-manage-meta" @if(!$uiSelectingServer && !$uiWithdraw) style="display:none;" @endif>
-                        <p>最終更新: <span id="license-meta-updated">{{ $uiWithdraw || $uiSelectingServer ? ($updatedLabel !== '' ? $updatedLabel : '----/--/-- --:--') : '----/--/-- --:--' }}</span></p>
-                    </div>
-
-                    <div id="license-doc-preview-wrap" class="license-manage-preview-wrap" @if(!$uiSelectingServer && !$uiWithdraw) style="display:none;" @endif>
-                        <div id="license-doc-preview-inner" class="license-manage-preview-inner">
-                            @if($uiSelectingServer || $uiWithdraw)
-                                @if($serverIsPdf)
-                                    <a href="{{ $serverFileUrl }}" target="_blank" rel="noopener noreferrer" class="license-manage-preview-tile license-manage-preview-tile--pdf">
-                                        <svg class="license-manage-preview-tile__doc" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                                        <span class="license-manage-preview-tile__fname">PDFを開く</span>
-                                    </a>
-                                @else
-                                    <div class="license-manage-preview-tile">
-                                        <img src="{{ $serverFileUrl }}" alt="アップロード済みのプレビュー" class="license-manage-preview-tile__img">
-                                    </div>
+                    <div id="license-doc-file-row" class="license-manage-file-row" @if(!$uiSelectingServer && !$uiWithdraw) style="display:none;" @endif>
+                        <div id="license-doc-preview-wrap" class="license-manage-preview-wrap">
+                            <div id="license-doc-preview-inner" class="license-manage-preview-inner">
+                                @if($uiSelectingServer || $uiWithdraw)
+                                    @if($serverIsPdf)
+                                        <a href="{{ $serverFileUrl }}" target="_blank" rel="noopener noreferrer" class="license-manage-preview-tile license-manage-preview-tile--pdf">
+                                            <svg class="license-manage-preview-tile__doc" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                            <span class="license-manage-preview-tile__fname">PDFを開く</span>
+                                        </a>
+                                    @else
+                                        <div class="license-manage-preview-tile">
+                                            <img src="{{ $serverFileUrl }}" alt="アップロード済みのプレビュー" class="license-manage-preview-tile__img">
+                                        </div>
+                                    @endif
                                 @endif
+                            </div>
+                        </div>
+                        <div id="license-doc-meta" class="license-manage-preview-meta">
+                            <p>最終更新: <span id="license-meta-updated">{{ $uiWithdraw || $uiSelectingServer ? ($updatedLabel !== '' ? $updatedLabel : '----/--/-- --:--') : '----/--/-- --:--' }}</span></p>
+                            @if($s === 'approved' && $approvedAtLabel !== '')
+                                <p class="license-manage-approved-at">承認日: {{ $approvedAtLabel }}</p>
                             @endif
                         </div>
                     </div>
 
                     @if($isBusiness)
-                        <div id="license-doc-expiry-block" class="license-manage-expiry-block" @if(!$uiSelectingServer && !$uiWithdraw) style="display:none;" @endif>
+                        <div id="license-doc-expiry-block" class="license-manage-expiry-block" @if(!$showBusinessExpiryBlock) style="display:none;" @endif>
                             <label class="license-manage-label" for="license-doc-expired-at">営業許可証の有効期限</label>
                             <div class="license-manage-date-wrap">
                                 <input type="date" id="license-doc-expired-at" name="expired_at" class="license-manage-date-input"
                                     value="{{ $expiryVal }}"
-                                    min="{{ now()->format('Y-m-d') }}"
+                                    @if(!$uiWithdraw) min="{{ now()->format('Y-m-d') }}" @endif
                                     @if($uiWithdraw) readonly @endif
                                     style="color-scheme: dark;">
                                 <span class="license-manage-date-icon" aria-hidden="true">
@@ -151,7 +152,7 @@
                             <div id="license-doc-state-unsubmitted" class="license-manage-state license-manage-state--empty" @if(!$uiUnsubmitted) style="display:none;" @endif>
                                 <svg class="license-manage-state__upload" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                                 <p class="license-manage-state__text">
-                                    {{ $isBusiness ? '営業許可証' : '風営許可証' }}の画像、またはPDFファイルをアップロードしてください。<br>
+                                    {{ $licenseDocName }}の画像、またはPDFファイルをアップロードしてください。<br>
                                     内容がはっきりと読み取れることを確認してください。
                                 </p>
                                 <button type="button" id="license-doc-pick-first" class="license-manage-btn license-manage-btn--primary-wide">
@@ -212,8 +213,7 @@
             var hasServerFileInitial = root.getAttribute('data-has-server-file') === '1';
 
             var flowEl = document.getElementById('license-doc-flow');
-            var metaEl = document.getElementById('license-doc-meta');
-            var previewWrap = document.getElementById('license-doc-preview-wrap');
+            var fileRow = document.getElementById('license-doc-file-row');
             var previewInner = document.getElementById('license-doc-preview-inner');
             var expiryBlock = document.getElementById('license-doc-expiry-block');
             var expiryInput = document.getElementById('license-doc-expired-at');
@@ -259,7 +259,7 @@
                     tile.href = objectUrl;
                     tile.target = '_blank';
                     tile.rel = 'noopener noreferrer';
-                    tile.innerHTML = '<svg class="license-manage-preview-tile__doc" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="license-manage-preview-tile__fname">PDFを開く</span>';
+                    tile.innerHTML = '<svg class="license-manage-preview-tile__doc" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="license-manage-preview-tile__fname">PDFを開く</span>';
                     previewInner.appendChild(tile);
                     return;
                 }
@@ -278,11 +278,12 @@
                 localSelecting = true;
                 if (stateUnsub) stateUnsub.style.display = 'none';
                 if (stateSel) stateSel.style.display = 'block';
-                if (metaEl) metaEl.style.display = 'block';
-                if (previewWrap) previewWrap.style.display = 'block';
-                if (expiryBlock) expiryBlock.style.display = 'block';
-                if (expiryHint) expiryHint.style.display = 'block';
-                if (expiryInput) expiryInput.removeAttribute('readonly');
+                if (fileRow) fileRow.style.display = 'flex';
+                if (isBusiness) {
+                    if (expiryBlock) expiryBlock.style.display = 'block';
+                    if (expiryHint) expiryHint.style.display = 'block';
+                    if (expiryInput) expiryInput.removeAttribute('readonly');
+                }
                 setFlowSelecting();
                 updateSubmitEnabled();
             }

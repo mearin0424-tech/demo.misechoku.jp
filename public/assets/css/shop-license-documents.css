@@ -523,6 +523,34 @@
     padding: 0 0 16px;
     border-bottom: none;
 }
+.license-manage-header--status-only {
+    justify-content: flex-start;
+}
+.license-manage-file-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+.license-manage-preview-meta {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: #a3a3a3;
+}
+.license-manage-preview-meta p {
+    margin: 0 0 4px;
+}
+.license-manage-preview-meta p:last-child {
+    margin-bottom: 0;
+}
+.license-manage-approved-at {
+    color: #86efac;
+    font-size: 0.78rem;
+}
 .license-manage-header__titles {
     display: flex;
     align-items: baseline;
@@ -727,6 +755,30 @@
 .page-shop-documents-manage .mypage-area {
     width: 100%;
     max-width: 100%;
+}
+.page-shop-documents-manage .license-manage-preview-wrap {
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+.page-shop-documents-manage .license-manage-preview-inner {
+    padding-bottom: 0;
+}
+.page-shop-documents-manage .license-manage-preview-tile {
+    width: 5.5rem;
+    height: 5.5rem;
+    border-radius: 10px;
+}
+.page-shop-documents-manage .license-manage-preview-tile--pdf {
+    padding: 8px 6px;
+}
+.page-shop-documents-manage .license-manage-preview-tile__doc {
+    margin-bottom: 4px;
+    flex-shrink: 0;
+}
+.page-shop-documents-manage .license-manage-preview-tile__fname {
+    font-size: 0.65rem;
+    line-height: 1.25;
+    -webkit-line-clamp: 2;
 }
 .license-manage-state__text {
     margin: 0 0 24px;
