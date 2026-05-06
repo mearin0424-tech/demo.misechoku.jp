@@ -23,6 +23,7 @@ class TalkController extends Controller
     private const MESSAGE_TYPE_HIRED = 4;
     private const MESSAGE_TYPE_REJECTED = 5;
     private const MESSAGE_TYPE_IMAGE = 6;
+    private const MESSAGE_TYPE_INTERVIEW_CANCEL_REQUEST = 7;
     private const APPLICATION_STATUS_CHATTING = 1;
     private const APPLICATION_STATUS_INTERVIEW_PENDING = 2;
     private const APPLICATION_STATUS_INTERVIEW_FIXED = 3;
@@ -275,7 +276,7 @@ class TalkController extends Controller
         $isCastPortal = request()->is('cast/*');
         $request->validate([
             'partner_id' => ['required', 'string'],
-            'action_type' => ['required', 'string', 'in:interview_offer,interview_confirm,hired,rejected,cancel_status,set_job_kind,fulltime_request,work_complete_report,bonus_achievement_report'],
+            'action_type' => ['required', 'string', 'in:interview_offer,interview_confirm,interview_cancel_request,interview_cancel_accept,hired,rejected,cancel_status,set_job_kind,fulltime_request,work_complete_report,bonus_achievement_report'],
             'options' => ['nullable', 'array'],
             'options.*' => ['nullable', 'string'],
             'offer_token' => ['nullable', 'string'],
@@ -291,8 +292,8 @@ class TalkController extends Controller
         $this->abortIfBlocked($partnerId, $isCastPortal);
 
         $actionType = $request->input('action_type');
-        abort_if($isCastPortal && !in_array($actionType, ['interview_confirm', 'set_job_kind', 'fulltime_request', 'work_complete_report', 'bonus_achievement_report'], true), 403);
-        abort_if(!$isCastPortal && $actionType === 'interview_confirm', 403);
+        abort_if($isCastPortal && !in_array($actionType, ['interview_confirm', 'interview_cancel_accept', 'set_job_kind', 'fulltime_request', 'work_complete_report', 'bonus_achievement_report'], true), 403);
+        abort_if(!$isCastPortal && in_array($actionType, ['interview_confirm', 'interview_cancel_accept'], true), 403);
         $castId = $isCastPortal ? $this->currentCastId() : $partnerId;
         $shopId = $isCastPortal ? $partnerId : $this->currentShopId();
         $currentApplicationStatus = $this->getCurrentApplicationStatus($castId, $shopId);
@@ -315,9 +316,28 @@ class TalkController extends Controller
                 '面談候補日を送る前に求人種別（体験入店／本入店／ヘルプ）を選択してください。'
             );
             abort_if(
-                $currentApplicationStatus !== self::APPLICATION_STATUS_CHATTING,
+                !in_array($currentApplicationStatus, [
+                    self::APPLICATION_STATUS_CHATTING,
+                    self::APPLICATION_STATUS_INTERVIEW_PENDING,
+                ], true),
                 422,
-                '面談候補日は「やり取り中」のときのみ送信できます。再設定する場合は先にキャンセルしてください。'
+                '面談候補日は「やり取り中」または「面談日調整中」のときのみ送信できます。'
+            );
+        }
+
+        if ($actionType === 'interview_cancel_request') {
+            abort_if(
+                $currentApplicationStatus !== self::APPLICATION_STATUS_INTERVIEW_FIXED,
+                422,
+                '面談日確定時のみキャンセル依頼を送信できます。'
+            );
+        }
+
+        if ($actionType === 'interview_cancel_accept') {
+            abort_if(
+                $currentApplicationStatus !== self::APPLICATION_STATUS_INTERVIEW_FIXED,
+                422,
+                '面談日確定時のみ承諾できます。'
             );
         }
 
@@ -399,6 +419,16 @@ class TalkController extends Controller
                     'bonus_meta' => $bonusMeta,
                 ], JSON_UNESCAPED_UNICODE),
             ],
+            'interview_cancel_request' => [
+                self::MESSAGE_TYPE_INTERVIEW_CANCEL_REQUEST,
+                json_encode([
+                    'requested_at' => now()->toDateTimeString(),
+                ], JSON_UNESCAPED_UNICODE),
+            ],
+            'interview_cancel_accept' => [
+                self::MESSAGE_TYPE_TEXT,
+                '面談キャンセルを承諾しました。やり取り中に戻します。',
+            ],
             'hired' => [
                 self::MESSAGE_TYPE_HIRED,
                 $this->resolveResultMessage((string) $actionType, (string) $request->input('message')),
@@ -427,6 +457,9 @@ class TalkController extends Controller
 
         if ($actionType === 'interview_offer') {
             abort_if(empty(json_decode($content, true)['options'] ?? []), 422);
+            if ($currentApplicationStatus === self::APPLICATION_STATUS_INTERVIEW_PENDING) {
+                $this->invalidateInterviewOffers($castId, $shopId);
+            }
         }
 
         if ($actionType === 'interview_confirm') {
@@ -651,6 +684,7 @@ class TalkController extends Controller
                 'offer_token' => $offerToken,
                 'selected_option' => $offerToken ? ($confirmedByToken[$offerToken] ?? null) : ($meta['selected_option'] ?? null),
                 'image_url' => $type === self::MESSAGE_TYPE_IMAGE ? $this->assetPathForStored($meta['image_path'] ?? null) : null,
+                'is_invalidated' => $type === self::MESSAGE_TYPE_INTERVIEW_OFFER ? !empty($meta['invalidated']) : false,
             ];
         });
     }
@@ -767,6 +801,9 @@ class TalkController extends Controller
                 ? '不採用メッセージを送りました'
                 : '不採用メッセージが届いています',
             self::MESSAGE_TYPE_IMAGE => $isMine ? '画像を送りました' : '画像が届いています',
+            self::MESSAGE_TYPE_INTERVIEW_CANCEL_REQUEST => $isMine
+                ? '面談キャンセル依頼を送りました'
+                : '面談キャンセル依頼が届いています',
             default => Str::limit(preg_replace('/\s+/u', ' ', trim((string) $message->content)), 60, '...'),
         };
     }
@@ -953,6 +990,9 @@ class TalkController extends Controller
             $updates['status'] = self::APPLICATION_STATUS_CHATTING;
             $updates['result_date'] = null;
             $updates['reason_rejection'] = null;
+        } elseif ($actionType === 'interview_cancel_accept') {
+            $updates['status'] = self::APPLICATION_STATUS_CHATTING;
+            $updates['result_date'] = null;
         } elseif ($actionType === 'work_complete_report') {
             $updates['status'] = self::APPLICATION_STATUS_HIRED;
         }
@@ -1415,6 +1455,12 @@ class TalkController extends Controller
         } elseif ($actionType === 'bonus_achievement_report') {
             $title = 'ボーナス達成報告';
             $body = 'キャストからボーナス達成報告が届きました。承認をご確認ください。';
+        } elseif ($actionType === 'interview_cancel_request') {
+            $title = '面談キャンセル依頼';
+            $body = '店舗から面談キャンセル依頼が届きました。承諾するとやり取り中に戻ります。';
+        } elseif ($actionType === 'interview_cancel_accept') {
+            $title = '面談キャンセル承諾';
+            $body = 'キャストが面談キャンセルを承諾しました。';
         }
 
         $this->notifyConversationPartner(
@@ -1491,5 +1537,33 @@ class TalkController extends Controller
         $title = '運営への振込指示';
         $body = 'ボーナス達成報告を受領しました。指示額: ¥' . number_format($amount);
         $this->notifyConversationPartner($castId, $shopId, true, $title, $body, url('/shop/talk/room/' . $castId));
+    }
+
+    private function invalidateInterviewOffers(string $castId, string $shopId): void
+    {
+        $targets = DB::table('messages')
+            ->where('cast_id', $castId)
+            ->where('shop_id', $shopId)
+            ->where('type', self::MESSAGE_TYPE_INTERVIEW_OFFER)
+            ->orderByDesc('id')
+            ->get();
+
+        foreach ($targets as $row) {
+            $meta = json_decode((string) $row->content, true);
+            if (!is_array($meta)) {
+                continue;
+            }
+            if (!empty($meta['invalidated'])) {
+                continue;
+            }
+            $meta['invalidated'] = true;
+            $meta['invalidated_at'] = now()->toDateTimeString();
+            DB::table('messages')
+                ->where('id', $row->id)
+                ->update([
+                    'content' => json_encode($meta, JSON_UNESCAPED_UNICODE),
+                    'updated_at' => now(),
+                ]);
+        }
     }
 }

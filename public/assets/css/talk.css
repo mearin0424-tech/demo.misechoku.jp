@@ -211,6 +211,7 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
     z-index: 100;
+    position: relative;
 }
 .talk-room-header-inner {
     display: flex;
@@ -234,10 +235,16 @@
 
 .talk-room-header-actions {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     margin-top: 4px;
     gap: 6px;
     flex-wrap: wrap;
+}
+
+.talk-room-header-block {
+    position: absolute;
+    top: 10px;
+    right: 15px;
 }
 
 .talk-room-shop-badges {
@@ -1037,6 +1044,28 @@
     font-size: 0.8rem;
 }
 
+.interview-option-group-grid {
+    display: grid;
+    grid-template-columns: 1fr 120px;
+    gap: 8px;
+}
+
+.interview-option-group-grid label {
+    grid-column: 1 / -1;
+}
+
+.interview-option-group-grid input[type="date"],
+.interview-option-group-grid input[type="time"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 121, 79, 0.7);
+    background: #120505;
+    color: #f5ecec;
+    font-size: 0.82rem;
+}
+
 .interview-option-group select {
     width: 100%;
     box-sizing: border-box;
@@ -1190,15 +1219,15 @@
    面談日候補メッセージ
    ========================================================================== */
 .message-bubble-interview {
-    min-width: min(264px, 100%);
-    padding: 10px 12px 8px;
-    border-radius: 20px;
+    min-width: min(240px, 100%);
+    padding: 10px 10px 8px;
+    border-radius: 16px;
 }
 .msg-right .message-bubble-interview {
-    border-radius: 20px 20px 4px 20px;
+    border-radius: 16px 16px 4px 16px;
 }
 .msg-left .message-bubble-interview {
-    border-radius: 20px 20px 20px 4px;
+    border-radius: 16px 16px 16px 4px;
 }
 
 .msg-right .message-bubble-confirmed {
@@ -1232,14 +1261,14 @@
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .interview-title {
     display: flex;
     align-items: center;
     gap: 5px;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 700;
     margin-bottom: 0;
 }
@@ -1263,8 +1292,8 @@
 }
 
 .interview-body-copy {
-    margin: 0 0 3px;
-    font-size: 0.74rem;
+    margin: 0 0 6px;
+    font-size: 0.72rem;
     line-height: 1.5;
     color: rgba(247, 237, 237, 0.92);
 }
@@ -1275,7 +1304,7 @@
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }
 
 .interview-option-btn {
@@ -1283,12 +1312,12 @@
     text-align: left;
     position: relative;
     overflow: hidden;
-    border-radius: 14px;
+    border-radius: 11px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(255, 248, 220, 0.06);
     color: #fff1bc;
-    font-size: 0.74rem;
-    padding: 9px 11px;
+    font-size: 0.72rem;
+    padding: 8px 10px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1306,13 +1335,13 @@
 }
 
 .interview-option-date {
-    font-size: 0.78rem;
+    font-size: 0.86rem;
     font-weight: 700;
     color: #fff4cf;
 }
 
 .interview-option-time {
-    font-size: 0.66rem;
+    font-size: 0.72rem;
     color: rgba(230, 214, 214, 0.8);
 }
 
@@ -1320,12 +1349,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 24px;
-    padding: 0 9px;
+    min-height: 20px;
+    padding: 0 8px;
     border-radius: 999px;
     background: rgba(226, 188, 79, 0.14);
     color: #fff1bc;
-    font-size: 0.62rem;
+    font-size: 0.58rem;
     font-weight: 700;
     white-space: nowrap;
 }
@@ -1370,6 +1399,10 @@ button.interview-option-btn:hover {
     opacity: 0.95;
     margin: 4px 0 0;
     color: rgba(245, 230, 230, 0.9);
+}
+
+.message-bubble-cancel-request {
+    border: 1px solid rgba(251, 191, 36, 0.4);
 }
 
 .interview-change-schedule-wrap {

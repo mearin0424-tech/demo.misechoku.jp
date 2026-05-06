@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const hasTalkMessages = typeof window.hasTalkMessages !== 'undefined' ? !!window.hasTalkMessages : false;
     const selectedTalkJobKind = typeof window.selectedTalkJobKind !== 'undefined' ? window.selectedTalkJobKind : null;
     const canSelectTalkJobKind = typeof window.canSelectTalkJobKind !== 'undefined' ? !!window.canSelectTalkJobKind : false;
+    const currentTalkStatusCode = typeof window.currentTalkStatusCode !== 'undefined' ? window.currentTalkStatusCode : 'chatting';
     const talkJobKindCurrent = document.getElementById('talk-job-kind-current');
 
     const scrollToBottom = (behavior = 'auto') => {
@@ -583,6 +584,18 @@ document.addEventListener('DOMContentLoaded', function() {
             openInterviewBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 closeTalkActionMenu();
+                if (currentTalkStatusCode === 'interview_fixed') {
+                    if (!window.confirm('面談キャンセル依頼を送信しますか？キャストが承諾すると、やり取り中に戻ります。')) return;
+                    postJson(actionUrl, token, {
+                        partner_id: partnerId,
+                        action_type: 'interview_cancel_request'
+                    }).then(function () {
+                        window.location.reload();
+                    }).catch(function (error) {
+                        window.alert(error.message || '面談キャンセル依頼の送信に失敗しました。');
+                    });
+                    return;
+                }
                 openModal();
             });
         }
@@ -733,11 +746,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
                 const formData = new FormData(interviewForm);
                 const options = [
-                    formData.get('option1'),
-                    formData.get('option2'),
-                    formData.get('option3'),
-                ].map(function(v) {
-                    return v ? String(v).replace('T', ' ') : '';
+                    ['option1_date', 'option1_time'],
+                    ['option2_date', 'option2_time'],
+                    ['option3_date', 'option3_time'],
+                ].map(function (keys) {
+                    const d = String(formData.get(keys[0]) || '').trim();
+                    const t = String(formData.get(keys[1]) || '').trim();
+                    if (!d || !t) return '';
+                    return d + ' ' + t + ':00';
                 }).filter(Boolean);
 
                 if (options.length === 0) {
@@ -1022,6 +1038,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 selectedOption: selectedOption,
                 displayLabel: displayLabel
             });
+        });
+
+        chatMessages.addEventListener('click', async function (e) {
+            const acceptBtn = e.target.closest('.js-interview-cancel-accept');
+            if (!acceptBtn) return;
+            e.preventDefault();
+            if (!window.confirm('面談キャンセルを承諾して、やり取り中に戻しますか？')) return;
+            acceptBtn.disabled = true;
+            try {
+                await postJson(actionUrl, token, {
+                    partner_id: partnerId,
+                    action_type: 'interview_cancel_accept'
+                });
+                window.location.reload();
+            } catch (error) {
+                window.alert(error.message || '承諾に失敗しました。');
+                acceptBtn.disabled = false;
+            }
         });
     }
 });

@@ -74,6 +74,7 @@
     window.hasTalkMessages = @json($hasMessages ?? false);
     window.selectedTalkJobKind = @json($selectedTalkJobKind ?? null);
     window.canSelectTalkJobKind = @json($canSelectTalkJobKind ?? false);
+    window.currentTalkStatusCode = @json($currentStatusCode ?? 'chatting');
 </script>
 <script src="{{ asset('assets/js/talk-room.js') }}"></script>
 @endpush
@@ -121,13 +122,7 @@
                 @endif
         </div>
         @if(empty($blockState['blocked_by_other']))
-        <div class="talk-room-header-actions">
-            @if($isCast && !empty($reviewApplicationId))
-                <button type="button" class="btn-interview btn-review-post" data-application-id="{{ $reviewApplicationId }}" title="レビュー投稿">
-                    <i class="fas fa-check-circle"></i>
-                    <span>{{ $currentTalkJobKindValue === 'fulltime' ? 'ボーナス達成報告' : '勤務完了報告' }}</span>
-                </button>
-            @endif
+        <div class="talk-room-header-block">
             <form action="{{ $blockUrl }}" method="POST">
                 @csrf
                 <input type="hidden" name="partner_id" value="{{ $partnerId }}">
@@ -136,6 +131,14 @@
                     <span>{{ !empty($blockState['blocked_by_me']) ? 'ブロック解除' : 'ブロック' }}</span>
                 </button>
             </form>
+        </div>
+        <div class="talk-room-header-actions">
+            @if($isCast && !empty($reviewApplicationId))
+                <button type="button" class="btn-interview btn-review-post" data-application-id="{{ $reviewApplicationId }}" title="レビュー投稿">
+                    <i class="fas fa-check-circle"></i>
+                    <span>{{ $currentTalkJobKindValue === 'fulltime' ? 'ボーナス達成報告' : '勤務完了報告' }}</span>
+                </button>
+            @endif
         </div>
         @endif
     </div>
@@ -179,6 +182,7 @@
                     @if($msg->type === 2)
                         @php
                             $selectedOption = $msg->selected_option ? \Carbon\Carbon::parse($msg->selected_option) : null;
+                            $isInvalidatedOffer = !empty($msg->is_invalidated);
                         @endphp
                         <div class="message-bubble message-bubble-interview">
                             <div class="interview-card-head">
@@ -196,7 +200,7 @@
                                         $isSelectedOption = $msg->selected_option === $option;
                                     @endphp
                                     <li>
-                                        @if(!empty($canConfirmInterview) && !$msg->selected_option && !$msg->is_mine && empty($blockState['is_blocked']))
+                                        @if(!empty($canConfirmInterview) && !$msg->selected_option && !$msg->is_mine && empty($blockState['is_blocked']) && !$isInvalidatedOffer)
                                             <button
                                                 type="button"
                                                 class="interview-option-btn"
@@ -218,6 +222,8 @@
                                                 </span>
                                                 @if($isSelectedOption)
                                                     <span class="interview-option-action">決定済み</span>
+                                                @elseif($isInvalidatedOffer)
+                                                    <span class="interview-option-action">無効</span>
                                                 @endif
                                             </div>
                                         @endif
@@ -226,6 +232,8 @@
                             </ul>
                             @if($selectedOption)
                                 <p class="interview-note">確定日時: {{ $selectedOption->format('Y年n月j日 H:i') }}</p>
+                            @elseif($isInvalidatedOffer)
+                                <p class="interview-note">この候補日は更新により無効になりました。</p>
                             @endif
                             @if(!$isCast && !empty($canCancelStatus) && $msg->is_mine && $msg->selected_option)
                                 <p class="interview-change-schedule-wrap">
@@ -262,6 +270,17 @@
                             @endif
                             @if(!empty($msg->content))
                                 <p class="message-image-caption">{!! nl2br(e($msg->content)) !!}</p>
+                            @endif
+                        </div>
+                    @elseif($msg->type === 7)
+                        <div class="message-bubble message-bubble-interview message-bubble-cancel-request">
+                            <div class="interview-title">
+                                <i class="fas fa-rotate-left"></i>
+                                <span>面談キャンセル依頼</span>
+                            </div>
+                            <p class="interview-body-copy">この面談をキャンセルして、やり取り中に戻しますか？</p>
+                            @if($isCast && !$msg->is_mine && empty($blockState['is_blocked']))
+                                <button type="button" class="interview-change-schedule-btn js-interview-cancel-accept">承諾する</button>
                             @endif
                         </div>
                     @else
@@ -417,17 +436,20 @@
             キャスト側の画面では、ここで入力した候補から1つ選べるUIを想定しています。
         </p>
         <form id="interview-form">
-            <div class="interview-option-group">
+            <div class="interview-option-group interview-option-group-grid">
                 <label>候補1</label>
-                <input type="datetime-local" name="option1">
+                <input type="date" name="option1_date">
+                <input type="time" name="option1_time">
             </div>
-            <div class="interview-option-group">
+            <div class="interview-option-group interview-option-group-grid">
                 <label>候補2（任意）</label>
-                <input type="datetime-local" name="option2">
+                <input type="date" name="option2_date">
+                <input type="time" name="option2_time">
             </div>
-            <div class="interview-option-group">
+            <div class="interview-option-group interview-option-group-grid">
                 <label>候補3（任意）</label>
-                <input type="datetime-local" name="option3">
+                <input type="date" name="option3_date">
+                <input type="time" name="option3_time">
             </div>
             <div class="interview-modal-footer">
                 <button type="button" class="btn-interview-cancel">キャンセル</button>
