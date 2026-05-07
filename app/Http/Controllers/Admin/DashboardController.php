@@ -104,7 +104,7 @@ class DashboardController extends Controller
         $transactionKpis = [
             [
                 'id' => 'trx_count',
-                'title' => '取引件数',
+                'title' => '今月の取引件数',
                 'value' => number_format($trxCountThisMonth),
                 'unit' => '件',
                 'trend_label' => $this->signedDelta($trxCountThisMonth - $trxCountPrevMonth),
@@ -114,7 +114,7 @@ class DashboardController extends Controller
             ],
             [
                 'id' => 'trx_amount',
-                'title' => '取引金額',
+                'title' => '今月の取引総額（GMV）',
                 'value' => number_format($trxAmountThisMonth / 1000000, 2),
                 'unit' => 'M円',
                 'trend_label' => $trxAmountDeltaPct === null

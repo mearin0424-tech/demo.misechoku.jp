@@ -622,6 +622,20 @@ ALTER TABLE `push_subscriptions`
   ADD INDEX `push_subscriptions_user_idx` (`user_type`, `user_id`);
 
 -- ------------------------------------------------------------------------------
+-- 運営管理：通知・リマインダー・未済タスクの仕様設定
+-- ------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `admin_notification_settings` (
+  `type` varchar(20) NOT NULL COMMENT 'notification / reminder / task',
+  `key` varchar(80) NOT NULL COMMENT 'カタログ上のユニークキー',
+  `enabled` tinyint(1) DEFAULT NULL COMMENT 'ON/OFF（通知のみ）',
+  `offset_value` int DEFAULT NULL COMMENT '発火タイミング（リマインダーのみ。単位はカタログ依存）',
+  `title` varchar(255) DEFAULT NULL,
+  `body` text,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`type`, `key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------------------------
 -- 運営アカウントのロール別権限設定
 -- ------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `admin_role_permissions` (

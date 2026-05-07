@@ -34,6 +34,7 @@ use App\Http\Controllers\Admin\AdminAccountController as AdminAccount;
 use App\Http\Controllers\Admin\VerificationController as AdminVerification;
 use App\Http\Controllers\Admin\BankController as AdminBank;
 use App\Http\Controllers\Admin\PolicyController as AdminPolicy;
+use App\Http\Controllers\Admin\NotificationSpecController as AdminNotificationSpec;
 
 // 蠎苓・蛛ｴ
 use App\Http\Controllers\Shops\HomeController as ShopHome;
@@ -161,7 +162,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/masters', [AdminMaster::class, 'index'])->name('masters.index');
             Route::post('/masters/catalogs/{catalogKey}', [AdminMaster::class, 'storeCatalog'])->name('masters.catalogs.store');
             Route::patch('/masters/catalogs/{catalogKey}/{recordId}', [AdminMaster::class, 'updateCatalog'])->name('masters.catalogs.update');
+            Route::patch('/masters/catalogs/{catalogKey}/{recordId}/sort-order', [AdminMaster::class, 'updateSortOrder'])->name('masters.catalogs.sort-order');
             Route::delete('/masters/catalogs/{catalogKey}/{recordId}', [AdminMaster::class, 'destroyCatalog'])->name('masters.catalogs.destroy');
+        });
+
+        // 通知・タスク仕様の確認／変更
+        Route::middleware('admin.permission:master.notification_spec')->group(function () {
+            Route::get('/notification-spec', [AdminNotificationSpec::class, 'index'])->name('notification-spec.index');
+            Route::put('/notification-spec/notifications/{key}', [AdminNotificationSpec::class, 'updateNotification'])
+                ->where('key', '[A-Za-z0-9_.\-]+')
+                ->name('notification-spec.notifications.update');
+            Route::put('/notification-spec/reminders/{key}', [AdminNotificationSpec::class, 'updateReminder'])
+                ->where('key', '[A-Za-z0-9_.\-]+')
+                ->name('notification-spec.reminders.update');
+            Route::put('/notification-spec/tasks/{key}', [AdminNotificationSpec::class, 'updateTask'])
+                ->where('key', '[A-Za-z0-9_.\-]+')
+                ->name('notification-spec.tasks.update');
         });
 
         // 蠎苓・邂｡逅・
@@ -173,9 +189,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 ->middleware('admin.permission:accounts.shops.private')
                 ->name('shops.unlock-private');
         });
-        Route::post('/shops/{shopId}/toggle-recruit-status', [AdminShop::class, 'toggleRecruitStatus'])
-            ->middleware('admin.permission:accounts.shops.manage')
-            ->name('shops.toggle-recruit-status');
+        Route::middleware('admin.permission:accounts.shops.manage')->group(function () {
+            Route::post('/shops/{shopId}/suspend', [AdminShop::class, 'suspend'])->name('shops.suspend');
+            Route::post('/shops/{shopId}/unsuspend', [AdminShop::class, 'unsuspend'])->name('shops.unsuspend');
+        });
 
         // 繧ｭ繝｣繧ｹ繝育ｮ｡逅・
         Route::middleware('admin.permission:accounts.casts.view')->group(function () {
@@ -186,11 +203,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 ->middleware('admin.permission:accounts.casts.private')
                 ->name('casts.unlock-private');
         });
+        Route::middleware('admin.permission:accounts.casts.manage')->group(function () {
+            Route::post('/casts/{castId}/suspend', [AdminCast::class, 'suspend'])->name('casts.suspend');
+            Route::post('/casts/{castId}/unsuspend', [AdminCast::class, 'unsuspend'])->name('casts.unsuspend');
+        });
 
         // NG繝ｯ繝ｼ繝臥ｮ｡逅・
-        Route::get('/ngwords', [AdminNgWord::class, 'index'])
-            ->middleware('admin.permission:master.ngwords')
-            ->name('ngwords.index');
+        Route::middleware('admin.permission:master.ngwords')->group(function () {
+            Route::get('/ngwords', [AdminNgWord::class, 'index'])->name('ngwords.index');
+            Route::post('/ngwords', [AdminNgWord::class, 'store'])->name('ngwords.store');
+            Route::put('/ngwords/{id}', [AdminNgWord::class, 'update'])->whereNumber('id')->name('ngwords.update');
+            Route::delete('/ngwords/{id}', [AdminNgWord::class, 'destroy'])->whereNumber('id')->name('ngwords.destroy');
+        });
 
         // 縺顔衍繧峨○邂｡逅・
         Route::middleware('admin.permission:content.notices')->group(function () {
@@ -293,6 +317,10 @@ Route::name('pages.')->group(function () {
     Route::get('/support/notices/{slug}', [SupportNoticeController::class, 'show'])->name('support.notices.show');
     Route::get('/support/form', [PageController::class, 'supportForm'])->name('support.form');
 });
+
+// 停止中アカウント向けランディング
+Route::get('/account/suspended', [\App\Http\Controllers\Common\SuspendedController::class, 'show'])
+    ->name('account.suspended');
 
 Route::prefix('share')->name('share.')->group(function () {
     Route::get('/recruit/{id}', [CastRecruit::class, 'publicShow'])->name('recruit.show');

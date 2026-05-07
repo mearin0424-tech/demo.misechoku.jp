@@ -3644,3 +3644,534 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
     box-shadow: var(--admin-shadow);
 }
 
+/* 停止アクション（赤系） */
+.btn-action.btn-action-danger,
+a.btn-action.btn-action-danger {
+    background: linear-gradient(135deg, #b91c1c, #7f1d1d);
+    color: #fff;
+    border: 0;
+}
+.btn-action.btn-action-danger:hover,
+a.btn-action.btn-action-danger:hover {
+    background: linear-gradient(135deg, #991b1b, #7f1d1d);
+    color: #fff;
+}
+
+/* 停止中の一覧行は薄く赤味掛けにする */
+.admin-table tr.is-suspended {
+    background: linear-gradient(90deg, rgba(220, 38, 38, 0.06), rgba(220, 38, 38, 0.02));
+}
+.admin-table tr.is-suspended td:first-child code {
+    background: rgba(220, 38, 38, 0.12);
+    color: #991b1b;
+}
+
+/* 停止バッジが is-danger と分かるように色を強める */
+.admin-status-badge.is-danger i { margin-right: 4px; }
+
+/* ==========================================================================
+   通知・タスク仕様画面
+   ========================================================================== */
+.spec-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 18px;
+    padding: 6px;
+    background: rgba(74, 18, 42, 0.05);
+    border-radius: 14px;
+}
+.spec-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--admin-muted);
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.spec-tab:hover { color: var(--admin-text); background: rgba(255, 255, 255, 0.5); }
+.spec-tab.is-active {
+    background: linear-gradient(135deg, #ffffff, rgba(220, 181, 104, 0.12));
+    color: #4a122a;
+    box-shadow: var(--admin-shadow);
+}
+.spec-tab i { font-size: 0.95rem; }
+
+.spec-panel { padding-bottom: 14px; }
+
+.spec-card-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+}
+@media (min-width: 980px) {
+    .spec-card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.spec-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 18px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(74, 18, 42, 0.08);
+    box-shadow: 0 4px 16px rgba(74, 18, 42, 0.04);
+}
+.spec-card--task {
+    background: linear-gradient(135deg, rgba(220, 181, 104, 0.05), rgba(255, 255, 255, 0.95));
+    border: 1px solid rgba(220, 181, 104, 0.35);
+}
+.spec-card__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    justify-content: space-between;
+}
+.spec-card__title {
+    margin: 0 0 4px;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--admin-text);
+}
+.spec-card__condition {
+    margin: 0;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--admin-muted);
+}
+.spec-card__condition-label {
+    display: inline-block;
+    font-weight: 700;
+    color: #4a122a;
+    margin-right: 6px;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+}
+.spec-card__key {
+    flex: 0 0 auto;
+    font-size: 0.7rem;
+    color: var(--admin-muted);
+    background: rgba(74, 18, 42, 0.04);
+    padding: 2px 8px;
+    border-radius: 6px;
+    align-self: flex-start;
+}
+
+.spec-readonly {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 14px;
+    background: rgba(74, 18, 42, 0.04);
+    border-radius: 10px;
+    border-left: 3px solid rgba(220, 181, 104, 0.55);
+}
+.spec-readonly__row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 8px;
+    align-items: start;
+}
+.spec-readonly__label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #4a122a;
+}
+.spec-readonly__label i { margin-right: 4px; }
+.spec-readonly__value {
+    font-size: 0.85rem;
+    color: var(--admin-text);
+    line-height: 1.6;
+}
+
+.spec-card__form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.spec-field { display: flex; flex-direction: column; gap: 4px; }
+.spec-field--inline { gap: 6px; }
+.spec-field__label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--admin-muted);
+    letter-spacing: 0.05em;
+}
+.spec-field input[type=text],
+.spec-field input[type=number],
+.spec-field textarea {
+    padding: 8px 10px;
+    border: 1px solid rgba(74, 18, 42, 0.18);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--admin-text);
+    font-size: 0.92rem;
+    font-family: inherit;
+}
+.spec-field textarea { resize: vertical; line-height: 1.6; }
+.spec-field input:focus,
+.spec-field textarea:focus {
+    outline: 2px solid rgba(220, 181, 104, 0.45);
+    outline-offset: 1px;
+}
+.spec-field__inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.spec-input-num {
+    width: 100px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 1.1rem !important;
+}
+.spec-field__suffix {
+    font-weight: 700;
+    color: var(--admin-text);
+}
+.spec-field__hint { color: var(--admin-muted); font-size: 0.78rem; margin-left: 4px; }
+
+.spec-card__actions { display: flex; justify-content: flex-end; }
+
+/* ON/OFF トグル */
+.spec-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+.spec-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+.spec-toggle__track {
+    width: 44px;
+    height: 24px;
+    border-radius: 999px;
+    background: rgba(74, 18, 42, 0.18);
+    position: relative;
+    transition: background 0.15s ease;
+}
+.spec-toggle__thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.15s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+.spec-toggle input:checked ~ .spec-toggle__track {
+    background: linear-gradient(135deg, #dcb568, #b8860b);
+}
+.spec-toggle input:checked ~ .spec-toggle__track .spec-toggle__thumb {
+    transform: translateX(20px);
+}
+.spec-toggle__label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--admin-text);
+}
+
+/* マスタ一覧の表示順インライン編集 */
+.master-records-table .cell-id { color: var(--admin-muted); font-size: 0.78rem; }
+.master-records-table .cell-id code {
+    background: rgba(74, 18, 42, 0.04);
+    padding: 1px 6px;
+    border-radius: 6px;
+}
+.sort-order-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+}
+.sort-order-input {
+    width: 70px;
+    padding: 4px 8px;
+    border: 1px solid rgba(74, 18, 42, 0.18);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--admin-text);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    text-align: right;
+    font-size: 0.92rem;
+}
+.sort-order-input:focus { outline: 2px solid rgba(220, 181, 104, 0.45); outline-offset: 1px; }
+.sort-order-save {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 6px;
+    background: rgba(220, 181, 104, 0.18);
+    color: #4a122a;
+    cursor: pointer;
+}
+.sort-order-save:hover { background: rgba(220, 181, 104, 0.35); }
+
+.u-w-60 { width: 60px; }
+.u-w-100 { width: 100px; }
+.u-w-110 { width: 110px; }
+.u-w-140 { width: 140px; }
+.u-text-muted { color: var(--admin-muted); }
+.u-fs-xs { font-size: 0.7rem; }
+
+/* ==========================================================================
+   売上管理／ダッシュボード共通：役割明示バナー
+   ========================================================================== */
+.screen-role-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 16px 20px;
+    margin: 0 0 18px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(220, 181, 104, 0.08), rgba(74, 18, 42, 0.04));
+    border: 1px solid rgba(220, 181, 104, 0.4);
+    box-shadow: 0 4px 16px rgba(74, 18, 42, 0.04);
+}
+.screen-role-banner__col {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    flex: 1 1 360px;
+    min-width: 0;
+}
+.screen-role-banner__icon {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #4a122a, #6e1b3f);
+    color: #f6e2b3;
+    font-size: 1.2rem;
+}
+.screen-role-banner__eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: var(--admin-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.screen-role-banner__title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--admin-text);
+    margin: 2px 0 4px;
+}
+.screen-role-banner__title strong { color: #4a122a; }
+.screen-role-banner__lead {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: var(--admin-muted);
+}
+.screen-role-banner__lead strong { color: var(--admin-text); }
+
+/* ==========================================================================
+   売上管理：期間切替
+   ========================================================================== */
+.sales-period-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 0 0 18px;
+}
+.sales-period-bar__label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--admin-muted);
+}
+.sales-period-bar__range {
+    font-size: 0.78rem;
+    color: var(--admin-muted);
+    margin-left: auto;
+}
+.sales-period-tabs {
+    display: inline-flex;
+    background: rgba(74, 18, 42, 0.05);
+    border-radius: 10px;
+    padding: 4px;
+    flex-wrap: wrap;
+    gap: 2px;
+}
+.sales-period-tab {
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--admin-muted);
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.sales-period-tab:hover { color: var(--admin-text); background: rgba(255,255,255,0.6); }
+.sales-period-tab.is-active {
+    background: linear-gradient(135deg, #4a122a, #6e1b3f);
+    color: #f6e2b3;
+    box-shadow: var(--admin-shadow);
+}
+
+/* ==========================================================================
+   売上管理：KPI カード
+   ========================================================================== */
+.sales-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+}
+.sales-kpi-card {
+    padding: 16px 18px;
+    border-radius: 16px;
+    background: #fff;
+    border: 1px solid rgba(74, 18, 42, 0.08);
+    box-shadow: var(--admin-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.sales-kpi-card.is-primary {
+    background: linear-gradient(135deg, #4a122a, #6e1b3f);
+    color: #f8e9c8;
+    border: 0;
+}
+.sales-kpi-card__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.sales-kpi-card__icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(220, 181, 104, 0.18);
+    color: #b8860b;
+}
+.sales-kpi-card.is-primary .sales-kpi-card__icon {
+    background: rgba(248, 233, 200, 0.2);
+    color: #ffe2a3;
+}
+.sales-kpi-card__title {
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: var(--admin-text);
+}
+.sales-kpi-card.is-primary .sales-kpi-card__title { color: #ffe2a3; }
+.sales-kpi-card__sub {
+    margin: 0;
+    font-size: 0.7rem;
+    color: var(--admin-muted);
+    letter-spacing: 0.04em;
+}
+.sales-kpi-card.is-primary .sales-kpi-card__sub { color: rgba(248, 233, 200, 0.7); }
+.sales-kpi-card__value {
+    margin: 4px 0 0;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--admin-text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+}
+.sales-kpi-card.is-primary .sales-kpi-card__value { color: #ffe2a3; }
+.sales-kpi-card__unit {
+    font-size: 0.78rem;
+    margin-left: 4px;
+    color: var(--admin-muted);
+    font-weight: 700;
+}
+.sales-kpi-card.is-primary .sales-kpi-card__unit { color: rgba(248, 233, 200, 0.78); }
+.sales-kpi-card__trend {
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--admin-text);
+}
+.sales-kpi-card__trend.is-up { color: #047857; }
+.sales-kpi-card__trend.is-down { color: #b91c1c; }
+.sales-kpi-card.is-primary .sales-kpi-card__trend { color: #ffe2a3; }
+.sales-kpi-card.is-primary .sales-kpi-card__trend.is-down { color: #fca5a5; }
+.sales-kpi-card__trend span {
+    margin-left: 4px;
+    color: var(--admin-muted);
+    font-weight: 500;
+}
+.sales-kpi-card.is-primary .sales-kpi-card__trend span { color: rgba(248, 233, 200, 0.65); }
+.sales-kpi-card__desc {
+    margin: 6px 0 0;
+    font-size: 0.74rem;
+    line-height: 1.5;
+    color: var(--admin-muted);
+}
+.sales-kpi-card.is-primary .sales-kpi-card__desc { color: rgba(248, 233, 200, 0.66); }
+
+/* ==========================================================================
+   売上管理：チャート＋上位リスト
+   ========================================================================== */
+.sales-chart-wrap {
+    width: 100%;
+    overflow: hidden;
+}
+.sales-chart {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+.sales-chart-legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    font-size: 0.78rem;
+    color: var(--admin-muted);
+}
+.sales-chart-legend .legend-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+.sales-monthly-detail {
+    margin-top: 12px;
+}
+.sales-monthly-detail summary {
+    cursor: pointer;
+    color: var(--admin-muted);
+    font-size: 0.86rem;
+    font-weight: 700;
+    padding: 6px 0;
+}
+.sales-monthly-detail summary:hover { color: var(--admin-text); }
+
+.sales-top-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+}
+@media (min-width: 980px) {
+    .sales-top-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+

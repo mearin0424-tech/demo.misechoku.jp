@@ -66,6 +66,29 @@ class MasterController extends Controller
     }
 
     /**
+     * 表示順 (sort_order) のみを更新する。
+     */
+    public function updateSortOrder(Request $request, string $catalogKey, int $recordId): RedirectResponse
+    {
+        $catalog = $this->adminMasterService->getCatalogDefinition($catalogKey);
+        abort_unless($catalog, 404);
+        abort_unless($this->adminMasterService->getCatalogRecord($catalogKey, $recordId), 404);
+
+        $data = $request->validate([
+            'sort_order' => ['required', 'integer', 'min:0', 'max:99999'],
+        ]);
+
+        $this->adminMasterService->updateCatalogSortOrder($catalogKey, $recordId, (int) $data['sort_order']);
+
+        return redirect()
+            ->route('admin.masters.index', [
+                'catalog' => $catalogKey,
+                'sort' => $request->input('current_sort', 'created_desc'),
+            ])
+            ->with('status', $catalog['title'] . 'の表示順を更新しました。');
+    }
+
+    /**
      * マスタ項目の論理削除
      */
     public function destroyCatalog(Request $request, string $catalogKey, int $recordId): RedirectResponse

@@ -7,10 +7,17 @@
     $registeredAt = $cast->created_at ?? null;
     $lastLoginAt = $cast->last_login_at ?? null;
     $accountStatus = (int) ($cast->status ?? 0);
+    $isSuspended = $accountStatus === 2;
     $accountStatusLabel = match ($accountStatus) {
         1 => '本登録済み',
+        2 => '停止中',
         0 => '仮登録／無効',
         default => 'ステータス: ' . $accountStatus,
+    };
+    $accountStatusBadge = match ($accountStatus) {
+        1 => 'is-active',
+        2 => 'is-danger',
+        default => 'is-inactive',
     };
     $genderLabel = match ((int) ($profile->gender ?? 0)) {
         1 => '女性',
@@ -32,13 +39,39 @@
 <div class="admin-page">
     <div class="u-flex-between u-flex-wrap u-gap-12">
         @include('admin.parts.page-title', ['eyebrow' => 'CAST DETAIL', 'title' => 'キャスト ' . $castId])
-        <a href="{{ route('admin.casts.index') }}" class="btn-action btn-action-secondary">
-            <i class="fas fa-arrow-left"></i> 一覧へ戻る
-        </a>
+        <div class="u-flex u-gap-8 u-flex-wrap">
+            @if($isSuspended)
+                <form method="POST" action="{{ route('admin.casts.unsuspend', $castId) }}" onsubmit="return confirm('このキャストアカウントの停止を解除しますか？');">
+                    @csrf
+                    <input type="hidden" name="redirect_to" value="show">
+                    <button type="submit" class="btn-action btn-action-secondary">
+                        <i class="fas fa-rotate-left"></i> 停止解除
+                    </button>
+                </form>
+            @else
+                <form method="POST" action="{{ route('admin.casts.suspend', $castId) }}" onsubmit="return confirm('このキャストアカウントを停止します。停止中はログイン後に「停止中」表示と問合せ送信のみ可能になります。よろしいですか？');">
+                    @csrf
+                    <input type="hidden" name="redirect_to" value="show">
+                    <button type="submit" class="btn-action btn-action-danger">
+                        <i class="fas fa-ban"></i> アカウント停止
+                    </button>
+                </form>
+            @endif
+            <a href="{{ route('admin.casts.index') }}" class="btn-action btn-action-secondary">
+                <i class="fas fa-arrow-left"></i> 一覧へ戻る
+            </a>
+        </div>
     </div>
 
     @if(session('status'))
         <div class="admin-alert admin-alert-success">{{ session('status') }}</div>
+    @endif
+
+    @if($isSuspended)
+        <div class="admin-alert admin-alert-warning">
+            <i class="fas fa-ban"></i>
+            このアカウントは <strong>停止中</strong> です。ログインはできますが、ログイン後の通常画面は表示されず、停止中の通知と問合せフォームのみアクセス可能になります。
+        </div>
     @endif
 
     {{-- ヘッダー（公開情報の概要） --}}
@@ -46,8 +79,8 @@
         <div class="admin-detail-hero__main">
             <div class="admin-detail-hero__title-row">
                 <h2 class="admin-panel-title u-mb-0">{{ $displayName }}</h2>
-                <span class="admin-status-badge {{ $accountStatus === 1 ? 'is-active' : 'is-inactive' }}">
-                    {{ $accountStatusLabel }}
+                <span class="admin-status-badge {{ $accountStatusBadge }}">
+                    @if($isSuspended)<i class="fas fa-ban"></i> @endif{{ $accountStatusLabel }}
                 </span>
                 <span class="admin-status-badge {{ $identityStatus === 2 ? 'is-success' : ($identityStatus === 3 ? 'is-danger' : 'is-warning') }}">
                     本人確認: {{ $identityLabel }}

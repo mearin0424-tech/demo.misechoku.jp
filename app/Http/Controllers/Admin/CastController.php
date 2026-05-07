@@ -159,6 +159,44 @@ class CastController extends Controller
             ->with('status', '非公開情報を再度ロックしました。');
     }
 
+    /**
+     * キャストアカウントを停止（status = 2）
+     */
+    public function suspend(Request $request, string $castId): RedirectResponse
+    {
+        $cast = DB::table('casts')->where('id', $castId)->first();
+        abort_unless($cast, 404);
+
+        DB::table('casts')->where('id', $castId)->update([
+            'status' => 2,
+            'updated_at' => now(),
+        ]);
+
+        $redirect = $request->input('redirect_to') === 'show'
+            ? redirect()->route('admin.casts.show', $castId)
+            : redirect()->route('admin.casts.index');
+        return $redirect->with('status', 'キャストアカウントを停止しました。');
+    }
+
+    /**
+     * キャストアカウントの停止を解除（status = 1）
+     */
+    public function unsuspend(Request $request, string $castId): RedirectResponse
+    {
+        $cast = DB::table('casts')->where('id', $castId)->first();
+        abort_unless($cast, 404);
+
+        DB::table('casts')->where('id', $castId)->update([
+            'status' => 1,
+            'updated_at' => now(),
+        ]);
+
+        $redirect = $request->input('redirect_to') === 'show'
+            ? redirect()->route('admin.casts.show', $castId)
+            : redirect()->route('admin.casts.index');
+        return $redirect->with('status', 'キャストアカウントの停止を解除しました。');
+    }
+
     private function sumCastEarnings(string $castId): int
     {
         return (int) DB::table('application_deposits')

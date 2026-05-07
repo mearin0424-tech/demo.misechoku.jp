@@ -123,6 +123,7 @@ class ShopController extends Controller
                     'published_at' => $shop->created_at,
                     'registered_at' => $shop->created_at,
                     'last_login_at' => $shop->latest_manager_login_at ?? null,
+                    'account_status' => (int) ($shop->shop_account_status ?? 0),
                     'document_status' => ((int) ($shop->approval ?? 0)) === 1 ? '確認済み' : '未確認',
                     'job_status' => $jobStatusLabel,
                     'job_status_key' => $jobStatusKey,
@@ -225,105 +226,51 @@ class ShopController extends Controller
             ->with('status', '非公開情報を再度ロックしました。');
     }
 
-    public function toggleRecruitStatus(Request $request, string $shopId): RedirectResponse
+    /**
+     * 店舗アカウントを停止（status = 2）。傘下の shop_managers も無効化。
+     */
+    public function suspend(Request $request, string $shopId): RedirectResponse
     {
-        $jt = (int) $request->input('job_type', 1);
-        if (!in_array($jt, [1, 2, 3], true)) {
-            $jt = 1;
-        }
+        $shop = DB::table('shops')->where('id', $shopId)->first();
+        abort_unless($shop, 404);
 
-        if (Schema::hasTable('shop_jobs') && Schema::hasColumn('shop_jobs', 'regular_status')) {
-            $col = match ($jt) {
-                2 => 'trial_status',
-                3 => 'help_status',
-                default => 'regular_status',
-            };
-            if (!Schema::hasColumn('shop_jobs', $col)) {
-                return redirect()
-                    ->route('admin.shops.index')
-                    ->with('status', '求人ステータス列が見つかりません。');
-            }
+        DB::table('shops')->where('id', $shopId)->update([
+            'status' => 2,
+            'updated_at' => now(),
+        ]);
+        // 紐づく管理者ログインも無効化（status = 0）
+        DB::table('shop_managers')->where('shop_id', $shopId)->update([
+            'status' => 0,
+            'updated_at' => now(),
+        ]);
 
-            $row = DB::table('shop_jobs')->where('shop_id', $shopId)->first();
-            if (!$row) {
-                $insert = [
-                    'shop_id' => $shopId,
-                    'regular_status' => 0,
-                    'trial_status' => 0,
-                    'help_status' => 0,
-                    $col => 1,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-                $insert = $this->filterExistingShopJobColumns($insert);
-                DB::table('shop_jobs')->insert($insert);
-
-                return redirect()
-                    ->route('admin.shops.index')
-                    ->with('status', '求人を公開しました。');
-            }
-
-            $cur = (int) ($row->{$col} ?? 0);
-            $next = $cur === 1 ? 0 : 1;
-            DB::table('shop_jobs')
-                ->where('shop_id', $shopId)
-                ->update([
-                    $col => $next,
-                    'updated_at' => now(),
-                ]);
-
-            return redirect()
-                ->route('admin.shops.index')
-                ->with('status', $next === 1 ? '求人を公開しました。' : '求人を非公開にしました。');
-        }
-
-        $currentStatus = Schema::hasColumn('shop_jobs', 'status')
-            ? DB::table('shop_jobs')->where('shop_id', $shopId)->value('status')
-            : null;
-        $nextStatus = ((int) ($currentStatus ?? 0)) === 1 ? 0 : 1;
-        $exists = DB::table('shop_jobs')->where('shop_id', $shopId)->exists();
-
-        if ($exists) {
-            $upd = ['updated_at' => now()];
-            if (Schema::hasColumn('shop_jobs', 'status')) {
-                $upd['status'] = $nextStatus;
-            }
-            $upd = $this->filterExistingShopJobColumns($upd);
-            if (!empty($upd)) {
-                DB::table('shop_jobs')
-                    ->where('shop_id', $shopId)
-                    ->update($upd);
-            }
-        } else {
-            $insert = [
-                'shop_id' => $shopId,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-            if (Schema::hasColumn('shop_jobs', 'status')) {
-                $insert['status'] = $nextStatus;
-            }
-            $insert = $this->filterExistingShopJobColumns($insert);
-            DB::table('shop_jobs')->insert($insert);
-        }
-
-        return redirect()
-            ->route('admin.shops.index')
-            ->with('status', $nextStatus === 1 ? '求人を公開しました。' : '求人を非公開にしました。');
+        $redirect = $request->input('redirect_to') === 'show'
+            ? redirect()->route('admin.shops.show', $shopId)
+            : redirect()->route('admin.shops.index');
+        return $redirect->with('status', '店舗アカウントを停止しました。');
     }
 
     /**
-     * @param  array<string, mixed>  $payload
-     * @return array<string, mixed>
+     * 店舗アカウントの停止を解除（status = 1）。傘下の shop_managers も再有効化。
      */
-    private function filterExistingShopJobColumns(array $payload): array
+    public function unsuspend(Request $request, string $shopId): RedirectResponse
     {
-        if (!Schema::hasTable('shop_jobs')) {
-            return [];
-        }
+        $shop = DB::table('shops')->where('id', $shopId)->first();
+        abort_unless($shop, 404);
 
-        return collect($payload)
-            ->filter(fn ($value, $column) => Schema::hasColumn('shop_jobs', (string) $column))
-            ->all();
+        DB::table('shops')->where('id', $shopId)->update([
+            'status' => 1,
+            'updated_at' => now(),
+        ]);
+        DB::table('shop_managers')->where('shop_id', $shopId)->update([
+            'status' => 1,
+            'updated_at' => now(),
+        ]);
+
+        $redirect = $request->input('redirect_to') === 'show'
+            ? redirect()->route('admin.shops.show', $shopId)
+            : redirect()->route('admin.shops.index');
+        return $redirect->with('status', '店舗アカウントの停止を解除しました。');
     }
+
 }

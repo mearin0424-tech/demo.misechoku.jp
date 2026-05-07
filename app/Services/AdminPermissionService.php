@@ -50,6 +50,7 @@ class AdminPermissionService
             'マスタ設定' => [
                 ['key' => 'master.ngwords', 'label' => 'NGワード管理', 'description' => 'NGワードの追加・削除'],
                 ['key' => 'master.masters', 'label' => 'マスタメンテナンス', 'description' => 'カタログ・選択肢のメンテナンス'],
+                ['key' => 'master.notification_spec', 'label' => '通知・タスク仕様の確認／変更', 'description' => '通知のON/OFFと文章、リマインダーの日数と文章、未済タスクの仕様確認'],
             ],
             'アナリティクス' => [
                 ['key' => 'analytics.sales', 'label' => '売上・ユーザー分析', 'description' => '売上推移・ユーザー数増減の閲覧'],

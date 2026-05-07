@@ -6,10 +6,17 @@
 @php
     $registeredAt = $shop->created_at ?? null;
     $accountStatus = (int) ($shop->status ?? 0);
+    $isSuspended = $accountStatus === 2;
     $accountStatusLabel = match ($accountStatus) {
         1 => '本登録済み',
+        2 => '停止中',
         0 => '仮登録／無効',
         default => 'ステータス: ' . $accountStatus,
+    };
+    $accountStatusBadge = match ($accountStatus) {
+        1 => 'is-active',
+        2 => 'is-danger',
+        default => 'is-inactive',
     };
     $licenseStatus = (int) ($shop->license_status ?? 0);
     $licenseLabel = match ($licenseStatus) {
@@ -24,13 +31,39 @@
 <div class="admin-page">
     <div class="u-flex-between u-flex-wrap u-gap-12">
         @include('admin.parts.page-title', ['eyebrow' => 'SHOP DETAIL', 'title' => '店舗 ' . $shopId])
-        <a href="{{ route('admin.shops.index') }}" class="btn-action btn-action-secondary">
-            <i class="fas fa-arrow-left"></i> 一覧へ戻る
-        </a>
+        <div class="u-flex u-gap-8 u-flex-wrap">
+            @if($isSuspended)
+                <form method="POST" action="{{ route('admin.shops.unsuspend', $shopId) }}" onsubmit="return confirm('この店舗アカウントの停止を解除しますか？');">
+                    @csrf
+                    <input type="hidden" name="redirect_to" value="show">
+                    <button type="submit" class="btn-action btn-action-secondary">
+                        <i class="fas fa-rotate-left"></i> 停止解除
+                    </button>
+                </form>
+            @else
+                <form method="POST" action="{{ route('admin.shops.suspend', $shopId) }}" onsubmit="return confirm('この店舗アカウントを停止します。停止中はログイン後に「停止中」表示と問合せ送信のみ可能になります。よろしいですか？');">
+                    @csrf
+                    <input type="hidden" name="redirect_to" value="show">
+                    <button type="submit" class="btn-action btn-action-danger">
+                        <i class="fas fa-ban"></i> アカウント停止
+                    </button>
+                </form>
+            @endif
+            <a href="{{ route('admin.shops.index') }}" class="btn-action btn-action-secondary">
+                <i class="fas fa-arrow-left"></i> 一覧へ戻る
+            </a>
+        </div>
     </div>
 
     @if(session('status'))
         <div class="admin-alert admin-alert-success">{{ session('status') }}</div>
+    @endif
+
+    @if($isSuspended)
+        <div class="admin-alert admin-alert-warning">
+            <i class="fas fa-ban"></i>
+            この店舗アカウントは <strong>停止中</strong> です。配下の管理者ユーザもログイン後に「停止中」表示と問合せフォームのみアクセス可能となります。
+        </div>
     @endif
 
     {{-- ヘッダー --}}
@@ -38,8 +71,8 @@
         <div class="admin-detail-hero__main">
             <div class="admin-detail-hero__title-row">
                 <h2 class="admin-panel-title u-mb-0">{{ $displayName }}</h2>
-                <span class="admin-status-badge {{ $accountStatus === 1 ? 'is-active' : 'is-inactive' }}">
-                    {{ $accountStatusLabel }}
+                <span class="admin-status-badge {{ $accountStatusBadge }}">
+                    @if($isSuspended)<i class="fas fa-ban"></i> @endif{{ $accountStatusLabel }}
                 </span>
                 <span class="admin-status-badge {{ $licenseStatus === 3 ? 'is-success' : ($licenseStatus === 4 ? 'is-danger' : 'is-warning') }}">
                     書類確認: {{ $licenseLabel }}

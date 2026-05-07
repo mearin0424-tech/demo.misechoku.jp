@@ -6,7 +6,7 @@
     <div class="admin-page">
         @include('admin.parts.page-title', ['eyebrow' => 'SHOPS', 'title' => '店舗管理'])
         <p class="admin-description">
-            登録されている店舗アカウントの一覧です。書類確認状況や求人公開状況に加えて、請求書送付・入金確認・振込完了までの運用実績を店舗単位で確認できます。
+            登録されている店舗アカウントの一覧です。書類確認状況、最終ログイン、運用実績（請求／入金／振込）を店舗単位で確認できます。詳細画面で非公開情報（口座・連絡先など）を解除できます。
         </p>
 
         @if (session('status'))
@@ -24,24 +24,28 @@
                         <th>登録日</th>
                         <th>最終ログイン</th>
                         <th>書類提出</th>
-                        <th>求人公開</th>
+                        <th>状態</th>
                         <th>運用実績（店舗単位）</th>
-                        <th>求人操作</th>
-                        <th>詳細</th>
+                        <th>操作</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($shops as $shop)
-                        <tr>
+                        @php $isSuspended = (int) ($shop['account_status'] ?? 0) === 2; @endphp
+                        <tr class="{{ $isSuspended ? 'is-suspended' : '' }}">
                             <td><code>{{ $shop['id'] }}</code></td>
                             <td><a href="{{ route('admin.shops.show', $shop['id']) }}">{{ $shop['name'] }}</a></td>
                             <td>{{ $shop['registered_at'] ? \Illuminate\Support\Carbon::parse($shop['registered_at'])->format('Y-m-d') : '—' }}</td>
                             <td>{{ $shop['last_login_at'] ? \Illuminate\Support\Carbon::parse($shop['last_login_at'])->format('Y-m-d H:i') : '—' }}</td>
                             <td>{{ $shop['document_status'] }}</td>
                             <td>
-                                <span class="admin-status-badge {{ $shop['job_status_key'] === 'active' ? 'is-active' : 'is-inactive' }}">
-                                    {{ $shop['job_status'] }}
-                                </span>
+                                @if($isSuspended)
+                                    <span class="admin-status-badge is-danger"><i class="fas fa-ban"></i> 停止中</span>
+                                @elseif((int) ($shop['account_status'] ?? 0) === 1)
+                                    <span class="admin-status-badge is-success">有効</span>
+                                @else
+                                    <span class="admin-status-badge is-inactive">仮登録</span>
+                                @endif
                             </td>
                             <td class="u-min-w-360">
                                 @php($summary = $shop['operation_summary'] ?? null)
@@ -55,91 +59,35 @@
                                 @endif
                             </td>
                             <td>
-                                @if(!empty($shop['recruit_schema_horizontal']))
-                                    <div class="u-flex u-flex-wrap u-gap-6">
-                                        @foreach($shop['admin_recruit_toggles'] as $t)
-                                            <form action="{{ route('admin.shops.toggle-recruit-status', $shop['id']) }}" method="POST" style="margin:0;">
-                                                @csrf
-                                                <input type="hidden" name="job_type" value="{{ $t['job_type'] }}">
-                                                <button type="submit" class="admin-toggle-button">
-                                                    {{ $t['label'] }} {{ $t['is_on'] ? '→非公開' : '→公開' }}
-                                                </button>
-                                            </form>
-                                        @endforeach
-                                    </div>
-                                @else
-                                <form action="{{ route('admin.shops.toggle-recruit-status', $shop['id']) }}" method="POST">
-                                    @csrf
-                                    <input type="hidden" name="job_type" value="1">
-                                    <button type="submit" class="admin-toggle-button">
-                                        {{ $shop['job_status_key'] === 'active' ? '非公開にする' : '公開にする' }}
-                                    </button>
-                                </form>
-                                @endif
-                            </td>
-                            <td>
-                                <a href="{{ route('admin.shops.show', $shop['id']) }}" class="btn-action btn-action-secondary">
-                                    <i class="fas fa-circle-info"></i> 詳細
-                                </a>
+                                <div class="u-flex u-flex-wrap u-gap-6">
+                                    <a href="{{ route('admin.shops.show', $shop['id']) }}" class="btn-action btn-action-secondary">
+                                        <i class="fas fa-circle-info"></i> 詳細
+                                    </a>
+                                    @if($isSuspended)
+                                        <form method="POST" action="{{ route('admin.shops.unsuspend', $shop['id']) }}" style="display:inline;" onsubmit="return confirm('この店舗アカウントの停止を解除しますか？');">
+                                            @csrf
+                                            <button type="submit" class="btn-action btn-action-secondary">
+                                                <i class="fas fa-rotate-left"></i> 停止解除
+                                            </button>
+                                        </form>
+                                    @else
+                                        <form method="POST" action="{{ route('admin.shops.suspend', $shop['id']) }}" style="display:inline;" onsubmit="return confirm('この店舗アカウントを停止します。停止中はログイン後に「停止中」表示と問合せ送信のみ可能になります。よろしいですか？');">
+                                            @csrf
+                                            <button type="submit" class="btn-action btn-action-danger">
+                                                <i class="fas fa-ban"></i> 停止
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="text-center">店舗アカウントがありません。</td>
+                            <td colspan="8" class="text-center">店舗アカウントがありません。</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </div>
-
-    <style>
-        .admin-alert {
-            margin-bottom: 18px;
-            padding: 12px 14px;
-            border-radius: 14px;
-        }
-
-        .admin-alert-success {
-            background: rgba(16, 185, 129, 0.12);
-            border: 0;
-            box-shadow: var(--admin-shadow);
-            color: #14532d;
-        }
-
-        .admin-status-badge {
-            display: inline-flex;
-            align-items: center;
-            min-height: 30px;
-            padding: 0 10px;
-            border-radius: 999px;
-            font-size: 0.78rem;
-            font-weight: 700;
-        }
-
-        .admin-status-badge.is-active {
-            background: rgba(16, 185, 129, 0.14);
-            color: #047857;
-            border: 0;
-        }
-
-        .admin-status-badge.is-inactive {
-            background: rgba(62, 44, 38, 0.06);
-            color: var(--admin-muted);
-            border: 0;
-        }
-
-        .admin-toggle-button {
-            min-height: 36px;
-            padding: 0 12px;
-            border: 0;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.85);
-            box-shadow: var(--admin-shadow);
-            color: var(--admin-text);
-            cursor: pointer;
-            white-space: nowrap;
-        }
-    </style>
 @endsection
-

@@ -134,16 +134,23 @@ class AdminMasterService
         }
     }
 
-    public function getNgWordData(): array
+    public function getNgWordData(?int $editingId = null): array
     {
         try {
+            $words = $this->getAllNgWords();
+            $editingWord = $editingId
+                ? $words->firstWhere('id', $editingId)
+                : null;
+
             return [
-                'words' => $this->fetchNgWords(),
+                'words' => $words,
+                'editingWord' => $editingWord,
                 'error' => null,
             ];
         } catch (QueryException) {
             return [
                 'words' => collect(),
+                'editingWord' => null,
                 'error' => 'データベースに接続できないため、NGワードを読み込めませんでした。',
             ];
         }
@@ -227,6 +234,96 @@ class AdminMasterService
         DB::table($catalog['table'])
             ->where('id', $recordId)
             ->update($payload);
+    }
+
+    /**
+     * 表示順 (sort_order) のみを更新する。
+     */
+    public function updateCatalogSortOrder(string $key, int $recordId, int $sortOrder): void
+    {
+        $catalog = $this->getCatalogDefinition($key);
+        if (!$catalog || !Schema::hasTable($catalog['table'])) {
+            return;
+        }
+        if (!Schema::hasColumn($catalog['table'], 'sort_order')) {
+            return;
+        }
+        DB::table($catalog['table'])
+            ->where('id', $recordId)
+            ->update([
+                'sort_order' => $sortOrder,
+                'updated_at' => now(),
+            ]);
+    }
+
+    /**
+     * NG ワードを新規追加。
+     */
+    public function createNgWord(string $word): void
+    {
+        if (!Schema::hasTable('ng_words')) {
+            return;
+        }
+        DB::table('ng_words')->insert([
+            'word' => $word,
+            'is_active' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    /**
+     * NG ワードの内容と有効フラグを更新。
+     */
+    public function updateNgWord(int $id, string $word, bool $isActive): void
+    {
+        if (!Schema::hasTable('ng_words')) {
+            return;
+        }
+        DB::table('ng_words')
+            ->where('id', $id)
+            ->update([
+                'word' => $word,
+                'is_active' => $isActive ? 1 : 0,
+                'updated_at' => now(),
+            ]);
+    }
+
+    /**
+     * NG ワードを削除（論理削除：is_active = 0）。
+     */
+    public function deleteNgWord(int $id): void
+    {
+        if (!Schema::hasTable('ng_words')) {
+            return;
+        }
+        DB::table('ng_words')
+            ->where('id', $id)
+            ->update([
+                'is_active' => 0,
+                'updated_at' => now(),
+            ]);
+    }
+
+    public function getNgWord(int $id): ?object
+    {
+        if (!Schema::hasTable('ng_words')) {
+            return null;
+        }
+        return DB::table('ng_words')->where('id', $id)->first();
+    }
+
+    /**
+     * NG ワード（無効含めて全件）を返す。管理画面で削除済みも編集可能にする用途。
+     */
+    public function getAllNgWords(): Collection
+    {
+        if (!Schema::hasTable('ng_words')) {
+            return collect();
+        }
+        return DB::table('ng_words')
+            ->orderBy('id')
+            ->get(['id', 'word', 'is_active', 'created_at', 'updated_at']);
     }
 
     /**
