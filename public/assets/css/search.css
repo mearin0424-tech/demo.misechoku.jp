@@ -377,10 +377,11 @@ body.page-search-ai .ai-recommend {
     background: rgba(220, 181, 104, 0.06);
 }
 
-/* 詳細検索 FAB */
+/* 詳細検索 FAB（センター寄せ app の右端に追従。tablet 以上でも viewport 右端ではなく app 右端に貼り付く） */
 .search-detail-fab {
     position: fixed;
-    right: max(16px, env(safe-area-inset-right, 0px));
+    /* 50% (viewport center) + min(50vw, app幅/2) で app の右端を取り、そこから 16px + FAB幅(52px) 戻す */
+    left: calc(50% + min(50vw, var(--max-content-width) / 2) - 16px - 52px - env(safe-area-inset-right, 0px));
     bottom: calc(var(--footer-height) + 16px + env(safe-area-inset-bottom, 0px));
     width: 52px;
     height: 52px;
@@ -389,11 +390,14 @@ body.page-search-ai .ai-recommend {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(145deg, #e8c379, #b8860b);
-    color: #161110;
+    background: linear-gradient(145deg, #ffe2a3, #dcb568 45%, #b8860b);
+    color: #2a1406;
     font-size: 1.15rem;
     cursor: pointer;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.55);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 245, 214, 0.55),
+        inset 0 -1px 0 rgba(112, 72, 10, 0.4),
+        0 6px 18px rgba(0, 0, 0, 0.55);
     z-index: 95;
     transition: transform 0.15s, filter 0.15s;
 }
@@ -871,7 +875,7 @@ body.page-search .connection-list--search {
 }
 .search-filter-sort__select:focus {
     border-color: var(--color-gold);
-    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.15);
+    box-shadow: 0 0 0 2px rgba(220, 181, 104, 0.15);
 }
 .search-filter-sort__icon {
     position: absolute;
@@ -901,7 +905,7 @@ body.page-search .connection-list--search {
     position: relative;
 }
 .search-filter-detail-btn:hover {
-    background: rgba(212, 175, 55, 0.1);
+    background: rgba(220, 181, 104, 0.1);
 }
 .search-filter-detail-btn__badge {
     min-width: 18px;
@@ -1147,11 +1151,11 @@ body.page-search .connection-list--search {
 }
 .detail-search-location-option__icon {
     font-size: 0.75rem;
-    color: #666;
+    color: #b5a69d;
     transition: color 0.2s;
 }
 .detail-search-location-option.is-selected {
-    background: rgba(212, 175, 55, 0.15);
+    background: rgba(220, 181, 104, 0.15);
     border: 1px solid var(--gold);
     color: var(--gold);
     z-index: 1;
@@ -1289,7 +1293,7 @@ body.page-search .connection-list--search {
 }
 .detail-search-chip:has(input:checked) {
     border-color: var(--color-gold);
-    background: rgba(212, 175, 55, 0.15);
+    background: rgba(220, 181, 104, 0.15);
     color: var(--color-gold);
 }
 .detail-search-chip span {
@@ -1300,9 +1304,9 @@ body.page-search .connection-list--search {
 .detail-search-modal__window--search {
     max-width: min(560px, var(--max-content-width));
     background:
-        linear-gradient(180deg, rgba(212, 175, 55, 0.06), rgba(212, 175, 55, 0) 72px),
+        linear-gradient(180deg, rgba(220, 181, 104, 0.06), rgba(220, 181, 104, 0) 72px),
         #140505;
-    border: 1px solid rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(220, 181, 104, 0.12);
 }
 
 .detail-search-modal__header--search {
@@ -1358,7 +1362,7 @@ body.page-search .connection-list--search {
 }
 
 .detail-search-accordion--panel[data-open="true"] .detail-search-accordion__head {
-    border-bottom: 1px solid rgba(212, 175, 55, 0.08);
+    border-bottom: 1px solid rgba(220, 181, 104, 0.08);
 }
 
 .detail-search-accordion--panel[data-open="true"] .detail-search-accordion__body {
@@ -1396,7 +1400,7 @@ body.page-search .connection-list--search {
     justify-content: center;
     min-height: 24px;
     padding: 0 10px;
-    border: 1px solid rgba(212, 175, 55, 0.3);
+    border: 1px solid rgba(220, 181, 104, 0.3);
     border-radius: 999px;
     background: rgba(42, 26, 8, 0.96);
     color: var(--gold);
@@ -1428,7 +1432,7 @@ body.page-search .connection-list--search {
     background: #2a1a08;
     border-color: var(--gold);
     color: var(--gold);
-    box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.12) inset;
+    box-shadow: 0 0 0 1px rgba(220, 181, 104, 0.12) inset;
 }
 
 .detail-search-location-segment {
@@ -1492,14 +1496,14 @@ body.page-search .connection-list--search {
     width: 22px;
     height: 22px;
     border: 2px solid #140505;
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.45);
+    box-shadow: 0 0 10px rgba(220, 181, 104, 0.45);
 }
 
 .detail-search-distance-slider::-moz-range-thumb {
     width: 22px;
     height: 22px;
     border: 2px solid #140505;
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.45);
+    box-shadow: 0 0 10px rgba(220, 181, 104, 0.45);
 }
 
 .detail-search-distance__value {
@@ -1528,7 +1532,7 @@ body.page-search .connection-list--search {
 
 .detail-search-select:focus {
     border-color: var(--gold);
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.12);
+    box-shadow: 0 0 0 3px rgba(220, 181, 104, 0.12);
 }
 
 .detail-search-select-wrap__icon {
@@ -1564,8 +1568,8 @@ body.page-search .connection-list--search {
 }
 
 .detail-search-modal__footer--search .detail-search-modal__btn--submit {
-    background: linear-gradient(90deg, #d4af37, #b38f26);
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.25);
+    background: linear-gradient(90deg, #dcb568, #b38f26);
+    box-shadow: 0 0 15px rgba(220, 181, 104, 0.25);
 }
 
 @media (max-width: 480px) {
@@ -1648,7 +1652,7 @@ body.page-search .connection-list--search {
     font-size: 0.82rem;
     font-weight: 700;
     text-decoration: none;
-    box-shadow: 0 10px 22px rgba(212, 175, 55, 0.22);
+    box-shadow: 0 10px 22px rgba(220, 181, 104, 0.22);
 }
 
 .ai-recommend__message {
@@ -1751,7 +1755,7 @@ body.page-search .connection-list--search {
     width: auto;
     min-height: 42px;
     padding: 10px 14px;
-    border: 1px solid rgba(212, 175, 55, 0.55);
+    border: 1px solid rgba(220, 181, 104, 0.55);
     border-radius: 12px;
     background: rgba(255, 250, 240, 0.96);
     color: #8d5a06;
@@ -1783,7 +1787,7 @@ body.page-search .connection-list--search {
 .ai-recommend__card {
     overflow: hidden;
     background: #fffdf8;
-    border: 1px solid rgba(212, 175, 55, 0.26);
+    border: 1px solid rgba(220, 181, 104, 0.26);
     border-radius: 18px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }

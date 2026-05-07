@@ -518,6 +518,60 @@ a:hover {
     font-weight: 600;
 }
 
+/* グローバル: placeholder のコントラストを底上げ（暗背景でも見える） */
+input::placeholder,
+textarea::placeholder {
+    color: rgba(245, 235, 214, 0.42);
+    opacity: 1; /* Firefox の薄化を抑制 */
+}
+
+/* ============================================================
+   <select> の OS デフォルト白背景・白文字問題対策
+   （Mac/iOS Safari は標準で OS 配色になり、color:#fff だけだと
+   　白×白で読めなくなる。ここで appearance:none で OS スタイルを切り、
+   　暗背景＋ゴールドchevronに統一する。option は OS 依存の挙動が残るが、
+   　CSS が効くブラウザでは暗色＋白文字で表示される。）
+   ============================================================ */
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: #1a0a0e;
+    color: #fff;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23dcb568' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 14px;
+    padding-right: 36px;
+}
+select option {
+    background-color: #1a0a0e;
+    color: #fff;
+}
+select optgroup {
+    background-color: #1a0a0e;
+    color: var(--gold);
+    font-weight: 700;
+}
+select:disabled {
+    color: rgba(255, 255, 255, 0.4);
+    opacity: 0.7;
+}
+/* multiple 表示時はchevron不要 */
+select[multiple] {
+    background-image: none;
+    padding-right: 12px;
+}
+/* iOS の date/time/datetime-local 入力もテキスト色を強制 */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="week"] {
+    color: #fff;
+    color-scheme: dark;
+}
+
 /* スクロールバー（没入感のため極力目立たせない） */
 ::-webkit-scrollbar {
     width: 0;

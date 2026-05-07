@@ -509,7 +509,7 @@
         line-height: 1.55;
     }
     .shop-mypage-v2 .shop-word-bubble-updated {
-        color: #8a7c74;
+        color: #b5a69d;
         font-weight: 700;
         font-size: 0.7rem;
     }

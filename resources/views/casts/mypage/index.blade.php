@@ -46,7 +46,7 @@
     .cast-mypage-v2 .shop-word-bubble { border: 0; border-radius: 12px; background: #f5ebd6; color: #3a2f2b; box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
     .cast-mypage-v2 .shop-word-bubble::after { left: -8px; top: 50%; margin-top: -6px; width: 0; height: 0; border-top: 6px solid transparent; border-right: 10px solid #f5ebd6; border-bottom: 6px solid transparent; border-left: 0; background: transparent; transform: none; }
     .cast-mypage-v2 .shop-word-text { color: #3a2f2b; font-weight: 700; font-size: 0.82rem; line-height: 1.55; }
-    .cast-mypage-v2 .shop-word-bubble-updated { color: #8a7c74; font-size: 0.7rem; font-weight: 700; }
+    .cast-mypage-v2 .shop-word-bubble-updated { color: #b5a69d; font-size: 0.7rem; font-weight: 700; }
     .cast-mypage-v2 .btn-word-edit { width: 24px; height: 24px; color: #a89050; }
     .cast-flat-stats { display: flex; align-items: center; gap: 10px; margin: 4px 0 24px; padding: 0 6px; }
     .cast-bonus-panel { flex: 1; min-width: 0; }
@@ -74,7 +74,7 @@
     .cast-k.mini { width: 42px; }
     .cast-v { color: #fff; font-weight: 700; font-size: 0.86rem; line-height: 1.55; word-break: break-word; }
     .cast-v.muted { color: #7e6f69; font-weight: 600; }
-    .cast-zip { margin-top: 2px; color: #8a7c74; font-size: 0.72rem; }
+    .cast-zip { margin-top: 2px; color: #b5a69d; font-size: 0.72rem; }
     .cast-badges { display: flex; flex-wrap: wrap; gap: 6px; }
     .cast-badge { display: inline-flex; padding: 6px 11px; border-radius: 6px; background: rgba(17, 12, 10, 0.8); border: 1px solid rgba(255,255,255,0.1); color: #eae0d5; font-size: 0.76rem; font-weight: 700; }
     .cast-inline-action { margin-left: auto; font-size: 0.7rem; color: #c8a951; border: 1px solid rgba(200,169,81,0.35); border-radius: 999px; padding: 5px 9px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }

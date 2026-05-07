@@ -353,6 +353,343 @@
         transition: background 0.15s ease;
     }
     .recruit-ref-map-link:hover { background: rgba(212,175,55,.1); }
+
+    /* =================================================================
+       Brushup overrides — 暗さ軽減・ブランド色（ボルドー×シャンパンゴールド）統一
+       ================================================================= */
+
+    /* 1. ベース：純黒からボルドー寄り暗色へ */
+    .recruit-ref-shell {
+        background: linear-gradient(180deg, #2a0d18 0%, #1a0a0e 100%);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(220, 181, 104, 0.06);
+    }
+    .recruit-ref-wrap { background: transparent; }
+
+    /* 2. プレビューバー */
+    .recruit-ref-preview-sticky {
+        background: rgba(42, 13, 24, 0.92);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-bottom-color: rgba(220, 181, 104, 0.22);
+    }
+    .recruit-ref-preview-sticky > p { color: #dcb568; }
+    .recruit-ref-switch-track { background: #4a1d28; }
+    .recruit-ref-switch-track.is-on { background: linear-gradient(135deg, #dcb568, #b8860b); }
+    .recruit-ref-switch-label { color: #b5a69d; }
+    .recruit-ref-switch-label.is-on { color: #dcb568; }
+    .recruit-ref-preview-edit { border-color: #dcb568; color: #dcb568; }
+    .recruit-ref-preview-edit:hover { background: rgba(220, 181, 104, 0.12); }
+
+    /* 3. ヒーロー */
+    .recruit-ref-hero { background: #1a0a0e; }
+    .recruit-ref-dot.is-active { background: #dcb568; }
+    .recruit-ref-thumbs--carousel button.is-active img { border-color: #dcb568; box-shadow: 0 0 0 1px #dcb568; }
+    .recruit-ref-thumbs--carousel img,
+    .recruit-ref-thumbs img { border-color: rgba(220, 181, 104, 0.55); }
+    .recruit-ref-thumb-more { background: rgba(26, 10, 14, 0.7); border-color: rgba(220, 181, 104, 0.28); }
+
+    /* 4. ヘッダ部 */
+    .recruit-ref-head { border-bottom-color: rgba(220, 181, 104, 0.16); }
+    .recruit-ref-chip {
+        background: rgba(220, 181, 104, 0.08);
+        color: #eae0d5;
+        border-color: rgba(220, 181, 104, 0.22);
+    }
+    .recruit-ref-chip.gold-outline { color: #dcb568; border-color: #dcb568; }
+    .recruit-ref-catch { color: #dcb568; }
+
+    /* 5. ジョブタイプ切替 */
+    .recruit-job-toggle {
+        background: rgba(0, 0, 0, 0.35);
+        border-color: rgba(220, 181, 104, 0.22);
+    }
+    .recruit-job-toggle button { color: #b5a69d; }
+    .recruit-job-toggle button.is-active {
+        background: rgba(220, 181, 104, 0.16);
+        color: #dcb568;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 6. 時給ハイライト */
+    .recruit-ref-pay-highlight {
+        background: linear-gradient(135deg, #2d1018 0%, #1f0810 100%);
+        border-color: rgba(220, 181, 104, 0.55);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    }
+    .recruit-ref-pay-highlight .label,
+    .recruit-ref-pay-highlight .yen { color: #dcb568; }
+    .recruit-ref-pay-highlight .tilde { color: #c8b8b0; }
+
+    /* 7. タグピル */
+    .recruit-ref-tags span.gold { background: rgba(220, 181, 104, 0.1); border-color: rgba(220, 181, 104, 0.32); color: #dcb568; }
+    .recruit-ref-tags span.dim { background: rgba(255, 255, 255, 0.04); border-color: rgba(220, 181, 104, 0.18); color: #eae0d5; font-weight: 600; }
+
+    /* 8. セクション見出し・本文 */
+    .recruit-ref-h2 { color: #dcb568; }
+    .recruit-ref-h2-lg .bar { background: #dcb568; }
+    .recruit-ref-subtle { color: #b5a69d; }
+    .recruit-ref-msg {
+        background: #2a0d18;
+        border-color: rgba(220, 181, 104, 0.22);
+        color: #eae0d5;
+        box-shadow: inset 0 1px 0 rgba(220, 181, 104, 0.04);
+    }
+
+    /* 9. シェアボタン */
+    .recruit-ref-share-row .recruit-ref-share-btn { color: #eae0d5; border-color: rgba(220, 181, 104, 0.32); }
+    .recruit-ref-share-row .recruit-ref-share-btn--gold { border-color: #dcb568; color: #dcb568; }
+    .recruit-ref-share-row .recruit-ref-share-btn--gold:hover { background: rgba(220, 181, 104, 0.12); }
+
+    /* 10. 入店ボーナスカード */
+    .recruit-ref-bonus-card {
+        background: linear-gradient(135deg, #4a1d28 0%, #2a0d18 100%);
+        border-color: rgba(220, 181, 104, 0.45);
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(220, 181, 104, 0.1);
+    }
+    .recruit-ref-bonus-card__head { color: #dcb568; }
+    .recruit-ref-bonus-card__cond {
+        background: rgba(0, 0, 0, 0.3);
+        border-color: rgba(220, 181, 104, 0.22);
+        color: #c8b8b0;
+    }
+    .recruit-ref-bonus-card__cond strong { color: #dcb568; }
+
+    /* 11. 情報行（k/v） */
+    .recruit-ref-inforow { border-bottom-color: rgba(220, 181, 104, 0.14); }
+    .recruit-ref-inforow .k { color: #b5a69d; }
+    .recruit-ref-inforow .v { color: #eae0d5; }
+
+    /* 12. タグマトリクス */
+    .recruit-ref-tag-matrix {
+        background: #2a0d18;
+        border-color: rgba(220, 181, 104, 0.18);
+    }
+    .recruit-ref-tag-matrix > p { color: #dcb568; }
+    .recruit-ref-tag-matrix-row .cat { color: #b5a69d; }
+
+    /* 13. マップリンク */
+    .recruit-ref-map-link { color: #dcb568; border-color: rgba(220, 181, 104, 0.5); }
+    .recruit-ref-map-link:hover { background: rgba(220, 181, 104, 0.12); }
+
+    /* 14. キャッチコピー強調 */
+    .recruit-ref-catch-hero .rc-msg-em { color: #ffe2a3; }
+
+    /* 15. CTA / 応募ボタンの色味（必要なら別途上書き） */
+
+    /* === 既存のローカル lightbox は削除済み。万が一の保険として念のため非表示。=== */
+    .recruit-ref-shell ~ #lightbox-overlay { display: none !important; }
+
+    /* =================================================================
+       New Components — A1-A4 / B5-B7 / C8-C9 / E14
+       ================================================================= */
+
+    /* ヒーロー：前/次矢印 (B6) */
+    .recruit-ref-hero-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 18;
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        border: 0;
+        background: rgba(0, 0, 0, 0.55);
+        color: rgba(255, 255, 255, 0.92);
+        font-size: 0.92rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.32);
+        transition: background 0.15s ease, transform 0.12s ease;
+    }
+    .recruit-ref-hero-arrow:hover { background: rgba(220, 181, 104, 0.65); color: #1a0a0e; }
+    .recruit-ref-hero-arrow:active { transform: translateY(-50%) scale(0.94); }
+    .recruit-ref-hero-arrow--prev { left: 12px; }
+    .recruit-ref-hero-arrow--next { right: 12px; }
+    .recruit-ref-hero-fallback {
+        width: 100%; height: 100%;
+        background: linear-gradient(135deg, #4a1d28 0%, #2a0d18 50%, #1a0a0e 100%);
+    }
+
+    /* 時給ハイライト：RANGE バッジ (A1) */
+    .recruit-ref-pay-highlight__head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+    }
+    .recruit-ref-pay-range-badge {
+        display: inline-block;
+        padding: 1px 8px;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.18em;
+        color: #2a1406;
+        background: linear-gradient(135deg, #ffe2a3, #dcb568);
+        border-radius: 999px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    .recruit-ref-pay-empty {
+        font-size: 0.9rem;
+        color: #b5a69d;
+        font-weight: 700;
+    }
+
+    /* ボーナス進捗バー (A2) */
+    .recruit-ref-bonus-progress {
+        margin: 14px 0 4px;
+    }
+    .recruit-ref-bonus-progress-track {
+        position: relative;
+        height: 28px;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(220, 181, 104, 0.25);
+        overflow: visible;
+    }
+    .recruit-ref-bonus-progress-fill {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 14%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, rgba(220, 181, 104, 0.85) 0%, rgba(255, 226, 163, 0.5) 100%);
+        box-shadow: 0 0 12px rgba(220, 181, 104, 0.5);
+    }
+    .recruit-ref-bonus-progress-marker {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        color: #f5e9c8;
+        white-space: nowrap;
+    }
+    .recruit-ref-bonus-progress-marker small { font-size: 8px; opacity: 0.72; margin-left: 4px; }
+    .recruit-ref-bonus-progress-marker--start { left: 10px; }
+    .recruit-ref-bonus-progress-marker--end { right: 10px; color: #ffe2a3; }
+
+    /* インフォ行レイアウト改善 (A3) */
+    .recruit-ref-inforow .k {
+        width: auto;
+        min-width: 6rem;
+        max-width: 8rem;
+        flex-shrink: 0;
+        word-break: keep-all;
+    }
+    .recruit-ref-inforow .v { flex: 1; min-width: 0; }
+
+    /* タグマトリクスのアイコン (A4) */
+    .recruit-ref-tag-matrix > p {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .recruit-ref-tag-matrix-row .cat {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .recruit-ref-tag-matrix-row .cat i {
+        color: #dcb568;
+        font-size: 11px;
+    }
+    /* タグ折りたたみ (C9) */
+    .recruit-ref-tag-more {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px dashed rgba(220, 181, 104, 0.4);
+        background: transparent;
+        color: #dcb568;
+        font-size: 10px;
+        font-weight: 800;
+        cursor: pointer;
+        font-family: inherit;
+        letter-spacing: 0.04em;
+    }
+    .recruit-ref-tag-more:hover { background: rgba(220, 181, 104, 0.1); }
+    .recruit-ref-tag-more .less-text { display: none; }
+    .recruit-ref-tag-more[aria-expanded="true"] .more-text { display: none; }
+    .recruit-ref-tag-more[aria-expanded="true"] .less-text { display: inline; }
+
+    /* 長文メッセージ折りたたみ (C8) */
+    .recruit-ref-msg.is-clipped {
+        max-height: 8rem;
+        overflow: hidden;
+        position: relative;
+        margin-bottom: 0;
+    }
+    .recruit-ref-msg.is-clipped::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 3.2rem;
+        background: linear-gradient(to bottom, rgba(42, 13, 24, 0) 0%, rgba(42, 13, 24, 0.95) 78%);
+        pointer-events: none;
+    }
+    .recruit-ref-msg.is-clipped.is-expanded {
+        max-height: none;
+    }
+    .recruit-ref-msg.is-clipped.is-expanded::after { display: none; }
+    .recruit-ref-msg-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin: 12px 0 16px;
+        padding: 7px 14px;
+        border: 1px solid rgba(220, 181, 104, 0.4);
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.25);
+        color: #dcb568;
+        font-size: 11px;
+        font-weight: 800;
+        cursor: pointer;
+        font-family: inherit;
+    }
+    .recruit-ref-msg-toggle:hover { background: rgba(220, 181, 104, 0.12); }
+    .recruit-ref-msg-toggle .recruit-ref-msg-toggle__less { display: none; }
+    .recruit-ref-msg-toggle[aria-expanded="true"] .recruit-ref-msg-toggle__more { display: none; }
+    .recruit-ref-msg-toggle[aria-expanded="true"] .recruit-ref-msg-toggle__less { display: inline-flex; align-items: center; gap: 6px; }
+
+    /* 共有ボタン強化 (B7) */
+    .recruit-ref-share-row {
+        gap: 8px;
+        margin-top: 14px;
+    }
+    .recruit-ref-share-row .recruit-ref-share-btn {
+        gap: 6px;
+        padding: 11px 10px;
+        font-size: 12px;
+        min-height: 42px;
+    }
+    .recruit-ref-share-row .recruit-ref-share-btn i,
+    .recruit-ref-share-row .recruit-ref-share-icon {
+        font-size: 1.05rem;
+    }
+
+    /* CTA sticky (B5) — キャストビューのみ */
+    body[class*="page-recruit"] .recruit-footer-cta,
+    .recruit-footer-cta {
+        position: sticky;
+        bottom: calc(var(--footer-height, 75px) + 8px);
+        z-index: 30;
+        margin: 28px -20px 0;
+        padding: 16px 20px 12px;
+        background: linear-gradient(to top, rgba(26, 10, 14, 0.96) 0%, rgba(26, 10, 14, 0.78) 60%, rgba(26, 10, 14, 0) 100%);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-top: 1px solid rgba(220, 181, 104, 0.16);
+    }
 </style>
 @endpush
 
@@ -436,7 +773,76 @@
             break;
         }
     }
+
+    // タグマトリクス：カテゴリ別アイコン
+    $matrixIcons = [
+        '働き方・給与'       => 'fa-yen-sign',
+        '歓迎条件'           => 'fa-handshake',
+        '待遇・サポート'     => 'fa-gift',
+        '店内の雰囲気・客層' => 'fa-store',
+        '設備・アクセス'     => 'fa-location-dot',
+    ];
+
+    // メッセージの長文判定（200字以上で折りたたみ対象）
+    $messageNeedsClip = mb_strlen($messageBody) > 200;
+    $jobSupplementNeedsClip = mb_strlen($jobSupplementMain) > 200;
+
+    // JSON-LD JobPosting 構築
+    $ldHiringName = $shop['name'] ?? ($recruit['store_name'] ?? '');
+    $ldDescription = $messageBody !== '' ? $messageBody : (string) ($recruit['catch_copy'] ?? '');
+    $ldHourly = [];
+    if ($regularWage > 0) {
+        $ldHourly['min'] = $regularWage;
+        $ldHourly['max'] = $regularWageMax ?: $regularWage;
+    } elseif ($hasTrial) {
+        $tw = (int) $recruit['trial_hourly_wage'];
+        $ldHourly['min'] = $tw;
+        $ldHourly['max'] = $trialWageMax ?: $tw;
+    }
+    $ldJsonLd = [
+        '@context' => 'https://schema.org',
+        '@type' => 'JobPosting',
+        'title' => $ldHiringName !== '' ? ($ldHiringName . '【' . ($recruit['catch_copy'] ?? '求人') . '】') : '求人',
+        'description' => $ldDescription !== '' ? mb_strimwidth($ldDescription, 0, 500, '…') : 'ミセチョクの求人情報',
+        'datePosted' => now()->toDateString(),
+        'validThrough' => now()->addDays(60)->toDateString(),
+        'employmentType' => $hasHelp ? 'CONTRACTOR' : 'PART_TIME',
+        'hiringOrganization' => [
+            '@type' => 'Organization',
+            'name' => $ldHiringName ?: 'ミセチョク',
+            'logo' => $shop['main_img'] ?? '',
+        ],
+        'jobLocation' => [
+            '@type' => 'Place',
+            'address' => [
+                '@type' => 'PostalAddress',
+                'addressCountry' => 'JP',
+                'addressRegion' => $pref,
+                'addressLocality' => $city,
+                'streetAddress' => trim((string) ($shop['addr1'] ?? '')),
+            ],
+        ],
+    ];
+    if (!empty($ldHourly)) {
+        $ldJsonLd['baseSalary'] = [
+            '@type' => 'MonetaryAmount',
+            'currency' => 'JPY',
+            'value' => [
+                '@type' => 'QuantitativeValue',
+                'minValue' => $ldHourly['min'],
+                'maxValue' => $ldHourly['max'],
+                'unitText' => 'HOUR',
+            ],
+        ];
+    }
+    // 空キーを取り除く
+    $ldJsonLd['hiringOrganization'] = array_filter($ldJsonLd['hiringOrganization']);
+    $ldJsonLd['jobLocation']['address'] = array_filter($ldJsonLd['jobLocation']['address']);
 @endphp
+
+@push('scripts')
+<script type="application/ld+json">{!! json_encode($ldJsonLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+@endpush
 
 <div class="recruit-detail-page animate-fadeIn recruit-ref-wrap">
     <div class="recruit-ref-shell">
@@ -466,12 +872,13 @@
         @endif
 
         <div class="recruit-ref-hero-wrap">
-            <div class="recruit-ref-hero" id="top">
+            <div class="recruit-ref-hero" id="top" aria-roledescription="carousel">
+                @php $shopNameForAlt = $recruit['store_name'] ?? ($shop['name'] ?? '店舗'); @endphp
                 @if(count($galleryImages) > 0)
                     <div class="recruit-ref-hero-carousel" id="recruit-hero-carousel">
                         @foreach($galleryImages as $hi => $imgUrl)
-                            <div class="recruit-ref-hero-slide" data-hero-slide="{{ $hi }}">
-                                <img src="{{ $imgUrl }}" alt="{{ ($recruit['store_name'] ?? $shop['name'] ?? '店舗') }}の写真 {{ $hi + 1 }}" class="js-lightbox-target">
+                            <div class="recruit-ref-hero-slide" data-hero-slide="{{ $hi }}" role="group" aria-roledescription="slide" aria-label="{{ $hi + 1 }} / {{ count($galleryImages) }}">
+                                <img src="{{ $imgUrl }}" alt="{{ $shopNameForAlt }} 店舗イメージ {{ $hi + 1 }}（{{ $areaChip ?: '日本' }}）" class="js-lightbox-target" loading="{{ $hi === 0 ? 'eager' : 'lazy' }}">
                             </div>
                         @endforeach
                     </div>
@@ -479,12 +886,21 @@
                     <div class="recruit-ref-hero-carousel" id="recruit-hero-carousel">
                         <div class="recruit-ref-hero-slide">
                             @if(!empty($recruit['hero_image']))
-                                <img src="{{ $recruit['hero_image'] }}" alt="{{ $recruit['store_name'] ?? '' }}" class="js-lightbox-target">
+                                <img src="{{ $recruit['hero_image'] }}" alt="{{ $shopNameForAlt }} 店舗イメージ" class="js-lightbox-target">
                             @else
-                                <div style="width:100%;height:100%;background:linear-gradient(135deg,#1a0c0e 0%,#2d1518 50%,#120405 100%);"></div>
+                                <div class="recruit-ref-hero-fallback" aria-hidden="true"></div>
                             @endif
                         </div>
                     </div>
+                @endif
+
+                @if(count($galleryImages) > 1)
+                    <button type="button" class="recruit-ref-hero-arrow recruit-ref-hero-arrow--prev" id="recruit-hero-prev" aria-label="前の写真を表示">
+                        <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="recruit-ref-hero-arrow recruit-ref-hero-arrow--next" id="recruit-hero-next" aria-label="次の写真を表示">
+                        <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                    </button>
                 @endif
                 @if(!empty($usesJobTypes))
                     @foreach(['trial' => $recruit_trial, 'help' => $recruit_help] as $vkHero => $rvHero)
@@ -577,7 +993,12 @@
 
                 <div id="recruit-panel-main" data-job-panel="main">
                     <div class="recruit-ref-pay-highlight">
-                        <span class="label">{{ $regularWage > 0 ? '本入時給' : ($hasTrial ? '体験時給' : '本入時給') }}</span>
+                        <div class="recruit-ref-pay-highlight__head">
+                            <span class="label">{{ $regularWage > 0 ? '本入時給' : ($hasTrial ? '体験時給' : '本入時給') }}</span>
+                            @if(($regularWage > 0 && $regularWageMax !== null && $regularWageMax > $regularWage) || ($hasTrial && $trialWageMax !== null && $trialWageMax > (int) $recruit['trial_hourly_wage']))
+                                <span class="recruit-ref-pay-range-badge">RANGE</span>
+                            @endif
+                        </div>
                         <div class="line">
                             @if($regularWage > 0)
                                 <span class="yen">¥</span><span class="num">{{ number_format($regularWage) }}</span>
@@ -595,7 +1016,7 @@
                                     <span class="tilde">〜</span>
                                 @endif
                             @else
-                                <span style="font-size:0.9rem;color:#71717a;font-weight:700;">求人編集で入力してください</span>
+                                <span class="recruit-ref-pay-empty">求人編集で入力してください</span>
                             @endif
                         </div>
                     </div>
@@ -604,7 +1025,12 @@
                 @if($hasHelp)
                     <div id="recruit-panel-help" data-job-panel="help" hidden>
                         <div class="recruit-ref-pay-highlight">
-                            <span class="label">ヘルプ時給</span>
+                            <div class="recruit-ref-pay-highlight__head">
+                                <span class="label">ヘルプ時給</span>
+                                @if($helpWageMax !== null && $helpWageMax > (int) $recruit['help_hourly_wage'])
+                                    <span class="recruit-ref-pay-range-badge">RANGE</span>
+                                @endif
+                            </div>
                             <div class="line">
                                 @php $hw = (int) $recruit['help_hourly_wage']; @endphp
                                 <span class="yen">¥</span><span class="num">{{ number_format($hw) }}</span>
@@ -636,27 +1062,38 @@
                     </div>
                 @endforeach
             @else
-                <section id="section-message">
-                    <h2 class="recruit-ref-h2"><i class="fas fa-comment-dots"></i> 店長からのメッセージ</h2>
-                    <div class="recruit-ref-msg">{{ $messageBody !== '' ? $messageBody : '店長からのメッセージは求人編集から入力できます。' }}</div>
+                <section id="section-message" aria-labelledby="section-message-heading">
+                    <h2 id="section-message-heading" class="recruit-ref-h2"><i class="fas fa-comment-dots" aria-hidden="true"></i> 店長からのメッセージ</h2>
+                    <div class="recruit-ref-msg recruit-ref-msg--pre {{ $messageNeedsClip ? 'is-clipped' : '' }}" data-recruit-clip>
+                        {{ $messageBody !== '' ? $messageBody : '店長からのメッセージは求人編集から入力できます。' }}
+                    </div>
+                    @if($messageNeedsClip)
+                        <button type="button" class="recruit-ref-msg-toggle" data-recruit-clip-toggle aria-expanded="false">
+                            <span class="recruit-ref-msg-toggle__more"><i class="fas fa-chevron-down"></i> 続きを読む</span>
+                            <span class="recruit-ref-msg-toggle__less"><i class="fas fa-chevron-up"></i> 折りたたむ</span>
+                        </button>
+                    @endif
 
                     @if(!empty($shareUrlResolved ?? null))
-                        <div class="recruit-ref-share-row">
+                        <div class="recruit-ref-share-row" role="group" aria-label="この求人を共有">
                             <button type="button" class="recruit-ref-share-btn recruit-ref-share-btn--gold js-recruit-native-share">
-                                <i class="fas fa-share-alt"></i> 共有
+                                <i class="fas fa-share-alt" aria-hidden="true"></i>
+                                <span>共有</span>
                             </button>
-                            <a href="{{ $xShareUrl }}" target="_blank" rel="noopener noreferrer" class="recruit-ref-share-btn recruit-ref-share-btn--muted">
-                                <span style="font-weight:900;">𝕏</span>
+                            <a href="{{ $xShareUrl }}" target="_blank" rel="noopener noreferrer" class="recruit-ref-share-btn recruit-ref-share-btn--muted" aria-label="X (旧 Twitter) で共有">
+                                <span class="recruit-ref-share-icon" aria-hidden="true">𝕏</span>
+                                <span>X</span>
                             </a>
-                            <a href="{{ $lineShareUrl }}" target="_blank" rel="noopener noreferrer" class="recruit-ref-share-btn recruit-ref-share-btn--line">
-                                LINE
+                            <a href="{{ $lineShareUrl }}" target="_blank" rel="noopener noreferrer" class="recruit-ref-share-btn recruit-ref-share-btn--line" aria-label="LINE で共有">
+                                <i class="fab fa-line" aria-hidden="true"></i>
+                                <span>LINE</span>
                             </a>
                         </div>
                     @endif
                 </section>
 
-                <section id="requirements">
-                    <h2 class="recruit-ref-h2-lg">
+                <section id="requirements" aria-labelledby="section-requirements-heading">
+                    <h2 id="section-requirements-heading" class="recruit-ref-h2-lg">
                         <span class="bar" aria-hidden="true"></span>
                         募集要項
                         <span id="recruit-req-sub" class="recruit-ref-subtle">（体験・本入店）</span>
@@ -677,6 +1114,19 @@
                                         <span class="num" style="font-size:1rem;">条件のみ設定されています</span>
                                     @endif
                                 </div>
+                                @if($bonusDays !== '' || $bonusHours !== '')
+                                    <div class="recruit-ref-bonus-progress" role="img" aria-label="入店ボーナス達成までの目安">
+                                        <div class="recruit-ref-bonus-progress-track">
+                                            <div class="recruit-ref-bonus-progress-fill"></div>
+                                            <span class="recruit-ref-bonus-progress-marker recruit-ref-bonus-progress-marker--start" aria-hidden="true">入店</span>
+                                            <span class="recruit-ref-bonus-progress-marker recruit-ref-bonus-progress-marker--end" aria-hidden="true">
+                                                達成
+                                                @if($bonusDays !== '')<small>{{ $bonusDays }}日</small>@endif
+                                                @if($bonusHours !== '')<small>{{ $bonusHours }}h</small>@endif
+                                            </span>
+                                        </div>
+                                    </div>
+                                @endif
                                 @if($bonusConditionsText !== '')
                                     <div class="recruit-ref-bonus-card__cond"><strong>条件:</strong> {{ $bonusConditionsText }}</div>
                                 @endif
@@ -703,16 +1153,25 @@
 
                         @if($hasFeatureMatrix)
                             <div class="recruit-ref-tag-matrix">
-                                <p>特徴・アピールタグ</p>
+                                <p><i class="fas fa-tags" aria-hidden="true"></i> 特徴・アピールタグ</p>
                                 @foreach($matrixLabels as $key => $label)
-                                    @php $tags = $storeFeatures[$key] ?? []; @endphp
+                                    @php
+                                        $tags = $storeFeatures[$key] ?? [];
+                                        $iconClass = $matrixIcons[$key] ?? 'fa-tag';
+                                    @endphp
                                     @if(!empty($tags))
                                         <div class="recruit-ref-tag-matrix-row">
-                                            <span class="cat">{{ $label }}</span>
-                                            <div class="recruit-ref-tag-matrix-pills">
-                                                @foreach((array) $tags as $t)
-                                                    <span>{{ $t }}</span>
+                                            <span class="cat"><i class="fas {{ $iconClass }}" aria-hidden="true"></i>{{ $label }}</span>
+                                            <div class="recruit-ref-tag-matrix-pills" data-recruit-tag-collapse="{{ count((array) $tags) > 6 ? 'true' : 'false' }}">
+                                                @foreach((array) $tags as $tagIndex => $t)
+                                                    <span @if(count((array) $tags) > 6 && $tagIndex >= 6) data-tag-extra hidden @endif>{{ $t }}</span>
                                                 @endforeach
+                                                @if(count((array) $tags) > 6)
+                                                    <button type="button" class="recruit-ref-tag-more" data-recruit-tag-toggle aria-expanded="false">
+                                                        <span class="more-text">+{{ count((array) $tags) - 6 }}件</span>
+                                                        <span class="less-text">折りたたむ</span>
+                                                    </button>
+                                                @endif
                                             </div>
                                         </div>
                                     @endif
@@ -766,14 +1225,20 @@
             @endif
 
             @if(empty($usesJobTypes) && $jobSupplementMain !== '')
-                <section id="section-job-supplement" class="recruit-ref-job-supplement">
-                    <h2 class="recruit-ref-h2"><i class="fas fa-briefcase"></i> お仕事内容について補足</h2>
-                    <div class="recruit-ref-msg recruit-ref-msg--pre">{!! nl2br(e($jobSupplementMain)) !!}</div>
+                <section id="section-job-supplement" class="recruit-ref-job-supplement" aria-labelledby="section-job-supplement-heading">
+                    <h2 id="section-job-supplement-heading" class="recruit-ref-h2"><i class="fas fa-briefcase" aria-hidden="true"></i> お仕事内容について補足</h2>
+                    <div class="recruit-ref-msg recruit-ref-msg--pre {{ $jobSupplementNeedsClip ? 'is-clipped' : '' }}" data-recruit-clip>{!! nl2br(e($jobSupplementMain)) !!}</div>
+                    @if($jobSupplementNeedsClip)
+                        <button type="button" class="recruit-ref-msg-toggle" data-recruit-clip-toggle aria-expanded="false">
+                            <span class="recruit-ref-msg-toggle__more"><i class="fas fa-chevron-down"></i> 続きを読む</span>
+                            <span class="recruit-ref-msg-toggle__less"><i class="fas fa-chevron-up"></i> 折りたたむ</span>
+                        </button>
+                    @endif
                 </section>
             @endif
 
-            <section id="info">
-                <h2 class="recruit-ref-h2-lg"><span class="bar" aria-hidden="true"></span> 店舗情報</h2>
+            <section id="info" aria-labelledby="section-info-heading">
+                <h2 id="section-info-heading" class="recruit-ref-h2-lg"><span class="bar" aria-hidden="true"></span> 店舗情報</h2>
 
                 <div class="recruit-ref-inforow"><span class="k">店名</span><span class="v">{{ $shop['name'] ?? ($recruit['store_name'] ?? '—') }}</span></div>
                 <div class="recruit-ref-inforow"><span class="k">業種</span><span class="v">{{ $shop['industry_name'] ?? '未設定' }}</span></div>
@@ -861,12 +1326,7 @@
     </div>
 </div>
 
-<div id="lightbox-overlay" class="lightbox-overlay" onclick="closeLightbox(event)">
-    <img id="lightbox-image" src="" alt="" class="lightbox-image">
-    <button type="button" class="lightbox-close" aria-label="閉じる" onclick="closeLightbox(event)">
-        <i class="fas fa-times"></i>
-    </button>
-</div>
+{{-- 画像フルスクリーン表示は layouts/app.blade.php の #global-lightbox-overlay を共有利用 --}}
 @endsection
 
 @push('scripts')
@@ -1005,30 +1465,83 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    var overlay = document.getElementById('lightbox-overlay');
-    var img = document.getElementById('lightbox-image');
-    document.querySelectorAll('.js-lightbox-target').forEach(function (el) {
-        el.style.cursor = 'zoom-in';
-        el.addEventListener('click', function () {
-            if (!overlay || !img) return;
-            img.src = el.currentSrc || el.src;
-            overlay.classList.add('is-open');
+    // 画像のフルスクリーン表示は layouts/app.blade.php の global lightbox に委譲
+    // （window.openImageLightbox が .js-lightbox-target を自動でハンドリング）
+
+    // ============== ヒーロー前/次矢印 (B6) ==============
+    var heroPrev = document.getElementById('recruit-hero-prev');
+    var heroNext = document.getElementById('recruit-hero-next');
+    function getHeroIndex() {
+        var slides = heroCarousel ? heroCarousel.querySelectorAll('.recruit-ref-hero-slide') : [];
+        if (!heroCarousel || !slides.length) return 0;
+        var sw = heroCarousel.scrollLeft;
+        var w = heroCarousel.clientWidth;
+        return Math.round(sw / Math.max(w, 1));
+    }
+    if (heroPrev && heroNext && heroCarousel) {
+        var slidesAll = heroCarousel.querySelectorAll('.recruit-ref-hero-slide');
+        heroPrev.addEventListener('click', function () {
+            var i = Math.max(0, getHeroIndex() - 1);
+            if (typeof setHeroIndex === 'function') setHeroIndex(i);
+        });
+        heroNext.addEventListener('click', function () {
+            var i = Math.min(slidesAll.length - 1, getHeroIndex() + 1);
+            if (typeof setHeroIndex === 'function') setHeroIndex(i);
+        });
+    }
+
+    // ============== 長文メッセージ折りたたみ (C8) ==============
+    document.querySelectorAll('[data-recruit-clip-toggle]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var section = btn.parentElement || btn.closest('section');
+            var clip = section ? section.querySelector('[data-recruit-clip]') : null;
+            if (!clip) return;
+            var expanded = btn.getAttribute('aria-expanded') === 'true';
+            if (expanded) {
+                clip.classList.remove('is-expanded');
+                btn.setAttribute('aria-expanded', 'false');
+            } else {
+                clip.classList.add('is-expanded');
+                btn.setAttribute('aria-expanded', 'true');
+            }
+        });
+    });
+
+    // ============== タグ折りたたみ (C9) ==============
+    document.querySelectorAll('[data-recruit-tag-toggle]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var container = btn.parentElement;
+            if (!container) return;
+            var extras = container.querySelectorAll('[data-tag-extra]');
+            var expanded = btn.getAttribute('aria-expanded') === 'true';
+            extras.forEach(function (el) {
+                if (expanded) el.setAttribute('hidden', '');
+                else el.removeAttribute('hidden');
+            });
+            btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+        });
+    });
+
+    // ============== 共有ボタン Web Share API (B7 既存機能の補強) ==============
+    document.querySelectorAll('.js-recruit-native-share').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var shareUrl = @json($shareUrlResolved ?? '');
+            var shareTitle = @json($shareTitleResolved ?? '');
+            var shareText = @json($shareTextResolved ?? '');
+            if (navigator.share) {
+                navigator.share({ title: shareTitle, text: shareText, url: shareUrl })
+                    .catch(function () { /* user canceled */ });
+            } else if (navigator.clipboard && shareUrl) {
+                navigator.clipboard.writeText(shareUrl).then(function () {
+                    btn.classList.add('is-copied');
+                    var label = btn.querySelector('span');
+                    var orig = label ? label.textContent : '';
+                    if (label) label.textContent = 'コピーしました';
+                    setTimeout(function () { if (label) label.textContent = orig; btn.classList.remove('is-copied'); }, 1500);
+                });
+            }
         });
     });
 });
-
-function closeLightbox(e) {
-    if (e) {
-        if (e.target && !e.target.classList.contains('lightbox-overlay') && !e.target.closest('.lightbox-close')) {
-            return;
-        }
-        e.stopPropagation();
-    }
-    var overlay = document.getElementById('lightbox-overlay');
-    var lbImg = document.getElementById('lightbox-image');
-    if (!overlay) return;
-    overlay.classList.remove('is-open');
-    if (lbImg) lbImg.src = '';
-}
 </script>
 @endpush

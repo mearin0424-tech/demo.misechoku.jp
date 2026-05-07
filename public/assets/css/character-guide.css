@@ -1,12 +1,17 @@
+/* 中央寄せ #app の右端に追従させる:
+   ビューポート中央から max-content-width の半分だけ右にずらして、その右端を基準にする。 */
 .discovery-guide {
     position: fixed;
     bottom: calc(var(--footer-height) + 15px); /* フッターの直上 */
-    right: max(15px, var(--content-padding-x));
-    left: auto;
-    max-width: calc(100vw - 2 * var(--content-padding-x));
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: var(--max-content-width);
+    padding: 0 var(--content-padding-x);
     z-index: 2000;
     display: flex;
     align-items: flex-end;
+    justify-content: flex-end;
     pointer-events: none; /* 背後のスワイプを邪魔しない */
     box-sizing: border-box;
 }

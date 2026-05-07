@@ -239,7 +239,7 @@
 .tag-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .tag-chip { position: relative; display: inline-flex; }
 .tag-chip input { position: absolute; opacity: 0; pointer-events: none; }
-.tag-chip span { padding: 7px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; border: 1px solid rgba(255, 255, 255, .05); background: rgba(17, 12, 10, .8); color: #8a7c74; }
+.tag-chip span { padding: 7px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; border: 1px solid rgba(255, 255, 255, .05); background: rgba(17, 12, 10, .8); color: #b5a69d; }
 .tag-looks input:checked + span { background: rgba(90, 28, 44, .8); border-color: rgba(200, 169, 81, .4); color: #eae0d5; }
 .tag-personality input:checked + span { background: rgba(26, 42, 58, .8); border-color: rgba(74, 144, 226, .4); color: #d0e3f0; }
 .radio-like-row { display: flex; gap: 18px; flex-wrap: wrap; }
@@ -248,7 +248,7 @@
 .radio-like .dot { width: 16px; height: 16px; border-radius: 50%; border: 1px solid #4a1d28; background: #110c0a; position: relative; }
 .radio-like input:checked + .dot { border-color: #c8a951; }
 .radio-like input:checked + .dot::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #c8a951; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
-.radio-like span:last-child { color: #8a7c74; font-size: 12px; font-weight: 600; }
+.radio-like span:last-child { color: #b5a69d; font-size: 12px; font-weight: 600; }
 .radio-like input:checked + .dot + span { color: #fff; }
 .save-bar { position: absolute; left: 0; right: 0; bottom: 0; padding: 24px 16px 16px; background: linear-gradient(to top, #110c0a 35%, rgba(17, 12, 10, .92) 65%, rgba(17, 12, 10, 0)); }
 .save-btn { width: 100%; border: 1px solid #a63253; border-radius: 16px; background: linear-gradient(135deg, #8a2542, #5a1628); color: #fff; font-weight: 700; letter-spacing: .08em; padding: 14px; display: inline-flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, .45); }

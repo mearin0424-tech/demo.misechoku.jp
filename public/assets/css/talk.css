@@ -70,7 +70,7 @@
 
 .talk-item.is-pinned {
     border-color: rgba(226, 188, 79, 0.64);
-    box-shadow: 0 12px 30px rgba(212, 175, 55, 0.18);
+    box-shadow: 0 12px 30px rgba(220, 181, 104, 0.18);
     background:
         radial-gradient(circle at top left, rgba(226, 188, 79, 0.18), transparent 48%),
         linear-gradient(180deg, rgba(41, 19, 23, 0.98), rgba(31, 12, 16, 0.98));
@@ -162,7 +162,7 @@
     flex: 1;
     text-align: center;
     padding: 15px 0;
-    color: #857070;
+    color: #b5a69d;
     font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
@@ -172,7 +172,7 @@
 }
 
 .talk-tabs .tab-item.active {
-    color: #d4af37;
+    color: #dcb568;
     font-weight: 700;
     background: transparent;
 }
@@ -184,7 +184,7 @@
     left: 0;
     width: 100%;
     height: 2px;
-    background: linear-gradient(to right, transparent, #d4af37, transparent);
+    background: linear-gradient(to right, transparent, #dcb568, transparent);
 }
 
 /* 表示パネルの切り替え制御（.talk-tabs 利用時用） */
@@ -289,7 +289,7 @@
     min-height: 28px;
     padding: 0 10px;
     border-radius: 999px;
-    border: 1px solid rgba(212, 175, 55, 0.4);
+    border: 1px solid rgba(220, 181, 104, 0.4);
     background: rgba(255, 255, 255, 0.05);
     color: #f8e7be;
     font-size: 0.72rem;
@@ -396,9 +396,9 @@
     margin: 0 15px 10px;
     padding: 14px;
     border-radius: 18px;
-    border: 1px solid rgba(212, 175, 55, 0.26);
+    border: 1px solid rgba(220, 181, 104, 0.26);
     background:
-        radial-gradient(circle at top left, rgba(212, 175, 55, 0.12), transparent 42%),
+        radial-gradient(circle at top left, rgba(220, 181, 104, 0.12), transparent 42%),
         linear-gradient(180deg, rgba(46, 18, 18, 0.96), rgba(26, 11, 14, 0.96));
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
 }
@@ -735,7 +735,7 @@
     align-items: center;
     justify-content: center;
     border: 1px solid rgba(255, 239, 184, 0.4);
-    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.35), 0 2px 6px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 20px rgba(220, 181, 104, 0.35), 0 2px 6px rgba(0, 0, 0, 0.3);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -745,19 +745,19 @@
 }
 
 .btn-send:hover {
-    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.5), 0 2px 4px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 4px 16px rgba(220, 181, 104, 0.5), 0 2px 4px rgba(0, 0, 0, 0.25);
 }
 
 .btn-send:active {
     transform: scale(0.92);
-    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.35);
+    box-shadow: 0 2px 8px rgba(220, 181, 104, 0.35);
 }
 
 /* --- Empty State (空の状態) --- */
 .no-messages {
     text-align: center;
     padding: 72px 20px;
-    color: #666;
+    color: #b5a69d;
 }
 
 .no-messages i {
@@ -782,7 +782,7 @@
 }
 
 .talk-status.unread {
-    color: #666; /* 未読時は目立たない色に */
+    color: #8a7c74; /* 未読時は目立たない色に（ただし黒背景でも判別可能なレベル） */
 }
 
 /* ==========================================================================
@@ -862,7 +862,7 @@
 
 .request-user-info .location {
     font-size: 0.85rem;
-    color: #ccc;
+    color: #c8b8b0;
     margin-top: 4px;
 }
 
@@ -910,7 +910,7 @@
     background: linear-gradient(145deg, #f2d06d 0%, #d6ab2a 55%, #b88a14 100%);
     color: #231516;
     border: 1px solid rgba(255, 239, 184, 0.72);
-    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.22);
+    box-shadow: 0 8px 20px rgba(220, 181, 104, 0.22);
 }
 
 .btn-reject {
@@ -974,7 +974,7 @@
 .interview-modal {
     background: #1b0a0a;
     border-radius: 18px;
-    border: 1px solid rgba(212, 175, 55, 0.5);
+    border: 1px solid rgba(220, 181, 104, 0.5);
     box-shadow: 0 16px 50px rgba(0, 0, 0, 0.7);
     padding: 18px 18px 16px;
     width: 100%;
@@ -1045,6 +1045,17 @@
     font-size: 0.8rem;
 }
 
+/* 採用区分セレクト：ブランド配色（グローバル select 設定の上書き整形） */
+.result-employment-kind-select {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid rgba(220, 181, 104, 0.32);
+    padding: 10px 36px 10px 12px;
+    color: #f5ecec;
+    font-size: 16px;
+    min-height: 44px;
+}
+
 .interview-option-group-grid {
     display: grid;
     grid-template-columns: 1fr 120px;
@@ -1101,9 +1112,9 @@
 }
 
 .btn-interview-submit {
-    background: linear-gradient(135deg, #c9a227, #d4af37);
+    background: linear-gradient(135deg, #c9a227, #dcb568);
     color: #1a0a0a;
-    border-color: #d4af37;
+    border-color: #dcb568;
     font-weight: 600;
 }
 
@@ -1198,7 +1209,7 @@
     margin-top: 12px;
     padding: 14px;
     border-radius: 14px;
-    border: 1px solid rgba(212, 175, 55, 0.28);
+    border: 1px solid rgba(220, 181, 104, 0.28);
     background: rgba(255, 248, 220, 0.06);
 }
 
@@ -1509,7 +1520,7 @@ button.interview-option-btn:hover {
 }
 
 .talk-pin-btn[aria-pressed="true"] {
-    background: rgba(212, 175, 55, 0.18);
+    background: rgba(220, 181, 104, 0.18);
     color: #fcd34d;
 }
 

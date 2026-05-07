@@ -555,7 +555,7 @@
         </div>
         <div id="result-employment-kind-wrap" class="hired-wage-field-wrap is-visible" aria-hidden="false">
             <label for="result-employment-kind">採用区分</label>
-            <select id="result-employment-kind" style="width:100%; border-radius:12px; border:1px solid rgba(229, 193, 88, 0.22); background:rgba(255,255,255,.05); color:#fff; padding:10px 12px;">
+            <select id="result-employment-kind" class="result-employment-kind-select">
                 <option value="trial">体験入店</option>
                 <option value="fulltime">本入店</option>
                 <option value="help">ヘルプ</option>

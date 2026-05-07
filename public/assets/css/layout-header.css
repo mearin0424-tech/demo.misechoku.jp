@@ -82,6 +82,24 @@ body.is-image-editing #global-header {
     overflow: hidden;
 }
 
+/* ヘッダタイトル：ゴールド・グラデーション + 中央配置 + 大文字 letterspaced */
+.header-title-main {
+    color: var(--gold);
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 0.18em;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: linear-gradient(135deg, #ffe2a3 0%, #dcb568 45%, #b8860b 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 14px rgba(220, 181, 104, 0.18);
+}
+
 .header-talk-identity {
     display: inline-flex;
     align-items: center;
@@ -114,11 +132,11 @@ body.is-image-editing #global-header {
     white-space: nowrap;
 }
 
-/* ヘッダータイトル：明朝・セリフで上品に */
+/* ヘッダータイトル：明朝・セリフ + 大文字 + ゴールドグラデーション（高級ブランド風） */
 .header-title-main.header-title-serif {
     font-family: 'Shippori Mincho', 'Noto Serif JP', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
     font-weight: 600;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
 }
 
