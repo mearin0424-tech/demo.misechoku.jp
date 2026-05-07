@@ -3,101 +3,111 @@
 @section('title', '請求書発行')
 
 @section('content')
+    @php
+        // ペンディング案件の集計
+        $castWaitingCount = 0;
+        $issueWaitingCount = 0;
+        if (!empty($pending)) {
+            foreach ($pending as $d) {
+                if ((int) ($d['status_code'] ?? 0) === \App\Services\BillingManagementService::STATUS_CAST_REQUESTED) {
+                    $castWaitingCount++;
+                } else {
+                    $issueWaitingCount++;
+                }
+            }
+        }
+        $totalAchievement = (int) (($adminOperationAchievements ?? [])['admin.invoices.index'] ?? 0);
+    @endphp
+
     <div class="admin-page">
-        <h1 class="admin-title">請求書発行</h1>
+        @include('admin.parts.operation-nav', ['active' => 'invoices'])
+
+        <div class="u-flex-between">
+            <h1 class="admin-title">請求書発行</h1>
+            @include('admin.parts.operation-achievement', ['operationAchievementRoute' => 'admin.invoices.index'])
+        </div>
         <p class="admin-description">
-            キャストからの入金依頼（店舗承認待ち）と、店舗承認後の請求書発行をここでまとめて扱います。帳票テンプレートは体裁のみ（数値・請求データは含みません）。確定発行はプレビュー画面から行ってください。入金照合・キャスト振込は「入金確認・振込」画面です。
+            キャストからの入金依頼（店舗承認待ち）と店舗承認後の請求書発行をまとめて扱います。入金照合・キャスト振込は「入金確認・振込」画面です。
         </p>
 
-        @include('admin.parts.operation-achievement', ['operationAchievementRoute' => 'admin.invoices.index'])
-
         @if(session('status'))
-            <div class="admin-alert">
-                {{ session('status') }}
-            </div>
+            <div class="admin-alert admin-alert-success">{{ session('status') }}</div>
         @endif
-
         @if(session('error'))
-            <div class="admin-alert admin-alert-error">
-                {{ session('error') }}
-            </div>
+            <div class="admin-alert admin-alert-error">{{ session('error') }}</div>
         @endif
 
-        {{-- 帳票テンプレートのダウンロード・設定 --}}
-        <section class="invoice-issue-hero">
-            <div>
-                <h2 class="invoice-issue-hero-title">請求書 帳票テンプレート</h2>
-                <p class="invoice-issue-hero-desc">
-                    発行元名・ロゴ・備考文は「テンプレートを設定」で変更できます。ダウンロードする帳票はレイアウト確認用で、金額・宛先・日付の数字は含みません（お振込先もプレースホルダー表示です）。
-                </p>
-            </div>
-            <div class="invoice-issue-hero-actions">
-                <a href="{{ route('admin.invoices.template-settings') }}" class="btn-action">
-                    <i class="fas fa-cog"></i> テンプレートを設定
-                </a>
-                <a href="{{ route('admin.deposits.invoice-template.download') }}" class="invoice-template-dl" target="_blank" rel="noopener">
-                    <i class="fas fa-file-pdf"></i> 帳票テンプレートをダウンロード（PDF）
-                </a>
-            </div>
-        </section>
-
-        {{-- 運営口座（請求書記載の振込先） --}}
-        <section class="admin-panel invoice-admin-bank">
-            <div class="billing-detail-row" style="margin-bottom: 14px;">
-                <h2 class="admin-panel-title" style="margin-bottom: 0;">運営口座</h2>
-                <a href="{{ route('admin.bank.index') }}" class="btn-action manage">
-                    <i class="fas fa-university"></i> 口座登録・編集
-                </a>
-            </div>
-            <p class="admin-note" style="margin-bottom: 0;">請求書に印字される振込先です。発行前に内容を確認してください。</p>
-            @if($adminBank)
-                <div class="billing-meta-list">
-                    <div class="billing-meta-item">
-                        <div class="billing-meta-label">金融機関</div>
-                        <div class="billing-meta-value">{{ $adminBank->bank_name }}</div>
-                    </div>
-                    <div class="billing-meta-item">
-                        <div class="billing-meta-label">支店名</div>
-                        <div class="billing-meta-value">{{ $adminBank->branch_name ?: '未設定' }}</div>
-                    </div>
-                    <div class="billing-meta-item">
-                        <div class="billing-meta-label">口座種別 / 口座番号</div>
-                        <div class="billing-meta-value">{{ in_array($adminBank->account_type, ['current', 'checking'], true) ? '当座' : '普通' }} / {{ $adminBank->account_number }}</div>
-                    </div>
-                    <div class="billing-meta-item">
-                        <div class="billing-meta-label">口座名義</div>
-                        <div class="billing-meta-value">{{ $adminBank->account_name }}</div>
-                    </div>
+        {{-- KPI --}}
+        <section class="dashboard-kpi-grid">
+            <article class="dashboard-kpi-card">
+                <div class="dashboard-kpi-head">
+                    <div class="dashboard-kpi-title">店舗承認待ち</div>
+                    <i class="fas fa-hourglass-half"></i>
                 </div>
-            @else
-                <p class="admin-note" style="margin-top: 12px;">請求書発行前に、上の「口座登録・編集」から振込先口座を登録してください。</p>
-            @endif
+                <div class="dashboard-kpi-main">
+                    <span class="dashboard-kpi-value">{{ number_format($castWaitingCount) }}</span>
+                    <span class="dashboard-kpi-unit">件</span>
+                </div>
+            </article>
+            <article class="dashboard-kpi-card">
+                <div class="dashboard-kpi-head">
+                    <div class="dashboard-kpi-title">発行待ち</div>
+                    <i class="fas fa-file-invoice"></i>
+                </div>
+                <div class="dashboard-kpi-main">
+                    <span class="dashboard-kpi-value">{{ number_format($issueWaitingCount) }}</span>
+                    <span class="dashboard-kpi-unit">件</span>
+                </div>
+            </article>
+            <article class="dashboard-kpi-card">
+                <div class="dashboard-kpi-head">
+                    <div class="dashboard-kpi-title">累計発行</div>
+                    <i class="fas fa-circle-check"></i>
+                </div>
+                <div class="dashboard-kpi-main">
+                    <span class="dashboard-kpi-value">{{ number_format($totalAchievement) }}</span>
+                    <span class="dashboard-kpi-unit">件</span>
+                </div>
+            </article>
         </section>
 
         {{-- 入金依頼・請求書発行待ち --}}
         <section class="admin-panel">
             <h2 class="admin-panel-title">入金依頼・請求書発行</h2>
-            <p class="admin-note" style="margin-bottom: 14px;">
-                キャストから入金依頼が届いているが店舗承認前の案件、および店舗承認済みで請求書未発行の案件です。店舗承認後は「発行する」でプレビューを開き、確定発行できます。入金照合・キャスト振込は「入金確認・振込」画面で行います。
+            <p class="admin-note u-mb-12">
+                キャストから入金依頼が届いて店舗承認前の案件、および店舗承認済みで請求書未発行の案件です。
             </p>
 
             @if(!empty($pending))
-                <p class="invoice-pending-count">{{ count($pending) }} 件</p>
                 <div class="invoice-pending-list">
                     @foreach($pending as $deposit)
                         @php
-                            $isCastRequestOnly = (int) ($deposit['status_code'] ?? 0) === \App\Services\BillingManagementService::STATUS_CAST_REQUESTED;
+                            $statusCode = (int) ($deposit['status_code'] ?? 0);
+                            $isCastRequestOnly = $statusCode === \App\Services\BillingManagementService::STATUS_CAST_REQUESTED;
+                            $createdAt = !empty($deposit['created_at']) ? \Carbon\Carbon::parse($deposit['created_at']) : null;
+                            $daysElapsed = $createdAt ? (int) $createdAt->diffInDays(now()) : null;
+                            $dueClass = $daysElapsed === null ? '' : ($daysElapsed >= 7 ? 'is-overdue' : ($daysElapsed >= 3 ? 'is-soon' : ''));
                         @endphp
                         <div class="invoice-pending-card" id="invoice-pending-{{ $deposit['id'] }}">
                             <div class="invoice-pending-card-info">
-                                <div class="invoice-pending-card-title">#{{ $deposit['id'] }} {{ $deposit['shop_name'] }} / {{ $deposit['cast_name'] }}</div>
+                                <div class="invoice-pending-card-title">
+                                    #{{ $deposit['id'] }} {{ $deposit['shop_name'] }} / {{ $deposit['cast_name'] }}
+                                </div>
                                 <div class="invoice-pending-card-meta">
                                     @if($isCastRequestOnly)
-                                        <span class="billing-status-chip" style="margin-right:8px;">キャスト入金依頼 · 店舗承認待ち</span>
+                                        <span class="admin-status-badge is-warning">店舗承認待ち</span>
                                     @else
-                                        <span class="billing-status-chip" style="margin-right:8px;">請求書発行待ち</span>
+                                        <span class="admin-status-badge is-info">請求書発行待ち</span>
                                     @endif
-                                    {{ $deposit['next_action'] ?? '' }}
+                                    @if($daysElapsed !== null)
+                                        <span class="invoice-pending-card-due {{ $dueClass }}">
+                                            <i class="fas fa-clock"></i>
+                                            申請から {{ $daysElapsed }} 日経過
+                                        </span>
+                                    @endif
+                                    @if(!empty($deposit['next_action']))
+                                        <div class="admin-note u-mt-4">{{ $deposit['next_action'] }}</div>
+                                    @endif
                                 </div>
                             </div>
                             <div class="invoice-pending-card-amount">¥{{ number_format($deposit['invoice_amount'] ?? 0) }}</div>
@@ -119,32 +129,98 @@
                 </div>
             @else
                 <div class="invoice-empty-note">
+                    <i class="fas fa-circle-check" aria-hidden="true"></i>
                     現在、入金依頼待ち・請求書発行待ちの案件はありません。
                 </div>
             @endif
 
-            <div style="margin-top: 18px;">
+            <div class="u-mt-16">
                 <a href="{{ route('admin.deposits.index') }}" class="invoice-link-deposits">
                     <i class="fas fa-list"></i> 入金確認・振込一覧へ
                 </a>
             </div>
         </section>
 
-        {{-- 手動で請求書を発行（障害時等の回避策） --}}
-        <section class="admin-panel">
-            <h2 class="admin-panel-title">手動で請求書を発行（回避策）</h2>
-            <div class="invoice-manual-warning">
-                <strong>注意事項（回避策としての利用に限定してください）</strong><br>
-                通常は上の「入金依頼・請求書発行」一覧からプレビュー経由で発行してください。<br>
-                システム不具合や運用上の理由で、ステータスが「入金依頼確認済み」でない場合に限り、ここから宛先（入金申請）を指定して手動で請求書を発行できます。<br>
-                誤用するとフローと実態がずれるため、必要な場合のみご利用ください。
+        {{-- 運営口座 --}}
+        <section class="admin-panel invoice-admin-bank">
+            <div class="billing-detail-row u-mb-12">
+                <h2 class="admin-panel-title u-mb-0">運営口座</h2>
+                <a href="{{ route('admin.bank.index') }}" class="btn-action btn-action-secondary">
+                    <i class="fas fa-university"></i> 口座登録・編集
+                </a>
             </div>
-            @if(!empty($manualTargets))
-                @include('admin.invoices.partials.manual-issue-form', ['manualTargets' => $manualTargets])
+            <p class="admin-note">請求書に印字される振込先です。発行前に内容を確認してください。</p>
+            @if($adminBank)
+                <div class="billing-meta-list">
+                    <div class="billing-meta-item">
+                        <div class="billing-meta-label">金融機関</div>
+                        <div class="billing-meta-value">{{ $adminBank->bank_name }}</div>
+                    </div>
+                    <div class="billing-meta-item">
+                        <div class="billing-meta-label">支店名</div>
+                        <div class="billing-meta-value">{{ $adminBank->branch_name ?: '未設定' }}</div>
+                    </div>
+                    <div class="billing-meta-item">
+                        <div class="billing-meta-label">口座種別 / 口座番号</div>
+                        <div class="billing-meta-value">{{ in_array($adminBank->account_type, ['current', 'checking'], true) ? '当座' : '普通' }} / {{ $adminBank->account_number }}</div>
+                    </div>
+                    <div class="billing-meta-item">
+                        <div class="billing-meta-label">口座名義</div>
+                        <div class="billing-meta-value">{{ $adminBank->account_name }}</div>
+                    </div>
+                </div>
             @else
-                <p class="invoice-empty-note">手動発行の対象（請求書未発行の入金申請）はありません。</p>
+                <div class="admin-alert admin-alert-warning u-mt-12">
+                    <strong>運営口座が未登録です。</strong> 請求書発行前に上の「口座登録・編集」から登録してください。
+                </div>
             @endif
         </section>
+
+        {{-- 帳票テンプレート（折りたたみ） --}}
+        <details class="admin-accordion">
+            <summary class="admin-accordion-summary">
+                <div class="admin-accordion-title">
+                    <span class="admin-accordion-title-main"><i class="fas fa-file-pdf"></i> 帳票テンプレート設定・プレビュー</span>
+                    <span class="admin-accordion-title-sub">発行元名・ロゴ・備考文の設定とテンプレート PDF のダウンロード</span>
+                </div>
+            </summary>
+            <div class="admin-accordion-body">
+                <p class="admin-note u-mb-12">
+                    発行元名・ロゴ・備考文は「テンプレートを設定」で変更できます。ダウンロードする帳票はレイアウト確認用で、金額・宛先・日付の数字は含みません。
+                </p>
+                <div class="invoice-issue-hero-actions">
+                    <a href="{{ route('admin.invoices.template-settings') }}" class="btn-action">
+                        <i class="fas fa-cog"></i> テンプレートを設定
+                    </a>
+                    <a href="{{ route('admin.deposits.invoice-template.download') }}" class="invoice-template-dl" target="_blank" rel="noopener">
+                        <i class="fas fa-file-pdf"></i> テンプレートを PDF プレビュー
+                    </a>
+                </div>
+            </div>
+        </details>
+
+        {{-- 手動発行（折りたたみ・警告強化） --}}
+        <details class="admin-accordion">
+            <summary class="admin-accordion-summary">
+                <div class="admin-accordion-title">
+                    <span class="admin-accordion-title-main"><i class="fas fa-triangle-exclamation"></i> 手動で請求書を発行（回避策）</span>
+                    <span class="admin-accordion-title-sub">障害時のみ使用。通常は上の一覧から発行してください</span>
+                </div>
+            </summary>
+            <div class="admin-accordion-body">
+                <div class="invoice-manual-warning">
+                    <strong>注意事項（回避策としての利用に限定してください）</strong><br>
+                    通常は上の「入金依頼・請求書発行」一覧からプレビュー経由で発行してください。<br>
+                    システム不具合や運用上の理由で、ステータスが「入金依頼確認済み」でない場合に限り、ここから宛先（入金申請）を指定して手動で請求書を発行できます。<br>
+                    誤用するとフローと実態がずれるため、必要な場合のみご利用ください。
+                </div>
+                @if(!empty($manualTargets))
+                    @include('admin.invoices.partials.manual-issue-form', ['manualTargets' => $manualTargets])
+                @else
+                    <p class="invoice-empty-note">手動発行の対象（請求書未発行の入金申請）はありません。</p>
+                @endif
+            </div>
+        </details>
     </div>
 @endsection
 

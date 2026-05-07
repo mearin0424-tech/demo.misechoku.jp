@@ -2364,6 +2364,544 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
 .policy-doc-admin { color: var(--admin-text); }
 
 /* ============================================================
+   25. オペレーション共通：ナビ／ツールバー／アコーディオン
+   ============================================================ */
+
+/* オペレーション横ナビ（兄弟画面切替） */
+.admin-op-nav {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px 4px;
+    margin: 0 -4px 4px;
+    scrollbar-width: none;
+}
+.admin-op-nav::-webkit-scrollbar { display: none; }
+.admin-op-nav-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--admin-line);
+    background: var(--admin-surface);
+    color: var(--admin-sub);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.admin-op-nav-item:hover {
+    background: var(--admin-primary-soft);
+    border-color: var(--admin-primary-border);
+    color: var(--admin-primary);
+}
+.admin-op-nav-item.is-active {
+    background: var(--admin-primary);
+    border-color: var(--admin-primary);
+    color: var(--admin-ink);
+}
+.admin-op-nav-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--admin-surface-alt);
+    color: var(--admin-sub);
+    font-size: 0.66rem;
+    font-weight: 800;
+    line-height: 1.4;
+}
+.admin-op-nav-item.is-active .admin-op-nav-badge {
+    background: rgba(255, 255, 255, 0.22);
+    color: var(--admin-ink);
+}
+.admin-op-nav-badge.is-alert {
+    background: var(--status-danger-bg);
+    color: var(--status-danger-fg);
+}
+.admin-op-nav-item.is-active .admin-op-nav-badge.is-alert {
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--status-danger-fg);
+}
+
+/* 実績バッジ（ヘッダ行末に置くコンパクト版） */
+.admin-achievement-pill {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--admin-surface-alt);
+    border: 1px solid var(--admin-line);
+    font-size: 0.74rem;
+    color: var(--admin-muted);
+    font-weight: 600;
+    white-space: nowrap;
+}
+.admin-achievement-pill strong {
+    color: var(--admin-primary);
+    font-weight: 800;
+    font-size: 0.86rem;
+}
+
+/* ページ・ツールバー（検索＋フィルタ） */
+.admin-page-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-line);
+    border-radius: 12px;
+    box-shadow: var(--admin-shadow);
+}
+.admin-page-toolbar-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.admin-page-toolbar-search {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+}
+.admin-page-toolbar-search i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--admin-muted);
+    font-size: 0.8rem;
+}
+.admin-page-toolbar-search input {
+    width: 100%;
+    padding: 10px 12px 10px 34px;
+    border-radius: 8px;
+    border: 1px solid var(--admin-line);
+    background: var(--admin-surface);
+    color: var(--admin-text);
+    font-size: 16px;
+    outline: none;
+    min-height: 42px;
+    font-family: inherit;
+}
+.admin-page-toolbar-search input:focus {
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px rgba(74, 18, 42, 0.14);
+}
+.admin-page-toolbar-filters {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.admin-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--admin-line);
+    background: var(--admin-surface);
+    color: var(--admin-sub);
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    min-height: 34px;
+    transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+    white-space: nowrap;
+}
+.admin-filter-chip:hover {
+    background: var(--admin-primary-soft);
+    border-color: var(--admin-primary-border);
+    color: var(--admin-primary);
+}
+.admin-filter-chip.is-active {
+    background: var(--admin-primary);
+    border-color: var(--admin-primary);
+    color: var(--admin-ink);
+}
+.admin-filter-chip strong {
+    min-width: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--admin-surface-alt);
+    color: var(--admin-sub);
+    font-size: 0.66rem;
+    font-weight: 800;
+    text-align: center;
+}
+.admin-filter-chip.is-active strong {
+    background: rgba(255, 255, 255, 0.22);
+    color: var(--admin-ink);
+}
+
+/* アコーディオン（details要素ベース） */
+.admin-accordion {
+    border: 1px solid var(--admin-line);
+    border-radius: 12px;
+    background: var(--admin-surface);
+    box-shadow: var(--admin-shadow);
+    overflow: hidden;
+}
+.admin-accordion[open] {
+    border-color: var(--admin-line-strong);
+}
+.admin-accordion-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    background: var(--admin-surface);
+}
+.admin-accordion-summary::-webkit-details-marker { display: none; }
+.admin-accordion-summary::after {
+    content: '\f078'; /* fa-chevron-down */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    color: var(--admin-muted);
+    font-size: 0.75rem;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+.admin-accordion[open] .admin-accordion-summary::after {
+    transform: rotate(180deg);
+}
+.admin-accordion-summary:hover {
+    background: var(--admin-surface-alt);
+}
+.admin-accordion-title {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+.admin-accordion-title-main {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--admin-text);
+}
+.admin-accordion-title-sub {
+    font-size: 0.78rem;
+    color: var(--admin-muted);
+    font-weight: 600;
+}
+.admin-accordion-body {
+    padding: 16px;
+    border-top: 1px solid var(--admin-line);
+    background: var(--admin-surface);
+}
+
+/* タブ切替 */
+.admin-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--admin-surface-alt);
+    border-radius: 10px;
+    border: 1px solid var(--admin-line);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.admin-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1 1 0;
+    padding: 9px 14px;
+    border-radius: 8px;
+    border: 0;
+    background: transparent;
+    color: var(--admin-sub);
+    font-size: 0.86rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    min-height: 38px;
+    font-family: inherit;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+.admin-tab:hover { color: var(--admin-text); }
+.admin-tab.is-active {
+    background: var(--admin-surface);
+    color: var(--admin-text);
+    box-shadow: var(--admin-shadow);
+}
+.admin-tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--admin-surface-alt);
+    color: var(--admin-sub);
+    font-size: 0.66rem;
+    font-weight: 800;
+}
+.admin-tab.is-active .admin-tab-badge {
+    background: var(--admin-primary-soft);
+    color: var(--admin-primary);
+}
+.admin-tab-badge.is-alert {
+    background: var(--status-danger-bg);
+    color: var(--status-danger-fg);
+}
+.admin-tab-panel { display: none; }
+.admin-tab-panel.is-active { display: block; }
+
+/* 入金フロー：ステップインジケータ */
+.deposit-step-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 12px 4px;
+    background: var(--admin-surface-alt);
+    border-radius: 10px;
+    border: 1px solid var(--admin-line);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 12px 0;
+}
+.deposit-step {
+    flex: 1 1 0;
+    min-width: 78px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    padding: 0 4px;
+}
+.deposit-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: var(--admin-line-strong);
+    z-index: 0;
+}
+.deposit-step.is-done:not(:last-child)::after {
+    background: var(--admin-primary);
+}
+.deposit-step-dot {
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    background: var(--admin-surface);
+    border: 2px solid var(--admin-line-strong);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--admin-muted);
+    position: relative;
+    z-index: 1;
+}
+.deposit-step.is-done .deposit-step-dot {
+    background: var(--admin-primary);
+    border-color: var(--admin-primary);
+    color: var(--admin-ink);
+}
+.deposit-step.is-current .deposit-step-dot {
+    background: var(--admin-surface);
+    border-color: var(--admin-primary);
+    color: var(--admin-primary);
+    box-shadow: 0 0 0 4px var(--admin-primary-soft);
+}
+.deposit-step-label {
+    font-size: 0.66rem;
+    font-weight: 700;
+    color: var(--admin-muted);
+    text-align: center;
+    line-height: 1.3;
+    white-space: nowrap;
+}
+.deposit-step.is-done .deposit-step-label,
+.deposit-step.is-current .deposit-step-label {
+    color: var(--admin-text);
+}
+
+/* 入金カード見出し（次アクション + ID + ステータスチップ + メイン CTA） */
+.deposit-card-head {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--admin-line-soft);
+    margin-bottom: 12px;
+}
+.deposit-card-head-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.deposit-card-head-id {
+    font-size: 0.74rem;
+    color: var(--admin-muted);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+.deposit-card-head-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--admin-text);
+    line-height: 1.3;
+    word-break: break-word;
+}
+.deposit-card-next-action {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--admin-primary-soft);
+    border: 1px solid var(--admin-primary-border);
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--admin-primary);
+}
+.deposit-card-next-action i {
+    font-size: 1rem;
+}
+
+/* 完了案件のサマリ行（折りたたみ） */
+.deposit-summary {
+    cursor: pointer;
+}
+.deposit-summary-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 4px 0;
+}
+.deposit-summary-id {
+    font-size: 0.78rem;
+    color: var(--admin-muted);
+    font-weight: 600;
+    flex-shrink: 0;
+}
+.deposit-summary-name {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--admin-text);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.deposit-summary-amount {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--admin-text);
+    flex-shrink: 0;
+}
+
+/* タスクカード urgency band（左側カラー帯） */
+.task-card {
+    position: relative;
+    padding-left: 18px;
+}
+.task-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--admin-line-strong);
+    border-radius: 4px 0 0 4px;
+}
+.task-card.urgency-critical::before { background: var(--status-danger-fg); }
+.task-card.urgency-high::before { background: var(--status-warning-fg); }
+.task-card.urgency-normal::before { background: var(--admin-line-strong); }
+
+/* インボイス画面の追加コンポーネント */
+.invoice-pending-card-due {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: var(--admin-surface-alt);
+    color: var(--admin-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-left: 8px;
+}
+.invoice-pending-card-due.is-overdue {
+    background: var(--status-danger-bg);
+    color: var(--status-danger-fg);
+}
+.invoice-pending-card-due.is-soon {
+    background: var(--status-warning-bg);
+    color: var(--status-warning-fg);
+}
+
+/* 問合せ詳細 */
+.inquiry-detail-meta {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin: 14px 0;
+}
+.inquiry-detail-meta-item {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--admin-surface-alt);
+    border: 1px solid var(--admin-line);
+}
+.inquiry-detail-meta-label {
+    font-size: 0.72rem;
+    color: var(--admin-muted);
+    margin-bottom: 4px;
+    font-weight: 600;
+}
+.inquiry-detail-meta-value {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--admin-text);
+}
+.inquiry-detail-body {
+    padding: 14px;
+    border-radius: 10px;
+    background: var(--admin-surface-alt);
+    border: 1px solid var(--admin-line);
+    font-size: 0.92rem;
+    line-height: 1.8;
+    color: var(--admin-text);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+@media (min-width: 640px) {
+    .inquiry-detail-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .admin-page-toolbar-row {
+        flex-direction: row;
+        align-items: center;
+    }
+}
+
+/* ============================================================
    22. メディアクエリ — タブレット (≥640px)
    ============================================================ */
 @media (min-width: 640px) {

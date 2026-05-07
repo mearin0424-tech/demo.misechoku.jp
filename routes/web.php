@@ -192,6 +192,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // 蝠上＞蜷医ｏ縺帷ｮ｡逅・
         Route::get('/inquiries', [AdminInquiry::class, 'index'])->name('inquiries.index');
+        Route::get('/inquiries/{id}', [AdminInquiry::class, 'show'])->whereNumber('id')->name('inquiries.show');
 
         // 繧｢繧ｫ繧ｦ繝ｳ繝育ｮ｡逅・ｼ磯°蝟ｶ・・
         Route::get('/admin-accounts', [AdminAccount::class, 'index'])->name('admin-accounts.index');
