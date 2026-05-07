@@ -18,13 +18,23 @@
             if (($d['expiry_filter_key'] ?? '') === 'expired') $shopExpiredCount++;
         }
         $defaultTab = request('focus') === 'shop' ? 'shop' : 'cast';
+
+        // アクター判定: pending=運営対応 / rejected=ユーザー再提出待ち / approved=完了
+        $resolveActor = function (string $statusKey, string $userType): array {
+            return match ($statusKey) {
+                'pending' => ['cls' => 'is-admin', 'icon' => 'fa-bell', 'label' => '運営対応'],
+                'rejected' => $userType === 'cast'
+                    ? ['cls' => 'is-cast', 'icon' => 'fa-user', 'label' => 'キャスト再提出待ち']
+                    : ['cls' => 'is-shop', 'icon' => 'fa-store', 'label' => '店舗再提出待ち'],
+                'approved' => ['cls' => 'is-done', 'icon' => 'fa-circle-check', 'label' => '完了'],
+                default => ['cls' => 'is-admin-soft', 'icon' => 'fa-circle-question', 'label' => '—'],
+            };
+        };
     @endphp
 
     <div class="admin-page">
-        @include('admin.parts.operation-nav', ['active' => 'verification'])
-
         <div class="u-flex-between">
-            <h1 class="admin-title">本人確認・書類審査</h1>
+            @include('admin.parts.page-title', ['eyebrow' => 'KYC & DOCUMENTS', 'title' => '本人確認・書類審査'])
             @include('admin.parts.operation-achievement', ['operationAchievementRoute' => 'admin.verification.index'])
         </div>
 
@@ -133,6 +143,7 @@
                     </thead>
                     <tbody id="cast-verification-table">
                         @forelse($castDocs as $document)
+                            @php $castActor = $resolveActor($document['status_key'], 'cast'); @endphp
                             <tr data-status="{{ $document['status_key'] }}" data-sort-rank="{{ $document['sort_rank'] }}" data-updated-at="{{ $document['updated_at_sort'] }}" data-keyword="{{ strtolower($document['target_name'].' '.$document['target_id'].' '.$document['type_label']) }}">
                                 <td>{{ $document['target_name'] }}<br><span class="text-xs text-muted">{{ $document['target_id'] }}</span></td>
                                 <td>
@@ -142,7 +153,12 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <span class="verification-status verification-status-{{ $document['status_key'] }}">{{ $document['status_label'] }}</span>
+                                    <span class="actor-pill {{ $castActor['cls'] }}">
+                                        <i class="fas {{ $castActor['icon'] }}"></i> {{ $castActor['label'] }}
+                                    </span>
+                                    <div class="u-mt-4">
+                                        <span class="verification-status verification-status-{{ $document['status_key'] }}">{{ $document['status_label'] }}</span>
+                                    </div>
                                     @if(!empty($document['approved_at_label']))
                                         <div class="text-xs text-muted u-mt-4">承認日時: {{ $document['approved_at_label'] }}</div>
                                     @endif
@@ -248,6 +264,7 @@
                     </thead>
                     <tbody id="shop-verification-table">
                         @forelse($shopDocs as $document)
+                            @php $shopActor = $resolveActor($document['status_key'], 'shop'); @endphp
                             <tr data-status="{{ $document['status_key'] }}" data-expiry="{{ $document['expiry_filter_key'] ?? 'none' }}" data-sort-rank="{{ $document['sort_rank'] }}" data-updated-at="{{ $document['updated_at_sort'] }}" data-keyword="{{ strtolower($document['target_name'].' '.$document['target_id'].' '.$document['type_label']) }}">
                                 <td>{{ $document['target_name'] }}<br><span class="text-xs text-muted">{{ $document['target_id'] }}</span></td>
                                 <td>
@@ -262,7 +279,12 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <span class="verification-status verification-status-{{ $document['status_key'] }}">{{ $document['status_label'] }}</span>
+                                    <span class="actor-pill {{ $shopActor['cls'] }}">
+                                        <i class="fas {{ $shopActor['icon'] }}"></i> {{ $shopActor['label'] }}
+                                    </span>
+                                    <div class="u-mt-4">
+                                        <span class="verification-status verification-status-{{ $document['status_key'] }}">{{ $document['status_label'] }}</span>
+                                    </div>
                                     @if(!empty($document['approved_at_label']))
                                         <div class="text-xs text-muted u-mt-4">承認日時: {{ $document['approved_at_label'] }}</div>
                                     @endif

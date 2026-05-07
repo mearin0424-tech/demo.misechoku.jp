@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="admin-page">
-        <h1 class="admin-title">キャスト管理</h1>
+        @include('admin.parts.page-title', ['eyebrow' => 'CASTS', 'title' => 'キャスト管理'])
         <p class="admin-description">
             登録されているキャストアカウントの一覧です。本人確認に加え、請求書送付・振込・完了までの運用実績をキャスト単位で確認できます。
         </p>

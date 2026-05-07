@@ -20,10 +20,8 @@
     @endphp
 
     <div class="admin-page">
-        @include('admin.parts.operation-nav', ['active' => 'invoices'])
-
         <div class="u-flex-between">
-            <h1 class="admin-title">請求書発行</h1>
+            @include('admin.parts.page-title', ['eyebrow' => 'INVOICES', 'title' => '請求書発行'])
             @include('admin.parts.operation-achievement', ['operationAchievementRoute' => 'admin.invoices.index'])
         </div>
         <p class="admin-description">
@@ -95,8 +93,14 @@
                                 </div>
                                 <div class="invoice-pending-card-meta">
                                     @if($isCastRequestOnly)
+                                        <span class="actor-pill is-shop">
+                                            <i class="fas fa-store"></i> 店舗待ち
+                                        </span>
                                         <span class="admin-status-badge is-warning">店舗承認待ち</span>
                                     @else
+                                        <span class="actor-pill is-admin">
+                                            <i class="fas fa-bell"></i> 運営対応
+                                        </span>
                                         <span class="admin-status-badge is-info">請求書発行待ち</span>
                                     @endif
                                     @if($daysElapsed !== null)

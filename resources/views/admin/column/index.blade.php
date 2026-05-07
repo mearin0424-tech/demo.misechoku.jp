@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="admin-page">
-        <h1 class="admin-title">コラム管理</h1>
+        @include('admin.parts.page-title', ['eyebrow' => 'COLUMNS', 'title' => 'コラム管理'])
         <p class="admin-description">
             キャスト・店舗向けのお役立ちコラムを作成・公開します。未ログイン向けに表示する場合は「未ログイン表示」をオンにしてください。
         </p>

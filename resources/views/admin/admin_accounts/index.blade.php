@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="admin-page">
-        <h1 class="admin-title">運営アカウント管理</h1>
+        @include('admin.parts.page-title', ['eyebrow' => 'ADMIN ACCOUNTS', 'title' => '運営アカウント管理'])
         <p class="admin-description">
             運営（管理者）アカウントの一覧です。氏名、メールアドレス、権限ロール、最終ログイン日時を確認できます。<br>
             現在はデモデータのみ表示しています。

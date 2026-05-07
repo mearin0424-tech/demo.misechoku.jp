@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="admin-page">
-        <h1 class="admin-title">店舗管理</h1>
+        @include('admin.parts.page-title', ['eyebrow' => 'SHOPS', 'title' => '店舗管理'])
         <p class="admin-description">
             登録されている店舗アカウントの一覧です。書類確認状況や求人公開状況に加えて、請求書送付・入金確認・振込完了までの運用実績を店舗単位で確認できます。
         </p>

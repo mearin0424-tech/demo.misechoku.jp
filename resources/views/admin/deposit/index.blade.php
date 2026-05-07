@@ -49,13 +49,33 @@
             if ($sc >= BMS::STATUS_COMPLETED) return 'completed';
             return 'other';
         };
+
+        // アクター判定（誰のタスクか）
+        // status:
+        //   1 CAST_REQUESTED        → 店舗待ち（承認）
+        //   2 SHOP_APPROVED         → 運営対応（請求書発行）
+        //   3 INVOICE_ISSUED        → 店舗待ち（入金）
+        //   4 SHOP_PAYMENT_REPORTED → 運営対応（入金照合）
+        //   5 SHOP_PAYMENT_CONFIRMED→ 運営対応（キャスト振込）
+        //   6 CAST_TRANSFERRED      → キャスト待ち（入金確認）
+        //   7+ COMPLETED            → 完了
+        $resolveActor = function (int $sc): array {
+            return match (true) {
+                $sc === BMS::STATUS_CAST_REQUESTED => ['cls' => 'is-shop', 'icon' => 'fa-store', 'label' => '店舗待ち'],
+                $sc === BMS::STATUS_SHOP_APPROVED => ['cls' => 'is-admin', 'icon' => 'fa-bell', 'label' => '運営対応'],
+                $sc === BMS::STATUS_INVOICE_ISSUED => ['cls' => 'is-shop', 'icon' => 'fa-store', 'label' => '店舗待ち'],
+                $sc === BMS::STATUS_SHOP_PAYMENT_REPORTED => ['cls' => 'is-admin', 'icon' => 'fa-bell', 'label' => '運営対応'],
+                $sc === BMS::STATUS_SHOP_PAYMENT_CONFIRMED => ['cls' => 'is-admin', 'icon' => 'fa-bell', 'label' => '運営対応'],
+                $sc === BMS::STATUS_CAST_TRANSFERRED => ['cls' => 'is-cast', 'icon' => 'fa-user', 'label' => 'キャスト待ち'],
+                $sc >= BMS::STATUS_COMPLETED => ['cls' => 'is-done', 'icon' => 'fa-circle-check', 'label' => '完了'],
+                default => ['cls' => 'is-admin-soft', 'icon' => 'fa-circle-question', 'label' => '確認中'],
+            };
+        };
     @endphp
 
     <div class="admin-page">
-        @include('admin.parts.operation-nav', ['active' => 'deposits'])
-
         <div class="u-flex-between">
-            <h1 class="admin-title">入金・振込管理</h1>
+            @include('admin.parts.page-title', ['eyebrow' => 'PAYMENTS & TRANSFERS', 'title' => '入金・振込管理'])
             @include('admin.parts.operation-achievement', ['operationAchievementRoute' => 'admin.deposits.index'])
         </div>
         <p class="admin-description">
@@ -140,6 +160,10 @@
                 $cat = $resolveCat($sc, $isUnconfirmedOver7);
                 $isCompleted = $sc >= BMS::STATUS_COMPLETED && !$isUnconfirmedOver7;
                 $keyword = strtolower($deposit['shop_name'] . ' ' . $deposit['cast_name'] . ' ' . $deposit['id']);
+                // 7日以上未確認の場合はキャスト待ちでも運営フォロー必須としてマーキング
+                $actor = $isUnconfirmedOver7
+                    ? ['cls' => 'is-admin', 'icon' => 'fa-triangle-exclamation', 'label' => '運営フォロー（キャスト未確認）']
+                    : $resolveActor($sc);
             @endphp
 
             <details
@@ -154,6 +178,9 @@
                     <div class="deposit-summary-content">
                         <span class="deposit-summary-id">#{{ $deposit['id'] }}</span>
                         <span class="deposit-summary-name">{{ $deposit['shop_name'] }} / {{ $deposit['cast_name'] }}</span>
+                        <span class="actor-pill {{ $actor['cls'] }}">
+                            <i class="fas {{ $actor['icon'] }}"></i> {{ $actor['label'] }}
+                        </span>
                         <span class="billing-status-chip">{{ $deposit['status_label'] }}</span>
                         <span class="deposit-summary-amount">¥{{ number_format($deposit['invoice_amount']) }}</span>
                     </div>
@@ -176,7 +203,9 @@
                         </div>
                         @if(!empty($deposit['next_action']))
                             <div class="deposit-card-next-action">
-                                <i class="fas fa-arrow-right"></i>
+                                <span class="actor-pill {{ $actor['cls'] }}">
+                                    <i class="fas {{ $actor['icon'] }}"></i> {{ $actor['label'] }}
+                                </span>
                                 <span>{{ $deposit['next_action'] }}</span>
                             </div>
                         @endif

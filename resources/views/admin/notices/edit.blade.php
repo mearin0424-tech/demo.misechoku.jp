@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="admin-page">
-        <h1 class="admin-title">お知らせ編集</h1>
+        @include('admin.parts.page-title', ['eyebrow' => 'EDIT NOTICE', 'title' => 'お知らせ編集'])
         @include('admin.notices.form')
     </div>
 @endsection

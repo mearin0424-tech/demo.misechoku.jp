@@ -87,20 +87,38 @@
 
         <section class="cast-edit-section">
             <h3><i class="fas fa-ruler"></i> 体型・ルックス情報</h3>
-            <div class="two-col">
-                <div class="field">
-                    <label>身長</label>
-                    <div class="unit-field"><input type="number" name="height" value="{{ old('height', $profile['height']) }}" class="cast-input"><span>cm</span></div>
+            <div class="metric-pair">
+                <div class="metric-field">
+                    <label class="metric-field-label" for="edit-height">身長 <small>cm</small></label>
+                    <div class="metric-input-wrap">
+                        <input type="number" id="edit-height" name="height" value="{{ old('height', $profile['height']) }}" inputmode="numeric" pattern="[0-9]*" min="130" max="200" placeholder="160">
+                        <span class="metric-unit">cm</span>
+                    </div>
                 </div>
-                <div class="field">
-                    <label>体重</label>
-                    <div class="unit-field"><input type="number" name="weight" value="{{ old('weight', $profile['weight']) }}" class="cast-input"><span>kg</span></div>
+                <div class="metric-field">
+                    <label class="metric-field-label" for="edit-weight">体重 <small>kg</small></label>
+                    <div class="metric-input-wrap">
+                        <input type="number" id="edit-weight" name="weight" value="{{ old('weight', $profile['weight']) }}" inputmode="numeric" pattern="[0-9]*" min="30" max="150" placeholder="48">
+                        <span class="metric-unit">kg</span>
+                    </div>
                 </div>
             </div>
-            <div class="three-col">
-                <div class="field bwh"><span>B</span><input type="number" name="bust" value="{{ old('bust', $profile['bust']) }}" class="cast-input pad-left"></div>
-                <div class="field bwh"><span>W</span><input type="number" name="waist" value="{{ old('waist', $profile['waist']) }}" class="cast-input pad-left"></div>
-                <div class="field bwh"><span>H</span><input type="number" name="hip" value="{{ old('hip', $profile['hip']) }}" class="cast-input pad-left"></div>
+            <div class="bwh-group">
+                <span class="metric-field-label">3サイズ <small>cm</small></span>
+                <div class="bwh-row">
+                    <label class="bwh-field" aria-label="バスト">
+                        <span class="bwh-letter">B</span>
+                        <input type="number" name="bust" value="{{ old('bust', $profile['bust']) }}" inputmode="numeric" pattern="[0-9]*" min="50" max="120" placeholder="--">
+                    </label>
+                    <label class="bwh-field" aria-label="ウエスト">
+                        <span class="bwh-letter">W</span>
+                        <input type="number" name="waist" value="{{ old('waist', $profile['waist']) }}" inputmode="numeric" pattern="[0-9]*" min="40" max="120" placeholder="--">
+                    </label>
+                    <label class="bwh-field" aria-label="ヒップ">
+                        <span class="bwh-letter">H</span>
+                        <input type="number" name="hip" value="{{ old('hip', $profile['hip']) }}" inputmode="numeric" pattern="[0-9]*" min="50" max="120" placeholder="--">
+                    </label>
+                </div>
             </div>
 
             <div class="field">
@@ -196,21 +214,28 @@
 .cast-edit-section h3 { margin: 0 0 12px; font-size: 14px; color: #c8a951; font-weight: 700; display: flex; gap: 8px; align-items: center; }
 .field { margin-bottom: 12px; }
 .field:last-child { margin-bottom: 0; }
-.field label { display: block; margin-bottom: 6px; font-size: 11px; font-weight: 700; color: #b5a69d; }
+.field > label { display: block; margin-bottom: 6px; font-size: 0.78rem; font-weight: 700; color: rgba(232, 213, 163, 0.78); letter-spacing: 0.04em; }
 .required { color: #f87171; margin-left: 4px; }
-.cast-input, .cast-select { width: 100%; background: #110c0a; border: 1px solid #4a1d28; border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 13px; outline: none; }
-.cast-input[type="date"] { min-height: 42px; color-scheme: dark; }
+.cast-input, .cast-select {
+    width: 100%;
+    background: #110c0a;
+    border: 1px solid #4a1d28;
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #fff;
+    font-size: 16px; /* iOSズーム回避 */
+    line-height: 1.4;
+    min-height: 44px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.cast-input[type="date"] { min-height: 44px; color-scheme: dark; font-variant-numeric: tabular-nums; }
 .cast-input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(79%) sepia(29%) saturate(566%) hue-rotate(5deg) brightness(91%) contrast(89%); cursor: pointer; }
-.cast-textarea { resize: vertical; }
-.min-h100 { min-height: 100px; }
-.cast-input:focus, .cast-select:focus { border-color: #c8a951; box-shadow: 0 0 0 2px rgba(200, 169, 81, .3); }
+.cast-textarea { resize: vertical; line-height: 1.6; }
+.min-h100 { min-height: 110px; }
+.cast-input:focus, .cast-select:focus { border-color: #c8a951; box-shadow: 0 0 0 3px rgba(200, 169, 81, 0.18); }
+.cast-input::placeholder { color: rgba(255, 255, 255, 0.28); font-weight: 500; }
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-.unit-field { display: flex; align-items: center; gap: 8px; }
-.unit-field span { color: #8a7c74; font-size: 12px; font-weight: 700; }
-.bwh { position: relative; }
-.bwh span { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #c8a951; font-size: 11px; font-weight: 700; }
-.pad-left { padding-left: 30px; }
 .tag-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .tag-chip { position: relative; display: inline-flex; }
 .tag-chip input { position: absolute; opacity: 0; pointer-events: none; }

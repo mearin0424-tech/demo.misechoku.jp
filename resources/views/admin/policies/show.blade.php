@@ -25,13 +25,10 @@
     <div class="admin-page policy-doc-admin">
         <div class="policy-doc-admin__toolbar">
             <div>
-                <div class="policy-doc-admin__crumb">
-                    <span>規約管理</span><span>/</span><span>{{ $document->title }}</span>
-                </div>
-                <h1 class="policy-doc-admin__title">
-                    {{ $document->title }}
+                @include('admin.parts.page-title', ['eyebrow' => 'POLICY', 'title' => $document->title])
+                <div class="u-mt-4">
                     <span class="policy-doc-admin__key-badge">キー: {{ $document->key }}</span>
-                </h1>
+                </div>
             </div>
             <div class="policy-doc-admin__actions">
                 <a href="{{ route('admin.dashboard') }}" class="btn-policy-ghost">

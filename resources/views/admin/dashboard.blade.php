@@ -150,6 +150,8 @@
     @endphp
 
     <div class="dashboard-page">
+        @include('admin.parts.page-title', ['eyebrow' => 'OVERVIEW', 'title' => 'ダッシュボード'])
+
         @if (session('status'))
             <div class="admin-alert admin-alert-success">{{ session('status') }}</div>
         @endif

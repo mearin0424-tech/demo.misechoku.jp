@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="admin-page">
-        <h1 class="admin-title">NGワード管理</h1>
+        @include('admin.parts.page-title', ['eyebrow' => 'NG WORDS', 'title' => 'NGワード管理'])
         <p class="admin-description">
             メッセージなどで使用できないキーワードを登録・管理します。<br>
             表示内容はデータベースの `ng_words` テーブルから読み込んでいます。

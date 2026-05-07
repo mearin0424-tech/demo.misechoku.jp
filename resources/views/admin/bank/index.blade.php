@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="admin-page">
-        <h1 class="admin-title">運営口座情報設定</h1>
+        @include('admin.parts.page-title', ['eyebrow' => 'BANK ACCOUNT', 'title' => '運営口座情報設定'])
 
         @if(session('status'))
             <div class="admin-alert">

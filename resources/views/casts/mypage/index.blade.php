@@ -65,6 +65,8 @@
     .cast-block-title .lucide-icon { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
     .cast-row { display: flex; gap: 10px; padding: 12px 14px; border-bottom: 1px solid rgba(74,29,40,0.4); }
     .cast-row:last-child { border-bottom: 0; }
+    .cast-metrics-row { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-bottom: 1px solid rgba(74,29,40,0.4); }
+    .cast-metrics-row:last-child { border-bottom: 0; }
     .cast-row.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0; padding: 0; }
     .cast-row.two-col > div { display: flex; gap: 8px; padding: 12px 14px; }
     .cast-row.two-col > div:first-child { border-right: 1px solid rgba(74,29,40,0.4); }
@@ -150,11 +152,33 @@
                     </h3>
                     <div class="cast-profile-card">
                         <div class="cast-row"><div class="cast-k">生年月日</div><div class="cast-v {{ $birthdayText === '--' ? 'muted' : '' }}">{{ $birthdayText }}</div></div>
-                        <div class="cast-row two-col">
-                            <div><div class="cast-k mini">身長</div><div class="cast-v {{ $heightText === '--' ? 'muted' : '' }}">{{ $heightText }}</div></div>
-                            <div><div class="cast-k mini">体重</div><div class="cast-v {{ $weightText === '--' ? 'muted' : '' }}">{{ $weightText }}</div></div>
+                        <div class="cast-metrics-row">
+                            <div class="metric-display-row">
+                                <div class="metric-display-item">
+                                    <span class="metric-display-label">Height</span>
+                                    <span class="metric-display-value {{ empty($cast['height']) ? 'is-empty' : '' }}">
+                                        {{ $cast['height'] ?: '--' }}<small>cm</small>
+                                    </span>
+                                </div>
+                                <div class="metric-display-item">
+                                    <span class="metric-display-label">Weight</span>
+                                    <span class="metric-display-value {{ empty($cast['weight']) ? 'is-empty' : '' }}">
+                                        {{ $cast['weight'] ?: '--' }}<small>kg</small>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="bwh-display" aria-label="3サイズ">
+                                <div class="bwh-display-pill {{ empty($cast['bust']) ? 'is-empty' : '' }}">
+                                    <b>B</b><span>{{ $cast['bust'] ?: '--' }}</span>
+                                </div>
+                                <div class="bwh-display-pill {{ empty($cast['waist']) ? 'is-empty' : '' }}">
+                                    <b>W</b><span>{{ $cast['waist'] ?: '--' }}</span>
+                                </div>
+                                <div class="bwh-display-pill {{ empty($cast['hip']) ? 'is-empty' : '' }}">
+                                    <b>H</b><span>{{ $cast['hip'] ?: '--' }}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="cast-row"><div class="cast-k">B / W / H</div><div class="cast-v {{ $bodyText === '-- / -- / --' ? 'muted' : '' }}">{{ $bodyText }}</div></div>
                         <div class="cast-row">
                             <div class="cast-k">住所</div>
                             <div class="cast-v {{ $addressText === '--' ? 'muted' : '' }}">

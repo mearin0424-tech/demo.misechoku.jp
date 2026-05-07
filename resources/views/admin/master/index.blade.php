@@ -19,7 +19,7 @@
         $columnCount = 3 + ($hasDirectory ? 1 : 0) + ($hasActive ? 1 : 0);
     @endphp
     <div class="admin-page">
-        <h1 class="admin-title">マスタコントロール</h1>
+        @include('admin.parts.page-title', ['eyebrow' => 'MASTER', 'title' => 'マスタコントロール'])
         <p class="admin-description">
             追加・編集したいマスタを選んで、対象ごとに管理する画面です。<br>
             すべてのマスタを同じ操作レイアウトで扱い、検索・並び替え・追加・編集を1つの導線で行えるようにしています。

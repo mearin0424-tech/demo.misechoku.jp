@@ -29,9 +29,7 @@
     @endphp
 
     <div class="admin-page">
-        @include('admin.parts.operation-nav', ['active' => 'tasks'])
-
-        <h1 class="admin-title">請求・振込タスク</h1>
+        @include('admin.parts.page-title', ['eyebrow' => 'TASKS', 'title' => '請求・振込タスク'])
         <p class="admin-description">
             ステータスに応じて、運営が今対応すべき請求・振込タスクだけを一覧化しています。実作業は各行の「詳細へ」から完了できます。
         </p>
@@ -65,10 +63,15 @@
                 <section class="task-card urgency-{{ $urgency }}" data-task-cat="{{ $task['cat_id'] ?? '' }}">
                     <div class="task-card-head">
                         <div>
-                            <div class="task-card-id">#{{ $task['id'] }} / {{ $task['task_actor_label'] ?? '運営' }}対応</div>
+                            <div class="task-card-id">#{{ $task['id'] }}</div>
                             <h2 class="task-card-title">{{ $task['task_title'] }}</h2>
                         </div>
-                        <span class="task-card-chip">{{ $task['status_label'] }}</span>
+                        <div class="u-flex u-gap-8 u-flex-wrap">
+                            <span class="actor-pill is-admin">
+                                <i class="fas fa-bell"></i> 運営対応
+                            </span>
+                            <span class="task-card-chip">{{ $task['status_label'] }}</span>
+                        </div>
                     </div>
 
                     <div class="task-card-grid">

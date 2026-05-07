@@ -11,7 +11,9 @@
         </div>
 
         <div class="admin-panel">
-            <h1 class="admin-title" style="text-align:center;">運営ログイン</h1>
+            <div style="text-align:center;">
+                @include('admin.parts.page-title', ['eyebrow' => 'ADMIN LOGIN', 'title' => '運営ログイン'])
+            </div>
             <p class="admin-description" style="text-align:center;">運営用ログインです。</p>
 
             @if ($errors->any())

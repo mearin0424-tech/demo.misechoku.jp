@@ -14,11 +14,17 @@
         };
     @endphp
 
-    <div class="admin-page">
-        @include('admin.parts.operation-nav', ['active' => 'inquiries'])
+    @php
+        $actor = match ($inquiry['status_tone']) {
+            'pending', 'in_progress' => ['cls' => 'is-admin', 'icon' => 'fa-bell', 'label' => '運営対応'],
+            'resolved', 'closed' => ['cls' => 'is-done', 'icon' => 'fa-circle-check', 'label' => '完了'],
+            default => ['cls' => 'is-admin-soft', 'icon' => 'fa-circle-question', 'label' => '—'],
+        };
+    @endphp
 
+    <div class="admin-page">
         <div class="u-flex-between">
-            <h1 class="admin-title">問合せ #{{ $inquiry['id'] }}</h1>
+            @include('admin.parts.page-title', ['eyebrow' => 'INQUIRY DETAIL', 'title' => '問合せ #' . $inquiry['id']])
             <a href="{{ route('admin.inquiries.index') }}" class="btn-action btn-action-secondary">
                 <i class="fas fa-arrow-left"></i> 一覧へ戻る
             </a>
@@ -27,7 +33,12 @@
         <section class="admin-panel">
             <div class="u-flex-between u-mb-12">
                 <h2 class="admin-panel-title u-mb-0">{{ $inquiry['subject'] ?: '（件名なし）' }}</h2>
-                <span class="admin-status-badge {{ $statusBadge }}">{{ $inquiry['status'] }}</span>
+                <div class="u-flex u-gap-8">
+                    <span class="actor-pill {{ $actor['cls'] }}">
+                        <i class="fas {{ $actor['icon'] }}"></i> {{ $actor['label'] }}
+                    </span>
+                    <span class="admin-status-badge {{ $statusBadge }}">{{ $inquiry['status'] }}</span>
+                </div>
             </div>
 
             <div class="inquiry-detail-meta">

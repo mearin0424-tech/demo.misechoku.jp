@@ -277,6 +277,247 @@ a:hover {
     color: var(--gold);
 }
 
+/* ============================================================
+   Metric Input — 身長・体重・BWH 入力／表示の統一コンポーネント
+   ============================================================ */
+
+/* 数値入力のネイティブスピナー除去（入力時の誤動作防止＋見た目統一） */
+.metric-input-wrap input[type="number"],
+.bwh-field input[type="number"] {
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+.metric-input-wrap input[type="number"]::-webkit-outer-spin-button,
+.metric-input-wrap input[type="number"]::-webkit-inner-spin-button,
+.bwh-field input[type="number"]::-webkit-outer-spin-button,
+.bwh-field input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* 身長・体重ペア */
+.metric-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.metric-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+}
+.metric-field-label {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: rgba(232, 213, 163, 0.78);
+    letter-spacing: 0.04em;
+}
+.metric-field-label small,
+.metric-field-hint {
+    font-size: 0.66rem;
+    font-weight: 600;
+    color: rgba(232, 213, 163, 0.5);
+    letter-spacing: 0.06em;
+}
+
+/* 入力エリア（input + 単位サフィックス） */
+.metric-input-wrap {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(220, 181, 104, 0.28);
+    border-radius: 10px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.metric-input-wrap:focus-within {
+    border-color: rgba(220, 181, 104, 0.6);
+    box-shadow: 0 0 0 3px rgba(220, 181, 104, 0.16);
+}
+.metric-input-wrap input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 0 10px 14px;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    font-size: 17px; /* iOSズーム回避 */
+    font-weight: 700;
+    outline: none;
+    min-height: 44px;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    box-shadow: none;
+}
+.metric-input-wrap input::placeholder {
+    color: rgba(255, 255, 255, 0.28);
+    font-weight: 500;
+}
+.metric-unit {
+    padding: 0 14px 0 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: rgba(220, 181, 104, 0.85);
+    letter-spacing: 0.04em;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* BWHグループ */
+.bwh-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0 0 8px;
+}
+.bwh-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+}
+.bwh-field {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(220, 181, 104, 0.28);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    margin: 0;
+}
+.bwh-field:focus-within {
+    border-color: rgba(220, 181, 104, 0.6);
+    box-shadow: 0 0 0 3px rgba(220, 181, 104, 0.16);
+}
+.bwh-letter {
+    flex-shrink: 0;
+    width: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: #2a1406;
+    background: linear-gradient(145deg, #dcb568, #b8860b);
+    letter-spacing: 0.04em;
+}
+.bwh-field input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 6px;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    font-size: 17px;
+    font-weight: 700;
+    outline: none;
+    min-height: 44px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    box-shadow: none;
+}
+.bwh-field input::placeholder {
+    color: rgba(255, 255, 255, 0.22);
+    font-weight: 500;
+}
+
+/* ============================================================
+   Metric Display — 表示版（show / mypage 用）
+   ============================================================ */
+.metric-display {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.metric-display-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+.metric-display-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(220, 181, 104, 0.22);
+    border-radius: 10px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+.metric-display-label {
+    font-size: 0.66rem;
+    font-weight: 700;
+    color: rgba(232, 213, 163, 0.7);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+.metric-display-value {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+}
+.metric-display-value small {
+    font-size: 0.7rem;
+    color: rgba(220, 181, 104, 0.85);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+.metric-display-value.is-empty {
+    color: rgba(255, 255, 255, 0.32);
+    font-weight: 600;
+}
+
+.bwh-display {
+    display: flex;
+    align-items: stretch;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(220, 181, 104, 0.22);
+    border-radius: 10px;
+    padding: 10px 8px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+.bwh-display-pill {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 4px;
+    border-right: 1px solid rgba(220, 181, 104, 0.18);
+}
+.bwh-display-pill:last-child { border-right: 0; }
+.bwh-display-pill b {
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    color: rgba(220, 181, 104, 0.85);
+}
+.bwh-display-pill span {
+    font-size: 1.02rem;
+    font-weight: 800;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+}
+.bwh-display-pill.is-empty span {
+    color: rgba(255, 255, 255, 0.32);
+    font-weight: 600;
+}
+
 /* スクロールバー（没入感のため極力目立たせない） */
 ::-webkit-scrollbar {
     width: 0;

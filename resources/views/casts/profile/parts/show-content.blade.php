@@ -68,14 +68,38 @@
 
         <section class="specs-section" aria-labelledby="specs-heading">
             <h2 id="specs-heading" class="section-heading">スペック</h2>
-            <div class="specs-grid">
-                <div class="spec-item">
-                    <span class="spec-label">Height / Weight</span>
-                    <span class="spec-value">{{ $cast['height'] ?? '--' }}cm / {{ $cast['weight'] ?? '--' }}kg</span>
+            @php
+                $heightVal = $cast['height'] ?? null;
+                $weightVal = $cast['weight'] ?? null;
+                $bustVal = $cast['bust'] ?? $cast['b'] ?? null;
+                $waistVal = $cast['waist'] ?? $cast['w'] ?? null;
+                $hipVal = $cast['hip'] ?? $cast['h'] ?? null;
+            @endphp
+            <div class="metric-display">
+                <div class="metric-display-row">
+                    <div class="metric-display-item">
+                        <span class="metric-display-label">Height</span>
+                        <span class="metric-display-value {{ empty($heightVal) ? 'is-empty' : '' }}">
+                            {{ $heightVal ?: '--' }}<small>cm</small>
+                        </span>
+                    </div>
+                    <div class="metric-display-item">
+                        <span class="metric-display-label">Weight</span>
+                        <span class="metric-display-value {{ empty($weightVal) ? 'is-empty' : '' }}">
+                            {{ $weightVal ?: '--' }}<small>kg</small>
+                        </span>
+                    </div>
                 </div>
-                <div class="spec-item">
-                    <span class="spec-label">B / W / H</span>
-                    <span class="spec-value">{{ $cast['bust'] ?? $cast['b'] ?? '--' }} / {{ $cast['waist'] ?? $cast['w'] ?? '--' }} / {{ $cast['hip'] ?? $cast['h'] ?? '--' }}</span>
+                <div class="bwh-display" aria-label="3サイズ">
+                    <div class="bwh-display-pill {{ empty($bustVal) ? 'is-empty' : '' }}">
+                        <b>B</b><span>{{ $bustVal ?: '--' }}</span>
+                    </div>
+                    <div class="bwh-display-pill {{ empty($waistVal) ? 'is-empty' : '' }}">
+                        <b>W</b><span>{{ $waistVal ?: '--' }}</span>
+                    </div>
+                    <div class="bwh-display-pill {{ empty($hipVal) ? 'is-empty' : '' }}">
+                        <b>H</b><span>{{ $hipVal ?: '--' }}</span>
+                    </div>
                 </div>
             </div>
         </section>

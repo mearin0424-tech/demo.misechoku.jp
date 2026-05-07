@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="admin-page">
-        <h1 class="admin-title">売上管理</h1>
+        @include('admin.parts.page-title', ['eyebrow' => 'SALES', 'title' => '売上管理'])
         <p class="admin-description">
             サブスクリプション料金と仲介料の売上を集計・可視化する画面です。<br>
             現時点ではダミー指標のみ表示しており、後続で実際の課金データ連携を行う想定です。

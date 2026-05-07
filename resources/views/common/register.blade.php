@@ -172,23 +172,38 @@
                     </div>
                     @endif
 
-                    <div class="register-grid register-grid-three">
-                        <label class="register-field">
-                            <span>身長 (cm)</span>
-                            <input type="number" name="height" value="{{ old('height') }}" min="100" max="250" placeholder="160">
-                        </label>
-                        <label class="register-field">
-                            <span>体重 (kg)</span>
-                            <input type="number" name="weight" value="{{ old('weight') }}" min="30" max="150" placeholder="48">
-                        </label>
-                        <label class="register-field">
-                            <span>3サイズ (B/W/H)</span>
-                            <div class="register-three-size">
-                                <input type="number" name="bust" value="{{ old('bust') }}" placeholder="B" min="50" max="120">
-                                <input type="number" name="waist" value="{{ old('waist') }}" placeholder="W" min="40" max="120">
-                                <input type="number" name="hip" value="{{ old('hip') }}" placeholder="H" min="50" max="120">
+                    <div class="metric-pair">
+                        <div class="metric-field">
+                            <label class="metric-field-label" for="reg-height">身長 <small>cm</small></label>
+                            <div class="metric-input-wrap">
+                                <input type="number" id="reg-height" name="height" value="{{ old('height') }}" inputmode="numeric" pattern="[0-9]*" min="130" max="200" placeholder="160">
+                                <span class="metric-unit">cm</span>
                             </div>
-                        </label>
+                        </div>
+                        <div class="metric-field">
+                            <label class="metric-field-label" for="reg-weight">体重 <small>kg</small></label>
+                            <div class="metric-input-wrap">
+                                <input type="number" id="reg-weight" name="weight" value="{{ old('weight') }}" inputmode="numeric" pattern="[0-9]*" min="30" max="150" placeholder="48">
+                                <span class="metric-unit">kg</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bwh-group">
+                        <span class="metric-field-label">3サイズ <small>cm</small></span>
+                        <div class="bwh-row">
+                            <label class="bwh-field" aria-label="バスト">
+                                <span class="bwh-letter">B</span>
+                                <input type="number" name="bust" value="{{ old('bust') }}" inputmode="numeric" pattern="[0-9]*" min="50" max="120" placeholder="--">
+                            </label>
+                            <label class="bwh-field" aria-label="ウエスト">
+                                <span class="bwh-letter">W</span>
+                                <input type="number" name="waist" value="{{ old('waist') }}" inputmode="numeric" pattern="[0-9]*" min="40" max="120" placeholder="--">
+                            </label>
+                            <label class="bwh-field" aria-label="ヒップ">
+                                <span class="bwh-letter">H</span>
+                                <input type="number" name="hip" value="{{ old('hip') }}" inputmode="numeric" pattern="[0-9]*" min="50" max="120" placeholder="--">
+                            </label>
+                        </div>
                     </div>
 
                     @if(!empty($masters['looks']) && $masters['looks']->isNotEmpty())
@@ -732,17 +747,21 @@
         .register-field select,
         .register-field textarea {
             width: 100%;
-            padding: 13px 14px;
-            border-radius: 16px;
-            border: 1px solid rgba(229, 193, 88, 0.16);
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(229, 193, 88, 0.18);
             background: rgba(255, 255, 255, 0.04);
             color: #fff;
-            font-size: 0.94rem;
+            font-size: 16px; /* iOSズーム回避 */
+            min-height: 46px;
+            line-height: 1.4;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
 
         .register-field input[type="date"] {
             min-height: 46px;
             color-scheme: dark;
+            font-variant-numeric: tabular-nums;
         }
 
         .register-field input[type="date"]::-webkit-calendar-picker-indicator {

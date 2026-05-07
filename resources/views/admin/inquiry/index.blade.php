@@ -13,6 +13,14 @@
                 default => '',
             };
         };
+        // アクター判定: 未対応・対応中=運営対応 / 対応済・クローズ=完了
+        $resolveActor = function (string $tone): array {
+            return match ($tone) {
+                'pending', 'in_progress' => ['cls' => 'is-admin', 'icon' => 'fa-bell', 'label' => '運営対応'],
+                'resolved', 'closed' => ['cls' => 'is-done', 'icon' => 'fa-circle-check', 'label' => '完了'],
+                default => ['cls' => 'is-admin-soft', 'icon' => 'fa-circle-question', 'label' => '—'],
+            };
+        };
         $filterChips = [
             ['key' => 'all', 'label' => 'すべて'],
             ['key' => 'pending', 'label' => '未対応'],
@@ -23,10 +31,8 @@
     @endphp
 
     <div class="admin-page">
-        @include('admin.parts.operation-nav', ['active' => 'inquiries'])
-
         <div class="u-flex-between">
-            <h1 class="admin-title">問合せ管理</h1>
+            @include('admin.parts.page-title', ['eyebrow' => 'INQUIRIES', 'title' => '問合せ管理'])
             @include('admin.parts.operation-achievement', ['operationAchievementRoute' => 'admin.inquiries.index'])
         </div>
         <p class="admin-description">
@@ -68,6 +74,7 @@
                 </thead>
                 <tbody id="inquiry-table-body">
                     @forelse($inquiries as $inquiry)
+                        @php $inqActor = $resolveActor($inquiry['status_tone']); @endphp
                         <tr data-inquiry-row
                             data-status-tone="{{ $inquiry['status_tone'] }}"
                             data-keyword="{{ strtolower($inquiry['from_name'] . ' ' . $inquiry['subject'] . ' ' . $inquiry['from_type']) }}">
@@ -82,9 +89,14 @@
                             <td>{{ $inquiry['from_name'] ?: '—' }}</td>
                             <td>{{ $inquiry['subject'] ?: '（件名なし）' }}</td>
                             <td>
-                                <span class="admin-status-badge {{ $statusBadge($inquiry['status_tone']) }}">
-                                    {{ $inquiry['status'] }}
+                                <span class="actor-pill {{ $inqActor['cls'] }}">
+                                    <i class="fas {{ $inqActor['icon'] }}"></i> {{ $inqActor['label'] }}
                                 </span>
+                                <div class="u-mt-4">
+                                    <span class="admin-status-badge {{ $statusBadge($inquiry['status_tone']) }}">
+                                        {{ $inquiry['status'] }}
+                                    </span>
+                                </div>
                             </td>
                             <td class="text-muted text-sm">{{ $inquiry['created_at']->format('Y-m-d H:i') }}</td>
                             <td class="text-right">

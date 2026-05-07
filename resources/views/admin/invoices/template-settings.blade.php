@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="admin-page">
-        <h1 class="admin-title">請求書テンプレート設定</h1>
+        @include('admin.parts.page-title', ['eyebrow' => 'INVOICE TEMPLATE', 'title' => '請求書テンプレート設定'])
         <p class="admin-description">
             請求書に表示する発行元名・メールアドレス・ロゴ・備考文を設定できます。設定は帳票テンプレートのプレビューおよび発行される請求書に反映されます。
         </p>

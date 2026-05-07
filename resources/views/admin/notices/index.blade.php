@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="admin-page">
-        <h1 class="admin-title">お知らせ管理</h1>
+        @include('admin.parts.page-title', ['eyebrow' => 'NOTICES', 'title' => 'お知らせ管理'])
         <p class="admin-description">
             キャスト・店舗・未ログインユーザー向けのお知らせを作成・公開します。「未ログイン表示」をオンにすると /support/notices にも表示されます。
         </p>
