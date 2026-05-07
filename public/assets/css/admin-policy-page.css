@@ -9,11 +9,19 @@
 
 .policy-doc-admin__toolbar {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.85rem;
     margin-bottom: 1.25rem;
+}
+@media (min-width: 640px) {
+    .policy-doc-admin__toolbar {
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
 }
 
 .policy-doc-admin__crumb {
@@ -29,13 +37,17 @@
 
 .policy-doc-admin__title {
     margin: 0;
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     font-weight: 700;
     color: var(--admin-text);
     display: flex;
     align-items: center;
-    gap: 0.65rem;
+    gap: 0.5rem;
     flex-wrap: wrap;
+    word-break: break-word;
+}
+@media (min-width: 640px) {
+    .policy-doc-admin__title { font-size: 1.25rem; gap: 0.65rem; }
 }
 
 .policy-doc-admin__key-badge {
@@ -50,9 +62,23 @@
 
 .policy-doc-admin__actions {
     display: flex;
+    flex-direction: column;
     gap: 0.5rem;
-    flex-wrap: wrap;
-    align-items: center;
+    align-items: stretch;
+}
+.policy-doc-admin__actions > * {
+    width: 100%;
+    justify-content: center;
+}
+@media (min-width: 640px) {
+    .policy-doc-admin__actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    .policy-doc-admin__actions > * {
+        width: auto;
+    }
 }
 
 /* アコーディオン（履歴・本文外枠） */
@@ -98,10 +124,11 @@
     align-items: center;
     justify-content: center;
     border-radius: 10px;
-    background: rgba(185, 140, 36, 0.12);
+    background: var(--admin-primary-soft);
     border: 0;
-    color: var(--admin-gold-strong);
+    color: var(--admin-primary);
     font-size: 0.85rem;
+    flex-shrink: 0;
 }
 
 .policy-acc__title {
@@ -187,8 +214,11 @@
 
 .policy-light__body {
     display: none;
-    padding: 1.35rem 1.25rem 1.75rem;
+    padding: 1rem 0.85rem 1.25rem;
     background: #f7f3ee;
+}
+@media (min-width: 640px) {
+    .policy-light__body { padding: 1.35rem 1.25rem 1.75rem; }
 }
 
 .policy-light.is-open .policy-light__body {
@@ -260,27 +290,28 @@
 /* ライトエリア内フォーム */
 .policy-field-label {
     display: block;
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #b98c24;
+    color: var(--admin-primary);
     margin-bottom: 0.35rem;
 }
 
 .policy-field-input,
 .policy-field-textarea {
     width: 100%;
-    padding: 0.65rem 0.75rem;
+    padding: 0.7rem 0.8rem;
     border-radius: 8px;
     border: 1px solid #d4c5b0;
     background: #fff;
     color: #241117;
-    font-size: 0.9rem;
+    font-size: 16px;
     font-family: inherit;
     line-height: 1.6;
     outline: none;
     box-sizing: border-box;
+    min-height: 44px;
 }
 
 .policy-field-textarea {
@@ -290,8 +321,8 @@
 
 .policy-field-input:focus,
 .policy-field-textarea:focus {
-    border-color: #b98c24;
-    box-shadow: 0 0 0 3px rgba(185, 140, 36, 0.15);
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .policy-preamble-sep {
@@ -381,8 +412,13 @@
 
 .policy-meta-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: 1fr;
     gap: 1rem;
+}
+@media (min-width: 640px) {
+    .policy-meta-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
 }
 
 .policy-meta-row {
@@ -413,19 +449,23 @@
     align-items: center;
     justify-content: center;
     gap: 0.45rem;
-    padding: 0.55rem 1rem;
-    border-radius: 10px;
-    border: 0;
-    background: linear-gradient(135deg, #e5c158, #b38a22);
-    color: #120405;
-    font-size: 0.82rem;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--admin-primary);
+    background: var(--admin-primary);
+    color: var(--admin-ink);
+    font-size: 0.86rem;
     font-weight: 700;
     cursor: pointer;
     text-decoration: none;
+    min-height: 44px;
+    transition: background 0.12s ease, border-color 0.12s ease;
 }
 
 .btn-policy-primary:hover {
-    filter: brightness(1.05);
+    background: var(--admin-primary-hover);
+    border-color: var(--admin-primary-hover);
+    color: var(--admin-ink);
 }
 
 .btn-policy-ghost {
@@ -433,18 +473,21 @@
     align-items: center;
     justify-content: center;
     gap: 0.45rem;
-    padding: 0.55rem 1rem;
-    border-radius: 10px;
-    border: 0;
-    background: rgba(255, 255, 255, 0.75);
-    box-shadow: var(--admin-shadow);
-    color: var(--admin-text);
-    font-size: 0.82rem;
-    font-weight: 600;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--admin-line);
+    background: var(--admin-surface);
+    color: var(--admin-sub);
+    font-size: 0.86rem;
+    font-weight: 700;
     cursor: pointer;
     text-decoration: none;
+    min-height: 44px;
+    transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
 }
 
 .btn-policy-ghost:hover {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--admin-surface-alt);
+    color: var(--admin-text);
+    border-color: var(--admin-line-strong);
 }
