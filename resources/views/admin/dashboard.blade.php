@@ -10,10 +10,12 @@
             $allValues = [];
             foreach ($data as $row) {
                 foreach ($series as $item) {
-                    $allValues[] = $row[$item['key']];
+                    $allValues[] = (float) ($row[$item['key']] ?? 0);
                 }
             }
-            $max = max($allValues) * 1.1;
+            // データ未投入や全件0の状態でもゼロ除算しないよう最小値1を保証
+            $rawMax = !empty($allValues) ? max($allValues) : 0;
+            $max = $rawMax > 0 ? $rawMax * 1.1 : 1;
             $count = max(count($data) - 1, 1);
             $getX = fn ($index) => $padX + ($index / $count) * ($width - ($padX * 2));
             $getY = fn ($value) => $height - $padY - (($value / $max) * ($height - ($padY * 2)));
