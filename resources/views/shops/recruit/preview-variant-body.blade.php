@@ -50,7 +50,7 @@
     <h2 class="recruit-ref-h2-lg">
         <span class="bar" aria-hidden="true"></span>
         募集要項
-        <span class="recruit-ref-subtle recruit-req-sub-label">{{ $vk === 'trial' ? '（体験入店）' : '（ヘルプ）' }}</span>
+        <span class="recruit-ref-subtle recruit-req-sub-label">{{ $vk === 'trial' ? '（新規入店）' : '（ヘルプ）' }}</span>
     </h2>
 
     <div class="recruit-req-block">
@@ -77,7 +77,7 @@
         <div class="recruit-ref-inforow"><span class="k">給与</span><span class="v">
             @if($vk === 'trial')
                 @if($vHasTrial)
-                    <span style="color:#d4af37;font-weight:800;">体験入店: {{ number_format((int) $rv['trial_hourly_wage']) }}円〜</span>
+                    <span style="color:#d4af37;font-weight:800;">新規入店: {{ number_format((int) $rv['trial_hourly_wage']) }}円〜</span>
                     @if($vRegularWage > 0)
                         <br><span style="color:#a1a1aa;font-size:0.8125rem;font-weight:600;">本入（参考）: {{ number_format($vRegularWage) }}円〜 ※正式条件は体験後に面談</span>
                     @endif

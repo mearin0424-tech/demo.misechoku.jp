@@ -102,6 +102,8 @@
         <img id="global-lightbox-image" src="" alt="" class="lightbox-image">
     </div>
 
+    <script src="{{ asset('assets/js/location-modal.js') }}" defer></script>
+    <script src="{{ asset('assets/js/share-menu.js') }}" defer></script>
     @stack('scripts')
     <script>
     (function () {

@@ -691,7 +691,10 @@ CREATE TABLE IF NOT EXISTS `notification_preferences` (
 CREATE TABLE IF NOT EXISTS `cast_identity_documents` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `cast_id` varchar(20) NOT NULL,
-  `type` varchar(40) NOT NULL,
+  `category` varchar(32) NOT NULL DEFAULT 'photo_id'
+    COMMENT 'photo_id:顔写真付身分証 / non_photo_id:顔写真なし身分証 / address_proof:住所確認書類',
+  `type` varchar(40) NOT NULL
+    COMMENT 'photo_id: driver_license/passport/mynumber_card/residence_card | non_photo_id: health_insurance/pension_book | address_proof: residence_certificate/utility_bill',
   `image_path_front` text DEFAULT NULL COMMENT 'Eloquent 暗号化対象',
   `image_path_back`  text DEFAULT NULL COMMENT 'Eloquent 暗号化対象',
   `status` tinyint NOT NULL DEFAULT 1,
@@ -701,7 +704,8 @@ CREATE TABLE IF NOT EXISTS `cast_identity_documents` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `cast_identity_documents_unique` (`cast_id`, `type`),
+  -- 1キャストあたり同一カテゴリは1書類のみ
+  UNIQUE KEY `cast_identity_documents_cast_category_unique` (`cast_id`, `category`),
   CONSTRAINT `cast_identity_documents_cast_id_foreign` FOREIGN KEY (`cast_id`) REFERENCES `casts` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

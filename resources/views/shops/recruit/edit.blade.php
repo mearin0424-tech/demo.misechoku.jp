@@ -484,7 +484,7 @@
             @csrf
             @method('PUT')
             {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                 Basic Information（体験入店・ヘルプ共通）
+                 Basic Information（新規入店・ヘルプ共通）
             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
             <div class="job-edit-v2__form" style="padding-bottom:0; gap:0;">
                 <section aria-labelledby="job-sec-basic">
@@ -512,7 +512,7 @@
             @if(!empty($usesJobTypes) && $usesJobTypes)
 
                 <details class="job-edit-v2__kind-details" @if($errors->any()) open @endif open>
-                    <summary class="job-edit-v2__kind-summary">本入店・体験入店・ヘルプの設定</summary>
+                    <summary class="job-edit-v2__kind-summary">本入店・新規入店・ヘルプの設定</summary>
                     <div class="job-edit-v2__kind-body" style="padding-top:12px;">
 
                         <div class="job-edit-v2__preview-row" style="margin-top:0;">
@@ -561,10 +561,10 @@
                                     </div>
                                 </div>
 
-                                <p class="job-edit-v2__kind-subtitle">体験入店</p>
+                                <p class="job-edit-v2__kind-subtitle">新規入店</p>
                                 <div class="job-edit-v2__status">
                                     <div>
-                                        <p class="job-edit-v2__status-label">体験入店を公開</p>
+                                        <p class="job-edit-v2__status-label">新規入店を公開</p>
                                         <p class="job-edit-v2__status-hint">オフにすると非公開になります</p>
                                     </div>
                                     <div class="job-edit-v2__status-right">
@@ -631,10 +631,10 @@
                                     </div>
                                 </div>
                             @else
-                                <p class="job-edit-v2__kind-subtitle">体験入店</p>
+                                <p class="job-edit-v2__kind-subtitle">新規入店</p>
                                 <div class="job-edit-v2__status">
                                     <div>
-                                        <p class="job-edit-v2__status-label">体験入店を公開</p>
+                                        <p class="job-edit-v2__status-label">新規入店を公開</p>
                                         <p class="job-edit-v2__status-hint">オフにすると非公開になります</p>
                                     </div>
                                     <div class="job-edit-v2__status-right">
@@ -669,7 +669,7 @@
                                 <p class="job-edit-v2__kind-subtitle">ヘルプ</p>
                                 <button type="button" class="job-edit-v2__copy-btn" id="copy-trial-tags-btn" style="margin-bottom:12px;">
                                     <i class="fas fa-copy"></i>
-                                    体験入店と同じタグをコピー
+                                    新規入店と同じタグをコピー
                                 </button>
                                 <div class="job-edit-v2__status">
                                     <div>
@@ -1082,11 +1082,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 「体験入店と同じタグをコピー」ボタン（ヘルプタブ専用）
+    // 「新規入店と同じタグをコピー」ボタン（ヘルプタブ専用）
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     var copyBtn = document.getElementById('copy-trial-tags-btn');
     if (copyBtn) {
-        // PHP から体験入店のタグIDを JS 変数として埋め込む
+        // PHP から新規入店のタグIDを JS 変数として埋め込む
         var trialWorkStyleIds = @json($trialWorkStyleIds);
         var trialWelcomeIds   = @json($trialWelcomeIds);
         var trialBenefitIds   = @json($trialBenefitIds);
@@ -1108,7 +1108,7 @@ document.addEventListener('DOMContentLoaded', function () {
             copyBtn.style.color = '#d4af37';
             copyBtn.style.borderColor = 'rgba(212,175,55,0.5)';
             setTimeout(function () {
-                copyBtn.innerHTML = '<i class="fas fa-copy"></i> 体験入店と同じタグをコピー';
+                copyBtn.innerHTML = '<i class="fas fa-copy"></i> 新規入店と同じタグをコピー';
                 copyBtn.style.color = '';
                 copyBtn.style.borderColor = '';
             }, 2000);

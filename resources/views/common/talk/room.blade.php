@@ -90,7 +90,7 @@
     $actionUrl = $actionUrl ?? ($isCast ? route('cast.talk.action') : route('shop.talk.action'));
     $blockUrl = $blockUrl ?? ($isCast ? route('cast.talk.block') : route('shop.talk.block'));
     $partnerAvatar = $partnerAvatar ?? asset('assets/images/common/no-image.png');
-    $talkJobKindLabelMap = ['trial' => '体験入店', 'fulltime' => '本入店', 'help' => 'ヘルプ'];
+    $talkJobKindLabelMap = ['trial' => '新規入店', 'fulltime' => '本入店', 'help' => 'ヘルプ'];
     $currentTalkJobKindValue = $selectedTalkJobKind ?? $initialTalkJobKind ?? null;
     $currentTalkJobKindLabel = $talkJobKindLabelMap[$currentTalkJobKindValue] ?? '未選択';
     $isInterviewOfferLocked = in_array(($currentStatusCode ?? ''), ['hired', 'rejected'], true);
@@ -455,7 +455,7 @@
             <label for="talk-room-job-kind">現在の求人種別</label>
             <select id="talk-room-job-kind" @if(empty($canSelectTalkJobKind)) disabled @endif>
                 <option value="">未選択</option>
-                <option value="trial">体験入店</option>
+                <option value="trial">新規入店</option>
                 <option value="fulltime">本入店</option>
                 <option value="help">ヘルプ</option>
             </select>
@@ -557,7 +557,7 @@
         <div id="result-employment-kind-wrap" class="hired-wage-field-wrap is-visible" aria-hidden="false">
             <label for="result-employment-kind">採用区分</label>
             <select id="result-employment-kind" class="result-employment-kind-select">
-                <option value="trial">体験入店</option>
+                <option value="trial">新規入店</option>
                 <option value="fulltime">本入店</option>
                 <option value="help">ヘルプ</option>
             </select>

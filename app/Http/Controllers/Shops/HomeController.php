@@ -4,6 +4,7 @@
 namespace App\Http\Controllers\Shops;
 
 use App\Http\Controllers\Controller;
+use App\Services\UserLocationService;
 use App\Support\RecruitCatchOverlay;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -12,6 +13,11 @@ use Illuminate\Support\Facades\Schema;
 class HomeController extends Controller
 {
     private const ACTION_TYPE_KEEP = 1;
+
+    public function __construct(
+        private readonly UserLocationService $userLocation,
+    ) {
+    }
 
     public function index()
     {
@@ -48,11 +54,15 @@ class HomeController extends Controller
                 'cast_profiles.pref',
                 'cast_profiles.city',
                 'cast_profiles.pr',
+                'cast_profiles.latitude',
+                'cast_profiles.longitude',
                 DB::raw("(SELECT ci.image_path FROM cast_images ci WHERE ci.cast_id = casts.id AND ci.type = 1 ORDER BY ci.is_main DESC, ci.main_order IS NULL, ci.main_order, ci.id LIMIT 1) as main_image_path")
             )
             ->orderBy('casts.id')
             ->limit(20)
             ->get();
+
+        $origin = $this->userLocation->getActiveLocation();
 
         // LIKE数は favorites テーブルから集計（存在しない環境でも動くようにガード）
         $likeCounts = [];
@@ -103,6 +113,9 @@ class HomeController extends Controller
         foreach ($rows as $row) {
             $birthday = $row->birthday ? Carbon::parse($row->birthday) : null;
             $images = $this->getCastImages($row->id, $row->main_image_path);
+            $distanceKm = $origin
+                ? $this->userLocation->distanceKm($origin['lat'], $origin['lng'], $row->latitude !== null ? (float) $row->latitude : null, $row->longitude !== null ? (float) $row->longitude : null)
+                : null;
             $items[] = [
                 'id' => $row->id,
                 'name' => $row->nickname ?: ($row->name ?: 'ゲスト'),
@@ -112,6 +125,8 @@ class HomeController extends Controller
                 'is_liked' => isset($likedTodayCastMap[$row->id]),
                 'images' => $images,
                 'is_kept' => isset($keptCastMap[$row->id]),
+                'distance_km' => $distanceKm,
+                'distance_label' => $distanceKm !== null ? $this->userLocation->formatDistance($distanceKm) : null,
             ];
         }
 
@@ -154,6 +169,8 @@ class HomeController extends Controller
             'shop_profiles.pref',
             'shop_profiles.city',
             'shop_profiles.industry_id',
+            'shop_profiles.latitude',
+            'shop_profiles.longitude',
             DB::raw("(SELECT si.image_path FROM shop_images si WHERE si.shop_id = shops.id ORDER BY si.is_main DESC, si.main_order IS NULL, si.main_order, si.id LIMIT 1) as main_image_path"),
         ];
         if (Schema::hasColumn('shop_jobs', 'hourly_wage_regular')) {
@@ -392,7 +409,28 @@ class HomeController extends Controller
                 'trial_hourly_range' => $this->discoveryHourlyPair($trialHourly, $meta, 'trial'),
                 'help_hourly_range' => $this->discoveryHourlyPair($helpHourly, $meta, 'help'),
                 'manager_overlay' => $managerOverlay,
+                'distance_km' => null,
+                'distance_label' => null,
+                '_lat' => $row->latitude !== null ? (float) $row->latitude : null,
+                '_lng' => $row->longitude !== null ? (float) $row->longitude : null,
             ];
+        }
+
+        // 探索拠点が設定されていれば各レコードに距離を付与
+        $origin = $this->userLocation->getActiveLocation();
+        if ($origin) {
+            foreach ($items as &$item) {
+                $km = $this->userLocation->distanceKm($origin['lat'], $origin['lng'], $item['_lat'] ?? null, $item['_lng'] ?? null);
+                $item['distance_km'] = $km;
+                $item['distance_label'] = $km !== null ? $this->userLocation->formatDistance($km) : null;
+                unset($item['_lat'], $item['_lng']);
+            }
+            unset($item);
+        } else {
+            foreach ($items as &$item) {
+                unset($item['_lat'], $item['_lng']);
+            }
+            unset($item);
         }
 
         return $items;

@@ -342,6 +342,9 @@ Route::prefix('setting')->name('setting.')->group(function () {
     Route::post('/notification', [SettingController::class, 'updateNotification'])->name('notification.update');
     Route::get('/line/link', [LineLogin::class, 'redirectLink'])->name('line.link');
     Route::get('/account', [SettingController::class, 'account'])->name('account');
+    // 探索拠点（現在地／パスポート）
+    Route::post('/location', [\App\Http\Controllers\Common\LocationController::class, 'store'])->name('location.store');
+    Route::delete('/location', [\App\Http\Controllers\Common\LocationController::class, 'destroy'])->name('location.destroy');
 });
 
 // 繝励Λ繝ｳ險ｭ螳夲ｼ亥ｺ苓・蟆ら畑繝ｻ繝・Δ逕ｨ・・

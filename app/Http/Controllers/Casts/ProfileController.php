@@ -611,6 +611,22 @@ class ProfileController extends Controller
             $shareText = 'ミセチョクのキャストプロフィールです。';
         }
 
+        // 距離（ログインユーザの探索拠点 → キャスト）
+        $distanceKm = null;
+        $distanceLabel = null;
+        $coords = DB::table('cast_profiles')
+            ->where('cast_id', $castId)
+            ->select('latitude', 'longitude')
+            ->first();
+        if ($coords && $coords->latitude !== null && $coords->longitude !== null) {
+            $userLocation = app(\App\Services\UserLocationService::class);
+            $origin = $userLocation->getActiveLocation();
+            if ($origin) {
+                $distanceKm = $userLocation->distanceKm($origin['lat'], $origin['lng'], (float) $coords->latitude, (float) $coords->longitude);
+                $distanceLabel = $distanceKm !== null ? $userLocation->formatDistance($distanceKm) : null;
+            }
+        }
+
         return [
             'pageId' => 'cast_detail',
             'cast' => $cast,
@@ -619,6 +635,8 @@ class ProfileController extends Controller
             'shareUrl' => route('share.cast.show', ['id' => $castId]),
             'shareTitle' => $displayName . 'のプロフィール',
             'shareText' => mb_strimwidth($shareText, 0, 80, '…'),
+            'distanceKm' => $distanceKm,
+            'distanceLabel' => $distanceLabel,
         ];
     }
 

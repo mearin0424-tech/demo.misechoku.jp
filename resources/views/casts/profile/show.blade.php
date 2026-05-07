@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', ($cast['nickname'] ?? $cast['name']) . 'のプロフィール')
+@section('title', 'Cast Profile')
 @section('body-class', 'page-cast-profile')
 @section('meta_description', trim((string) (($cast['intro'] ?? $cast['pr'] ?? '') ?: 'ミセチョクのキャストプロフィールです。')))
 @section('meta_image', $cast['img'] ?? asset('assets/images/common/no-image.png'))
@@ -19,6 +19,8 @@
         'shareUrl' => $shareUrl ?? null,
         'shareTitle' => $shareTitle ?? (($cast['nickname'] ?? $cast['name']) . 'のプロフィール'),
         'shareText' => $shareText ?? ($cast['intro'] ?? $cast['pr'] ?? ''),
+        'distanceLabel' => $distanceLabel ?? null,
+        'distanceKm' => $distanceKm ?? null,
     ])
 </div>
 

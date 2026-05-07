@@ -654,8 +654,9 @@
     box-sizing: border-box;
     padding: 10px var(--content-padding-x) 12px;
     padding-bottom: calc(12px + env(safe-area-inset-bottom, 0));
-    background: rgba(26, 10, 14, 0.98);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    /* アプリ全体のボルドー基調と統一 */
+    background: linear-gradient(180deg, rgba(74, 18, 42, 0.92), rgba(56, 13, 31, 0.96));
+    border-top: 1px solid rgba(220, 181, 104, 0.22);
     box-shadow: 0 -8px 22px rgba(0, 0, 0, 0.22);
 }
 

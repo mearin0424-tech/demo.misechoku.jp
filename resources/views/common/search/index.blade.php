@@ -68,6 +68,7 @@
 <div class="contents {{ !empty($tabsForHeader) ? 'tab-page-body' : 'search-page-body' }}">
     {{-- 検索パネル：タイムライン＋一覧を統合した画面 --}}
     <div id="pane-list" class="tab-pane {{ $activeTab === 'pane-list' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-list' ? 'display:none' : '' }}">
+        @include('layouts.parts.location-pill')
         <div class="search-filter-box">
             {{-- 役割に応じたフィルター（検索窓・並び替え）／詳細検索は FAB --}}
             @include($partsView . '.filter')

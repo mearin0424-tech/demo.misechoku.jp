@@ -5,11 +5,6 @@
     <div class="profile-hero-inner">
         <img id="profile-main-img" src="{{ $cast['img'] }}" alt="{{ $cast['nickname'] ?? $cast['name'] }}" class="profile-hero-img js-lightbox-target">
         <div class="profile-hero-gradient"></div>
-        <div class="profile-hero-badge">
-            @if($cast['is_applied'] ?? false)
-                <span class="badge-approved">入金承認済</span>
-            @endif
-        </div>
     </div>
 </section>
 
@@ -26,10 +21,25 @@
 <div class="profile-main-contents">
     <div class="profile-view-inner">
         <header class="cast-header">
-            <h1 class="cast-name serif-font">{{ $cast['nickname'] ?? $cast['name'] }}<span class="cast-age">({{ $cast['age'] }})</span></h1>
+            <div class="recruit-ref-title-row">
+                <h1 class="cast-name serif-font">{{ $cast['nickname'] ?? $cast['name'] }}<span class="cast-age">({{ $cast['age'] }})</span></h1>
+                @if(!empty($shareUrl) && !$isOwn)
+                    @include('partials.share-menu', [
+                        'shareUrl' => $shareUrl,
+                        'shareTitle' => $shareTitle ?? (($cast['nickname'] ?? $cast['name']) . 'のプロフィール'),
+                        'shareText' => $shareText ?? ($cast['intro'] ?? $cast['pr'] ?? ''),
+                        'menuId' => 'cast-share-menu',
+                    ])
+                @endif
+            </div>
             <p class="cast-location">
                 <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
                 <span>@if(!empty($cast['pref']) || !empty($cast['city'])){{ implode(' / ', array_filter([$cast['pref'] ?? null, $cast['city'] ?? null])) }} / @endifキャスト</span>
+                @if(!empty($distanceLabel ?? null))
+                    <span class="distance-badge" style="margin-left:6px;">
+                        <i class="fas fa-route"></i> 現在位置から {{ $distanceLabel }}
+                    </span>
+                @endif
             </p>
         </header>
 
@@ -56,14 +66,7 @@
                     </button>
                 @endif
             </div>
-            @if(!empty($shareUrl))
-                @include('common.share-actions', [
-                    'shareUrl' => $shareUrl,
-                    'shareTitle' => $shareTitle ?? (($cast['nickname'] ?? $cast['name']) . 'のプロフィール'),
-                    'shareText' => $shareText ?? ($cast['intro'] ?? $cast['pr'] ?? ''),
-                    'shareLabel' => 'このキャストプロフィールをSNSで共有'
-                ])
-            @endif
+            {{-- 共有はヘッダー横の share-menu に集約済み --}}
         @endif
 
         <section class="specs-section" aria-labelledby="specs-heading">
@@ -151,10 +154,7 @@
                     <span class="detail-label">勤務時間帯</span>
                     <span class="detail-value">{{ $cast['work_time_label'] ?? '--' }}</span>
                 </div>
-                <div class="detail-row detail-row-block">
-                    <span class="detail-label">自己PR</span>
-                    <div class="detail-value">@if(!empty($cast['pr'])){!! nl2br(e($cast['pr'])) !!}@else--@endif</div>
-                </div>
+                {{-- 自己PR は上のアコーディオンに集約済み --}}
                 <div class="detail-row detail-row-block">
                     <span class="detail-label">現職業</span>
                     <div class="detail-value">@if(!empty($cast['profession'])){!! nl2br(e($cast['profession'])) !!}@elseif(!empty($cast['current_job'])){!! nl2br(e($cast['current_job'])) !!}@else--@endif</div>
@@ -166,31 +166,17 @@
             </div>
         </section>
 
-        <section class="reviews-section" aria-labelledby="reviews-heading">
-            <h2 id="reviews-heading" class="section-heading">Reviews</h2>
-            @if($isOwn)
+        @if($isOwn)
+            <section class="reviews-section" aria-labelledby="reviews-heading">
+                <h2 id="reviews-heading" class="section-heading">Reviews</h2>
                 <p class="reviews-empty">レビューはマイページの「レビュー一覧」で確認できます。</p>
                 <a href="{{ route('cast.mypage.reviews') }}" class="detail-action-btn edit-btn" style="margin-top: 0.5rem;">
                     <i class="fas fa-star"></i>
                     <span>レビュー一覧を見る</span>
                 </a>
-            @elseif(!empty($cast['reviews']) && count($cast['reviews']) > 0)
-                <ul class="reviews-list">
-                    @foreach($cast['reviews'] as $rev)
-                        <li class="review-item">
-                            <div class="review-stars" aria-label="{{ $rev['score'] }}点">
-                                @for($i = 1; $i <= 5; $i++)
-                                    <i class="{{ $i <= ($rev['score'] ?? 0) ? 'fas' : 'far' }} fa-star"></i>
-                                @endfor
-                            </div>
-                            <p class="review-text">{{ $rev['text'] ?? '' }}</p>
-                        </li>
-                    @endforeach
-                </ul>
-            @else
-                <p class="reviews-empty">まだレビューはありません</p>
-            @endif
-        </section>
+            </section>
+        @endif
+        {{-- 店舗側の表示では Reviews セクションは表示しない --}}
     </div>
 </div>
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Casts;
 
 use App\Http\Controllers\Common\SearchController as BaseSearchController;
 use App\Services\AdminMasterService;
+use App\Services\UserLocationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -121,6 +122,8 @@ class SearchController extends BaseSearchController
                 'shop_profiles.shop_name',
                 'shop_profiles.pref',
                 'shop_profiles.city',
+                'shop_profiles.latitude',
+                'shop_profiles.longitude',
                 DB::raw("(SELECT si.image_path FROM shop_images si WHERE si.shop_id = shops.id ORDER BY si.is_main DESC, si.main_order IS NULL, si.main_order, si.id LIMIT 1) as main_image_path"),
                 'shop_profiles.updated_at as profile_updated_at',
                 'shops.created_at as shop_created_at',
@@ -211,12 +214,39 @@ class SearchController extends BaseSearchController
                     'hitokoto_updated_at' => $hitokotoUpdatedAt?->locale('ja')->diffForHumans(),
                     'hourly_wage'         => $this->searchRowHourlyWage($row),
                     'reward'              => $this->searchRowReward($row),
+                    'latitude'            => $row->latitude !== null ? (float) $row->latitude : null,
+                    'longitude'           => $row->longitude !== null ? (float) $row->longitude : null,
                 ];
             })
             ->values()
             ->all();
 
-        return $this->enrichCastSearchShopCards($items);
+        $items = $this->enrichCastSearchShopCards($items);
+
+        // 距離計算＋距離フィルタ
+        $userLocation = app(UserLocationService::class);
+        $origin = $userLocation->getActiveLocation();
+        $distanceKmLimit = (int) $request->query('distance_km', 0);
+        $useDistance = $origin && in_array((string) $request->query('location_type'), ['current', 'geo'], true) && $distanceKmLimit > 0;
+
+        foreach ($items as &$item) {
+            $km = $origin
+                ? $userLocation->distanceKm($origin['lat'], $origin['lng'], $item['latitude'] ?? null, $item['longitude'] ?? null)
+                : null;
+            $item['distance_km'] = $km;
+            $item['distance_label'] = $km !== null ? $userLocation->formatDistance($km) : null;
+            unset($item['latitude'], $item['longitude']);
+        }
+        unset($item);
+
+        if ($useDistance) {
+            $items = array_values(array_filter($items, function ($it) use ($distanceKmLimit) {
+                $km = $it['distance_km'] ?? null;
+                return $km !== null && $km <= $distanceKmLimit;
+            }));
+        }
+
+        return $items;
     }
 
     /**

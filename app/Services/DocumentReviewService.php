@@ -22,13 +22,48 @@ class DocumentReviewService
             ->get();
 
         $latestDocument = $documents->first();
+        $byCategory = $documents->keyBy('category');
+
+        $photoId = $byCategory->get(CastIdentityDocument::CATEGORY_PHOTO_ID);
+        $nonPhotoId = $byCategory->get(CastIdentityDocument::CATEGORY_NON_PHOTO_ID);
+        $addressProof = $byCategory->get(CastIdentityDocument::CATEGORY_ADDRESS_PROOF);
+
+        // 提出パターンの推定（既に提出されている書類から）：
+        //   - photo_id が1つでもあれば 'photo'
+        //   - non_photo_id か address_proof が1つでもあれば 'non_photo'
+        //   - どちらもなければ 'photo'（既定）
+        $detectedPattern = $photoId
+            ? 'photo'
+            : (($nonPhotoId || $addressProof) ? 'non_photo' : 'photo');
 
         return [
             'status' => $this->castStatusKey($documents),
+            'is_verified' => CastIdentityDocument::isCastVerified($castId),
             'documents' => $documents
                 ->map(fn (CastIdentityDocument $document) => $this->mapCastDocument($document))
                 ->all(),
             'latest_document' => $latestDocument ? $this->mapCastDocument($latestDocument) : null,
+            'pattern' => $detectedPattern, // 'photo' | 'non_photo'
+            'category_documents' => [
+                'photo_id' => $photoId ? $this->mapCastDocument($photoId) : null,
+                'non_photo_id' => $nonPhotoId ? $this->mapCastDocument($nonPhotoId) : null,
+                'address_proof' => $addressProof ? $this->mapCastDocument($addressProof) : null,
+            ],
+            'allowed_types' => [
+                'photo_id' => CastIdentityDocument::TYPES_PHOTO_ID,
+                'non_photo_id' => CastIdentityDocument::TYPES_NON_PHOTO_ID,
+                'address_proof' => CastIdentityDocument::TYPES_ADDRESS_PROOF,
+            ],
+            'type_labels' => [
+                'driver_license' => $this->castTypeLabel('driver_license'),
+                'passport' => $this->castTypeLabel('passport'),
+                'mynumber_card' => $this->castTypeLabel('mynumber_card'),
+                'residence_card' => $this->castTypeLabel('residence_card'),
+                'health_insurance' => $this->castTypeLabel('health_insurance'),
+                'pension_book' => $this->castTypeLabel('pension_book'),
+                'residence_certificate' => $this->castTypeLabel('residence_certificate'),
+                'utility_bill' => $this->castTypeLabel('utility_bill'),
+            ],
         ];
     }
 
@@ -37,19 +72,25 @@ class DocumentReviewService
         string $type,
         UploadedFile $frontFile,
         ?UploadedFile $backFile = null,
-        ?string $expiredAt = null
+        ?string $expiredAt = null,
+        ?string $category = null
     ): CastIdentityDocument {
+        // category が未指定の場合は type から推定（旧呼び出し互換）
+        $category = $category ?: CastIdentityDocument::categoryForType($type);
+
         // 機密ファイルは Web から直接アクセスできない private ディスク (storage/app/private) に保存する。
         // 配信は必ず認証済みコントローラ経由で行う。
         $frontPath = 'private/' . $frontFile->store('casts/identity', 'private');
         $backPath = $backFile ? 'private/' . $backFile->store('casts/identity', 'private') : null;
 
+        // 1キャストあたり同一カテゴリは1書類のみ。type を変更した場合は同じ category 行を上書きする。
         $document = CastIdentityDocument::query()->updateOrCreate(
             [
                 'cast_id' => $castId,
-                'type' => $type,
+                'category' => $category,
             ],
             [
+                'type' => $type,
                 'image_path_front' => $frontPath,
                 'image_path_back' => $backPath,
                 'status' => CastIdentityDocument::STATUS_PENDING,
@@ -58,6 +99,14 @@ class DocumentReviewService
                 'approved_at' => null,
             ]
         );
+
+        // パターンA（顔写真付）に切り替えた場合は、Bで残っていた non_photo_id / address_proof は不要になるため削除
+        if ($category === CastIdentityDocument::CATEGORY_PHOTO_ID) {
+            CastIdentityDocument::query()
+                ->where('cast_id', $castId)
+                ->whereIn('category', [CastIdentityDocument::CATEGORY_NON_PHOTO_ID, CastIdentityDocument::CATEGORY_ADDRESS_PROOF])
+                ->delete();
+        }
 
         $this->syncCastLegacyStatus($castId);
 
@@ -446,15 +495,32 @@ class DocumentReviewService
             return 'not_submitted';
         }
 
-        if ($documents->contains(fn (CastIdentityDocument $document) => $document->status === CastIdentityDocument::STATUS_PENDING)) {
+        // 「本人確認完了」の判定はカテゴリ単位で行う：
+        //   - photo_id 1枚が承認済み、または
+        //   - non_photo_id ＋ address_proof の両方が承認済み
+        $approvedCategories = $documents
+            ->filter(fn (CastIdentityDocument $d) => $d->status === CastIdentityDocument::STATUS_APPROVED)
+            ->pluck('category')
+            ->unique();
+
+        $isApproved = $approvedCategories->contains(CastIdentityDocument::CATEGORY_PHOTO_ID)
+            || ($approvedCategories->contains(CastIdentityDocument::CATEGORY_NON_PHOTO_ID)
+                && $approvedCategories->contains(CastIdentityDocument::CATEGORY_ADDRESS_PROOF));
+
+        if ($isApproved) {
+            return 'approved';
+        }
+
+        if ($documents->contains(fn (CastIdentityDocument $d) => $d->status === CastIdentityDocument::STATUS_PENDING)) {
             return 'pending';
         }
 
-        if ($documents->contains(fn (CastIdentityDocument $document) => $document->status === CastIdentityDocument::STATUS_REJECTED)) {
+        if ($documents->contains(fn (CastIdentityDocument $d) => $d->status === CastIdentityDocument::STATUS_REJECTED)) {
             return 'rejected';
         }
 
-        return 'approved';
+        // 全部承認済みだがパターン未充足（B のうち片方だけ承認）→ pending 扱い
+        return 'pending';
     }
 
     private function shopStatusKey(?ShopLicenseDocument $document): string
@@ -473,8 +539,11 @@ class DocumentReviewService
 
     private function mapCastDocument(CastIdentityDocument $document): array
     {
+        $category = (string) ($document->category ?? CastIdentityDocument::categoryForType((string) $document->type));
         return [
             'id' => $document->id,
+            'category' => $category,
+            'category_label' => $this->castCategoryLabel($category),
             'type' => $document->type,
             'type_label' => $this->castTypeLabel($document->type),
             'status_code' => (int) $document->status,
@@ -491,6 +560,16 @@ class DocumentReviewService
             'front_url' => $this->castIdentityAdminFileUrl($document, 'front'),
             'back_url' => $this->castIdentityAdminFileUrl($document, 'back'),
         ];
+    }
+
+    public function castCategoryLabel(string $category): string
+    {
+        return match ($category) {
+            CastIdentityDocument::CATEGORY_PHOTO_ID => '顔写真付身分証',
+            CastIdentityDocument::CATEGORY_NON_PHOTO_ID => '顔写真なし身分証',
+            CastIdentityDocument::CATEGORY_ADDRESS_PROOF => '住所確認書類',
+            default => '—',
+        };
     }
 
     private function mapShopDocument(ShopLicenseDocument $document): array
@@ -620,9 +699,16 @@ class DocumentReviewService
     private function castTypeLabel(string $type): string
     {
         return match ($type) {
-            'passport' => '旅券',
-            'my_number' => 'マイナンバーカード',
-            default => '運転免許証',
+            'driver_license' => '運転免許証',
+            'passport' => '旅券（パスポート）',
+            'mynumber_card', 'my_number' => 'マイナンバーカード',
+            'residence_card' => '在留カード',
+            'health_insurance' => '健康保険証',
+            'pension_book' => '年金手帳',
+            'residence_certificate' => '住民票',
+            'utility_bill' => '公共料金領収書',
+            'id_card' => '身分証（旧）',
+            default => $type ?: '—',
         };
     }
 

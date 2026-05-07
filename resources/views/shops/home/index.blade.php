@@ -17,6 +17,7 @@
 @endphp
 @section('content')
 <div id="home-screen" data-discovery-mode="{{ $itemType }}">
+    @include('layouts.parts.location-pill')
     {{-- メインスワイパー（上下） --}}
     <div class="main-swiper swiper">
         <div class="swiper-wrapper">
@@ -141,6 +142,11 @@
                                 @endif
                                 <i class="fas fa-map-marker-alt rc-mappin" aria-hidden="true"></i>
                                 <span>{{ trim(($item['pref'] ?? '') . ' ' . ($item['city'] ?? '')) ?: '六本木' }}</span>
+                                @if(!empty($item['distance_label']))
+                                    <span class="distance-badge" style="margin-left:6px;">
+                                        <i class="fas fa-route"></i> {{ $item['distance_label'] }}
+                                    </span>
+                                @endif
                             </div>
                         </div>
 
@@ -251,7 +257,14 @@
                 {{-- プロフィール情報 --}}
                 <div class="card-bottom-info">
                     <h2 class="cast-name serif-font">{{ $item['name'] }}@if(!$isShop && isset($item['age'])) <span class="age">{{ $item['age'] }}</span>@endif</h2>
-                    <div class="card-location"><i class="fas fa-map-marker-alt"></i> 六本木</div>
+                    <div class="card-location">
+                        <i class="fas fa-map-marker-alt"></i> 六本木
+                        @if(!empty($item['distance_label']))
+                            <span class="distance-badge" style="margin-left:6px;">
+                                <i class="fas fa-route"></i> {{ $item['distance_label'] }}
+                            </span>
+                        @endif
+                    </div>
                     @if($isShop && isset($item['rating']))
                     <div class="card-rating">
                         <span class="card-rating-stars" aria-label="評価 {{ $item['rating'] }}">

@@ -151,28 +151,56 @@ class MypageController extends Controller
             'identityStatus' => $identityData['status'],
             'identityDocuments' => $identityData['documents'],
             'latestIdentityDocument' => $identityData['latest_document'],
+            'isVerified' => $identityData['is_verified'] ?? false,
+            'detectedPattern' => $identityData['pattern'] ?? 'photo',
+            'categoryDocuments' => $identityData['category_documents'] ?? [],
+            'allowedTypes' => $identityData['allowed_types'] ?? [],
+            'typeLabels' => $identityData['type_labels'] ?? [],
         ]);
     }
 
     /**
-     * 本人確認書類アップロード（デモ用）
+     * 本人確認書類アップロード。
+     *
+     * 対応する2パターン：
+     *   - photo_id：顔写真付身分証 1枚（運転免許／パスポート／マイナンバーカード／在留カード）
+     *   - non_photo_id ＋ address_proof：顔写真なし身分証（保険証等）＋ 住所確認書類（住民票等）の2枚セット
      */
     public function uploadIdentity(Request $request)
     {
+        $allowedCategories = [
+            \App\Models\CastIdentityDocument::CATEGORY_PHOTO_ID,
+            \App\Models\CastIdentityDocument::CATEGORY_NON_PHOTO_ID,
+            \App\Models\CastIdentityDocument::CATEGORY_ADDRESS_PROOF,
+        ];
+
         $request->validate([
-            'type' => 'required|string|in:driver_license,passport,my_number',
-            'front_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:8192',
-            'back_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:8192',
-            'expired_at' => 'nullable|date',
+            'category' => ['required', 'string', \Illuminate\Validation\Rule::in($allowedCategories)],
+            'type' => ['required', 'string'],
+            'front_file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:8192'],
+            'back_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:8192'],
+            'expired_at' => ['nullable', 'date'],
         ]);
+
+        $category = (string) $request->input('category');
+        $type = (string) $request->input('type');
+        $allowedTypes = \App\Models\CastIdentityDocument::allowedTypesFor($category);
+        if (!in_array($type, $allowedTypes, true)) {
+            return response()->json([
+                'success' => false,
+                'message' => '選択した書類種別がカテゴリと一致しません。',
+                'errors' => ['type' => ['カテゴリに対応する書類種別を選択してください。']],
+            ], 422);
+        }
 
         $castId = $this->currentCastId();
         $this->documentReviewService->uploadCastIdentityDocument(
             $castId,
-            (string) $request->input('type'),
+            $type,
             $request->file('front_file'),
             $request->file('back_file'),
-            $request->input('expired_at')
+            $request->input('expired_at'),
+            $category
         );
 
         return response()->json([

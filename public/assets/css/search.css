@@ -252,11 +252,11 @@ body.page-search-ai .ai-recommend {
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* 検索フィルタエリア */
+/* 検索フィルタエリア（アプリ全体のボルドー基調と統一） */
 .search-filter-box {
-    background: rgba(22, 14, 12, 0.98);
+    background: linear-gradient(180deg, rgba(74, 18, 42, 0.92), rgba(56, 13, 31, 0.92));
     padding: 10px 12px 12px;
-    border-bottom: 1px solid rgba(74, 54, 51, 0.55);
+    border-bottom: 1px solid rgba(220, 181, 104, 0.22);
     box-sizing: border-box;
     max-width: 100%;
 }
@@ -1300,13 +1300,13 @@ body.page-search .connection-list--search {
     pointer-events: none;
 }
 
-/* ---------- SEARCH詳細条件の強化UI ---------- */
+/* ---------- SEARCH詳細条件の強化UI（ボルドー基調と統一） ---------- */
 .detail-search-modal__window--search {
     max-width: min(560px, var(--max-content-width));
     background:
-        linear-gradient(180deg, rgba(220, 181, 104, 0.06), rgba(220, 181, 104, 0) 72px),
-        #140505;
-    border: 1px solid rgba(220, 181, 104, 0.12);
+        linear-gradient(180deg, rgba(220, 181, 104, 0.10), rgba(220, 181, 104, 0) 72px),
+        linear-gradient(180deg, var(--color-main) 0%, var(--dark-bg) 100%);
+    border: 1px solid rgba(220, 181, 104, 0.22);
 }
 
 .detail-search-modal__header--search {

@@ -14,7 +14,7 @@
             ? (int) $rv['trial_hourly_wage_max'] : null;
     @endphp
     <div class="recruit-ref-pay-highlight">
-        <span class="label">体験入店時給</span>
+        <span class="label">新規入店時給</span>
         <div class="line">
             @if($vHasTrial)
                 <span class="yen">¥</span><span class="num">{{ number_format($trialMinV) }}</span>
@@ -24,7 +24,7 @@
                     <span class="tilde">〜</span>
                 @endif
             @else
-                <span style="font-size:0.9rem;color:#71717a;font-weight:700;">体験入店求人で入力してください</span>
+                <span style="font-size:0.9rem;color:#71717a;font-weight:700;">新規入店求人で入力してください</span>
             @endif
         </div>
     </div>

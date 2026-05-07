@@ -416,6 +416,23 @@ class RecruitmentController extends Controller
             $shareText = 'ミセチョクの求人情報です。';
         }
 
+        // 距離（ログインユーザの探索拠点 → 店舗）
+        $distanceKm = null;
+        $distanceLabel = null;
+        $shopId = 's' . str_pad((string) $id, 8, '0', STR_PAD_LEFT);
+        $shopCoords = DB::table('shop_profiles')
+            ->where('shop_id', $shopId)
+            ->select('latitude', 'longitude')
+            ->first();
+        if ($shopCoords && $shopCoords->latitude !== null && $shopCoords->longitude !== null) {
+            $userLocation = app(\App\Services\UserLocationService::class);
+            $origin = $userLocation->getActiveLocation();
+            if ($origin) {
+                $distanceKm = $userLocation->distanceKm($origin['lat'], $origin['lng'], (float) $shopCoords->latitude, (float) $shopCoords->longitude);
+                $distanceLabel = $distanceKm !== null ? $userLocation->formatDistance($distanceKm) : null;
+            }
+        }
+
         return [
             'pageId' => 'job_info',
             'recruit' => $data['recruit'],
@@ -430,6 +447,8 @@ class RecruitmentController extends Controller
             'shareUrl' => $shareUrl,
             'shareTitle' => $shopName . 'の求人情報',
             'shareText' => mb_strimwidth($shareText, 0, 80, '…'),
+            'distanceKm' => $distanceKm,
+            'distanceLabel' => $distanceLabel,
         ];
     }
 

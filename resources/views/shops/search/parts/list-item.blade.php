@@ -17,6 +17,11 @@
                     <span class="shop-cast-search__sep" aria-hidden="true">・</span>
                     <span class="shop-cast-search__area">{{ $area }}</span>
                 @endif
+                @if(!empty($item['distance_label']))
+                    <span class="distance-badge distance-badge--inline" style="margin-left:6px;">
+                        <i class="fas fa-route"></i> {{ $item['distance_label'] }}
+                    </span>
+                @endif
             </div>
             @if($hitokoto !== '' || $hitokotoTime !== '')
                 <div class="shop-cast-search__line2 @if($hitokoto === '') shop-cast-search__line2--time-only @endif">

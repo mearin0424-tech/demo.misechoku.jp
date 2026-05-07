@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Shops;
 
 use App\Http\Controllers\Common\SearchController as BaseSearchController;
+use App\Services\UserLocationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -64,6 +65,8 @@ class SearchController extends BaseSearchController
             'cast_profiles.pref',
             'cast_profiles.city',
             'cast_profiles.pr',
+            'cast_profiles.latitude',
+            'cast_profiles.longitude',
             DB::raw("(SELECT ci.image_path FROM cast_images ci WHERE ci.cast_id = casts.id AND ci.type = 1 ORDER BY ci.is_main DESC, ci.main_order IS NULL, ci.main_order, ci.id LIMIT 1) as main_image_path"),
             'cast_profiles.updated_at as profile_updated_at',
         ];
@@ -101,6 +104,12 @@ class SearchController extends BaseSearchController
                 ->distinct();
         }
 
+        // 距離フィルタ：location_type と distance_km
+        $userLocation = app(UserLocationService::class);
+        $origin = $userLocation->getActiveLocation();
+        $distanceKmLimit = (int) $request->query('distance_km', 0);
+        $useDistance = $origin && in_array((string) $request->query('location_type'), ['current', 'geo'], true) && $distanceKmLimit > 0;
+
         return $rows->get()
             ->filter(function ($row) use ($normalizedKeyword) {
                 if ($normalizedKeyword === '') {
@@ -118,7 +127,7 @@ class SearchController extends BaseSearchController
 
                 return str_contains($this->normalizeSearchText($haystack), $normalizedKeyword);
             })
-            ->map(function ($row) {
+            ->map(function ($row) use ($userLocation, $origin) {
                 $birthday = $row->birthday ? Carbon::parse($row->birthday) : null;
                 $hitokotoTs = null;
                 if (!empty($row->hitokoto_updated_at)) {
@@ -133,6 +142,14 @@ class SearchController extends BaseSearchController
 
                 $hitokotoBody = (string) ($row->hitokoto_body ?? '');
 
+                $distanceKm = $origin
+                    ? $userLocation->distanceKm(
+                        $origin['lat'], $origin['lng'],
+                        $row->latitude !== null ? (float) $row->latitude : null,
+                        $row->longitude !== null ? (float) $row->longitude : null
+                    )
+                    : null;
+
                 return [
                     'id'                  => $row->id,
                     'name'                => $this->castDisplayName($row),
@@ -143,7 +160,19 @@ class SearchController extends BaseSearchController
                     'pr'                  => (string) ($row->pr ?? ''),
                     'hitokoto'            => $hitokotoBody,
                     'hitokoto_updated_at' => $hitokotoTs?->locale('ja')->diffForHumans(),
+                    'distance_km'         => $distanceKm,
+                    'distance_label'      => $distanceKm !== null ? $userLocation->formatDistance($distanceKm) : null,
                 ];
+            })
+            ->filter(function ($item) use ($useDistance, $distanceKmLimit) {
+                if (!$useDistance) {
+                    return true;
+                }
+                $km = $item['distance_km'] ?? null;
+                if ($km === null) {
+                    return false; // 緯度経度未登録は距離検索に含めない
+                }
+                return $km <= $distanceKmLimit;
             })
             ->values()
             ->all();

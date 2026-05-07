@@ -224,19 +224,35 @@
     .recruit-job-toggle button { flex: 1; border: none; background: transparent; color: #71717a; padding: 10px 4px; font-size: 12px; font-weight: 800; border-radius: 6px; cursor: pointer; transition: color .15s, background .15s; }
     .recruit-job-toggle button.is-active { background: #2a2210; color: #d4af37; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
 
-    /* ヒーロー直下の単一時給カード */
+    /* ヒーロー直下の単一時給カード（時給・ボーナスは目立たせる） */
     .recruit-ref-pay-highlight {
-        background: #110f0d;
-        border-radius: 8px;
-        padding: 16px;
-        border: 1px solid rgba(212,175,55,.5);
-        margin-bottom: 24px;
+        background: linear-gradient(135deg, rgba(220, 181, 104, 0.18), rgba(74, 18, 42, 0.5));
+        border-radius: 14px;
+        padding: 18px 20px;
+        border: 1px solid rgba(220, 181, 104, 0.55);
+        margin-bottom: 18px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 226, 163, 0.18);
+        position: relative;
+        overflow: hidden;
     }
-    .recruit-ref-pay-highlight .label { font-size: 10px; font-weight: 800; color: #d4af37; margin-bottom: 4px; display: block; }
-    .recruit-ref-pay-highlight .line { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
-    .recruit-ref-pay-highlight .yen { color: #d4af37; font-weight: 800; font-size: 0.875rem; }
-    .recruit-ref-pay-highlight .num { font-size: 1.875rem; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
-    .recruit-ref-pay-highlight .tilde { font-size: 0.875rem; color: #a1a1aa; }
+    .recruit-ref-pay-highlight::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at top right, rgba(255, 226, 163, 0.18), transparent 60%);
+        pointer-events: none;
+    }
+    .recruit-ref-pay-highlight .label {
+        font-size: 0.7rem; font-weight: 800; color: #ffe2a3; margin-bottom: 6px; display: block;
+        letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .recruit-ref-pay-highlight .line { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+    .recruit-ref-pay-highlight .yen { color: #ffe2a3; font-weight: 900; font-size: 1.05rem; }
+    .recruit-ref-pay-highlight .num {
+        font-size: 2.4rem; font-weight: 900; color: #fff; letter-spacing: -0.02em;
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+    }
+    .recruit-ref-pay-highlight .tilde { font-size: 1rem; color: #ffe2a3; font-weight: 700; }
 
     .recruit-ref-tags { display: flex; flex-wrap: wrap; gap: 6px; }
     .recruit-ref-tags span { font-size: 10px; padding: 4px 10px; border-radius: 999px; font-weight: 700; }
@@ -277,19 +293,22 @@
     .recruit-ref-share-row .recruit-ref-share-btn--line:hover { background: rgba(6,199,85,.1); }
     .recruit-ref-share-row .recruit-ref-share-btn--muted:hover { background: #27272a; }
 
-    /* 入店ボーナス（募集要項内） */
+    /* 入店ボーナス（募集要項内）— 採用ボーナスを目立たせる */
     .recruit-ref-bonus-card {
-        border-radius: 12px;
-        padding: 16px;
-        margin-bottom: 24px;
-        background: linear-gradient(to bottom right, #2a2210, #141210);
-        border: 1px solid rgba(212,175,55,.4);
-        box-shadow: 0 8px 24px rgba(0,0,0,.35);
+        border-radius: 14px;
+        padding: 18px 20px;
+        margin-bottom: 18px;
+        background: linear-gradient(135deg, rgba(220, 181, 104, 0.22), rgba(74, 18, 42, 0.55));
+        border: 1px solid rgba(220, 181, 104, 0.6);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 226, 163, 0.2);
     }
-    .recruit-ref-bonus-card__head { display: flex; align-items: center; gap: 8px; color: #d4af37; margin-bottom: 8px; font-size: 12px; font-weight: 800; letter-spacing: 0.06em; }
-    .recruit-ref-bonus-card__amount { display: flex; align-items: baseline; gap: 4px; margin-bottom: 10px; }
-    .recruit-ref-bonus-card__amount .num { font-size: 1.25rem; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
-    .recruit-ref-bonus-card__amount .suffix { font-size: 0.875rem; font-weight: 800; color: #d4d4d8; }
+    .recruit-ref-bonus-card__head { display: flex; align-items: center; gap: 8px; color: #ffe2a3; margin-bottom: 10px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+    .recruit-ref-bonus-card__amount { display: flex; align-items: baseline; gap: 6px; margin-bottom: 10px; }
+    .recruit-ref-bonus-card__amount .num {
+        font-size: 2.0rem; font-weight: 900; color: #fff; letter-spacing: -0.02em;
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+    .recruit-ref-bonus-card__amount .suffix { font-size: 1rem; font-weight: 800; color: #ffe2a3; }
     .recruit-ref-bonus-card__cond {
         font-size: 10px;
         color: #a1a1aa;
@@ -971,11 +990,29 @@
                 @endif
             </div>
 
-            <h1 class="recruit-ref-title">{{ $recruit['store_name'] ?? ($shop['name'] ?? '—') }}</h1>
+            <div class="recruit-ref-title-row">
+                <h1 class="recruit-ref-title">{{ $recruit['store_name'] ?? ($shop['name'] ?? '—') }}</h1>
+                @if(!empty($shareUrlResolved ?? null))
+                    @include('partials.share-menu', [
+                        'shareUrl' => $shareUrlResolved,
+                        'shareTitle' => $shareTitleResolved ?? '',
+                        'shareText' => $shareText ?? '',
+                        'menuId' => 'recruit-share-menu',
+                    ])
+                @endif
+            </div>
+
+            @if(!empty($distanceLabel ?? null))
+                <div style="margin: 6px 0 8px;">
+                    <span class="distance-badge">
+                        <i class="fas fa-route"></i> 現在位置から {{ $distanceLabel }}
+                    </span>
+                </div>
+            @endif
 
             @if($usesJobTypes)
                 <div class="recruit-job-toggle" id="recruit-job-toggle" role="tablist" aria-label="求人の種類">
-                    <button type="button" class="is-active" data-job-type="trial">体験入店</button>
+                    <button type="button" class="is-active" data-job-type="trial">新規入店</button>
                     <button type="button" data-job-type="help">ヘルプ</button>
                 </div>
                 @foreach(['trial' => $recruit_trial, 'help' => $recruit_help] as $vk => $rv)
@@ -986,7 +1023,7 @@
             @else
                 @if($hasHelp)
                     <div class="recruit-job-toggle" id="recruit-job-toggle" role="tablist" aria-label="募集枠">
-                        <button type="button" class="is-active" data-job-type="main">体験入店・本入店</button>
+                        <button type="button" class="is-active" data-job-type="main">新規入店・本入店</button>
                         <button type="button" data-job-type="help">ヘルプ</button>
                     </div>
                 @endif
@@ -994,7 +1031,7 @@
                 <div id="recruit-panel-main" data-job-panel="main">
                     <div class="recruit-ref-pay-highlight">
                         <div class="recruit-ref-pay-highlight__head">
-                            <span class="label">{{ $regularWage > 0 ? '本入時給' : ($hasTrial ? '体験時給' : '本入時給') }}</span>
+                            <span class="label">{{ $regularWage > 0 ? '本入時給' : ($hasTrial ? '新規時給' : '本入時給') }}</span>
                             @if(($regularWage > 0 && $regularWageMax !== null && $regularWageMax > $regularWage) || ($hasTrial && $trialWageMax !== null && $trialWageMax > (int) $recruit['trial_hourly_wage']))
                                 <span class="recruit-ref-pay-range-badge">RANGE</span>
                             @endif
@@ -1074,29 +1111,14 @@
                         </button>
                     @endif
 
-                    @if(!empty($shareUrlResolved ?? null))
-                        <div class="recruit-ref-share-row" role="group" aria-label="この求人を共有">
-                            <button type="button" class="recruit-ref-share-btn recruit-ref-share-btn--gold js-recruit-native-share">
-                                <i class="fas fa-share-alt" aria-hidden="true"></i>
-                                <span>共有</span>
-                            </button>
-                            <a href="{{ $xShareUrl }}" target="_blank" rel="noopener noreferrer" class="recruit-ref-share-btn recruit-ref-share-btn--muted" aria-label="X (旧 Twitter) で共有">
-                                <span class="recruit-ref-share-icon" aria-hidden="true">𝕏</span>
-                                <span>X</span>
-                            </a>
-                            <a href="{{ $lineShareUrl }}" target="_blank" rel="noopener noreferrer" class="recruit-ref-share-btn recruit-ref-share-btn--line" aria-label="LINE で共有">
-                                <i class="fab fa-line" aria-hidden="true"></i>
-                                <span>LINE</span>
-                            </a>
-                        </div>
-                    @endif
+                    {{-- 共有ボタンはページ上部のタイトル横に集約済み（partials.share-menu） --}}
                 </section>
 
                 <section id="requirements" aria-labelledby="section-requirements-heading">
                     <h2 id="section-requirements-heading" class="recruit-ref-h2-lg">
                         <span class="bar" aria-hidden="true"></span>
                         募集要項
-                        <span id="recruit-req-sub" class="recruit-ref-subtle">（体験・本入店）</span>
+                        <span id="recruit-req-sub" class="recruit-ref-subtle">（新規入店）</span>
                     </h2>
 
                     <div id="recruit-req-main">
@@ -1238,7 +1260,7 @@
             @endif
 
             <section id="info" aria-labelledby="section-info-heading">
-                <h2 id="section-info-heading" class="recruit-ref-h2-lg"><span class="bar" aria-hidden="true"></span> 店舗情報</h2>
+                <h2 id="section-info-heading" class="recruit-ref-h2-lg">店舗情報</h2>
 
                 <div class="recruit-ref-inforow"><span class="k">店名</span><span class="v">{{ $shop['name'] ?? ($recruit['store_name'] ?? '—') }}</span></div>
                 <div class="recruit-ref-inforow"><span class="k">業種</span><span class="v">{{ $shop['industry_name'] ?? '未設定' }}</span></div>
@@ -1395,7 +1417,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         reqHelp.hidden = (t !== 'help');
                     }
                     if (reqSub) {
-                        reqSub.textContent = t === 'help' ? '（ヘルプ）' : '（体験・本入店）';
+                        reqSub.textContent = t === 'help' ? '（ヘルプ）' : '（新規入店）';
                     }
                 }
             });

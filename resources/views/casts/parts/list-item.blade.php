@@ -36,6 +36,11 @@
                             {{ $locationLine }}
                         </span>
                     @endif
+                    @if(!empty($item['distance_label']))
+                        <span class="distance-badge distance-badge--inline">
+                            <i class="fas fa-route"></i> {{ $item['distance_label'] }}
+                        </span>
+                    @endif
                 </div>
             </div>
         </div>
