@@ -4,10 +4,14 @@
 
 @section('content')
     <div class="admin-page">
-        @include('admin.parts.page-title', ['eyebrow' => 'COLUMNS', 'title' => 'コラム管理'])
-        <p class="admin-description">
-            キャスト・店舗向けのお役立ちコラムを作成・公開します。未ログイン向けに表示する場合は「未ログイン表示」をオンにしてください。
-        </p>
+        @include('admin.parts.page-title', [
+            'eyebrow' => 'COLUMNS',
+            'title' => 'コラム管理',
+            'info' => '
+                <p>キャスト・店舗向けの<strong>お役立ちコラム</strong>を作成・公開します。</p>
+                <p>未ログイン向けに表示する場合は「<strong>未ログイン表示</strong>」をオンにしてください。</p>
+            ',
+        ])
 
         @if(session('status'))
             <div class="admin-alert">

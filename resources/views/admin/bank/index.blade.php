@@ -4,17 +4,19 @@
 
 @section('content')
     <div class="admin-page">
-        @include('admin.parts.page-title', ['eyebrow' => 'BANK ACCOUNT', 'title' => '運営口座情報設定'])
+        @include('admin.parts.page-title', [
+            'eyebrow' => 'BANK ACCOUNT',
+            'title' => '運営口座情報設定',
+            'info' => '
+                <p>お店側に発行する<strong>請求書に記載される、運営の振込先口座情報</strong>を登録します。</p>
+            ',
+        ])
 
         @if(session('status'))
             <div class="admin-alert">
                 {{ session('status') }}
             </div>
         @endif
-
-        <p class="admin-description">
-            お店側に発行する請求書に記載される、運営の振込先口座情報を登録します。
-        </p>
 
         <div class="admin-panel">
             <h2 class="admin-panel-title">口座情報</h2>

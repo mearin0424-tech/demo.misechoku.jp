@@ -32,12 +32,16 @@
 
     <div class="admin-page">
         <div class="u-flex-between">
-            @include('admin.parts.page-title', ['eyebrow' => 'INQUIRIES', 'title' => '問合せ管理'])
+            @include('admin.parts.page-title', [
+                'eyebrow' => 'INQUIRIES',
+                'title' => '問合せ管理',
+                'info' => '
+                    <p>ミセチョク運営への<strong>問い合わせ内容</strong>を一覧で確認・対応する画面です。</p>
+                    <p>未対応のものから優先的に処理してください。返信は登録メールアドレス宛にメールで行います。</p>
+                ',
+            ])
             @include('admin.parts.operation-achievement', ['operationAchievementRoute' => 'admin.inquiries.index'])
         </div>
-        <p class="admin-description">
-            ミセチョク運営への問い合わせ内容を一覧で確認・対応する画面です。未対応のものから優先的に処理してください。
-        </p>
 
         {{-- フィルタ＋検索 --}}
         <div class="admin-page-toolbar">

@@ -4,10 +4,17 @@
 
 @section('content')
     <div class="admin-page">
-        @include('admin.parts.page-title', ['eyebrow' => 'NG WORDS', 'title' => 'NGワード管理'])
-        <p class="admin-description">
-            メッセージなどで使用できないキーワードを登録・管理します。表示順は ID 昇順で固定です。
-        </p>
+        @include('admin.parts.page-title', [
+            'eyebrow' => 'NG WORDS',
+            'title' => 'NGワード管理',
+            'info' => '
+                <p>メッセージなどで使用できない<strong>キーワード</strong>を登録・管理します。</p>
+                <ul>
+                    <li>新規追加・編集・削除（無効化）が可能</li>
+                    <li>表示順は ID 昇順で固定</li>
+                </ul>
+            ',
+        ])
 
         @if (session('status'))
             <div class="admin-alert admin-alert-success">{{ session('status') }}</div>

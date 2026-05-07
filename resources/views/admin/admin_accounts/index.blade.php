@@ -4,11 +4,22 @@
 
 @section('content')
     <div class="admin-page">
-        @include('admin.parts.page-title', ['eyebrow' => 'ADMIN ACCOUNTS', 'title' => '運営アカウント管理'])
-        <p class="admin-description">
-            運営（管理者）アカウントの一覧と、ロールごとの権限設定を行います。<br>
-            ロールは <strong>スーパー管理者（admin）</strong> と <strong>オペレーター（staff）</strong> の2種類です。スーパー管理者は全権限を保有し、オペレーターは許可する機能をチェックボックスで選択できます。
-        </p>
+        <div class="u-flex-between u-flex-wrap u-gap-12">
+            @include('admin.parts.page-title', [
+                'eyebrow' => 'ADMIN ACCOUNTS',
+                'title' => '運営アカウント管理',
+                'info' => '
+                    <p>運営（管理者）アカウントの一覧と、ロールごとの権限設定を行います。</p>
+                    <ul>
+                        <li><strong>スーパー管理者（admin）</strong>：全権限を保有（変更不可）</li>
+                        <li><strong>オペレーター（staff）</strong>：許可する機能をチェックボックスで選択</li>
+                    </ul>
+                ',
+            ])
+            <a href="{{ route('admin.admin-accounts.operation-log') }}" class="btn-action btn-action-secondary">
+                <i class="fas fa-clipboard-list"></i> 運営操作ログ
+            </a>
+        </div>
 
         @if(session('status'))
             <div class="admin-alert admin-alert-success">{{ session('status') }}</div>

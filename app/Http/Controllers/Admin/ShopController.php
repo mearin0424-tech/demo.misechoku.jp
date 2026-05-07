@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\AdminOperationLogService;
 use App\Services\AdminPrivateAccessService;
 use App\Services\BillingManagementService;
 use Illuminate\Http\RedirectResponse;
@@ -15,6 +16,7 @@ class ShopController extends Controller
     public function __construct(
         private readonly BillingManagementService $billingManagementService,
         private readonly AdminPrivateAccessService $privateAccessService,
+        private readonly AdminOperationLogService $opLog,
     ) {
     }
 
@@ -212,9 +214,11 @@ class ShopController extends Controller
 
         $ok = $this->privateAccessService->unlockWithPassword('shop', $shopId, (string) $request->input('password'));
         if (!$ok) {
+            $this->opLog->record('shop.private_unlock.fail', 'shop', $shopId, 'パスワード認証失敗');
             return redirect()->route('admin.shops.show', $shopId)
                 ->with('private_unlock_error', '管理者パスワードが一致しません。');
         }
+        $this->opLog->record('shop.private_unlock', 'shop', $shopId, '店舗非公開情報の解除');
         return redirect()->route('admin.shops.show', $shopId)
             ->with('status', '非公開情報を解除しました（' . (int) ($this->privateAccessService->ttlSeconds() / 60) . '分間有効）。');
     }
@@ -243,6 +247,7 @@ class ShopController extends Controller
             'status' => 0,
             'updated_at' => now(),
         ]);
+        $this->opLog->record('shop.suspend', 'shop', $shopId, '店舗停止: ' . $shopId);
 
         $redirect = $request->input('redirect_to') === 'show'
             ? redirect()->route('admin.shops.show', $shopId)
@@ -266,6 +271,7 @@ class ShopController extends Controller
             'status' => 1,
             'updated_at' => now(),
         ]);
+        $this->opLog->record('shop.unsuspend', 'shop', $shopId, '店舗停止解除: ' . $shopId);
 
         $redirect = $request->input('redirect_to') === 'show'
             ? redirect()->route('admin.shops.show', $shopId)

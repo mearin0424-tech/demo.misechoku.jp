@@ -150,25 +150,18 @@
     @endphp
 
     <div class="dashboard-page">
-        @include('admin.parts.page-title', ['eyebrow' => 'OVERVIEW', 'title' => 'ダッシュボード'])
-
-        {{-- 役割バナー：売上管理との違いを明示 --}}
-        <div class="screen-role-banner">
-            <div class="screen-role-banner__col">
-                <div class="screen-role-banner__icon"><i class="fas fa-gauge-high"></i></div>
-                <div>
-                    <div class="screen-role-banner__eyebrow">この画面の役割</div>
-                    <div class="screen-role-banner__title">今この瞬間の<strong>運用状況</strong>と要対応タスク</div>
-                    <p class="screen-role-banner__lead">
-                        登録ユーザの伸び・取引件数・<strong>対応すべきタスク</strong>をリアルタイムで把握します。<br>
-                        ※運営の<strong>収益（仲介料／GMV／推移）</strong>の詳細は <a href="{{ route('admin.sales.index') }}">売上管理</a> をご確認ください。
-                    </p>
-                </div>
-            </div>
-            <a href="{{ route('admin.sales.index') }}" class="btn-action btn-action-secondary">
-                <i class="fas fa-chart-line"></i> 売上管理へ
-            </a>
-        </div>
+        @include('admin.parts.page-title', [
+            'eyebrow' => 'OVERVIEW',
+            'title' => 'ダッシュボード',
+            'info' => '
+                <p><strong>この画面の役割：</strong>今この瞬間の運用状況と要対応タスクを把握します。</p>
+                <ul>
+                    <li>登録ユーザの伸び・取引件数をリアルタイムで確認</li>
+                    <li>対応すべきタスク（本人確認・書類審査・請求／入金／振込）を一覧で確認</li>
+                </ul>
+                <p>運営の<strong>収益（仲介料／GMV／推移）</strong>の詳細は <a href="' . route('admin.sales.index') . '">売上管理</a> をご確認ください。</p>
+            ',
+        ])
 
         @if (session('status'))
             <div class="admin-alert admin-alert-success">{{ session('status') }}</div>

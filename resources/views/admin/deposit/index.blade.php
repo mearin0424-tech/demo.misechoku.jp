@@ -75,12 +75,16 @@
 
     <div class="admin-page">
         <div class="u-flex-between">
-            @include('admin.parts.page-title', ['eyebrow' => 'PAYMENTS & TRANSFERS', 'title' => '入金・振込管理'])
+            @include('admin.parts.page-title', [
+                'eyebrow' => 'PAYMENTS & TRANSFERS',
+                'title' => '入金・振込管理',
+                'info' => '
+                    <p><strong>店舗入金の照合</strong>と<strong>キャストへの振込記録</strong>を管理します。</p>
+                    <p>請求書発行は「<strong>請求書発行</strong>」画面で行ってください。</p>
+                ',
+            ])
             @include('admin.parts.operation-achievement', ['operationAchievementRoute' => 'admin.deposits.index'])
         </div>
-        <p class="admin-description">
-            店舗入金の照合とキャストへの振込記録を管理します。請求書発行は「請求書発行」画面で行ってください。
-        </p>
 
         @if(session('status'))
             <div class="admin-alert admin-alert-success">{{ session('status') }}</div>

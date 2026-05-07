@@ -55,6 +55,16 @@ return [
             'throw' => false,
         ],
 
+        // 機密ファイル（本人確認書類・営業許可証など）専用。
+        // root は storage/app/private で、Web からはアクセスできない。
+        // ファイル配信は必ずコントローラ経由（認証・権限・所有者チェック）で行う。
+        'private' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private'),
+            'visibility' => 'private',
+            'throw' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

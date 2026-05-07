@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SystemAccount;
+use App\Services\AdminOperationLogService;
 use App\Services\AdminPermissionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,6 +14,7 @@ class AdminAccountController extends Controller
 {
     public function __construct(
         private readonly AdminPermissionService $permissionService,
+        private readonly AdminOperationLogService $opLog,
     ) {
     }
 
@@ -66,6 +68,39 @@ class AdminAccountController extends Controller
         ]);
     }
 
+    /**
+     * 運営操作ログ一覧（管理者のみ閲覧）
+     */
+    public function operationLog(Request $request)
+    {
+        $action = (string) $request->query('action', '');
+        $targetType = (string) $request->query('target_type', '');
+        $logs = $this->opLog->search($action !== '' ? $action : null, $targetType !== '' ? $targetType : null, 500);
+
+        return view('admin.admin_accounts.operation_log', [
+            'logs' => $logs,
+            'filters' => [
+                'action' => $action,
+                'target_type' => $targetType,
+            ],
+            'actionOptions' => [
+                '' => '全て',
+                'cast.suspend' => 'キャスト停止',
+                'cast.unsuspend' => 'キャスト停止解除',
+                'shop.suspend' => '店舗停止',
+                'shop.unsuspend' => '店舗停止解除',
+                'cast.private_unlock' => 'キャスト非公開情報の解除',
+                'shop.private_unlock' => '店舗非公開情報の解除',
+                'role.update' => 'ロール権限変更',
+                'verification.cast.approve' => '本人確認 承認',
+                'verification.cast.reject' => '本人確認 差戻し',
+                'verification.shop.approve' => '店舗書類 承認',
+                'verification.shop.reject' => '店舗書類 差戻し',
+            ],
+            'actionLabel' => fn (string $a) => $this->opLog->actionLabel($a),
+        ]);
+    }
+
     public function updateRole(Request $request, string $role): RedirectResponse
     {
         $rolesCatalog = $this->permissionService->rolesCatalog();
@@ -82,7 +117,20 @@ class AdminAccountController extends Controller
         ]);
 
         $keys = (array) $request->input('permissions', []);
+        $beforeKeys = $this->permissionService->getRolePermissions($role);
         $this->permissionService->setRolePermissions($role, $keys);
+        $afterKeys = $this->permissionService->getRolePermissions($role);
+
+        $this->opLog->record(
+            'role.update',
+            'role',
+            $role,
+            'ロール権限を変更: ' . $role,
+            [
+                'before' => array_values($beforeKeys),
+                'after' => array_values($afterKeys),
+            ]
+        );
 
         return redirect()->route('admin.admin-accounts.roles.edit', $role)
             ->with('status', 'ロール権限を保存しました。');

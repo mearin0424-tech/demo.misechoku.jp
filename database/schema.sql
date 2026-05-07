@@ -50,17 +50,18 @@ CREATE TABLE IF NOT EXISTS `cast_profiles` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `cast_id` varchar(20) NOT NULL,
   `nickname` varchar(255) DEFAULT NULL,
-  `name` varchar(255) DEFAULT NULL,
-  `name_kana` varchar(100) DEFAULT NULL,
+  -- 以下は Eloquent 暗号化キャストの対象（AES-256-CBC ciphertext を格納するため TEXT に拡張）
+  `name` text DEFAULT NULL,
+  `name_kana` text DEFAULT NULL,
   `birthday` date DEFAULT NULL,
   `gender` tinyint DEFAULT NULL,
-  `zip` varchar(10) DEFAULT NULL,
+  `zip` text DEFAULT NULL,
   `pref` varchar(10) DEFAULT NULL,
   `city` varchar(100) DEFAULT NULL,
-  `addr1` varchar(100) DEFAULT NULL,
-  `addr2` varchar(100) DEFAULT NULL,
-  `addr3` varchar(100) DEFAULT NULL,
-  `tel` varchar(20) DEFAULT NULL,
+  `addr1` text DEFAULT NULL,
+  `addr2` text DEFAULT NULL,
+  `addr3` text DEFAULT NULL,
+  `tel` text DEFAULT NULL,
   `height` smallint DEFAULT NULL,
   `weight` smallint DEFAULT NULL,
   `bust` smallint DEFAULT NULL,
@@ -113,12 +114,13 @@ CREATE TABLE IF NOT EXISTS `shop_profiles` (
   `shop_id` varchar(20) NOT NULL,
   `shop_name` varchar(255) NOT NULL,
   `opened_on` date DEFAULT NULL,
-  `zip` varchar(20) DEFAULT NULL,
+  -- 以下は Eloquent 暗号化キャストの対象（TEXT に拡張）
+  `zip` text DEFAULT NULL,
   `pref` varchar(255) NOT NULL,
   `city` varchar(100) DEFAULT NULL,
-  `addr2` varchar(255) NOT NULL,
-  `addr3` varchar(255) DEFAULT NULL,
-  `tel` varchar(20) DEFAULT NULL,
+  `addr2` text NOT NULL,
+  `addr3` text DEFAULT NULL,
+  `tel` text DEFAULT NULL,
   `station1` varchar(255) DEFAULT NULL,
   `station2` varchar(255) DEFAULT NULL,
   `catch` varchar(255) DEFAULT NULL,
@@ -137,10 +139,10 @@ CREATE TABLE IF NOT EXISTS `shop_profiles` (
 CREATE TABLE IF NOT EXISTS `shop_managers` (
   `id` varchar(20) NOT NULL,
   `shop_id` varchar(20) NOT NULL,
-  `name` varchar(255) DEFAULT NULL,
+  `name` text DEFAULT NULL COMMENT 'Eloquent 暗号化対象（本名）',
   `email` varchar(255) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
-  `line_user_id` varchar(255) DEFAULT NULL COMMENT 'LINE Login 繝ｦ繝ｼ繧ｶ繝ｼID・・essaging API push 逕ｨ・・,
+  `line_user_id` text DEFAULT NULL COMMENT 'Eloquent 暗号化対象（LINE Login ユーザID）',
   `role` tinyint NOT NULL DEFAULT '0',
   `status` tinyint NOT NULL DEFAULT '0',
   `last_login_at` timestamp NULL DEFAULT NULL,
@@ -451,8 +453,9 @@ CREATE TABLE IF NOT EXISTS `bank_accounts` (
   `branch_name` varchar(100) NOT NULL,
   `branch_name_kana` varchar(100) NOT NULL,
   `account_type` varchar(20) NOT NULL,
-  `account_number` varchar(8) NOT NULL,
-  `account_name` varchar(100) NOT NULL,
+  -- Eloquent 暗号化対象（口座番号・口座名義）
+  `account_number` text NOT NULL,
+  `account_name` text NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -622,6 +625,29 @@ ALTER TABLE `push_subscriptions`
   ADD INDEX `push_subscriptions_user_idx` (`user_type`, `user_id`);
 
 -- ------------------------------------------------------------------------------
+-- 運営操作ログ（書類審査・アカウント停止・ロール変更・振込実行などを追跡）
+-- ------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `admin_operation_logs` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `operator_id` bigint unsigned DEFAULT NULL COMMENT 'system_accounts.id',
+  `operator_email` varchar(255) DEFAULT NULL,
+  `operator_role` varchar(20) DEFAULT NULL,
+  `action` varchar(64) NOT NULL COMMENT 'cast.suspend / role.update など',
+  `target_type` varchar(40) DEFAULT NULL COMMENT 'cast / shop / cast_identity_document / role 等',
+  `target_id` varchar(64) DEFAULT NULL,
+  `summary` varchar(255) DEFAULT NULL,
+  `payload` text COMMENT 'before/after などのJSON',
+  `ip_address` varchar(45) DEFAULT NULL,
+  `user_agent` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `admin_operation_logs_operator_idx` (`operator_id`),
+  KEY `admin_operation_logs_action_idx` (`action`),
+  KEY `admin_operation_logs_target_idx` (`target_type`, `target_id`),
+  KEY `admin_operation_logs_created_idx` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------------------------
 -- 運営管理：通知・リマインダー・未済タスクの仕様設定
 -- ------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `admin_notification_settings` (
@@ -658,3 +684,66 @@ CREATE TABLE IF NOT EXISTS `notification_preferences` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `notification_preferences_user_unique` (`user_type`, `user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------------------------
+-- 本人確認書類・店舗書類（Eloquent 暗号化対象列を含むため新規/再作成は TEXT 型）
+-- ------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `cast_identity_documents` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `cast_id` varchar(20) NOT NULL,
+  `type` varchar(40) NOT NULL,
+  `image_path_front` text DEFAULT NULL COMMENT 'Eloquent 暗号化対象',
+  `image_path_back`  text DEFAULT NULL COMMENT 'Eloquent 暗号化対象',
+  `status` tinyint NOT NULL DEFAULT 1,
+  `ng_reason` text DEFAULT NULL COMMENT 'Eloquent 暗号化対象',
+  `expired_at` date DEFAULT NULL,
+  `approved_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `cast_identity_documents_unique` (`cast_id`, `type`),
+  CONSTRAINT `cast_identity_documents_cast_id_foreign` FOREIGN KEY (`cast_id`) REFERENCES `casts` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `shop_license_documents` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `shop_id` varchar(20) NOT NULL,
+  `type` varchar(40) NOT NULL,
+  `image_path` text DEFAULT NULL COMMENT 'Eloquent 暗号化対象',
+  `status` tinyint NOT NULL DEFAULT 0,
+  `ng_reason` text DEFAULT NULL COMMENT 'Eloquent 暗号化対象',
+  `expired_at` date DEFAULT NULL,
+  `approved_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `shop_license_documents_unique` (`shop_id`, `type`),
+  CONSTRAINT `shop_license_documents_shop_id_foreign` FOREIGN KEY (`shop_id`) REFERENCES `shops` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------------------------
+-- 既存テーブル向け：暗号化対応のためのカラム拡張（既存 DB に対しても流せるよう冪等的に書く）
+-- AES-256-CBC + base64+JSON 包装の ciphertext は 短い PII でも 150 文字超になるため TEXT へ変更する
+-- ------------------------------------------------------------------------------
+ALTER TABLE `cast_profiles`
+  MODIFY COLUMN `name`      text DEFAULT NULL,
+  MODIFY COLUMN `name_kana` text DEFAULT NULL,
+  MODIFY COLUMN `zip`       text DEFAULT NULL,
+  MODIFY COLUMN `addr1`     text DEFAULT NULL,
+  MODIFY COLUMN `addr2`     text DEFAULT NULL,
+  MODIFY COLUMN `addr3`     text DEFAULT NULL,
+  MODIFY COLUMN `tel`       text DEFAULT NULL;
+
+ALTER TABLE `shop_profiles`
+  MODIFY COLUMN `zip`       text DEFAULT NULL,
+  MODIFY COLUMN `addr2`     text NOT NULL,
+  MODIFY COLUMN `addr3`     text DEFAULT NULL,
+  MODIFY COLUMN `tel`       text DEFAULT NULL;
+
+ALTER TABLE `shop_managers`
+  MODIFY COLUMN `name`         text DEFAULT NULL,
+  MODIFY COLUMN `line_user_id` text DEFAULT NULL;
+
+ALTER TABLE `bank_accounts`
+  MODIFY COLUMN `account_number` text NOT NULL,
+  MODIFY COLUMN `account_name`   text NOT NULL;

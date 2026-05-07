@@ -29,10 +29,14 @@
     @endphp
 
     <div class="admin-page">
-        @include('admin.parts.page-title', ['eyebrow' => 'TASKS', 'title' => '請求・振込タスク'])
-        <p class="admin-description">
-            ステータスに応じて、運営が今対応すべき請求・振込タスクだけを一覧化しています。実作業は各行の「詳細へ」から完了できます。
-        </p>
+        @include('admin.parts.page-title', [
+            'eyebrow' => 'TASKS',
+            'title' => '請求・振込タスク',
+            'info' => '
+                <p>ステータスに応じて、運営が<strong>今対応すべき請求・振込タスク</strong>だけを一覧化しています。</p>
+                <p>実作業は各行の「詳細へ」から完了できます。</p>
+            ',
+        ])
 
         @if(session('status'))
             <div class="admin-alert admin-alert-success">{{ session('status') }}</div>

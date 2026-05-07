@@ -4,10 +4,14 @@
 
 @section('content')
     <div class="admin-page">
-        @include('admin.parts.page-title', ['eyebrow' => 'NOTICES', 'title' => 'お知らせ管理'])
-        <p class="admin-description">
-            キャスト・店舗・未ログインユーザー向けのお知らせを作成・公開します。「未ログイン表示」をオンにすると /support/notices にも表示されます。
-        </p>
+        @include('admin.parts.page-title', [
+            'eyebrow' => 'NOTICES',
+            'title' => 'お知らせ管理',
+            'info' => '
+                <p>キャスト・店舗・未ログインユーザー向けの<strong>お知らせ</strong>を作成・公開します。</p>
+                <p>「<strong>未ログイン表示</strong>」をオンにすると <code>/support/notices</code> にも表示されます。</p>
+            ',
+        ])
 
         @if(session('status'))
             <div class="admin-alert">

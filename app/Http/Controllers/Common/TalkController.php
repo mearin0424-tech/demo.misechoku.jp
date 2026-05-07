@@ -94,6 +94,16 @@ class TalkController extends Controller
         abort_unless($partner, 404);
         $castId = $isCastPortal ? $currentId : $partnerId;
         $shopId = $isCastPortal ? $partnerId : $currentId;
+
+        // IDOR 対策：ログインユーザと相手との関係性が無ければ参照不可。
+        // 許可条件のいずれかを満たす必要がある：
+        //   (a) 既にメッセージ履歴がある
+        //   (b) 既に応募／面談（shop_job_applications）の関係がある
+        //   (c) お気に入り／いいね等（favorites）がある
+        //   (d) URL に ?initiate=1 を伴って遷移してきた（公開導線：求人/プロフィール画面の "メッセージを送る" ボタン）
+        if (!$this->canAccessTalkRoom($castId, $shopId, request()->boolean('initiate'))) {
+            abort(403, 'このトークルームを表示する権限がありません。');
+        }
         $blockState = $this->getBlockState($castId, $shopId, $isCastPortal);
         $currentApplicationStatus = $this->getCurrentApplicationStatus($castId, $shopId);
         $selectedTalkJobKind = $this->getSelectedTalkJobKind($castId, $shopId);
@@ -198,6 +208,14 @@ class TalkController extends Controller
         $partnerId = (string) $request->input('partner_id');
         abort_unless($this->resolvePartner($partnerId, $isCastPortal), 404);
         $this->abortIfBlocked($partnerId, $isCastPortal);
+
+        // IDOR 対策：トークルーム表示と同じ条件を送信時にも適用。
+        // 初回会話は initiate=1 を許可（送信後はメッセージ履歴が残るため以後のアクセスは自動的に通る）。
+        $checkCastId = $isCastPortal ? (string) $this->currentCastId() : $partnerId;
+        $checkShopId = $isCastPortal ? $partnerId : (string) $this->currentShopId();
+        if (!$this->canAccessTalkRoom($checkCastId, $checkShopId, (bool) $request->boolean('initiate'))) {
+            abort(403, 'このトークルームへの送信権限がありません。');
+        }
 
         $content = trim((string) $request->input('message'));
         $content = str_replace(["\r\n", "\r"], "\n", $content);
@@ -758,6 +776,52 @@ class TalkController extends Controller
             ->orderBy('created_at')
             ->orderBy('id')
             ->get();
+    }
+
+    /**
+     * トークルームに対する参照権限（IDOR 対策）。
+     *
+     * @param  string $castId       cast_id（or partner_id）
+     * @param  string $shopId       shop_id（or partner_id）
+     * @param  bool   $hasInitiate  初回会話を許可する明示的な遷移か（?initiate=1）
+     */
+    private function canAccessTalkRoom(string $castId, string $shopId, bool $hasInitiate): bool
+    {
+        // (a) メッセージ履歴
+        $hasMessages = DB::table('messages')
+            ->where('cast_id', $castId)
+            ->where('shop_id', $shopId)
+            ->exists();
+        if ($hasMessages) {
+            return true;
+        }
+
+        // (b) 応募／面談関係
+        if (Schema::hasTable('shop_job_applications') && Schema::hasTable('shop_jobs')) {
+            $hasApplication = DB::table('shop_job_applications')
+                ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
+                ->where('shop_job_applications.cast_id', $castId)
+                ->where('shop_jobs.shop_id', $shopId)
+                ->exists();
+            if ($hasApplication) {
+                return true;
+            }
+        }
+
+        // (c) お気に入り（いずれかの方向の保存／いいね）
+        if (Schema::hasTable('favorites')) {
+            $hasFavorite = DB::table('favorites')
+                ->where('cast_id', $castId)
+                ->where('shop_id', $shopId)
+                ->exists();
+            if ($hasFavorite) {
+                return true;
+            }
+        }
+
+        // (d) 公開導線からの初回会話（求人画面の「メッセージを送る」ボタンなど）
+        // 遷移後にメッセージが送信されれば (a) が成立するため、以後のアクセスは許可される。
+        return $hasInitiate;
     }
 
     private function resolvePartner(string $partnerId, bool $isCastPortal): ?array

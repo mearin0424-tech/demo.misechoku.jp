@@ -3925,6 +3925,202 @@ a.btn-action.btn-action-danger:hover {
 .u-w-100 { width: 100px; }
 .u-w-110 { width: 110px; }
 .u-w-140 { width: 140px; }
+
+/* ==========================================================================
+   行クリック対応テーブル（admin-table-clickable）
+   ========================================================================== */
+.admin-table-clickable .admin-row-clickable {
+    cursor: pointer;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+.admin-table-clickable .admin-row-clickable:hover {
+    background-color: rgba(220, 181, 104, 0.08);
+}
+.admin-table-clickable .admin-row-clickable:focus {
+    outline: 2px solid rgba(220, 181, 104, 0.5);
+    outline-offset: -2px;
+}
+.admin-row-clickable__link {
+    color: var(--admin-text);
+    font-weight: 700;
+    text-decoration: none;
+}
+.admin-row-clickable__link:hover {
+    color: #4a122a;
+    text-decoration: underline;
+}
+.admin-table-clickable tr.is-suspended:hover {
+    background-color: rgba(220, 38, 38, 0.10);
+}
+
+/* ==========================================================================
+   詳細画面の「公開プロフィール導線」カード
+   ========================================================================== */
+.admin-public-link-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 14px 18px;
+}
+.admin-public-link-card__icon {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(220, 181, 104, 0.18), rgba(220, 181, 104, 0.06));
+    color: #b8860b;
+    font-size: 1.1rem;
+}
+.admin-public-link-card__body {
+    flex: 1 1 280px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* ==========================================================================
+   共通バックリンク（admin.parts.back-link）
+   ========================================================================== */
+.admin-back-link {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+.admin-back-link i { font-size: 0.85em; }
+
+/* ==========================================================================
+   ページタイトル＋インフォボタン（admin-info-*）
+   ========================================================================== */
+.admin-title-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.admin-info-wrap {
+    position: relative;
+    display: inline-flex;
+}
+.admin-info-btn {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid rgba(220, 181, 104, 0.55);
+    background: linear-gradient(135deg, rgba(220, 181, 104, 0.18), rgba(220, 181, 104, 0.06));
+    color: #6e4f15;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+    padding: 0;
+    font-size: 0.92rem;
+}
+.admin-info-btn:hover {
+    background: linear-gradient(135deg, rgba(220, 181, 104, 0.32), rgba(220, 181, 104, 0.12));
+    transform: scale(1.05);
+}
+.admin-info-btn[aria-expanded="true"] {
+    background: linear-gradient(135deg, #4a122a, #6e1b3f);
+    color: #f8e9c8;
+    border-color: #4a122a;
+}
+.u-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.admin-info-popover {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 30;
+    width: min(420px, calc(100vw - 32px));
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid rgba(74, 18, 42, 0.12);
+    box-shadow: 0 18px 40px rgba(74, 18, 42, 0.18);
+    padding: 0;
+    overflow: hidden;
+}
+.admin-info-popover[hidden] { display: none; }
+
+/* 三角形ノッチ（ポインタ） */
+.admin-info-popover::before {
+    content: "";
+    position: absolute;
+    top: -7px;
+    left: 14px;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-top: 1px solid rgba(74, 18, 42, 0.12);
+    border-left: 1px solid rgba(74, 18, 42, 0.12);
+    transform: rotate(45deg);
+}
+.admin-info-popover__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(74, 18, 42, 0.08);
+    background: linear-gradient(135deg, rgba(220, 181, 104, 0.10), rgba(255, 255, 255, 0.6));
+    color: #4a122a;
+    font-size: 0.86rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
+.admin-info-popover__head i { color: #b8860b; }
+.admin-info-popover__head strong { flex: 1; font-weight: 800; }
+.admin-info-popover__close {
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 0;
+    background: transparent;
+    color: var(--admin-muted);
+    cursor: pointer;
+}
+.admin-info-popover__close:hover { background: rgba(74, 18, 42, 0.06); color: var(--admin-text); }
+.admin-info-popover__body {
+    padding: 14px 16px;
+    color: var(--admin-text);
+    font-size: 0.92rem;
+    line-height: 1.7;
+}
+.admin-info-popover__body p { margin: 0 0 8px; }
+.admin-info-popover__body p:last-child { margin-bottom: 0; }
+.admin-info-popover__body ul,
+.admin-info-popover__body ol { margin: 0 0 8px; padding-left: 18px; }
+.admin-info-popover__body li { margin-bottom: 4px; line-height: 1.6; }
+.admin-info-popover__body strong { color: #4a122a; }
+.admin-info-popover__body code {
+    background: rgba(74, 18, 42, 0.06);
+    padding: 1px 6px;
+    border-radius: 6px;
+    font-size: 0.86em;
+}
+.admin-info-popover__body a {
+    color: #4a122a;
+    text-decoration: underline;
+    text-decoration-color: rgba(220, 181, 104, 0.7);
+    text-underline-offset: 2px;
+}
 .u-text-muted { color: var(--admin-muted); }
 .u-fs-xs { font-size: 0.7rem; }
 

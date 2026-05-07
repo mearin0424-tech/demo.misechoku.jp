@@ -28,6 +28,15 @@ class BankAccount extends Model
         'account_name',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            // 口座番号と口座名義は機微情報のため暗号化（復号失敗時は null）
+            'account_number' => \App\Casts\SafeEncrypted::class,
+            'account_name'   => \App\Casts\SafeEncrypted::class,
+        ];
+    }
+
     public function scopeForHolder(Builder $query, string $holderType, string $holderId): Builder
     {
         return $query

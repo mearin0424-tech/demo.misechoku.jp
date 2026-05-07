@@ -29,6 +29,9 @@ class ShopLicenseDocument extends Model
         return [
             'expired_at' => 'date',
             'approved_at' => 'datetime',
+            // 機密ファイルパス＋差戻し理由を暗号化（復号失敗時は null）
+            'image_path' => \App\Casts\SafeEncrypted::class,
+            'ng_reason'  => \App\Casts\SafeEncrypted::class,
         ];
     }
 

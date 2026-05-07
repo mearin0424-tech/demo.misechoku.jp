@@ -379,12 +379,17 @@ class MypageController extends Controller
             abort(404, '書類が見つかりません。');
         }
 
-        $relative = $this->documentReviewService->shopLicenseRelativePublicPath($document->image_path);
-        if ($relative === null || !Storage::disk('public')->exists($relative)) {
+        // 新形式 (private/...) と旧形式 (public/...) の両方に対応する
+        $resolved = $this->documentReviewService->resolveDocumentDiskPath($document->image_path);
+        if ($resolved === null) {
+            abort(404, 'ファイルが見つかりません。');
+        }
+        [$disk, $relative] = $resolved;
+        if (!Storage::disk($disk)->exists($relative)) {
             abort(404, 'ファイルが見つかりません。');
         }
 
-        $absolute = Storage::disk('public')->path($relative);
+        $absolute = Storage::disk($disk)->path($relative);
         $mime = @mime_content_type($absolute) ?: 'application/octet-stream';
 
         return response()->file($absolute, [

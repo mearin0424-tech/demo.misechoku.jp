@@ -248,6 +248,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/verification/cast/{document}/reject', [AdminVerification::class, 'rejectCast'])->name('verification.cast.reject');
             Route::post('/verification/shopdoc/{document}/approve', [AdminVerification::class, 'approveShopDocument'])->name('verification.shopdoc.approve');
             Route::post('/verification/shopdoc/{document}/reject', [AdminVerification::class, 'rejectShopDocument'])->name('verification.shopdoc.reject');
+            // 機密ファイル配信（private ディスクから直接ストリーム。Web 直アクセス禁止）
+            Route::get('/verification/cast/{document}/file/{side}', [AdminVerification::class, 'viewCastFile'])
+                ->where('side', 'front|back')
+                ->whereNumber('document')
+                ->name('verification.cast.file');
+            Route::get('/verification/shopdoc/{document}/file', [AdminVerification::class, 'viewShopFile'])
+                ->whereNumber('document')
+                ->name('verification.shopdoc.file');
         });
 
         // 蝠上＞蜷医ｏ縺帷ｮ｡逅・
@@ -259,6 +267,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // 繧｢繧ｫ繧ｦ繝ｳ繝育ｮ｡逅・ｼ磯°蝟ｶ・・
         Route::middleware('admin.permission:accounts.admins')->group(function () {
             Route::get('/admin-accounts', [AdminAccount::class, 'index'])->name('admin-accounts.index');
+            Route::get('/admin-accounts/operation-log', [AdminAccount::class, 'operationLog'])->name('admin-accounts.operation-log');
             Route::get('/admin-accounts/roles/{role}/edit', [AdminAccount::class, 'editRole'])
                 ->where('role', 'admin|staff')
                 ->name('admin-accounts.roles.edit');

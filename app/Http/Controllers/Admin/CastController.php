@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\AdminOperationLogService;
 use App\Services\AdminPrivateAccessService;
 use App\Services\BillingManagementService;
 use Illuminate\Http\RedirectResponse;
@@ -16,6 +17,7 @@ class CastController extends Controller
     public function __construct(
         private readonly BillingManagementService $billingManagementService,
         private readonly AdminPrivateAccessService $privateAccessService,
+        private readonly AdminOperationLogService $opLog,
     ) {
     }
 
@@ -145,9 +147,11 @@ class CastController extends Controller
 
         $ok = $this->privateAccessService->unlockWithPassword('cast', $castId, (string) $request->input('password'));
         if (!$ok) {
+            $this->opLog->record('cast.private_unlock.fail', 'cast', $castId, 'パスワード認証失敗');
             return redirect()->route('admin.casts.show', $castId)
                 ->with('private_unlock_error', '管理者パスワードが一致しません。');
         }
+        $this->opLog->record('cast.private_unlock', 'cast', $castId, 'キャスト非公開情報の解除');
         return redirect()->route('admin.casts.show', $castId)
             ->with('status', '非公開情報を解除しました（' . (int) ($this->privateAccessService->ttlSeconds() / 60) . '分間有効）。');
     }
@@ -171,6 +175,7 @@ class CastController extends Controller
             'status' => 2,
             'updated_at' => now(),
         ]);
+        $this->opLog->record('cast.suspend', 'cast', $castId, 'キャスト停止: ' . $castId);
 
         $redirect = $request->input('redirect_to') === 'show'
             ? redirect()->route('admin.casts.show', $castId)
@@ -190,6 +195,7 @@ class CastController extends Controller
             'status' => 1,
             'updated_at' => now(),
         ]);
+        $this->opLog->record('cast.unsuspend', 'cast', $castId, 'キャスト停止解除: ' . $castId);
 
         $redirect = $request->input('redirect_to') === 'show'
             ? redirect()->route('admin.casts.show', $castId)

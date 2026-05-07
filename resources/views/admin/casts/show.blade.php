@@ -57,9 +57,7 @@
                     </button>
                 </form>
             @endif
-            <a href="{{ route('admin.casts.index') }}" class="btn-action btn-action-secondary">
-                <i class="fas fa-arrow-left"></i> 一覧へ戻る
-            </a>
+            @include('admin.parts.back-link', ['url' => route('admin.casts.index')])
         </div>
     </div>
 
@@ -110,48 +108,18 @@
         </div>
     </section>
 
-    {{-- 公開プロフィール --}}
-    <section class="admin-panel">
-        <h2 class="admin-panel-title">公開プロフィール</h2>
-        <div class="inquiry-detail-meta">
-            <div class="inquiry-detail-meta-item">
-                <div class="inquiry-detail-meta-label">ニックネーム</div>
-                <div class="inquiry-detail-meta-value">{{ $profile->nickname ?? '—' }}</div>
-            </div>
-            <div class="inquiry-detail-meta-item">
-                <div class="inquiry-detail-meta-label">年齢</div>
-                <div class="inquiry-detail-meta-value">{{ $age !== null ? $age . ' 歳' : '—' }}</div>
-            </div>
-            <div class="inquiry-detail-meta-item">
-                <div class="inquiry-detail-meta-label">活動エリア</div>
-                <div class="inquiry-detail-meta-value">{{ trim(($profile->pref ?? '') . ' ' . ($profile->city ?? '')) ?: '—' }}</div>
-            </div>
-            <div class="inquiry-detail-meta-item">
-                <div class="inquiry-detail-meta-label">身長 / 体重</div>
-                <div class="inquiry-detail-meta-value">
-                    {{ ($profile->height ?? null) ? $profile->height . ' cm' : '—' }} /
-                    {{ ($profile->weight ?? null) ? $profile->weight . ' kg' : '—' }}
-                </div>
-            </div>
-            <div class="inquiry-detail-meta-item">
-                <div class="inquiry-detail-meta-label">B / W / H</div>
-                <div class="inquiry-detail-meta-value">
-                    {{ ($profile->bust ?? null) ?: '—' }} / {{ ($profile->waist ?? null) ?: '—' }} / {{ ($profile->hip ?? null) ?: '—' }}
-                </div>
-            </div>
-            <div class="inquiry-detail-meta-item">
-                <div class="inquiry-detail-meta-label">経験年数</div>
-                <div class="inquiry-detail-meta-value">{{ $profile->years_exp ?? '—' }}</div>
-            </div>
-            <div class="inquiry-detail-meta-item">
-                <div class="inquiry-detail-meta-label">職種</div>
-                <div class="inquiry-detail-meta-value">{{ $profile->profession ?? '—' }}</div>
-            </div>
-            <div class="inquiry-detail-meta-item inquiry-detail-meta-item--full">
-                <div class="inquiry-detail-meta-label">PR</div>
-                <div class="inquiry-detail-meta-value">{{ $profile->pr ?? '—' }}</div>
-            </div>
+    {{-- 公開プロフィール導線（アプリ内で公開されている情報はそちらで確認） --}}
+    <section class="admin-panel admin-public-link-card">
+        <div class="admin-public-link-card__icon"><i class="fas fa-eye"></i></div>
+        <div class="admin-public-link-card__body">
+            <h2 class="admin-panel-title u-mb-0">公開プロフィール</h2>
+            <p class="admin-note u-mb-0">
+                ニックネーム・年齢・身長／体重／BWH・PR・職種などの<strong>公開情報</strong>は、ユーザーと同じ画面で確認できます。
+            </p>
         </div>
+        <a href="{{ route('share.cast.show', $castId) }}" target="_blank" rel="noopener" class="btn-action btn-action-secondary">
+            <i class="fas fa-arrow-up-right-from-square"></i> プロフィール画面を開く
+        </a>
     </section>
 
     {{-- 運用実績（常時表示） --}}
@@ -188,7 +156,6 @@
                             <th>店舗</th>
                             <th>ステータス</th>
                             <th>結果日</th>
-                            <th>初出勤</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -217,7 +184,6 @@
                                 </td>
                                 <td>{{ $appStatusLabel }}</td>
                                 <td>{{ $app->result_date ? \Illuminate\Support\Carbon::parse($app->result_date)->format('Y-m-d') : '—' }}</td>
-                                <td>{{ $app->real_start_date ? \Illuminate\Support\Carbon::parse($app->real_start_date)->format('Y-m-d') : '—' }}</td>
                             </tr>
                         @endforeach
                     </tbody>

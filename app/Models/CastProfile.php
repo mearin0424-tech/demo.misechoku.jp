@@ -43,6 +43,18 @@ class CastProfile extends Model
             'birthday' => 'date',
             'latitude' => 'decimal:7',
             'longitude' => 'decimal:7',
+            // PII 暗号化（AES-256-CBC, 復号失敗時は null を返す耐障害キャスト）
+            'name'      => \App\Casts\SafeEncrypted::class,
+            'name_kana' => \App\Casts\SafeEncrypted::class,
+            'zip'       => \App\Casts\SafeEncrypted::class,
+            'addr1'     => \App\Casts\SafeEncrypted::class,
+            'addr2'     => \App\Casts\SafeEncrypted::class,
+            'addr3'     => \App\Casts\SafeEncrypted::class,
+            'addr'      => \App\Casts\SafeEncrypted::class,
+            'building'  => \App\Casts\SafeEncrypted::class,
+            'tel'       => \App\Casts\SafeEncrypted::class,
+            'memo'      => \App\Casts\SafeEncrypted::class,
+            'ng_reason' => \App\Casts\SafeEncrypted::class,
         ];
     }
 

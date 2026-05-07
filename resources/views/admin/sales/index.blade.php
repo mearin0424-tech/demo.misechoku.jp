@@ -38,24 +38,20 @@
 @endphp
 
 <div class="admin-page sales-page">
-    @include('admin.parts.page-title', ['eyebrow' => 'SALES & REVENUE', 'title' => '売上管理'])
-
-    {{-- 役割バナー：ダッシュボードとの違いを明示 --}}
-    <div class="screen-role-banner">
-        <div class="screen-role-banner__col">
-            <div class="screen-role-banner__icon"><i class="fas fa-chart-line"></i></div>
-            <div>
-                <div class="screen-role-banner__eyebrow">この画面の役割</div>
-                <div class="screen-role-banner__title">運営の<strong>収益サイド</strong>を可視化</div>
-                <p class="screen-role-banner__lead">
-                    仲介料収益・取引総額（GMV）・サブスクリプション収益の<strong>推移と内訳</strong>を確認します。<br>
-                    ※「今この瞬間の対応すべきタスク」は <a href="{{ route('admin.dashboard') }}">ダッシュボード</a> をご確認ください。
-                </p>
-            </div>
-        </div>
-        <a href="{{ route('admin.dashboard') }}" class="btn-action btn-action-secondary">
-            <i class="fas fa-arrow-left"></i> ダッシュボードへ
-        </a>
+    <div class="u-flex-between u-flex-wrap u-gap-12">
+        @include('admin.parts.page-title', [
+            'eyebrow' => 'SALES & REVENUE',
+            'title' => '売上管理',
+            'info' => '
+                <p><strong>この画面の役割：</strong>運営の収益サイドを可視化します。</p>
+                <ul>
+                    <li>仲介料収益・取引総額（GMV）の<strong>推移と内訳</strong>を確認</li>
+                    <li>サブスクリプション収益（連携後）の確認</li>
+                </ul>
+                <p>「今この瞬間の対応すべきタスク」は <a href="' . route('admin.dashboard') . '">ダッシュボード</a> をご確認ください。</p>
+            ',
+        ])
+        @include('admin.parts.back-link', ['url' => route('admin.dashboard'), 'label' => 'ダッシュボードへ戻る'])
     </div>
 
     {{-- 期間切替 --}}

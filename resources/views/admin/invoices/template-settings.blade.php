@@ -4,10 +4,14 @@
 
 @section('content')
     <div class="admin-page">
-        @include('admin.parts.page-title', ['eyebrow' => 'INVOICE TEMPLATE', 'title' => '請求書テンプレート設定'])
-        <p class="admin-description">
-            請求書に表示する発行元名・メールアドレス・ロゴ・備考文を設定できます。設定は帳票テンプレートのプレビューおよび発行される請求書に反映されます。
-        </p>
+        @include('admin.parts.page-title', [
+            'eyebrow' => 'INVOICE TEMPLATE',
+            'title' => '請求書テンプレート設定',
+            'info' => '
+                <p>請求書に表示する<strong>発行元名・メールアドレス・ロゴ・備考文</strong>を設定できます。</p>
+                <p>設定は帳票テンプレートのプレビューおよび発行される請求書に反映されます。</p>
+            ',
+        ])
 
         @if(session('status'))
             <div class="admin-alert">
@@ -49,7 +53,7 @@
                     <p class="admin-note" style="margin-top: 6px;">請求書の「備考」欄に表示する文言。未入力の場合は既定の説明文を表示します。</p>
                 </div>
                 <div class="admin-form-actions">
-                    <a href="{{ route('admin.invoices.index') }}" class="btn-action btn-action-secondary">請求書発行画面へ戻る</a>
+                    @include('admin.parts.back-link', ['url' => route('admin.invoices.index'), 'label' => '請求書発行画面へ戻る'])
                     <button type="submit" class="btn-action manage">
                         <i class="fas fa-save"></i> 設定を保存
                     </button>

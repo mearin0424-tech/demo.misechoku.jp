@@ -6,9 +6,7 @@
 <div class="admin-page">
     <div class="u-flex-between u-flex-wrap u-gap-12">
         @include('admin.parts.page-title', ['eyebrow' => 'ROLE PERMISSIONS', 'title' => 'ロール権限：' . ($roleMeta['label'] ?? $role)])
-        <a href="{{ route('admin.admin-accounts.index') }}" class="btn-action btn-action-secondary">
-            <i class="fas fa-arrow-left"></i> 一覧へ戻る
-        </a>
+        @include('admin.parts.back-link', ['url' => route('admin.admin-accounts.index')])
     </div>
 
     @if(session('status'))

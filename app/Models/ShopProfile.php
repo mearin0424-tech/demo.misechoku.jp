@@ -40,6 +40,14 @@ class ShopProfile extends Model
             'opened_on' => 'date',
             'latitude' => 'decimal:7',
             'longitude' => 'decimal:7',
+            // PII 暗号化（連絡先・正確な住所・運営メモ）。pref/city などのエリア情報は検索に使うため平文。
+            'zip'      => \App\Casts\SafeEncrypted::class,
+            'addr'     => \App\Casts\SafeEncrypted::class,
+            'addr2'    => \App\Casts\SafeEncrypted::class,
+            'addr3'    => \App\Casts\SafeEncrypted::class,
+            'building' => \App\Casts\SafeEncrypted::class,
+            'tel'      => \App\Casts\SafeEncrypted::class,
+            'memo'     => \App\Casts\SafeEncrypted::class,
         ];
     }
 

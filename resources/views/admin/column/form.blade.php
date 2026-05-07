@@ -83,7 +83,7 @@
         </div>
 
         <div class="admin-form-actions">
-            <a href="{{ route('admin.columns.index') }}" class="btn-action btn-action-secondary">一覧へ戻る</a>
+            @include('admin.parts.back-link', ['url' => route('admin.columns.index')])
             <button type="submit" class="btn-action manage" @if($categories->isEmpty()) disabled @endif>
                 <i class="fas fa-save"></i> {{ $isEdit ? '更新する' : '登録する' }}
             </button>

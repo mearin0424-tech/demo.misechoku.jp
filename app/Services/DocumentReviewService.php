@@ -39,8 +39,10 @@ class DocumentReviewService
         ?UploadedFile $backFile = null,
         ?string $expiredAt = null
     ): CastIdentityDocument {
-        $frontPath = $frontFile->store('public/casts/identity');
-        $backPath = $backFile?->store('public/casts/identity');
+        // 機密ファイルは Web から直接アクセスできない private ディスク (storage/app/private) に保存する。
+        // 配信は必ず認証済みコントローラ経由で行う。
+        $frontPath = 'private/' . $frontFile->store('casts/identity', 'private');
+        $backPath = $backFile ? 'private/' . $backFile->store('casts/identity', 'private') : null;
 
         $document = CastIdentityDocument::query()->updateOrCreate(
             [
@@ -172,8 +174,9 @@ class DocumentReviewService
         UploadedFile $file,
         ?string $expiredAt = null
     ): ShopLicenseDocument {
-        // storage/app/public 配下（/storage シンボリックリンクで公開可）。旧データは public/ 接頭辞で保存されていた。
-        $path = $file->store('shops/documents', 'public');
+        // 機密ファイルは Web から直接アクセスできない private ディスク (storage/app/private) に保存する。
+        // 配信は必ず認証済みコントローラ経由で行う。
+        $path = 'private/' . $file->store('shops/documents', 'private');
 
         $document = ShopLicenseDocument::query()->updateOrCreate(
             [
@@ -485,8 +488,8 @@ class DocumentReviewService
             'expired_at' => optional($document->expired_at)->format('Y-m-d'),
             'approved_at' => optional($document->approved_at)->format('Y-m-d H:i'),
             'updated_at_label' => optional($document->updated_at)->format('Y-m-d H:i'),
-            'front_url' => $this->documentUrl($document->image_path_front),
-            'back_url' => $this->documentUrl($document->image_path_back),
+            'front_url' => $this->castIdentityAdminFileUrl($document, 'front'),
+            'back_url' => $this->castIdentityAdminFileUrl($document, 'back'),
         ];
     }
 
@@ -561,8 +564,8 @@ class DocumentReviewService
             'approved_at_label' => $this->formatDateTime($document->approved_at),
             'updated_at_label' => $this->formatDateTime($document->updated_at),
             'updated_at_sort' => $document->updated_at ? strtotime((string) $document->updated_at) : 0,
-            'front_url' => $this->documentUrl($document->image_path_front),
-            'back_url' => $this->documentUrl($document->image_path_back),
+            'front_url' => $this->castIdentityAdminFileUrl($document, 'front'),
+            'back_url' => $this->castIdentityAdminFileUrl($document, 'back'),
         ];
     }
 
@@ -591,7 +594,7 @@ class DocumentReviewService
             'updated_at_label' => $this->formatDateTime($document->updated_at),
             'updated_at_sort' => $document->updated_at ? strtotime((string) $document->updated_at) : 0,
             'expiry_filter_key' => $expiryFilterKey,
-            'file_url' => $this->documentUrl($document->image_path),
+            'file_url' => $this->shopLicenseAdminFileUrl($document),
         ];
     }
 
@@ -664,6 +667,8 @@ class DocumentReviewService
 
     /**
      * DB に保存されている image_path を、public ディスク上の相対パスに正規化する。
+     * 旧データ（public/...）と新データ（private/...）の両方に対応するため、
+     * 公開URL生成は新形式では null（=コントローラ経由配信のみ）。
      */
     public function shopLicenseRelativePublicPath(?string $storedPath): ?string
     {
@@ -675,18 +680,92 @@ class DocumentReviewService
         if (str_starts_with($path, 'public/')) {
             return substr($path, strlen('public/'));
         }
+        if (str_starts_with($path, 'private/')) {
+            // 新形式は Web 公開しないため null を返す（呼び出し側はコントローラ経由でアクセスする）
+            return null;
+        }
 
         return ltrim($path, '/');
+    }
+
+    /**
+     * DB に保存されている image_path から、ディスク名と相対パスを返す。
+     *
+     * - 'private/...' → 'local' ディスク, パスは 'private/...' のまま（root=storage_path('app')）
+     * - 'public/...'  → 'local' ディスク, パスは 'public/...' のまま（旧データ互換）
+     * - その他       → 'public' ディスク（旧データ互換）
+     *
+     * @return array{0:string, 1:string}|null  [disk, relativePath] または null（パス無し）
+     */
+    public function resolveDocumentDiskPath(?string $storedPath): ?array
+    {
+        if (empty($storedPath)) {
+            return null;
+        }
+        $path = str_replace('\\', '/', $storedPath);
+        if (str_starts_with($path, 'private/') || str_starts_with($path, 'public/')) {
+            return ['local', $path];
+        }
+        return ['public', ltrim($path, '/')];
+    }
+
+    /**
+     * ファイルが新形式（private ディスク）に保存されているかを返す。
+     */
+    public function isPrivateStored(?string $storedPath): bool
+    {
+        if (empty($storedPath)) {
+            return false;
+        }
+        return str_starts_with(str_replace('\\', '/', $storedPath), 'private/');
     }
 
     private function documentUrl(?string $path): ?string
     {
         $relative = $this->shopLicenseRelativePublicPath($path);
         if ($relative === null) {
+            // 新形式（private）はコントローラ経由のルート URL を使う必要があるため、
+            // 表示側で route('shop.mypage.documents.view', [...]) などに切り替える。
             return null;
         }
 
         return Storage::disk('public')->url($relative);
+    }
+
+    /**
+     * 管理画面（運営）からキャスト本人確認書類を閲覧するためのファイル URL。
+     * - 旧形式（public/...）：そのまま公開URL
+     * - 新形式（private/...）：認証＋権限付き管理画面ルート
+     *
+     * @param  object  $document  CastIdentityDocument or DB row stdClass
+     */
+    public function castIdentityAdminFileUrl(object $document, string $side): ?string
+    {
+        $path = $side === 'back' ? ($document->image_path_back ?? null) : ($document->image_path_front ?? null);
+        if (empty($path)) {
+            return null;
+        }
+        if ($this->isPrivateStored($path)) {
+            return route('admin.verification.cast.file', ['document' => $document->id, 'side' => $side]);
+        }
+        return $this->documentUrl($path);
+    }
+
+    /**
+     * 管理画面（運営）から店舗書類を閲覧するためのファイル URL。
+     *
+     * @param  object  $document  ShopLicenseDocument or DB row stdClass
+     */
+    public function shopLicenseAdminFileUrl(object $document): ?string
+    {
+        $path = $document->image_path ?? null;
+        if (empty($path)) {
+            return null;
+        }
+        if ($this->isPrivateStored($path)) {
+            return route('admin.verification.shopdoc.file', ['document' => $document->id]);
+        }
+        return $this->documentUrl($path);
     }
 
     private function formatDateTime($value): ?string

@@ -21,12 +21,16 @@
 
     <div class="admin-page">
         <div class="u-flex-between">
-            @include('admin.parts.page-title', ['eyebrow' => 'INVOICES', 'title' => '請求書発行'])
+            @include('admin.parts.page-title', [
+                'eyebrow' => 'INVOICES',
+                'title' => '請求書発行',
+                'info' => '
+                    <p>キャストからの<strong>入金依頼（店舗承認待ち）</strong>と、<strong>店舗承認後の請求書発行</strong>をまとめて扱います。</p>
+                    <p>入金照合・キャスト振込は「<strong>入金確認・振込</strong>」画面で行ってください。</p>
+                ',
+            ])
             @include('admin.parts.operation-achievement', ['operationAchievementRoute' => 'admin.invoices.index'])
         </div>
-        <p class="admin-description">
-            キャストからの入金依頼（店舗承認待ち）と店舗承認後の請求書発行をまとめて扱います。入金照合・キャスト振込は「入金確認・振込」画面です。
-        </p>
 
         @if(session('status'))
             <div class="admin-alert admin-alert-success">{{ session('status') }}</div>

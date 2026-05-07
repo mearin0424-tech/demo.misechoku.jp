@@ -49,9 +49,7 @@
                     </button>
                 </form>
             @endif
-            <a href="{{ route('admin.shops.index') }}" class="btn-action btn-action-secondary">
-                <i class="fas fa-arrow-left"></i> 一覧へ戻る
-            </a>
+            @include('admin.parts.back-link', ['url' => route('admin.shops.index')])
         </div>
     </div>
 
@@ -102,69 +100,20 @@
         </div>
     </section>
 
-    {{-- 公開プロフィール --}}
-    <section class="admin-panel">
-        <h2 class="admin-panel-title">店舗情報（公開）</h2>
-        <div class="inquiry-detail-meta">
-            <div class="inquiry-detail-meta-item">
-                <div class="inquiry-detail-meta-label">店舗名</div>
-                <div class="inquiry-detail-meta-value">{{ $profile->shop_name ?? '—' }}</div>
-            </div>
-            <div class="inquiry-detail-meta-item">
-                <div class="inquiry-detail-meta-label">開店日</div>
-                <div class="inquiry-detail-meta-value">{{ ($profile->opened_on ?? null) ? \Illuminate\Support\Carbon::parse($profile->opened_on)->format('Y-m-d') : '—' }}</div>
-            </div>
-            <div class="inquiry-detail-meta-item">
-                <div class="inquiry-detail-meta-label">エリア</div>
-                <div class="inquiry-detail-meta-value">{{ trim(($profile->pref ?? '') . ' ' . ($profile->city ?? '')) ?: '—' }}</div>
-            </div>
-            <div class="inquiry-detail-meta-item">
-                <div class="inquiry-detail-meta-label">最寄駅</div>
-                <div class="inquiry-detail-meta-value">{{ $profile->station1 ?? '—' }}@if(!empty($profile->station2 ?? null)) / {{ $profile->station2 }}@endif</div>
-            </div>
-            <div class="inquiry-detail-meta-item inquiry-detail-meta-item--full">
-                <div class="inquiry-detail-meta-label">キャッチコピー</div>
-                <div class="inquiry-detail-meta-value">{{ $profile->catch ?? '—' }}</div>
-            </div>
-            <div class="inquiry-detail-meta-item inquiry-detail-meta-item--full">
-                <div class="inquiry-detail-meta-label">概要</div>
-                <div class="inquiry-detail-meta-value">{{ $profile->overview ?? '—' }}</div>
-            </div>
-            <div class="inquiry-detail-meta-item inquiry-detail-meta-item--full">
-                <div class="inquiry-detail-meta-label">求職者向けメッセージ</div>
-                <div class="inquiry-detail-meta-value u-text-pre">{{ $profile->message ?? '—' }}</div>
-            </div>
+    {{-- 公開プロフィール／求人情報 導線（アプリ内で公開されている情報はそちらで確認） --}}
+    <section class="admin-panel admin-public-link-card">
+        <div class="admin-public-link-card__icon"><i class="fas fa-eye"></i></div>
+        <div class="admin-public-link-card__body">
+            <h2 class="admin-panel-title u-mb-0">公開プロフィール／求人情報</h2>
+            <p class="admin-note u-mb-0">
+                店舗名・エリア・キャッチ・求人条件などの<strong>公開情報</strong>は、求職者と同じ求人画面で確認できます。
+            </p>
         </div>
+        @php $shopNumericId = (int) ltrim((string) $shopId, 'sS0'); @endphp
+        <a href="{{ route('share.recruit.show', $shopNumericId) }}" target="_blank" rel="noopener" class="btn-action btn-action-secondary">
+            <i class="fas fa-arrow-up-right-from-square"></i> 求人画面を開く
+        </a>
     </section>
-
-    {{-- 求人状況 --}}
-    @if($job)
-        <section class="admin-panel">
-            <h2 class="admin-panel-title">求人情報</h2>
-            <div class="inquiry-detail-meta">
-                <div class="inquiry-detail-meta-item">
-                    <div class="inquiry-detail-meta-label">時給（本入店）</div>
-                    <div class="inquiry-detail-meta-value">{{ $job->hourly_wage_regular ?? '—' }}</div>
-                </div>
-                <div class="inquiry-detail-meta-item">
-                    <div class="inquiry-detail-meta-label">時給（体験）</div>
-                    <div class="inquiry-detail-meta-value">{{ ($job->has_trial ?? 0) ? ($job->trial_hourly_wage ?? '—') : '提供なし' }}</div>
-                </div>
-                <div class="inquiry-detail-meta-item">
-                    <div class="inquiry-detail-meta-label">時給（ヘルプ）</div>
-                    <div class="inquiry-detail-meta-value">{{ ($job->has_help ?? 0) ? ($job->help_hourly_wage ?? '—') : '提供なし' }}</div>
-                </div>
-                <div class="inquiry-detail-meta-item">
-                    <div class="inquiry-detail-meta-label">標準勤務時間</div>
-                    <div class="inquiry-detail-meta-value">{{ ($job->normal_time ?? null) ? $job->normal_time . ' 時間' : '—' }}</div>
-                </div>
-                <div class="inquiry-detail-meta-item inquiry-detail-meta-item--full">
-                    <div class="inquiry-detail-meta-label">仕事内容</div>
-                    <div class="inquiry-detail-meta-value">{{ $job->job_description ?? '—' }}</div>
-                </div>
-            </div>
-        </section>
-    @endif
 
     {{-- 運用実績 --}}
     <section class="admin-panel">

@@ -18,10 +18,14 @@
         $hasSortOrder = $selectedCatalog ? !empty($selectedCatalog['uses_sort_order']) : false;
     @endphp
     <div class="admin-page">
-        @include('admin.parts.page-title', ['eyebrow' => 'MASTER', 'title' => 'マスタコントロール'])
-        <p class="admin-description">
-            管理したいマスタを選択して、項目の追加・編集・削除・表示順の変更を行います。
-        </p>
+        @include('admin.parts.page-title', [
+            'eyebrow' => 'MASTER',
+            'title' => 'マスタコントロール',
+            'info' => '
+                <p>管理したいマスタを選択して、項目の<strong>追加・編集・削除・表示順の変更</strong>を行います。</p>
+                <p>表示順の数値が小さいほど画面上で先頭に並びます。</p>
+            ',
+        ])
 
         @if (session('status'))
             <div class="admin-alert admin-alert-success">{{ session('status') }}</div>

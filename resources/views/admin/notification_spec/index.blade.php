@@ -4,12 +4,18 @@
 
 @section('content')
 <div class="admin-page">
-    @include('admin.parts.page-title', ['eyebrow' => 'NOTIFICATIONS & TASKS', 'title' => '通知・タスク仕様'])
-
-    <p class="admin-description">
-        運営から送る <strong>通知</strong>、<strong>リマインダー通知</strong>、および運営／キャスト／店舗が扱う <strong>未済タスク</strong> の仕様を確認・変更できます。<br>
-        トリガー条件・タスクの解消条件は仕様として固定（変更不可）で、表示文言・ON/OFF・リマインドのタイミングのみ変更できます。
-    </p>
+    @include('admin.parts.page-title', [
+        'eyebrow' => 'NOTIFICATIONS & TASKS',
+        'title' => '通知・タスク仕様',
+        'info' => '
+            <p>運営から送る通知、リマインダー通知、未済タスクの仕様を確認・変更できます。</p>
+            <ul>
+                <li><strong>通知</strong>：ON/OFF とタイトル・本文を編集</li>
+                <li><strong>リマインダー</strong>：発火タイミング（日数／時間）と本文を編集</li>
+                <li><strong>未済タスク</strong>：表示文言のみ編集（条件・解消条件は仕様固定）</li>
+            </ul>
+        ',
+    ])
 
     @if(session('status'))
         <div class="admin-alert admin-alert-success">{{ session('status') }}</div>

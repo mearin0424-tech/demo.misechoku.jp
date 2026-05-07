@@ -25,9 +25,7 @@
     <div class="admin-page">
         <div class="u-flex-between">
             @include('admin.parts.page-title', ['eyebrow' => 'INQUIRY DETAIL', 'title' => '問合せ #' . $inquiry['id']])
-            <a href="{{ route('admin.inquiries.index') }}" class="btn-action btn-action-secondary">
-                <i class="fas fa-arrow-left"></i> 一覧へ戻る
-            </a>
+            @include('admin.parts.back-link', ['url' => route('admin.inquiries.index')])
         </div>
 
         <section class="admin-panel">

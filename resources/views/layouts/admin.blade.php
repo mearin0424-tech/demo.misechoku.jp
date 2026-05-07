@@ -319,6 +319,67 @@
                 closeTaskPopover();
             });
         })();
+
+        // インフォボタン（ページタイトル横の (i)）のポップオーバー開閉
+        (function () {
+            function closeAllInfoPopovers(except) {
+                document.querySelectorAll('.admin-info-btn').forEach(function (btn) {
+                    if (btn === except) return;
+                    var id = btn.getAttribute('aria-controls');
+                    var pop = id ? document.getElementById(id) : null;
+                    if (pop) pop.hidden = true;
+                    btn.setAttribute('aria-expanded', 'false');
+                });
+            }
+            document.querySelectorAll('.admin-info-btn').forEach(function (btn) {
+                btn.addEventListener('click', function (event) {
+                    event.stopPropagation();
+                    var id = btn.getAttribute('aria-controls');
+                    var pop = id ? document.getElementById(id) : null;
+                    if (!pop) return;
+                    var willOpen = pop.hidden === true;
+                    closeAllInfoPopovers(btn);
+                    pop.hidden = !willOpen;
+                    btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+                });
+            });
+            document.querySelectorAll('.admin-info-popover__close').forEach(function (closer) {
+                closer.addEventListener('click', function (event) {
+                    event.stopPropagation();
+                    var pop = closer.closest('.admin-info-popover');
+                    if (!pop) return;
+                    pop.hidden = true;
+                    var btn = document.querySelector('.admin-info-btn[aria-controls="' + pop.id + '"]');
+                    if (btn) btn.setAttribute('aria-expanded', 'false');
+                });
+            });
+            document.addEventListener('click', function (event) {
+                if (event.target.closest('.admin-info-popover') || event.target.closest('.admin-info-btn')) return;
+                closeAllInfoPopovers(null);
+            });
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') closeAllInfoPopovers(null);
+            });
+        })();
+
+        // 行クリックで詳細画面へ遷移する共通ハンドラ（.admin-row-clickable[data-href]）
+        (function () {
+            document.querySelectorAll('.admin-row-clickable').forEach(function (row) {
+                var href = row.getAttribute('data-href');
+                if (!href) return;
+                row.addEventListener('click', function (event) {
+                    // 行内の <a> / <button> / <form> 要素のクリックは元の挙動を優先
+                    if (event.target.closest('a, button, input, form, label, select, textarea')) return;
+                    window.location.href = href;
+                });
+                row.addEventListener('keydown', function (event) {
+                    if (event.key !== 'Enter' && event.key !== ' ') return;
+                    if (event.target.closest('a, button, input, form, label, select, textarea')) return;
+                    event.preventDefault();
+                    window.location.href = href;
+                });
+            });
+        })();
     </script>
     @include('partials.bank-autocomplete-scripts')
     @stack('admin-scripts')

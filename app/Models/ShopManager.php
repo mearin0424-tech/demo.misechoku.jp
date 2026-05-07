@@ -36,6 +36,10 @@ class ShopManager extends Authenticatable
     {
         return [
             'last_login_at' => 'datetime',
+            // PII（本名・LINE ID）を暗号化。
+            // email は認証で WHERE 検索するため平文のまま（暗号化すると同一値でもIVが異なるため WHERE が機能しない）。
+            'name'         => \App\Casts\SafeEncrypted::class,
+            'line_user_id' => \App\Casts\SafeEncrypted::class,
         ];
     }
 
