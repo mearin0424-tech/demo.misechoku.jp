@@ -1007,161 +1007,125 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
 .admin-mobile-overlay.is-open { display: block; }
 
 /* ============================================================
-   14. ダッシュボード（モバイル基準）
+   14. ダッシュボード（モバイル基準・コンパクト）
    ============================================================ */
 .dashboard-page {
     display: flex;
     flex-direction: column;
-    gap: 18px;
-}
-.dashboard-section {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-.dashboard-section-head {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: stretch;
-}
-.dashboard-section-title-wrap {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-}
-.dashboard-section-title {
-    margin: 0;
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: var(--admin-text);
-    letter-spacing: 0.01em;
-}
-.dashboard-date-chip,
-.dashboard-export-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 36px;
-    padding: 0 14px;
-    border-radius: 8px;
-    border: 1px solid var(--admin-line);
-    background: var(--admin-surface);
-    color: var(--admin-sub);
-    font-size: 0.78rem;
-    font-weight: 700;
-    text-decoration: none;
-    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
-}
-.dashboard-export-button { cursor: pointer; }
-.dashboard-export-button:hover,
-.dashboard-date-chip:hover {
-    background: var(--admin-primary-soft);
-    border-color: var(--admin-primary-border);
-    color: var(--admin-primary);
+    gap: 14px;
 }
 
-.bi-panel,
-.task-panel {
-    background: var(--admin-surface);
-    border: 1px solid var(--admin-line);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: var(--admin-shadow);
-}
-.bi-tabs {
-    display: flex;
-    border-bottom: 1px solid var(--admin-line);
-    background: var(--admin-surface-alt);
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-.bi-tab-button {
-    border: 0;
-    border-bottom: 2px solid transparent;
-    background: transparent;
-    color: var(--admin-sub);
-    padding: 12px 14px;
-    font-size: 0.84rem;
-    font-weight: 700;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: color 0.12s ease, border-color 0.12s ease;
-}
-.bi-tab-button:hover { color: var(--admin-text); }
-.bi-tab-button.is-active {
-    border-bottom-color: var(--admin-primary);
-    color: var(--admin-primary);
-    background: var(--admin-surface);
-}
-.bi-tab-panel { display: none; padding: 14px; }
-.bi-tab-panel.is-active { display: block; }
-
+/* KPIカード（モバイル: 2x2、デスクトップ: 4x1） */
 .dashboard-kpi-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
-    margin-bottom: 14px;
 }
-.dashboard-kpi-card,
+.dashboard-kpi-card {
+    padding: 12px;
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-line);
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.dashboard-kpi-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+.dashboard-kpi-head i {
+    color: var(--admin-primary);
+    background: var(--admin-primary-soft);
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.78rem;
+}
+.dashboard-kpi-title {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--admin-sub);
+    line-height: 1.3;
+    word-break: keep-all;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.dashboard-kpi-main {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+.dashboard-kpi-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--admin-text);
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+}
+.dashboard-kpi-unit {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--admin-muted);
+}
+
+/* サブ値（プレミアム店舗等） */
+.dashboard-kpi-sub {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--admin-primary-soft);
+    color: var(--admin-primary);
+    font-size: 0.72rem;
+    align-self: flex-start;
+}
+.dashboard-kpi-sub-label { font-weight: 700; opacity: 0.8; }
+.dashboard-kpi-sub-value { font-weight: 800; font-size: 0.84rem; }
+.dashboard-kpi-sub-unit { font-weight: 700; opacity: 0.7; }
+
+.dashboard-kpi-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    align-self: flex-start;
+}
+.dashboard-kpi-trend.is-up { color: var(--status-success-fg); background: var(--status-success-bg); }
+.dashboard-kpi-trend.is-down { color: var(--status-danger-fg); background: var(--status-danger-bg); }
+.dashboard-kpi-trend-caption {
+    font-weight: 600;
+    opacity: 0.72;
+    margin-left: 2px;
+}
+
+/* チャートカード */
 .dashboard-chart-card {
     background: var(--admin-surface);
     border: 1px solid var(--admin-line);
     border-radius: 10px;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    padding: 14px;
 }
-.dashboard-kpi-card { padding: 14px; }
-.dashboard-kpi-head,
 .dashboard-chart-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px;
     flex-wrap: wrap;
+    margin-bottom: 8px;
 }
-.dashboard-kpi-head { margin-bottom: 10px; }
-.dashboard-kpi-head i {
-    color: var(--admin-primary);
-    background: var(--admin-primary-soft);
-    width: 32px; height: 32px;
-    border-radius: 8px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-.dashboard-kpi-title { font-size: 0.78rem; font-weight: 700; color: var(--admin-sub); }
-.dashboard-kpi-main {
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-bottom: 10px;
-}
-.dashboard-kpi-value {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--admin-text);
-    letter-spacing: 0.01em;
-    line-height: 1.2;
-}
-.dashboard-kpi-sub-value { font-size: 1.05rem; font-weight: 700; color: var(--admin-primary); }
-.dashboard-kpi-unit { font-size: 0.7rem; font-weight: 700; color: var(--admin-muted); }
-.dashboard-kpi-trend {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 0.74rem;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 999px;
-}
-.dashboard-kpi-trend.is-up { color: var(--status-success-fg); background: var(--status-success-bg); }
-.dashboard-kpi-trend.is-down { color: var(--status-danger-fg); background: var(--status-danger-bg); }
-.dashboard-kpi-trend .is-down { transform: rotate(180deg); }
-
-.dashboard-chart-card { padding: 14px; }
 .dashboard-chart-head h3 {
     margin: 0;
     font-size: 0.9rem;
@@ -1173,47 +1137,93 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
     align-items: center;
     gap: 12px;
     flex-wrap: wrap;
-    font-size: 0.74rem;
+    font-size: 0.7rem;
     font-weight: 700;
     color: var(--admin-sub);
 }
 .dashboard-chart-legend span { display: inline-flex; align-items: center; gap: 6px; }
 .dashboard-chart-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
 .dashboard-chart-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    padding-top: 14px;
-    margin: 0 -4px;
+    margin: 0;
 }
 .dashboard-chart-canvas {
-    min-width: 480px;
+    min-width: 100%;
     position: relative;
-    height: 220px;
 }
-.dashboard-chart-canvas.is-compact { min-width: 360px; }
-.dashboard-chart-svg { width: 100%; height: 180px; overflow: visible; }
-.dashboard-chart-grid { stroke: var(--admin-line); stroke-dasharray: 3 3; stroke-width: 1; }
+.dashboard-chart-svg { width: 100%; overflow: visible; display: block; }
+.dashboard-chart-grid {
+    stroke: var(--admin-line);
+    stroke-dasharray: 3 3;
+    stroke-width: 1;
+}
+
+/* SVG内のラベル（Y軸目盛・データ点の値） */
+.dashboard-chart-axis-label {
+    font-size: 9px;
+    font-weight: 700;
+    fill: var(--admin-muted);
+}
+.dashboard-chart-axis-label--right {
+    fill: var(--admin-muted);
+}
+.dashboard-chart-value-label {
+    font-size: 9px;
+    font-weight: 700;
+}
+
+/* デュアル軸チャートの棒 */
+.dashboard-chart-bar {
+    fill: #60a5fa;
+}
+
+/* X軸ラベル（月名） */
 .dashboard-chart-labels {
     position: absolute;
-    left: 0; right: 0; bottom: 0;
+    bottom: 0;
     display: flex;
     justify-content: space-between;
-    padding: 0 20px;
     font-size: 0.7rem;
     color: var(--admin-muted);
+    pointer-events: none;
 }
-.dashboard-subchart-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
+.dashboard-chart-labels span {
+    text-align: center;
+    flex: 1;
+    min-width: 0;
 }
-.dashboard-alert {
-    padding: 11px 13px;
-    border-radius: 10px;
-    background: var(--status-info-bg);
-    border: 1px solid var(--status-info-bd);
-    color: var(--status-info-fg);
-    font-size: 0.86rem;
+
+/* 要対応タスクパネル */
+.task-panel {
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-line);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--admin-shadow);
+}
+.task-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--admin-line);
+}
+.task-panel-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--admin-text);
+}
+.task-panel-count {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--admin-muted);
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--admin-surface-alt);
 }
 
 /* タスクサマリーチップ＆テーブル（モバイル: フィルタ縦並び、テーブルはカード化） */
@@ -2326,8 +2336,7 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
     .billing-amount-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .invoice-admin-bank .billing-meta-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .invoice-manual-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .dashboard-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    .dashboard-subchart-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .dashboard-kpi-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
     .task-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .detail-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 14px; }
     .admin-role-switch { grid-template-columns: repeat(3, 1fr); }
@@ -2459,7 +2468,6 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
         gap: 16px;
     }
     .dashboard-kpi-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
-    .dashboard-subchart-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
     .billing-detail-card {
         grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr);
         gap: 18px;
@@ -2548,24 +2556,8 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
 
     .verification-modal-actions { justify-content: flex-end; }
 
-    .dashboard-section-head {
-        flex-direction: row;
-        align-items: flex-end;
-        justify-content: space-between;
-        flex-wrap: wrap;
-    }
-
-    .dashboard-chart-canvas { min-width: 600px; }
-
     /* utility min-width 解放 */
     .u-min-w-220 { min-width: 220px; }
     .u-min-w-340 { min-width: 340px; }
     .u-min-w-360 { min-width: 360px; }
-}
-
-/* ============================================================
-   24. メディアクエリ — ワイドデスクトップ (≥1280px)
-   ============================================================ */
-@media (min-width: 1280px) {
-    .dashboard-chart-canvas { min-width: 720px; }
 }
