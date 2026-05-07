@@ -1,0 +1,354 @@
+@extends('layouts.admin')
+
+@section('title', 'キャスト詳細 ' . ($castId ?? ''))
+
+@section('content')
+@php
+    $registeredAt = $cast->created_at ?? null;
+    $lastLoginAt = $cast->last_login_at ?? null;
+    $accountStatus = (int) ($cast->status ?? 0);
+    $accountStatusLabel = match ($accountStatus) {
+        1 => '本登録済み',
+        0 => '仮登録／無効',
+        default => 'ステータス: ' . $accountStatus,
+    };
+    $genderLabel = match ((int) ($profile->gender ?? 0)) {
+        1 => '女性',
+        2 => '男性',
+        3 => 'その他',
+        default => '—',
+    };
+    $birthday = !empty($profile->birthday ?? null) ? \Illuminate\Support\Carbon::parse($profile->birthday) : null;
+    $age = $birthday ? $birthday->age : null;
+    $identityStatus = (int) ($identity->status ?? 0);
+    $identityLabel = match ($identityStatus) {
+        2 => '確認済み',
+        1 => '審査中',
+        3 => '差戻し',
+        default => '未提出',
+    };
+@endphp
+
+<div class="admin-page">
+    <div class="u-flex-between u-flex-wrap u-gap-12">
+        @include('admin.parts.page-title', ['eyebrow' => 'CAST DETAIL', 'title' => 'キャスト ' . $castId])
+        <a href="{{ route('admin.casts.index') }}" class="btn-action btn-action-secondary">
+            <i class="fas fa-arrow-left"></i> 一覧へ戻る
+        </a>
+    </div>
+
+    @if(session('status'))
+        <div class="admin-alert admin-alert-success">{{ session('status') }}</div>
+    @endif
+
+    {{-- ヘッダー（公開情報の概要） --}}
+    <section class="admin-panel admin-detail-hero">
+        <div class="admin-detail-hero__main">
+            <div class="admin-detail-hero__title-row">
+                <h2 class="admin-panel-title u-mb-0">{{ $displayName }}</h2>
+                <span class="admin-status-badge {{ $accountStatus === 1 ? 'is-active' : 'is-inactive' }}">
+                    {{ $accountStatusLabel }}
+                </span>
+                <span class="admin-status-badge {{ $identityStatus === 2 ? 'is-success' : ($identityStatus === 3 ? 'is-danger' : 'is-warning') }}">
+                    本人確認: {{ $identityLabel }}
+                </span>
+            </div>
+            <p class="admin-note u-mb-0">ID: <code>{{ $castId }}</code></p>
+        </div>
+        <div class="admin-detail-hero__meta">
+            <div>
+                <span class="admin-detail-hero__meta-label">登録日</span>
+                <span class="admin-detail-hero__meta-value">
+                    {{ $registeredAt ? \Illuminate\Support\Carbon::parse($registeredAt)->format('Y-m-d H:i') : '—' }}
+                </span>
+            </div>
+            <div>
+                <span class="admin-detail-hero__meta-label">最終ログイン</span>
+                <span class="admin-detail-hero__meta-value">
+                    {{ $lastLoginAt ? \Illuminate\Support\Carbon::parse($lastLoginAt)->format('Y-m-d H:i') : '—' }}
+                </span>
+            </div>
+            <div>
+                <span class="admin-detail-hero__meta-label">累計振込額</span>
+                <span class="admin-detail-hero__meta-value">
+                    {{ number_format($totalEarnings) }} <small>円</small>
+                </span>
+            </div>
+        </div>
+    </section>
+
+    {{-- 公開プロフィール --}}
+    <section class="admin-panel">
+        <h2 class="admin-panel-title">公開プロフィール</h2>
+        <div class="inquiry-detail-meta">
+            <div class="inquiry-detail-meta-item">
+                <div class="inquiry-detail-meta-label">ニックネーム</div>
+                <div class="inquiry-detail-meta-value">{{ $profile->nickname ?? '—' }}</div>
+            </div>
+            <div class="inquiry-detail-meta-item">
+                <div class="inquiry-detail-meta-label">年齢</div>
+                <div class="inquiry-detail-meta-value">{{ $age !== null ? $age . ' 歳' : '—' }}</div>
+            </div>
+            <div class="inquiry-detail-meta-item">
+                <div class="inquiry-detail-meta-label">活動エリア</div>
+                <div class="inquiry-detail-meta-value">{{ trim(($profile->pref ?? '') . ' ' . ($profile->city ?? '')) ?: '—' }}</div>
+            </div>
+            <div class="inquiry-detail-meta-item">
+                <div class="inquiry-detail-meta-label">身長 / 体重</div>
+                <div class="inquiry-detail-meta-value">
+                    {{ ($profile->height ?? null) ? $profile->height . ' cm' : '—' }} /
+                    {{ ($profile->weight ?? null) ? $profile->weight . ' kg' : '—' }}
+                </div>
+            </div>
+            <div class="inquiry-detail-meta-item">
+                <div class="inquiry-detail-meta-label">B / W / H</div>
+                <div class="inquiry-detail-meta-value">
+                    {{ ($profile->bust ?? null) ?: '—' }} / {{ ($profile->waist ?? null) ?: '—' }} / {{ ($profile->hip ?? null) ?: '—' }}
+                </div>
+            </div>
+            <div class="inquiry-detail-meta-item">
+                <div class="inquiry-detail-meta-label">経験年数</div>
+                <div class="inquiry-detail-meta-value">{{ $profile->years_exp ?? '—' }}</div>
+            </div>
+            <div class="inquiry-detail-meta-item">
+                <div class="inquiry-detail-meta-label">職種</div>
+                <div class="inquiry-detail-meta-value">{{ $profile->profession ?? '—' }}</div>
+            </div>
+            <div class="inquiry-detail-meta-item inquiry-detail-meta-item--full">
+                <div class="inquiry-detail-meta-label">PR</div>
+                <div class="inquiry-detail-meta-value">{{ $profile->pr ?? '—' }}</div>
+            </div>
+        </div>
+    </section>
+
+    {{-- 運用実績（常時表示） --}}
+    <section class="admin-panel">
+        <h2 class="admin-panel-title">運用実績（請求／振込フロー）</h2>
+        @if($operationSummary)
+            <div class="admin-summary-grid">
+                <div><span>請求書送付</span><strong>{{ number_format($operationSummary['invoice_issued']) }}</strong></div>
+                <div><span>振込実行</span><strong>{{ number_format($operationSummary['cast_transferred']) }}</strong></div>
+                <div><span>完了</span><strong>{{ number_format($operationSummary['completed']) }}</strong></div>
+                <div><span>合計件数</span><strong>{{ number_format($operationSummary['total']) }}</strong></div>
+            </div>
+            @if(!empty($operationSummary['latest_status_label']))
+                <p class="admin-note u-mt-12">
+                    最新ステータス: {{ $operationSummary['latest_status_label'] }}{{ !empty($operationSummary['latest_updated_at']) ? '（' . $operationSummary['latest_updated_at'] . '）' : '' }}
+                </p>
+            @endif
+        @else
+            <p class="admin-note u-mb-0">請求・振込フローの実績はありません。</p>
+        @endif
+    </section>
+
+    {{-- 取引履歴（応募一覧） --}}
+    <section class="admin-panel">
+        <h2 class="admin-panel-title">応募・採用履歴（{{ $applications->count() }} 件）</h2>
+        @if($applications->isEmpty())
+            <p class="admin-note u-mb-0">応募履歴はありません。</p>
+        @else
+            <div class="table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>応募日</th>
+                            <th>店舗</th>
+                            <th>ステータス</th>
+                            <th>結果日</th>
+                            <th>初出勤</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($applications as $app)
+                            @php
+                                $appStatus = (int) ($app->status ?? 0);
+                                $appStatusLabel = match ($appStatus) {
+                                    1 => 'チャット中',
+                                    2 => '面談調整中',
+                                    3 => '面談確定',
+                                    4 => '採用',
+                                    5 => '不採用',
+                                    6 => '本採用',
+                                    7 => '本入店不採用',
+                                    default => '—',
+                                };
+                            @endphp
+                            <tr>
+                                <td>{{ $app->created_at ? \Illuminate\Support\Carbon::parse($app->created_at)->format('Y-m-d') : '—' }}</td>
+                                <td>
+                                    @if(!empty($app->shop_id))
+                                        <a href="{{ route('admin.shops.show', $app->shop_id) }}">{{ $app->shop_name ?: $app->shop_id }}</a>
+                                    @else
+                                        {{ $app->shop_name ?: '—' }}
+                                    @endif
+                                </td>
+                                <td>{{ $appStatusLabel }}</td>
+                                <td>{{ $app->result_date ? \Illuminate\Support\Carbon::parse($app->result_date)->format('Y-m-d') : '—' }}</td>
+                                <td>{{ $app->real_start_date ? \Illuminate\Support\Carbon::parse($app->real_start_date)->format('Y-m-d') : '—' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    </section>
+
+    {{-- 入金・振込履歴 --}}
+    <section class="admin-panel">
+        <h2 class="admin-panel-title">入金・振込履歴（{{ $depositRows->count() }} 件）</h2>
+        @if($depositRows->isEmpty())
+            <p class="admin-note u-mb-0">入金・振込履歴はありません。</p>
+        @else
+            <div class="table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>請求番号</th>
+                            <th>店舗</th>
+                            <th>採用ボーナス</th>
+                            <th>振込額</th>
+                            <th>請求日</th>
+                            <th>振込日</th>
+                            <th>完了日</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($depositRows as $row)
+                            <tr>
+                                <td>{{ $row->invoice_number ?: '—' }}</td>
+                                <td>{{ $row->shop_name ?: '—' }}</td>
+                                <td>{{ $row->bonus_amount !== null ? number_format($row->bonus_amount) . ' 円' : '—' }}</td>
+                                <td>{{ $row->cast_transfer_amount !== null ? number_format($row->cast_transfer_amount) . ' 円' : '—' }}</td>
+                                <td>{{ $row->invoice_issued_at ? \Illuminate\Support\Carbon::parse($row->invoice_issued_at)->format('Y-m-d') : '—' }}</td>
+                                <td>{{ $row->cast_transferred_at ? \Illuminate\Support\Carbon::parse($row->cast_transferred_at)->format('Y-m-d') : '—' }}</td>
+                                <td>{{ $row->completed_at ? \Illuminate\Support\Carbon::parse($row->completed_at)->format('Y-m-d') : '—' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    </section>
+
+    {{-- 非公開情報ゲート --}}
+    @include('admin.parts.private-gate', [
+        'isUnlocked' => $isUnlocked,
+        'unlockTtlSeconds' => $unlockTtlSeconds,
+        'unlockUrl' => route('admin.casts.unlock-private', $castId),
+        'lockUrl' => route('admin.casts.lock-private', $castId),
+    ])
+
+    @if($isUnlocked)
+        <section class="admin-panel admin-private-section">
+            <div class="u-flex-between u-mb-12">
+                <h2 class="admin-panel-title u-mb-0">非公開情報（連絡先・本人情報）</h2>
+                <span class="admin-private-status__pill admin-private-status__pill--inline">
+                    <i class="fas fa-eye"></i> 解除中
+                </span>
+            </div>
+            <div class="inquiry-detail-meta">
+                <div class="inquiry-detail-meta-item">
+                    <div class="inquiry-detail-meta-label">本名</div>
+                    <div class="inquiry-detail-meta-value">{{ $profile->name ?? '—' }}</div>
+                </div>
+                <div class="inquiry-detail-meta-item">
+                    <div class="inquiry-detail-meta-label">本名（カナ）</div>
+                    <div class="inquiry-detail-meta-value">{{ $profile->name_kana ?? '—' }}</div>
+                </div>
+                <div class="inquiry-detail-meta-item">
+                    <div class="inquiry-detail-meta-label">生年月日</div>
+                    <div class="inquiry-detail-meta-value">
+                        {{ $birthday ? $birthday->format('Y-m-d') : '—' }}
+                        @if($age !== null)（{{ $age }}歳）@endif
+                    </div>
+                </div>
+                <div class="inquiry-detail-meta-item">
+                    <div class="inquiry-detail-meta-label">性別</div>
+                    <div class="inquiry-detail-meta-value">{{ $genderLabel }}</div>
+                </div>
+                <div class="inquiry-detail-meta-item">
+                    <div class="inquiry-detail-meta-label">メールアドレス</div>
+                    <div class="inquiry-detail-meta-value">
+                        @if(!empty($cast->email))
+                            <a href="mailto:{{ $cast->email }}">{{ $cast->email }}</a>
+                        @else — @endif
+                    </div>
+                </div>
+                <div class="inquiry-detail-meta-item">
+                    <div class="inquiry-detail-meta-label">電話番号</div>
+                    <div class="inquiry-detail-meta-value">
+                        @if(!empty($profile->tel))
+                            <a href="tel:{{ $profile->tel }}">{{ $profile->tel }}</a>
+                        @else — @endif
+                    </div>
+                </div>
+                <div class="inquiry-detail-meta-item inquiry-detail-meta-item--full">
+                    <div class="inquiry-detail-meta-label">住所</div>
+                    <div class="inquiry-detail-meta-value">
+                        {{ trim(($profile->zip ?? '') ? '〒' . $profile->zip . ' ' : '') }}{{ $profile->pref ?? '' }}{{ $profile->city ?? '' }}{{ $profile->addr1 ?? '' }}{{ $profile->addr2 ?? '' }}{{ $profile->addr3 ?? '' }}
+                        @if(empty($profile->zip) && empty($profile->pref) && empty($profile->city)) — @endif
+                    </div>
+                </div>
+                <div class="inquiry-detail-meta-item inquiry-detail-meta-item--full">
+                    <div class="inquiry-detail-meta-label">運営メモ</div>
+                    <div class="inquiry-detail-meta-value u-text-pre">{{ $profile->memo ?? '—' }}</div>
+                </div>
+                @if(!empty($profile->ng_reason))
+                    <div class="inquiry-detail-meta-item inquiry-detail-meta-item--full">
+                        <div class="inquiry-detail-meta-label">NG 理由</div>
+                        <div class="inquiry-detail-meta-value u-text-pre">{{ $profile->ng_reason }}</div>
+                    </div>
+                @endif
+            </div>
+
+            <h3 class="admin-panel-title u-mt-24">振込先銀行口座</h3>
+            @if($bank)
+                <div class="inquiry-detail-meta">
+                    <div class="inquiry-detail-meta-item">
+                        <div class="inquiry-detail-meta-label">銀行</div>
+                        <div class="inquiry-detail-meta-value">{{ $bank->bank_name }}（{{ $bank->bank_code }}）</div>
+                    </div>
+                    <div class="inquiry-detail-meta-item">
+                        <div class="inquiry-detail-meta-label">支店</div>
+                        <div class="inquiry-detail-meta-value">{{ $bank->branch_name }}（{{ $bank->branch_code }}）</div>
+                    </div>
+                    <div class="inquiry-detail-meta-item">
+                        <div class="inquiry-detail-meta-label">口座種別</div>
+                        <div class="inquiry-detail-meta-value">{{ $bank->account_type === 'ordinary' ? '普通' : ($bank->account_type === 'checking' ? '当座' : $bank->account_type) }}</div>
+                    </div>
+                    <div class="inquiry-detail-meta-item">
+                        <div class="inquiry-detail-meta-label">口座番号</div>
+                        <div class="inquiry-detail-meta-value">{{ $bank->account_number }}</div>
+                    </div>
+                    <div class="inquiry-detail-meta-item inquiry-detail-meta-item--full">
+                        <div class="inquiry-detail-meta-label">口座名義</div>
+                        <div class="inquiry-detail-meta-value">{{ $bank->account_name }}</div>
+                    </div>
+                </div>
+            @else
+                <p class="admin-note u-mb-0">振込先口座は未登録です。</p>
+            @endif
+
+            @if($providers->isNotEmpty())
+                <h3 class="admin-panel-title u-mt-24">外部認証連携</h3>
+                <div class="table-wrapper">
+                    <table class="admin-table">
+                        <thead>
+                            <tr><th>プロバイダ</th><th>プロバイダID</th><th>連携日時</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach($providers as $p)
+                                <tr>
+                                    <td>{{ $p->provider }}</td>
+                                    <td><code>{{ $p->provider_id }}</code></td>
+                                    <td>{{ $p->created_at ? \Illuminate\Support\Carbon::parse($p->created_at)->format('Y-m-d H:i') : '—' }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </section>
+    @endif
+</div>
+@endsection

@@ -34,13 +34,13 @@
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
 <style>
-    .cast-mypage-custom-header .header-title-main,
+    /* ヘッダタイトルは global の gold-gradient を使うため上書きしない */
     .cast-mypage-custom-header .btn-back,
-    .cast-mypage-custom-header .header-icon-btn { color: #c8a951; }
+    .cast-mypage-custom-header .header-icon-btn { color: #dcb568; }
     .cast-mypage-custom-header #btn-header-notification .badge-notify { background: #ef4444; color: #fff; }
     .cast-mypage-v2 .mypage-shop-name { color: #fff; letter-spacing: 0.08em; font-size: clamp(1.7rem, 6.4vw, 2.1rem); }
     .cast-mypage-v2 .mypage-hero { align-items: flex-start; gap: 14px; margin-bottom: 20px; }
-    .cast-mypage-v2 .shop-icon-wrapper { width: 84px; height: 84px; border-radius: 999px; background: #000; overflow: hidden; border: 3px solid rgba(200,169,81,0.8); box-shadow: 0 6px 16px rgba(0,0,0,0.35); }
+    .cast-mypage-v2 .shop-icon-wrapper { width: 84px; height: 84px; border-radius: 999px; background: #000; overflow: hidden; border: 3px solid rgba(220, 181, 104,0.8); box-shadow: 0 6px 16px rgba(0,0,0,0.35); }
     .cast-mypage-v2 .shop-icon-main { border: 0; border-radius: 999px; box-shadow: none; }
     .cast-mypage-v2 .btn-add-icon { display: none !important; }
     .cast-mypage-v2 .shop-word-bubble { border: 0; border-radius: 12px; background: #f5ebd6; color: #3a2f2b; box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
@@ -50,18 +50,18 @@
     .cast-mypage-v2 .btn-word-edit { width: 24px; height: 24px; color: #a89050; }
     .cast-flat-stats { display: flex; align-items: center; gap: 10px; margin: 4px 0 24px; padding: 0 6px; }
     .cast-bonus-panel { flex: 1; min-width: 0; }
-    .cast-bonus-label { color: #c8a951; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 4px; }
+    .cast-bonus-label { color: #dcb568; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 4px; }
     .cast-bonus-value { display: flex; align-items: baseline; gap: 2px; }
     .cast-bonus-value .yen { color: #34d399; font-size: 18px; font-weight: 700; }
     .cast-bonus-value .amount { color: #fff; font-size: 32px; font-weight: 800; line-height: 1; }
     .cast-like-panel { width: 66px; flex-shrink: 0; text-align: center; opacity: 0.88; }
     .cast-like-panel i { color: rgba(244, 114, 182, 0.82); font-size: 16px; margin-bottom: 4px; }
     .cast-like-panel .n { color: #c9b6ae; font-size: 17px; font-weight: 700; line-height: 1; }
-    .cast-profile-head { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(200, 169, 81, 0.2); padding-bottom: 9px; margin-bottom: 16px; }
-    .cast-profile-head h2 { margin: 0; color: #c8a951; font-size: 1.08rem; font-style: italic; font-family: var(--font-serif); letter-spacing: 0.05em; }
+    .cast-profile-head { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(220, 181, 104, 0.2); padding-bottom: 9px; margin-bottom: 16px; }
+    .cast-profile-head h2 { margin: 0; color: #dcb568; font-size: 1.05rem; font-family: var(--font-serif); font-weight: 600; letter-spacing: 0.06em; }
     .cast-profile-card { background: rgba(26,10,14,0.6); border: 1px solid rgba(74,29,40,0.4); border-radius: 12px; overflow: hidden; }
     .cast-block { margin-bottom: 20px; }
-    .cast-block-title { color: #c8a951; font-size: 0.92rem; font-weight: 700; margin: 0 0 9px; display: flex; align-items: center; gap: 6px; }
+    .cast-block-title { color: #dcb568; font-size: 0.92rem; font-weight: 700; margin: 0 0 9px; display: flex; align-items: center; gap: 6px; }
     .cast-block-title .lucide-icon { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
     .cast-row { display: flex; gap: 10px; padding: 12px 14px; border-bottom: 1px solid rgba(74,29,40,0.4); }
     .cast-row:last-child { border-bottom: 0; }
@@ -77,7 +77,7 @@
     .cast-zip { margin-top: 2px; color: #b5a69d; font-size: 0.72rem; }
     .cast-badges { display: flex; flex-wrap: wrap; gap: 6px; }
     .cast-badge { display: inline-flex; padding: 6px 11px; border-radius: 6px; background: rgba(17, 12, 10, 0.8); border: 1px solid rgba(255,255,255,0.1); color: #eae0d5; font-size: 0.76rem; font-weight: 700; }
-    .cast-inline-action { margin-left: auto; font-size: 0.7rem; color: #c8a951; border: 1px solid rgba(200,169,81,0.35); border-radius: 999px; padding: 5px 9px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+    .cast-inline-action { margin-left: auto; font-size: 0.7rem; color: #dcb568; border: 1px solid rgba(220, 181, 104,0.35); border-radius: 999px; padding: 5px 9px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
     .cast-inline-action .lucide-icon { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 </style>
 @endpush

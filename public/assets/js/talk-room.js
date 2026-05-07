@@ -9,7 +9,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!chatMessages) return;
 
     const messageInput = chatForm ? chatForm.querySelector('textarea[name="message"]') : null;
-    const imageInput = chatForm ? chatForm.querySelector('#talk-image-input') : null;
+    const sendButton = chatForm ? chatForm.querySelector('#talk-send-btn') : null;
+    const ngWarnEl = chatForm ? chatForm.querySelector('#talk-ng-warn') : null;
+    const ngWarnTextEl = ngWarnEl ? ngWarnEl.querySelector('.talk-ng-warn-text') : null;
     const talkTopicField = chatForm ? chatForm.querySelector('[name="talk_topic"]') : null;
     const talkJobKindField = chatForm ? chatForm.querySelector('[name="talk_job_kind"]') : null;
     const initialTalkTopic = typeof window.initialTalkTopic !== 'undefined' ? window.initialTalkTopic : null;
@@ -45,14 +47,69 @@ document.addEventListener('DOMContentLoaded', function() {
         if (emptyState) emptyState.remove();
     }
 
-    function appendImageMessage(url, caption, timeStr) {
-        const safeUrl = escapeHtml(url || '');
-        const safeCaption = escapeHtml((caption || '').trim()).replace(/\n/g, '<br>');
-        const captionHtml = safeCaption ? ('<p class="message-image-caption">' + safeCaption + '</p>') : '';
-        const messageHtml = '<div class="message-row msg-right"><div class="message-block"><div class="message-inline"><div class="msg-meta"><span class="msg-status"><i class="fas fa-check"></i></span><span class="msg-time">' + timeStr + '</span></div><div class="message-bubble message-bubble-image"><a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer" class="message-image-link"><img src="' + safeUrl + '" alt="送信画像" class="message-image"></a>' + captionHtml + '</div></div></div></div>';
-        ensureEmptyStateRemoved();
-        chatMessages.insertAdjacentHTML('beforeend', messageHtml);
-        scrollToBottom('smooth');
+    // ===== NGワード検査 =====
+    const ngPayload = (window.talkNgPayload && typeof window.talkNgPayload === 'object') ? window.talkNgPayload : { patterns: [], words: [] };
+    const ngPatterns = Array.isArray(ngPayload.patterns) ? ngPayload.patterns.map(function (p) {
+        try {
+            return { re: new RegExp(p.re, p.flags || ''), label: p.label || 'NGワード' };
+        } catch (e) {
+            return null;
+        }
+    }).filter(Boolean) : [];
+    const ngWordList = Array.isArray(ngPayload.words) ? ngPayload.words.map(function (w) { return String(w || '').toLowerCase(); }).filter(Boolean) : [];
+
+    function detectNg(text) {
+        if (!text) return null;
+        const normalized = String(text);
+        for (let i = 0; i < ngPatterns.length; i++) {
+            const m = normalized.match(ngPatterns[i].re);
+            if (m) return { hit: m[0], label: ngPatterns[i].label };
+        }
+        const lower = normalized.toLowerCase();
+        for (let i = 0; i < ngWordList.length; i++) {
+            const w = ngWordList[i];
+            if (w && lower.indexOf(w) !== -1) {
+                return { hit: w, label: 'NGワード' };
+            }
+        }
+        return null;
+    }
+
+    function setSendDisabled(disabled) {
+        if (!sendButton) return;
+        sendButton.disabled = !!disabled;
+        sendButton.classList.toggle('is-disabled', !!disabled);
+    }
+
+    function showNgWarning(label, hit) {
+        if (!ngWarnEl) return;
+        if (ngWarnTextEl) {
+            ngWarnTextEl.textContent = '使用できない表現が含まれています：' + (label || 'NGワード') + (hit ? '（' + hit + '）' : '');
+        }
+        ngWarnEl.hidden = false;
+    }
+
+    function clearNgWarning() {
+        if (!ngWarnEl) return;
+        ngWarnEl.hidden = true;
+    }
+
+    function evaluateNgState() {
+        const value = messageInput ? messageInput.value : '';
+        const result = detectNg(value);
+        if (result) {
+            showNgWarning(result.label, result.hit);
+            setSendDisabled(true);
+            return false;
+        }
+        clearNgWarning();
+        setSendDisabled(value.trim() === '');
+        return true;
+    }
+
+    if (messageInput) {
+        messageInput.addEventListener('input', evaluateNgState);
+        evaluateNgState();
     }
 
     // 共通フォールバック: どの分岐でも + メニューを開閉できるようにする
@@ -132,6 +189,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const content = messageInput.value.trim();
             if (!content) return;
             if (isSubmitting) return;
+
+            // クライアント側 NG ワード検査
+            const ngHit = detectNg(content);
+            if (ngHit) {
+                showNgWarning(ngHit.label, ngHit.hit);
+                setSendDisabled(true);
+                if (typeof messageInput.focus === 'function') messageInput.focus();
+                return;
+            }
+
             isSubmitting = true;
 
             const url = chatForm.getAttribute('data-url');
@@ -189,10 +256,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     errorMsg.querySelector('.msg-status').innerHTML = '<i class="fas fa-exclamation-circle text-red-500"></i>';
                     errorMsg.querySelector('.msg-status').classList.remove('sending');
                 }
+                // サーバ側 NG 検出（422）の場合は本文を復元して警告表示
+                const msg = String((error && error.message) || '');
+                if (msg.indexOf('使用できない表現') !== -1) {
+                    if (errorMsg) errorMsg.remove();
+                    messageInput.value = content;
+                    showNgWarning('NGワード', '');
+                    if (ngWarnTextEl) ngWarnTextEl.textContent = msg;
+                    setSendDisabled(true);
+                }
             } finally {
                 isSubmitting = false;
                 submitBtn.disabled = false;
                 messageInput.focus();
+                evaluateNgState();
             }
         });
 
@@ -289,7 +366,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const openJobKindModalBtn = document.getElementById('open-job-kind-modal');
         const jobKindOverlay = document.getElementById('job-kind-modal-overlay');
         const closeJobKindButtons = document.querySelectorAll('.js-job-kind-close');
-        const openImageSendMenu = document.getElementById('open-image-send-menu');
         const openTemplateSendMenu = document.getElementById('open-template-send-menu');
         const openWorkCompleteReportMenu = document.getElementById('open-work-complete-report-menu');
         const templateMenuOverlay = document.getElementById('talk-template-menu-overlay');
@@ -317,30 +393,65 @@ document.addEventListener('DOMContentLoaded', function() {
         const hiredHourlyWageWrap = document.getElementById('hired-hourly-wage-wrap');
         const hiredHourlyWageInput = document.getElementById('hired-hourly-wage-input');
         const resultEmploymentKind = document.getElementById('result-employment-kind');
-        const quickTemplates = [
-            'ありがとうございます。内容を確認して折り返します。',
-            '承知しました。よろしくお願いします。',
-            '本日はご連絡ありがとうございます。'
-        ];
+        const quickTemplates = (Array.isArray(window.talkQuickTemplates) && window.talkQuickTemplates.length > 0)
+            ? window.talkQuickTemplates
+            : [
+                { key: 'fallback_thanks', category: '基本', title: 'お礼', body: 'ありがとうございます。内容を確認して折り返します。' },
+                { key: 'fallback_ok', category: '基本', title: '承知',  body: '承知しました。よろしくお願いします。' },
+                { key: 'fallback_greet', category: '基本', title: '挨拶',  body: '本日はご連絡ありがとうございます。' },
+            ];
         const closeTemplateMenu = () => {
             if (templateMenuOverlay) templateMenuOverlay.setAttribute('aria-hidden', 'true');
         };
         const openTemplateMenu = () => {
             if (!templateMenuOverlay || !templateMenuList) return;
             templateMenuList.innerHTML = '';
-            quickTemplates.forEach(function (text) {
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.className = 'talk-template-item';
-                button.textContent = text;
-                button.addEventListener('click', function () {
-                    if (!messageInput) return;
-                    closeTemplateMenu();
-                    messageInput.value = text;
-                    messageInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    messageInput.focus();
+
+            // カテゴリ別にグルーピング
+            const grouped = {};
+            const order = [];
+            quickTemplates.forEach(function (tpl) {
+                const cat = (tpl && tpl.category) ? String(tpl.category) : 'その他';
+                if (!grouped[cat]) { grouped[cat] = []; order.push(cat); }
+                grouped[cat].push(tpl);
+            });
+
+            order.forEach(function (cat) {
+                const group = document.createElement('div');
+                group.className = 'talk-template-group';
+                const header = document.createElement('div');
+                header.className = 'talk-template-group-title';
+                header.textContent = cat;
+                group.appendChild(header);
+
+                grouped[cat].forEach(function (tpl) {
+                    const text = (tpl && typeof tpl === 'object') ? String(tpl.body || '') : String(tpl || '');
+                    const title = (tpl && typeof tpl === 'object') ? String(tpl.title || '') : '';
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'talk-template-item';
+                    if (title) {
+                        const titleEl = document.createElement('span');
+                        titleEl.className = 'talk-template-item-title';
+                        titleEl.textContent = title;
+                        const bodyEl = document.createElement('span');
+                        bodyEl.className = 'talk-template-item-body';
+                        bodyEl.textContent = text;
+                        button.appendChild(titleEl);
+                        button.appendChild(bodyEl);
+                    } else {
+                        button.textContent = text;
+                    }
+                    button.addEventListener('click', function () {
+                        if (!messageInput) return;
+                        closeTemplateMenu();
+                        messageInput.value = text;
+                        messageInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        messageInput.focus();
+                    });
+                    group.appendChild(button);
                 });
-                templateMenuList.appendChild(button);
+                templateMenuList.appendChild(group);
             });
             templateMenuOverlay.setAttribute('aria-hidden', 'false');
         };
@@ -534,47 +645,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (jobKindOverlay) {
             jobKindOverlay.addEventListener('click', function(e) {
                 if (e.target === jobKindOverlay) closeJobKindModal();
-            });
-        }
-        if (openImageSendMenu && imageInput) {
-            openImageSendMenu.addEventListener('click', function(e) {
-                e.preventDefault();
-                closeTalkActionMenu();
-                imageInput.click();
-            });
-        }
-        if (imageInput) {
-            imageInput.addEventListener('change', async function() {
-                const file = imageInput.files && imageInput.files[0] ? imageInput.files[0] : null;
-                if (!file) return;
-                const formData = new FormData();
-                formData.append('partner_id', partnerId || '');
-                formData.append('image', file);
-                if (isCastRoom && !hasTalkMessages && talkTopicField && talkTopicField.value) {
-                    formData.append('talk_topic', talkTopicField.value);
-                    if (talkJobKindField && !talkJobKindField.disabled && talkJobKindField.value) {
-                        formData.append('talk_job_kind', talkJobKindField.value);
-                    }
-                }
-                try {
-                    const response = await fetch(chatForm.getAttribute('data-url'), {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': token,
-                            'Accept': 'application/json'
-                        },
-                        body: formData
-                    });
-                    const result = await response.json();
-                    if (!response.ok || !result.success) {
-                        throw new Error((result && result.message) || '画像送信に失敗しました。');
-                    }
-                    appendImageMessage((result.data && result.data.image_url) || '', '', (result.data && result.data.time) || '');
-                } catch (error) {
-                    window.alert(error.message || '画像送信に失敗しました。');
-                } finally {
-                    imageInput.value = '';
-                }
             });
         }
         templateMenuCloseButtons.forEach(function (btn) {
@@ -845,35 +915,68 @@ document.addEventListener('DOMContentLoaded', function() {
         const openTalkActionMenuBtn = document.getElementById('open-talk-action-menu');
         const talkActionMenuOverlay = document.getElementById('talk-action-menu-overlay');
         const talkActionMenuCloseButtons = document.querySelectorAll('.js-talk-action-menu-close');
-        const openImageSendMenu = document.getElementById('open-image-send-menu');
         const openTemplateSendMenu = document.getElementById('open-template-send-menu');
         const templateMenuOverlay = document.getElementById('talk-template-menu-overlay');
         const templateMenuList = document.getElementById('talk-template-menu-list');
         const templateMenuCloseButtons = document.querySelectorAll('.js-talk-template-close');
-        const quickTemplates = [
-            '本日はよろしくお願いします。',
-            'ご確認ありがとうございます。承知しました。',
-            '問題なければこの内容で進めさせてください。'
-        ];
+        const quickTemplates = (Array.isArray(window.talkQuickTemplates) && window.talkQuickTemplates.length > 0)
+            ? window.talkQuickTemplates
+            : [
+                { key: 'fallback_greet', category: '基本', title: '挨拶', body: '本日はよろしくお願いします。' },
+                { key: 'fallback_ok', category: '基本', title: '了承', body: 'ご確認ありがとうございます。承知しました。' },
+                { key: 'fallback_proceed', category: '基本', title: '進行', body: '問題なければこの内容で進めさせてください。' },
+            ];
         const closeTemplateMenu = () => {
             if (templateMenuOverlay) templateMenuOverlay.setAttribute('aria-hidden', 'true');
         };
         const openTemplateMenu = () => {
             if (!templateMenuOverlay || !templateMenuList) return;
             templateMenuList.innerHTML = '';
-            quickTemplates.forEach(function (text) {
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.className = 'talk-template-item';
-                button.textContent = text;
-                button.addEventListener('click', function () {
-                    if (!messageInput) return;
-                    closeTemplateMenu();
-                    messageInput.value = text;
-                    messageInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    messageInput.focus();
+
+            const grouped = {};
+            const order = [];
+            quickTemplates.forEach(function (tpl) {
+                const cat = (tpl && tpl.category) ? String(tpl.category) : 'その他';
+                if (!grouped[cat]) { grouped[cat] = []; order.push(cat); }
+                grouped[cat].push(tpl);
+            });
+
+            order.forEach(function (cat) {
+                const group = document.createElement('div');
+                group.className = 'talk-template-group';
+                const header = document.createElement('div');
+                header.className = 'talk-template-group-title';
+                header.textContent = cat;
+                group.appendChild(header);
+
+                grouped[cat].forEach(function (tpl) {
+                    const text = (tpl && typeof tpl === 'object') ? String(tpl.body || '') : String(tpl || '');
+                    const title = (tpl && typeof tpl === 'object') ? String(tpl.title || '') : '';
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'talk-template-item';
+                    if (title) {
+                        const titleEl = document.createElement('span');
+                        titleEl.className = 'talk-template-item-title';
+                        titleEl.textContent = title;
+                        const bodyEl = document.createElement('span');
+                        bodyEl.className = 'talk-template-item-body';
+                        bodyEl.textContent = text;
+                        button.appendChild(titleEl);
+                        button.appendChild(bodyEl);
+                    } else {
+                        button.textContent = text;
+                    }
+                    button.addEventListener('click', function () {
+                        if (!messageInput) return;
+                        closeTemplateMenu();
+                        messageInput.value = text;
+                        messageInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        messageInput.focus();
+                    });
+                    group.appendChild(button);
                 });
-                templateMenuList.appendChild(button);
+                templateMenuList.appendChild(group);
             });
             templateMenuOverlay.setAttribute('aria-hidden', 'false');
         };
@@ -906,47 +1009,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (talkActionMenuOverlay) {
             talkActionMenuOverlay.addEventListener('click', function (e) {
                 if (e.target === talkActionMenuOverlay) closeTalkActionMenu();
-            });
-        }
-        if (openImageSendMenu && imageInput) {
-            openImageSendMenu.addEventListener('click', function(e) {
-                e.preventDefault();
-                closeTalkActionMenu();
-                imageInput.click();
-            });
-        }
-        if (imageInput) {
-            imageInput.addEventListener('change', async function() {
-                const file = imageInput.files && imageInput.files[0] ? imageInput.files[0] : null;
-                if (!file) return;
-                const formData = new FormData();
-                formData.append('partner_id', partnerId || '');
-                formData.append('image', file);
-                if (!hasTalkMessages && talkTopicField && talkTopicField.value) {
-                    formData.append('talk_topic', talkTopicField.value);
-                    if (talkJobKindField && !talkJobKindField.disabled && talkJobKindField.value) {
-                        formData.append('talk_job_kind', talkJobKindField.value);
-                    }
-                }
-                try {
-                    const response = await fetch(chatForm.getAttribute('data-url'), {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': token,
-                            'Accept': 'application/json'
-                        },
-                        body: formData
-                    });
-                    const result = await response.json();
-                    if (!response.ok || !result.success) {
-                        throw new Error((result && result.message) || '画像送信に失敗しました。');
-                    }
-                    appendImageMessage((result.data && result.data.image_url) || '', '', (result.data && result.data.time) || '');
-                } catch (error) {
-                    window.alert(error.message || '画像送信に失敗しました。');
-                } finally {
-                    imageInput.value = '';
-                }
             });
         }
         templateMenuCloseButtons.forEach(function (btn) {

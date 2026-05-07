@@ -134,7 +134,11 @@ class TalkController extends Controller
             'blockState' => $blockState,
             'canSend' => !$blockState['is_blocked'],
             'currentStatusCode' => $this->applicationStatusCode($currentApplicationStatus),
-            'currentStatusLabel' => $this->statusLabel($this->applicationStatusCode($currentApplicationStatus)),
+            'currentStatusLabel' => $this->statusLabel(
+                $this->applicationStatusCode($currentApplicationStatus),
+                $selectedTalkJobKind,
+                $currentApplicationStatus
+            ),
             'canOfferInterview' => !$isCastPortal
                 && !$blockState['is_blocked']
                 && $currentApplicationStatus === self::APPLICATION_STATUS_CHATTING
@@ -171,6 +175,10 @@ class TalkController extends Controller
                 && !$blockState['is_blocked']
                 && $currentApplicationStatus === self::APPLICATION_STATUS_HIRED
                 && $selectedTalkJobKind === 'trial',
+            'quickTemplates' => $this->messageTemplateService->getTemplates(
+                $isCastPortal ? 'talk_quick_cast' : 'talk_quick_shop'
+            ),
+            'ngWordPayload' => $this->ngWordPayloadForView(),
         ]);
     }
 
@@ -182,8 +190,7 @@ class TalkController extends Controller
         $isCastPortal = request()->is('cast/*');
         $request->validate([
             'partner_id' => ['required', 'string'],
-            'message' => ['nullable', 'string', 'max:5000'],
-            'image' => ['nullable', 'image', 'max:10240'],
+            'message' => ['required', 'string', 'max:5000'],
             'talk_topic' => ['nullable', 'string', 'in:new_hire,help,other'],
             'talk_job_kind' => ['nullable', 'string', 'in:fulltime,trial,help'],
         ]);
@@ -195,19 +202,19 @@ class TalkController extends Controller
         $content = trim((string) $request->input('message'));
         $content = str_replace(["\r\n", "\r"], "\n", $content);
         $content = preg_replace('/\n{2,}/', "\n", $content);
-        $hasImage = $request->hasFile('image');
-        abort_if(!$hasImage && $content === '', 422, 'メッセージを入力してください。');
+        abort_if($content === '', 422, 'メッセージを入力してください。');
+
+        // NGワード検査（電話・SNSハンドル・URL・連絡先誘導など）
+        if ($ngHit = $this->detectNgWord($content)) {
+            return response()->json([
+                'success' => false,
+                'message' => '使用できない表現が含まれています：「' . $ngHit . '」',
+                'ng_word' => $ngHit,
+            ], 422);
+        }
 
         $messageType = self::MESSAGE_TYPE_TEXT;
         $storedContent = $content;
-        if ($hasImage) {
-            $storedPath = $request->file('image')->store('public/uploads/messages');
-            $messageType = self::MESSAGE_TYPE_IMAGE;
-            $storedContent = json_encode([
-                'image_path' => $storedPath,
-                'caption' => $content,
-            ], JSON_UNESCAPED_UNICODE);
-        }
 
         $payload = [
             'cast_id' => $isCastPortal ? $this->currentCastId() : $partnerId,
@@ -247,7 +254,6 @@ class TalkController extends Controller
                 'message_id' => $messageId,
                 'message_type' => $messageType,
                 'content' => $content,
-                'image_url' => $hasImage ? $this->assetPathForStored(json_decode((string) $storedContent, true)['image_path'] ?? null) : null,
                 'time' => Carbon::now()->format('H:i'),
             ]
         ]);
@@ -652,6 +658,11 @@ class TalkController extends Controller
                     $isCastPortal ? (string) $partnerId : $currentId,
                     $isCastPortal
                 );
+                // 採用種別（体験／本入店／ヘルプ）— ステータスラベルに反映
+                $jobKindForLabel = $this->getSelectedTalkJobKind(
+                    $isCastPortal ? $currentId : (string) $partnerId,
+                    $isCastPortal ? (string) $partnerId : $currentId
+                );
 
                 return [
                     'partner_id' => (string) $partnerId,
@@ -684,7 +695,8 @@ class TalkController extends Controller
                     'application_status' => $applicationStatus,
                     'status_label' => $blockState['is_blocked']
                         ? ($blockState['blocked_by_me'] ? 'ブロック中' : '相手がブロック中')
-                        : $this->statusLabel($statusCode),
+                        : $this->statusLabel($statusCode, $jobKindForLabel, $applicationStatus),
+                    'talk_job_kind' => $jobKindForLabel,
                     'has_fulltime_request_badge' => (!$isCastPortal)
                         && $messages
                             ->where('sender_type', '!=', $mySenderType)
@@ -891,13 +903,39 @@ class TalkController extends Controller
             ->first();
     }
 
-    private function statusLabel(string $code): string
+    /**
+     * トークステータスのラベル。採用／不採用は求人種別と合わせて
+     * 「体験採用 / 本採用 / ヘルプ採用 / 体験不採用 / 本入店不採用 / ヘルプ不採用」を返す。
+     */
+    private function statusLabel(string $code, ?string $jobKind = null, int $applicationStatus = 0): string
     {
+        if ($code === 'hired') {
+            // HIRED_FULLTIME は本採用確定（体験から本採用に変わった案件）
+            if ($applicationStatus === self::APPLICATION_STATUS_HIRED_FULLTIME) {
+                return '本採用';
+            }
+            return match ($jobKind) {
+                'fulltime' => '本採用',
+                'trial' => '体験採用',
+                'help' => 'ヘルプ採用',
+                default => '採用',
+            };
+        }
+        if ($code === 'rejected') {
+            // REJECTED_TRIAL = 体験後に本入店を見送り
+            if ($applicationStatus === self::APPLICATION_STATUS_REJECTED_TRIAL) {
+                return '本入店不採用';
+            }
+            return match ($jobKind) {
+                'fulltime' => '本入店不採用',
+                'trial' => '体験不採用',
+                'help' => 'ヘルプ不採用',
+                default => '不採用',
+            };
+        }
         return match ($code) {
             'interview_pending' => '面談調整中',
             'interview_fixed' => '面談日決定',
-            'hired' => '採用',
-            'rejected' => '不採用',
             default => 'やり取り中',
         };
     }
@@ -980,6 +1018,87 @@ class TalkController extends Controller
         $application = $this->findApplicationForTalk($castId, $shopId);
 
         return (int) ($application->status ?? self::APPLICATION_STATUS_CHATTING);
+    }
+
+    /**
+     * NGワード検出。最初にヒットした語を返す。なければ null。
+     * 連絡先誘導（電話・メール・URL・SNSハンドル）と、ng_words テーブルの双方を検査。
+     */
+    private function detectNgWord(string $text): ?string
+    {
+        if ($text === '') {
+            return null;
+        }
+        $normalized = mb_convert_kana($text, 'asKV');
+
+        // 1) 正規表現での連絡先誘導検出
+        $patterns = [
+            '/\b\d{2,4}-\d{2,4}-\d{4}\b/u'                       => '電話番号',
+            '/(?:080|090|070|050)\d{8}/u'                        => '携帯番号',
+            '/[\w.+-]+@[\w-]+\.[\w.-]+/u'                        => 'メールアドレス',
+            '/https?:\/\/\S+/iu'                                 => 'URL',
+            '/(?:line|ﾗｲﾝ|ライン)\s*(?:id|ID|アイディー)?[:：]?\s*[A-Za-z0-9._-]{3,}/iu' => 'LINE ID',
+            '/@[A-Za-z0-9_.]{3,}/u'                              => 'SNSアカウント',
+        ];
+        foreach ($patterns as $regex => $label) {
+            if (preg_match($regex, $normalized)) {
+                return $label;
+            }
+        }
+
+        // 2) ng_words テーブル
+        try {
+            $words = \Illuminate\Support\Facades\Cache::remember(
+                'talk:ng_words',
+                300,
+                fn () => DB::table('ng_words')
+                    ->where('is_active', 1)
+                    ->pluck('word')
+                    ->filter()
+                    ->map(fn ($w) => (string) $w)
+                    ->all()
+            );
+        } catch (\Throwable $e) {
+            $words = [];
+        }
+        $needle = mb_strtolower($normalized);
+        foreach ($words as $word) {
+            $w = mb_strtolower(trim((string) $word));
+            if ($w !== '' && mb_strpos($needle, $w) !== false) {
+                return $word;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 画面側 NG ワードチェック用の素材（正規表現リスト＋語句）。
+     */
+    private function ngWordPayloadForView(): array
+    {
+        $words = [];
+        try {
+            $words = DB::table('ng_words')
+                ->where('is_active', 1)
+                ->pluck('word')
+                ->filter()
+                ->map(fn ($w) => (string) $w)
+                ->values()
+                ->all();
+        } catch (\Throwable $e) {
+            $words = [];
+        }
+        return [
+            'patterns' => [
+                ['re' => '\\d{2,4}-\\d{2,4}-\\d{4}', 'flags' => '', 'label' => '電話番号'],
+                ['re' => '(080|090|070|050)\\d{8}', 'flags' => '', 'label' => '携帯番号'],
+                ['re' => '[\\w.+-]+@[\\w-]+\\.[\\w.-]+', 'flags' => '', 'label' => 'メールアドレス'],
+                ['re' => 'https?:\\/\\/\\S+', 'flags' => 'i', 'label' => 'URL'],
+                ['re' => '(line|ﾗｲﾝ|ライン)\\s*(id|ID|アイディー)?[:：]?\\s*[A-Za-z0-9._-]{3,}', 'flags' => 'i', 'label' => 'LINE ID'],
+                ['re' => '@[A-Za-z0-9_.]{3,}', 'flags' => '', 'label' => 'SNSアカウント'],
+            ],
+            'words' => $words,
+        ];
     }
 
     private function applicationStatusCode(int $status): string

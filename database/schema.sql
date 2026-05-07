@@ -621,6 +621,16 @@ ALTER TABLE `push_subscriptions`
   ADD COLUMN `user_id` varchar(32) DEFAULT NULL AFTER `user_type`,
   ADD INDEX `push_subscriptions_user_idx` (`user_type`, `user_id`);
 
+-- ------------------------------------------------------------------------------
+-- 運営アカウントのロール別権限設定
+-- ------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `admin_role_permissions` (
+  `role` varchar(32) NOT NULL COMMENT 'system_accounts.role と対応',
+  `permissions` text NOT NULL COMMENT '許可する権限キーのJSON配列',
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`role`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS `notification_preferences` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `user_type` varchar(32) NOT NULL,

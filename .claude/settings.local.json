@@ -18,7 +18,14 @@
       "Bash(php -d error_reporting=\"E_ALL & ~E_DEPRECATED & ~E_STRICT\" artisan route:clear)",
       "Bash(php -d error_reporting=\"E_ALL & ~E_DEPRECATED & ~E_STRICT\" artisan route:cache)",
       "Bash(xargs grep -l \"recruit\")",
-      "Bash(php -r \"echo extension_loaded\\('gd'\\) ? 'GD: yes' : 'GD: no'; echo PHP_EOL; if \\(extension_loaded\\('gd'\\)\\) { print_r\\(gd_info\\(\\)\\); }\")"
+      "Bash(php -r \"echo extension_loaded\\('gd'\\) ? 'GD: yes' : 'GD: no'; echo PHP_EOL; if \\(extension_loaded\\('gd'\\)\\) { print_r\\(gd_info\\(\\)\\); }\")",
+      "Bash(php -l \"C:\\\\Users\\\\Lenovo\\\\OneDrive\\\\デスクトップ\\\\mearin0424-tech\\\\demo.misechoku.jp\\\\app\\\\Http\\\\Controllers\\\\Common\\\\TalkController.php\")",
+      "Bash(php -l \"C:\\\\Users\\\\Lenovo\\\\OneDrive\\\\デスクトップ\\\\mearin0424-tech\\\\demo.misechoku.jp\\\\app\\\\Services\\\\MessageTemplateService.php\")",
+      "Bash(node --check \"C:\\\\Users\\\\Lenovo\\\\OneDrive\\\\デスクトップ\\\\mearin0424-tech\\\\demo.misechoku.jp\\\\public\\\\assets\\\\js\\\\talk-room.js\")",
+      "Bash(Get-ChildItem -Recurse -Name routes/web.php)",
+      "Bash(dir \"C:\\\\Users\\\\Lenovo\\\\OneDrive\\\\デスクトップ\\\\mearin0424-tech\\\\demo.misechoku.jp\\\\database\\\\migrations\")",
+      "Bash(grep -A 35 \"CREATE TABLE IF NOT EXISTS \\\\`shops\\\\`\" \"/c/Users/Lenovo/OneDrive/デスクトップ/mearin0424-tech/demo.misechoku.jp/database/schema.sql\")",
+      "Bash(xargs grep -l \"password_confirm\\\\|confirm.*password\")"
     ]
   }
 }

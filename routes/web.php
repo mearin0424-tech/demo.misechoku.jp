@@ -124,96 +124,146 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // 邂｡逅・判髱｢譛ｬ菴・
     Route::middleware([])->group(function () {
-        Route::get('/', [AdminDashboard::class, 'index'])->name('dashboard');
+        Route::get('/', [AdminDashboard::class, 'index'])
+            ->middleware('admin.permission:dashboard.view')
+            ->name('dashboard');
 
         // 隲区ｱよ嶌逋ｺ陦・
-        Route::get('/invoices', [AdminInvoice::class, 'index'])->name('invoices.index');
-        Route::post('/invoices/issue-manual', [AdminInvoice::class, 'issueManual'])->name('invoices.issue-manual');
-        Route::get('/invoices/template-settings', [AdminInvoice::class, 'templateSettings'])->name('invoices.template-settings');
-        Route::post('/invoices/template-settings', [AdminInvoice::class, 'updateTemplateSettings'])->name('invoices.template-settings.update');
+        Route::middleware('admin.permission:operations.invoices')->group(function () {
+            Route::get('/invoices', [AdminInvoice::class, 'index'])->name('invoices.index');
+            Route::post('/invoices/issue-manual', [AdminInvoice::class, 'issueManual'])->name('invoices.issue-manual');
+            Route::get('/invoices/template-settings', [AdminInvoice::class, 'templateSettings'])->name('invoices.template-settings');
+            Route::post('/invoices/template-settings', [AdminInvoice::class, 'updateTemplateSettings'])->name('invoices.template-settings.update');
+        });
 
         // 蜈･驥代・謖ｯ霎ｼ邂｡逅・
-        Route::get('/deposits/invoice-template/download', [AdminDeposit::class, 'downloadInvoiceTemplate'])->name('deposits.invoice-template.download');
-        Route::get('/deposits', [AdminDeposit::class, 'index'])->name('deposits.index');
-        Route::get('/deposits/{deposit}/invoice', [AdminDeposit::class, 'showInvoice'])->name('deposits.invoice.show');
-        Route::get('/deposits/{deposit}/invoice/pdf', [AdminDeposit::class, 'downloadInvoicePdf'])->name('deposits.invoice.pdf');
-        Route::post('/deposits/{deposit}/invoice', [AdminDeposit::class, 'issueInvoice'])->name('deposits.invoice.issue');
-        Route::post('/deposits/{deposit}/confirm-shop-payment', [AdminDeposit::class, 'confirmShopPayment'])->name('deposits.shop-payment.confirm');
-        Route::post('/deposits/{deposit}/transfer-start', [AdminDeposit::class, 'transferStart'])->name('deposits.transfer-start');
-        Route::post('/deposits/{deposit}/transfer-complete', [AdminDeposit::class, 'transferComplete'])->name('deposits.transfer-complete');
-        Route::post('/deposits/{deposit}/payment-task-invalidate', [AdminDeposit::class, 'paymentTaskInvalidate'])->name('deposits.payment-task.invalidate');
-        Route::post('/deposits/{deposit}/payment-task-refund-flag', [AdminDeposit::class, 'paymentTaskRefundFlag'])->name('deposits.payment-task.refund-flag');
-        Route::post('/deposits/{deposit}/transfer-cast', [AdminDeposit::class, 'transferCast'])->name('deposits.cast-transfer.execute');
+        Route::middleware('admin.permission:operations.deposits')->group(function () {
+            Route::get('/deposits/invoice-template/download', [AdminDeposit::class, 'downloadInvoiceTemplate'])->name('deposits.invoice-template.download');
+            Route::get('/deposits', [AdminDeposit::class, 'index'])->name('deposits.index');
+            Route::get('/deposits/{deposit}/invoice', [AdminDeposit::class, 'showInvoice'])->name('deposits.invoice.show');
+            Route::get('/deposits/{deposit}/invoice/pdf', [AdminDeposit::class, 'downloadInvoicePdf'])->name('deposits.invoice.pdf');
+            Route::post('/deposits/{deposit}/invoice', [AdminDeposit::class, 'issueInvoice'])->name('deposits.invoice.issue');
+            Route::post('/deposits/{deposit}/confirm-shop-payment', [AdminDeposit::class, 'confirmShopPayment'])->name('deposits.shop-payment.confirm');
+            Route::post('/deposits/{deposit}/transfer-start', [AdminDeposit::class, 'transferStart'])->name('deposits.transfer-start');
+            Route::post('/deposits/{deposit}/transfer-complete', [AdminDeposit::class, 'transferComplete'])->name('deposits.transfer-complete');
+            Route::post('/deposits/{deposit}/payment-task-invalidate', [AdminDeposit::class, 'paymentTaskInvalidate'])->name('deposits.payment-task.invalidate');
+            Route::post('/deposits/{deposit}/payment-task-refund-flag', [AdminDeposit::class, 'paymentTaskRefundFlag'])->name('deposits.payment-task.refund-flag');
+            Route::post('/deposits/{deposit}/transfer-cast', [AdminDeposit::class, 'transferCast'])->name('deposits.cast-transfer.execute');
+        });
 
         // 螢ｲ荳顔ｮ｡逅・
-        Route::get('/sales', [AdminSales::class, 'index'])->name('sales.index');
+        Route::get('/sales', [AdminSales::class, 'index'])
+            ->middleware('admin.permission:analytics.sales')
+            ->name('sales.index');
 
         // 繝槭せ繧ｿ險ｭ螳夂ｮ｡逅・
-        Route::get('/masters', [AdminMaster::class, 'index'])->name('masters.index');
-        Route::post('/masters/catalogs/{catalogKey}', [AdminMaster::class, 'storeCatalog'])->name('masters.catalogs.store');
-        Route::patch('/masters/catalogs/{catalogKey}/{recordId}', [AdminMaster::class, 'updateCatalog'])->name('masters.catalogs.update');
-        Route::delete('/masters/catalogs/{catalogKey}/{recordId}', [AdminMaster::class, 'destroyCatalog'])->name('masters.catalogs.destroy');
+        Route::middleware('admin.permission:master.masters')->group(function () {
+            Route::get('/masters', [AdminMaster::class, 'index'])->name('masters.index');
+            Route::post('/masters/catalogs/{catalogKey}', [AdminMaster::class, 'storeCatalog'])->name('masters.catalogs.store');
+            Route::patch('/masters/catalogs/{catalogKey}/{recordId}', [AdminMaster::class, 'updateCatalog'])->name('masters.catalogs.update');
+            Route::delete('/masters/catalogs/{catalogKey}/{recordId}', [AdminMaster::class, 'destroyCatalog'])->name('masters.catalogs.destroy');
+        });
 
         // 蠎苓・邂｡逅・
-        Route::get('/shops', [AdminShop::class, 'index'])->name('shops.index');
-        Route::post('/shops/{shopId}/toggle-recruit-status', [AdminShop::class, 'toggleRecruitStatus'])->name('shops.toggle-recruit-status');
+        Route::middleware('admin.permission:accounts.shops.view')->group(function () {
+            Route::get('/shops', [AdminShop::class, 'index'])->name('shops.index');
+            Route::get('/shops/{shopId}', [AdminShop::class, 'show'])->name('shops.show');
+            Route::post('/shops/{shopId}/lock-private', [AdminShop::class, 'lockPrivate'])->name('shops.lock-private');
+            Route::post('/shops/{shopId}/unlock-private', [AdminShop::class, 'unlockPrivate'])
+                ->middleware('admin.permission:accounts.shops.private')
+                ->name('shops.unlock-private');
+        });
+        Route::post('/shops/{shopId}/toggle-recruit-status', [AdminShop::class, 'toggleRecruitStatus'])
+            ->middleware('admin.permission:accounts.shops.manage')
+            ->name('shops.toggle-recruit-status');
 
         // 繧ｭ繝｣繧ｹ繝育ｮ｡逅・
-        Route::get('/casts', [AdminCast::class, 'index'])->name('casts.index');
+        Route::middleware('admin.permission:accounts.casts.view')->group(function () {
+            Route::get('/casts', [AdminCast::class, 'index'])->name('casts.index');
+            Route::get('/casts/{castId}', [AdminCast::class, 'show'])->name('casts.show');
+            Route::post('/casts/{castId}/lock-private', [AdminCast::class, 'lockPrivate'])->name('casts.lock-private');
+            Route::post('/casts/{castId}/unlock-private', [AdminCast::class, 'unlockPrivate'])
+                ->middleware('admin.permission:accounts.casts.private')
+                ->name('casts.unlock-private');
+        });
 
         // NG繝ｯ繝ｼ繝臥ｮ｡逅・
-        Route::get('/ngwords', [AdminNgWord::class, 'index'])->name('ngwords.index');
+        Route::get('/ngwords', [AdminNgWord::class, 'index'])
+            ->middleware('admin.permission:master.ngwords')
+            ->name('ngwords.index');
 
         // 縺顔衍繧峨○邂｡逅・
-        Route::get('/notices', [AdminNotice::class, 'index'])->name('notices.index');
-        Route::get('/notices/create', [AdminNotice::class, 'create'])->name('notices.create');
-        Route::post('/notices', [AdminNotice::class, 'store'])->name('notices.store');
-        Route::get('/notices/{notice}/edit', [AdminNotice::class, 'edit'])->name('notices.edit');
-        Route::put('/notices/{notice}', [AdminNotice::class, 'update'])->name('notices.update');
-        Route::delete('/notices/{notice}', [AdminNotice::class, 'destroy'])->name('notices.destroy');
+        Route::middleware('admin.permission:content.notices')->group(function () {
+            Route::get('/notices', [AdminNotice::class, 'index'])->name('notices.index');
+            Route::get('/notices/create', [AdminNotice::class, 'create'])->name('notices.create');
+            Route::post('/notices', [AdminNotice::class, 'store'])->name('notices.store');
+            Route::get('/notices/{notice}/edit', [AdminNotice::class, 'edit'])->name('notices.edit');
+            Route::put('/notices/{notice}', [AdminNotice::class, 'update'])->name('notices.update');
+            Route::delete('/notices/{notice}', [AdminNotice::class, 'destroy'])->name('notices.destroy');
+        });
 
         // 繧ｳ繝ｩ繝邂｡逅・
-        Route::get('/columns', [AdminColumn::class, 'index'])->name('columns.index');
-        Route::get('/columns/create', [AdminColumn::class, 'create'])->name('columns.create');
-        Route::post('/columns', [AdminColumn::class, 'store'])->name('columns.store');
-        Route::get('/columns/{column}/edit', [AdminColumn::class, 'edit'])->name('columns.edit');
-        Route::put('/columns/{column}', [AdminColumn::class, 'update'])->name('columns.update');
-        Route::delete('/columns/{column}', [AdminColumn::class, 'destroy'])->name('columns.destroy');
+        Route::middleware('admin.permission:content.columns')->group(function () {
+            Route::get('/columns', [AdminColumn::class, 'index'])->name('columns.index');
+            Route::get('/columns/create', [AdminColumn::class, 'create'])->name('columns.create');
+            Route::post('/columns', [AdminColumn::class, 'store'])->name('columns.store');
+            Route::get('/columns/{column}/edit', [AdminColumn::class, 'edit'])->name('columns.edit');
+            Route::put('/columns/{column}', [AdminColumn::class, 'update'])->name('columns.update');
+            Route::delete('/columns/{column}', [AdminColumn::class, 'destroy'])->name('columns.destroy');
+        });
 
         // 隲区ｱゅ・謖ｯ霎ｼ繧ｿ繧ｹ繧ｯ邂｡逅・
-        Route::get('/tasks', [AdminTask::class, 'index'])->name('tasks.index');
+        Route::get('/tasks', [AdminTask::class, 'index'])
+            ->middleware('admin.permission:dashboard.view')
+            ->name('tasks.index');
 
         // 譛ｬ莠ｺ繝ｻ譖ｸ鬘槫ｯｩ譟ｻ
-        Route::get('/verification', [AdminVerification::class, 'index'])->name('verification.index');
-        Route::post('/verification/cast/{document}/approve', [AdminVerification::class, 'approveCast'])->name('verification.cast.approve');
-        Route::post('/verification/cast/{document}/reject', [AdminVerification::class, 'rejectCast'])->name('verification.cast.reject');
-        Route::post('/verification/shopdoc/{document}/approve', [AdminVerification::class, 'approveShopDocument'])->name('verification.shopdoc.approve');
-        Route::post('/verification/shopdoc/{document}/reject', [AdminVerification::class, 'rejectShopDocument'])->name('verification.shopdoc.reject');
+        Route::middleware('admin.permission:operations.verification')->group(function () {
+            Route::get('/verification', [AdminVerification::class, 'index'])->name('verification.index');
+            Route::post('/verification/cast/{document}/approve', [AdminVerification::class, 'approveCast'])->name('verification.cast.approve');
+            Route::post('/verification/cast/{document}/reject', [AdminVerification::class, 'rejectCast'])->name('verification.cast.reject');
+            Route::post('/verification/shopdoc/{document}/approve', [AdminVerification::class, 'approveShopDocument'])->name('verification.shopdoc.approve');
+            Route::post('/verification/shopdoc/{document}/reject', [AdminVerification::class, 'rejectShopDocument'])->name('verification.shopdoc.reject');
+        });
 
         // 蝠上＞蜷医ｏ縺帷ｮ｡逅・
-        Route::get('/inquiries', [AdminInquiry::class, 'index'])->name('inquiries.index');
-        Route::get('/inquiries/{id}', [AdminInquiry::class, 'show'])->whereNumber('id')->name('inquiries.show');
+        Route::middleware('admin.permission:operations.inquiries')->group(function () {
+            Route::get('/inquiries', [AdminInquiry::class, 'index'])->name('inquiries.index');
+            Route::get('/inquiries/{id}', [AdminInquiry::class, 'show'])->whereNumber('id')->name('inquiries.show');
+        });
 
         // 繧｢繧ｫ繧ｦ繝ｳ繝育ｮ｡逅・ｼ磯°蝟ｶ・・
-        Route::get('/admin-accounts', [AdminAccount::class, 'index'])->name('admin-accounts.index');
+        Route::middleware('admin.permission:accounts.admins')->group(function () {
+            Route::get('/admin-accounts', [AdminAccount::class, 'index'])->name('admin-accounts.index');
+            Route::get('/admin-accounts/roles/{role}/edit', [AdminAccount::class, 'editRole'])
+                ->where('role', 'admin|staff')
+                ->name('admin-accounts.roles.edit');
+            Route::put('/admin-accounts/roles/{role}', [AdminAccount::class, 'updateRole'])
+                ->where('role', 'admin|staff')
+                ->name('admin-accounts.roles.update');
+        });
 
         // 驕句霧蜿｣蠎ｧ諠・ｱ
-        Route::get('/bank', [AdminBank::class, 'index'])->name('bank.index');
-        Route::post('/bank', [AdminBank::class, 'store'])->name('bank.store');
+        Route::middleware('admin.permission:operations.deposits')->group(function () {
+            Route::get('/bank', [AdminBank::class, 'index'])->name('bank.index');
+            Route::post('/bank', [AdminBank::class, 'store'])->name('bank.store');
+        });
 
         // 規約管理（運営協会／利用規約／プライバシーポリシー）
-        Route::get('/policies/{key}', [AdminPolicy::class, 'show'])
-            ->where('key', 'about|terms|privacy')
-            ->name('policies.show');
-        Route::get('/policies/{key}/edit', [AdminPolicy::class, 'edit'])
-            ->where('key', 'about|terms|privacy')
-            ->name('policies.edit');
-        Route::put('/policies/{key}', [AdminPolicy::class, 'update'])
-            ->where('key', 'about|terms|privacy')
-            ->name('policies.update');
-        Route::post('/policies/{key}/toggle-lock', [AdminPolicy::class, 'toggleLock'])
-            ->where('key', 'about|terms|privacy')
-            ->name('policies.toggle-lock');
+        Route::middleware('admin.permission:policies.manage')->group(function () {
+            Route::get('/policies/{key}', [AdminPolicy::class, 'show'])
+                ->where('key', 'about|terms|privacy')
+                ->name('policies.show');
+            Route::get('/policies/{key}/edit', [AdminPolicy::class, 'edit'])
+                ->where('key', 'about|terms|privacy')
+                ->name('policies.edit');
+            Route::put('/policies/{key}', [AdminPolicy::class, 'update'])
+                ->where('key', 'about|terms|privacy')
+                ->name('policies.update');
+            Route::post('/policies/{key}/toggle-lock', [AdminPolicy::class, 'toggleLock'])
+                ->where('key', 'about|terms|privacy')
+                ->name('policies.toggle-lock');
+        });
     });
 });
 

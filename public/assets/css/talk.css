@@ -1627,3 +1627,235 @@ button.interview-option-btn:hover {
         padding: 8px 14px;
     }
 }
+
+/* =================================================================
+   Brushup overrides — 自動送信バブル・面談カード・リンクを
+   ブランド配色（ボルドー + シャンパンゴールド）に統一
+   ================================================================= */
+
+/* 自動送信バブル：クリーム/グレー → ボルドー + ゴールドアクセント */
+.message-bubble-auto {
+    border: 1px solid rgba(220, 181, 104, 0.42) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.32);
+}
+.msg-right .message-bubble-auto,
+.msg-left .message-bubble-auto {
+    background: linear-gradient(180deg, rgba(74, 18, 42, 0.85) 0%, rgba(42, 13, 24, 0.95) 100%);
+    color: #f5e9c8;
+}
+.message-bubble-auto p,
+.msg-right .message-bubble-auto,
+.msg-left .message-bubble-auto {
+    color: #f5e9c8;
+}
+.message-bubble-auto .interview-title {
+    color: #dcb568 !important;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
+.message-bubble-auto .interview-title i { color: #ffe2a3; }
+.message-bubble-auto .interview-body-copy {
+    color: rgba(245, 233, 200, 0.92) !important;
+    opacity: 1;
+}
+.message-bubble-auto .interview-badge {
+    background: rgba(220, 181, 104, 0.16) !important;
+    border-color: rgba(220, 181, 104, 0.38) !important;
+    color: #dcb568 !important;
+}
+
+/* 自動送信メッセージのアバター：クリーム → ゴールドアクセント */
+.msg-avatar-auto {
+    background: rgba(220, 181, 104, 0.18);
+    color: #dcb568;
+    border: 1px solid rgba(220, 181, 104, 0.45);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* 面談候補日（オプション）ボタン：暗色背景＋ゴールド枠で「タップ可能」を明示 */
+.interview-option-btn {
+    background: rgba(0, 0, 0, 0.32);
+    border: 1px solid rgba(220, 181, 104, 0.35);
+    color: #fff5e0;
+}
+button.interview-option-btn:hover {
+    background: rgba(220, 181, 104, 0.18);
+    border-color: rgba(220, 181, 104, 0.6);
+    transform: translateY(-1px);
+}
+.interview-option-btn .interview-option-date { color: #ffe2a3; }
+.interview-option-btn .interview-option-time { color: rgba(245, 233, 200, 0.82); }
+.interview-option-btn .interview-option-action {
+    background: rgba(220, 181, 104, 0.18);
+    border: 1px solid rgba(220, 181, 104, 0.35);
+    color: #dcb568;
+}
+
+/* 選択済みオプション：強調ゴールド */
+.interview-option-btn.is-selected {
+    background: linear-gradient(135deg, rgba(220, 181, 104, 0.32), rgba(184, 134, 11, 0.28));
+    border-color: rgba(255, 226, 163, 0.7);
+    color: #fff8e4;
+}
+.interview-option-btn.is-selected::before {
+    background: linear-gradient(180deg, #ffe2a3, #dcb568, #b8860b);
+}
+.interview-option-btn.is-selected .interview-option-date,
+.interview-option-btn.is-selected .interview-option-time,
+.interview-option-btn.is-selected .interview-option-action {
+    color: #fff8e4 !important;
+}
+
+/* 面談確定ブロック */
+.interview-confirmed-slot {
+    background: rgba(220, 181, 104, 0.12);
+    border: 1px solid rgba(220, 181, 104, 0.42);
+    color: #fff5e0;
+}
+.interview-confirmed-date {
+    color: #ffe2a3;
+    font-weight: 800;
+}
+.interview-note {
+    color: rgba(245, 233, 200, 0.82) !important;
+}
+
+/* キャンセル依頼バブル：警告アンバー＋ゴールドの組合せ */
+.message-bubble-cancel-request {
+    border-color: rgba(252, 211, 77, 0.55) !important;
+}
+.message-bubble-cancel-request .interview-title {
+    color: #fcd34d !important;
+}
+.message-bubble-cancel-request .interview-badge {
+    background: rgba(252, 211, 77, 0.14) !important;
+    border-color: rgba(252, 211, 77, 0.38) !important;
+    color: #fcd34d !important;
+}
+
+/* 日程変更ボタン：両側で統一 */
+.interview-change-schedule-btn {
+    color: #fff8e4;
+    background: rgba(220, 181, 104, 0.2);
+    border: 1px solid rgba(220, 181, 104, 0.45);
+}
+.msg-right .interview-change-schedule-btn,
+.msg-left .interview-change-schedule-btn {
+    color: #fff8e4;
+    background: rgba(220, 181, 104, 0.2);
+    border: 1px solid rgba(220, 181, 104, 0.45);
+}
+.interview-change-schedule-btn:hover,
+.msg-right .interview-change-schedule-btn:hover,
+.msg-left .interview-change-schedule-btn:hover {
+    background: rgba(220, 181, 104, 0.35);
+    border-color: rgba(255, 226, 163, 0.65);
+    color: #fff8e4;
+}
+
+/* 通常の面談候補バブル（msg-right）：オレンジ → ブランドゴールドへ */
+.msg-right .message-bubble-interview:not(.message-bubble-auto) {
+    background: linear-gradient(135deg, #ffe2a3, #dcb568 45%, #b8860b);
+    color: #2c1a0f;
+    border-radius: 16px 16px 4px 16px;
+}
+
+/* リンク色：バブル種別ごとに最適化（白×白／金×金 を回避） */
+/* 自動送信バブル（暗色）：明るいゴールドリンク */
+.message-bubble-auto a {
+    color: #ffe2a3;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    font-weight: 700;
+}
+.message-bubble-auto a:hover { color: #ffeec0; }
+
+/* 自分のメッセージ（ゴールド地）：ダークボルドーリンク */
+.msg-right .message-bubble:not(.message-bubble-auto) a {
+    color: #4a122a;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    font-weight: 700;
+}
+.msg-right .message-bubble:not(.message-bubble-auto) a:hover { color: #2a0d18; }
+
+/* 相手のメッセージ（ボルドー地）：ゴールド系リンク */
+.msg-left .message-bubble:not(.message-bubble-auto) a {
+    color: #ffe2a3;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    font-weight: 600;
+}
+.msg-left .message-bubble:not(.message-bubble-auto) a:hover { color: #ffeec0; }
+
+/* 画像コメント（msg-image-caption）：白×ゴールド地のキャプション */
+.msg-right .message-bubble-image .message-image-caption { color: #2c1a0f; }
+.msg-left .message-bubble-image .message-image-caption { color: var(--talk-text-main); }
+
+/* ==========================================================================
+   定型文メニュー（カテゴリ別）
+   ========================================================================== */
+.talk-template-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.talk-template-group:last-child { margin-bottom: 0; }
+.talk-template-group-title {
+    font-size: 11px;
+    letter-spacing: .12em;
+    color: var(--gold, #dcb568);
+    font-weight: 700;
+    padding: 4px 6px;
+    border-bottom: 1px solid rgba(220, 181, 104, .25);
+    margin-bottom: 4px;
+}
+.talk-template-item {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    width: 100%;
+    text-align: left;
+    background: rgba(255, 255, 255, .04);
+    border: 1px solid rgba(220, 181, 104, .2);
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: var(--talk-text-main);
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+}
+.talk-template-item:hover {
+    background: rgba(220, 181, 104, .1);
+    border-color: rgba(220, 181, 104, .55);
+}
+.talk-template-item-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gold, #dcb568);
+}
+.talk-template-item-body {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--talk-text-main);
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* ==========================================================================
+   NGワード警告（送信欄直下）
+   ========================================================================== */
+.talk-ng-warn {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 6px 4px 0;
+    padding: 8px 10px;
+    background: rgba(220, 38, 38, .12);
+    border: 1px solid rgba(220, 38, 38, .55);
+    border-radius: 8px;
+    color: #fca5a5;
+    font-size: 12px;
+    line-height: 1.5;
+}
+.talk-ng-warn[hidden] { display: none !important; }
+.talk-ng-warn i { margin-top: 1px; }
+.talk-ng-warn-text { flex: 1; }
+.btn-send.is-disabled,
+.btn-send:disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }

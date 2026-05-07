@@ -443,10 +443,10 @@
     .shop-mypage-custom-header {
         border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
-    .shop-mypage-custom-header .header-title-main,
+    /* ヘッダタイトルは global の gold-gradient を使うため上書きしない */
     .shop-mypage-custom-header .btn-back,
     .shop-mypage-custom-header .header-icon-btn {
-        color: #c8a951;
+        color: #dcb568;
     }
     .shop-mypage-custom-header #btn-header-notification .badge-notify {
         background: #ef4444;
@@ -457,7 +457,7 @@
         padding-top: 8px;
     }
     .shop-mypage-v2 .shop-mypage-store-title {
-        color: #c8a951;
+        color: #dcb568;
         font-size: clamp(1.65rem, 6vw, 2rem);
         letter-spacing: 0.04em;
     }
@@ -470,7 +470,7 @@
         height: 84px;
         border-radius: 12px;
         background: #080808;
-        border: 1px solid rgba(200, 169, 81, 0.28);
+        border: 1px solid rgba(220, 181, 104, 0.28);
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
         overflow: hidden;
     }
@@ -514,7 +514,7 @@
         font-size: 0.7rem;
     }
     .shop-mypage-v2 .btn-word-edit {
-        color: #a89050;
+        color: #b8860b;
         width: 24px;
         height: 24px;
     }
@@ -585,11 +585,11 @@
     }
 
     .shop-mypage-v2 .shop-mypage-section-label {
-        color: #c8a951;
+        color: #dcb568;
         font-size: 0.98rem;
         font-style: italic;
         padding-bottom: 8px;
-        border-bottom: 1px solid rgba(200, 169, 81, 0.3);
+        border-bottom: 1px solid rgba(220, 181, 104, 0.3);
     }
     .shop-mypage-v2 .shop-mypage-job-button {
         display: flex;
@@ -656,7 +656,7 @@
         border-bottom: 1px solid rgba(90, 29, 40, 0.55);
     }
     .shop-mypage-v2 .shop-mypage-info-row .k {
-        color: #c8a951;
+        color: #dcb568;
         font-size: 0.78rem;
     }
     .shop-mypage-v2 .shop-mypage-info-row .v {

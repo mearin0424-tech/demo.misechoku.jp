@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\AdminPrivateAccessService;
 use App\Services\BillingManagementService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,7 +13,8 @@ use Illuminate\Support\Facades\Schema;
 class ShopController extends Controller
 {
     public function __construct(
-        private readonly BillingManagementService $billingManagementService
+        private readonly BillingManagementService $billingManagementService,
+        private readonly AdminPrivateAccessService $privateAccessService,
     ) {
     }
 
@@ -24,17 +26,29 @@ class ShopController extends Controller
         $operationSummaries = $this->billingManagementService->getOperationSummaryByEntity('shop');
         $horizontal = Schema::hasTable('shop_jobs') && Schema::hasColumn('shop_jobs', 'regular_status');
 
+        $hasApprovalColumn = Schema::hasColumn('shops', 'approval');
+        $managerLastLoginSub = DB::table('shop_managers')
+            ->selectRaw('shop_id, MAX(last_login_at) as last_login_at')
+            ->groupBy('shop_id');
+
         $query = DB::table('shops')
             ->leftJoin('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
             ->leftJoin('shop_jobs', 'shops.id', '=', 'shop_jobs.shop_id')
+            ->leftJoinSub($managerLastLoginSub, 'manager_login', function ($join) {
+                $join->on('shops.id', '=', 'manager_login.shop_id');
+            })
             ->select(
                 'shops.id',
                 'shops.created_at',
                 'shops.updated_at',
-                'shops.approval',
                 'shops.status as shop_account_status',
                 'shop_profiles.shop_name',
+                'manager_login.last_login_at as latest_manager_login_at',
             );
+
+        if ($hasApprovalColumn) {
+            $query->addSelect('shops.approval');
+        }
 
         if ($horizontal) {
             $query->addSelect(
@@ -107,6 +121,8 @@ class ShopController extends Controller
                     'plan' => '未設定',
                     'fee' => 0,
                     'published_at' => $shop->created_at,
+                    'registered_at' => $shop->created_at,
+                    'last_login_at' => $shop->latest_manager_login_at ?? null,
                     'document_status' => ((int) ($shop->approval ?? 0)) === 1 ? '確認済み' : '未確認',
                     'job_status' => $jobStatusLabel,
                     'job_status_key' => $jobStatusKey,
@@ -120,6 +136,93 @@ class ShopController extends Controller
         return view('admin.shops.index', [
             'shops' => $shops,
         ]);
+    }
+
+    /**
+     * 店舗詳細（公開情報＋運用実績は常時表示、非公開情報はパスワード解除制）
+     */
+    public function show(string $shopId)
+    {
+        $shop = DB::table('shops')->where('id', $shopId)->first();
+        abort_unless($shop, 404);
+
+        $profile = DB::table('shop_profiles')->where('shop_id', $shopId)->first();
+        $job = DB::table('shop_jobs')->where('shop_id', $shopId)->first();
+        $managers = DB::table('shop_managers')
+            ->where('shop_id', $shopId)
+            ->orderByDesc('last_login_at')
+            ->get();
+        $bank = DB::table('bank_accounts')
+            ->where('holder_type', 'shops')
+            ->where('holder_id', $shopId)
+            ->first();
+
+        // 取引履歴
+        $applicationDeposits = DB::table('application_deposits')
+            ->join('shop_job_applications', 'application_deposits.shop_job_application_id', '=', 'shop_job_applications.id')
+            ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
+            ->leftJoin('cast_profiles', 'shop_job_applications.cast_id', '=', 'cast_profiles.cast_id')
+            ->where('shop_jobs.shop_id', $shopId)
+            ->orderByDesc('application_deposits.created_at')
+            ->get([
+                'application_deposits.id',
+                'application_deposits.status',
+                'application_deposits.invoice_number',
+                'application_deposits.invoice_amount',
+                'application_deposits.bonus_amount',
+                'application_deposits.invoice_issued_at',
+                'application_deposits.shop_payment_confirmed_at',
+                'application_deposits.completed_at',
+                'shop_job_applications.cast_id',
+                'cast_profiles.nickname as cast_nickname',
+            ]);
+
+        $operationSummary = $this->billingManagementService->getOperationSummaryByEntity('shop')[$shopId] ?? null;
+
+        $isUnlocked = $this->privateAccessService->isUnlocked('shop', $shopId);
+        $unlockTtl = $this->privateAccessService->unlockedSecondsRemaining('shop', $shopId);
+
+        return view('admin.shops.show', [
+            'shopId' => $shopId,
+            'shop' => $shop,
+            'profile' => $profile,
+            'job' => $job,
+            'managers' => $managers,
+            'bank' => $bank,
+            'applicationDeposits' => $applicationDeposits,
+            'operationSummary' => $operationSummary,
+            'isUnlocked' => $isUnlocked,
+            'unlockTtlSeconds' => $unlockTtl,
+            'totalBilled' => (int) DB::table('application_deposits')
+                ->join('shop_job_applications', 'application_deposits.shop_job_application_id', '=', 'shop_job_applications.id')
+                ->join('shop_jobs', 'shop_job_applications.shop_job_id', '=', 'shop_jobs.id')
+                ->where('shop_jobs.shop_id', $shopId)
+                ->whereNotNull('application_deposits.invoice_amount')
+                ->sum('application_deposits.invoice_amount'),
+            'displayName' => $profile->shop_name ?? '未設定',
+        ]);
+    }
+
+    public function unlockPrivate(Request $request, string $shopId): RedirectResponse
+    {
+        $request->validate([
+            'password' => ['required', 'string'],
+        ]);
+
+        $ok = $this->privateAccessService->unlockWithPassword('shop', $shopId, (string) $request->input('password'));
+        if (!$ok) {
+            return redirect()->route('admin.shops.show', $shopId)
+                ->with('private_unlock_error', '管理者パスワードが一致しません。');
+        }
+        return redirect()->route('admin.shops.show', $shopId)
+            ->with('status', '非公開情報を解除しました（' . (int) ($this->privateAccessService->ttlSeconds() / 60) . '分間有効）。');
+    }
+
+    public function lockPrivate(string $shopId): RedirectResponse
+    {
+        $this->privateAccessService->lock('shop', $shopId);
+        return redirect()->route('admin.shops.show', $shopId)
+            ->with('status', '非公開情報を再度ロックしました。');
     }
 
     public function toggleRecruitStatus(Request $request, string $shopId): RedirectResponse

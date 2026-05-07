@@ -21,23 +21,22 @@
                     <tr>
                         <th>ID</th>
                         <th>店舗名</th>
-                        <th>登録プラン</th>
-                        <th>登録費</th>
-                        <th>公開日</th>
+                        <th>登録日</th>
+                        <th>最終ログイン</th>
                         <th>書類提出</th>
                         <th>求人公開</th>
                         <th>運用実績（店舗単位）</th>
-                        <th>操作</th>
+                        <th>求人操作</th>
+                        <th>詳細</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($shops as $shop)
                         <tr>
-                            <td>{{ $shop['id'] }}</td>
-                            <td>{{ $shop['name'] }}</td>
-                            <td>{{ $shop['plan'] }}</td>
-                            <td>{{ number_format($shop['fee']) }} 円</td>
-                            <td>{{ $shop['published_at'] ? \Illuminate\Support\Carbon::parse($shop['published_at'])->format('Y-m-d') : '-' }}</td>
+                            <td><code>{{ $shop['id'] }}</code></td>
+                            <td><a href="{{ route('admin.shops.show', $shop['id']) }}">{{ $shop['name'] }}</a></td>
+                            <td>{{ $shop['registered_at'] ? \Illuminate\Support\Carbon::parse($shop['registered_at'])->format('Y-m-d') : '—' }}</td>
+                            <td>{{ $shop['last_login_at'] ? \Illuminate\Support\Carbon::parse($shop['last_login_at'])->format('Y-m-d H:i') : '—' }}</td>
                             <td>{{ $shop['document_status'] }}</td>
                             <td>
                                 <span class="admin-status-badge {{ $shop['job_status_key'] === 'active' ? 'is-active' : 'is-inactive' }}">
@@ -77,6 +76,11 @@
                                     </button>
                                 </form>
                                 @endif
+                            </td>
+                            <td>
+                                <a href="{{ route('admin.shops.show', $shop['id']) }}" class="btn-action btn-action-secondary">
+                                    <i class="fas fa-circle-info"></i> 詳細
+                                </a>
                             </td>
                         </tr>
                     @empty

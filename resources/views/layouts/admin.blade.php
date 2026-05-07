@@ -1,53 +1,66 @@
 @php
     $currentRoute = optional(request()->route())->getName();
     $pageTitle = trim($__env->yieldContent('admin_page_title')) ?: trim($__env->yieldContent('title')) ?: 'ダッシュボード';
+    $authedAdmin = auth()->guard('admin')->user();
     $menuGroups = [
         [
             'title' => 'オペレーション',
             'items' => [
-                ['label' => '請求書発行', 'route' => 'admin.invoices.index', 'icon' => 'fa-file-invoice', 'badge' => null, 'badge_class' => ''],
-                ['label' => '入金確認・振込', 'route' => 'admin.deposits.index', 'icon' => 'fa-money-bill-wave', 'badge' => null, 'badge_class' => ''],
-                ['label' => '身分証・書類審査', 'route' => 'admin.verification.index', 'icon' => 'fa-id-card', 'badge' => null, 'badge_class' => ''],
-                ['label' => '問合せ対応', 'route' => 'admin.inquiries.index', 'icon' => 'fa-triangle-exclamation', 'badge' => null, 'badge_class' => ''],
+                ['label' => '請求書発行', 'route' => 'admin.invoices.index', 'icon' => 'fa-file-invoice', 'badge' => null, 'badge_class' => '', 'permission' => 'operations.invoices'],
+                ['label' => '入金確認・振込', 'route' => 'admin.deposits.index', 'icon' => 'fa-money-bill-wave', 'badge' => null, 'badge_class' => '', 'permission' => 'operations.deposits'],
+                ['label' => '身分証・書類審査', 'route' => 'admin.verification.index', 'icon' => 'fa-id-card', 'badge' => null, 'badge_class' => '', 'permission' => 'operations.verification'],
+                ['label' => '問合せ対応', 'route' => 'admin.inquiries.index', 'icon' => 'fa-triangle-exclamation', 'badge' => null, 'badge_class' => '', 'permission' => 'operations.inquiries'],
             ],
         ],
         [
             'title' => 'コンテンツ',
             'items' => [
-                ['label' => 'お知らせ管理', 'route' => 'admin.notices.index', 'icon' => 'fa-bell', 'badge' => null, 'badge_class' => ''],
-                ['label' => 'コラム管理', 'route' => 'admin.columns.index', 'icon' => 'fa-pen-nib', 'badge' => null, 'badge_class' => ''],
+                ['label' => 'お知らせ管理', 'route' => 'admin.notices.index', 'icon' => 'fa-bell', 'badge' => null, 'badge_class' => '', 'permission' => 'content.notices'],
+                ['label' => 'コラム管理', 'route' => 'admin.columns.index', 'icon' => 'fa-pen-nib', 'badge' => null, 'badge_class' => '', 'permission' => 'content.columns'],
             ],
         ],
         [
             'title' => 'マスタ設定',
             'items' => [
-                ['label' => 'NGワード管理', 'route' => 'admin.ngwords.index', 'icon' => 'fa-ban', 'badge' => null, 'badge_class' => ''],
-                ['label' => 'マスタメンテナンス', 'route' => 'admin.masters.index', 'icon' => 'fa-database', 'badge' => null, 'badge_class' => ''],
+                ['label' => 'NGワード管理', 'route' => 'admin.ngwords.index', 'icon' => 'fa-ban', 'badge' => null, 'badge_class' => '', 'permission' => 'master.ngwords'],
+                ['label' => 'マスタメンテナンス', 'route' => 'admin.masters.index', 'icon' => 'fa-database', 'badge' => null, 'badge_class' => '', 'permission' => 'master.masters'],
             ],
         ],
         [
             'title' => 'アナリティクス',
             'items' => [
-                ['label' => '売上・ユーザー数増減', 'route' => 'admin.sales.index', 'icon' => 'fa-chart-column', 'badge' => null, 'badge_class' => ''],
+                ['label' => '売上・ユーザー数増減', 'route' => 'admin.sales.index', 'icon' => 'fa-chart-column', 'badge' => null, 'badge_class' => '', 'permission' => 'analytics.sales'],
             ],
         ],
         [
             'title' => 'アカウント管理',
             'items' => [
-                ['label' => '店舗管理', 'route' => 'admin.shops.index', 'icon' => 'fa-building', 'badge' => null, 'badge_class' => ''],
-                ['label' => 'キャスト管理', 'route' => 'admin.casts.index', 'icon' => 'fa-users', 'badge' => null, 'badge_class' => ''],
-                ['label' => '運営アカウント管理', 'route' => 'admin.admin-accounts.index', 'icon' => 'fa-user-gear', 'badge' => null, 'badge_class' => ''],
+                ['label' => '店舗管理', 'route' => 'admin.shops.index', 'icon' => 'fa-building', 'badge' => null, 'badge_class' => '', 'permission' => 'accounts.shops.view'],
+                ['label' => 'キャスト管理', 'route' => 'admin.casts.index', 'icon' => 'fa-users', 'badge' => null, 'badge_class' => '', 'permission' => 'accounts.casts.view'],
+                ['label' => '運営アカウント管理', 'route' => 'admin.admin-accounts.index', 'icon' => 'fa-user-gear', 'badge' => null, 'badge_class' => '', 'permission' => 'accounts.admins'],
             ],
         ],
         [
             'title' => '規約管理',
             'items' => [
-                ['label' => '運営協会', 'route' => 'admin.policies.show', 'route_params' => ['key' => 'about'], 'icon' => 'fa-landmark', 'badge' => null, 'badge_class' => ''],
-                ['label' => '利用規約', 'route' => 'admin.policies.show', 'route_params' => ['key' => 'terms'], 'icon' => 'fa-file-contract', 'badge' => null, 'badge_class' => ''],
-                ['label' => 'プライバシーポリシー', 'route' => 'admin.policies.show', 'route_params' => ['key' => 'privacy'], 'icon' => 'fa-user-shield', 'badge' => null, 'badge_class' => ''],
+                ['label' => '運営協会', 'route' => 'admin.policies.show', 'route_params' => ['key' => 'about'], 'icon' => 'fa-landmark', 'badge' => null, 'badge_class' => '', 'permission' => 'policies.manage'],
+                ['label' => '利用規約', 'route' => 'admin.policies.show', 'route_params' => ['key' => 'terms'], 'icon' => 'fa-file-contract', 'badge' => null, 'badge_class' => '', 'permission' => 'policies.manage'],
+                ['label' => 'プライバシーポリシー', 'route' => 'admin.policies.show', 'route_params' => ['key' => 'privacy'], 'icon' => 'fa-user-shield', 'badge' => null, 'badge_class' => '', 'permission' => 'policies.manage'],
             ],
         ],
     ];
+
+    // 権限フィルタ：authedAdmin が存在する場合のみ非保有を除外（未ログインの旧UIは従来挙動）
+    if ($authedAdmin && method_exists($authedAdmin, 'hasPermission')) {
+        foreach ($menuGroups as &$g) {
+            $g['items'] = array_values(array_filter($g['items'], function ($it) use ($authedAdmin) {
+                $perm = $it['permission'] ?? null;
+                return $perm === null || $authedAdmin->hasPermission($perm);
+            }));
+        }
+        unset($g);
+        $menuGroups = array_values(array_filter($menuGroups, fn ($g) => count($g['items'] ?? []) > 0));
+    }
     $opBadges = $adminOperationBadges ?? [];
     $opAchievements = $adminOperationAchievements ?? [];
     foreach ($menuGroups as &$group) {
@@ -163,12 +176,19 @@
                     </section>
                 @endforeach
 
+                @php
+                    $authedName = $authedAdmin->name ?? '管理者';
+                    $authedRoleLabel = $authedAdmin && method_exists($authedAdmin, 'isAdmin') && $authedAdmin->isAdmin()
+                        ? 'SUPER ADMIN'
+                        : ($authedAdmin ? 'OPERATOR' : 'GUEST');
+                    $avatarLetters = mb_strtoupper(mb_substr($authedName ?: 'AD', 0, 2));
+                @endphp
                 <div class="admin-sidebar-user">
                     <div class="admin-sidebar-user-row">
-                        <div class="admin-user-avatar">AD</div>
+                        <div class="admin-user-avatar">{{ $avatarLetters }}</div>
                         <div>
-                            <div class="admin-user-name">管理者 太郎</div>
-                            <div class="admin-user-role">SUPER ADMIN</div>
+                            <div class="admin-user-name">{{ $authedName }}</div>
+                            <div class="admin-user-role">{{ $authedRoleLabel }}</div>
                         </div>
                     </div>
                     <button type="button" class="admin-logout-btn" onclick="if(confirm('ログアウトしますか？')) location.href='{{ route('login.demo') }}'">
@@ -236,7 +256,7 @@
                             </div>
                         </div>
                     </div>
-                    <span class="admin-header-avatar">AD</span>
+                    <span class="admin-header-avatar">{{ $avatarLetters ?? 'AD' }}</span>
                 </div>
             </header>
 

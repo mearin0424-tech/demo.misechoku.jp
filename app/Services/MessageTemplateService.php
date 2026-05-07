@@ -13,18 +13,24 @@ class MessageTemplateService
     public function getTemplates(string $group): array
     {
         if (Schema::hasTable('message_templates')) {
+            $hasCategory = Schema::hasColumn('message_templates', 'category');
+            $columns = ['template_key', 'title', 'body'];
+            if ($hasCategory) {
+                $columns[] = 'category';
+            }
             $rows = DB::table('message_templates')
                 ->where('template_group', $group)
                 ->where('is_active', true)
                 ->orderBy('sort_order')
                 ->orderBy('id')
-                ->get(['template_key', 'title', 'body']);
+                ->get($columns);
 
             if ($rows->isNotEmpty()) {
                 return $rows->map(fn ($row) => [
                     'key' => (string) $row->template_key,
                     'title' => (string) $row->title,
                     'body' => (string) $row->body,
+                    'category' => $hasCategory ? (string) ($row->category ?? '') : '',
                 ])->all();
             }
         }
@@ -124,6 +130,31 @@ class MessageTemplateService
                     'title' => '再応募歓迎',
                     'body' => 'ご応募ありがとうございました。今回は見送らせていただく結果となりましたが、募集状況が変わりましたら再度ご相談させていただく場合がございます。その際はよろしくお願いいたします。',
                 ],
+            ],
+            // キャスト→店舗 のクイックテンプレ
+            'talk_quick_cast' => [
+                ['key' => 'cast_greet_initial',  'category' => '初回挨拶', 'title' => 'はじめまして',     'body' => 'はじめまして。求人を拝見してご連絡いたしました。詳細についてお伺いできますと幸いです。よろしくお願いいたします。'],
+                ['key' => 'cast_greet_thanks',   'category' => '初回挨拶', 'title' => 'ご返信ありがとうございます', 'body' => 'ご返信ありがとうございます。前向きに検討させていただきたいと思いますので、どうぞよろしくお願いいたします。'],
+                ['key' => 'cast_ask_shift',     'category' => '確認・質問', 'title' => 'シフトについて', 'body' => '出勤可能なシフトや最低出勤本数について、もう少し詳しく教えていただけますでしょうか。'],
+                ['key' => 'cast_ask_pay',       'category' => '確認・質問', 'title' => '報酬について',   'body' => '体験時の時給や本入店後のバック率について、念のため確認させてください。'],
+                ['key' => 'cast_ask_dress',     'category' => '確認・質問', 'title' => '服装・身だしなみ', 'body' => '当日の服装や髪色などのドレスコードがあれば事前に教えていただけますでしょうか。'],
+                ['key' => 'cast_interview_ok', 'category' => '面談調整', 'title' => '面談OK',         'body' => '面談の件、承知しました。ご提示いただいた日程で問題ございません。当日はよろしくお願いいたします。'],
+                ['key' => 'cast_interview_change', 'category' => '面談調整', 'title' => '日程変更のお願い', 'body' => '申し訳ございません、ご提示いただいた日時に予定が入ってしまいました。別の候補日をご相談させていただけますでしょうか。'],
+                ['key' => 'cast_late',          'category' => '面談調整', 'title' => '遅刻のご連絡', 'body' => '大変申し訳ございません、電車の遅延により〇分ほど遅れて到着しそうです。ご迷惑をおかけし恐れ入ります。'],
+                ['key' => 'cast_thanks_after',  'category' => 'お礼・締め', 'title' => '面談後のお礼',  'body' => '本日はお時間をいただきありがとうございました。前向きに検討のうえ、改めてご連絡させていただきます。'],
+                ['key' => 'cast_decline',       'category' => 'お礼・締め', 'title' => '辞退のご連絡',  'body' => 'ご検討いただきありがとうございました。誠に勝手ながら、今回はご縁を見送らせていただければと思います。よろしくお願いいたします。'],
+            ],
+            // 店舗→キャスト のクイックテンプレ
+            'talk_quick_shop' => [
+                ['key' => 'shop_greet',         'category' => '初回挨拶', 'title' => 'ご連絡ありがとうございます', 'body' => 'ご連絡ありがとうございます。当店にご興味を持っていただき大変嬉しく思います。お気軽にご質問くださいませ。'],
+                ['key' => 'shop_intro',         'category' => '初回挨拶', 'title' => 'お店のご案内', 'body' => '当店は〇〇エリアで営業しているお店です。落ち着いた雰囲気で、初心者の方も安心して働ける環境を整えております。'],
+                ['key' => 'shop_ask_when',     'category' => '確認・質問', 'title' => '勤務開始希望時期', 'body' => 'ご質問ありがとうございます。差し支えなければ、勤務開始のご希望時期や週の出勤可能日数を教えていただけますか。'],
+                ['key' => 'shop_ask_exp',      'category' => '確認・質問', 'title' => 'ご経験の確認',  'body' => '差し支えなければ、これまでのご経験や現在の在籍状況について教えていただけますでしょうか。'],
+                ['key' => 'shop_offer_interview', 'category' => '面談調整', 'title' => '面談のご提案', 'body' => 'ぜひ一度面談をさせていただければと思います。ご都合のよい日時をいくつか教えていただけますでしょうか。'],
+                ['key' => 'shop_interview_confirm', 'category' => '面談調整', 'title' => '面談確定', 'body' => 'ご返信ありがとうございます。それでは下記日時にて面談をさせていただきます。当日お会いできるのを楽しみにしております。'],
+                ['key' => 'shop_access',       'category' => '面談調整', 'title' => 'アクセス案内', 'body' => '店舗のアクセス情報をお送りします。最寄り駅からの道順でご不明な点があればお気軽にご連絡ください。'],
+                ['key' => 'shop_thanks_after',  'category' => 'お礼・締め', 'title' => '面談後のお礼', 'body' => '本日はお越しいただきありがとうございました。社内で検討のうえ、改めて結果をご連絡させていただきます。'],
+                ['key' => 'shop_welcome',       'category' => 'お礼・締め', 'title' => '入店歓迎',     'body' => 'この度はご縁をいただきありがとうございます。スタッフ一同、心より歓迎いたします。これからどうぞよろしくお願いいたします。'],
             ],
         ];
     }

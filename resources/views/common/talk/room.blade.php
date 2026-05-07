@@ -76,6 +76,8 @@
     window.selectedTalkJobKind = @json($selectedTalkJobKind ?? null);
     window.canSelectTalkJobKind = @json($canSelectTalkJobKind ?? false);
     window.currentTalkStatusCode = @json($currentStatusCode ?? 'chatting');
+    window.talkQuickTemplates = @json($quickTemplates ?? []);
+    window.talkNgPayload = @json($ngWordPayload ?? ['patterns' => [], 'words' => []]);
 </script>
 <script src="{{ asset('assets/js/talk-room.js') }}"></script>
 @endpush
@@ -382,8 +384,11 @@
                     <div class="chat-input-wrapper">
                         <textarea name="message" rows="1" placeholder="メッセージを入力..." class="focus:outline-none"></textarea>
                     </div>
-                    <input type="file" id="talk-image-input" name="image" accept="image/*" style="display:none;">
-                    <button type="submit" class="btn-send" aria-label="送信"><i class="fas fa-paper-plane"></i></button>
+                    <button type="submit" id="talk-send-btn" class="btn-send" aria-label="送信"><i class="fas fa-paper-plane"></i></button>
+                </div>
+                <div id="talk-ng-warn" class="talk-ng-warn" role="alert" aria-live="polite" hidden>
+                    <i class="fas fa-circle-exclamation" aria-hidden="true"></i>
+                    <span class="talk-ng-warn-text">使用できない表現が含まれています。</span>
                 </div>
             </form>
         </div>
@@ -404,10 +409,6 @@
                     <span>面談候補日を送信</span>
                 </button>
             @endif
-            <button type="button" id="open-image-send-menu" class="talk-action-item talk-action-item-disabled" disabled>
-                <span class="talk-action-icon"><i class="far fa-image"></i></span>
-                <span>現在実装中</span>
-            </button>
             <button type="button" id="open-template-send-menu" class="talk-action-item">
                 <span class="talk-action-icon"><i class="far fa-file-alt"></i></span>
                 <span>定型文を使う</span>
