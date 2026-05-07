@@ -9,7 +9,7 @@
         body { margin: 0; background: #f3f4f6; color: #111827; font-family: "Helvetica Neue", Arial, "Hiragino Sans", "Meiryo", sans-serif; }
         .invoice-shell { max-width: 900px; margin: 40px auto; padding: 0 20px; }
         .invoice-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
-        .invoice-toolbar-msg { font-size: 0.9rem; color: #1d4ed8; }
+        .invoice-toolbar-msg { font-size: 0.9rem; color: #4A122A; }
         .invoice-btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; border-radius: 10px; border: 1px solid #d1d5db; background: #111827; color: #fff; text-decoration: none; cursor: pointer; font-size: 14px; font-weight: 700; }
         .invoice-paper { background: #fff; border-radius: 20px; padding: 36px; box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12); }
         .invoice-wrap { max-width: none; padding: 0; }
@@ -20,8 +20,8 @@
         .invoice-to { margin-bottom: 16pt; }
         .invoice-to-name { font-size: 14pt; font-weight: 800; margin: 0 0 4pt; }
         .invoice-to-addr { font-size: 9pt; color: #4b5563; line-height: 1.5; }
-        .invoice-total { margin: 14pt 0; padding: 12pt 14pt; background: #eff6ff; border-radius: 8pt; }
-        .invoice-total-label { font-size: 9pt; color: #1d4ed8; font-weight: 700; margin-bottom: 4pt; }
+        .invoice-total { margin: 14pt 0; padding: 12pt 14pt; background: #fdf4f7; border-radius: 8pt; }
+        .invoice-total-label { font-size: 9pt; color: #4A122A; font-weight: 700; margin-bottom: 4pt; }
         .invoice-total-value { font-size: 18pt; font-weight: 800; }
         .invoice-table { width: 100%; border-collapse: collapse; margin-top: 8pt; font-size: 10pt; }
         .invoice-table th, .invoice-table td { border: 1px solid #e5e7eb; padding: 10pt 12pt; text-align: left; vertical-align: top; }

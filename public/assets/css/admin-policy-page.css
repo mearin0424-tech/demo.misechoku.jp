@@ -322,7 +322,7 @@
 .policy-field-input:focus,
 .policy-field-textarea:focus {
     border-color: var(--admin-primary);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    box-shadow: 0 0 0 3px rgba(74, 18, 42, 0.15);
 }
 
 .policy-preamble-sep {

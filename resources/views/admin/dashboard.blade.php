@@ -142,8 +142,8 @@
         };
 
         $registrationChart = $buildLineChart($chartData, [
-            ['key' => 'cast_new', 'label' => 'キャスト', 'color' => '#2563eb'],
-            ['key' => 'shop_new', 'label' => '店舗', 'color' => '#7c3aed'],
+            ['key' => 'cast_new', 'label' => 'キャスト', 'color' => '#4A122A', 'text_color' => '#4A122A'],
+            ['key' => 'shop_new', 'label' => '店舗', 'color' => '#b8860b', 'text_color' => '#92590a'],
         ]);
         $transactionChart = $buildDualChart($chartData);
         $allKpis = array_merge($registrationKpis, $transactionKpis);
@@ -224,7 +224,7 @@
                             <polyline points="{{ $series['polyline'] }}" fill="none" stroke="{{ $series['color'] }}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></polyline>
                             @foreach ($series['points'] as $idx => $point)
                                 <circle cx="{{ $point['x'] }}" cy="{{ $point['y'] }}" r="3" fill="#ffffff" stroke="{{ $series['color'] }}" stroke-width="1.5"></circle>
-                                <text x="{{ $point['x'] }}" y="{{ $point['y'] - 8 }}" class="dashboard-chart-value-label" text-anchor="middle" fill="{{ $series['color'] }}">{{ (int) $point['value'] }}</text>
+                                <text x="{{ $point['x'] }}" y="{{ $point['y'] - 8 }}" class="dashboard-chart-value-label" text-anchor="middle" fill="{{ $series['text_color'] ?? $series['color'] }}">{{ (int) $point['value'] }}</text>
                             @endforeach
                         @endforeach
                     </svg>
@@ -244,7 +244,7 @@
             <div class="dashboard-chart-head">
                 <h3>取引推移</h3>
                 <div class="dashboard-chart-legend">
-                    <span><i style="background: #60a5fa"></i>件数（左軸）</span>
+                    <span><i style="background: #4A122A"></i>件数（左軸）</span>
                     <span><i style="background: #16a34a"></i>金額 M円（右軸）</span>
                 </div>
             </div>
@@ -270,7 +270,7 @@
                         @foreach ($transactionChart['bars'] as $bar)
                             @if ($bar['h'] > 0)
                                 <rect x="{{ $bar['x'] }}" y="{{ $bar['y'] }}" width="{{ $bar['w'] }}" height="{{ $bar['h'] }}" rx="2" class="dashboard-chart-bar"></rect>
-                                <text x="{{ $bar['centerX'] }}" y="{{ $bar['y'] - 5 }}" class="dashboard-chart-value-label" text-anchor="middle" fill="#1d4ed8">{{ $bar['value'] }}</text>
+                                <text x="{{ $bar['centerX'] }}" y="{{ $bar['y'] - 5 }}" class="dashboard-chart-value-label" text-anchor="middle" fill="#4A122A">{{ $bar['value'] }}</text>
                             @endif
                         @endforeach
 

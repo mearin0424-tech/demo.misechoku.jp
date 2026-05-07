@@ -19,8 +19,8 @@
         .invoice-to { margin-bottom: 16pt; }
         .invoice-to-name { font-size: 14pt; font-weight: 800; margin: 0 0 4pt; }
         .invoice-to-addr { font-size: 9pt; color: #4b5563; line-height: 1.5; }
-        .invoice-total { margin: 14pt 0; padding: 12pt 14pt; background: #eff6ff; border-radius: 8pt; }
-        .invoice-total-label { font-size: 9pt; color: #1d4ed8; font-weight: 700; margin-bottom: 4pt; }
+        .invoice-total { margin: 14pt 0; padding: 12pt 14pt; background: #fdf4f7; border-radius: 8pt; }
+        .invoice-total-label { font-size: 9pt; color: #4A122A; font-weight: 700; margin-bottom: 4pt; }
         .invoice-total-value { font-size: 18pt; font-weight: 800; }
         .invoice-table { width: 100%; border-collapse: collapse; margin-top: 8pt; font-size: 10pt; }
         .invoice-table th, .invoice-table td { border: 1px solid #e5e7eb; padding: 10pt 12pt; text-align: left; vertical-align: top; }
