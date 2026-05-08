@@ -464,20 +464,6 @@ CREATE TABLE IF NOT EXISTS `payment_tasks` (
 -- favorites
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `favorites` (
-<<<<<<< HEAD
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `cast_id` varchar(20) DEFAULT NULL,
-  `shop_id` varchar(20) DEFAULT NULL,
-  `action_type` varchar(16) NOT NULL,
-  `sender_type` varchar(8) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `favorites_unique_per_pair_action_sender` (`cast_id`, `shop_id`, `action_type`, `sender_type`),
-  KEY `favorites_cast_id_foreign` (`cast_id`),
-  KEY `favorites_shop_id_foreign` (`shop_id`),
-  CONSTRAINT `favorites_cast_id_foreign` FOREIGN KEY (`cast_id`) REFERENCES `casts` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `favorites_shop_id_foreign` FOREIGN KEY (`shop_id`) REFERENCES `shops` (`id`) ON DELETE CASCADE
-=======
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `cast_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `shop_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -487,7 +473,6 @@ CREATE TABLE IF NOT EXISTS `favorites` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `favorites_unique_per_pair_action_sender` (`cast_id`, `shop_id`, `action_type`, `sender_type`),
   KEY `favorites_shop_id_foreign` (`shop_id`)
->>>>>>> 3022dc1 (refactor: 未使用テーブル・デッドコードの削除とschema.sql再構築)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -----------------------------------------------------------------------------
@@ -570,151 +555,9 @@ CREATE TABLE IF NOT EXISTS `reviews` (
   KEY `reviews_shop_id_foreign` (`shop_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-<<<<<<< HEAD
-CREATE TABLE IF NOT EXISTS `review_details` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `review_id` bigint unsigned NOT NULL,
-  `review_content_id` bigint unsigned NOT NULL,
-  `score` decimal(3,1) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `review_details_review_id_foreign` (`review_id`),
-  CONSTRAINT `review_details_review_id_foreign` FOREIGN KEY (`review_id`) REFERENCES `reviews` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS `tags` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `type` varchar(50) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS `cast_tag` (
-  `cast_id` varchar(20) NOT NULL,
-  `tag_id` bigint unsigned NOT NULL,
-  PRIMARY KEY (`cast_id`, `tag_id`),
-  KEY `cast_tag_tag_id_foreign` (`tag_id`),
-  CONSTRAINT `cast_tag_cast_id_foreign` FOREIGN KEY (`cast_id`) REFERENCES `casts` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `cast_tag_tag_id_foreign` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS `cast_posts` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `cast_id` varchar(20) NOT NULL,
-  `body` text COMMENT '縺ｲ縺ｨ縺薙→',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `cast_posts_cast_id_unique` (`cast_id`),
-  CONSTRAINT `cast_posts_cast_id_foreign` FOREIGN KEY (`cast_id`) REFERENCES `casts` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS `shop_tag` (
-  `shop_id` varchar(20) NOT NULL,
-  `tag_id` bigint unsigned NOT NULL,
-  PRIMARY KEY (`shop_id`, `tag_id`),
-  KEY `shop_tag_tag_id_foreign` (`tag_id`),
-  CONSTRAINT `shop_tag_shop_id_foreign` FOREIGN KEY (`shop_id`) REFERENCES `shops` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `shop_tag_tag_id_foreign` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS `system_accounts` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) COMMENT '邂｡逅・・錐',
-  `email` varchar(255) NOT NULL COMMENT '繝ｭ繧ｰ繧､繝ｳ繝｡繝ｼ繝ｫ繧｢繝峨Ξ繧ｹ',
-  `email_verified_at` timestamp NULL DEFAULT NULL,
-  `password` varchar(255) NOT NULL COMMENT '繝上ャ繧ｷ繝･蛹悶ヱ繧ｹ繝ｯ繝ｼ繝・,
-  `role` varchar(20) NOT NULL DEFAULT 'staff' COMMENT '讓ｩ髯・admin:蜈ｨ讖溯・, staff:荳驛ｨ讖溯・)',
-  `is_active` tinyint(1) NOT NULL DEFAULT '1' COMMENT '譛牙柑繝輔Λ繧ｰ(false縺ｧ繝ｭ繧ｰ繧､繝ｳ荳榊庄)',
-  `remember_token` varchar(100) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `system_accounts_email_unique` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- 繧ｳ繧｢蛻晄悄繝・・繧ｿ
-INSERT IGNORE INTO `casts` (`id`, `email`, `password`, `status`, `identity_status`, `last_login_at`, `created_at`, `updated_at`) VALUES
-('c00000001', 'cast01@example.com', '$2y$10$dummyhashedpassword01', 1, 3, '2026-03-01 10:00:00', '2026-01-10 12:00:00', '2026-03-01 10:00:00'),
-('c00000002', 'cast02@example.com', '$2y$10$dummyhashedpassword02', 1, 3, '2026-03-05 15:30:00', '2026-02-15 09:00:00', '2026-03-05 15:30:00'),
-('c00000003', 'cast03@example.com', '$2y$10$dummyhashedpassword03', 1, 1, '2026-03-10 20:15:00', '2026-03-01 18:45:00', '2026-03-10 20:15:00');
-
-INSERT IGNORE INTO `cast_profiles` (`cast_id`, `nickname`, `name`, `birthday`, `gender`, `pref`, `city`, `height`, `weight`, `bust`, `waist`, `hip`, `profession`, `exp`, `pr`) VALUES
-('c00000001', '縺ｿ縺輔″', '譯應ｺ慕ｾ主調', '2001-05-15', 1, '譚ｱ莠ｬ驛ｽ', '貂ｯ蛹ｺ', 160, 48, 85, 58, 86, '繧｢繝代Ξ繝ｫ蠎怜藤', 1, '讌ｽ縺励￥縺願ｩｱ縺励☆繧九・縺悟､ｧ螂ｽ縺阪〒縺呻ｼ√ｈ繧阪＠縺上♀鬘倥＞縺励∪縺吶・),
-('c00000002', '縺ゅ＞', '螻ｱ逕ｰ諢・, '1999-10-22', 1, '逾槫･亥ｷ晉恁', '讓ｪ豬懷ｸ・, 155, 45, 82, 56, 84, '鄒主ｮｹ蟶ｫ', 1, '騾ｱ譛ｫ繝｡繧､繝ｳ縺ｧ蜒阪″縺溘＞縺ｧ縺呻ｼ・),
-('c00000003', '繝ｦ繝・, '菴占陸邨占｡｣', '2003-02-14', 1, '蝓ｼ邇臥恁', '縺輔＞縺溘∪蟶・, 165, 50, 88, 60, 89, '螟ｧ蟄ｦ逕・, 0, '譛ｪ邨碁ｨ薙〒縺吶′荳逕滓・蜻ｽ鬆大ｼｵ繧翫∪縺呻ｼ・);
-
-INSERT IGNORE INTO `cast_providers` (`cast_id`, `provider`, `provider_id`) VALUES
-('c00000001', 'line', 'U11112222333344445555666677778888'),
-('c00000002', 'line', 'Uaaaabbbbccccddddeeeeffffgggghhhh'),
-('c00000003', 'line', 'Uzzzzxxxxccccvvvvbbbbnnnnmmmmkkkk');
-
-INSERT IGNORE INTO `shops` (`id`, `email`, `status`, `license_status`, `created_at`, `updated_at`) VALUES
-('s00000001', 'info@club-luminous.example.com', 1, 3, '2025-12-01 10:00:00', '2025-12-05 10:00:00'),
-('s00000002', 'contact@lounge-stella.example.com', 1, 3, '2026-01-15 14:00:00', '2026-01-20 14:00:00');
-
-INSERT IGNORE INTO `shop_profiles` (`shop_id`, `shop_name`, `opened_on`, `pref`, `city`, `addr2`, `addr3`, `station1`, `catch`, `overview`, `message`) VALUES
-('s00000001', 'Club Luminous (繝ｫ繝溘リ繧ｹ)', '2015-04-01', '譚ｱ莠ｬ驛ｽ', '貂ｯ蛹ｺ', '蜈ｭ譛ｬ譛ｨ3-1-1', '繝ｫ繝溘リ繧ｹ繝薙Ν2F', '蜈ｭ譛ｬ譛ｨ鬧・蠕呈ｭｩ3蛻・, '關ｽ縺｡逹縺・◆髮ｰ蝗ｲ豌励・鬮倡ｴ壹け繝ｩ繝・, '譛ｪ邨碁ｨ薙°繧峨〒繧ゅ＠縺｣縺九ｊ繧ｵ繝昴・繝医☆繧句ｮ牙ｿ・・迺ｰ蠅・〒縺吶・, '荳邱偵↓讌ｽ縺励￥蜒阪￠繧区婿繧偵♀蠕・■縺励※縺翫ｊ縺ｾ縺呻ｼ・),
-('s00000002', 'Lounge Stella (繧ｹ繝・Λ)', '2020-09-15', '譚ｱ莠ｬ驛ｽ', '譁ｰ螳ｿ蛹ｺ', '豁瑚・莨守伴1-2-3', '繧ｹ繝・Λ繧ｿ繝ｯ繝ｼ5F', '譁ｰ螳ｿ鬧・蠕呈ｭｩ5蛻・, '繧｢繝・ヨ繝帙・繝縺ｧ蜒阪″繧・☆縺・Λ繧ｦ繝ｳ繧ｸ', '繝弱Ν繝槭↑縺暦ｼ√≠縺ｪ縺溘・繝壹・繧ｹ縺ｧ蜒阪￠縺ｾ縺吶・, '蟄ｦ逕溘＆繧薙ｄW繝ｯ繝ｼ繧ｯ縺ｮ譁ｹ繧ょ､ｧ豁楢ｿ弱〒縺吶・);
-
-INSERT IGNORE INTO `shop_managers` (`id`, `shop_id`, `name`, `email`, `password`, `role`, `status`, `last_login_at`) VALUES
-('m00000001', 's00000001', '菴占陸 蠎鈴聞', 'sato.mgr@club-luminous.example.com', '$2y$10$dummyhashedpasswordM1', 1, 1, '2026-03-12 18:00:00'),
-('m00000002', 's00000002', '驤ｴ譛ｨ 繧ｪ繝ｼ繝翫・', 'suzuki.owner@lounge-stella.example.com', '$2y$10$dummyhashedpasswordM2', 1, 1, '2026-03-11 22:30:00');
-
-INSERT IGNORE INTO `shop_jobs` (`id`, `shop_id`, `hourly_wage_regular`, `normal_time`, `has_trial`, `trial_hourly_wage`, `has_help`, `help_hourly_wage`, `job_description`, `created_at`, `updated_at`) VALUES
-(1, 's00000001', '5000', 5, 1, '4000', 1, '3500', '縺雁ｮ｢讒倥→讌ｽ縺励￥縺翫＠繧・∋繧翫＠縺ｦ縺企・繧剃ｽ懊ｋ縺贋ｻ穂ｺ九〒縺吶・, '2025-12-05 12:00:00', '2025-12-05 12:00:00'),
-(2, 's00000002', '3500', 4, 1, '3000', 0, NULL, '邁｡蜊倥↑繝峨Μ繝ｳ繧ｯ菴懈・縺ｨ謗･螳｢繧偵♀莉ｻ縺帙＠縺ｾ縺吶ゅヮ繝ｫ繝槭↑縺暦ｼ・, '2026-01-20 15:00:00', '2026-01-20 15:00:00');
-
-INSERT IGNORE INTO `shop_job_applications` (`id`, `cast_id`, `shop_job_id`, `status`, `result_date`, `hourly_wage_regular`, `created_at`, `updated_at`) VALUES
-(1, 'c00000001', 1, 4, '2026-01-15', '5000', '2026-01-10 15:30:00', '2026-01-15 18:00:00'),
-(2, 'c00000002', 2, 3, NULL, '3500', '2026-03-05 18:00:00', '2026-03-06 12:00:00'),
-(3, 'c00000003', 1, 1, NULL, '5000', '2026-03-10 21:00:00', '2026-03-10 21:00:00');
-
-INSERT IGNORE INTO `application_deposits` (`id`, `shop_job_application_id`, `status`, `created_at`, `updated_at`) VALUES
-(1, 1, 6, '2026-02-15 10:00:00', '2026-02-20 15:00:00');
-
-INSERT IGNORE INTO `application_deposit_histories` (`id`, `application_deposit_id`, `status`, `status_date`) VALUES
-(1, 1, 1, '2026-02-15 10:00:00'),
-(2, 1, 2, '2026-02-16 11:30:00'),
-(3, 1, 6, '2026-02-20 15:00:00');
-
-INSERT IGNORE INTO `favorites` (`cast_id`, `shop_id`, `action_type`, `sender_type`, `created_at`) VALUES
-('c00000001', 's00000002', 'KEEP', 'cast', '2026-01-12 20:00:00'),
-('c00000002', 's00000001', 'LIKE', 'shop', '2026-02-10 21:15:00');
-
-INSERT IGNORE INTO `messages` (`cast_id`, `shop_id`, `sender_type`, `content`, `is_read`, `created_at`) VALUES
-('c00000002', 's00000002', 1, '髱｢謗･繧偵♀鬘倥＞縺励◆縺・〒縺呻ｼ・, 1, '2026-03-05 18:05:00'),
-('c00000002', 's00000002', 2, '縺泌ｿ懷供縺ゅｊ縺後→縺・＃縺悶＞縺ｾ縺吶ゆｻ企ｱ縺ｮ蝨滓屆譌･縺ｮ19譎ゅ・縺・°縺後〒縺励ｇ縺・°・・, 1, '2026-03-05 19:00:00'),
-('c00000003', 's00000001', 1, '譛ｪ邨碁ｨ薙〒縺吶′蠢懷供蜿ｯ閭ｽ縺ｧ縺励ｇ縺・°・・, 0, '2026-03-10 21:05:00');
-
-INSERT IGNORE INTO `reviews` (`id`, `cast_id`, `shop_id`, `contents`, `created_at`) VALUES
-(1, 'c00000001', 's00000001', '繧ｹ繧ｿ繝・ヵ縺ｮ逧・＆繧薙′蜆ｪ縺励￥縺ｦ縲√→縺ｦ繧ょロ縺阪ｄ縺吶＞縺雁ｺ励〒縺励◆・・, '2026-02-28 10:00:00');
-
-INSERT IGNORE INTO `tags` (`id`, `type`, `name`, `created_at`) VALUES
-(1, 'salary', '1繝ｶ譛域鴛縺・, '2025-01-14 05:33:11'),
-(8, 'salary', '莠､騾夊ｲｻ謾ｯ邨ｦ', '2025-01-14 05:33:12'),
-(14, 'howto', '騾ｱ1縺九ｉOK', '2025-01-14 05:33:12'),
-(82, 'casttag', '繧ｹ繝ｬ繝ｳ繝繝ｼ', '2025-01-14 05:33:13'),
-(89, 'casttag', '繧ｭ繝ｬ繧､邉ｻ', '2025-01-14 05:33:13');
-
-INSERT IGNORE INTO `cast_tag` (`cast_id`, `tag_id`) VALUES
-('c00000001', 82), ('c00000001', 89), ('c00000002', 82);
-
-INSERT IGNORE INTO `shop_tag` (`shop_id`, `tag_id`) VALUES
-('s00000001', 8), ('s00000002', 14);
-
-INSERT IGNORE INTO `system_accounts` (`name`, `email`, `password`, `role`, `is_active`, `email_verified_at`, `created_at`, `updated_at`) VALUES
-('邂｡逅・・い繧ｫ繧ｦ繝ｳ繝茨ｼ・, 'admin@misechoku.jp', '$2y$10$dummyhashedpasswordAdmin01', 'admin', 1, '2025-01-01 00:00:00', '2025-01-01 00:00:00', '2025-01-01 00:00:00');
-
--- ------------------------------------------------------------------------------
--- 3. 邂｡逅・・繧ｹ繧ｿ繝ｻreview_contents (2026_03_13_000002_create_admin_master_tables)
--- ------------------------------------------------------------------------------
-
-=======
 -- -----------------------------------------------------------------------------
 -- review_contents  (マスターデータ)
 -- -----------------------------------------------------------------------------
->>>>>>> 3022dc1 (refactor: 未使用テーブル・デッドコードの削除とschema.sql再構築)
 CREATE TABLE IF NOT EXISTS `review_contents` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `content` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '設問内容',
@@ -885,60 +728,9 @@ CREATE TABLE IF NOT EXISTS `system_accounts` (
   UNIQUE KEY `uq_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-<<<<<<< HEAD
--- ------------------------------------------------------------------------------
--- 7. 繝ｬ繧ｬ繧ｷ繝ｼ繝薙Η繝ｼ (2026_03_14_000000_create_legacy_member_manager_views)
---    members.line_user_id 縺ｯ cast_providers・・rovider=line・峨°繧牙叙蠕暦ｼ・INE Notify 蛻励・蟒・ｭ｢・・
--- ------------------------------------------------------------------------------
-
-DROP VIEW IF EXISTS `members`;
-DROP VIEW IF EXISTS `managers`;
-
-CREATE VIEW `members` AS
-SELECT
-  casts.id, casts.email, casts.password, casts.status, casts.status AS `approval`, casts.identity_status,
-  casts.last_login_at, casts.remember_token, casts.created_at, casts.updated_at, casts.deleted_at,
-  CASE WHEN casts.deleted_at IS NULL THEN 0 ELSE 1 END AS del_flg,
-  cast_profiles.nickname, cast_profiles.name, cast_profiles.name_kana AS kana, cast_profiles.birthday,
-  YEAR(cast_profiles.birthday) AS birthday_y, MONTH(cast_profiles.birthday) AS birthday_m, DAY(cast_profiles.birthday) AS birthday_d,
-  cast_profiles.gender, cast_profiles.zip, cast_profiles.pref, cast_profiles.city, cast_profiles.addr1, cast_profiles.addr2, cast_profiles.addr3,
-  cast_profiles.tel, cast_profiles.height, cast_profiles.weight, cast_profiles.bust AS b, cast_profiles.waist AS w, cast_profiles.hip AS h,
-  cast_profiles.shift, cast_profiles.profession, cast_profiles.exp, cast_profiles.years_exp, cast_profiles.where_work,
-  cast_profiles.pr, cast_profiles.charm_point, cast_profiles.memo, cast_profiles.ng_reason, cast_profiles.latitude, cast_profiles.longitude,
-  (SELECT cp.provider_id FROM cast_providers cp WHERE cp.cast_id = casts.id AND cp.provider = 'line' LIMIT 1) AS line_user_id,
-  0 AS `matching`, 0 AS `release`, NULL AS shop_name
-FROM casts
-LEFT JOIN cast_profiles ON casts.id = cast_profiles.cast_id;
-
-CREATE VIEW `managers` AS
-SELECT shop_managers.*, shop_profiles.shop_name
-FROM shop_managers
-LEFT JOIN shop_profiles ON shop_managers.shop_id = shop_profiles.shop_id;
-
--- ------------------------------------------------------------------------------
--- 8. 謗｡逕ｨ繝懊・繝翫せ繧ｹ繝翫ャ繝励す繝ｧ繝・ヨ (2026_03_15_000000_add_hired_bonus_snapshot)
--- ------------------------------------------------------------------------------
-
-ALTER TABLE `shop_job_applications`
-  ADD COLUMN `hired_bonus_amount` int DEFAULT NULL AFTER `normal_time`,
-  ADD COLUMN `hired_bonus_condition` text DEFAULT NULL AFTER `hired_bonus_amount`;
-
--- 譌｢蟄倥・謗｡逕ｨ貂医∩(status=4)縺ｧ繧ｹ繝翫ャ繝励す繝ｧ繝・ヨ譛ｪ險ｭ螳壹・陦後ｒ豎ゆｺｺ縺九ｉ繝舌ャ繧ｯ繝輔ぅ繝ｫ・亥ｿ・ｦ√↓蠢懊§縺ｦ螳溯｡鯉ｼ・
--- UPDATE shop_job_applications sja
--- INNER JOIN shop_jobs sj ON sja.shop_job_id = sj.id
--- SET sja.hired_bonus_amount = COALESCE(sj.noruma_reward, sj.hourly_wage_regular, 0),
---     sja.hired_bonus_condition = ...
--- WHERE sja.status = 4 AND sja.hired_bonus_amount IS NULL;
-
--- ------------------------------------------------------------------------------
--- 9. 隲区ｱよ嶌繝・Φ繝励Ξ繝ｼ繝郁ｨｭ螳・(2026_03_16_000000_create_invoice_template_settings_table)
--- ------------------------------------------------------------------------------
-
-=======
 -- -----------------------------------------------------------------------------
 -- invoice_template_settings
 -- -----------------------------------------------------------------------------
->>>>>>> 3022dc1 (refactor: 未使用テーブル・デッドコードの削除とschema.sql再構築)
 CREATE TABLE IF NOT EXISTS `invoice_template_settings` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `key` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'issuer_name, issuer_email, logo_url, footer_text 等',
@@ -1093,54 +885,6 @@ CREATE TABLE IF NOT EXISTS `character_guide_settings` (
   UNIQUE KEY `character_guide_settings_route_name_unique` (`route_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-<<<<<<< HEAD
--- ------------------------------------------------------------------------------
--- 既存 favorites の action_type を文字列化し、sender_type を追加するマイグレーション
--- 既存 DB に対して 1 回だけ実行する想定（冪等的に書く）。
---
---   旧スキーマ:
---     action_type tinyint  ... 1=KEEP, 2=FOOTPRINT(廃止), 3=LIKE
---   新スキーマ:
---     action_type varchar(16) ... 'KEEP' | 'LIKE'
---     sender_type varchar(8)  ... 'cast' | 'shop'
---
--- 注意:
--- - 旧 KEEP 行（1）は方向情報を保持していないため一意に sender_type を決められない。
---   ここでは安全策として sender_type を一旦 'shop' にしておく（運用上は店舗側のキープが
---   多い前提）。利用者には再キープを促してください。厳密に整理する場合は事前に
---   DELETE FROM favorites WHERE action_type = 1; を流してください。
--- - 旧 LIKE 行（3）はキャスト→店舗 LIKE が無効化されているため、すべて 'shop' 発信。
--- - 旧 FOOTPRINT 行（2）はすでに廃止のため削除する。
--- ------------------------------------------------------------------------------
-
--- 1) sender_type を追加（一旦 NULL 許容）
-ALTER TABLE `favorites`
-  ADD COLUMN IF NOT EXISTS `sender_type` varchar(8) NULL AFTER `action_type`;
-
--- 2) action_type を文字列カラム化（既存 tinyint からの ALTER は VARCHAR に直接変換可能）
-ALTER TABLE `favorites`
-  MODIFY COLUMN `action_type` varchar(16) NOT NULL;
-
--- 3) 値の置換: 1->'KEEP', 3->'LIKE'、2 は削除
-DELETE FROM `favorites` WHERE `action_type` = '2';
-UPDATE `favorites` SET `action_type` = 'KEEP' WHERE `action_type` = '1';
-UPDATE `favorites` SET `action_type` = 'LIKE' WHERE `action_type` = '3';
-
--- 4) sender_type バックフィル
---    LIKE は店舗発信のみで運用していたので 'shop' を入れる。
---    KEEP は方向不明だが、過渡期は 'shop' で埋める。重複が出る場合は手動で精査。
-UPDATE `favorites` SET `sender_type` = 'shop' WHERE `sender_type` IS NULL AND `action_type` = 'LIKE';
-UPDATE `favorites` SET `sender_type` = 'shop' WHERE `sender_type` IS NULL AND `action_type` = 'KEEP';
-
--- 5) sender_type を NOT NULL に締める
-ALTER TABLE `favorites`
-  MODIFY COLUMN `sender_type` varchar(8) NOT NULL;
-
--- 6) 重複防止のユニークキー（既に存在するなら無視される）
-ALTER TABLE `favorites`
-  ADD UNIQUE KEY IF NOT EXISTS `favorites_unique_per_pair_action_sender`
-  (`cast_id`, `shop_id`, `action_type`, `sender_type`);
-=======
 -- -----------------------------------------------------------------------------
 -- policy_documents  (コンテンツデータ)
 -- -----------------------------------------------------------------------------
@@ -1402,4 +1146,3 @@ ALTER TABLE `policy_revisions`
   ADD CONSTRAINT `policy_revisions_policy_document_id_foreign` FOREIGN KEY (`policy_document_id`) REFERENCES `policy_documents` (`id`) ON DELETE CASCADE;
 
 SET foreign_key_checks = 1;
->>>>>>> 3022dc1 (refactor: 未使用テーブル・デッドコードの削除とschema.sql再構築)
