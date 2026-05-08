@@ -22,7 +22,7 @@
     }
 
     .shop-profile-edit__shell {
-        max-width: 28rem;
+        max-width: 100%;
         margin: 0 auto;
         min-height: 100%;
         background: var(--spe-panel);
@@ -332,7 +332,7 @@
         align-items: stretch;
         gap: 12px;
         width: 100%;
-        max-width: 28rem;
+        max-width: var(--max-content-width);
     }
 
     .shop-profile-edit__cancel {

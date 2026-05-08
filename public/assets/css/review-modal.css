@@ -5,7 +5,7 @@
   color: #f4ecec;
   display: flex;
   flex-direction: column;
-  max-width: 28rem;
+  max-width: var(--max-content-width, 28rem);
   margin: 0 auto;
 }
 
@@ -218,7 +218,7 @@
   background: linear-gradient(to top, #110a0a, rgba(17, 10, 10, 0.95), transparent);
   padding: 2rem 1.25rem 1.5rem;
   z-index: 20;
-  max-width: 28rem;
+  max-width: var(--max-content-width, 28rem);
   margin: 0 auto;
 }
 

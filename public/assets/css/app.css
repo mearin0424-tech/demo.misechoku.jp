@@ -45,8 +45,8 @@ html {
     --header-height: 60px;
     --footer-height: 75px;
     --sub-header-height: 46px;
-    /* 全レイアウト共通：この2つを変えるだけでヘッダー・フッター・コンテンツ幅がそろう。
-     * モバイル基準（430px）で固定。タブレット/デスクトップでも拡大しない（ユーザ要件）。 */
+    /* 全レイアウト共通：この 2 つを変えるだけでヘッダー・フッター・コンテンツ幅がそろう。
+     * モバイル基準でデフォルト 430px。タブレット〜PC ではブレークポイントで広げる。 */
     --max-content-width: 430px;
     --content-padding-x: 15px;
 }
@@ -55,6 +55,29 @@ html {
 @media (max-width: 360px) {
     :root {
         --content-padding-x: 10px;
+    }
+}
+
+/* タブレット（≥768px）：本体を 720px に拡張、左右余白も少し広げる */
+@media (min-width: 768px) {
+    :root {
+        --max-content-width: 720px;
+        --content-padding-x: 24px;
+    }
+}
+
+/* デスクトップ（≥1024px）：本体を 880px に拡張 */
+@media (min-width: 1024px) {
+    :root {
+        --max-content-width: 880px;
+        --content-padding-x: 28px;
+    }
+}
+
+/* ワイドモニタ（≥1440px）：少しゆとりを */
+@media (min-width: 1440px) {
+    :root {
+        --max-content-width: 960px;
     }
 }
 

@@ -1,26 +1,28 @@
 @extends('layouts.app')
 
 @section('title', '求人票の編集')
+@section('body-class', 'page-recruit-edit')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/recruitment.css') }}">
 <style>
     .job-edit-v2 {
-        --je-bg: #050505;
-        --je-panel: #0a0a0a;
-        --je-field: #110f0d;
-        --je-border: #2a2015;
-        --je-gold: #d4af37;
+        --je-bg: transparent;
+        --je-panel: rgba(20, 12, 18, 0.55);
+        --je-field: rgba(255, 255, 255, 0.05);
+        --je-border: rgba(220, 181, 104, 0.22);
+        --je-gold: #dcb568;
         background: var(--je-bg);
         margin: 0 calc(-1 * var(--content-padding-x, 16px));
         padding-bottom: calc(var(--footer-height, 75px) + 96px + env(safe-area-inset-bottom, 0px));
     }
     .job-edit-v2__shell {
-        max-width: 28rem;
+        max-width: 100%;
         margin: 0 auto;
         min-height: 100%;
         background: var(--je-panel);
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
     }
     .job-edit-v2__top {
         position: sticky;
@@ -31,9 +33,9 @@
         justify-content: space-between;
         gap: 12px;
         padding: 12px 16px;
-        background: rgba(10, 10, 10, 0.95);
+        background: rgba(40, 18, 30, 0.92);
         backdrop-filter: blur(10px);
-        border-bottom: 1px solid #1f1a14;
+        border-bottom: 1px solid rgba(220, 181, 104, 0.22);
     }
     .job-edit-v2__back {
         color: #a1a1aa;
@@ -63,16 +65,23 @@
         align-items: center;
         gap: 8px;
         margin: 0 0 20px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid #1f1a14;
-        font-size: 0.875rem;
-        font-style: italic;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(220, 181, 104, 0.18);
+        font-size: 1rem;
         font-family: var(--font-serif, "Shippori Mincho", serif);
-        font-weight: 600;
-        color: rgba(161, 161, 170, 0.95);
-        letter-spacing: 0.06em;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: 0.04em;
     }
-    .job-edit-v2__sec-title i { font-size: 0.9rem; color: #52525b; font-style: normal; }
+    .job-edit-v2__sec-title::before {
+        content: '';
+        width: 4px;
+        height: 1.1rem;
+        background: #dcb568;
+        border-radius: 2px;
+        flex-shrink: 0;
+    }
+    .job-edit-v2__sec-title i { font-size: 0.9rem; color: #dcb568; }
 
     .job-edit-v2__field { margin-bottom: 22px; }
     .job-edit-v2__field:last-child { margin-bottom: 0; }
@@ -80,10 +89,11 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        font-size: 10px;
+        font-size: 0.78rem;
         font-weight: 800;
-        color: var(--je-gold);
-        margin: 0 0 6px 4px;
+        color: #f8e9c8;
+        margin: 0 0 8px 2px;
+        letter-spacing: 0.02em;
     }
     .job-edit-v2__req {
         font-size: 8px;
@@ -111,20 +121,23 @@
         box-sizing: border-box;
         background: var(--je-field);
         border: 1px solid var(--je-border);
-        border-radius: 8px;
+        border-radius: 10px;
         padding: 12px 14px;
-        font-size: 0.875rem;
+        font-size: 0.92rem;
         color: #fafafa;
-        transition: border-color 0.15s ease, background 0.15s ease;
+        transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
     }
+    .job-edit-v2__input::placeholder,
+    .job-edit-v2__textarea::placeholder { color: rgba(248, 233, 200, 0.35); }
     .job-edit-v2__textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
     .job-edit-v2__input:focus,
     .job-edit-v2__textarea:focus {
         outline: none;
-        border-color: rgba(212, 175, 55, 0.5);
-        background: #161311;
+        border-color: rgba(220, 181, 104, 0.6);
+        background: rgba(255, 255, 255, 0.07);
+        box-shadow: 0 0 0 3px rgba(220, 181, 104, 0.18);
     }
-    .job-edit-v2__hint { margin: 6px 0 0 4px; font-size: 9px; line-height: 1.55; color: #52525b; }
+    .job-edit-v2__hint { margin: 8px 0 0 2px; font-size: 0.72rem; line-height: 1.6; color: rgba(248, 233, 200, 0.5); }
 
     .job-edit-v2__grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
@@ -141,7 +154,7 @@
     }
 
     .job-edit-v2__card {
-        background: #110f0d;
+        background: rgba(255, 255, 255, 0.04);
         border: 1px solid var(--je-border);
         border-radius: 12px;
         padding: 16px;
@@ -171,23 +184,23 @@
     .job-edit-v2__chip span {
         display: inline-flex;
         align-items: center;
-        min-height: 32px;
-        padding: 6px 12px;
+        min-height: 34px;
+        padding: 6px 14px;
         border-radius: 999px;
         border: 1px solid var(--je-border);
-        background: #141210;
-        color: #a1a1aa;
-        font-size: 10px;
+        background: rgba(255, 255, 255, 0.04);
+        color: #d4d4d8;
+        font-size: 0.74rem;
         font-weight: 600;
         transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
     }
     .job-edit-v2__chip input:checked + span {
         border-color: var(--je-gold);
-        background: #2a2210;
-        color: var(--je-gold);
-        box-shadow: 0 0 10px rgba(212, 175, 55, 0.1);
+        background: rgba(220, 181, 104, 0.18);
+        color: #ffe2a3;
+        box-shadow: 0 0 10px rgba(220, 181, 104, 0.18);
     }
-    .job-edit-v2__tag-cat { margin: 0 0 8px; font-size: 0.75rem; font-weight: 800; color: var(--je-gold); }
+    .job-edit-v2__tag-cat { margin: 0 0 8px; font-size: 0.78rem; font-weight: 800; color: var(--je-gold); }
 
     .job-edit-v2__shop-note {
         margin-top: 10px;
@@ -205,7 +218,7 @@
         margin: 24px 16px 0;
         border: 1px solid var(--je-border);
         border-radius: 12px;
-        background: #0c0c0c;
+        background: rgba(20, 12, 18, 0.42);
         overflow: hidden;
     }
     .job-edit-v2__kind-summary {
@@ -363,29 +376,28 @@
         color: var(--je-gold);
     }
 
-    /* ── フッター ─────────────────────────── */
+    /* ── フッター（ヘッダー・ボトムナビと同じく #app 幅に揃える） ─────────────────────── */
     .job-edit-v2__footer {
         position: fixed;
-        left: 0;
-        right: 0;
+        left: 50%;
+        transform: translateX(-50%);
         bottom: var(--footer-height, 75px);
+        width: 100%;
+        max-width: var(--max-content-width);
         z-index: 35;
         display: flex;
         justify-content: center;
-        padding: 16px;
-        padding-left: max(16px, env(safe-area-inset-left, 0px));
-        padding-right: max(16px, env(safe-area-inset-right, 0px));
-        padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-        background: rgba(10, 10, 10, 0.95);
+        padding: 14px var(--content-padding-x, 16px);
+        padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+        background: rgba(40, 18, 30, 0.95);
         backdrop-filter: blur(10px);
-        border-top: 1px solid #1f1a14;
+        border-top: 1px solid rgba(220, 181, 104, 0.22);
         box-sizing: border-box;
     }
     .job-edit-v2__footer-inner {
         display: flex;
         gap: 12px;
         width: 100%;
-        max-width: 28rem;
     }
     .job-edit-v2__btn-cancel {
         flex: 0 0 auto;
@@ -419,6 +431,33 @@
         font-family: inherit;
     }
     .job-edit-v2__btn-save:hover { opacity: 0.92; }
+
+    /* 上部に表示する案内ノーティス（読みやすさ向上のためボックス＋アイコン） */
+    .job-edit-v2__notice {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin: 14px 16px 0;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: rgba(220, 181, 104, 0.10);
+        border: 1px solid rgba(220, 181, 104, 0.45);
+        color: #ffe2a3;
+        font-size: 0.82rem;
+        line-height: 1.6;
+    }
+    .job-edit-v2__notice i { flex-shrink: 0; margin-top: 3px; color: #ffd47a; }
+    .job-edit-v2__notice a {
+        color: #ffd47a;
+        font-weight: 800;
+        text-decoration: underline;
+    }
+    .job-edit-v2__notice--success {
+        background: rgba(16, 185, 129, 0.10);
+        border-color: rgba(16, 185, 129, 0.45);
+        color: #6ee7b7;
+    }
+    .job-edit-v2__notice--success i { color: #6ee7b7; }
 
     .profile-edit-flash,
     .recruit-error-summary { margin: 12px 16px 0; }
@@ -458,15 +497,21 @@
         </header>
 
         @if(session('message'))
-            <p class="profile-edit-flash" style="margin-top:12px;">{{ session('message') }}</p>
+            <div class="job-edit-v2__notice job-edit-v2__notice--success">
+                <i class="fas fa-check-circle"></i>
+                <span>{{ session('message') }}</span>
+            </div>
         @endif
 
         @php $canPublishJobs = $canPublishJobs ?? true; @endphp
         @if(!$canPublishJobs)
-            <p class="profile-edit-flash" style="margin-top:8px; border:1px solid rgba(234,179,8,0.35); color:#fde68a;">
-                求人を公開するには、営業許可証と風営許可証の両方を提出し、運営の承認が必要です。審査が完了するまで「公開」にできません。
-                <a href="{{ route('shop.mypage.index') }}" style="color:#fcd34d; font-weight:700;">マイページで許可証を提出する</a>
-            </p>
+            <div class="job-edit-v2__notice">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>
+                    求人を公開するには、営業許可証と風営許可証の両方を提出し、運営の承認が必要です。審査が完了するまで「公開」にできません。
+                    <a href="{{ route('shop.mypage.index') }}">マイページで許可証を提出する</a>
+                </span>
+            </div>
         @endif
 
         @if($errors->any())
@@ -488,7 +533,7 @@
             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ --}}
             <div class="job-edit-v2__form" style="padding-bottom:0; gap:0;">
                 <section aria-labelledby="job-sec-basic">
-                    <h2 id="job-sec-basic" class="job-edit-v2__sec-title"><i class="fas fa-file-alt"></i> Basic Information</h2>
+                    <h2 id="job-sec-basic" class="job-edit-v2__sec-title"><i class="fas fa-file-alt"></i> 店舗からのメッセージ</h2>
                     <div class="job-edit-v2__field">
                         <label class="job-edit-v2__label" for="catch_copy">キャッチコピー <span class="job-edit-v2__req">必須</span></label>
                         <input type="text" id="catch_copy" name="catch_copy" class="job-edit-v2__input recruit-input"
@@ -523,7 +568,7 @@
                         </div>
 
                         <section aria-labelledby="job-sec-salary">
-                            <h2 id="job-sec-salary" class="job-edit-v2__sec-title"><i class="fas fa-wallet"></i> Salary &amp; Bonus</h2>
+                            <h2 id="job-sec-salary" class="job-edit-v2__sec-title"><i class="fas fa-wallet"></i> 給与・ボーナス</h2>
 
                             @if($horizontal)
                                 <p class="job-edit-v2__kind-subtitle">本入店</p>
@@ -765,7 +810,7 @@
 
                 <div class="job-edit-v2__tab-panel" style="padding-top:4px;">
                     <section aria-labelledby="job-sec-work">
-                        <h2 id="job-sec-work" class="job-edit-v2__sec-title"><i class="fas fa-clock"></i> Working Conditions</h2>
+                        <h2 id="job-sec-work" class="job-edit-v2__sec-title"><i class="fas fa-clock"></i> 勤務条件</h2>
                         @include('shops.recruit.parts.shift-time-fields')
                         <div class="job-edit-v2__field">
                             <label class="job-edit-v2__label" for="working_days">勤務日数・シフト <span class="job-edit-v2__req">必須</span></label>
@@ -782,7 +827,7 @@
                     </section>
 
                     <section aria-labelledby="job-sec-detail">
-                        <h2 id="job-sec-detail" class="job-edit-v2__sec-title"><i class="fas fa-briefcase"></i> Recruitment</h2>
+                        <h2 id="job-sec-detail" class="job-edit-v2__sec-title"><i class="fas fa-briefcase"></i> 募集要項</h2>
                         <div class="job-edit-v2__field">
                             <label class="job-edit-v2__label" for="qualification">応募資格 <span class="job-edit-v2__req">必須</span></label>
                             <input type="text" id="qualification" name="qualification" class="job-edit-v2__input"
@@ -792,7 +837,7 @@
                     </section>
 
                     <section aria-labelledby="job-sec-tags">
-                        <h2 id="job-sec-tags" class="job-edit-v2__sec-title"><i class="fas fa-check-circle"></i> Tags &amp; Appeals</h2>
+                        <h2 id="job-sec-tags" class="job-edit-v2__sec-title"><i class="fas fa-check-circle"></i> タグ・アピールポイント</h2>
                         <div style="margin-bottom:22px;">
                             <p class="job-edit-v2__tag-cat">働き方・給与</p>
                             <div class="job-edit-v2__chips" id="chips-work-style">
@@ -861,7 +906,7 @@
                     </div>
 
                     <section aria-labelledby="job-sec-salary-s">
-                        <h2 id="job-sec-salary-s" class="job-edit-v2__sec-title"><i class="fas fa-wallet"></i> Salary &amp; Bonus</h2>
+                        <h2 id="job-sec-salary-s" class="job-edit-v2__sec-title"><i class="fas fa-wallet"></i> 給与・ボーナス</h2>
                         <input type="hidden" name="recruit_job_kind" value="fulltime">
                         <div class="job-edit-v2__grid2">
                             <div class="job-edit-v2__field">
@@ -947,7 +992,7 @@
                     </section>
 
                     <section aria-labelledby="job-sec-work-s">
-                        <h2 id="job-sec-work-s" class="job-edit-v2__sec-title"><i class="fas fa-clock"></i> Working Conditions</h2>
+                        <h2 id="job-sec-work-s" class="job-edit-v2__sec-title"><i class="fas fa-clock"></i> 勤務条件</h2>
                         @include('shops.recruit.parts.shift-time-fields')
                         <div class="job-edit-v2__field">
                             <label class="job-edit-v2__label" for="working_days">勤務日数・シフト <span class="job-edit-v2__req">必須</span></label>
@@ -962,7 +1007,7 @@
                     </section>
 
                     <section aria-labelledby="job-sec-detail-s">
-                        <h2 id="job-sec-detail-s" class="job-edit-v2__sec-title"><i class="fas fa-briefcase"></i> Recruitment</h2>
+                        <h2 id="job-sec-detail-s" class="job-edit-v2__sec-title"><i class="fas fa-briefcase"></i> 募集要項</h2>
                         <div class="job-edit-v2__field">
                             <label class="job-edit-v2__label" for="qualification">応募資格 <span class="job-edit-v2__req">必須</span></label>
                             <input type="text" id="qualification" name="qualification" class="job-edit-v2__input"
@@ -971,7 +1016,7 @@
                     </section>
 
                     <section aria-labelledby="job-sec-tags-s">
-                        <h2 id="job-sec-tags-s" class="job-edit-v2__sec-title"><i class="fas fa-check-circle"></i> Tags &amp; Appeals</h2>
+                        <h2 id="job-sec-tags-s" class="job-edit-v2__sec-title"><i class="fas fa-check-circle"></i> タグ・アピールポイント</h2>
                         <div style="margin-bottom:22px;">
                             <p class="job-edit-v2__tag-cat">働き方・給与</p>
                             <div class="job-edit-v2__chips">
