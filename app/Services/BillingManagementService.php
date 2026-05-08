@@ -1652,6 +1652,7 @@ class BillingManagementService
 
         return [
             'id' => (int) $row->id,
+            'shop_job_application_id' => isset($row->shop_job_application_id) ? (int) $row->shop_job_application_id : null,
             'status_code' => $status,
             'status_label' => $this->statusLabel($status),
             'shop_id' => $row->shop_id,

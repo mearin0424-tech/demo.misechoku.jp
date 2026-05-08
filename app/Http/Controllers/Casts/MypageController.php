@@ -125,9 +125,44 @@ class MypageController extends Controller
 
         $paymentData = $this->billingManagementService->getCastPaymentPageData($castId);
 
+        // 採用→入金 を一気通貫で見せるため、application と deposit を結合した cases を組み立てる
+        $allDeposits = collect($this->billingManagementService->getAllDeposits())
+            ->where('cast_id', $castId)
+            ->keyBy('shop_job_application_id');
+
+        $hiredCases = [];
+        $ongoingApplications = [];
+        $rejectedApplications = [];
+        foreach ($employments as $emp) {
+            $code = (int) ($emp['status_code'] ?? 0);
+            // ステータスコード:
+            //   1=チャット中 / 2=面談調整 / 3=面談確定 / 4=採用 / 5=不採用 / 6=本採用 / 7=本入店不採用
+            if (in_array($code, [4, 6], true)) {
+                $deposit = $allDeposits->get($emp['application_id']);
+                $hiredCases[] = $this->buildCastEmploymentCase($emp, $deposit ? (array) $deposit : null);
+            } elseif (in_array($code, [5, 7], true)) {
+                $rejectedApplications[] = $emp;
+            } else {
+                $ongoingApplications[] = $emp;
+            }
+        }
+
+        // 進行中（未完了）の案件が上、完了済みは下に
+        usort($hiredCases, function (array $a, array $b) {
+            $aDone = (int) ($a['is_completed'] ?? 0);
+            $bDone = (int) ($b['is_completed'] ?? 0);
+            if ($aDone !== $bDone) {
+                return $aDone <=> $bDone; // 未完了→完了
+            }
+            return ($b['progress_index'] ?? 0) <=> ($a['progress_index'] ?? 0);
+        });
+
         return view('casts.mypage.employment', [
             'pageId' => 'mypage',
-            'employments' => $employments,
+            'employments' => $employments, // 旧データ：互換用に保持
+            'hiredCases' => $hiredCases,
+            'ongoingApplications' => $ongoingApplications,
+            'rejectedApplications' => $rejectedApplications,
             'payments' => $paymentData['payments'],
             'depositFlow' => $paymentData['flow'],
             'castBank' => $paymentData['bank'],
@@ -136,6 +171,116 @@ class MypageController extends Controller
             'requestDisabledReason' => $paymentData['request_disabled_reason'],
             'requestTarget' => $paymentData['request_target'],
         ]);
+    }
+
+    /**
+     * 採用済み案件 1 件分の「採用→入金」一気通貫ケースを組み立てる。
+     *
+     * @param  array        $emp     mapApplicationStatus 済みの employment 配列
+     * @param  array|null   $deposit getAllDeposits の deposit 配列（null = 入金フロー未開始）
+     */
+    private function buildCastEmploymentCase(array $emp, ?array $deposit): array
+    {
+        // パイプライン定義：採用 → ボーナス申請 → 店舗承認 → 請求書発行 → 店舗入金 → 振込実行 → 受領完了
+        // 進捗インデックス（数字が大きいほど先へ進んでいる）
+        //   0: 採用された（deposit 未作成）
+        //   1: ボーナス申請（deposit status=1）
+        //   2: 店舗承認（deposit status=2）
+        //   3: 請求書発行（deposit status=3）
+        //   4: 店舗入金（deposit status=4 or 5）
+        //   5: 振込実行（deposit status=6）
+        //   6: 受領完了（deposit status=7）
+        $depositStatus = $deposit['status_code'] ?? null;
+        $progressIndex = match ((int) ($depositStatus ?? -1)) {
+            -1 => 0,            // deposit 未作成
+            0, 1 => 1,
+            2 => 2,
+            3 => 3,
+            4, 5 => 4,
+            6 => 5,
+            default => 6,       // 7 以上は完了
+        };
+        $isCompleted = $progressIndex >= 6;
+
+        $stages = [
+            ['key' => 'hired',         'label' => '採用確定',       'desc' => '店舗が採用を決定'],
+            ['key' => 'cast_request',  'label' => 'ボーナス申請',   'desc' => 'キャストから申請'],
+            ['key' => 'shop_approve',  'label' => '店舗承認',       'desc' => '店舗が承認'],
+            ['key' => 'invoice_issue', 'label' => '請求書発行',     'desc' => '運営が発行'],
+            ['key' => 'shop_pay',      'label' => '店舗入金',       'desc' => '店舗が支払い'],
+            ['key' => 'cast_transfer', 'label' => '振込実行',       'desc' => '運営から振込'],
+            ['key' => 'received',      'label' => '受領完了',       'desc' => '受領確認済み'],
+        ];
+
+        // 「次のアクション」算出
+        // - 0: 採用直後 → ボーナス申請（cast）
+        // - 5: 振込実行済み → 受領確認（cast）
+        // - それ以外：相手方の対応待ち
+        $actionableState = null;
+        $actionableLabel = null;
+        if ($progressIndex === 0) {
+            $actionableState = 'request';
+            $actionableLabel = 'ボーナス申請を行う';
+        } elseif ($progressIndex === 5) {
+            $actionableState = 'confirm';
+            $actionableLabel = '入金を確認しました';
+        }
+
+        $waitingOnLabel = null;
+        if ($actionableState === null) {
+            $waitingOnLabel = match ($progressIndex) {
+                1 => '店舗の承認待ち',
+                2 => '運営の請求書発行待ち',
+                3 => '店舗の入金待ち',
+                4 => '運営の振込実行待ち',
+                6 => null,
+                default => null,
+            };
+        }
+
+        $primaryStatus = match (true) {
+            $isCompleted              => ['label' => '振込完了',       'tone' => 'done'],
+            $progressIndex === 5      => ['label' => '受領確認待ち',   'tone' => 'action'],
+            $progressIndex >= 1       => ['label' => '入金処理中',     'tone' => 'progress'],
+            default                   => ['label' => '採用済（未申請）', 'tone' => 'action'],
+        };
+
+        return [
+            'application_id' => (int) ($emp['application_id'] ?? 0),
+            'shop_name'      => $emp['shop_name'] ?? '',
+            'shop_id'        => $deposit['shop_id'] ?? null,
+            'talk_link'      => $emp['link'] ?? null,
+            'hired_at'       => $emp['applied_at'] ?? null,
+            'hired_hourly_wage_display' => $emp['hired_hourly_wage_display'] ?? null,
+            'bonus_at_apply_lines' => $emp['bonus_at_apply_lines'] ?? [],
+
+            // パイプライン
+            'stages'        => $stages,
+            'progress_index' => $progressIndex,
+            'is_completed'  => $isCompleted,
+
+            // 状態表示
+            'status_label'  => $primaryStatus['label'],
+            'status_tone'   => $primaryStatus['tone'],
+            'waiting_on'    => $waitingOnLabel,
+            'actionable'    => $actionableState,
+            'actionable_label' => $actionableLabel,
+
+            // deposit のスナップショット
+            'deposit'       => $deposit ? [
+                'id'                  => $deposit['id'] ?? null,
+                'status_label'        => $deposit['status_label'] ?? '',
+                'invoice_number'      => $deposit['invoice_number'] ?? null,
+                'invoice_issued_at'   => $deposit['invoice_issued_at'] ?? null,
+                'invoice_due_date'    => $deposit['invoice_due_date'] ?? null,
+                'shop_payment_confirmed_at' => $deposit['shop_payment_confirmed_at'] ?? null,
+                'cast_transferred_at' => $deposit['cast_transferred_at'] ?? null,
+                'completed_at'        => $deposit['completed_at'] ?? null,
+                'cast_transfer_amount' => $deposit['cast_transfer_amount'] ?? null,
+                'bonus_amount'        => $deposit['bonus_amount'] ?? null,
+                'updated_at_label'    => $deposit['updated_at_label'] ?? null,
+            ] : null,
+        ];
     }
 
     /**

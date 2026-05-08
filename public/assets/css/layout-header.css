@@ -194,30 +194,40 @@ body.is-image-editing #global-header {
     min-width: 0;
 }
 
+/* ヘッダー右側のアイコンボタン：丸囲いなしのモダンな共通スタイル（全画面共通） */
 .header-icon-btn {
-    background: radial-gradient(circle at 30% 0%, rgba(253, 240, 178, 0.22), transparent 60%) !important;
-    border: 1px solid rgba(255, 240, 245, 0.24) !important;
+    background: transparent !important;
+    border: 0 !important;
     padding: 6px;
     margin: 0;
-    width: 32px;
-    height: 32px;
-    border-radius: 999px;
-    color: #dcb568;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    color: rgba(248, 233, 200, 0.86);
     cursor: pointer;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: color 0.15s ease, background-color 0.15s ease;
+    box-shadow: none;
 }
 
 .header-icon-btn i {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
+    line-height: 1;
 }
 
-.header-icon-btn:hover {
-    box-shadow:
-        inset 0 1px 0 rgba(255, 240, 245, 0.2),
-        0 0 12px rgba(220, 181, 104, 0.45);
+.header-icon-btn:hover,
+.header-icon-btn:focus-visible {
+    color: #ffe2a3;
+    background-color: rgba(220, 181, 104, 0.10) !important;
+    box-shadow: none;
+}
+
+.header-icon-btn:active {
+    color: #dcb568;
+    background-color: rgba(220, 181, 104, 0.18) !important;
 }
 
 /* 戻るボタンのホワイトカラーとサイズ */
@@ -290,16 +300,23 @@ body.is-image-editing #global-header {
     overflow-y: auto;
 }
 
-/* 通知バッジの調整 */
+/* 通知バッジ：丸囲いを撤廃したアイコンに合わせて位置・形を調整 */
 .badge-notify {
-    top: -5px;
-    right: -8px;
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
     background: linear-gradient(145deg, #dcb568, #b8860b);
     color: #3a1a0f;
-    border-radius: 10px;
+    border-radius: 999px;
     font-size: 0.6rem;
-    padding: 1px 4px;
-    position: absolute;
+    font-weight: 800;
+    line-height: 16px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
 }
 
 /* ==========================================================================
@@ -347,39 +364,9 @@ body.page-talk .header-right {
     gap: 8px;
 }
 
-body.page-talk .header-icon-btn {
-    width: 34px;
-    height: 34px;
-    padding: 0;
-    color: #e2bc4f;
-    background: rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.14);
-}
+/* page-talk のヘッダーアイコンも共通スタイルに統一（個別オーバーライドを撤廃） */
 
-body.page-talk .header-icon-btn:hover {
-    color: #fff2c4;
-    border-color: rgba(226, 188, 79, 0.28) !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
-}
-
-body.page-talk .header-icon-btn i {
-    font-size: 1rem;
-}
-
-body.page-talk .badge-notify {
-    top: -4px;
-    right: -5px;
-    min-width: 17px;
-    height: 17px;
-    padding: 0 4px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    box-shadow: 0 4px 10px rgba(185, 28, 28, 0.32);
-}
+/* page-talk の badge も共通スタイルに統一（個別オーバーライドを撤廃） */
 
 body.page-talk.page-talk-room .header-center-title {
     justify-content: flex-start;
@@ -400,12 +387,13 @@ body.page-talk.page-talk-room .header-left {
         gap: 8px;
     }
     .header-icon-btn {
-        width: 30px;
-        height: 30px;
+        width: 34px;
+        height: 34px;
         padding: 5px;
+        border-radius: 8px;
     }
     .header-icon-btn i {
-        font-size: 1rem;
+        font-size: 1.05rem;
     }
 }
 @media (max-width: 360px) {
@@ -416,8 +404,8 @@ body.page-talk.page-talk-room .header-left {
         gap: 6px;
     }
     .header-icon-btn {
-        width: 28px;
-        height: 28px;
+        width: 32px;
+        height: 32px;
     }
     .demo-pill-switch__segment {
         padding: 4px 10px;
