@@ -9,8 +9,20 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/recruitment.css') }}">
 <style>
-    .recruit-ref-shell { max-width: 28rem; margin: 0 auto; min-height: 100vh; background: #0a0a0a; box-shadow: 0 25px 50px -12px rgba(0,0,0,.5); position: relative; }
-    .recruit-ref-wrap { padding-bottom: calc(var(--footer-height, 75px) + 16px); background: #050505; }
+    /* アプリの max-content-width に追従させ、追加の幅制限・余分なネストを掛けない */
+    .recruit-ref-shell { width: 100%; max-width: 100%; margin: 0; min-height: auto; background: transparent; box-shadow: none; position: relative; }
+    .recruit-ref-wrap { padding-bottom: calc(var(--footer-height, 75px) + 16px); background: transparent; }
+    /* タイトル類だけセリフ。それ以外の本文・項目・ラベルは Noto Sans JP（メイリオ系）に統一 */
+    .recruit-ref-shell,
+    .recruit-ref-shell p,
+    .recruit-ref-shell span,
+    .recruit-ref-shell li,
+    .recruit-ref-shell a,
+    .recruit-ref-shell button,
+    .recruit-ref-shell .recruit-ref-inforow,
+    .recruit-ref-shell .recruit-ref-h2 { font-family: 'Noto Sans JP', 'Hiragino Sans', 'メイリオ', Meiryo, sans-serif; }
+    .recruit-ref-shell h1.recruit-ref-title,
+    .recruit-ref-shell .recruit-ref-h2-lg { font-family: 'Shippori Mincho', 'Noto Serif JP', serif; }
 
     /* プレビューバー（sticky） */
     .recruit-ref-preview-sticky {
@@ -212,7 +224,7 @@
     .recruit-ref-thumbs img { width: 2.5rem; height: 2.5rem; border-radius: 8px; border: 1px solid rgba(212,175,55,.5); object-fit: cover; }
     .recruit-ref-thumb-more { width: 2.5rem; height: 2.5rem; border-radius: 8px; border: 1px solid #2a2015; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: #fff; }
 
-    .recruit-ref-head { padding: 16px 20px 20px; border-bottom: 1px solid #1f1a14; }
+    .recruit-ref-head { padding: 16px var(--content-padding-x, 12px) 20px; border-bottom: 1px solid rgba(220, 181, 104, 0.16); }
     .recruit-ref-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
     .recruit-ref-chip { font-size: 10px; padding: 2px 8px; border-radius: 2px; font-weight: 700; background: #27272a; color: #d4d4d8; border: 1px solid #3f3f46; }
     .recruit-ref-chip.gold-outline { background: transparent; color: #d4af37; border: 1px solid #d4af37; }
@@ -259,7 +271,7 @@
     .recruit-ref-tags span.gold { background: rgba(212,175,55,.1); border: 1px solid rgba(212,175,55,.3); color: #d4af37; }
     .recruit-ref-tags span.dim { background: #1a1714; border: 1px solid #3a2a18; color: #d4d4d8; font-weight: 600; }
 
-    .recruit-ref-body { padding: 20px; display: flex; flex-direction: column; gap: 40px; padding-bottom: 32px; }
+    .recruit-ref-body { padding: 16px var(--content-padding-x, 12px) 32px; display: flex; flex-direction: column; gap: 32px; }
 
     .recruit-ref-h2 { margin: 0 0 12px; font-size: 0.875rem; font-weight: 800; color: #d4af37; display: flex; align-items: center; gap: 8px; }
     .recruit-ref-h2-lg { margin: 0 0 16px; font-size: 1.125rem; font-weight: 800; color: #fff; display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap; }

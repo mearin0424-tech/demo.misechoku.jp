@@ -491,6 +491,311 @@
     .mypage-status-card-action-btn.btn-review-post:hover {
         background: rgba(229, 193, 88, 0.12);
     }
+
+    /* ===========================================================
+       ステップバー（キャスト→店舗→運営）
+       =========================================================== */
+    .deposit-stepper {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 4px;
+        list-style: none;
+        margin: 6px 0 0;
+        padding: 0;
+        position: relative;
+    }
+    .deposit-stepper__step {
+        position: relative;
+        text-align: center;
+        padding-top: 36px;
+        font-size: 0.7rem;
+    }
+    .deposit-stepper__step::after {
+        content: '';
+        position: absolute;
+        top: 14px;
+        left: 50%;
+        right: -50%;
+        height: 2px;
+        background: rgba(220, 181, 104, 0.18);
+        z-index: 0;
+    }
+    .deposit-stepper__step:last-child::after { display: none; }
+    .deposit-stepper__step.is-done::after { background: #dcb568; }
+    .deposit-stepper__bullet {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 0.78rem;
+        background: rgba(255, 255, 255, 0.04);
+        border: 2px solid rgba(220, 181, 104, 0.28);
+        color: rgba(248, 233, 200, 0.55);
+        z-index: 1;
+    }
+    .deposit-stepper__step.is-done .deposit-stepper__bullet {
+        background: linear-gradient(135deg, #dcb568, #b8860b);
+        color: #2a1406;
+        border-color: #dcb568;
+        box-shadow: 0 0 0 4px rgba(220, 181, 104, 0.15);
+    }
+    .deposit-stepper__step.is-active .deposit-stepper__bullet {
+        background: rgba(220, 181, 104, 0.25);
+        color: #ffe2a3;
+        border-color: #dcb568;
+        animation: deposit-step-pulse 1.6s ease-in-out infinite;
+    }
+    .deposit-stepper__step.is-next .deposit-stepper__bullet {
+        background: rgba(220, 181, 104, 0.1);
+        color: #ffe2a3;
+        border-color: rgba(220, 181, 104, 0.65);
+    }
+    @keyframes deposit-step-pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(220, 181, 104, 0.4); }
+        50% { box-shadow: 0 0 0 8px rgba(220, 181, 104, 0); }
+    }
+    .deposit-stepper__label {
+        display: block;
+        font-weight: 800;
+        color: #f8e9c8;
+        font-size: 0.74rem;
+        line-height: 1.3;
+    }
+    .deposit-stepper__step.is-done .deposit-stepper__label,
+    .deposit-stepper__step.is-active .deposit-stepper__label,
+    .deposit-stepper__step.is-next .deposit-stepper__label { color: #ffe2a3; }
+    .deposit-stepper__desc {
+        display: block;
+        margin-top: 2px;
+        font-size: 0.65rem;
+        color: rgba(248, 233, 200, 0.55);
+        line-height: 1.3;
+    }
+    @media (max-width: 380px) {
+        .deposit-stepper { gap: 2px; }
+        .deposit-stepper__label { font-size: 0.66rem; }
+        .deposit-stepper__desc { display: none; }
+    }
+
+    /* ===========================================================
+       フローティング CTA バー（画面下部固定）
+       =========================================================== */
+    .deposit-cta-bar {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: var(--footer-height, 60px);
+        z-index: 90;
+        width: min(100vw, var(--max-content-width, 430px));
+        max-width: 100%;
+        padding: 10px var(--content-padding-x, 16px) calc(10px + env(safe-area-inset-bottom, 0));
+        background: linear-gradient(180deg, rgba(74, 18, 42, 0.98), rgba(35, 8, 21, 1));
+        border-top: 1px solid rgba(220, 181, 104, 0.55);
+        box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.45);
+        animation: deposit-cta-slide-up 0.3s ease;
+    }
+    @keyframes deposit-cta-slide-up {
+        from { transform: translate(-50%, 100%); opacity: 0; }
+        to { transform: translate(-50%, 0); opacity: 1; }
+    }
+    .deposit-cta-bar__inner {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .deposit-cta-bar__info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+    }
+    .deposit-cta-bar__amount {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 4px;
+        color: #ffe2a3;
+        font-weight: 800;
+    }
+    .deposit-cta-bar__amount strong {
+        font-size: 1.3rem;
+        font-weight: 900;
+        color: #fff;
+        font-variant-numeric: tabular-nums;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    }
+    .deposit-cta-bar__amount i {
+        font-size: 0.9rem;
+        color: #dcb568;
+    }
+    .deposit-cta-bar__label {
+        font-size: 0.7rem;
+        color: rgba(248, 233, 200, 0.78);
+        font-weight: 600;
+    }
+    .deposit-cta-bar__btn {
+        flex: 0 0 auto;
+        margin-left: auto;
+        padding: 12px 18px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #ffe2a3, #dcb568 48%, #b8860b);
+        color: #2a1406;
+        border: 0;
+        font-weight: 900;
+        font-size: 0.92rem;
+        cursor: pointer;
+        box-shadow: 0 6px 16px rgba(220, 181, 104, 0.45);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        transition: transform 0.1s ease, box-shadow 0.15s ease;
+    }
+    .deposit-cta-bar__btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(220, 181, 104, 0.55);
+    }
+    .deposit-cta-bar__btn:active { transform: translateY(0); }
+
+    /* CTA バーの分だけ本文末尾に余白を追加（ボタンが情報を覆わないように） */
+    .deposit-cta-bar ~ .deposit-cta-bar-spacer,
+    body:has(.deposit-cta-bar) .cast-mypage-sub-page {
+        padding-bottom: calc(var(--footer-height, 60px) + 80px) !important;
+    }
+
+    /* ===========================================================
+       タップ領域・店舗カードの整理
+       =========================================================== */
+    .deposit-check-row {
+        cursor: pointer;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        transition: background 0.12s ease, border-color 0.12s ease;
+        line-height: 1.5;
+    }
+    .deposit-check-row:hover { background: rgba(220, 181, 104, 0.06); border-color: rgba(220, 181, 104, 0.22); }
+    .deposit-check-row input[type="checkbox"] {
+        flex: 0 0 auto;
+        margin-top: 2px;
+        accent-color: #dcb568;
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+    .deposit-check-row span { flex: 1; cursor: pointer; }
+    .deposit-check-row:has(input:checked) {
+        background: rgba(220, 181, 104, 0.1);
+        border-color: rgba(220, 181, 104, 0.45);
+    }
+
+    /* 店舗カードの呼吸感 */
+    .mypage-status-card { padding: 14px; gap: 14px; }
+    .mypage-status-card-head { gap: 10px; flex-wrap: wrap; }
+    .mypage-status-card-name {
+        font-size: 0.96rem;
+        font-weight: 800;
+        line-height: 1.4;
+        word-break: break-word;
+    }
+    .mypage-status-card-date {
+        display: block;
+        margin-top: 6px;
+        font-size: 0.74rem;
+        color: rgba(201, 184, 184, 0.78);
+    }
+    .mypage-status-card-meta {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 8px;
+        font-size: 0.86rem;
+        color: #f5e0c4;
+    }
+    .mypage-status-card-meta strong {
+        color: #ffe2a3;
+        font-size: 1rem;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+    }
+    .mypage-status-card-meta i { color: #dcb568; }
+    .mypage-status-card-meta--soft {
+        color: rgba(201, 184, 184, 0.7);
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+    /* ===========================================================
+       振込先口座アコーディオン
+       =========================================================== */
+    .payment-bank-accordion {
+        border: 1px solid rgba(220, 181, 104, 0.22);
+        border-radius: 14px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+        overflow: hidden;
+    }
+    .payment-bank-accordion__summary {
+        list-style: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        user-select: none;
+    }
+    .payment-bank-accordion__summary::-webkit-details-marker { display: none; }
+    .payment-bank-accordion__summary:hover { background: rgba(220, 181, 104, 0.05); }
+    .payment-bank-accordion__icon {
+        width: 36px;
+        height: 36px;
+        flex: 0 0 auto;
+        border-radius: 50%;
+        background: rgba(220, 181, 104, 0.14);
+        color: #dcb568;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+    .payment-bank-accordion__main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+    }
+    .payment-bank-accordion__label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: rgba(220, 181, 104, 0.85);
+        letter-spacing: 0.04em;
+    }
+    .payment-bank-accordion__summary-text {
+        font-size: 0.92rem;
+        color: #f8e9c8;
+        font-weight: 700;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .payment-bank-accordion__chev {
+        color: rgba(255, 255, 255, 0.55);
+        font-size: 0.85rem;
+        transition: transform 0.2s ease;
+    }
+    .payment-bank-accordion[open] .payment-bank-accordion__chev { transform: rotate(180deg); }
+    .payment-bank-accordion__body {
+        padding: 12px 16px 16px;
+        border-top: 1px solid rgba(220, 181, 104, 0.16);
+        background: rgba(0, 0, 0, 0.18);
+    }
 </style>
 @endpush
 
@@ -564,9 +869,15 @@
                                         @endif
                                         @php $isHiredEmployment = in_array((int) ($item['status_code'] ?? 0), [4, 6], true); @endphp
                                         @if($isHiredEmployment && !empty($item['hired_hourly_wage_display']))
-                                            <span class="mypage-status-card-meta numeric-font">採用時給: {{ $item['hired_hourly_wage_display'] }}円</span>
+                                            <span class="mypage-status-card-meta numeric-font">
+                                                <i class="fas fa-yen-sign" aria-hidden="true"></i>
+                                                採用時給：<strong>{{ $item['hired_hourly_wage_display'] }} 円</strong>
+                                            </span>
                                         @elseif($isHiredEmployment)
-                                            <span class="mypage-status-card-meta numeric-font" style="opacity:0.75;">採用時給: 店舗登録待ち</span>
+                                            <span class="mypage-status-card-meta mypage-status-card-meta--soft">
+                                                <i class="fas fa-clock" aria-hidden="true"></i>
+                                                採用時給：店舗側で設定中です。しばらくお待ちください。
+                                            </span>
                                         @endif
                                     </div>
                                     <div class="mypage-status-card-actions">
@@ -728,50 +1039,73 @@
                 @endif
 
                 <div class="mypage-section">
-                    <h2 class="mypage-actions-title">現在の入金ステータス</h2>
-                    <div class="mypage-flow-grid">
-                        <div class="mypage-flow-card">
-                            <span class="mypage-flow-card-label">キャスト</span>
-                            <strong class="mypage-flow-card-value">{{ $flow['cast'] }}</strong>
-                        </div>
-                        <div class="mypage-flow-card">
-                            <span class="mypage-flow-card-label">店舗</span>
-                            <strong class="mypage-flow-card-value">{{ $flow['shop'] }}</strong>
-                        </div>
-                        <div class="mypage-flow-card">
-                            <span class="mypage-flow-card-label">運営</span>
-                            <strong class="mypage-flow-card-value">{{ $flow['admin'] }}</strong>
-                        </div>
-                    </div>
-                    <div class="text-right">
+                    <h2 class="mypage-actions-title">振込までの進捗</h2>
+                    @php
+                        // ステータスコード→ステップ進捗の解決
+                        // 1: キャスト申請中（cast送信済み）→ step 1 完了
+                        // 2: 店舗承認済み              → step 2 完了
+                        // 3: 店舗入金報告              → step 3 半分
+                        // 4: 店舗入金確認              → step 3 完了
+                        // 5: 振込開始                  → step 4 半分
+                        // 6: 振込実行                  → step 4 完了（受領待ち）
+                        // 7: 完了                      → step 5 完了
+                        $statusCode = (int) ($currentDeposit['status_code'] ?? 0);
+                        $depositSteps = [
+                            ['key' => 'cast',   'label' => 'キャスト申請', 'desc' => $flow['cast'] ?? '未申請'],
+                            ['key' => 'shop',   'label' => '店舗承認',     'desc' => $flow['shop'] ?? '未稼働'],
+                            ['key' => 'shop_pay','label' => '店舗入金',    'desc' => '入金確認待ち'],
+                            ['key' => 'admin',  'label' => '運営振込',     'desc' => $flow['admin'] ?? '未稼働'],
+                            ['key' => 'done',   'label' => '受領完了',     'desc' => '振込到着確認'],
+                        ];
+                        $stepStateOf = function (int $idx) use ($statusCode): string {
+                            if ($statusCode <= 0) return $idx === 0 ? 'next' : 'pending';
+                            if ($statusCode === 1) return $idx < 1 ? 'done' : ($idx === 1 ? 'next' : 'pending');
+                            if ($statusCode === 2) return $idx < 2 ? 'done' : ($idx === 2 ? 'next' : 'pending');
+                            if ($statusCode === 3) return $idx < 2 ? 'done' : ($idx === 2 ? 'active' : ($idx === 3 ? 'next' : 'pending'));
+                            if ($statusCode === 4) return $idx < 3 ? 'done' : ($idx === 3 ? 'next' : 'pending');
+                            if ($statusCode === 5) return $idx < 3 ? 'done' : ($idx === 3 ? 'active' : ($idx === 4 ? 'next' : 'pending'));
+                            if ($statusCode === 6) return $idx < 4 ? 'done' : ($idx === 4 ? 'next' : 'pending');
+                            if ($statusCode >= 7) return 'done';
+                            return 'pending';
+                        };
+                    @endphp
+                    <ol class="deposit-stepper" aria-label="入金進捗">
+                        @foreach($depositSteps as $idx => $step)
+                            @php $state = $stepStateOf($idx); @endphp
+                            <li class="deposit-stepper__step is-{{ $state }}">
+                                <span class="deposit-stepper__bullet" aria-hidden="true">
+                                    @if($state === 'done')
+                                        <i class="fas fa-check"></i>
+                                    @else
+                                        {{ $idx + 1 }}
+                                    @endif
+                                </span>
+                                <span class="deposit-stepper__label">{{ $step['label'] }}</span>
+                                <span class="deposit-stepper__desc">{{ $step['desc'] }}</span>
+                            </li>
+                        @endforeach
+                    </ol>
+                    <div class="text-right" style="margin-top: 12px;">
                         @if(($currentDeposit['status_code'] ?? null) === 6)
                             <form method="POST" action="{{ route('cast.mypage.deposit.confirm') }}">
                                 @csrf
                                 <button type="submit" class="btn-action manage">
-                                    入金を確認しました
+                                    <i class="fas fa-check-circle"></i> 入金を確認しました
                                 </button>
                             </form>
-                        @elseif(empty($requestTarget) && !empty($requestDisabledReason))
-                            <p class="text-xs" style="color:#C9B8B8;">{{ $requestDisabledReason }}</p>
                         @endif
                     </div>
                 </div>
 
                 <div class="mypage-section payment-bank-section">
-                    <div class="payment-bank-header">
-                        <div>
-                            <p class="payment-bank-label">キャストの振込先口座</p>
-                            <h2 class="mypage-actions-title payment-bank-title">報酬の振込先口座情報</h2>
-                        </div>
-                        @if(!empty($castBank['exists']))
-                            <button type="button" class="payment-bank-change-btn" data-open-bank-modal aria-label="口座情報を変更">
-                                変更する
-                            </button>
-                        @endif
-                    </div>
-
                     @if(empty($castBank['exists']))
-                        {{-- 未登録: 口座情報登録モーダルへの導線のみ --}}
+                        {{-- 未登録: 視覚的に強調した CTA を残す --}}
+                        <div class="payment-bank-header">
+                            <div>
+                                <p class="payment-bank-label">キャストの振込先口座</p>
+                                <h2 class="mypage-actions-title payment-bank-title">報酬の振込先口座情報</h2>
+                            </div>
+                        </div>
                         <div class="payment-bank-unregistered">
                             <div class="payment-bank-unregistered-icon">
                                 <i class="fas fa-university" aria-hidden="true"></i>
@@ -788,35 +1122,57 @@
                             </button>
                         </div>
                     @else
-                        {{-- 登録済: 口座情報表示＋変更でモーダル --}}
-                        <div class="payment-bank-registered">
-                            <div class="payment-bank-data-rows">
-                                <div class="payment-bank-data-row">
-                                    <span class="payment-bank-data-label">金融機関</span>
-                                    <span class="payment-bank-data-value">{{ $castBank['bank_name'] ?? '' }}</span>
+                        {{-- 登録済: アコーディオンで折りたたみ。最後の4桁だけサマリ表示 --}}
+                        @php
+                            $anum = $castBank['account_number'] ?? '';
+                            $maskedShort = strlen($anum) > 4 ? '末尾 ' . substr($anum, -4) : $anum;
+                            $maskedFull = strlen($anum) > 4 ? str_repeat('*', strlen($anum) - 4) . substr($anum, -4) : $anum;
+                        @endphp
+                        <details class="payment-bank-accordion">
+                            <summary class="payment-bank-accordion__summary">
+                                <span class="payment-bank-accordion__icon">
+                                    <i class="fas fa-university" aria-hidden="true"></i>
+                                </span>
+                                <span class="payment-bank-accordion__main">
+                                    <span class="payment-bank-accordion__label">振込先口座（登録済）</span>
+                                    <span class="payment-bank-accordion__summary-text">
+                                        {{ $castBank['bank_name'] ?? '' }} / {{ $maskedShort }}
+                                    </span>
+                                </span>
+                                <span class="payment-bank-accordion__chev" aria-hidden="true">
+                                    <i class="fas fa-chevron-down"></i>
+                                </span>
+                            </summary>
+                            <div class="payment-bank-accordion__body">
+                                <div class="payment-bank-data-rows">
+                                    <div class="payment-bank-data-row">
+                                        <span class="payment-bank-data-label">金融機関</span>
+                                        <span class="payment-bank-data-value">{{ $castBank['bank_name'] ?? '' }}</span>
+                                    </div>
+                                    <div class="payment-bank-data-row">
+                                        <span class="payment-bank-data-label">支店名</span>
+                                        <span class="payment-bank-data-value">{{ $castBank['branch_name'] ?? '' }}</span>
+                                    </div>
+                                    <div class="payment-bank-data-row">
+                                        <span class="payment-bank-data-label">口座種別</span>
+                                        <span class="payment-bank-data-value">{{ $castBank['account_type_label'] ?? '普通' }}</span>
+                                    </div>
+                                    <div class="payment-bank-data-row">
+                                        <span class="payment-bank-data-label">口座番号</span>
+                                        <span class="payment-bank-data-value">{{ $maskedFull }}</span>
+                                    </div>
+                                    <div class="payment-bank-data-row">
+                                        <span class="payment-bank-data-label">口座名義</span>
+                                        <span class="payment-bank-data-value">{{ $castBank['account_name'] ?? $castBank['account_holder_name'] ?? '' }}</span>
+                                    </div>
                                 </div>
-                                <div class="payment-bank-data-row">
-                                    <span class="payment-bank-data-label">支店名</span>
-                                    <span class="payment-bank-data-value">{{ $castBank['branch_name'] ?? '' }}</span>
-                                </div>
-                                <div class="payment-bank-data-row">
-                                    <span class="payment-bank-data-label">口座種別</span>
-                                    <span class="payment-bank-data-value">{{ $castBank['account_type_label'] ?? '普通' }}</span>
-                                </div>
-                                <div class="payment-bank-data-row">
-                                    <span class="payment-bank-data-label">口座番号</span>
-                                    @php
-                                        $anum = $castBank['account_number'] ?? '';
-                                        $masked = strlen($anum) > 4 ? str_repeat('*', strlen($anum) - 4) . substr($anum, -4) : $anum;
-                                    @endphp
-                                    <span class="payment-bank-data-value">{{ $masked }}</span>
-                                </div>
-                                <div class="payment-bank-data-row">
-                                    <span class="payment-bank-data-label">口座名義</span>
-                                    <span class="payment-bank-data-value">{{ $castBank['account_name'] ?? $castBank['account_holder_name'] ?? '' }}</span>
+                                <div class="text-right" style="margin-top: 10px;">
+                                    <button type="button" class="payment-bank-change-btn" data-open-bank-modal aria-label="口座情報を変更">
+                                        <i class="fas fa-pen"></i> 変更する
+                                    </button>
                                 </div>
                             </div>
-                        </div>
+                        </details>
                     @endif
                 </div>
             </div>
@@ -944,6 +1300,34 @@
         </div>
     </div>
 </div>
+
+{{-- フローティング CTA：申請可能な状態のときだけ画面下部に固定 --}}
+@if(!empty($requestTarget) && ($canRequestDeposit ?? false))
+    @php
+        $hasReview = !empty($requestTarget['review_exists']);
+        $bonusAmount = (int) ($requestTarget['bonus_amount'] ?? 0);
+    @endphp
+    <div class="deposit-cta-bar" id="deposit-cta-bar" data-application-id="{{ $requestTarget['application_id'] ?? '' }}">
+        <div class="deposit-cta-bar__inner">
+            <div class="deposit-cta-bar__info">
+                <span class="deposit-cta-bar__amount">
+                    <i class="fas fa-yen-sign"></i>
+                    <strong>¥{{ number_format($bonusAmount) }}</strong>
+                </span>
+                <span class="deposit-cta-bar__label">{{ $hasReview ? '入金依頼を送信できます' : 'レビュー投稿後に入金依頼' }}</span>
+            </div>
+            @if($hasReview)
+                <button type="button" class="deposit-cta-bar__btn" id="deposit-cta-bar-submit">
+                    <i class="fas fa-paper-plane"></i> 入金依頼を送信
+                </button>
+            @else
+                <button type="button" class="deposit-cta-bar__btn btn-review-post" data-application-id="{{ $requestTarget['application_id'] ?? '' }}">
+                    <i class="fas fa-star"></i> レビューを投稿する
+                </button>
+            @endif
+        </div>
+    </div>
+@endif
 @endsection
 
 @push('scripts')
@@ -1242,6 +1626,30 @@ document.addEventListener('DOMContentLoaded', function () {
             if (id) openReviewModal(id);
         });
     });
+
+    // フローティング CTA：入金依頼ボタン → ボーナス確認モーダルを開く
+    var ctaSubmitBtn = document.getElementById('deposit-cta-bar-submit');
+    if (ctaSubmitBtn) {
+        ctaSubmitBtn.addEventListener('click', function () {
+            var bar = document.getElementById('deposit-cta-bar');
+            var applicationId = bar ? bar.getAttribute('data-application-id') : '';
+            if (!applicationId) return;
+            // request-target を取得して bonus confirm モーダルへ
+            fetch(requestTargetUrl + '?application_id=' + encodeURIComponent(applicationId), {
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.success && data.request_target) {
+                    showBonusConfirmModal(parseInt(applicationId, 10), data.request_target);
+                } else {
+                    alert((data && data.message) || 'データの取得に失敗しました。');
+                }
+            }).catch(function () {
+                alert('読み込みに失敗しました。');
+            });
+        });
+    }
     document.querySelectorAll('[data-close-review-modal]').forEach(function (el) {
         el.addEventListener('click', closeReviewModal);
     });

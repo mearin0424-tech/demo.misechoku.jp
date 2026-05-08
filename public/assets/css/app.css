@@ -234,6 +234,29 @@ h1, h2, h3, .luxury-title {
     to { opacity: 1; }
 }
 
+/* ライトボックス共通ベース（page-specific CSS が無くても誤表示しないように初期非表示） */
+.lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    background: rgba(0, 0, 0, 0.9);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    box-sizing: border-box;
+}
+.lightbox-overlay.is-open {
+    display: flex;
+}
+.lightbox-image {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+    object-fit: contain;
+}
+
 /* グローバルライトボックス（スマホでは余白・閉じるボタンがはみ出さないように） */
 #global-lightbox-overlay.lightbox-overlay {
     padding: max(12px, env(safe-area-inset-top)) max(var(--content-padding-x), 12px) max(12px, env(safe-area-inset-bottom)) max(var(--content-padding-x), 12px);

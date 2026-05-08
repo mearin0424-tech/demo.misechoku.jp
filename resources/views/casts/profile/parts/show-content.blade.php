@@ -1,18 +1,64 @@
 {{-- キャストプロフィール本文（shop/castprofileview と cast/mypage で共通） --}}
 @php $isOwn = $isOwn ?? false; @endphp
 @php $showInteractionActions = $showInteractionActions ?? true; @endphp
+@php
+    $profileImages = !empty($cast['images']) ? array_values(array_filter((array) $cast['images'])) : [];
+    if (empty($profileImages) && !empty($cast['img'])) {
+        $profileImages = [$cast['img']];
+    }
+    $castDisplayName = $cast['nickname'] ?? $cast['name'] ?? 'キャスト';
+    $imageCount = count($profileImages);
+@endphp
 <section class="profile-hero" aria-label="プロフィール写真">
     <div class="profile-hero-inner">
-        <img id="profile-main-img" src="{{ $cast['img'] }}" alt="{{ $cast['nickname'] ?? $cast['name'] }}" class="profile-hero-img js-lightbox-target">
+        <div class="profile-hero-carousel" id="profile-hero-carousel" role="list">
+            @foreach($profileImages as $hi => $imgUrl)
+                <div class="profile-hero-slide"
+                     data-hero-slide="{{ $hi }}"
+                     role="listitem"
+                     aria-roledescription="slide"
+                     aria-label="{{ $hi + 1 }} / {{ $imageCount }}">
+                    <img src="{{ $imgUrl }}"
+                         alt="{{ $castDisplayName }} 写真 {{ $hi + 1 }}"
+                         class="profile-hero-img js-lightbox-target"
+                         loading="{{ $hi === 0 ? 'eager' : 'lazy' }}">
+                </div>
+            @endforeach
+        </div>
         <div class="profile-hero-gradient"></div>
+
+        @if($imageCount > 1)
+            <button type="button" class="profile-hero-arrow profile-hero-arrow--prev" id="profile-hero-prev" aria-label="前の写真を表示">
+                <i class="fas fa-chevron-left" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="profile-hero-arrow profile-hero-arrow--next" id="profile-hero-next" aria-label="次の写真を表示">
+                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+            </button>
+            <div class="profile-hero-dots" id="profile-hero-dots" role="tablist" aria-label="プロフィール写真の切り替え">
+                @foreach($profileImages as $hi => $_)
+                    <button type="button"
+                            class="profile-hero-dot {{ $hi === 0 ? 'is-active' : '' }}"
+                            data-hero-goto="{{ $hi }}"
+                            role="tab"
+                            aria-selected="{{ $hi === 0 ? 'true' : 'false' }}"
+                            aria-label="写真 {{ $hi + 1 }}"></button>
+                @endforeach
+            </div>
+            <span class="profile-hero-counter" id="profile-hero-counter">
+                <span id="profile-hero-counter-current">1</span> / {{ $imageCount }}
+            </span>
+        @endif
     </div>
 </section>
 
-@if(!empty($cast['images']) && count($cast['images']) > 0)
+@if($imageCount > 1)
     <div class="profile-photo-strip">
-        @foreach($cast['images'] as $index => $imgUrl)
-            <button type="button" class="profile-photo-thumb {{ $index === 0 ? 'active' : '' }}" data-index="{{ $index }}" onclick="setProfileMainImage({{ $index }})" aria-label="写真{{ $index + 1 }}を表示">
-                <img src="{{ $imgUrl }}" alt="" class="js-lightbox-target">
+        @foreach($profileImages as $index => $imgUrl)
+            <button type="button"
+                    class="profile-photo-thumb {{ $index === 0 ? 'active' : '' }}"
+                    data-hero-goto="{{ $index }}"
+                    aria-label="写真{{ $index + 1 }}を表示">
+                <img src="{{ $imgUrl }}" alt="">
             </button>
         @endforeach
     </div>

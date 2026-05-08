@@ -30,12 +30,105 @@
     height: 100%;
 }
 
+/* --- 横スワイプ・カルーセル（shop/jobdescription と同じパターン） --- */
+.profile-hero-carousel {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.profile-hero-carousel::-webkit-scrollbar { display: none; }
+.profile-hero-slide {
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    position: relative;
+}
 .profile-hero-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: center top;
     display: block;
+}
+
+/* 左右矢印 */
+.profile-hero-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(0, 0, 0, 0.55);
+    color: #ffe2a3;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 12;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+.profile-hero-arrow:hover { background: rgba(220, 181, 104, 0.65); color: #1a0a0e; }
+.profile-hero-arrow:active { transform: translateY(-50%) scale(0.94); }
+.profile-hero-arrow--prev { left: 12px; }
+.profile-hero-arrow--next { right: 12px; }
+
+/* ドット */
+.profile-hero-dots {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 14px;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    z-index: 12;
+    pointer-events: none;
+}
+.profile-hero-dot {
+    pointer-events: auto;
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(255, 255, 255, 0.45);
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+.profile-hero-dot.is-active {
+    background: #dcb568;
+    transform: scale(1.25);
+}
+
+/* カウンタ（X / N） */
+.profile-hero-counter {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 12;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.55);
+    color: #ffe2a3;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
 }
 
 .profile-hero-gradient {
