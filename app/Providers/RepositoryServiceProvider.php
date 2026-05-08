@@ -80,11 +80,6 @@ class RepositoryServiceProvider extends ServiceProvider
         );
 
         $this->app->bind(
-            \App\Repositories\News\NewsAccountRepositoryInterface::class,
-            \App\Repositories\News\NewsAccountRepository::class,
-        );
-
-        $this->app->bind(
             \App\Repositories\Tag\TagRepositoryInterface::class,
             \App\Repositories\Tag\TagRepository::class,
         );
@@ -92,10 +87,6 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             \App\Repositories\Shop\ManagerRepositoryInterface::class,
             \App\Repositories\Shop\ManagerRepository::class,
-        );
-        $this->app->bind(
-            \App\Repositories\News\NewsRepositoryInterface::class,
-            \App\Repositories\News\NewsRepository::class,
         );
         $this->app->bind(
             \App\Repositories\Ng\NgRepositoryInterface::class,
@@ -135,11 +126,6 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             \App\Repositories\Review\ReviewRepositoryInterface::class,
             \App\Repositories\Review\ReviewRepository::class,
-        );
-
-        $this->app->bind(
-            \App\Repositories\Download\DownloadRepositoryInterface::class,
-            \App\Repositories\Download\DownloadRepository::class,
         );
 
         $this->app->bind(
