@@ -671,15 +671,19 @@
                 <img src="{{ (isset($subImages[0]) ? $subImages[0]['url'] : null) ?? asset('assets/images/common/no-image.png') }}" class="shop-icon-main" id="main-icon-display" alt="">
             </div>
             <div class="shop-word-bubble glass-panel">
-                <p id="display-word" class="shop-word-text {{ empty(trim($shopData['word'] ?? '')) ? 'is-placeholder' : '' }}" data-placeholder="ひとことを入力すると、タイムラインに表示されます。">{{ !empty(trim($shopData['word'] ?? '')) ? $shopData['word'] : 'ひとことを入力すると、タイムラインに表示されます。' }}</p>
+                <p id="display-word" class="shop-word-text {{ empty(trim($shopData['word'] ?? '')) ? 'is-placeholder' : '' }}" data-placeholder="今、何してる？（タイムラインに公開されます）">{{ !empty(trim($shopData['word'] ?? '')) ? $shopData['word'] : '今、何してる？（タイムラインに公開されます）' }}</p>
                 <div class="shop-word-bubble-footer">
                     <span id="display-word-updated" class="shop-word-bubble-updated">最終更新 {{ $shopData['appeal_updated_at'] ?? '未設定' }}</span>
+                    <span class="shop-word-bubble-timeline-icon" aria-hidden="true" title="タイムラインに公開されます">
+                        <i class="fas fa-globe"></i>
+                    </span>
                     <button type="button" class="btn-word-edit" id="open-word-edit-btn" aria-label="ひとことを編集">
                         <i class="fas fa-pen"></i>
                     </button>
                 </div>
             </div>
         </div>
+        <p class="shop-word-bubble-help">※更新するとタイムラインに反映されます</p>
 
         @php $hasGoodPayerBadge = !empty($shopData['badges']['good_payer']); @endphp
         <div class="mypage-stats-row mypage-stats-row--cols-2" aria-label="統計">
@@ -900,8 +904,9 @@
 {{-- ひとこと編集モーダル --}}
 <div id="modal-word" class="mypage-modal-overlay modal-word-edit" style="display:none;">
     <div class="mypage-modal-panel glass-panel">
-        <h3 class="mypage-modal-title serif-font">ひとことを編集</h3>
-        <textarea id="word-input" rows="3" class="mypage-modal-textarea" placeholder="例：新人大歓迎！働きやすさもお任せください。"></textarea>
+        <h3 class="mypage-modal-title serif-font"><i class="fas fa-globe" style="color:#dcb568; font-size:0.85rem; margin-right:6px;"></i>ひとことを編集</h3>
+        <textarea id="word-input" rows="3" class="mypage-modal-textarea" placeholder="今、何してる？（タイムラインに公開されます）"></textarea>
+        <p class="mypage-modal-help" style="margin:6px 0 12px; font-size:0.72rem; color:rgba(203,187,187,0.65);">※更新するとタイムラインに反映されます</p>
         <div class="mypage-modal-actions">
             <button type="button" class="btn-action btn-action-secondary" id="word-edit-cancel-btn">戻る</button>
             <button type="button" class="btn-action btn-action-primary" id="word-edit-save-btn">保存</button>
@@ -926,7 +931,7 @@ window.MYPAGE_GALLERY_CONFIG = {
 <script src="{{ asset('assets/js/mypage-gallery.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    var placeholderText = 'ひとことを入力すると、タイムラインに表示されます。';
+    var placeholderText = '今、何してる？（タイムラインに公開されます）';
     var openWordBtn = document.getElementById('open-word-edit-btn');
     if (openWordBtn) openWordBtn.addEventListener('click', function() {
         document.getElementById('modal-word').style.display = 'flex';

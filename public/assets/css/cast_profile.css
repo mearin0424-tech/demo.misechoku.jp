@@ -30,17 +30,20 @@
     height: 100%;
 }
 
-/* --- 横スワイプ・カルーセル（shop/jobdescription と同じパターン） --- */
+/* --- 横スワイプ・カルーセル（shop/jobdescription と同じ仕様） --- */
 .profile-hero-carousel {
     position: relative;
     width: 100%;
     height: 100%;
     display: flex;
+    flex-flow: row nowrap;
     overflow-x: auto;
     overflow-y: hidden;
     scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    touch-action: pan-y pinch-zoom;
 }
 .profile-hero-carousel::-webkit-scrollbar { display: none; }
 .profile-hero-slide {
@@ -51,6 +54,7 @@
     scroll-snap-stop: always;
     position: relative;
 }
+.profile-hero-slide img { display: block; }
 .profile-hero-img {
     width: 100%;
     height: 100%;

@@ -7,7 +7,7 @@
 @section('canonical', $shareUrl ?? url()->current())
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/cast_profile.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/cast_profile.css') }}?v=20260509-cast-carousel">
 @endpush
 
 @section('content')
