@@ -16,7 +16,6 @@ class LoginController extends Controller
             'role' => 'cast',
             'title' => 'キャストログイン',
             'bodyClass' => 'page-auth-login page-auth-login-cast',
-            'guideMessage' => "キャストログインです。\n入力して進んでください。",
             'eyebrow' => '',
             'heroTitle' => 'キャストログイン',
             'heroDescription' => '',

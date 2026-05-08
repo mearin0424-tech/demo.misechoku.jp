@@ -2,7 +2,6 @@
 
 @section('title', $title)
 @section('body-class', $bodyClass)
-@section('guide_message', $guideMessage)
 
 @section('content')
     <div class="role-login-shell">

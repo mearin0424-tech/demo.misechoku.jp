@@ -1,43 +1,23 @@
 @php
     use App\Services\CharacterGuideService;
 
-    $bodyClass = trim($__env->yieldContent('body-class'));
-    $sectionGuide = trim((string) ($guideMessage ?? ''));
+    // 表示判定とセリフは運営管理 DB（character_guide_settings）に一本化。
+    // 設定が無い／無効化されている画面では何も表示しない（デフォルト文言は持たない）。
+    $resolvedGuideMessage = '';
+    $shouldShow = false;
 
-    // 1. ページから @section('guide_message') で渡された文言を最優先
-    $resolvedGuideMessage = $sectionGuide;
-    $isExplicitlyHidden = false;
-    $hasExplicitOverride = false;
-
-    if ($sectionGuide !== '') {
-        $hasExplicitOverride = true;
-    }
-
-    // 2. 明示的にメッセージが渡されていない場合は、運営管理 DB の設定を見る
     $routeName = optional(request()->route())->getName();
-    if (!$hasExplicitOverride && $routeName) {
+    if ($routeName) {
         try {
             $setting = app(CharacterGuideService::class)->getForRoute($routeName);
-            if (!$setting['enabled']) {
-                $isExplicitlyHidden = true;
-            } else {
+            if ($setting['enabled'] && $setting['message'] !== '') {
                 $resolvedGuideMessage = $setting['message'];
+                $shouldShow = true;
             }
         } catch (\Throwable $e) {
-            // DB 未準備時などは静かにスキップ（後続のフォールバックに委ねる）
+            // DB 未準備時などは静かにスキップ
         }
     }
-
-    // 3. それでもメッセージが空かつ DB で明示的に非表示でもなければ、旧来のヒューリスティックでフォールバック
-    if (!$hasExplicitOverride && !$isExplicitlyHidden && $resolvedGuideMessage === '') {
-        $isHome = str_contains($bodyClass, 'page-home');
-        $isLikes = str_contains($bodyClass, 'page-interaction') || request()->is('*/interaction*');
-        if (!$isHome && $isLikes) {
-            $resolvedGuideMessage = '「優良店」バッヂは、直近の請求・入金がスムーズな店舗に付く信頼の目印です。';
-        }
-    }
-
-    $shouldShow = !$isExplicitlyHidden && $resolvedGuideMessage !== '';
 @endphp
 
 {{-- オコジョガイド：右下浮遊デザイン。閉じるボタンはキャラクター右下に配置（吹き出し外） --}}

@@ -3,10 +3,6 @@
 @section('title', '許可証の提出')
 @section('body-class', 'page-shop-mypage shop-mypage-v2 page-shop-documents-onboarding')
 
-@section('guide_message')
-営業許可証と風営許可証の2種類をアップロードし、運営の承認がおりるまで求人を公開できません。「あとで」にして先に求人票だけ登録することもできますが、公開は審査が完了してからになります。
-@endsection
-
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/shop-license-documents.css') }}?v=20260505">

@@ -29,7 +29,6 @@ class SearchController extends BaseSearchController
         $items = $this->buildSearchItems($request, $sort);
 
         return $this->renderIndex([
-            'guideMessage' => "気になるキャストを探そう！\nひとこと更新が新しい順に並んでいるよ。",
             'items'        => $items,
             'sort'         => $sort,
             'sortOptions'  => self::SORT_OPTIONS,

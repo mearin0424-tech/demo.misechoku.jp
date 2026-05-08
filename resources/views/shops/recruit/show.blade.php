@@ -4,7 +4,6 @@
 @section('meta_description', trim((string) (($recruit['catch_copy'] ?? '') ?: ($recruit['message'] ?? 'ミセチョクの求人情報です。'))))
 @section('meta_image', $shop['main_img'] ?? ($recruit['hero_image'] ?? asset('assets/images/common/no-image.png')))
 @section('canonical', $shareUrl ?? url()->current())
-@section('guide_message', empty($forCast) ? '表示の見え方をご確認いただきながら、時給・勤務条件・メッセージが適切に伝わっているかご確認ください。気になる点がございましたら、そのまま編集画面へお戻りいただけます。' : '')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/recruitment.css') }}">

@@ -356,9 +356,6 @@ class RegistrationController extends Controller
             'pageId' => 'register',
             'title' => $isCast ? 'キャスト新規登録' : '店舗新規登録',
             'bodyClass' => $isCast ? 'page-auth-register page-auth-register-cast' : 'page-auth-register page-auth-register-shop',
-            'guideMessage' => $isCast
-                ? "キャスト登録です。\n必要項目を入力してください。"
-                : "店舗登録です。\n必要項目を入力してください。",
             'eyebrow' => '',
             'heroTitle' => $isCast ? 'キャスト登録' : '店舗登録',
             'heroDescription' => '',

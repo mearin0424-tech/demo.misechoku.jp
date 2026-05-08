@@ -16,7 +16,6 @@ class LoginController extends Controller
             'role' => 'shop',
             'title' => '店舗ログイン',
             'bodyClass' => 'page-auth-login page-auth-login-shop',
-            'guideMessage' => "店舗ログインです。\n入力して進んでください。",
             'eyebrow' => '',
             'heroTitle' => '店舗ログイン',
             'heroDescription' => '',

@@ -72,8 +72,8 @@
                 @include('layouts.parts.header', ['headerTitle' => trim($__env->yieldContent('title'))])
             @endif
 
-            {{-- @yield('guide_message') で各ページの設定内容を注入する --}}
-            @include('layouts.parts.character-guide', ['guideMessage' => $__env->yieldContent('guide_message')])
+            {{-- オコジョガイド：表示／文言は運営管理画面（admin.character-guide）で設定 --}}
+            @include('layouts.parts.character-guide')
 
             {{-- メインコンテンツ（プロフィール詳細は content-wrapper を使わず幅をアプリ全体に統一） --}}
             <main id="main-content">

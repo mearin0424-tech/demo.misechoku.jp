@@ -20,29 +20,28 @@ class CharacterGuideService
      */
     private const CATALOG = [
         // キャスト向け
-        'cast.home'                  => ['label' => 'キャスト：ホーム（スワイプ）',     'group' => 'cast',   'default_enabled' => false],
-        'cast.search.index'          => ['label' => 'キャスト：店舗検索（一覧/AI）',   'group' => 'cast',   'default_enabled' => true],
-        'cast.recruit.show'          => ['label' => 'キャスト：求人詳細',               'group' => 'cast',   'default_enabled' => true],
-        'cast.mypage.index'          => ['label' => 'キャスト：マイページ',             'group' => 'cast',   'default_enabled' => true],
-        'cast.mypage.profile.edit'   => ['label' => 'キャスト：プロフィール編集',       'group' => 'cast',   'default_enabled' => true],
-        'cast.mypage.employment'     => ['label' => 'キャスト：採用・入金管理',         'group' => 'cast',   'default_enabled' => true],
-        'cast.interaction.index'     => ['label' => 'キャスト：つながり（LIKES）',      'group' => 'cast',   'default_enabled' => true],
-        'cast.talk.index'            => ['label' => 'キャスト：トーク一覧',             'group' => 'cast',   'default_enabled' => true],
+        'cast.home'                       => ['label' => 'キャスト：ホーム（スワイプ）',     'group' => 'cast',   'default_enabled' => false],
+        'cast.search.index'               => ['label' => 'キャスト：店舗検索（一覧/AI）',   'group' => 'cast',   'default_enabled' => false],
+        'cast.recruit.show'               => ['label' => 'キャスト：求人詳細',               'group' => 'cast',   'default_enabled' => false],
+        'cast.mypage.index'               => ['label' => 'キャスト：マイページ',             'group' => 'cast',   'default_enabled' => false],
+        'cast.profile.edit'               => ['label' => 'キャスト：プロフィール編集',       'group' => 'cast',   'default_enabled' => false],
+        'cast.mypage.management'          => ['label' => 'キャスト：採用・入金管理',         'group' => 'cast',   'default_enabled' => false],
+        'cast.interaction.index'          => ['label' => 'キャスト：つながり（LIKES）',      'group' => 'cast',   'default_enabled' => false],
+        'cast.talk.index'                 => ['label' => 'キャスト：トーク一覧',             'group' => 'cast',   'default_enabled' => false],
+        'cast.register'                   => ['label' => 'キャスト：新規登録',               'group' => 'cast',   'default_enabled' => false],
 
         // 店舗向け
-        'shop.home'                  => ['label' => '店舗：ホーム',                     'group' => 'shop',   'default_enabled' => false],
-        'shop.search.index'          => ['label' => '店舗：キャスト検索',               'group' => 'shop',   'default_enabled' => true],
-        'shop.recruit.show'          => ['label' => '店舗：求人プレビュー',             'group' => 'shop',   'default_enabled' => true],
-        'shop.mypage.index'          => ['label' => '店舗：マイページ',                 'group' => 'shop',   'default_enabled' => true],
-        'shop.mypage.management'     => ['label' => '店舗：採用・入金管理',             'group' => 'shop',   'default_enabled' => true],
-        'shop.recruits.status'       => ['label' => '店舗：求人ステータス',             'group' => 'shop',   'default_enabled' => true],
-        'shop.recruits.edit'         => ['label' => '店舗：求人票編集',                 'group' => 'shop',   'default_enabled' => true],
-        'shop.interaction.index'     => ['label' => '店舗：つながり（LIKES）',          'group' => 'shop',   'default_enabled' => true],
-        'shop.talk.index'            => ['label' => '店舗：トーク一覧',                 'group' => 'shop',   'default_enabled' => true],
-
-        // 共通
-        'register'                   => ['label' => '共通：会員登録',                   'group' => 'common', 'default_enabled' => true],
-        'role-login'                 => ['label' => '共通：ログイン選択',               'group' => 'common', 'default_enabled' => true],
+        'shop.home'                       => ['label' => '店舗：ホーム',                     'group' => 'shop',   'default_enabled' => false],
+        'shop.search.index'               => ['label' => '店舗：キャスト検索',               'group' => 'shop',   'default_enabled' => false],
+        'shop.jobdescription'             => ['label' => '店舗：求人プレビュー',             'group' => 'shop',   'default_enabled' => false],
+        'shop.recruits.show'              => ['label' => '店舗：求人票（管理表示）',         'group' => 'shop',   'default_enabled' => false],
+        'shop.recruits.edit'              => ['label' => '店舗：求人票編集',                 'group' => 'shop',   'default_enabled' => false],
+        'shop.mypage.index'               => ['label' => '店舗：マイページ',                 'group' => 'shop',   'default_enabled' => false],
+        'shop.mypage.management'          => ['label' => '店舗：採用・入金管理',             'group' => 'shop',   'default_enabled' => false],
+        'shop.mypage.documents.onboarding' => ['label' => '店舗：許可証提出オンボーディング', 'group' => 'shop',   'default_enabled' => false],
+        'shop.interaction.index'          => ['label' => '店舗：つながり（LIKES）',          'group' => 'shop',   'default_enabled' => false],
+        'shop.talk.index'                 => ['label' => '店舗：トーク一覧',                 'group' => 'shop',   'default_enabled' => false],
+        'shop.register'                   => ['label' => '店舗：新規登録',                   'group' => 'shop',   'default_enabled' => false],
     ];
 
     /**
@@ -156,9 +155,8 @@ class CharacterGuideService
     public function getGroupLabels(): array
     {
         return [
-            'cast'   => 'キャスト向け画面',
-            'shop'   => '店舗向け画面',
-            'common' => '共通画面',
+            'cast' => 'キャスト向け画面',
+            'shop' => '店舗向け画面',
         ];
     }
 }

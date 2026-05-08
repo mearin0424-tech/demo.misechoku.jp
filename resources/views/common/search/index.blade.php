@@ -1,10 +1,5 @@
 @extends('layouts.app')
 
-{{-- 各ページから渡されるオコジョのメッセージをセット --}}
-@section('guide_message', ($activeTab ?? 'pane-search') === 'pane-ai'
-    ? '登録済みの接客タイプ診断結果をもとに、ぴったりのお店をご案内いたします'
-    : ($guideMessage ?? '気になるお相手をお探しください。'))
-
 @section('title', 'SEARCH')
 @section('body-class', request()->is('cast/*') && ($activeTab ?? null) === 'pane-ai' ? 'page-search page-search-ai' : 'page-search')
 

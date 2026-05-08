@@ -1,14 +1,6 @@
 @extends('layouts.app')
 
 @section('title', 'マイページ')
-@php
-    $showLicenseGuide = collect($documents ?? [])->contains(fn ($doc) => ($doc['status'] ?? null) === 'not_submitted');
-@endphp
-@section('guide_message')
-    @if($showLicenseGuide)
-        営業許可証と風営許可証の両方を提出し、運営の承認がおりるまで求人を公開できません。面談日設定などの機能も、書類が整い承認後にご利用いただけます。
-    @endif
-@endsection
 
 @section('header')
 <header id="global-header" class="shop-mypage-custom-header">

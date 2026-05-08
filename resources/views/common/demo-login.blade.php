@@ -11,7 +11,6 @@
 
 @section('title', 'ログイン（デモ）')
 @section('body-class', 'page-demo-login')
-@section('guide_message', '')
 
 @section('content')
     <div class="demo-login-shell">

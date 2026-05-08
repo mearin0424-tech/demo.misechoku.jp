@@ -2,7 +2,6 @@
 
 @section('title', $title)
 @section('body-class', $bodyClass)
-@section('guide_message', $guideMessage)
 
 @if ($role === 'cast')
 @push('styles')

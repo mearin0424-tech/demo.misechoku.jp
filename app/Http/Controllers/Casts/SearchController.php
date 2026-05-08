@@ -42,7 +42,6 @@ class SearchController extends BaseSearchController
         $personalityType = $this->currentCastPersonalityType();
 
         return $this->renderIndex([
-            'guideMessage'        => "あなたの希望に合うお店を探そう！\nひとこと更新が新しい順に並んでいるよ。",
             'items'               => $items,
             'personalityType'     => $personalityType,
             'activeTab'           => $activeTab,
