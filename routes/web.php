@@ -35,6 +35,7 @@ use App\Http\Controllers\Admin\VerificationController as AdminVerification;
 use App\Http\Controllers\Admin\BankController as AdminBank;
 use App\Http\Controllers\Admin\PolicyController as AdminPolicy;
 use App\Http\Controllers\Admin\NotificationSpecController as AdminNotificationSpec;
+use App\Http\Controllers\Admin\CharacterGuideController as AdminCharacterGuide;
 
 // 蠎苓・蛛ｴ
 use App\Http\Controllers\Shops\HomeController as ShopHome;
@@ -214,6 +215,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/ngwords', [AdminNgWord::class, 'store'])->name('ngwords.store');
             Route::put('/ngwords/{id}', [AdminNgWord::class, 'update'])->whereNumber('id')->name('ngwords.update');
             Route::delete('/ngwords/{id}', [AdminNgWord::class, 'destroy'])->whereNumber('id')->name('ngwords.destroy');
+        });
+
+        // オコジョガイド設定
+        Route::middleware('admin.permission:master.character_guide')->group(function () {
+            Route::get('/character-guide', [AdminCharacterGuide::class, 'index'])->name('character-guide.index');
+            Route::put('/character-guide', [AdminCharacterGuide::class, 'update'])->name('character-guide.update');
         });
 
         // 縺顔衍繧峨○邂｡逅・

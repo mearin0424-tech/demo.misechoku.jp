@@ -39,6 +39,9 @@ class RecruitmentController extends Controller
 
     /**
      * 採用・入金管理 統合画面
+     *
+     * 採用 → ボーナス申請 → 店舗承認 → 請求書発行 → 店舗入金 → 振込実行 → 受領完了
+     * を 1 件のケースとして組み立て、店舗の操作待ち状態がぱっと見で分かるように表示する。
      */
     public function management(Request $request)
     {
@@ -46,39 +49,160 @@ class RecruitmentController extends Controller
         $applications = $this->getApplicationsForShop($shopId);
         $paymentData = $this->billingManagementService->getShopPaymentPageData($shopId);
 
-        // タブ初期値
-        $tab = $request->query('tab') === 'payment' ? 'payment' : 'recruit';
+        // 店舗側に紐づく deposit を application_id でキー化
+        $shopDeposits = collect($this->billingManagementService->getAllDeposits())
+            ->where('shop_id', $shopId)
+            ->keyBy('shop_job_application_id');
 
-        // 採用バッジ：面談日超過 × 採用/不採用通知未送信
-        $recruitOverdue = collect($applications)->where('is_decision_overdue', true)->count();
-        $recruitInProgressCount = collect($applications)
-            ->whereIn('status', [1, 2, 3])
-            ->count();
+        $hiredCases = [];
+        $ongoingApplications = [];
+        $rejectedApplications = [];
+        foreach ($applications as $app) {
+            $code = (int) ($app['status'] ?? 0);
+            // 1=やり取り中 / 2=面談調整 / 3=面談確定 / 4=採用 / 5=不採用 / 6=本採用 / 7=本入店不採用
+            if (in_array($code, [4, 6], true)) {
+                $deposit = $shopDeposits->get((int) $app['id']);
+                $hiredCases[] = $this->buildShopEmploymentCase($app, $deposit ? (array) $deposit : null);
+            } elseif (in_array($code, [5, 7], true)) {
+                $rejectedApplications[] = $app;
+            } else {
+                $ongoingApplications[] = $app;
+            }
+        }
 
-        // 入金バッジ：
-        //  ・キャスト入金依頼（勤務完了+レビュー済）未承認 = STATUS_CAST_REQUESTED
-        //  ・運営からの請求書 未入金 = STATUS_INVOICE_ISSUED / STATUS_SHOP_PAYMENT_REPORTED
-        $deposits = collect($this->billingManagementService->getAllDeposits())
-            ->where('shop_id', $shopId);
-        $paymentPending = $deposits->whereIn('status_code', [
-            BillingManagementService::STATUS_CAST_REQUESTED,
-            BillingManagementService::STATUS_INVOICE_ISSUED,
-            BillingManagementService::STATUS_SHOP_PAYMENT_REPORTED,
-        ])->count();
+        // 進行中（未完了）→ 完了済の順に並べ替え
+        usort($hiredCases, function (array $a, array $b) {
+            $aDone = (int) ($a['is_completed'] ?? 0);
+            $bDone = (int) ($b['is_completed'] ?? 0);
+            if ($aDone !== $bDone) {
+                return $aDone <=> $bDone;
+            }
+            return ($b['progress_index'] ?? 0) <=> ($a['progress_index'] ?? 0);
+        });
 
         return view('shops.mypage.management', [
             'pageId' => 'management',
-            'tab' => $tab,
-            // 採用
             'applications' => $applications,
-            'recruitBadge' => $recruitOverdue > 0,
-            'recruitInProgressCount' => $recruitInProgressCount,
-            // 入金
+            'hiredCases' => $hiredCases,
+            'ongoingApplications' => $ongoingApplications,
+            'rejectedApplications' => $rejectedApplications,
+            'shopBank' => $paymentData['bank'],
             'invoices' => $paymentData['invoices'],
             'summary' => $paymentData['summary'],
-            'paymentBadge' => $paymentPending > 0,
-            'paymentPendingCount' => $paymentPending,
         ]);
+    }
+
+    /**
+     * 採用済み案件 1 件分の「採用→入金」一気通貫ケース（店舗視点）を組み立てる。
+     *
+     * @param  array        $app     getApplicationsForShop 由来の application 配列
+     * @param  array|null   $deposit getAllDeposits の deposit 配列（null = 入金フロー未開始）
+     */
+    private function buildShopEmploymentCase(array $app, ?array $deposit): array
+    {
+        // パイプライン定義（cast 側と同一の 7 段階）
+        //   0: 採用確定（deposit 未作成）
+        //   1: ボーナス申請受信（deposit status=1, 店舗の承認待ち）★ 店舗操作
+        //   2: 店舗承認済み（deposit status=2）
+        //   3: 請求書発行済み（deposit status=3）★ 店舗操作（入金）
+        //   4: 店舗入金（deposit status=4 or 5）
+        //   5: 振込実行（deposit status=6）
+        //   6: 受領完了（deposit status=7）
+        $depositStatus = $deposit['status_code'] ?? null;
+        $progressIndex = match ((int) ($depositStatus ?? -1)) {
+            -1 => 0,
+            0, 1 => 1,
+            2 => 2,
+            3 => 3,
+            4, 5 => 4,
+            6 => 5,
+            default => 6,
+        };
+        $isCompleted = $progressIndex >= 6;
+
+        $stages = [
+            ['key' => 'hired',         'label' => '採用確定',     'desc' => '店舗が採用を決定'],
+            ['key' => 'cast_request',  'label' => 'ボーナス申請', 'desc' => 'キャストから申請'],
+            ['key' => 'shop_approve',  'label' => '店舗承認',     'desc' => '店舗が承認'],
+            ['key' => 'invoice_issue', 'label' => '請求書発行',   'desc' => '運営が発行'],
+            ['key' => 'shop_pay',      'label' => '店舗入金',     'desc' => '店舗が支払い'],
+            ['key' => 'cast_transfer', 'label' => '振込実行',     'desc' => '運営から振込'],
+            ['key' => 'received',      'label' => '受領完了',     'desc' => '受領確認済み'],
+        ];
+
+        // 「店舗の次のアクション」算出
+        // - 1: ボーナス申請受信 → 「承認する」
+        // - 3: 請求書発行済み → 「入金処理する」
+        $actionableState = null;
+        $actionableLabel = null;
+        if ($progressIndex === 1) {
+            $actionableState = 'approve';
+            $actionableLabel = 'ボーナス申請を承認する';
+        } elseif ($progressIndex === 3) {
+            $actionableState = 'pay';
+            $actionableLabel = '入金処理を行う';
+        }
+
+        $waitingOnLabel = null;
+        if ($actionableState === null) {
+            $waitingOnLabel = match ($progressIndex) {
+                0 => 'キャストの申請待ち',
+                2 => '運営の請求書発行待ち',
+                4 => '運営の振込実行待ち',
+                5 => 'キャストの受領確認待ち',
+                default => null,
+            };
+        }
+
+        $primaryStatus = match (true) {
+            $isCompleted              => ['label' => '振込完了',         'tone' => 'done'],
+            $progressIndex === 1      => ['label' => '承認待ち',         'tone' => 'action'],
+            $progressIndex === 3      => ['label' => '入金待ち',         'tone' => 'action'],
+            $progressIndex >= 1       => ['label' => '入金処理中',       'tone' => 'progress'],
+            default                   => ['label' => '採用済（申請前）', 'tone' => 'progress'],
+        };
+
+        return [
+            'application_id' => (int) ($app['id'] ?? 0),
+            'cast_id'        => (string) ($app['cast_id'] ?? ''),
+            'cast_name'      => $app['cast_name'] ?? '',
+            'cast_avatar_url' => $app['cast_avatar_url'] ?? null,
+            'job_kind_label' => $app['job_kind_label'] ?? '',
+            'pattern_label'  => $app['pattern_label'] ?? '',
+            'hired_at'       => $app['result_date'] ?? null,
+            'real_start_date' => $app['real_start_date'] ?? null,
+            'hired_hourly_wage_display' => $app['hired_regular_hourly_wage'] ?? null,
+            'talk_link'      => !empty($app['cast_id']) ? route('shop.talk.room', $app['cast_id']) : null,
+
+            // パイプライン
+            'stages'         => $stages,
+            'progress_index' => $progressIndex,
+            'is_completed'   => $isCompleted,
+
+            // 状態表示
+            'status_label'   => $primaryStatus['label'],
+            'status_tone'    => $primaryStatus['tone'],
+            'waiting_on'     => $waitingOnLabel,
+            'actionable'     => $actionableState,
+            'actionable_label' => $actionableLabel,
+
+            // deposit のスナップショット
+            'deposit'        => $deposit ? [
+                'id'                  => $deposit['id'] ?? null,
+                'status_label'        => $deposit['status_label'] ?? '',
+                'invoice_number'      => $deposit['invoice_number'] ?? null,
+                'invoice_issued_at'   => $deposit['invoice_issued_at'] ?? null,
+                'invoice_due_date'    => $deposit['invoice_due_date'] ?? null,
+                'invoice_amount'      => $deposit['invoice_amount'] ?? null,
+                'invoice_pdf_url'     => !empty($deposit['id']) ? $this->billingManagementService->getSignedInvoicePdfUrl((int) $deposit['id']) : null,
+                'invoice_url'         => !empty($deposit['id']) ? $this->billingManagementService->getSignedInvoiceUrl((int) $deposit['id']) : null,
+                'shop_payment_confirmed_at' => $deposit['shop_payment_confirmed_at'] ?? null,
+                'cast_transferred_at' => $deposit['cast_transferred_at'] ?? null,
+                'cast_transfer_amount' => $deposit['cast_transfer_amount'] ?? null,
+                'bonus_amount'        => $deposit['bonus_amount'] ?? null,
+                'updated_at_label'    => $deposit['updated_at_label'] ?? null,
+            ] : null,
+        ];
     }
 
     /**

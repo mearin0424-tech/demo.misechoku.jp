@@ -25,6 +25,7 @@
                 ['label' => 'NGワード管理', 'route' => 'admin.ngwords.index', 'icon' => 'fa-ban', 'badge' => null, 'badge_class' => '', 'permission' => 'master.ngwords'],
                 ['label' => 'マスタメンテナンス', 'route' => 'admin.masters.index', 'icon' => 'fa-database', 'badge' => null, 'badge_class' => '', 'permission' => 'master.masters'],
                 ['label' => '通知・タスク仕様', 'route' => 'admin.notification-spec.index', 'icon' => 'fa-bell', 'badge' => null, 'badge_class' => '', 'permission' => 'master.notification_spec'],
+                ['label' => 'オコジョガイド設定', 'route' => 'admin.character-guide.index', 'icon' => 'fa-comment-dots', 'badge' => null, 'badge_class' => '', 'permission' => 'master.character_guide'],
             ],
         ],
         [
@@ -92,6 +93,7 @@
         'admin.ngwords.*' => 'マスタ設定',
         'admin.masters.*' => 'マスタ設定',
         'admin.notification-spec.*' => 'マスタ設定',
+        'admin.character-guide.*' => 'マスタ設定',
         'admin.sales.*' => 'アナリティクス',
         'admin.shops.*' => 'アカウント管理',
         'admin.casts.*' => 'アカウント管理',

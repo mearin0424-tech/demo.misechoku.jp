@@ -751,3 +751,22 @@ ALTER TABLE `shop_managers`
 ALTER TABLE `bank_accounts`
   MODIFY COLUMN `account_number` text NOT NULL,
   MODIFY COLUMN `account_name`   text NOT NULL;
+
+-- ------------------------------------------------------------------------------
+-- character_guide_settings: オコジョガイドの画面別設定（運営管理画面から編集）
+-- - route_name:    Laravel ルート名（例: shop.home, cast.mypage.index）
+-- - screen_label:  運営画面で表示する人間向けの画面名
+-- - is_enabled:    当該画面でオコジョを表示するか
+-- - message:       表示するセリフ。空文字なら吹き出しを出さずキャラのみ表示
+-- ------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `character_guide_settings` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `route_name` varchar(150) NOT NULL,
+  `screen_label` varchar(150) DEFAULT NULL,
+  `is_enabled` tinyint(1) NOT NULL DEFAULT 1,
+  `message` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `character_guide_settings_route_name_unique` (`route_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

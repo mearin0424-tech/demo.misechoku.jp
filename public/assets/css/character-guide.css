@@ -29,7 +29,7 @@
     transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
-/* キャラクター画像：囲みなし */
+/* キャラクター画像：囲みなし。閉じるボタン用にスタッキングコンテキストを作る */
 .guide-character-wrap {
     position: relative;
     pointer-events: auto; /* ここだけクリック可能に */
@@ -48,11 +48,10 @@
     filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); /* 影をつけて視認性確保 */
 }
 
-/* 吹き出し：左側に配置 */
+/* 吹き出し：左側に配置。×は外側に出したのでパディングを軽く戻す */
 .guide-speech-bubble {
     background: #ffffff;
-    padding: 10px 15px;
-    padding-top: 28px; /* 閉じるボタン用の余白 */
+    padding: 10px 14px;
     border-radius: 15px 15px 2px 15px;
     margin-right: 8px;
     margin-bottom: 25px;
@@ -63,30 +62,35 @@
     box-sizing: border-box;
 }
 
-/* 閉じるボタン：吹き出しの右上に絶対配置（fixed にしない＝メイン・フッターの欄外に出さない） */
+/* 閉じるボタン：キャラクターの右下に小さく配置（吹き出し内部からは退避） */
 .guide-close-btn {
     position: absolute;
-    top: 6px;
-    right: 8px;
-    width: 24px;
-    height: 24px;
+    bottom: -4px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
     padding: 0;
-    border: none;
+    border: 1.5px solid rgba(255, 255, 255, 0.9);
     border-radius: 50%;
-    background: rgba(0, 0, 0, 0.12);
-    color: #555;
-    font-size: 1rem;
+    background: rgba(20, 14, 14, 0.78);
+    color: #ffffff;
+    font-size: 0.62rem;
     line-height: 1;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     pointer-events: auto;
-    transition: background 0.15s ease, color 0.15s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+    transition: background 0.15s ease, transform 0.15s ease;
+    z-index: 2;
 }
 .guide-close-btn:hover {
-    background: rgba(0, 0, 0, 0.2);
-    color: #333;
+    background: rgba(0, 0, 0, 0.92);
+    transform: scale(1.08);
+}
+.guide-close-btn:active {
+    transform: scale(0.94);
 }
 
 /* 吹き出しの三角（しっぽ） */

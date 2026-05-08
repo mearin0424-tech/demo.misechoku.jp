@@ -5,195 +5,568 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/recruitment.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/css/management.css') }}?v=20260506">
+<link rel="stylesheet" href="{{ asset('assets/css/management.css') }}?v=20260508">
 <style>
-    /* ===== 入金パネル用スタイル（既存 payment.blade.php から移植） ===== */
-    .payment-mobile-shell { width: 100%; margin: 0 auto 28px; background: transparent; border: none; border-radius: 0; box-shadow: none; overflow: visible; color: #EAE0D5; }
-    .payment-mobile-body { padding: 16px; }
-    .payment-summary-card { border: 1px solid #382A25; border-radius: 12px; background: #1A1412; padding: 20px 14px; margin-bottom: 18px; text-align: center; }
-    .payment-summary-card.is-alert { border-color: rgba(127, 29, 29, 0.55); background: rgba(38, 15, 17, 0.95); }
-    .payment-summary-label { font-size: 11px; font-weight: 700; color: #8A7C74; margin-bottom: 4px; }
-    .payment-summary-card.is-alert .payment-summary-label { color: #f87171; }
-    .payment-summary-count { font-size: 42px; line-height: 1; font-weight: 700; color: #fff; letter-spacing: 0.02em; }
-    .payment-summary-count span { font-size: 15px; color: #8A7C74; margin-left: 3px; font-weight: 500; }
-    .payment-summary-total { margin-top: 5px; font-size: 14px; color: #C8A951; font-weight: 700; }
-    .payment-summary-note { margin: 9px auto 0; width: 96%; font-size: 10px; line-height: 1.6; color: #9A8C84; }
-    .payment-task-title { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #fff; margin: 0 0 10px; }
-    .payment-task-title i { color: #C8A951; }
-    .payment-segment { display: flex; gap: 4px; background: #1A1412; border: 1px solid #2A221E; border-radius: 10px; padding: 4px; margin-bottom: 12px; }
-    .payment-segment button { flex: 1; border: none; border-radius: 8px; background: transparent; color: #8A7C74; font-size: 11px; padding: 8px 4px; font-weight: 600; cursor: pointer; position: relative; }
-    .payment-segment button.is-active { background: #2A221E; color: #fff; }
-    .payment-segment button.is-unpaid-active { color: #C8A951; }
-    .payment-dot { width: 6px; height: 6px; border-radius: 999px; background: #ef4444; display: inline-block; margin-left: 5px; vertical-align: middle; }
-    .payment-task-list { display: grid; gap: 10px; }
-    .payment-task-empty { padding: 36px 10px; text-align: center; font-size: 11px; color: #5A4D45; border-radius: 12px; background: #1A1412; border: 1px solid #2A221E; }
-    .payment-task-card { position: relative; border: 1px solid #382A25; border-radius: 12px; background: #1A1113; padding: 14px; overflow: hidden; }
-    .payment-task-card.is-delayed { border-color: rgba(127, 29, 29, 0.6); background: rgba(69, 14, 18, 0.2); }
-    .payment-task-delay-line { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: rgba(239, 68, 68, 0.85); }
-    .payment-task-top { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
-    .payment-task-name { font-size: 11px; font-weight: 700; color: #fff; line-height: 1.45; }
-    .payment-task-id { margin-top: 3px; color: #8A7C74; font-size: 9px; }
-    .payment-task-status { font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 999px; border: 1px solid; white-space: nowrap; }
-    .payment-task-status.is-paid { background: rgba(6, 95, 70, 0.35); color: #6ee7b7; border-color: rgba(4, 120, 87, 0.5); }
-    .payment-task-status.is-unpaid { background: rgba(200, 169, 81, 0.15); color: #C8A951; border-color: rgba(200, 169, 81, 0.4); }
-    .payment-task-status.is-expected { background: rgba(63, 63, 70, 0.5); color: #a1a1aa; border-color: rgba(82, 82, 91, 0.55); }
-    .payment-task-alert { margin-bottom: 10px; font-size: 10px; color: #fca5a5; display: flex; align-items: center; gap: 6px; background: rgba(127, 29, 29, 0.25); border: 1px solid rgba(127, 29, 29, 0.45); border-radius: 8px; padding: 7px 8px; }
-    .payment-task-middle { display: flex; justify-content: space-between; align-items: end; border-bottom: 1px solid #2A221E; margin-bottom: 9px; padding-bottom: 9px; }
-    .payment-task-middle span { color: #8A7C74; font-size: 10px; }
-    .payment-task-middle strong { color: #fff; font-size: 18px; letter-spacing: 0.02em; }
-    .payment-task-bottom { display: flex; justify-content: space-between; align-items: center; }
-    .payment-task-date { color: #8A7C74; font-size: 9px; display: flex; align-items: center; gap: 5px; }
-    .payment-invoice-link { color: #C8A951; text-decoration: none; font-size: 9px; display: inline-flex; align-items: center; gap: 5px; background: rgba(200, 169, 81, 0.1); border: 1px solid rgba(200, 169, 81, 0.3); border-radius: 6px; padding: 5px 8px; }
-    .payment-invoice-wait { font-size: 9px; color: #5A4D45; }
+    /* ========================================================
+       採用・入金 統合タイムライン（店舗側）
+       ======================================================== */
+    .shop-management-shell { padding: 0 16px 16px; }
+    .shop-management-shell .mypage-page-title {
+        font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
+        font-size: 1.2rem; font-weight: 700; color: #f8e9c8; margin: 16px 0 14px;
+    }
 
-    /* ===== 採用・入金管理 統合タブ ===== */
-    .management-shell { padding: 0; }
-    .management-head { padding: 14px 16px 0; }
-    .management-page-title { margin: 0 0 12px; font-size: 1.05rem; font-weight: 700; color: #fff; letter-spacing: 0.04em; }
-    .management-tabs {
-        display: flex;
-        gap: 4px;
-        background: #1A1412;
-        border: 1px solid #2A221E;
+    .case-summary {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    .case-summary-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(220,181,104,0.2);
         border-radius: 12px;
-        padding: 4px;
-        margin: 0 16px 12px;
+        padding: 10px 12px;
+        text-align: center;
     }
-    .management-tab {
-        flex: 1;
+    .case-summary-card__label { display: block; font-size: 0.66rem; color: rgba(248,233,200,0.7); letter-spacing: 0.06em; font-weight: 700; margin-bottom: 4px; }
+    .case-summary-card__value { display: block; font-size: 1.4rem; font-weight: 800; color: #ffe2a3; font-variant-numeric: tabular-nums; line-height: 1.1; }
+    .case-summary-card.is-action { border-color: rgba(220,181,104,0.65); background: rgba(220,181,104,0.10); }
+    .case-summary-card.is-action .case-summary-card__value { color: #ffd47a; }
+
+    .case-card {
+        background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+        border: 1px solid rgba(220,181,104,0.2);
+        border-radius: 18px;
+        padding: 16px;
+        margin-bottom: 14px;
         position: relative;
-        border: none;
-        border-radius: 9px;
-        background: transparent;
-        color: #8A7C74;
-        font-size: 13px;
-        font-weight: 600;
-        padding: 10px 8px;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        transition: background 0.15s ease, color 0.15s ease;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.18);
     }
-    .management-tab.is-active { background: #2A221E; color: #fff; }
-    .management-tab-count { font-size: 11px; color: #8A7C74; font-weight: 500; }
-    .management-tab.is-active .management-tab-count { color: #C8A951; }
-    .management-tab-dot {
-        position: absolute;
-        top: 6px;
-        right: 10px;
-        width: 7px;
-        height: 7px;
-        border-radius: 999px;
-        background: #ef4444;
-        box-shadow: 0 0 0 2px #1A1412;
+    .case-card.is-actionable {
+        border-color: rgba(220,181,104,0.65);
+        background: linear-gradient(180deg, rgba(220,181,104,0.10), rgba(220,181,104,0.03));
+        box-shadow: 0 4px 18px rgba(220,181,104,0.18), inset 0 1px 0 rgba(255,226,163,0.10);
     }
-    .management-pane[hidden] { display: none; }
-    .rsm-meta-status-overdue { color: #fca5a5 !important; }
-    [data-field="interviewDate"].is-overdue { color: #fca5a5 !important; }
-    @media (min-width: 375px) and (max-width: 430px) {
-        .management-head { padding: 12px 12px 0; }
-        .management-page-title { font-size: 1.15rem; margin-bottom: 10px; }
-        .management-tabs { margin: 0 12px 10px; }
-        .management-tab { font-size: 14px; padding: 11px 8px; }
-        .management-tab-count { font-size: 12px; }
+    .case-card.is-completed { opacity: 0.84; }
 
-        .payment-mobile-body { padding: 12px; }
-        .payment-summary-label { font-size: 12px; }
-        .payment-summary-count { font-size: 46px; }
-        .payment-summary-count span { font-size: 16px; }
-        .payment-summary-total { font-size: 15px; }
-        .payment-summary-note { font-size: 11px; line-height: 1.65; }
-
-        .payment-task-title { font-size: 13px; }
-        .payment-segment button { font-size: 12px; padding: 9px 5px; }
-        .payment-task-empty { font-size: 12px; }
-        .payment-task-name { font-size: 12px; line-height: 1.5; }
-        .payment-task-id { font-size: 10px; }
-        .payment-task-status { font-size: 10px; }
-        .payment-task-alert { font-size: 11px; }
-        .payment-task-middle span { font-size: 11px; }
-        .payment-task-middle strong { font-size: 20px; }
-        .payment-task-date { font-size: 10px; }
-        .payment-invoice-link { font-size: 10px; }
-        .payment-invoice-wait { font-size: 10px; }
+    .case-card__head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+    .case-card__icon {
+        width: 40px; height: 40px; flex: 0 0 auto;
+        border-radius: 10px; background: rgba(220,181,104,0.12); color: #dcb568;
+        display: inline-flex; align-items: center; justify-content: center; font-size: 1rem;
     }
+    .case-card__avatar {
+        width: 40px; height: 40px; flex: 0 0 auto;
+        border-radius: 10px; object-fit: cover;
+        border: 1px solid rgba(220,181,104,0.3);
+    }
+    .case-card.is-completed .case-card__icon { background: rgba(16,185,129,0.18); color: #6ee7b7; }
+    .case-card__main { flex: 1; min-width: 0; }
+    .case-card__shop-name { font-size: 1rem; font-weight: 800; color: #f8e9c8; line-height: 1.4; word-break: break-word; margin: 0 0 4px; }
+    .case-card__meta { font-size: 0.74rem; color: rgba(201,184,184,0.78); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .case-card__meta strong { color: #ffe2a3; font-weight: 800; }
+    .case-card__pill {
+        display: inline-flex; align-items: center; gap: 4px;
+        padding: 4px 10px; border-radius: 999px;
+        font-size: 0.7rem; font-weight: 800; white-space: nowrap; flex: 0 0 auto;
+    }
+    .case-card__pill.is-action  { background: linear-gradient(135deg, #ffe2a3, #dcb568 50%, #b8860b); color: #2a1406; box-shadow: 0 4px 10px rgba(220,181,104,0.35); }
+    .case-card__pill.is-progress { background: rgba(220,181,104,0.18); color: #ffe2a3; border: 1px solid rgba(220,181,104,0.45); }
+    .case-card__pill.is-done    { background: rgba(16,185,129,0.20); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.45); }
+    .case-card__pill i { font-size: 0.65rem; }
+
+    /* 横長 7 ステップパイプライン */
+    .case-pipeline {
+        list-style: none; margin: 0 0 12px; padding: 4px 0 6px;
+        display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; position: relative;
+    }
+    .case-pipeline__step { position: relative; text-align: center; padding-top: 28px; font-size: 0.62rem; }
+    .case-pipeline__step::after {
+        content: ''; position: absolute; top: 11px; left: 50%; right: -50%;
+        height: 2px; background: rgba(220,181,104,0.16); z-index: 0;
+    }
+    .case-pipeline__step:last-child::after { display: none; }
+    .case-pipeline__step.is-done::after,
+    .case-pipeline__step.is-current::after { background: #dcb568; }
+
+    .case-pipeline__bullet {
+        position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+        width: 22px; height: 22px; border-radius: 50%;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 0.65rem; font-weight: 800;
+        background: rgba(255,255,255,0.04); border: 2px solid rgba(220,181,104,0.28);
+        color: rgba(248,233,200,0.5); z-index: 1;
+    }
+    .case-pipeline__step.is-done .case-pipeline__bullet {
+        background: linear-gradient(135deg, #dcb568, #b8860b); color: #2a1406; border-color: #dcb568;
+    }
+    .case-pipeline__step.is-current .case-pipeline__bullet {
+        background: rgba(220,181,104,0.22); color: #ffe2a3; border-color: #dcb568;
+        animation: case-pulse 1.6s ease-in-out infinite;
+        box-shadow: 0 0 0 3px rgba(220,181,104,0.18);
+    }
+    @keyframes case-pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(220,181,104,0.45); }
+        50% { box-shadow: 0 0 0 6px rgba(220,181,104,0); }
+    }
+    .case-pipeline__label { display: block; font-size: 0.62rem; color: rgba(248,233,200,0.55); line-height: 1.25; }
+    .case-pipeline__step.is-done .case-pipeline__label,
+    .case-pipeline__step.is-current .case-pipeline__label { color: #ffe2a3; font-weight: 700; }
+
+    .case-card__highlights {
+        display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;
+        margin: 10px 0 4px;
+    }
+    .case-card__highlight {
+        background: rgba(0,0,0,0.18); border-radius: 10px; padding: 8px 10px;
+        font-size: 0.74rem; color: rgba(248,233,200,0.7);
+    }
+    .case-card__highlight strong {
+        display: block; margin-top: 2px; font-size: 0.95rem; color: #ffe2a3;
+        font-variant-numeric: tabular-nums; font-weight: 800;
+    }
+    .case-card__highlight i { color: #dcb568; margin-right: 4px; }
+
+    .case-card__invoice-link-row {
+        margin: 10px 0 0; padding-top: 10px;
+        border-top: 1px dashed rgba(220,181,104,0.14);
+    }
+    .case-card__invoice-link {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 0.78rem; padding: 8px 14px; border-radius: 999px;
+        background: rgba(220,181,104,0.08); border: 1px solid rgba(220,181,104,0.4);
+        color: #ffe2a3; text-decoration: none;
+    }
+    .case-card__invoice-link:hover { background: rgba(220,181,104,0.16); color: #fff; }
+
+    .case-card__action-row {
+        display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+        margin-top: 12px; padding-top: 12px;
+        border-top: 1px dashed rgba(220,181,104,0.18);
+    }
+    .case-card__waiting {
+        font-size: 0.78rem; color: rgba(201,184,184,0.78);
+        display: inline-flex; align-items: center; gap: 6px;
+    }
+    .case-card__waiting i { color: #dcb568; }
+    .case-card__action-btn {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 10px 16px; border-radius: 999px;
+        background: linear-gradient(135deg, #ffe2a3, #dcb568 50%, #b8860b);
+        color: #2a1406; border: 0; font-weight: 800; font-size: 0.86rem; cursor: pointer;
+        box-shadow: 0 4px 12px rgba(220,181,104,0.4);
+        margin-left: auto;
+    }
+    .case-card__action-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(220,181,104,0.5); }
+    .case-card__view-talk {
+        display: inline-flex; align-items: center; gap: 4px;
+        font-size: 0.78rem; color: rgba(248,233,200,0.7); text-decoration: none;
+    }
+    .case-card__view-talk:hover { color: #ffe2a3; text-decoration: underline; }
+
+    /* セクション見出し */
+    .mypage-stage-heading {
+        margin: 22px 0 10px;
+        font-size: 0.78rem; font-weight: 800;
+        color: rgba(220,181,104,0.85); letter-spacing: 0.08em; text-transform: uppercase;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .mypage-stage-heading i { color: #dcb568; font-size: 0.7rem; }
+
+    /* 進行中／不採用の応募リスト（mini） */
+    .mypage-mini-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+    .mypage-mini-row {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 12px; border-radius: 12px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        text-decoration: none; color: inherit;
+    }
+    .mypage-mini-row:hover { border-color: rgba(220,181,104,0.3); background: rgba(220,181,104,0.04); }
+    .mypage-mini-row__avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex: 0 0 auto; }
+    .mypage-mini-row__avatar-fallback {
+        width: 32px; height: 32px; border-radius: 50%; background: rgba(220,181,104,0.14); color: #dcb568;
+        display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+    }
+    .mypage-mini-row__name { flex: 1; font-size: 0.88rem; font-weight: 700; color: #f5e0c4; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mypage-mini-row__sub { font-size: 0.7rem; color: rgba(201,184,184,0.6); }
+    .mypage-mini-row__status { flex: 0 0 auto; font-size: 0.7rem; padding: 3px 8px; border-radius: 999px; background: rgba(220,181,104,0.1); color: #dcb568; }
+    .mypage-mini-row__status.is-rejected { background: rgba(220,38,38,0.12); color: #fca5a5; }
+    .mypage-mini-row__status.is-overdue { background: rgba(220,38,38,0.12); color: #fca5a5; }
+    .mypage-mini-row__chev { color: rgba(248,233,200,0.4); font-size: 0.72rem; }
+
+    /* 空状態 */
+    .shop-management-empty {
+        padding: 40px 12px; text-align: center;
+        font-size: 0.86rem; color: rgba(201,184,184,0.6);
+        border: 1px dashed rgba(255,255,255,0.08);
+        border-radius: 14px; background: rgba(255,255,255,0.02);
+    }
+
+    /* セッション通知 */
+    .management-summary-note {
+        margin: 12px 0; padding: 10px 14px;
+        border-radius: 10px;
+        background: rgba(220,181,104,0.10);
+        border: 1px solid rgba(220,181,104,0.35);
+        color: #ffe2a3; font-size: 0.82rem; line-height: 1.5;
+    }
+
+    /* フローティング CTA */
+    .deposit-cta-bar {
+        position: fixed; left: 50%; transform: translateX(-50%);
+        bottom: var(--footer-height, 60px); z-index: 90;
+        width: min(100vw, var(--max-content-width, 430px)); max-width: 100%;
+        padding: 10px var(--content-padding-x, 16px) calc(10px + env(safe-area-inset-bottom, 0));
+        background: linear-gradient(180deg, rgba(74,18,42,0.98), rgba(35,8,21,1));
+        border-top: 1px solid rgba(220,181,104,0.55);
+        box-shadow: 0 -8px 24px rgba(0,0,0,0.45);
+        animation: deposit-cta-slide-up 0.3s ease;
+    }
+    @keyframes deposit-cta-slide-up {
+        from { transform: translate(-50%, 100%); opacity: 0; }
+        to { transform: translate(-50%, 0); opacity: 1; }
+    }
+    .deposit-cta-bar__inner { display: flex; align-items: center; gap: 12px; }
+    .deposit-cta-bar__info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .deposit-cta-bar__amount { display: inline-flex; align-items: baseline; gap: 4px; color: #ffe2a3; font-weight: 800; }
+    .deposit-cta-bar__amount strong { font-size: 1.05rem; font-weight: 900; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.4); overflow: hidden; text-overflow: ellipsis; max-width: 50vw; white-space: nowrap; }
+    .deposit-cta-bar__amount i { font-size: 0.9rem; color: #dcb568; }
+    .deposit-cta-bar__label { font-size: 0.7rem; color: rgba(248,233,200,0.78); font-weight: 600; }
+    .deposit-cta-bar__btn {
+        flex: 0 0 auto; margin-left: auto; padding: 12px 18px; border-radius: 999px;
+        background: linear-gradient(135deg, #ffe2a3, #dcb568 48%, #b8860b);
+        color: #2a1406; border: 0; font-weight: 900; font-size: 0.92rem; cursor: pointer;
+        box-shadow: 0 6px 16px rgba(220,181,104,0.45);
+        display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+    }
+    .deposit-cta-bar__btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(220,181,104,0.55); }
+    body:has(.deposit-cta-bar) .shop-management-shell { padding-bottom: calc(var(--footer-height, 60px) + 80px) !important; }
+
+    /* モーダル（承認・入金処理共通） */
+    .shop-action-modal { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); padding: 0; }
+    .shop-action-modal[hidden] { display: none; }
+    @media (min-width: 640px) { .shop-action-modal { justify-content: center; } }
+    .shop-action-modal-backdrop { position: absolute; inset: 0; cursor: pointer; }
+    .shop-action-modal-panel { position: relative; width: 100%; max-width: min(28rem, calc(100vw - 2rem)); max-height: 90vh; background: #160d0d; border-top-left-radius: 1.5rem; border-top-right-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); overflow: hidden; box-sizing: border-box; }
+    .shop-action-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); background: #1a1111; }
+    .shop-action-modal-title { margin: 0; font-size: 1.05rem; font-weight: 700; color: #cda766; letter-spacing: 0.04em; }
+    .shop-action-modal-close { width: 2.5rem; height: 2.5rem; border: none; background: transparent; color: #a89b9b; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .shop-action-modal-body { overflow-y: auto; overflow-x: hidden; padding: 1.5rem; min-width: 0; flex: 1 1 auto; box-sizing: border-box; }
+    .shop-action-modal-note { font-size: 0.78rem; line-height: 1.7; color: #a89b9b; margin: 0 0 1.2rem; padding: 0.9rem; background: #231818; border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.08); }
+    .shop-action-modal-checklist { display: grid; gap: 10px; margin-bottom: 1rem; }
+    .shop-action-modal-check {
+        display: flex; align-items: flex-start; gap: 10px;
+        font-size: 0.86rem; color: #f7eded;
+        cursor: pointer; padding: 10px 12px; border-radius: 10px;
+        background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+        line-height: 1.5;
+    }
+    .shop-action-modal-check:hover { background: rgba(220,181,104,0.06); border-color: rgba(220,181,104,0.22); }
+    .shop-action-modal-check input[type="checkbox"] { flex: 0 0 auto; margin-top: 2px; accent-color: #dcb568; width: 18px; height: 18px; cursor: pointer; }
+    .shop-action-modal-check span { flex: 1; cursor: pointer; }
+    .shop-action-modal-check:has(input:checked) { background: rgba(220,181,104,0.1); border-color: rgba(220,181,104,0.45); }
+    .shop-action-modal-field { margin-bottom: 1rem; }
+    .shop-action-modal-label { display: block; font-size: 0.74rem; font-weight: 600; color: #a89b9b; margin-bottom: 6px; }
+    .shop-action-modal-input { width: 100%; padding: 12px 14px; border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.12); background: #231818; color: #fff; font-size: 0.92rem; box-sizing: border-box; }
+    .shop-action-modal-input:focus { outline: none; border-color: rgba(220,181,104,0.55); }
+    .shop-action-modal-error { color: #fca5a5; font-size: 0.82rem; line-height: 1.5; display: none; margin: 0 0 0.6rem; }
+    .shop-action-modal-error.show { display: block; }
+    .shop-action-modal-footer { display: flex; gap: 0.75rem; padding: 1.1rem 1.5rem; background: #1a1111; border-top: 1px solid rgba(255,255,255,0.08); }
+    .shop-action-modal-btn { flex: 1; padding: 13px 1rem; border-radius: 0.75rem; font-size: 0.9rem; font-weight: 700; cursor: pointer; border: 0; }
+    .shop-action-modal-btn-cancel { background: transparent; border: 1px solid rgba(255,255,255,0.12); color: #d4c8c8; }
+    .shop-action-modal-btn-submit { background: linear-gradient(135deg, #ffe2a3, #dcb568 48%, #b8860b); color: #2a1406; box-shadow: 0 4px 14px rgba(220,181,104,0.35); }
+    .shop-action-modal-btn-submit:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
 </style>
 @endpush
 
 @section('content')
-<div class="management-shell animate-fadeIn">
-    <div class="management-head">
-        <h1 class="management-page-title">採用・入金管理</h1>
+<div class="shop-management-shell animate-fadeIn">
+    <h1 class="mypage-page-title">採用・入金管理</h1>
+
+    @php
+        $hiredCases = $hiredCases ?? [];
+        $ongoingApplications = $ongoingApplications ?? [];
+        $rejectedApplications = $rejectedApplications ?? [];
+        $activeCases = collect($hiredCases)->filter(fn ($c) => empty($c['is_completed']))->values();
+        $completedCases = collect($hiredCases)->filter(fn ($c) => !empty($c['is_completed']))->values();
+        $actionableCount = $activeCases->filter(fn ($c) => !empty($c['actionable']))->count();
+        $primaryActionable = $activeCases->filter(fn ($c) => !empty($c['actionable']))->first();
+    @endphp
+
+    {{-- サマリー --}}
+    <div class="case-summary">
+        <div class="case-summary-card {{ $actionableCount > 0 ? 'is-action' : '' }}">
+            <span class="case-summary-card__label">要対応</span>
+            <span class="case-summary-card__value">{{ $actionableCount }}</span>
+        </div>
+        <div class="case-summary-card">
+            <span class="case-summary-card__label">進行中</span>
+            <span class="case-summary-card__value">{{ max($activeCases->count() - $actionableCount, 0) }}</span>
+        </div>
+        <div class="case-summary-card">
+            <span class="case-summary-card__label">完了</span>
+            <span class="case-summary-card__value">{{ $completedCases->count() }}</span>
+        </div>
     </div>
 
-    <nav class="management-tabs" role="tablist" aria-label="採用・入金切替">
-        <button type="button"
-                class="management-tab"
-                data-pane="recruit"
-                role="tab"
-                aria-selected="false"
-                aria-controls="management-pane-recruit"
-                id="management-tab-recruit">
-            採用
-            <span class="management-tab-count">{{ $recruitInProgressCount ?? 0 }}</span>
-            @if(!empty($recruitBadge))
-                <span class="management-tab-dot" aria-label="未対応の採用タスクがあります"></span>
-            @endif
-        </button>
-        <button type="button"
-                class="management-tab"
-                data-pane="payment"
-                role="tab"
-                aria-selected="false"
-                aria-controls="management-pane-payment"
-                id="management-tab-payment">
-            入金
-            <span class="management-tab-count">{{ $paymentPendingCount ?? 0 }}</span>
-            @if(!empty($paymentBadge))
-                <span class="management-tab-dot" aria-label="未対応の入金タスクがあります"></span>
-            @endif
-        </button>
-    </nav>
+    @if(session('status'))
+        <p class="management-summary-note">{{ session('status') }}</p>
+    @endif
+    @if(session('error'))
+        <p class="management-summary-note" style="color:#fca5a5; background: rgba(220,38,38,0.12); border-color: rgba(220,38,38,0.4);">{{ session('error') }}</p>
+    @endif
 
-    @include('shops.mypage.partials.management-recruit')
-    @include('shops.mypage.partials.management-payment')
+    @if($activeCases->isNotEmpty())
+        <h2 class="mypage-stage-heading"><i class="fas fa-fire"></i> 進行中の案件</h2>
+        @foreach($activeCases as $case)
+            @include('shops.mypage._case_card', ['case' => $case])
+        @endforeach
+    @endif
+
+    @if($completedCases->isNotEmpty())
+        <h2 class="mypage-stage-heading"><i class="fas fa-check-circle"></i> 完了した案件</h2>
+        @foreach($completedCases as $case)
+            @include('shops.mypage._case_card', ['case' => $case])
+        @endforeach
+    @endif
+
+    @if(!empty($ongoingApplications))
+        <h2 class="mypage-stage-heading"><i class="fas fa-comments"></i> 選考中・やり取り中</h2>
+        <ul class="mypage-mini-list">
+            @foreach($ongoingApplications as $app)
+                <a href="{{ !empty($app['cast_id']) ? route('shop.talk.room', $app['cast_id']) : '#' }}" class="mypage-mini-row">
+                    @if(!empty($app['cast_avatar_url']))
+                        <img src="{{ $app['cast_avatar_url'] }}" alt="" class="mypage-mini-row__avatar">
+                    @else
+                        <span class="mypage-mini-row__avatar-fallback"><i class="fas fa-user"></i></span>
+                    @endif
+                    <span class="mypage-mini-row__name">
+                        {{ $app['cast_name'] }}
+                        @if(!empty($app['job_kind_label']))
+                            <span class="mypage-mini-row__sub">／{{ $app['job_kind_label'] }}</span>
+                        @endif
+                    </span>
+                    <span class="mypage-mini-row__status {{ !empty($app['is_decision_overdue']) ? 'is-overdue' : '' }}">
+                        {{ $app['status_display_label'] ?? $app['status_label'] ?? '' }}
+                    </span>
+                    <i class="fas fa-chevron-right mypage-mini-row__chev"></i>
+                </a>
+            @endforeach
+        </ul>
+    @endif
+
+    @if(!empty($rejectedApplications))
+        <h2 class="mypage-stage-heading"><i class="fas fa-times-circle"></i> 不採用となった応募</h2>
+        <ul class="mypage-mini-list">
+            @foreach($rejectedApplications as $app)
+                <a href="{{ !empty($app['cast_id']) ? route('shop.talk.room', $app['cast_id']) : '#' }}" class="mypage-mini-row">
+                    @if(!empty($app['cast_avatar_url']))
+                        <img src="{{ $app['cast_avatar_url'] }}" alt="" class="mypage-mini-row__avatar">
+                    @else
+                        <span class="mypage-mini-row__avatar-fallback"><i class="fas fa-user"></i></span>
+                    @endif
+                    <span class="mypage-mini-row__name">
+                        {{ $app['cast_name'] }}
+                        @if(!empty($app['job_kind_label']))
+                            <span class="mypage-mini-row__sub">／{{ $app['job_kind_label'] }}</span>
+                        @endif
+                    </span>
+                    <span class="mypage-mini-row__status is-rejected">{{ $app['status_display_label'] ?? $app['status_label'] ?? '' }}</span>
+                    <i class="fas fa-chevron-right mypage-mini-row__chev"></i>
+                </a>
+            @endforeach
+        </ul>
+    @endif
+
+    @if(empty($hiredCases) && empty($ongoingApplications) && empty($rejectedApplications))
+        <div class="shop-management-empty">
+            応募・採用案件がまだありません。<br>
+            求人票を公開してキャストからの応募を受け付けましょう。
+        </div>
+    @endif
+</div>
+
+@if($primaryActionable)
+    <div class="deposit-cta-bar" id="deposit-cta-bar"
+         data-application-id="{{ $primaryActionable['application_id'] }}"
+         data-deposit-id="{{ $primaryActionable['deposit']['id'] ?? '' }}"
+         data-action="{{ $primaryActionable['actionable'] }}">
+        <div class="deposit-cta-bar__inner">
+            <div class="deposit-cta-bar__info">
+                <span class="deposit-cta-bar__amount">
+                    <i class="fas fa-user"></i>
+                    <strong>{{ $primaryActionable['cast_name'] }}</strong>
+                </span>
+                <span class="deposit-cta-bar__label">{{ $primaryActionable['actionable_label'] }}</span>
+            </div>
+            <button type="button" class="deposit-cta-bar__btn" id="deposit-cta-bar-submit">
+                <i class="fas {{ $primaryActionable['actionable'] === 'approve' ? 'fa-check-circle' : 'fa-yen-sign' }}"></i>
+                {{ $primaryActionable['actionable_label'] }}
+            </button>
+        </div>
+    </div>
+@endif
+
+{{-- 承認モーダル --}}
+<div id="shop-approve-modal" class="shop-action-modal" role="dialog" aria-labelledby="shop-approve-modal-title" aria-modal="true" hidden>
+    <div class="shop-action-modal-backdrop" data-close-approve-modal></div>
+    <div class="shop-action-modal-panel">
+        <div class="shop-action-modal-header">
+            <h3 id="shop-approve-modal-title" class="shop-action-modal-title">ボーナス申請の承認</h3>
+            <button type="button" class="shop-action-modal-close" data-close-approve-modal aria-label="閉じる"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="shop-action-modal-body">
+            <p class="shop-action-modal-note">
+                キャストから提出されたレビューと達成条件を確認のうえ、承認を行ってください。<br>
+                承認後は、運営から請求書が発行されます。
+            </p>
+            <form id="shop-approve-form" action="{{ route('shop.mypage.deposit.approve') }}" method="POST">
+                @csrf
+                <div class="shop-action-modal-checklist">
+                    <label class="shop-action-modal-check">
+                        <input type="checkbox" name="confirm_review_checked" value="1" required>
+                        <span>キャストが投稿したレビュー内容を確認しました</span>
+                    </label>
+                    <label class="shop-action-modal-check">
+                        <input type="checkbox" name="confirm_bonus_condition" value="1" required>
+                        <span>求人票に登録したボーナス達成条件を満たしていることを確認しました</span>
+                    </label>
+                </div>
+                <p class="shop-action-modal-error" id="shop-approve-error"></p>
+            </form>
+        </div>
+        <div class="shop-action-modal-footer">
+            <button type="button" class="shop-action-modal-btn shop-action-modal-btn-cancel" data-close-approve-modal>キャンセル</button>
+            <button type="submit" form="shop-approve-form" class="shop-action-modal-btn shop-action-modal-btn-submit" id="shop-approve-submit" disabled>
+                承認する
+            </button>
+        </div>
+    </div>
+</div>
+
+{{-- 入金処理モーダル --}}
+<div id="shop-pay-modal" class="shop-action-modal" role="dialog" aria-labelledby="shop-pay-modal-title" aria-modal="true" hidden>
+    <div class="shop-action-modal-backdrop" data-close-pay-modal></div>
+    <div class="shop-action-modal-panel">
+        <div class="shop-action-modal-header">
+            <h3 id="shop-pay-modal-title" class="shop-action-modal-title">入金処理の報告</h3>
+            <button type="button" class="shop-action-modal-close" data-close-pay-modal aria-label="閉じる"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="shop-action-modal-body">
+            <p class="shop-action-modal-note">
+                請求書のお支払いが完了したら、振込日と金額を入力して報告してください。<br>
+                報告内容は運営側で確認後、キャストへの振込が実行されます。
+            </p>
+            <form id="shop-pay-form" action="{{ route('shop.mypage.deposit.pay') }}" method="POST">
+                @csrf
+                <div class="shop-action-modal-field">
+                    <label class="shop-action-modal-label" for="shop-pay-amount">振込金額（円）<span style="color:#dcb568;">*</span></label>
+                    <input id="shop-pay-amount" type="number" name="reported_amount" min="1" step="1" required class="shop-action-modal-input" inputmode="numeric" placeholder="例: 50000">
+                </div>
+                <div class="shop-action-modal-field">
+                    <label class="shop-action-modal-label" for="shop-pay-at">振込日時<span style="color:#dcb568;">*</span></label>
+                    <input id="shop-pay-at" type="datetime-local" name="reported_at" required class="shop-action-modal-input">
+                </div>
+                <div class="shop-action-modal-field">
+                    <label class="shop-action-modal-label" for="shop-pay-ref">振込番号・参考情報（任意）</label>
+                    <input id="shop-pay-ref" type="text" name="reference" maxlength="255" class="shop-action-modal-input" placeholder="振込番号、メモ等">
+                </div>
+                <p class="shop-action-modal-error" id="shop-pay-error"></p>
+            </form>
+        </div>
+        <div class="shop-action-modal-footer">
+            <button type="button" class="shop-action-modal-btn shop-action-modal-btn-cancel" data-close-pay-modal>キャンセル</button>
+            <button type="submit" form="shop-pay-form" class="shop-action-modal-btn shop-action-modal-btn-submit" id="shop-pay-submit">
+                報告する
+            </button>
+        </div>
+    </div>
 </div>
 @endsection
 
 @push('scripts')
 <script>
-(function() {
-    var tabs = document.querySelectorAll('.management-tab');
-    var panes = document.querySelectorAll('.management-pane');
-    if (!tabs.length || !panes.length) return;
+document.addEventListener('DOMContentLoaded', function () {
+    var approveModal = document.getElementById('shop-approve-modal');
+    var payModal = document.getElementById('shop-pay-modal');
 
-    function activate(name) {
-        tabs.forEach(function(t) {
-            var on = t.getAttribute('data-pane') === name;
-            t.classList.toggle('is-active', on);
-            t.setAttribute('aria-selected', on ? 'true' : 'false');
-        });
-        panes.forEach(function(p) {
-            p.hidden = p.getAttribute('data-pane') !== name;
-        });
-        try {
-            var url = new URL(window.location.href);
-            url.searchParams.set('tab', name);
-            window.history.replaceState({}, '', url);
-        } catch (e) {}
+    function openModal(el) { if (el) { el.removeAttribute('hidden'); document.body.style.overflow = 'hidden'; } }
+    function closeModal(el) { if (el) { el.setAttribute('hidden', ''); document.body.style.overflow = ''; } }
+
+    // 承認モーダル
+    if (approveModal) {
+        var approveForm = document.getElementById('shop-approve-form');
+        var approveSubmit = document.getElementById('shop-approve-submit');
+        function syncApproveReady() {
+            var ok = true;
+            approveForm.querySelectorAll('input[type="checkbox"][required]').forEach(function (c) { if (!c.checked) ok = false; });
+            if (approveSubmit) approveSubmit.disabled = !ok;
+        }
+        approveForm.querySelectorAll('input[type="checkbox"]').forEach(function (c) { c.addEventListener('change', syncApproveReady); });
+        document.querySelectorAll('[data-close-approve-modal]').forEach(function (b) { b.addEventListener('click', function () { closeModal(approveModal); }); });
+        approveModal.addEventListener('click', function (e) { if (e.target === approveModal) closeModal(approveModal); });
     }
 
-    tabs.forEach(function(t) {
-        t.addEventListener('click', function() {
-            activate(t.getAttribute('data-pane'));
+    // 入金処理モーダル
+    if (payModal) {
+        var payForm = document.getElementById('shop-pay-form');
+        document.querySelectorAll('[data-close-pay-modal]').forEach(function (b) { b.addEventListener('click', function () { closeModal(payModal); }); });
+        payModal.addEventListener('click', function (e) { if (e.target === payModal) closeModal(payModal); });
+        // 振込日時のデフォルトを「いま」にしておく
+        var payAt = document.getElementById('shop-pay-at');
+        if (payAt && !payAt.value) {
+            var now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            payAt.value = now.toISOString().slice(0, 16);
+        }
+    }
+
+    function openApproveForCase(applicationId) {
+        if (!approveModal) return;
+        approveModal.querySelectorAll('input[type="checkbox"]').forEach(function (c) { c.checked = false; });
+        var btn = document.getElementById('shop-approve-submit'); if (btn) btn.disabled = true;
+        var err = document.getElementById('shop-approve-error'); if (err) { err.textContent = ''; err.classList.remove('show'); }
+        openModal(approveModal);
+    }
+    function openPayForCase(invoiceAmount) {
+        if (!payModal) return;
+        var amt = document.getElementById('shop-pay-amount');
+        if (amt && invoiceAmount) amt.value = invoiceAmount;
+        var err = document.getElementById('shop-pay-error'); if (err) { err.textContent = ''; err.classList.remove('show'); }
+        openModal(payModal);
+    }
+
+    document.querySelectorAll('[data-case-action]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var action = btn.getAttribute('data-case-action');
+            var appId = btn.getAttribute('data-application-id');
+            if (action === 'approve') {
+                openApproveForCase(appId);
+            } else if (action === 'pay') {
+                var card = btn.closest('.case-card');
+                var amountText = card ? (card.querySelector('.case-card__highlight strong') || {}).textContent || '' : '';
+                var digits = amountText.replace(/[^0-9]/g, '');
+                openPayForCase(digits ? parseInt(digits, 10) : '');
+            }
         });
     });
 
-    var initial = (new URLSearchParams(window.location.search).get('tab')) || @json($tab ?? 'recruit');
-    if (initial !== 'recruit' && initial !== 'payment') initial = 'recruit';
-    activate(initial);
-})();
+    // フローティング CTA
+    var ctaBar = document.getElementById('deposit-cta-bar');
+    var ctaBtn = document.getElementById('deposit-cta-bar-submit');
+    if (ctaBar && ctaBtn) {
+        ctaBtn.addEventListener('click', function () {
+            var action = ctaBar.getAttribute('data-action');
+            var appId = ctaBar.getAttribute('data-application-id');
+            if (action === 'approve') {
+                openApproveForCase(appId);
+            } else if (action === 'pay') {
+                openPayForCase('');
+            }
+        });
+    }
+});
 </script>
 @endpush
