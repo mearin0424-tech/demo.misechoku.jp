@@ -535,15 +535,6 @@ class MemberRepository implements MemberRepositoryInterface
     }
 
 
-    public function isFootprints($id)
-    {
-        $records =  $this->findById($id);
-        if ($records->footprints == \CommonConsts::FOOTPRINTS_ON) {
-            return true;
-        }
-        return false;
-    }
-
     public function findMatchingById($member_id)
     {
         //✅ Kết quả trả về:
@@ -1337,7 +1328,6 @@ class MemberRepository implements MemberRepositoryInterface
         $cast->setAttribute('line_user_id', null);
         $cast->setAttribute('matching', 0);
         $cast->setAttribute('release', 0);
-        $cast->setAttribute('footprints', 0);
 
         if ($profile) {
             $cast->setAttribute('nickname', $profile->nickname);

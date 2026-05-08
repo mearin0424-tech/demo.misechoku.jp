@@ -11,8 +11,6 @@ use Illuminate\Support\Facades\Schema;
 
 class ProfileController extends Controller
 {
-    private const ACTION_TYPE_FOOTPRINT = 2;
-
     public function __construct(private readonly AdminMasterService $adminMasterService)
     {
     }
@@ -303,7 +301,6 @@ class ProfileController extends Controller
         $id = $id ?? 1;
 
         if (request()->is('cast/*')) {
-            $this->recordCastFootprintForShop((string) $id);
             // キャスト側 → お店の情報を表示
             $shop = $this->buildShopDetailData((string) $id);
             return view('shops.profile.show', [
@@ -313,7 +310,6 @@ class ProfileController extends Controller
             ]);
         }
 
-        $this->recordShopFootprintForCast((string) $id);
         // お店側 → キャストの情報を表示
         return view('casts.profile.show', $this->buildCastProfileViewData((string) $id, false));
     }
@@ -428,58 +424,6 @@ class ProfileController extends Controller
     private function currentCastId(): string
     {
         return (string) auth()->guard('member')->id();
-    }
-
-    private function recordCastFootprintForShop(string $shopId): void
-    {
-        if (!auth()->guard('member')->check()) {
-            return;
-        }
-        if (!Schema::hasTable('favorites')) {
-            return;
-        }
-
-        $castId = (string) auth()->guard('member')->id();
-        if ($castId === '' || $shopId === '') {
-            return;
-        }
-
-        DB::table('favorites')->updateOrInsert(
-            [
-                'cast_id' => $castId,
-                'shop_id' => $shopId,
-                'action_type' => self::ACTION_TYPE_FOOTPRINT,
-            ],
-            [
-                'created_at' => now(),
-            ]
-        );
-    }
-
-    private function recordShopFootprintForCast(string $castId): void
-    {
-        if (!auth()->guard('shop')->check()) {
-            return;
-        }
-        if (!Schema::hasTable('favorites')) {
-            return;
-        }
-
-        $shopId = (string) (auth()->guard('shop')->user()->shop_id ?? '');
-        if ($shopId === '' || $castId === '') {
-            return;
-        }
-
-        DB::table('favorites')->updateOrInsert(
-            [
-                'cast_id' => $castId,
-                'shop_id' => $shopId,
-                'action_type' => self::ACTION_TYPE_FOOTPRINT,
-            ],
-            [
-                'created_at' => now(),
-            ]
-        );
     }
 
     private function buildCastDetailData(string $castId): array

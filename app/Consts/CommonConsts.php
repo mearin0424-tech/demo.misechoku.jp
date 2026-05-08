@@ -72,16 +72,6 @@ class CommonConsts {
     // 不採用
     public const REJECTED = 0;
 
-    public const FOOTPRINTS_ON = 1;
-    public const FOOTPRINTS_OFF = 0;
-
-    public const FOOTPRINTS = [
-
-        '有り' => self::FOOTPRINTS_ON,
-        '無し' => self::FOOTPRINTS_OFF,
-
-    ];
-
     // メンバーから
     public const FORROW_BY_MEMBER = 1;
 

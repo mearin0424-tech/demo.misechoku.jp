@@ -836,12 +836,6 @@ class MemberInfoUtil extends Facade
         return $count;
     }
 
-    public static function likeMemberCnt($member_id)
-    {
-        $count =  DB::table('likes')->where('member_id',$member_id)->count();
-        return $count;
-    }
-
     public function good2ByMyself($member_id)
     {
         try {

@@ -88,48 +88,4 @@ class BankAccountRepository implements BankAccountRepositoryInterface
     }
 
 
-/*
-
-   public function findBankAccountShop($member_id)
-    {
-
-        $records = DB::table('footprints')
-                   ->join('shops', 'footprints.shop_id', '=', 'shops.id')
-                   ->where('footprints.member_id',$member_id)
-                   ->groupby('shops.id')
-                   ->select('shops.*')
-                   ->get();
-
-        return $records;
-
-    }
-
-    public function findBankAccountMember($shop_id)
-    {
-
-        $records = DB::table('footprints')
-                   ->join('mmembers', 'footprints.member_id', '=', 'members.id')
-                   ->where('footprints.shop_id',$shop_id)
-                   ->select('members.*')
-                   ->get();
-
-        return $records;
-
-    }
-
-
-
-    public function findBankAccountByShopId($shop_id)
-    {
-
-        $records = DB::table('footprints')
-                   ->join('mmembers', 'footprints.memeber_id', '=', 'members.id')
-                   ->where('footprints.shop_id',$shop_id)
-                   ->select('members.*')
-                   ->get();
-
-        return $records;
-
-    }
-*/
 }

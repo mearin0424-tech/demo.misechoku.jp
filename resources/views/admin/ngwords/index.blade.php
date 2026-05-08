@@ -60,13 +60,6 @@
                         <span>NGワード</span>
                         <input type="text" name="word" value="{{ old('word', $editingWord->word) }}" required maxlength="255">
                     </label>
-                    <label class="ngword-edit-form__toggle">
-                        <input type="checkbox" name="is_active" value="1" @if((int) ($editingWord->is_active ?? 0) === 1) checked @endif>
-                        <span class="spec-toggle__track" aria-hidden="true">
-                            <span class="spec-toggle__thumb"></span>
-                        </span>
-                        <span class="spec-toggle__label">このNGワードを有効にする</span>
-                    </label>
                     <div class="u-flex u-gap-8">
                         <button type="submit" class="btn-action manage">
                             <i class="fas fa-floppy-disk"></i> 変更を保存
@@ -174,15 +167,6 @@
     font-size: 0.95rem;
     color: var(--admin-text);
 }
-.ngword-edit-form__toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    user-select: none;
-    margin-bottom: 6px;
-}
-.ngword-edit-form__toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
 .ngword-edit-card { border-left: 4px solid #dcb568; }
 </style>
 @endpush

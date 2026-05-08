@@ -2197,15 +2197,6 @@ class ShopRepository implements ShopRepositoryInterface
     }
 
 
-    public function isFootprints($id)
-    {
-        $records =  $this->findById($id);
-        if ($records->footprints == \CommonConsts::FOOTPRINTS_ON) {
-            return true;
-        }
-        return false;
-    }
-
     public function addMemberToShop(Request $request)
     {
         $memberId = $request->input('member_id');

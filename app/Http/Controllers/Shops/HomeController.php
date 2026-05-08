@@ -4,6 +4,7 @@
 namespace App\Http\Controllers\Shops;
 
 use App\Http\Controllers\Controller;
+use App\Models\Favorite;
 use App\Services\UserLocationService;
 use App\Support\RecruitCatchOverlay;
 use Carbon\Carbon;
@@ -12,7 +13,6 @@ use Illuminate\Support\Facades\Schema;
 
 class HomeController extends Controller
 {
-    private const ACTION_TYPE_KEEP = 1;
 
     public function __construct(
         private readonly UserLocationService $userLocation,
@@ -68,10 +68,12 @@ class HomeController extends Controller
         $likeCounts = [];
         $likedTodayCastIds = [];
         if (Schema::hasTable('favorites')) {
+            // 各キャストが店舗から受け取った LIKE 数（LIKE は店舗発信のみ）
             $likeRows = DB::table('favorites')
                 ->select('cast_id', DB::raw('COUNT(*) as cnt'))
                 ->whereNotNull('cast_id')
-                ->where('action_type', 3)
+                ->where('action_type', Favorite::ACTION_LIKE)
+                ->where('sender_type', Favorite::SENDER_SHOP)
                 ->groupBy('cast_id')
                 ->get();
             foreach ($likeRows as $lr) {
@@ -86,7 +88,8 @@ class HomeController extends Controller
                     $likedTodayCastIds = DB::table('favorites')
                         ->where('shop_id', $shopId)
                         ->whereNotNull('cast_id')
-                        ->where('action_type', 3)
+                        ->where('action_type', Favorite::ACTION_LIKE)
+                        ->where('sender_type', Favorite::SENDER_SHOP)
                         ->whereDate('created_at', now()->toDateString())
                         ->pluck('cast_id')
                         ->all();
@@ -101,7 +104,8 @@ class HomeController extends Controller
             if ($shopId !== '') {
                 $keptCastIds = DB::table('favorites')
                     ->where('shop_id', $shopId)
-                    ->where('action_type', self::ACTION_TYPE_KEEP)
+                    ->where('action_type', Favorite::ACTION_KEEP)
+                    ->where('sender_type', Favorite::SENDER_SHOP)
                     ->whereNotNull('cast_id')
                     ->pluck('cast_id')
                     ->all();
@@ -275,13 +279,14 @@ class HomeController extends Controller
                 ->keyBy('shop_id');
         }
 
-        // 店舗側求人カードの LIKE数（cast -> shop のいいね数）
+        // 店舗側求人カードの LIKE数（cast 発信の LIKE は廃止のため、現状常に 0 件）
         $likeCounts = [];
         if (Schema::hasTable('favorites')) {
             $likeRows = DB::table('favorites')
                 ->select('shop_id', DB::raw('COUNT(*) as cnt'))
                 ->whereNotNull('shop_id')
-                ->where('action_type', 3)
+                ->where('action_type', Favorite::ACTION_LIKE)
+                ->where('sender_type', Favorite::SENDER_CAST)
                 ->groupBy('shop_id')
                 ->get();
             foreach ($likeRows as $lr) {
@@ -297,7 +302,8 @@ class HomeController extends Controller
             if ($castId !== '') {
                 $keptShopIds = DB::table('favorites')
                     ->where('cast_id', $castId)
-                    ->where('action_type', self::ACTION_TYPE_KEEP)
+                    ->where('action_type', Favorite::ACTION_KEEP)
+                    ->where('sender_type', Favorite::SENDER_CAST)
                     ->whereNotNull('shop_id')
                     ->pluck('shop_id')
                     ->all();

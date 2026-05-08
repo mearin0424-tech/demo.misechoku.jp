@@ -65,11 +65,6 @@ class RepositoryServiceProvider extends ServiceProvider
             \App\Repositories\Matching\MatchingRepository::class,
         );     
         $this->app->bind(
-            \App\Repositories\Footprints\FootprintsRepositoryInterface::class,
-            \App\Repositories\Footprints\FootprintsRepository::class,
-        );
-
-        $this->app->bind(
             \App\Repositories\Scout\ScoutRepositoryInterface::class,
             \App\Repositories\Scout\ScoutRepository::class,
         );
@@ -117,11 +112,6 @@ class RepositoryServiceProvider extends ServiceProvider
                 \App\Repositories\Interfaces\ManagerRepositoryInterface::class,
                 \App\Repositories\Eloquents\ManagerRepository::class,
 
-        );
-
-        $this->app->bind(
-                \App\Repositories\Keep\KeepRepositoryInterface::class,
-                \App\Repositories\Keep\KeepRepository::class,
         );
 
         $this->app->bind(

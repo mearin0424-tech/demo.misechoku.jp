@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Shops;
 
 use App\Http\Controllers\Controller;
+use App\Models\Favorite;
 use App\Services\AdminMasterService;
 use App\Services\BillingManagementService;
 use App\Services\DocumentReviewService;
@@ -16,8 +17,6 @@ use Illuminate\Validation\ValidationException;
 class RecruitmentController extends Controller
 {
     private const MSG_LICENSE_REQUIRED_FOR_PUBLISH = '求人を公開するには、営業許可証と風営許可証の両方を提出し、運営の承認が必要です。';
-    private const ACTION_TYPE_FOOTPRINT = 2;
-    private const ACTION_TYPE_KEEP = 1;
 
     public function __construct(
         private readonly AdminMasterService $adminMasterService,
@@ -478,7 +477,6 @@ class RecruitmentController extends Controller
     public function show($id = null)
     {
         $shopId = $id ? $this->normalizeShopId($id) : $this->currentShopId();
-        $this->recordCastFootprintForShop($shopId);
         $recruitData = $this->getRecruitData($shopId);
         $isKeptByCurrentCast = $this->isKeptByCurrentCast($shopId);
         $recruitData['recruit']['is_kept'] = $isKeptByCurrentCast;
@@ -2088,32 +2086,6 @@ class RecruitmentController extends Controller
         return (int) ltrim(substr($shopId, 1), '0');
     }
 
-    private function recordCastFootprintForShop(string $shopId): void
-    {
-        if (!auth()->guard('member')->check()) {
-            return;
-        }
-        if (!Schema::hasTable('favorites')) {
-            return;
-        }
-
-        $castId = (string) auth()->guard('member')->id();
-        if ($castId === '' || $shopId === '') {
-            return;
-        }
-
-        DB::table('favorites')->updateOrInsert(
-            [
-                'cast_id' => $castId,
-                'shop_id' => $shopId,
-                'action_type' => self::ACTION_TYPE_FOOTPRINT,
-            ],
-            [
-                'created_at' => now(),
-            ]
-        );
-    }
-
     private function isKeptByCurrentCast(string $shopId): bool
     {
         if (!auth()->guard('member')->check()) {
@@ -2128,10 +2100,12 @@ class RecruitmentController extends Controller
             return false;
         }
 
+        // キャスト発信のキープのみ対象（店舗→キャスト KEEP は別物）
         return DB::table('favorites')
             ->where('cast_id', $castId)
             ->where('shop_id', $shopId)
-            ->where('action_type', self::ACTION_TYPE_KEEP)
+            ->where('action_type', Favorite::ACTION_KEEP)
+            ->where('sender_type', Favorite::SENDER_CAST)
             ->exists();
     }
 }

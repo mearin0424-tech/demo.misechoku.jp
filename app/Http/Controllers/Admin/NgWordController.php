@@ -39,12 +39,11 @@ class NgWordController extends Controller
 
         $data = $request->validate([
             'word' => ['required', 'string', 'max:255'],
-            'is_active' => ['nullable'],
         ]);
         $this->adminMasterService->updateNgWord(
             $id,
             trim($data['word']),
-            (bool) $request->boolean('is_active')
+            (bool) ($existing->is_active ?? true)
         );
         return redirect()->route('admin.ngwords.index')->with('status', 'NGワードを更新しました。');
     }

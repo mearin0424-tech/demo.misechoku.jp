@@ -223,9 +223,11 @@ CREATE TABLE IF NOT EXISTS `favorites` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `cast_id` varchar(20) DEFAULT NULL,
   `shop_id` varchar(20) DEFAULT NULL,
-  `action_type` tinyint NOT NULL,
+  `action_type` varchar(16) NOT NULL,
+  `sender_type` varchar(8) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `favorites_unique_per_pair_action_sender` (`cast_id`, `shop_id`, `action_type`, `sender_type`),
   KEY `favorites_cast_id_foreign` (`cast_id`),
   KEY `favorites_shop_id_foreign` (`shop_id`),
   CONSTRAINT `favorites_cast_id_foreign` FOREIGN KEY (`cast_id`) REFERENCES `casts` (`id`) ON DELETE CASCADE,
@@ -370,9 +372,9 @@ INSERT IGNORE INTO `application_deposit_histories` (`id`, `application_deposit_i
 (2, 1, 2, '2026-02-16 11:30:00'),
 (3, 1, 6, '2026-02-20 15:00:00');
 
-INSERT IGNORE INTO `favorites` (`cast_id`, `shop_id`, `action_type`, `created_at`) VALUES
-('c00000001', 's00000002', 1, '2026-01-12 20:00:00'),
-('c00000002', 's00000001', 3, '2026-02-10 21:15:00');
+INSERT IGNORE INTO `favorites` (`cast_id`, `shop_id`, `action_type`, `sender_type`, `created_at`) VALUES
+('c00000001', 's00000002', 'KEEP', 'cast', '2026-01-12 20:00:00'),
+('c00000002', 's00000001', 'LIKE', 'shop', '2026-02-10 21:15:00');
 
 INSERT IGNORE INTO `messages` (`cast_id`, `shop_id`, `sender_type`, `content`, `is_read`, `created_at`) VALUES
 ('c00000002', 's00000002', 1, '髱｢謗･繧偵♀鬘倥＞縺励◆縺・〒縺呻ｼ・, 1, '2026-03-05 18:05:00'),
@@ -549,7 +551,7 @@ SELECT
   cast_profiles.shift, cast_profiles.profession, cast_profiles.exp, cast_profiles.years_exp, cast_profiles.where_work,
   cast_profiles.pr, cast_profiles.charm_point, cast_profiles.memo, cast_profiles.ng_reason, cast_profiles.latitude, cast_profiles.longitude,
   (SELECT cp.provider_id FROM cast_providers cp WHERE cp.cast_id = casts.id AND cp.provider = 'line' LIMIT 1) AS line_user_id,
-  0 AS `matching`, 0 AS `release`, 0 AS `footprints`, NULL AS shop_name
+  0 AS `matching`, 0 AS `release`, NULL AS shop_name
 FROM casts
 LEFT JOIN cast_profiles ON casts.id = cast_profiles.cast_id;
 
@@ -770,3 +772,50 @@ CREATE TABLE IF NOT EXISTS `character_guide_settings` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `character_guide_settings_route_name_unique` (`route_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------------------------
+-- 既存 favorites の action_type を文字列化し、sender_type を追加するマイグレーション
+-- 既存 DB に対して 1 回だけ実行する想定（冪等的に書く）。
+--
+--   旧スキーマ:
+--     action_type tinyint  ... 1=KEEP, 2=FOOTPRINT(廃止), 3=LIKE
+--   新スキーマ:
+--     action_type varchar(16) ... 'KEEP' | 'LIKE'
+--     sender_type varchar(8)  ... 'cast' | 'shop'
+--
+-- 注意:
+-- - 旧 KEEP 行（1）は方向情報を保持していないため一意に sender_type を決められない。
+--   ここでは安全策として sender_type を一旦 'shop' にしておく（運用上は店舗側のキープが
+--   多い前提）。利用者には再キープを促してください。厳密に整理する場合は事前に
+--   DELETE FROM favorites WHERE action_type = 1; を流してください。
+-- - 旧 LIKE 行（3）はキャスト→店舗 LIKE が無効化されているため、すべて 'shop' 発信。
+-- - 旧 FOOTPRINT 行（2）はすでに廃止のため削除する。
+-- ------------------------------------------------------------------------------
+
+-- 1) sender_type を追加（一旦 NULL 許容）
+ALTER TABLE `favorites`
+  ADD COLUMN IF NOT EXISTS `sender_type` varchar(8) NULL AFTER `action_type`;
+
+-- 2) action_type を文字列カラム化（既存 tinyint からの ALTER は VARCHAR に直接変換可能）
+ALTER TABLE `favorites`
+  MODIFY COLUMN `action_type` varchar(16) NOT NULL;
+
+-- 3) 値の置換: 1->'KEEP', 3->'LIKE'、2 は削除
+DELETE FROM `favorites` WHERE `action_type` = '2';
+UPDATE `favorites` SET `action_type` = 'KEEP' WHERE `action_type` = '1';
+UPDATE `favorites` SET `action_type` = 'LIKE' WHERE `action_type` = '3';
+
+-- 4) sender_type バックフィル
+--    LIKE は店舗発信のみで運用していたので 'shop' を入れる。
+--    KEEP は方向不明だが、過渡期は 'shop' で埋める。重複が出る場合は手動で精査。
+UPDATE `favorites` SET `sender_type` = 'shop' WHERE `sender_type` IS NULL AND `action_type` = 'LIKE';
+UPDATE `favorites` SET `sender_type` = 'shop' WHERE `sender_type` IS NULL AND `action_type` = 'KEEP';
+
+-- 5) sender_type を NOT NULL に締める
+ALTER TABLE `favorites`
+  MODIFY COLUMN `sender_type` varchar(8) NOT NULL;
+
+-- 6) 重複防止のユニークキー（既に存在するなら無視される）
+ALTER TABLE `favorites`
+  ADD UNIQUE KEY IF NOT EXISTS `favorites_unique_per_pair_action_sender`
+  (`cast_id`, `shop_id`, `action_type`, `sender_type`);

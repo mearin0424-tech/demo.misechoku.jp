@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Casts;
 
+use App\Models\Favorite;
 use App\Rules\KouzaMeig;
 use App\Services\BillingManagementService;
 use App\Services\DocumentReviewService;
@@ -767,9 +768,11 @@ class MypageController extends Controller
         $industryNames = $this->resolveDesiredJobByIndustries($castId, $castRow->industry_id ?? null);
         $looksSummary = $looksTags !== [] ? implode(' / ', $looksTags) : '';
         $personalitySummary = $personalityTags !== [] ? implode(' / ', $personalityTags) : '';
+        // 自分が店舗から受け取った LIKE 数（LIKE は店舗発信のみ）
         $likeCount = DB::table('favorites')
             ->where('cast_id', $castId)
-            ->where('action_type', 3)
+            ->where('action_type', Favorite::ACTION_LIKE)
+            ->where('sender_type', Favorite::SENDER_SHOP)
             ->count();
 
         $matchCount = 0;
