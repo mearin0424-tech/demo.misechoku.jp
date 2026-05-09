@@ -104,6 +104,7 @@ Route::get('/manifest.json', function () {
 // ルートはサービス紹介の welcome へ
 Route::redirect('/', '/welcome');
 Route::view('/welcome', 'common.welcome')->name('welcome');
+Route::view('/welcome/shop', 'lp.shop')->name('welcome.shop');
 Route::redirect('/shop', '/shop/home');
 Route::redirect('/cast', '/cast/home');
 Route::redirect('/bk', '/admin');
