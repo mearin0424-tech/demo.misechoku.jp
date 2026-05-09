@@ -101,7 +101,9 @@ Route::get('/manifest.json', function () {
 | 繝ｪ繝繧､繝ｬ繧ｯ繝郁ｨｭ螳・
 |--------------------------------------------------------------------------
 */
-Route::redirect('/', '/login');
+// ルートはサービス紹介の welcome へ
+Route::redirect('/', '/welcome');
+Route::view('/welcome', 'common.welcome')->name('welcome');
 Route::redirect('/shop', '/shop/home');
 Route::redirect('/cast', '/cast/home');
 Route::redirect('/bk', '/admin');
@@ -349,6 +351,10 @@ Route::prefix('setting')->name('setting.')->group(function () {
     Route::post('/notification', [SettingController::class, 'updateNotification'])->name('notification.update');
     Route::get('/line/link', [LineLogin::class, 'redirectLink'])->name('line.link');
     Route::get('/account', [SettingController::class, 'account'])->name('account');
+    Route::post('/account/email', [SettingController::class, 'updateEmail'])->name('account.email.update');
+    Route::post('/account/password', [SettingController::class, 'updatePassword'])->name('account.password.update');
+    Route::post('/account/line/unlink', [SettingController::class, 'unlinkLine'])->name('account.line.unlink');
+    Route::post('/account/withdraw', [SettingController::class, 'withdraw'])->name('account.withdraw');
     // 探索拠点（現在地／パスポート）
     Route::post('/location', [\App\Http\Controllers\Common\LocationController::class, 'store'])->name('location.store');
     Route::delete('/location', [\App\Http\Controllers\Common\LocationController::class, 'destroy'])->name('location.destroy');
@@ -460,6 +466,7 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
         Route::get('/documents/onboarding', [ShopMypage::class, 'documentsOnboarding'])->name('documents.onboarding');
         Route::get('/documents/{type}/manage', [ShopMypage::class, 'manageLicenseDocument'])->name('documents.manage')->whereIn('type', ['business', 'entertainment']);
         Route::post('/word', [ShopMypage::class, 'updateWord'])->name('word');
+        Route::post('/search-location', [ShopMypage::class, 'updateSearchLocation'])->name('search-location.update');
         Route::get('/management', [ShopRecruit::class, 'management'])->name('management');
         Route::get('/reviews', [ShopReview::class, 'index'])->name('review.index');
         Route::get('/documents/{type}', [ShopMypage::class, 'viewLicenseDocument'])->name('documents.show')->whereIn('type', ['business', 'entertainment']);
@@ -498,6 +505,7 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
     Route::get('/interaction', [ShopInteraction::class, 'index'])->name('interaction.index');
     Route::get('/mypage', [CastMypage::class, 'index'])->name('mypage.index');
     Route::post('/mypage/word', [CastMypage::class, 'updateWord'])->name('mypage.word');
+    Route::post('/mypage/search-location', [CastMypage::class, 'updateSearchLocation'])->name('mypage.search-location.update');
     Route::get('/mypage/management', [CastMypage::class, 'employment'])->name('mypage.management');
     Route::get('/mypage/reviews', [CastMypage::class, 'reviews'])->name('mypage.reviews');
     Route::post('/mypage/payment/bank', [CastMypage::class, 'updateBank'])->name('mypage.payment.bank.update');

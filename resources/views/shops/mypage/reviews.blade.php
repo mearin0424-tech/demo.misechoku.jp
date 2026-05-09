@@ -4,7 +4,7 @@
 @section('body-class', 'page-shop-mypage-reviews')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('assets/css/review.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/review.css') }}?v=20260509-shop-reviews-cards">
     <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 @endpush
 

@@ -493,24 +493,48 @@ body.page-search .connection-list--search {
     display: block;
     background: #2c1b23;
 }
+/* 優良店バッヂ（プレミアムゴールド + シマー） */
 .shop-search-card__badge {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 3px;
+    gap: 4px;
     width: 100%;
-    max-width: 72px;
-    padding: 2px 6px;
+    max-width: 78px;
+    padding: 3px 8px;
     border-radius: 999px;
     font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.02em;
-    color: #2e1300;
-    background: linear-gradient(90deg, #dcb568, #b8860b);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    color: #2d030e;
+    background: linear-gradient(135deg, #f8df8b 0%, #d4af37 50%, #b8860b 100%);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.45);
+    overflow: hidden;
+    isolation: isolate;
+}
+.shop-search-card__badge > * { position: relative; z-index: 1; }
+.shop-search-card__badge::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -60%;
+    width: 50%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+    transform: skewX(-18deg);
+    animation: shop-search-badge-shimmer 3.6s ease-in-out infinite;
+    z-index: 0;
+    pointer-events: none;
+}
+@keyframes shop-search-badge-shimmer {
+    0%   { left: -60%; }
+    55%  { left: 110%; }
+    100% { left: 110%; }
 }
 .shop-search-card__badge-icon {
     font-size: 10px;
+    color: #2d030e;
 }
 .shop-search-card__body {
     flex: 1;
@@ -1614,9 +1638,11 @@ body.page-search .connection-list--search {
     margin: 0 0 14px;
     padding: 16px;
     border-radius: 18px;
-    background: linear-gradient(180deg, rgba(39, 17, 22, 0.98), rgba(30, 12, 16, 0.98));
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
 }
 
 .ai-recommend__intro-title {
@@ -1625,7 +1651,7 @@ body.page-search .connection-list--search {
     font-weight: 700;
     letter-spacing: 0.04em;
     line-height: 1.6;
-    color: #fff1cf;
+    color: var(--color-text-header);
     margin-bottom: 8px;
 }
 
@@ -1635,7 +1661,7 @@ body.page-search .connection-list--search {
     font-size: 0.85rem;
     line-height: 1.9;
     letter-spacing: 0.01em;
-    color: #dccccc;
+    color: var(--color-text);
 }
 
 .ai-recommend__intro-link {
@@ -1647,12 +1673,12 @@ body.page-search .connection-list--search {
     min-height: 42px;
     padding: 0 16px;
     border-radius: 999px;
-    background: linear-gradient(145deg, #f2d06d 0%, #d6ab2a 55%, #b88a14 100%);
-    color: #231516;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold) 50%, var(--gold-deep));
+    color: #2a1406;
     font-size: 0.82rem;
-    font-weight: 700;
+    font-weight: 800;
     text-decoration: none;
-    box-shadow: 0 10px 22px rgba(220, 181, 104, 0.22);
+    box-shadow: 0 4px 12px rgba(220, 181, 104, 0.4);
 }
 
 .ai-recommend__message {
@@ -1688,10 +1714,10 @@ body.page-search .connection-list--search {
     height: 42px;
     border-radius: 50%;
     flex-shrink: 0;
-    background: linear-gradient(180deg, #fff7d8, #e7c65a);
-    border: 2px solid rgba(255, 255, 255, 0.75);
+    background: linear-gradient(135deg, var(--gold-light), var(--gold-deep));
+    border: 2px solid rgba(255, 255, 255, 0.4);
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .ai-recommend__avatar img {
@@ -1709,34 +1735,40 @@ body.page-search .connection-list--search {
     line-height: 1.85;
     letter-spacing: 0.01em;
     word-break: break-word;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
 }
 
+/* AI 側（左）：本体テーマと同じガラス調＋ゴールド枠 */
 .ai-recommend__message--ai .ai-recommend__bubble {
-    background: #fffaf0;
-    color: #3e3123;
-    border: 1px solid #ecd08a;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    color: var(--color-text-header);
+    border: 1px solid rgba(220, 181, 104, 0.3);
     border-radius: 6px 18px 18px 18px;
 }
 
+/* ユーザ側（右）：プライマリのゴールド・グラデーション */
 .ai-recommend__message--user .ai-recommend__bubble {
-    background: linear-gradient(135deg, #e3bf57, #c7941a);
-    color: #1d1204;
-    font-weight: 500;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold) 50%, var(--gold-deep));
+    color: #2a1406;
+    font-weight: 600;
+    border: 0;
     border-radius: 18px 6px 18px 18px;
+    box-shadow: 0 4px 12px rgba(220, 181, 104, 0.4);
 }
 
 .ai-recommend__message--typing .ai-recommend__bubble {
-    color: #8e7750;
+    color: rgba(240, 180, 198, 0.7);
 }
 
 .ai-recommend__bubble strong {
-    font-weight: 700;
-    color: #8f6423;
+    font-weight: 800;
+    color: var(--gold-light);
 }
 
 .ai-recommend__message--user .ai-recommend__bubble strong {
-    color: #120b02;
+    color: #2a1406;
 }
 
 .ai-recommend__options {
@@ -1751,20 +1783,30 @@ body.page-search .connection-list--search {
     grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+/* 選択肢ボタン：ゴーストゴールド（他画面のチップと統一感） */
 .ai-recommend__option {
     width: auto;
     min-height: 42px;
     padding: 10px 14px;
-    border: 1px solid rgba(220, 181, 104, 0.55);
+    border: 1px solid rgba(220, 181, 104, 0.4);
     border-radius: 12px;
-    background: rgba(255, 250, 240, 0.96);
-    color: #8d5a06;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--gold-light);
     font-family: var(--font-sans);
     font-size: 0.83rem;
-    font-weight: 500;
+    font-weight: 600;
     line-height: 1.6;
     letter-spacing: 0.01em;
     cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.ai-recommend__option:hover {
+    background: rgba(220, 181, 104, 0.12);
+    border-color: rgba(220, 181, 104, 0.65);
+    color: #fff;
+}
+.ai-recommend__option:active {
+    transform: scale(0.97);
 }
 
 .ai-recommend__options--grid .ai-recommend__option {
@@ -1786,10 +1828,10 @@ body.page-search .connection-list--search {
 
 .ai-recommend__card {
     overflow: hidden;
-    background: #fffdf8;
-    border: 1px solid rgba(220, 181, 104, 0.26);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(220, 181, 104, 0.28);
     border-radius: 18px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
 }
 
 .ai-recommend__card-media {
@@ -1810,9 +1852,11 @@ body.page-search .connection-list--search {
     left: 10px;
     padding: 4px 8px;
     border-radius: 999px;
-    background: rgba(25, 5, 9, 0.82);
-    color: #fff4d4;
+    background: rgba(20, 6, 12, 0.85);
+    border: 1px solid rgba(220, 181, 104, 0.4);
+    color: var(--gold-light);
     font-size: 0.68rem;
+    font-weight: 700;
 }
 
 .ai-recommend__card-body {
@@ -1825,7 +1869,7 @@ body.page-search .connection-list--search {
     font-size: 1rem;
     line-height: 1.6;
     letter-spacing: 0.03em;
-    color: #24160a;
+    color: var(--color-text-header);
 }
 
 .ai-recommend__reason {
@@ -1835,11 +1879,12 @@ body.page-search .connection-list--search {
     margin-bottom: 8px;
     padding: 5px 9px;
     border-radius: 999px;
-    background: #fff2c8;
-    color: #946207;
+    background: rgba(220, 181, 104, 0.18);
+    border: 1px solid rgba(220, 181, 104, 0.4);
+    color: var(--gold-light);
     font-family: var(--font-sans);
     font-size: 0.74rem;
-    font-weight: 500;
+    font-weight: 700;
     letter-spacing: 0.01em;
 }
 
@@ -1849,7 +1894,7 @@ body.page-search .connection-list--search {
     font-size: 0.85rem;
     line-height: 1.8;
     letter-spacing: 0.01em;
-    color: #5d4a32;
+    color: var(--color-text);
 }
 
 .ai-recommend__card-link {
@@ -1860,13 +1905,14 @@ body.page-search .connection-list--search {
     margin-top: 12px;
     padding: 11px 14px;
     border-radius: 12px;
-    background: linear-gradient(135deg, #e4bf56, #c28f16);
-    color: #201104;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold) 50%, var(--gold-deep));
+    color: #2a1406;
     font-family: var(--font-sans);
     font-size: 0.86rem;
-    font-weight: 600;
+    font-weight: 800;
     letter-spacing: 0.01em;
     text-decoration: none;
+    box-shadow: 0 4px 12px rgba(220, 181, 104, 0.4);
 }
 
 @media (max-width: 640px) {

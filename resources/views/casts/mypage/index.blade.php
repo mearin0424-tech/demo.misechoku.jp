@@ -139,6 +139,13 @@
         </div>
 
         <div class="mypage-detail-box">
+            {{-- 位置情報での絞り込み設定 --}}
+            @include('partials.search-location-settings', [
+                'searchLocationSettings' => $searchLocationSettings ?? null,
+                'searchLocationDistanceOptions' => $searchLocationDistanceOptions ?? [0,1,3,5,10,20,30,50,100],
+                'updateRouteName' => 'cast.mypage.search-location.update',
+            ])
+
             {{-- メニュー（プロフィール情報より上） --}}
             @include('casts.mypage.parts.menu', ['current' => 'profile', 'fullWidth' => false])
 

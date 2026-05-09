@@ -222,11 +222,14 @@ class SearchController extends BaseSearchController
 
         $items = $this->enrichCastSearchShopCards($items);
 
-        // 距離計算＋距離フィルタ
+        // 距離計算＋距離フィルタ（MyPage に保存された永続設定を優先。クエリパラメータ指定があればそれで上書き）
         $userLocation = app(UserLocationService::class);
         $origin = $userLocation->getActiveLocation();
-        $distanceKmLimit = (int) $request->query('distance_km', 0);
-        $useDistance = $origin && in_array((string) $request->query('location_type'), ['current', 'geo'], true) && $distanceKmLimit > 0;
+        $persistedMaxKm = (int) ($userLocation->getEffectiveMaxDistanceKm() ?? 0);
+        $queryMaxKm = (int) $request->query('distance_km', 0);
+        $hasQueryFilter = $queryMaxKm > 0
+            && in_array((string) $request->query('location_type'), ['current', 'geo'], true);
+        $effectiveMaxKm = $hasQueryFilter ? $queryMaxKm : $persistedMaxKm;
 
         foreach ($items as &$item) {
             $km = $origin
@@ -238,10 +241,14 @@ class SearchController extends BaseSearchController
         }
         unset($item);
 
-        if ($useDistance) {
-            $items = array_values(array_filter($items, function ($it) use ($distanceKmLimit) {
+        if ($origin && $effectiveMaxKm > 0) {
+            $items = array_values(array_filter($items, function ($it) use ($effectiveMaxKm) {
                 $km = $it['distance_km'] ?? null;
-                return $km !== null && $km <= $distanceKmLimit;
+                // 距離不明は除外しない（lat/lng 未登録の店舗は表示機会を残す）
+                if ($km === null) {
+                    return true;
+                }
+                return $km <= $effectiveMaxKm;
             }));
         }
 

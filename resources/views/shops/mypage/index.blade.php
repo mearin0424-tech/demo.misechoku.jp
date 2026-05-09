@@ -40,6 +40,7 @@
         text-align: center;
         width: 100%;
     }
+    /* 優良店未付与（モノクロ） */
     .mypage-stat-panel-badge--inactive {
         border-color: rgba(120, 120, 120, 0.35);
         background: rgba(40, 40, 45, 0.55);
@@ -52,48 +53,69 @@
         color: #9ca3af;
         font-size: 0.88rem;
     }
+
+    /* 優良店：プレミアムゴールド + シマー */
     .mypage-stat-panel-badge--active {
-        border-color: rgba(34, 197, 94, 0.45);
-        box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.12);
-    }
-    .mypage-stat-panel-badge--active .mypage-stat-icon {
-        color: #86efac !important;
-    }
-    .mypage-stat-panel-badge--active .mypage-stat-value {
-        color: #bbf7d0;
-    }
-    .good-payer-badge-modal-guide {
-        display: flex;
-        gap: 10px;
-        align-items: flex-end;
-        margin-bottom: 14px;
-    }
-    .good-payer-badge-modal-guide img {
-        width: 56px;
-        height: auto;
-        flex-shrink: 0;
-        filter: drop-shadow(0 4px 10px rgba(0,0,0,0.32));
-    }
-    .good-payer-badge-modal-bubble {
         position: relative;
-        flex: 1;
-        background: #fffaf0;
-        color: #3f3128;
-        border-radius: 14px;
-        padding: 10px 12px;
-        font-size: 0.8rem;
-        line-height: 1.55;
-        font-weight: 700;
+        border: 0;
+        padding: 1px;
+        background: linear-gradient(135deg, #f8df8b 0%, #d4af37 50%, #b8860b 100%);
+        box-shadow: 0 6px 18px rgba(212, 175, 55, 0.35);
+        overflow: hidden;
+        isolation: isolate;
     }
-    .good-payer-badge-modal-bubble::after {
+    .mypage-stat-panel-badge--active > * {
+        position: relative;
+        z-index: 1;
+    }
+    .mypage-stat-panel-badge--active::before {
+        /* 内側のダーク薄ガラス層 */
         content: '';
         position: absolute;
-        right: -8px;
-        bottom: 10px;
-        border-width: 8px 0 8px 8px;
-        border-style: solid;
-        border-color: transparent transparent transparent #fffaf0;
+        inset: 1px;
+        border-radius: 13px;
+        background: linear-gradient(180deg, rgba(45, 3, 14, 0.05), rgba(45, 3, 14, 0.18));
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
+        z-index: 0;
     }
+    .mypage-stat-panel-badge--active::after {
+        /* シマー（左→右に走る光） */
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: -60%;
+        width: 50%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.42), transparent);
+        transform: skewX(-18deg);
+        animation: mypage-badge-shimmer 3.6s ease-in-out infinite;
+        z-index: 0;
+        pointer-events: none;
+    }
+    @keyframes mypage-badge-shimmer {
+        0%   { left: -60%; }
+        55%  { left: 110%; }
+        100% { left: 110%; }
+    }
+    .mypage-stat-panel-badge--active .mypage-stat-icon {
+        color: #2d030e !important;
+        text-shadow: 0 1px 0 rgba(255, 226, 163, 0.55);
+    }
+    .mypage-stat-panel-badge--active .mypage-stat-label {
+        color: rgba(45, 3, 14, 0.78);
+        font-weight: 800;
+        letter-spacing: 0.1em;
+    }
+    .mypage-stat-panel-badge--active .mypage-stat-value {
+        color: #2d030e;
+        font-weight: 900;
+        letter-spacing: 0.18em;
+    }
+    .mypage-stat-panel-badge--active:active {
+        transform: scale(0.96);
+    }
+
     .good-payer-badge-modal-close-top {
         position: absolute;
         top: 10px;
@@ -112,38 +134,24 @@
         line-height: 1;
     }
     .good-payer-badge-modal-body {
-        margin: 0 0 16px;
-        font-size: 0.88rem;
+        margin: 0;
+        font-size: 0.9rem;
         line-height: 1.75;
         color: #e8e0d8;
         text-align: left;
     }
     .good-payer-badge-modal-body ul {
-        margin: 10px 0 0 1.1em;
-        padding: 0;
+        margin: 0;
+        padding-left: 1.2em;
+    }
+    .good-payer-badge-modal-body li {
+        margin-bottom: 4px;
     }
     .good-payer-badge-modal-note {
-        margin-top: 10px;
-        font-size: 0.76rem;
+        margin-top: 12px;
+        font-size: 0.74rem;
         line-height: 1.65;
         color: #cabcbc;
-    }
-    .good-payer-badge-modal-status {
-        margin-top: 14px;
-        padding: 10px 12px;
-        border-radius: 10px;
-        font-size: 0.82rem;
-        font-weight: 700;
-    }
-    .good-payer-badge-modal-status.is-yes {
-        background: rgba(34, 197, 94, 0.12);
-        border: 1px solid rgba(34, 197, 94, 0.28);
-        color: #bbf7d0;
-    }
-    .good-payer-badge-modal-status.is-no {
-        background: rgba(107, 114, 128, 0.15);
-        border: 1px solid rgba(156, 163, 175, 0.25);
-        color: #d1d5db;
     }
     .status-menu-grid {
         display: grid;
@@ -834,6 +842,13 @@
         </div>
 
         @include('shops.mypage.partials.shop-license-documents', ['documents' => $documents ?? []])
+
+        {{-- 位置情報での絞り込み設定 --}}
+        @include('partials.search-location-settings', [
+            'searchLocationSettings' => $searchLocationSettings ?? null,
+            'searchLocationDistanceOptions' => $searchLocationDistanceOptions ?? [0,1,3,5,10,20,30,50,100],
+            'updateRouteName' => 'shop.mypage.search-location.update',
+        ])
     </section>
 </div>
 
@@ -875,28 +890,13 @@
 <div id="modal-good-payer-badge" class="mypage-modal-overlay modal-word-edit" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="good-payer-badge-modal-title">
     <div class="mypage-modal-panel glass-panel">
         <button type="button" class="good-payer-badge-modal-close-top" id="good-payer-badge-modal-close-top" aria-label="閉じる">×</button>
-        <h3 id="good-payer-badge-modal-title" class="mypage-modal-title serif-font">優良店バッヂとは？</h3>
-        <div class="good-payer-badge-modal-guide" aria-hidden="true">
-            <p class="good-payer-badge-modal-bubble">条件を満たしていないため未付与です。上記を満たすと優良店バッヂが表示されます。</p>
-            <img src="{{ asset('assets/images/guide/guide-character.png') }}" alt="">
-        </div>
+        <h3 id="good-payer-badge-modal-title" class="mypage-modal-title serif-font">優良店バッヂの獲得条件</h3>
         <div class="good-payer-badge-modal-body">
-            <p>優良店バッヂは、直近3ヶ月の請求・入金履歴をもとに、安心して働ける店舗の目安として付与されます。</p>
             <ul>
                 <li>すべての案件が「店舗入金確認済み」まで完了している</li>
                 <li>請求書発行から店舗入金確認までが10日以内である</li>
             </ul>
             <p class="good-payer-badge-modal-note">※ 条件は毎月見直され、基準を満たさなくなった場合はバッヂ表示が外れることがあります。</p>
-        </div>
-        <div class="good-payer-badge-modal-status {{ $hasGoodPayerBadge ? 'is-yes' : 'is-no' }}">
-            @if($hasGoodPayerBadge)
-                現在のお店：優良店バッヂが付与されています。
-            @else
-                現在のお店：条件を満たしていないため未付与です。上記を満たすと優良店バッヂが表示されます。
-            @endif
-        </div>
-        <div class="mypage-modal-actions">
-            <button type="button" class="btn-action btn-action-primary" id="good-payer-badge-modal-close">閉じる</button>
         </div>
     </div>
 </div>
@@ -986,7 +986,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var openBadgeModal = document.getElementById('open-good-payer-badge-modal');
     var badgeModal = document.getElementById('modal-good-payer-badge');
-    var closeBadgeModal = document.getElementById('good-payer-badge-modal-close');
     var closeBadgeModalTop = document.getElementById('good-payer-badge-modal-close-top');
     function hideBadgeModal() {
         if (badgeModal) badgeModal.style.display = 'none';
@@ -995,13 +994,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (openBadgeModal && badgeModal) {
         openBadgeModal.addEventListener('click', function() {
             badgeModal.style.display = 'flex';
-            if (closeBadgeModal) closeBadgeModal.focus();
+            if (closeBadgeModalTop) closeBadgeModalTop.focus();
         });
         badgeModal.addEventListener('click', function(e) {
             if (e.target === badgeModal) hideBadgeModal();
         });
     }
-    if (closeBadgeModal) closeBadgeModal.addEventListener('click', hideBadgeModal);
     if (closeBadgeModalTop) closeBadgeModalTop.addEventListener('click', hideBadgeModal);
 });
 </script>

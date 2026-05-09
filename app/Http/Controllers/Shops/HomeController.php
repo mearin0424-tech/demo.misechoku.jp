@@ -113,6 +113,8 @@ class HomeController extends Controller
         }
         $keptCastMap = array_fill_keys($keptCastIds, true);
 
+        $maxDistanceKm = (int) ($this->userLocation->getEffectiveMaxDistanceKm() ?? 0);
+
         $items = [];
         foreach ($rows as $row) {
             $birthday = $row->birthday ? Carbon::parse($row->birthday) : null;
@@ -120,6 +122,11 @@ class HomeController extends Controller
             $distanceKm = $origin
                 ? $this->userLocation->distanceKm($origin['lat'], $origin['lng'], $row->latitude !== null ? (float) $row->latitude : null, $row->longitude !== null ? (float) $row->longitude : null)
                 : null;
+            // 距離フィルタ：拠点設定があり、かつ半径>0 の場合のみ適用。
+            // 距離不明（lat/lng 未登録）は除外しない（情報不足を理由にスキップする方針もあるが、表示機会を残す）。
+            if ($origin && $maxDistanceKm > 0 && $distanceKm !== null && $distanceKm > $maxDistanceKm) {
+                continue;
+            }
             $items[] = [
                 'id' => $row->id,
                 'name' => $row->nickname ?: ($row->name ?: 'ゲスト'),
@@ -424,6 +431,7 @@ class HomeController extends Controller
 
         // 探索拠点が設定されていれば各レコードに距離を付与
         $origin = $this->userLocation->getActiveLocation();
+        $maxDistanceKm = (int) ($this->userLocation->getEffectiveMaxDistanceKm() ?? 0);
         if ($origin) {
             foreach ($items as &$item) {
                 $km = $this->userLocation->distanceKm($origin['lat'], $origin['lng'], $item['_lat'] ?? null, $item['_lng'] ?? null);
@@ -432,6 +440,12 @@ class HomeController extends Controller
                 unset($item['_lat'], $item['_lng']);
             }
             unset($item);
+            if ($maxDistanceKm > 0) {
+                $items = array_values(array_filter($items, function ($item) use ($maxDistanceKm) {
+                    $km = $item['distance_km'] ?? null;
+                    return $km === null || $km <= $maxDistanceKm;
+                }));
+            }
         } else {
             foreach ($items as &$item) {
                 unset($item['_lat'], $item['_lng']);

@@ -4,45 +4,57 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
- * ログインユーザの「いまの探索拠点」を扱うサービス。
+ * ログインユーザの「いまの探索拠点」と「半径フィルタ」を扱うサービス。
  *
- * 探索拠点は次の優先順で解決する：
- *   1. セッションに保存されたユーザ指定の位置（現在地 or パスポート）
- *   2. ログイン中のキャスト／店舗の自プロフィール（cast_profiles / shop_profiles の lat/lng）
- *   3. 解決不能（null）→ 距離は表示せず、距離フィルタも無効
- *
- * 距離計算は Haversine 公式（地球半径 6371km）で km 単位を返す。
+ * 探索拠点の解決順:
+ *   1. 自プロフィールの search_location_mode に従う:
+ *      - 'profile'  : cast_profiles / shop_profiles の latitude/longitude
+ *      - 'passport' : cast_profiles / shop_profiles の search_passport_latitude/longitude
+ *      - 'current'  : セッションに保存された端末 geolocation
+ *   2. 設定が無い場合は、セッションの一時保存（旧 location-modal フロー）にフォールバック
+ *   3. それでも解決できなければ、自プロフィールの住所緯度経度
+ *   4. 解決不能 → null（距離フィルタ無効）
  */
 class UserLocationService
 {
     public const SESSION_KEY = 'user_location';
     public const MODE_CURRENT = 'current';   // 端末の geolocation
-    public const MODE_PASSPORT = 'passport'; // 任意位置を指定（住所→ジオコーディング）
-    public const MODE_PROFILE = 'profile';   // 自プロフィールから
+    public const MODE_PASSPORT = 'passport'; // 任意位置（住所→ジオコーディング）
+    public const MODE_PROFILE = 'profile';   // 自プロフィール住所
+
+    public const ALL_MODES = [self::MODE_PROFILE, self::MODE_PASSPORT, self::MODE_CURRENT];
+
+    /** プルダウン用：選択肢（半径 km）。0 は「制限なし」。 */
+    public const DISTANCE_OPTIONS_KM = [0, 1, 3, 5, 10, 20, 30, 50, 100];
 
     /**
-     * 現在の探索拠点を返す。
+     * 現在の探索拠点を返す（永続設定 → セッション → プロフィール住所 の順）。
      *
      * @return array{lat: float, lng: float, mode: string, label: string}|null
      */
     public function getActiveLocation(): ?array
     {
+        $persisted = $this->resolvePersistedOrigin();
+        if ($persisted) {
+            return $persisted;
+        }
+
         $session = (array) session(self::SESSION_KEY, []);
         if (
             isset($session['lat'], $session['lng']) &&
             is_numeric($session['lat']) && is_numeric($session['lng'])
         ) {
             return [
-                'lat' => (float) $session['lat'],
-                'lng' => (float) $session['lng'],
-                'mode' => (string) ($session['mode'] ?? self::MODE_CURRENT),
+                'lat'   => (float) $session['lat'],
+                'lng'   => (float) $session['lng'],
+                'mode'  => (string) ($session['mode'] ?? self::MODE_CURRENT),
                 'label' => (string) ($session['label'] ?? '指定位置'),
             ];
         }
 
-        // フォールバック：自プロフィールに緯度経度があればそれを使う
         $profile = $this->resolveSelfProfileLocation();
         if ($profile) {
             return $profile + ['mode' => self::MODE_PROFILE, 'label' => 'プロフィール住所'];
@@ -52,23 +64,95 @@ class UserLocationService
     }
 
     /**
-     * セッションに位置を保存（現在地 or パスポート）。
+     * 永続設定（cast_profiles / shop_profiles のカラム）から探索拠点を解決する。
+     */
+    private function resolvePersistedOrigin(): ?array
+    {
+        $settings = $this->loadProfileSettings();
+        if (!$settings) {
+            return null;
+        }
+
+        $mode = (string) ($settings['mode'] ?? '');
+        if ($mode === self::MODE_PROFILE) {
+            $row = $settings['profile_location'];
+            if ($row !== null) {
+                return [
+                    'lat'   => $row['lat'],
+                    'lng'   => $row['lng'],
+                    'mode'  => self::MODE_PROFILE,
+                    'label' => 'プロフィール住所',
+                ];
+            }
+            return null;
+        }
+
+        if ($mode === self::MODE_PASSPORT) {
+            if (
+                $settings['passport_lat'] !== null &&
+                $settings['passport_lng'] !== null
+            ) {
+                return [
+                    'lat'   => (float) $settings['passport_lat'],
+                    'lng'   => (float) $settings['passport_lng'],
+                    'mode'  => self::MODE_PASSPORT,
+                    'label' => $settings['passport_label'] !== ''
+                        ? $settings['passport_label']
+                        : '指定位置',
+                ];
+            }
+            return null;
+        }
+
+        if ($mode === self::MODE_CURRENT) {
+            $session = (array) session(self::SESSION_KEY, []);
+            if (
+                isset($session['lat'], $session['lng']) &&
+                is_numeric($session['lat']) && is_numeric($session['lng'])
+            ) {
+                return [
+                    'lat'   => (float) $session['lat'],
+                    'lng'   => (float) $session['lng'],
+                    'mode'  => self::MODE_CURRENT,
+                    'label' => '現在地',
+                ];
+            }
+            return null;
+        }
+
+        return null;
+    }
+
+    /**
+     * 永続設定の半径フィルタ（km）。0 は「制限なし」、null は「未設定」。
+     */
+    public function getEffectiveMaxDistanceKm(): ?int
+    {
+        $settings = $this->loadProfileSettings();
+        if (!$settings) {
+            return null;
+        }
+        $km = $settings['max_distance_km'];
+        return ($km === null) ? null : (int) $km;
+    }
+
+    /**
+     * セッションに位置を保存（端末 geolocation 用）。
      */
     public function setManualLocation(string $mode, float $lat, float $lng, string $label = ''): void
     {
         if (!in_array($mode, [self::MODE_CURRENT, self::MODE_PASSPORT], true)) {
             $mode = self::MODE_CURRENT;
         }
-        // 範囲チェック
         if ($lat < -90 || $lat > 90 || $lng < -180 || $lng > 180) {
             return;
         }
         session([
             self::SESSION_KEY => [
-                'mode' => $mode,
-                'lat' => $lat,
-                'lng' => $lng,
-                'label' => $label !== '' ? $label : ($mode === self::MODE_CURRENT ? '現在地' : '指定位置'),
+                'mode'   => $mode,
+                'lat'    => $lat,
+                'lng'    => $lng,
+                'label'  => $label !== '' ? $label : ($mode === self::MODE_CURRENT ? '現在地' : '指定位置'),
                 'set_at' => time(),
             ],
         ]);
@@ -77,6 +161,128 @@ class UserLocationService
     public function clear(): void
     {
         session()->forget(self::SESSION_KEY);
+    }
+
+    /**
+     * MyPage 設定（mode / passport / max_km）を DB に保存する。
+     *
+     * @param array{
+     *   mode: string,
+     *   passport_address?: ?string,
+     *   passport_latitude?: ?float,
+     *   passport_longitude?: ?float,
+     *   passport_label?: ?string,
+     *   max_distance_km?: ?int,
+     * } $payload
+     */
+    public function saveSearchSettings(array $payload): void
+    {
+        $mode = (string) ($payload['mode'] ?? '');
+        if (!in_array($mode, self::ALL_MODES, true)) {
+            return;
+        }
+
+        [$table, $idColumn, $idValue] = $this->resolveCurrentProfileTarget();
+        if ($table === null) {
+            return;
+        }
+
+        $update = [
+            'search_location_mode'   => $mode,
+            'search_max_distance_km' => isset($payload['max_distance_km'])
+                ? (int) $payload['max_distance_km']
+                : 0,
+        ];
+
+        if ($mode === self::MODE_PASSPORT) {
+            $update['search_passport_address']   = $payload['passport_address']   ?? null;
+            $update['search_passport_latitude']  = $payload['passport_latitude']  ?? null;
+            $update['search_passport_longitude'] = $payload['passport_longitude'] ?? null;
+            $update['search_passport_label']     = $payload['passport_label']     ?? null;
+        } else {
+            // 他モードに切り替えた場合、パスポート情報はクリアしておく
+            $update['search_passport_address']   = null;
+            $update['search_passport_latitude']  = null;
+            $update['search_passport_longitude'] = null;
+            $update['search_passport_label']     = null;
+        }
+
+        DB::table($table)
+            ->where($idColumn, $idValue)
+            ->update($update);
+    }
+
+    /**
+     * MyPage 表示用：現在の保存設定を返す。
+     *
+     * @return array{
+     *   mode: string,
+     *   passport_address: ?string,
+     *   passport_latitude: ?float,
+     *   passport_longitude: ?float,
+     *   passport_label: ?string,
+     *   max_distance_km: ?int,
+     *   profile_location: ?array{lat: float, lng: float},
+     * }|null
+     */
+    public function loadProfileSettings(): ?array
+    {
+        [$table, $idColumn, $idValue] = $this->resolveCurrentProfileTarget();
+        if ($table === null) {
+            return null;
+        }
+        if (!Schema::hasColumn($table, 'search_location_mode')) {
+            return null;
+        }
+
+        $row = DB::table($table)
+            ->where($idColumn, $idValue)
+            ->select(
+                'latitude',
+                'longitude',
+                'search_location_mode as mode',
+                'search_passport_address as passport_address',
+                'search_passport_latitude as passport_lat',
+                'search_passport_longitude as passport_lng',
+                'search_passport_label as passport_label',
+                'search_max_distance_km as max_distance_km',
+            )
+            ->first();
+        if (!$row) {
+            return null;
+        }
+
+        $profileLocation = ($row->latitude !== null && $row->longitude !== null)
+            ? ['lat' => (float) $row->latitude, 'lng' => (float) $row->longitude]
+            : null;
+
+        return [
+            'mode'              => (string) ($row->mode ?? ''),
+            'passport_address'  => $row->passport_address,
+            'passport_latitude' => $row->passport_lat !== null ? (float) $row->passport_lat : null,
+            'passport_longitude' => $row->passport_lng !== null ? (float) $row->passport_lng : null,
+            'passport_label'    => (string) ($row->passport_label ?? ''),
+            'max_distance_km'   => $row->max_distance_km !== null ? (int) $row->max_distance_km : null,
+            'profile_location'  => $profileLocation,
+        ];
+    }
+
+    /**
+     * 現在ログイン中のユーザに紐づく profile テーブル情報を返す。
+     *
+     * @return array{0: ?string, 1: ?string, 2: ?string} [tableName, idColumn, idValue]
+     */
+    private function resolveCurrentProfileTarget(): array
+    {
+        $cast = Auth::guard('member')->user();
+        if ($cast && !empty($cast->id)) {
+            return ['cast_profiles', 'cast_id', (string) $cast->id];
+        }
+        $manager = Auth::guard('shop')->user();
+        if ($manager && !empty($manager->shop_id)) {
+            return ['shop_profiles', 'shop_id', (string) $manager->shop_id];
+        }
+        return [null, null, null];
     }
 
     /**
@@ -117,9 +323,8 @@ class UserLocationService
 
     /**
      * 距離計算用 SQL 式（MySQL）。
-     * 戻り値は km 単位の単純 Haversine。プレースホルダ埋め用にバインド配列も返す。
      *
-     * @return array{0:string, 1:array<int, float>}  [expression, bindings]
+     * @return array{0:string, 1:array<int, float>} [expression, bindings]
      */
     public function haversineSqlExpression(string $latColumn, string $lngColumn, float $originLat, float $originLng): array
     {
@@ -132,7 +337,7 @@ class UserLocationService
     }
 
     /**
-     * 自プロフィールの緯度経度を取得。
+     * 自プロフィールの緯度経度を取得（住所→geocode 済みの値）。
      *
      * @return array{lat: float, lng: float}|null
      */

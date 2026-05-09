@@ -103,11 +103,15 @@ class SearchController extends BaseSearchController
                 ->distinct();
         }
 
-        // 距離フィルタ：location_type と distance_km
+        // 距離フィルタ：MyPage の永続設定を優先、URL クエリ指定があればそれで上書き
         $userLocation = app(UserLocationService::class);
         $origin = $userLocation->getActiveLocation();
-        $distanceKmLimit = (int) $request->query('distance_km', 0);
-        $useDistance = $origin && in_array((string) $request->query('location_type'), ['current', 'geo'], true) && $distanceKmLimit > 0;
+        $persistedMaxKm = (int) ($userLocation->getEffectiveMaxDistanceKm() ?? 0);
+        $queryMaxKm = (int) $request->query('distance_km', 0);
+        $hasQueryFilter = $queryMaxKm > 0
+            && in_array((string) $request->query('location_type'), ['current', 'geo'], true);
+        $distanceKmLimit = $hasQueryFilter ? $queryMaxKm : $persistedMaxKm;
+        $useDistance = $origin && $distanceKmLimit > 0;
 
         return $rows->get()
             ->filter(function ($row) use ($normalizedKeyword) {
@@ -168,8 +172,9 @@ class SearchController extends BaseSearchController
                     return true;
                 }
                 $km = $item['distance_km'] ?? null;
+                // 距離不明（lat/lng 未登録）は除外しない方針：表示機会を残す
                 if ($km === null) {
-                    return false; // 緯度経度未登録は距離検索に含めない
+                    return true;
                 }
                 return $km <= $distanceKmLimit;
             })

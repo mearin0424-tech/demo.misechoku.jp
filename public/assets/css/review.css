@@ -162,11 +162,23 @@ body.page-shop-mypage-reviews #global-header .header-title-main.header-title-ser
     font-weight: 500;
 }
 
+/* このページは PC でやや広めに表示 */
+@media (min-width: 768px) {
+    body.page-shop-mypage-reviews #app { max-width: 960px; }
+}
+@media (min-width: 1024px) {
+    body.page-shop-mypage-reviews #app { max-width: 1080px; }
+}
+
+/* 総合評価サマリー：カード化 */
 .shop-review-summary {
-    padding: 2rem 1rem 1.5rem;
+    padding: 1.6rem 1.25rem;
     text-align: center;
-    border-bottom: 1px solid rgba(54, 33, 28, 0.95);
-    background: transparent;
+    background: linear-gradient(180deg, rgba(220, 181, 104, 0.08), rgba(220, 181, 104, 0.02));
+    border: 1px solid rgba(220, 181, 104, 0.22);
+    border-radius: 18px;
+    margin: 0 0 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
 }
 
 .shop-review-summary__label {
@@ -227,23 +239,41 @@ body.page-shop-mypage-reviews #global-header .header-title-main.header-title-ser
 .shop-review-items {
     display: flex;
     flex-direction: column;
+    gap: 14px;
 }
 
 .shop-review-items__empty {
     padding: 2.5rem 1rem !important;
-    border-bottom: 1px solid rgba(54, 33, 28, 0.95);
+    border: 1px dashed rgba(220, 181, 104, 0.22);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    color: #b6a3a3;
 }
 
+/* 1 件 1 件のレビューをカードとして区切る */
 .shop-review-item {
-    border-bottom: 1px solid rgba(54, 33, 28, 0.95);
+    position: relative;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(220, 181, 104, 0.22);
+    border-radius: 16px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.22);
+    overflow: hidden;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.shop-review-item:hover {
+    border-color: rgba(220, 181, 104, 0.42);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
 }
 
 .shop-review-item.is-hidden {
-    opacity: 0.65;
+    opacity: 0.55;
+    border-style: dashed;
+    background: rgba(255, 255, 255, 0.02);
 }
 
 .shop-review-item__surface {
-    padding: 1.25rem 1rem 1rem;
+    padding: 1.1rem 1.1rem 1rem;
 }
 
 .shop-review-item__surface--interactive {
@@ -252,7 +282,7 @@ body.page-shop-mypage-reviews #global-header .header-title-main.header-title-ser
 }
 
 .shop-review-item__surface--interactive:hover {
-    background-color: rgba(255, 255, 255, 0.02);
+    background-color: rgba(220, 181, 104, 0.04);
 }
 
 .shop-review-item__surface--interactive:focus {
@@ -404,7 +434,7 @@ body.page-shop-mypage-reviews #global-header .header-title-main.header-title-ser
 
 .shop-review-item__breakdown-inner {
     padding-top: 1rem;
-    border-top: 1px dashed rgba(54, 33, 28, 0.95);
+    border-top: 1px dashed rgba(220, 181, 104, 0.28);
 }
 
 .shop-review-item__breakdown-title {
@@ -455,10 +485,10 @@ body.page-shop-mypage-reviews #global-header .header-title-main.header-title-ser
 }
 
 .shop-review-item__admin {
-    padding: 0 1rem 1rem;
-    border-top: 1px solid rgba(54, 33, 28, 0.55);
-    margin-top: 0;
-    padding-top: 0.875rem;
+    padding: 0.875rem 1.1rem 1rem;
+    border-top: 1px solid rgba(220, 181, 104, 0.18);
+    background: rgba(0, 0, 0, 0.18);
+    margin: 0;
 }
 
 .shop-review-item__admin .btn-hide,
@@ -466,9 +496,17 @@ body.page-shop-mypage-reviews #global-header .header-title-main.header-title-ser
     width: 100%;
     padding: 10px;
     border-radius: 8px;
-    border: 1px solid #444;
+    border: 1px solid rgba(220, 181, 104, 0.35);
     background: transparent;
-    color: #ccc;
+    color: #f5e0c4;
     font-size: 0.8rem;
+    font-weight: 700;
     cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.shop-review-item__admin .btn-hide:hover,
+.shop-review-item__admin .btn-show-again:hover {
+    background: rgba(220, 181, 104, 0.08);
+    border-color: rgba(220, 181, 104, 0.55);
 }

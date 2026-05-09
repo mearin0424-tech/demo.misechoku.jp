@@ -6,6 +6,8 @@ use App\Models\Favorite;
 use App\Rules\KouzaMeig;
 use App\Services\BillingManagementService;
 use App\Services\DocumentReviewService;
+use App\Services\GeocodingService;
+use App\Services\UserLocationService;
 use App\Support\ShopJobApplicationView;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
@@ -40,11 +42,78 @@ class MypageController extends Controller
                 'url' => is_array($img) ? ($img['url'] ?? '') : $img,
             ];
         }
+        $searchLocationSettings = app(UserLocationService::class)->loadProfileSettings();
+
         return view('casts.mypage.index', [
             'pageId'       => 'mypage',
             'cast'         => $castForProfile,
             'isOwn'        => true,
             'subImages'    => $subImages,
+            'searchLocationSettings' => $searchLocationSettings,
+            'searchLocationDistanceOptions' => UserLocationService::DISTANCE_OPTIONS_KM,
+        ]);
+    }
+
+    /**
+     * 位置情報フィルタ（住所/パスポート/現在地 + 半径）の保存
+     */
+    public function updateSearchLocation(Request $request, UserLocationService $userLocation, GeocodingService $geocoding)
+    {
+        $data = $request->validate([
+            'mode' => ['required', 'string', 'in:profile,passport,current'],
+            'passport_address' => ['nullable', 'string', 'max:255'],
+            'passport_lat' => ['nullable', 'numeric', 'between:-90,90'],
+            'passport_lng' => ['nullable', 'numeric', 'between:-180,180'],
+            'current_lat' => ['nullable', 'numeric', 'between:-90,90'],
+            'current_lng' => ['nullable', 'numeric', 'between:-180,180'],
+            'max_distance_km' => ['nullable', 'integer', 'in:0,1,3,5,10,20,30,50,100'],
+        ]);
+
+        $payload = [
+            'mode' => $data['mode'],
+            'max_distance_km' => $data['max_distance_km'] ?? 0,
+        ];
+
+        if ($data['mode'] === 'passport') {
+            $address = trim((string) ($data['passport_address'] ?? ''));
+            $lat = isset($data['passport_lat']) ? (float) $data['passport_lat'] : null;
+            $lng = isset($data['passport_lng']) ? (float) $data['passport_lng'] : null;
+            if (($lat === null || $lng === null) && $address !== '') {
+                $coords = $geocoding->fromAddress($address);
+                if (!$coords) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => '指定の住所から緯度経度を取得できませんでした。別の表現で試してください。',
+                    ], 422);
+                }
+                $lat = (float) $coords['latitude'];
+                $lng = (float) $coords['longitude'];
+            }
+            if ($lat === null || $lng === null) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'パスポートモードでは住所または緯度経度が必要です。',
+                ], 422);
+            }
+            $payload['passport_address'] = $address !== '' ? $address : null;
+            $payload['passport_latitude'] = $lat;
+            $payload['passport_longitude'] = $lng;
+            $payload['passport_label'] = $address !== '' ? $address : '指定位置';
+        }
+
+        if ($data['mode'] === 'current') {
+            $lat = isset($data['current_lat']) ? (float) $data['current_lat'] : null;
+            $lng = isset($data['current_lng']) ? (float) $data['current_lng'] : null;
+            if ($lat !== null && $lng !== null) {
+                $userLocation->setManualLocation(UserLocationService::MODE_CURRENT, $lat, $lng, '現在地');
+            }
+        }
+
+        $userLocation->saveSearchSettings($payload);
+
+        return response()->json([
+            'success' => true,
+            'settings' => $userLocation->loadProfileSettings(),
         ]);
     }
 
