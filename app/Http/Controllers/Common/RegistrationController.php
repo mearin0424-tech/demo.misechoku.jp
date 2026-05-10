@@ -298,28 +298,19 @@ class RegistrationController extends Controller
                 'updated_at' => now(),
             ]);
 
-            // 店舗登録と同時に、求人票（本入・体入・ヘルプを想定したベースレコード）を1件作成しておく
-            // 各勤務形態は時給やフラグの設定有無で任意に利用可能
+            // 店舗登録と同時に、求人票（本入・体入・ヘルプを想定したベースレコード）を1件作成しておく。
+            // 各勤務形態は regular_status / trial_status / help_status を 0 (非公開) で初期化し、
+            // 詳細はマイページの求人編集から後で設定する。
             if (DB::getSchemaBuilder()->hasTable('shop_jobs')) {
-                $jobRow = [
-                    'shop_id' => $shopId,
-                    'status' => 0,                 // 初期状態は非公開
-                    'hourly_wage_regular' => null, // 本入の時給（未設定）
-                    'normal_time' => null,
-                    'has_trial' => 0,              // 体入は未設定
-                    'trial_hourly_wage' => null,
-                    'has_help' => 0,               // ヘルプは未設定
-                    'help_hourly_wage' => null,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-                if (Schema::hasColumn('shop_jobs', 'job_type')) {
-                    $jobRow['job_type'] = 1;
-                }
-                if (Schema::hasColumn('shop_jobs', 'pr')) {
-                    $jobRow['pr'] = null;
-                }
-                DB::table('shop_jobs')->insert($jobRow);
+                DB::table('shop_jobs')->insert([
+                    'shop_id'        => $shopId,
+                    'regular_status' => 0,
+                    'trial_status'   => 0,
+                    'help_status'    => 0,
+                    'has_help'       => 0,
+                    'created_at'     => now(),
+                    'updated_at'     => now(),
+                ]);
             }
 
             // 店舗プロフィール画像（必須1枚）を保存
