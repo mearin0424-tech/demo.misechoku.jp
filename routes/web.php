@@ -396,6 +396,10 @@ Route::prefix('api/bank-lookup')->name('api.bank-lookup.')->group(function () {
     Route::get('branches', [BankLookupController::class, 'branches'])->name('branches');
 });
 
+// 住所→緯度経度のジオコーディング（保存はしない、プレビュー用）
+Route::get('/api/geocoding/lookup', [\App\Http\Controllers\Common\LocationController::class, 'lookup'])
+    ->name('api.geocoding.lookup');
+
 Route::prefix('cast')->name('cast.')->group(function () {
     Route::get('/login', fn () => redirect('/login'))->name('login');
     Route::get('/register', [RegistrationController::class, 'showCast'])->name('register');

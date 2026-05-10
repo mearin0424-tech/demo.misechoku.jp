@@ -121,21 +121,36 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
                         </span>
                     </span>
                     <span class="search-location-card__expand" data-mode-section="passport">
-                        <span class="search-location-input-wrap">
-                            <i class="fas fa-search"></i>
-                            <input id="search-location-passport-address"
-                                   type="text"
-                                   name="passport_address"
-                                   class="search-location-input"
-                                   maxlength="255"
-                                   placeholder="例: 渋谷駅, 新宿区..."
-                                   value="{{ $currentPassportAddress }}">
+                        <span class="search-location-passport-row">
+                            <span class="search-location-input-wrap">
+                                <i class="fas fa-search"></i>
+                                <input id="search-location-passport-address"
+                                       type="text"
+                                       name="passport_address"
+                                       class="search-location-input"
+                                       maxlength="255"
+                                       placeholder="例: 渋谷駅, 新宿区..."
+                                       value="{{ $currentPassportAddress }}"
+                                       autocomplete="off">
+                            </span>
+                            <button type="button" class="search-location-lookup-btn" id="search-location-lookup-btn">
+                                <i class="fas fa-magnifying-glass-location" data-lookup-icon></i>
+                                <span data-lookup-label>検索</span>
+                            </button>
                         </span>
                         <input type="hidden" name="passport_lat" id="search-location-passport-lat" value="{{ $settings['passport_latitude'] ?? '' }}">
                         <input type="hidden" name="passport_lng" id="search-location-passport-lng" value="{{ $settings['passport_longitude'] ?? '' }}">
-                        @if($currentPassportLabel !== '' && $currentMode === 'passport')
-                            <p class="search-location-current">現在の指定：<strong>{{ $currentPassportLabel }}</strong></p>
-                        @endif
+                        <p class="search-location-passport-status" id="search-location-passport-status"
+                           data-default-message="住所・駅名を入れて『検索』を押してください"
+                           data-state="{{ ($currentMode === 'passport' && $currentPassportLabel !== '' && !empty($settings['passport_latitude'])) ? 'resolved' : 'idle' }}">
+                            @if($currentMode === 'passport' && $currentPassportLabel !== '' && !empty($settings['passport_latitude']))
+                                <i class="fas fa-circle-check"></i>
+                                <span>解決済み: <strong>{{ $currentPassportLabel }}</strong>（{{ number_format((float) $settings['passport_latitude'], 4) }}, {{ number_format((float) $settings['passport_longitude'], 4) }}）</span>
+                            @else
+                                <i class="fas fa-info-circle"></i>
+                                <span>住所・駅名を入れて『検索』を押してください</span>
+                            @endif
+                        </p>
                     </span>
                 </label>
 
@@ -239,62 +254,62 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
 /* ===== ダイアログ ===== */
 .search-location-dialog-overlay {
     position: fixed; inset: 0; z-index: 1000;
-    background: rgba(15, 5, 10, 0.72);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: rgba(8, 4, 6, 0.78);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     display: none;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
-    padding: 0;
+    padding: 24px 16px;
 }
 .search-location-dialog-overlay[aria-hidden="false"] { display: flex; }
 .search-location-dialog {
     position: relative;
-    width: 100%; max-width: 480px;
-    max-height: 92vh;
+    width: 100%; max-width: 380px;
+    max-height: min(78vh, 640px);
     overflow-y: auto;
     background: #2D1B24;
     color: #fff;
-    border: 1px solid #4a2f3e;
-    border-radius: 24px 24px 0 0;
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
-    padding: 22px 22px calc(22px + env(safe-area-inset-bottom));
-    animation: search-location-slide-up 0.22s ease-out;
+    border: 1px solid rgba(232, 195, 114, 0.55);
+    border-radius: 20px;
+    box-shadow:
+        0 0 0 1px rgba(232, 195, 114, 0.18),
+        0 24px 48px rgba(0, 0, 0, 0.6),
+        0 0 60px rgba(232, 195, 114, 0.18);
+    padding: 20px 18px;
+    animation: search-location-pop 0.2s ease-out;
 }
-@keyframes search-location-slide-up {
-    from { transform: translateY(24px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-@media (min-width: 600px) {
-    .search-location-dialog-overlay { align-items: center; padding: 24px; }
-    .search-location-dialog { border-radius: 24px; }
+@keyframes search-location-pop {
+    from { transform: scale(0.96) translateY(8px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
 }
 
 .search-location-dialog__close {
-    position: absolute; top: 14px; right: 14px;
-    width: 36px; height: 36px;
+    position: absolute; top: 12px; right: 12px;
+    width: 32px; height: 32px;
     border-radius: 50%;
     border: 1px solid #4a2f3e;
     background: #3a232f;
     color: #f8e9c8;
     cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.78rem;
     z-index: 2;
 }
 .search-location-dialog__close:hover { background: #4a2f3e; }
 
-.search-location-dialog__head { padding-bottom: 16px; border-bottom: 1px solid rgba(74, 47, 62, 0.6); margin-bottom: 20px; }
+.search-location-dialog__head { padding: 0 28px 12px 0; border-bottom: 1px solid rgba(74, 47, 62, 0.6); margin-bottom: 16px; }
 .search-location-dialog__title {
-    margin: 0 0 8px;
-    font-size: 1.05rem; font-weight: 800;
+    margin: 0 0 6px;
+    font-size: 0.98rem; font-weight: 800;
     color: #fff;
     display: flex; align-items: center; gap: 8px;
 }
-.search-location-dialog__title i { color: #E8C372; font-size: 0.95rem; }
+.search-location-dialog__title i { color: #E8C372; font-size: 0.9rem; }
 .search-location-dialog__lead {
     margin: 0;
-    font-size: 0.82rem; line-height: 1.65;
-    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.75rem; line-height: 1.6;
+    color: rgba(255, 255, 255, 0.68);
 }
 
 /* ===== セクションタイトル ===== */
@@ -308,14 +323,14 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
 
 /* ===== 拠点カード ===== */
 .search-location-modes {
-    border: 0; padding: 0; margin: 0 0 24px;
-    display: flex; flex-direction: column; gap: 10px;
+    border: 0; padding: 0; margin: 0 0 18px;
+    display: flex; flex-direction: column; gap: 8px;
 }
 .search-location-card {
     position: relative;
     display: block;
-    padding: 14px 16px;
-    border-radius: 16px;
+    padding: 12px 14px;
+    border-radius: 14px;
     border: 1px solid #4a2f3e;
     background: #3a232f;
     cursor: pointer;
@@ -369,9 +384,47 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
 /* 選択時にだけ展開する内側コンテンツ */
 .search-location-card__expand {
     display: none;
-    margin: 14px 0 0 30px;
+    margin: 12px 0 0 28px;
 }
 .search-location-card.is-selected .search-location-card__expand { display: block; }
+
+/* 指定地：検索ボタン付きの入力行 */
+.search-location-passport-row {
+    display: flex; gap: 8px; align-items: stretch;
+}
+.search-location-passport-row .search-location-input-wrap { flex: 1; min-width: 0; }
+.search-location-lookup-btn {
+    flex-shrink: 0;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #E8C372, #d4af37);
+    color: #1a1015;
+    font-size: 0.82rem; font-weight: 800;
+    cursor: pointer;
+    transition: filter 0.15s ease;
+}
+.search-location-lookup-btn:hover { filter: brightness(1.05); }
+.search-location-lookup-btn:disabled { opacity: 0.6; cursor: wait; }
+.search-location-lookup-btn.is-loading [data-lookup-icon] {
+    animation: search-location-spin 0.9s linear infinite;
+}
+
+.search-location-passport-status {
+    display: flex; align-items: flex-start; gap: 6px;
+    margin: 10px 0 0;
+    font-size: 0.74rem; line-height: 1.55;
+    color: rgba(255, 255, 255, 0.6);
+}
+.search-location-passport-status i { color: rgba(232, 195, 114, 0.6); margin-top: 2px; }
+.search-location-passport-status[data-state="resolved"] { color: rgba(110, 231, 183, 0.95); }
+.search-location-passport-status[data-state="resolved"] i { color: #34d399; }
+.search-location-passport-status[data-state="resolved"] strong { color: #fff; font-weight: 800; }
+.search-location-passport-status[data-state="error"] { color: #fca5a5; }
+.search-location-passport-status[data-state="error"] i { color: #fca5a5; }
+.search-location-passport-status[data-state="loading"] { color: rgba(232, 195, 114, 0.85); }
+.search-location-passport-status[data-state="loading"] i { color: #E8C372; animation: search-location-spin 0.9s linear infinite; }
 
 .search-location-inline-action {
     display: inline-flex; align-items: center; gap: 4px;
@@ -444,8 +497,8 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
 
 /* ===== 半径スライダー ===== */
 .search-location-radius {
-    margin-top: 8px;
-    padding-top: 20px;
+    margin-top: 4px;
+    padding-top: 16px;
     border-top: 1px solid rgba(74, 47, 62, 0.6);
 }
 .search-location-slider { padding: 6px 4px 0; }
@@ -498,18 +551,18 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
 }
 .search-location-slider__value {
     text-align: center;
-    margin-top: 18px;
-    font-size: 1.2rem; font-weight: 800;
+    margin-top: 14px;
+    font-size: 1.1rem; font-weight: 800;
     color: #E8C372;
     letter-spacing: 0.04em;
 }
 
 /* ===== 保存ボタン / フィードバック ===== */
-.search-location-actions { margin-top: 24px; }
+.search-location-actions { margin-top: 20px; }
 .search-location-save-btn {
     width: 100%;
-    padding: 14px 20px;
-    border-radius: 14px;
+    padding: 12px 18px;
+    border-radius: 12px;
     border: 0;
     background: linear-gradient(135deg, #E8C372, #d4af37);
     color: #1a1015;
@@ -553,6 +606,13 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
 
     var modeCards = form.querySelectorAll('[data-mode-card]');
     var modeInputs = form.querySelectorAll('input[name="mode"]');
+    var passportInput = document.getElementById('search-location-passport-address');
+    var passportLatEl = document.getElementById('search-location-passport-lat');
+    var passportLngEl = document.getElementById('search-location-passport-lng');
+    var lookupBtn = document.getElementById('search-location-lookup-btn');
+    var lookupLabelEl = lookupBtn ? lookupBtn.querySelector('[data-lookup-label]') : null;
+    var passportStatus = document.getElementById('search-location-passport-status');
+    var lookupUrl = @json(route('api.geocoding.lookup'));
     var currentBtn = document.getElementById('search-location-current-btn');
     var currentBtnLabel = currentBtn ? currentBtn.querySelector('[data-current-btn-label]') : null;
     var currentLatEl = document.getElementById('search-location-current-lat');
@@ -623,6 +683,77 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
         });
     });
 
+    // 指定地：住所→緯度経度ルックアップ
+    function setPassportStatus(state, html) {
+        if (!passportStatus) return;
+        passportStatus.setAttribute('data-state', state);
+        passportStatus.innerHTML = html;
+    }
+    function clearPassportCoords() {
+        if (passportLatEl) passportLatEl.value = '';
+        if (passportLngEl) passportLngEl.value = '';
+    }
+    function setLookupLoading(isLoading) {
+        if (!lookupBtn) return;
+        lookupBtn.disabled = !!isLoading;
+        lookupBtn.classList.toggle('is-loading', !!isLoading);
+        if (lookupLabelEl) lookupLabelEl.textContent = isLoading ? '検索中...' : '検索';
+    }
+    function performLookup() {
+        if (!passportInput) return;
+        var q = (passportInput.value || '').trim();
+        if (q === '') {
+            setPassportStatus('error', '<i class="fas fa-circle-exclamation"></i><span>住所または駅名を入力してください</span>');
+            return;
+        }
+        setLookupLoading(true);
+        setPassportStatus('loading', '<i class="fas fa-spinner"></i><span>位置情報を検索中...</span>');
+        var url = lookupUrl + (lookupUrl.indexOf('?') >= 0 ? '&' : '?') + 'q=' + encodeURIComponent(q);
+        fetch(url, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
+        .then(function (res) {
+            setLookupLoading(false);
+            if (res.ok && res.body && res.body.success) {
+                if (passportLatEl) passportLatEl.value = String(res.body.latitude);
+                if (passportLngEl) passportLngEl.value = String(res.body.longitude);
+                var label = res.body.label || q;
+                var lat = parseFloat(res.body.latitude).toFixed(4);
+                var lng = parseFloat(res.body.longitude).toFixed(4);
+                setPassportStatus('resolved',
+                    '<i class="fas fa-circle-check"></i><span>解決済み: <strong>' +
+                    label.replace(/[<>&"]/g, function (c) { return ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]); }) +
+                    '</strong>（' + lat + ', ' + lng + '）</span>'
+                );
+            } else {
+                clearPassportCoords();
+                var msg = (res.body && res.body.message) ? res.body.message : '位置情報を取得できませんでした。';
+                setPassportStatus('error', '<i class="fas fa-circle-xmark"></i><span>' + msg + '</span>');
+            }
+        })
+        .catch(function () {
+            setLookupLoading(false);
+            clearPassportCoords();
+            setPassportStatus('error', '<i class="fas fa-circle-xmark"></i><span>通信に失敗しました</span>');
+        });
+    }
+    if (lookupBtn) lookupBtn.addEventListener('click', performLookup);
+    if (passportInput) {
+        passportInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); performLookup(); }
+        });
+        // 入力が変わったら過去に解決した座標は破棄（次回再検索を促す）
+        passportInput.addEventListener('input', function () {
+            if (passportStatus && passportStatus.getAttribute('data-state') === 'resolved') {
+                clearPassportCoords();
+                var defaultMsg = passportStatus.getAttribute('data-default-message') || '住所・駅名を入れて『検索』を押してください';
+                setPassportStatus('idle', '<i class="fas fa-info-circle"></i><span>' + defaultMsg + '</span>');
+            }
+        });
+    }
+
     // 現在地取得
     function setCurrentLoading(isLoading) {
         if (!currentBtn) return;
@@ -657,6 +788,24 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
     // 保存
     form.addEventListener('submit', function (e) {
         e.preventDefault();
+
+        // 指定地モード：座標未解決なら自動で検索を促す
+        var checkedMode = (form.querySelector('input[name="mode"]:checked') || {}).value || '';
+        if (checkedMode === 'passport') {
+            var lat = (passportLatEl && passportLatEl.value) || '';
+            var lng = (passportLngEl && passportLngEl.value) || '';
+            var addr = (passportInput && passportInput.value || '').trim();
+            if (addr === '') {
+                setPassportStatus('error', '<i class="fas fa-circle-exclamation"></i><span>住所または駅名を入力してください</span>');
+                return;
+            }
+            if (!lat || !lng) {
+                // 自動的に検索 → 成功したらサーバ送信は次回（明示再保存）に任せる：UX 一貫のためここは検索のみ実行
+                performLookup();
+                return;
+            }
+        }
+
         if (saveBtn) saveBtn.disabled = true;
         feedback.hidden = true;
         feedback.className = 'search-location-feedback';

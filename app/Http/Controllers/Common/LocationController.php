@@ -84,4 +84,39 @@ class LocationController extends Controller
         $this->userLocation->clear();
         return response()->json(['success' => true, 'location' => $this->userLocation->getActiveLocation()]);
     }
+
+    /**
+     * GET /api/geocoding/lookup?q=...
+     *
+     * 住所・駅名を緯度経度に解決する（プレビュー用、保存はしない）。
+     */
+    public function lookup(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'q' => ['required', 'string', 'max:255'],
+        ]);
+
+        $address = trim((string) $data['q']);
+        if ($address === '') {
+            return response()->json([
+                'success' => false,
+                'message' => '住所または駅名を入力してください。',
+            ], 422);
+        }
+
+        $coords = $this->geocodingService->fromAddress($address);
+        if (!$coords) {
+            return response()->json([
+                'success' => false,
+                'message' => '指定の住所から緯度経度を取得できませんでした。別の表現で試してください。',
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'label' => $address,
+            'latitude' => (float) $coords['latitude'],
+            'longitude' => (float) $coords['longitude'],
+        ]);
+    }
 }

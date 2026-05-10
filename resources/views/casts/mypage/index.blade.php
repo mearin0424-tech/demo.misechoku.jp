@@ -139,17 +139,10 @@
         </div>
 
         <div class="mypage-detail-box">
-            {{-- 位置情報での絞り込み設定 --}}
-            @include('partials.search-location-settings', [
-                'searchLocationSettings' => $searchLocationSettings ?? null,
-                'searchLocationDistanceOptions' => $searchLocationDistanceOptions ?? [0,1,3,5,10,20,30,50,100],
-                'updateRouteName' => 'cast.mypage.search-location.update',
-            ])
-
-            {{-- メニュー（プロフィール情報より上） --}}
+            {{-- 1. 採用・入金管理 --}}
             @include('casts.mypage.parts.menu', ['current' => 'profile', 'fullWidth' => false])
 
-            {{-- プロフィール情報：編集ボタン＋5カテゴリ --}}
+            {{-- 2. Profile：編集ボタン＋5カテゴリ --}}
             <div class="mypage-section profile-info-section">
                 <div class="cast-profile-head">
                     <h2>Profile Information</h2>
@@ -246,10 +239,10 @@
                 </div>
             </div>
 
-            {{-- Image Library（ドラッグで並び替え・お店同様） --}}
+            {{-- 3. Image Gallery（ドラッグで並び替え・お店同様） --}}
             <div class="mypage-section gallery-edit-section">
                 <div class="gallery-section-header">
-                    <h2 class="section-title section-title-gold">Image Library</h2>
+                    <h2 class="section-title section-title-gold">Image Gallery</h2>
                     <p class="gallery-section-hint">ドラッグで並び替え（スマホは長押し）</p>
                 </div>
                 <ul class="responsive-gallery gallery-grid" id="gallery-list" data-sort-save-url="{{ route('cast.mypage.images.order') }}" data-empty-image-url="{{ asset('assets/images/common/no-image.png') }}">
@@ -272,6 +265,13 @@
                     @endfor
                 </ul>
             </div>
+
+            {{-- 4. Place（位置情報での絞り込み） --}}
+            @include('partials.search-location-settings', [
+                'searchLocationSettings' => $searchLocationSettings ?? null,
+                'searchLocationDistanceOptions' => $searchLocationDistanceOptions ?? [0,1,3,5,10,20,30,50,100],
+                'updateRouteName' => 'cast.mypage.search-location.update',
+            ])
         </div>
     </section>
 </div>

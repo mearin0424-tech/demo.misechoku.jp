@@ -14,6 +14,34 @@ document.addEventListener('DOMContentLoaded', function() {
         isPhotoSwiping = false;
     }
 
+    /**
+     * カード本文の "下からふわっ" アニメーションを再トリガーする。
+     * mode: 'card'  → 上下スワイプ（カード切替）。スタガーで全要素を立ち上げる。
+     *       'photo' → 左右スワイプ（写真切替）。軽量バリアント。
+     */
+    function refreshCardContent(card, mode) {
+        if (!card) return;
+        var fullClass = 'is-content-fresh';
+        var photoClass = 'is-photo-fresh';
+        // どちらのアニメーションも一旦リセット
+        card.classList.remove(fullClass, photoClass, 'is-flipping');
+        // 強制リフロー → 再付与で animation を再生
+        // eslint-disable-next-line no-unused-expressions
+        void card.offsetWidth;
+        if (mode === 'photo') {
+            card.classList.add(photoClass);
+        } else {
+            card.classList.add(fullClass, 'is-flipping');
+        }
+    }
+
+    function refreshActiveCard(swiperInstance, mode) {
+        if (!swiperInstance) return;
+        var slide = swiperInstance.slides && swiperInstance.slides[swiperInstance.activeIndex];
+        var card = slide && (slide.classList.contains('cast-card') ? slide : slide.querySelector('.cast-card'));
+        refreshCardContent(card, mode || 'card');
+    }
+
     // メインの上下スワイプ（モダン・操作性重視）
     const mainSwiper = new Swiper('.main-swiper', {
         direction: 'vertical',
@@ -47,7 +75,19 @@ document.addEventListener('DOMContentLoaded', function() {
         on: {
             init: function () {
                 var self = this;
-                setTimeout(function () { self.update(); }, 100);
+                setTimeout(function () {
+                    self.update();
+                    // 初回表示でも文字がフワッと立ち上がるように
+                    refreshActiveCard(self, 'card');
+                }, 100);
+            },
+            slideChangeTransitionStart: function () {
+                // 上下スワイプの切替時：本文を一旦消してから新カードで再生
+                refreshActiveCard(this, 'card');
+            },
+            slideChangeTransitionEnd: function () {
+                // 完全到達後にもう一度ピン留めし、stagger を確実に再生
+                refreshActiveCard(this, 'card');
             }
         }
     });
@@ -103,6 +143,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 touchMove: function () {
                     isPhotoSwiping = true;
+                },
+                slideChange: function () {
+                    // 写真切替で本文をフワッと再表示
+                    var card = el.closest('.cast-card');
+                    refreshCardContent(card, 'photo');
                 },
                 transitionEnd: function () {
                     setTimeout(releasePhotoSwipeLock, 80);

@@ -1659,3 +1659,154 @@ body.no-scroll main#main-content .content-wrapper {
     .cast-card--recruit .rc-info { padding-right: 84px; }
     .cast-card--recruit .rc-actions { right: 16px; top: clamp(94px, 50%, calc(100% - 116px)); transform: translateY(-50%); }
 }
+
+/* =====================================================================
+   カード "めくり" 演出：カードスタック感 + 文字の立ち上がりアニメーション
+   ===================================================================== */
+
+/* メインスワイパーのコンテナに 3D 視差を持たせる */
+.main-swiper { perspective: 1400px; perspective-origin: 50% 50%; }
+.main-swiper .swiper-wrapper { transform-style: preserve-3d; }
+
+/* 共通カードトランジション（既存より滑らかなカーブ） */
+.main-swiper .swiper-slide .cast-card {
+    transition:
+        transform 0.55s cubic-bezier(0.22, 0.8, 0.34, 1),
+        opacity 0.45s cubic-bezier(0.22, 0.8, 0.34, 1),
+        box-shadow 0.45s ease,
+        filter 0.45s ease;
+    will-change: transform, opacity, filter;
+}
+
+/* アクティブカード：シャープに浮き上げる + ゴールドのリム + 強い影 */
+.main-swiper .swiper-slide-active .cast-card {
+    transform: translateY(0) scale(1) rotateX(0);
+    opacity: 1;
+    box-shadow:
+        0 28px 60px -16px rgba(0, 0, 0, 0.78),
+        0 12px 24px -8px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(220, 181, 104, 0.28),
+        0 0 36px rgba(220, 181, 104, 0.18);
+    filter: saturate(1.05);
+}
+
+/* 非アクティブカード：奥に並ぶ "重ねた紙" の質感 */
+.main-swiper .swiper-slide:not(.swiper-slide-active) .cast-card {
+    transform: scale(0.92) rotateX(6deg) translateZ(-30px);
+    opacity: 0.5;
+    filter: saturate(0.85) brightness(0.78);
+}
+.main-swiper .swiper-slide-prev .cast-card { transform-origin: 50% 100%; }
+.main-swiper .swiper-slide-next .cast-card { transform-origin: 50% 0%; }
+
+/* アクティブカードの上端に光のハイライト（紙の "縁" 感） */
+.main-swiper .swiper-slide-active .cast-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 8%; right: 8%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 234, 184, 0.7), transparent);
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0;
+    animation: cardRimFlash 0.9s 0.05s ease-out both;
+}
+@keyframes cardRimFlash {
+    0%   { opacity: 0; transform: translateY(-2px); }
+    35%  { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(0); }
+}
+
+/* "めくり" 開始時：上方向にすっと持ち上がる微かなショック演出 */
+.cast-card.is-flipping {
+    animation: cardFlipPop 0.45s cubic-bezier(0.22, 0.8, 0.34, 1) both;
+}
+@keyframes cardFlipPop {
+    0%   { transform: translateY(8px) scale(0.985); }
+    55%  { transform: translateY(-3px) scale(1.012); }
+    100% { transform: translateY(0) scale(1); }
+}
+
+/* ---- 文字の "下からふわっ" 立ち上がりアニメーション ---- */
+@keyframes cardContentRise {
+    0%   { opacity: 0; transform: translate3d(0, 22px, 0); filter: blur(3px); }
+    60%  { opacity: 1; filter: blur(0); }
+    100% { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
+}
+
+/* 通常カード（キャスト・店舗）の本文 */
+.cast-card .card-bottom-info > * {
+    opacity: 0;
+    will-change: transform, opacity, filter;
+}
+.cast-card.is-content-fresh .card-bottom-info > .cast-name        { animation: cardContentRise 0.62s 0.04s cubic-bezier(0.22, 0.8, 0.34, 1) both; }
+.cast-card.is-content-fresh .card-bottom-info > .card-location    { animation: cardContentRise 0.62s 0.13s cubic-bezier(0.22, 0.8, 0.34, 1) both; }
+.cast-card.is-content-fresh .card-bottom-info > .card-rating      { animation: cardContentRise 0.62s 0.20s cubic-bezier(0.22, 0.8, 0.34, 1) both; }
+.cast-card.is-content-fresh .card-bottom-info > .card-tags-row    { animation: cardContentRise 0.62s 0.27s cubic-bezier(0.22, 0.8, 0.34, 1) both; }
+
+/* 求人カードの本文 */
+.cast-card--recruit .rc-bottom-bar__stack > *,
+.cast-card--recruit .rc-info > * {
+    opacity: 0;
+    will-change: transform, opacity, filter;
+}
+.cast-card--recruit.is-content-fresh .rc-info > .rc-badges               { animation: cardContentRise 0.62s 0.04s cubic-bezier(0.22, 0.8, 0.34, 1) both; }
+.cast-card--recruit.is-content-fresh .rc-info > .rc-shop-name            { animation: cardContentRise 0.62s 0.10s cubic-bezier(0.22, 0.8, 0.34, 1) both; }
+.cast-card--recruit.is-content-fresh .rc-info > .rc-meta                 { animation: cardContentRise 0.62s 0.17s cubic-bezier(0.22, 0.8, 0.34, 1) both; }
+.cast-card--recruit.is-content-fresh .rc-bottom-bar__stack > .rc-info    { animation: cardContentRise 0.62s 0s    cubic-bezier(0.22, 0.8, 0.34, 1) both; }
+.cast-card--recruit.is-content-fresh .rc-bottom-bar__stack > .rc-signup-bonus-pill { animation: cardContentRise 0.62s 0.24s cubic-bezier(0.22, 0.8, 0.34, 1) both; }
+.cast-card--recruit.is-content-fresh .rc-bottom-bar__stack > .rc-wage-panel        { animation: cardContentRise 0.62s 0.30s cubic-bezier(0.22, 0.8, 0.34, 1) both; }
+
+/* 求人カード：オーバーレイメッセージも一緒に立ち上げる */
+.cast-card--recruit .rc-manager-msg { opacity: 0; }
+.cast-card--recruit.is-content-fresh .rc-manager-msg {
+    animation: cardContentRise 0.62s 0.36s cubic-bezier(0.22, 0.8, 0.34, 1) both;
+}
+
+/* 写真切替時のみ流す軽量バリアント（JS で is-photo-fresh を付与） */
+.cast-card.is-photo-fresh .card-bottom-info > .cast-name,
+.cast-card.is-photo-fresh .card-bottom-info > .card-location,
+.cast-card.is-photo-fresh .card-bottom-info > .card-tags-row,
+.cast-card--recruit.is-photo-fresh .rc-info > .rc-shop-name,
+.cast-card--recruit.is-photo-fresh .rc-info > .rc-meta,
+.cast-card--recruit.is-photo-fresh .rc-bottom-bar__stack > .rc-signup-bonus-pill,
+.cast-card--recruit.is-photo-fresh .rc-bottom-bar__stack > .rc-wage-panel {
+    animation: cardContentRise 0.42s cubic-bezier(0.22, 0.8, 0.34, 1) both;
+}
+
+/* スワイプヒント：アクティブ時のみ目立たせ、めくる気持ちを誘発 */
+.main-swiper .swiper-slide-active .cast-card .card-swipe-hint,
+.main-swiper .swiper-slide-active .cast-card .rc-swipe-hint {
+    opacity: 1;
+    animation: cardSwipeNudge 1.6s ease-in-out infinite;
+}
+.main-swiper .swiper-slide:not(.swiper-slide-active) .cast-card .card-swipe-hint,
+.main-swiper .swiper-slide:not(.swiper-slide-active) .cast-card .rc-swipe-hint {
+    opacity: 0;
+}
+@keyframes cardSwipeNudge {
+    0%, 100% { transform: translate(-50%, 0); }
+    50%      { transform: translate(-50%, -3px); }
+}
+
+/* スワイプ進行中（ユーザーの指追従中）にカードを少しだけ縮める＝物理感 */
+.main-swiper.swiper-grabbed .swiper-slide-active .cast-card,
+.main-swiper.swiper-pointer-events .swiper-slide-active .cast-card {
+    transform: translateY(0) scale(0.985);
+}
+
+/* ユーザーが reduce-motion を希望する場合は控えめに */
+@media (prefers-reduced-motion: reduce) {
+    .cast-card.is-content-fresh .card-bottom-info > *,
+    .cast-card--recruit.is-content-fresh .rc-info > *,
+    .cast-card--recruit.is-content-fresh .rc-bottom-bar__stack > *,
+    .cast-card.is-photo-fresh .card-bottom-info > *,
+    .cast-card--recruit.is-photo-fresh .rc-info > *,
+    .cast-card--recruit.is-photo-fresh .rc-bottom-bar__stack > * {
+        animation: none !important;
+        opacity: 1 !important;
+    }
+    .main-swiper .swiper-slide:not(.swiper-slide-active) .cast-card {
+        transform: scale(0.94) !important;
+    }
+}

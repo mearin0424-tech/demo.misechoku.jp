@@ -4,7 +4,7 @@
 @section('body-class', 'no-scroll page-home')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260506-home-actions-safe-v1">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260510-card-flip-rise">
 @endpush
 
 @php
@@ -322,5 +322,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/home.js') }}?v=20260503-recruit-card-tap"></script>
+<script src="{{ asset('assets/js/home.js') }}?v=20260510-card-flip-rise"></script>
 @endpush
