@@ -482,10 +482,15 @@ class MypageController extends Controller
         $slotIndex = max(0, min($slotIndex, count($orderedIds)));
         array_splice($orderedIds, $slotIndex, 0, [(int) $id]);
 
+        // 並び順の同期は副次処理。万一 sync で例外が出ても cast_images 自体は登録済みなので、
+        // 成功として返してログだけ残す（リロードすると正しく表示される事態を避ける）。
         try {
             $this->syncCastImageOrder($castId, $orderedIds);
         } catch (\Throwable $e) {
-            return response()->json(['success' => false, 'message' => '画像の登録に失敗しました。'], 500);
+            \Illuminate\Support\Facades\Log::warning('syncCastImageOrder failed after upload: ' . $e->getMessage(), [
+                'cast_id' => $castId,
+                'image_id' => $id,
+            ]);
         }
 
         return response()->json(['success' => true, 'path' => asset($path), 'id' => $id]);

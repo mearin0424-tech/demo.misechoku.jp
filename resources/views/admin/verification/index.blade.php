@@ -2,6 +2,24 @@
 
 @section('title', '本人確認・書類審査')
 
+@push('admin-styles')
+<style>
+.verification-profile {
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: #f1e6c4;
+    min-width: 220px;
+}
+.verification-profile-label {
+    display: inline-block;
+    min-width: 5em;
+    margin-right: 6px;
+    color: #c9b8b8;
+    font-size: 0.72rem;
+}
+</style>
+@endpush
+
 @section('content')
     @php
         $castDocs = $castDocuments ?? [];
@@ -133,6 +151,7 @@
                     <thead>
                         <tr>
                             <th>キャスト</th>
+                            <th>登録情報（書類との照合用）</th>
                             <th>書類種別</th>
                             <th>ステータス</th>
                             <th>提出物</th>
@@ -144,9 +163,41 @@
                     <tbody id="cast-verification-table">
                         @forelse($castDocs as $document)
                             @php $castActor = $resolveActor($document['status_key'], 'cast'); @endphp
-                            <tr data-status="{{ $document['status_key'] }}" data-sort-rank="{{ $document['sort_rank'] }}" data-updated-at="{{ $document['updated_at_sort'] }}" data-keyword="{{ strtolower($document['target_name'].' '.$document['target_id'].' '.$document['type_label']) }}">
-                                <td>{{ $document['target_name'] }}<br><span class="text-xs text-muted">{{ $document['target_id'] }}</span></td>
+                            <tr data-status="{{ $document['status_key'] }}" data-sort-rank="{{ $document['sort_rank'] }}" data-updated-at="{{ $document['updated_at_sort'] }}" data-keyword="{{ strtolower(($document['target_name'] ?? '').' '.($document['target_id'] ?? '').' '.($document['real_name'] ?? '').' '.($document['type_label'] ?? '')) }}">
                                 <td>
+                                    <strong>{{ $document['target_name'] ?: '—' }}</strong>
+                                    <div class="text-xs text-muted">{{ $document['target_id'] }}</div>
+                                    @if(!empty($document['email']))
+                                        <div class="text-xs text-muted">{{ $document['email'] }}</div>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="verification-profile">
+                                        @if(!empty($document['real_name']))
+                                            <div><span class="verification-profile-label">氏名</span>{{ $document['real_name'] }}</div>
+                                        @endif
+                                        @if(!empty($document['birthday']))
+                                            <div><span class="verification-profile-label">生年月日</span>{{ $document['birthday'] }}</div>
+                                        @endif
+                                        @if(!empty($document['tel']))
+                                            <div><span class="verification-profile-label">電話</span>{{ $document['tel'] }}</div>
+                                        @endif
+                                        @if(!empty($document['zip']) || !empty($document['address']))
+                                            <div>
+                                                <span class="verification-profile-label">住所</span>
+                                                @if(!empty($document['zip']))〒{{ $document['zip'] }} @endif
+                                                {{ $document['address'] }}
+                                            </div>
+                                        @endif
+                                        @if(empty($document['real_name']) && empty($document['birthday']) && empty($document['tel']) && empty($document['address']))
+                                            <span class="text-xs text-muted">プロフィール詳細未入力</span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td>
+                                    @if(!empty($document['category_label']) && $document['category_label'] !== '—')
+                                        <div class="text-xs text-muted">{{ $document['category_label'] }}</div>
+                                    @endif
                                     {{ $document['type_label'] }}
                                     @if(!empty($document['expired_at_label']))
                                         <div class="text-xs text-muted">有効期限: {{ $document['expired_at_label'] }}</div>
@@ -200,7 +251,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted">提出された本人確認書類はありません。</td>
+                                <td colspan="8" class="text-center text-muted">提出された本人確認書類はありません。</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -254,6 +305,7 @@
                     <thead>
                         <tr>
                             <th>店舗</th>
+                            <th>登録情報（書類との照合用）</th>
                             <th>書類</th>
                             <th>ステータス</th>
                             <th>提出物</th>
@@ -265,8 +317,34 @@
                     <tbody id="shop-verification-table">
                         @forelse($shopDocs as $document)
                             @php $shopActor = $resolveActor($document['status_key'], 'shop'); @endphp
-                            <tr data-status="{{ $document['status_key'] }}" data-expiry="{{ $document['expiry_filter_key'] ?? 'none' }}" data-sort-rank="{{ $document['sort_rank'] }}" data-updated-at="{{ $document['updated_at_sort'] }}" data-keyword="{{ strtolower($document['target_name'].' '.$document['target_id'].' '.$document['type_label']) }}">
-                                <td>{{ $document['target_name'] }}<br><span class="text-xs text-muted">{{ $document['target_id'] }}</span></td>
+                            <tr data-status="{{ $document['status_key'] }}" data-expiry="{{ $document['expiry_filter_key'] ?? 'none' }}" data-sort-rank="{{ $document['sort_rank'] }}" data-updated-at="{{ $document['updated_at_sort'] }}" data-keyword="{{ strtolower(($document['target_name'] ?? '').' '.($document['target_id'] ?? '').' '.($document['type_label'] ?? '')) }}">
+                                <td>
+                                    <strong>{{ $document['target_name'] ?: '—' }}</strong>
+                                    <div class="text-xs text-muted">{{ $document['target_id'] }}</div>
+                                    @if(!empty($document['email']))
+                                        <div class="text-xs text-muted">{{ $document['email'] }}</div>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="verification-profile">
+                                        @if(!empty($document['shop_name']))
+                                            <div><span class="verification-profile-label">店舗名</span>{{ $document['shop_name'] }}</div>
+                                        @endif
+                                        @if(!empty($document['tel']))
+                                            <div><span class="verification-profile-label">電話</span>{{ $document['tel'] }}</div>
+                                        @endif
+                                        @if(!empty($document['zip']) || !empty($document['address']))
+                                            <div>
+                                                <span class="verification-profile-label">住所</span>
+                                                @if(!empty($document['zip']))〒{{ $document['zip'] }} @endif
+                                                {{ $document['address'] }}
+                                            </div>
+                                        @endif
+                                        @if(empty($document['shop_name']) && empty($document['tel']) && empty($document['address']))
+                                            <span class="text-xs text-muted">プロフィール未入力</span>
+                                        @endif
+                                    </div>
+                                </td>
                                 <td>
                                     {{ $document['type_label'] }}
                                     @if(!empty($document['expired_at_label']))
@@ -325,7 +403,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted">提出された店舗書類はありません。</td>
+                                <td colspan="8" class="text-center text-muted">提出された店舗書類はありません。</td>
                             </tr>
                         @endforelse
                     </tbody>

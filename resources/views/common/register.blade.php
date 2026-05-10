@@ -72,6 +72,23 @@
     });
     </script>
     @endif
+    <script>
+    // 登録フォーム送信中のインジケータ表示。submit直後にオーバーレイを出し、ボタン二重押下を防ぐ。
+    document.addEventListener('DOMContentLoaded', function () {
+        var form = document.querySelector('form.register-form');
+        var overlay = document.getElementById('register-submit-overlay');
+        if (!form || !overlay) return;
+        form.addEventListener('submit', function () {
+            overlay.classList.add('is-visible');
+            var btn = form.querySelector('.register-submit');
+            if (btn) {
+                btn.disabled = true;
+                btn.dataset.originalLabel = btn.textContent;
+                btn.textContent = '登録処理中…';
+            }
+        });
+    });
+    </script>
 @endpush
 
 @section('content')
@@ -611,6 +628,14 @@
         </form>
     </div>
 
+    <div id="register-submit-overlay" class="register-submit-overlay" aria-hidden="true">
+        <div class="register-submit-overlay-inner">
+            <div class="register-submit-spinner" aria-hidden="true"></div>
+            <p class="register-submit-overlay-text">登録処理中です</p>
+            <p class="register-submit-overlay-sub">画像のアップロードや書類の保存を行っています。<br>このまま少々お待ちください。</p>
+        </div>
+    </div>
+
     @if ($role === 'cast')
     <div id="register-cast-crop-modal" class="register-cast-crop-overlay" role="dialog" aria-modal="true" aria-labelledby="register-cast-crop-title" style="display:none;">
         <div class="register-cast-crop-inner">
@@ -1030,6 +1055,61 @@
         .register-submit:hover,
         .register-secondary:hover {
             transform: translateY(-1px);
+        }
+
+        .register-submit:disabled {
+            opacity: 0.7;
+            cursor: progress;
+            transform: none;
+        }
+
+        .register-submit-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 5000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(8, 4, 2, 0.78);
+            backdrop-filter: blur(4px);
+        }
+        .register-submit-overlay.is-visible { display: flex; }
+        .register-submit-overlay-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            padding: 28px 32px;
+            border-radius: 18px;
+            background: rgba(20, 14, 8, 0.92);
+            border: 1px solid rgba(229, 193, 88, 0.32);
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.55);
+            color: #fff4d6;
+            text-align: center;
+            max-width: min(92vw, 360px);
+        }
+        .register-submit-overlay-text {
+            margin: 0;
+            font-size: 1.02rem;
+            font-weight: 800;
+            color: #ffe7a8;
+        }
+        .register-submit-overlay-sub {
+            margin: 0;
+            font-size: 0.78rem;
+            line-height: 1.7;
+            color: rgba(246, 217, 139, 0.78);
+        }
+        .register-submit-spinner {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 3px solid rgba(229, 193, 88, 0.22);
+            border-top-color: #f4df9c;
+            animation: register-submit-spin 0.9s linear infinite;
+        }
+        @keyframes register-submit-spin {
+            to { transform: rotate(360deg); }
         }
 
         .register-login-link {

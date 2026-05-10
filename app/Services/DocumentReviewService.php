@@ -301,9 +301,25 @@ class DocumentReviewService
 
     public function getAdminVerificationData(): array
     {
+        // 審査時に運営が「書類の記載内容」と「登録情報」を突き合わせられるよう、
+        // casts/cast_profiles の主要項目をまとめて取得する。
+        $castSelects = [
+            'cast_identity_documents.*',
+            'casts.email as cast_email',
+            'cast_profiles.nickname',
+            'cast_profiles.name',
+            'cast_profiles.birthday',
+            'cast_profiles.tel',
+            'cast_profiles.zip',
+            'cast_profiles.pref',
+            'cast_profiles.city',
+            'cast_profiles.addr',
+            'cast_profiles.building',
+        ];
         $castDocuments = CastIdentityDocument::query()
+            ->leftJoin('casts', 'cast_identity_documents.cast_id', '=', 'casts.id')
             ->leftJoin('cast_profiles', 'cast_identity_documents.cast_id', '=', 'cast_profiles.cast_id')
-            ->select('cast_identity_documents.*', 'cast_profiles.nickname', 'cast_profiles.name')
+            ->select($castSelects)
             ->orderByRaw('CASE WHEN cast_identity_documents.status = 1 THEN 0 WHEN cast_identity_documents.status = 3 THEN 1 ELSE 2 END')
             ->orderByDesc('cast_identity_documents.updated_at')
             ->get()
@@ -311,13 +327,24 @@ class DocumentReviewService
             ->all();
 
         $shopDocuments = ShopLicenseDocument::query()
+            ->leftJoin('shops', 'shop_license_documents.shop_id', '=', 'shops.id')
             ->leftJoin('shop_profiles', 'shop_license_documents.shop_id', '=', 'shop_profiles.shop_id')
             ->whereIn('shop_license_documents.status', [
                 ShopLicenseDocument::STATUS_PENDING,
                 ShopLicenseDocument::STATUS_APPROVED,
                 ShopLicenseDocument::STATUS_REJECTED,
             ])
-            ->select('shop_license_documents.*', 'shop_profiles.shop_name')
+            ->select(
+                'shop_license_documents.*',
+                'shops.email as shop_email',
+                'shop_profiles.shop_name',
+                'shop_profiles.tel',
+                'shop_profiles.zip',
+                'shop_profiles.pref',
+                'shop_profiles.city',
+                'shop_profiles.addr',
+                'shop_profiles.building'
+            )
             ->orderByRaw('CASE WHEN shop_license_documents.status = 1 THEN 0 WHEN shop_license_documents.status = 3 THEN 1 ELSE 2 END')
             ->orderByDesc('shop_license_documents.updated_at')
             ->get()
@@ -624,14 +651,32 @@ class DocumentReviewService
 
     private function mapCastDocumentRecord(object $document): array
     {
-        $name = trim((string) ($document->nickname ?: $document->name ?: $document->cast_id));
+        $nickname = trim((string) ($document->nickname ?? ''));
+        $realName = trim((string) ($document->name ?? ''));
+        $displayName = $nickname !== '' ? $nickname : ($realName !== '' ? $realName : (string) $document->cast_id);
+
+        $address = trim(implode('', array_filter([
+            (string) ($document->pref ?? ''),
+            (string) ($document->city ?? ''),
+            (string) ($document->addr ?? ''),
+            (string) ($document->building ?? ''),
+        ])));
 
         return [
             'id' => (int) $document->id,
             'target_id' => $document->cast_id,
-            'target_name' => $name !== '' ? $name : $document->cast_id,
+            'target_name' => $displayName,
+            'real_name' => $realName ?: null,
+            'nickname' => $nickname ?: null,
+            'email' => $document->cast_email ?? null,
+            'birthday' => $document->birthday ? date('Y-m-d', strtotime((string) $document->birthday)) : null,
+            'tel' => $document->tel ?? null,
+            'zip' => $document->zip ?? null,
+            'address' => $address ?: null,
+            'category' => $document->category ?? null,
+            'category_label' => $this->castCategoryLabel((string) ($document->category ?? '')),
             'type' => $document->type,
-            'type_label' => $this->castTypeLabel($document->type),
+            'type_label' => $this->castTypeLabel((string) ($document->type ?? '')),
             'status_code' => (int) $document->status,
             'status_key' => $this->statusKey((int) $document->status),
             'status_label' => $this->statusLabel((int) $document->status),
@@ -655,12 +700,25 @@ class DocumentReviewService
             $document->expired_at ?? null
         );
 
+        $shopName = trim((string) ($document->shop_name ?? ''));
+        $address = trim(implode('', array_filter([
+            (string) ($document->pref ?? ''),
+            (string) ($document->city ?? ''),
+            (string) ($document->addr ?? ''),
+            (string) ($document->building ?? ''),
+        ])));
+
         return [
             'id' => (int) $document->id,
             'target_id' => $document->shop_id,
-            'target_name' => $document->shop_name ?: $document->shop_id,
+            'target_name' => $shopName !== '' ? $shopName : (string) $document->shop_id,
+            'shop_name' => $shopName ?: null,
+            'email' => $document->shop_email ?? null,
+            'tel' => $document->tel ?? null,
+            'zip' => $document->zip ?? null,
+            'address' => $address ?: null,
             'type' => $document->type,
-            'type_label' => $this->shopTypeLabel($document->type),
+            'type_label' => $this->shopTypeLabel((string) ($document->type ?? '')),
             'status_code' => (int) $document->status,
             'status_key' => $this->statusKey((int) $document->status),
             'status_label' => $this->statusLabel((int) $document->status),

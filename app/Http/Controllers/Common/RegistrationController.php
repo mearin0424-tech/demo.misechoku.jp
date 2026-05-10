@@ -267,11 +267,6 @@ class RegistrationController extends Controller
             DB::table('shop_profiles')->insert($shopProfilePayload);
             $this->syncShopIndustries($shopId, $industryIds);
 
-            if (Schema::hasColumn('shop_profiles', 'latitude')) {
-                $fullAddr = $this->shopProfileLocationSyncService->buildFullAddressLineForGeocode($request);
-                $this->shopProfileLocationSyncService->persistResolvedLocation($shopId, $fullAddr);
-            }
-
             if (Schema::hasTable('shop_posts') && $request->filled('word')) {
                 $shopPostRow = [
                     'shop_id'    => $shopId,
@@ -345,6 +340,24 @@ class RegistrationController extends Controller
         auth()->guard('member')->logout();
         auth()->guard('shop')->login($manager);
         $request->session()->regenerate();
+
+        // 緯度経度・最寄駅は外部 API（国土地理院 / HeartRails）への HTTP 通信を伴うため、
+        // レスポンスを返してから（=ユーザーがリダイレクト先に到達した後）バックグラウンドで実行する。
+        // PHP-FPM 環境では fastcgi_finish_request により、ユーザーは API 完了を待たずに次画面へ遷移できる。
+        if (Schema::hasColumn('shop_profiles', 'latitude')) {
+            $shopId = $manager->shop_id;
+            $fullAddr = $this->shopProfileLocationSyncService->buildFullAddressLineForGeocode($request);
+            $service = $this->shopProfileLocationSyncService;
+            app()->terminating(function () use ($service, $shopId, $fullAddr) {
+                try {
+                    $service->persistResolvedLocation($shopId, $fullAddr);
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning('shop registration geocode failed: ' . $e->getMessage(), [
+                        'shop_id' => $shopId,
+                    ]);
+                }
+            });
+        }
 
         return redirect()
             ->route('shop.mypage.index')

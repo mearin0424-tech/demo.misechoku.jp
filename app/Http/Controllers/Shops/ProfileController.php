@@ -336,10 +336,15 @@ class ProfileController extends Controller
         $slotIndex = max(0, min($slotIndex, count($orderedIds)));
         array_splice($orderedIds, $slotIndex, 0, [(int) $id]);
 
+        // 並び順の同期は副次処理。万一 sync で例外が出ても shop_images の登録自体は完了しているので、
+        // ユーザーには成功として返し、サーバ側にはログを残す。
         try {
             $this->syncShopImageOrder($shopId, $orderedIds);
         } catch (\Throwable $e) {
-            return response()->json(['success' => false, 'message' => '画像の登録に失敗しました。'], 500);
+            \Illuminate\Support\Facades\Log::warning('syncShopImageOrder failed after upload: ' . $e->getMessage(), [
+                'shop_id' => $shopId,
+                'image_id' => $id,
+            ]);
         }
 
         return response()->json([
@@ -452,17 +457,21 @@ class ProfileController extends Controller
                     ]);
             }
 
-            $mainImageId = $orderedIds[0] ?? null;
-            $mainImagePath = $mainImageId
-                ? optional($existingImages->firstWhere('id', $mainImageId))->image_path
-                : null;
+            // shop_profiles.main_image_path は旧スキーマのみのカラムなので、
+            // カラムが存在する環境だけ更新する。
+            if (Schema::hasColumn('shop_profiles', 'main_image_path')) {
+                $mainImageId = $orderedIds[0] ?? null;
+                $mainImagePath = $mainImageId
+                    ? optional($existingImages->firstWhere('id', $mainImageId))->image_path
+                    : null;
 
-            DB::table('shop_profiles')
-                ->where('shop_id', $shopId)
-                ->update([
-                    'main_image_path' => $mainImagePath,
-                    'updated_at' => now(),
-                ]);
+                DB::table('shop_profiles')
+                    ->where('shop_id', $shopId)
+                    ->update([
+                        'main_image_path' => $mainImagePath,
+                        'updated_at' => now(),
+                    ]);
+            }
         });
     }
 
