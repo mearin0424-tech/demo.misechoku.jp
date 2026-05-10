@@ -266,12 +266,17 @@
                 </ul>
             </div>
 
-            {{-- 4. Place（位置情報での絞り込み） --}}
-            @include('partials.search-location-settings', [
-                'searchLocationSettings' => $searchLocationSettings ?? null,
-                'searchLocationDistanceOptions' => $searchLocationDistanceOptions ?? [0,1,3,5,10,20,30,50,100],
-                'updateRouteName' => 'cast.mypage.search-location.update',
-            ])
+            {{-- 4. Place Setting（位置情報での絞り込み） --}}
+            <div class="mypage-section place-setting-section">
+                <div class="gallery-section-header">
+                    <h2 class="section-title section-title-gold">Place Setting</h2>
+                </div>
+                @include('partials.search-location-settings', [
+                    'searchLocationSettings' => $searchLocationSettings ?? null,
+                    'searchLocationDistanceOptions' => $searchLocationDistanceOptions ?? [0,1,3,5,10,20,30,50,100],
+                    'updateRouteName' => 'cast.mypage.search-location.update',
+                ])
+            </div>
         </div>
     </section>
 </div>

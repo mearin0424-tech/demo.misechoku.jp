@@ -16,7 +16,6 @@
 @endphp
 @section('content')
 <div id="home-screen" data-discovery-mode="{{ $itemType }}">
-    @include('layouts.parts.location-pill')
     {{-- メインスワイパー（上下） --}}
     <div class="main-swiper swiper">
         <div class="swiper-wrapper">

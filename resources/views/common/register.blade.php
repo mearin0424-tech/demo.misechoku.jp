@@ -3,18 +3,74 @@
 @section('title', $title)
 @section('body-class', $bodyClass)
 
+@if ($role === 'shop')
+@push('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+<link rel="stylesheet" href="{{ asset('assets/css/register-shop-profile-crop.css') }}">
+@endpush
+@endif
+
 @if ($role === 'cast')
 @push('styles')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
 <link rel="stylesheet" href="{{ asset('assets/css/register-cast-profile-crop.css') }}">
+<style>
+.register-skip-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    border: 1px dashed rgba(220, 181, 104, .35);
+    border-radius: 10px;
+    background: rgba(220, 181, 104, .05);
+    color: #f8e9c8;
+    font-size: 0.86rem;
+    cursor: pointer;
+}
+.register-skip-toggle input { accent-color: #c5a059; }
+.register-field-compact input { max-width: 280px; }
+</style>
 @endpush
 @endif
 
 @push('scripts')
     <script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
+    @if ($role === 'shop')
+    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+    <script src="{{ asset('assets/js/register-shop-profile-crop.js') }}"></script>
+    @endif
     @if ($role === 'cast')
     <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
     <script src="{{ asset('assets/js/register-cast-profile-crop.js') }}"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 「あとで登録する」トグル：チェック時に対象フィールドを非表示＋disabled で送信対象から外す
+        document.querySelectorAll('[data-skip-section]').forEach(function (section) {
+            var checkbox = section.querySelector('.register-skip-toggle input[type="checkbox"]');
+            var target = section.querySelector('.register-skip-target');
+            if (!checkbox || !target) return;
+            var apply = function () {
+                var skipped = checkbox.checked;
+                target.hidden = skipped;
+                target.querySelectorAll('input, select, textarea').forEach(function (el) {
+                    el.disabled = skipped;
+                });
+            };
+            checkbox.addEventListener('change', apply);
+            apply();
+        });
+
+        // 本人確認書類のパターン切替（A: 顔写真付き / B: 顔写真なし＋住所確認）
+        document.querySelectorAll('input[name="identity_category"]').forEach(function (radio) {
+            radio.addEventListener('change', function () {
+                document.querySelectorAll('[data-identity-pane]').forEach(function (pane) {
+                    pane.hidden = pane.getAttribute('data-identity-pane') !== radio.value;
+                });
+            });
+        });
+    });
+    </script>
     @endif
 @endpush
 
@@ -123,35 +179,20 @@
                             placeholder="例：1-2-3"
                         >
                     </label>
-
-                    <div class="register-grid register-grid-two">
-                        <label class="register-field">
-                            <span>ナイトワーク経験 <em>必須</em></span>
-                            <select name="experience">
-                                <option value="">選択してください</option>
-                                <option value="beginner" @selected(old('experience') === 'beginner')>未経験</option>
-                                <option value="experienced" @selected(old('experience') === 'experienced')>経験あり</option>
-                            </select>
-                        </label>
-
-                        <label class="register-field">
-                            <span>希望シフト <em>必須</em></span>
-                            <select name="shift_style">
-                                <option value="">選択してください</option>
-                                <option value="once" @selected(old('shift_style') === 'once')>週1回程度</option>
-                                <option value="twice" @selected(old('shift_style') === 'twice')>週2回程度</option>
-                                <option value="flex" @selected(old('shift_style') === 'flex')>柔軟に相談したい</option>
-                            </select>
-                        </label>
-                    </div>
                 </section>
 
-                {{-- プロフィール詳細（編集画面と同等） --}}
-                <section class="register-card">
+                {{-- プロフィール詳細（編集画面と同等。あとでマイページでも登録可能） --}}
+                <section class="register-card" data-skip-section="profile">
                     <div class="register-card-head">
                         <h2>プロフィール詳細</h2>
                     </div>
 
+                    <label class="register-skip-toggle">
+                        <input type="checkbox" name="profile_skip" value="1" @checked(old('profile_skip'))>
+                        <span>あとで登録する（マイページから後で編集できます）</span>
+                    </label>
+
+                    <div class="register-skip-target" @if(old('profile_skip')) hidden @endif>
                     <label class="register-field">
                         <span>自己紹介</span>
                         <textarea name="intro" rows="4" placeholder="自己紹介">{{ old('intro') }}</textarea>
@@ -235,9 +276,9 @@
 
                     <div class="register-grid register-grid-two">
                         <label class="register-field">
-                            <span>シフト希望</span>
+                            <span>希望シフト</span>
                             <select name="work_where">
-                                <option value="">基本情報の希望シフトに従う</option>
+                                <option value="">選択してください</option>
                                 <option value="週1回出勤" @selected(old('work_where', old('shift_hope')) === '週1回出勤')>週1回出勤</option>
                                 <option value="週2回出勤" @selected(old('work_where', old('shift_hope')) === '週2回出勤')>週2回出勤</option>
                                 <option value="週3回以上" @selected(old('work_where', old('shift_hope')) === '週3回以上')>週3回以上</option>
@@ -253,19 +294,19 @@
                         </label>
                     </div>
 
-                    <label class="register-field">
+                    <label class="register-field register-field-compact">
                         <span>現職業</span>
-                        <textarea name="profession" rows="2" placeholder="現職業を入力">{{ old('profession', old('current_job')) }}</textarea>
+                        <input type="text" name="profession" value="{{ old('profession', old('current_job')) }}" maxlength="40" placeholder="例：会社員 / 学生 / フリーター">
                     </label>
 
                     <div class="register-field">
-                        <span>ナイトワーク経験（詳細）</span>
+                        <span>ナイトワーク経験</span>
                         <div class="register-radio-row">
-                            <label class="register-radio"><input type="radio" name="exp" value="none" @checked(old('exp', old('night_work_exp', '')) === 'none' || old('experience') === 'beginner')> 無し</label>
-                            <label class="register-radio"><input type="radio" name="exp" value="yes" @checked(old('exp', old('night_work_exp')) === 'yes' || old('experience') === 'experienced')> 有り</label>
+                            <label class="register-radio"><input type="radio" name="exp" value="none" @checked(old('exp', old('night_work_exp', '')) === 'none')> 無し</label>
+                            <label class="register-radio"><input type="radio" name="exp" value="yes" @checked(old('exp', old('night_work_exp')) === 'yes')> 有り</label>
                         </div>
-                        <small class="register-field-hint">上で選択した「ナイトワーク経験」と同一です。上で未選択の場合はここで指定してください。</small>
                     </div>
+                    </div>{{-- /.register-skip-target --}}
                 </section>
 
                 {{-- プロフィール画像（必須 1枚） --}}
@@ -278,6 +319,105 @@
                         <input type="file" id="cast-register-profile-image" name="profile_image" accept="image/jpeg,image/png,image/gif,image/webp" required>
                         <small class="register-field-hint">顔が分かる画像を1枚選び、次の画面で<strong>縦長（3:4）</strong>の範囲を調整してから登録してください。（JPEG / PNG / GIF / WebP、最大2MB）</small>
                     </label>
+                </section>
+
+                {{-- 本人確認書類（任意・あとでマイページで登録可） --}}
+                <section class="register-card" data-skip-section="identity">
+                    <div class="register-card-head">
+                        <h2>本人確認書類</h2>
+                    </div>
+
+                    <p class="register-field-hint" style="margin: 0 0 12px;">
+                        本人確認書類はサービスご利用前に必ず必要です。今すぐ提出するか、登録後にマイページから提出するかを選べます。
+                    </p>
+
+                    <label class="register-skip-toggle">
+                        <input type="hidden" name="identity_skip" value="0">
+                        <input type="checkbox" name="identity_skip" value="1" @checked(old('identity_skip', '1') == '1')>
+                        <span>あとで登録する（マイページから後でアップロードできます）</span>
+                    </label>
+
+                    <div class="register-skip-target" @if(old('identity_skip', '1') == '1') hidden @endif>
+                        <div class="register-field">
+                            <span>提出パターン</span>
+                            <div class="register-radio-row">
+                                <label class="register-radio">
+                                    <input type="radio" name="identity_category" value="photo_id" @checked(old('identity_category', 'photo_id') === 'photo_id')>
+                                    パターンA：顔写真付き身分証 1枚
+                                </label>
+                                <label class="register-radio">
+                                    <input type="radio" name="identity_category" value="non_photo_id" @checked(old('identity_category') === 'non_photo_id')>
+                                    パターンB：顔写真なし身分証 ＋ 住所確認書類
+                                </label>
+                            </div>
+                        </div>
+
+                        <div data-identity-pane="photo_id" @if(old('identity_category', 'photo_id') !== 'photo_id') hidden @endif>
+                            <label class="register-field">
+                                <span>書類種別</span>
+                                <select name="identity_type">
+                                    <option value="driver_license" @selected(old('identity_type') === 'driver_license')>運転免許証</option>
+                                    <option value="passport" @selected(old('identity_type') === 'passport')>パスポート</option>
+                                    <option value="mynumber_card" @selected(old('identity_type') === 'mynumber_card')>マイナンバーカード</option>
+                                    <option value="residence_card" @selected(old('identity_type') === 'residence_card')>在留カード</option>
+                                </select>
+                            </label>
+
+                            <div class="register-grid register-grid-two">
+                                <label class="register-field">
+                                    <span>表面（画像 / PDF）</span>
+                                    <input type="file" name="identity_front_file" accept=".pdf,image/*">
+                                </label>
+                                <label class="register-field">
+                                    <span>裏面（任意）</span>
+                                    <input type="file" name="identity_back_file" accept=".pdf,image/*">
+                                </label>
+                            </div>
+
+                            <label class="register-field">
+                                <span>有効期限（任意）</span>
+                                <input type="date" name="identity_expired_at" value="{{ old('identity_expired_at') }}">
+                            </label>
+                        </div>
+
+                        <div data-identity-pane="non_photo_id" @if(old('identity_category') !== 'non_photo_id') hidden @endif>
+                            <p class="register-field-hint" style="margin: 0 0 8px;">
+                                <strong>① 顔写真なし身分証</strong> と <strong>② 住所確認書類</strong> の両方をアップロードしてください。
+                            </p>
+
+                            <label class="register-field">
+                                <span>① 書類種別（顔写真なし身分証）</span>
+                                <select name="identity_type">
+                                    <option value="health_insurance" @selected(old('identity_type') === 'health_insurance')>健康保険証</option>
+                                    <option value="pension_book" @selected(old('identity_type') === 'pension_book')>年金手帳</option>
+                                </select>
+                            </label>
+
+                            <div class="register-grid register-grid-two">
+                                <label class="register-field">
+                                    <span>① 表面（画像 / PDF）</span>
+                                    <input type="file" name="identity_front_file" accept=".pdf,image/*">
+                                </label>
+                                <label class="register-field">
+                                    <span>① 裏面（任意）</span>
+                                    <input type="file" name="identity_back_file" accept=".pdf,image/*">
+                                </label>
+                            </div>
+
+                            <label class="register-field">
+                                <span>② 書類種別（住所確認書類）</span>
+                                <select name="identity_address_type">
+                                    <option value="residence_certificate" @selected(old('identity_address_type') === 'residence_certificate')>住民票</option>
+                                    <option value="utility_bill" @selected(old('identity_address_type') === 'utility_bill')>公共料金領収書</option>
+                                </select>
+                            </label>
+
+                            <label class="register-field">
+                                <span>② 表面（画像 / PDF）</span>
+                                <input type="file" name="identity_address_front_file" accept=".pdf,image/*">
+                            </label>
+                        </div>
+                    </div>
                 </section>
             @else
                 <section class="register-card">
@@ -297,23 +437,10 @@
                         </label>
                     </div>
 
-                    <div class="register-grid register-grid-two">
-                        <label class="register-field">
-                            <span>担当者名 <em>必須</em></span>
-                            <input type="text" name="contact_name" value="{{ old('contact_name') }}" placeholder="例：田中 一郎">
-                        </label>
-
-                        <label class="register-field">
-                            <span>業態 <em>必須</em></span>
-                            <select name="business_type">
-                                <option value="">選択してください</option>
-                                <option value="club" @selected(old('business_type') === 'club')>クラブ</option>
-                                <option value="lounge" @selected(old('business_type') === 'lounge')>ラウンジ</option>
-                                <option value="girls-bar" @selected(old('business_type') === 'girls-bar')>ガールズバー</option>
-                                <option value="other" @selected(old('business_type') === 'other')>その他</option>
-                            </select>
-                        </label>
-                    </div>
+                    <label class="register-field">
+                        <span>担当者名 <em>必須</em></span>
+                        <input type="text" name="contact_name" value="{{ old('contact_name') }}" placeholder="例：田中 一郎">
+                    </label>
 
                     <label class="register-field">
                         <span>郵便番号 <em>必須</em></span>
@@ -412,10 +539,11 @@
                                     <strong>Basic</strong>
                                 </span>
                             </label>
-                            <label class="register-plan-option">
-                                <input type="radio" name="plan" value="premium" @checked(old('plan') === 'premium')>
+                            <label class="register-plan-option is-disabled">
+                                <input type="radio" name="plan" value="premium" disabled>
                                 <span>
                                     <strong>Premium</strong>
+                                    <small class="register-plan-coming">実装中（近日公開）</small>
                                 </span>
                             </label>
                         </div>
@@ -429,8 +557,8 @@
                     </div>
                     <label class="register-field">
                         <span>メイン画像 <em>必須</em></span>
-                        <input type="file" name="shop_profile_image" accept="image/jpeg,image/png,image/gif,image/webp" required>
-                        <small class="register-field-hint">店舗の雰囲気が伝わる画像を1枚アップロードしてください。（JPEG / PNG / GIF / WebP、最大2MB）</small>
+                        <input type="file" id="shop-register-profile-image" name="shop_profile_image" accept="image/jpeg,image/png,image/gif,image/webp" required>
+                        <small class="register-field-hint">店舗の雰囲気が伝わる画像を1枚選び、次の画面で<strong>横長（16:9）</strong>の範囲を調整してから登録してください。（JPEG / PNG / GIF / WebP、最大2MB）</small>
                     </label>
                 </section>
             @endif
@@ -496,6 +624,24 @@
             <div class="register-cast-crop-actions">
                 <button type="button" class="register-cast-crop-btn-secondary" id="register-cast-crop-cancel">別の画像を選ぶ</button>
                 <button type="button" class="register-cast-crop-btn-primary" id="register-cast-crop-confirm">この画像で続ける</button>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if ($role === 'shop')
+    <div id="register-shop-crop-modal" class="register-shop-crop-overlay" role="dialog" aria-modal="true" aria-labelledby="register-shop-crop-title" style="display:none;">
+        <div class="register-shop-crop-inner">
+            <div>
+                <h3 id="register-shop-crop-title">店舗メイン画像の調整</h3>
+                <p class="register-shop-crop-guide">表示枠は横長（16:9）です。ズームや位置を調整し、「この画像で続ける」を押すと登録フォームに反映されます。</p>
+            </div>
+            <div class="register-shop-crop-frame">
+                <img id="register-shop-crop-preview" src="" alt="">
+            </div>
+            <div class="register-shop-crop-actions">
+                <button type="button" class="register-shop-crop-btn-secondary" id="register-shop-crop-cancel">別の画像を選ぶ</button>
+                <button type="button" class="register-shop-crop-btn-primary" id="register-shop-crop-confirm">この画像で続ける</button>
             </div>
         </div>
     </div>
@@ -811,6 +957,18 @@
         .register-plan-option strong {
             display: block;
             color: #fff5da;
+        }
+
+        .register-plan-option.is-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .register-plan-coming {
+            display: block;
+            margin-top: 4px;
+            font-size: 0.72rem;
+            color: #c9b8b8;
         }
 
         .register-check {

@@ -6,7 +6,9 @@ use App\Consts\CommonConsts;
 use App\Http\Controllers\Controller;
 use App\Models\Cast;
 use App\Models\ShopManager;
+use App\Models\CastIdentityDocument;
 use App\Services\AdminMasterService;
+use App\Services\DocumentReviewService;
 use App\Services\ShopProfileLocationSyncService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +23,7 @@ class RegistrationController extends Controller
     public function __construct(
         private readonly AdminMasterService $adminMasterService,
         private readonly ShopProfileLocationSyncService $shopProfileLocationSyncService,
+        private readonly DocumentReviewService $documentReviewService,
     ) {
     }
 
@@ -50,8 +53,6 @@ class RegistrationController extends Controller
             'addr1' => ['nullable', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:20'],
             'email' => ['required', 'email', 'max:255', 'unique:casts,email'],
-            'experience' => ['required', 'in:beginner,experienced'],
-            'shift_style' => ['required', 'in:once,twice,flex'],
             'profile_image' => ['required', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:2048'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'terms' => ['accepted'],
@@ -74,6 +75,15 @@ class RegistrationController extends Controller
             'look_tag_ids.*' => ['integer'],
             'personality_tag_ids' => ['nullable', 'array'],
             'personality_tag_ids.*' => ['integer'],
+            // 本人確認書類（任意・後で登録可能）
+            'identity_skip' => ['nullable'],
+            'identity_category' => ['nullable', 'string', 'in:photo_id,non_photo_id'],
+            'identity_type' => ['nullable', 'string'],
+            'identity_front_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:8192'],
+            'identity_back_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:8192'],
+            'identity_expired_at' => ['nullable', 'date'],
+            'identity_address_type' => ['nullable', 'string'],
+            'identity_address_front_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:8192'],
         ];
         if (Schema::hasTable('industries')) {
             $rules['industry_ids.*'][] = 'exists:industries,id';
@@ -88,7 +98,14 @@ class RegistrationController extends Controller
             'zip.regex' => '郵便番号は 7 桁、または 123-4567 形式で入力してください。',
         ]);
 
-        $member = DB::transaction(function () use ($request) {
+        // プロフィール詳細・本人確認書類は「あとで登録」可。
+        // フォーム側でスキップが指定されていれば各セクションの入力は無視する。
+        $profileSkipped = (bool) $request->boolean('profile_skip');
+        $identitySkipped = (bool) $request->boolean('identity_skip');
+
+        $this->validateIdentityUpload($request, $identitySkipped);
+
+        $member = DB::transaction(function () use ($request, $profileSkipped, $identitySkipped) {
             $castId = $this->nextSequentialId('casts', 'c');
 
             DB::table('casts')->insert([
@@ -102,14 +119,16 @@ class RegistrationController extends Controller
                 'updated_at' => now(),
             ]);
 
-            $workWhere = $request->filled('work_where')
-                ? $request->input('work_where')
-                : ($request->filled('shift_hope') ? $request->input('shift_hope') : $this->shiftStyleToShiftHope((string) $request->input('shift_style')));
-            $workTime = $request->filled('work_time') ? (string) $request->input('work_time') : $this->shiftStyleToWorkTime((string) $request->input('shift_style'));
-            $exp = $request->filled('exp')
-                ? $request->input('exp')
-                : ($request->filled('night_work_exp') ? $request->input('night_work_exp') : ($request->input('experience') === 'experienced' ? 'yes' : 'none'));
-            $industryIds = array_values(array_unique(array_map('intval', (array) $request->input('industry_ids', []))));
+            $workWhere = $profileSkipped
+                ? null
+                : ($request->filled('work_where') ? $request->input('work_where') : $request->input('shift_hope'));
+            $workTime = $profileSkipped ? null : $request->input('work_time');
+            $exp = $profileSkipped
+                ? 'none'
+                : ($request->filled('exp') ? $request->input('exp') : ($request->input('night_work_exp') ?? 'none'));
+            $industryIds = $profileSkipped
+                ? []
+                : array_values(array_unique(array_map('intval', (array) $request->input('industry_ids', []))));
 
             $profilePayload = [
                 'cast_id' => $castId,
@@ -122,16 +141,16 @@ class RegistrationController extends Controller
                 'addr' => $request->input('addr1'),
                 'building' => null,
                 'tel' => $request->input('phone'),
-                'work_time' => $this->workTimeToShiftCode($workTime),
+                'work_time' => $workTime ? $this->workTimeToShiftCode($workTime) : null,
                 'work_where' => $workWhere,
                 'exp' => $exp === 'yes' ? 1 : 0,
-                'pr' => $request->input('intro'),
-                'height' => $request->filled('height') ? (int) $request->input('height') : null,
-                'weight' => $request->filled('weight') ? (int) $request->input('weight') : null,
-                'bust' => $request->filled('bust') ? (int) $request->input('bust') : null,
-                'waist' => $request->filled('waist') ? (int) $request->input('waist') : null,
-                'hip' => $request->filled('hip') ? (int) $request->input('hip') : null,
-                'profession' => $request->input('profession', $request->input('current_job')),
+                'pr' => $profileSkipped ? null : $request->input('intro'),
+                'height' => !$profileSkipped && $request->filled('height') ? (int) $request->input('height') : null,
+                'weight' => !$profileSkipped && $request->filled('weight') ? (int) $request->input('weight') : null,
+                'bust' => !$profileSkipped && $request->filled('bust') ? (int) $request->input('bust') : null,
+                'waist' => !$profileSkipped && $request->filled('waist') ? (int) $request->input('waist') : null,
+                'hip' => !$profileSkipped && $request->filled('hip') ? (int) $request->input('hip') : null,
+                'profession' => $profileSkipped ? null : $request->input('profession', $request->input('current_job')),
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -164,8 +183,14 @@ class RegistrationController extends Controller
 
             }
 
-            $this->syncCastTags($castId, 'looks', $request->input('look_tag_ids', []));
-            $this->syncCastTags($castId, 'personality', $request->input('personality_tag_ids', []));
+            if (!$profileSkipped) {
+                $this->syncCastTags($castId, 'looks', $request->input('look_tag_ids', []));
+                $this->syncCastTags($castId, 'personality', $request->input('personality_tag_ids', []));
+            }
+
+            if (!$identitySkipped) {
+                $this->saveIdentityDocuments($request, $castId);
+            }
 
             return Cast::query()->findOrFail($castId);
         });
@@ -188,13 +213,11 @@ class RegistrationController extends Controller
             'zip' => ['required', 'regex:/^\d{3}-?\d{4}$/'],
             'pref' => ['required', 'string', 'max:20'],
             'city' => ['required', 'string', 'max:100'],
-            'address' => ['nullable', 'string', 'max:255'],
-            'addr' => ['nullable', 'string', 'max:255', 'required_without:address'],
+            'addr' => ['required', 'string', 'max:255'],
             'building' => ['nullable', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:20'],
             'email' => ['required', 'email', 'max:255', 'unique:shop_managers,email'],
-            'business_type' => ['required', 'in:club,lounge,girls-bar,other'],
-            'plan' => ['required', 'in:basic,premium'],
+            'plan' => ['required', 'in:basic'],
             'shop_profile_image' => ['required', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:2048'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'terms' => ['accepted'],
@@ -226,21 +249,14 @@ class RegistrationController extends Controller
 
             $industryIds = array_values(array_unique(array_map('intval', (array) $request->input('industry_ids', []))));
 
-            $resolvedAddress = trim(implode(' ', array_filter([
-                (string) $request->input('addr', ''),
-                (string) $request->input('building', ''),
-            ])));
-            if ($resolvedAddress === '') {
-                $resolvedAddress = trim((string) $request->input('address', ''));
-            }
-
             $shopProfilePayload = [
                 'shop_id' => $shopId,
                 'shop_name' => $request->input('shop_name'),
                 'zip' => $this->normalizeZip($request->input('zip')),
                 'pref' => $request->input('pref'),
                 'city' => $request->input('city'),
-                'addr2' => $resolvedAddress,
+                'addr' => $request->input('addr'),
+                'building' => $request->input('building'),
                 'tel' => $request->input('phone'),
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -256,13 +272,10 @@ class RegistrationController extends Controller
                 $this->shopProfileLocationSyncService->persistResolvedLocation($shopId, $fullAddr);
             }
 
-            if (Schema::hasTable('shop_posts')) {
-                $hitokoto = $request->filled('word')
-                    ? (string) $request->input('word')
-                    : $this->mapBusinessTypeLabel((string) $request->input('business_type'));
+            if (Schema::hasTable('shop_posts') && $request->filled('word')) {
                 $shopPostRow = [
                     'shop_id'    => $shopId,
-                    'body'       => $hitokoto,
+                    'body'       => (string) $request->input('word'),
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
@@ -383,34 +396,6 @@ class RegistrationController extends Controller
         return $prefix . str_pad((string) $nextNumber, 8, '0', STR_PAD_LEFT);
     }
 
-    private function mapCastShift(string $shiftStyle): int
-    {
-        return match ($shiftStyle) {
-            'once' => 1,
-            'twice' => 2,
-            default => 3,
-        };
-    }
-
-    private function shiftStyleToShiftHope(string $shiftStyle): string
-    {
-        return match ($shiftStyle) {
-            'once' => '週1回出勤',
-            'twice' => '週2回出勤',
-            'flex' => '週3回以上',
-            default => '週1回出勤',
-        };
-    }
-
-    private function shiftStyleToWorkTime(string $shiftStyle): string
-    {
-        return match ($shiftStyle) {
-            'once' => 'morning',
-            'twice', 'flex' => 'day_night',
-            default => 'day_night',
-        };
-    }
-
     private function workTimeToShiftCode(?string $workTime): int
     {
         return match ($workTime) {
@@ -420,14 +405,74 @@ class RegistrationController extends Controller
         };
     }
 
-    private function shiftHopeToCode(?string $shiftHope): ?int
+    /**
+     * 新規登録時に提出された本人確認書類のバリデーション。
+     * パターンA: 顔写真付き身分証 1枚 / パターンB: 顔写真なし身分証＋住所確認書類 の2枚を許容。
+     */
+    private function validateIdentityUpload(Request $request, bool $skipped): void
     {
-        return match ($shiftHope) {
-            '週1回出勤' => 1,
-            '週2回出勤' => 2,
-            '週3回以上' => 3,
-            default => null,
-        };
+        if ($skipped) {
+            return;
+        }
+        if (!$request->hasFile('identity_front_file') && !$request->hasFile('identity_address_front_file')) {
+            return; // 何も提出していなければスキップ扱い
+        }
+
+        $category = (string) $request->input('identity_category');
+        $allowedTypes = CastIdentityDocument::allowedTypesFor($category);
+
+        $messages = [];
+        if (!in_array($category, [CastIdentityDocument::CATEGORY_PHOTO_ID, CastIdentityDocument::CATEGORY_NON_PHOTO_ID], true)) {
+            $messages['identity_category'] = ['本人確認書類の種別を選択してください。'];
+        } elseif (!$request->hasFile('identity_front_file')) {
+            $messages['identity_front_file'] = ['本人確認書類の表面ファイルを添付してください。'];
+        } elseif (!in_array((string) $request->input('identity_type'), $allowedTypes, true)) {
+            $messages['identity_type'] = ['選択した書類種別がカテゴリと一致しません。'];
+        }
+
+        if ($category === CastIdentityDocument::CATEGORY_NON_PHOTO_ID) {
+            $addressTypes = CastIdentityDocument::allowedTypesFor(CastIdentityDocument::CATEGORY_ADDRESS_PROOF);
+            if (!$request->hasFile('identity_address_front_file')) {
+                $messages['identity_address_front_file'] = ['住所確認書類の表面ファイルを添付してください。'];
+            } elseif (!in_array((string) $request->input('identity_address_type'), $addressTypes, true)) {
+                $messages['identity_address_type'] = ['住所確認書類の種別を選択してください。'];
+            }
+        }
+
+        if (!empty($messages)) {
+            throw \Illuminate\Validation\ValidationException::withMessages($messages);
+        }
+    }
+
+    /**
+     * バリデーション通過後に本人確認書類を保存する。
+     */
+    private function saveIdentityDocuments(Request $request, string $castId): void
+    {
+        if (!$request->hasFile('identity_front_file')) {
+            return;
+        }
+        $category = (string) $request->input('identity_category');
+
+        $this->documentReviewService->uploadCastIdentityDocument(
+            $castId,
+            (string) $request->input('identity_type'),
+            $request->file('identity_front_file'),
+            $request->file('identity_back_file'),
+            $request->input('identity_expired_at'),
+            $category
+        );
+
+        if ($category === CastIdentityDocument::CATEGORY_NON_PHOTO_ID && $request->hasFile('identity_address_front_file')) {
+            $this->documentReviewService->uploadCastIdentityDocument(
+                $castId,
+                (string) $request->input('identity_address_type'),
+                $request->file('identity_address_front_file'),
+                null,
+                null,
+                CastIdentityDocument::CATEGORY_ADDRESS_PROOF
+            );
+        }
     }
 
     private function syncCastTags(string $castId, string $tagType, array $tagIds): void
@@ -502,21 +547,6 @@ class RegistrationController extends Controller
             'updated_at' => $now,
         ], $industryIds);
         DB::table($table)->insert($rows);
-    }
-
-    private function mapBusinessTypeLabel(string $businessType): string
-    {
-        return match ($businessType) {
-            'club' => 'クラブ',
-            'lounge' => 'ラウンジ',
-            'girls-bar' => 'ガールズバー',
-            default => 'その他',
-        };
-    }
-
-    private function mapPlanLabel(string $plan): string
-    {
-        return $plan === 'premium' ? 'Premium' : 'Basic';
     }
 
     private function normalizeZip(?string $zip): ?string
