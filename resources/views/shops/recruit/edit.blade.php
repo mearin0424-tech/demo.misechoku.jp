@@ -488,12 +488,10 @@
 
         {{-- ヘッダー --}}
         <header class="job-edit-v2__top">
-            <a href="{{ route('shop.jobdescription') }}" class="job-edit-v2__back" aria-label="戻る"><i class="fas fa-chevron-left"></i></a>
             <div class="job-edit-v2__title-wrap">
                 <h1 class="job-edit-v2__title-en">EDIT JOB</h1>
                 <p class="job-edit-v2__title-sub">求人票の編集</p>
             </div>
-            <div class="job-edit-v2__spacer" aria-hidden="true"></div>
         </header>
 
         @if(session('message'))

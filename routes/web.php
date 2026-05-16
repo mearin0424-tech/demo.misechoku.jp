@@ -8,6 +8,7 @@ use App\Http\Controllers\Common\PageController;
 use App\Http\Controllers\Common\ColumnArticleController;
 use App\Http\Controllers\Common\SupportNoticeController;
 use App\Http\Controllers\Common\SettingController;
+use App\Http\Controllers\Common\TalkTemplateController;
 use App\Http\Controllers\Common\DemoLoginController;
 use App\Http\Controllers\Common\BankLookupController;
 use App\Http\Controllers\Common\RegistrationController;
@@ -359,6 +360,15 @@ Route::prefix('setting')->name('setting.')->group(function () {
     // 探索拠点（現在地／パスポート）
     Route::post('/location', [\App\Http\Controllers\Common\LocationController::class, 'store'])->name('location.store');
     Route::delete('/location', [\App\Http\Controllers\Common\LocationController::class, 'destroy'])->name('location.destroy');
+
+    // トーク定型文（キャスト／店舗ともに利用）
+    Route::prefix('talk-templates')->name('talk-templates.')->group(function () {
+        Route::get('/', [TalkTemplateController::class, 'index'])->name('index');
+        Route::post('/', [TalkTemplateController::class, 'store'])->name('store');
+        Route::put('/{id}', [TalkTemplateController::class, 'update'])->whereNumber('id')->name('update');
+        Route::delete('/{id}', [TalkTemplateController::class, 'destroy'])->whereNumber('id')->name('destroy');
+        Route::post('/import-defaults', [TalkTemplateController::class, 'importDefaults'])->name('import-defaults');
+    });
 });
 
 // 繝励Λ繝ｳ險ｭ螳夲ｼ亥ｺ苓・蟆ら畑繝ｻ繝・Δ逕ｨ・・

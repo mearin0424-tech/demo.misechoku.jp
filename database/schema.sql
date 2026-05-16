@@ -1176,4 +1176,22 @@ ALTER TABLE `shop_profiles`
   ADD COLUMN IF NOT EXISTS `search_passport_label`     varchar(80)  DEFAULT NULL,
   ADD COLUMN IF NOT EXISTS `search_max_distance_km`    smallint     DEFAULT NULL;
 
+-- -----------------------------------------------------------------------------
+-- user_talk_templates : キャスト／店舗ごとに編集できるトーク定型文
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `user_talk_templates` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `owner_type` varchar(16) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'cast または shop',
+  `owner_id` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `category` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'その他',
+  `title` varchar(80) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `body` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sort_order` int NOT NULL DEFAULT '0',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_talk_templates_owner_idx` (`owner_type`, `owner_id`, `sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET foreign_key_checks = 1;

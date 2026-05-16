@@ -278,9 +278,6 @@
 <div class="content-wrapper animate-fadeIn">
     <div class="cast-mypage-sub-page">
         <section class="mypage-area">
-            <a href="{{ route('cast.mypage.index') }}" class="cast-mypage-back-link">
-                <i class="fas fa-chevron-left"></i> マイページへ戻る
-            </a>
             <h1 class="mypage-page-title serif-font">採用・入金管理</h1>
 
             @php

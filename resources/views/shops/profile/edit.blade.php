@@ -497,14 +497,10 @@ document.addEventListener('DOMContentLoaded', function () {
 <div class="shop-profile-edit animate-fadeIn">
     <div class="shop-profile-edit__shell">
         <header class="shop-profile-edit__top">
-            <a href="{{ route('shop.mypage.index') }}" class="shop-profile-edit__back" aria-label="戻る">
-                <i class="fas fa-chevron-left"></i>
-            </a>
             <div class="shop-profile-edit__title-block">
                 <h1 class="shop-profile-edit__title-en">EDIT PROFILE</h1>
                 <p class="shop-profile-edit__title-sub">Shop Information</p>
             </div>
-            <div class="shop-profile-edit__spacer" aria-hidden="true"></div>
         </header>
 
         @if(session('message'))

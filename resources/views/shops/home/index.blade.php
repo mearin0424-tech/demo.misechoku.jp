@@ -90,7 +90,7 @@
                     </div>
                     <div class="rc-action-item stop-propagation">
                         <a
-                            href="{{ route($talkRoute, ['id' => $item['id'], 'talk_topic' => 'other']) }}"
+                            href="{{ route($talkRoute, ['id' => $item['id'], 'talk_topic' => 'other', 'initiate' => 1]) }}"
                             class="action-circle-btn message stop-propagation"
                             aria-label="メッセージを送る"
                         >
@@ -244,7 +244,7 @@
                     >
                         <i class="fas fa-bookmark"></i>
                     </button>
-                    <a href="{{ route($talkRoute, ['id' => $item['id'], 'talk_topic' => 'other']) }}" class="action-btn-message stop-propagation" aria-label="メッセージを送る">
+                    <a href="{{ route($talkRoute, ['id' => $item['id'], 'talk_topic' => 'other', 'initiate' => 1]) }}" class="action-btn-message stop-propagation" aria-label="メッセージを送る">
                         <i class="fas fa-comment-dots"></i>
                     </a>
                     @if($isShop)

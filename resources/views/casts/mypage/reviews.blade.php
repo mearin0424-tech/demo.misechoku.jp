@@ -12,9 +12,6 @@
 <div class="content-wrapper animate-fadeIn">
     <div class="cast-mypage-sub-page">
         <section class="mypage-area">
-            <a href="{{ route('cast.mypage.index') }}" class="cast-mypage-back-link">
-                <i class="fas fa-chevron-left"></i> マイページへ戻る
-            </a>
             <h1 class="mypage-page-title serif-font">レビュー一覧</h1>
             <section class="review-list-area">
         {{-- 総合評価サマリー --}}

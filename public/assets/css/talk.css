@@ -1838,6 +1838,28 @@ button.interview-option-btn:hover {
     white-space: normal;
     word-break: break-word;
 }
+.talk-template-edit-link-wrap {
+    margin: 0 0 10px;
+}
+.talk-template-edit-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(220, 181, 104, .35);
+    background: rgba(220, 181, 104, .08);
+    color: var(--gold, #dcb568);
+    font-size: 12px;
+    text-decoration: none;
+    transition: background .15s ease, border-color .15s ease;
+}
+.talk-template-edit-link:hover {
+    background: rgba(220, 181, 104, .18);
+    border-color: rgba(220, 181, 104, .65);
+    text-decoration: none;
+}
+.talk-template-edit-link i { font-size: 11px; }
 
 /* ==========================================================================
    NGワード警告（送信欄直下）

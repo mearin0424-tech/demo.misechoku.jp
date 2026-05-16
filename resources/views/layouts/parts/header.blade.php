@@ -37,7 +37,7 @@
         'castprofileview' => 'CAST PROFILE',
     ];
     $engBySecond = [
-        'home'        => 'SWIPE',
+        'home'        => 'ENCOUNT',
         'login'       => 'LOGIN',
         'search'      => 'SEARCH',
         'mypage'      => 'MY PAGE',

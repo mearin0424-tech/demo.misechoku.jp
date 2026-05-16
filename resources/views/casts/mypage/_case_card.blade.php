@@ -5,6 +5,8 @@
     $isCompleted = (bool) ($case['is_completed'] ?? false);
     $isActionable = !empty($case['actionable']);
     $deposit = $case['deposit'] ?? null;
+    // 進行中の案件ではステータスバッジを出さず、下のパイプライン図のみで進捗を表現する。
+    $showStatusPill = $showStatusPill ?? $isCompleted;
 
     $pillClass = match ($case['status_tone'] ?? '') {
         'action'   => 'is-action',
@@ -36,10 +38,12 @@
                 @endif
             </div>
         </div>
-        <span class="case-card__pill {{ $pillClass }}">
-            <i class="fas {{ $pillIcon }}"></i>
-            {{ $case['status_label'] ?? '' }}
-        </span>
+        @if($showStatusPill)
+            <span class="case-card__pill {{ $pillClass }}">
+                <i class="fas {{ $pillIcon }}"></i>
+                {{ $case['status_label'] ?? '' }}
+            </span>
+        @endif
     </header>
 
     {{-- パイプライン：採用 → ボーナス申請 → 店舗承認 → 請求書発行 → 店舗入金 → 振込実行 → 受領完了 --}}

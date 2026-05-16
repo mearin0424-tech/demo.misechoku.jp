@@ -439,6 +439,12 @@
             <h2>定型文を選択</h2>
             <button type="button" class="interview-modal-close js-talk-template-close" aria-label="閉じる">&times;</button>
         </div>
+        <div class="talk-template-edit-link-wrap">
+            <a href="{{ route('setting.talk-templates.index') }}" class="talk-template-edit-link">
+                <i class="fas fa-pen" aria-hidden="true"></i>
+                <span>定型文を編集・追加する</span>
+            </a>
+        </div>
         <div id="talk-template-menu-list" class="talk-template-list"></div>
     </div>
 </div>

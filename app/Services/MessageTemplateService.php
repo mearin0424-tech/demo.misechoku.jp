@@ -58,6 +58,50 @@ class MessageTemplateService
     }
 
     /**
+     * ユーザ（キャスト／店舗）が編集できるクイック定型文を取得する。
+     * 自分用テンプレートがあればそれを返し、無ければシステムプリセットを返す。
+     *
+     * @return array<int, array{key:string,title:string,body:string,category:string}>
+     */
+    public function getQuickTemplatesForOwner(string $ownerType, ?string $ownerId): array
+    {
+        $fallbackGroup = $ownerType === 'cast' ? 'talk_quick_cast' : 'talk_quick_shop';
+
+        if (!$ownerId || !Schema::hasTable('user_talk_templates')) {
+            return $this->getTemplates($fallbackGroup);
+        }
+
+        $rows = DB::table('user_talk_templates')
+            ->where('owner_type', $ownerType)
+            ->where('owner_id', $ownerId)
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get(['id', 'category', 'title', 'body']);
+
+        if ($rows->isEmpty()) {
+            return $this->getTemplates($fallbackGroup);
+        }
+
+        return $rows->map(fn ($row) => [
+            'key' => 'user_' . $row->id,
+            'category' => (string) ($row->category ?: 'その他'),
+            'title' => (string) $row->title,
+            'body' => (string) $row->body,
+        ])->all();
+    }
+
+    /**
+     * 既定（プリセット）のクイック定型文を返す。設定画面でのプリセット取り込み用。
+     *
+     * @return array<int, array{key:string,title:string,body:string,category:string}>
+     */
+    public function getDefaultQuickTemplates(string $ownerType): array
+    {
+        return $this->getTemplates($ownerType === 'cast' ? 'talk_quick_cast' : 'talk_quick_shop');
+    }
+
+    /**
      * @return array<string, array<int, array{key:string,title:string,body:string}>>
      */
     private function defaultTemplates(): array
