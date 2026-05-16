@@ -37,13 +37,17 @@ class StationService
             return [];
         }
 
+        // HeartRails は同一駅でも路線ごとに別レコードで返るため、
+        // 駅名で重複排除（最も近い距離のレコードを優先）してから N 件取る。
         return collect($stations)
             ->sortBy(fn ($s) => (float) ($s['distance'] ?? PHP_FLOAT_MAX))
+            ->unique(fn ($s) => trim((string) ($s['name'] ?? '')))
+            ->filter(fn ($s) => trim((string) ($s['name'] ?? '')) !== '')
             ->take($limit)
             ->map(function ($s) {
                 $name = trim((string) ($s['name'] ?? ''));
                 $dist = isset($s['distance']) ? (int) round((float) $s['distance']) : null;
-                $label = $name !== '' && !str_ends_with($name, '駅') ? $name . '駅' : $name;
+                $label = !str_ends_with($name, '駅') ? $name . '駅' : $name;
                 $walkMinutes = $dist !== null ? max(1, (int) ceil($dist / 80)) : null;
                 $suffix = $walkMinutes !== null ? ' 徒歩' . $walkMinutes . '分' : '';
 

@@ -58,41 +58,57 @@ class MessageTemplateService
     }
 
     /**
-     * ユーザ（キャスト／店舗）が編集できるクイック定型文を取得する。
-     * 自分用テンプレートがあればそれを返し、無ければシステムプリセットを返す。
-     *
-     * @return array<int, array{key:string,title:string,body:string,category:string}>
+     * クイック定型文の最大スロット数（1〜4）。
      */
-    public function getQuickTemplatesForOwner(string $ownerType, ?string $ownerId): array
+    public const QUICK_TEMPLATE_SLOTS = 4;
+
+    /**
+     * ユーザ（キャスト／店舗）の 4 スロット分の定型文を返す。
+     * カスタムが無いスロットはデフォルト文を使う。
+     *
+     * @return array<int, array{slot:int,title:string,body:string,is_custom:bool,default_title:string,default_body:string}>
+     */
+    public function getQuickTemplateSlots(string $ownerType, ?string $ownerId): array
     {
-        $fallbackGroup = $ownerType === 'cast' ? 'talk_quick_cast' : 'talk_quick_shop';
+        $defaults = $this->getDefaultQuickTemplates($ownerType);
+        $customs = [];
 
-        if (!$ownerId || !Schema::hasTable('user_talk_templates')) {
-            return $this->getTemplates($fallbackGroup);
+        if ($ownerId && Schema::hasTable('user_talk_templates')) {
+            $rows = DB::table('user_talk_templates')
+                ->where('owner_type', $ownerType)
+                ->where('owner_id', $ownerId)
+                ->where('is_active', true)
+                ->whereBetween('sort_order', [1, self::QUICK_TEMPLATE_SLOTS])
+                ->get(['id', 'sort_order', 'title', 'body']);
+            foreach ($rows as $row) {
+                $customs[(int) $row->sort_order] = [
+                    'title' => (string) $row->title,
+                    'body' => (string) $row->body,
+                ];
+            }
         }
 
-        $rows = DB::table('user_talk_templates')
-            ->where('owner_type', $ownerType)
-            ->where('owner_id', $ownerId)
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->get(['id', 'category', 'title', 'body']);
-
-        if ($rows->isEmpty()) {
-            return $this->getTemplates($fallbackGroup);
+        $slots = [];
+        for ($slot = 1; $slot <= self::QUICK_TEMPLATE_SLOTS; $slot++) {
+            $default = $defaults[$slot - 1] ?? null;
+            $defaultTitle = (string) ($default['title'] ?? '定型文' . $slot);
+            $defaultBody = (string) ($default['body'] ?? '');
+            $custom = $customs[$slot] ?? null;
+            $slots[] = [
+                'slot' => $slot,
+                'is_custom' => $custom !== null,
+                'title' => $custom['title'] ?? $defaultTitle,
+                'body' => $custom['body'] ?? $defaultBody,
+                'default_title' => $defaultTitle,
+                'default_body' => $defaultBody,
+            ];
         }
 
-        return $rows->map(fn ($row) => [
-            'key' => 'user_' . $row->id,
-            'category' => (string) ($row->category ?: 'その他'),
-            'title' => (string) $row->title,
-            'body' => (string) $row->body,
-        ])->all();
+        return $slots;
     }
 
     /**
-     * 既定（プリセット）のクイック定型文を返す。設定画面でのプリセット取り込み用。
+     * 既定（プリセット）のクイック定型文を返す。スロットのフォールバックに使う。
      *
      * @return array<int, array{key:string,title:string,body:string,category:string}>
      */

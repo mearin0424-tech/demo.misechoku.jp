@@ -715,10 +715,87 @@
         z-index: 30;
         margin: 28px -20px 0;
         padding: 16px 20px 12px;
-        background: linear-gradient(to top, rgba(26, 10, 14, 0.96) 0%, rgba(26, 10, 14, 0.78) 60%, rgba(26, 10, 14, 0) 100%);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border-top: 1px solid rgba(220, 181, 104, 0.16);
+        background: linear-gradient(to top, rgba(26, 10, 14, 0.98) 0%, rgba(26, 10, 14, 0.86) 70%, rgba(26, 10, 14, 0) 100%);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(220, 181, 104, 0.18);
+    }
+    .recruit-cta-row {
+        display: flex;
+        align-items: stretch;
+        gap: 10px;
+    }
+    .recruit-cta-actions {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 0;
+    }
+    .recruit-cta-heart {
+        flex: 0 0 auto;
+        align-self: stretch;
+        width: 48px;
+        border-radius: 14px;
+        border: 1px solid rgba(220, 181, 104, 0.4);
+        background: rgba(0, 0, 0, 0.4);
+        color: #f4e7c2;
+        font-size: 1.05rem;
+        cursor: pointer;
+        transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+    .recruit-cta-heart:hover {
+        background: rgba(220, 181, 104, 0.12);
+        border-color: rgba(220, 181, 104, 0.65);
+    }
+    .recruit-cta-heart.is-active {
+        background: rgba(220, 181, 104, 0.22);
+        border-color: rgba(220, 181, 104, 0.85);
+        color: #fff1cc;
+    }
+    .recruit-cta-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 14px;
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-decoration: none;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: transform 0.12s ease, box-shadow 0.18s ease, background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        min-height: 46px;
+    }
+    .recruit-cta-btn:hover {
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+    .recruit-cta-btn i { font-size: 0.95rem; }
+    .recruit-cta-btn--primary {
+        background: linear-gradient(135deg, #ffe2a3 0%, #d4af37 100%);
+        color: #2a1406;
+        box-shadow: 0 6px 18px rgba(212, 175, 55, 0.32);
+    }
+    .recruit-cta-btn--primary:hover { box-shadow: 0 8px 22px rgba(212, 175, 55, 0.42); color: #2a1406; }
+    .recruit-cta-btn--help {
+        background: rgba(220, 181, 104, 0.16);
+        border-color: rgba(220, 181, 104, 0.7);
+        color: #f5e1a8;
+    }
+    .recruit-cta-btn--help:hover { background: rgba(220, 181, 104, 0.26); color: #fff1cc; }
+    .recruit-cta-btn--ghost {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(220, 181, 104, 0.28);
+        color: #d6c6c6;
+    }
+    .recruit-cta-btn--ghost:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(220, 181, 104, 0.5);
+        color: #f4e7c2;
     }
 </style>
 @endpush
@@ -1334,26 +1411,48 @@
                 </div>
             </section>
 
-            @if(!empty($forCast) && empty($usesJobTypes))
-                <div class="recruit-footer-cta">
-                    <button
-                        type="button"
-                        class="recruit-cta-heart {{ !empty($recruit['is_kept']) ? 'is-active' : '' }}"
-                        aria-label="キープ"
-                        data-item-id="{{ $shop['id'] ?? '' }}"
-                        data-item-type="shop"
-                        data-action="keep"
-                    ><i class="fas fa-bookmark"></i></button>
-                    @php
-                        $singleTalkJobKind = !empty($hasHelp) ? 'help' : (!empty($hasTrial) ? 'trial' : 'fulltime');
-                        $singleTalkTopic = $singleTalkJobKind === 'help' ? 'help' : 'new_hire';
-                        $singleTalkShopId = $shop['id'] ?? $shop['shop_id'] ?? $recruit['id'] ?? $recruit['shop_id'] ?? null;
-                    @endphp
-                    @if(!empty($singleTalkShopId))
-                        <a href="{{ route('cast.talk.room', ['id' => $singleTalkShopId, 'job_kind' => $singleTalkJobKind, 'talk_topic' => $singleTalkTopic]) }}" class="recruit-cta-btn"><i class="fas fa-paper-plane"></i> 応募する</a>
-                        <a href="{{ route('cast.talk.room', ['id' => $singleTalkShopId, 'talk_topic' => 'other']) }}" class="recruit-cta-btn" style="margin-top:8px; opacity:.88;"><i class="fas fa-comment-dots"></i> 質問・相談</a>
-                    @endif
-                </div>
+            @if(!empty($forCast))
+                @php
+                    $ctaShopId = $shop['id'] ?? $shop['shop_id'] ?? $recruit['id'] ?? $recruit['shop_id'] ?? null;
+                    $ctaHasHelp = $usesJobTypes
+                        ? !empty($recruit_help['help_hourly_wage']) || !empty($recruit_help['hourly_wage'])
+                        : !empty($recruit['help_hourly_wage']);
+                    $ctaHasTrial = $usesJobTypes
+                        ? !empty($recruit_trial['trial_hourly_wage']) || !empty($recruit_trial['hourly_wage'])
+                        : (!empty($recruit['trial_hourly_wage']) || $regularWage > 0);
+                @endphp
+                @if(!empty($ctaShopId))
+                    <div class="recruit-footer-cta">
+                        <div class="recruit-cta-row">
+                            <button
+                                type="button"
+                                class="recruit-cta-heart {{ !empty($recruit['is_kept']) ? 'is-active' : '' }}"
+                                aria-label="キープ"
+                                data-item-id="{{ $shop['id'] ?? '' }}"
+                                data-item-type="shop"
+                                data-action="keep"
+                            ><i class="fas fa-bookmark"></i></button>
+                            <div class="recruit-cta-actions">
+                                @if($ctaHasHelp)
+                                    <a href="{{ route('cast.talk.room', ['id' => $ctaShopId, 'job_kind' => 'help', 'talk_topic' => 'help', 'initiate' => 1]) }}" class="recruit-cta-btn recruit-cta-btn--help">
+                                        <i class="fas fa-hand-holding-heart"></i>
+                                        <span>ヘルプ求人に応募する</span>
+                                    </a>
+                                @endif
+                                @if($ctaHasTrial)
+                                    <a href="{{ route('cast.talk.room', ['id' => $ctaShopId, 'job_kind' => 'trial', 'talk_topic' => 'new_hire', 'initiate' => 1]) }}" class="recruit-cta-btn recruit-cta-btn--primary">
+                                        <i class="fas fa-paper-plane"></i>
+                                        <span>新規採用に応募する</span>
+                                    </a>
+                                @endif
+                                <a href="{{ route('cast.talk.room', ['id' => $ctaShopId, 'talk_topic' => 'other', 'initiate' => 1]) }}" class="recruit-cta-btn recruit-cta-btn--ghost">
+                                    <i class="fas fa-comment-dots"></i>
+                                    <span>まずは話を聞いてみる</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @endif
             @endif
         </div>
     </div>

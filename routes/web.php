@@ -361,13 +361,11 @@ Route::prefix('setting')->name('setting.')->group(function () {
     Route::post('/location', [\App\Http\Controllers\Common\LocationController::class, 'store'])->name('location.store');
     Route::delete('/location', [\App\Http\Controllers\Common\LocationController::class, 'destroy'])->name('location.destroy');
 
-    // トーク定型文（キャスト／店舗ともに利用）
+    // トーク定型文（キャスト／店舗ともに利用）— トーク画面のモーダルから JSON で操作
     Route::prefix('talk-templates')->name('talk-templates.')->group(function () {
-        Route::get('/', [TalkTemplateController::class, 'index'])->name('index');
-        Route::post('/', [TalkTemplateController::class, 'store'])->name('store');
-        Route::put('/{id}', [TalkTemplateController::class, 'update'])->whereNumber('id')->name('update');
-        Route::delete('/{id}', [TalkTemplateController::class, 'destroy'])->whereNumber('id')->name('destroy');
-        Route::post('/import-defaults', [TalkTemplateController::class, 'importDefaults'])->name('import-defaults');
+        Route::get('/slots', [TalkTemplateController::class, 'slots'])->name('slots');
+        Route::put('/slot/{slot}', [TalkTemplateController::class, 'saveSlot'])->whereNumber('slot')->name('slot.save');
+        Route::delete('/slot/{slot}', [TalkTemplateController::class, 'resetSlot'])->whereNumber('slot')->name('slot.reset');
     });
 });
 

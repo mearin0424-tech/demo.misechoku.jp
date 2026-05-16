@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Common;
 use App\Http\Controllers\Controller;
 use App\Models\UserTalkTemplate;
 use App\Services\MessageTemplateService;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class TalkTemplateController extends Controller
@@ -15,172 +15,96 @@ class TalkTemplateController extends Controller
     }
 
     /**
-     * 定型文の設定画面。
+     * 自分の 4 スロット分の定型文を JSON で返す。
      */
-    public function index()
+    public function slots(): JsonResponse
     {
         [$ownerType, $ownerId] = $this->resolveOwner();
-        $isCast = $ownerType === 'cast';
+        if (!$ownerType || !$ownerId) {
+            return response()->json(['success' => false, 'message' => 'ログイン後にご利用ください。'], 401);
+        }
 
-        $templates = ($ownerType && $ownerId)
-            ? UserTalkTemplate::query()
-                ->where('owner_type', $ownerType)
-                ->where('owner_id', $ownerId)
-                ->orderBy('sort_order')
-                ->orderBy('id')
-                ->get()
-            : collect();
-
-        $defaults = $this->messageTemplateService->getDefaultQuickTemplates($ownerType ?? 'cast');
-
-        return view('common.setting.talk-templates', [
-            'isCast' => $isCast,
-            'isLoggedIn' => (bool) $ownerType,
-            'templates' => $templates,
-            'defaults' => $defaults,
+        return response()->json([
+            'success' => true,
+            'slots' => $this->messageTemplateService->getQuickTemplateSlots($ownerType, $ownerId),
         ]);
     }
 
     /**
-     * 新規追加。
+     * 指定スロットを保存する（無ければ作成、あれば更新）。
      */
-    public function store(Request $request): RedirectResponse
+    public function saveSlot(Request $request, int $slot): JsonResponse
     {
+        if ($slot < 1 || $slot > MessageTemplateService::QUICK_TEMPLATE_SLOTS) {
+            return response()->json(['success' => false, 'message' => 'スロット番号が不正です。'], 422);
+        }
+
         [$ownerType, $ownerId] = $this->resolveOwner();
         if (!$ownerType || !$ownerId) {
-            return redirect()->route('setting.talk-templates.index')
-                ->withErrors(['ログイン後に設定してください。']);
+            return response()->json(['success' => false, 'message' => 'ログイン後にご利用ください。'], 401);
         }
 
         $data = $request->validate([
-            'category' => ['nullable', 'string', 'max:64'],
-            'title' => ['required', 'string', 'max:80'],
+            'title' => ['nullable', 'string', 'max:80'],
             'body' => ['required', 'string', 'max:2000'],
         ], [
-            'title.required' => 'タイトルを入力してください。',
             'body.required' => '本文を入力してください。',
+            'body.max' => '本文は2000文字以内で入力してください。',
         ]);
 
-        $nextOrder = (int) UserTalkTemplate::query()
-            ->where('owner_type', $ownerType)
-            ->where('owner_id', $ownerId)
-            ->max('sort_order');
-
-        UserTalkTemplate::create([
-            'owner_type' => $ownerType,
-            'owner_id' => $ownerId,
-            'category' => $data['category'] ?: 'その他',
-            'title' => $data['title'],
-            'body' => $data['body'],
-            'sort_order' => $nextOrder + 1,
-            'is_active' => true,
-        ]);
-
-        return redirect()->route('setting.talk-templates.index')
-            ->with('message', '定型文を追加しました。');
-    }
-
-    /**
-     * 編集（保存）。
-     */
-    public function update(Request $request, int $id): RedirectResponse
-    {
-        [$ownerType, $ownerId] = $this->resolveOwner();
-        if (!$ownerType || !$ownerId) {
-            return redirect()->route('setting.talk-templates.index')
-                ->withErrors(['ログイン後に設定してください。']);
+        $title = trim((string) ($data['title'] ?? ''));
+        if ($title === '') {
+            $title = '定型文' . $slot;
         }
 
-        $template = $this->findOwned($id, $ownerType, $ownerId);
-        if (!$template) {
-            return redirect()->route('setting.talk-templates.index')
-                ->withErrors(['対象の定型文が見つかりません。']);
-        }
-
-        $data = $request->validate([
-            'category' => ['nullable', 'string', 'max:64'],
-            'title' => ['required', 'string', 'max:80'],
-            'body' => ['required', 'string', 'max:2000'],
-            'is_active' => ['nullable'],
-        ], [
-            'title.required' => 'タイトルを入力してください。',
-            'body.required' => '本文を入力してください。',
-        ]);
-
-        $template->fill([
-            'category' => $data['category'] ?: 'その他',
-            'title' => $data['title'],
-            'body' => $data['body'],
-            'is_active' => $request->boolean('is_active', true),
-        ])->save();
-
-        return redirect()->route('setting.talk-templates.index')
-            ->with('message', '定型文を更新しました。');
-    }
-
-    /**
-     * 削除。
-     */
-    public function destroy(int $id): RedirectResponse
-    {
-        [$ownerType, $ownerId] = $this->resolveOwner();
-        if (!$ownerType || !$ownerId) {
-            return redirect()->route('setting.talk-templates.index')
-                ->withErrors(['ログイン後に設定してください。']);
-        }
-
-        $template = $this->findOwned($id, $ownerType, $ownerId);
-        if ($template) {
-            $template->delete();
-        }
-
-        return redirect()->route('setting.talk-templates.index')
-            ->with('message', '定型文を削除しました。');
-    }
-
-    /**
-     * プリセットの定型文を自分のリストへ取り込む。
-     * 既に取り込み済（自分のテンプレートが1件でもある場合）は何もしない。
-     */
-    public function importDefaults(): RedirectResponse
-    {
-        [$ownerType, $ownerId] = $this->resolveOwner();
-        if (!$ownerType || !$ownerId) {
-            return redirect()->route('setting.talk-templates.index')
-                ->withErrors(['ログイン後に設定してください。']);
-        }
-
-        $exists = UserTalkTemplate::query()
-            ->where('owner_type', $ownerType)
-            ->where('owner_id', $ownerId)
-            ->exists();
-        if ($exists) {
-            return redirect()->route('setting.talk-templates.index')
-                ->withErrors(['既に自分の定型文が登録されています。プリセットを上書き取り込みする場合は、いったん全て削除してから再度お試しください。']);
-        }
-
-        $defaults = $this->messageTemplateService->getDefaultQuickTemplates($ownerType);
-        $order = 0;
-        foreach ($defaults as $tpl) {
-            $order++;
-            UserTalkTemplate::create([
+        UserTalkTemplate::updateOrCreate(
+            [
                 'owner_type' => $ownerType,
                 'owner_id' => $ownerId,
-                'category' => (string) ($tpl['category'] ?? 'その他'),
-                'title' => (string) ($tpl['title'] ?? ''),
-                'body' => (string) ($tpl['body'] ?? ''),
-                'sort_order' => $order,
+                'sort_order' => $slot,
+            ],
+            [
+                'category' => '',
+                'title' => $title,
+                'body' => $data['body'],
                 'is_active' => true,
-            ]);
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'slots' => $this->messageTemplateService->getQuickTemplateSlots($ownerType, $ownerId),
+        ]);
+    }
+
+    /**
+     * 指定スロットをデフォルトに戻す（カスタム行を削除）。
+     */
+    public function resetSlot(int $slot): JsonResponse
+    {
+        if ($slot < 1 || $slot > MessageTemplateService::QUICK_TEMPLATE_SLOTS) {
+            return response()->json(['success' => false, 'message' => 'スロット番号が不正です。'], 422);
         }
 
-        return redirect()->route('setting.talk-templates.index')
-            ->with('message', 'プリセットの定型文を取り込みました。自由に編集できます。');
+        [$ownerType, $ownerId] = $this->resolveOwner();
+        if (!$ownerType || !$ownerId) {
+            return response()->json(['success' => false, 'message' => 'ログイン後にご利用ください。'], 401);
+        }
+
+        UserTalkTemplate::query()
+            ->where('owner_type', $ownerType)
+            ->where('owner_id', $ownerId)
+            ->where('sort_order', $slot)
+            ->delete();
+
+        return response()->json([
+            'success' => true,
+            'slots' => $this->messageTemplateService->getQuickTemplateSlots($ownerType, $ownerId),
+        ]);
     }
 
     /**
      * ログイン中のアクター（cast / shop）を解決する。
-     * shop は shop_id（管理者ではなく店舗）に紐付ける。
      *
      * @return array{0: ?string, 1: ?string}
      */
@@ -197,14 +121,5 @@ class TalkTemplateController extends Controller
             }
         }
         return [null, null];
-    }
-
-    private function findOwned(int $id, string $ownerType, string $ownerId): ?UserTalkTemplate
-    {
-        return UserTalkTemplate::query()
-            ->where('id', $id)
-            ->where('owner_type', $ownerType)
-            ->where('owner_id', $ownerId)
-            ->first();
     }
 }

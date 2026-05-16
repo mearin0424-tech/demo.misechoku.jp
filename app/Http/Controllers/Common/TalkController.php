@@ -185,7 +185,7 @@ class TalkController extends Controller
                 && !$blockState['is_blocked']
                 && $currentApplicationStatus === self::APPLICATION_STATUS_HIRED
                 && $selectedTalkJobKind === 'trial',
-            'quickTemplates' => $this->messageTemplateService->getQuickTemplatesForOwner(
+            'quickTemplates' => $this->messageTemplateService->getQuickTemplateSlots(
                 $isCastPortal ? 'cast' : 'shop',
                 $isCastPortal ? $this->currentCastId() : $this->currentShopId()
             ),

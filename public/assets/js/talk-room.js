@@ -356,6 +356,220 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // ========================================================================
+    // クイック定型文（4 スロット）— モーダル内で挿入／編集／デフォルト復帰
+    // 共有: shop / cast 両ブランチから openTemplateMenu / closeTemplateMenu を呼ぶ。
+    // ========================================================================
+    const templateMenuOverlay = document.getElementById('talk-template-menu-overlay');
+    const templateMenuList = document.getElementById('talk-template-menu-list');
+    const templateMenuCloseButtons = document.querySelectorAll('.js-talk-template-close');
+    let cachedQuickTemplateSlots = Array.isArray(window.talkQuickTemplates)
+        ? window.talkQuickTemplates.slice()
+        : [];
+
+    const getTalkCsrfToken = () => {
+        if (chatForm) {
+            const tok = chatForm.querySelector('input[name="_token"]');
+            if (tok) return tok.value;
+        }
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? meta.getAttribute('content') : '';
+    };
+
+    const closeTemplateMenu = () => {
+        if (templateMenuOverlay) templateMenuOverlay.setAttribute('aria-hidden', 'true');
+    };
+
+    const buildSlotCard = (slot) => {
+        const card = document.createElement('div');
+        card.className = 'talk-template-slot-card' + (slot.is_custom ? ' is-custom' : '');
+
+        const useBtn = document.createElement('button');
+        useBtn.type = 'button';
+        useBtn.className = 'talk-template-slot-use';
+
+        const num = document.createElement('span');
+        num.className = 'talk-template-slot-no';
+        num.textContent = '定型文' + slot.slot;
+
+        const body = document.createElement('span');
+        body.className = 'talk-template-slot-body';
+        body.textContent = slot.body || slot.default_body || '';
+
+        useBtn.appendChild(num);
+        useBtn.appendChild(body);
+        useBtn.addEventListener('click', function () {
+            if (!messageInput) return;
+            closeTemplateMenu();
+            messageInput.value = body.textContent;
+            messageInput.dispatchEvent(new Event('input', { bubbles: true }));
+            messageInput.focus();
+        });
+
+        const editBtn = document.createElement('button');
+        editBtn.type = 'button';
+        editBtn.className = 'talk-template-slot-edit-btn';
+        editBtn.title = 'この定型文を編集';
+        editBtn.setAttribute('aria-label', 'この定型文を編集');
+        editBtn.innerHTML = '<i class="fas fa-pen" aria-hidden="true"></i>';
+        editBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            toggleSlotEdit(card, slot);
+        });
+
+        const viewRow = document.createElement('div');
+        viewRow.className = 'talk-template-slot-view';
+        viewRow.appendChild(useBtn);
+        viewRow.appendChild(editBtn);
+        card.appendChild(viewRow);
+        return card;
+    };
+
+    const toggleSlotEdit = (card, slot) => {
+        const existing = card.querySelector('.talk-template-slot-edit-form');
+        const viewRow = card.querySelector('.talk-template-slot-view');
+        if (existing) {
+            existing.remove();
+            if (viewRow) viewRow.style.display = '';
+            return;
+        }
+        if (viewRow) viewRow.style.display = 'none';
+
+        const form = document.createElement('div');
+        form.className = 'talk-template-slot-edit-form';
+
+        const label = document.createElement('label');
+        label.className = 'talk-template-slot-edit-label';
+        label.textContent = '定型文' + slot.slot + ' の本文';
+        form.appendChild(label);
+
+        const textarea = document.createElement('textarea');
+        textarea.value = slot.body || slot.default_body || '';
+        textarea.rows = 4;
+        textarea.maxLength = 2000;
+        textarea.className = 'talk-template-slot-textarea';
+        form.appendChild(textarea);
+
+        const err = document.createElement('p');
+        err.className = 'talk-template-slot-error';
+        err.hidden = true;
+        form.appendChild(err);
+
+        const actions = document.createElement('div');
+        actions.className = 'talk-template-slot-edit-actions';
+
+        const saveBtn = document.createElement('button');
+        saveBtn.type = 'button';
+        saveBtn.className = 'talk-template-slot-save';
+        saveBtn.textContent = '保存';
+        saveBtn.addEventListener('click', async function () {
+            const bodyText = textarea.value.trim();
+            if (!bodyText) {
+                err.textContent = '本文を入力してください。';
+                err.hidden = false;
+                return;
+            }
+            saveBtn.disabled = true;
+            try {
+                const res = await fetch('/setting/talk-templates/slot/' + slot.slot, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': getTalkCsrfToken(),
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ body: bodyText }),
+                });
+                const j = await res.json();
+                if (!res.ok || !j.success) throw new Error(j.message || '保存に失敗しました。');
+                cachedQuickTemplateSlots = Array.isArray(j.slots) ? j.slots : cachedQuickTemplateSlots;
+                window.talkQuickTemplates = cachedQuickTemplateSlots;
+                renderTemplateSlots();
+            } catch (ex) {
+                err.textContent = ex.message || '保存に失敗しました。';
+                err.hidden = false;
+            } finally {
+                saveBtn.disabled = false;
+            }
+        });
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.type = 'button';
+        cancelBtn.className = 'talk-template-slot-cancel';
+        cancelBtn.textContent = 'キャンセル';
+        cancelBtn.addEventListener('click', function () {
+            renderTemplateSlots();
+        });
+
+        const resetBtn = document.createElement('button');
+        resetBtn.type = 'button';
+        resetBtn.className = 'talk-template-slot-reset';
+        resetBtn.textContent = 'デフォルトに戻す';
+        resetBtn.hidden = !slot.is_custom;
+        resetBtn.addEventListener('click', async function () {
+            if (!window.confirm('このスロットをデフォルトの文面に戻します。よろしいですか？')) return;
+            resetBtn.disabled = true;
+            try {
+                const res = await fetch('/setting/talk-templates/slot/' + slot.slot, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': getTalkCsrfToken(),
+                        'Accept': 'application/json',
+                    },
+                });
+                const j = await res.json();
+                if (!res.ok || !j.success) throw new Error(j.message || 'リセットに失敗しました。');
+                cachedQuickTemplateSlots = Array.isArray(j.slots) ? j.slots : cachedQuickTemplateSlots;
+                window.talkQuickTemplates = cachedQuickTemplateSlots;
+                renderTemplateSlots();
+            } catch (ex) {
+                err.textContent = ex.message || 'リセットに失敗しました。';
+                err.hidden = false;
+            } finally {
+                resetBtn.disabled = false;
+            }
+        });
+
+        actions.appendChild(saveBtn);
+        actions.appendChild(cancelBtn);
+        actions.appendChild(resetBtn);
+        form.appendChild(actions);
+        card.appendChild(form);
+    };
+
+    const renderTemplateSlots = () => {
+        if (!templateMenuList) return;
+        templateMenuList.innerHTML = '';
+        if (!cachedQuickTemplateSlots.length) {
+            const empty = document.createElement('p');
+            empty.className = 'talk-template-empty';
+            empty.textContent = '定型文が利用できません。';
+            templateMenuList.appendChild(empty);
+            return;
+        }
+        cachedQuickTemplateSlots.forEach(function (slot) {
+            templateMenuList.appendChild(buildSlotCard(slot));
+        });
+    };
+
+    const openTemplateMenu = () => {
+        if (!templateMenuOverlay) return;
+        renderTemplateSlots();
+        templateMenuOverlay.setAttribute('aria-hidden', 'false');
+    };
+
+    templateMenuCloseButtons.forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            closeTemplateMenu();
+        });
+    });
+    if (templateMenuOverlay) {
+        templateMenuOverlay.addEventListener('click', function (e) {
+            if (e.target === templateMenuOverlay) closeTemplateMenu();
+        });
+    }
+
     if (!isCastRoom && chatForm) {
         const actionUrl = chatForm.getAttribute('data-action-url');
         const token = chatForm.querySelector('input[name="_token"]').value;
@@ -368,9 +582,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const closeJobKindButtons = document.querySelectorAll('.js-job-kind-close');
         const openTemplateSendMenu = document.getElementById('open-template-send-menu');
         const openWorkCompleteReportMenu = document.getElementById('open-work-complete-report-menu');
-        const templateMenuOverlay = document.getElementById('talk-template-menu-overlay');
-        const templateMenuList = document.getElementById('talk-template-menu-list');
-        const templateMenuCloseButtons = document.querySelectorAll('.js-talk-template-close');
         const overlay = document.getElementById('interview-modal-overlay');
         const interviewForm = overlay ? overlay.querySelector('#interview-form') : null;
         const closeBtn = overlay ? overlay.querySelector('.interview-modal-close') : null;
@@ -393,68 +604,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const hiredHourlyWageWrap = document.getElementById('hired-hourly-wage-wrap');
         const hiredHourlyWageInput = document.getElementById('hired-hourly-wage-input');
         const resultEmploymentKind = document.getElementById('result-employment-kind');
-        const quickTemplates = (Array.isArray(window.talkQuickTemplates) && window.talkQuickTemplates.length > 0)
-            ? window.talkQuickTemplates
-            : [
-                { key: 'fallback_thanks', category: '基本', title: 'お礼', body: 'ありがとうございます。内容を確認して折り返します。' },
-                { key: 'fallback_ok', category: '基本', title: '承知',  body: '承知しました。よろしくお願いします。' },
-                { key: 'fallback_greet', category: '基本', title: '挨拶',  body: '本日はご連絡ありがとうございます。' },
-            ];
-        const closeTemplateMenu = () => {
-            if (templateMenuOverlay) templateMenuOverlay.setAttribute('aria-hidden', 'true');
-        };
-        const openTemplateMenu = () => {
-            if (!templateMenuOverlay || !templateMenuList) return;
-            templateMenuList.innerHTML = '';
-
-            // カテゴリ別にグルーピング
-            const grouped = {};
-            const order = [];
-            quickTemplates.forEach(function (tpl) {
-                const cat = (tpl && tpl.category) ? String(tpl.category) : 'その他';
-                if (!grouped[cat]) { grouped[cat] = []; order.push(cat); }
-                grouped[cat].push(tpl);
-            });
-
-            order.forEach(function (cat) {
-                const group = document.createElement('div');
-                group.className = 'talk-template-group';
-                const header = document.createElement('div');
-                header.className = 'talk-template-group-title';
-                header.textContent = cat;
-                group.appendChild(header);
-
-                grouped[cat].forEach(function (tpl) {
-                    const text = (tpl && typeof tpl === 'object') ? String(tpl.body || '') : String(tpl || '');
-                    const title = (tpl && typeof tpl === 'object') ? String(tpl.title || '') : '';
-                    const button = document.createElement('button');
-                    button.type = 'button';
-                    button.className = 'talk-template-item';
-                    if (title) {
-                        const titleEl = document.createElement('span');
-                        titleEl.className = 'talk-template-item-title';
-                        titleEl.textContent = title;
-                        const bodyEl = document.createElement('span');
-                        bodyEl.className = 'talk-template-item-body';
-                        bodyEl.textContent = text;
-                        button.appendChild(titleEl);
-                        button.appendChild(bodyEl);
-                    } else {
-                        button.textContent = text;
-                    }
-                    button.addEventListener('click', function () {
-                        if (!messageInput) return;
-                        closeTemplateMenu();
-                        messageInput.value = text;
-                        messageInput.dispatchEvent(new Event('input', { bubbles: true }));
-                        messageInput.focus();
-                    });
-                    group.appendChild(button);
-                });
-                templateMenuList.appendChild(group);
-            });
-            templateMenuOverlay.setAttribute('aria-hidden', 'false');
-        };
         let currentResultAction = null;
         const renderResultDescByKind = () => {
             if (!resultDesc || !resultEmploymentKind) return;
@@ -645,17 +794,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (jobKindOverlay) {
             jobKindOverlay.addEventListener('click', function(e) {
                 if (e.target === jobKindOverlay) closeJobKindModal();
-            });
-        }
-        templateMenuCloseButtons.forEach(function (btn) {
-            btn.addEventListener('click', function (e) {
-                e.preventDefault();
-                closeTemplateMenu();
-            });
-        });
-        if (templateMenuOverlay) {
-            templateMenuOverlay.addEventListener('click', function (e) {
-                if (e.target === templateMenuOverlay) closeTemplateMenu();
             });
         }
         if (openTemplateSendMenu && messageInput) {
@@ -916,70 +1054,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const talkActionMenuOverlay = document.getElementById('talk-action-menu-overlay');
         const talkActionMenuCloseButtons = document.querySelectorAll('.js-talk-action-menu-close');
         const openTemplateSendMenu = document.getElementById('open-template-send-menu');
-        const templateMenuOverlay = document.getElementById('talk-template-menu-overlay');
-        const templateMenuList = document.getElementById('talk-template-menu-list');
-        const templateMenuCloseButtons = document.querySelectorAll('.js-talk-template-close');
-        const quickTemplates = (Array.isArray(window.talkQuickTemplates) && window.talkQuickTemplates.length > 0)
-            ? window.talkQuickTemplates
-            : [
-                { key: 'fallback_greet', category: '基本', title: '挨拶', body: '本日はよろしくお願いします。' },
-                { key: 'fallback_ok', category: '基本', title: '了承', body: 'ご確認ありがとうございます。承知しました。' },
-                { key: 'fallback_proceed', category: '基本', title: '進行', body: '問題なければこの内容で進めさせてください。' },
-            ];
-        const closeTemplateMenu = () => {
-            if (templateMenuOverlay) templateMenuOverlay.setAttribute('aria-hidden', 'true');
-        };
-        const openTemplateMenu = () => {
-            if (!templateMenuOverlay || !templateMenuList) return;
-            templateMenuList.innerHTML = '';
-
-            const grouped = {};
-            const order = [];
-            quickTemplates.forEach(function (tpl) {
-                const cat = (tpl && tpl.category) ? String(tpl.category) : 'その他';
-                if (!grouped[cat]) { grouped[cat] = []; order.push(cat); }
-                grouped[cat].push(tpl);
-            });
-
-            order.forEach(function (cat) {
-                const group = document.createElement('div');
-                group.className = 'talk-template-group';
-                const header = document.createElement('div');
-                header.className = 'talk-template-group-title';
-                header.textContent = cat;
-                group.appendChild(header);
-
-                grouped[cat].forEach(function (tpl) {
-                    const text = (tpl && typeof tpl === 'object') ? String(tpl.body || '') : String(tpl || '');
-                    const title = (tpl && typeof tpl === 'object') ? String(tpl.title || '') : '';
-                    const button = document.createElement('button');
-                    button.type = 'button';
-                    button.className = 'talk-template-item';
-                    if (title) {
-                        const titleEl = document.createElement('span');
-                        titleEl.className = 'talk-template-item-title';
-                        titleEl.textContent = title;
-                        const bodyEl = document.createElement('span');
-                        bodyEl.className = 'talk-template-item-body';
-                        bodyEl.textContent = text;
-                        button.appendChild(titleEl);
-                        button.appendChild(bodyEl);
-                    } else {
-                        button.textContent = text;
-                    }
-                    button.addEventListener('click', function () {
-                        if (!messageInput) return;
-                        closeTemplateMenu();
-                        messageInput.value = text;
-                        messageInput.dispatchEvent(new Event('input', { bubbles: true }));
-                        messageInput.focus();
-                    });
-                    group.appendChild(button);
-                });
-                templateMenuList.appendChild(group);
-            });
-            templateMenuOverlay.setAttribute('aria-hidden', 'false');
-        };
         const fulltimeRequestBtn = document.getElementById('send-fulltime-request');
         const confirmOverlay = document.getElementById('interview-confirm-overlay');
         const confirmSelected = document.getElementById('interview-confirm-selected');
@@ -1009,17 +1083,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (talkActionMenuOverlay) {
             talkActionMenuOverlay.addEventListener('click', function (e) {
                 if (e.target === talkActionMenuOverlay) closeTalkActionMenu();
-            });
-        }
-        templateMenuCloseButtons.forEach(function (btn) {
-            btn.addEventListener('click', function (e) {
-                e.preventDefault();
-                closeTemplateMenu();
-            });
-        });
-        if (templateMenuOverlay) {
-            templateMenuOverlay.addEventListener('click', function (e) {
-                if (e.target === templateMenuOverlay) closeTemplateMenu();
             });
         }
         if (openTemplateSendMenu && messageInput) {

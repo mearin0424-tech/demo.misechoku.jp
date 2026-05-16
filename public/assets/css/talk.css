@@ -1838,28 +1838,150 @@ button.interview-option-btn:hover {
     white-space: normal;
     word-break: break-word;
 }
-.talk-template-edit-link-wrap {
+.talk-template-menu-hint {
     margin: 0 0 10px;
+    font-size: 11px;
+    line-height: 1.5;
+    color: rgba(245, 230, 230, 0.6);
 }
-.talk-template-edit-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 999px;
-    border: 1px solid rgba(220, 181, 104, .35);
+.talk-template-slot-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: rgba(255, 255, 255, .04);
+    border: 1px solid rgba(220, 181, 104, .2);
+    border-radius: 12px;
+    padding: 0;
+    margin-bottom: 8px;
+    transition: border-color .15s ease, background .15s ease;
+}
+.talk-template-slot-card.is-custom {
+    border-color: rgba(220, 181, 104, .45);
+    background: rgba(220, 181, 104, .07);
+}
+.talk-template-slot-view {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    width: 100%;
+}
+.talk-template-slot-use {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    background: transparent;
+    border: none;
+    text-align: left;
+    padding: 10px 12px;
+    color: var(--talk-text-main);
+    cursor: pointer;
+}
+.talk-template-slot-use:hover {
     background: rgba(220, 181, 104, .08);
+}
+.talk-template-slot-no {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
     color: var(--gold, #dcb568);
+}
+.talk-template-slot-body {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--talk-text-main);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.talk-template-slot-edit-btn {
+    flex: 0 0 auto;
+    background: transparent;
+    border: none;
+    border-left: 1px solid rgba(220, 181, 104, .18);
+    color: var(--gold, #dcb568);
+    padding: 0 14px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background .15s ease;
+}
+.talk-template-slot-edit-btn:hover {
+    background: rgba(220, 181, 104, .12);
+}
+.talk-template-slot-edit-form {
+    padding: 10px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-top: 1px solid rgba(220, 181, 104, .18);
+}
+.talk-template-slot-edit-label {
+    font-size: 11px;
+    color: var(--gold, #dcb568);
+    letter-spacing: .06em;
+}
+.talk-template-slot-textarea {
+    width: 100%;
+    min-height: 96px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(229, 193, 88, .25);
+    background: rgba(0, 0, 0, .25);
+    color: #fff;
+    font-size: 13px;
+    line-height: 1.5;
+    resize: vertical;
+}
+.talk-template-slot-textarea:focus {
+    outline: none;
+    border-color: rgba(229, 193, 88, .6);
+}
+.talk-template-slot-edit-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-end;
+}
+.talk-template-slot-save,
+.talk-template-slot-cancel,
+.talk-template-slot-reset {
+    border-radius: 999px;
+    padding: 6px 14px;
     font-size: 12px;
-    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
     transition: background .15s ease, border-color .15s ease;
 }
-.talk-template-edit-link:hover {
-    background: rgba(220, 181, 104, .18);
-    border-color: rgba(220, 181, 104, .65);
-    text-decoration: none;
+.talk-template-slot-save {
+    background: rgba(6, 95, 70, .9);
+    color: #ecfdf5;
+    border-color: rgba(52, 211, 153, .65);
 }
-.talk-template-edit-link i { font-size: 11px; }
+.talk-template-slot-save:disabled { opacity: .5; cursor: not-allowed; }
+.talk-template-slot-cancel {
+    background: rgba(255, 255, 255, .05);
+    color: var(--talk-text-main);
+    border-color: rgba(220, 181, 104, .25);
+}
+.talk-template-slot-reset {
+    background: rgba(185, 28, 28, .15);
+    color: #fecaca;
+    border-color: rgba(248, 113, 113, .35);
+}
+.talk-template-slot-error {
+    margin: 0;
+    font-size: 12px;
+    color: #fca5a5;
+}
+.talk-template-empty {
+    margin: 0;
+    padding: 14px;
+    color: rgba(245, 230, 230, .6);
+    font-size: 13px;
+    text-align: center;
+}
 
 /* ==========================================================================
    NGワード警告（送信欄直下）
