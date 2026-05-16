@@ -1,7 +1,7 @@
 /* [CAUTION] このファイル(public/build/assets/css)は稼働時はvite有効化後に移動（resources/css/） */
 
-/* フォント：Playfair Display / Noto Sans JP / Shippori Mincho */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&family=Shippori+Mincho:wght@500;600;700&display=swap');
+/* フォント：Noto Sans JP に統一 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700;800;900&display=swap');
 
 /* レスポンシブ基盤：はみ出し防止・ボックスモデル統一 */
 html {
@@ -39,9 +39,9 @@ html {
     --color-success: #86efac;
     --color-success-bg: rgba(22, 163, 74, 0.18);
 
-    /* Typography（タイトル: Noto Serif JP / 本文: 游ゴシック寄り） */
-    --font-serif: 'Shippori Mincho', 'Noto Serif JP', 'Playfair Display', serif;
-    --font-sans: '游ゴシック', 'Yu Gothic', 'YuGothic', 'Noto Sans JP', 'Meiryo', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    /* Typography（全画面 Noto Sans JP に統一） */
+    --font-sans: 'Noto Sans JP', system-ui, -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Meiryo', sans-serif;
+    --font-serif: var(--font-sans);
 
     /* Glassmorphism */
     --glass-bg: rgba(20, 20, 20, 0.55);

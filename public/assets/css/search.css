@@ -545,7 +545,7 @@ body.page-search .connection-list--search {
 }
 .shop-search-card__name {
     margin: 0;
-    font-family: 'Shippori Mincho', var(--font-serif, 'Noto Serif JP', serif);
+    font-family: var(--font-sans);
     font-size: 1.38rem;
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -1646,7 +1646,7 @@ body.page-search .connection-list--search {
 }
 
 .ai-recommend__intro-title {
-    font-family: 'Shippori Mincho', var(--font-serif);
+    font-family: var(--font-sans);
     font-size: 0.95rem;
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -1865,7 +1865,7 @@ body.page-search .connection-list--search {
 
 .ai-recommend__card-title {
     margin: 0 0 8px;
-    font-family: 'Shippori Mincho', var(--font-serif);
+    font-family: var(--font-sans);
     font-size: 1rem;
     line-height: 1.6;
     letter-spacing: 0.03em;

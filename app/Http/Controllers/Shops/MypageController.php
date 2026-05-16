@@ -810,6 +810,14 @@ class MypageController extends Controller
             }
         }
 
+        // プロフィール住所モード：緯度経度が未取得なら住所からジオコーディングして latitude/longitude を埋める。
+        if ($data['mode'] === 'profile') {
+            $current = $userLocation->loadProfileSettings();
+            if ($current && empty($current['profile_location']) && !empty($current['has_address'])) {
+                $userLocation->geocodeAndSaveProfileLocation($geocoding);
+            }
+        }
+
         $userLocation->saveSearchSettings($payload);
 
         return response()->json([

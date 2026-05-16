@@ -11,7 +11,12 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
     $currentMaxKm = (int) ($settings['max_distance_km'] ?? 20);
     $currentPassportAddress = $settings['passport_address'] ?? '';
     $currentPassportLabel = $settings['passport_label'] ?? '';
+    // プロフィールに住所が登録されているかどうかは pref/city/addr のいずれかが入っているかで判定。
+    // 緯度経度はジオコーディング前だと未取得のことがあるが、住所自体は登録済みのため
+    // 「住所が登録されていません」と表示しない（保存時に自動でジオコーディングする）。
+    $hasProfileAddress = !empty($settings['has_address']);
     $hasProfileLocation = !empty($settings['profile_location']);
+    $profileAddressText = (string) ($settings['profile_address'] ?? '');
     $updateUrl = route($updateRouteName);
 
     // スライダーの目盛り → 実際に submit する km 値
@@ -83,22 +88,24 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
                 <legend class="search-location-section-title">基準となる拠点</legend>
 
                 {{-- 登録住所 --}}
-                <label class="search-location-card {{ $currentMode === 'profile' ? 'is-selected' : '' }} {{ $hasProfileLocation ? '' : 'is-disabled-soft' }}" data-mode-card="profile">
+                <label class="search-location-card {{ $currentMode === 'profile' ? 'is-selected' : '' }} {{ $hasProfileAddress ? '' : 'is-disabled-soft' }}" data-mode-card="profile">
                     <input type="radio" name="mode" value="profile" @checked($currentMode === 'profile')>
                     <span class="search-location-card__row">
                         <i class="fas fa-home search-location-card__icon"></i>
                         <span class="search-location-card__main">
                             <span class="search-location-card__title">登録住所</span>
-                            <span class="search-location-card__sub {{ $hasProfileLocation ? '' : 'is-warn' }}">
+                            <span class="search-location-card__sub {{ $hasProfileAddress ? '' : 'is-warn' }}">
                                 @if($hasProfileLocation)
-                                    プロフィールの住所を基準にします
+                                    {{ $profileAddressText !== '' ? $profileAddressText : 'プロフィールの住所を基準にします' }}
+                                @elseif($hasProfileAddress)
+                                    {{ $profileAddressText }}（保存時に緯度経度を自動取得します）
                                 @else
                                     プロフィールに住所が登録されていません
                                 @endif
                             </span>
                         </span>
                     </span>
-                    @unless($hasProfileLocation)
+                    @unless($hasProfileAddress)
                         <span class="search-location-card__expand" data-mode-section="profile">
                             <a href="{{ url('/setting/account') }}" class="search-location-inline-action">
                                 住所を登録する <i class="fas fa-chevron-right"></i>

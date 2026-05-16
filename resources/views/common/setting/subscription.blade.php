@@ -70,7 +70,7 @@
 }
 
 .setting-title {
-    font-family: 'Shippori Mincho', 'Noto Sans JP', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: var(--font-sans);
     font-size: 1.4rem;
     margin-bottom: 8px;
     color: var(--color-gold, #d4af37);

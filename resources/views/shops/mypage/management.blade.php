@@ -12,7 +12,7 @@
        ======================================================== */
     .shop-management-shell { padding: 0 16px 16px; }
     .shop-management-shell .mypage-page-title {
-        font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
+        font-family: var(--font-sans);
         font-size: 1.2rem; font-weight: 700; color: #f8e9c8; margin: 16px 0 14px;
     }
 

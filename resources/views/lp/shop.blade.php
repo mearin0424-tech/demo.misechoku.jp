@@ -39,7 +39,7 @@
         display: flex; align-items: center; justify-content: space-between;
     }
     .lp-topbar__logo {
-        font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
+        font-family: var(--font-sans);
         font-weight: 900; letter-spacing: 0.16em;
         font-size: 1.1rem; color: var(--lp-gold-deep); margin: 0;
     }
@@ -66,7 +66,7 @@
         border-radius: 4px; pointer-events: none;
     }
     .lp-hero__eyebrow {
-        font-family: 'Playfair Display', serif;
+        font-family: var(--font-sans);
         display: inline-block;
         font-size: 0.78rem; letter-spacing: 0.34em;
         font-weight: 700; color: var(--lp-gold-deep);
@@ -74,7 +74,7 @@
         border-radius: 999px; background: #fff; margin-bottom: 22px;
     }
     .lp-hero__catch {
-        font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
+        font-family: var(--font-sans);
         font-size: clamp(1.5rem, 6.4vw, 2.1rem);
         font-weight: 900; line-height: 1.5;
         color: var(--lp-text); margin: 0 0 26px;
@@ -109,12 +109,12 @@
     .lp-section--alt { background: var(--lp-bg-alt); }
     .lp-section__head { text-align: center; margin-bottom: 32px; }
     .lp-section__eyebrow {
-        font-family: 'Playfair Display', serif;
+        font-family: var(--font-sans);
         display: inline-block; font-size: 0.78rem; letter-spacing: 0.32em;
         font-weight: 700; color: var(--lp-gold-deep); margin-bottom: 8px;
     }
     .lp-section__title {
-        font-family: 'Shippori Mincho', serif;
+        font-family: var(--font-sans);
         font-size: clamp(1.3rem, 5vw, 1.7rem);
         font-weight: 900; margin: 0;
     }
@@ -174,7 +174,7 @@
         border: 1px solid var(--lp-gold-light);
     }
     .lp-flow__num {
-        font-family: 'Playfair Display', serif;
+        font-family: var(--font-sans);
         font-size: 0.78rem; letter-spacing: 0.24em; font-weight: 700;
         color: var(--lp-gold-deep);
         display: inline-block;
@@ -185,7 +185,7 @@
         background: #fff5dd;
     }
     .lp-flow__title {
-        font-family: 'Shippori Mincho', serif;
+        font-family: var(--font-sans);
         font-size: 1.15rem; font-weight: 900;
         color: var(--lp-text); margin: 0 0 12px;
         line-height: 1.5;
@@ -213,7 +213,7 @@
         box-shadow: var(--lp-shadow);
     }
     .lp-mid-cta__lead {
-        font-family: 'Shippori Mincho', serif;
+        font-family: var(--font-sans);
         font-size: 1.05rem; font-weight: 800; color: var(--lp-text);
         margin: 0 0 16px;
     }
@@ -241,7 +241,7 @@
         border-radius: 18px; padding: 28px 22px;
         text-align: center; box-shadow: var(--lp-shadow);
     }
-    .lp-contact__title { font-family: 'Shippori Mincho', serif; font-size: 1.1rem; font-weight: 800; margin: 0 0 8px; }
+    .lp-contact__title { font-family: var(--font-sans); font-size: 1.1rem; font-weight: 800; margin: 0 0 8px; }
     .lp-contact__body { font-size: 0.86rem; line-height: 1.85; color: var(--lp-text-soft); margin: 0 0 18px; }
     .lp-line-btn {
         display: inline-flex; align-items: center; justify-content: center;

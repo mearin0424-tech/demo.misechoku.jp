@@ -95,7 +95,7 @@
 .setting-page { padding: 24px 16px 32px; color: #f9f5f5; }
 @media (min-width: 768px) { .setting-page { padding: 32px 24px 40px; } }
 .setting-header { margin-bottom: 24px; }
-.setting-title { font-family: 'Shippori Mincho','Noto Sans JP',sans-serif; font-size: 1.4rem; margin-bottom: 8px; color: var(--color-gold, #d4af37); }
+.setting-title { font-family: var(--font-sans); font-size: 1.4rem; margin-bottom: 8px; color: var(--color-gold, #d4af37); }
 .setting-lead { font-size: 0.9rem; line-height: 1.6; color: #d1c1c1; }
 .setting-section { margin-bottom: 18px; background: rgba(20, 7, 15, 0.9); border-radius: 16px; padding: 14px 12px 10px; border: 1px solid rgba(212, 175, 55, 0.4); }
 @media (min-width: 768px) { .setting-section { padding: 16px 16px 12px; } }

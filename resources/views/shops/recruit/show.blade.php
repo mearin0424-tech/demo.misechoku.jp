@@ -21,7 +21,7 @@
     .recruit-ref-shell .recruit-ref-inforow,
     .recruit-ref-shell .recruit-ref-h2 { font-family: 'Noto Sans JP', 'Hiragino Sans', 'メイリオ', Meiryo, sans-serif; }
     .recruit-ref-shell h1.recruit-ref-title,
-    .recruit-ref-shell .recruit-ref-h2-lg { font-family: 'Shippori Mincho', 'Noto Serif JP', serif; }
+    .recruit-ref-shell .recruit-ref-h2-lg { font-family: var(--font-sans); }
 
     /* プレビューバー（sticky） */
     .recruit-ref-preview-sticky {
@@ -228,7 +228,7 @@
     .recruit-ref-chip { font-size: 10px; padding: 2px 8px; border-radius: 2px; font-weight: 700; background: #27272a; color: #d4d4d8; border: 1px solid #3f3f46; }
     .recruit-ref-chip.gold-outline { background: transparent; color: #d4af37; border: 1px solid #d4af37; }
 
-    .recruit-ref-title { margin: 0 0 8px; font-size: 1.5rem; line-height: 1.25; font-weight: 800; color: #fff; letter-spacing: .02em; font-family: var(--font-serif, "Shippori Mincho", serif); }
+    .recruit-ref-title { margin: 0 0 8px; font-size: 1.5rem; line-height: 1.25; font-weight: 800; color: #fff; letter-spacing: .02em; font-family: var(--font-sans); }
     .recruit-ref-catch { margin: 0 0 20px; font-size: 0.875rem; font-weight: 800; color: #d4af37; letter-spacing: 0.02em; }
 
     .recruit-job-toggle { background: #110f0d; padding: 4px; border-radius: 8px; display: flex; border: 1px solid #2a2015; margin-bottom: 16px; }

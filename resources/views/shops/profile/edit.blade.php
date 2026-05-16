@@ -68,7 +68,7 @@
         font-weight: 800;
         color: #fff;
         letter-spacing: 0.2em;
-        font-family: var(--font-serif, "Shippori Mincho", serif);
+        font-family: var(--font-sans);
     }
     .shop-profile-edit__title-sub {
         margin: 2px 0 0;
@@ -124,7 +124,7 @@
         border-bottom: 1px solid #1f1a14;
         font-size: 0.875rem;
         font-style: italic;
-        font-family: var(--font-serif, "Shippori Mincho", serif);
+        font-family: var(--font-sans);
         font-weight: 600;
         color: rgba(161, 161, 170, 0.95);
         letter-spacing: 0.08em;

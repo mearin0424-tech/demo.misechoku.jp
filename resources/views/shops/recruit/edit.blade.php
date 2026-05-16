@@ -53,7 +53,7 @@
         font-weight: 800;
         color: #fff;
         letter-spacing: 0.18em;
-        font-family: var(--font-serif, "Shippori Mincho", serif);
+        font-family: var(--font-sans);
     }
     .job-edit-v2__title-sub { margin: 2px 0 0; font-size: 9px; font-weight: 700; color: var(--je-gold); letter-spacing: 0.06em; }
     .job-edit-v2__spacer { width: 2rem; flex-shrink: 0; }
@@ -68,7 +68,7 @@
         padding-bottom: 10px;
         border-bottom: 1px solid rgba(220, 181, 104, 0.18);
         font-size: 1rem;
-        font-family: var(--font-serif, "Shippori Mincho", serif);
+        font-family: var(--font-sans);
         font-weight: 700;
         color: #fff;
         letter-spacing: 0.04em;

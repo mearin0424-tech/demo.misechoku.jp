@@ -83,8 +83,8 @@
     --status-neutral-bd: #d4c5b0;
 
     --font-admin-sans: "Noto Sans JP", "Hiragino Sans", "Meiryo", system-ui, -apple-system, sans-serif;
-    --font-admin-serif: "Shippori Mincho", "Noto Serif JP", "Yu Mincho", "Hiragino Mincho ProN", serif;
-    --font-admin-eyebrow: "Lato", "Noto Sans JP", system-ui, sans-serif;
+    --font-admin-serif: var(--font-admin-sans);
+    --font-admin-eyebrow: var(--font-admin-sans);
 
     /* レイアウト寸法 */
     --admin-sidebar-width: 240px;

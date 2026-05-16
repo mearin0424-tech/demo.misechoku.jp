@@ -75,7 +75,7 @@
     font-weight: 800;
     color: #ffe2a3;
     margin: 0 0 12px;
-    font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
+    font-family: var(--font-sans);
     letter-spacing: 0.06em;
 }
 .suspended-card__lead {

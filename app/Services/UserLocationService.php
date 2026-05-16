@@ -238,6 +238,9 @@ class UserLocationService
         $row = DB::table($table)
             ->where($idColumn, $idValue)
             ->select(
+                'pref',
+                'city',
+                'addr',
                 'latitude',
                 'longitude',
                 'search_location_mode as mode',
@@ -256,6 +259,12 @@ class UserLocationService
             ? ['lat' => (float) $row->latitude, 'lng' => (float) $row->longitude]
             : null;
 
+        $addressText = trim(
+            ((string) ($row->pref ?? ''))
+            . ((string) ($row->city ?? ''))
+            . ((string) ($row->addr ?? ''))
+        );
+
         return [
             'mode'              => (string) ($row->mode ?? ''),
             'passport_address'  => $row->passport_address,
@@ -264,7 +273,52 @@ class UserLocationService
             'passport_label'    => (string) ($row->passport_label ?? ''),
             'max_distance_km'   => $row->max_distance_km !== null ? (int) $row->max_distance_km : null,
             'profile_location'  => $profileLocation,
+            'profile_address'   => $addressText,
+            'has_address'       => $addressText !== '',
         ];
+    }
+
+    /**
+     * 自プロフィールの住所を国土地理院 API でジオコーディングし、
+     * cast_profiles / shop_profiles の latitude/longitude を更新する。
+     * 成功時は lat/lng を返す。失敗時は null。
+     *
+     * @return array{lat: float, lng: float}|null
+     */
+    public function geocodeAndSaveProfileLocation(GeocodingService $geocoding): ?array
+    {
+        [$table, $idColumn, $idValue] = $this->resolveCurrentProfileTarget();
+        if ($table === null) {
+            return null;
+        }
+
+        $row = DB::table($table)
+            ->where($idColumn, $idValue)
+            ->select('pref', 'city', 'addr')
+            ->first();
+        if (!$row) {
+            return null;
+        }
+        $address = trim(((string) ($row->pref ?? ''))
+            . ((string) ($row->city ?? ''))
+            . ((string) ($row->addr ?? '')));
+        if ($address === '') {
+            return null;
+        }
+
+        $coords = $geocoding->fromAddress($address);
+        if (!$coords) {
+            return null;
+        }
+
+        DB::table($table)
+            ->where($idColumn, $idValue)
+            ->update([
+                'latitude'  => $coords['latitude'],
+                'longitude' => $coords['longitude'],
+            ]);
+
+        return ['lat' => (float) $coords['latitude'], 'lng' => (float) $coords['longitude']];
     }
 
     /**

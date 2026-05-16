@@ -173,7 +173,7 @@
 <style>
 .setting-page { padding: 24px var(--content-padding-x, 16px) 32px; color: #f9f5f5; }
 .setting-header { margin-bottom: 18px; }
-.setting-title { font-family: 'Shippori Mincho','Noto Sans JP',sans-serif; font-size: 1.4rem; margin-bottom: 8px; color: var(--mypage-gold, #dcb568); }
+.setting-title { font-family: var(--font-sans); font-size: 1.4rem; margin-bottom: 8px; color: var(--mypage-gold, #dcb568); }
 .setting-lead { font-size: 0.86rem; line-height: 1.6; color: #d1c1c1; }
 
 .setting-flash {

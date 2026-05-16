@@ -41,7 +41,7 @@
         display: flex; align-items: center; justify-content: space-between;
     }
     .lp-topbar__logo {
-        font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
+        font-family: var(--font-sans);
         font-weight: 900; letter-spacing: 0.16em;
         font-size: 1.1rem; color: var(--lp-gold-deep); margin: 0;
     }
@@ -75,7 +75,7 @@
         border-radius: 999px; background: #fff; margin-bottom: 18px;
     }
     .lp-hero__catch {
-        font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
+        font-family: var(--font-sans);
         font-size: clamp(1.45rem, 6.2vw, 2.1rem);
         font-weight: 900; line-height: 1.5;
         color: var(--lp-text); margin: 0 0 14px;
@@ -111,7 +111,7 @@
         font-weight: 800; color: var(--lp-gold-deep); margin-bottom: 8px;
     }
     .lp-section__title {
-        font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
+        font-family: var(--font-sans);
         font-size: clamp(1.3rem, 5vw, 1.7rem);
         font-weight: 900; color: var(--lp-text); margin: 0;
         letter-spacing: 0.04em;
@@ -152,7 +152,7 @@
         font-size: 1.3rem;
     }
     .lp-benefit__title {
-        font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
+        font-family: var(--font-sans);
         font-size: 1.05rem; font-weight: 800;
         color: var(--lp-text); margin: 0 0 8px;
     }
@@ -183,7 +183,7 @@
         border-radius: 50%;
         background: linear-gradient(135deg, #ffefc4, var(--lp-gold));
         color: #fff;
-        font-family: 'Playfair Display', serif;
+        font-family: var(--font-sans);
         font-weight: 700; font-size: 1.05rem;
         display: inline-flex; align-items: center; justify-content: center;
         box-shadow: 0 4px 10px rgba(197, 160, 89, 0.45);
@@ -192,7 +192,7 @@
         font-size: 1.3rem; color: var(--lp-gold-deep); margin-bottom: 8px;
     }
     .lp-step__title {
-        font-family: 'Shippori Mincho', serif;
+        font-family: var(--font-sans);
         font-size: 1rem; font-weight: 800;
         color: var(--lp-text); margin: 0 0 6px;
     }
@@ -224,7 +224,7 @@
     .lp-faq__summary::before {
         content: 'Q.';
         flex-shrink: 0; color: var(--lp-gold-deep);
-        font-family: 'Playfair Display', serif; font-weight: 700;
+        font-family: var(--font-sans); font-weight: 700;
     }
     .lp-faq__summary::after {
         content: '\f078';
@@ -242,7 +242,7 @@
     .lp-faq__body::before {
         content: 'A.';
         flex-shrink: 0; color: var(--lp-gold);
-        font-family: 'Playfair Display', serif; font-weight: 700;
+        font-family: var(--font-sans); font-weight: 700;
     }
     .lp-faq__body p { margin: 0; }
     .lp-faq__body p + p { margin-top: 6px; }
@@ -258,7 +258,7 @@
         box-shadow: var(--lp-shadow);
     }
     .lp-contact__title {
-        font-family: 'Shippori Mincho', serif;
+        font-family: var(--font-sans);
         font-size: 1.1rem; font-weight: 800;
         color: var(--lp-text); margin: 0 0 8px;
     }
