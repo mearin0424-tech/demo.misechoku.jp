@@ -1147,34 +1147,29 @@ ALTER TABLE `policy_revisions`
 
 -- ------------------------------------------------------------------------------
 -- 位置情報フィルタ：MyPage で「住所」「指定地（パスポート）」「現在地」のいずれかと
--- 表示距離（半径 km）を保存できるようにする。
---   search_location_mode      : 'profile' | 'passport' | 'current'
---   search_passport_address   : パスポートモードの住所文字列（任意）
---   search_passport_latitude  : パスポートモードの緯度
---   search_passport_longitude : パスポートモードの経度
---   search_passport_label     : 表示用ラベル（駅名など）
---   search_max_distance_km    : 0=制限なし、>0 なら半径 km で絞り込み
+-- 表示距離（半径 km）を保存できるようにする。専用テーブル user_search_locations を
+-- owner_type / owner_id でポリモーフィックに紐づける（user_talk_templates と同規約）。
 -- ------------------------------------------------------------------------------
 -- shop_managers にアカウント設定で使うカラムを追加（退会用 soft delete と LINE 連携用）
 ALTER TABLE `shop_managers`
   ADD COLUMN IF NOT EXISTS `line_user_id` text DEFAULT NULL,
   ADD COLUMN IF NOT EXISTS `deleted_at`   timestamp NULL DEFAULT NULL;
 
-ALTER TABLE `cast_profiles`
-  ADD COLUMN IF NOT EXISTS `search_location_mode`      varchar(16)  DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS `search_passport_address`   text         DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS `search_passport_latitude`  decimal(10,7) DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS `search_passport_longitude` decimal(10,7) DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS `search_passport_label`     varchar(80)  DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS `search_max_distance_km`    smallint     DEFAULT NULL;
-
-ALTER TABLE `shop_profiles`
-  ADD COLUMN IF NOT EXISTS `search_location_mode`      varchar(16)  DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS `search_passport_address`   text         DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS `search_passport_latitude`  decimal(10,7) DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS `search_passport_longitude` decimal(10,7) DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS `search_passport_label`     varchar(80)  DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS `search_max_distance_km`    smallint     DEFAULT NULL;
+CREATE TABLE IF NOT EXISTS `user_search_locations` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `owner_type` varchar(16) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'cast または shop',
+  `owner_id`   varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `mode`               varchar(16)   COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'profile / passport / current',
+  `passport_address`   text          COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `passport_latitude`  decimal(10,7) DEFAULT NULL,
+  `passport_longitude` decimal(10,7) DEFAULT NULL,
+  `passport_label`     varchar(80)   COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `max_distance_km`    smallint      DEFAULT NULL COMMENT '0=制限なし、>0 で半径 km',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_user_search_locations_owner` (`owner_type`, `owner_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -----------------------------------------------------------------------------
 -- user_talk_templates : キャスト／店舗ごとに編集できるトーク定型文

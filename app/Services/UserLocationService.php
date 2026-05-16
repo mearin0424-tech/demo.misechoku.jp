@@ -4,15 +4,16 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * ログインユーザの「いまの探索拠点」と「半径フィルタ」を扱うサービス。
  *
+ * 検索設定は user_search_locations テーブル（owner_type / owner_id でユニーク）に保存。
+ *
  * 探索拠点の解決順:
- *   1. 自プロフィールの search_location_mode に従う:
+ *   1. user_search_locations.mode に従う:
  *      - 'profile'  : cast_profiles / shop_profiles の latitude/longitude
- *      - 'passport' : cast_profiles / shop_profiles の search_passport_latitude/longitude
+ *      - 'passport' : user_search_locations.passport_latitude/longitude
  *      - 'current'  : セッションに保存された端末 geolocation
  *   2. 設定が無い場合は、セッションの一時保存（旧 location-modal フロー）にフォールバック
  *   3. それでも解決できなければ、自プロフィールの住所緯度経度
@@ -165,6 +166,7 @@ class UserLocationService
 
     /**
      * MyPage 設定（mode / passport / max_km）を DB に保存する。
+     * 保存先は user_search_locations（owner_type / owner_id でユニーク）。
      *
      * @param array{
      *   mode: string,
@@ -182,34 +184,42 @@ class UserLocationService
             return;
         }
 
-        [$table, $idColumn, $idValue] = $this->resolveCurrentProfileTarget();
-        if ($table === null) {
+        [$ownerType, $ownerId] = $this->resolveCurrentOwner();
+        if ($ownerType === null) {
             return;
         }
 
-        $update = [
-            'search_location_mode'   => $mode,
-            'search_max_distance_km' => isset($payload['max_distance_km'])
+        $row = [
+            'mode'            => $mode,
+            'max_distance_km' => isset($payload['max_distance_km'])
                 ? (int) $payload['max_distance_km']
                 : 0,
         ];
 
         if ($mode === self::MODE_PASSPORT) {
-            $update['search_passport_address']   = $payload['passport_address']   ?? null;
-            $update['search_passport_latitude']  = $payload['passport_latitude']  ?? null;
-            $update['search_passport_longitude'] = $payload['passport_longitude'] ?? null;
-            $update['search_passport_label']     = $payload['passport_label']     ?? null;
+            $row['passport_address']   = $payload['passport_address']   ?? null;
+            $row['passport_latitude']  = $payload['passport_latitude']  ?? null;
+            $row['passport_longitude'] = $payload['passport_longitude'] ?? null;
+            $row['passport_label']     = $payload['passport_label']     ?? null;
         } else {
             // 他モードに切り替えた場合、パスポート情報はクリアしておく
-            $update['search_passport_address']   = null;
-            $update['search_passport_latitude']  = null;
-            $update['search_passport_longitude'] = null;
-            $update['search_passport_label']     = null;
+            $row['passport_address']   = null;
+            $row['passport_latitude']  = null;
+            $row['passport_longitude'] = null;
+            $row['passport_label']     = null;
         }
 
-        DB::table($table)
-            ->where($idColumn, $idValue)
-            ->update($update);
+        $now = now();
+        DB::table('user_search_locations')->upsert(
+            [array_merge($row, [
+                'owner_type' => $ownerType,
+                'owner_id'   => $ownerId,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ])],
+            ['owner_type', 'owner_id'],
+            array_merge(array_keys($row), ['updated_at'])
+        );
     }
 
     /**
@@ -231,47 +241,42 @@ class UserLocationService
         if ($table === null) {
             return null;
         }
-        if (!Schema::hasColumn($table, 'search_location_mode')) {
-            return null;
-        }
 
-        $row = DB::table($table)
+        // プロフィールテーブルからは住所と緯度経度のみ取得（検索設定は user_search_locations に分離）
+        $profileRow = DB::table($table)
             ->where($idColumn, $idValue)
-            ->select(
-                'pref',
-                'city',
-                'addr',
-                'latitude',
-                'longitude',
-                'search_location_mode as mode',
-                'search_passport_address as passport_address',
-                'search_passport_latitude as passport_lat',
-                'search_passport_longitude as passport_lng',
-                'search_passport_label as passport_label',
-                'search_max_distance_km as max_distance_km',
-            )
+            ->select('pref', 'city', 'addr', 'latitude', 'longitude')
             ->first();
-        if (!$row) {
+        if (!$profileRow) {
             return null;
         }
 
-        $profileLocation = ($row->latitude !== null && $row->longitude !== null)
-            ? ['lat' => (float) $row->latitude, 'lng' => (float) $row->longitude]
+        [$ownerType, $ownerId] = $this->resolveCurrentOwner();
+        $settingRow = null;
+        if ($ownerType !== null) {
+            $settingRow = DB::table('user_search_locations')
+                ->where('owner_type', $ownerType)
+                ->where('owner_id', $ownerId)
+                ->first();
+        }
+
+        $profileLocation = ($profileRow->latitude !== null && $profileRow->longitude !== null)
+            ? ['lat' => (float) $profileRow->latitude, 'lng' => (float) $profileRow->longitude]
             : null;
 
         $addressText = trim(
-            ((string) ($row->pref ?? ''))
-            . ((string) ($row->city ?? ''))
-            . ((string) ($row->addr ?? ''))
+            ((string) ($profileRow->pref ?? ''))
+            . ((string) ($profileRow->city ?? ''))
+            . ((string) ($profileRow->addr ?? ''))
         );
 
         return [
-            'mode'              => (string) ($row->mode ?? ''),
-            'passport_address'  => $row->passport_address,
-            'passport_latitude' => $row->passport_lat !== null ? (float) $row->passport_lat : null,
-            'passport_longitude' => $row->passport_lng !== null ? (float) $row->passport_lng : null,
-            'passport_label'    => (string) ($row->passport_label ?? ''),
-            'max_distance_km'   => $row->max_distance_km !== null ? (int) $row->max_distance_km : null,
+            'mode'              => (string) ($settingRow->mode ?? ''),
+            'passport_address'  => $settingRow->passport_address ?? null,
+            'passport_latitude' => isset($settingRow->passport_latitude) ? (float) $settingRow->passport_latitude : null,
+            'passport_longitude' => isset($settingRow->passport_longitude) ? (float) $settingRow->passport_longitude : null,
+            'passport_label'    => (string) ($settingRow->passport_label ?? ''),
+            'max_distance_km'   => isset($settingRow->max_distance_km) ? (int) $settingRow->max_distance_km : null,
             'profile_location'  => $profileLocation,
             'profile_address'   => $addressText,
             'has_address'       => $addressText !== '',
@@ -337,6 +342,24 @@ class UserLocationService
             return ['shop_profiles', 'shop_id', (string) $manager->shop_id];
         }
         return [null, null, null];
+    }
+
+    /**
+     * user_search_locations の owner_type / owner_id を返す。
+     *
+     * @return array{0: ?string, 1: ?string} [ownerType, ownerId]
+     */
+    private function resolveCurrentOwner(): array
+    {
+        $cast = Auth::guard('member')->user();
+        if ($cast && !empty($cast->id)) {
+            return ['cast', (string) $cast->id];
+        }
+        $manager = Auth::guard('shop')->user();
+        if ($manager && !empty($manager->shop_id)) {
+            return ['shop', (string) $manager->shop_id];
+        }
+        return [null, null];
     }
 
     /**
