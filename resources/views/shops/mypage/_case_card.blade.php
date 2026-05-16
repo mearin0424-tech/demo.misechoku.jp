@@ -6,17 +6,6 @@
     $isActionable = !empty($case['actionable']);
     $deposit = $case['deposit'] ?? null;
 
-    $pillClass = match ($case['status_tone'] ?? '') {
-        'action'   => 'is-action',
-        'progress' => 'is-progress',
-        'done'     => 'is-done',
-        default    => 'is-progress',
-    };
-    $pillIcon = match ($case['status_tone'] ?? '') {
-        'action'   => 'fa-bolt',
-        'done'     => 'fa-check-circle',
-        default    => 'fa-clock',
-    };
     $actionIcon = match ($case['actionable'] ?? '') {
         'approve' => 'fa-check-circle',
         'pay'     => 'fa-yen-sign',
@@ -36,20 +25,16 @@
             <h3 class="case-card__shop-name">{{ $case['cast_name'] }}</h3>
             <div class="case-card__meta">
                 @if(!empty($case['job_kind_label']))
-                    <span><i class="fas fa-briefcase" style="color:#dcb568;"></i> {{ $case['job_kind_label'] }}</span>
+                    <span><i class="fas fa-briefcase"></i> {{ $case['job_kind_label'] }}</span>
                 @endif
                 @if(!empty($case['hired_at']))
-                    <span><i class="fas fa-calendar-check" style="color:#dcb568;"></i> 採用 {{ $case['hired_at'] }}</span>
+                    <span><i class="fas fa-calendar-check"></i> {{ $case['hired_at'] }}</span>
                 @endif
                 @if(!empty($case['hired_hourly_wage_display']))
-                    <span>採用時給 <strong>{{ $case['hired_hourly_wage_display'] }}円</strong></span>
+                    <span>時給 <strong>{{ $case['hired_hourly_wage_display'] }}円</strong></span>
                 @endif
             </div>
         </div>
-        <span class="case-card__pill {{ $pillClass }}">
-            <i class="fas {{ $pillIcon }}"></i>
-            {{ $case['status_label'] ?? '' }}
-        </span>
     </header>
 
     {{-- パイプライン：採用 → ボーナス申請 → 店舗承認 → 請求書発行 → 店舗入金 → 振込実行 → 受領完了 --}}
@@ -143,7 +128,7 @@
                 <i class="fas fa-hourglass-half"></i> {{ $case['waiting_on'] }}
             </span>
         @elseif($isCompleted)
-            <span class="case-card__waiting" style="color:#6ee7b7;">
+            <span class="case-card__waiting case-card__waiting--done">
                 <i class="fas fa-check-double"></i> 振込完了
             </span>
         @endif

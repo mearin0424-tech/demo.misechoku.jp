@@ -2,11 +2,20 @@
     $routeName = Route::currentRouteName();
     $pageId = $pageId ?? (explode('.', $routeName)[1] ?? 'home');
 
-    // ロゴを表示する主要画面の判定（ログイン画面など一部は戻るボタンを非表示）
-    $isMainPage = request()->is('*/home', '*/search', '*/interaction', '*/talk', '*/mypage');
+    // ENCOUNT / SEARCH / LIKES / TALK / MYPAGE のトップ画面はバックボタンを出さず
+    // タスク・通知・メニューだけの共通ヘッダーで統一する。
+    // それ以外（プロフィール詳細・採用管理など 1 階層以上深い画面）はバック付きで統一。
+    $mainRouteNames = [
+        'cast.home', 'shop.home',
+        'cast.search.index', 'shop.search.index',
+        'cast.interaction.index', 'shop.interaction.index',
+        'cast.talk.index', 'shop.talk.index',
+        'cast.mypage.index', 'shop.mypage.index',
+    ];
+    $isMainPage = in_array($routeName, $mainRouteNames, true);
     $isLoginPage = request()->routeIs('login.demo');
     $showBackButton = !$isMainPage && !$isLoginPage;
-    $isTalkRoomPage = request()->is('cast/talk/room/*', 'shop/talk/room/*');
+    $isTalkRoomPage = request()->routeIs('cast.talk.room', 'shop.talk.room');
 
     // ============================================================
     // 英語タイトル決定ロジック（最終セグメント優先 → 第2セグメント）

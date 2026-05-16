@@ -19,58 +19,47 @@
     font-weight: bold;
 }
 .edit-label.sub { font-size: 0.65rem; margin-bottom: 4px; }
-.required { color: #e53e3e; font-size: 0.7rem; font-weight: normal; }
+.required { color: var(--color-danger); font-size: 0.7rem; font-weight: normal; }
 
-.edit-input {
+/* 入力系は app.css の .app-input / .app-select / .app-textarea とトークンを揃える */
+.edit-input,
+.edit-select,
+.edit-textarea {
     width: 100%;
-    background: #000;
-    border: 1px solid #333;
-    color: #fff;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-header);
     padding: 12px;
     border-radius: 8px;
     font-size: 0.9rem;
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
 }
-
-.edit-input:focus {
-    border-color: var(--gold);
+.edit-input:focus,
+.edit-select:focus,
+.edit-textarea:focus {
+    border-color: var(--color-border-strong);
     outline: none;
+    background: rgba(255, 255, 255, 0.06);
 }
 .edit-select {
-    width: 100%;
-    background: #000;
-    border: 1px solid #333;
-    color: #fff;
-    padding: 12px 36px 12px 15px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+    padding-right: 36px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23c5a059' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
 }
-.edit-select:focus { border-color: var(--gold); outline: none; }
-.edit-textarea {
-    width: 100%;
-    background: #000;
-    border: 1px solid #333;
-    color: #fff;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    resize: vertical;
-    min-height: 80px;
-}
-.edit-textarea:focus { border-color: var(--gold); outline: none; }
+.edit-textarea { resize: vertical; min-height: 80px; }
 
 .accent-gold {
-    accent-color: var(--color-gold);
+    accent-color: var(--gold);
 }
 
 .btn-gold-submit {
-    background: var(--gold);
-    color: #000;
-    border: none;
-    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+    background: linear-gradient(145deg, var(--gold-light), var(--gold));
+    color: #1a1206;
+    border: 1px solid rgba(232, 205, 138, 0.55);
+    box-shadow: 0 6px 18px rgba(197, 160, 89, 0.28);
     width: 100%;
     padding: 14px;
     border-radius: 12px;
@@ -95,14 +84,15 @@
     font-size: 0.9rem;
 }
 
-/* ピンクの情報バナー */
+/* 情報バナー（ゴールド系） */
 .profile-edit-banner {
     position: relative;
-    background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+    background: linear-gradient(135deg, rgba(197, 160, 89, 0.18) 0%, rgba(20, 20, 20, 0.6) 100%);
+    border: 1px solid var(--color-border);
     border-radius: 12px;
     padding: 14px 16px 14px 16px;
     margin-bottom: 20px;
-    color: #880e4f;
+    color: var(--color-text-header);
 }
 .profile-edit-banner-text {
     margin: 0 0 8px 0;
@@ -114,7 +104,7 @@
     align-items: center;
     gap: 6px;
     font-size: 0.8rem;
-    color: #ad1457;
+    color: var(--gold);
     text-decoration: none;
 }
 .profile-edit-banner-link:hover { text-decoration: underline; }
@@ -124,7 +114,7 @@
     bottom: 12px;
     width: 48px;
     height: 48px;
-    background: radial-gradient(circle, #f48fb1 50%, transparent 50%);
+    background: radial-gradient(circle, var(--gold) 50%, transparent 50%);
     border-radius: 50%;
 }
 
@@ -184,7 +174,7 @@
 .other-info-icon {
     width: 28px;
     height: 28px;
-    background: linear-gradient(135deg, #f8bbd9, #f48fb1);
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
     border-radius: 50%;
     display: inline-block;
     vertical-align: middle;

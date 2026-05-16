@@ -5,20 +5,6 @@
     $isCompleted = (bool) ($case['is_completed'] ?? false);
     $isActionable = !empty($case['actionable']);
     $deposit = $case['deposit'] ?? null;
-    // 進行中の案件ではステータスバッジを出さず、下のパイプライン図のみで進捗を表現する。
-    $showStatusPill = $showStatusPill ?? $isCompleted;
-
-    $pillClass = match ($case['status_tone'] ?? '') {
-        'action'   => 'is-action',
-        'progress' => 'is-progress',
-        'done'     => 'is-done',
-        default    => 'is-progress',
-    };
-    $pillIcon = match ($case['status_tone'] ?? '') {
-        'action'   => 'fa-bolt',
-        'done'     => 'fa-check-circle',
-        default    => 'fa-clock',
-    };
 @endphp
 <article class="case-card {{ $isActionable ? 'is-actionable' : '' }} {{ $isCompleted ? 'is-completed' : '' }}">
     <header class="case-card__head">
@@ -29,21 +15,15 @@
             <h3 class="case-card__shop-name">{{ $case['shop_name'] }}</h3>
             <div class="case-card__meta">
                 @if(!empty($case['hired_at']))
-                    <span><i class="fas fa-calendar-check" style="color:#dcb568;"></i> 採用 {{ $case['hired_at'] }}</span>
+                    <span><i class="fas fa-calendar-check"></i> {{ $case['hired_at'] }}</span>
                 @endif
                 @if(!empty($case['hired_hourly_wage_display']))
-                    <span>採用時給 <strong>{{ $case['hired_hourly_wage_display'] }}円</strong></span>
+                    <span>時給 <strong>{{ $case['hired_hourly_wage_display'] }}円</strong></span>
                 @else
-                    <span style="color: rgba(201,184,184,0.6);"><i class="fas fa-clock"></i> 採用時給：店舗側で設定中</span>
+                    <span class="case-card__meta-muted"><i class="fas fa-clock"></i> 時給設定待ち</span>
                 @endif
             </div>
         </div>
-        @if($showStatusPill)
-            <span class="case-card__pill {{ $pillClass }}">
-                <i class="fas {{ $pillIcon }}"></i>
-                {{ $case['status_label'] ?? '' }}
-            </span>
-        @endif
     </header>
 
     {{-- パイプライン：採用 → ボーナス申請 → 店舗承認 → 請求書発行 → 店舗入金 → 振込実行 → 受領完了 --}}
@@ -127,7 +107,7 @@
                 <i class="fas fa-hourglass-half"></i> {{ $case['waiting_on'] }}
             </span>
         @elseif($isCompleted)
-            <span class="case-card__waiting" style="color:#6ee7b7;">
+            <span class="case-card__waiting case-card__waiting--done">
                 <i class="fas fa-check-double"></i> 振込完了
             </span>
         @endif

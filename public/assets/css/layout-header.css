@@ -1,4 +1,4 @@
-/* ヘッダー全体のグラスモーフィズム（高級感のあるグラデ＋グロー） */
+/* ヘッダー全体のグラスモーフィズム（黒ベース + シャンパンゴールド） */
 #global-header {
     display: flex;
     justify-content: space-between;
@@ -8,12 +8,12 @@
     min-width: 0;
     overflow: hidden;
     background:
-        radial-gradient(circle at 0% 0%, rgba(255, 191, 219, 0.22), transparent 55%),
-        radial-gradient(circle at 100% 0%, rgba(220, 181, 104, 0.32), transparent 62%),
-        rgba(74, 18, 42, 0.92);
+        radial-gradient(circle at 0% 0%, rgba(197, 160, 89, 0.18), transparent 55%),
+        radial-gradient(circle at 100% 0%, rgba(197, 160, 89, 0.28), transparent 62%),
+        rgba(10, 10, 10, 0.92);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-    border-bottom: 1px solid rgba(255, 240, 245, 0.24);
+    border-bottom: 1px solid var(--color-border);
     position: fixed;
     top: 0;
     left: 50%;
@@ -24,7 +24,7 @@
     z-index: 1500;
     box-shadow:
         0 10px 30px rgba(0, 0, 0, 0.65),
-        0 0 18px rgba(220, 181, 104, 0.28);
+        0 0 18px rgba(197, 160, 89, 0.22);
 }
 
 /* 画像編集モーダル表示中はヘッダーを隠す */
@@ -43,8 +43,8 @@ body.is-image-editing #global-header {
 .btn-back-container {
     display: flex;
     align-items: center;
-    gap: 6px; /* アイコンと文字の間隔 */
-    color: #fff; /* ホワイトに固定 */
+    gap: 6px;
+    color: var(--color-text-header);
     text-decoration: none;
     transition: opacity 0.2s;
 }
@@ -58,22 +58,22 @@ body.is-image-editing #global-header {
 }
 
 .btn-back-text {
-    font-size: 0.75rem; /* BACKの文字サイズ */
+    font-size: 0.75rem;
     font-weight: bold;
     letter-spacing: 0.5px;
 }
 
 /* 左右・中央のレイアウト固定 */
 .header-left {
-    flex: 1; /* 左側スロット */
+    flex: 1;
     display: flex;
     align-items: center;
     gap: 8px;
-    min-width: 80px; /* ボタンやロゴの場所を確保 */
+    min-width: 80px;
 }
 
 .header-center-title {
-    flex: 2; /* 中央スロット */
+    flex: 2;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -82,7 +82,7 @@ body.is-image-editing #global-header {
     overflow: hidden;
 }
 
-/* ヘッダタイトル：ゴールド・グラデーション + 中央配置 + 大文字 letterspaced */
+/* ヘッダタイトル：ゴールド・グラデーション */
 .header-title-main {
     color: var(--gold);
     font-weight: 600;
@@ -93,11 +93,11 @@ body.is-image-editing #global-header {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    background: linear-gradient(135deg, #ffe2a3 0%, #dcb568 45%, #b8860b 100%);
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 45%, var(--gold-deep) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 14px rgba(220, 181, 104, 0.18);
+    text-shadow: 0 0 14px rgba(197, 160, 89, 0.18);
 }
 
 .header-talk-identity {
@@ -112,12 +112,12 @@ body.is-image-editing #global-header {
     height: 28px;
     border-radius: 999px;
     object-fit: cover;
-    border: 1px solid rgba(255, 255, 255, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     flex-shrink: 0;
 }
 
 .header-talk-name {
-    color: #f2e7d0;
+    color: var(--color-text-header);
     font-size: 0.92rem;
     font-weight: 700;
     letter-spacing: 0.02em;
@@ -132,24 +132,24 @@ body.is-image-editing #global-header {
     white-space: nowrap;
 }
 
-/* ヘッダータイトル：明朝・セリフ + 大文字 + ゴールドグラデーション（高級ブランド風） */
+/* ヘッダータイトル：明朝・セリフ + 大文字 + ゴールドグラデーション */
 .header-title-main.header-title-serif {
-    font-family: 'Shippori Mincho', 'Noto Serif JP', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
+    font-family: var(--font-serif);
     font-weight: 600;
     letter-spacing: 0.22em;
     text-transform: uppercase;
 }
 
-/* デモ用：キャスト／お店ピル型トグルスイッチ（センター） */
+/* デモ用：キャスト／お店ピル型トグルスイッチ */
 .demo-pill-switch {
     display: inline-flex;
     align-items: stretch;
-    border: 1px solid rgba(229, 193, 88, 0.6);
+    border: 1px solid var(--color-border-strong);
     border-radius: 999px;
     padding: 2px;
     background:
-        radial-gradient(circle at 0% 0%, rgba(253, 240, 178, 0.08), transparent 60%),
-        rgba(26, 11, 14, 0.9);
+        radial-gradient(circle at 0% 0%, rgba(232, 205, 138, 0.08), transparent 60%),
+        rgba(10, 10, 10, 0.9);
     overflow: hidden;
     max-width: 100%;
     min-width: 0;
@@ -166,23 +166,23 @@ body.is-image-editing #global-header {
     border: none;
     border-radius: 999px;
     transition: color 0.2s, background 0.2s;
-    color: #E6D080;
+    color: var(--gold);
     background: transparent;
 }
 .demo-pill-switch__segment:hover {
-    color: #FDF0B2;
-    background: rgba(229, 193, 88, 0.18);
+    color: var(--gold-light);
+    background: rgba(197, 160, 89, 0.18);
 }
 .demo-pill-switch__segment.is-active {
-    background: linear-gradient(135deg, #E5C158, #B38A22);
-    color: #190509;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold-deep));
+    color: #1a1206;
     box-shadow:
-        0 0 14px rgba(253, 240, 178, 0.65),
+        0 0 14px rgba(232, 205, 138, 0.5),
         0 4px 14px rgba(0, 0, 0, 0.4);
 }
 .demo-pill-switch__segment.is-active:hover {
-    background: linear-gradient(135deg, #FDF0B2, #B38A22);
-    color: #190509;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    color: #1a1206;
 }
 
 .header-right {
@@ -194,7 +194,7 @@ body.is-image-editing #global-header {
     min-width: 0;
 }
 
-/* ヘッダー右側のアイコンボタン：丸囲いなしのモダンな共通スタイル（全画面共通） */
+/* ヘッダー右側のアイコンボタン共通スタイル */
 .header-icon-btn {
     background: transparent !important;
     border: 0 !important;
@@ -203,7 +203,7 @@ body.is-image-editing #global-header {
     width: 36px;
     height: 36px;
     border-radius: 8px;
-    color: rgba(248, 233, 200, 0.86);
+    color: var(--color-text);
     cursor: pointer;
     position: relative;
     display: flex;
@@ -220,19 +220,19 @@ body.is-image-editing #global-header {
 
 .header-icon-btn:hover,
 .header-icon-btn:focus-visible {
-    color: #ffe2a3;
-    background-color: rgba(220, 181, 104, 0.10) !important;
+    color: var(--gold-light);
+    background-color: rgba(197, 160, 89, 0.10) !important;
     box-shadow: none;
 }
 
 .header-icon-btn:active {
-    color: #dcb568;
-    background-color: rgba(220, 181, 104, 0.18) !important;
+    color: var(--gold);
+    background-color: rgba(197, 160, 89, 0.18) !important;
 }
 
-/* 戻るボタンのホワイトカラーとサイズ */
+/* 戻るボタン */
 .btn-back {
-    color: #fff;
+    color: var(--color-text-header);
     font-size: 1.2rem;
     display: flex;
     align-items: center;
@@ -242,28 +242,24 @@ body.is-image-editing #global-header {
 /* ポップオーバーの強制固定位置 */
 .header-popup {
     position: absolute !important;
-    top: 60px !important; /* ヘッダーの高さに合わせる */
-    
-    /* 中央寄せのロジックを解除し、右端に固定 */
+    top: 60px !important;
+
     left: auto !important;
     right: 0 !important;
-    transform: none !important; 
-    
-    /* 幅を右側半分にする設定 */
+    transform: none !important;
+
     width: 80% !important;
     max-width: calc(var(--max-content-width) / 2) !important;
-    
-    background: #1a0505;
-    border: 1px solid rgba(212, 175, 55, 0.6);
-    /* 右端に付くため、左側の角だけを丸める */
-    border-radius: 0 0 0 15px; 
+
+    background: var(--color-card-strong);
+    border: 1px solid var(--color-border-strong);
+    border-radius: 0 0 0 15px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.9);
     z-index: 2500;
     padding: 0;
     overflow: hidden;
-    display: none; /* JSで制御 */
-    
-    /* 必要に応じて高さを画面いっぱいに近づける場合 */
+    display: none;
+
     height: auto;
     max-height: calc(100vh - var(--header-height) - 20px);
     overflow-y: auto;
@@ -274,21 +270,21 @@ body.is-image-editing #global-header {
     justify-content: space-between;
     align-items: center;
     padding: 12px 15px;
-    background: rgba(255,255,255,0.05);
-    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    background: rgba(255,255,255,0.04);
+    border-bottom: 1px solid var(--color-border);
 }
 
 .task-popup-header h4 {
     margin: 0;
     font-size: 0.9rem;
-    color: #d4af37;
+    color: var(--gold);
     letter-spacing: 1px;
 }
 
 .btn-close-popup {
     background: none;
     border: none;
-    color: #fff;
+    color: var(--color-text-header);
     font-size: 1.2rem;
     cursor: pointer;
     opacity: 0.6;
@@ -300,7 +296,50 @@ body.is-image-editing #global-header {
     overflow-y: auto;
 }
 
-/* 通知バッジ：丸囲いを撤廃したアイコンに合わせて位置・形を調整 */
+/* 通知ポップアップ内のアイテム共通スタイル */
+.notif-popup-section-label {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.76rem;
+    color: var(--gold);
+    letter-spacing: 0.04em;
+}
+.notif-popup-item {
+    display: block;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--color-border);
+    text-decoration: none;
+    color: var(--color-text-header);
+    transition: background 0.15s ease;
+}
+a.notif-popup-item:hover {
+    background: rgba(197, 160, 89, 0.06);
+    text-decoration: none;
+    color: var(--color-text-header);
+}
+.notif-popup-item__title { font-size: 0.85rem; }
+.notif-popup-item__meta {
+    margin-top: 4px;
+    font-size: 0.72rem;
+    color: var(--color-text-muted);
+}
+.notif-popup-empty {
+    padding: 14px;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    text-align: center;
+    font-size: 0.8rem;
+}
+.notif-popup-pushrow {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--color-border);
+}
+.notif-popup-push-btn { width: 100%; }
+
+/* 通知バッジ */
 .badge-notify {
     position: absolute;
     top: 2px;
@@ -308,8 +347,8 @@ body.is-image-editing #global-header {
     min-width: 16px;
     height: 16px;
     padding: 0 4px;
-    background: linear-gradient(145deg, #dcb568, #b8860b);
-    color: #3a1a0f;
+    background: linear-gradient(145deg, var(--gold), var(--gold-deep));
+    color: #1a1206;
     border-radius: 999px;
     font-size: 0.6rem;
     font-weight: 800;
@@ -320,54 +359,9 @@ body.is-image-editing #global-header {
 }
 
 /* ==========================================================================
-   TALK専用ヘッダー
+   TALK ルーム：左側にアバター＋名前を表示するため、レイアウト配分のみ調整
+   （色味・装飾は共通ヘッダーと完全に揃える）
    ========================================================================== */
-body.page-talk #global-header {
-    background:
-        radial-gradient(circle at 0% 0%, rgba(220, 181, 104, 0.2), transparent 45%),
-        radial-gradient(circle at 100% 0%, rgba(255, 183, 214, 0.18), transparent 55%),
-        rgba(74, 18, 42, 0.92);
-    border-bottom: 1px solid rgba(255, 240, 245, 0.18);
-    box-shadow:
-        0 10px 28px rgba(0, 0, 0, 0.34),
-        0 0 0 1px rgba(255, 255, 255, 0.04) inset;
-}
-
-body.page-talk .header-title-main {
-    color: #f2e7d0;
-    font-size: 0.96rem;
-    font-weight: 700;
-    letter-spacing: 0.22em;
-}
-body.page-talk .header-title-main.header-title-serif {
-    font-family: 'Shippori Mincho', 'Noto Serif JP', 'Yu Mincho', serif;
-}
-
-body.page-talk .btn-back {
-    width: 36px;
-    height: 36px;
-    border-radius: 999px;
-    justify-content: center;
-    color: #fff4f2;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.16);
-}
-
-body.page-talk .btn-back:hover {
-    color: #fff6d0;
-    border-color: rgba(226, 188, 79, 0.28);
-    background: rgba(255, 255, 255, 0.05);
-}
-
-body.page-talk .header-right {
-    gap: 8px;
-}
-
-/* page-talk のヘッダーアイコンも共通スタイルに統一（個別オーバーライドを撤廃） */
-
-/* page-talk の badge も共通スタイルに統一（個別オーバーライドを撤廃） */
-
 body.page-talk.page-talk-room .header-center-title {
     justify-content: flex-start;
 }

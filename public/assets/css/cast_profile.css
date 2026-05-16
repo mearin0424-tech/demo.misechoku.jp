@@ -73,7 +73,7 @@
     border-radius: 50%;
     border: 0;
     background: rgba(0, 0, 0, 0.55);
-    color: #ffe2a3;
+    color: var(--gold-light);
     font-size: 0.95rem;
     cursor: pointer;
     display: inline-flex;
@@ -85,7 +85,7 @@
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
     transition: background 0.15s ease, transform 0.1s ease;
 }
-.profile-hero-arrow:hover { background: rgba(220, 181, 104, 0.65); color: #1a0a0e; }
+.profile-hero-arrow:hover { background: rgba(197, 160, 89, 0.65); color: var(--dark-bg); }
 .profile-hero-arrow:active { transform: translateY(-50%) scale(0.94); }
 .profile-hero-arrow--prev { left: 12px; }
 .profile-hero-arrow--next { right: 12px; }
@@ -114,7 +114,7 @@
     transition: background 0.15s ease, transform 0.15s ease;
 }
 .profile-hero-dot.is-active {
-    background: #dcb568;
+    background: var(--gold);
     transform: scale(1.25);
 }
 
@@ -127,7 +127,7 @@
     padding: 4px 10px;
     border-radius: 999px;
     background: rgba(0, 0, 0, 0.55);
-    color: #ffe2a3;
+    color: var(--gold-light);
     font-size: 0.74rem;
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -176,7 +176,7 @@
     overflow: hidden;
     border: 2px solid transparent;
     padding: 0;
-    background: #222;
+    background: var(--color-card-strong);
     cursor: pointer;
     transition: border-color 0.2s, opacity 0.2s;
     box-sizing: border-box;
@@ -203,11 +203,11 @@
     padding: 6px 12px;
     font-size: 0.7rem;
     font-weight: 700;
-    color: #000;
+    color: #1a1206;
     background: linear-gradient(135deg, var(--gold-light), var(--gold));
     border-radius: 20px;
     letter-spacing: 0.05em;
-    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.35);
+    box-shadow: 0 2px 8px rgba(197, 160, 89, 0.35);
 }
 
 /* --- メインコンテンツ（サムネイルストリップの下に名前が来るよう余白を確保） --- */
@@ -289,11 +289,11 @@
     font-size: 0.85rem;
 }
 .detail-action-btn:hover {
-    border-color: rgba(212, 175, 55, 0.4);
+    border-color: rgba(197, 160, 89, 0.4);
     color: var(--color-text-header);
 }
 .detail-action-btn.keep.active {
-    background: rgba(212, 175, 55, 0.15);
+    background: rgba(197, 160, 89, 0.15);
     border-color: var(--gold);
     color: var(--gold);
 }
@@ -408,12 +408,12 @@
 
 .icon-btn:hover {
     background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(212, 175, 55, 0.4);
+    border-color: rgba(197, 160, 89, 0.4);
 }
 
 .icon-btn.active,
 .icon-btn-keep.active {
-    background: rgba(212, 175, 55, 0.2);
+    background: rgba(197, 160, 89, 0.2);
     border-color: var(--gold);
     color: var(--gold);
 }
@@ -559,8 +559,8 @@
 .review-item {
     padding: 14px 16px;
     margin-bottom: 10px;
-    background: rgba(212, 175, 55, 0.12);
-    border: 1px solid rgba(212, 175, 55, 0.25);
+    background: rgba(197, 160, 89, 0.12);
+    border: 1px solid rgba(197, 160, 89, 0.25);
     border-radius: 14px;
     color: var(--color-text);
 }
@@ -670,8 +670,8 @@
 
 .action-btn.like {
     flex: 2;
-    background: var(--color-accent);
-    color: #fff;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    color: #1a1206;
 }
 
 .action-btn.like:hover {
@@ -680,8 +680,9 @@
 
 .action-btn.message {
     flex: 2;
-    background: #fff;
-    color: #1a1a1a;
+    background: var(--color-card-strong);
+    color: var(--color-text-header);
+    border: 1px solid var(--color-border-strong);
 }
 
 .action-btn.message:hover {
@@ -695,11 +696,11 @@
     color: var(--gold);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(212, 175, 55, 0.4);
+    border: 1px solid rgba(197, 160, 89, 0.4);
 }
 
 .action-btn.keep:hover {
-    background: rgba(212, 175, 55, 0.2);
+    background: rgba(197, 160, 89, 0.2);
 }
 
 .accordion-body {

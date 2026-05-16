@@ -254,16 +254,16 @@ body.page-search-ai .ai-recommend {
 
 /* 検索フィルタエリア（アプリ全体のボルドー基調と統一） */
 .search-filter-box {
-    background: linear-gradient(180deg, rgba(74, 18, 42, 0.92), rgba(56, 13, 31, 0.92));
+    background: linear-gradient(180deg, rgba(20, 20, 20, 0.92), rgba(10, 10, 10, 0.92));
     padding: 10px 12px 12px;
-    border-bottom: 1px solid rgba(220, 181, 104, 0.22);
+    border-bottom: 1px solid var(--color-border);
     box-sizing: border-box;
     max-width: 100%;
 }
 .search-filter-box input, .search-filter-box select {
     background: var(--surface);
     color: var(--color-text-header);
-    border: 1px solid rgba(230, 208, 128, 0.35);
+    border: 1px solid var(--color-border-strong);
     padding: 10px;
     border-radius: 10px;
     font-size: 0.9rem;
@@ -291,8 +291,8 @@ body.page-search-ai .ai-recommend {
     min-width: 0;
     width: 0;
     padding: 10px 16px;
-    background: #0d0a09;
-    border: 1px solid rgba(74, 54, 51, 0.85);
+    background: var(--dark-bg);
+    border: 1px solid var(--color-border);
     border-radius: 999px;
     color: #ececec;
     font-size: 0.88rem;
@@ -303,8 +303,8 @@ body.page-search-ai .ai-recommend {
     color: #6a5a58;
 }
 .search-filter-minimal__input:focus {
-    border-color: rgba(220, 181, 104, 0.65);
-    box-shadow: 0 0 0 2px rgba(220, 181, 104, 0.12);
+    border-color: rgba(197, 160, 89, 0.65);
+    box-shadow: 0 0 0 2px rgba(197, 160, 89, 0.12);
 }
 .search-filter-icon-btn {
     width: 42px;
@@ -314,16 +314,16 @@ body.page-search-ai .ai-recommend {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    border: 1px solid rgba(74, 54, 51, 0.85);
-    background: #0d0a09;
-    color: #dcb568;
+    border: 1px solid var(--color-border);
+    background: var(--dark-bg);
+    color: var(--gold);
     font-size: 0.95rem;
     cursor: pointer;
     transition: border-color 0.2s, background 0.2s, transform 0.15s;
 }
 .search-filter-icon-btn:hover {
-    border-color: rgba(220, 181, 104, 0.55);
-    background: rgba(220, 181, 104, 0.06);
+    border-color: rgba(197, 160, 89, 0.55);
+    background: rgba(197, 160, 89, 0.06);
 }
 .search-filter-icon-btn:active {
     transform: scale(0.96);
@@ -347,8 +347,8 @@ body.page-search-ai .ai-recommend {
     min-width: min(100%, 280px);
     max-width: 100%;
     padding: 8px 0;
-    background: rgba(20, 10, 8, 0.98);
-    border: 1px solid rgba(74, 54, 51, 0.9);
+    background: rgba(10, 10, 10, 0.98);
+    border: 1px solid var(--color-border-strong);
     border-radius: 14px;
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
     z-index: 96;
@@ -367,14 +367,14 @@ body.page-search-ai .ai-recommend {
 }
 .search-sort-panel__item:hover,
 .search-sort-panel__item:focus-visible {
-    background: rgba(220, 181, 104, 0.08);
+    background: rgba(197, 160, 89, 0.08);
     color: #f3e7d3;
     outline: none;
 }
 .search-sort-panel__item.is-active {
-    color: #dcb568;
+    color: var(--gold);
     font-weight: 600;
-    background: rgba(220, 181, 104, 0.06);
+    background: rgba(197, 160, 89, 0.06);
 }
 
 /* 詳細検索 FAB（センター寄せ app の右端に追従。tablet 以上でも viewport 右端ではなく app 右端に貼り付く） */
@@ -390,7 +390,7 @@ body.page-search-ai .ai-recommend {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(145deg, #ffe2a3, #dcb568 45%, #b8860b);
+    background: linear-gradient(145deg, #ffe2a3, var(--gold) 45%, var(--gold-deep));
     color: #2a1406;
     font-size: 1.15rem;
     cursor: pointer;
@@ -422,14 +422,14 @@ body.page-search-ai .search-detail-fab {
     height: 18px;
     padding: 0 5px;
     border-radius: 9px;
-    background: #c62828;
-    color: #fff;
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
     font-size: 0.68rem;
     font-weight: 700;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid #161110;
+    border: 2px solid var(--color-border);
 }
 
 .page-search .connection-list--search {
@@ -448,11 +448,11 @@ body.page-search .connection-list--search {
 /* ---------- 店舗カード（キャスト側検索・リッチ） ---------- */
 .connection-item--shop-rich {
     padding: 0;
-    background: linear-gradient(145deg, #6a0834 0%, #540529 52%, #43031f 100%);
-    border: 1px solid rgba(255, 156, 205, 0.14);
+    background: linear-gradient(145deg, var(--color-card-strong) 0%, var(--color-sub) 52%, var(--dark-bg) 100%);
+    border: 1px solid var(--color-border);
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
 }
 .connection-item--shop-rich .connection-item__link {
     align-items: stretch;
@@ -491,7 +491,7 @@ body.page-search .connection-list--search {
     border-radius: 9px;
     object-fit: cover;
     display: block;
-    background: #2c1b23;
+    background: var(--color-card-strong);
 }
 /* 優良店バッヂ（プレミアムゴールド + シマー） */
 .shop-search-card__badge {
@@ -507,9 +507,9 @@ body.page-search .connection-list--search {
     font-size: 10px;
     font-weight: 900;
     letter-spacing: 0.16em;
-    color: #2d030e;
-    background: linear-gradient(135deg, #f8df8b 0%, #d4af37 50%, #b8860b 100%);
-    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.45);
+    color: #1a1206;
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-deep) 100%);
+    box-shadow: 0 4px 12px rgba(197, 160, 89, 0.45);
     overflow: hidden;
     isolation: isolate;
 }
@@ -563,12 +563,12 @@ body.page-search .connection-list--search {
     align-items: center;
     gap: 5px 8px;
     font-size: 11px;
-    color: #f9d6e5;
+    color: var(--color-text-muted);
 }
 .shop-search-card__industry {
-    color: #ffde8f;
+    color: var(--gold-light);
     border: none;
-    background: rgba(255, 195, 82, 0.12);
+    background: rgba(197, 160, 89, 0.12);
     padding: 2px 8px;
     border-radius: 999px;
     font-weight: 600;
@@ -577,30 +577,30 @@ body.page-search .connection-list--search {
     display: inline-flex;
     align-items: center;
     gap: 3px;
-    color: #f3e7d3;
+    color: var(--color-text);
     font-weight: 600;
 }
 .shop-search-card__rating .fa-star {
-    color: #dcb568;
+    color: var(--gold);
     font-size: 10px;
 }
 .shop-search-card__location {
     display: inline-flex;
     align-items: center;
     gap: 3px;
-    color: #f9d6e5;
+    color: var(--color-text-muted);
     font-weight: 600;
 }
 .shop-search-card__location .fa-map-marker-alt {
     font-size: 10px;
     opacity: 1;
-    color: #ffd9ea;
+    color: var(--gold);
 }
 .shop-search-card__message {
     margin: 0;
     font-size: 1.02rem;
     line-height: 1.45;
-    color: #ffeef6;
+    color: var(--color-text);
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -620,7 +620,7 @@ body.page-search .connection-list--search {
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.04em;
-    color: #ffcfdf;
+    color: var(--color-text-muted);
 }
 .shop-search-card__time .fa-clock {
     font-size: 10px;
@@ -629,7 +629,7 @@ body.page-search .connection-list--search {
 /* 店舗側キャスト一覧：サムネ丸＋時間右下 */
 .conn-thumb--round {
     border-radius: 50%;
-    border: 1px solid rgba(220, 181, 104, 0.35);
+    border: 1px solid rgba(197, 160, 89, 0.35);
     width: 56px;
     height: 56px;
     object-fit: cover;
@@ -649,7 +649,7 @@ body.page-search .connection-list--search {
     gap: 4px;
     font-size: 10px;
     font-weight: 600;
-    color: rgba(220, 181, 104, 0.55);
+    color: rgba(197, 160, 89, 0.55);
 }
 .connection-item--search:not(.connection-item--shop-rich):not(.connection-item--shop-cast-list) .connection-item__link {
     align-items: flex-start;
@@ -689,8 +689,8 @@ body.page-search .connection-list--search {
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
-    border: 1px solid rgba(220, 181, 104, 0.28);
-    background: #0d0a09;
+    border: 1px solid rgba(197, 160, 89, 0.28);
+    background: var(--dark-bg);
 }
 .shop-cast-search__main {
     flex: 1;
@@ -773,7 +773,7 @@ body.page-search .connection-list--search {
     font-size: 0.76rem;
     font-weight: 600;
     letter-spacing: 0.02em;
-    color: rgba(220, 181, 104, 0.62);
+    color: rgba(197, 160, 89, 0.62);
     white-space: nowrap;
 }
 .shop-cast-search__when .fa-clock {
@@ -788,7 +788,7 @@ body.page-search .connection-list--search {
     padding-left: 4px;
 }
 .connection-item--shop-cast-list .shop-cast-search__link:hover .shop-cast-search__chev {
-    color: #dcb568;
+    color: var(--gold);
 }
 
 /* ========== 一覧・検索：詳細検索UI（賃貸検索風） ========== */
@@ -899,7 +899,7 @@ body.page-search .connection-list--search {
 }
 .search-filter-sort__select:focus {
     border-color: var(--color-gold);
-    box-shadow: 0 0 0 2px rgba(220, 181, 104, 0.15);
+    box-shadow: 0 0 0 2px rgba(197, 160, 89, 0.15);
 }
 .search-filter-sort__icon {
     position: absolute;
@@ -929,7 +929,7 @@ body.page-search .connection-list--search {
     position: relative;
 }
 .search-filter-detail-btn:hover {
-    background: rgba(220, 181, 104, 0.1);
+    background: rgba(197, 160, 89, 0.1);
 }
 .search-filter-detail-btn__badge {
     min-width: 18px;
@@ -1179,7 +1179,7 @@ body.page-search .connection-list--search {
     transition: color 0.2s;
 }
 .detail-search-location-option.is-selected {
-    background: rgba(220, 181, 104, 0.15);
+    background: rgba(197, 160, 89, 0.15);
     border: 1px solid var(--gold);
     color: var(--gold);
     z-index: 1;
@@ -1317,7 +1317,7 @@ body.page-search .connection-list--search {
 }
 .detail-search-chip:has(input:checked) {
     border-color: var(--color-gold);
-    background: rgba(220, 181, 104, 0.15);
+    background: rgba(197, 160, 89, 0.15);
     color: var(--color-gold);
 }
 .detail-search-chip span {
@@ -1328,16 +1328,16 @@ body.page-search .connection-list--search {
 .detail-search-modal__window--search {
     max-width: min(560px, var(--max-content-width));
     background:
-        linear-gradient(180deg, rgba(220, 181, 104, 0.10), rgba(220, 181, 104, 0) 72px),
+        linear-gradient(180deg, rgba(197, 160, 89, 0.10), rgba(197, 160, 89, 0) 72px),
         linear-gradient(180deg, var(--color-main) 0%, var(--dark-bg) 100%);
-    border: 1px solid rgba(220, 181, 104, 0.22);
+    border: 1px solid rgba(197, 160, 89, 0.22);
 }
 
 .detail-search-modal__header--search {
     position: relative;
     padding-top: 18px;
     padding-bottom: 18px;
-    background: rgba(20, 5, 5, 0.96);
+    background: rgba(10, 10, 10, 0.96);
 }
 
 .detail-search-modal__header-line {
@@ -1361,8 +1361,8 @@ body.page-search .connection-list--search {
 
 .detail-search-section--panel,
 .detail-search-accordion--panel {
-    background: rgba(26, 8, 8, 0.92);
-    border: 1px solid #361515;
+    background: rgba(10, 10, 10, 0.92);
+    border: 1px solid rgba(197, 160, 89, 0.22);
     border-radius: 14px;
     overflow: hidden;
 }
@@ -1372,7 +1372,7 @@ body.page-search .connection-list--search {
 }
 
 .detail-search-accordion--panel {
-    border-bottom: 1px solid #361515;
+    border-bottom: 1px solid rgba(197, 160, 89, 0.22);
 }
 
 .detail-search-accordion--panel .detail-search-accordion__head {
@@ -1386,7 +1386,7 @@ body.page-search .connection-list--search {
 }
 
 .detail-search-accordion--panel[data-open="true"] .detail-search-accordion__head {
-    border-bottom: 1px solid rgba(220, 181, 104, 0.08);
+    border-bottom: 1px solid rgba(197, 160, 89, 0.08);
 }
 
 .detail-search-accordion--panel[data-open="true"] .detail-search-accordion__body {
@@ -1396,7 +1396,7 @@ body.page-search .connection-list--search {
 .detail-search-accordion__icon {
     min-width: 20px;
     text-align: center;
-    color: #a89090;
+    color: var(--color-text-muted);
     transform: none;
 }
 
@@ -1424,9 +1424,9 @@ body.page-search .connection-list--search {
     justify-content: center;
     min-height: 24px;
     padding: 0 10px;
-    border: 1px solid rgba(220, 181, 104, 0.3);
+    border: 1px solid rgba(197, 160, 89, 0.3);
     border-radius: 999px;
-    background: rgba(42, 26, 8, 0.96);
+    background: rgba(197, 160, 89, 0.12);
     color: var(--gold);
     font-size: 0.72rem;
     white-space: nowrap;
@@ -1440,42 +1440,42 @@ body.page-search .connection-list--search {
     min-height: 40px;
     padding: 9px 14px;
     border-radius: 10px;
-    background: #1a0808;
-    border-color: #361515;
-    color: #a89090;
+    background: var(--color-card-strong);
+    border-color: rgba(197, 160, 89, 0.22);
+    color: var(--color-text-muted);
     font-size: 0.82rem;
     font-weight: 600;
 }
 
 .detail-search-chip--search:hover {
-    border-color: #522525;
-    background: #221212;
+    border-color: var(--color-border-strong);
+    background: rgba(255, 255, 255, 0.04);
 }
 
 .detail-search-chip--search:has(input:checked) {
-    background: #2a1a08;
+    background: rgba(197, 160, 89, 0.18);
     border-color: var(--gold);
     color: var(--gold);
-    box-shadow: 0 0 0 1px rgba(220, 181, 104, 0.12) inset;
+    box-shadow: 0 0 0 1px rgba(197, 160, 89, 0.12) inset;
 }
 
 .detail-search-location-segment {
     border-radius: 12px;
-    border-color: #361515;
-    background: #1a0808;
+    border-color: rgba(197, 160, 89, 0.22);
+    background: var(--color-card-strong);
     margin-bottom: 18px;
 }
 
 .detail-search-location-option {
     min-height: 48px;
-    color: #a89090;
+    color: var(--color-text-muted);
     font-size: 0.82rem;
     background: transparent;
-    border-right-color: #361515;
+    border-right-color: rgba(197, 160, 89, 0.22);
 }
 
 .detail-search-location-option:hover {
-    background: #221212;
+    background: rgba(255, 255, 255, 0.04);
 }
 
 .detail-search-location-option__icon {
@@ -1500,7 +1500,7 @@ body.page-search .connection-list--search {
 
 .detail-search-distance__marks {
     margin-bottom: 12px;
-    color: #a89090;
+    color: var(--color-text-muted);
 }
 
 .detail-search-distance-slider {
@@ -1510,24 +1510,24 @@ body.page-search .connection-list--search {
         90deg,
         var(--gold) 0,
         var(--gold) var(--detail-search-slider-progress, 42.85%),
-        #2a1010 var(--detail-search-slider-progress, 42.85%),
-        #2a1010 100%
+        rgba(255, 255, 255, 0.08) var(--detail-search-slider-progress, 42.85%),
+        rgba(255, 255, 255, 0.08) 100%
     );
-    border: 1px solid #361515;
+    border: 1px solid rgba(197, 160, 89, 0.22);
 }
 
 .detail-search-distance-slider::-webkit-slider-thumb {
     width: 22px;
     height: 22px;
-    border: 2px solid #140505;
-    box-shadow: 0 0 10px rgba(220, 181, 104, 0.45);
+    border: 2px solid var(--dark-bg);
+    box-shadow: 0 0 10px rgba(197, 160, 89, 0.45);
 }
 
 .detail-search-distance-slider::-moz-range-thumb {
     width: 22px;
     height: 22px;
-    border: 2px solid #140505;
-    box-shadow: 0 0 10px rgba(220, 181, 104, 0.45);
+    border: 2px solid var(--dark-bg);
+    box-shadow: 0 0 10px rgba(197, 160, 89, 0.45);
 }
 
 .detail-search-distance__value {
@@ -1546,8 +1546,8 @@ body.page-search .connection-list--search {
     appearance: none;
     padding: 14px 42px 14px 14px;
     border-radius: 10px;
-    border: 1px solid #361515;
-    background: #1a0808;
+    border: 1px solid rgba(197, 160, 89, 0.22);
+    background: var(--color-card-strong);
     color: #f5f0f0;
     font-size: 0.9rem;
     outline: none;
@@ -1556,7 +1556,7 @@ body.page-search .connection-list--search {
 
 .detail-search-select:focus {
     border-color: var(--gold);
-    box-shadow: 0 0 0 3px rgba(220, 181, 104, 0.12);
+    box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.12);
 }
 
 .detail-search-select-wrap__icon {
@@ -1564,7 +1564,7 @@ body.page-search .connection-list--search {
     top: 50%;
     right: 14px;
     transform: translateY(-50%);
-    color: #a89090;
+    color: var(--color-text-muted);
     pointer-events: none;
 }
 
@@ -1572,9 +1572,9 @@ body.page-search .connection-list--search {
     position: sticky;
     bottom: 0;
     padding: 16px 18px 18px;
-    background: rgba(20, 5, 5, 0.96);
-    border-top-color: #361515;
-    box-shadow: 0 -10px 20px rgba(20, 5, 5, 0.9);
+    background: rgba(10, 10, 10, 0.96);
+    border-top-color: rgba(197, 160, 89, 0.22);
+    box-shadow: 0 -10px 20px rgba(10, 10, 10, 0.9);
 }
 
 .detail-search-modal__footer--search .detail-search-modal__btn {
@@ -1586,14 +1586,14 @@ body.page-search .connection-list--search {
 
 .detail-search-modal__footer--search .detail-search-modal__btn--reset {
     max-width: 132px;
-    background: #1a0808;
-    border-color: #361515;
-    color: #a89090;
+    background: var(--color-card-strong);
+    border-color: rgba(197, 160, 89, 0.22);
+    color: var(--color-text-muted);
 }
 
 .detail-search-modal__footer--search .detail-search-modal__btn--submit {
-    background: linear-gradient(90deg, #dcb568, #b38f26);
-    box-shadow: 0 0 15px rgba(220, 181, 104, 0.25);
+    background: linear-gradient(90deg, var(--gold), var(--gold-deep));
+    box-shadow: 0 0 15px rgba(197, 160, 89, 0.25);
 }
 
 @media (max-width: 480px) {
@@ -1678,7 +1678,7 @@ body.page-search .connection-list--search {
     font-size: 0.82rem;
     font-weight: 800;
     text-decoration: none;
-    box-shadow: 0 4px 12px rgba(220, 181, 104, 0.4);
+    box-shadow: 0 4px 12px rgba(197, 160, 89, 0.4);
 }
 
 .ai-recommend__message {
@@ -1744,7 +1744,7 @@ body.page-search .connection-list--search {
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     color: var(--color-text-header);
-    border: 1px solid rgba(220, 181, 104, 0.3);
+    border: 1px solid rgba(197, 160, 89, 0.3);
     border-radius: 6px 18px 18px 18px;
 }
 
@@ -1755,7 +1755,7 @@ body.page-search .connection-list--search {
     font-weight: 600;
     border: 0;
     border-radius: 18px 6px 18px 18px;
-    box-shadow: 0 4px 12px rgba(220, 181, 104, 0.4);
+    box-shadow: 0 4px 12px rgba(197, 160, 89, 0.4);
 }
 
 .ai-recommend__message--typing .ai-recommend__bubble {
@@ -1788,7 +1788,7 @@ body.page-search .connection-list--search {
     width: auto;
     min-height: 42px;
     padding: 10px 14px;
-    border: 1px solid rgba(220, 181, 104, 0.4);
+    border: 1px solid rgba(197, 160, 89, 0.4);
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.04);
     color: var(--gold-light);
@@ -1801,8 +1801,8 @@ body.page-search .connection-list--search {
     transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 .ai-recommend__option:hover {
-    background: rgba(220, 181, 104, 0.12);
-    border-color: rgba(220, 181, 104, 0.65);
+    background: rgba(197, 160, 89, 0.12);
+    border-color: rgba(197, 160, 89, 0.65);
     color: #fff;
 }
 .ai-recommend__option:active {
@@ -1829,7 +1829,7 @@ body.page-search .connection-list--search {
 .ai-recommend__card {
     overflow: hidden;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-    border: 1px solid rgba(220, 181, 104, 0.28);
+    border: 1px solid rgba(197, 160, 89, 0.28);
     border-radius: 18px;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
 }
@@ -1853,7 +1853,7 @@ body.page-search .connection-list--search {
     padding: 4px 8px;
     border-radius: 999px;
     background: rgba(20, 6, 12, 0.85);
-    border: 1px solid rgba(220, 181, 104, 0.4);
+    border: 1px solid rgba(197, 160, 89, 0.4);
     color: var(--gold-light);
     font-size: 0.68rem;
     font-weight: 700;
@@ -1879,8 +1879,8 @@ body.page-search .connection-list--search {
     margin-bottom: 8px;
     padding: 5px 9px;
     border-radius: 999px;
-    background: rgba(220, 181, 104, 0.18);
-    border: 1px solid rgba(220, 181, 104, 0.4);
+    background: rgba(197, 160, 89, 0.18);
+    border: 1px solid rgba(197, 160, 89, 0.4);
     color: var(--gold-light);
     font-family: var(--font-sans);
     font-size: 0.74rem;
@@ -1912,7 +1912,7 @@ body.page-search .connection-list--search {
     font-weight: 800;
     letter-spacing: 0.01em;
     text-decoration: none;
-    box-shadow: 0 4px 12px rgba(220, 181, 104, 0.4);
+    box-shadow: 0 4px 12px rgba(197, 160, 89, 0.4);
 }
 
 @media (max-width: 640px) {

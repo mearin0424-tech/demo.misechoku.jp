@@ -86,7 +86,7 @@
 
 .btn-add-icon:hover {
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+    box-shadow: 0 4px 12px rgba(197, 160, 89, 0.4);
 }
 
 .btn-add-icon:active {
@@ -136,7 +136,7 @@
 }
 
 .shop-word-bubble:hover {
-    border-color: rgba(212, 175, 55, 0.55);
+    border-color: rgba(197, 160, 89, 0.55);
     box-shadow: 0 3px 12px rgba(0, 0, 0, 0.25);
 }
 
@@ -219,7 +219,7 @@
     width: 22px;
     height: 22px;
     border-radius: 50%;
-    background: rgba(212, 175, 55, 0.18);
+    background: rgba(197, 160, 89, 0.18);
     color: var(--mypage-gold);
     font-size: 0.62rem;
 }
@@ -250,7 +250,7 @@
 }
 
 .mypage-review-card:hover {
-    border-color: rgba(212, 175, 55, 0.55);
+    border-color: rgba(197, 160, 89, 0.55);
     box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
     transform: translateY(-1px);
 }
@@ -324,7 +324,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #ff8ea5;
+    color: var(--color-danger);
     font-size: 1rem;
 }
 
@@ -332,7 +332,7 @@
     font-size: 0.8rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #ffb8c5;
+    color: var(--gold-light);
     font-weight: 700;
 }
 
@@ -364,7 +364,7 @@
 }
 
 .mypage-stat-panel:hover {
-    border-color: rgba(212, 175, 55, 0.55);
+    border-color: rgba(197, 160, 89, 0.55);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
@@ -388,7 +388,7 @@ a.mypage-stat-panel-link:hover {
 
 .mypage-stat-panel:first-child .mypage-stat-icon { color: #ff8ea5; }
 .mypage-stat-panel:nth-child(2) .mypage-stat-icon { color: var(--mypage-gold); }
-.mypage-stat-panel:last-child .mypage-stat-icon { color: #a8d4a8; }
+.mypage-stat-panel:last-child .mypage-stat-icon { color: var(--color-success); }
 
 /* 店舗マイページ：統計4列（バッヂ含む）のときは3番目を採用数の緑、4番目はバッヂ側のスタイルに任せる */
 .mypage-stats-row--cols-4 {
@@ -397,7 +397,7 @@ a.mypage-stat-panel-link:hover {
 .mypage-stats-row--cols-2 {
     grid-template-columns: repeat(2, 1fr);
 }
-.mypage-stats-row--cols-4 .mypage-stat-panel:nth-child(3) .mypage-stat-icon { color: #a8d4a8; }
+.mypage-stats-row--cols-4 .mypage-stat-panel:nth-child(3) .mypage-stat-icon { color: var(--color-success); }
 .mypage-stats-row--cols-4 .mypage-stat-panel:nth-child(4) .mypage-stat-icon {
     color: var(--mypage-gold);
 }
@@ -529,7 +529,7 @@ a.btn-outline-gold {
     margin-bottom: 10px;
 }
 
-/* 接客タイプ診断ボタン（ピンク系・背景と調和） */
+/* 接客タイプ診断ボタン */
 .btn-personality-test {
     display: inline-flex;
     align-items: center;
@@ -537,18 +537,18 @@ a.btn-outline-gold {
     margin-top: 14px;
     padding: 10px 18px;
     border-radius: 12px;
-    border: 1px solid rgba(180, 130, 145, 0.5);
-    background: rgba(160, 110, 125, 0.18);
-    color: #e0c0c8;
+    border: 1px solid var(--color-border-strong);
+    background: rgba(197, 160, 89, 0.12);
+    color: var(--gold-light);
     font-size: 0.9rem;
     font-weight: 600;
     text-decoration: none;
     transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 .btn-personality-test:hover {
-    border-color: rgba(200, 150, 165, 0.55);
-    background: rgba(170, 120, 135, 0.25);
-    color: #e8d0d6;
+    border-color: var(--gold);
+    background: rgba(197, 160, 89, 0.2);
+    color: var(--color-text-header);
 }
 .btn-personality-test i {
     font-size: 0.95rem;
@@ -759,7 +759,7 @@ a.btn-outline-gold {
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(to right, transparent, rgba(205, 167, 102, 0.05), transparent);
+    background: linear-gradient(to right, transparent, rgba(197, 160, 89, 0.05), transparent);
     transform: translateX(-100%);
     transition: transform 0.7s ease-out;
     pointer-events: none;
@@ -786,14 +786,14 @@ a.btn-outline-gold {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #cda766;
+    color: var(--gold);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
 }
 .cast-mypage-menu-buttons .menu-btn:hover .menu-btn-icon {
     transform: scale(1.05);
-    background-color: rgba(205, 167, 102, 0.1);
-    border-color: rgba(205, 167, 102, 0.3);
+    background-color: rgba(197, 160, 89, 0.1);
+    border-color: rgba(197, 160, 89, 0.3);
 }
 
 .cast-mypage-menu-buttons .menu-btn-text {
@@ -809,12 +809,12 @@ a.btn-outline-gold {
     transition: color 0.3s ease;
 }
 .cast-mypage-menu-buttons .menu-btn:hover .menu-btn-label {
-    color: #cda766;
+    color: var(--gold);
 }
 .cast-mypage-menu-buttons .menu-btn-title {
     font-size: 15px;
     font-family: var(--font-serif), serif;
-    color: #cda766;
+    color: var(--gold);
     letter-spacing: 0.1em;
     margin: 0;
     transition: color 0.3s ease;
@@ -848,28 +848,28 @@ a.btn-outline-gold {
     transition: all 0.3s ease;
 }
 .cast-mypage-menu-buttons .menu-btn:hover .menu-btn-arrow {
-    background: linear-gradient(to bottom right, #cda766, #b38f4a);
-    border-color: #cda766;
+    background: linear-gradient(to bottom right, var(--gold), var(--gold-deep));
+    border-color: var(--gold);
     color: #110a0a;
 }
 
 /* 現在のページのメニュー項目 */
 .cast-mypage-menu-buttons .menu-btn.is-current {
-    border-color: rgba(205, 167, 102, 0.6);
+    border-color: rgba(197, 160, 89, 0.6);
 }
 .cast-mypage-menu-buttons .menu-btn.is-current .menu-btn-label {
-    color: #cda766;
+    color: var(--gold);
 }
 .cast-mypage-menu-buttons .menu-btn.is-current .menu-btn-title {
     color: #ffffff;
 }
 .cast-mypage-menu-buttons .menu-btn.is-current .menu-btn-icon {
-    background-color: rgba(205, 167, 102, 0.1);
-    border-color: rgba(205, 167, 102, 0.3);
+    background-color: rgba(197, 160, 89, 0.1);
+    border-color: rgba(197, 160, 89, 0.3);
 }
 .cast-mypage-menu-buttons .menu-btn.is-current .menu-btn-arrow {
-    background: linear-gradient(to bottom right, #cda766, #b38f4a);
-    border-color: #cda766;
+    background: linear-gradient(to bottom right, var(--gold), var(--gold-deep));
+    border-color: var(--gold);
     color: #110a0a;
 }
 
@@ -1050,7 +1050,7 @@ a.btn-outline-gold {
 
 .gallery-edit-section .photo-slot:hover {
     border-color: var(--mypage-gold);
-    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.2);
+    box-shadow: 0 4px 16px rgba(197, 160, 89, 0.2);
 }
 
 .gallery-edit-section .photo-slot img {
@@ -1080,7 +1080,7 @@ a.btn-outline-gold {
 /* Image Library 並び替え（ドラッグ・長押し） */
 .gallery-sortable-ghost {
     opacity: 0.4;
-    background: rgba(212, 175, 55, 0.15);
+    background: rgba(197, 160, 89, 0.15);
     border-radius: 12px;
 }
 .gallery-sortable-chosen {
@@ -1089,7 +1089,7 @@ a.btn-outline-gold {
 }
 .gallery-sortable-drag {
     opacity: 1;
-    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.25);
+    box-shadow: 0 8px 24px rgba(197, 160, 89, 0.25);
 }
 
 /* --- モーダル --- */

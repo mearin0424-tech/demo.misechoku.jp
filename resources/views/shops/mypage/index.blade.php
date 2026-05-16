@@ -2,32 +2,6 @@
 
 @section('title', 'マイページ')
 
-@section('header')
-<header id="global-header" class="shop-mypage-custom-header">
-    <div class="header-left">
-        <a href="javascript:history.back()" class="btn-back" aria-label="戻る">
-            <i class="fas fa-chevron-left"></i>
-        </a>
-    </div>
-    <div class="header-center-title">
-        <span class="header-title-main header-title-serif">MyPage</span>
-    </div>
-    <div class="header-right">
-        <button id="btn-header-notification" class="header-icon-btn" aria-label="通知">
-            <i class="fas fa-bell"></i>
-            @if(isset($unreadNewsCount) && $unreadNewsCount > 0)
-                <span class="badge-notify">{{ $unreadNewsCount }}</span>
-            @else
-                <span class="badge-notify">1</span>
-            @endif
-        </button>
-        <button id="btn-header-menu" class="header-icon-btn" aria-label="メニュー">
-            <i class="fas fa-bars"></i>
-        </button>
-    </div>
-</header>
-@endsection
-
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/shop-license-documents.css') }}?v=20260505">

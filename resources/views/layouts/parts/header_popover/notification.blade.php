@@ -4,57 +4,57 @@
         <button class="btn-close-popup" onclick="togglePopup('header-notification-popup')">&times;</button>
     </div>
     <div class="notification-popup-content">
-        <div style="padding:10px 12px; border-bottom:1px solid #333; font-size:0.76rem; color:#D4AF37;">運営からのお知らせ</div>
+        <div class="notif-popup-section-label">運営からのお知らせ</div>
         @if(isset($operationalNotices) && count($operationalNotices) > 0)
             @foreach($operationalNotices as $notice)
                 @php $noticeUrl = $notice['url'] ?? null; @endphp
                 @if($noticeUrl)
-                    <a href="{{ $noticeUrl }}" style="display:block; padding:10px; border-bottom:1px solid #333; text-decoration:none; color:#fff;">
-                        <div style="font-size:0.85rem;">{{ $notice['title'] }}</div>
+                    <a href="{{ $noticeUrl }}" class="notif-popup-item">
+                        <div class="notif-popup-item__title">{{ $notice['title'] }}</div>
                         @if(!empty($notice['published_at']))
-                            <div style="margin-top:4px; font-size:0.72rem; color:#bbb;">{{ $notice['published_at'] }}</div>
+                            <div class="notif-popup-item__meta">{{ $notice['published_at'] }}</div>
                         @endif
                     </a>
                 @else
-                    <div style="padding:10px; border-bottom:1px solid #333; font-size:0.85rem; color:#fff;">
-                        <div>{{ $notice['title'] }}</div>
+                    <div class="notif-popup-item">
+                        <div class="notif-popup-item__title">{{ $notice['title'] }}</div>
                         @if(!empty($notice['published_at']))
-                            <div style="margin-top:4px; font-size:0.72rem; color:#bbb;">{{ $notice['published_at'] }}</div>
+                            <div class="notif-popup-item__meta">{{ $notice['published_at'] }}</div>
                         @endif
                     </div>
                 @endif
             @endforeach
         @else
-            <div style="padding:12px; border-bottom:1px solid #333; color:#999; text-align:center; font-size:0.8rem;">表示できるお知らせはありません。</div>
+            <div class="notif-popup-empty">表示できるお知らせはありません。</div>
         @endif
 
-        <div style="padding:10px 12px; border-bottom:1px solid #333; font-size:0.76rem; color:#D4AF37;">あなたへの通知</div>
+        <div class="notif-popup-section-label">あなたへの通知</div>
         {{-- Push 通知テスト（PWA） --}}
-        <div class="push-actions" style="padding:10px 12px; border-bottom:1px solid #333;">
-            <button type="button" id="push-enable-btn" class="push-action-btn" style="display:block; width:100%; padding:8px 12px; margin-bottom:6px; background:#2a1a1a; color:#D4AF37; border:1px solid #444; border-radius:6px; font-size:0.8rem; cursor:pointer;">通知を有効にする</button>
-            <button type="button" id="push-test-btn" class="push-action-btn" style="display:block; width:100%; padding:8px 12px; background:#1a2a1a; color:#8bc34a; border:1px solid #444; border-radius:6px; font-size:0.8rem; cursor:pointer;">テスト通知を送る</button>
+        <div class="notif-popup-pushrow">
+            <button type="button" id="push-enable-btn" class="app-btn app-btn--ghost app-btn--sm notif-popup-push-btn">通知を有効にする</button>
+            <button type="button" id="push-test-btn" class="app-btn app-btn--outline app-btn--sm notif-popup-push-btn">テスト通知を送る</button>
         </div>
         @if(isset($notifications) && count($notifications) > 0)
             @foreach($notifications as $item)
                 @php $url = $item['url'] ?? null; @endphp
                 @if($url)
-                    <a href="{{ $url }}" style="display:block; padding:10px; border-bottom:1px solid #333; text-decoration:none; color:#fff;">
-                        <div style="font-size:0.85rem;">{{ $item['title'] }}</div>
+                    <a href="{{ $url }}" class="notif-popup-item">
+                        <div class="notif-popup-item__title">{{ $item['title'] }}</div>
                         @if(!empty($item['body']))
-                            <div style="margin-top:4px; font-size:0.76rem; color:#bbb;">{{ $item['body'] }}</div>
+                            <div class="notif-popup-item__meta">{{ $item['body'] }}</div>
                         @endif
                     </a>
                 @else
-                    <div style="padding:10px; border-bottom:1px solid #333; font-size:0.85rem; color:#fff;">
-                        <div>{{ $item['title'] }}</div>
+                    <div class="notif-popup-item">
+                        <div class="notif-popup-item__title">{{ $item['title'] }}</div>
                         @if(!empty($item['body']))
-                            <div style="margin-top:4px; font-size:0.76rem; color:#bbb;">{{ $item['body'] }}</div>
+                            <div class="notif-popup-item__meta">{{ $item['body'] }}</div>
                         @endif
                     </div>
                 @endif
             @endforeach
         @else
-            <div style="padding:15px; color:#999; text-align:center; font-size:0.8rem;">新しいお知らせはありません。</div>
+            <div class="notif-popup-empty">新しいお知らせはありません。</div>
         @endif
     </div>
 </div>

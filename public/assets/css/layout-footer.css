@@ -1,17 +1,16 @@
-/* フッター：画像に基づいた角丸＆濃色デザイン */
+/* フッター：黒ベース + シャンパンゴールド */
 #bottom-nav {
     position: fixed;
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
-    max-width: var(--max-content-width); /* ヘッダー・コンテンツと統一 */
+    max-width: var(--max-content-width);
     height: 75px;
-    /* 上部を丸くするデザイン */
-    background: rgba(92, 23, 53, 0.46);
+    background: rgba(10, 10, 10, 0.85);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-    border-top: 1px solid rgba(255, 240, 245, 0.28);
+    border-top: 1px solid var(--color-border);
     display: flex;
     justify-content: space-around;
     align-items: center;
@@ -26,7 +25,7 @@
     flex-direction: column;
     align-items: center;
     text-decoration: none;
-    color: #F0B4C6;
+    color: var(--color-text-muted);
     transition: color 0.3s;
 }
 
@@ -57,11 +56,11 @@
 
 /* アクティブ時のゴールドカラー */
 .nav-item.active {
-    color: #dcb568;
+    color: var(--gold);
 }
 
 .nav-item.active i {
-    filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.5));
+    filter: drop-shadow(0 0 5px rgba(197, 160, 89, 0.5));
 }
 
 /* 画像編集モーダル表示中はボトムナビを隠す */

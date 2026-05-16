@@ -3,41 +3,11 @@
 @section('title', 'マイページ - プロフィール確認')
 @section('body-class', 'page-cast-mypage')
 
-@section('header')
-<header id="global-header" class="cast-mypage-custom-header">
-    <div class="header-left">
-        <a href="javascript:history.back()" class="btn-back" aria-label="戻る">
-            <i class="fas fa-chevron-left"></i>
-        </a>
-    </div>
-    <div class="header-center-title">
-        <span class="header-title-main header-title-serif">MyPage</span>
-    </div>
-    <div class="header-right">
-        <button id="btn-header-notification" class="header-icon-btn" aria-label="通知">
-            <i class="fas fa-bell"></i>
-            @if(isset($unreadNewsCount) && $unreadNewsCount > 0)
-                <span class="badge-notify">{{ $unreadNewsCount }}</span>
-            @else
-                <span class="badge-notify">1</span>
-            @endif
-        </button>
-        <button id="btn-header-menu" class="header-icon-btn" aria-label="メニュー">
-            <i class="fas fa-bars"></i>
-        </button>
-    </div>
-</header>
-@endsection
-
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/cast_profile.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
 <style>
-    /* ヘッダタイトルは global の gold-gradient を使うため上書きしない */
-    .cast-mypage-custom-header .btn-back,
-    .cast-mypage-custom-header .header-icon-btn { color: #dcb568; }
-    .cast-mypage-custom-header #btn-header-notification .badge-notify { background: #ef4444; color: #fff; }
     .cast-mypage-v2 .mypage-shop-name { color: #fff; letter-spacing: 0.08em; font-size: clamp(1.7rem, 6.4vw, 2.1rem); }
     .cast-mypage-v2 .mypage-hero { align-items: flex-start; gap: 14px; margin-bottom: 20px; }
     .cast-mypage-v2 .shop-icon-wrapper { width: 84px; height: 84px; border-radius: 999px; background: #000; overflow: hidden; border: 3px solid rgba(220, 181, 104,0.8); box-shadow: 0 6px 16px rgba(0,0,0,0.35); }

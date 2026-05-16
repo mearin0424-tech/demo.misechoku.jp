@@ -37,7 +37,7 @@
     color: var(--color-text-header);
     margin: 0;
     letter-spacing: 0.02em;
-    background: linear-gradient(135deg, #e8a4b5, #e0466d);
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -70,7 +70,7 @@
 .management-summary-amount {
     font-size: 2rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--color-text-header);
     margin: 0;
     letter-spacing: 0.02em;
 }
@@ -147,11 +147,11 @@
     font-weight: 600;
 }
 .management-invoice-status.status-paid {
-    background: rgba(76, 175, 80, 0.15);
-    color: #81c784;
+    background: var(--color-success-bg);
+    color: var(--color-success);
 }
 .management-invoice-status.status-pending {
-    background: rgba(212, 175, 55, 0.15);
+    background: rgba(197, 160, 89, 0.15);
     color: var(--gold);
 }
 .management-invoice-pdf {
@@ -216,9 +216,9 @@
     font-size: 0.7rem;
     padding: 2px 8px;
     border-radius: 999px;
-    border: 1px solid rgba(212, 175, 55, 0.5);
+    border: 1px solid rgba(197, 160, 89, 0.5);
     color: var(--gold);
-    background: rgba(212, 175, 55, 0.12);
+    background: rgba(197, 160, 89, 0.12);
 }
 .management-hire-status {
     margin: 0 0 4px 0;
@@ -230,16 +230,16 @@
     margin-right: 6px;
 }
 .management-hire-status-interview_pending {
-    background: rgba(59, 130, 246, 0.18);
-    color: #93c5fd;
+    background: rgba(197, 160, 89, 0.12);
+    color: var(--color-text-header);
 }
 .management-hire-status-interview_fixed {
-    background: rgba(16, 185, 129, 0.18);
-    color: #6ee7b7;
+    background: var(--color-success-bg);
+    color: var(--color-success);
 }
 .management-hire-status-deposit_pending,
 .management-hire-status-other {
-    background: rgba(212, 175, 55, 0.18);
+    background: rgba(197, 160, 89, 0.18);
     color: var(--gold);
 }
 .management-hire-next {
@@ -283,20 +283,20 @@
     text-align: center;
     padding: 8px 4px;
     border-radius: 12px;
-    background: rgba(17, 24, 39, 0.9);
-    border: 1px solid rgba(55, 65, 81, 0.9);
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
     box-sizing: border-box;
 }
 .management-calendar-date .date-main {
     display: block;
     font-weight: 700;
-    color: #e5e7eb;
+    color: var(--color-text-header);
     font-size: 0.9rem;
 }
 .management-calendar-date .date-sub {
     display: block;
     font-size: 0.7rem;
-    color: #9ca3af;
+    color: var(--color-text-muted);
 }
 .management-calendar-events {
     flex: 1;
@@ -311,17 +311,17 @@
     gap: 8px;
     padding: 6px 10px;
     border-radius: 10px;
-    background: rgba(15, 23, 42, 0.9);
-    border: 1px solid rgba(55, 65, 81, 0.9);
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
 }
 .management-calendar-event-interview {
-    border-color: rgba(59, 130, 246, 0.6);
+    border-color: var(--color-border-strong);
 }
 .management-calendar-event-deadline {
-    border-color: rgba(249, 115, 22, 0.6);
+    border-color: rgba(248, 113, 113, 0.5);
 }
 .management-calendar-event-deposit {
-    border-color: rgba(212, 175, 55, 0.7);
+    border-color: var(--gold);
 }
 .management-calendar-event .event-icon {
     width: 20px;
@@ -337,11 +337,11 @@
 .management-calendar-event .event-label {
     display: block;
     font-size: 0.85rem;
-    color: #e5e7eb;
+    color: var(--color-text-header);
 }
 .management-calendar-event .event-meta {
     display: block;
     font-size: 0.7rem;
-    color: #9ca3af;
+    color: var(--color-text-muted);
     margin-top: 2px;
 }
