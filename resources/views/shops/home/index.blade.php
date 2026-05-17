@@ -199,10 +199,9 @@
                     </div>
                 </div>
 
-                {{-- 4. スワイプアフォーダンス --}}
-                <div class="rc-swipe-hint" aria-hidden="true">
-                    <i class="fas fa-chevron-up rc-chevron-anim"></i>
-                    <span class="rc-swipe-text">SWIPE NEXT</span>
+                {{-- 4. スワイプ誘導ガイド（上向きキャレット・常時バウンス） --}}
+                <div class="discovery-swipe-guide" aria-hidden="true">
+                    <i class="fas fa-chevron-up"></i>
                 </div>
 
                 @else
@@ -291,9 +290,8 @@
                         @endforeach
                     </div>
                 </div>
-                <div class="card-swipe-hint" aria-hidden="true">
-                    <i class="fas fa-chevron-up card-chevron-anim"></i>
-                    <i class="fas fa-chevron-down card-chevron-anim"></i>
+                <div class="discovery-swipe-guide" aria-hidden="true">
+                    <i class="fas fa-chevron-up"></i>
                 </div>
 
                 @endif

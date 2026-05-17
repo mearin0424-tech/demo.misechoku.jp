@@ -1810,3 +1810,299 @@ body.no-scroll main#main-content .content-wrapper {
         transform: scale(0.94) !important;
     }
 }
+
+/* ==========================================================================
+   DISCOVERY v2 — フルブリード没入体験
+   仕様: DESIGN.md「DISCOVERY（スワイプ画面）」
+   - ヘッダー／フッター等 app.css の共通要素は触らない
+   - スワイプ画面内のオーバーレイ・サイドボタン・情報帯・誘導ガイドのみ刷新
+   - 既存のシャンパンゴールド・ボーナスバッジは維持
+   ========================================================================== */
+
+body.page-home {
+    --discovery-base: #050505;
+    --discovery-accent-from: #FBCFE8;
+    --discovery-accent-to: #F472B6;
+    --discovery-pill-bg: rgba(18, 18, 18, 0.80);
+    --discovery-text-shadow:
+        0 2px 4px rgba(0,0,0,0.9),
+        0 4px 12px rgba(0,0,0,0.9),
+        0 0 2px rgba(0,0,0,0.5);
+}
+body.page-home #app,
+body.page-home .main-layout-container {
+    background: var(--discovery-base);
+}
+
+/* 画像全体への薄い暗幕（上→下、左→右、いずれでもなく中央に薄め）と、下端の強グラデ */
+body.page-home .home-photo-wrap::before,
+body.page-home .rc-img-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(180deg, rgba(0,0,0,0.50) 0%, rgba(0,0,0,0) 35%, var(--discovery-base) 100%);
+    opacity: 0.95;
+    z-index: 2;
+}
+body.page-home .home-photo-wrap::after,
+body.page-home .rc-img-wrap::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 75%;
+    pointer-events: none;
+    background: linear-gradient(0deg,
+        var(--discovery-base) 0%,
+        rgba(5,5,5,0.92) 18%,
+        rgba(5,5,5,0.80) 35%,
+        rgba(5,5,5,0.40) 60%,
+        transparent 100%);
+    z-index: 3;
+}
+
+/* ヘビー・テキストシャドウ（店舗名・キャスト名・時給など） */
+body.page-home .rc-shop-name,
+body.page-home .cast-name,
+body.page-home .rc-wage-panel__trial-amount,
+body.page-home .rc-wage-panel__help-amount,
+body.page-home .rc-signup-bonus-pill__nums,
+body.page-home .rc-meta,
+body.page-home .card-location {
+    text-shadow: var(--discovery-text-shadow);
+}
+
+/* 上部プログレスバー（同一店舗の複数画像インデックス） */
+body.page-home .photo-pagination.swiper-pagination-bullets {
+    top: 12px !important;
+    bottom: auto !important;
+    left: 12px;
+    right: 12px;
+    display: flex !important;
+    gap: 4px;
+    padding: 0;
+    z-index: 30;
+    pointer-events: none;
+}
+body.page-home .photo-pagination .swiper-pagination-bullet {
+    flex: 1 1 0;
+    width: auto !important;
+    height: 3px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.32) !important;
+    opacity: 1 !important;
+    margin: 0 !important;
+    transform: none !important;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+body.page-home .photo-pagination .swiper-pagination-bullet-active {
+    background: #fff !important;
+    box-shadow: 0 0 8px rgba(255,255,255,0.7), 0 0 2px rgba(255,255,255,0.9);
+}
+
+/* サイド・アクションボタン（右下縦配置、60px グラスモーフィック円） */
+body.page-home .card-actions-overlay,
+body.page-home .rc-actions {
+    position: absolute;
+    right: 14px;
+    bottom: 30%;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+body.page-home .card-actions-overlay .action-circle-btn,
+body.page-home .card-actions-overlay .action-btn-message,
+body.page-home .card-actions-overlay .card-recruit-btn,
+body.page-home .rc-actions .action-circle-btn {
+    width: 60px;
+    height: 60px;
+    min-width: 60px;
+    min-height: 60px;
+    border-radius: 50% !important;
+    background: rgba(0, 0, 0, 0.60) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.40) !important;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+body.page-home .card-actions-overlay .action-circle-btn:hover,
+body.page-home .rc-actions .action-circle-btn:hover { transform: scale(1.05); }
+body.page-home .card-actions-overlay .action-circle-btn:active,
+body.page-home .rc-actions .action-circle-btn:active { transform: scale(0.90); }
+
+/* アイコン本体：白＋薄いグロー */
+body.page-home .card-actions-overlay .action-circle-btn i,
+body.page-home .card-actions-overlay .action-btn-message i,
+body.page-home .rc-actions .action-circle-btn i {
+    font-size: 30px;
+    color: #fff;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+    transition: color 0.15s ease;
+}
+
+/* LIKE はアクセントピンクのグラデで強調 */
+body.page-home .card-actions-overlay .action-circle-btn.like i {
+    background: linear-gradient(135deg, var(--discovery-accent-from), var(--discovery-accent-to));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+body.page-home .card-actions-overlay .action-circle-btn.like.is-active {
+    background: linear-gradient(135deg, rgba(251, 207, 232, 0.18), rgba(244, 114, 182, 0.28)) !important;
+    border-color: rgba(244, 114, 182, 0.65) !important;
+    box-shadow: 0 8px 22px rgba(244, 114, 182, 0.35);
+}
+
+/* KEEP は app.css のゴールド系トークン維持 */
+body.page-home .card-actions-overlay .action-circle-btn.keep i,
+body.page-home .rc-actions .action-circle-btn.keep i {
+    color: var(--gold-light, #e8cd8a);
+}
+body.page-home .card-actions-overlay .action-circle-btn.keep.is-active {
+    background: linear-gradient(145deg, var(--gold-light), var(--gold)) !important;
+    border-color: var(--gold) !important;
+}
+body.page-home .card-actions-overlay .action-circle-btn.keep.is-active i {
+    color: #1a1206;
+    background: none;
+    -webkit-text-fill-color: #1a1206;
+}
+
+/* カウント表示は小さく */
+body.page-home .action-btn-count {
+    position: absolute;
+    bottom: -16px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    letter-spacing: 0.02em;
+}
+
+/* 「求人」ボタンは枠線のみで自己主張弱め */
+body.page-home .card-actions-overlay .card-recruit-btn {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #fff;
+    text-decoration: none;
+    background: rgba(0,0,0,0.60) !important;
+}
+
+/* 店舗情報エリア（下部）— pb-44 相当の底上げ */
+body.page-home .rc-bottom-bar,
+body.page-home .card-bottom-info {
+    padding-bottom: 11rem !important; /* スワイプガイドとの被り防止 */
+    z-index: 10;
+}
+
+/* キャッチコピー — ガラス風ピル */
+body.page-home .rc-manager-msg__inner,
+body.page-home .rc-manager-msg__backdrop {
+    background: var(--discovery-pill-bg) !important;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    color: #fff;
+    text-align: center;
+    border-radius: 999px;
+}
+
+/* 店舗名 — 34px・太字（フォントは app.css の Noto Sans JP 維持） */
+body.page-home .rc-shop-name {
+    font-size: 34px !important;
+    line-height: 1.15;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 0.02em;
+}
+body.page-home .cast-name {
+    font-size: 30px !important;
+    font-weight: 800;
+    color: #fff;
+}
+
+/* 評価・エリアのアイコンをアクセントピンクに */
+body.page-home .rc-rating-inline .rc-star,
+body.page-home .card-rating-stars .filled,
+body.page-home .rc-mappin,
+body.page-home .card-location i:not(.fa-route) {
+    color: var(--discovery-accent-to);
+}
+body.page-home .rc-review-cnt,
+body.page-home .card-rating-num {
+    color: rgba(255, 255, 255, 0.72);
+}
+
+/* ボーナスバッジ：仕様どおりゴールド立体グラデを維持 */
+body.page-home .rc-signup-bonus-pill {
+    background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%) !important;
+    border: 1px solid rgba(232, 205, 138, 0.55);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 245, 214, 0.55),
+        inset 0 -1px 0 rgba(112, 72, 10, 0.4),
+        0 6px 18px rgba(0, 0, 0, 0.55);
+    color: #1a1206;
+}
+body.page-home .rc-signup-bonus-pill__label,
+body.page-home .rc-signup-bonus-pill__nums { color: #1a1206 !important; text-shadow: none; }
+
+/* 時給情報 */
+body.page-home .rc-wage-panel__trial-label,
+body.page-home .rc-wage-panel__help-label {
+    white-space: nowrap;
+}
+body.page-home .rc-wage-panel__trial-amount {
+    color: #fff;
+    font-size: 24px;
+    font-weight: 800;
+}
+body.page-home .rc-wage-panel__help-amount {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* スワイプ誘導ガイド（DESIGN.md 3.4） */
+body.page-home .discovery-swipe-guide {
+    position: absolute;
+    left: 50%;
+    bottom: 100px;
+    transform: translateX(-50%);
+    z-index: 35;
+    pointer-events: none;
+    color: rgba(255, 255, 255, 0.92);
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.7));
+    animation: discovery-bounce 1.4s ease-in-out infinite;
+}
+body.page-home .discovery-swipe-guide i { font-size: 32px; }
+@keyframes discovery-bounce {
+    0%, 100% { transform: translate(-50%, 0); }
+    50%      { transform: translate(-50%, -12px); }
+}
+
+/* 旧スワイプガイドを非表示（重複防止） */
+body.page-home .rc-swipe-hint,
+body.page-home .card-swipe-hint { display: none !important; }
+
+/* アクションボタン下のテキストラベルは廃止（仕様 3.2：ノイズになるため） */
+body.page-home .rc-action-label { display: none !important; }
+
+/* 距離バッジ：暗背景の上で読みやすく */
+body.page-home .distance-badge {
+    background: rgba(0, 0, 0, 0.55);
+    border-color: rgba(255, 255, 255, 0.20);
+}
+
+/* セーフエリア（縦長スマホ） */
+@supports (padding: max(0px)) {
+    body.page-home .discovery-swipe-guide {
+        bottom: max(100px, calc(env(safe-area-inset-bottom, 0px) + 92px));
+    }
+}
