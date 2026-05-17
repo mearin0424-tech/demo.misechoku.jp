@@ -42,7 +42,7 @@
                 img.src = e.target.result;
                 destroyCropper();
                 cropper = new Cropper(img, {
-                    aspectRatio: 16 / 9,
+                    aspectRatio: 4 / 5,
                     viewMode: 1,
                     dragMode: 'move',
                     autoCropArea: 1,

@@ -12,8 +12,6 @@ class CastImage extends Model
     protected $fillable = [
         'cast_id',
         'image_path',
-        'type',
-        'front_and_back',
         'status',
         'is_main',
         'main_order',

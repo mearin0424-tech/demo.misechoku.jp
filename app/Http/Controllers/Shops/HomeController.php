@@ -56,7 +56,7 @@ class HomeController extends Controller
                 'cast_profiles.pr',
                 'cast_profiles.latitude',
                 'cast_profiles.longitude',
-                DB::raw("(SELECT ci.image_path FROM cast_images ci WHERE ci.cast_id = casts.id AND ci.type = 1 ORDER BY ci.is_main DESC, ci.main_order IS NULL, ci.main_order, ci.id LIMIT 1) as main_image_path")
+                DB::raw("(SELECT ci.image_path FROM cast_images ci WHERE ci.cast_id = casts.id ORDER BY ci.is_main DESC, ci.main_order IS NULL, ci.main_order, ci.id LIMIT 1) as main_image_path")
             )
             ->orderBy('casts.id')
             ->limit(20)
@@ -761,7 +761,6 @@ class HomeController extends Controller
     {
         $images = DB::table('cast_images')
             ->where('cast_id', $castId)
-            ->where('type', 1)
             ->orderByRaw('is_main DESC')
             ->orderByRaw('main_order IS NULL')
             ->orderBy('main_order')
@@ -856,7 +855,6 @@ class HomeController extends Controller
                 ->each(function ($row) {
                     $hasImages = DB::table('cast_images')
                         ->where('cast_id', $row->cast_id)
-                        ->where('type', 1)
                         ->exists();
 
                     if (!$hasImages) {

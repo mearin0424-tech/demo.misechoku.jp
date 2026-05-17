@@ -239,12 +239,13 @@
     </section>
 </div>
 
-{{-- 画像大表示モーダル（削除ボタンで削除） --}}
+{{-- 画像大表示モーダル（削除・再切り抜き） --}}
 <div id="image-preview-modal" class="mypage-modal-overlay gallery-preview-overlay" role="dialog" aria-label="画像プレビュー">
     <div class="gallery-preview-inner">
         <img id="modal-img" src="" alt="" class="mypage-modal-preview-img">
         <div class="gallery-preview-actions">
             <button type="button" class="btn-action btn-action-secondary gallery-preview-btn-close" id="gallery-preview-close-btn">閉じる</button>
+            <button type="button" id="gallery-preview-recrop-btn" class="btn-action">再切り抜き</button>
             <button type="button" id="gallery-preview-delete-btn" class="btn-action gallery-preview-btn-delete">削除</button>
         </div>
     </div>
@@ -256,8 +257,8 @@
         <div class="image-edit-header">
             <h3 class="mypage-modal-title serif-font">画像を調整してアップロード</h3>
             <p class="image-edit-guide">
-                推奨サイズは <strong>3:4（例：1200×1600px、縦長）</strong> です。<br>
-                画面に表示されている範囲で中央を基準に自動トリミングし、スマホ表示でも粗くなりすぎないよう約2MPまでサイズ調整してアップロードします。
+                推奨サイズは <strong>4:5（例：1080×1350px、Instagram 縦長）</strong> です。<br>
+                ピンチ・ドラッグで拡大縮小・位置調整できます。範囲枠内に収めたい部分を合わせてアップロードしてください。
             </p>
         </div>
         <div class="image-edit-preview-wrapper">
@@ -299,10 +300,11 @@ window.MYPAGE_GALLERY_CONFIG = {
     csrfToken: @json(csrf_token()),
     uploadUrl: @json(route('cast.mypage.images.upload')),
     deleteUrlTemplate: @json(route('cast.mypage.images.delete', ['id' => '__ID__'])),
-    cropAspectW: 3,
-    cropAspectH: 4,
-    cropMaxWidth: 1200,
-    cropMaxHeight: 1600
+    // ENCOUNT 画面はインスタ縦長と同じ 4:5（1080×1350）に統一
+    cropAspectW: 4,
+    cropAspectH: 5,
+    cropMaxWidth: 1080,
+    cropMaxHeight: 1350
 };
 </script>
 <script src="{{ asset('assets/js/mypage-gallery.js') }}"></script>

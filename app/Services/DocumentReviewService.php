@@ -13,6 +13,12 @@ use Illuminate\Support\Facades\Storage;
 
 class DocumentReviewService
 {
+    // 本人確認・許可証書類の保持期間ポリシー（運営への削除候補通知の閾値）。
+    // 自動削除はせず「削除候補」として運営ダッシュボードに通知する。
+    public const RETENTION_APPROVED_DAYS = 30;   // 承認済み：approved_at から N 日経過で削除候補
+    public const RETENTION_REJECTED_DAYS = 14;   // 却下：updated_at から N 日経過で削除候補
+    public const RETENTION_PENDING_DAYS  = 90;   // 長期放置：updated_at から N 日経過で削除候補
+
     public function getCastIdentityPageData(string $castId): array
     {
         $documents = CastIdentityDocument::query()
@@ -488,10 +494,236 @@ class DocumentReviewService
                 ]),
             ]);
 
+        $purgeTasks = collect($this->getPurgeCandidateTasks());
+
         return $castTasks
             ->concat($shopTasks)
+            ->concat($purgeTasks)
             ->values()
             ->all();
+    }
+
+    /**
+     * 本人確認書類・許可証書類のうち、保持期間ポリシー (RETENTION_*_DAYS) を超過した
+     * 「削除候補」を運営ダッシュボード向けのタスク形式で返す。
+     *
+     * 自動削除はしない。運営が確認のうえ手動で削除する運用に寄せる。
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getPurgeCandidateTasks(): array
+    {
+        $now = now();
+        $approvedThreshold = $now->copy()->subDays(self::RETENTION_APPROVED_DAYS);
+        $rejectedThreshold = $now->copy()->subDays(self::RETENTION_REJECTED_DAYS);
+        $pendingThreshold  = $now->copy()->subDays(self::RETENTION_PENDING_DAYS);
+
+        $tasks = [];
+
+        // キャスト本人確認書類
+        $castDocs = CastIdentityDocument::query()
+            ->leftJoin('cast_profiles', 'cast_identity_documents.cast_id', '=', 'cast_profiles.cast_id')
+            ->where(function ($q) use ($approvedThreshold, $rejectedThreshold, $pendingThreshold) {
+                $q->where(function ($q2) use ($approvedThreshold) {
+                    $q2->where('cast_identity_documents.status', CastIdentityDocument::STATUS_APPROVED)
+                       ->whereNotNull('cast_identity_documents.approved_at')
+                       ->where('cast_identity_documents.approved_at', '<', $approvedThreshold)
+                       ->where(function ($q3) {
+                           $q3->whereNotNull('cast_identity_documents.image_path_front')
+                              ->orWhereNotNull('cast_identity_documents.image_path_back');
+                       });
+                })->orWhere(function ($q2) use ($rejectedThreshold) {
+                    $q2->where('cast_identity_documents.status', CastIdentityDocument::STATUS_REJECTED)
+                       ->where('cast_identity_documents.updated_at', '<', $rejectedThreshold)
+                       ->where(function ($q3) {
+                           $q3->whereNotNull('cast_identity_documents.image_path_front')
+                              ->orWhereNotNull('cast_identity_documents.image_path_back');
+                       });
+                })->orWhere(function ($q2) use ($pendingThreshold) {
+                    $q2->where('cast_identity_documents.status', CastIdentityDocument::STATUS_PENDING)
+                       ->where('cast_identity_documents.updated_at', '<', $pendingThreshold)
+                       ->where(function ($q3) {
+                           $q3->whereNotNull('cast_identity_documents.image_path_front')
+                              ->orWhereNotNull('cast_identity_documents.image_path_back');
+                       });
+                });
+            })
+            ->select(
+                'cast_identity_documents.*',
+                'cast_profiles.nickname',
+                'cast_profiles.name as profile_name'
+            )
+            ->orderBy('cast_identity_documents.updated_at')
+            ->get();
+
+        foreach ($castDocs as $doc) {
+            $statusCode = (int) $doc->status;
+            $reason = $this->purgeReasonLabel($statusCode);
+            $nickname = trim((string) ($doc->nickname ?? ''));
+            $realName = trim((string) ($doc->profile_name ?? ''));
+            $displayName = $nickname !== '' ? $nickname : ($realName !== '' ? $realName : (string) $doc->cast_id);
+
+            $tasks[] = [
+                'id' => 'cast-doc-purge-' . $doc->id,
+                'category' => '削除候補',
+                'target' => $displayName,
+                'type' => 'キャスト本人確認',
+                'status' => $reason,
+                'date' => $this->formatDateTime($doc->updated_at),
+                'urgency' => 'high',
+                'action' => '削除を検討',
+                'cat_id' => 'purge',
+                'amount' => null,
+                'url' => route('admin.verification.index', [
+                    'focus' => 'cast',
+                    'cast_purge' => '1',
+                ]),
+            ];
+        }
+
+        // 店舗許可証書類
+        $shopDocs = ShopLicenseDocument::query()
+            ->leftJoin('shop_profiles', 'shop_license_documents.shop_id', '=', 'shop_profiles.shop_id')
+            ->where(function ($q) use ($approvedThreshold, $rejectedThreshold, $pendingThreshold) {
+                $q->where(function ($q2) use ($approvedThreshold) {
+                    $q2->where('shop_license_documents.status', ShopLicenseDocument::STATUS_APPROVED)
+                       ->whereNotNull('shop_license_documents.approved_at')
+                       ->where('shop_license_documents.approved_at', '<', $approvedThreshold)
+                       ->whereNotNull('shop_license_documents.image_path');
+                })->orWhere(function ($q2) use ($rejectedThreshold) {
+                    $q2->where('shop_license_documents.status', ShopLicenseDocument::STATUS_REJECTED)
+                       ->where('shop_license_documents.updated_at', '<', $rejectedThreshold)
+                       ->whereNotNull('shop_license_documents.image_path');
+                })->orWhere(function ($q2) use ($pendingThreshold) {
+                    $q2->where('shop_license_documents.status', ShopLicenseDocument::STATUS_PENDING)
+                       ->where('shop_license_documents.updated_at', '<', $pendingThreshold)
+                       ->whereNotNull('shop_license_documents.image_path');
+                });
+            })
+            ->select(
+                'shop_license_documents.*',
+                'shop_profiles.shop_name'
+            )
+            ->orderBy('shop_license_documents.updated_at')
+            ->get();
+
+        foreach ($shopDocs as $doc) {
+            $statusCode = (int) $doc->status;
+            $reason = $this->purgeReasonLabel($statusCode);
+            $shopName = trim((string) ($doc->shop_name ?? ''));
+            $displayName = $shopName !== '' ? $shopName : (string) $doc->shop_id;
+
+            $tasks[] = [
+                'id' => 'shop-doc-purge-' . $doc->id,
+                'category' => '削除候補',
+                'target' => $displayName,
+                'type' => '店舗許可証',
+                'status' => $reason,
+                'date' => $this->formatDateTime($doc->updated_at),
+                'urgency' => 'high',
+                'action' => '削除を検討',
+                'cat_id' => 'purge',
+                'amount' => null,
+                'url' => route('admin.verification.index', [
+                    'focus' => 'shop',
+                    'shop_purge' => '1',
+                ]),
+            ];
+        }
+
+        return $tasks;
+    }
+
+    private function purgeReasonLabel(int $statusCode): string
+    {
+        return match ($statusCode) {
+            CastIdentityDocument::STATUS_APPROVED => sprintf('承認から%d日経過', self::RETENTION_APPROVED_DAYS),
+            CastIdentityDocument::STATUS_REJECTED => sprintf('却下から%d日経過', self::RETENTION_REJECTED_DAYS),
+            CastIdentityDocument::STATUS_PENDING  => sprintf('未審査%d日経過', self::RETENTION_PENDING_DAYS),
+            default => '保持期間超過',
+        };
+    }
+
+    /**
+     * 指定の書類が「保持期間ポリシーを超えて削除候補に該当する」かを判定する。
+     * 承認は approved_at、それ以外は updated_at を起算点にする。
+     */
+    public function isPurgeCandidate(int $statusCode, mixed $approvedAt, mixed $updatedAt): bool
+    {
+        $now = now();
+        switch ($statusCode) {
+            case CastIdentityDocument::STATUS_APPROVED:
+                if (empty($approvedAt)) {
+                    return false;
+                }
+                return Carbon::parse((string) $approvedAt)->lt($now->copy()->subDays(self::RETENTION_APPROVED_DAYS));
+            case CastIdentityDocument::STATUS_REJECTED:
+                if (empty($updatedAt)) {
+                    return false;
+                }
+                return Carbon::parse((string) $updatedAt)->lt($now->copy()->subDays(self::RETENTION_REJECTED_DAYS));
+            case CastIdentityDocument::STATUS_PENDING:
+                if (empty($updatedAt)) {
+                    return false;
+                }
+                return Carbon::parse((string) $updatedAt)->lt($now->copy()->subDays(self::RETENTION_PENDING_DAYS));
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * 本人確認書類を完全削除する（運営による手動削除のみ）。
+     * private ディスクの実ファイルも消す。
+     */
+    public function purgeCastDocument(int $documentId): void
+    {
+        $document = CastIdentityDocument::query()->findOrFail($documentId);
+        $castId = $document->cast_id;
+
+        foreach (['image_path_front', 'image_path_back'] as $col) {
+            $path = $document->getAttribute($col);
+            if (empty($path)) {
+                continue;
+            }
+            $relative = preg_replace('#^private/#', '', (string) $path);
+            try {
+                Storage::disk('private')->delete($relative);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Failed to delete identity file: ' . $e->getMessage(), [
+                    'document_id' => $documentId,
+                    'path' => $path,
+                ]);
+            }
+        }
+
+        $document->delete();
+        $this->syncCastLegacyStatus($castId);
+    }
+
+    /**
+     * 店舗許可証書類を完全削除する（運営による手動削除のみ）。
+     */
+    public function purgeShopDocument(int $documentId): void
+    {
+        $document = ShopLicenseDocument::query()->findOrFail($documentId);
+        $shopId = $document->shop_id;
+        $path = $document->getAttribute('image_path');
+
+        if (!empty($path)) {
+            $relative = preg_replace('#^private/#', '', (string) $path);
+            try {
+                Storage::disk('private')->delete($relative);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Failed to delete license file: ' . $e->getMessage(), [
+                    'document_id' => $documentId,
+                    'path' => $path,
+                ]);
+            }
+        }
+
+        $document->delete();
+        $this->syncShopLegacyStatus($shopId);
     }
 
     private function syncCastLegacyStatus(string $castId): void
@@ -727,6 +959,10 @@ class DocumentReviewService
             'updated_at_sort' => $document->updated_at ? strtotime((string) $document->updated_at) : 0,
             'front_url' => $this->castIdentityAdminFileUrl($document, 'front'),
             'back_url' => $this->castIdentityAdminFileUrl($document, 'back'),
+            'is_purge_candidate' => $this->isPurgeCandidate((int) $document->status, $document->approved_at ?? null, $document->updated_at ?? null),
+            'purge_reason' => $this->isPurgeCandidate((int) $document->status, $document->approved_at ?? null, $document->updated_at ?? null)
+                ? $this->purgeReasonLabel((int) $document->status)
+                : null,
         ];
     }
 
@@ -769,6 +1005,10 @@ class DocumentReviewService
             'updated_at_sort' => $document->updated_at ? strtotime((string) $document->updated_at) : 0,
             'expiry_filter_key' => $expiryFilterKey,
             'file_url' => $this->shopLicenseAdminFileUrl($document),
+            'is_purge_candidate' => $this->isPurgeCandidate((int) $document->status, $document->approved_at ?? null, $document->updated_at ?? null),
+            'purge_reason' => $this->isPurgeCandidate((int) $document->status, $document->approved_at ?? null, $document->updated_at ?? null)
+                ? $this->purgeReasonLabel((int) $document->status)
+                : null,
         ];
     }
 

@@ -88,7 +88,7 @@ class SearchController extends BaseSearchController
             'cast_profiles.pr',
             'cast_profiles.latitude',
             'cast_profiles.longitude',
-            DB::raw("(SELECT ci.image_path FROM cast_images ci WHERE ci.cast_id = casts.id AND ci.type = 1 ORDER BY ci.is_main DESC, ci.main_order IS NULL, ci.main_order, ci.id LIMIT 1) as main_image_path"),
+            DB::raw("(SELECT ci.image_path FROM cast_images ci WHERE ci.cast_id = casts.id ORDER BY ci.is_main DESC, ci.main_order IS NULL, ci.main_order, ci.id LIMIT 1) as main_image_path"),
             'cast_profiles.updated_at as profile_updated_at',
         ];
 
@@ -260,7 +260,6 @@ class SearchController extends BaseSearchController
     {
         $images = DB::table('cast_images')
             ->where('cast_id', $castId)
-            ->where('type', 1)
             ->orderByRaw('is_main DESC')
             ->orderByRaw('main_order IS NULL')
             ->orderBy('main_order')

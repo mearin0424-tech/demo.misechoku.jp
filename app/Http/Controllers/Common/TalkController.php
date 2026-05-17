@@ -871,7 +871,6 @@ class TalkController extends Controller
 
         $mainImagePath = DB::table('cast_images')
             ->where('cast_id', $partnerId)
-            ->where('type', 1)
             ->orderByRaw('is_main DESC')
             ->orderByRaw('main_order IS NULL')
             ->orderBy('main_order')

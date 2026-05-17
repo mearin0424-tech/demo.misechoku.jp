@@ -189,7 +189,6 @@ class ProfileController extends Controller
 
         $imageCount = (int) DB::table('cast_images')
             ->where('cast_id', $castId)
-            ->where('type', 1)
             ->count();
 
         if ($imageCount < 1) {
@@ -446,7 +445,6 @@ class ProfileController extends Controller
 
         $images = DB::table('cast_images')
             ->where('cast_id', $castId)
-            ->where('type', 1)
             ->orderByRaw('is_main DESC')
             ->orderByRaw('main_order IS NULL')
             ->orderBy('main_order')

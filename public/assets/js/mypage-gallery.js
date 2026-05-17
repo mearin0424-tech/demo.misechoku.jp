@@ -28,9 +28,14 @@
         if (modal) modal.style.display = 'none';
         var deleteBtn = document.getElementById('gallery-preview-delete-btn');
         if (deleteBtn) deleteBtn.style.display = '';
+        var recropBtn = document.getElementById('gallery-preview-recrop-btn');
+        if (recropBtn) recropBtn.style.display = '';
         _galleryPreviewImageId = null;
         _galleryPreviewLi = null;
     }
+
+    // 既存画像を再切り抜きするためのフラグ：再切り抜きで上書きアップロード後に旧 ID を削除する
+    var _recropReplacingId = null;
 
     function run() {
         var uploadInput = document.getElementById('gallery-upload');
@@ -66,13 +71,61 @@
                 _galleryPreviewImageId = imageId;
                 _galleryPreviewLi = li;
                 if (modalImg) modalImg.src = imageUrl;
-                if (deleteBtn) deleteBtn.style.display = (imageId && String(imageId).indexOf('local-') !== 0) ? '' : 'none';
+                var canEditOrDelete = imageId && String(imageId).indexOf('local-') !== 0;
+                if (deleteBtn) deleteBtn.style.display = canEditOrDelete ? '' : 'none';
+                var recropBtnEl = document.getElementById('gallery-preview-recrop-btn');
+                if (recropBtnEl) {
+                    // 再切り抜きはサーバ保存済み画像のみ
+                    recropBtnEl.style.display = canEditOrDelete ? '' : 'none';
+                    recropBtnEl.setAttribute('data-image-url', imageUrl);
+                }
                 if (modal) modal.style.display = 'flex';
             } else {
                 _galleryUploadSlotIndex = slotIndex;
                 uploadInput.click();
             }
         }, true);
+
+        // 再切り抜き：既存画像を fetch→Blob→Cropper モーダルに流す
+        var recropBtn = document.getElementById('gallery-preview-recrop-btn');
+        if (recropBtn) {
+            recropBtn.addEventListener('click', function (ev) {
+                ev.preventDefault();
+                ev.stopPropagation();
+                var url = recropBtn.getAttribute('data-image-url') || '';
+                if (!url || !_galleryPreviewLi || !_galleryPreviewImageId) return;
+                var slotIndex = parseInt(_galleryPreviewLi.getAttribute('data-slot-index'), 10);
+                if (isNaN(slotIndex)) slotIndex = 0;
+                var oldImageId = _galleryPreviewImageId;
+
+                // プレビューモーダルを閉じてからエディタを開く
+                closeGalleryPreview();
+
+                fetch(url, { credentials: 'same-origin' })
+                    .then(function (r) {
+                        if (!r.ok) throw new Error('fetch failed');
+                        return r.blob();
+                    })
+                    .then(function (blob) {
+                        // File 化して openEditModal に渡す（name を持つ Blob として扱う）
+                        var fileName = 'recrop-' + Date.now() + '.jpg';
+                        var file;
+                        try {
+                            file = new File([blob], fileName, { type: blob.type || 'image/jpeg' });
+                        } catch (e) {
+                            // Safari 14- など File コンストラクタが使えない環境
+                            file = blob;
+                            file.name = fileName;
+                        }
+                        // 再切り抜き後にアップロード成功したら、旧 ID を削除する
+                        _recropReplacingId = oldImageId;
+                        openEditModal(file, slotIndex);
+                    })
+                    .catch(function () {
+                        alert('画像の読み込みに失敗しました。');
+                    });
+            });
+        }
 
         if (modal) modal.addEventListener('click', function(ev) {
             if (ev.target === this) closeGalleryPreview();
@@ -240,12 +293,32 @@
                             if (window.refreshGalleryMainState) window.refreshGalleryMainState(list);
                             if (window.persistGalleryOrder) window.persistGalleryOrder(list);
                         }
+
+                        // 再切り抜きフローの場合：旧画像をサーバから削除
+                        if (_recropReplacingId && deleteUrlTemplate) {
+                            var oldId = _recropReplacingId;
+                            _recropReplacingId = null;
+                            // 新画像と旧 ID が同じことは無い前提（アップロードで新規 ID 採番）
+                            if (String(oldId) !== String(res.id)) {
+                                var delUrl = deleteUrlTemplate.replace('__ID__', oldId);
+                                fetch(delUrl, {
+                                    method: 'DELETE',
+                                    headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+                                    credentials: 'same-origin'
+                                }).catch(function () { /* 旧画像の削除失敗はサイレント */ });
+                            }
+                        }
                     } else {
+                        // 失敗時は再切り抜きフラグもクリア
+                        _recropReplacingId = null;
                         var msg = (res && res.message) || (res.errors && res.errors.image && res.errors.image[0]) || 'アップロードに失敗しました';
                         alert(msg);
                     }
                 })
-                .catch(function() { alert('アップロードに失敗しました'); })
+                .catch(function() {
+                    _recropReplacingId = null;
+                    alert('アップロードに失敗しました');
+                })
                 .finally(function() {
                     _galleryUploadSlotIndex = null;
                     _pendingUploadFile = null;
@@ -310,6 +383,7 @@
                 _pendingUploadFile = null;
                 _pendingUploadSlotIndex = null;
                 _pendingZoom = 1;
+                _recropReplacingId = null;
                 if (_cropper) {
                     _cropper.destroy();
                     _cropper = null;

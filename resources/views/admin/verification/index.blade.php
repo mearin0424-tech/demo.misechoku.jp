@@ -247,6 +247,19 @@
                                     @else
                                         <span class="text-xs text-muted">承認済み</span>
                                     @endif
+                                    @if(!empty($document['is_purge_candidate']))
+                                        <div style="margin-top:6px;">
+                                            <span class="badge" style="background:#fee2e2; color:#b91c1c; padding:2px 6px; border-radius:4px; font-size:11px;">
+                                                削除候補（{{ $document['purge_reason'] }}）
+                                            </span>
+                                            <form method="POST" action="{{ route('admin.verification.cast.purge', ['document' => $document['id']]) }}"
+                                                  style="display:inline-block; margin-top:4px;"
+                                                  onsubmit="return confirm('本人確認書類を完全に削除します。\n対象: {{ $document['target_name'] }} / {{ $document['type_label'] }}\n\nこの操作は取り消せません。よろしいですか？');">
+                                                @csrf
+                                                <button type="submit" class="btn-action" style="background:#b91c1c; color:#fff;">完全削除</button>
+                                            </form>
+                                        </div>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
@@ -398,6 +411,19 @@
                                         </button>
                                     @else
                                         <span class="text-xs text-muted">承認済み</span>
+                                    @endif
+                                    @if(!empty($document['is_purge_candidate']))
+                                        <div style="margin-top:6px;">
+                                            <span class="badge" style="background:#fee2e2; color:#b91c1c; padding:2px 6px; border-radius:4px; font-size:11px;">
+                                                削除候補（{{ $document['purge_reason'] }}）
+                                            </span>
+                                            <form method="POST" action="{{ route('admin.verification.shopdoc.purge', ['document' => $document['id']]) }}"
+                                                  style="display:inline-block; margin-top:4px;"
+                                                  onsubmit="return confirm('店舗提出書類を完全に削除します。\n対象: {{ $document['target_name'] }} / {{ $document['type_label'] }}\n\nこの操作は取り消せません。よろしいですか？');">
+                                                @csrf
+                                                <button type="submit" class="btn-action" style="background:#b91c1c; color:#fff;">完全削除</button>
+                                            </form>
+                                        </div>
                                     @endif
                                 </td>
                             </tr>

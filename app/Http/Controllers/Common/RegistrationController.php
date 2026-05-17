@@ -163,8 +163,6 @@ class RegistrationController extends Controller
                 DB::table('cast_images')->insert([
                     'cast_id'       => $castId,
                     'image_path'    => $path,
-                    'type'          => 1,
-                    'front_and_back'=> 0,
                     'status'        => 0,
                     'is_main'       => 1,
                     'main_order'    => 0,

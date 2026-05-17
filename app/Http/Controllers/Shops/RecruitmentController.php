@@ -237,7 +237,7 @@ class RecruitmentController extends Controller
         if (Schema::hasColumn('shop_jobs', 'job_type')) {
             $query->addSelect('shop_jobs.job_type');
         }
-        $query->addSelect(DB::raw("(SELECT ci.image_path FROM cast_images ci WHERE ci.cast_id = cast_profiles.cast_id AND ci.type = 1 ORDER BY ci.is_main DESC, ci.main_order IS NULL, ci.main_order, ci.id LIMIT 1) as main_image_path"));
+        $query->addSelect(DB::raw("(SELECT ci.image_path FROM cast_images ci WHERE ci.cast_id = cast_profiles.cast_id ORDER BY ci.is_main DESC, ci.main_order IS NULL, ci.main_order, ci.id LIMIT 1) as main_image_path"));
         if (Schema::hasColumn('shop_job_applications', 'reason_rejection')) {
             $query->addSelect('shop_job_applications.reason_rejection');
         }

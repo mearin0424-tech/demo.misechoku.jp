@@ -98,6 +98,33 @@ class VerificationController extends Controller
     }
 
     /**
+     * 運営：キャスト本人確認書類の完全削除（保持期間ポリシーに基づく手動パージ）。
+     * private ディスクの実ファイルも一緒に消す。
+     */
+    public function purgeCast(Request $request, int $document)
+    {
+        $this->documentReviewService->purgeCastDocument($document);
+        $this->opLog->record('verification.cast.purge', 'cast_identity_document', (string) $document, '本人確認書類を完全削除');
+
+        return redirect()
+            ->route('admin.verification.index')
+            ->with('status', 'キャストの本人確認書類を完全削除しました。');
+    }
+
+    /**
+     * 運営：店舗書類の完全削除（保持期間ポリシーに基づく手動パージ）。
+     */
+    public function purgeShopDocument(Request $request, int $document)
+    {
+        $this->documentReviewService->purgeShopDocument($document);
+        $this->opLog->record('verification.shop.purge', 'shop_license_document', (string) $document, '店舗書類を完全削除');
+
+        return redirect()
+            ->route('admin.verification.index')
+            ->with('status', '店舗提出書類を完全削除しました。');
+    }
+
+    /**
      * 運営：キャスト本人確認書類のファイル配信。
      * Web 直アクセス不可の private ディスクから、認証＋権限ミドルウェア通過後に限り配信する。
      */

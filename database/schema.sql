@@ -102,8 +102,6 @@ CREATE TABLE IF NOT EXISTS `cast_images` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `cast_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `image_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `type` tinyint NOT NULL DEFAULT '0' COMMENT '1:アバター, 2:身分証等',
-  `front_and_back` tinyint NOT NULL DEFAULT '0' COMMENT '1:表, 2:裏',
   `status` tinyint NOT NULL DEFAULT '0',
   `is_main` tinyint(1) NOT NULL DEFAULT '0',
   `main_order` int DEFAULT NULL,
@@ -111,7 +109,12 @@ CREATE TABLE IF NOT EXISTS `cast_images` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_cast_images_cast_id` (`cast_id`),
-  KEY `idx_cast_images_cast_id_type` (`cast_id`, `type`)
+  -- 1キャストにつき is_main=1 は最大1枚（非メインは無制限）。
+  -- 関数 UNIQUE インデックス：CASE 式が NULL の行は重複扱いされない MySQL 仕様を利用。
+  UNIQUE KEY `uq_cast_images_main_per_cast` (
+    `cast_id`,
+    (CASE WHEN `is_main` = 1 THEN 1 ELSE NULL END)
+  )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -----------------------------------------------------------------------------

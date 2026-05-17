@@ -206,7 +206,7 @@ class RecommendationService
             'cast_profiles.latitude',
             'cast_profiles.longitude',
             'cast_profiles.updated_at',
-            DB::raw("(SELECT ci.image_path FROM cast_images ci WHERE ci.cast_id = casts.id AND ci.type = 1 ORDER BY ci.is_main DESC, ci.main_order IS NULL, ci.main_order, ci.id LIMIT 1) as main_image_path"),
+            DB::raw("(SELECT ci.image_path FROM cast_images ci WHERE ci.cast_id = casts.id ORDER BY ci.is_main DESC, ci.main_order IS NULL, ci.main_order, ci.id LIMIT 1) as main_image_path"),
         ])->limit(200)->get();
 
         if ($rows->isEmpty()) {

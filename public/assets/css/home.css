@@ -2014,18 +2014,26 @@ body.page-home .rc-manager-msg__backdrop {
     border-radius: 999px;
 }
 
-/* 店舗名 — 34px・太字（フォントは app.css の Noto Sans JP 維持） */
+/* 店舗名・キャスト名（フォントは app.css の Noto Sans JP 維持。幅に応じて可変） */
 body.page-home .rc-shop-name {
-    font-size: 34px !important;
+    font-size: clamp(22px, 7.2vw, 34px) !important;
     line-height: 1.15;
     font-weight: 800;
     color: #fff;
     letter-spacing: 0.02em;
 }
 body.page-home .cast-name {
-    font-size: 30px !important;
+    font-size: clamp(20px, 6.4vw, 30px) !important;
     font-weight: 800;
     color: #fff;
+}
+
+/* 時給金額もコンテナに収まる範囲で大きく */
+body.page-home .rc-wage-panel__trial-amount {
+    font-size: clamp(18px, 5.4vw, 24px) !important;
+}
+body.page-home .rc-wage-panel__help-amount {
+    font-size: clamp(14px, 4.4vw, 18px) !important;
 }
 
 /* 評価・エリアのアイコンをアクセントピンクに */
@@ -2095,27 +2103,31 @@ body.page-home .card-swipe-hint { display: none !important; }
 body.page-home .rc-action-label { display: none !important; }
 
 /* ==========================================================================
-   フルブリード化：カード枠を撤廃し画像を画面端まで広げる
+   フルブリード化：カード枠を撤廃し画像を表示領域（#app）全幅に広げる
    - ヘッダー／フッターは触らない（共通要素は維持）
-   - .cast-card を 100vw × 100dvh にし、画像はビューポート全面に
-   - ヘッダー／フッターは固定オーバーレイのまま画像の上に乗る形になる
+   - .cast-card を表示領域いっぱい（100% × 100dvh）にする
+   - 100vw ではなく 100% を使い、#app の幅（430〜880px）に正しく追従させる
    ========================================================================== */
 
 body.page-home main,
 body.page-home #main-content {
-    /* ヘッダー／フッター下のクリア余白を解除し、画像をビューポート端まで広げる */
+    /* ヘッダー／フッター下のクリア余白を解除し、画像を表示領域の端まで広げる */
     padding-top: 0 !important;
     padding-bottom: 0 !important;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
 }
 body.page-home .content-wrapper {
     padding: 0 !important;
+    width: 100% !important;
     max-width: 100% !important;
-    overflow: visible !important;
+    overflow: hidden !important;
 }
 
 body.page-home #home-screen {
     position: relative;
-    width: 100vw;
+    width: 100%;
     height: 100vh;
     height: 100dvh;
     margin: 0;
@@ -2134,17 +2146,19 @@ body.page-home .main-swiper > .swiper-wrapper {
 body.page-home .main-swiper .swiper-slide {
     height: 100% !important;
     width: 100% !important;
+    max-width: 100% !important;
     display: flex !important;
     align-items: stretch !important;
     justify-content: stretch !important;
+    box-sizing: border-box;
 }
 
 /* カード枠の撤廃：余白・角丸・影・スケール縮小・透明度をすべて解除 */
 body.page-home .cast-card,
 body.page-home .cast-card.glass-card,
 body.page-home .cast-card--recruit {
-    width: 100vw !important;
-    max-width: 100vw !important;
+    width: 100% !important;
+    max-width: 100% !important;
     height: 100% !important;
     max-height: none !important;
     min-height: 0 !important;
@@ -2160,6 +2174,7 @@ body.page-home .cast-card--recruit {
     overflow: hidden;
     display: flex !important;
     flex-direction: column;
+    box-sizing: border-box;
 }
 
 /* 非アクティブカードの 0.94 縮小指定（複数箇所）も無効化してフルブリード維持 */
@@ -2206,14 +2221,77 @@ body.page-home .card-bottom-info {
     left: 0;
     right: 0;
     bottom: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     padding-left: var(--content-padding-x, 16px);
     padding-right: var(--content-padding-x, 16px);
     /* フッター(75px)分 + 余白で底上げ、スワイプガイドとの被り防止 */
     padding-bottom: calc(var(--footer-height, 75px) + 110px) !important;
     z-index: 10;
 }
-body.page-home .rc-bottom-bar__stack {
+body.page-home .rc-bottom-bar__stack,
+body.page-home .rc-info,
+body.page-home .rc-meta,
+body.page-home .rc-badges,
+body.page-home .rc-signup-bonus-pill,
+body.page-home .rc-wage-panel,
+body.page-home .card-tags-row,
+body.page-home .card-location,
+body.page-home .card-rating {
     width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+/* 横並び要素は折返し可能に。テキストは折返し、長い住所/駅名は溢れさせない */
+body.page-home .rc-meta,
+body.page-home .rc-badges,
+body.page-home .card-tags-row,
+body.page-home .card-location {
+    flex-wrap: wrap;
+    row-gap: 6px;
+    column-gap: 8px;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+body.page-home .rc-shop-name,
+body.page-home .cast-name {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    max-width: 100%;
+}
+
+/* 時給パネルは横並びだが、幅不足時は縦に積む */
+body.page-home .rc-wage-panel {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 14px;
+    row-gap: 6px;
+}
+body.page-home .rc-wage-panel > * {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+body.page-home .rc-wage-panel__trial-amount,
+body.page-home .rc-wage-panel__help-amount {
+    overflow-wrap: anywhere;
+    word-break: keep-all;
+}
+
+/* 入店祝い金ピル：画面端で切れないよう内側に折返し許可 */
+body.page-home .rc-signup-bonus-pill {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 8px;
+    row-gap: 2px;
+    max-width: 100%;
+}
+body.page-home .rc-signup-bonus-pill__nums {
+    overflow-wrap: anywhere;
+    word-break: keep-all;
 }
 
 /* スワイプガイドはフッターの直上にくるよう調整 */

@@ -433,7 +433,7 @@ class MypageController extends Controller
     }
 
     /**
-     * キャスト画像アップロード（DB: cast_images type=1 に保存）
+     * キャスト画像アップロード（DB: cast_images に保存）
      */
     public function uploadImage(Request $request)
     {
@@ -458,18 +458,16 @@ class MypageController extends Controller
 
         $maxOrder = DB::table('cast_images')
             ->where('cast_id', $castId)
-            ->where('type', 1)
             ->max('main_order');
         $mainOrder = $maxOrder !== null ? $maxOrder + 1 : 0;
-        $isMain = $slotIndex === 0 ? 1 : 0;
 
+        // is_main は常に 0 で投入し、後段の syncCastImageOrder で「先頭1枚=1、他=0」に揃える。
+        // UNIQUE(cast_id, CASE WHEN is_main=1 THEN 1 ELSE NULL END) の競合を避けるため。
         $id = DB::table('cast_images')->insertGetId([
             'cast_id'       => $castId,
             'image_path'    => $path,
-            'type'          => 1,
-            'front_and_back'=> 0,
             'status'        => 0,
-            'is_main'       => $isMain,
+            'is_main'       => 0,
             'main_order'    => $mainOrder,
             'created_at'    => now(),
             'updated_at'    => now(),
@@ -477,7 +475,6 @@ class MypageController extends Controller
 
         $orderedIds = DB::table('cast_images')
             ->where('cast_id', $castId)
-            ->where('type', 1)
             ->orderByRaw('is_main DESC')
             ->orderByRaw('main_order IS NULL')
             ->orderBy('main_order')
@@ -513,13 +510,11 @@ class MypageController extends Controller
 
         $currentCount = (int) DB::table('cast_images')
             ->where('cast_id', $castId)
-            ->where('type', 1)
             ->count();
 
         $row = DB::table('cast_images')
             ->where('id', $id)
             ->where('cast_id', $castId)
-            ->where('type', 1)
             ->first();
 
         if (!$row) {
@@ -540,7 +535,6 @@ class MypageController extends Controller
 
         $orderedIds = DB::table('cast_images')
             ->where('cast_id', $castId)
-            ->where('type', 1)
             ->orderByRaw('is_main DESC')
             ->orderByRaw('main_order IS NULL')
             ->orderBy('main_order')
@@ -870,11 +864,10 @@ class MypageController extends Controller
                 ->sum('application_deposits.bonus_amount');
         }
 
-        // 画像: cast_images (type=1) を id + url で取得（is_main を先に）
+        // 画像: cast_images を id + url で取得（is_main を先に）
         $images = [];
         $castImages = DB::table('cast_images')
             ->where('cast_id', $castId)
-            ->where('type', 1)
             ->orderByRaw('is_main DESC')
             ->orderByRaw('main_order IS NULL')
             ->orderBy('main_order')
@@ -1069,7 +1062,6 @@ class MypageController extends Controller
     {
         $existingImages = DB::table('cast_images')
             ->where('cast_id', $castId)
-            ->where('type', 1)
             ->orderByRaw('is_main DESC')
             ->orderByRaw('main_order IS NULL')
             ->orderBy('main_order')
@@ -1088,7 +1080,6 @@ class MypageController extends Controller
         DB::transaction(function () use ($castId, $orderedIds, $existingImages) {
             DB::table('cast_images')
                 ->where('cast_id', $castId)
-                ->where('type', 1)
                 ->update([
                     'is_main' => 0,
                     'updated_at' => now(),
@@ -1097,7 +1088,6 @@ class MypageController extends Controller
             foreach ($orderedIds as $index => $imageId) {
                 DB::table('cast_images')
                     ->where('cast_id', $castId)
-                    ->where('type', 1)
                     ->where('id', $imageId)
                     ->update([
                         'main_order' => $index,

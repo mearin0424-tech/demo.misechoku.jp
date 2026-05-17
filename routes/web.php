@@ -267,6 +267,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/verification/shopdoc/{document}/file', [AdminVerification::class, 'viewShopFile'])
                 ->whereNumber('document')
                 ->name('verification.shopdoc.file');
+            // 保持期間ポリシーに基づく完全削除（運営の手動操作のみ。自動削除は行わない）
+            Route::post('/verification/cast/{document}/purge', [AdminVerification::class, 'purgeCast'])
+                ->whereNumber('document')
+                ->name('verification.cast.purge');
+            Route::post('/verification/shopdoc/{document}/purge', [AdminVerification::class, 'purgeShopDocument'])
+                ->whereNumber('document')
+                ->name('verification.shopdoc.purge');
         });
 
         // 蝠上＞蜷医ｏ縺帷ｮ｡逅・
