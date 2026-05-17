@@ -237,17 +237,16 @@ class ProfileController extends Controller
         $this->syncCastTags($castId, 'looks', $request->input('look_tag_ids', []));
         $this->syncCastTags($castId, 'personality', $request->input('personality_tag_ids', []));
 
-        // 希望業種は user_search_preferences (industry_ids JSON) に保存
+        // 希望業種は cast_search_preferences (industry_ids JSON) に保存
         $now = now();
-        DB::table('user_search_preferences')->upsert(
+        DB::table('cast_search_preferences')->upsert(
             [[
-                'owner_type'   => 'cast',
-                'owner_id'     => $castId,
+                'cast_id'      => $castId,
                 'industry_ids' => json_encode(array_values(array_map('intval', $industryIds))),
                 'created_at'   => $now,
                 'updated_at'   => $now,
             ]],
-            ['owner_type', 'owner_id'],
+            ['cast_id'],
             ['industry_ids', 'updated_at']
         );
 
@@ -704,9 +703,8 @@ class ProfileController extends Controller
     private function resolveDesiredJobByIndustries(string $castId, $fallbackIndustryId = null): string
     {
         $names = [];
-        $row = DB::table('user_search_preferences')
-            ->where('owner_type', 'cast')
-            ->where('owner_id', $castId)
+        $row = DB::table('cast_search_preferences')
+            ->where('cast_id', $castId)
             ->value('industry_ids');
         $ids = $row ? (json_decode($row, true) ?: []) : [];
         if (!empty($ids)) {
@@ -792,9 +790,8 @@ class ProfileController extends Controller
      */
     private function resolveCastIndustryIds(string $castId, $fallbackIndustryId = null): array
     {
-        $row = DB::table('user_search_preferences')
-            ->where('owner_type', 'cast')
-            ->where('owner_id', $castId)
+        $row = DB::table('cast_search_preferences')
+            ->where('cast_id', $castId)
             ->value('industry_ids');
         $ids = $row ? (json_decode($row, true) ?: []) : [];
         $ids = array_values(array_filter(array_map('intval', is_array($ids) ? $ids : [])));

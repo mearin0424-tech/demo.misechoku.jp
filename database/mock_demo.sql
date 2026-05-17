@@ -1,5 +1,26 @@
--- --------------------------------------------------------
--- 2026.05.17 時点
+-- phpMyAdmin SQL Dump
+-- version 5.2.3
+-- https://www.phpmyadmin.net/
+--
+-- ホスト: localhost:3306
+-- 生成日時: 2026 年 5 月 17 日 13:40
+-- サーバのバージョン： 8.0.45
+-- PHP のバージョン: 8.4.19
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- データベース: `mock_demo`
+--
+
 -- --------------------------------------------------------
 
 --
@@ -570,6 +591,8 @@ INSERT INTO `industries` (`id`, `name`, `del_flg`, `created_at`, `updated_at`) V
 (4, 'ガールズバー', 0, '2026-03-13 02:32:50', '2026-03-13 02:32:50'),
 (5, 'コンカフェ', 0, '2026-03-13 02:32:50', '2026-03-13 02:32:50'),
 (6, 'スナック', 0, '2026-03-13 02:32:50', '2026-03-13 02:32:50'),
+(7, '朝キャバ', 0, '2026-05-17 03:59:10', '2026-05-17 03:59:19'),
+(8, '昼キャバ', 0, '2026-05-17 03:59:26', '2026-05-17 12:59:26'),
 (9, 'その他', 0, '2026-03-13 02:32:50', '2026-03-13 02:32:50');
 
 -- --------------------------------------------------------
@@ -1380,6 +1403,7 @@ INSERT INTO `shop_posts` (`id`, `shop_id`, `body`, `created_at`, `updated_at`) V
 CREATE TABLE `shop_profiles` (
   `id` bigint UNSIGNED NOT NULL,
   `industry_id` bigint UNSIGNED DEFAULT NULL COMMENT '業種ID (industries)',
+  `industry_label` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '表示用の業種名（フリーテキスト）',
   `shop_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `shop_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `zip` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -1401,11 +1425,11 @@ CREATE TABLE `shop_profiles` (
 -- テーブルのデータのダンプ `shop_profiles`
 --
 
-INSERT INTO `shop_profiles` (`id`, `industry_id`, `shop_id`, `shop_name`, `zip`, `pref`, `city`, `addr`, `building`, `tel`, `open_time`, `close_is_last`, `close_time`, `latitude`, `longitude`, `created_at`, `updated_at`) VALUES
-(1, 1, 's00000001', 'Club Luminous (ルミナス)', '103-0016', '東京都', '中央区', '日本橋小網町', 'ヂューエ日本橋 101', '+817099999999', '12:00:00', 1, NULL, 35.6826780, 139.7807160, '2026-05-06 15:15:40', '2026-05-06 15:15:40'),
-(2, NULL, 's00000002', 'CUTE', '134-0088', '東京都', '江戸川区', '西葛西', NULL, '07012345678', NULL, 0, NULL, NULL, NULL, '2026-03-16 13:08:08', '2026-03-20 08:22:07'),
-(8, 1, 's00000003', 'スナック奈緒子', '140-0014', '東京都', '品川区', '大井', '２８－３ＤｕｏＣｏｕｒｔ大井１０１号　室', '0356743525', NULL, 0, NULL, 35.6058540, 139.7325590, '2026-05-10 14:14:14', '2026-05-10 14:14:23'),
-(9, 1, 's00000004', 'USA', '192-0046', '東京都', '八王子市', '明神町', NULL, '99999999', NULL, 0, NULL, 35.6583670, 139.3493350, '2026-05-10 14:18:59', '2026-05-10 14:19:06');
+INSERT INTO `shop_profiles` (`id`, `industry_id`, `industry_label`, `shop_id`, `shop_name`, `zip`, `pref`, `city`, `addr`, `building`, `tel`, `open_time`, `close_is_last`, `close_time`, `latitude`, `longitude`, `created_at`, `updated_at`) VALUES
+(1, 1, NULL, 's00000001', 'Club Luminous (ルミナス)', '103-0016', '東京都', '中央区', '日本橋小網町', 'ヂューエ日本橋 101', '+817099999999', '12:00:00', 1, NULL, 35.6826780, 139.7807160, '2026-05-06 15:15:40', '2026-05-06 15:15:40'),
+(2, NULL, NULL, 's00000002', 'CUTE', '134-0088', '東京都', '江戸川区', '西葛西', NULL, '07012345678', NULL, 0, NULL, NULL, NULL, '2026-03-16 13:08:08', '2026-03-20 08:22:07'),
+(8, 1, NULL, 's00000003', 'スナック奈緒子', '140-0014', '東京都', '品川区', '大井', '２８－３ＤｕｏＣｏｕｒｔ大井１０１号　室', '0356743525', NULL, 0, NULL, 35.6058540, 139.7325590, '2026-05-10 14:14:14', '2026-05-10 14:14:23'),
+(9, 1, NULL, 's00000004', 'USA', '192-0046', '東京都', '八王子市', '明神町', NULL, '99999999', NULL, 0, NULL, 35.6583670, 139.3493350, '2026-05-10 14:18:59', '2026-05-10 14:19:06');
 
 -- --------------------------------------------------------
 
@@ -2578,3 +2602,7 @@ ALTER TABLE `talk_blocks`
   ADD CONSTRAINT `talk_blocks_cast_id_foreign` FOREIGN KEY (`cast_id`) REFERENCES `casts` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `talk_blocks_shop_id_foreign` FOREIGN KEY (`shop_id`) REFERENCES `shops` (`id`) ON DELETE CASCADE;
 COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

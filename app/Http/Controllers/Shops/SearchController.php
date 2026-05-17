@@ -119,12 +119,9 @@ class SearchController extends BaseSearchController
         $this->applySort($rows, $sort, $castPostsHasUpdatedAt);
 
         if (!empty($industries)) {
-            $rows->join('user_search_preferences', function ($j) {
-                    $j->on('user_search_preferences.owner_id', '=', 'casts.id')
-                      ->where('user_search_preferences.owner_type', '=', 'cast');
-                })
+            $rows->join('cast_search_preferences', 'cast_search_preferences.cast_id', '=', 'casts.id')
                 ->join('industries', function ($j) {
-                    $j->whereRaw('JSON_CONTAINS(user_search_preferences.industry_ids, CAST(industries.id AS JSON))');
+                    $j->whereRaw('JSON_CONTAINS(cast_search_preferences.industry_ids, CAST(industries.id AS JSON))');
                 })
                 ->whereIn('industries.name', $industries)
                 ->distinct();

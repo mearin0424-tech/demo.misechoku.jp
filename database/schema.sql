@@ -1134,22 +1134,16 @@ ALTER TABLE `policy_revisions`
   ADD CONSTRAINT `policy_revisions_policy_document_id_foreign` FOREIGN KEY (`policy_document_id`) REFERENCES `policy_documents` (`id`) ON DELETE CASCADE;
 
 -- ------------------------------------------------------------------------------
--- 位置情報フィルタ：MyPage で「住所」「指定地（パスポート）」「現在地」のいずれかと
--- 表示距離（半径 km）を保存できるようにする。専用テーブル user_search_locations を
--- owner_type / owner_id でポリモーフィックに紐づける（user_talk_templates と同規約）。
+-- 検索希望条件：cast / shop それぞれ専用テーブル（mock_demo.sql と整合）
 -- ------------------------------------------------------------------------------
 -- shop_managers にアカウント設定で使うカラムを追加（退会用 soft delete と LINE 連携用）
 ALTER TABLE `shop_managers`
   ADD COLUMN IF NOT EXISTS `line_user_id` text DEFAULT NULL,
   ADD COLUMN IF NOT EXISTS `deleted_at`   timestamp NULL DEFAULT NULL;
 
-ALTER TABLE `cast_profiles`
-  ADD COLUMN IF NOT EXISTS `desired_hourly_wage_min` int UNSIGNED DEFAULT NULL COMMENT '希望時給（円以上）';
-
-CREATE TABLE IF NOT EXISTS `user_search_preferences` (
+CREATE TABLE IF NOT EXISTS `cast_search_preferences` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  `owner_type` varchar(16) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'cast または shop',
-  `owner_id`   varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `cast_id` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   -- 位置情報
   `mode`               varchar(16)   COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'profile / passport / current',
   `passport_address`   text          COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -1158,14 +1152,31 @@ CREATE TABLE IF NOT EXISTS `user_search_preferences` (
   `passport_label`     varchar(80)   COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `max_distance_km`    smallint      DEFAULT NULL COMMENT '0=制限なし、>0 で半径 km',
   -- 詳細検索フォームから保存される希望条件
-  `shift_frequency`    varchar(16)   COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '希望出勤頻度（週1回出勤 / 週2回出勤 / 週3回以上）',
-  `work_periods`       json          DEFAULT NULL COMMENT '希望勤務時間帯（morning / day / night の配列）',
+  `shift_frequency`    varchar(16)   COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '週1回出勤 / 週2回出勤 / 週3回以上',
+  `work_periods`       json          DEFAULT NULL COMMENT '時間帯配列 morning/day/night',
   `hourly_wage_min`    int UNSIGNED  DEFAULT NULL COMMENT '希望時給（円以上）',
-  `industry_ids`       json          DEFAULT NULL COMMENT '希望業種ID配列（複数可）',
+  `industry_ids`       json          DEFAULT NULL COMMENT '希望業種ID配列',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_user_search_preferences_owner` (`owner_type`, `owner_id`)
+  UNIQUE KEY `uq_cast_search_preferences_cast` (`cast_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `shop_search_preferences` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `shop_id` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `max_distance_km`     smallint        DEFAULT NULL COMMENT '0=制限なし、>0 で半径 km',
+  `age_min`             tinyint UNSIGNED DEFAULT NULL,
+  `age_max`             tinyint UNSIGNED DEFAULT NULL,
+  `shift_frequency`     varchar(16)     COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `work_periods`        json            DEFAULT NULL,
+  `looks_tag_ids`       json            DEFAULT NULL,
+  `personality_tag_ids` json            DEFAULT NULL,
+  `night_work_exp`      varchar(8)      COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'none / yes / any',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_shop_search_preferences_shop` (`shop_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -----------------------------------------------------------------------------

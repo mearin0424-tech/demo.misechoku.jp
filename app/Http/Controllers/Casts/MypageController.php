@@ -1196,9 +1196,8 @@ class MypageController extends Controller
     private function resolveDesiredJobByIndustries(string $castId, $fallbackIndustryId = null): string
     {
         $names = [];
-        $row = DB::table('user_search_preferences')
-            ->where('owner_type', 'cast')
-            ->where('owner_id', $castId)
+        $row = DB::table('cast_search_preferences')
+            ->where('cast_id', $castId)
             ->value('industry_ids');
         $ids = $row ? (json_decode($row, true) ?: []) : [];
         if (!empty($ids)) {

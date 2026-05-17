@@ -489,15 +489,14 @@ class RegistrationController extends Controller
     {
         $industryIds = array_values(array_unique(array_filter(array_map('intval', $industryIds))));
         $now = now();
-        DB::table('user_search_preferences')->upsert(
+        DB::table('cast_search_preferences')->upsert(
             [[
-                'owner_type'   => 'cast',
-                'owner_id'     => $castId,
+                'cast_id'      => $castId,
                 'industry_ids' => json_encode($industryIds),
                 'created_at'   => $now,
                 'updated_at'   => $now,
             ]],
-            ['owner_type', 'owner_id'],
+            ['cast_id'],
             ['industry_ids', 'updated_at']
         );
     }
