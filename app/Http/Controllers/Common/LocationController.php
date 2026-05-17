@@ -119,4 +119,23 @@ class LocationController extends Controller
             'longitude' => (float) $coords['longitude'],
         ]);
     }
+
+    /**
+     * GET /api/geocoding/suggest?q=...
+     *
+     * 入力に応じて住所候補を最大 8 件返す（オートサジェスト用）。
+     */
+    public function suggest(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'q' => ['required', 'string', 'max:255'],
+        ]);
+
+        $candidates = $this->geocodingService->searchCandidates((string) $data['q'], 8);
+
+        return response()->json([
+            'success' => true,
+            'candidates' => $candidates,
+        ]);
+    }
 }

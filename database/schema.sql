@@ -66,7 +66,6 @@ CREATE TABLE IF NOT EXISTS `cast_profiles` (
   `bust` smallint DEFAULT NULL,
   `waist` smallint DEFAULT NULL,
   `hip` smallint DEFAULT NULL,
-  `work_time` int DEFAULT NULL,
   `profession` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `exp` tinyint DEFAULT NULL,
   `work_where` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -227,7 +226,8 @@ CREATE TABLE IF NOT EXISTS `shops` (
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `shop_profiles` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  `industry_id` bigint UNSIGNED DEFAULT NULL COMMENT '業種ID (industries)',
+  `industry_id` bigint UNSIGNED DEFAULT NULL COMMENT '業種ID (industries) ※検索用',
+  `industry_label` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '表示用の業種名（フリーテキスト、例：高級ラウンジ）',
   `shop_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `shop_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `zip` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -596,20 +596,8 @@ CREATE TABLE IF NOT EXISTS `industries` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- -----------------------------------------------------------------------------
--- shop_industry
--- -----------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `shop_industry` (
-  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  `shop_id` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `industry_id` bigint UNSIGNED NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_shop_industry` (`shop_id`, `industry_id`),
-  KEY `idx_shop_industry_shop` (`shop_id`),
-  KEY `idx_shop_industry_industry` (`industry_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- 店舗の業種は shop_profiles.industry_id（1 店舗 1 業種）に一本化済み。
+-- かつての中間テーブル shop_industry は廃止。
 
 -- -----------------------------------------------------------------------------
 -- shop_tags  (マスターデータ)
@@ -1155,20 +1143,29 @@ ALTER TABLE `shop_managers`
   ADD COLUMN IF NOT EXISTS `line_user_id` text DEFAULT NULL,
   ADD COLUMN IF NOT EXISTS `deleted_at`   timestamp NULL DEFAULT NULL;
 
-CREATE TABLE IF NOT EXISTS `user_search_locations` (
+ALTER TABLE `cast_profiles`
+  ADD COLUMN IF NOT EXISTS `desired_hourly_wage_min` int UNSIGNED DEFAULT NULL COMMENT '希望時給（円以上）';
+
+CREATE TABLE IF NOT EXISTS `user_search_preferences` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
   `owner_type` varchar(16) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'cast または shop',
   `owner_id`   varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  -- 位置情報
   `mode`               varchar(16)   COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'profile / passport / current',
   `passport_address`   text          COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `passport_latitude`  decimal(10,7) DEFAULT NULL,
   `passport_longitude` decimal(10,7) DEFAULT NULL,
   `passport_label`     varchar(80)   COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `max_distance_km`    smallint      DEFAULT NULL COMMENT '0=制限なし、>0 で半径 km',
+  -- 詳細検索フォームから保存される希望条件
+  `shift_frequency`    varchar(16)   COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '希望出勤頻度（週1回出勤 / 週2回出勤 / 週3回以上）',
+  `work_periods`       json          DEFAULT NULL COMMENT '希望勤務時間帯（morning / day / night の配列）',
+  `hourly_wage_min`    int UNSIGNED  DEFAULT NULL COMMENT '希望時給（円以上）',
+  `industry_ids`       json          DEFAULT NULL COMMENT '希望業種ID配列（複数可）',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_user_search_locations_owner` (`owner_type`, `owner_id`)
+  UNIQUE KEY `uq_user_search_preferences_owner` (`owner_type`, `owner_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -----------------------------------------------------------------------------

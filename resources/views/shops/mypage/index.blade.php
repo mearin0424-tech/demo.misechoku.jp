@@ -817,17 +817,7 @@
 
         @include('shops.mypage.partials.shop-license-documents', ['documents' => $documents ?? []])
 
-        {{-- Place Setting（位置情報での絞り込み） --}}
-        <div class="shop-mypage-section place-setting-section">
-            <div class="shop-mypage-section-head-row">
-                <h3 class="shop-mypage-section-label">Place Setting</h3>
-            </div>
-            @include('partials.search-location-settings', [
-                'searchLocationSettings' => $searchLocationSettings ?? null,
-                'searchLocationDistanceOptions' => $searchLocationDistanceOptions ?? [0,1,3,5,10,20,30,50,100],
-                'updateRouteName' => 'shop.mypage.search-location.update',
-            ])
-        </div>
+        {{-- 検索条件・絞り込みはすべて SEARCH 画面の「詳細検索」モーダルに集約しています --}}
     </section>
 </div>
 

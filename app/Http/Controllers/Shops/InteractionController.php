@@ -181,6 +181,24 @@ class InteractionController extends Controller
             $showReceivedLike = false;
         }
 
+        // レコメンド（条件が似ているお店／キャスト）
+        $recommendation = app(\App\Services\RecommendationService::class);
+        if ($isCastPortal) {
+            $castUser = Auth::guard('member')->user();
+            $castIdForReco = $castUser ? (string) $castUser->id : null;
+            $recommendItems = $castIdForReco ? $recommendation->recommendShopsForCast($castIdForReco, 6) : [];
+            $recommendType = 'shop';
+            $recommendLogic = \App\Services\RecommendationService::castRecommendLogicLines();
+            $recommendDetailRoute = 'cast.recruit.show';
+        } else {
+            $shopUser = Auth::guard('shop')->user();
+            $shopIdForReco = $shopUser ? (string) $shopUser->shop_id : null;
+            $recommendItems = $shopIdForReco ? $recommendation->recommendCastsForShop($shopIdForReco, 6) : [];
+            $recommendType = 'cast';
+            $recommendLogic = \App\Services\RecommendationService::shopRecommendLogicLines();
+            $recommendDetailRoute = 'shop.castprofileview.show';
+        }
+
         return view('shops.interaction.index', [
             'pageId' => 'connection',
             'keepCasts' => $keepCasts,
@@ -188,6 +206,10 @@ class InteractionController extends Controller
             'sentLikeCasts' => $sentLikeCasts,
             'profileRoute' => $profileRoute,
             'showReceivedLike' => $showReceivedLike,
+            'recommendItems' => $recommendItems,
+            'recommendType' => $recommendType,
+            'recommendLogic' => $recommendLogic,
+            'recommendDetailRoute' => $recommendDetailRoute,
         ]);
     }
 

@@ -7,6 +7,7 @@ use App\Consts\CommonConsts;
 use App\Consts\TreatmentConsts;
 use App\Repositories\Master\IndustryRepositoryInterface as MyRepository;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use App\Models\ShopIndustry;
 use App\Models\MemberIndustry;
 use App\Models\NearestStation;
@@ -101,7 +102,20 @@ class StrUtil extends Facade {
     }
 
     public static function industryNameByShopId ($shop_id) {
-         $records = ShopIndustry::where("shop_id",$shop_id)->get();
+         // industry_label が登録されていれば最優先で採用
+         if (Schema::hasColumn('shop_profiles', 'industry_label')) {
+             $label = trim((string) DB::table('shop_profiles')
+                 ->where('shop_id', $shop_id)
+                 ->value('industry_label'));
+             if ($label !== '') {
+                 return $label . ' ';
+             }
+         }
+         $records = DB::table('shop_profiles')
+            ->join('industries', 'shop_profiles.industry_id', '=', 'industries.id')
+            ->where('shop_profiles.shop_id', $shop_id)
+            ->select('industries.name')
+            ->get();
          $str = "";
          foreach($records as $record){
              $str .= $record->name." ";
@@ -110,7 +124,20 @@ class StrUtil extends Facade {
     }
 
     public static function industryNameByShopIdHtml ($shop_id) {
-         $records = ShopIndustry::where("shop_id",$shop_id)->get();
+         // industry_label が登録されていれば最優先で採用
+         if (Schema::hasColumn('shop_profiles', 'industry_label')) {
+             $label = trim((string) DB::table('shop_profiles')
+                 ->where('shop_id', $shop_id)
+                 ->value('industry_label'));
+             if ($label !== '') {
+                 return "<li>".$label."</li>";
+             }
+         }
+         $records = DB::table('shop_profiles')
+            ->join('industries', 'shop_profiles.industry_id', '=', 'industries.id')
+            ->where('shop_profiles.shop_id', $shop_id)
+            ->select('industries.name')
+            ->get();
          $str = "";
          foreach($records as $record){
              $str .= "<li>".$record->name."</li>";
@@ -138,9 +165,19 @@ class StrUtil extends Facade {
 
     public static function industryByShopId ($shop_id) {
 
+        // industry_label が登録されていれば最優先で採用
+        if (Schema::hasColumn('shop_profiles', 'industry_label')) {
+            $label = trim((string) DB::table('shop_profiles')
+                ->where('shop_id', $shop_id)
+                ->value('industry_label'));
+            if ($label !== '') {
+                return collect([(object) ['name' => $label]]);
+            }
+        }
+
         $records = DB::table('industries')
-                   ->join('shop_industries', 'industries.id', '=', 'shop_industries.industry_id')
-                   ->where('shop_industries.shop_id',$shop_id)
+                   ->join('shop_profiles', 'industries.id', '=', 'shop_profiles.industry_id')
+                   ->where('shop_profiles.shop_id',$shop_id)
                    ->select('industries.name')
                    ->get();
 

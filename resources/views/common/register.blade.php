@@ -291,26 +291,6 @@
                     </div>
                     @endif
 
-                    <div class="register-grid register-grid-two">
-                        <label class="register-field">
-                            <span>希望シフト</span>
-                            <select name="work_where">
-                                <option value="">選択してください</option>
-                                <option value="週1回出勤" @selected(old('work_where', old('shift_hope')) === '週1回出勤')>週1回出勤</option>
-                                <option value="週2回出勤" @selected(old('work_where', old('shift_hope')) === '週2回出勤')>週2回出勤</option>
-                                <option value="週3回以上" @selected(old('work_where', old('shift_hope')) === '週3回以上')>週3回以上</option>
-                            </select>
-                        </label>
-                        <label class="register-field">
-                            <span>勤務時間帯</span>
-                            <select name="work_time">
-                                <option value="">未選択</option>
-                                <option value="morning" @selected(old('work_time') === 'morning')>朝〜昼</option>
-                                <option value="day_night" @selected(old('work_time') === 'day_night')>夜</option>
-                            </select>
-                        </label>
-                    </div>
-
                     <label class="register-field register-field-compact">
                         <span>現職業</span>
                         <input type="text" name="profession" value="{{ old('profession', old('current_job')) }}" maxlength="40" placeholder="例：会社員 / 学生 / フリーター">

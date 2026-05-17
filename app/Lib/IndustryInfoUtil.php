@@ -18,16 +18,19 @@ class IndustryInfoUtil extends Facade {
 
 
     public static function getByShopIdw ($shop_id) {
-        return ShopIndustry::where("shop_id",$shop_id)->select('industry_id')->get();
+        return DB::table('shop_profiles')
+            ->where('shop_id', $shop_id)
+            ->select('industry_id')
+            ->get();
     }
 
 
     public static function getByShopId ($shop_id) {
 
         $records = DB::table('industries')
-                   ->join('shop_industries', 'industries.id', '=', 'shop_industries.industry_id')
-                   ->where('shop_industries.shop_id',$shop_id)
-                   ->select('industries.*','shop_industries.industry_id')
+                   ->join('shop_profiles', 'industries.id', '=', 'shop_profiles.industry_id')
+                   ->where('shop_profiles.shop_id',$shop_id)
+                   ->select('industries.*','shop_profiles.industry_id')
                    ->get();
         return  $records;
 

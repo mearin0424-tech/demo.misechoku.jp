@@ -8,7 +8,7 @@
 - **フレームワーク**: Laravel（PHP）
 - **テンプレートエンジン**: Blade
 - **フロントエンド**: Vanilla JS（一部 jQuery）、Tailwind CSS
-- **DB**: MySQL
+- **DB**: MySQL 8.0
 - **デプロイ先**: Plesk サーバ
 - **認証**: キャスト / 店舗 / 管理者 の3ロール
 
@@ -62,40 +62,32 @@ public/assets/js/    # フロントエンドJS
 
 ---
 
-## よく使うコマンド
-
-```bash
-# テスト実行
-php artisan test
-php artisan test --filter=ClassName
-
-# キャッシュクリア
-php artisan cache:clear
-php artisan config:clear
-php artisan view:clear
-php artisan route:clear
-
-# マイグレーション
-php artisan migrate
-php artisan migrate:fresh --seed
-
-# ルート確認
-php artisan route:list
-php artisan route:list --path=cast
-
-# ログ確認
-tail -f storage/logs/laravel.log
-```
-
----
-
 ## 開発ルール
+
+### テスト
+- テスト方針・実装ルールは `AUTO-TEST.md` を参照（未整備の場合はスキップ）
+
+### Git
+- Gitコマンドは開発者が個別に実行する。Claudeはgit操作を一切行わない。
+- コミットメッセージの形式やブランチ命名などの規約は以下のとおり：
+  - ブランチ: `feature/SCR-xxx-機能名`
+  - コミット prefix: `feat` / `fix` / `refactor` / `style` / `test` / `docs`
+  - 例: `feat(SCR-xxx): 機能名の実装`
+
+### DB操作
+- DB操作はClaudeが直接実行しない。
+- マイグレーションやデータ変更が必要な場合、**MySQL 8.0 対応のSQL文を生成して開発者に渡し、実行を促す**。
+- スキーマ変更（CREATE TABLE / ALTER TABLE / DROP 等）を行った場合、`schema.sql` を必ず最新化する（本番適用時の参照用）。
+- 生クエリは避け、Eloquent ORM を使用する。DDL変更は新規マイグレーションで対応。
+- **最新のテーブル構造は `database/mock_demo.sql` を参照**。コード・ロジック・テストを書く際は必ずこのファイルのスキーマと照合し、カラム名・型・制約の不整合があれば指摘または修正すること。
+
+### デザイン
+- デザインは `DESIGN.md` の定義に従う。コード・ビュー生成時は必ず参照すること。
 
 ### コーディング規約
 - PSR-12 準拠（PHP）
 - コントローラは薄く、ロジックはサービスクラスに集約
 - バリデーションは FormRequest または `$request->validate()` を使用
-- DB操作は Eloquent ORM を使用（生クエリは避ける）
 - Blade テンプレートは `@component` / `@include` を活用
 
 ### 命名規則
@@ -111,49 +103,6 @@ tail -f storage/logs/laravel.log
 - **メッセージ削除**: 送信から10分以内、自分のメッセージ、type=TEXT のみ削除可
 - **ブロック**: `talk_blocks`（cast_id, shop_id）に複合UNIQUE制約
 - **NGワード**: `ng_words` テーブル、レビュー・メッセージに適用
-
-### デザインシステム（大型リニューアル中）
-- **カラー**: 黒ベース(`#0a0a0a`) + シャンパンゴールド(`#c5a059`)
-- **スタイル**: グラスモーフィズム（`backdrop-blur` + 半透明）
-- **フォント**: タイトル系=Noto Serif JP、本文=游ゴシック
-- **UI パターン**: TikTok風スワイプ（ホーム）、ボトムナビ5タブ
-
----
-
-## Git ワークフロー
-
-```bash
-# 機能ブランチで開発
-git checkout -b feature/SCR-xxx-機能名
-
-# コミットメッセージ形式
-git commit -m "feat(SCR-xxx): 機能名の実装"
-git commit -m "fix(SCR-xxx): バグ修正の内容"
-git commit -m "refactor: リファクタリング内容"
-
-# プッシュ
-git push origin feature/SCR-xxx-機能名
-```
-
-### プレフィックス一覧
-- `feat`: 新機能
-- `fix`: バグ修正
-- `refactor`: リファクタリング
-- `style`: CSS/デザイン変更
-- `test`: テスト追加・修正
-- `docs`: ドキュメント更新
-
----
-
-## テストの方針
-
-- **単体テスト**: `tests/Feature/` 配下に機能テストを作成
-- **テスト対象の優先度**:
-  1. 請求・振込ロジック（`BillingManagementService`）
-  2. トークアクション遷移（`TalkController@action`）
-  3. バリデーション（FormRequest 系）
-  4. API エンドポイント（Push、銀行検索）
-- **テストDB**: `.env.testing` を参照、`RefreshDatabase` を使用
 
 ---
 

@@ -38,7 +38,6 @@ class CharacterGuideService
         'shop.recruits.edit'              => ['label' => '店舗：求人票編集',                 'group' => 'shop',   'default_enabled' => false],
         'shop.mypage.index'               => ['label' => '店舗：マイページ',                 'group' => 'shop',   'default_enabled' => false],
         'shop.mypage.management'          => ['label' => '店舗：採用・入金管理',             'group' => 'shop',   'default_enabled' => false],
-        'shop.mypage.documents.onboarding' => ['label' => '店舗：許可証提出オンボーディング', 'group' => 'shop',   'default_enabled' => false],
         'shop.interaction.index'          => ['label' => '店舗：つながり（LIKES）',          'group' => 'shop',   'default_enabled' => false],
         'shop.talk.index'                 => ['label' => '店舗：トーク一覧',                 'group' => 'shop',   'default_enabled' => false],
         'shop.register'                   => ['label' => '店舗：新規登録',                   'group' => 'shop',   'default_enabled' => false],

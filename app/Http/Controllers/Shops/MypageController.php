@@ -261,33 +261,6 @@ class MypageController extends Controller
     /**
      * 新規登録直後など：許可証2種の提出に誘導する画面
      */
-    public function documentsOnboarding()
-    {
-        return redirect()
-            ->route('shop.mypage.index')
-            ->with('message', '許可証の提出はマイページから操作してください。');
-    }
-
-    public function manageLicenseDocument(string $type)
-    {
-        if (!in_array($type, ['business', 'entertainment'], true)) {
-            abort(404);
-        }
-
-        $shopId = $this->currentShopId();
-        $documentData = $this->documentReviewService->getShopLicensePageData($shopId);
-        $document = collect($documentData['documents'])->firstWhere('key', $type);
-
-        if (!$document) {
-            abort(404);
-        }
-
-        return view('shops.mypage.documents-manage', [
-            'pageId' => 'documents_manage',
-            'document' => $document,
-        ]);
-    }
-
     /**
      * ひとこと（キャッチコピー）をモーダルから更新
      */
@@ -416,7 +389,7 @@ class MypageController extends Controller
             'expired_at' => 'nullable|date|after_or_equal:today',
         ], [
             'expired_at.date' => '有効期限は日付形式で入力してください。',
-            'expired_at.after_or_equal' => '営業許可証の有効期限には本日以降の日付を入力してください。',
+            'expired_at.after_or_equal' => '有効期限には本日以降の日付を入力してください。',
         ]);
 
         if ($request->hasFile('file')) {
@@ -425,16 +398,17 @@ class MypageController extends Controller
                 ->where('shop_id', $this->currentShopId())
                 ->where('type', $type)
                 ->first();
-            if ($current && in_array((int) $current->status, [ShopLicenseDocument::STATUS_PENDING, ShopLicenseDocument::STATUS_APPROVED], true)) {
+            // 承認済みは差し替え不可（先に取り下げが必要）
+            if ($current && (int) $current->status === ShopLicenseDocument::STATUS_APPROVED) {
                 if (!$request->expectsJson()) {
                     return redirect()
-                        ->route('shop.mypage.documents.manage', ['type' => $type])
-                        ->withErrors(['file' => '提出済みのため差し替えできません。先に「提出取り下げ」を行ってください。']);
+                        ->route('shop.mypage.index')
+                        ->withErrors(['file' => '承認済みのため差し替えできません。先に「提出取り下げ」を行ってください。']);
                 }
 
                 return response()->json([
                     'success' => false,
-                    'message' => '提出済みのため差し替えできません。先に「提出取り下げ」を行ってください。',
+                    'message' => '承認済みのため差し替えできません。先に「提出取り下げ」を行ってください。',
                 ], 422);
             }
 
@@ -447,7 +421,7 @@ class MypageController extends Controller
 
             if (!$request->expectsJson()) {
                 return redirect()
-                    ->route('shop.mypage.documents.manage', ['type' => $type])
+                    ->route('shop.mypage.index')
                     ->with('message', '書類をアップロードしました。内容を確認して「提出」を押してください。');
             }
 
@@ -471,9 +445,9 @@ class MypageController extends Controller
             'type' => 'required|string|in:business,entertainment',
             'expired_at' => 'nullable|date|required_if:type,business|after_or_equal:today',
         ], [
-            'expired_at.required_if' => '営業許可証の有効期限を入力してください。',
+            'expired_at.required_if' => '飲食店営業許可書の有効期限を入力してください。',
             'expired_at.date' => '有効期限は日付形式で入力してください。',
-            'expired_at.after_or_equal' => '営業許可証の有効期限には本日以降の日付を入力してください。',
+            'expired_at.after_or_equal' => '有効期限には本日以降の日付を入力してください。',
         ]);
 
         try {
@@ -485,7 +459,7 @@ class MypageController extends Controller
         } catch (\RuntimeException $e) {
             if (!$request->expectsJson()) {
                 return redirect()
-                    ->route('shop.mypage.documents.manage', ['type' => (string) $data['type']])
+                    ->route('shop.mypage.index')
                     ->withErrors(['document' => $e->getMessage()]);
             }
 
@@ -497,7 +471,7 @@ class MypageController extends Controller
 
         if (!$request->expectsJson()) {
             return redirect()
-                ->route('shop.mypage.documents.manage', ['type' => (string) $data['type']])
+                ->route('shop.mypage.index')
                 ->with('message', '提出が完了しました。運営の審査をお待ちください。');
         }
 
@@ -518,7 +492,7 @@ class MypageController extends Controller
         } catch (\RuntimeException $e) {
             if (!$request->expectsJson()) {
                 return redirect()
-                    ->route('shop.mypage.documents.manage', ['type' => (string) $data['type']])
+                    ->route('shop.mypage.index')
                     ->withErrors(['document' => $e->getMessage()]);
             }
 
@@ -530,7 +504,7 @@ class MypageController extends Controller
 
         if (!$request->expectsJson()) {
             return redirect()
-                ->route('shop.mypage.documents.manage', ['type' => (string) $data['type']])
+                ->route('shop.mypage.index')
                 ->with('message', '提出を取り下げました。ファイルを再アップロードしてから審査依頼してください。');
         }
 
@@ -701,49 +675,26 @@ class MypageController extends Controller
      */
     private function resolveShopIndustryNames(string $shopId, $fallbackIndustryId = null): array
     {
-        if (Schema::hasTable('shop_industry')) {
-            $names = DB::table('shop_industry')
-                ->join('industries', 'shop_industry.industry_id', '=', 'industries.id')
-                ->where('shop_industry.shop_id', $shopId)
-                ->orderBy('shop_industry.industry_id')
-                ->pluck('industries.name')
-                ->map(fn ($name) => trim((string) $name))
-                ->filter()
-                ->values()
-                ->all();
-            if ($names !== []) {
-                return $names;
+        // industry_label が登録されていれば最優先で採用
+        if (Schema::hasColumn('shop_profiles', 'industry_label')) {
+            $label = trim((string) DB::table('shop_profiles')
+                ->where('shop_id', $shopId)
+                ->value('industry_label'));
+            if ($label !== '') {
+                return [$label];
             }
         }
 
-        if (Schema::hasTable('industry_shop')) {
-            $names = DB::table('industry_shop')
-                ->join('industries', 'industry_shop.industry_id', '=', 'industries.id')
-                ->where('industry_shop.shop_id', $shopId)
-                ->orderBy('industry_shop.industry_id')
-                ->pluck('industries.name')
-                ->map(fn ($name) => trim((string) $name))
-                ->filter()
-                ->values()
-                ->all();
-            if ($names !== []) {
-                return $names;
-            }
-        }
-
-        if (Schema::hasTable('shop_industries')) {
-            $names = DB::table('shop_industries')
-                ->join('industries', 'shop_industries.industry_id', '=', 'industries.id')
-                ->where('shop_industries.shop_id', $shopId)
-                ->orderBy('shop_industries.industry_id')
-                ->pluck('industries.name')
-                ->map(fn ($name) => trim((string) $name))
-                ->filter()
-                ->values()
-                ->all();
-            if ($names !== []) {
-                return $names;
-            }
+        $names = DB::table('shop_profiles')
+            ->join('industries', 'shop_profiles.industry_id', '=', 'industries.id')
+            ->where('shop_profiles.shop_id', $shopId)
+            ->pluck('industries.name')
+            ->map(fn ($name) => trim((string) $name))
+            ->filter()
+            ->values()
+            ->all();
+        if ($names !== []) {
+            return $names;
         }
 
         $single = (int) ($fallbackIndustryId ?? 0);

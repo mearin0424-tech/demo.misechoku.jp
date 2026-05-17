@@ -218,6 +218,119 @@
     }
     .shop-profile-edit__check-line input { width: auto; accent-color: var(--spe-gold); }
     .shop-profile-edit__station-list { display: flex; flex-direction: column; gap: 10px; }
+    .shop-profile-edit__station-row {
+        display: flex;
+        align-items: stretch;
+        gap: 8px;
+        padding: 8px;
+        border: 1px solid var(--color-border, rgba(197,160,89,0.22));
+        border-radius: 10px;
+        background: rgba(255,255,255,0.02);
+        transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .shop-profile-edit__station-row:first-child {
+        border-color: var(--gold, #c5a059);
+        background: rgba(197,160,89,0.06);
+    }
+    .shop-profile-edit__station-row.is-dragging { opacity: 0.55; }
+    .shop-profile-edit__station-row.is-ghost { background: rgba(197,160,89,0.18); }
+    .shop-profile-edit__station-drag {
+        flex: 0 0 auto;
+        width: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: 0;
+        color: var(--color-text-muted, rgba(216,201,168,0.65));
+        cursor: grab;
+        touch-action: none;
+        border-radius: 6px;
+    }
+    .shop-profile-edit__station-drag:hover { color: var(--gold, #c5a059); background: rgba(197,160,89,0.10); }
+    .shop-profile-edit__station-drag:active { cursor: grabbing; }
+    .shop-profile-edit__station-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .shop-profile-edit__station-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: var(--color-text-muted, rgba(216,201,168,0.65));
+        letter-spacing: 0.04em;
+    }
+    .shop-profile-edit__station-row:first-child .shop-profile-edit__station-badge { color: var(--gold, #c5a059); }
+    .shop-profile-edit__station-badge .is-main-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 1px 8px;
+        border-radius: 999px;
+        font-size: 0.62rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--gold-light, #e8cd8a), var(--gold, #c5a059));
+        color: #1a1206;
+    }
+    .shop-profile-edit__station-row:not(:first-child) .is-main-pill { display: none; }
+    .shop-profile-edit__station-set-main {
+        align-self: flex-start;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 6px;
+        padding: 5px 10px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        background: transparent;
+        border: 1px solid var(--color-border, rgba(197,160,89,0.22));
+        border-radius: 999px;
+        color: var(--color-text-muted, rgba(216,201,168,0.65));
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+    .shop-profile-edit__station-set-main:hover {
+        background: rgba(197,160,89,0.10);
+        color: var(--gold-light, #e8cd8a);
+        border-color: var(--color-border-strong, rgba(197,160,89,0.4));
+    }
+    .shop-profile-edit__station-set-main i { font-size: 0.66rem; }
+    /* メイン（先頭）の行は「設定済み」状態にして無効化 */
+    .shop-profile-edit__station-row:first-child .shop-profile-edit__station-set-main {
+        background: linear-gradient(135deg, var(--gold-light, #e8cd8a), var(--gold, #c5a059));
+        border-color: var(--gold, #c5a059);
+        color: #1a1206;
+        cursor: default;
+        pointer-events: none;
+    }
+    .shop-profile-edit__station-row:first-child .shop-profile-edit__station-set-main-label::before {
+        content: '✓ ';
+    }
+    .shop-profile-edit__station-row:first-child .shop-profile-edit__station-set-main-label {
+        font-weight: 800;
+    }
+    .shop-profile-edit__station-remove {
+        flex: 0 0 auto;
+        width: 32px;
+        background: transparent;
+        border: 0;
+        color: var(--color-text-muted, rgba(216,201,168,0.65));
+        cursor: pointer;
+        border-radius: 6px;
+    }
+    .shop-profile-edit__station-remove:hover { color: var(--color-danger, #fca5a5); background: rgba(248,113,113,0.10); }
+    .shop-profile-edit__station-info {
+        display: flex;
+        align-items: flex-start;
+        gap: 6px;
+        margin: 6px 0 10px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        background: rgba(197,160,89,0.06);
+        border: 1px solid rgba(197,160,89,0.22);
+        font-size: 0.72rem;
+        line-height: 1.55;
+        color: var(--color-text, #d8c9a8);
+    }
+    .shop-profile-edit__station-info i { color: var(--gold, #c5a059); margin-top: 2px; }
     .shop-profile-edit__station-add {
         align-self: flex-start;
         margin-top: 4px;
@@ -424,22 +537,42 @@ document.addEventListener('DOMContentLoaded', function () {
             addr1: addr1Input ? addr1Input.value : ''
         };
     }
+    function buildStationRow(value, idx) {
+        var row = document.createElement('div');
+        row.className = 'shop-profile-edit__station-row';
+        row.setAttribute('data-station-row', '');
+        row.innerHTML =
+            '<button type="button" class="shop-profile-edit__station-drag" aria-label="並び替え"><i class="fas fa-grip-vertical" aria-hidden="true"></i></button>' +
+            '<div class="shop-profile-edit__station-body">' +
+                '<span class="shop-profile-edit__station-badge">最寄り <span class="js-station-index">' + (idx + 1) + '</span> <span class="is-main-pill">MAIN</span></span>' +
+                '<input type="text" name="stations[]" class="shop-profile-edit__input" placeholder="例：六本木駅 徒歩3分">' +
+                '<button type="button" class="shop-profile-edit__station-set-main" data-station-set-main aria-label="この駅をメインに設定">' +
+                    '<i class="fas fa-star" aria-hidden="true"></i>' +
+                    '<span class="shop-profile-edit__station-set-main-label">メインに設定</span>' +
+                '</button>' +
+            '</div>' +
+            '<button type="button" class="shop-profile-edit__station-remove" aria-label="削除"><i class="fas fa-times" aria-hidden="true"></i></button>';
+        var input = row.querySelector('input[name="stations[]"]');
+        if (input) input.value = value || '';
+        return row;
+    }
+    function refreshStationIndexes() {
+        if (!stList) return;
+        var rows = stList.querySelectorAll('[data-station-row]');
+        rows.forEach(function (r, i) {
+            var idx = r.querySelector('.js-station-index');
+            if (idx) idx.textContent = String(i + 1);
+        });
+    }
     function renderStationRows(lines) {
         if (!stList) return;
         var rows = Array.isArray(lines) ? lines.filter(function (v) { return (v || '').trim() !== ''; }) : [];
         if (rows.length === 0) return;
         stList.innerHTML = '';
         rows.forEach(function (line, i) {
-            var wrap = document.createElement('div');
-            wrap.className = 'shop-profile-edit__field';
-            wrap.style.marginBottom = '10px';
-            wrap.innerHTML =
-                '<label class="shop-profile-edit__label" for="station-auto-' + i + '">最寄り ' + (i + 1) + '</label>' +
-                '<input id="station-auto-' + i + '" type="text" name="stations[]" class="shop-profile-edit__input" placeholder="例：六本木駅 徒歩3分">';
-            var input = wrap.querySelector('input[name="stations[]"]');
-            if (input) input.value = line;
-            stList.appendChild(wrap);
+            stList.appendChild(buildStationRow(line, i));
         });
+        refreshStationIndexes();
     }
     function suggestStations() {
         if (!stList || !suggestUrl) return Promise.resolve();
@@ -479,18 +612,57 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (stAdd && stList) {
         stAdd.addEventListener('click', function () {
-            var n = stList.querySelectorAll('input[name="stations[]"]').length + 1;
-            var wrap = document.createElement('div');
-            wrap.className = 'shop-profile-edit__field';
-            wrap.style.marginBottom = '10px';
-            wrap.innerHTML =
-                '<label class="shop-profile-edit__label" for="station-new-' + n + '">最寄り ' + n + '</label>' +
-                '<input id="station-new-' + n + '" type="text" name="stations[]" class="shop-profile-edit__input" placeholder="例：六本木駅 徒歩3分">';
-            stList.appendChild(wrap);
+            var n = stList.querySelectorAll('input[name="stations[]"]').length;
+            stList.appendChild(buildStationRow('', n));
+            refreshStationIndexes();
         });
     }
+
+    // 削除ボタン＋「メインに設定」ボタン（イベント委譲）
+    if (stList) {
+        stList.addEventListener('click', function (e) {
+            // メインに設定：押下した行を最上段へ
+            var mainBtn = e.target.closest && e.target.closest('[data-station-set-main]');
+            if (mainBtn) {
+                var row = mainBtn.closest('[data-station-row]');
+                if (row && row.parentNode === stList && row !== stList.firstElementChild) {
+                    stList.insertBefore(row, stList.firstElementChild);
+                    refreshStationIndexes();
+                }
+                return;
+            }
+
+            // 削除
+            var rmBtn = e.target.closest && e.target.closest('.shop-profile-edit__station-remove');
+            if (!rmBtn) return;
+            var rmRow = rmBtn.closest('[data-station-row]');
+            if (!rmRow) return;
+            // 最後の1行は中身を消すだけにする（フォーム送信時に行が消えるとレイアウトが崩れるため）
+            var rows = stList.querySelectorAll('[data-station-row]');
+            if (rows.length <= 1) {
+                var input = rmRow.querySelector('input[name="stations[]"]');
+                if (input) input.value = '';
+            } else {
+                rmRow.remove();
+            }
+            refreshStationIndexes();
+        });
+    }
+
+    // SortableJS で並び替えを有効化（一番上が「メイン最寄り駅」として一覧に採用される）
+    if (stList && window.Sortable) {
+        new Sortable(stList, {
+            handle: '.shop-profile-edit__station-drag',
+            animation: 150,
+            ghostClass: 'is-ghost',
+            dragClass: 'is-dragging',
+            onEnd: refreshStationIndexes,
+        });
+    }
+    refreshStationIndexes();
 });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js" defer></script>
 @endpush
 
 @section('content')
@@ -551,16 +723,31 @@ document.addEventListener('DOMContentLoaded', function () {
                             $selectedIndustryIds = collect(old('industry_ids', $shopData['industry_ids'] ?? []))
                                 ->map(fn ($id) => (int) $id)
                                 ->all();
+                            $selectedIndustryId = $selectedIndustryIds[0] ?? null;
                         @endphp
                         @foreach(($masters['industries'] ?? []) as $industry)
                             <label class="shop-profile-edit__chip">
-                                <input type="checkbox" name="industry_ids[]" value="{{ $industry->id }}"
-                                    {{ in_array((int) $industry->id, $selectedIndustryIds, true) ? 'checked' : '' }}>
+                                <input type="radio" name="industry_ids[]" value="{{ $industry->id }}"
+                                    {{ (int) $industry->id === (int) $selectedIndustryId ? 'checked' : '' }}>
                                 <span>{{ $industry->name }}</span>
                             </label>
                         @endforeach
                     </div>
-                    <p class="shop-profile-edit__hint">※複数選択できます。未選択でも保存できます。</p>
+                    <p class="shop-profile-edit__hint">※1 つだけ選択してください。朝キャバとキャバクラ等、両方の営業形態を持つ店舗はメインの業種を 1 つ選んでください。</p>
+                </div>
+
+                <div class="shop-profile-edit__field">
+                    <label class="shop-profile-edit__label" for="industry_label">業種名（表示用・自由入力）</label>
+                    <input
+                        id="industry_label"
+                        type="text"
+                        name="industry_label"
+                        class="shop-profile-edit__input"
+                        value="{{ old('industry_label', $shopData['industry_label'] ?? '') }}"
+                        maxlength="60"
+                        placeholder="例：高級ラウンジ／会員制クラブ／カジュアルキャバ等"
+                    >
+                    <p class="shop-profile-edit__hint">店舗ページや一覧で表示される業種名です。空欄の場合は上で選んだ業種名（例：キャバクラ）が表示されます。検索の絞り込みには上の業種カテゴリが使われます。</p>
                 </div>
             </section>
 
@@ -713,12 +900,27 @@ document.addEventListener('DOMContentLoaded', function () {
                     </span>
                 </h2>
                 <p class="shop-profile-edit__hint" style="margin-top:0;">複数行で登録できます（例：六本木駅 徒歩3分）。</p>
+                <p class="shop-profile-edit__station-info">
+                    <i class="fas fa-info-circle" aria-hidden="true"></i>
+                    <span>各行の「★ メインに設定」を押すか、ハンドル <i class="fas fa-grip-vertical" aria-hidden="true"></i> をドラッグして一番上に持ってきた最寄り駅が、ホーム／検索の一覧に表示されます。</span>
+                </p>
                 <div class="shop-profile-edit__station-list" id="shop-stations-list">
                     @foreach(old('stations', $shopData['stations'] ?? ['']) as $i => $stLine)
-                        <div class="shop-profile-edit__field" style="margin-bottom:10px;">
-                            <label class="shop-profile-edit__label" for="station-{{ $i }}">最寄り {{ $i + 1 }}</label>
-                            <input id="station-{{ $i }}" type="text" name="stations[]" class="shop-profile-edit__input"
-                                   value="{{ $stLine }}" placeholder="例：六本木駅 徒歩3分">
+                        <div class="shop-profile-edit__station-row" data-station-row>
+                            <button type="button" class="shop-profile-edit__station-drag" aria-label="並び替え"><i class="fas fa-grip-vertical" aria-hidden="true"></i></button>
+                            <div class="shop-profile-edit__station-body">
+                                <span class="shop-profile-edit__station-badge">
+                                    最寄り <span class="js-station-index">{{ $i + 1 }}</span>
+                                    <span class="is-main-pill">MAIN</span>
+                                </span>
+                                <input id="station-{{ $i }}" type="text" name="stations[]" class="shop-profile-edit__input"
+                                       value="{{ $stLine }}" placeholder="例：六本木駅 徒歩3分">
+                                <button type="button" class="shop-profile-edit__station-set-main" data-station-set-main aria-label="この駅をメインに設定">
+                                    <i class="fas fa-star" aria-hidden="true"></i>
+                                    <span class="shop-profile-edit__station-set-main-label">メインに設定</span>
+                                </button>
+                            </div>
+                            <button type="button" class="shop-profile-edit__station-remove" aria-label="削除"><i class="fas fa-times" aria-hidden="true"></i></button>
                         </div>
                     @endforeach
                 </div>

@@ -3,368 +3,130 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 /**
- * ログインユーザの「いまの探索拠点」と「半径フィルタ」を扱うサービス。
+ * 後方互換のための薄いファサード。
+ * 認証中ロール（キャスト/ショップ）に応じて、
+ *   - CastSearchPreferenceService
+ *   - ShopSearchPreferenceService
+ * へ処理を振り分ける。
  *
- * 検索設定は user_search_locations テーブル（owner_type / owner_id でユニーク）に保存。
+ * 新規コードはこの class ではなく、対象ロールのサービスを直接 inject すること。
  *
- * 探索拠点の解決順:
- *   1. user_search_locations.mode に従う:
- *      - 'profile'  : cast_profiles / shop_profiles の latitude/longitude
- *      - 'passport' : user_search_locations.passport_latitude/longitude
- *      - 'current'  : セッションに保存された端末 geolocation
- *   2. 設定が無い場合は、セッションの一時保存（旧 location-modal フロー）にフォールバック
- *   3. それでも解決できなければ、自プロフィールの住所緯度経度
- *   4. 解決不能 → null（距離フィルタ無効）
+ * @deprecated 個別サービスを使用してください
  */
 class UserLocationService
 {
-    public const SESSION_KEY = 'user_location';
-    public const MODE_CURRENT = 'current';   // 端末の geolocation
-    public const MODE_PASSPORT = 'passport'; // 任意位置（住所→ジオコーディング）
-    public const MODE_PROFILE = 'profile';   // 自プロフィール住所
+    public const SESSION_KEY = CastSearchPreferenceService::SESSION_KEY;
+    public const MODE_CURRENT = CastSearchPreferenceService::MODE_CURRENT;
+    public const MODE_PASSPORT = CastSearchPreferenceService::MODE_PASSPORT;
+    public const MODE_PROFILE = CastSearchPreferenceService::MODE_PROFILE;
+    public const ALL_MODES = CastSearchPreferenceService::ALL_MODES;
+    public const DISTANCE_OPTIONS_KM = CastSearchPreferenceService::DISTANCE_OPTIONS_KM;
 
-    public const ALL_MODES = [self::MODE_PROFILE, self::MODE_PASSPORT, self::MODE_CURRENT];
+    public function __construct(
+        private readonly CastSearchPreferenceService $cast,
+        private readonly ShopSearchPreferenceService $shop,
+    ) {
+    }
 
-    /** プルダウン用：選択肢（半径 km）。0 は「制限なし」。 */
-    public const DISTANCE_OPTIONS_KM = [0, 1, 3, 5, 10, 20, 30, 50, 100];
-
-    /**
-     * 現在の探索拠点を返す（永続設定 → セッション → プロフィール住所 の順）。
-     *
-     * @return array{lat: float, lng: float, mode: string, label: string}|null
-     */
     public function getActiveLocation(): ?array
     {
-        $persisted = $this->resolvePersistedOrigin();
-        if ($persisted) {
-            return $persisted;
-        }
-
-        $session = (array) session(self::SESSION_KEY, []);
-        if (
-            isset($session['lat'], $session['lng']) &&
-            is_numeric($session['lat']) && is_numeric($session['lng'])
-        ) {
-            return [
-                'lat'   => (float) $session['lat'],
-                'lng'   => (float) $session['lng'],
-                'mode'  => (string) ($session['mode'] ?? self::MODE_CURRENT),
-                'label' => (string) ($session['label'] ?? '指定位置'),
-            ];
-        }
-
-        $profile = $this->resolveSelfProfileLocation();
-        if ($profile) {
-            return $profile + ['mode' => self::MODE_PROFILE, 'label' => 'プロフィール住所'];
-        }
-
-        return null;
+        return $this->isCast() ? $this->cast->getActiveLocation() : $this->shop->getActiveLocation();
     }
 
-    /**
-     * 永続設定（cast_profiles / shop_profiles のカラム）から探索拠点を解決する。
-     */
-    private function resolvePersistedOrigin(): ?array
-    {
-        $settings = $this->loadProfileSettings();
-        if (!$settings) {
-            return null;
-        }
-
-        $mode = (string) ($settings['mode'] ?? '');
-        if ($mode === self::MODE_PROFILE) {
-            $row = $settings['profile_location'];
-            if ($row !== null) {
-                return [
-                    'lat'   => $row['lat'],
-                    'lng'   => $row['lng'],
-                    'mode'  => self::MODE_PROFILE,
-                    'label' => 'プロフィール住所',
-                ];
-            }
-            return null;
-        }
-
-        if ($mode === self::MODE_PASSPORT) {
-            if (
-                $settings['passport_lat'] !== null &&
-                $settings['passport_lng'] !== null
-            ) {
-                return [
-                    'lat'   => (float) $settings['passport_lat'],
-                    'lng'   => (float) $settings['passport_lng'],
-                    'mode'  => self::MODE_PASSPORT,
-                    'label' => $settings['passport_label'] !== ''
-                        ? $settings['passport_label']
-                        : '指定位置',
-                ];
-            }
-            return null;
-        }
-
-        if ($mode === self::MODE_CURRENT) {
-            $session = (array) session(self::SESSION_KEY, []);
-            if (
-                isset($session['lat'], $session['lng']) &&
-                is_numeric($session['lat']) && is_numeric($session['lng'])
-            ) {
-                return [
-                    'lat'   => (float) $session['lat'],
-                    'lng'   => (float) $session['lng'],
-                    'mode'  => self::MODE_CURRENT,
-                    'label' => '現在地',
-                ];
-            }
-            return null;
-        }
-
-        return null;
-    }
-
-    /**
-     * 永続設定の半径フィルタ（km）。0 は「制限なし」、null は「未設定」。
-     */
     public function getEffectiveMaxDistanceKm(): ?int
     {
-        $settings = $this->loadProfileSettings();
-        if (!$settings) {
-            return null;
-        }
-        $km = $settings['max_distance_km'];
-        return ($km === null) ? null : (int) $km;
+        return $this->isCast() ? $this->cast->getEffectiveMaxDistanceKm() : $this->shop->getEffectiveMaxDistanceKm();
     }
 
-    /**
-     * セッションに位置を保存（端末 geolocation 用）。
-     */
     public function setManualLocation(string $mode, float $lat, float $lng, string $label = ''): void
     {
-        if (!in_array($mode, [self::MODE_CURRENT, self::MODE_PASSPORT], true)) {
-            $mode = self::MODE_CURRENT;
-        }
-        if ($lat < -90 || $lat > 90 || $lng < -180 || $lng > 180) {
-            return;
-        }
-        session([
-            self::SESSION_KEY => [
-                'mode'   => $mode,
-                'lat'    => $lat,
-                'lng'    => $lng,
-                'label'  => $label !== '' ? $label : ($mode === self::MODE_CURRENT ? '現在地' : '指定位置'),
-                'set_at' => time(),
-            ],
-        ]);
+        // 端末 GPS / パスポート位置の一時保存はキャストのみで使用
+        $this->cast->setManualLocation($mode, $lat, $lng, $label);
     }
 
     public function clear(): void
     {
-        session()->forget(self::SESSION_KEY);
+        $this->cast->clearSessionLocation();
     }
 
     /**
-     * MyPage 設定（mode / passport / max_km）を DB に保存する。
-     * 保存先は user_search_locations（owner_type / owner_id でユニーク）。
-     *
-     * @param array{
-     *   mode: string,
-     *   passport_address?: ?string,
-     *   passport_latitude?: ?float,
-     *   passport_longitude?: ?float,
-     *   passport_label?: ?string,
-     *   max_distance_km?: ?int,
-     * } $payload
+     * キャストの位置設定（mode / passport / max_km）を保存。
+     * ショップから呼び出された場合は何もしない。
      */
     public function saveSearchSettings(array $payload): void
     {
-        $mode = (string) ($payload['mode'] ?? '');
-        if (!in_array($mode, self::ALL_MODES, true)) {
-            return;
+        if ($this->isCast()) {
+            $this->cast->saveLocationSettings($payload);
         }
-
-        [$ownerType, $ownerId] = $this->resolveCurrentOwner();
-        if ($ownerType === null) {
-            return;
-        }
-
-        $row = [
-            'mode'            => $mode,
-            'max_distance_km' => isset($payload['max_distance_km'])
-                ? (int) $payload['max_distance_km']
-                : 0,
-        ];
-
-        if ($mode === self::MODE_PASSPORT) {
-            $row['passport_address']   = $payload['passport_address']   ?? null;
-            $row['passport_latitude']  = $payload['passport_latitude']  ?? null;
-            $row['passport_longitude'] = $payload['passport_longitude'] ?? null;
-            $row['passport_label']     = $payload['passport_label']     ?? null;
-        } else {
-            // 他モードに切り替えた場合、パスポート情報はクリアしておく
-            $row['passport_address']   = null;
-            $row['passport_latitude']  = null;
-            $row['passport_longitude'] = null;
-            $row['passport_label']     = null;
-        }
-
-        $now = now();
-        DB::table('user_search_locations')->upsert(
-            [array_merge($row, [
-                'owner_type' => $ownerType,
-                'owner_id'   => $ownerId,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ])],
-            ['owner_type', 'owner_id'],
-            array_merge(array_keys($row), ['updated_at'])
-        );
     }
 
     /**
-     * MyPage 表示用：現在の保存設定を返す。
-     *
-     * @return array{
-     *   mode: string,
-     *   passport_address: ?string,
-     *   passport_latitude: ?float,
-     *   passport_longitude: ?float,
-     *   passport_label: ?string,
-     *   max_distance_km: ?int,
-     *   profile_location: ?array{lat: float, lng: float},
-     * }|null
+     * 詳細検索フォームの希望条件を保存。ロールに応じて振り分け。
+     */
+    public function saveSearchPreferences(array $payload): void
+    {
+        if ($this->isCast()) {
+            $this->cast->savePreferences($payload);
+        } else {
+            $this->shop->savePreferences($payload);
+        }
+    }
+
+    /**
+     * MyPage 表示用：位置情報＋住所情報を返す（cast/shop 共通フォーマット）。
      */
     public function loadProfileSettings(): ?array
     {
-        [$table, $idColumn, $idValue] = $this->resolveCurrentProfileTarget();
-        if ($table === null) {
-            return null;
+        if ($this->isCast()) {
+            return $this->cast->loadAll();
         }
-
-        // プロフィールテーブルからは住所と緯度経度のみ取得（検索設定は user_search_locations に分離）
-        $profileRow = DB::table($table)
-            ->where($idColumn, $idValue)
-            ->select('pref', 'city', 'addr', 'latitude', 'longitude')
-            ->first();
-        if (!$profileRow) {
-            return null;
-        }
-
-        [$ownerType, $ownerId] = $this->resolveCurrentOwner();
-        $settingRow = null;
-        if ($ownerType !== null) {
-            $settingRow = DB::table('user_search_locations')
-                ->where('owner_type', $ownerType)
-                ->where('owner_id', $ownerId)
-                ->first();
-        }
-
-        $profileLocation = ($profileRow->latitude !== null && $profileRow->longitude !== null)
-            ? ['lat' => (float) $profileRow->latitude, 'lng' => (float) $profileRow->longitude]
-            : null;
-
-        $addressText = trim(
-            ((string) ($profileRow->pref ?? ''))
-            . ((string) ($profileRow->city ?? ''))
-            . ((string) ($profileRow->addr ?? ''))
-        );
-
+        // ショップ側は cast 側のキー命名を踏襲し、不要キーは未設定で返す
+        $shop = $this->shop->loadAll();
         return [
-            'mode'              => (string) ($settingRow->mode ?? ''),
-            'passport_address'  => $settingRow->passport_address ?? null,
-            'passport_latitude' => isset($settingRow->passport_latitude) ? (float) $settingRow->passport_latitude : null,
-            'passport_longitude' => isset($settingRow->passport_longitude) ? (float) $settingRow->passport_longitude : null,
-            'passport_label'    => (string) ($settingRow->passport_label ?? ''),
-            'max_distance_km'   => isset($settingRow->max_distance_km) ? (int) $settingRow->max_distance_km : null,
-            'profile_location'  => $profileLocation,
-            'profile_address'   => $addressText,
-            'has_address'       => $addressText !== '',
+            'mode'              => '',
+            'passport_address'  => null,
+            'passport_latitude' => null,
+            'passport_longitude'=> null,
+            'passport_label'    => '',
+            'max_distance_km'   => $shop['max_distance_km'],
+            'profile_location'  => $this->shop->getActiveLocation(),
+            'profile_address'   => '',
+            'has_address'       => true,
         ];
     }
 
     /**
-     * 自プロフィールの住所を国土地理院 API でジオコーディングし、
-     * cast_profiles / shop_profiles の latitude/longitude を更新する。
-     * 成功時は lat/lng を返す。失敗時は null。
-     *
-     * @return array{lat: float, lng: float}|null
+     * 詳細検索フォーム用に希望条件をロード。
+     */
+    public function loadSearchPreferences(): array
+    {
+        if ($this->isCast()) {
+            $all = $this->cast->loadAll();
+            return [
+                'shift_frequency' => $all['shift_frequency'],
+                'work_periods'    => $all['work_periods'],
+                'hourly_wage_min' => $all['hourly_wage_min'],
+                'industry_ids'    => $all['industry_ids'],
+            ];
+        }
+        return $this->shop->loadAll();
+    }
+
+    /**
+     * 自プロフィール住所をジオコーディングし latitude/longitude を埋める（キャストのみ）。
      */
     public function geocodeAndSaveProfileLocation(GeocodingService $geocoding): ?array
     {
-        [$table, $idColumn, $idValue] = $this->resolveCurrentProfileTarget();
-        if ($table === null) {
-            return null;
+        if ($this->isCast()) {
+            return $this->cast->geocodeAndSaveProfileLocation($geocoding);
         }
-
-        $row = DB::table($table)
-            ->where($idColumn, $idValue)
-            ->select('pref', 'city', 'addr')
-            ->first();
-        if (!$row) {
-            return null;
-        }
-        $address = trim(((string) ($row->pref ?? ''))
-            . ((string) ($row->city ?? ''))
-            . ((string) ($row->addr ?? '')));
-        if ($address === '') {
-            return null;
-        }
-
-        $coords = $geocoding->fromAddress($address);
-        if (!$coords) {
-            return null;
-        }
-
-        DB::table($table)
-            ->where($idColumn, $idValue)
-            ->update([
-                'latitude'  => $coords['latitude'],
-                'longitude' => $coords['longitude'],
-            ]);
-
-        return ['lat' => (float) $coords['latitude'], 'lng' => (float) $coords['longitude']];
+        return null;
     }
 
-    /**
-     * 現在ログイン中のユーザに紐づく profile テーブル情報を返す。
-     *
-     * @return array{0: ?string, 1: ?string, 2: ?string} [tableName, idColumn, idValue]
-     */
-    private function resolveCurrentProfileTarget(): array
-    {
-        $cast = Auth::guard('member')->user();
-        if ($cast && !empty($cast->id)) {
-            return ['cast_profiles', 'cast_id', (string) $cast->id];
-        }
-        $manager = Auth::guard('shop')->user();
-        if ($manager && !empty($manager->shop_id)) {
-            return ['shop_profiles', 'shop_id', (string) $manager->shop_id];
-        }
-        return [null, null, null];
-    }
+    // ===== 距離・幾何計算（ロール非依存・静的ユーティリティ） =====
 
-    /**
-     * user_search_locations の owner_type / owner_id を返す。
-     *
-     * @return array{0: ?string, 1: ?string} [ownerType, ownerId]
-     */
-    private function resolveCurrentOwner(): array
-    {
-        $cast = Auth::guard('member')->user();
-        if ($cast && !empty($cast->id)) {
-            return ['cast', (string) $cast->id];
-        }
-        $manager = Auth::guard('shop')->user();
-        if ($manager && !empty($manager->shop_id)) {
-            return ['shop', (string) $manager->shop_id];
-        }
-        return [null, null];
-    }
-
-    /**
-     * 2点間の距離（km）。どちらかでも欠損なら null。
-     */
     public function distanceKm(?float $lat1, ?float $lng1, ?float $lat2, ?float $lng2): ?float
     {
         if ($lat1 === null || $lng1 === null || $lat2 === null || $lng2 === null) {
@@ -381,9 +143,6 @@ class UserLocationService
         return $earthRadiusKm * $c;
     }
 
-    /**
-     * 距離をユーザに見せる文字列にフォーマット。
-     */
     public function formatDistance(?float $km): string
     {
         if ($km === null) {
@@ -398,11 +157,6 @@ class UserLocationService
         return number_format((int) round($km)) . ' km';
     }
 
-    /**
-     * 距離計算用 SQL 式（MySQL）。
-     *
-     * @return array{0:string, 1:array<int, float>} [expression, bindings]
-     */
     public function haversineSqlExpression(string $latColumn, string $lngColumn, float $originLat, float $originLng): array
     {
         $expr = "(6371 * 2 * ASIN(SQRT("
@@ -413,33 +167,11 @@ class UserLocationService
         return [$expr, [$originLat, $originLat, $originLng]];
     }
 
-    /**
-     * 自プロフィールの緯度経度を取得（住所→geocode 済みの値）。
-     *
-     * @return array{lat: float, lng: float}|null
-     */
-    private function resolveSelfProfileLocation(): ?array
+    // ===== private =====
+
+    private function isCast(): bool
     {
         $cast = Auth::guard('member')->user();
-        if ($cast && !empty($cast->id)) {
-            $row = DB::table('cast_profiles')
-                ->where('cast_id', $cast->id)
-                ->select('latitude', 'longitude')
-                ->first();
-            if ($row && $row->latitude !== null && $row->longitude !== null) {
-                return ['lat' => (float) $row->latitude, 'lng' => (float) $row->longitude];
-            }
-        }
-        $manager = Auth::guard('shop')->user();
-        if ($manager && !empty($manager->shop_id)) {
-            $row = DB::table('shop_profiles')
-                ->where('shop_id', $manager->shop_id)
-                ->select('latitude', 'longitude')
-                ->first();
-            if ($row && $row->latitude !== null && $row->longitude !== null) {
-                return ['lat' => (float) $row->latitude, 'lng' => (float) $row->longitude];
-            }
-        }
-        return null;
+        return $cast && !empty($cast->id);
     }
 }

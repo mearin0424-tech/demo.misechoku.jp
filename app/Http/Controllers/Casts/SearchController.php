@@ -49,6 +49,7 @@ class SearchController extends BaseSearchController
             'sort'                => $sort,
             'sortOptions'         => self::SORT_OPTIONS,
             'detailSearchOptions' => $this->buildDetailSearchOptions(),
+            'savedPreferences'    => app(\App\Services\CastSearchPreferenceService::class)->loadAll(),
         ]);
     }
 
@@ -136,22 +137,8 @@ class SearchController extends BaseSearchController
         $this->applySort($rows, $sort);
 
         if (!empty($industries)) {
-            if (DB::getSchemaBuilder()->hasTable('shop_industry')) {
-                $rows->join('shop_industry', 'shops.id', '=', 'shop_industry.shop_id')
-                    ->join('industries', 'shop_industry.industry_id', '=', 'industries.id')
-                    ->whereIn('industries.name', $industries)
-                    ->distinct();
-            } elseif (DB::getSchemaBuilder()->hasTable('industry_shop')) {
-                $rows->join('industry_shop', 'shops.id', '=', 'industry_shop.shop_id')
-                    ->join('industries', 'industry_shop.industry_id', '=', 'industries.id')
-                    ->whereIn('industries.name', $industries)
-                    ->distinct();
-            } elseif (DB::getSchemaBuilder()->hasTable('shop_industries')) {
-                $rows->join('shop_industries', 'shops.id', '=', 'shop_industries.shop_id')
-                    ->join('industries', 'shop_industries.industry_id', '=', 'industries.id')
-                    ->whereIn('industries.name', $industries)
-                    ->distinct();
-            }
+            $rows->join('industries', 'shop_profiles.industry_id', '=', 'industries.id')
+                ->whereIn('industries.name', $industries);
         }
 
         $items = $rows->get()
@@ -277,6 +264,7 @@ class SearchController extends BaseSearchController
 
         $industryByShop = $this->fetchShopIndustryLabelsByIds($ids);
         $ratingByShop = $this->fetchShopRatingAggregatesByIds($ids);
+        $stationByShop = $this->fetchMainStationByShopIds($ids);
 
         foreach ($items as &$item) {
             $id = (string) ($item['id'] ?? '');
@@ -287,10 +275,44 @@ class SearchController extends BaseSearchController
             $item['is_excellent'] = $agg['avg'] !== null
                 && (float) $agg['avg'] >= 4.5
                 && (int) $agg['cnt'] >= 2;
+            $item['nearest_station'] = $stationByShop[$id] ?? '';
         }
         unset($item);
 
         return $items;
+    }
+
+    /**
+     * 各 shop_id のメイン最寄り駅（sort_order が最小のレコード）を返す。
+     *
+     * @param  array<int, string>  $shopIds
+     * @return array<string, string> shop_id => station_name
+     */
+    private function fetchMainStationByShopIds(array $shopIds): array
+    {
+        if ($shopIds === [] || !Schema::hasTable('shop_stations')) {
+            return [];
+        }
+
+        // shop_id ごとに sort_order / id が最小の 1 件だけ取得
+        $rows = DB::table('shop_stations')
+            ->whereIn('shop_id', $shopIds)
+            ->orderBy('shop_id')
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get(['shop_id', 'station_name']);
+
+        $out = [];
+        foreach ($rows as $row) {
+            $sid = (string) $row->shop_id;
+            if (!isset($out[$sid])) {
+                $name = trim((string) $row->station_name);
+                if ($name !== '') {
+                    $out[$sid] = $name;
+                }
+            }
+        }
+        return $out;
     }
 
     /**
@@ -303,35 +325,27 @@ class SearchController extends BaseSearchController
             return [];
         }
 
-        $out = [];
+        $hasLabel = Schema::hasColumn('shop_profiles', 'industry_label');
 
-        if (Schema::hasTable('shop_industry') && Schema::hasTable('industries')) {
-            $rows = DB::table('shop_industry')
-                ->join('industries', 'shop_industry.industry_id', '=', 'industries.id')
-                ->whereIn('shop_industry.shop_id', $shopIds)
-                ->orderBy('industries.id')
-                ->get(['shop_industry.shop_id as shop_id', 'industries.name as name']);
-        } elseif (Schema::hasTable('industry_shop') && Schema::hasTable('industries')) {
-            $rows = DB::table('industry_shop')
-                ->join('industries', 'industry_shop.industry_id', '=', 'industries.id')
-                ->whereIn('industry_shop.shop_id', $shopIds)
-                ->orderBy('industries.id')
-                ->get(['industry_shop.shop_id as shop_id', 'industries.name as name']);
-        } elseif (Schema::hasTable('shop_industries') && Schema::hasTable('industries')) {
-            $rows = DB::table('shop_industries')
-                ->join('industries', 'shop_industries.industry_id', '=', 'industries.id')
-                ->whereIn('shop_industries.shop_id', $shopIds)
-                ->orderBy('industries.id')
-                ->get(['shop_industries.shop_id as shop_id', 'industries.name as name']);
-        } else {
-            return [];
+        $selectCols = ['shop_profiles.shop_id as shop_id', 'industries.name as name'];
+        if ($hasLabel) {
+            $selectCols[] = 'shop_profiles.industry_label as industry_label';
         }
 
+        $rows = DB::table('shop_profiles')
+            ->leftJoin('industries', 'shop_profiles.industry_id', '=', 'industries.id')
+            ->whereIn('shop_profiles.shop_id', $shopIds)
+            ->get($selectCols);
+
+        $out = [];
         foreach ($rows as $r) {
             $sid = (string) $r->shop_id;
-            if (!isset($out[$sid])) {
-                $out[$sid] = (string) $r->name;
+            if (isset($out[$sid])) {
+                continue;
             }
+            $label = $hasLabel ? trim((string) ($r->industry_label ?? '')) : '';
+            $masterName = trim((string) ($r->name ?? ''));
+            $out[$sid] = $label !== '' ? $label : $masterName;
         }
 
         return $out;
@@ -652,6 +666,20 @@ class SearchController extends BaseSearchController
         }
 
         return asset(ltrim($path, '/'));
+    }
+
+    public function savePreferences(\Illuminate\Http\Request $request, \App\Services\CastSearchPreferenceService $prefs)
+    {
+        $data = $request->validate([
+            'shift_frequency' => ['nullable', 'string', 'in:週1回出勤,週2回出勤,週3回以上'],
+            'work_periods'    => ['nullable', 'array'],
+            'work_periods.*'  => ['string', 'in:morning,day,night'],
+            'hourly_wage_min' => ['nullable', 'integer', 'min:0', 'max:99999'],
+            'industry_ids'    => ['nullable', 'array'],
+            'industry_ids.*'  => ['integer', 'exists:industries,id'],
+        ]);
+        $prefs->savePreferences($data);
+        return response()->json(['success' => true, 'preferences' => $prefs->loadAll()]);
     }
 
     private function currentCastPersonalityType(): ?string

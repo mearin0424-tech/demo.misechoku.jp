@@ -62,9 +62,6 @@ class RegistrationController extends Controller
             'bust' => ['nullable', 'integer', 'min:50', 'max:120'],
             'waist' => ['nullable', 'integer', 'min:40', 'max:120'],
             'hip' => ['nullable', 'integer', 'min:50', 'max:120'],
-            'work_where' => ['nullable', 'string', 'in:週1回出勤,週2回出勤,週3回以上'],
-            'shift_hope' => ['nullable', 'string', 'in:週1回出勤,週2回出勤,週3回以上'], // backward compatible
-            'work_time' => ['nullable', 'string', 'in:morning,day_night'],
             'profession' => ['nullable', 'string', 'max:1000'],
             'current_job' => ['nullable', 'string', 'max:1000'], // backward compatible
             'exp' => ['nullable', 'string', 'in:none,yes'],
@@ -119,10 +116,6 @@ class RegistrationController extends Controller
                 'updated_at' => now(),
             ]);
 
-            $workWhere = $profileSkipped
-                ? null
-                : ($request->filled('work_where') ? $request->input('work_where') : $request->input('shift_hope'));
-            $workTime = $profileSkipped ? null : $request->input('work_time');
             $exp = $profileSkipped
                 ? 'none'
                 : ($request->filled('exp') ? $request->input('exp') : ($request->input('night_work_exp') ?? 'none'));
@@ -141,8 +134,6 @@ class RegistrationController extends Controller
                 'addr' => $request->input('addr1'),
                 'building' => null,
                 'tel' => $request->input('phone'),
-                'work_time' => $workTime ? $this->workTimeToShiftCode($workTime) : null,
-                'work_where' => $workWhere,
                 'exp' => $exp === 'yes' ? 1 : 0,
                 'pr' => $profileSkipped ? null : $request->input('intro'),
                 'height' => !$profileSkipped && $request->filled('height') ? (int) $request->input('height') : null,
@@ -400,15 +391,6 @@ class RegistrationController extends Controller
         return $prefix . str_pad((string) $nextNumber, 8, '0', STR_PAD_LEFT);
     }
 
-    private function workTimeToShiftCode(?string $workTime): int
-    {
-        return match ($workTime) {
-            'morning' => 1,
-            'day_night' => 2,
-            default => 2,
-        };
-    }
-
     /**
      * 新規登録時に提出された本人確認書類のバリデーション。
      * パターンA: 顔写真付き身分証 1枚 / パターンB: 顔写真なし身分証＋住所確認書類 の2枚を許容。
@@ -506,51 +488,28 @@ class RegistrationController extends Controller
     private function syncCastIndustries(string $castId, array $industryIds): void
     {
         $industryIds = array_values(array_unique(array_filter(array_map('intval', $industryIds))));
-        if (!Schema::hasTable('cast_industry')) {
-            return;
-        }
-        DB::table('cast_industry')->where('cast_id', $castId)->delete();
-        if ($industryIds === []) {
-            return;
-        }
         $now = now();
-        $rows = array_map(fn ($industryId) => [
-            'cast_id' => $castId,
-            'industry_id' => $industryId,
-            'created_at' => $now,
-            'updated_at' => $now,
-        ], $industryIds);
-        DB::table('cast_industry')->insert($rows);
+        DB::table('user_search_preferences')->upsert(
+            [[
+                'owner_type'   => 'cast',
+                'owner_id'     => $castId,
+                'industry_ids' => json_encode($industryIds),
+                'created_at'   => $now,
+                'updated_at'   => $now,
+            ]],
+            ['owner_type', 'owner_id'],
+            ['industry_ids', 'updated_at']
+        );
     }
 
     /** @param array<int, int> $industryIds */
     private function syncShopIndustries(string $shopId, array $industryIds): void
     {
         $industryIds = array_values(array_unique(array_filter(array_map('intval', $industryIds))));
-        $table = null;
-        if (Schema::hasTable('shop_industry')) {
-            $table = 'shop_industry';
-        } elseif (Schema::hasTable('industry_shop')) {
-            $table = 'industry_shop';
-        } elseif (Schema::hasTable('shop_industries')) {
-            $table = 'shop_industries';
-        }
-        if ($table === null) {
-            return;
-        }
-
-        DB::table($table)->where('shop_id', $shopId)->delete();
-        if ($industryIds === []) {
-            return;
-        }
-        $now = now();
-        $rows = array_map(fn ($industryId) => [
-            'shop_id' => $shopId,
-            'industry_id' => $industryId,
-            'created_at' => $now,
-            'updated_at' => $now,
-        ], $industryIds);
-        DB::table($table)->insert($rows);
+        $industryId = $industryIds[0] ?? null;
+        DB::table('shop_profiles')
+            ->where('shop_id', $shopId)
+            ->update(['industry_id' => $industryId ?: null]);
     }
 
     private function normalizeZip(?string $zip): ?string

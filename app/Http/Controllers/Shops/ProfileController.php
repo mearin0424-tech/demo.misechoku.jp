@@ -57,6 +57,7 @@ class ProfileController extends Controller
     public function update(Request $request) {
         $rules = [
             'shop_name' => 'required|string|max:100',
+            'industry_label' => 'nullable|string|max:60',
             'zip' => ['nullable', 'regex:/^\d{3}-?\d{4}$/'],
             'pref' => 'required|string|max:50',
             'city' => 'nullable|string|max:100',
@@ -64,7 +65,7 @@ class ProfileController extends Controller
             'addr' => 'nullable|string|max:255',
             'building' => 'nullable|string|max:255',
             'tel' => 'nullable|string|max:30',
-            'industry_ids' => 'nullable|array',
+            'industry_ids' => 'nullable|array|max:1',
             'industry_ids.*' => 'integer|exists:industries,id',
             'atmosphere_tag_ids'   => 'nullable|array',
             'atmosphere_tag_ids.*' => 'integer|exists:shop_tags,id',
@@ -95,10 +96,12 @@ class ProfileController extends Controller
         $existingProfile = DB::table('shop_profiles')->where('shop_id', $shopId)->first();
         $addressChanged = $this->profileAddressChanged($existingProfile, $request);
 
+        // 業種は 1 店舗 1 つ。複数送信されても先頭のみ採用する。
         $industryIds = collect($request->input('industry_ids', []))
             ->map(fn ($id) => (int) $id)
             ->filter()
             ->unique()
+            ->take(1)
             ->values()
             ->all();
 
@@ -111,6 +114,10 @@ class ProfileController extends Controller
             'updated_at' => now(),
             'created_at' => now(),
         ];
+        if (Schema::hasColumn('shop_profiles', 'industry_label')) {
+            $label = trim((string) $request->input('industry_label', ''));
+            $profileRow['industry_label'] = $label !== '' ? $label : null;
+        }
 
         if (Schema::hasColumn('shop_profiles', 'addr')) {
             $profileRow['addr'] = trim((string) $request->input('addr', ''));
@@ -690,6 +697,7 @@ class ProfileController extends Controller
             'building' => $building,
             'tel' => ($row && Schema::hasColumn('shop_profiles', 'tel')) ? (string) ($row->tel ?? '') : '',
             'industry_ids' => $this->resolveShopIndustryIds($shopId, $row ? ($row->industry_id ?? null) : null),
+            'industry_label' => ($row && Schema::hasColumn('shop_profiles', 'industry_label')) ? (string) ($row->industry_label ?? '') : '',
             'atmosphere_tag_ids' => $shopTagIds['atmosphere'],
             'facility_tag_ids'   => $shopTagIds['facility'],
             'stations' => $stations,
@@ -786,49 +794,12 @@ class ProfileController extends Controller
      */
     private function resolveShopIndustryIds(string $shopId, $fallbackIndustryId = null): array
     {
-        if (Schema::hasTable('shop_industry')) {
-            $ids = DB::table('shop_industry')
-                ->where('shop_id', $shopId)
-                ->orderBy('industry_id')
-                ->pluck('industry_id')
-                ->map(fn ($id) => (int) $id)
-                ->filter()
-                ->values()
-                ->all();
-            if ($ids !== []) {
-                return $ids;
-            }
-        }
-
-        if (Schema::hasTable('industry_shop')) {
-            $ids = DB::table('industry_shop')
-                ->where('shop_id', $shopId)
-                ->orderBy('industry_id')
-                ->pluck('industry_id')
-                ->map(fn ($id) => (int) $id)
-                ->filter()
-                ->values()
-                ->all();
-            if ($ids !== []) {
-                return $ids;
-            }
-        }
-
-        if (Schema::hasTable('shop_industries')) {
-            $ids = DB::table('shop_industries')
-                ->where('shop_id', $shopId)
-                ->orderBy('industry_id')
-                ->pluck('industry_id')
-                ->map(fn ($id) => (int) $id)
-                ->filter()
-                ->values()
-                ->all();
-            if ($ids !== []) {
-                return $ids;
-            }
-        }
-
         $single = (int) ($fallbackIndustryId ?? 0);
+        if ($single <= 0) {
+            $single = (int) DB::table('shop_profiles')
+                ->where('shop_id', $shopId)
+                ->value('industry_id');
+        }
         return $single > 0 ? [$single] : [];
     }
 
@@ -837,36 +808,9 @@ class ProfileController extends Controller
      */
     private function syncShopIndustries(string $shopId, array $industryIds): void
     {
-        if (Schema::hasTable('shop_industry')) {
-            DB::table('shop_industry')->where('shop_id', $shopId)->delete();
-            foreach ($industryIds as $industryId) {
-                DB::table('shop_industry')->insert([
-                    'shop_id' => $shopId,
-                    'industry_id' => (int) $industryId,
-                ]);
-            }
-            return;
-        }
-
-        if (Schema::hasTable('industry_shop')) {
-            DB::table('industry_shop')->where('shop_id', $shopId)->delete();
-            foreach ($industryIds as $industryId) {
-                DB::table('industry_shop')->insert([
-                    'shop_id' => $shopId,
-                    'industry_id' => (int) $industryId,
-                ]);
-            }
-            return;
-        }
-
-        if (Schema::hasTable('shop_industries')) {
-            DB::table('shop_industries')->where('shop_id', $shopId)->delete();
-            foreach ($industryIds as $industryId) {
-                DB::table('shop_industries')->insert([
-                    'shop_id' => $shopId,
-                    'industry_id' => (int) $industryId,
-                ]);
-            }
-        }
+        $industryId = $industryIds[0] ?? null;
+        DB::table('shop_profiles')
+            ->where('shop_id', $shopId)
+            ->update(['industry_id' => $industryId ? (int) $industryId : null]);
     }
 }

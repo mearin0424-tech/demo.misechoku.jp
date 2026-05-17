@@ -203,8 +203,6 @@
                     </h3>
                     <div class="cast-profile-card">
                         <div class="cast-row"><div class="cast-k">希望職種</div><div class="cast-v {{ empty($cast['industry_names'] ?? ($cast['desired_job'] ?? '')) ? 'muted' : '' }}">{{ $cast['industry_names'] ?? ($cast['desired_job'] ?? '--') }}</div></div>
-                        <div class="cast-row"><div class="cast-k">シフト希望</div><div class="cast-v {{ empty($cast['memo_data']['work_where'] ?? ($cast['memo_data']['shift_hope'] ?? '')) ? 'muted' : '' }}">{{ $cast['memo_data']['work_where'] ?? ($cast['memo_data']['shift_hope'] ?? '--') }}</div></div>
-                        <div class="cast-row"><div class="cast-k">勤務時間帯</div><div class="cast-v {{ empty($cast['work_time_label'] ?? '') ? 'muted' : '' }}">{{ $cast['work_time_label'] ?: '--' }}</div></div>
                     </div>
                 </div>
             </div>
@@ -236,17 +234,7 @@
                 </ul>
             </div>
 
-            {{-- 4. Place Setting（位置情報での絞り込み） --}}
-            <div class="mypage-section place-setting-section">
-                <div class="gallery-section-header">
-                    <h2 class="section-title section-title-gold">Place Setting</h2>
-                </div>
-                @include('partials.search-location-settings', [
-                    'searchLocationSettings' => $searchLocationSettings ?? null,
-                    'searchLocationDistanceOptions' => $searchLocationDistanceOptions ?? [0,1,3,5,10,20,30,50,100],
-                    'updateRouteName' => 'cast.mypage.search-location.update',
-                ])
-            </div>
+            {{-- 検索条件・絞り込みはすべて SEARCH 画面の「詳細検索」モーダルに集約しています --}}
         </div>
     </section>
 </div>

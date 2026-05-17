@@ -115,22 +115,17 @@ class DocumentReviewService
 
     public function getShopLicensePageData(string $shopId): array
     {
-        $definitions = [
-            ['key' => 'business', 'name' => '営業許可証'],
-            ['key' => 'entertainment', 'name' => '風営許可証'],
-        ];
+        $definitions = $this->shopLicenseDefinitions();
 
         if (!Schema::hasTable('shop_license_documents')) {
             $documents = [];
             foreach ($definitions as $def) {
                 $status = 'not_submitted';
-                $documents[] = [
-                    'key' => $def['key'],
-                    'name' => $def['name'],
+                $documents[] = array_merge($def, [
                     'status' => $status,
                     'status_label' => $this->shopDocumentStatusLabel($status),
                     'record' => null,
-                ];
+                ]);
             }
 
             return [
@@ -152,18 +147,60 @@ class DocumentReviewService
             /** @var ShopLicenseDocument|null $document */
             $document = $byType->get($type);
             $status = $this->shopStatusKey($document);
-            $mapped[] = [
-                'key' => $type,
-                'name' => $def['name'],
+            $mapped[] = array_merge($def, [
                 'status' => $status,
                 'status_label' => $this->shopDocumentStatusLabel($status),
                 'record' => $document ? $this->mapShopDocument($document) : null,
-            ];
+            ]);
         }
 
         return [
             'documents' => $mapped,
             'all_approved' => collect($mapped)->every(fn (array $row) => $row['status'] === 'approved'),
+        ];
+    }
+
+    /**
+     * 店舗の許可書 2 枠の表示メタ情報を返す。
+     * - 枠1: 飲食店営業許可書（保健所）— 有効期限必須
+     * - 枠2: 風営許可証 / 深夜酒類届出（警察系）— 有効期限任意
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function shopLicenseDefinitions(): array
+    {
+        return [
+            [
+                'key'             => 'business',
+                'name'            => '飲食店営業許可書',
+                'display_name'    => '飲食店営業許可書',
+                'issuer'          => '管轄の保健所 発行',
+                'description'     => 'お酒や飲食物を提供するすべての店舗で必要です。許可書の全体が写るように撮影してください。',
+                'description_html'=> null,
+                'expiry_required' => true,
+                'expiry_note'     => '',
+                'support_note'    => null,
+            ],
+            [
+                'key'             => 'entertainment',
+                'name'            => '風営許可証 / 深夜酒類届出',
+                'display_name'    => '風営許可証 / 深夜酒類届出',
+                'issuer'          => '都道府県公安委員会 または 管轄の警察署',
+                // 注釈文は HTML で「受領印」を強調
+                'description'     => null,
+                'description_html'=>
+                    'お店の業態に合わせて、以下のいずれかをアップロードしてください。' .
+                    '<ul class="license-accordion__desc-list">' .
+                    '<li><strong>キャバクラ等（接待あり）の場合：</strong><br>「風俗営業許可証（第1号）」</li>' .
+                    '<li><strong>ガールズバー等（深夜営業あり）の場合：</strong><br>' .
+                    '「深夜酒類提供飲食店営業開始届出書」<br>' .
+                    '<span class="license-accordion__desc-emphasis">※警察署の受領印（日付スタンプ）があるページ</span>' .
+                    '</li>' .
+                    '</ul>',
+                'expiry_required' => false,
+                'expiry_note'     => '※深夜酒類提供の届出など、有効期限がない場合は空欄で構いません。',
+                'support_note'    => '深夜0時前に閉店するスナック等、法律上、上記の許可・届出が不要な業態の店舗様は、サポート窓口までご相談ください。',
+            ],
         ];
     }
 
@@ -263,7 +300,7 @@ class DocumentReviewService
             throw new \RuntimeException('すでに審査依頼中です。');
         }
         if ($type === 'business' && empty($expiredAt) && !$document->expired_at) {
-            throw new \RuntimeException('営業許可証の有効期限を入力してください。');
+            throw new \RuntimeException('飲食店営業許可書の有効期限を入力してください。');
         }
 
         $document->update([

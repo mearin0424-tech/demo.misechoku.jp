@@ -411,6 +411,7 @@ class HomeController extends Controller
                 'tags' => $this->buildHomeRecruitDiscoveryTags($row->id, $shopJobId),
                 'pref' => $row->pref ?? '',
                 'city' => $row->city ?? '',
+                'nearest_station' => '',
                 'like_count' => $likeCounts[$row->id] ?? 0,
                 'industry_name' => $industryByShop[$row->id] ?? null,
                 'rating' => $hasReviews ? (float) ($row->avg_rating ?? 0) : 0.0,
@@ -428,6 +429,15 @@ class HomeController extends Controller
                 '_lng' => $row->longitude !== null ? (float) $row->longitude : null,
             ];
         }
+
+        // メイン最寄り駅を一括取得して各レコードに付与
+        $shopIds = array_values(array_unique(array_map(fn ($it) => (string) ($it['id'] ?? ''), $items)));
+        $shopIds = array_values(array_filter($shopIds, fn ($v) => $v !== ''));
+        $mainStationByShop = $this->fetchMainStationByShopIds($shopIds);
+        foreach ($items as &$item) {
+            $item['nearest_station'] = $mainStationByShop[(string) ($item['id'] ?? '')] ?? '';
+        }
+        unset($item);
 
         // 探索拠点が設定されていれば各レコードに距離を付与
         $origin = $this->userLocation->getActiveLocation();
@@ -454,6 +464,38 @@ class HomeController extends Controller
         }
 
         return $items;
+    }
+
+    /**
+     * 各 shop_id のメイン最寄り駅（sort_order が最小のレコード）を返す。
+     *
+     * @param  array<int, string>  $shopIds
+     * @return array<string, string> shop_id => station_name
+     */
+    private function fetchMainStationByShopIds(array $shopIds): array
+    {
+        if ($shopIds === [] || !Schema::hasTable('shop_stations')) {
+            return [];
+        }
+
+        $rows = DB::table('shop_stations')
+            ->whereIn('shop_id', $shopIds)
+            ->orderBy('shop_id')
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get(['shop_id', 'station_name']);
+
+        $out = [];
+        foreach ($rows as $row) {
+            $sid = (string) $row->shop_id;
+            if (!isset($out[$sid])) {
+                $name = trim((string) $row->station_name);
+                if ($name !== '') {
+                    $out[$sid] = $name;
+                }
+            }
+        }
+        return $out;
     }
 
     /**
@@ -541,37 +583,28 @@ class HomeController extends Controller
             return [];
         }
 
-        $rows = collect();
-        if (Schema::hasTable('shop_industry')) {
-            $rows = DB::table('shop_industry')
-                ->join('industries', 'shop_industry.industry_id', '=', 'industries.id')
-                ->whereIn('shop_industry.shop_id', $shopIds)
-                ->orderBy('shop_industry.industry_id')
-                ->get(['shop_industry.shop_id as shop_id', 'industries.name as name']);
-        } elseif (Schema::hasTable('industry_shop')) {
-            $rows = DB::table('industry_shop')
-                ->join('industries', 'industry_shop.industry_id', '=', 'industries.id')
-                ->whereIn('industry_shop.shop_id', $shopIds)
-                ->orderBy('industry_shop.industry_id')
-                ->get(['industry_shop.shop_id as shop_id', 'industries.name as name']);
-        } elseif (Schema::hasTable('shop_industries')) {
-            $rows = DB::table('shop_industries')
-                ->join('industries', 'shop_industries.industry_id', '=', 'industries.id')
-                ->whereIn('shop_industries.shop_id', $shopIds)
-                ->orderBy('shop_industries.industry_id')
-                ->get(['shop_industries.shop_id as shop_id', 'industries.name as name']);
-        } else {
-            $rows = DB::table('shop_profiles')
-                ->leftJoin('industries', 'shop_profiles.industry_id', '=', 'industries.id')
-                ->whereIn('shop_profiles.shop_id', $shopIds)
-                ->get(['shop_profiles.shop_id as shop_id', 'industries.name as name']);
+        $hasLabel = Schema::hasColumn('shop_profiles', 'industry_label');
+
+        $selectCols = ['shop_profiles.shop_id as shop_id', 'industries.name as name'];
+        if ($hasLabel) {
+            $selectCols[] = 'shop_profiles.industry_label as industry_label';
         }
+
+        $rows = DB::table('shop_profiles')
+            ->leftJoin('industries', 'shop_profiles.industry_id', '=', 'industries.id')
+            ->whereIn('shop_profiles.shop_id', $shopIds)
+            ->get($selectCols);
 
         $map = [];
         foreach ($rows as $row) {
             $shopId = (string) ($row->shop_id ?? '');
-            $name = trim((string) ($row->name ?? ''));
-            if ($shopId === '' || $name === '') {
+            if ($shopId === '') {
+                continue;
+            }
+            $label = $hasLabel ? trim((string) ($row->industry_label ?? '')) : '';
+            $masterName = trim((string) ($row->name ?? ''));
+            $name = $label !== '' ? $label : $masterName;
+            if ($name === '') {
                 continue;
             }
             $map[$shopId] ??= [];

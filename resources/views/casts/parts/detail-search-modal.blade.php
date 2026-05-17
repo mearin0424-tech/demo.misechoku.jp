@@ -10,6 +10,18 @@
     $facilityTags = $options['facility'] ?? collect();
     $atmosphereTags = $options['atmosphere'] ?? collect();
 
+    // 保存済み検索条件（cast_search_preferences）。フォーム未送信時は保存値をデフォルトに使う。
+    $savedPrefs = $savedPreferences ?? [];
+    $savedIndustryIds = array_map('intval', $savedPrefs['industry_ids'] ?? []);
+    $savedShiftFrequency = (string) ($savedPrefs['shift_frequency'] ?? '');
+    $savedWorkPeriods = array_values(array_filter((array) ($savedPrefs['work_periods'] ?? []), 'is_string'));
+    $savedHourlyWageMin = $savedPrefs['hourly_wage_min'] ?? null;
+
+    // 業種は industry_ids[] と industry[] (name) の二系統。
+    // - industry_ids[]: 保存用 / 既存検索パラメータ（POST 後はこちらが優先）
+    // - industry[]   : 既存 GET クエリパラメータ（互換維持、業種名で検索）
+    $reqIndustryIds = array_map('intval', (array) request('industry_ids', []));
+    $selectedIndustryIds = $reqIndustryIds !== [] ? $reqIndustryIds : $savedIndustryIds;
     $selectedIndustries = array_values((array) request('industry', []));
     $selectedAreas = array_values((array) request('area', []));
     $selectedWorkStyleTags = array_map('intval', (array) request('work_style_tag_ids', []));
@@ -17,8 +29,20 @@
     $selectedBenefitTags = array_map('intval', (array) request('benefit_tag_ids', []));
     $selectedFacilityTags = array_map('intval', (array) request('facility_tag_ids', []));
     $selectedAtmosphereTags = array_map('intval', (array) request('atmosphere_tag_ids', []));
-    $selectedHourlyWage = (string) request('hourly_wage', '');
+
+    $reqHourlyWage = (string) request('hourly_wage', '');
+    $selectedHourlyWage = $reqHourlyWage !== ''
+        ? $reqHourlyWage
+        : ($savedHourlyWageMin !== null ? (string) $savedHourlyWageMin : '');
     $selectedReward = (string) request('reward', '');
+
+    $reqShiftFrequency = (string) request('shift_frequency', '');
+    $selectedShiftFrequency = $reqShiftFrequency !== '' ? $reqShiftFrequency : $savedShiftFrequency;
+
+    $reqWorkPeriods = array_values(array_filter((array) request('work_periods', []), 'is_string'));
+    $selectedWorkPeriods = $reqWorkPeriods !== [] ? $reqWorkPeriods : $savedWorkPeriods;
+
+    $workPeriodLabels = ['morning' => '朝', 'day' => '昼', 'night' => '夜'];
 @endphp
 
 <div id="detail-search-modal" class="detail-search-modal" aria-hidden="true">
@@ -34,17 +58,57 @@
             <form id="detail-search-form" class="detail-search-form detail-search-form--search">
                 <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="業種" data-open="true">
                     <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="true">
-                        <span>業種</span>
+                        <span>希望業種</span>
                         <span class="detail-search-accordion__icon">−</span>
                     </button>
                     <div class="detail-search-accordion__body">
                         <div class="detail-search-chips detail-search-chips--search">
                             @foreach($industries as $industry)
+                                @php
+                                    $iid = (int) $industry->id;
+                                    $checked = in_array($iid, $selectedIndustryIds, true)
+                                        || in_array($industry->name, $selectedIndustries, true);
+                                @endphp
                                 <label class="detail-search-chip detail-search-chip--search">
-                                    <input type="checkbox" name="industry[]" value="{{ $industry->name }}" {{ in_array($industry->name, $selectedIndustries, true) ? 'checked' : '' }}>
+                                    <input type="checkbox" name="industry_ids[]" value="{{ $iid }}" data-industry-name="{{ $industry->name }}" {{ $checked ? 'checked' : '' }}>
                                     <span>{{ $industry->name }}</span>
                                 </label>
                             @endforeach
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="出勤頻度・時間帯">
+                    <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="false">
+                        <span>希望の出勤頻度・時間帯</span>
+                        <span class="detail-search-accordion__icon">+</span>
+                    </button>
+                    <div class="detail-search-accordion__body" hidden>
+                        <div class="detail-search-subsection">
+                            <span class="detail-search-subsection__label">出勤頻度</span>
+                            <div class="detail-search-chips detail-search-chips--search">
+                                <label class="detail-search-chip detail-search-chip--search">
+                                    <input type="radio" name="shift_frequency" value="" {{ $selectedShiftFrequency === '' ? 'checked' : '' }}>
+                                    <span>指定なし</span>
+                                </label>
+                                @foreach(['週1回出勤', '週2回出勤', '週3回以上'] as $freq)
+                                    <label class="detail-search-chip detail-search-chip--search">
+                                        <input type="radio" name="shift_frequency" value="{{ $freq }}" {{ $selectedShiftFrequency === $freq ? 'checked' : '' }}>
+                                        <span>{{ $freq }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+                        <div class="detail-search-subsection">
+                            <span class="detail-search-subsection__label">時間帯（複数選択可）</span>
+                            <div class="detail-search-chips detail-search-chips--search">
+                                @foreach($workPeriodLabels as $key => $label)
+                                    <label class="detail-search-chip detail-search-chip--search">
+                                        <input type="checkbox" name="work_periods[]" value="{{ $key }}" {{ in_array($key, $selectedWorkPeriods, true) ? 'checked' : '' }}>
+                                        <span>{{ $label }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -200,7 +264,110 @@
 
         <div class="detail-search-modal__footer detail-search-modal__footer--search">
             <button type="button" class="detail-search-modal__btn detail-search-modal__btn--reset" data-detail-search-reset>条件をクリア</button>
+            <button type="button" class="detail-search-modal__btn detail-search-modal__btn--save" data-detail-search-save
+                    data-save-url="{{ route('cast.search-preferences.save') }}">
+                条件を保存
+            </button>
             <button type="button" class="detail-search-modal__btn detail-search-modal__btn--submit" data-detail-search-submit>この条件で検索</button>
         </div>
+        <p class="detail-search-modal__save-feedback" data-detail-search-save-feedback hidden></p>
     </div>
 </div>
+
+@push('scripts')
+<script>
+(function () {
+    var form = document.getElementById('detail-search-form');
+    if (!form) return;
+    var saveBtn = form.closest('.detail-search-modal__window')?.querySelector('[data-detail-search-save]');
+    var feedback = form.closest('.detail-search-modal__window')?.querySelector('[data-detail-search-save-feedback]');
+    if (!saveBtn) return;
+
+    function readCheckedValues(name) {
+        return Array.from(form.querySelectorAll('input[name="' + name + '"]:checked'))
+            .map(function (el) { return el.value; })
+            .filter(function (v) { return v !== ''; });
+    }
+    function readRadioValue(name) {
+        var el = form.querySelector('input[name="' + name + '"]:checked');
+        return el ? el.value : '';
+    }
+
+    saveBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (saveBtn.dataset.busy === '1') return;
+        saveBtn.dataset.busy = '1';
+        if (feedback) { feedback.hidden = true; feedback.className = 'detail-search-modal__save-feedback'; }
+
+        var payload = new FormData();
+        payload.append('_token', (document.querySelector('meta[name="csrf-token"]') || {}).content || '');
+        readCheckedValues('industry_ids[]').forEach(function (v) { payload.append('industry_ids[]', v); });
+        readCheckedValues('work_periods[]').forEach(function (v) { payload.append('work_periods[]', v); });
+        var freq = readRadioValue('shift_frequency');
+        if (freq !== '') payload.append('shift_frequency', freq);
+        var wage = (form.querySelector('[name="hourly_wage"]') || {}).value || '';
+        if (wage !== '') payload.append('hourly_wage_min', wage);
+
+        fetch(saveBtn.dataset.saveUrl, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            body: payload,
+            credentials: 'same-origin'
+        })
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+        .then(function () {
+            if (feedback) {
+                feedback.hidden = false;
+                feedback.className = 'detail-search-modal__save-feedback is-success';
+                feedback.textContent = '検索条件を保存しました。次回もこの条件で開きます。';
+            }
+        })
+        .catch(function () {
+            if (feedback) {
+                feedback.hidden = false;
+                feedback.className = 'detail-search-modal__save-feedback is-error';
+                feedback.textContent = '保存に失敗しました。時間をおいて再度お試しください。';
+            }
+        })
+        .finally(function () { saveBtn.dataset.busy = '0'; });
+    });
+})();
+</script>
+<style>
+.detail-search-subsection { margin-bottom: 12px; }
+.detail-search-subsection__label {
+    display: block;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.04em;
+    margin: 0 0 6px;
+}
+.detail-search-modal__footer--search {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.detail-search-modal__btn--save {
+    flex: 1 1 auto;
+    background: rgba(197, 160, 89, 0.10);
+    border: 1px solid var(--color-border-strong);
+    color: var(--gold-light);
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.84rem;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.detail-search-modal__btn--save:hover { background: rgba(197, 160, 89, 0.18); }
+.detail-search-modal__save-feedback {
+    padding: 8px 16px 0;
+    margin: 0;
+    font-size: 0.76rem;
+    text-align: center;
+}
+.detail-search-modal__save-feedback.is-success { color: var(--color-success); }
+.detail-search-modal__save-feedback.is-error { color: var(--color-danger); }
+</style>
+@endpush

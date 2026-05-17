@@ -192,14 +192,6 @@
                     <span class="detail-label">性格・内面</span>
                     <span class="detail-value">{{ $cast['my_inner_skills'] ?? '--' }}</span>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">シフト希望</span>
-                    <span class="detail-value">{{ $cast['work_where'] ?? ($cast['shift_hope'] ?? '--') }}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">勤務時間帯</span>
-                    <span class="detail-value">{{ $cast['work_time_label'] ?? '--' }}</span>
-                </div>
                 {{-- 自己PR は上のアコーディオンに集約済み --}}
                 <div class="detail-row detail-row-block">
                     <span class="detail-label">現職業</span>

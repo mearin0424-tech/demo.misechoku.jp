@@ -12,6 +12,8 @@ class ShopProfile extends Model
     protected $fillable = [
         'shop_id',
         'shop_name',
+        'industry_id',
+        'industry_label',
         'main_image_path',
         'opened_on',
         'zip',

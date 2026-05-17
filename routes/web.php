@@ -407,6 +407,8 @@ Route::prefix('api/bank-lookup')->name('api.bank-lookup.')->group(function () {
 // 住所→緯度経度のジオコーディング（保存はしない、プレビュー用）
 Route::get('/api/geocoding/lookup', [\App\Http\Controllers\Common\LocationController::class, 'lookup'])
     ->name('api.geocoding.lookup');
+Route::get('/api/geocoding/suggest', [\App\Http\Controllers\Common\LocationController::class, 'suggest'])
+    ->name('api.geocoding.suggest');
 
 Route::prefix('cast')->name('cast.')->group(function () {
     Route::get('/login', fn () => redirect('/login'))->name('login');
@@ -430,6 +432,7 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
     Route::get('/home', [ShopHome::class, 'index'])->name('home');
     Route::get('/search', [ShopSearch::class, 'index'])->name('search.index');
     Route::get('/search/{tab}', fn ($tab) => redirect()->route('shop.search.index'))->where('tab', 'timeline|list');
+    Route::post('/search-preferences', [ShopSearch::class, 'savePreferences'])->name('search-preferences.save');
 
     // 繝医・繧ｯ
     Route::prefix('talk')->name('talk.')->group(function () {
@@ -476,8 +479,6 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
     // 繝槭う繝壹・繧ｸ
     Route::prefix('mypage')->name('mypage.')->group(function () {
         Route::get('/', [ShopMypage::class, 'index'])->name('index');
-        Route::get('/documents/onboarding', [ShopMypage::class, 'documentsOnboarding'])->name('documents.onboarding');
-        Route::get('/documents/{type}/manage', [ShopMypage::class, 'manageLicenseDocument'])->name('documents.manage')->whereIn('type', ['business', 'entertainment']);
         Route::post('/word', [ShopMypage::class, 'updateWord'])->name('word');
         Route::post('/search-location', [ShopMypage::class, 'updateSearchLocation'])->name('search-location.update');
         Route::get('/management', [ShopRecruit::class, 'management'])->name('management');
@@ -513,6 +514,7 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
     Route::post('/profile/personality-type', [CastProfile::class, 'updatePersonalityType'])->name('profile.personality-type');
     Route::get('/search', fn () => redirect()->route('cast.search.index', ['tab' => 'list']));
     Route::get('/search/{tab}', [CastSearch::class, 'index'])->name('search.index')->where('tab', 'search|ai|timeline|list');
+    Route::post('/search-preferences', [CastSearch::class, 'savePreferences'])->name('search-preferences.save');
     Route::get('/recruit/{id}', [CastRecruit::class, 'show'])->name('recruit.show');
     
     Route::get('/interaction', [ShopInteraction::class, 'index'])->name('interaction.index');

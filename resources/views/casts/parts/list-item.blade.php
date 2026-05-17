@@ -2,7 +2,12 @@
     $recruitUrl = Route::has('cast.recruit.show') ? route('cast.recruit.show', $item['id']) : '#';
     $hitokoto = trim((string) ($item['hitokoto'] ?? ''));
     $hitokotoTime = (string) ($item['hitokoto_updated_at'] ?? '');
-    $locationLine = trim((string) (($item['pref'] ?? '') . ' ' . ($item['city'] ?? '')));
+    // メイン最寄り駅を優先表示。無い店舗は従来通り 都道府県+市区町村にフォールバック。
+    $nearestStation = trim((string) ($item['nearest_station'] ?? ''));
+    $locationLine = $nearestStation !== ''
+        ? $nearestStation
+        : trim((string) (($item['pref'] ?? '') . ' ' . ($item['city'] ?? '')));
+    $locationIcon = $nearestStation !== '' ? 'fa-train' : 'fa-map-marker-alt';
 @endphp
 <li class="connection-item connection-item--clickable connection-item--shop-rich">
     <a href="{{ $recruitUrl }}" class="connection-item__link shop-search-card__link">
@@ -32,7 +37,7 @@
                     @endif
                     @if($locationLine !== '')
                         <span class="shop-search-card__location">
-                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                            <i class="fas {{ $locationIcon }}" aria-hidden="true"></i>
                             {{ $locationLine }}
                         </span>
                     @endif

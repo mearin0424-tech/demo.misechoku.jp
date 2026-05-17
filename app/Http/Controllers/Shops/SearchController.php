@@ -29,10 +29,32 @@ class SearchController extends BaseSearchController
         $items = $this->buildSearchItems($request, $sort);
 
         return $this->renderIndex([
-            'items'        => $items,
-            'sort'         => $sort,
-            'sortOptions'  => self::SORT_OPTIONS,
+            'items'             => $items,
+            'sort'              => $sort,
+            'sortOptions'       => self::SORT_OPTIONS,
+            'savedPreferences'  => app(\App\Services\ShopSearchPreferenceService::class)->loadAll(),
+            'castTagsByCategory' => $this->loadCastTagsByCategory(),
         ]);
+    }
+
+    private function loadCastTagsByCategory(): array
+    {
+        if (!Schema::hasTable('cast_tags')) {
+            return ['looks' => [], 'personality' => []];
+        }
+        $rows = DB::table('cast_tags')
+            ->where('del_flg', 0)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get(['id', 'category', 'name']);
+        $byCat = ['looks' => [], 'personality' => []];
+        foreach ($rows as $row) {
+            $cat = (string) ($row->category ?? '');
+            if (isset($byCat[$cat])) {
+                $byCat[$cat][] = $row;
+            }
+        }
+        return $byCat;
     }
 
     /**
@@ -96,9 +118,14 @@ class SearchController extends BaseSearchController
 
         $this->applySort($rows, $sort, $castPostsHasUpdatedAt);
 
-        if (!empty($industries) && DB::getSchemaBuilder()->hasTable('cast_industry')) {
-            $rows->join('cast_industry', 'casts.id', '=', 'cast_industry.cast_id')
-                ->join('industries', 'cast_industry.industry_id', '=', 'industries.id')
+        if (!empty($industries)) {
+            $rows->join('user_search_preferences', function ($j) {
+                    $j->on('user_search_preferences.owner_id', '=', 'casts.id')
+                      ->where('user_search_preferences.owner_type', '=', 'cast');
+                })
+                ->join('industries', function ($j) {
+                    $j->whereRaw('JSON_CONTAINS(user_search_preferences.industry_ids, CAST(industries.id AS JSON))');
+                })
                 ->whereIn('industries.name', $industries)
                 ->distinct();
         }
@@ -180,6 +207,25 @@ class SearchController extends BaseSearchController
             })
             ->values()
             ->all();
+    }
+
+    public function savePreferences(\Illuminate\Http\Request $request, \App\Services\ShopSearchPreferenceService $prefs)
+    {
+        $data = $request->validate([
+            'max_distance_km' => ['nullable', 'integer', 'in:0,1,3,5,10,20,30,50,100'],
+            'age_min'         => ['nullable', 'integer', 'min:18', 'max:99'],
+            'age_max'         => ['nullable', 'integer', 'min:18', 'max:99'],
+            'shift_frequency' => ['nullable', 'string', 'in:週1回出勤,週2回出勤,週3回以上'],
+            'work_periods'    => ['nullable', 'array'],
+            'work_periods.*'  => ['string', 'in:morning,day,night'],
+            'looks_tag_ids'   => ['nullable', 'array'],
+            'looks_tag_ids.*' => ['integer'],
+            'personality_tag_ids'   => ['nullable', 'array'],
+            'personality_tag_ids.*' => ['integer'],
+            'night_work_exp'  => ['nullable', 'string', 'in:none,yes,any'],
+        ]);
+        $prefs->savePreferences($data);
+        return response()->json(['success' => true, 'preferences' => $prefs->loadAll()]);
     }
 
     private function applySort($rows, string $sort, bool $castPostsHasUpdatedAt): void

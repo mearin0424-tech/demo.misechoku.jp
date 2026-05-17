@@ -1375,7 +1375,7 @@ class ShopRepository implements ShopRepositoryInterface
         // =======================
         if ($request->industry) {
             $query = $this->bildIndustry($query)
-                ->whereIn('shop_industries.industry_id', $request->industry);
+                ->whereIn('shop_profiles.industry_id', $request->industry);
         }
 
         // =======================
@@ -1645,8 +1645,8 @@ class ShopRepository implements ShopRepositoryInterface
 
     function bildIndustry($query)
     {
-        $query->join('shop_industries', function ($query) {
-            $query->on('shops.id', '=', 'shop_industries.shop_id');
+        $query->join('shop_profiles', function ($query) {
+            $query->on('shops.id', '=', 'shop_profiles.shop_id');
         });
         return $query;
     }

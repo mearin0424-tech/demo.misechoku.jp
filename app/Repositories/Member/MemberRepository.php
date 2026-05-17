@@ -657,9 +657,6 @@ class MemberRepository implements MemberRepositoryInterface
 
 
         $query = DB::table('members');
-        //$query->join('shop_industries', function ($query) use ($request) {
-        //$query->on('shops.id', '=', 'shop_industries.shop_id');
-        //});
 
         if ($search) {
             // �S�p�X�y�[�X�𔼊p�ɕϊ�
@@ -1008,7 +1005,7 @@ class MemberRepository implements MemberRepositoryInterface
 
         $ind_id_str = rtrim($ind_id_str, ",");
 
-        $query = DB::table('shops')->join("shop_industries", "shops.id", "=", "shop_industries.shop_id")->whereIn('shop_industries.industry_id', $ind_id_arr);
+        $query = DB::table('shops')->join('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')->whereIn('shop_profiles.industry_id', $ind_id_arr);
 
         if ($lat != "" && !$log != "") {
 
@@ -1279,11 +1276,9 @@ class MemberRepository implements MemberRepositoryInterface
             'bust' => $payload['bust'] ?? ($payload['b'] ?? null),
             'waist' => $payload['waist'] ?? ($payload['w'] ?? null),
             'hip' => $payload['hip'] ?? ($payload['h'] ?? null),
-            'work_time' => $payload['work_time'] ?? ($payload['shift'] ?? null),
             'profession' => $payload['profession'] ?? null,
             'exp' => $payload['exp'] ?? null,
             'years_exp' => $payload['years_exp'] ?? null,
-            'work_where' => $payload['work_where'] ?? ($payload['where_work'] ?? null),
             'pr' => $payload['pr'] ?? null,
             'charm_point' => $payload['charm_point'] ?? null,
             'memo' => $payload['memo'] ?? null,
@@ -1350,11 +1345,9 @@ class MemberRepository implements MemberRepositoryInterface
             $cast->setAttribute('b', $profile->bust);
             $cast->setAttribute('w', $profile->waist);
             $cast->setAttribute('h', $profile->hip);
-            $cast->setAttribute('shift', $profile->work_time);
             $cast->setAttribute('profession', $profile->profession);
             $cast->setAttribute('exp', $profile->exp);
             $cast->setAttribute('years_exp', $profile->years_exp);
-            $cast->setAttribute('where_work', $profile->work_where);
             $cast->setAttribute('pr', $profile->pr);
             $cast->setAttribute('charm_point', $profile->charm_point);
             $cast->setAttribute('memo', $profile->memo);

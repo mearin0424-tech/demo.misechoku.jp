@@ -29,7 +29,6 @@
         $selectedIndustryIds = collect(old('industry_ids', $profile['industry_ids'] ?? []))->map(fn ($id) => (int) $id)->all();
         $selectedLookIds = collect(old('look_tag_ids', $profile['look_tag_ids'] ?? []))->map(fn ($id) => (int) $id)->all();
         $selectedPersonalityIds = collect(old('personality_tag_ids', $profile['personality_tag_ids'] ?? []))->map(fn ($id) => (int) $id)->all();
-        $selectedWorkTime = old('work_time', $profile['work_time'] ?? 'day_night');
         $selectedNightExp = old('exp', old('night_work_exp', $profile['exp'] ?? ($profile['night_work_exp'] ?? 'none')));
     @endphp
 
@@ -156,27 +155,6 @@
                             <span>{{ $industry->name }}</span>
                         </label>
                     @endforeach
-                </div>
-            </div>
-            <div class="field">
-                <label>シフト希望</label>
-                <select name="work_where" class="cast-select">
-                    <option value="週1回出勤" @selected(old('work_where', old('shift_hope', $profile['work_where'] ?? ($profile['shift_hope'] ?? ''))) === '週1回出勤')>週1回出勤</option>
-                    <option value="週2回出勤" @selected(old('work_where', old('shift_hope', $profile['work_where'] ?? ($profile['shift_hope'] ?? ''))) === '週2回出勤')>週2回出勤</option>
-                    <option value="週3回以上" @selected(old('work_where', old('shift_hope', $profile['work_where'] ?? ($profile['shift_hope'] ?? ''))) === '週3回以上')>週3回以上</option>
-                </select>
-            </div>
-            <div class="field">
-                <label>勤務時間帯</label>
-                <div class="radio-like-row">
-                    <label class="radio-like">
-                        <input type="radio" name="work_time" value="morning" @checked($selectedWorkTime === 'morning')>
-                        <span class="dot"></span><span>朝〜昼</span>
-                    </label>
-                    <label class="radio-like">
-                        <input type="radio" name="work_time" value="day_night" @checked($selectedWorkTime === 'day_night')>
-                        <span class="dot"></span><span>夜</span>
-                    </label>
                 </div>
             </div>
             <div class="field">

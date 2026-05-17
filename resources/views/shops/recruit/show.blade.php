@@ -1352,7 +1352,7 @@
 
                 <div class="recruit-ref-inforow"><span class="k">店名</span><span class="v">{{ $shop['name'] ?? ($recruit['store_name'] ?? '—') }}</span></div>
                 <div class="recruit-ref-inforow"><span class="k">業種</span><span class="v">{{ $shop['industry_name'] ?? '未設定' }}</span></div>
-                <div class="recruit-ref-inforow"><span class="k">営業時間</span><span class="v">{{ $recruit['working_hours'] ?: '—' }}</span></div>
+                <div class="recruit-ref-inforow"><span class="k">営業時間</span><span class="v">{{ $shop['business_hours_shop'] ?? '' ?: '—' }}</span></div>
                 <div class="recruit-ref-inforow"><span class="k">定休日</span><span class="v">{{ $recruit['regular_holiday'] ?: '—' }}</span></div>
                 @if(!empty($recruit['store_atmosphere']))
                     <div class="recruit-ref-inforow"><span class="k">店舗の雰囲気</span><span class="v" style="white-space:pre-wrap;">{{ $recruit['store_atmosphere'] }}</span></div>

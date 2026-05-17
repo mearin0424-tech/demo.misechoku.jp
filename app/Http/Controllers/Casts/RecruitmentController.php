@@ -469,39 +469,27 @@ class RecruitmentController extends Controller
 
     private function resolveShopIndustryName(string $shopId, mixed $fallbackIndustryId = null): ?string
     {
+        // industry_label が登録されていれば最優先で採用
+        if (Schema::hasColumn('shop_profiles', 'industry_label')) {
+            $label = trim((string) DB::table('shop_profiles')
+                ->where('shop_id', $shopId)
+                ->value('industry_label'));
+            if ($label !== '') {
+                return $label;
+            }
+        }
+
         if (!Schema::hasTable('industries')) {
             return null;
         }
 
-        $names = [];
-        if (Schema::hasTable('shop_industry')) {
-            $names = DB::table('shop_industry')
-                ->join('industries', 'shop_industry.industry_id', '=', 'industries.id')
-                ->where('shop_industry.shop_id', $shopId)
-                ->orderBy('shop_industry.industry_id')
-                ->pluck('industries.name')
-                ->filter()
-                ->values()
-                ->all();
-        } elseif (Schema::hasTable('industry_shop')) {
-            $names = DB::table('industry_shop')
-                ->join('industries', 'industry_shop.industry_id', '=', 'industries.id')
-                ->where('industry_shop.shop_id', $shopId)
-                ->orderBy('industry_shop.industry_id')
-                ->pluck('industries.name')
-                ->filter()
-                ->values()
-                ->all();
-        } elseif (Schema::hasTable('shop_industries')) {
-            $names = DB::table('shop_industries')
-                ->join('industries', 'shop_industries.industry_id', '=', 'industries.id')
-                ->where('shop_industries.shop_id', $shopId)
-                ->orderBy('shop_industries.industry_id')
-                ->pluck('industries.name')
-                ->filter()
-                ->values()
-                ->all();
-        }
+        $names = DB::table('shop_profiles')
+            ->join('industries', 'shop_profiles.industry_id', '=', 'industries.id')
+            ->where('shop_profiles.shop_id', $shopId)
+            ->pluck('industries.name')
+            ->filter()
+            ->values()
+            ->all();
 
         if ($names === [] && $fallbackIndustryId !== null && $fallbackIndustryId !== '') {
             $name = DB::table('industries')
@@ -842,6 +830,12 @@ class RecruitmentController extends Controller
                 'addr1' => $this->streetAddressFromProfileRow($row),
                 'industry_name' => $industryName,
                 'nearest_station' => $this->resolveNearestStation($shopId, $row->station1 ?? null),
+                // 店舗プロフィールの営業時間（求人個別の working_hours は使わない）
+                'business_hours_shop' => \App\Support\ShopBusinessHours::formatDisplay(
+                    $row->open_time ?? null,
+                    isset($row->close_is_last) ? (int) $row->close_is_last : 0,
+                    $row->close_time ?? null
+                ),
                 'tag_groups' => $shopTagGroups,
             ],
         ];

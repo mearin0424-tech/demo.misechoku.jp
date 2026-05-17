@@ -43,8 +43,6 @@ class ProfileController extends Controller
                 'cast_profiles.bust',
                 'cast_profiles.waist',
                 'cast_profiles.hip',
-                'cast_profiles.work_time',
-                'cast_profiles.work_where',
                 'cast_profiles.profession',
                 'cast_profiles.exp',
                 Schema::hasColumn('cast_profiles', 'personality_type')
@@ -62,7 +60,6 @@ class ProfileController extends Controller
         $looksTags = $this->getCastTagNamesByType($castId, 'looks');
         $personalityTags = $this->getCastTagNamesByType($castId, 'personality');
         $industryNames = $this->resolveDesiredJobByIndustries($castId, $row->industry_id ?? null);
-        $workTime = $this->workTimeKeyFromShift($row->work_time);
 
         return [
             'nickname'       => $row->nickname ?? '',
@@ -85,9 +82,6 @@ class ProfileController extends Controller
             'desired_job'    => $industryNames, // backward compatible key
             'my_field'       => '',
             'my_inner_skills'=> '',
-            'work_where'     => (string) ($row->work_where ?? ''),
-            'shift_hope'     => (string) ($row->work_where ?? ''), // backward compatible key
-            'work_time'      => $this->workTimeKeyFromShift($row->work_time),
             'profession'     => $row->profession ?? '',
             'current_job'    => $row->profession ?? '', // backward compatible key
             'exp'            => $nightWorkExp,
@@ -122,9 +116,6 @@ class ProfileController extends Controller
             'desired_job'    => '',
             'my_field'       => '',
             'my_inner_skills'=> '',
-            'work_where'     => '',
-            'shift_hope'     => '',
-            'work_time'      => '',
             'profession'     => '',
             'current_job'    => '',
             'exp'            => 'none',
@@ -173,9 +164,6 @@ class ProfileController extends Controller
             'hip'          => 'nullable|string|max:10',
             'my_field'     => 'nullable|string|max:255',
             'my_inner_skills' => 'nullable|string|max:500',
-            'work_where'   => 'nullable|string|max:50',
-            'shift_hope'   => 'nullable|string|max:50', // backward compatible
-            'work_time'    => 'nullable|string|max:20',
             'profession'   => 'nullable|string',
             'current_job'  => 'nullable|string', // backward compatible
             'exp'          => 'nullable|string|max:20',
@@ -216,41 +204,52 @@ class ProfileController extends Controller
             ->unique()
             ->values()
             ->all();
-        $workWhere = $request->input('work_where', $request->input('shift_hope'));
         $profession = $request->input('profession', $request->input('current_job'));
         $exp = $request->input('exp', $request->input('night_work_exp'));
 
+        $castProfileData = [
+            'nickname' => $request->input('nickname'),
+            'name' => $request->input('name'),
+            'birthday' => $request->input('birth_date'),
+            'zip' => $this->normalizeZip($request->input('zip')),
+            'pref' => $request->input('pref'),
+            'city' => $request->input('city'),
+            'addr' => $request->input('addr1'),
+            'building' => null,
+            'pr' => $request->input('intro'),
+            'height' => $request->filled('height') ? (int) $request->input('height') : null,
+            'weight' => $request->filled('weight') ? (int) $request->input('weight') : null,
+            'bust' => $request->filled('bust') ? (int) $request->input('bust') : null,
+            'waist' => $request->filled('waist') ? (int) $request->input('waist') : null,
+            'hip' => $request->filled('hip') ? (int) $request->input('hip') : null,
+            'profession' => $profession,
+            'exp' => $exp === 'yes' ? 1 : 0,
+            'industry_id' => $industryIds[0] ?? null,
+            'updated_at' => now(),
+            'created_at' => now(),
+        ];
         DB::table('cast_profiles')->updateOrInsert(
             ['cast_id' => $castId],
-            [
-                'nickname' => $request->input('nickname'),
-                'name' => $request->input('name'),
-                'birthday' => $request->input('birth_date'),
-                'zip' => $this->normalizeZip($request->input('zip')),
-                'pref' => $request->input('pref'),
-                'city' => $request->input('city'),
-                'addr' => $request->input('addr1'),
-                'building' => null,
-                'pr' => $request->input('intro'),
-                'height' => $request->filled('height') ? (int) $request->input('height') : null,
-                'weight' => $request->filled('weight') ? (int) $request->input('weight') : null,
-                'bust' => $request->filled('bust') ? (int) $request->input('bust') : null,
-                'waist' => $request->filled('waist') ? (int) $request->input('waist') : null,
-                'hip' => $request->filled('hip') ? (int) $request->input('hip') : null,
-                'work_time' => $this->workTimeShiftCode($request->input('work_time')),
-                'work_where' => $workWhere,
-                'profession' => $profession,
-                'exp' => $exp === 'yes' ? 1 : 0,
-                'industry_id' => $industryIds[0] ?? null,
-                'updated_at' => now(),
-                'created_at' => now(),
-            ]
+            $castProfileData
         );
 
         // キャストタグ（ルックス・性格）を中間テーブル cast_tag_relations で同期
         $this->syncCastTags($castId, 'looks', $request->input('look_tag_ids', []));
         $this->syncCastTags($castId, 'personality', $request->input('personality_tag_ids', []));
-        $this->syncCastIndustries($castId, $industryIds);
+
+        // 希望業種は user_search_preferences (industry_ids JSON) に保存
+        $now = now();
+        DB::table('user_search_preferences')->upsert(
+            [[
+                'owner_type'   => 'cast',
+                'owner_id'     => $castId,
+                'industry_ids' => json_encode(array_values(array_map('intval', $industryIds))),
+                'created_at'   => $now,
+                'updated_at'   => $now,
+            ]],
+            ['owner_type', 'owner_id'],
+            ['industry_ids', 'updated_at']
+        );
 
         return redirect()->route('cast.mypage.index')
             ->with('message', 'プロフィールを更新しました')
@@ -375,41 +374,25 @@ class ProfileController extends Controller
 
     private function resolveIndustryLabelsByShopId(string $shopId): string
     {
+        // industry_label が登録されていれば最優先で採用
+        if (Schema::hasColumn('shop_profiles', 'industry_label')) {
+            $label = trim((string) DB::table('shop_profiles')
+                ->where('shop_id', $shopId)
+                ->value('industry_label'));
+            if ($label !== '') {
+                return $label;
+            }
+        }
+
         if (!Schema::hasTable('industries')) {
             return '';
         }
 
-        $names = [];
-        if (Schema::hasTable('shop_industry')) {
-            $names = DB::table('shop_industry')
-                ->join('industries', 'shop_industry.industry_id', '=', 'industries.id')
-                ->where('shop_industry.shop_id', $shopId)
-                ->orderBy('shop_industry.industry_id')
-                ->pluck('industries.name')
-                ->all();
-        } elseif (Schema::hasTable('industry_shop')) {
-            $names = DB::table('industry_shop')
-                ->join('industries', 'industry_shop.industry_id', '=', 'industries.id')
-                ->where('industry_shop.shop_id', $shopId)
-                ->orderBy('industry_shop.industry_id')
-                ->pluck('industries.name')
-                ->all();
-        } elseif (Schema::hasTable('shop_industries')) {
-            $names = DB::table('shop_industries')
-                ->join('industries', 'shop_industries.industry_id', '=', 'industries.id')
-                ->where('shop_industries.shop_id', $shopId)
-                ->orderBy('shop_industries.industry_id')
-                ->pluck('industries.name')
-                ->all();
-        } elseif (Schema::hasTable('shop_profiles') && Schema::hasColumn('shop_profiles', 'industry_id')) {
-            $industryId = DB::table('shop_profiles')->where('shop_id', $shopId)->value('industry_id');
-            if ($industryId) {
-                $name = DB::table('industries')->where('id', $industryId)->value('name');
-                if ($name) {
-                    $names = [$name];
-                }
-            }
-        }
+        $names = DB::table('shop_profiles')
+            ->join('industries', 'shop_profiles.industry_id', '=', 'industries.id')
+            ->where('shop_profiles.shop_id', $shopId)
+            ->pluck('industries.name')
+            ->all();
 
         $normalized = collect($names)
             ->map(fn ($name) => trim((string) $name))
@@ -443,8 +426,6 @@ class ProfileController extends Controller
                 'cast_profiles.bust',
                 'cast_profiles.waist',
                 'cast_profiles.hip',
-                'cast_profiles.work_time',
-                'cast_profiles.work_where',
                 'cast_profiles.profession',
                 'cast_profiles.exp',
                 'cast_profiles.pr',
@@ -463,7 +444,6 @@ class ProfileController extends Controller
         $looksTags = $this->getCastTagNamesByType($castId, 'looks');
         $personalityTags = $this->getCastTagNamesByType($castId, 'personality');
         $industryNames = $this->resolveDesiredJobByIndustries($castId);
-        $workTime = $this->workTimeKeyFromShift($row->work_time);
 
         $images = DB::table('cast_images')
             ->where('cast_id', $castId)
@@ -530,10 +510,6 @@ class ProfileController extends Controller
             'looks_tags' => $looksTags,
             'personality_tags' => $personalityTags,
             'personality_type' => $this->resolvePersonalityType($row->personality_type ?? null),
-            'work_where' => (string) ($row->work_where ?? ''),
-            'shift_hope' => (string) ($row->work_where ?? ''),
-            'work_time' => $workTime,
-            'work_time_label' => $this->workTimeLabel($workTime),
             'profession' => $row->profession ?? '',
             'current_job' => $row->profession ?? '',
             'exp' => $nightWorkExp,
@@ -614,13 +590,9 @@ class ProfileController extends Controller
             'desired_job' => '',
             'my_field' => '',
             'my_inner_skills' => '',
-            'work_where' => '',
             'looks_tags' => [],
             'personality_tags' => [],
             'personality_type' => '',
-            'shift_hope' => '',
-            'work_time' => '',
-            'work_time_label' => '',
             'profession' => '',
             'current_job' => '',
             'exp' => 'none',
@@ -710,33 +682,6 @@ class ProfileController extends Controller
         };
     }
 
-    private function workTimeLabel(string $workTime): string
-    {
-        return match ($workTime) {
-            'morning' => '朝〜昼',
-            'day_night' => '夜',
-            default => '',
-        };
-    }
-
-    private function workTimeShiftCode(?string $workTime): ?int
-    {
-        return match ($workTime) {
-            'morning' => 1,
-            'day_night' => 2,
-            default => null,
-        };
-    }
-
-    private function workTimeKeyFromShift($shift): string
-    {
-        return match ((int) ($shift ?? 0)) {
-            1 => 'morning',
-            2 => 'day_night',
-            default => '',
-        };
-    }
-
     private function normalizeZip(?string $zip): ?string
     {
         if ($zip === null) {
@@ -759,12 +704,16 @@ class ProfileController extends Controller
     private function resolveDesiredJobByIndustries(string $castId, $fallbackIndustryId = null): string
     {
         $names = [];
-        if (Schema::hasTable('cast_industry')) {
-            $names = DB::table('cast_industry')
-                ->join('industries', 'cast_industry.industry_id', '=', 'industries.id')
-                ->where('cast_industry.cast_id', $castId)
-                ->orderBy('cast_industry.industry_id')
-                ->pluck('industries.name')
+        $row = DB::table('user_search_preferences')
+            ->where('owner_type', 'cast')
+            ->where('owner_id', $castId)
+            ->value('industry_ids');
+        $ids = $row ? (json_decode($row, true) ?: []) : [];
+        if (!empty($ids)) {
+            $names = DB::table('industries')
+                ->whereIn('id', $ids)
+                ->orderBy('id')
+                ->pluck('name')
                 ->map(fn ($name) => trim((string) $name))
                 ->filter()
                 ->values()
@@ -843,39 +792,17 @@ class ProfileController extends Controller
      */
     private function resolveCastIndustryIds(string $castId, $fallbackIndustryId = null): array
     {
-        if (Schema::hasTable('cast_industry')) {
-            $ids = DB::table('cast_industry')
-                ->where('cast_id', $castId)
-                ->orderBy('industry_id')
-                ->pluck('industry_id')
-                ->map(fn ($id) => (int) $id)
-                ->filter()
-                ->values()
-                ->all();
-            if ($ids !== []) {
-                return $ids;
-            }
+        $row = DB::table('user_search_preferences')
+            ->where('owner_type', 'cast')
+            ->where('owner_id', $castId)
+            ->value('industry_ids');
+        $ids = $row ? (json_decode($row, true) ?: []) : [];
+        $ids = array_values(array_filter(array_map('intval', is_array($ids) ? $ids : [])));
+        if ($ids !== []) {
+            return $ids;
         }
 
         $single = (int) ($fallbackIndustryId ?? 0);
         return $single > 0 ? [$single] : [];
-    }
-
-    /**
-     * @param array<int, int> $industryIds
-     */
-    private function syncCastIndustries(string $castId, array $industryIds): void
-    {
-        if (!Schema::hasTable('cast_industry')) {
-            return;
-        }
-
-        DB::table('cast_industry')->where('cast_id', $castId)->delete();
-        foreach ($industryIds as $industryId) {
-            DB::table('cast_industry')->insert([
-                'cast_id' => $castId,
-                'industry_id' => (int) $industryId,
-            ]);
-        }
     }
 }

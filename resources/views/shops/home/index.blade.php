@@ -134,12 +134,18 @@
 
                             <h2 class="rc-shop-name serif-font">{{ $item['name'] }}</h2>
 
+                            @php
+                                $stationLine = trim((string) ($item['nearest_station'] ?? ''));
+                                $areaLine = trim(($item['pref'] ?? '') . ' ' . ($item['city'] ?? ''));
+                                $locLine = $stationLine !== '' ? $stationLine : ($areaLine !== '' ? $areaLine : '六本木');
+                                $locIcon = $stationLine !== '' ? 'fa-train' : 'fa-map-marker-alt';
+                            @endphp
                             <div class="rc-meta">
                                 @if(!empty($item['industry_name']))
                                 <span class="rc-genre">{{ $item['industry_name'] }}</span>
                                 @endif
-                                <i class="fas fa-map-marker-alt rc-mappin" aria-hidden="true"></i>
-                                <span>{{ trim(($item['pref'] ?? '') . ' ' . ($item['city'] ?? '')) ?: '六本木' }}</span>
+                                <i class="fas {{ $locIcon }} rc-mappin" aria-hidden="true"></i>
+                                <span>{{ $locLine }}</span>
                                 @if(!empty($item['distance_label']))
                                     <span class="distance-badge" style="margin-left:6px;">
                                         <i class="fas fa-route"></i> {{ $item['distance_label'] }}
@@ -255,8 +261,14 @@
                 {{-- プロフィール情報 --}}
                 <div class="card-bottom-info">
                     <h2 class="cast-name serif-font">{{ $item['name'] }}@if(!$isShop && isset($item['age'])) <span class="age">{{ $item['age'] }}</span>@endif</h2>
+                    @php
+                        $bottomStation = trim((string) ($item['nearest_station'] ?? ''));
+                        $bottomArea = trim(($item['pref'] ?? '') . ' ' . ($item['city'] ?? ''));
+                        $bottomLoc = $bottomStation !== '' ? $bottomStation : ($bottomArea !== '' ? $bottomArea : '六本木');
+                        $bottomIcon = $bottomStation !== '' ? 'fa-train' : 'fa-map-marker-alt';
+                    @endphp
                     <div class="card-location">
-                        <i class="fas fa-map-marker-alt"></i> 六本木
+                        <i class="fas {{ $bottomIcon }}"></i> {{ $bottomLoc }}
                         @if(!empty($item['distance_label']))
                             <span class="distance-badge" style="margin-left:6px;">
                                 <i class="fas fa-route"></i> {{ $item['distance_label'] }}

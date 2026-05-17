@@ -823,8 +823,6 @@ class MypageController extends Controller
                 'cast_profiles.bust',
                 'cast_profiles.waist',
                 'cast_profiles.hip',
-                'cast_profiles.work_time',
-                'cast_profiles.work_where',
                 'cast_profiles.profession',
                 'cast_profiles.exp',
                 'cast_profiles.pr',
@@ -842,8 +840,6 @@ class MypageController extends Controller
 
         $birthday = $castRow->birthday ? Carbon::parse($castRow->birthday) : null;
         $age = $birthday ? $birthday->age : null;
-        $workWhere = (string) ($castRow->work_where ?? '');
-        $workTime = $this->workTimeKeyFromShift($castRow->work_time);
         $nightWorkExp = ((int) ($castRow->exp ?? 0) === 1 ? 'yes' : 'none');
         $looksTags = $this->getCastTagNamesByType($castId, 'looks');
         $personalityTags = $this->getCastTagNamesByType($castId, 'personality');
@@ -968,18 +964,11 @@ class MypageController extends Controller
                 'desired_job' => $industryNames,
                 'my_field' => $looksSummary,
                 'my_inner_skills' => $personalitySummary,
-                'work_where' => $workWhere,
-                'shift_hope' => $workWhere,
-                'work_time' => $workTime,
                 'exp' => $nightWorkExp,
                 'night_work_exp' => $nightWorkExp,
                 'profession' => $castRow->profession ?? '',
                 'current_job' => $castRow->profession ?? '',
             ],
-            'work_where'       => $workWhere,
-            'shift_hope'       => $workWhere,
-            'work_time'        => $workTime,
-            'work_time_label'  => $this->workTimeLabel($workTime),
             'profession'       => $castRow->profession ?? '',
             'current_job'      => $castRow->profession ?? '',
             'exp'              => $nightWorkExp,
@@ -1057,18 +1046,11 @@ class MypageController extends Controller
                 'desired_job' => '',
                 'my_field' => '',
                 'my_inner_skills' => '',
-                'work_where' => '',
-                'shift_hope' => '',
-                'work_time' => '',
                 'exp' => '',
                 'night_work_exp' => '',
                 'profession' => '',
                 'current_job' => '',
             ],
-            'work_where'       => '',
-            'shift_hope'       => '',
-            'work_time'        => '',
-            'work_time_label'  => '',
             'profession'       => '',
             'current_job'      => '',
             'exp'              => '',
@@ -1211,33 +1193,19 @@ class MypageController extends Controller
         };
     }
 
-    private function workTimeLabel(string $workTime): string
-    {
-        return match ($workTime) {
-            'morning' => '朝〜昼',
-            'day_night' => '夜',
-            default => '',
-        };
-    }
-
-    private function workTimeKeyFromShift($shift): string
-    {
-        return match ((int) ($shift ?? 0)) {
-            1 => 'morning',
-            2 => 'day_night',
-            default => '',
-        };
-    }
-
     private function resolveDesiredJobByIndustries(string $castId, $fallbackIndustryId = null): string
     {
         $names = [];
-        if (Schema::hasTable('cast_industry')) {
-            $names = DB::table('cast_industry')
-                ->join('industries', 'cast_industry.industry_id', '=', 'industries.id')
-                ->where('cast_industry.cast_id', $castId)
-                ->orderBy('cast_industry.industry_id')
-                ->pluck('industries.name')
+        $row = DB::table('user_search_preferences')
+            ->where('owner_type', 'cast')
+            ->where('owner_id', $castId)
+            ->value('industry_ids');
+        $ids = $row ? (json_decode($row, true) ?: []) : [];
+        if (!empty($ids)) {
+            $names = DB::table('industries')
+                ->whereIn('id', $ids)
+                ->orderBy('id')
+                ->pluck('name')
                 ->map(fn ($name) => trim((string) $name))
                 ->filter()
                 ->values()

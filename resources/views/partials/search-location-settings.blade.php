@@ -129,7 +129,7 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
                     </span>
                     <span class="search-location-card__expand" data-mode-section="passport">
                         <span class="search-location-passport-row">
-                            <span class="search-location-input-wrap">
+                            <span class="search-location-input-wrap search-location-suggest-wrap" id="search-location-suggest-wrap">
                                 <i class="fas fa-search"></i>
                                 <input id="search-location-passport-address"
                                        type="text"
@@ -138,7 +138,12 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
                                        maxlength="255"
                                        placeholder="例: 渋谷駅, 新宿区..."
                                        value="{{ $currentPassportAddress }}"
-                                       autocomplete="off">
+                                       autocomplete="off"
+                                       role="combobox"
+                                       aria-autocomplete="list"
+                                       aria-controls="search-location-suggest-list"
+                                       aria-expanded="false">
+                                <ul class="search-location-suggest-list" id="search-location-suggest-list" role="listbox" hidden></ul>
                             </span>
                             <button type="button" class="search-location-lookup-btn" id="search-location-lookup-btn">
                                 <i class="fas fa-magnifying-glass-location" data-lookup-icon></i>
@@ -464,6 +469,49 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
     font-size: 0.88rem;
 }
 .search-location-input::placeholder { color: rgba(255, 255, 255, 0.35); }
+
+/* ===== 住所サジェスト ===== */
+.search-location-suggest-wrap { position: relative; }
+.search-location-suggest-list {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 20;
+    margin: 0;
+    padding: 4px;
+    list-style: none;
+    max-height: 220px;
+    overflow-y: auto;
+    background: var(--color-card-strong, #1a1a1a);
+    border: 1px solid var(--color-border-strong, rgba(197,160,89,0.4));
+    border-radius: 10px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
+}
+.search-location-suggest-list[hidden] { display: none; }
+.search-location-suggest-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    color: var(--color-text, #d8c9a8);
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+.search-location-suggest-item:hover,
+.search-location-suggest-item.is-active {
+    background: rgba(197, 160, 89, 0.12);
+    color: var(--color-text-header, #f4e7c2);
+}
+.search-location-suggest-item i { color: var(--gold, #c5a059); font-size: 0.78rem; }
+.search-location-suggest-empty {
+    padding: 10px;
+    font-size: 0.78rem;
+    color: var(--color-text-muted, rgba(216,201,168,0.65));
+    text-align: center;
+}
 .search-location-input:focus {
     outline: none;
     border-color: #E8C372;
@@ -761,6 +809,96 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
         });
     }
 
+    // ----- パスポート: 入力に応じて候補をサジェスト -----
+    var suggestListEl = document.getElementById('search-location-suggest-list');
+    var suggestUrl = @json(route('api.geocoding.suggest'));
+    var suggestSeq = 0;
+    var suggestDebounceTimer = null;
+
+    function escapeHtml(s) {
+        return String(s).replace(/[<>&"]/g, function (c) {
+            return ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' })[c];
+        });
+    }
+    function closeSuggest() {
+        if (!suggestListEl) return;
+        suggestListEl.hidden = true;
+        suggestListEl.innerHTML = '';
+        if (passportInput) passportInput.setAttribute('aria-expanded', 'false');
+    }
+    function renderSuggest(candidates) {
+        if (!suggestListEl) return;
+        suggestListEl.innerHTML = '';
+        if (!candidates || candidates.length === 0) {
+            var empty = document.createElement('li');
+            empty.className = 'search-location-suggest-empty';
+            empty.textContent = '候補が見つかりません';
+            suggestListEl.appendChild(empty);
+        } else {
+            candidates.forEach(function (c) {
+                var li = document.createElement('li');
+                li.className = 'search-location-suggest-item';
+                li.setAttribute('role', 'option');
+                li.setAttribute('data-lat', String(c.latitude));
+                li.setAttribute('data-lng', String(c.longitude));
+                li.setAttribute('data-label', c.label);
+                li.innerHTML = '<i class="fas fa-map-marker-alt"></i><span>' + escapeHtml(c.label) + '</span>';
+                suggestListEl.appendChild(li);
+            });
+        }
+        suggestListEl.hidden = false;
+        if (passportInput) passportInput.setAttribute('aria-expanded', 'true');
+    }
+    function fetchSuggest(q) {
+        if (!suggestUrl) return;
+        var seq = ++suggestSeq;
+        var url = suggestUrl + (suggestUrl.indexOf('?') >= 0 ? '&' : '?') + 'q=' + encodeURIComponent(q);
+        fetch(url, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (json) {
+            if (seq !== suggestSeq) return; // 最後の入力結果のみ採用
+            if (!json) { closeSuggest(); return; }
+            renderSuggest(json.candidates || []);
+        })
+        .catch(function () { closeSuggest(); });
+    }
+    if (passportInput && suggestListEl) {
+        passportInput.addEventListener('input', function () {
+            var q = (passportInput.value || '').trim();
+            clearTimeout(suggestDebounceTimer);
+            if (q.length < 2) { closeSuggest(); return; }
+            suggestDebounceTimer = setTimeout(function () { fetchSuggest(q); }, 220);
+        });
+        passportInput.addEventListener('focus', function () {
+            var q = (passportInput.value || '').trim();
+            if (q.length >= 2) fetchSuggest(q);
+        });
+        passportInput.addEventListener('blur', function () {
+            // クリックを拾うため少し遅延
+            setTimeout(closeSuggest, 150);
+        });
+        // 候補クリックで入力欄＋緯度経度を確定
+        suggestListEl.addEventListener('mousedown', function (e) {
+            var li = e.target.closest && e.target.closest('.search-location-suggest-item');
+            if (!li) return;
+            e.preventDefault();
+            var label = li.getAttribute('data-label') || '';
+            var lat = li.getAttribute('data-lat') || '';
+            var lng = li.getAttribute('data-lng') || '';
+            passportInput.value = label;
+            if (passportLatEl) passportLatEl.value = lat;
+            if (passportLngEl) passportLngEl.value = lng;
+            setPassportStatus('resolved',
+                '<i class="fas fa-circle-check"></i><span>解決済み: <strong>' + escapeHtml(label) +
+                '</strong>（' + parseFloat(lat).toFixed(4) + ', ' + parseFloat(lng).toFixed(4) + '）</span>'
+            );
+            closeSuggest();
+        });
+    }
+
     // 現在地取得
     function setCurrentLoading(isLoading) {
         if (!currentBtn) return;
@@ -790,6 +928,35 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
                 feedback.textContent = '位置情報の取得に失敗しました。ブラウザの権限を確認してください。';
             }, { enableHighAccuracy: true, maximumAge: 60000, timeout: 8000 });
         });
+    }
+
+    // 保存後にトリガーボタンの文言（mode／指定地名／半径）を更新するヘルパー
+    var triggerSubEl = trigger.querySelector('.search-location-trigger__sub');
+    function formatTriggerSub(settings) {
+        if (!settings) return '未設定';
+        var parts = [];
+        var mode = settings.mode || '';
+        if (mode === 'profile') parts.push('登録住所を基準');
+        else if (mode === 'passport') parts.push('指定地：' + (settings.passport_label || settings.passport_address || '未設定'));
+        else if (mode === 'current') parts.push('現在地を基準');
+        else parts.push('未設定');
+        var km = parseInt(settings.max_distance_km || 0, 10);
+        if (km > 0) {
+            var label = '';
+            sliderMarks.forEach(function (m) { if (m.value === km) label = m.label; });
+            if (!label) {
+                // 直近の目盛にスナップ
+                var best = sliderMarks[0]; var bestDelta = Math.abs(best.value - km);
+                sliderMarks.forEach(function (m) {
+                    var d = Math.abs(m.value - km);
+                    if (d < bestDelta) { best = m; bestDelta = d; }
+                });
+                if (km >= 40) best = sliderMarks[sliderMarks.length - 1];
+                label = best.label;
+            }
+            parts.push(label);
+        }
+        return parts.join(' ／ ');
     }
 
     // 保存
@@ -835,6 +1002,10 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
                 feedback.hidden = false;
                 feedback.className = 'search-location-feedback is-success';
                 feedback.textContent = '位置情報の絞り込み設定を保存しました。';
+                // トリガーボタン表示を即時反映（ページリロード不要）
+                if (triggerSubEl) {
+                    triggerSubEl.textContent = formatTriggerSub(res.body.settings || null);
+                }
                 setTimeout(closeDialog, 800);
             } else {
                 feedback.hidden = false;
