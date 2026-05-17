@@ -29,11 +29,12 @@ class SearchController extends BaseSearchController
         $items = $this->buildSearchItems($request, $sort);
 
         return $this->renderIndex([
-            'items'             => $items,
-            'sort'              => $sort,
-            'sortOptions'       => self::SORT_OPTIONS,
-            'savedPreferences'  => app(\App\Services\ShopSearchPreferenceService::class)->loadAll(),
-            'castTagsByCategory' => $this->loadCastTagsByCategory(),
+            'items'                  => $items,
+            'sort'                   => $sort,
+            'sortOptions'            => self::SORT_OPTIONS,
+            'savedPreferences'       => app(\App\Services\ShopSearchPreferenceService::class)->loadAll(),
+            'castTagsByCategory'     => $this->loadCastTagsByCategory(),
+            'searchLocationSettings' => app(UserLocationService::class)->loadProfileSettings(),
         ]);
     }
 
@@ -127,14 +128,43 @@ class SearchController extends BaseSearchController
                 ->distinct();
         }
 
-        // 距離フィルタ：MyPage の永続設定を優先、URL クエリ指定があればそれで上書き
+        // 距離フィルタ：新クエリ（location_mode）が優先、無ければ MyPage 永続設定
         $userLocation = app(UserLocationService::class);
-        $origin = $userLocation->getActiveLocation();
+        $persistedOrigin = $userLocation->getActiveLocation();
         $persistedMaxKm = (int) ($userLocation->getEffectiveMaxDistanceKm() ?? 0);
-        $queryMaxKm = (int) $request->query('distance_km', 0);
-        $hasQueryFilter = $queryMaxKm > 0
+
+        $locationMode = (string) $request->query('location_mode', '');
+        if (!in_array($locationMode, ['profile', 'passport', 'current'], true)) {
+            $locationMode = '';
+        }
+        $queryDistanceKm = (int) $request->query('distance_km', 0);
+
+        $origin = $persistedOrigin;
+        if ($locationMode === 'profile') {
+            $settings = $userLocation->loadProfileSettings();
+            $profileLoc = $settings['profile_location'] ?? null;
+            $origin = (is_array($profileLoc) && isset($profileLoc['lat'], $profileLoc['lng']))
+                ? ['lat' => (float) $profileLoc['lat'], 'lng' => (float) $profileLoc['lng']]
+                : null;
+        } elseif ($locationMode === 'passport') {
+            $pLat = $request->query('passport_lat');
+            $pLng = $request->query('passport_lng');
+            $origin = (is_numeric($pLat) && is_numeric($pLng))
+                ? ['lat' => (float) $pLat, 'lng' => (float) $pLng]
+                : null;
+        } elseif ($locationMode === 'current') {
+            $cLat = $request->query('current_lat');
+            $cLng = $request->query('current_lng');
+            $origin = (is_numeric($cLat) && is_numeric($cLng))
+                ? ['lat' => (float) $cLat, 'lng' => (float) $cLng]
+                : null;
+        }
+
+        $legacyHasFilter = $queryDistanceKm > 0
             && in_array((string) $request->query('location_type'), ['current', 'geo'], true);
-        $distanceKmLimit = $hasQueryFilter ? $queryMaxKm : $persistedMaxKm;
+        $distanceKmLimit = ($locationMode !== '' && $queryDistanceKm > 0)
+            ? $queryDistanceKm
+            : ($legacyHasFilter ? $queryDistanceKm : $persistedMaxKm);
         $useDistance = $origin && $distanceKmLimit > 0;
 
         return $rows->get()

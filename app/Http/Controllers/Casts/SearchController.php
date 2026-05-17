@@ -42,14 +42,15 @@ class SearchController extends BaseSearchController
         $personalityType = $this->currentCastPersonalityType();
 
         return $this->renderIndex([
-            'items'               => $items,
-            'personalityType'     => $personalityType,
-            'activeTab'           => $activeTab,
-            'searchTab'           => $tab,
-            'sort'                => $sort,
-            'sortOptions'         => self::SORT_OPTIONS,
-            'detailSearchOptions' => $this->buildDetailSearchOptions(),
-            'savedPreferences'    => app(\App\Services\CastSearchPreferenceService::class)->loadAll(),
+            'items'                  => $items,
+            'personalityType'        => $personalityType,
+            'activeTab'              => $activeTab,
+            'searchTab'              => $tab,
+            'sort'                   => $sort,
+            'sortOptions'            => self::SORT_OPTIONS,
+            'detailSearchOptions'    => $this->buildDetailSearchOptions(),
+            'savedPreferences'       => app(\App\Services\CastSearchPreferenceService::class)->loadAll(),
+            'searchLocationSettings' => app(UserLocationService::class)->loadProfileSettings(),
         ]);
     }
 
@@ -209,14 +210,47 @@ class SearchController extends BaseSearchController
 
         $items = $this->enrichCastSearchShopCards($items);
 
-        // 距離計算＋距離フィルタ（MyPage に保存された永続設定を優先。クエリパラメータ指定があればそれで上書き）
+        // 距離計算＋距離フィルタ。
+        // 新クエリ（location_mode/passport_*/current_*）が指定されていればそれを最優先。
+        // それ以外は MyPage 永続設定にフォールバック。
         $userLocation = app(UserLocationService::class);
-        $origin = $userLocation->getActiveLocation();
+        $persistedOrigin = $userLocation->getActiveLocation();
         $persistedMaxKm = (int) ($userLocation->getEffectiveMaxDistanceKm() ?? 0);
-        $queryMaxKm = (int) $request->query('distance_km', 0);
-        $hasQueryFilter = $queryMaxKm > 0
+
+        $locationMode = (string) $request->query('location_mode', '');
+        if (!in_array($locationMode, ['profile', 'passport', 'current'], true)) {
+            $locationMode = '';
+        }
+        $queryDistanceKm = (int) $request->query('distance_km', 0);
+
+        $origin = $persistedOrigin;
+        if ($locationMode === 'profile') {
+            // プロフィール住所を基準にする：永続設定の profile_location をそのまま採用
+            $settings = $userLocation->loadProfileSettings();
+            $profileLoc = $settings['profile_location'] ?? null;
+            $origin = (is_array($profileLoc) && isset($profileLoc['lat'], $profileLoc['lng']))
+                ? ['lat' => (float) $profileLoc['lat'], 'lng' => (float) $profileLoc['lng']]
+                : null;
+        } elseif ($locationMode === 'passport') {
+            $pLat = $request->query('passport_lat');
+            $pLng = $request->query('passport_lng');
+            $origin = (is_numeric($pLat) && is_numeric($pLng))
+                ? ['lat' => (float) $pLat, 'lng' => (float) $pLng]
+                : null;
+        } elseif ($locationMode === 'current') {
+            $cLat = $request->query('current_lat');
+            $cLng = $request->query('current_lng');
+            $origin = (is_numeric($cLat) && is_numeric($cLng))
+                ? ['lat' => (float) $cLat, 'lng' => (float) $cLng]
+                : null;
+        }
+
+        // 後方互換：旧 location_type=current/geo + distance_km(5/10/...) 形式も受け付ける
+        $legacyHasFilter = $queryDistanceKm > 0
             && in_array((string) $request->query('location_type'), ['current', 'geo'], true);
-        $effectiveMaxKm = $hasQueryFilter ? $queryMaxKm : $persistedMaxKm;
+        $effectiveMaxKm = ($locationMode !== '' && $queryDistanceKm > 0)
+            ? $queryDistanceKm
+            : ($legacyHasFilter ? $queryDistanceKm : $persistedMaxKm);
 
         foreach ($items as &$item) {
             $km = $origin
