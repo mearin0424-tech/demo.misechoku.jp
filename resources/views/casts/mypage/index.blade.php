@@ -65,7 +65,7 @@
         <div class="flex items-center justify-between gap-3 mb-5">
             <h1 class="app-title text-[24px] text-text-main leading-tight truncate min-w-0">{{ $displayName }}</h1>
             <div class="flex items-center gap-1.5 shrink-0">
-                <x-ui.icon name="like" class="text-[18px] text-accent-text" />
+                <x-ui.icon name="like" class="text-[18px] text-discovery-pink" />
                 <span class="font-bold text-[14px] text-text-main">{{ $likeCount }}</span>
             </div>
         </div>
@@ -77,7 +77,8 @@
             <x-ui.menu-card icon="settings"
                             sub="EMPLOYMENT & PAYMENT"
                             title="採用・入金管理"
-                            href="{{ route('cast.mypage.management') }}" />
+                            href="{{ route('cast.mypage.management') }}"
+                            class="mypage-menu-card" />
         </div>
     </div>
 
@@ -201,11 +202,13 @@
                 <x-ui.menu-card icon="check"
                                 sub="IDENTITY"
                                 title="本人確認"
-                                href="{{ route('cast.mypage.identity') }}" />
+                                href="{{ route('cast.mypage.identity') }}"
+                                class="mypage-menu-card" />
                 <x-ui.menu-card icon="mypage"
                                 sub="PROFILE"
                                 title="プロフィールを編集"
-                                href="{{ route('cast.profile.edit') }}" />
+                                href="{{ route('cast.profile.edit') }}"
+                                class="mypage-menu-card" />
 
             </div>
         </div>
@@ -430,6 +433,20 @@ window.MYPAGE_GALLERY_CONFIG = {
         padding: 2px 6px;
         border-radius: 4px;
         line-height: 1;
+    }
+
+    /* menu-card の右端「＞」を紫アクセントの矢印だけにする（丸枠を撤去） */
+    .mypage-menu-card > span:last-child {
+        width: auto !important;
+        height: auto !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        color: var(--color-accent-text) !important;
+        opacity: 1 !important;
+    }
+    .mypage-menu-card > span:last-child > i {
+        font-size: 1.3rem !important;
+        color: var(--color-accent-text) !important;
     }
 </style>
 @endpush

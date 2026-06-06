@@ -9,7 +9,7 @@
         <a href="{{ $isCast ? route('cast.home') : route('shop.home') }}">
             <img src="{{ asset('assets/images/common/logo-yoko.png') }}" alt="ミセチョク" class="sidebar-logo">
         </a>
-        <button class="btn-sidebar-close" onclick="document.getElementById('side-menu').classList.remove('open'); document.getElementById('menu-overlay').classList.remove('show');">
+        <button class="btn-sidebar-close" onclick="document.getElementById('side-menu').classList.remove('open'); document.getElementById('menu-overlay').classList.remove('show'); document.body.style.overflow = '';">
             <i class="fas fa-times"></i>
         </button>
     </div>

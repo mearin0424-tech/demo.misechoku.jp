@@ -101,11 +101,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    {{-- layout-sidebar.css が依存する CSS 変数（旧 app.css 由来）の最小フォールバック --}}
+    {{-- layout-sidebar.css が依存する CSS 変数（旧 app.css 由来）の最小フォールバック。
+         サイドメニューはビューポート右端から出すため --max-content-width を 100vw にして
+         layout-sidebar.css の `right: max(0px, calc(50vw - var(--max-content-width)/2))` を 0 に解決させる。 --}}
     <style>
         :root {
-            --max-content-width: 430px;
+            --max-content-width: 100vw;
             --footer-height: 75px;
+            --header-height: 60px;
             --color-border-strong: rgba(197, 160, 89, 0.4);
         }
     </style>
@@ -115,6 +118,43 @@
 
     {{-- ヘッダーのポップアップ（通知 / タスク）専用CSS：app.js が #btn-header-* で togglePopup する --}}
     <link rel="stylesheet" href="{{ asset('assets/css/layout-header.css') }}">
+
+    {{-- 通知 / やることリスト ポップアップを mypage のカード調に上書き（不透明 + アクセント枠 + 3Dシャドウ） --}}
+    <style>
+        #header-task-popup,
+        #header-notification-popup {
+            background: linear-gradient(to bottom right, var(--color-surface-from), var(--color-base)) !important;
+            border: 1px solid rgba(168, 85, 247, 0.4) !important;
+            box-shadow: var(--shadow-card-3d) !important;
+            border-radius: var(--radius-card) !important;
+            opacity: 1 !important;
+        }
+        .task-popup-header {
+            background: rgba(168, 85, 247, 0.12) !important;
+            border-bottom: 1px solid rgba(168, 85, 247, 0.30) !important;
+        }
+        .task-popup-header h4 {
+            color: var(--color-accent-text) !important;
+            font-family: var(--font-display) !important;
+            letter-spacing: 0.10em !important;
+        }
+        .notif-popup-section-label {
+            background: rgba(168, 85, 247, 0.08) !important;
+            color: var(--color-accent-text) !important;
+            border-bottom-color: rgba(168, 85, 247, 0.20) !important;
+        }
+        .notif-popup-item {
+            border-bottom-color: rgba(168, 85, 247, 0.20) !important;
+            color: var(--color-text-main) !important;
+        }
+        a.notif-popup-item:hover {
+            background: rgba(168, 85, 247, 0.10) !important;
+        }
+        .notif-popup-empty {
+            color: var(--color-text-sub) !important;
+            border-bottom-color: rgba(168, 85, 247, 0.20) !important;
+        }
+    </style>
 
     {{-- キャラクターガイド（オコジョ）専用CSS --}}
     <link rel="stylesheet" href="{{ asset('assets/css/character-guide.css') }}?v={{ $assetVersion }}">
@@ -136,50 +176,9 @@
 
     <div id="app">
 
-        {{-- ============================================================
-             新ヘッダー：常時グラス表示（最上部スクロール位置でも見える）
-             3つのボタン id は旧と同じものを維持（既存JSがそのまま使える）
-             ============================================================ --}}
-        <header class="fixed top-0 left-0 w-full z-40 pt-safe bg-deep-purple/30 backdrop-blur-md border-b border-line-accent/40 shadow-header">
-            <div class="flex justify-between items-center gap-2 px-3 py-2 max-w-[430px] mx-auto">
-                {{-- 左：戻る（条件付き） --}}
-                <div class="w-10 h-10 flex items-center justify-center shrink-0">
-                    @if($showBackButton)
-                        <a href="javascript:history.back()"
-                           class="w-10 h-10 rounded-full flex items-center justify-center bg-black/50 backdrop-blur-md text-white border border-white/20 shadow-md">
-                            <x-ui.icon name="back" class="text-xl" />
-                        </a>
-                    @endif
-                </div>
-
-                {{-- 中央：タイトル（常時表示。app-title=Montserrat） --}}
-                <div class="app-title font-bold tracking-widest text-[13px] text-white text-center flex-1 truncate">
-                    {{ $displayTitle }}
-                </div>
-
-                {{-- 右：タスク / 通知 / ハンバーガー（id は旧 layouts.parts.header と同一） --}}
-                <div class="flex items-center gap-1 shrink-0">
-                    <button id="btn-header-task" type="button"
-                            class="relative w-10 h-10 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-md text-white border border-white/10">
-                        <x-ui.icon name="task" class="text-lg" />
-                        @if(isset($todoList) && count($todoList) > 0)
-                            <span class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full bg-accent text-on-accent text-[9px] font-bold shadow-badge-3d">{{ count($todoList) }}</span>
-                        @endif
-                    </button>
-                    <button id="btn-header-notification" type="button"
-                            class="relative w-10 h-10 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-md text-white border border-white/10">
-                        <x-ui.icon name="bell" class="text-lg" />
-                        @if(isset($unreadNewsCount) && $unreadNewsCount > 0)
-                            <span class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full bg-accent text-on-accent text-[9px] font-bold shadow-badge-3d">{{ $unreadNewsCount }}</span>
-                        @endif
-                    </button>
-                    <button id="btn-header-menu" type="button"
-                            class="w-10 h-10 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-md text-white border border-white/10">
-                        <x-ui.icon name="list" class="text-xl" />
-                    </button>
-                </div>
-            </div>
-        </header>
+        {{-- ヘッダー：旧画面とサイズ・フォント・配色を完全に揃えるため、
+             layouts/parts/header を流用する（layout-header.css と Font Awesome に依存）。 --}}
+        @include('layouts.parts.header', ['headerTitle' => $pageTitle])
 
         {{-- オコジョガイド：表示／文言は運営管理画面で設定 --}}
         @include('layouts.parts.character-guide')
