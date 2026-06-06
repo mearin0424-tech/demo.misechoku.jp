@@ -15,54 +15,74 @@
     $addressText = trim((string) ($cast['pref'] ?? '') . (string) ($cast['city'] ?? '') . (string) ($cast['addr1'] ?? ''));
     $addressText = $addressText !== '' ? $addressText : '--';
     $zipText     = !empty($cast['zip']) ? ('〒' . $cast['zip']) : '';
-    $heroImage   = ($subImages[0]['url'] ?? null) ?: ($cast['img'] ?? asset('assets/images/common/no-image.png'));
     $iconImage   = ($cast['img'] ?? null) ?: ($subImages[0]['url'] ?? asset('assets/images/common/no-image.png'));
     $bonusTotal  = number_format((int) ($cast['bonus_total'] ?? 0));
     $likeCount   = number_format((int) ($cast['like_cnt'] ?? 0));
     $photoCount  = count($subImages);
     $word        = trim((string) ($cast['word'] ?? ''));
+    $wordPlaceholder = '今、何してる？（タイムラインに公開されます）';
 @endphp
 
 @section('content')
-<div class="pb-24">
+<div class="pt-14 pb-24">
 
-    {{-- Hero image --}}
-    <div class="relative w-full h-[220px] overflow-hidden">
-        <img src="{{ $heroImage }}" alt="" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-base opacity-90"></div>
-    </div>
+    <div class="px-5 pt-4 pb-6">
 
-    {{-- Profile head --}}
-    <div class="relative px-5 pt-2 pb-6">
-        <div class="flex items-end justify-between -mt-12 mb-4 relative z-10">
-            <div class="w-[88px] h-[88px] rounded-full border-[3px] border-base overflow-hidden shadow-card-3d bg-surface-from">
+        {{-- ===== アイコン + ひとこと吹き出し ===== --}}
+        <div class="flex items-start gap-3 mb-5">
+            <div class="w-[84px] h-[84px] rounded-full overflow-hidden border-2 border-line-accent/40 shadow-card-3d bg-surface-from shrink-0">
                 <img src="{{ $iconImage }}" alt="" class="w-full h-full object-cover">
             </div>
-            <div class="flex gap-5 px-2 pb-1">
-                <div class="flex flex-col items-center">
-                    <span class="font-bold text-[18px] text-text-main tracking-tight">{{ $likeCount }}</span>
-                    <span class="text-[10px] text-text-sub">ライク</span>
-                </div>
-                <div class="flex flex-col items-center">
-                    <span class="font-bold text-[18px] text-accent-text tracking-tight">¥{{ $bonusTotal }}</span>
-                    <span class="text-[10px] text-text-sub">ボーナス</span>
-                </div>
-                <div class="flex flex-col items-center">
-                    <span class="font-bold text-[18px] text-text-main tracking-tight">{{ $photoCount }}</span>
-                    <span class="text-[10px] text-text-sub">写真</span>
+
+            <div class="flex-1 min-w-0">
+                <div class="relative bg-gradient-to-br from-surface-from to-base border border-line-accent/40 rounded-2xl shadow-card-3d p-3 pr-9">
+                    {{-- 吹き出しのしっぽ（アイコン側に向く） --}}
+                    <span class="absolute top-5 -left-[8px] w-0 h-0 border-y-[8px] border-y-transparent border-r-[10px] border-r-line-accent/40"></span>
+                    <span class="absolute top-5 -left-[6px] w-0 h-0 border-y-[7px] border-y-transparent border-r-[9px] border-r-surface-from"></span>
+
+                    <p id="display-word"
+                       data-placeholder="{{ $wordPlaceholder }}"
+                       class="text-[13px] leading-relaxed {{ $word === '' ? 'text-text-sub' : 'text-text-main' }}">
+                        {{ $word !== '' ? $word : $wordPlaceholder }}
+                    </p>
+
+                    <button type="button" id="open-word-edit-btn"
+                            aria-label="ひとことを編集"
+                            class="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center bg-accent/20 text-accent-text border border-line-accent/40 hover:bg-accent/30 transition-colors">
+                        <x-ui.icon name="edit" class="text-xs" />
+                    </button>
+
+                    <div class="mt-2 pt-2 border-t border-line">
+                        <span id="display-word-updated" class="text-[10px] text-text-sub">
+                            最終更新 {{ $cast['appeal_updated_at'] ?? '未設定' }}
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="mb-4">
-            <h1 class="app-title text-[26px] text-text-main mb-2 leading-tight">{{ $displayName }}</h1>
-            @if($word !== '')
-                <p class="text-[13px] text-text-main font-medium leading-relaxed">{{ $word }}</p>
-            @else
-                <p class="text-[13px] text-text-sub leading-relaxed">プロフィールを編集してアピール文を設定しましょう</p>
-            @endif
+        {{-- ===== Stats ===== --}}
+        <div class="flex justify-around py-3 mb-5 rounded-panel border border-line-accent/40 bg-gradient-to-br from-surface-from to-base shadow-card-3d">
+            <div class="flex flex-col items-center">
+                <span class="font-bold text-[18px] text-text-main tracking-tight">{{ $likeCount }}</span>
+                <span class="text-[10px] text-text-sub">ライク</span>
+            </div>
+            <div class="flex flex-col items-center">
+                <span class="font-bold text-[18px] text-accent-text tracking-tight">¥{{ $bonusTotal }}</span>
+                <span class="text-[10px] text-text-sub">ボーナス</span>
+            </div>
+            <div class="flex flex-col items-center">
+                <span class="font-bold text-[18px] text-text-main tracking-tight">{{ $photoCount }}</span>
+                <span class="text-[10px] text-text-sub">写真</span>
+            </div>
         </div>
 
+        {{-- ===== Name ===== --}}
+        <div class="mb-4">
+            <h1 class="app-title text-[24px] text-text-main leading-tight">{{ $displayName }}</h1>
+        </div>
+
+        {{-- ===== Bonus badge ===== --}}
         <div class="mb-5">
             <x-ui.badge variant="gold">
                 <span class="text-[10px] tracking-wider opacity-90 mr-2">獲得ボーナス金合計</span>
@@ -70,7 +90,7 @@
             </x-ui.badge>
         </div>
 
-        {{-- Sub-page menu --}}
+        {{-- ===== Sub-page menu ===== --}}
         <div class="flex flex-col gap-3">
             <x-ui.menu-card icon="settings"
                             sub="EMPLOYMENT & PAYMENT"
@@ -91,7 +111,7 @@
         </div>
     </div>
 
-    {{-- Tabs --}}
+    {{-- ===== Tabs ===== --}}
     <div data-tabs-scope>
         <div data-tabs class="border-t border-b border-line-accent/40 bg-base/90 backdrop-blur-md">
             <div class="flex">
@@ -133,88 +153,183 @@
         </div>
 
         {{-- Details panel --}}
-        <div data-tab-panel="details" class="p-4 flex flex-col gap-4">
+        <div data-tab-panel="details">
+            <div class="p-4 flex flex-col gap-4">
 
-        <x-ui.card class="p-5">
-            <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
-                <x-ui.icon name="mypage" class="text-lg" /> BASIC
-            </h3>
-            <div class="flex flex-col gap-3">
-                <div class="flex justify-between items-center border-b border-line pb-2">
-                    <span class="text-[12px] text-text-sub font-medium">生年月日</span>
-                    <span class="text-[13px] font-bold text-text-main">{{ $birthdayText }}</span>
+                <x-ui.card class="p-5">
+                    <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
+                        <x-ui.icon name="mypage" class="text-lg" /> BASIC
+                    </h3>
+                    <div class="flex flex-col gap-3">
+                        <div class="flex justify-between items-center border-b border-line pb-2">
+                            <span class="text-[12px] text-text-sub font-medium">生年月日</span>
+                            <span class="text-[13px] font-bold text-text-main">{{ $birthdayText }}</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-line pb-2">
+                            <span class="text-[12px] text-text-sub font-medium">身長 / 体重</span>
+                            <span class="text-[13px] font-bold text-text-main">{{ $heightText }} / {{ $weightText }}</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-line pb-2">
+                            <span class="text-[12px] text-text-sub font-medium">B / W / H</span>
+                            <span class="text-[13px] font-bold text-text-main">{{ $bwhText }}</span>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <span class="text-[12px] text-text-sub font-medium">住所</span>
+                            <span class="text-[13px] font-bold text-text-main">{{ $addressText }}</span>
+                            @if($zipText !== '')
+                                <span class="text-[11px] text-text-sub">{{ $zipText }}</span>
+                            @endif
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <span class="text-[12px] text-text-sub font-medium">自己PR</span>
+                            <span class="text-[13px] font-medium text-text-main leading-relaxed">
+                                {!! !empty($cast['pr'] ?? '') ? nl2br(e($cast['pr'])) : '<span class="text-text-sub">--</span>' !!}
+                            </span>
+                        </div>
+                    </div>
+                </x-ui.card>
+
+                <x-ui.card class="p-5">
+                    <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
+                        <x-ui.icon name="super" class="text-lg" /> STYLE &amp; TAGS
+                    </h3>
+                    <div class="flex flex-col gap-3">
+                        <div class="flex justify-between items-center border-b border-line pb-2">
+                            <span class="text-[12px] text-text-sub font-medium">接客タイプ</span>
+                            <span class="text-[13px] font-bold text-text-main">{{ $cast['personality_type'] ?: '--' }}</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-line pb-2">
+                            <span class="text-[12px] text-text-sub font-medium">ルックス</span>
+                            <span class="text-[13px] font-bold text-text-main">{{ $cast['my_field'] ?? '--' }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[12px] text-text-sub font-medium">性格・内面</span>
+                            <span class="text-[13px] font-bold text-text-main">{{ $cast['my_inner_skills'] ?? '--' }}</span>
+                        </div>
+                    </div>
+                </x-ui.card>
+
+                <x-ui.card class="p-5">
+                    <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
+                        <x-ui.icon name="settings" class="text-lg" /> CAREER
+                    </h3>
+                    <div class="flex flex-col gap-3">
+                        <div class="flex justify-between items-center border-b border-line pb-2">
+                            <span class="text-[12px] text-text-sub font-medium">ナイトワーク経験</span>
+                            <span class="text-[13px] font-bold text-text-main">{{ $cast['night_work_label'] ?: '--' }}</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-line pb-2">
+                            <span class="text-[12px] text-text-sub font-medium">現職業</span>
+                            <span class="text-[13px] font-bold text-text-main">{{ $cast['profession'] ?? ($cast['current_job'] ?? '--') }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[12px] text-text-sub font-medium">希望職種</span>
+                            <span class="text-[13px] font-bold text-text-main">{{ $cast['industry_names'] ?? ($cast['desired_job'] ?? '--') }}</span>
+                        </div>
+                    </div>
+                </x-ui.card>
+
+                <div class="flex justify-center pt-1">
+                    <x-ui.button variant="grad" as="a" href="{{ route('cast.profile.edit') }}">
+                        プロフィールを編集
+                    </x-ui.button>
                 </div>
-                <div class="flex justify-between items-center border-b border-line pb-2">
-                    <span class="text-[12px] text-text-sub font-medium">身長 / 体重</span>
-                    <span class="text-[13px] font-bold text-text-main">{{ $heightText }} / {{ $weightText }}</span>
-                </div>
-                <div class="flex justify-between items-center border-b border-line pb-2">
-                    <span class="text-[12px] text-text-sub font-medium">B / W / H</span>
-                    <span class="text-[13px] font-bold text-text-main">{{ $bwhText }}</span>
-                </div>
-                <div class="flex flex-col gap-1">
-                    <span class="text-[12px] text-text-sub font-medium">住所</span>
-                    <span class="text-[13px] font-bold text-text-main">{{ $addressText }}</span>
-                    @if($zipText !== '')
-                        <span class="text-[11px] text-text-sub">{{ $zipText }}</span>
-                    @endif
-                </div>
-                <div class="flex flex-col gap-1">
-                    <span class="text-[12px] text-text-sub font-medium">自己PR</span>
-                    <span class="text-[13px] font-medium text-text-main leading-relaxed">
-                        {!! !empty($cast['pr'] ?? '') ? nl2br(e($cast['pr'])) : '<span class="text-text-sub">--</span>' !!}
-                    </span>
-                </div>
+
             </div>
-        </x-ui.card>
-
-        <x-ui.card class="p-5">
-            <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
-                <x-ui.icon name="super" class="text-lg" /> STYLE & TAGS
-            </h3>
-            <div class="flex flex-col gap-3">
-                <div class="flex justify-between items-center border-b border-line pb-2">
-                    <span class="text-[12px] text-text-sub font-medium">接客タイプ</span>
-                    <span class="text-[13px] font-bold text-text-main">{{ $cast['personality_type'] ?: '--' }}</span>
-                </div>
-                <div class="flex justify-between items-center border-b border-line pb-2">
-                    <span class="text-[12px] text-text-sub font-medium">ルックス</span>
-                    <span class="text-[13px] font-bold text-text-main">{{ $cast['my_field'] ?? '--' }}</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-[12px] text-text-sub font-medium">性格・内面</span>
-                    <span class="text-[13px] font-bold text-text-main">{{ $cast['my_inner_skills'] ?? '--' }}</span>
-                </div>
-            </div>
-        </x-ui.card>
-
-        <x-ui.card class="p-5">
-            <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
-                <x-ui.icon name="settings" class="text-lg" /> CAREER
-            </h3>
-            <div class="flex flex-col gap-3">
-                <div class="flex justify-between items-center border-b border-line pb-2">
-                    <span class="text-[12px] text-text-sub font-medium">ナイトワーク経験</span>
-                    <span class="text-[13px] font-bold text-text-main">{{ $cast['night_work_label'] ?: '--' }}</span>
-                </div>
-                <div class="flex justify-between items-center border-b border-line pb-2">
-                    <span class="text-[12px] text-text-sub font-medium">現職業</span>
-                    <span class="text-[13px] font-bold text-text-main">{{ $cast['profession'] ?? ($cast['current_job'] ?? '--') }}</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-[12px] text-text-sub font-medium">希望職種</span>
-                    <span class="text-[13px] font-bold text-text-main">{{ $cast['industry_names'] ?? ($cast['desired_job'] ?? '--') }}</span>
-                </div>
-            </div>
-        </x-ui.card>
-
-        <div class="flex justify-center pt-1">
-            <x-ui.button variant="grad" as="a" href="{{ route('cast.profile.edit') }}">
-                プロフィールを編集
-            </x-ui.button>
         </div>
-        </div>
+
     </div>
 
 </div>
+
+{{-- ============================================================
+     ひとこと編集モーダル
+     ============================================================ --}}
+<div id="modal-word"
+     class="fixed inset-0 z-[1100] hidden items-center justify-center bg-black/60 backdrop-blur-sm p-5">
+    <div class="w-full max-w-md bg-gradient-to-br from-surface-from to-base border border-line-accent/40 rounded-card shadow-card-3d p-5">
+        <h3 class="app-title text-[13px] text-accent-text tracking-widest mb-3">ひとことを編集</h3>
+        <textarea id="word-input" rows="3"
+                  placeholder="{{ $wordPlaceholder }}"
+                  class="w-full px-3 py-2 rounded-panel bg-accent/10 border border-line-accent/40 text-text-main placeholder-gray-400 shadow-input-dark outline-none resize-none"></textarea>
+        <p class="text-[10px] text-text-sub mt-2 mb-4">※更新するとタイムラインに反映されます</p>
+        <div class="flex justify-end gap-2">
+            <button type="button" id="word-edit-cancel-btn"
+                    class="px-5 py-2 rounded-full border border-line-accent/40 text-text-main text-[13px] font-bold">戻る</button>
+            <button type="button" id="word-edit-save-btn"
+                    class="px-5 py-2 rounded-full bg-gradient-to-r from-accent-grad-from to-accent-grad-to text-on-accent-strong text-[13px] font-bold shadow-btn-3d">保存</button>
+        </div>
+    </div>
+</div>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    'use strict';
+    var placeholderText = @json($wordPlaceholder);
+    var openBtn = document.getElementById('open-word-edit-btn');
+    var modal = document.getElementById('modal-word');
+    var displayEl = document.getElementById('display-word');
+    var input = document.getElementById('word-input');
+    var saveBtn = document.getElementById('word-edit-save-btn');
+    var cancelBtn = document.getElementById('word-edit-cancel-btn');
+    var updatedEl = document.getElementById('display-word-updated');
+
+    function showModal() {
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        if (displayEl && input) {
+            var cur = displayEl.innerText.trim();
+            input.value = (cur === placeholderText) ? '' : cur;
+        }
+        setTimeout(function () { if (input) input.focus(); }, 50);
+    }
+    function hideModal() {
+        if (!modal) return;
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    if (openBtn) openBtn.addEventListener('click', showModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', hideModal);
+    if (modal) modal.addEventListener('click', function (e) {
+        if (e.target === modal) hideModal();
+    });
+
+    if (saveBtn) saveBtn.addEventListener('click', function () {
+        if (saveBtn.disabled) return;
+        var val = (input ? input.value : '').trim();
+        saveBtn.disabled = true;
+        fetch(@json(route('cast.mypage.word')), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': @json(csrf_token())
+            },
+            body: JSON.stringify({ word: val })
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+            if (res && res.success) {
+                if (displayEl) {
+                    displayEl.innerText = val || placeholderText;
+                    displayEl.classList.toggle('text-text-sub', !val);
+                    displayEl.classList.toggle('text-text-main', !!val);
+                }
+                if (updatedEl && res.appeal_updated_at) {
+                    updatedEl.innerText = '最終更新 ' + res.appeal_updated_at;
+                }
+                hideModal();
+            } else {
+                alert((res && res.message) || '保存に失敗しました');
+            }
+        })
+        .catch(function () { alert('保存に失敗しました'); })
+        .finally(function () { saveBtn.disabled = false; });
+    });
+})();
+</script>
+@endpush

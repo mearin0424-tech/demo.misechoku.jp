@@ -101,6 +101,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
+    {{-- サイドバー partial の位置決めCSS（オフキャンバス＆.openでスライド） --}}
+    <link rel="stylesheet" href="{{ asset('assets/css/layout-sidebar.css') }}">
+
     {{-- キャラクターガイド（オコジョ）専用CSS --}}
     <link rel="stylesheet" href="{{ asset('assets/css/character-guide.css') }}?v={{ $assetVersion }}">
 
@@ -122,11 +125,10 @@
     <div id="app">
 
         {{-- ============================================================
-             新ヘッダー：bg は透明 → スクロールでグラス化（behaviors.js）
+             新ヘッダー：常時グラス表示（最上部スクロール位置でも見える）
              3つのボタン id は旧と同じものを維持（既存JSがそのまま使える）
              ============================================================ --}}
-        <header data-scroll-reveal
-                class="fixed top-0 left-0 w-full z-40 pt-safe transition-all duration-300">
+        <header class="fixed top-0 left-0 w-full z-40 pt-safe bg-deep-purple/30 backdrop-blur-md border-b border-line-accent/40 shadow-header">
             <div class="flex justify-between items-center gap-2 px-3 py-2 max-w-[430px] mx-auto">
                 {{-- 左：戻る（条件付き） --}}
                 <div class="w-10 h-10 flex items-center justify-center shrink-0">
@@ -138,9 +140,8 @@
                     @endif
                 </div>
 
-                {{-- 中央：タイトル（スクロール時のみ表示。app-title=Montserrat） --}}
-                <div data-header-title
-                     class="app-title font-bold tracking-widest text-[13px] text-white text-center flex-1 truncate">
+                {{-- 中央：タイトル（常時表示。app-title=Montserrat） --}}
+                <div class="app-title font-bold tracking-widest text-[13px] text-white text-center flex-1 truncate">
                     {{ $displayTitle }}
                 </div>
 
