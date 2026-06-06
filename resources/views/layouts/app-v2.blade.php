@@ -126,8 +126,162 @@
             --color-card-strong:  #1a1a1a;
         }
 
-        /* --- ヘッダー本体：背景グラデ・シャドウを紫トーンへ（旧 layout-header.css の gold rgba をそのまま紫 rgba で上書き） --- */
+        /* --- 認証/ログイン画面：ヘッダー・フッター・サイドメニュー・キャラガイドを非表示にして
+              ロゴ＋フォームだけの全画面表示に。デザイン側は共通の紫アクセント（global override で適用済み） --- */
+        body.page-demo-login #global-header,
+        body.page-demo-login nav[data-bottom-nav],
+        body.page-demo-login #character-guide,
+        body.page-demo-login #side-menu,
+        body.page-demo-login #menu-overlay,
+        body.page-demo-login #header-task-popup,
+        body.page-demo-login #header-notification-popup,
+        body.page-auth-login #global-header,
+        body.page-auth-login nav[data-bottom-nav],
+        body.page-auth-login #character-guide,
+        body.page-auth-login #side-menu,
+        body.page-auth-login #menu-overlay,
+        body.page-auth-login #header-task-popup,
+        body.page-auth-login #header-notification-popup {
+            display: none !important;
+        }
+        body.page-demo-login main#main-content,
+        body.page-auth-login main#main-content {
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            min-height: 100vh !important;
+            max-width: 100% !important;
+        }
+
+        /* --- SWIPE カード上のテキスト：ひとまわり小さく + もう少し画面下へ寄せる --- */
+        .card-bottom-info {
+            padding-bottom: 12px !important;   /* 旧 24px → 12px に縮めて画面下へ */
+            padding-top: 48px !important;      /* 上方のグラデ領域を少し短く */
+            min-height: 96px !important;       /* 旧 120px → 96px */
+        }
+        .cast-card:not(.cast-card--recruit) .card-bottom-info {
+            padding-top: 44px !important;
+            min-height: 90px !important;
+        }
+        .cast-name {
+            font-size: clamp(1.05rem, 4.4vw, 1.45rem) !important;
+            margin-bottom: 1px !important;
+        }
+        .cast-name .age { font-size: 0.92em !important; }
+        .card-shop-name-main {
+            font-size: clamp(0.92rem, 3.4vw, 1.2rem) !important;
+            margin: 0 0 3px !important;
+        }
+        .card-shop-name-sub {
+            font-size: clamp(0.68rem, 2.2vw, 0.78rem) !important;
+        }
+        .card-location {
+            font-size: clamp(0.74rem, 2.6vw, 0.85rem) !important;
+            margin-bottom: 6px !important;
+        }
+        .card-recruit-bonus-line {
+            font-size: clamp(0.82rem, 3vw, 0.98rem) !important;
+        }
+        .card-shop-meta { margin-bottom: 7px !important; }
+        .card-rating-cnt { font-size: clamp(0.54rem, 1.6vw, 0.62rem) !important; }
+        @media (max-width: 480px) {
+            .card-bottom-info {
+                padding-bottom: 8px !important;
+                padding-top: 40px !important;
+                min-height: 82px !important;
+            }
+        }
+
+        /* --- SWIPE カード右側のアクションボタン群を小さく
+              旧 home.css は 56px（PC）/ 52px（タブ）/ 48px（モバイル）。これを全体的に縮める --- */
+        .action-circle-btn,
+        .action-btn-message,
+        .card-recruit-btn {
+            width: 42px !important;
+            height: 42px !important;
+            min-width: 42px !important;
+            min-height: 42px !important;
+            font-size: 1.05rem !important;
+        }
+        .action-circle-btn.like {
+            height: auto !important;
+            min-height: 42px !important;
+            padding-top: 6px !important;
+            padding-bottom: 5px !important;
+        }
+        .action-circle-btn.like .action-btn-count {
+            font-size: 0.62rem !important;
+        }
+        .card-actions-overlay {
+            gap: 8px !important;
+        }
+        @media (max-width: 480px) {
+            .action-circle-btn,
+            .action-btn-message,
+            .card-recruit-btn {
+                width: 38px !important;
+                height: 38px !important;
+                min-width: 38px !important;
+                min-height: 38px !important;
+                font-size: 0.95rem !important;
+            }
+            .action-circle-btn.like {
+                min-height: 38px !important;
+            }
+            .card-actions-overlay {
+                gap: 7px !important;
+            }
+        }
+
+        /* --- 詳細検索 FAB：画面（ビューポート）右下に固定。
+              旧 search.css は 430px センターのコンテンツ右端基準で left 計算していたため、
+              デスクトップだと中央寄りに出てしまう。ここで右端基準に上書き。 */
+        .search-detail-fab {
+            left: auto !important;
+            right: calc(16px + env(safe-area-inset-right, 0px)) !important;
+            bottom: calc(var(--footer-height, 75px) + 16px + env(safe-area-inset-bottom, 0px)) !important;
+        }
+
+        /* --- TALK ROOM 専用：ボトムナビを隠し、メッセージ入力欄をフッター位置（最下部）に固定。
+              さらに main / body のスクロールを抑止して二重スクロールバーを解消する --- */
+        body.page-talk-room { overflow: hidden; }
+        body.page-talk-room nav[data-bottom-nav] { display: none !important; }
+        body.page-talk-room main#main-content {
+            height: 100vh !important;
+            min-height: 0 !important;
+            padding-bottom: 0 !important;      /* ボトムナビが無いので確保不要 */
+            overflow: hidden !important;
+        }
+        body.page-talk-room #talk-room-container {
+            height: calc(100vh - var(--header-height, 60px)) !important;
+            min-height: 0 !important;
+        }
+        body.page-talk-room #talk-room-container .chat-input-area {
+            bottom: 0 !important;              /* フッターの位置まで降ろす */
+        }
+
+        /* --- サブヘッダー（TALK / LIKES 等のタブ）をヘッダー直下にぴったり密着させる ---
+             #global-header の box-shadow が下に流れて隙間に見えるので、
+             サブヘッダーの z-index を上げて完全に覆い、背景も不透明に。 */
+        .sub-header-wrapper {
+            top: var(--header-height, 60px) !important;
+            z-index: 1600 !important;
+            background: rgba(10, 10, 10, 0.98) !important;
+            margin-top: 0 !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+        }
+        .sub-header-tabs {
+            background-color: rgba(10, 10, 10, 0.98) !important;
+        }
+
+        /* --- ヘッダー本体：背景は全幅、中身は 430px センター（ボトムナビと幅が揃う） + 紫グラデ＆シャドウ --- */
         #global-header {
+            width: 100% !important;
+            max-width: 100% !important;
+            left: 0 !important;
+            transform: none !important;
+            /* 左右パディングで中身を 430px の中央エリアに押し込む（モバイルでは 15px ガター） */
+            padding-left:  max(15px, calc(50vw - 215px)) !important;
+            padding-right: max(15px, calc(50vw - 215px)) !important;
             background:
                 radial-gradient(circle at 0% 0%, rgba(168, 85, 247, 0.20), transparent 55%),
                 radial-gradient(circle at 100% 0%, rgba(168, 85, 247, 0.30), transparent 62%),
@@ -237,6 +391,39 @@
         @keyframes fadeIn {
             from { opacity: 0; }
             to   { opacity: 1; }
+        }
+
+        /* --- スクロールバー非表示（全要素） : 機能は維持して見た目だけ消す --- */
+        * {
+            -ms-overflow-style: none;   /* IE / Edge */
+            scrollbar-width: none;      /* Firefox */
+        }
+        *::-webkit-scrollbar {
+            display: none;              /* Chrome / Safari / Webkit */
+            width: 0;
+            height: 0;
+        }
+
+        /* --- フォント統一：全要素を Noto Sans JP に。<i> は Font Awesome / Phosphor のアイコンフォントを保つため除外 --- */
+        :root {
+            --font-display: "Noto Sans JP", sans-serif;
+            --font-sans:    "Noto Sans JP", sans-serif;
+            --font-serif:   "Noto Sans JP", sans-serif;
+        }
+        html, body, body *:not(i):not(svg):not(svg *) {
+            font-family: "Noto Sans JP", sans-serif !important;
+        }
+        /* serif-font / .header-title-serif 等の旧クラスも上書き */
+        .serif-font,
+        .header-title-serif,
+        .header-title-main.header-title-serif,
+        .mypage-page-title.serif-font,
+        .mypage-shop-name.serif-font {
+            font-family: "Noto Sans JP", sans-serif !important;
+        }
+        /* app-title (Montserrat 想定) も Noto Sans JP に */
+        .app-title {
+            font-family: "Noto Sans JP", sans-serif !important;
         }
     </style>
 
