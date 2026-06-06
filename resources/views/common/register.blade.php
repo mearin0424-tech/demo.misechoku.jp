@@ -666,7 +666,7 @@
         body.page-auth-register.page-auth-register-cast {
             background:
                 radial-gradient(circle at top left, rgba(168, 85, 247, 0.18), transparent 32%),
-                linear-gradient(180deg, #120405 0%, #190509 45%, #110406 100%);
+                linear-gradient(180deg, #050505 0%, #050505 45%, #050505 100%);
         }
 
         body.page-auth-register.page-auth-register-shop {

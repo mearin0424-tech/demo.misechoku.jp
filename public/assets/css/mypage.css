@@ -75,7 +75,7 @@
     border-radius: 50%;
     background: linear-gradient(135deg, var(--mypage-gold), #b67a2b);
     border: 2px solid var(--color-main);
-    color: #120505;
+    color: #050505;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1064,7 +1064,7 @@ a.btn-outline-gold {
     top: 0;
     left: 0;
     background: linear-gradient(135deg, var(--mypage-gold), #b67a2b);
-    color: #120505;
+    color: #050505;
     font-size: 0.65rem;
     font-weight: 700;
     padding: 4px 8px;
@@ -1298,7 +1298,7 @@ a.btn-outline-gold {
 
 .btn-action-primary {
     background: linear-gradient(135deg, var(--mypage-gold), #b67a2b) !important;
-    color: #120505 !important;
+    color: #050505 !important;
     border: none !important;
 }
 
@@ -1388,7 +1388,7 @@ a.btn-outline-gold {
 .cast-mypage-menu-item.is-current {
     background: linear-gradient(135deg, rgba(196, 181, 253, 0.3), rgba(124, 58, 237, 0.6));
     border-color: rgba(196, 181, 253, 0.95);
-    color: #190509;
+    color: #050505;
     box-shadow: 0 0 16px rgba(196, 181, 253, 0.7);
 }
 .cast-mypage-menu-item.is-current i {

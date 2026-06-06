@@ -48,7 +48,7 @@
         color: #ccc;
     }
     .badge-active { background: #1e3a1e; color: #4caf50; } /* 契約中 */
-    .badge-attention { background: #3d1a1a; color: var(--color-accent); } /* 面談予定など */
+    .badge-attention { background: #2a2a2a; color: var(--color-accent); } /* 面談予定など */
 
     .date-text { font-size: 0.65rem; color: #666; margin-top: 5px; display: block; }
 </style>

@@ -730,7 +730,7 @@
     min-height: 44px;
     flex-shrink: 0;
     background: linear-gradient(145deg, var(--talk-accent) 0%, #cca24a 55%, var(--talk-accent-deep) 100%);
-    color: #1a0a0a;
+    color: #1a1a1a;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -1066,7 +1066,7 @@
     padding: 6px 8px;
     border-radius: 8px;
     border: 1px solid rgba(148, 121, 79, 0.7);
-    background: #120505;
+    background: #050505;
     color: #f5ecec;
     font-size: 0.8rem;
 }
@@ -1099,7 +1099,7 @@
     padding: 9px 10px;
     border-radius: 10px;
     border: 1px solid rgba(148, 121, 79, 0.7);
-    background: #120505;
+    background: #050505;
     color: #f5ecec;
     font-size: 0.82rem;
 }
@@ -1110,7 +1110,7 @@
     padding: 10px 12px;
     border-radius: 10px;
     border: 1px solid rgba(148, 121, 79, 0.7);
-    background: #120505;
+    background: #050505;
     color: #f5ecec;
     font-size: 0.85rem;
 }
@@ -1139,7 +1139,7 @@
 
 .btn-interview-submit {
     background: linear-gradient(135deg, #c9a227, #a78bfa);
-    color: #1a0a0a;
+    color: #1a1a1a;
     border-color: #a78bfa;
     font-weight: 600;
 }
@@ -1189,7 +1189,7 @@
 
 .talk-action-item-primary .talk-action-icon {
     background: #e5af4f;
-    color: #1a0a0a;
+    color: #1a1a1a;
 }
 
 .talk-action-item-disabled {

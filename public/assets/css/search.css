@@ -848,7 +848,7 @@ body.page-search .connection-list--search {
     gap: 6px;
     padding: 12px 18px;
     background: linear-gradient(135deg, #E5C158, #7c3aed);
-    color: #190509;
+    color: #050505;
     border: none;
     border-radius: 999px;
     font-size: 0.9rem;
@@ -1837,7 +1837,7 @@ body.page-search .connection-list--search {
 .ai-recommend__card-media {
     position: relative;
     height: 142px;
-    background: rgba(25, 5, 9, 0.45);
+    background: rgba(5, 5, 5, 0.45);
 }
 
 .ai-recommend__card-media img {

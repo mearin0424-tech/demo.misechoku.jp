@@ -357,11 +357,17 @@
             bottom: 0 !important;              /* フッターの位置まで降ろす */
         }
 
-        /* --- サブヘッダー（TALK / LIKES 等のタブ）をヘッダー直下にぴったり密着させる ---
-             #global-header の box-shadow が下に流れて隙間に見えるので、
-             サブヘッダーの z-index を上げて完全に覆い、背景も不透明に。 */
+        /* --- サブヘッダー（TALK / LIKES 等のタブ）をヘッダーと同じく
+              全幅展開＋中身は 430px センターに揃え、ヘッダー直下に密着させる --- */
         .sub-header-wrapper {
             top: var(--header-height, 60px) !important;
+            left: 0 !important;
+            transform: none !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            /* 中身を 430px センターに押し込む（モバイルでは 0 ガター） */
+            padding-left:  max(0px, calc(50vw - 215px)) !important;
+            padding-right: max(0px, calc(50vw - 215px)) !important;
             z-index: 1600 !important;
             background: rgba(10, 10, 10, 0.98) !important;
             margin-top: 0 !important;
@@ -369,6 +375,19 @@
         }
         .sub-header-tabs {
             background-color: rgba(10, 10, 10, 0.98) !important;
+        }
+
+        /* --- TALK ROOM：内側の入れ子（負マージン＋ボルドー背景）を撤去して全画面化＋ニュートラル黒へ --- */
+        body.page-talk-room main#main-content {
+            max-width: 100% !important;
+        }
+        body.page-talk-room #talk-room-container {
+            margin: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            background:
+                radial-gradient(circle at top, rgba(168, 85, 247, 0.10), transparent 40%),
+                linear-gradient(180deg, var(--color-surface-from, #1a1a1a) 0%, var(--color-base, #050505) 100%) !important;
         }
 
         /* --- ヘッダー本体：背景は全幅、中身は 430px センター（ボトムナビと幅が揃う） + 紫グラデ＆シャドウ --- */

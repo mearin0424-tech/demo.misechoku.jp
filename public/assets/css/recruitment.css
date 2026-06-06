@@ -739,7 +739,7 @@
     max-width: none;
     height: 320px;
     overflow: hidden;
-    background: linear-gradient(180deg, #1a0c0e 0%, #120405 100%);
+    background: linear-gradient(180deg, #1a0c0e 0%, #050505 100%);
 }
 .recruit-hero-wrap img {
     width: 100%;
@@ -765,7 +765,7 @@
     padding: 4px 10px;
     margin-bottom: 8px;
     background: rgba(168, 85, 247, 0.95);
-    color: #120405;
+    color: #050505;
     font-size: 0.7rem;
     font-weight: 700;
     border-radius: 6px;
@@ -795,7 +795,7 @@
     margin-top: -16px;
     position: relative;
     z-index: 5;
-    background: linear-gradient(180deg, #1A0C0E 0%, #120405 100%);
+    background: linear-gradient(180deg, #1A0C0E 0%, #050505 100%);
     border: 1px solid rgba(168, 85, 247, 0.3);
     border-radius: 24px;
     padding: 24px 20px;
@@ -863,7 +863,7 @@
     border-radius: 10px;
     font-size: 0.75rem;
     font-weight: 700;
-    background: #120405;
+    background: #050505;
     border: 1px solid rgba(168, 85, 247, 0.4);
     color: var(--gold);
 }
@@ -925,7 +925,7 @@
 }
 .recruit-type-card-new:not(.is-main) {
     border: 1px solid rgba(61, 26, 31, 0.9);
-    background: #120405;
+    background: #050505;
 }
 .recruit-type-card.recruit-type-card-new {
     display: block;
@@ -943,7 +943,7 @@
 }
 .recruit-type-card-new.is-main .recruit-type-badge-new {
     background: var(--gold);
-    color: #120405;
+    color: #050505;
 }
 .recruit-type-card-new:not(.is-main) .recruit-type-badge-new {
     background: rgba(61, 26, 31, 0.95);
@@ -1049,7 +1049,7 @@
     border-radius: 14px;
     overflow: hidden;
     position: relative;
-    background: #120405;
+    background: #050505;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1135,7 +1135,7 @@
 
 /* Recruit Status ページ（プレビュー風に統一） */
 .recruit-status-page .recruit-status-card {
-    background: linear-gradient(180deg, #1A0C0E 0%, #120405 100%);
+    background: linear-gradient(180deg, #1A0C0E 0%, #050505 100%);
     border: 1px solid rgba(168, 85, 247, 0.25);
     border-radius: 24px;
     padding: 24px 20px;
@@ -1209,9 +1209,9 @@
 .recruit-btn-preview:hover { filter: brightness(1.08); }
 .toggle-btn.active { background: linear-gradient(135deg, #E5C158, #7c3aed); box-shadow: 0 0 12px rgba(168, 85, 247, 0.4); }
 .recruit-type-regular { border: 2px solid rgba(168, 85, 247, 0.5); background: #1A0C0E; box-shadow: 0 6px 20px rgba(168, 85, 247, 0.15); }
-.recruit-type-regular .recruit-type-label { background: var(--gold); color: #120405; }
+.recruit-type-regular .recruit-type-label { background: var(--gold); color: #050505; }
 .recruit-type-trial,
-.recruit-type-help { border: 1px solid rgba(61, 26, 31, 0.9); background: #120405; }
+.recruit-type-help { border: 1px solid rgba(61, 26, 31, 0.9); background: #050505; }
 .recruit-type-trial .recruit-type-label,
 .recruit-type-help .recruit-type-label { background: rgba(61, 26, 31, 0.95); color: var(--gold); border: 1px solid rgba(168, 85, 247, 0.3); }
 .recruit-store-message {
@@ -1637,7 +1637,7 @@
     border: 1px solid rgba(168, 85, 247, 0.3);
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     scroll-snap-align: start;
-    background: #120405;
+    background: #050505;
 }
 .recruit-shop-gallery-item img {
     width: 100%;
