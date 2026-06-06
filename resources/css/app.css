@@ -1,0 +1,187 @@
+/* =============================================================
+   app.css  —  デザインシステムの単一の正（Single Source of Truth）
+   Tailwind v4 / Laravel + Vite
+   このファイルのトークン・状態クラスだけを使ってUIを組む。任意値は禁止。
+   ============================================================= */
+
+@import "tailwindcss";
+
+/* Tailwind に走査させる対象（ここに無いファイルのクラスは purge される） */
+@source "../views";
+@source "../js";
+
+/* -------------------------------------------------------------
+   1. テーマ切替用アクセント変数（:root に出るので CSS からも参照可）
+   <html data-theme="amethyst"> のように切り替える。
+   ------------------------------------------------------------- */
+:root,
+[data-theme="amethyst"] {
+  --accent:           #8b5cf6;
+  --accent-text:      #a78bfa;
+  --accent-grad-from: #a78bfa;
+  --accent-grad-to:   #7c3aed;
+  --on-accent:        #e6dffc;
+  --on-accent-strong: #f4f2fa;
+}
+[data-theme="lilac"] {
+  --accent: #d8b4e2; --accent-text: #d8b4e2;
+  --accent-grad-from: #f3e8f6; --accent-grad-to: #c997d6;
+  --on-accent: #111111; --on-accent-strong: #111111;
+}
+[data-theme="light_blue"] {
+  --accent: #7dd3fc; --accent-text: #7dd3fc;
+  --accent-grad-from: #bae6fd; --accent-grad-to: #38bdf8;
+  --on-accent: #111111; --on-accent-strong: #111111;
+}
+[data-theme="light_pink"] {
+  --accent: #f9a8d4; --accent-text: #f9a8d4;
+  --accent-grad-from: #fbcfe8; --accent-grad-to: #f472b6;
+  --on-accent: #111111; --on-accent-strong: #111111;
+}
+
+/* -------------------------------------------------------------
+   2a. アクセント系トークン（inline = data-theme に実行時追従）
+   bg-accent / text-accent-text / from-accent-grad-from など
+   ------------------------------------------------------------- */
+@theme inline {
+  --color-accent:           var(--accent);
+  --color-accent-text:      var(--accent-text);
+  --color-accent-grad-from: var(--accent-grad-from);
+  --color-accent-grad-to:   var(--accent-grad-to);
+  --color-on-accent:        var(--on-accent);
+  --color-on-accent-strong: var(--on-accent-strong);
+}
+
+/* -------------------------------------------------------------
+   2b. 固定トークン（:root に出力 → カスタムCSSからも var() で使える）
+   ------------------------------------------------------------- */
+@theme {
+  /* 背景・サーフェス */
+  --color-base:         #050505;
+  --color-surface-from: #1a1a1a;
+
+  /* テキスト・ライン */
+  --color-text-main: #f5f5f5;
+  --color-text-sub:  #a0a0a0;
+  --color-line:        #2a2a2a;
+  --color-line-accent: #a855f7;   /* /40 で使用 */
+
+  /* ブランド固定色 */
+  --color-deep-purple:      #9333ea;
+  --color-deep-purple-btn:  #581c87;
+  --color-deep-purple-from: #6b21a8;
+  --color-deep-purple-to:   #3b0764;
+  --color-gold-from:        #d4af37;
+  --color-gold-to:          #b8860b;
+
+  /* 入力欄（明） */
+  --color-input-light:      #f5f2fa;
+  --color-input-light-text: #1a1a1a;
+  --color-input-light-sub:  #666666;
+
+  /* タイポグラフィ */
+  --font-display: "Montserrat", "Noto Sans JP", sans-serif;
+  --font-sans:    "Noto Sans JP", sans-serif;
+
+  /* 角丸 */
+  --radius-card:  20px;
+  --radius-panel: 16px;
+
+  /* シャドウ（3D / ニューモーフィズム） */
+  --shadow-btn-3d:        inset 0 4px 6px rgba(255,255,255,.5), inset 0 -6px 6px rgba(0,0,0,.4), 0 12px 24px rgba(0,0,0,.7);
+  --shadow-btn-3d-active: inset 0 6px 8px rgba(0,0,0,.6), 0 2px 4px rgba(0,0,0,.6);
+  --shadow-badge-3d:      inset 0 2px 3px rgba(255,255,255,.4), inset 0 -3px 3px rgba(0,0,0,.4), 0 6px 12px rgba(0,0,0,.5);
+  --shadow-fab-3d:        inset 0 4px 6px rgba(255,255,255,.5), inset 0 -6px 6px rgba(0,0,0,.4), 0 14px 28px rgba(0,0,0,.7);
+  --shadow-card-3d:       6px 6px 16px rgba(0,0,0,.9), -2px -2px 6px rgba(255,255,255,.06), inset 1px 1px 1px rgba(255,255,255,.08);
+  --shadow-header:        0 4px 12px rgba(0,0,0,.6), inset 0 1px 1px rgba(255,255,255,.15), inset 0 -1px 1px rgba(0,0,0,.5);
+  --shadow-footer:        0 -4px 20px rgba(0,0,0,.7), inset 0 1px 1px rgba(255,255,255,.15), inset 0 -1px 1px rgba(0,0,0,.5);
+  --shadow-input-dark:    inset 0 2px 4px rgba(0,0,0,.5);
+  --shadow-input-light:   inset 0 2px 4px rgba(0,0,0,.1);
+  --shadow-gold-3d:       inset 0 4px 6px rgba(255,255,255,.4), inset 0 -6px 6px rgba(0,0,0,.4), 0 8px 16px rgba(0,0,0,.7);
+  --shadow-nav-pill:      4px 4px 10px rgba(0,0,0,.9), -1px -1px 4px rgba(255,255,255,.1), inset 1px 1px 2px rgba(255,255,255,.05);
+
+  /* アニメーション */
+  --animate-slide-up: slideUpFade .4s cubic-bezier(.16,1,.3,1) forwards;
+  --animate-fade-in:  fadeIn .4s ease-out forwards;
+}
+
+@keyframes slideUpFade {
+  0%   { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  0%   { opacity: 0; transform: scale(.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* -------------------------------------------------------------
+   3. カスタムユーティリティ
+   ------------------------------------------------------------- */
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+@utility text-shadow-heavy {
+  text-shadow: 0 2px 4px rgba(0,0,0,.9), 0 4px 12px rgba(0,0,0,.9), 0 0 2px rgba(0,0,0,.5);
+}
+@utility text-gradient {
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@utility pb-safe { padding-bottom: max(16px, env(safe-area-inset-bottom, 16px)); }
+@utility pt-safe { padding-top: max(8px,  env(safe-area-inset-top,    8px)); }
+
+/* -------------------------------------------------------------
+   4. ベース
+   ------------------------------------------------------------- */
+@layer base {
+  html { -webkit-tap-highlight-color: transparent; }
+  body {
+    background-color: var(--color-base);
+    color: var(--color-text-main);
+    font-family: var(--font-sans);
+  }
+  .app-title { font-family: var(--font-display); font-weight: 700; letter-spacing: .05em; }
+}
+
+/* -------------------------------------------------------------
+   5. JS が切り替える状態（behaviors.js が class をトグルするだけ）
+   ※ ここに定義することで、JSからTailwindクラスを足さずに済み purge 事故を防ぐ
+   ------------------------------------------------------------- */
+@layer components {
+
+  /* スクロールで出現するグラスヘッダー（data-scroll-reveal に .is-scrolled） */
+  [data-scroll-reveal] { background: transparent; border-bottom: 1px solid transparent; box-shadow: none; }
+  [data-scroll-reveal].is-scrolled {
+    background-color: rgba(147, 51, 234, .30);   /* deep-purple/30 */
+    backdrop-filter: blur(12px);
+    border-bottom-color: rgba(168, 85, 247, .40); /* line-accent/40 */
+    box-shadow: var(--shadow-header);
+  }
+  [data-header-title] { opacity: 0; transition: opacity .3s; }
+  [data-scroll-reveal].is-scrolled [data-header-title] { opacity: 1; }
+
+  /* タブ（data-tab-panel に .is-active） */
+  [data-tab-panel] { display: none; }
+  [data-tab-panel].is-active { display: block; }
+
+  /* 下部ナビ アクティブ表示（3スタイル：neon / flat / 3d） */
+  [data-bottom-nav] .nav-item { color: rgba(255,255,255,.6); }
+  [data-bottom-nav] .nav-item.is-active { color: var(--accent-text); }
+
+  [data-nav-style="neon"] .nav-item.is-active .nav-icon {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 8px currentColor);
+  }
+  [data-nav-style="3d"]   .nav-item.is-active .nav-icon-wrap {
+    background: linear-gradient(135deg, rgba(42,42,42,.8), rgba(5,5,5,.8));
+    box-shadow: var(--shadow-nav-pill);
+    border: 1px solid rgba(255,255,255,.05);
+  }
+
+  /* スワイプ中のカード（behaviors.js が transform を直接当てる。色味だけ補助） */
+  [data-swipe-card] { will-change: transform; touch-action: pan-y; }
+  [data-swipe-card].is-leaving { transition: transform .3s ease, opacity .3s ease; }
+}

@@ -24,7 +24,13 @@
         @if (empty($keepCasts))
             <div class="no-data-wrapper">
                 <i class="fas fa-star opacity-10 text-5xl mb-3 block"></i>
-                <p class="no-data-msg">お気に入り登録したキャストはいません。</p>
+                <p class="no-data-msg">
+                    @if(!empty($isCastPortal))
+                        お気に入り登録したお店はいません。
+                    @else
+                        お気に入り登録したキャストはいません。
+                    @endif
+                </p>
             </div>
         @else
             @foreach($keepCasts as $c)

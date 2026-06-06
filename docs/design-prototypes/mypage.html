@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NightWork App - Profile Simulator</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM (CDN) -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel (CDN) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        .pb-safe { padding-bottom: max(16px, env(safe-area-inset-bottom, 16px)); }
+        .pt-safe { padding-top: max(8px, env(safe-area-inset-top, 8px)); }
+        body { 
+            background-color: #000; 
+            color: #fff; 
+            margin: 0; 
+            overflow: hidden;
+            height: 100dvh; 
+            width: 100vw;
+            -webkit-tap-highlight-color: transparent; 
+        }
+        #root { height: 100%; width: 100%; }
+
+        .font-noto { font-family: 'Noto Sans JP', sans-serif; }
+        .font-noto .app-title { font-family: 'Montserrat', 'Noto Sans JP', sans-serif; font-weight: 700; letter-spacing: 0.05em; }
+        
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .text-gradient {
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // ==========================================
+        // 🎨 テーマ定義
+        // ==========================================
+        const bgThemes = {
+            black: { 
+                id: 'black', name: 'ブラック', 
+                bgApp: 'bg-[#050505]', bgMain: 'bg-[#050505]', textMain: 'text-[#F5F5F5]', textSub: 'text-[#A0A0A0]', 
+                borderColor: 'border-[#2A2A2A]', glassBg: 'bg-[#050505]/40', bgMainHex: '#050505'
+            }
+        };
+
+        const accentColors = {
+            amethyst: {
+                id: 'amethyst', name: 'アメジスト (王道の紫)',
+                accentBg: 'bg-[#8B5CF6]', accentText: 'text-[#A78BFA]',
+                btnTextClass: 'text-[#E6DFFC]', btnIconClass: 'text-white',
+                accentGrad: 'from-[#A78BFA] to-[#7C3AED]', btnTextGradClass: 'text-[#F4F2FA]', btnIconGradClass: 'text-white'
+            },
+            lilac: {
+                id: 'lilac', name: 'ライラック (淡い紫)',
+                accentBg: 'bg-[#D8B4E2]', accentText: 'text-[#D8B4E2]',
+                btnTextClass: 'text-[#111]', btnIconClass: 'text-[#111]',
+                accentGrad: 'from-[#F3E8F6] to-[#C997D6]', btnTextGradClass: 'text-[#111]', btnIconGradClass: 'text-[#111]'
+            },
+            light_blue: {
+                id: 'light_blue', name: 'ライトブルー (水色)',
+                accentBg: 'bg-[#7DD3FC]', accentText: 'text-[#7DD3FC]',
+                btnTextClass: 'text-[#111]', btnIconClass: 'text-[#111]',
+                accentGrad: 'from-[#BAE6FD] to-[#38BDF8]', btnTextGradClass: 'text-[#111]', btnIconGradClass: 'text-[#111]'
+            },
+            light_pink: {
+                id: 'light_pink', name: 'ライトピンク (薄桃色)',
+                accentBg: 'bg-[#F9A8D4]', accentText: 'text-[#F9A8D4]',
+                btnTextClass: 'text-[#111]', btnIconClass: 'text-[#111]',
+                accentGrad: 'from-[#FBCFE8] to-[#F472B6]', btnTextGradClass: 'text-[#111]', btnIconGradClass: 'text-[#111]'
+            }
+        };
+
+        const hfColorDefs = {
+            black: { id: 'black', name: '単色 (ブラック)', bgClass: 'bg-[#050505]/50' },
+            deep_purple: { id: 'deep_purple', name: '単色 (ディープパープル)', bgClass: 'bg-[#9333EA]/30' },
+            grad_black_purple: { id: 'grad_black_purple', name: 'グラデ (ブラック × ディープパープル)', bgClass: 'bg-gradient-to-r from-[#050505]/60 to-[#9333EA]/30' },
+            grad_purple_yellow: { id: 'grad_purple_yellow', name: 'グラデ (ディープパープル × イエロー)', bgClass: 'bg-gradient-to-r from-[#9333EA]/30 to-[#D4AF37]/30' },
+            grad_purple_lilac: { id: 'grad_purple_lilac', name: 'グラデ (ディープパープル × ライラック)', bgClass: 'bg-gradient-to-r from-[#9333EA]/30 to-[#D8B4E2]/30' },
+            grad_purple_amethyst: { id: 'grad_purple_amethyst', name: 'グラデ (ディープパープル × アメジスト)', bgClass: 'bg-gradient-to-r from-[#9333EA]/30 to-[#8B5CF6]/30' },
+            grad_purple_pink: { id: 'grad_purple_pink', name: 'グラデ (ディープパープル × ピンク)', bgClass: 'bg-gradient-to-r from-[#9333EA]/30 to-[#EC4899]/30' }
+        };
+
+        // ==========================================
+        // 🧩 Tailwind セーフリスト & スタイル生成
+        // ==========================================
+        const TailwindSafelist = () => (
+            <div className="hidden border-[#A855F7]/40 bg-[#A855F7] bg-[#A855F7]/10 bg-[#F5F2FA] bg-[#8B5CF6] text-[#A78BFA] from-[#A78BFA] to-[#7C3AED] bg-[#D8B4E2] text-[#D8B4E2] from-[#F3E8F6] to-[#C997D6] bg-[#7DD3FC] text-[#7DD3FC] from-[#BAE6FD] to-[#38BDF8] bg-[#F9A8D4] text-[#F9A8D4] from-[#FBCFE8] to-[#F472B6] text-[#1A1A1A] text-[#666666] text-[#E6DFFC] text-[#F3E8FF] text-[#E0E7FF] text-[#FAF5FF] text-[#EEF2FF] text-[#111] text-white shadow-[inset_0_4px_6px_rgba(255,255,255,0.5),inset_0_-6px_6px_rgba(0,0,0,0.4),0_12px_24px_rgba(0,0,0,0.7)] active:shadow-[inset_0_6px_8px_rgba(0,0,0,0.6),0_2px_4px_rgba(0,0,0,0.6)] shadow-[8px_8px_20px_rgba(0,0,0,0.8),-2px_-2px_8px_rgba(255,255,255,0.03)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)] bg-[#050505] text-[#F5F5F5] text-[#A0A0A0] border-[#2A2A2A] bg-[#050505]/40 from-[#D4AF37] to-[#B8860B] border-[#D4AF37]/30 bg-[#9333EA] from-[#A855F7] to-[#7E22CE] bg-[#581c87] from-[#6b21a8] to-[#3b0764] bg-[#050505]/50 bg-[#9333EA]/30 from-[#050505]/60 to-[#9333EA]/30 from-[#9333EA]/30 to-[#D4AF37]/30 to-[#D8B4E2]/30 to-[#8B5CF6]/30 to-[#EC4899]/30 shadow-[0_4px_12px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.15),inset_0_-1px_1px_rgba(0,0,0,0.5)] shadow-[0_-4px_20px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.15),inset_0_-1px_1px_rgba(0,0,0,0.5)] bg-gradient-to-br from-[#1a1a1a] to-[#050505] shadow-[6px_6px_16px_rgba(0,0,0,0.9),-2px_-2px_6px_rgba(255,255,255,0.06),inset_1px_1px_1px_rgba(255,255,255,0.08)] aspect-[4/5] aspect-[5/4] whitespace-nowrap"></div>
+        );
+
+        const generateStyles = (t, inputStyle, is3D, isGrad, hfColor) => {
+            const shadowBtn3D = 'shadow-[inset_0_4px_6px_rgba(255,255,255,0.5),inset_0_-6px_6px_rgba(0,0,0,0.4),0_12px_24px_rgba(0,0,0,0.7)] active:translate-y-1.5 active:shadow-[inset_0_6px_8px_rgba(0,0,0,0.6),0_2px_4px_rgba(0,0,0,0.6)]';
+            const shadowBadge3D = 'shadow-[inset_0_2px_3px_rgba(255,255,255,0.4),inset_0_-3px_3px_rgba(0,0,0,0.4),0_6px_12px_rgba(0,0,0,0.5)]';
+            const shadowFab3D = 'shadow-[inset_0_4px_6px_rgba(255,255,255,0.5),inset_0_-6px_6px_rgba(0,0,0,0.4),0_14px_28px_rgba(0,0,0,0.7)] active:translate-y-1.5 active:shadow-[inset_0_6px_8px_rgba(0,0,0,0.6),0_2px_4px_rgba(0,0,0,0.6)]';
+
+            const fixedBorderColor = 'border-[#A855F7]/40';
+            const cardBg = is3D ? 'bg-gradient-to-br from-[#1a1a1a] to-[#050505]' : 'bg-transparent';
+            const shadowCard3D = is3D ? 'shadow-[6px_6px_16px_rgba(0,0,0,0.9),-2px_-2px_6px_rgba(255,255,255,0.06),inset_1px_1px_1px_rgba(255,255,255,0.08)]' : 'shadow-none';
+
+            const headerShadow = 'shadow-[0_4px_12px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.15),inset_0_-1px_1px_rgba(0,0,0,0.5)]';
+            const footerShadow = 'shadow-[0_-4px_20px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.15),inset_0_-1px_1px_rgba(0,0,0,0.5)]';
+
+            const glassHeaderStyle = `${hfColor.bgClass} backdrop-blur-md border-b ${fixedBorderColor} ${headerShadow}`;
+            const glassFooterStyle = `${hfColor.bgClass} backdrop-blur-md border-t ${fixedBorderColor} ${footerShadow}`;
+
+            const inputBgClass = inputStyle === 'light' ? 'bg-[#F5F2FA]' : 'bg-[#A855F7]/10';
+            const inputBorderClass = inputStyle === 'light' ? 'border-transparent' : `border ${fixedBorderColor}`;
+            const inputTextClass = inputStyle === 'light' ? 'text-[#1A1A1A]' : 'text-[#F5F5F5]';
+            const inputSubTextClass = inputStyle === 'light' ? 'text-[#666666]' : 'text-[#A0A0A0]';
+            const inputPlaceholderClass = inputStyle === 'light' ? 'placeholder-gray-500' : 'placeholder-gray-400';
+            const inputShadowClass = inputStyle === 'light' ? 'shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]' : 'shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]';
+
+            const btnBgClass = isGrad ? `bg-gradient-to-r ${t.accentGrad}` : t.accentBg;
+            const btnTextClass = isGrad ? t.btnTextGradClass : t.btnTextClass;
+            const btnIconClass = isGrad ? t.btnIconGradClass : t.btnIconClass;
+
+            return {
+                button: `px-6 py-3.5 rounded-full ${btnBgClass} ${btnTextClass} ${is3D ? shadowBtn3D : 'shadow-md'} border border-transparent transition-all duration-300 flex items-center justify-center gap-2 font-bold`,
+                buttonIcon: btnIconClass,
+                badge: `px-4 py-2 rounded-full ${btnBgClass} ${btnTextClass} ${is3D ? shadowBadge3D : ''} font-bold text-sm`,
+                miniBadge: `flex items-center justify-center gap-1 ${btnBgClass} ${btnTextClass} text-[9px] font-bold px-1.5 py-0.5 rounded w-full relative -mt-4 z-10 ${is3D ? shadowBadge3D : 'border border-black/20'}`,
+                fab: `absolute bottom-[90px] right-5 w-[56px] h-[56px] rounded-full flex items-center justify-center ${btnBgClass} ${btnTextClass} hover:scale-105 transition-all z-30 ${is3D ? shadowFab3D : 'shadow-lg active:scale-95'}`,
+                
+                textAccent: t.accentText,
+                iconAccent: t.accentText,
+                fixedBorderColor: fixedBorderColor,
+                
+                card: `${cardBg} rounded-[20px] overflow-hidden transition-all duration-300 ${shadowCard3D} border ${fixedBorderColor}`,
+                menuCard: `${cardBg} p-4 flex items-center justify-between rounded-[16px] transition-all duration-300 group cursor-pointer ${shadowCard3D} border ${fixedBorderColor}`,
+                
+                specialMenuCard: `rounded-[16px] p-4 flex items-center justify-between transition-all duration-300 group cursor-pointer ${is3D ? `${btnBgClass} ${shadowBtn3D} border border-transparent` : `${cardBg} ${shadowCard3D} border ${fixedBorderColor}`}`,
+                specialMenuTitle: `app-title font-bold text-[15px] tracking-widest group-hover:opacity-80 transition-opacity ${is3D ? btnTextClass : t.accentText}`,
+                specialMenuSub: `text-[9px] font-bold tracking-[0.1em] mb-1 uppercase ${is3D ? btnTextClass + ' opacity-70' : t.textSub}`,
+                specialMenuIconWrapper: `w-11 h-11 rounded-xl flex items-center justify-center transition-all ${is3D ? 'bg-black/20 shadow-inner border border-white/10' : 'bg-transparent border ' + fixedBorderColor + ' shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]'}`,
+                specialMenuIcon: `text-[18px] ${is3D ? btnIconClass : t.accentText}`,
+                specialMenuArrow: `w-8 h-8 rounded-full border flex items-center justify-center transition-colors ${is3D ? 'border-white/30 group-hover:border-white/70' : 'border-white/20 group-hover:border-white/50'}`,
+                specialMenuArrowIcon: `text-[16px] transition-colors ${is3D ? btnIconClass + ' opacity-70 group-hover:opacity-100' : 'text-white/50 group-hover:text-white'}`,
+
+                inputContainer: `${inputBgClass} ${inputBorderClass} ${inputShadowClass} transition-all duration-300`,
+                inputText: inputTextClass,
+                inputSubText: inputSubTextClass,
+                inputPlaceholder: inputPlaceholderClass,
+
+                glassHeader: glassHeaderStyle,
+                glassFooter: glassFooterStyle,
+                tabLine: `absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 rounded-t-full bg-[#A855F7]`,
+            }
+        };
+
+        const shopData = {
+            name: "Club Luminous",
+            industry: "高級ラウンジ",
+            location: "東京都 港区",
+            rating: "4.8",
+            reviews: "24",
+            likes: "1.2k",
+            bonus: "￥120,000",
+            hourlyWage: "￥2,500 ~ ￥5,000",
+            helpWage: "￥2,500 ~ ￥5,000",
+            catchphrase: "エリア最高峰の高級ラウンジで、未経験からでも輝ける場所。",
+            description: "落ち着いた客層と、丁寧なサポート体制が自慢です。ノルマや罰金は一切なく、あなたのペースで働けます。学生さんやWワークの方も大歓迎！",
+            tags: ["日払いOK", "送り無料", "ノルマなし", "ドレスレンタル", "未経験歓迎", "終電上がりOK"],
+            headerImage: "https://images.unsplash.com/photo-1575037614876-c385bbd826ea?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+            iconImage: "https://images.unsplash.com/photo-1585553616435-2dc0a54e271d?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
+            gallery: [
+                "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=400&q=80",
+                "https://images.unsplash.com/photo-1525268771113-32d9e9021a97?auto=format&fit=crop&w=400&q=80",
+                "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=400&q=80",
+                "https://images.unsplash.com/photo-1543007630-9710e4a00a20?auto=format&fit=crop&w=400&q=80",
+                "https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?auto=format&fit=crop&w=400&q=80",
+                "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&w=400&q=80",
+                "https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?auto=format&fit=crop&w=400&q=80",
+                "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=400&q=80",
+                "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?auto=format&fit=crop&w=400&q=80",
+            ]
+        };
+
+        // ==========================================
+        // 📱 Profile Screen (メインプレビュー)
+        // ==========================================
+        const ProfileScreen = ({ theme, styles, isVerticalAspect, is3D, isGrad }) => {
+            const [activeTab, setActiveTab] = useState('gallery'); // 'gallery' | 'details'
+            const [isScrolled, setIsScrolled] = useState(false);
+
+            // アスペクト比を切り替えるクラス
+            const aspectClass = isVerticalAspect ? 'aspect-[4/5]' : 'aspect-[5/4]';
+
+            useEffect(() => {
+                const handleScroll = (e) => {
+                    setIsScrolled(e.target.scrollTop > 20); // 少しスクロールしたらヘッダーを表示
+                };
+                const el = document.getElementById('profile-scroll-area');
+                if (el) el.addEventListener('scroll', handleScroll);
+                return () => {
+                    if (el) el.removeEventListener('scroll', handleScroll);
+                }
+            }, []);
+
+            const bonusBadgeStyle = `inline-flex items-center gap-4 transform hover:scale-105 transition-all self-start px-4 py-2.5 rounded-full text-[#111] font-bold bg-gradient-to-r from-[#D4AF37] to-[#B8860B] shadow-[inset_0_4px_6px_rgba(255,255,255,0.4),inset_0_-6px_6px_rgba(0,0,0,0.4),0_8px_16px_rgba(0,0,0,0.7)] border border-[#D4AF37]/30`;
+
+            return (
+                <div className={`w-full max-w-[430px] mx-auto h-[100dvh] relative overflow-hidden font-noto ${theme.bgMain} shadow-[0_0_50px_rgba(0,0,0,0.8)]`}>
+                    
+                    {/* Sticky Header - ★ 非スクロール時はボーダーと影を透明にしてガタツキを防止 */}
+                    <header className={`absolute top-0 left-0 w-full z-40 transition-all duration-300 pt-safe ${isScrolled ? styles.glassHeader : 'bg-transparent border-b border-transparent shadow-none'}`}>
+                        <div className="flex justify-between items-center px-4 py-3">
+                            <button className={`w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md transition-colors ${isScrolled ? 'bg-white/10 text-white border-transparent' : 'bg-black/50 text-white border border-white/20'} shadow-md hover:scale-105 active:scale-95`}>
+                                <i className="ph-bold ph-caret-left text-xl"></i>
+                            </button>
+                            <div className={`app-title font-bold tracking-widest text-[15px] transition-opacity duration-300 text-white ${isScrolled ? 'opacity-100' : 'opacity-0'}`}>
+                                {shopData.name}
+                            </div>
+                            <button className={`w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md transition-colors ${isScrolled ? 'bg-white/10 text-white border-transparent' : 'bg-black/50 text-white border border-white/20'} shadow-md hover:scale-105 active:scale-95`}>
+                                <i className="ph-bold ph-share-network text-lg"></i>
+                            </button>
+                        </div>
+                    </header>
+
+                    {/* Scrollable Content */}
+                    <div id="profile-scroll-area" className="w-full h-full overflow-y-auto scrollbar-hide pb-[100px]">
+                        
+                        {/* 1. Hero Image */}
+                        <div className="relative w-full h-[220px]">
+                            <img src={shopData.headerImage} alt="Cover" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-[#050505] opacity-90"></div>
+                        </div>
+
+                        {/* 2. Profile Info */}
+                        <div className="relative px-5 pt-2 pb-6">
+                            
+                            {/* Icon & Stats */}
+                            <div className="flex items-end justify-between -mt-12 mb-4 relative z-10">
+                                <div className="w-[88px] h-[88px] rounded-full border-[3px] border-[#050505] overflow-hidden shadow-[0_8px_16px_rgba(0,0,0,0.6)] bg-[#111]">
+                                    <img src={shopData.iconImage} alt="Icon" className="w-full h-full object-cover" />
+                                </div>
+                                
+                                <div className="flex gap-5 px-2 pb-1">
+                                    <div className="flex flex-col items-center">
+                                        <span className="font-bold text-[18px] text-white tracking-tight">{shopData.likes}</span>
+                                        <span className={`text-[10px] ${theme.textSub}`}>ライク</span>
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        <span className={`font-bold text-[18px] ${styles.textAccent} tracking-tight`}>{shopData.rating}</span>
+                                        <span className={`text-[10px] ${theme.textSub}`}>評価</span>
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        <span className="font-bold text-[18px] text-white tracking-tight">{shopData.reviews}</span>
+                                        <span className={`text-[10px] ${theme.textSub}`}>レビュー</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Name & Basic Info */}
+                            <div className="mb-4">
+                                <h1 className="text-[26px] app-title font-bold text-white mb-2 leading-tight drop-shadow-md">{shopData.name}</h1>
+                                <div className="flex flex-wrap items-center gap-2 text-[11px] mb-3">
+                                    <span className={`${styles.textAccent} border border-[#A855F7]/40 px-2 py-0.5 rounded shadow-sm bg-white/5`}>{shopData.industry}</span>
+                                    <span className={`${theme.textSub} flex items-center`}><i className="ph-fill ph-map-pin mr-1"></i>{shopData.location}</span>
+                                </div>
+                                <p className={`text-[13px] text-white font-medium mb-2 leading-relaxed`}>{shopData.catchphrase}</p>
+                                <p className={`text-[12px] ${theme.textSub} leading-relaxed mb-4`}>{shopData.description}</p>
+                                
+                                <div className="flex flex-wrap gap-1.5">
+                                    {shopData.tags.map((tag, i) => (
+                                        <span key={i} className="text-[10px] font-bold text-white bg-[#1A1A1A] border border-white/10 px-2.5 py-1 rounded-full shadow-sm">
+                                            #{tag}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 3. Tabs (Instagram Style) */}
+                        <div className="flex border-t border-b border-[#A855F7]/30 sticky top-[64px] z-30 bg-[#050505]/90 backdrop-blur-md">
+                            <button 
+                                onClick={() => setActiveTab('gallery')}
+                                className={`flex-1 py-3 flex justify-center transition-colors relative ${activeTab === 'gallery' ? styles.textAccent : 'text-gray-600 hover:text-gray-400'}`}
+                            >
+                                <i className="ph-bold ph-squares-four text-[22px]"></i>
+                                {activeTab === 'gallery' && <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-[40px] h-[2px] bg-gradient-to-r ${theme.accentGrad}`}></div>}
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('details')}
+                                className={`flex-1 py-3 flex justify-center transition-colors relative ${activeTab === 'details' ? styles.textAccent : 'text-gray-600 hover:text-gray-400'}`}
+                            >
+                                <i className="ph-bold ph-list-dashes text-[22px]"></i>
+                                {activeTab === 'details' && <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-[40px] h-[2px] bg-gradient-to-r ${theme.accentGrad}`}></div>}
+                            </button>
+                        </div>
+
+                        {/* 4. Tab Content */}
+                        <div className="w-full min-h-[300px]">
+                            {/* Gallery View */}
+                            {activeTab === 'gallery' && (
+                                <div className="grid grid-cols-3 gap-[2px]">
+                                    {shopData.gallery.map((img, i) => (
+                                        <div key={i} className={`${aspectClass} relative bg-[#111] overflow-hidden group cursor-pointer transition-all duration-300`}>
+                                            <img src={img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors"></div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Details View */}
+                            {activeTab === 'details' && (
+                                <div className="p-4 flex flex-col gap-4 animate-fade-in">
+                                    
+                                    <div className={bonusBadgeStyle}>
+                                        <span className="text-[10px] tracking-wider opacity-90 mr-2">ボーナス金</span>
+                                        <span className="text-[18px] tracking-wider font-extrabold">{shopData.bonus}</span>
+                                    </div>
+
+                                    <div className={`${styles.card} p-5`}>
+                                        <h3 className={`text-[14px] font-bold ${styles.textAccent} mb-4 flex items-center gap-2`}>
+                                            <i className="ph-fill ph-currency-jpy text-lg"></i> 募集条件・給与
+                                        </h3>
+                                        
+                                        <div className="flex flex-col gap-4">
+                                            <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                                                <span className={`text-[12px] ${theme.textSub} font-medium`}>体入時給</span>
+                                                <span className="text-[16px] font-bold text-white tracking-wide">{shopData.hourlyWage}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                                                <span className={`text-[12px] ${theme.textSub} font-medium`}>ヘルプ時給</span>
+                                                <span className="text-[14px] font-bold text-white tracking-wide">{shopData.helpWage}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                                                <span className={`text-[12px] ${theme.textSub} font-medium`}>各種バック</span>
+                                                <div className="text-right">
+                                                    <p className="text-[13px] font-bold text-white">本指名 10% / 場内 5%</p>
+                                                    <p className="text-[10px] text-gray-500 mt-0.5">※売上スライド制あり</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className={`${styles.card} p-5`}>
+                                        <h3 className={`text-[14px] font-bold ${styles.textAccent} mb-4 flex items-center gap-2`}>
+                                            <i className="ph-fill ph-clock text-lg"></i> 勤務時間
+                                        </h3>
+                                        <p className="text-[13px] text-white leading-relaxed font-medium">
+                                            20:00 〜 翌1:00<br/>
+                                            <span className="text-[11px] text-gray-400 mt-1 block">※週1日・1日3時間〜勤務OK<br/>※終電上がりOK・遅出OK</span>
+                                        </p>
+                                    </div>
+
+                                    {/* ★追加: アクセス・位置情報 */}
+                                    <div className={`${styles.card} p-5`}>
+                                        <h3 className={`text-[14px] font-bold ${styles.textAccent} mb-4 flex items-center gap-2`}>
+                                            <i className="ph-fill ph-map-pin text-lg"></i> アクセス・位置情報
+                                        </h3>
+                                        <p className="text-[13px] text-white leading-relaxed font-medium mb-1">
+                                            {shopData.location}
+                                        </p>
+                                        <p className={`text-[11px] ${theme.textSub} mb-4`}>
+                                            東京都港区六本木X-X-X ビル名X階<br />
+                                            六本木駅 徒歩3分
+                                        </p>
+                                        
+                                        {/* 地図のプレースホルダー */}
+                                        <div className={`w-full h-[140px] rounded-[12px] bg-[#111] border ${styles.fixedBorderColor} flex items-center justify-center overflow-hidden relative shadow-inner`}>
+                                            <div className="absolute inset-0 bg-[#1A1A1A] opacity-50 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.05)_50%,transparent_75%)] bg-[length:20px_20px]"></div>
+                                            <i className="ph-fill ph-map-trifold text-4xl text-white/20 relative z-10"></i>
+                                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pb-4 z-10">
+                                                <i className={`ph-fill ph-map-pin text-3xl ${styles.textAccent} drop-shadow-md`}></i>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className={`${styles.card} p-5`}>
+                                        <h3 className={`text-[14px] font-bold ${styles.textAccent} mb-4 flex items-center gap-2`}>
+                                            <i className="ph-fill ph-check-circle text-lg"></i> 待遇・福利厚生
+                                        </h3>
+                                        <ul className="text-[13px] text-white leading-loose space-y-1">
+                                            <li className="flex items-center gap-2"><i className="ph-bold ph-check text-[#D4AF37]"></i> 全額日払いOK</li>
+                                            <li className="flex items-center gap-2"><i className="ph-bold ph-check text-[#D4AF37]"></i> 深夜送り無料対応</li>
+                                            <li className="flex items-center gap-2"><i className="ph-bold ph-check text-[#D4AF37]"></i> ドレス・靴・ポーチ無料レンタル</li>
+                                            <li className="flex items-center gap-2"><i className="ph-bold ph-check text-[#D4AF37]"></i> 経験者優遇・未経験者歓迎</li>
+                                            <li className="flex items-center gap-2"><i className="ph-bold ph-check text-[#D4AF37]"></i> 個人ロッカー完備</li>
+                                        </ul>
+                                    </div>
+
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* 5. Bottom Action Bar */}
+                    <div className={`absolute bottom-0 left-0 w-full z-50 ${styles.glassFooter} pb-safe`}>
+                        <div className="flex items-center gap-3 px-4 py-3">
+                            {/* Like Button */}
+                            <button className={`w-[52px] h-[52px] rounded-full bg-black/60 border border-white/20 flex items-center justify-center shadow-lg shrink-0 hover:bg-white/10 hover:border-[#F9A8D4]/50 active:scale-95 transition-all`}>
+                                <i className={`ph-bold ph-heart text-[24px] ${styles.textAccent}`}></i>
+                            </button>
+                            
+                            {/* Primary Action Button */}
+                            <button className={`flex-1 h-[52px] rounded-full bg-gradient-to-r ${theme.accentGrad} text-[#111] font-bold shadow-[0_4px_16px_rgba(244,114,182,0.4)] flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all`}>
+                                <i className="ph-bold ph-paper-plane-tilt text-xl"></i>
+                                メッセージを送る
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ==========================================
+        // 🚀 アプリケーション全体 (コントローラー + プレビュー)
+        // ==========================================
+        const App = () => {
+            const [currentAccentId, setCurrentAccentId] = useState('light_pink');
+            const [hfColorId, setHfColorId] = useState('deep_purple');
+            const [inputStyle, setInputStyle] = useState('light');
+            const [is3D, setIs3D] = useState(true);
+            const [isGrad, setIsGrad] = useState(true);
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
+            
+            // ★ 画像のアスペクト比切り替え用 (true: 4:5, false: 5:4)
+            const [isVerticalAspect, setIsVerticalAspect] = useState(true);
+
+            const theme = { ...bgThemes.black, ...accentColors[currentAccentId], bgMainHex: '#050505' };
+            const styles = generateStyles(theme, inputStyle, is3D, isGrad, hfColorDefs[hfColorId]);
+
+            return (
+                <div className={`h-[100dvh] w-full flex flex-col ${theme.bgApp} transition-colors duration-500 font-noto`}>
+                    <TailwindSafelist />
+                    
+                    {/* デザイン切り替えボタン */}
+                    <button onClick={() => setIsMenuOpen(true)} className="fixed top-4 right-4 z-[60] bg-black/60 backdrop-blur-md border border-white/20 px-4 py-3 rounded-full shadow-2xl flex items-center gap-2 hover:scale-105 transition-all">
+                        <i className="ph-fill ph-palette text-[20px] text-white"></i>
+                        <span className="text-white text-[10px] font-bold tracking-widest uppercase">Design</span>
+                    </button>
+                    
+                    {isMenuOpen && <div className="fixed inset-0 bg-black/50 z-[70]" onClick={() => setIsMenuOpen(false)}></div>}
+                    
+                    {/* コントローラーパネル */}
+                    <div className={`fixed top-0 right-0 h-full w-[300px] bg-[#0A0A0A]/95 backdrop-blur-xl border-l border-white/10 z-[80] transform transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'} p-6 overflow-y-auto`}>
+                        <div className="flex justify-between mb-8 pb-4 border-b border-white/10 text-white font-bold tracking-widest text-sm flex items-center gap-2">
+                            <i className="ph-fill ph-faders text-white"></i>CONTROLLER
+                            <i onClick={() => setIsMenuOpen(false)} className="ph-bold ph-x text-gray-400 cursor-pointer ml-auto"></i>
+                        </div>
+                        <div className="flex flex-col gap-6 text-white text-[10px] font-bold tracking-wider">
+                            
+                            {/* ★ アスペクト比 切り替え */}
+                            <div className="border-t border-white/10 pt-4 flex flex-col gap-2">
+                                <label className="uppercase text-white text-[10px] font-bold tracking-wider">Image Aspect Ratio</label>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setIsVerticalAspect(true)} className={`flex-1 py-2 text-[11px] font-bold border rounded transition-all ${isVerticalAspect ? 'bg-white text-black' : 'border-white/20 text-white'}`}>縦長 (4:5)</button>
+                                    <button onClick={() => setIsVerticalAspect(false)} className={`flex-1 py-2 text-[11px] font-bold border rounded transition-all ${!isVerticalAspect ? 'bg-white text-black' : 'border-white/20 text-white'}`}>横長 (5:4)</button>
+                                </div>
+                            </div>
+
+                            <label className="mb-[-15px] uppercase">Header & Footer Color</label>
+                            <select className="bg-[#1A1A1A] border border-white/20 rounded-lg p-3 outline-none" value={hfColorId} onChange={e => setHfColorId(e.target.value)}>
+                                {Object.values(hfColorDefs).map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                            </select>
+                            
+                            <label className="mb-[-15px] uppercase">Text & Icon Color</label>
+                            <select className="bg-[#1A1A1A] border border-white/20 rounded-lg p-3 outline-none" value={currentAccentId} onChange={e => setCurrentAccentId(e.target.value)}>
+                                {Object.values(accentColors).map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                            </select>
+                            
+                            <div className="border-t border-white/10 pt-4 flex flex-col gap-4">
+                                <label className="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" checked={is3D} onChange={e => setIs3D(e.target.checked)} className="hidden" />
+                                    <div className={`w-5 h-5 border rounded flex items-center justify-center ${is3D ? 'bg-white' : ''}`}>{is3D && <i className="ph-bold ph-check text-black"></i>}</div>思いっきり立体
+                                </label>
+                                <label className="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" checked={isGrad} onChange={e => setIsGrad(e.target.checked)} className="hidden" />
+                                    <div className={`w-5 h-5 border rounded flex items-center justify-center ${isGrad ? 'bg-white' : ''}`}>{isGrad && <i className="ph-bold ph-check text-black"></i>}</div>グラデーション背景
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 flex flex-col w-full max-w-[430px] mx-auto bg-[#050505] shadow-[0_0_50px_rgba(0,0,0,0.8)] relative overflow-hidden h-full">
+                        <ProfileScreen theme={theme} styles={styles} isVerticalAspect={isVerticalAspect} is3D={is3D} isGrad={isGrad} />
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

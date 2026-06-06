@@ -7,7 +7,8 @@
 
 - **フレームワーク**: Laravel（PHP）
 - **テンプレートエンジン**: Blade
-- **フロントエンド**: Vanilla JS（一部 jQuery）、Tailwind CSS
+- **フロントエンド**: Vanilla JS（一部 jQuery）、Tailwind CSS v4（CSS-first config / @tailwindcss/cli）
+- **ビルド**: Tailwind は CLI で `public/assets/css/tailwind.css` に直接出力（Vite はバイパス運用中）
 - **DB**: MySQL 8.0
 - **デプロイ先**: Plesk サーバ
 - **認証**: キャスト / 店舗 / 管理者 の3ロール
@@ -83,6 +84,21 @@ public/assets/js/    # フロントエンドJS
 
 ### デザイン
 - デザインは `DESIGN.md` の定義に従う。コード・ビュー生成時は必ず参照すること。
+
+### Tailwind CSS（v4）
+- Tailwind v4 を使用。`tailwind.config.js` は **使わない**（v4 から CSS-first config に変更）。
+- 設定の正本は `resources/css/app.css`:
+  - `@import "tailwindcss";` で本体を読み込む
+  - `@source "../views";` で Blade を走査対象に追加（`resources/js` 等も必要に応じて `@source` で追記）
+  - 色・影などのデザイントークンは `@theme { ... }` ブロックに集約（例: `--color-gold: #c5a059;`）
+- ビルドは **`@tailwindcss/cli` 直叩き** で `public/assets/css/tailwind.css` に出力（Vite は使わない）。
+  - 本番: `npm run tw:build`（minify あり）
+  - 開発: `npm run tw:watch`（差分監視）
+- ビュー側からは `<link rel="stylesheet" href="{{ asset('assets/css/tailwind.css') }}">` で読み込む。
+  - すでに `layouts/app.blade.php` / `layouts/admin.blade.php` / `layouts/lp.blade.php` に組み込み済み。
+  - 既存のページ固有 CSS（`asset('assets/css/*.css')`）**より前** に置くこと（preflight を既存スタイルで上書き可能にして回帰を防ぐ）。
+- PostCSS 設定や `@tailwind base/components/utilities` 旧ディレクティブは **書かない**（v4 では不要）。
+- Blade を新規追加・移動したら `npm run tw:build` を必ず再実行（CLI は起動時の `@source` 走査結果でクラスを抽出するため）。
 
 ### コーディング規約
 - PSR-12 準拠（PHP）

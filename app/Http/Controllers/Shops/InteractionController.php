@@ -201,6 +201,7 @@ class InteractionController extends Controller
 
         return view('shops.interaction.index', [
             'pageId' => 'connection',
+            'isCastPortal' => $isCastPortal,
             'keepCasts' => $keepCasts,
             'receivedLikeCasts' => $receivedLikeCasts,
             'sentLikeCasts' => $sentLikeCasts,

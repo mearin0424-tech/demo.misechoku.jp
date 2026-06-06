@@ -55,6 +55,7 @@
     <script src="{{ asset('assets/js/app.js') }}" defer></script>
 
     @stack('styles')
+    @stack('head-styles')
 </head>
     
 <body class="@yield('body-class')" data-notification-badge="{{ isset($unreadNewsCount) ? (int) $unreadNewsCount : 0 }}">
@@ -238,5 +239,6 @@
         }
       })();
     </script>
+    @stack('foot-scripts')
 </body>
 </html>

@@ -1,111 +1,179 @@
-# ミセチョク デザイン定義
+# DESIGN.md — デザインシステムの単一の正
 
-> CLAUDE.md からの参照元。ビュー / CSS 生成時はこの定義に従う。
+このファイルは UI 実装の **唯一の正（Single Source of Truth）** です。
+全画面はここに定義されたトークンと x-ui コンポーネントだけで組みます。
+CLAUDE.md から本ファイルを参照させ、画面移行のたびに先頭に読み込ませてください。
+
+実体は `resources/css/app.css` の `@theme` ブロックにあります。本ファイルは
+「何を・なぜ・どう使うか」を定義する仕様書です。
 
 ---
 
-## DISCOVERY（スワイプ画面）
+## 0. 一本化の決定事項（2枚のプロトタイプの食い違いを解消）
 
-### 1. 画面コンセプトと基本レイアウト
+| 項目 | プロトA（mypage） | プロトB（その他画面） | 採用 |
+|---|---|---|---|
+| **プライマリボタン色** | アクセント追従（`#8B5CF6` / グラデ `#A78BFA→#7C3AED`） | 固定ディープパープル（`#581C87` / グラデ `#6B21A8→#3B0764`） | **★要確認：アクセント追従を既定** |
+| ボタン上の文字色 | `#E6DFFC` / グラデ `#F4F2FA` | `#F3E8FF` / グラデ `#FAF5FF` | アクセント追従（`--on-accent`） |
+| アクセント枠 | `#A855F7/40` | `#A855F7/40` | 一致 → `border-line-accent/40` |
+| 背景 / 文字 / サブ | `#050505 / #F5F5F5 / #A0A0A0` | 同左 | 一致 |
 
-- **フルスクリーン・イマーシブ体験**: カード型の余白を排除し、スマートフォン画面全体（フルブリード）に店舗やキャストの画像を広げる TikTok / Instagram リール形式。没入感を最大化。
-- **無限ループスワイプ**: リストの最後まで到達しても最初のカードに戻る無限ループ。ブラウジングを途切れさせない。
-- **片手操作の最適化**: 「ライク」「メッセージ」などの主要アクションは、右手の親指でアクセスしやすい画面右下に縦配置。
+> **★確認してほしい1点：プライマリボタンの色**
+> A はテーマ（アメジスト/ライラック/水色/ピンク）に追従、B はテーマに関係なく固定ディープパープル。
+> テーマスイッチャーを活かす観点から **既定はアクセント追従** にしています。
+> 固定ディープパープルにしたい場合は、ボタンの class を
+> `bg-accent` → `bg-deep-purple-btn` / `from-accent-grad-from to-accent-grad-to` → `from-deep-purple-from to-deep-purple-to` に
+> 差し替えるだけ（1行）です。
 
-### 2. カラーパレットと視認性
+---
 
-背景画像の明るさに依存せず、テキスト / UI を常に明瞭に読ませる処理を施す。
+## 1. カラートークン
 
-| 役割 | 値 |
-|---|---|
-| ベース背景（ソリッド） | `#050505`（ピュアブラック） |
-| アクセント | Light Pink（デフォルト） |
-| アクセントグラデ | `#FBCFE8` → `#F472B6` |
+| 用途 | トークン（utility） | 値 |
+|---|---|---|
+| アプリ背景 | `bg-base` | `#050505` |
+| 3Dカード上端グラデ | `from-surface-from` | `#1a1a1a`（→ `to-base`） |
+| 本文 | `text-text-main` | `#F5F5F5` |
+| サブ文字 | `text-text-sub` | `#A0A0A0` |
+| 通常ボーダー | `border-line` | `#2A2A2A` |
+| アクセント枠 | `border-line-accent/40` | `#A855F7` @40% |
+| アクセント面 | `bg-accent` | テーマ追従 |
+| アクセント文字 | `text-accent-text` | テーマ追従 |
+| アクセントグラデ | `from-accent-grad-from to-accent-grad-to` | テーマ追従 |
+| アクセント上の文字 | `text-on-accent` / `text-on-accent-strong` | テーマ追従 |
+| ディープパープル | `bg-deep-purple` | `#9333EA` |
+| ボーナス金グラデ | `from-gold-from to-gold-to` | `#D4AF37 → #B8860B` |
+| 明るい入力背景 | `bg-input-light` | `#F5F2FA` |
 
-#### ディープ・シャドウ・フェード（画像上のグラデオーバーレイ）
+**禁止：** `bg-[#050505]` のような任意値、`text-white` 等のベタ指定（白はアイコンのみ可）。
 
-- 画面下部 75 % に、下→上の強力な黒グラデを重ねる
-- 最下部〜中間: `from-[#050505] via-[#050505]/80 to-transparent`
-- 画像全体への薄い暗幕: `from-black/50 via-transparent to-[#050505] opacity-95`
+---
 
-#### ヘビー・テキストシャドウ
+## 2. テーマ切替
 
-店舗名や時給などの重要な白文字には、輪郭をくっきりさせる多重シャドウを適用。
+ルート要素の `data-theme` を切り替える（`amethyst`（既定）/ `lilac` / `light_blue` / `light_pink`）。
+アクセント系トークンはすべて CSS 変数経由なので、属性を変えるだけで全画面が一括追従する。
+画面ごとに色分岐を書かない。
 
-```css
-text-shadow:
-  0 2px 4px rgba(0,0,0,0.9),
-  0 4px 12px rgba(0,0,0,0.9),
-  0 0 2px rgba(0,0,0,0.5);
+```html
+<html data-theme="amethyst"> ... </html>
 ```
 
-### 3. UI コンポーネント仕様
+---
 
-#### 3.1 ヘッダー（Glass Header）
+## 3. タイポグラフィ
 
-- スタイル: ディープパープル単色 `bg-[#9333EA]/30` + `backdrop-blur-md`
-- タイポ: 画面タイトル「DISCOVERY」は **Montserrat** 中央配置
-- アイコン: 通知（ベル）は純白＋ドロップシャドウ。未読バッジのみアクセントカラー
-
-#### 3.2 サイド・アクションボタン（Right Action Buttons）
-
-画面右下 `bottom-[30%]` 付近、縦配置。ラベルテキストは廃止、アイコンのみ。
-
-**コンテナ（フラット・グラスモーフィズム）**
-- 形状: `w-[60px] h-[60px] rounded-full`
-- 背景: `bg-black/60 backdrop-blur-lg`
-- 枠線: `border-[1.5px] border-white/40`
-- 影: `shadow-[0_8px_20px_rgba(0,0,0,0.6)]`
-
-**アイコン**
-- サイズ: 30 px
-- カラー: アクセントグラデをテキストに適用（`text-gradient`）
-- 効果: 薄い白のグロー `drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]`
-
-**インタラクション**
-- ホバー時: `hover:scale-105`
-- タップ時: `active:scale-90`
-
-#### 3.3 店舗情報エリア（Info Container）
-
-画面下部（`pb-44` で底上げ、スワイプガイドとの重なり防止）。
-
-- **キャッチコピー**: 背景黒のすりガラス風ピル `bg-[#121212]/80 backdrop-blur-md` ＋白文字、中央配置
-- **店舗名**: 34 px、明朝 / Serif フォント
-- **評価・エリア**: アイコンにアクセントカラー、テキストは白とグレーでメリハリ
-- **ボーナスバッジ**: 金銭情報のみ「ゴールド」の立体グラデ `from-[#D4AF37] to-[#B8860B]`
-- **時給情報**:
-  - 体入時給: 白文字 24 px
-  - ヘルプ時給: グレー 18 px
-  - ラベルは `whitespace-nowrap`
-  - フォーマット: `￥2,500 ~ ￥5,000`
-
-#### 3.4 スワイプ誘導ガイド（Swipe Guide）
-
-画面下部 `bottom-[100px]` 中央。テキストなし。
-
-- アイコン: 上向きキャレット（`ph-caret-up`）、32 px
-- スタイル: 白、ドロップシャドウ付き
-- アニメ: 縦バウンス（`animate-bounce`）を常時適用
-
-### 4. インタラクション・ロジック
-
-**縦スワイプ（Y 軸）**
-- しきい値: 60 px 以上のドラッグ
-- アクション: 次 / 前の店舗カードへ切替（Z 軸重なりでアニメ）
-
-**横スワイプ / 画面左右タップ（X 軸）**
-- しきい値: 60 px 以上のドラッグ、または画面の右半分 / 左半分のタップ
-- アクション: 同一店舗内の画像を次 / 前へ
-
-**プログレスバー**
-- 画像上部に、現在の画像インデックスを示すバーを配置
-- アクティブ: 白色＋発光
-- 非アクティブ: 半透明の白
+| 用途 | utility |
+|---|---|
+| 本文 | `font-sans`（Noto Sans JP・既定） |
+| 見出し・英字ロゴ | `.app-title`（Montserrat / letter-spacing 0.05em） |
 
 ---
 
-## 注意
+## 4. シャドウ（3D / ニューモーフィズム）
 
-- 上記は **DISCOVERY（スワイプ）画面のみの定義**。フォーム・一覧・マイページ等の他画面は黒＋シャンパンゴールド（`--gold #c5a059`）の既存トークン体系を維持する。
-- Discovery では Light Pink / Purple アクセントを意図的に使用し、没入体験用の「特別な画面」として差別化する。
+| utility | 用途 |
+|---|---|
+| `shadow-btn-3d` / `shadow-btn-3d-active` | ボタン（押下時は `active:` で差し替え） |
+| `shadow-badge-3d` | バッジ |
+| `shadow-fab-3d` | FAB |
+| `shadow-card-3d` | カード |
+| `shadow-header` / `shadow-footer` | グラスヘッダー / フッター |
+| `shadow-input-dark` / `shadow-input-light` | 入力欄 |
+| `shadow-gold-3d` | ボーナス金バッジ |
+| `shadow-nav-pill` | ナビ3Dスタイルのアクティブ丸 |
+
+**禁止：** `shadow-[inset_0_4px_6px_...]` の任意値。上記トークンを使う。
+
+---
+
+## 5. アイコン辞書（Phosphor）
+
+**生クラス（`ph-fill ph-house` 等）を画面に直書きしない。** 必ず意味名で `<x-ui.icon>` を呼ぶ。
+新しいアイコンが要るときは、まずこの表に意味名を追加してから使う。
+
+| 意味名（name） | Phosphor クラス |
+|---|---|
+| `home` | `ph-fill ph-house` |
+| `search` | `ph-bold ph-magnifying-glass` |
+| `likes` | `ph-fill ph-heart` |
+| `talk` | `ph-fill ph-chat-teardrop-text` |
+| `mypage` | `ph-fill ph-user` |
+| `back` | `ph-bold ph-caret-left` |
+| `share` | `ph-bold ph-share-network` |
+| `like`（スワイプ） | `ph-fill ph-heart` |
+| `nope`（スワイプ） | `ph-bold ph-x` |
+| `super`（スワイプ） | `ph-fill ph-star` |
+| `forward` | `ph-bold ph-caret-right` |
+| `settings` | `ph-bold ph-gear-six` |
+| `close` | `ph-bold ph-x` |
+| `plus` | `ph-bold ph-plus` |
+| `check` | `ph-bold ph-check` |
+
+> 読み込みは npm パッケージ `@phosphor-icons/web` を `resources/js/app.js` で import する想定（CDN webfont 廃止）。
+
+---
+
+## 6. アニメーション / トランジション
+
+| utility | 効果 |
+|---|---|
+| `animate-slide-up` | 下から30pxフェードイン（カード・モーダル登場） |
+| `animate-fade-in` | scale 0.95→1 のフェードイン |
+| `transition-all duration-300` | 既定のトランジション尺（ホバー・状態変化） |
+
+keyframes はコンパイル済み CSS にのみ存在する。**画面側に `<style>` で keyframes を書かない。**
+
+---
+
+## 7. コンポーネント一覧（x-ui.*）
+
+各画面はこれらを組み合わせるだけ。class レシピ（= 実装の根拠）を併記。
+`is3D` / `isGrad` 等のバリエーションは props で出し分ける。
+
+| コンポーネント | class レシピ（既定） |
+|---|---|
+| `x-ui.button`（primary） | `inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full font-bold bg-accent text-on-accent shadow-btn-3d active:translate-y-1.5 active:shadow-btn-3d-active transition-all duration-300` |
+| `x-ui.button`（grad） | 上記の `bg-accent` を `bg-gradient-to-r from-accent-grad-from to-accent-grad-to text-on-accent-strong` に置換 |
+| `x-ui.badge` | `px-4 py-2 rounded-full bg-accent text-on-accent shadow-badge-3d font-bold text-sm` |
+| `x-ui.fab` | `fixed bottom-[90px] right-5 w-14 h-14 rounded-full flex items-center justify-center bg-accent text-on-accent shadow-fab-3d active:translate-y-1.5 transition-all z-30` |
+| `x-ui.card` | `rounded-card overflow-hidden border border-line-accent/40 bg-gradient-to-br from-surface-from to-base shadow-card-3d transition-all duration-300`（flat 時は bg/shadow を外す） |
+| `x-ui.menu-card` | card に `p-4 flex items-center justify-between rounded-panel cursor-pointer group` |
+| `x-ui.header`（glass） | `bg-deep-purple/30 backdrop-blur-md border-b border-line-accent/40 shadow-header pt-safe` |
+| `x-ui.bottom-nav` | `bg-deep-purple/30 backdrop-blur-md border-t border-line-accent/40 shadow-footer pb-safe`（中身は §8 参照） |
+| `x-ui.icon` | `<i class="{Phosphorクラス}">`（name → §5 で解決） |
+| `x-ui.input` | dark: `bg-accent/10 border border-line-accent/40 shadow-input-dark text-text-main` / light: `bg-input-light shadow-input-light text-input-light-text` |
+| message bubble（自分） | `px-4 py-2.5 rounded-[20px] rounded-tr-sm bg-accent text-on-accent shadow-badge-3d font-medium text-[13px] leading-relaxed w-fit` |
+| message bubble（相手） | `... rounded-tl-sm` + card と同じ面 |
+
+---
+
+## 8. インタラクション / アクション一覧（data属性駆動の共通JS）
+
+挙動は画面ごとに書かず、**1つの behaviors.js が data 属性を見て付与する。**
+画面の Blade は「属性を置くだけ」。これでアクションが全画面で完全に一致する。
+
+| data 属性 | 挙動 |
+|---|---|
+| `data-swipe-deck` / `data-swipe-action="like\|nope\|super"` | カードのドラッグ＆スワイプ判定・アクション発火 |
+| `data-bottom-nav` / `data-nav-style="neon\|flat\|3d"` | 下部ナビのアクティブ表示・スタイル出し分け |
+| `data-fab` | FABの押下挙動 |
+| `data-tabs` / `data-tab-panel="..."` | タブ切替（例：gallery / details） |
+| `data-scroll-reveal` | スクロール量に応じたヘッダーの出し入れ（`isScrolled` 相当） |
+| `data-message-form` | メッセージ送信・吹き出し追加 |
+
+---
+
+## 9. 画面移行ルール（Claude Code 向け）
+
+**必ず守る：**
+- 本ファイルのトークンと `x-ui.*` だけで組む
+- アイコンは `<x-ui.icon name="...">`、アクションは data 属性
+- 1画面ずつ。完了後に `npm run build` を通し、purge 警告ゼロを確認 → 目視確認 → 移行チェックリストを更新
+
+**禁止：**
+- 任意値（`bg-[#...]` `shadow-[...]` `text-[13px]` 等。`text-[13px]` のような一回限りのサイズは可だが色・影は不可）
+- Phosphor 生クラスの直書き
+- 画面内の `<style>` での keyframes / 色定義
+- 文字列連結によるクラス生成（`'bg-' + x`）。purge で消える
+- 画面ごとの色分岐（テーマは `data-theme` に一元化）
