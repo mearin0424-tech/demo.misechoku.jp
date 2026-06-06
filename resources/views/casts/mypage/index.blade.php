@@ -70,13 +70,7 @@
             </div>
         </div>
 
-        {{-- ===== Bonus badge ===== --}}
-        <div class="mb-5">
-            <x-ui.badge variant="gold">
-                <span class="text-[10px] tracking-wider opacity-90 mr-2">獲得ボーナス金合計</span>
-                <span class="text-[16px] tracking-wider font-extrabold">¥{{ $bonusTotal }}</span>
-            </x-ui.badge>
-        </div>
+        {{-- 獲得ボーナス金合計バッジは「採用・入金管理」画面に移設 --}}
 
         {{-- ===== Sub-page menu（採用・入金管理のみ。本人確認/プロフィール編集は DETAILS 内、レビューは採用・入金管理から店舗別導線へ） ===== --}}
         <div class="flex flex-col gap-3">
@@ -272,8 +266,13 @@
             </div>
         </div>
         <div class="gallery-preview-actions image-edit-actions flex gap-2 justify-end">
-            <x-ui.button id="image-edit-cancel-btn" variant="solid">別の画像を選ぶ</x-ui.button>
-            <x-ui.button id="image-edit-confirm-btn" variant="grad" icon="check">この画像でアップロード</x-ui.button>
+            {{-- キャンセル：副次アクションなのでグレー --}}
+            <button type="button" id="image-edit-cancel-btn"
+                    class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full font-bold bg-gray-700 text-gray-200 border border-gray-600 shadow-md hover:bg-gray-600 active:translate-y-1 transition-all duration-300">
+                キャンセル
+            </button>
+            {{-- アップロード：主要アクション。x-ui.button variant="grad" を踏襲 --}}
+            <x-ui.button id="image-edit-confirm-btn" variant="grad" icon="check">アップロード</x-ui.button>
         </div>
     </div>
 </div>
@@ -400,6 +399,12 @@ window.MYPAGE_GALLERY_CONFIG = {
         border-radius: 0;
         overflow: hidden;
         cursor: pointer;
+        box-sizing: border-box;
+    }
+    /* 画像未登録の枠：点線で「ここに追加できる」を視覚化 */
+    #gallery-list .photo-slot:not(.has-img) {
+        border: 2px dashed rgba(255, 255, 255, 0.22);
+        background: transparent;
     }
     #gallery-list .photo-slot > img {
         width: 100%;
@@ -414,7 +419,7 @@ window.MYPAGE_GALLERY_CONFIG = {
         align-items: center;
         justify-content: center;
         font-size: 22px;
-        opacity: 0.4;
+        opacity: 0.45;
     }
     #gallery-list .photo-slot-badge {
         position: absolute;

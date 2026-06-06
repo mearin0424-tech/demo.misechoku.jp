@@ -184,8 +184,8 @@
         {{-- オコジョガイド：表示／文言は運営管理画面で設定 --}}
         @include('layouts.parts.character-guide')
 
-        {{-- メイン --}}
-        <main id="main-content">
+        {{-- メイン（サイドバーの right 位置と揃えるため max-w-[430px] で中央寄せ） --}}
+        <main id="main-content" class="max-w-[430px] mx-auto">
             @yield('content')
         </main>
 
@@ -195,39 +195,39 @@
              ============================================================ --}}
         <nav data-bottom-nav data-nav-style="neon"
              class="fixed bottom-0 left-0 w-full z-50 pb-safe bg-deep-purple/30 backdrop-blur-md border-t border-line-accent/40 shadow-footer">
-            <div class="flex justify-around items-center pt-3 pb-2 px-2 max-w-[430px] mx-auto">
+            <div class="flex justify-around items-center pt-1.5 pb-1 px-2 max-w-[430px] mx-auto">
                 <a href="{{ route($navPrefix . '.home') }}"
-                   class="nav-item flex flex-col items-center p-2 transition-all duration-300 {{ $navIsHome ? 'is-active' : '' }}">
-                    <span class="nav-icon-wrap w-12 h-12 rounded-full flex items-center justify-center mb-0.5 transition-all">
-                        <x-ui.icon name="home" class="nav-icon text-[28px] transition-all" />
+                   class="nav-item flex flex-col items-center px-2 py-0.5 transition-all duration-300 {{ $navIsHome ? 'is-active' : '' }}">
+                    <span class="nav-icon-wrap w-9 h-9 rounded-full flex items-center justify-center transition-all">
+                        <x-ui.icon name="home" class="nav-icon text-[22px] transition-all" />
                     </span>
                     <span class="app-title text-[9px] font-bold tracking-wider">ENCOUNT</span>
                 </a>
                 <a href="{{ $searchHref }}"
-                   class="nav-item flex flex-col items-center p-2 transition-all duration-300 {{ $navIsSearch ? 'is-active' : '' }}">
-                    <span class="nav-icon-wrap w-12 h-12 rounded-full flex items-center justify-center mb-0.5 transition-all">
-                        <x-ui.icon name="search" class="nav-icon text-[28px] transition-all" />
+                   class="nav-item flex flex-col items-center px-2 py-0.5 transition-all duration-300 {{ $navIsSearch ? 'is-active' : '' }}">
+                    <span class="nav-icon-wrap w-9 h-9 rounded-full flex items-center justify-center transition-all">
+                        <x-ui.icon name="search" class="nav-icon text-[22px] transition-all" />
                     </span>
                     <span class="app-title text-[9px] font-bold tracking-wider">SEARCH</span>
                 </a>
                 <a href="{{ route($navPrefix . '.interaction.index') }}"
-                   class="nav-item flex flex-col items-center p-2 transition-all duration-300 {{ $navIsInteraction ? 'is-active' : '' }}">
-                    <span class="nav-icon-wrap w-12 h-12 rounded-full flex items-center justify-center mb-0.5 transition-all">
-                        <x-ui.icon name="likes" class="nav-icon text-[28px] transition-all" />
+                   class="nav-item flex flex-col items-center px-2 py-0.5 transition-all duration-300 {{ $navIsInteraction ? 'is-active' : '' }}">
+                    <span class="nav-icon-wrap w-9 h-9 rounded-full flex items-center justify-center transition-all">
+                        <x-ui.icon name="likes" class="nav-icon text-[22px] transition-all" />
                     </span>
                     <span class="app-title text-[9px] font-bold tracking-wider">LIKES</span>
                 </a>
                 <a href="{{ route($navPrefix . '.talk.index') }}"
-                   class="nav-item flex flex-col items-center p-2 transition-all duration-300 {{ $navIsTalk ? 'is-active' : '' }}">
-                    <span class="nav-icon-wrap w-12 h-12 rounded-full flex items-center justify-center mb-0.5 transition-all">
-                        <x-ui.icon name="talk" class="nav-icon text-[28px] transition-all" />
+                   class="nav-item flex flex-col items-center px-2 py-0.5 transition-all duration-300 {{ $navIsTalk ? 'is-active' : '' }}">
+                    <span class="nav-icon-wrap w-9 h-9 rounded-full flex items-center justify-center transition-all">
+                        <x-ui.icon name="talk" class="nav-icon text-[22px] transition-all" />
                     </span>
                     <span class="app-title text-[9px] font-bold tracking-wider">TALK</span>
                 </a>
                 <a href="{{ route($navPrefix . '.mypage.index') }}"
-                   class="nav-item flex flex-col items-center p-2 transition-all duration-300 {{ $navIsMypage ? 'is-active' : '' }}">
-                    <span class="nav-icon-wrap w-12 h-12 rounded-full flex items-center justify-center mb-0.5 transition-all">
-                        <x-ui.icon name="mypage" class="nav-icon text-[28px] transition-all" />
+                   class="nav-item flex flex-col items-center px-2 py-0.5 transition-all duration-300 {{ $navIsMypage ? 'is-active' : '' }}">
+                    <span class="nav-icon-wrap w-9 h-9 rounded-full flex items-center justify-center transition-all">
+                        <x-ui.icon name="mypage" class="nav-icon text-[22px] transition-all" />
                     </span>
                     <span class="app-title text-[9px] font-bold tracking-wider">MY PAGE</span>
                 </a>

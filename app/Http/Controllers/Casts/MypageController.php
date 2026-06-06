@@ -236,6 +236,16 @@ class MypageController extends Controller
             return ($b['progress_index'] ?? 0) <=> ($a['progress_index'] ?? 0);
         });
 
+        // 獲得ボーナス金合計（mypage から移設したバッジ用）
+        $bonusTotal = 0;
+        if (Schema::hasTable('application_deposits') && Schema::hasTable('shop_job_applications')) {
+            $bonusTotal = (int) DB::table('application_deposits')
+                ->join('shop_job_applications', 'application_deposits.shop_job_application_id', '=', 'shop_job_applications.id')
+                ->where('shop_job_applications.cast_id', $castId)
+                ->whereNotNull('application_deposits.bonus_amount')
+                ->sum('application_deposits.bonus_amount');
+        }
+
         return view('casts.mypage.employment', [
             'pageId' => 'mypage',
             'employments' => $employments, // 旧データ：互換用に保持
@@ -249,6 +259,7 @@ class MypageController extends Controller
             'canRequestDeposit' => $paymentData['can_request'],
             'requestDisabledReason' => $paymentData['request_disabled_reason'],
             'requestTarget' => $paymentData['request_target'],
+            'bonusTotal' => $bonusTotal,
         ]);
     }
 

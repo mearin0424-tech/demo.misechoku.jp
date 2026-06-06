@@ -282,7 +282,16 @@
                 $activeCases = collect($hiredCases)->filter(fn ($c) => empty($c['is_completed']))->values();
                 $completedCases = collect($hiredCases)->filter(fn ($c) => !empty($c['is_completed']))->values();
                 $actionableCount = $activeCases->filter(fn ($c) => !empty($c['actionable']))->count();
+                $bonusTotal = $bonusTotal ?? 0;
             @endphp
+
+            {{-- 獲得ボーナス金合計バッジ（旧 mypage 上部から移設。x-ui.badge variant="gold" のデザイン踏襲） --}}
+            <div style="margin: 4px 0 18px;">
+                <div style="display:inline-flex;align-items:center;gap:10px;padding:8px 18px;border-radius:999px;background:linear-gradient(to right,#D4AF37,#B8860B);color:#111;border:1px solid rgba(212,175,55,0.4);font-weight:700;box-shadow:inset 0 4px 6px rgba(255,255,255,0.4),inset 0 -6px 6px rgba(0,0,0,0.4),0 8px 16px rgba(0,0,0,0.7);">
+                    <span style="font-size:10px;letter-spacing:0.08em;opacity:0.9;">獲得ボーナス金合計</span>
+                    <span style="font-size:18px;letter-spacing:0.04em;font-weight:800;">¥{{ number_format($bonusTotal) }}</span>
+                </div>
+            </div>
 
             <div class="mypage-detail-box">
                 {{-- サマリー --}}
