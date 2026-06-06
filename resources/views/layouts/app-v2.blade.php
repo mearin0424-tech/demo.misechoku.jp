@@ -109,7 +109,60 @@
             --max-content-width: 100vw;
             --footer-height: 75px;
             --header-height: 60px;
-            --color-border-strong: rgba(197, 160, 89, 0.4);
+
+            /* layout-header.css / layout-sidebar.css が var(--gold) 等で参照する旧ゴールド系トークンを、
+               mypage のアクセント紫（#A78BFA / #A855F7 / #8B5CF6）に上書きする。
+               これでヘッダー文字色・サイドメニューのラベル・アイコン・hover が全部紫アクセントになる。 */
+            --gold:               #a78bfa;
+            --gold-light:         #c4b5fd;
+            --gold-deep:          #7c3aed;
+            --color-text-header:  #f5f5f5;
+            --color-text-muted:   #a0a0a0;
+            --color-text:         #f5f5f5;
+            --color-border:       rgba(168, 85, 247, 0.20);
+            --color-border-strong: rgba(168, 85, 247, 0.45);
+            --color-card-strong:  #1a1a1a;
+        }
+
+        /* --- ヘッダー本体：背景グラデ・シャドウを紫トーンへ（旧 layout-header.css の gold rgba をそのまま紫 rgba で上書き） --- */
+        #global-header {
+            background:
+                radial-gradient(circle at 0% 0%, rgba(168, 85, 247, 0.20), transparent 55%),
+                radial-gradient(circle at 100% 0%, rgba(168, 85, 247, 0.30), transparent 62%),
+                rgba(10, 10, 10, 0.92) !important;
+            box-shadow:
+                0 10px 30px rgba(0,0,0,0.65),
+                0 0 18px rgba(168, 85, 247, 0.25) !important;
+        }
+        .header-icon-btn:hover,
+        .header-icon-btn:focus-visible {
+            background-color: rgba(168, 85, 247, 0.10) !important;
+        }
+        .header-icon-btn:active {
+            background-color: rgba(168, 85, 247, 0.18) !important;
+        }
+
+        /* --- サイドメニュー本体：背景グラデ・シャドウを紫トーンへ --- */
+        #side-menu {
+            background:
+                radial-gradient(circle at 0% 0%, rgba(168, 85, 247, 0.20), transparent 55%),
+                linear-gradient(180deg, rgba(20, 20, 20, 0.96), rgba(10, 10, 10, 0.98)) !important;
+            box-shadow:
+                -12px 0 36px rgba(0,0,0,0.65),
+                -2px 0 18px rgba(168, 85, 247, 0.28) !important;
+            border-left: 1px solid rgba(168, 85, 247, 0.35) !important;
+        }
+        .sidebar-header {
+            border-bottom-color: rgba(168, 85, 247, 0.25) !important;
+        }
+        .sidebar-footer {
+            border-top-color: rgba(168, 85, 247, 0.25) !important;
+        }
+        .sidebar-sub-menu a:hover {
+            background: rgba(168, 85, 247, 0.14) !important;
+        }
+        .btn-sidebar-close:hover {
+            background: rgba(168, 85, 247, 0.18) !important;
         }
     </style>
 
@@ -193,42 +246,42 @@
              active 判定は URL 階層から（旧 footer と同等）。href は実ルート。
              ============================================================ --}}
         <nav data-bottom-nav data-nav-style="neon"
-             class="fixed bottom-0 left-0 w-full z-50 pb-safe bg-deep-purple/30 backdrop-blur-md border-t border-line-accent/40 shadow-footer">
-            <div class="flex justify-around items-center pt-1.5 pb-1 px-2 max-w-[430px] mx-auto">
+             class="fixed bottom-0 left-0 w-full z-50 h-[75px] pb-[env(safe-area-inset-bottom)] box-border bg-deep-purple/30 backdrop-blur-md border-t border-line-accent/40 shadow-footer">
+            <div class="flex justify-around items-center h-full px-2 max-w-[430px] mx-auto">
                 <a href="{{ route($navPrefix . '.home') }}"
-                   class="nav-item flex flex-col items-center px-2 py-0.5 transition-all duration-300 {{ $navIsHome ? 'is-active' : '' }}">
-                    <span class="nav-icon-wrap w-9 h-9 rounded-full flex items-center justify-center transition-all">
+                   class="nav-item flex flex-col items-center justify-center transition-all duration-300 {{ $navIsHome ? 'is-active' : '' }}">
+                    <span class="nav-icon-wrap flex items-center justify-center mb-1 transition-all">
                         <x-ui.icon name="home" class="nav-icon text-[22px] transition-all" />
                     </span>
-                    <span class="app-title text-[9px] font-bold tracking-wider">ENCOUNT</span>
+                    <span class="app-title text-[10px] font-bold tracking-wider">ENCOUNT</span>
                 </a>
                 <a href="{{ $searchHref }}"
-                   class="nav-item flex flex-col items-center px-2 py-0.5 transition-all duration-300 {{ $navIsSearch ? 'is-active' : '' }}">
-                    <span class="nav-icon-wrap w-9 h-9 rounded-full flex items-center justify-center transition-all">
+                   class="nav-item flex flex-col items-center justify-center transition-all duration-300 {{ $navIsSearch ? 'is-active' : '' }}">
+                    <span class="nav-icon-wrap flex items-center justify-center mb-1 transition-all">
                         <x-ui.icon name="search" class="nav-icon text-[22px] transition-all" />
                     </span>
-                    <span class="app-title text-[9px] font-bold tracking-wider">SEARCH</span>
+                    <span class="app-title text-[10px] font-bold tracking-wider">SEARCH</span>
                 </a>
                 <a href="{{ route($navPrefix . '.interaction.index') }}"
-                   class="nav-item flex flex-col items-center px-2 py-0.5 transition-all duration-300 {{ $navIsInteraction ? 'is-active' : '' }}">
-                    <span class="nav-icon-wrap w-9 h-9 rounded-full flex items-center justify-center transition-all">
+                   class="nav-item flex flex-col items-center justify-center transition-all duration-300 {{ $navIsInteraction ? 'is-active' : '' }}">
+                    <span class="nav-icon-wrap flex items-center justify-center mb-1 transition-all">
                         <x-ui.icon name="likes" class="nav-icon text-[22px] transition-all" />
                     </span>
-                    <span class="app-title text-[9px] font-bold tracking-wider">LIKES</span>
+                    <span class="app-title text-[10px] font-bold tracking-wider">LIKES</span>
                 </a>
                 <a href="{{ route($navPrefix . '.talk.index') }}"
-                   class="nav-item flex flex-col items-center px-2 py-0.5 transition-all duration-300 {{ $navIsTalk ? 'is-active' : '' }}">
-                    <span class="nav-icon-wrap w-9 h-9 rounded-full flex items-center justify-center transition-all">
+                   class="nav-item flex flex-col items-center justify-center transition-all duration-300 {{ $navIsTalk ? 'is-active' : '' }}">
+                    <span class="nav-icon-wrap flex items-center justify-center mb-1 transition-all">
                         <x-ui.icon name="talk" class="nav-icon text-[22px] transition-all" />
                     </span>
-                    <span class="app-title text-[9px] font-bold tracking-wider">TALK</span>
+                    <span class="app-title text-[10px] font-bold tracking-wider">TALK</span>
                 </a>
                 <a href="{{ route($navPrefix . '.mypage.index') }}"
-                   class="nav-item flex flex-col items-center px-2 py-0.5 transition-all duration-300 {{ $navIsMypage ? 'is-active' : '' }}">
-                    <span class="nav-icon-wrap w-9 h-9 rounded-full flex items-center justify-center transition-all">
+                   class="nav-item flex flex-col items-center justify-center transition-all duration-300 {{ $navIsMypage ? 'is-active' : '' }}">
+                    <span class="nav-icon-wrap flex items-center justify-center mb-1 transition-all">
                         <x-ui.icon name="mypage" class="nav-icon text-[22px] transition-all" />
                     </span>
-                    <span class="app-title text-[9px] font-bold tracking-wider">MY PAGE</span>
+                    <span class="app-title text-[10px] font-bold tracking-wider">MY PAGE</span>
                 </a>
             </div>
         </nav>

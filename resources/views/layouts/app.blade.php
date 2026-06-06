@@ -52,6 +52,87 @@
     <link rel="stylesheet" href="{{ asset('assets/css/layout-sidebar.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/character-guide.css') }}?v={{ $assetVersion }}">
 
+    {{-- ============================================================
+         全画面の配色を mypage のデザインシステム（紫アクセント）へ寄せる。
+         - レイアウトと機能には触らない（CSS の色だけを上書き）
+         - 旧 app.css 由来の --gold 系トークンを紫アクセントに再定義
+         - 旧 layout-header.css / layout-sidebar.css のラジアル・シャドウ（rgba 直書き）も紫に上書き
+         - 1 画面ずつの内部スタイル（@push）は触らない。screen 側で意図的に gold を使っていれば優先される
+         ============================================================ --}}
+    <style>
+        :root {
+            /* gold（シャンパンゴールド #C5A059）→ accent purple */
+            --gold:                #a78bfa;
+            --gold-light:          #c4b5fd;
+            --gold-deep:           #7c3aed;
+            /* 境界線とカードトーン：紫寄り */
+            --color-border:        rgba(168, 85, 247, 0.20);
+            --color-border-strong: rgba(168, 85, 247, 0.45);
+            --color-card-strong:   #1a1a1a;
+        }
+
+        /* --- ヘッダー：背景ラジアル・シャドウを紫に --- */
+        #global-header {
+            background:
+                radial-gradient(circle at 0% 0%, rgba(168, 85, 247, 0.20), transparent 55%),
+                radial-gradient(circle at 100% 0%, rgba(168, 85, 247, 0.30), transparent 62%),
+                rgba(10, 10, 10, 0.92) !important;
+            box-shadow:
+                0 10px 30px rgba(0,0,0,0.65),
+                0 0 18px rgba(168, 85, 247, 0.25) !important;
+        }
+        .header-icon-btn:hover,
+        .header-icon-btn:focus-visible {
+            background-color: rgba(168, 85, 247, 0.10) !important;
+        }
+        .header-icon-btn:active {
+            background-color: rgba(168, 85, 247, 0.18) !important;
+        }
+
+        /* --- サイドメニュー：背景ラジアル・シャドウを紫に --- */
+        #side-menu {
+            background:
+                radial-gradient(circle at 0% 0%, rgba(168, 85, 247, 0.20), transparent 55%),
+                linear-gradient(180deg, rgba(20, 20, 20, 0.96), rgba(10, 10, 10, 0.98)) !important;
+            box-shadow:
+                -12px 0 36px rgba(0,0,0,0.65),
+                -2px 0 18px rgba(168, 85, 247, 0.28) !important;
+            border-left: 1px solid rgba(168, 85, 247, 0.35) !important;
+        }
+        .sidebar-header { border-bottom-color: rgba(168, 85, 247, 0.25) !important; }
+        .sidebar-footer { border-top-color: rgba(168, 85, 247, 0.25) !important; }
+        .sidebar-sub-menu a:hover { background: rgba(168, 85, 247, 0.14) !important; }
+        .btn-sidebar-close:hover { background: rgba(168, 85, 247, 0.18) !important; }
+
+        /* --- 通知 / やることリスト ポップアップ：mypage と同様にカード調＋紫枠 --- */
+        #header-task-popup,
+        #header-notification-popup {
+            background: linear-gradient(to bottom right, #1a1a1a, #050505) !important;
+            border: 1px solid rgba(168, 85, 247, 0.4) !important;
+            box-shadow:
+                6px 6px 16px rgba(0,0,0,.9),
+                -2px -2px 6px rgba(255,255,255,.06),
+                inset 1px 1px 1px rgba(255,255,255,.08) !important;
+            border-radius: 20px !important;
+            opacity: 1 !important;
+        }
+        .task-popup-header {
+            background: rgba(168, 85, 247, 0.12) !important;
+            border-bottom: 1px solid rgba(168, 85, 247, 0.30) !important;
+        }
+        .notif-popup-section-label {
+            background: rgba(168, 85, 247, 0.08) !important;
+            border-bottom-color: rgba(168, 85, 247, 0.20) !important;
+        }
+        .notif-popup-item { border-bottom-color: rgba(168, 85, 247, 0.20) !important; }
+        a.notif-popup-item:hover { background: rgba(168, 85, 247, 0.10) !important; }
+        .notif-popup-empty { border-bottom-color: rgba(168, 85, 247, 0.20) !important; }
+
+        /* --- ボトムナビ：active 色は --gold 経由で自動的に紫になる。
+              ただし `#bottom-nav` の境界色だけ raw rgba になっているケースに備えて上書き --- */
+        #bottom-nav { border-top-color: rgba(168, 85, 247, 0.25) !important; }
+    </style>
+
     <script src="{{ asset('assets/js/app.js') }}" defer></script>
 
     @stack('styles')
