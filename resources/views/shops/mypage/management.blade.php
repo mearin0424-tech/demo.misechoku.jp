@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-v2')
 
 @section('title', '採用・入金管理')
 

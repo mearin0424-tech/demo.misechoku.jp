@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-v2')
 
 @section('title', 'Cast Profile')
 @section('body-class', 'page-cast-profile')

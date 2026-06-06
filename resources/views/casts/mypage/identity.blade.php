@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-v2')
 
 @section('title', '本人確認')
 @section('body-class', 'page-cast-mypage')

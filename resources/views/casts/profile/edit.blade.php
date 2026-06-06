@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-v2')
 
 @section('title', 'Profile Edit')
 @section('header_title', 'Profile Edit')

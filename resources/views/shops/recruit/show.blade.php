@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-v2')
 
 @section('title', ($recruit['store_name'] ?? ($shop['name'] ?? '店舗')) . 'の求人情報')
 @section('meta_description', trim((string) (($recruit['catch_copy'] ?? '') ?: ($recruit['message'] ?? 'ミセチョクの求人情報です。'))))

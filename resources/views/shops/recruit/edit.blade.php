@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-v2')
 
 @section('title', '求人票の編集')
 @section('body-class', 'page-recruit-edit')

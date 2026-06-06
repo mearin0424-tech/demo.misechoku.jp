@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-v2')
 
 @php
     $selectedRole = old('role', $roleGroups[0]['key'] ?? 'cast');

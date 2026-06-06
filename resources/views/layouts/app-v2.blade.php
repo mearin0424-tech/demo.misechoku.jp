@@ -207,6 +207,21 @@
             color: var(--color-text-sub) !important;
             border-bottom-color: rgba(168, 85, 247, 0.20) !important;
         }
+
+        /* --- 旧 layouts.app の content-wrapper / animate-fadeIn を v2 でも再現 --- */
+        .content-wrapper {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            padding: 0 var(--content-padding-x, 16px);
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+        .animate-fadeIn { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
     </style>
 
     {{-- キャラクターガイド（オコジョ）専用CSS --}}
@@ -236,9 +251,16 @@
         {{-- オコジョガイド：表示／文言は運営管理画面で設定 --}}
         @include('layouts.parts.character-guide')
 
-        {{-- メイン（サイドバーの right 位置と揃えるため max-w-[430px] で中央寄せ） --}}
+        {{-- メイン（サイドバーの right 位置と揃えるため max-w-[430px] で中央寄せ）
+             旧 layouts.app と同じ条件で content-wrapper を被せ、移行画面のレイアウトを大きく崩さないようにする。 --}}
         <main id="main-content" class="max-w-[430px] mx-auto">
-            @yield('content')
+            @if(request()->routeIs('cast.recruit.show', 'shop.castprofileview.show', 'cast.mypage.index', 'shop.mypage.index', 'share.cast.show', 'share.recruit.show'))
+                @yield('content')
+            @else
+                <div class="content-wrapper animate-fadeIn">
+                    @yield('content')
+                </div>
+            @endif
         </main>
 
         {{-- ============================================================

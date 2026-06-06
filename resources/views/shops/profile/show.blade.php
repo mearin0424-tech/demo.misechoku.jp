@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-v2')
 @section('title', $shop['name'])
 @section('body-class', 'page-shop-profile')
 

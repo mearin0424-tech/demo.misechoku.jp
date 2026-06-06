@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-v2')
 
 @section('title', 'TALK')
 @section('body-class', 'page-talk page-talk-list')
