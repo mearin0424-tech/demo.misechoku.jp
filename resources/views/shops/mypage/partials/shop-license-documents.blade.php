@@ -215,7 +215,7 @@
                             @if(!empty($supportNote))
                                 <div class="license-accordion__support">
                                     <p class="license-accordion__support-text">{{ $supportNote }}</p>
-                                    <a href="{{ route('support.form') }}" class="license-accordion__support-link">
+                                    <a href="{{ route('pages.support.form') }}" class="license-accordion__support-link">
                                         <i class="fas fa-comments"></i> サポート窓口に相談する
                                     </a>
                                 </div>
