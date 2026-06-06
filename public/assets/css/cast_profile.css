@@ -85,7 +85,7 @@
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
     transition: background 0.15s ease, transform 0.1s ease;
 }
-.profile-hero-arrow:hover { background: rgba(197, 160, 89, 0.65); color: var(--dark-bg); }
+.profile-hero-arrow:hover { background: rgba(168, 85, 247, 0.65); color: var(--dark-bg); }
 .profile-hero-arrow:active { transform: translateY(-50%) scale(0.94); }
 .profile-hero-arrow--prev { left: 12px; }
 .profile-hero-arrow--next { right: 12px; }
@@ -207,7 +207,7 @@
     background: linear-gradient(135deg, var(--gold-light), var(--gold));
     border-radius: 20px;
     letter-spacing: 0.05em;
-    box-shadow: 0 2px 8px rgba(197, 160, 89, 0.35);
+    box-shadow: 0 2px 8px rgba(168, 85, 247, 0.35);
 }
 
 /* --- メインコンテンツ（サムネイルストリップの下に名前が来るよう余白を確保） --- */
@@ -289,11 +289,11 @@
     font-size: 0.85rem;
 }
 .detail-action-btn:hover {
-    border-color: rgba(197, 160, 89, 0.4);
+    border-color: rgba(168, 85, 247, 0.4);
     color: var(--color-text-header);
 }
 .detail-action-btn.keep.active {
-    background: rgba(197, 160, 89, 0.15);
+    background: rgba(168, 85, 247, 0.15);
     border-color: var(--gold);
     color: var(--gold);
 }
@@ -408,12 +408,12 @@
 
 .icon-btn:hover {
     background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(197, 160, 89, 0.4);
+    border-color: rgba(168, 85, 247, 0.4);
 }
 
 .icon-btn.active,
 .icon-btn-keep.active {
-    background: rgba(197, 160, 89, 0.2);
+    background: rgba(168, 85, 247, 0.2);
     border-color: var(--gold);
     color: var(--gold);
 }
@@ -559,8 +559,8 @@
 .review-item {
     padding: 14px 16px;
     margin-bottom: 10px;
-    background: rgba(197, 160, 89, 0.12);
-    border: 1px solid rgba(197, 160, 89, 0.25);
+    background: rgba(168, 85, 247, 0.12);
+    border: 1px solid rgba(168, 85, 247, 0.25);
     border-radius: 14px;
     color: var(--color-text);
 }
@@ -696,11 +696,11 @@
     color: var(--gold);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(197, 160, 89, 0.4);
+    border: 1px solid rgba(168, 85, 247, 0.4);
 }
 
 .action-btn.keep:hover {
-    background: rgba(197, 160, 89, 0.2);
+    background: rgba(168, 85, 247, 0.2);
 }
 
 .accordion-body {

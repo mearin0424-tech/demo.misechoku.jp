@@ -107,7 +107,7 @@
         <div class="u-flex-between u-mb-12">
             <h2 class="admin-panel-title u-mb-0">月別推移（直近12ヶ月）</h2>
             <div class="sales-chart-legend">
-                <span><i class="legend-dot" style="background:#dcb568;"></i> 仲介料収益（円）</span>
+                <span><i class="legend-dot" style="background:#a78bfa;"></i> 仲介料収益（円）</span>
                 <span><i class="legend-dot" style="background:#7f1d1d;"></i> 取引総額（円）</span>
             </div>
         </div>
@@ -129,9 +129,9 @@
                 @endforeach
 
                 {{-- 仲介料収益（折れ線・主） --}}
-                <polyline points="{{ $commissionPoly }}" fill="none" stroke="#b8860b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                <polyline points="{{ $commissionPoly }}" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
                 @foreach($commissionPoints as $i => $p)
-                    <circle cx="{{ round($p['x'], 1) }}" cy="{{ round($p['y'], 1) }}" r="3.5" fill="#dcb568" stroke="#fff" stroke-width="1.5"/>
+                    <circle cx="{{ round($p['x'], 1) }}" cy="{{ round($p['y'], 1) }}" r="3.5" fill="#a78bfa" stroke="#fff" stroke-width="1.5"/>
                 @endforeach
 
                 {{-- 月ラベル --}}

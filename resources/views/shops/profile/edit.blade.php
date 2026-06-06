@@ -11,8 +11,8 @@
         --spe-panel: #0a0a0a;
         --spe-field: #110f0d;
         --spe-border: #2a2015;
-        --spe-border-focus: rgba(212, 175, 55, 0.5);
-        --spe-gold: #d4af37;
+        --spe-border-focus: rgba(168, 85, 247, 0.5);
+        --spe-gold: #a78bfa;
         --spe-muted: #71717a;
         --spe-hint: #52525b;
         background: var(--spe-bg);
@@ -223,17 +223,17 @@
         align-items: stretch;
         gap: 8px;
         padding: 8px;
-        border: 1px solid var(--color-border, rgba(197,160,89,0.22));
+        border: 1px solid var(--color-border, rgba(168, 85, 247, 0.22));
         border-radius: 10px;
         background: rgba(255,255,255,0.02);
         transition: border-color 0.15s ease, background 0.15s ease;
     }
     .shop-profile-edit__station-row:first-child {
-        border-color: var(--gold, #c5a059);
-        background: rgba(197,160,89,0.06);
+        border-color: var(--gold, #a78bfa);
+        background: rgba(168, 85, 247, 0.06);
     }
     .shop-profile-edit__station-row.is-dragging { opacity: 0.55; }
-    .shop-profile-edit__station-row.is-ghost { background: rgba(197,160,89,0.18); }
+    .shop-profile-edit__station-row.is-ghost { background: rgba(168, 85, 247, 0.18); }
     .shop-profile-edit__station-drag {
         flex: 0 0 auto;
         width: 32px;
@@ -247,7 +247,7 @@
         touch-action: none;
         border-radius: 6px;
     }
-    .shop-profile-edit__station-drag:hover { color: var(--gold, #c5a059); background: rgba(197,160,89,0.10); }
+    .shop-profile-edit__station-drag:hover { color: var(--gold, #a78bfa); background: rgba(168, 85, 247, 0.10); }
     .shop-profile-edit__station-drag:active { cursor: grabbing; }
     .shop-profile-edit__station-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
     .shop-profile-edit__station-badge {
@@ -259,7 +259,7 @@
         color: var(--color-text-muted, rgba(216,201,168,0.65));
         letter-spacing: 0.04em;
     }
-    .shop-profile-edit__station-row:first-child .shop-profile-edit__station-badge { color: var(--gold, #c5a059); }
+    .shop-profile-edit__station-row:first-child .shop-profile-edit__station-badge { color: var(--gold, #a78bfa); }
     .shop-profile-edit__station-badge .is-main-pill {
         display: inline-flex;
         align-items: center;
@@ -267,7 +267,7 @@
         border-radius: 999px;
         font-size: 0.62rem;
         font-weight: 800;
-        background: linear-gradient(135deg, var(--gold-light, #e8cd8a), var(--gold, #c5a059));
+        background: linear-gradient(135deg, var(--gold-light, #c4b5fd), var(--gold, #a78bfa));
         color: #1a1206;
     }
     .shop-profile-edit__station-row:not(:first-child) .is-main-pill { display: none; }
@@ -281,22 +281,22 @@
         font-size: 0.7rem;
         font-weight: 700;
         background: transparent;
-        border: 1px solid var(--color-border, rgba(197,160,89,0.22));
+        border: 1px solid var(--color-border, rgba(168, 85, 247, 0.22));
         border-radius: 999px;
         color: var(--color-text-muted, rgba(216,201,168,0.65));
         cursor: pointer;
         transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     }
     .shop-profile-edit__station-set-main:hover {
-        background: rgba(197,160,89,0.10);
-        color: var(--gold-light, #e8cd8a);
-        border-color: var(--color-border-strong, rgba(197,160,89,0.4));
+        background: rgba(168, 85, 247, 0.10);
+        color: var(--gold-light, #c4b5fd);
+        border-color: var(--color-border-strong, rgba(168, 85, 247, 0.4));
     }
     .shop-profile-edit__station-set-main i { font-size: 0.66rem; }
     /* メイン（先頭）の行は「設定済み」状態にして無効化 */
     .shop-profile-edit__station-row:first-child .shop-profile-edit__station-set-main {
-        background: linear-gradient(135deg, var(--gold-light, #e8cd8a), var(--gold, #c5a059));
-        border-color: var(--gold, #c5a059);
+        background: linear-gradient(135deg, var(--gold-light, #c4b5fd), var(--gold, #a78bfa));
+        border-color: var(--gold, #a78bfa);
         color: #1a1206;
         cursor: default;
         pointer-events: none;
@@ -324,13 +324,13 @@
         margin: 6px 0 10px;
         padding: 8px 10px;
         border-radius: 8px;
-        background: rgba(197,160,89,0.06);
-        border: 1px solid rgba(197,160,89,0.22);
+        background: rgba(168, 85, 247, 0.06);
+        border: 1px solid rgba(168, 85, 247, 0.22);
         font-size: 0.72rem;
         line-height: 1.55;
         color: var(--color-text, #d8c9a8);
     }
-    .shop-profile-edit__station-info i { color: var(--gold, #c5a059); margin-top: 2px; }
+    .shop-profile-edit__station-info i { color: var(--gold, #a78bfa); margin-top: 2px; }
     .shop-profile-edit__station-add {
         align-self: flex-start;
         margin-top: 4px;
@@ -339,7 +339,7 @@
         font-weight: 700;
         color: var(--spe-gold);
         background: transparent;
-        border: 1px dashed rgba(212, 175, 55, 0.35);
+        border: 1px dashed rgba(168, 85, 247, 0.35);
         border-radius: 8px;
         cursor: pointer;
     }
@@ -415,10 +415,10 @@
         border-color: var(--spe-gold);
         background: #2a2210;
         color: var(--spe-gold);
-        box-shadow: 0 0 10px rgba(212, 175, 55, 0.1);
+        box-shadow: 0 0 10px rgba(168, 85, 247, 0.1);
     }
     .shop-profile-edit__chip input:focus-visible + span {
-        outline: 2px solid rgba(212, 175, 55, 0.45);
+        outline: 2px solid rgba(168, 85, 247, 0.45);
         outline-offset: 2px;
     }
 
@@ -482,8 +482,8 @@
         font-weight: 800;
         cursor: pointer;
         color: #141210;
-        background: linear-gradient(to right, #d4af37, #b8942b);
-        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.15);
+        background: linear-gradient(to right, #a78bfa, #b8942b);
+        box-shadow: 0 4px 15px rgba(168, 85, 247, 0.15);
         transition: opacity 0.15s ease, transform 0.15s ease;
     }
     .shop-profile-edit__submit:hover {

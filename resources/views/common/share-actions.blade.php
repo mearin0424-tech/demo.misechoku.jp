@@ -31,7 +31,7 @@
                 align-items: center;
                 gap: 8px;
                 padding: 10px 14px;
-                border: 1px solid rgba(212, 175, 55, 0.35);
+                border: 1px solid rgba(168, 85, 247, 0.35);
                 border-radius: 999px;
                 background: rgba(255, 255, 255, 0.04);
                 color: #fff;
@@ -42,13 +42,13 @@
             }
 
             .share-action-btn:hover {
-                background: rgba(212, 175, 55, 0.12);
+                background: rgba(168, 85, 247, 0.12);
                 transform: translateY(-1px);
             }
 
             .share-copy-status {
                 font-size: 0.82rem;
-                color: #d4af37;
+                color: #a78bfa;
             }
         </style>
     @endpush

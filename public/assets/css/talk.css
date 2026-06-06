@@ -70,7 +70,7 @@
 
 .talk-item.is-pinned {
     border-color: rgba(226, 188, 79, 0.64);
-    box-shadow: 0 12px 30px rgba(220, 181, 104, 0.18);
+    box-shadow: 0 12px 30px rgba(168, 85, 247, 0.18);
     background:
         radial-gradient(circle at top left, rgba(226, 188, 79, 0.18), transparent 48%),
         linear-gradient(180deg, rgba(41, 19, 23, 0.98), rgba(31, 12, 16, 0.98));
@@ -172,7 +172,7 @@
 }
 
 .talk-tabs .tab-item.active {
-    color: #dcb568;
+    color: #a78bfa;
     font-weight: 700;
     background: transparent;
 }
@@ -184,7 +184,7 @@
     left: 0;
     width: 100%;
     height: 2px;
-    background: linear-gradient(to right, transparent, #dcb568, transparent);
+    background: linear-gradient(to right, transparent, #a78bfa, transparent);
 }
 
 /* 表示パネルの切り替え制御（.talk-tabs 利用時用） */
@@ -203,7 +203,7 @@
     min-height: calc(100vh - var(--header-height) - var(--footer-height));
     height: calc(100vh - var(--header-height) - var(--footer-height));
     background:
-        radial-gradient(circle at top, rgba(197, 160, 89, 0.14), transparent 32%),
+        radial-gradient(circle at top, rgba(168, 85, 247, 0.14), transparent 32%),
         linear-gradient(180deg, var(--talk-bg-main) 0%, var(--talk-bg-base) 100%);
     position: relative;
     margin: 0 calc(-1 * var(--content-padding-x)); /* コンテンツ幅いっぱいに広げる */
@@ -289,7 +289,7 @@
     min-height: 28px;
     padding: 0 10px;
     border-radius: 999px;
-    border: 1px solid rgba(220, 181, 104, 0.4);
+    border: 1px solid rgba(168, 85, 247, 0.4);
     background: rgba(255, 255, 255, 0.05);
     color: #f8e7be;
     font-size: 0.72rem;
@@ -396,9 +396,9 @@
     margin: 0 15px 10px;
     padding: 14px;
     border-radius: 18px;
-    border: 1px solid rgba(220, 181, 104, 0.26);
+    border: 1px solid rgba(168, 85, 247, 0.26);
     background:
-        radial-gradient(circle at top left, rgba(220, 181, 104, 0.12), transparent 42%),
+        radial-gradient(circle at top left, rgba(168, 85, 247, 0.12), transparent 42%),
         linear-gradient(180deg, rgba(10, 10, 10, 0.96), rgba(10, 10, 10, 0.96));
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
 }
@@ -411,7 +411,7 @@
     display: inline-block;
     font-size: 0.86rem;
     font-weight: 700;
-    color: #fef3c7;
+    color: #e6dffc;
     margin-bottom: 4px;
 }
 
@@ -435,7 +435,7 @@
 
 .btn-interview-cancel-state {
     border-color: rgba(251, 191, 36, 0.65);
-    color: #fef3c7;
+    color: #e6dffc;
     background: rgba(66, 38, 3, 0.42);
 }
 
@@ -656,7 +656,7 @@
     padding-bottom: calc(12px + env(safe-area-inset-bottom, 0));
     /* アプリ全体のボルドー基調と統一 */
     background: linear-gradient(180deg, rgba(10, 10, 10, 0.92), rgba(20, 20, 20, 0.96));
-    border-top: 1px solid rgba(220, 181, 104, 0.22);
+    border-top: 1px solid rgba(168, 85, 247, 0.22);
     box-shadow: 0 -8px 22px rgba(0, 0, 0, 0.22);
 }
 
@@ -675,7 +675,7 @@
     border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.14);
     background: rgba(31, 11, 15, 0.92);
-    color: #d4c4a4;
+    color: #c4b5fd;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -736,7 +736,7 @@
     align-items: center;
     justify-content: center;
     border: 1px solid rgba(255, 239, 184, 0.4);
-    box-shadow: 0 8px 20px rgba(220, 181, 104, 0.35), 0 2px 6px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 20px rgba(168, 85, 247, 0.35), 0 2px 6px rgba(0, 0, 0, 0.3);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -746,12 +746,12 @@
 }
 
 .btn-send:hover {
-    box-shadow: 0 4px 16px rgba(220, 181, 104, 0.5), 0 2px 4px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 4px 16px rgba(168, 85, 247, 0.5), 0 2px 4px rgba(0, 0, 0, 0.25);
 }
 
 .btn-send:active {
     transform: scale(0.92);
-    box-shadow: 0 2px 8px rgba(220, 181, 104, 0.35);
+    box-shadow: 0 2px 8px rgba(168, 85, 247, 0.35);
 }
 
 /* --- Empty State (空の状態) --- */
@@ -911,7 +911,7 @@
     background: linear-gradient(145deg, #f2d06d 0%, #d6ab2a 55%, #b88a14 100%);
     color: #231516;
     border: 1px solid rgba(255, 239, 184, 0.72);
-    box-shadow: 0 8px 20px rgba(220, 181, 104, 0.22);
+    box-shadow: 0 8px 20px rgba(168, 85, 247, 0.22);
 }
 
 .btn-reject {
@@ -975,7 +975,7 @@
 .interview-modal {
     background: #1b0a0a;
     border-radius: 18px;
-    border: 1px solid rgba(220, 181, 104, 0.5);
+    border: 1px solid rgba(168, 85, 247, 0.5);
     box-shadow: 0 16px 50px rgba(0, 0, 0, 0.7);
     padding: 18px 18px 16px;
     width: 100%;
@@ -1075,7 +1075,7 @@
 .result-employment-kind-select {
     width: 100%;
     border-radius: 10px;
-    border: 1px solid rgba(220, 181, 104, 0.32);
+    border: 1px solid rgba(168, 85, 247, 0.32);
     padding: 10px 36px 10px 12px;
     color: #f5ecec;
     font-size: 16px;
@@ -1138,9 +1138,9 @@
 }
 
 .btn-interview-submit {
-    background: linear-gradient(135deg, #c9a227, #dcb568);
+    background: linear-gradient(135deg, #c9a227, #a78bfa);
     color: #1a0a0a;
-    border-color: #dcb568;
+    border-color: #a78bfa;
     font-weight: 600;
 }
 
@@ -1200,7 +1200,7 @@
 .talk-job-kind-save-status {
     margin: 8px 2px 0;
     font-size: 0.72rem;
-    color: #d4c4a4;
+    color: #c4b5fd;
 }
 
 .talk-job-kind-lock-note {
@@ -1235,7 +1235,7 @@
     margin-top: 12px;
     padding: 14px;
     border-radius: 14px;
-    border: 1px solid rgba(220, 181, 104, 0.28);
+    border: 1px solid rgba(168, 85, 247, 0.28);
     background: rgba(255, 248, 220, 0.06);
 }
 
@@ -1546,7 +1546,7 @@ button.interview-option-btn:hover {
 }
 
 .talk-pin-btn[aria-pressed="true"] {
-    background: rgba(220, 181, 104, 0.18);
+    background: rgba(168, 85, 247, 0.18);
     color: #fcd34d;
 }
 
@@ -1661,7 +1661,7 @@ button.interview-option-btn:hover {
 
 /* 自動送信バブル：クリーム/グレー → ボルドー + ゴールドアクセント */
 .message-bubble-auto {
-    border: 1px solid rgba(220, 181, 104, 0.42) !important;
+    border: 1px solid rgba(168, 85, 247, 0.42) !important;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.32);
 }
 .msg-right .message-bubble-auto,
@@ -1675,56 +1675,56 @@ button.interview-option-btn:hover {
     color: #f5e9c8;
 }
 .message-bubble-auto .interview-title {
-    color: #dcb568 !important;
+    color: #a78bfa !important;
     font-weight: 800;
     letter-spacing: 0.04em;
 }
-.message-bubble-auto .interview-title i { color: #ffe2a3; }
+.message-bubble-auto .interview-title i { color: #c4b5fd; }
 .message-bubble-auto .interview-body-copy {
     color: rgba(245, 233, 200, 0.92) !important;
     opacity: 1;
 }
 .message-bubble-auto .interview-badge {
-    background: rgba(220, 181, 104, 0.16) !important;
-    border-color: rgba(220, 181, 104, 0.38) !important;
-    color: #dcb568 !important;
+    background: rgba(168, 85, 247, 0.16) !important;
+    border-color: rgba(168, 85, 247, 0.38) !important;
+    color: #a78bfa !important;
 }
 
 /* 自動送信メッセージのアバター：クリーム → ゴールドアクセント */
 .msg-avatar-auto {
-    background: rgba(220, 181, 104, 0.18);
-    color: #dcb568;
-    border: 1px solid rgba(220, 181, 104, 0.45);
+    background: rgba(168, 85, 247, 0.18);
+    color: #a78bfa;
+    border: 1px solid rgba(168, 85, 247, 0.45);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
 /* 面談候補日（オプション）ボタン：暗色背景＋ゴールド枠で「タップ可能」を明示 */
 .interview-option-btn {
     background: rgba(0, 0, 0, 0.32);
-    border: 1px solid rgba(220, 181, 104, 0.35);
+    border: 1px solid rgba(168, 85, 247, 0.35);
     color: #fff5e0;
 }
 button.interview-option-btn:hover {
-    background: rgba(220, 181, 104, 0.18);
-    border-color: rgba(220, 181, 104, 0.6);
+    background: rgba(168, 85, 247, 0.18);
+    border-color: rgba(168, 85, 247, 0.6);
     transform: translateY(-1px);
 }
-.interview-option-btn .interview-option-date { color: #ffe2a3; }
+.interview-option-btn .interview-option-date { color: #c4b5fd; }
 .interview-option-btn .interview-option-time { color: rgba(245, 233, 200, 0.82); }
 .interview-option-btn .interview-option-action {
-    background: rgba(220, 181, 104, 0.18);
-    border: 1px solid rgba(220, 181, 104, 0.35);
-    color: #dcb568;
+    background: rgba(168, 85, 247, 0.18);
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    color: #a78bfa;
 }
 
 /* 選択済みオプション：強調ゴールド */
 .interview-option-btn.is-selected {
-    background: linear-gradient(135deg, rgba(220, 181, 104, 0.32), rgba(184, 134, 11, 0.28));
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.32), rgba(124, 58, 237, 0.28));
     border-color: rgba(255, 226, 163, 0.7);
     color: #fff8e4;
 }
 .interview-option-btn.is-selected::before {
-    background: linear-gradient(180deg, #ffe2a3, #dcb568, #b8860b);
+    background: linear-gradient(180deg, #c4b5fd, #a78bfa, #7c3aed);
 }
 .interview-option-btn.is-selected .interview-option-date,
 .interview-option-btn.is-selected .interview-option-time,
@@ -1734,12 +1734,12 @@ button.interview-option-btn:hover {
 
 /* 面談確定ブロック */
 .interview-confirmed-slot {
-    background: rgba(220, 181, 104, 0.12);
-    border: 1px solid rgba(220, 181, 104, 0.42);
+    background: rgba(168, 85, 247, 0.12);
+    border: 1px solid rgba(168, 85, 247, 0.42);
     color: #fff5e0;
 }
 .interview-confirmed-date {
-    color: #ffe2a3;
+    color: #c4b5fd;
     font-weight: 800;
 }
 .interview-note {
@@ -1762,26 +1762,26 @@ button.interview-option-btn:hover {
 /* 日程変更ボタン：両側で統一 */
 .interview-change-schedule-btn {
     color: #fff8e4;
-    background: rgba(220, 181, 104, 0.2);
-    border: 1px solid rgba(220, 181, 104, 0.45);
+    background: rgba(168, 85, 247, 0.2);
+    border: 1px solid rgba(168, 85, 247, 0.45);
 }
 .msg-right .interview-change-schedule-btn,
 .msg-left .interview-change-schedule-btn {
     color: #fff8e4;
-    background: rgba(220, 181, 104, 0.2);
-    border: 1px solid rgba(220, 181, 104, 0.45);
+    background: rgba(168, 85, 247, 0.2);
+    border: 1px solid rgba(168, 85, 247, 0.45);
 }
 .interview-change-schedule-btn:hover,
 .msg-right .interview-change-schedule-btn:hover,
 .msg-left .interview-change-schedule-btn:hover {
-    background: rgba(220, 181, 104, 0.35);
+    background: rgba(168, 85, 247, 0.35);
     border-color: rgba(255, 226, 163, 0.65);
     color: #fff8e4;
 }
 
 /* 通常の面談候補バブル（msg-right）：オレンジ → ブランドゴールドへ */
 .msg-right .message-bubble-interview:not(.message-bubble-auto) {
-    background: linear-gradient(135deg, #ffe2a3, #dcb568 45%, #b8860b);
+    background: linear-gradient(135deg, #c4b5fd, #a78bfa 45%, #7c3aed);
     color: #2c1a0f;
     border-radius: 16px 16px 4px 16px;
 }
@@ -1789,7 +1789,7 @@ button.interview-option-btn:hover {
 /* リンク色：バブル種別ごとに最適化（白×白／金×金 を回避） */
 /* 自動送信バブル（暗色）：明るいゴールドリンク */
 .message-bubble-auto a {
-    color: #ffe2a3;
+    color: #c4b5fd;
     text-decoration: underline;
     text-underline-offset: 2px;
     font-weight: 700;
@@ -1826,10 +1826,10 @@ button.interview-option-btn:hover {
 .talk-template-group-title {
     font-size: 11px;
     letter-spacing: .12em;
-    color: var(--gold, #dcb568);
+    color: var(--gold, #a78bfa);
     font-weight: 700;
     padding: 4px 6px;
-    border-bottom: 1px solid rgba(220, 181, 104, .25);
+    border-bottom: 1px solid rgba(168, 85, 247, .25);
     margin-bottom: 4px;
 }
 .talk-template-item {
@@ -1840,7 +1840,7 @@ button.interview-option-btn:hover {
     width: 100%;
     text-align: left;
     background: rgba(255, 255, 255, .04);
-    border: 1px solid rgba(220, 181, 104, .2);
+    border: 1px solid rgba(168, 85, 247, .2);
     border-radius: 10px;
     padding: 10px 12px;
     color: var(--talk-text-main);
@@ -1848,13 +1848,13 @@ button.interview-option-btn:hover {
     transition: border-color .15s ease, background .15s ease;
 }
 .talk-template-item:hover {
-    background: rgba(220, 181, 104, .1);
-    border-color: rgba(220, 181, 104, .55);
+    background: rgba(168, 85, 247, .1);
+    border-color: rgba(168, 85, 247, .55);
 }
 .talk-template-item-title {
     font-size: 12px;
     font-weight: 700;
-    color: var(--gold, #dcb568);
+    color: var(--gold, #a78bfa);
 }
 .talk-template-item-body {
     font-size: 13px;
@@ -1874,15 +1874,15 @@ button.interview-option-btn:hover {
     flex-direction: column;
     gap: 0;
     background: rgba(255, 255, 255, .04);
-    border: 1px solid rgba(220, 181, 104, .2);
+    border: 1px solid rgba(168, 85, 247, .2);
     border-radius: 12px;
     padding: 0;
     margin-bottom: 8px;
     transition: border-color .15s ease, background .15s ease;
 }
 .talk-template-slot-card.is-custom {
-    border-color: rgba(220, 181, 104, .45);
-    background: rgba(220, 181, 104, .07);
+    border-color: rgba(168, 85, 247, .45);
+    background: rgba(168, 85, 247, .07);
 }
 .talk-template-slot-view {
     display: flex;
@@ -1905,13 +1905,13 @@ button.interview-option-btn:hover {
     cursor: pointer;
 }
 .talk-template-slot-use:hover {
-    background: rgba(220, 181, 104, .08);
+    background: rgba(168, 85, 247, .08);
 }
 .talk-template-slot-no {
     font-size: 11px;
     font-weight: 700;
     letter-spacing: .08em;
-    color: var(--gold, #dcb568);
+    color: var(--gold, #a78bfa);
 }
 .talk-template-slot-body {
     font-size: 13px;
@@ -1924,26 +1924,26 @@ button.interview-option-btn:hover {
     flex: 0 0 auto;
     background: transparent;
     border: none;
-    border-left: 1px solid rgba(220, 181, 104, .18);
-    color: var(--gold, #dcb568);
+    border-left: 1px solid rgba(168, 85, 247, .18);
+    color: var(--gold, #a78bfa);
     padding: 0 14px;
     cursor: pointer;
     font-size: 13px;
     transition: background .15s ease;
 }
 .talk-template-slot-edit-btn:hover {
-    background: rgba(220, 181, 104, .12);
+    background: rgba(168, 85, 247, .12);
 }
 .talk-template-slot-edit-form {
     padding: 10px 12px 12px;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    border-top: 1px solid rgba(220, 181, 104, .18);
+    border-top: 1px solid rgba(168, 85, 247, .18);
 }
 .talk-template-slot-edit-label {
     font-size: 11px;
-    color: var(--gold, #dcb568);
+    color: var(--gold, #a78bfa);
     letter-spacing: .06em;
 }
 .talk-template-slot-textarea {
@@ -1951,7 +1951,7 @@ button.interview-option-btn:hover {
     min-height: 96px;
     padding: 8px 10px;
     border-radius: 10px;
-    border: 1px solid rgba(229, 193, 88, .25);
+    border: 1px solid rgba(168, 85, 247, .25);
     background: rgba(0, 0, 0, .25);
     color: #fff;
     font-size: 13px;
@@ -1960,7 +1960,7 @@ button.interview-option-btn:hover {
 }
 .talk-template-slot-textarea:focus {
     outline: none;
-    border-color: rgba(229, 193, 88, .6);
+    border-color: rgba(168, 85, 247, .6);
 }
 .talk-template-slot-edit-actions {
     display: flex;
@@ -1988,7 +1988,7 @@ button.interview-option-btn:hover {
 .talk-template-slot-cancel {
     background: rgba(255, 255, 255, .05);
     color: var(--talk-text-main);
-    border-color: rgba(220, 181, 104, .25);
+    border-color: rgba(168, 85, 247, .25);
 }
 .talk-template-slot-reset {
     background: rgba(185, 28, 28, .15);

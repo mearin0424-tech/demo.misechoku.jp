@@ -141,7 +141,7 @@
     right: 15%;
     height: 2px;
     background: var(--gold);
-    box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+    box-shadow: 0 0 8px rgba(168, 85, 247, 0.4);
 }
 
 /* --- ライクタブ全体のレイアウト --- */
@@ -267,7 +267,7 @@
     transition: 0.2s;
 }
 .like-expand-btn:hover {
-    background: rgba(212, 175, 55, 0.1);
+    background: rgba(168, 85, 247, 0.1);
     border-color: var(--gold);
 }
 #pane-like .like-area.expanded .like-expand-btn {

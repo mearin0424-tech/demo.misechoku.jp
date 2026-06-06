@@ -13,13 +13,13 @@
         --lp-text: #2a1d0f;
         --lp-text-soft: #6b563a;
         --lp-text-mute: #9b876a;
-        --lp-gold: #c5a059;
+        --lp-gold: #a78bfa;
         --lp-gold-light: #e6cf99;
         --lp-gold-deep: #8a6d2f;
         --lp-line: #06c755;
         --lp-border: #ebe0c8;
         --lp-shadow: 0 8px 24px rgba(138, 109, 47, 0.08);
-        --lp-cta-shadow: 0 10px 28px rgba(197, 160, 89, 0.42);
+        --lp-cta-shadow: 0 10px 28px rgba(168, 85, 247, 0.42);
         --lp-content-pad: 20px;
     }
 
@@ -59,13 +59,13 @@
         padding: 56px var(--lp-content-pad) 48px;
         text-align: center;
         background:
-            radial-gradient(circle at 80% 0%, rgba(197, 160, 89, 0.18), transparent 55%),
+            radial-gradient(circle at 80% 0%, rgba(168, 85, 247, 0.18), transparent 55%),
             radial-gradient(circle at 0% 90%, rgba(230, 207, 153, 0.22), transparent 55%),
             linear-gradient(180deg, #fff8e9 0%, #fbf7ee 70%);
     }
     .lp-hero::before {
         content: ''; position: absolute;
-        inset: 18px; border: 1px solid rgba(197, 160, 89, 0.25);
+        inset: 18px; border: 1px solid rgba(168, 85, 247, 0.25);
         border-radius: 4px; pointer-events: none;
     }
     .lp-hero__eyebrow {
@@ -82,7 +82,7 @@
     }
     .lp-hero__catch em {
         font-style: normal;
-        background: linear-gradient(transparent 65%, rgba(197, 160, 89, 0.35) 65%);
+        background: linear-gradient(transparent 65%, rgba(168, 85, 247, 0.35) 65%);
         padding: 0 4px;
     }
     .lp-hero__lead {
@@ -186,7 +186,7 @@
         font-family: var(--font-sans);
         font-weight: 700; font-size: 1.05rem;
         display: inline-flex; align-items: center; justify-content: center;
-        box-shadow: 0 4px 10px rgba(197, 160, 89, 0.45);
+        box-shadow: 0 4px 10px rgba(168, 85, 247, 0.45);
     }
     .lp-step__icon {
         font-size: 1.3rem; color: var(--lp-gold-deep); margin-bottom: 8px;

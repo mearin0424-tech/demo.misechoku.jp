@@ -95,9 +95,9 @@
 .setting-page { padding: 24px 16px 32px; color: #f9f5f5; }
 @media (min-width: 768px) { .setting-page { padding: 32px 24px 40px; } }
 .setting-header { margin-bottom: 24px; }
-.setting-title { font-family: var(--font-sans); font-size: 1.4rem; margin-bottom: 8px; color: var(--color-gold, #d4af37); }
+.setting-title { font-family: var(--font-sans); font-size: 1.4rem; margin-bottom: 8px; color: var(--color-gold, #a78bfa); }
 .setting-lead { font-size: 0.9rem; line-height: 1.6; color: #d1c1c1; }
-.setting-section { margin-bottom: 18px; background: rgba(20, 7, 15, 0.9); border-radius: 16px; padding: 14px 12px 10px; border: 1px solid rgba(212, 175, 55, 0.4); }
+.setting-section { margin-bottom: 18px; background: rgba(20, 7, 15, 0.9); border-radius: 16px; padding: 14px 12px 10px; border: 1px solid rgba(168, 85, 247, 0.4); }
 @media (min-width: 768px) { .setting-section { padding: 16px 16px 12px; } }
 .setting-section-title { font-size: 0.95rem; margin-bottom: 8px; color: #f9f5f5; }
 .setting-row { padding: 10px 4px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -113,7 +113,7 @@
 .setting-btn { display: inline-block; padding: 10px 18px; border-radius: 12px; font-size: 0.88rem; font-weight: 600; text-decoration: none; border: none; transition: opacity 0.2s; cursor: pointer; }
 .setting-btn:hover { opacity: 0.9; }
 .setting-btn-install { background: #8b5cf6; color: #fff; }
-.setting-btn-push { background: #1f2937; color: #f9f5f5; border: 1px solid rgba(212,175,55,0.55); }
+.setting-btn-push { background: #1f2937; color: #f9f5f5; border: 1px solid rgba(168, 85, 247, 0.55); }
 .setting-btn-test { background: #065f46; color: #ecfdf5; border: 1px solid rgba(52,211,153,0.65); }
 .setting-guide { margin: 2px 4px 8px; font-size: 0.78rem; color: #d6c6c6; }
 .setting-guest-note { color: #b69f9f; font-size: 0.9rem; margin-bottom: 20px; }

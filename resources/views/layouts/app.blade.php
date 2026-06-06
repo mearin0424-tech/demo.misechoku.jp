@@ -37,7 +37,7 @@
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="{{ asset('assets/images/pwa/icon-192.png') }}">
     {{-- ファビコン（データURIで404防止。色はアプリのゴールド・ダーク） --}}
-    <link rel="icon" href="data:image/svg+xml,{{ rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#190509"/><text x="16" y="22" font-size="18" text-anchor="middle" fill="#D4AF37">店</text></svg>') }}" type="image/svg+xml">
+    <link rel="icon" href="data:image/svg+xml,{{ rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#190509"/><text x="16" y="22" font-size="18" text-anchor="middle" fill="#a78bfa">店</text></svg>') }}" type="image/svg+xml">
     <title>{{ $resolvedTitle }}</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -61,7 +61,7 @@
          ============================================================ --}}
     <style>
         :root {
-            /* gold（シャンパンゴールド #C5A059）→ accent purple */
+            /* gold（シャンパンゴールド #a78bfa）→ accent purple */
             --gold:                #a78bfa;
             --gold-light:          #c4b5fd;
             --gold-deep:           #7c3aed;

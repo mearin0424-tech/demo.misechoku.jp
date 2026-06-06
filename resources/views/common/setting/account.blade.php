@@ -173,7 +173,7 @@
 <style>
 .setting-page { padding: 24px var(--content-padding-x, 16px) 32px; color: #f9f5f5; }
 .setting-header { margin-bottom: 18px; }
-.setting-title { font-family: var(--font-sans); font-size: 1.4rem; margin-bottom: 8px; color: var(--mypage-gold, #dcb568); }
+.setting-title { font-family: var(--font-sans); font-size: 1.4rem; margin-bottom: 8px; color: var(--mypage-gold, #a78bfa); }
 .setting-lead { font-size: 0.86rem; line-height: 1.6; color: #d1c1c1; }
 
 .setting-flash {
@@ -197,19 +197,19 @@
     background: rgba(20, 7, 15, 0.85);
     border-radius: 18px;
     padding: 16px 16px 18px;
-    border: 1px solid rgba(220, 181, 104, 0.32);
+    border: 1px solid rgba(168, 85, 247, 0.32);
 }
 .setting-section--danger { border-color: rgba(220, 38, 38, 0.4); }
 .setting-section-title {
     font-size: 0.95rem;
     font-weight: 800;
     margin: 0 0 14px;
-    color: #f8e9c8;
+    color: #e6dffc;
     display: flex;
     align-items: center;
     gap: 8px;
 }
-.setting-section-title i { color: var(--mypage-gold, #dcb568); font-size: 0.85rem; }
+.setting-section-title i { color: var(--mypage-gold, #a78bfa); font-size: 0.85rem; }
 .setting-section--danger .setting-section-title i { color: #fca5a5; }
 
 .setting-form-group { margin-bottom: 12px; }
@@ -219,7 +219,7 @@
     width: 100%;
     box-sizing: border-box;
     border-radius: 10px;
-    border: 1px solid rgba(220, 181, 104, 0.3);
+    border: 1px solid rgba(168, 85, 247, 0.3);
     background: rgba(8, 4, 6, 0.85);
     padding: 11px 12px;
     font-size: 0.92rem;
@@ -229,8 +229,8 @@
 .setting-form-group input:focus,
 .setting-form-group textarea:focus {
     outline: none;
-    border-color: rgba(220, 181, 104, 0.65);
-    box-shadow: 0 0 0 3px rgba(220, 181, 104, 0.15);
+    border-color: rgba(168, 85, 247, 0.65);
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
 }
 .setting-form-group input:disabled { opacity: 0.7; cursor: not-allowed; }
 .setting-form-group textarea { resize: vertical; min-height: 100px; }
@@ -247,9 +247,9 @@
     font-size: 0.92rem;
     font-weight: 800;
     color: #2a1406;
-    background: linear-gradient(135deg, #ffe2a3, #dcb568 50%, #b8860b);
+    background: linear-gradient(135deg, #c4b5fd, #a78bfa 50%, #7c3aed);
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(220, 181, 104, 0.4);
+    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -264,7 +264,7 @@
 
 .setting-row { padding: 4px 0; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .setting-row-main { flex: 1; min-width: 0; }
-.setting-row-label { font-size: 0.92rem; margin-bottom: 4px; font-weight: 700; color: #f8e9c8; }
+.setting-row-label { font-size: 0.92rem; margin-bottom: 4px; font-weight: 700; color: #e6dffc; }
 .setting-row-desc { font-size: 0.78rem; color: #b69f9f; line-height: 1.55; }
 .setting-linked { color: #6ee7b7; margin-left: 6px; font-size: 0.78rem; font-weight: 800; }
 
@@ -286,7 +286,7 @@
 .setting-btn-unlink {
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #f8e9c8;
+    color: #e6dffc;
 }
 .setting-btn-unlink:hover { background: rgba(255, 255, 255, 0.06); }
 

@@ -73,7 +73,7 @@
     font-family: var(--font-sans);
     font-size: 1.4rem;
     margin-bottom: 8px;
-    color: var(--color-gold, #d4af37);
+    color: var(--color-gold, #a78bfa);
 }
 
 .setting-lead {
@@ -86,7 +86,7 @@
     background: rgba(20, 7, 15, 0.9);
     border-radius: 16px;
     padding: 16px 14px 18px;
-    border: 1px solid rgba(212, 175, 55, 0.4);
+    border: 1px solid rgba(168, 85, 247, 0.4);
 }
 @media (min-width: 768px) {
     .setting-card {
@@ -120,13 +120,13 @@
 
 .plan-item {
     border-radius: 14px;
-    border: 1px solid rgba(212, 175, 55, 0.35);
+    border: 1px solid rgba(168, 85, 247, 0.35);
     padding: 12px 10px 10px;
     background: rgba(0, 0, 0, 0.35);
 }
 
 .plan-item--active {
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.22), rgba(24, 16, 6, 0.95));
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.22), rgba(24, 16, 6, 0.95));
 }
 
 .plan-item-header {

@@ -37,7 +37,7 @@
 
     @if($currentDoc)
         <div class="text-xs" style="margin-bottom:10px; color:#C9B8B8;">
-            提出済み：<strong style="color:#f8e9c8;">{{ $currentDoc['type_label'] ?? '' }}</strong>
+            提出済み：<strong style="color:#e6dffc;">{{ $currentDoc['type_label'] ?? '' }}</strong>
             @if(!empty($currentDoc['updated_at_label']))
                 <span style="margin-left:8px;">更新: {{ $currentDoc['updated_at_label'] }}</span>
             @endif

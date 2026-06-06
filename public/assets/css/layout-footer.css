@@ -60,7 +60,7 @@
 }
 
 .nav-item.active i {
-    filter: drop-shadow(0 0 5px rgba(197, 160, 89, 0.5));
+    filter: drop-shadow(0 0 5px rgba(168, 85, 247, 0.5));
 }
 
 /* 画像編集モーダル表示中はボトムナビを隠す */

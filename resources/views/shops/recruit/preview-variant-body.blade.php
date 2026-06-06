@@ -77,7 +77,7 @@
         <div class="recruit-ref-inforow"><span class="k">給与</span><span class="v">
             @if($vk === 'trial')
                 @if($vHasTrial)
-                    <span style="color:#d4af37;font-weight:800;">新規入店: {{ number_format((int) $rv['trial_hourly_wage']) }}円〜</span>
+                    <span style="color:#a78bfa;font-weight:800;">新規入店: {{ number_format((int) $rv['trial_hourly_wage']) }}円〜</span>
                     @if($vRegularWage > 0)
                         <br><span style="color:#a1a1aa;font-size:0.8125rem;font-weight:600;">本入（参考）: {{ number_format($vRegularWage) }}円〜 ※正式条件は体験後に面談</span>
                     @endif
@@ -86,7 +86,7 @@
                 @endif
             @else
                 @if($vHasHelp)
-                    <span style="color:#d4af37;font-weight:800;">{{ number_format((int) $rv['help_hourly_wage']) }}円〜</span>
+                    <span style="color:#a78bfa;font-weight:800;">{{ number_format((int) $rv['help_hourly_wage']) }}円〜</span>
                 @else
                     —
                 @endif

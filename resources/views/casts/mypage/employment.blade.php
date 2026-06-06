@@ -18,15 +18,15 @@
     }
     .case-summary-card {
         background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(220,181,104,0.2);
+        border: 1px solid rgba(168, 85, 247, 0.2);
         border-radius: 12px;
         padding: 10px 12px;
         text-align: center;
     }
-    .case-summary-card__label { display: block; font-size: 0.66rem; color: rgba(248,233,200,0.7); letter-spacing: 0.06em; font-weight: 700; margin-bottom: 4px; }
-    .case-summary-card__value { display: block; font-size: 1.4rem; font-weight: 800; color: #ffe2a3; font-variant-numeric: tabular-nums; line-height: 1.1; }
-    .case-summary-card.is-action { border-color: rgba(220,181,104,0.65); background: rgba(220,181,104,0.10); }
-    .case-summary-card.is-action .case-summary-card__value { color: #ffd47a; }
+    .case-summary-card__label { display: block; font-size: 0.66rem; color: rgba(196, 181, 253, 0.7); letter-spacing: 0.06em; font-weight: 700; margin-bottom: 4px; }
+    .case-summary-card__value { display: block; font-size: 1.4rem; font-weight: 800; color: #c4b5fd; font-variant-numeric: tabular-nums; line-height: 1.1; }
+    .case-summary-card.is-action { border-color: rgba(168, 85, 247, 0.65); background: rgba(168, 85, 247, 0.10); }
+    .case-summary-card.is-action .case-summary-card__value { color: #c4b5fd; }
 
     .case-card {
         background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
@@ -39,15 +39,15 @@
     }
     .case-card.is-actionable {
         border-color: var(--color-border-strong);
-        background: linear-gradient(180deg, rgba(197,160,89,0.10), rgba(197,160,89,0.03));
-        box-shadow: 0 2px 14px rgba(197,160,89,0.16), inset 0 1px 0 rgba(232,205,138,0.08);
+        background: linear-gradient(180deg, rgba(168, 85, 247, 0.10), rgba(168, 85, 247, 0.03));
+        box-shadow: 0 2px 14px rgba(168, 85, 247, 0.16), inset 0 1px 0 rgba(168, 85, 247, 0.08);
     }
     .case-card.is-completed { opacity: 0.78; }
 
     .case-card__head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
     .case-card__icon {
         width: 32px; height: 32px; flex: 0 0 auto;
-        border-radius: 8px; background: rgba(197,160,89,0.12); color: var(--gold);
+        border-radius: 8px; background: rgba(168, 85, 247, 0.12); color: var(--gold);
         display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem;
     }
     .case-card.is-completed .case-card__icon { background: var(--color-success-bg); color: var(--color-success); }
@@ -66,7 +66,7 @@
     .case-pipeline__step { position: relative; text-align: center; padding-top: 22px; font-size: 0.6rem; }
     .case-pipeline__step::after {
         content: ''; position: absolute; top: 8px; left: 50%; right: -50%;
-        height: 2px; background: rgba(197,160,89,0.16); z-index: 0;
+        height: 2px; background: rgba(168, 85, 247, 0.16); z-index: 0;
     }
     .case-pipeline__step:last-child::after { display: none; }
     .case-pipeline__step.is-done::after,
@@ -77,20 +77,20 @@
         width: 18px; height: 18px; border-radius: 50%;
         display: inline-flex; align-items: center; justify-content: center;
         font-size: 0.6rem; font-weight: 800;
-        background: rgba(255,255,255,0.04); border: 2px solid rgba(197,160,89,0.28);
+        background: rgba(255,255,255,0.04); border: 2px solid rgba(168, 85, 247, 0.28);
         color: var(--color-text-muted); z-index: 1;
     }
     .case-pipeline__step.is-done .case-pipeline__bullet {
         background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: #1a1206; border-color: var(--gold);
     }
     .case-pipeline__step.is-current .case-pipeline__bullet {
-        background: rgba(197,160,89,0.22); color: var(--gold-light); border-color: var(--gold);
+        background: rgba(168, 85, 247, 0.22); color: var(--gold-light); border-color: var(--gold);
         animation: case-pulse 1.6s ease-in-out infinite;
-        box-shadow: 0 0 0 3px rgba(197,160,89,0.18);
+        box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.18);
     }
     @keyframes case-pulse {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(197,160,89,0.45); }
-        50% { box-shadow: 0 0 0 5px rgba(197,160,89,0); }
+        0%, 100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.45); }
+        50% { box-shadow: 0 0 0 5px rgba(168, 85, 247, 0); }
     }
     .case-pipeline__label { display: block; font-size: 0.58rem; color: var(--color-text-muted); line-height: 1.2; }
     .case-pipeline__step.is-done .case-pipeline__label,
@@ -127,10 +127,10 @@
         padding: 8px 14px; border-radius: 999px;
         background: linear-gradient(135deg, var(--gold-light), var(--gold) 50%, var(--gold-deep));
         color: #1a1206; border: 0; font-weight: 800; font-size: 0.82rem; cursor: pointer;
-        box-shadow: 0 3px 10px rgba(197,160,89,0.4);
+        box-shadow: 0 3px 10px rgba(168, 85, 247, 0.4);
         margin-left: auto;
     }
-    .case-card__action-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(197,160,89,0.5); }
+    .case-card__action-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(168, 85, 247, 0.5); }
     .case-card__view-talk {
         display: inline-flex; align-items: center; gap: 4px;
         font-size: 0.74rem; color: var(--color-text-muted); text-decoration: none;
@@ -141,10 +141,10 @@
     .mypage-stage-heading {
         margin: 22px 0 10px;
         font-size: 0.78rem; font-weight: 800;
-        color: rgba(220,181,104,0.85); letter-spacing: 0.08em; text-transform: uppercase;
+        color: rgba(168, 85, 247, 0.85); letter-spacing: 0.08em; text-transform: uppercase;
         display: flex; align-items: center; gap: 8px;
     }
-    .mypage-stage-heading i { color: #dcb568; font-size: 0.7rem; }
+    .mypage-stage-heading i { color: #a78bfa; font-size: 0.7rem; }
 
     /* チェックボックス */
     .deposit-precheck { display: grid; gap: 14px; }
@@ -159,10 +159,10 @@
         background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
         line-height: 1.5;
     }
-    .deposit-check-row:hover { background: rgba(220,181,104,0.06); border-color: rgba(220,181,104,0.22); }
-    .deposit-check-row input[type="checkbox"] { flex: 0 0 auto; margin-top: 2px; accent-color: #dcb568; width: 18px; height: 18px; cursor: pointer; }
+    .deposit-check-row:hover { background: rgba(168, 85, 247, 0.06); border-color: rgba(168, 85, 247, 0.22); }
+    .deposit-check-row input[type="checkbox"] { flex: 0 0 auto; margin-top: 2px; accent-color: #a78bfa; width: 18px; height: 18px; cursor: pointer; }
     .deposit-check-row span { flex: 1; cursor: pointer; }
-    .deposit-check-row:has(input:checked) { background: rgba(220,181,104,0.1); border-color: rgba(220,181,104,0.45); }
+    .deposit-check-row:has(input:checked) { background: rgba(168, 85, 247, 0.1); border-color: rgba(168, 85, 247, 0.45); }
 
     /* フローティング CTA */
     .deposit-cta-bar {
@@ -171,7 +171,7 @@
         width: min(100vw, var(--max-content-width, 430px)); max-width: 100%;
         padding: 10px var(--content-padding-x, 16px) calc(10px + env(safe-area-inset-bottom, 0));
         background: linear-gradient(180deg, rgba(74,18,42,0.98), rgba(35,8,21,1));
-        border-top: 1px solid rgba(220,181,104,0.55);
+        border-top: 1px solid rgba(168, 85, 247, 0.55);
         box-shadow: 0 -8px 24px rgba(0,0,0,0.45);
         animation: deposit-cta-slide-up 0.3s ease;
     }
@@ -181,24 +181,24 @@
     }
     .deposit-cta-bar__inner { display: flex; align-items: center; gap: 12px; }
     .deposit-cta-bar__info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-    .deposit-cta-bar__amount { display: inline-flex; align-items: baseline; gap: 4px; color: #ffe2a3; font-weight: 800; }
+    .deposit-cta-bar__amount { display: inline-flex; align-items: baseline; gap: 4px; color: #c4b5fd; font-weight: 800; }
     .deposit-cta-bar__amount strong { font-size: 1.05rem; font-weight: 900; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.4); overflow: hidden; text-overflow: ellipsis; max-width: 50vw; white-space: nowrap; }
-    .deposit-cta-bar__amount i { font-size: 0.9rem; color: #dcb568; }
-    .deposit-cta-bar__label { font-size: 0.7rem; color: rgba(248,233,200,0.78); font-weight: 600; }
+    .deposit-cta-bar__amount i { font-size: 0.9rem; color: #a78bfa; }
+    .deposit-cta-bar__label { font-size: 0.7rem; color: rgba(196, 181, 253, 0.78); font-weight: 600; }
     .deposit-cta-bar__btn {
         flex: 0 0 auto; margin-left: auto; padding: 12px 18px; border-radius: 999px;
-        background: linear-gradient(135deg, #ffe2a3, #dcb568 48%, #b8860b);
+        background: linear-gradient(135deg, #c4b5fd, #a78bfa 48%, #7c3aed);
         color: #2a1406; border: 0; font-weight: 900; font-size: 0.92rem; cursor: pointer;
-        box-shadow: 0 6px 16px rgba(220,181,104,0.45);
+        box-shadow: 0 6px 16px rgba(168, 85, 247, 0.45);
         display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
     }
-    .deposit-cta-bar__btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(220,181,104,0.55); }
+    .deposit-cta-bar__btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(168, 85, 247, 0.55); }
     body:has(.deposit-cta-bar) .cast-mypage-sub-page { padding-bottom: calc(var(--footer-height, 60px) + 80px) !important; }
 
     /* 振込先口座アコーディオン */
     .payment-bank-section { padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08); margin-top: 18px; }
     .payment-bank-accordion {
-        border: 1px solid rgba(220,181,104,0.22); border-radius: 14px;
+        border: 1px solid rgba(168, 85, 247, 0.22); border-radius: 14px;
         background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
         overflow: hidden;
     }
@@ -207,18 +207,18 @@
         padding: 14px 16px; user-select: none;
     }
     .payment-bank-accordion__summary::-webkit-details-marker { display: none; }
-    .payment-bank-accordion__summary:hover { background: rgba(220,181,104,0.05); }
+    .payment-bank-accordion__summary:hover { background: rgba(168, 85, 247, 0.05); }
     .payment-bank-accordion__icon {
         width: 36px; height: 36px; flex: 0 0 auto;
-        border-radius: 50%; background: rgba(220,181,104,0.14); color: #dcb568;
+        border-radius: 50%; background: rgba(168, 85, 247, 0.14); color: #a78bfa;
         display: inline-flex; align-items: center; justify-content: center; font-size: 1rem;
     }
     .payment-bank-accordion__main { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-    .payment-bank-accordion__label { font-size: 0.72rem; font-weight: 700; color: rgba(220,181,104,0.85); letter-spacing: 0.04em; }
-    .payment-bank-accordion__summary-text { font-size: 0.92rem; color: #f8e9c8; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .payment-bank-accordion__label { font-size: 0.72rem; font-weight: 700; color: rgba(168, 85, 247, 0.85); letter-spacing: 0.04em; }
+    .payment-bank-accordion__summary-text { font-size: 0.92rem; color: #e6dffc; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .payment-bank-accordion__chev { color: rgba(255,255,255,0.55); font-size: 0.85rem; transition: transform 0.2s ease; }
     .payment-bank-accordion[open] .payment-bank-accordion__chev { transform: rotate(180deg); }
-    .payment-bank-accordion__body { padding: 12px 16px 16px; border-top: 1px solid rgba(220,181,104,0.16); background: rgba(0,0,0,0.18); }
+    .payment-bank-accordion__body { padding: 12px 16px 16px; border-top: 1px solid rgba(168, 85, 247, 0.16); background: rgba(0,0,0,0.18); }
 
     .payment-bank-unregistered { background: rgba(26,17,17,0.95); border: 1px dashed rgba(255,255,255,0.12); border-radius: 1rem; padding: 1.6rem 1.2rem; display: flex; flex-direction: column; align-items: center; text-align: center; }
     .payment-bank-unregistered-icon { width: 44px; height: 44px; border-radius: 50%; background: #2a1d1d; display: flex; align-items: center; justify-content: center; margin-bottom: 0.8rem; color: #a89b9b; font-size: 1.1rem; }
@@ -230,7 +230,7 @@
     .payment-bank-data-row:last-child { border-bottom: none; }
     .payment-bank-data-label { font-size: 0.74rem; color: #a89b9b; }
     .payment-bank-data-value { font-size: 0.86rem; font-weight: 500; color: #fff; }
-    .payment-bank-change-btn { font-size: 0.78rem; padding: 8px 14px; border: 1px solid rgba(220,181,104,0.4); border-radius: 9999px; background: transparent; color: #dcb568; cursor: pointer; }
+    .payment-bank-change-btn { font-size: 0.78rem; padding: 8px 14px; border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 9999px; background: transparent; color: #a78bfa; cursor: pointer; }
 
     /* 口座登録モーダル */
     .payment-bank-modal { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); padding: 0; }
@@ -261,11 +261,11 @@
         border: 1px solid rgba(255,255,255,0.06);
         text-decoration: none; color: inherit;
     }
-    .mypage-mini-row:hover { border-color: rgba(220,181,104,0.3); background: rgba(220,181,104,0.04); }
+    .mypage-mini-row:hover { border-color: rgba(168, 85, 247, 0.3); background: rgba(168, 85, 247, 0.04); }
     .mypage-mini-row__name { flex: 1; font-size: 0.88rem; font-weight: 700; color: #f5e0c4; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .mypage-mini-row__status { flex: 0 0 auto; font-size: 0.7rem; padding: 3px 8px; border-radius: 999px; background: rgba(220,181,104,0.1); color: #dcb568; }
+    .mypage-mini-row__status { flex: 0 0 auto; font-size: 0.7rem; padding: 3px 8px; border-radius: 999px; background: rgba(168, 85, 247, 0.1); color: #a78bfa; }
     .mypage-mini-row__status.is-rejected { background: rgba(220,38,38,0.12); color: #fca5a5; }
-    .mypage-mini-row__chev { color: rgba(248,233,200,0.4); font-size: 0.72rem; }
+    .mypage-mini-row__chev { color: rgba(196, 181, 253, 0.4); font-size: 0.72rem; }
 </style>
 @endpush
 
@@ -287,7 +287,7 @@
 
             {{-- 獲得ボーナス金合計バッジ（旧 mypage 上部から移設。x-ui.badge variant="gold" のデザイン踏襲） --}}
             <div style="margin: 4px 0 18px;">
-                <div style="display:inline-flex;align-items:center;gap:10px;padding:8px 18px;border-radius:999px;background:linear-gradient(to right,#D4AF37,#B8860B);color:#111;border:1px solid rgba(212,175,55,0.4);font-weight:700;box-shadow:inset 0 4px 6px rgba(255,255,255,0.4),inset 0 -6px 6px rgba(0,0,0,0.4),0 8px 16px rgba(0,0,0,0.7);">
+                <div style="display:inline-flex;align-items:center;gap:10px;padding:8px 18px;border-radius:999px;background:linear-gradient(to right,#a78bfa,#7c3aed);color:#111;border:1px solid rgba(168, 85, 247, 0.4);font-weight:700;box-shadow:inset 0 4px 6px rgba(255,255,255,0.4),inset 0 -6px 6px rgba(0,0,0,0.4),0 8px 16px rgba(0,0,0,0.7);">
                     <span style="font-size:10px;letter-spacing:0.08em;opacity:0.9;">獲得ボーナス金合計</span>
                     <span style="font-size:18px;letter-spacing:0.04em;font-weight:800;">¥{{ number_format($bonusTotal) }}</span>
                 </div>
@@ -336,7 +336,7 @@
                     <ul class="mypage-mini-list">
                         @foreach($ongoingApplications as $app)
                             <a href="{{ $app['link'] ?? '#' }}" class="mypage-mini-row">
-                                <i class="fas fa-store" style="color:#dcb568;"></i>
+                                <i class="fas fa-store" style="color:#a78bfa;"></i>
                                 <span class="mypage-mini-row__name">{{ $app['shop_name'] }}</span>
                                 <span class="mypage-mini-row__status">{{ $app['status_label'] }}</span>
                                 <i class="fas fa-chevron-right mypage-mini-row__chev"></i>

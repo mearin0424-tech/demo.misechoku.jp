@@ -50,7 +50,7 @@
 .sub-header-tabs .tab-item.active {
     color: var(--gold);
     font-weight: 700;
-    text-shadow: 0 0 8px rgba(197, 160, 89, 0.25);
+    text-shadow: 0 0 8px rgba(168, 85, 247, 0.25);
 }
 
 .sub-header-tabs .tab-item.active::after {

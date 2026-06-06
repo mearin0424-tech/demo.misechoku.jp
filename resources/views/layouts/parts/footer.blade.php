@@ -16,7 +16,7 @@
     {{-- ホーム（おすすめのスワイプ表示） --}}
     <a href="{{ route($prefix . '.home') }}" class="nav-item {{ $isHome ? 'active' : '' }}">
         <i class="fas fa-home"></i>
-        <span>ENCOUNT</span>
+        <span>SWIPE</span>
     </a>
 
     {{-- さがす（統合検索画面へ） --}}

@@ -15,10 +15,10 @@
             <h1 class="mypage-page-title serif-font">レビュー一覧</h1>
 
             @if(!empty($filterShopId ?? null))
-                <div class="review-filter-chip" style="display:flex;align-items:center;gap:8px;padding:10px 14px;margin-bottom:14px;border-radius:999px;background:rgba(220,181,104,0.10);border:1px solid rgba(220,181,104,0.35);color:#f5e6c5;font-size:0.8rem;">
+                <div class="review-filter-chip" style="display:flex;align-items:center;gap:8px;padding:10px 14px;margin-bottom:14px;border-radius:999px;background:rgba(168, 85, 247, 0.10);border:1px solid rgba(168, 85, 247, 0.35);color:#e6dffc;font-size:0.8rem;">
                     <i class="fas fa-filter"></i>
                     <span>絞り込み：<strong>{{ $filterShopName ?: $filterShopId }}</strong> へ投稿したレビュー</span>
-                    <a href="{{ route('cast.mypage.reviews') }}" style="margin-left:auto;color:#dcb568;text-decoration:none;font-weight:700;">
+                    <a href="{{ route('cast.mypage.reviews') }}" style="margin-left:auto;color:#a78bfa;text-decoration:none;font-weight:700;">
                         <i class="fas fa-times-circle"></i> 解除
                     </a>
                 </div>

@@ -31,7 +31,7 @@
     @if($vRegularWage > 0)
         <p class="recruit-ref-pay-ref" style="margin:10px 0 0;font-size:11px;line-height:1.5;color:#a1a1aa;font-weight:600;">
             本入時給（参考・体験後は面談で調整）:
-            <span style="color:#d4af37;font-weight:800;">¥{{ number_format($vRegularWage) }}〜</span>
+            <span style="color:#a78bfa;font-weight:800;">¥{{ number_format($vRegularWage) }}〜</span>
         </p>
     @endif
 @else

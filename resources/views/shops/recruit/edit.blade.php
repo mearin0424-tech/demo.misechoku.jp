@@ -10,8 +10,8 @@
         --je-bg: transparent;
         --je-panel: rgba(20, 12, 18, 0.55);
         --je-field: rgba(255, 255, 255, 0.05);
-        --je-border: rgba(220, 181, 104, 0.22);
-        --je-gold: #dcb568;
+        --je-border: rgba(168, 85, 247, 0.22);
+        --je-gold: #a78bfa;
         background: var(--je-bg);
         margin: 0 calc(-1 * var(--content-padding-x, 16px));
         padding-bottom: calc(var(--footer-height, 75px) + 96px + env(safe-area-inset-bottom, 0px));
@@ -35,7 +35,7 @@
         padding: 12px 16px;
         background: rgba(40, 18, 30, 0.92);
         backdrop-filter: blur(10px);
-        border-bottom: 1px solid rgba(220, 181, 104, 0.22);
+        border-bottom: 1px solid rgba(168, 85, 247, 0.22);
     }
     .job-edit-v2__back {
         color: #a1a1aa;
@@ -66,7 +66,7 @@
         gap: 8px;
         margin: 0 0 20px;
         padding-bottom: 10px;
-        border-bottom: 1px solid rgba(220, 181, 104, 0.18);
+        border-bottom: 1px solid rgba(168, 85, 247, 0.18);
         font-size: 1rem;
         font-family: var(--font-sans);
         font-weight: 700;
@@ -77,11 +77,11 @@
         content: '';
         width: 4px;
         height: 1.1rem;
-        background: #dcb568;
+        background: #a78bfa;
         border-radius: 2px;
         flex-shrink: 0;
     }
-    .job-edit-v2__sec-title i { font-size: 0.9rem; color: #dcb568; }
+    .job-edit-v2__sec-title i { font-size: 0.9rem; color: #a78bfa; }
 
     .job-edit-v2__field { margin-bottom: 22px; }
     .job-edit-v2__field:last-child { margin-bottom: 0; }
@@ -91,7 +91,7 @@
         gap: 8px;
         font-size: 0.78rem;
         font-weight: 800;
-        color: #f8e9c8;
+        color: #e6dffc;
         margin: 0 0 8px 2px;
         letter-spacing: 0.02em;
     }
@@ -100,8 +100,8 @@
         font-weight: 800;
         padding: 2px 6px;
         border-radius: 4px;
-        background: rgba(212, 175, 55, 0.15);
-        border: 1px solid rgba(212, 175, 55, 0.35);
+        background: rgba(168, 85, 247, 0.15);
+        border: 1px solid rgba(168, 85, 247, 0.35);
         color: var(--je-gold);
         line-height: 1.2;
     }
@@ -128,16 +128,16 @@
         transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
     }
     .job-edit-v2__input::placeholder,
-    .job-edit-v2__textarea::placeholder { color: rgba(248, 233, 200, 0.35); }
+    .job-edit-v2__textarea::placeholder { color: rgba(196, 181, 253, 0.35); }
     .job-edit-v2__textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
     .job-edit-v2__input:focus,
     .job-edit-v2__textarea:focus {
         outline: none;
-        border-color: rgba(220, 181, 104, 0.6);
+        border-color: rgba(168, 85, 247, 0.6);
         background: rgba(255, 255, 255, 0.07);
-        box-shadow: 0 0 0 3px rgba(220, 181, 104, 0.18);
+        box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.18);
     }
-    .job-edit-v2__hint { margin: 8px 0 0 2px; font-size: 0.72rem; line-height: 1.6; color: rgba(248, 233, 200, 0.5); }
+    .job-edit-v2__hint { margin: 8px 0 0 2px; font-size: 0.72rem; line-height: 1.6; color: rgba(196, 181, 253, 0.5); }
 
     .job-edit-v2__grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
@@ -171,7 +171,7 @@
         top: 0;
         bottom: 0;
         width: 4px;
-        background: rgba(212, 175, 55, 0.45);
+        background: rgba(168, 85, 247, 0.45);
     }
 
     .job-edit-v2__chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -196,9 +196,9 @@
     }
     .job-edit-v2__chip input:checked + span {
         border-color: var(--je-gold);
-        background: rgba(220, 181, 104, 0.18);
-        color: #ffe2a3;
-        box-shadow: 0 0 10px rgba(220, 181, 104, 0.18);
+        background: rgba(168, 85, 247, 0.18);
+        color: #c4b5fd;
+        box-shadow: 0 0 10px rgba(168, 85, 247, 0.18);
     }
     .job-edit-v2__tag-cat { margin: 0 0 8px; font-size: 0.78rem; font-weight: 800; color: var(--je-gold); }
 
@@ -341,12 +341,12 @@
         font-weight: 700;
         color: var(--je-gold);
         text-decoration: none;
-        border: 1px solid rgba(212, 175, 55, 0.35);
+        border: 1px solid rgba(168, 85, 247, 0.35);
         padding: 6px 12px;
         border-radius: 999px;
         transition: background 0.15s ease;
     }
-    .job-edit-v2__preview-link:hover { background: rgba(212, 175, 55, 0.08); }
+    .job-edit-v2__preview-link:hover { background: rgba(168, 85, 247, 0.08); }
     .job-edit-v2__preview-row {
         display: flex;
         align-items: center;
@@ -372,7 +372,7 @@
         transition: border-color 0.15s ease, color 0.15s ease;
     }
     .job-edit-v2__copy-btn:hover {
-        border-color: rgba(212, 175, 55, 0.4);
+        border-color: rgba(168, 85, 247, 0.4);
         color: var(--je-gold);
     }
 
@@ -391,7 +391,7 @@
         padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
         background: rgba(40, 18, 30, 0.95);
         backdrop-filter: blur(10px);
-        border-top: 1px solid rgba(220, 181, 104, 0.22);
+        border-top: 1px solid rgba(168, 85, 247, 0.22);
         box-sizing: border-box;
     }
     .job-edit-v2__footer-inner {
@@ -426,8 +426,8 @@
         font-weight: 800;
         cursor: pointer;
         color: #141210;
-        background: linear-gradient(to right, #d4af37, #b8942b);
-        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.15);
+        background: linear-gradient(to right, #a78bfa, #b8942b);
+        box-shadow: 0 4px 15px rgba(168, 85, 247, 0.15);
         font-family: inherit;
     }
     .job-edit-v2__btn-save:hover { opacity: 0.92; }
@@ -440,15 +440,15 @@
         margin: 14px 16px 0;
         padding: 12px 14px;
         border-radius: 12px;
-        background: rgba(220, 181, 104, 0.10);
-        border: 1px solid rgba(220, 181, 104, 0.45);
-        color: #ffe2a3;
+        background: rgba(168, 85, 247, 0.10);
+        border: 1px solid rgba(168, 85, 247, 0.45);
+        color: #c4b5fd;
         font-size: 0.82rem;
         line-height: 1.6;
     }
-    .job-edit-v2__notice i { flex-shrink: 0; margin-top: 3px; color: #ffd47a; }
+    .job-edit-v2__notice i { flex-shrink: 0; margin-top: 3px; color: #c4b5fd; }
     .job-edit-v2__notice a {
-        color: #ffd47a;
+        color: #c4b5fd;
         font-weight: 800;
         text-decoration: underline;
     }
@@ -1148,8 +1148,8 @@ document.addEventListener('DOMContentLoaded', function () {
             applyTagIds('chips-benefit',    trialBenefitIds);
 
             copyBtn.textContent = '✓ コピーしました';
-            copyBtn.style.color = '#d4af37';
-            copyBtn.style.borderColor = 'rgba(212,175,55,0.5)';
+            copyBtn.style.color = '#a78bfa';
+            copyBtn.style.borderColor = 'rgba(168, 85, 247, 0.5)';
             setTimeout(function () {
                 copyBtn.innerHTML = '<i class="fas fa-copy"></i> 新規入店と同じタグをコピー';
                 copyBtn.style.color = '';

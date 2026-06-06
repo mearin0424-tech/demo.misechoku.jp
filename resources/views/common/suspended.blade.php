@@ -52,9 +52,9 @@
     padding: 32px 24px;
     border-radius: 22px;
     background: linear-gradient(180deg, rgba(74, 18, 42, 0.94), rgba(35, 8, 21, 0.95));
-    border: 1px solid rgba(220, 181, 104, 0.45);
+    border: 1px solid rgba(168, 85, 247, 0.45);
     box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
-    color: #f8e9c8;
+    color: #e6dffc;
     text-align: center;
 }
 .suspended-card__icon {
@@ -73,7 +73,7 @@
 .suspended-card__title {
     font-size: 1.35rem;
     font-weight: 800;
-    color: #ffe2a3;
+    color: #c4b5fd;
     margin: 0 0 12px;
     font-family: var(--font-sans);
     letter-spacing: 0.06em;
@@ -81,12 +81,12 @@
 .suspended-card__lead {
     font-size: 0.96rem;
     line-height: 1.7;
-    color: #f8e9c8;
+    color: #e6dffc;
     margin: 0 0 12px;
 }
 .suspended-card__lead--small {
     font-size: 0.85rem;
-    color: rgba(248, 233, 200, 0.78);
+    color: rgba(196, 181, 253, 0.78);
 }
 .suspended-card__actions {
     display: flex;
@@ -107,28 +107,28 @@
     transition: transform 0.1s ease, background 0.15s ease;
 }
 .btn-suspended-primary {
-    background: linear-gradient(135deg, #dcb568, #b8860b);
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
     color: #2a1406;
     border: 0;
-    box-shadow: 0 4px 16px rgba(220, 181, 104, 0.3);
+    box-shadow: 0 4px 16px rgba(168, 85, 247, 0.3);
 }
 .btn-suspended-primary:hover { transform: translateY(-1px); color: #2a1406; }
 .btn-suspended-secondary {
     background: transparent;
-    border: 1px solid rgba(248, 233, 200, 0.35);
-    color: #f8e9c8;
+    border: 1px solid rgba(196, 181, 253, 0.35);
+    color: #e6dffc;
 }
-.btn-suspended-secondary:hover { background: rgba(248, 233, 200, 0.06); color: #f8e9c8; }
+.btn-suspended-secondary:hover { background: rgba(196, 181, 253, 0.06); color: #e6dffc; }
 .suspended-card__id {
     margin: 12px 0 0;
     font-size: 0.78rem;
-    color: rgba(248, 233, 200, 0.6);
+    color: rgba(196, 181, 253, 0.6);
 }
 .suspended-card__id code {
     background: rgba(255, 255, 255, 0.06);
     padding: 1px 8px;
     border-radius: 6px;
-    color: #ffe2a3;
+    color: #c4b5fd;
 }
 </style>
 @endsection

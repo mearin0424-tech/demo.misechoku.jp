@@ -181,8 +181,8 @@
 
         body.page-demo-login #bg-layer {
             background:
-                radial-gradient(circle at 22% 20%, rgba(220, 181, 104, 0.14), transparent 26%),
-                radial-gradient(circle at 80% 72%, rgba(220, 181, 104, 0.16), transparent 30%),
+                radial-gradient(circle at 22% 20%, rgba(168, 85, 247, 0.14), transparent 26%),
+                radial-gradient(circle at 80% 72%, rgba(168, 85, 247, 0.16), transparent 30%),
                 linear-gradient(180deg, rgba(74, 18, 42, 0.66), rgba(56, 13, 31, 0.95));
         }
 
@@ -244,13 +244,13 @@
         .demo-login-bg-glow-left {
             top: 12%;
             left: 8%;
-            background: rgba(230, 208, 128, 0.12);
+            background: rgba(168, 85, 247, 0.12);
         }
 
         .demo-login-bg-glow-right {
             right: 8%;
             bottom: 10%;
-            background: rgba(179, 138, 34, 0.12);
+            background: rgba(124, 58, 237, 0.12);
         }
 
         .demo-login-page {
@@ -292,7 +292,7 @@
         }
 
         .demo-login-alert-info {
-            border-color: rgba(230, 208, 128, 0.24);
+            border-color: rgba(168, 85, 247, 0.24);
             background: rgba(255, 255, 255, 0.05);
             color: #f9efcf;
         }
@@ -304,7 +304,7 @@
 
         .demo-login-card {
             overflow: hidden;
-            border: 1px solid rgba(220, 181, 104, 0.24);
+            border: 1px solid rgba(168, 85, 247, 0.24);
             border-radius: 30px;
             background: linear-gradient(155deg, rgba(255, 240, 245, 0.06), rgba(92, 23, 53, 0.88));
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
@@ -317,7 +317,7 @@
         .demo-login-tabs {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            border-bottom: 1px solid rgba(220, 181, 104, 0.18);
+            border-bottom: 1px solid rgba(168, 85, 247, 0.18);
         }
 
         .demo-login-tab {
@@ -345,7 +345,7 @@
             bottom: 0;
             height: 2px;
             background: linear-gradient(90deg, var(--gold), var(--gold-deep));
-            box-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
+            box-shadow: 0 0 12px rgba(168, 85, 247, 0.5);
         }
 
         .demo-login-panel {
@@ -385,7 +385,7 @@
         }
 
         .demo-role-chip.is-active {
-            border-color: rgba(220, 181, 104, 0.45);
+            border-color: rgba(168, 85, 247, 0.45);
             color: var(--gold-light);
             background: rgba(35, 15, 18, 0.95);
         }
@@ -447,7 +447,7 @@
             content: '';
             flex: 1;
             height: 1px;
-            background: rgba(230, 208, 128, 0.1);
+            background: rgba(168, 85, 247, 0.1);
         }
 
         .demo-login-field-group {
@@ -505,8 +505,8 @@
         .demo-login-select:focus,
         .demo-login-input-wrap input:focus {
             outline: none;
-            border-color: rgba(220, 181, 104, 0.56);
-            box-shadow: 0 0 0 3px rgba(220, 181, 104, 0.16);
+            border-color: rgba(168, 85, 247, 0.56);
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.16);
         }
 
         .demo-login-input-wrap input[readonly] {
@@ -524,7 +524,7 @@
             margin-top: 18px;
             background: linear-gradient(145deg, var(--gold), var(--gold-deep));
             color: #2a1406;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
         }
 
         .demo-register-title {
@@ -545,7 +545,7 @@
             justify-content: center;
             gap: 10px;
             min-height: 54px;
-            border: 1px solid rgba(230, 208, 128, 0.18);
+            border: 1px solid rgba(168, 85, 247, 0.18);
             border-radius: 16px;
             background: rgba(18, 4, 5, 0.46);
             color: #f5e6e6;
@@ -570,7 +570,7 @@
         }
 
         .demo-login-footer-links a:hover {
-            color: #e6d080;
+            color: #a78bfa;
         }
 
         @keyframes demoLineShine {

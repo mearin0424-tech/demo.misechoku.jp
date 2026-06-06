@@ -720,7 +720,7 @@
 }
 .detail-search-modal__btn--save {
     flex: 1 1 auto;
-    background: rgba(197, 160, 89, 0.10);
+    background: rgba(168, 85, 247, 0.10);
     border: 1px solid var(--color-border-strong);
     color: var(--gold-light);
     padding: 10px 14px;
@@ -730,7 +730,7 @@
     cursor: pointer;
     transition: background 0.15s ease;
 }
-.detail-search-modal__btn--save:hover { background: rgba(197, 160, 89, 0.18); }
+.detail-search-modal__btn--save:hover { background: rgba(168, 85, 247, 0.18); }
 .detail-search-modal__save-feedback {
     padding: 8px 16px 0;
     margin: 0;
@@ -779,7 +779,7 @@
 .detail-search-location-card__badge {
     font-size: 0.60rem; letter-spacing: 0.14em; font-weight: 800;
     padding: 2px 8px; border-radius: 4px;
-    background: linear-gradient(135deg, #E8C372, #d4af37);
+    background: linear-gradient(135deg, #E8C372, #a78bfa);
     color: #1a1015;
 }
 .detail-search-location-card__sub {
@@ -820,7 +820,7 @@
     padding: 0 14px;
     border: 0;
     border-radius: 10px;
-    background: linear-gradient(135deg, #E8C372, #d4af37);
+    background: linear-gradient(135deg, #E8C372, #a78bfa);
     color: #1a1015;
     font-size: 0.80rem; font-weight: 800;
     cursor: pointer;
@@ -858,7 +858,7 @@
     max-height: 220px;
     overflow-y: auto;
     background: var(--color-card-strong, #1a1a1a);
-    border: 1px solid var(--color-border-strong, rgba(197,160,89,0.4));
+    border: 1px solid var(--color-border-strong, rgba(168, 85, 247, 0.4));
     border-radius: 10px;
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
 }
@@ -874,10 +874,10 @@
 }
 .detail-search-location-suggest-item:hover,
 .detail-search-location-suggest-item.is-active {
-    background: rgba(197, 160, 89, 0.12);
-    color: var(--color-text-header, #f4e7c2);
+    background: rgba(168, 85, 247, 0.12);
+    color: var(--color-text-header, #c4b5fd);
 }
-.detail-search-location-suggest-item i { color: var(--gold, #c5a059); font-size: 0.78rem; }
+.detail-search-location-suggest-item i { color: var(--gold, #a78bfa); font-size: 0.78rem; }
 .detail-search-location-suggest-empty {
     padding: 10px;
     font-size: 0.76rem;

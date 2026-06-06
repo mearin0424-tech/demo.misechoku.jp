@@ -2,7 +2,7 @@
     $routeName = Route::currentRouteName();
     $pageId = $pageId ?? (explode('.', $routeName)[1] ?? 'home');
 
-    // ENCOUNT / SEARCH / LIKES / TALK / MYPAGE のトップ画面はバックボタンを出さず
+    // SWIPE / SEARCH / LIKES / TALK / MYPAGE のトップ画面はバックボタンを出さず
     // タスク・通知・メニューだけの共通ヘッダーで統一する。
     // それ以外（プロフィール詳細・採用管理など 1 階層以上深い画面）はバック付きで統一。
     $mainRouteNames = [
@@ -46,7 +46,7 @@
         'castprofileview' => 'CAST PROFILE',
     ];
     $engBySecond = [
-        'home'        => 'ENCOUNT',
+        'home'        => 'SWIPE',
         'login'       => 'LOGIN',
         'search'      => 'SEARCH',
         'mypage'      => 'MY PAGE',

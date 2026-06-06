@@ -158,7 +158,7 @@
     transform: translateX(20px);
 }
 .cg-item__toggle input[type="checkbox"]:focus-visible ~ .cg-item__toggle-track {
-    outline: 2px solid #dcb568;
+    outline: 2px solid #a78bfa;
     outline-offset: 2px;
 }
 .cg-item__toggle-label {
@@ -195,8 +195,8 @@
 }
 .cg-item__field textarea:focus {
     outline: none;
-    border-color: #dcb568;
-    box-shadow: 0 0 0 3px rgba(220, 181, 104, 0.18);
+    border-color: #a78bfa;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.18);
 }
 
 /* 保存バー */

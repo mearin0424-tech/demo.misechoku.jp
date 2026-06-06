@@ -39,7 +39,7 @@
             'castprofileview' => 'CAST PROFILE',
         ];
         $engBySecond = [
-            'home' => 'ENCOUNT', 'login' => 'LOGIN', 'search' => 'SEARCH', 'mypage' => 'MY PAGE',
+            'home' => 'SWIPE', 'login' => 'LOGIN', 'search' => 'SEARCH', 'mypage' => 'MY PAGE',
             'talk' => 'TALK', 'interaction' => 'CONNECTION', 'manage' => 'MANAGEMENT',
             'register' => 'ENTRY', 'profile' => 'PROFILE', 'recruit' => 'RECRUIT', 'recruits' => 'RECRUIT',
             'setting' => 'SETTING', 'support' => 'SUPPORT', 'official' => 'OFFICIAL',
@@ -106,7 +106,9 @@
          layout-sidebar.css の `right: max(0px, calc(50vw - var(--max-content-width)/2))` を 0 に解決させる。 --}}
     <style>
         :root {
-            --max-content-width: 100vw;
+            /* --max-content-width は 430px のまま保持（chat-input-area / sub-header-wrapper / .content-wrapper
+               などが幅計算に使うため）。サイドバーの右端だけは別途 #side-menu に right:0 を直接当てる。 */
+            --max-content-width: 430px;
             --footer-height: 75px;
             --header-height: 60px;
 
@@ -142,8 +144,9 @@
             background-color: rgba(168, 85, 247, 0.18) !important;
         }
 
-        /* --- サイドメニュー本体：背景グラデ・シャドウを紫トーンへ --- */
+        /* --- サイドメニュー本体：背景グラデ・シャドウを紫トーンへ + 右端はビューポート右端固定 --- */
         #side-menu {
+            right: 0 !important;
             background:
                 radial-gradient(circle at 0% 0%, rgba(168, 85, 247, 0.20), transparent 55%),
                 linear-gradient(180deg, rgba(20, 20, 20, 0.96), rgba(10, 10, 10, 0.98)) !important;
@@ -288,7 +291,7 @@
                     <span class="nav-icon-wrap flex items-center justify-center mb-1 transition-all">
                         <x-ui.icon name="home" class="nav-icon text-[22px] transition-all" />
                     </span>
-                    <span class="app-title text-[10px] font-bold tracking-wider">ENCOUNT</span>
+                    <span class="app-title text-[10px] font-bold tracking-wider">SWIPE</span>
                 </a>
                 <a href="{{ $searchHref }}"
                    class="nav-item flex flex-col items-center justify-center transition-all duration-300 {{ $navIsSearch ? 'is-active' : '' }}">

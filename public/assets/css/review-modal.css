@@ -130,7 +130,7 @@
 .review-star-btn.active .fa-star,
 .review-star-btn.hover .fa-star {
   color: var(--gold);
-  filter: drop-shadow(0 0 8px rgba(197, 160, 89, 0.4));
+  filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.4));
 }
 
 .review-star-btn.active .fa-star {
@@ -247,7 +247,7 @@
 .review-submit-btn:not(:disabled) {
   background: linear-gradient(to right, var(--gold-light), var(--gold));
   color: #1a1206;
-  box-shadow: 0 4px 20px rgba(197, 160, 89, 0.2);
+  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.2);
 }
 
 .review-submit-btn:not(:disabled):hover {
