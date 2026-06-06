@@ -61,20 +61,11 @@
             </div>
         </div>
 
-        {{-- ===== Stats ===== --}}
-        <div class="flex justify-around py-3 mb-5 rounded-panel border border-line-accent/40 bg-gradient-to-br from-surface-from to-base shadow-card-3d">
-            <div class="flex flex-col items-center">
-                <span class="font-bold text-[18px] text-text-main tracking-tight">{{ $likeCount }}</span>
-                <span class="text-[10px] text-text-sub">ライク</span>
-            </div>
-            <div class="flex flex-col items-center">
-                <span class="font-bold text-[18px] text-accent-text tracking-tight">¥{{ $bonusTotal }}</span>
-                <span class="text-[10px] text-text-sub">ボーナス</span>
-            </div>
-            <div class="flex flex-col items-center">
-                <span class="font-bold text-[18px] text-text-main tracking-tight">{{ $photoCount }}</span>
-                <span class="text-[10px] text-text-sub">写真</span>
-            </div>
+        {{-- ===== Likes（ハートアイコン＋件数のみ） ===== --}}
+        <div class="flex items-center gap-2 mb-5">
+            <x-ui.icon name="like" class="text-[20px] text-accent-text" />
+            <span class="font-bold text-[16px] text-text-main">{{ $likeCount }}</span>
+            <span class="text-[11px] text-text-sub">ライク</span>
         </div>
 
         {{-- ===== Name ===== --}}
@@ -90,7 +81,7 @@
             </x-ui.badge>
         </div>
 
-        {{-- ===== Sub-page menu ===== --}}
+        {{-- ===== Sub-page menu（採用・入金管理 / レビューのみ。本人確認とプロフィール編集は DETAILS タブ内に移動） ===== --}}
         <div class="flex flex-col gap-3">
             <x-ui.menu-card icon="settings"
                             sub="EMPLOYMENT & PAYMENT"
@@ -100,14 +91,6 @@
                             sub="REVIEWS"
                             title="レビュー一覧"
                             href="{{ route('cast.mypage.reviews') }}" />
-            <x-ui.menu-card icon="check"
-                            sub="IDENTITY"
-                            title="本人確認"
-                            href="{{ route('cast.mypage.identity') }}" />
-            <x-ui.menu-card icon="mypage"
-                            sub="PROFILE"
-                            title="プロフィールを編集"
-                            href="{{ route('cast.profile.edit') }}" />
         </div>
     </div>
 
@@ -126,30 +109,29 @@
             </div>
         </div>
 
-        {{-- Gallery panel --}}
+        {{-- Gallery panel：元の機能を維持（並び替え / アップロード / 再切り抜き / 削除） --}}
         <div data-tab-panel="gallery" class="is-active">
-            <div class="grid grid-cols-3 gap-[2px]">
-                @for($i = 0; $i < 9; $i++)
-                    @php $img = $subImages[$i] ?? null; @endphp
-                    <div class="aspect-[4/5] relative bg-surface-from overflow-hidden">
+            <ul class="responsive-gallery gallery-grid" id="gallery-list"
+                data-sort-save-url="{{ route('cast.mypage.images.order') }}"
+                data-empty-image-url="{{ asset('assets/images/common/no-image.png') }}">
+                @for($i = 0; $i < 8; $i++)
+                @php $img = $subImages[$i] ?? null; @endphp
+                <li class="gallery-grid-item" data-slot-index="{{ $i }}">
+                    <div class="photo-slot {{ $img ? 'has-img' : '' }}"
+                         data-image-id="{{ $img['id'] ?? '' }}"
+                         data-image-url="{{ $img['url'] ?? '' }}">
                         @if($img && !empty($img['url']))
-                            <img src="{{ $img['url'] }}" alt="" class="w-full h-full object-cover">
+                            <img src="{{ $img['url'] }}" alt="" loading="lazy">
                             @if($i === 0)
-                                <span class="absolute top-1 left-1 text-[9px] font-bold text-on-accent-strong bg-gradient-to-r from-accent-grad-from to-accent-grad-to px-1.5 py-0.5 rounded">MAIN</span>
+                                <span class="photo-slot-badge">MAIN</span>
                             @endif
                         @else
-                            <div class="absolute inset-0 flex items-center justify-center text-text-sub/60">
-                                <x-ui.icon name="plus" class="text-2xl" />
-                            </div>
+                            <span class="photo-slot-empty"><i class="fas fa-image"></i></span>
                         @endif
                     </div>
+                </li>
                 @endfor
-            </div>
-            <div class="px-5 pt-5 flex justify-center">
-                <x-ui.button variant="grad" as="a" href="{{ route('cast.profile.edit') }}" icon="plus">
-                    ギャラリーを編集
-                </x-ui.button>
-            </div>
+            </ul>
         </div>
 
         {{-- Details panel --}}
@@ -229,11 +211,14 @@
                     </div>
                 </x-ui.card>
 
-                <div class="flex justify-center pt-1">
-                    <x-ui.button variant="grad" as="a" href="{{ route('cast.profile.edit') }}">
-                        プロフィールを編集
-                    </x-ui.button>
-                </div>
+                <x-ui.menu-card icon="check"
+                                sub="IDENTITY"
+                                title="本人確認"
+                                href="{{ route('cast.mypage.identity') }}" />
+                <x-ui.menu-card icon="mypage"
+                                sub="PROFILE"
+                                title="プロフィールを編集"
+                                href="{{ route('cast.profile.edit') }}" />
 
             </div>
         </div>
@@ -261,6 +246,46 @@
         </div>
     </div>
 </div>
+
+{{-- ============================================================
+     ギャラリー：元の機能のモーダル群
+     ============================================================ --}}
+{{-- 画像大表示モーダル（削除・再切り抜き） --}}
+<div id="image-preview-modal" class="mypage-modal-overlay gallery-preview-overlay" role="dialog" aria-label="画像プレビュー">
+    <div class="gallery-preview-inner">
+        <img id="modal-img" src="" alt="" class="mypage-modal-preview-img">
+        <div class="gallery-preview-actions">
+            <button type="button" class="btn-action btn-action-secondary gallery-preview-btn-close" id="gallery-preview-close-btn">閉じる</button>
+            <button type="button" id="gallery-preview-recrop-btn" class="btn-action">再切り抜き</button>
+            <button type="button" id="gallery-preview-delete-btn" class="btn-action gallery-preview-btn-delete">削除</button>
+        </div>
+    </div>
+</div>
+
+{{-- 画像編集モーダル（推奨サイズに合わせてトリミング） --}}
+<div id="image-edit-modal" class="mypage-modal-overlay gallery-preview-overlay" role="dialog" aria-label="画像編集" style="display:none;">
+    <div class="gallery-preview-inner image-edit-inner">
+        <div class="image-edit-header">
+            <h3 class="mypage-modal-title serif-font">画像を調整してアップロード</h3>
+            <p class="image-edit-guide">
+                推奨サイズは <strong>4:5（例：1080×1350px、Instagram 縦長）</strong> です。<br>
+                ピンチ・ドラッグで拡大縮小・位置調整できます。範囲枠内に収めたい部分を合わせてアップロードしてください。
+            </p>
+        </div>
+        <div class="image-edit-preview-wrapper">
+            <div class="image-edit-frame image-edit-frame--portrait">
+                <img id="image-edit-preview" src="" alt="編集プレビュー" class="image-edit-preview-img">
+                <div class="image-edit-frame-mask"></div>
+            </div>
+        </div>
+        <div class="gallery-preview-actions image-edit-actions">
+            <button type="button" class="btn-action btn-action-secondary" id="image-edit-cancel-btn">別の画像を選ぶ</button>
+            <button type="button" class="btn-action btn-action-primary" id="image-edit-confirm-btn">この画像でアップロード</button>
+        </div>
+    </div>
+</div>
+
+<input type="file" id="gallery-upload" class="sr-only" accept="image/*">
 @endsection
 
 @push('scripts')
@@ -332,4 +357,29 @@
     });
 })();
 </script>
+
+{{-- ===== ギャラリー機能：元のスクリプト群 ===== --}}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="{{ asset('assets/js/gallery-sortable.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+<script>
+window.MYPAGE_GALLERY_CONFIG = {
+    csrfToken: @json(csrf_token()),
+    uploadUrl: @json(route('cast.mypage.images.upload')),
+    deleteUrlTemplate: @json(route('cast.mypage.images.delete', ['id' => '__ID__'])),
+    cropAspectW: 4,
+    cropAspectH: 5,
+    cropMaxWidth: 1080,
+    cropMaxHeight: 1350
+};
+</script>
+<script src="{{ asset('assets/js/mypage-gallery.js') }}"></script>
+@endpush
+
+@push('head-styles')
+{{-- ===== ギャラリー機能の依存CSS（モーダル・並び替え・cropper） ===== --}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+<link rel="stylesheet" href="{{ asset('assets/css/cast_profile.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 @endpush

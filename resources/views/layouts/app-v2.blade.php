@@ -101,7 +101,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    {{-- サイドバー partial の位置決めCSS（オフキャンバス＆.openでスライド） --}}
+    {{-- layout-sidebar.css が依存する CSS 変数（旧 app.css 由来）の最小フォールバック --}}
+    <style>
+        :root {
+            --max-content-width: 430px;
+            --footer-height: 75px;
+            --color-border-strong: rgba(197, 160, 89, 0.4);
+        }
+    </style>
+
+    {{-- サイドバー partial の位置決めCSS（右端からスライド） --}}
     <link rel="stylesheet" href="{{ asset('assets/css/layout-sidebar.css') }}">
 
     {{-- キャラクターガイド（オコジョ）専用CSS --}}
