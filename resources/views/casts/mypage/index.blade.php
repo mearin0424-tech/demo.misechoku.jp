@@ -261,7 +261,7 @@
         <div class="image-edit-header">
             <h3 class="mypage-modal-title serif-font">画像を調整してアップロード</h3>
             <p class="image-edit-guide">
-                推奨サイズは <strong>4:5（例：1080×1350px、Instagram 縦長）</strong> です。<br>
+                推奨サイズは <strong>4:5（例：1080×1350px の縦長）</strong> です。<br>
                 ピンチ・ドラッグで拡大縮小・位置調整できます。範囲枠内に収めたい部分を合わせてアップロードしてください。
             </p>
         </div>
@@ -271,9 +271,9 @@
                 <div class="image-edit-frame-mask"></div>
             </div>
         </div>
-        <div class="gallery-preview-actions image-edit-actions">
-            <button type="button" class="btn-action btn-action-secondary" id="image-edit-cancel-btn">別の画像を選ぶ</button>
-            <button type="button" class="btn-action btn-action-primary" id="image-edit-confirm-btn">この画像でアップロード</button>
+        <div class="gallery-preview-actions image-edit-actions flex gap-2 justify-end">
+            <x-ui.button id="image-edit-cancel-btn" variant="solid">別の画像を選ぶ</x-ui.button>
+            <x-ui.button id="image-edit-confirm-btn" variant="grad" icon="check">この画像でアップロード</x-ui.button>
         </div>
     </div>
 </div>
@@ -375,7 +375,7 @@ window.MYPAGE_GALLERY_CONFIG = {
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
 <link rel="stylesheet" href="{{ asset('assets/css/cast_profile.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
-{{-- Instagram風グリッドへの上書き（#gallery-list 配下のみ。色は触らずレイアウトだけ） --}}
+{{-- ギャラリーグリッドへの上書き（#gallery-list 配下のみ。色は触らずレイアウトだけ） --}}
 <style>
     #gallery-list {
         display: grid;

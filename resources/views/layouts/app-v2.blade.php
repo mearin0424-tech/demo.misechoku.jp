@@ -113,6 +113,9 @@
     {{-- サイドバー partial の位置決めCSS（右端からスライド） --}}
     <link rel="stylesheet" href="{{ asset('assets/css/layout-sidebar.css') }}">
 
+    {{-- ヘッダーのポップアップ（通知 / タスク）専用CSS：app.js が #btn-header-* で togglePopup する --}}
+    <link rel="stylesheet" href="{{ asset('assets/css/layout-header.css') }}">
+
     {{-- キャラクターガイド（オコジョ）専用CSS --}}
     <link rel="stylesheet" href="{{ asset('assets/css/character-guide.css') }}?v={{ $assetVersion }}">
 
