@@ -107,15 +107,14 @@
     {{-- アプリ既存 JS（CSRFやサイドメニュー開閉などはここに集約） --}}
     <script src="{{ asset('assets/js/app.js') }}" defer></script>
 
-    {{-- 新デザインシステム（tailwind.css / Phosphor / Montserrat / behaviors.js を @push 経由で挿入） --}}
+    {{-- 新デザインシステム（tailwind.css / Phosphor / Montserrat / behaviors.js）
+         x-ui.assets は @push 経由なので、必ず @stack('head-styles') より前に呼ぶ（後だとスタックが空のまま head が確定する）。 --}}
+    <x-ui.assets />
     @stack('styles')
     @stack('head-styles')
 </head>
 <body class="@yield('body-class') bg-base text-text-main"
       data-notification-badge="{{ isset($unreadNewsCount) ? (int) $unreadNewsCount : 0 }}">
-
-    {{-- レイアウト先頭で1回だけ呼ぶ（@push が head/foot に流れる） --}}
-    <x-ui.assets />
 
     {{-- サイドメニュー開閉用オーバーレイ（app.js が #menu-overlay を操作） --}}
     <div id="menu-overlay" class="menu-overlay"></div>
