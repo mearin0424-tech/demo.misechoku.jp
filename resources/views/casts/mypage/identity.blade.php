@@ -235,6 +235,15 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     });
+
+    /* === Fix 4: カスタムファイル選択ボタンに名前表示を追従 === */
+    document.querySelectorAll('input[type="file"].bank-input').forEach(function (input) {
+        input.addEventListener('change', function () {
+            var nameDisplay = document.getElementById(input.id + '_name');
+            if (!nameDisplay) return;
+            nameDisplay.textContent = (input.files && input.files[0] && input.files[0].name) || '選択されていません';
+        });
+    });
 });
 </script>
 @endpush

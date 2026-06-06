@@ -137,25 +137,25 @@
             </div>
         </div>
 
-        {{-- GALLERY --}}
+        {{-- GALLERY：登録済み画像のみ表示（空スロットは出さない） --}}
         <div data-tab-panel="gallery" class="is-active">
-            <ul id="profile-gallery-list">
-                @for($i = 0; $i < $totalSlots; $i++)
-                    @php $img = $galleryImages[$i] ?? null; @endphp
-                    <li class="profile-gallery-item">
-                        @if($img)
+            @if(count($galleryImages) > 0)
+                <ul id="profile-gallery-list">
+                    @foreach($galleryImages as $i => $img)
+                        <li class="profile-gallery-item">
                             <button type="button" class="profile-gallery-slot has-img js-lightbox-target" data-image-url="{{ $img }}" aria-label="写真 {{ $i + 1 }} を拡大">
                                 <img src="{{ $img }}" alt="" loading="lazy">
                                 @if($i === 0)<span class="profile-gallery-badge">MAIN</span>@endif
                             </button>
-                        @else
-                            <div class="profile-gallery-slot">
-                                <span class="profile-gallery-empty"><i class="far fa-image"></i></span>
-                            </div>
-                        @endif
-                    </li>
-                @endfor
-            </ul>
+                        </li>
+                    @endforeach
+                </ul>
+            @else
+                <div class="p-8 text-center text-text-sub text-[13px]">
+                    <i class="far fa-image text-2xl mb-2 block opacity-50"></i>
+                    写真はまだ登録されていません
+                </div>
+            @endif
         </div>
 
         {{-- DETAILS --}}

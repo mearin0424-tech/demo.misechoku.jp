@@ -152,6 +152,104 @@
             max-width: 100% !important;
         }
 
+        /* ============================================================
+           レイアウト崩れ修正バッチ
+           ============================================================ */
+
+        /* Fix 4: 本人確認 _identity_form のカスタムファイル入力 */
+        .visually-hidden {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            overflow: hidden !important;
+            clip: rect(0,0,0,0) !important;
+            white-space: nowrap !important;
+        }
+        .file-upload-btn {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            padding: 8px 16px !important;
+            background: linear-gradient(135deg, var(--color-accent-grad-from, #a78bfa), var(--color-accent-grad-to, #7c3aed)) !important;
+            color: #fff !important;
+            border-radius: 999px !important;
+            cursor: pointer !important;
+            font-size: 0.875rem !important;
+            font-weight: 700 !important;
+            box-shadow: var(--shadow-btn-3d) !important;
+        }
+        .file-upload-btn:active { transform: translateY(1px); }
+        .file-name-display {
+            display: block !important;
+            font-size: 0.78rem !important;
+            color: var(--color-text-sub) !important;
+            margin-top: 6px !important;
+            word-break: break-all !important;
+        }
+
+        /* Fix 1 + 2: SEARCH 画面のサブヘッダー（top:60px, h:47px）が
+           「指定中の条件」「AI チャット先頭」を覆っていたので padding-top を確保 */
+        body.page-search .search-filter-box,
+        body.page-search-ai .search-filter-box {
+            padding-top: calc(var(--sub-header-height, 47px) + 10px) !important;
+        }
+        body.page-search-ai .ai-recommend,
+        body.page-search-ai .ai-recommend__chat {
+            padding-top: var(--sub-header-height, 47px) !important;
+        }
+
+        /* Fix 3: /cast/profile/edit の身長・体重・3サイズフィールド
+           input と単位（cm/kg）を横並びに */
+        .metric-input-wrap {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+        }
+        .metric-input-wrap input[type="number"] {
+            width: 80px !important;
+            flex-shrink: 0 !important;
+        }
+        .metric-unit {
+            flex-shrink: 0 !important;
+            font-size: 0.875rem !important;
+            color: inherit !important;
+        }
+
+        /* Fix 5: /cast/talk の店舗名が 2 行に折り返すのを 1 行省略へ */
+        .talk-name {
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            max-width: 100% !important;
+        }
+
+        /* Fix 6: /cast/mypage/management の下部ボーナス申請バーで店舗名が切れる
+           Option 2 採用：info を flex:1 + min-width:0 で縮小許可、内側で省略 */
+        .deposit-cta-bar__inner {
+            gap: 8px !important;
+        }
+        .deposit-cta-bar__info {
+            flex: 1 !important;
+            min-width: 0 !important;
+            overflow: hidden !important;
+        }
+        .deposit-cta-bar__amount {
+            overflow: hidden !important;
+        }
+        .deposit-cta-bar__amount strong {
+            display: block !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+        }
+
+        /* Fix 9: SWIPE の求人カード店舗名が 2 行に折り返すのを 1 行省略へ */
+        .rc-shop-name {
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+        }
+
         /* --- SWIPE カード上のテキスト：ひとまわり小さく + もう少し画面下へ寄せる --- */
         .card-bottom-info {
             padding-bottom: 12px !important;   /* 旧 24px → 12px に縮めて画面下へ */

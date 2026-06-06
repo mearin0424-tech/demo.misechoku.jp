@@ -60,11 +60,19 @@
         </div>
         <div class="bank-form-row">
             <label class="bank-label">表面（画像 or PDF）</label>
-            <input type="file" name="front_file" class="bank-input" accept=".pdf,image/*" required>
+            <label for="front_file" class="file-upload-btn">
+                <i class="fas fa-upload"></i> ファイルを選択
+            </label>
+            <span class="file-name-display" id="front_file_name">選択されていません</span>
+            <input type="file" id="front_file" name="front_file" class="bank-input visually-hidden" accept=".pdf,image/*" required>
         </div>
         <div class="bank-form-row">
             <label class="bank-label">裏面（{{ $requireBack ? '必須' : '任意' }}）</label>
-            <input type="file" name="back_file" class="bank-input" accept=".pdf,image/*" @if($requireBack) required @endif>
+            <label for="back_file" class="file-upload-btn">
+                <i class="fas fa-upload"></i> ファイルを選択
+            </label>
+            <span class="file-name-display" id="back_file_name">選択されていません</span>
+            <input type="file" id="back_file" name="back_file" class="bank-input visually-hidden" accept=".pdf,image/*" @if($requireBack) required @endif>
         </div>
         @if($showExpiry)
             <div class="bank-form-row">
