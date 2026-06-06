@@ -188,6 +188,7 @@ class MypageController extends Controller
                 return [
                     'application_id' => (int) $row->application_id,
                     'status_code' => (int) $row->status,
+                    'shop_id' => (string) $row->shop_id,
                     'shop_name' => $row->shop_name ?: $row->shop_id,
                     'status_label' => $status['label'],
                     'status_class' => $status['class'],
@@ -326,7 +327,7 @@ class MypageController extends Controller
         return [
             'application_id' => (int) ($emp['application_id'] ?? 0),
             'shop_name'      => $emp['shop_name'] ?? '',
-            'shop_id'        => $deposit['shop_id'] ?? null,
+            'shop_id'        => $deposit['shop_id'] ?? ($emp['shop_id'] ?? null),
             'talk_link'      => $emp['link'] ?? null,
             'hired_at'       => $emp['applied_at'] ?? null,
             'hired_hourly_wage_display' => $emp['hired_hourly_wage_display'] ?? null,
@@ -725,21 +726,40 @@ class MypageController extends Controller
 
     /**
      * レビュー一覧（お店の mypage/reviews と同様）
+     * ?shop_id=XXX があると、そのお店に投稿したレビューだけにフィルタする。
      */
-    public function reviews()
+    public function reviews(Request $request)
     {
         $cast = $this->getCastFromDatabase($this->currentCastId());
-        $reviewCount = count($cast['reviews']);
+        $filterShopId = $request->query('shop_id');
+        $filterShopName = null;
+
+        $reviews = $cast['reviews'];
+        if (!empty($filterShopId)) {
+            $reviews = array_values(array_filter($reviews, function ($r) use ($filterShopId) {
+                return (string) ($r['shop_id'] ?? '') === (string) $filterShopId;
+            }));
+            $shopRow = DB::table('shops')
+                ->leftJoin('shop_profiles', 'shops.id', '=', 'shop_profiles.shop_id')
+                ->where('shops.id', $filterShopId)
+                ->select('shop_profiles.shop_name')
+                ->first();
+            $filterShopName = $shopRow->shop_name ?? null;
+        }
+
+        $reviewCount = count($reviews);
         $castData = [
             'review_avg'   => $reviewCount > 0
-                ? round(array_sum(array_column($cast['reviews'], 'score')) / $reviewCount, 1)
+                ? round(array_sum(array_column($reviews, 'score')) / $reviewCount, 1)
                 : 0,
             'review_count' => $reviewCount,
         ];
         return view('casts.mypage.reviews', [
-            'pageId'    => 'mypage',
-            'castData'  => $castData,
-            'reviews'   => $cast['reviews'],
+            'pageId'         => 'mypage',
+            'castData'       => $castData,
+            'reviews'        => $reviews,
+            'filterShopId'   => $filterShopId,
+            'filterShopName' => $filterShopName,
         ]);
     }
 
@@ -883,14 +903,15 @@ class MypageController extends Controller
             $images[] = ['id' => null, 'url' => asset('assets/images/common/no-image.png')];
         }
 
-        // レビュー（レビュー本文＋平均スコア）
+        // レビュー（レビュー本文＋平均スコア＋投稿先 shop_id）
         $reviewRows = DB::table('reviews')
             ->leftJoin('review_details', 'reviews.id', '=', 'review_details.review_id')
             ->where('reviews.cast_id', $castId)
-            ->groupBy('reviews.id', 'reviews.contents', 'reviews.created_at')
+            ->groupBy('reviews.id', 'reviews.contents', 'reviews.shop_id', 'reviews.created_at')
             ->select(
                 'reviews.id',
                 'reviews.contents',
+                'reviews.shop_id',
                 'reviews.created_at',
                 DB::raw('AVG(review_details.score) as avg_score')
             )
@@ -899,8 +920,9 @@ class MypageController extends Controller
         $reviews = [];
         foreach ($reviewRows as $r) {
             $reviews[] = [
-                'score' => $r->avg_score !== null ? (float) $r->avg_score : 0.0,
-                'text'  => $r->contents ?? '',
+                'score'   => $r->avg_score !== null ? (float) $r->avg_score : 0.0,
+                'text'    => $r->contents ?? '',
+                'shop_id' => $r->shop_id ?? null,
             ];
         }
 

@@ -95,6 +95,11 @@
                 <i class="fas fa-comment-dots"></i> トークを見る
             </a>
         @endif
+        @if(!empty($case['shop_id']))
+            <a href="{{ route('cast.mypage.reviews', ['shop_id' => $case['shop_id']]) }}" class="case-card__view-talk">
+                <i class="fas fa-star"></i> 投稿したレビューを見る
+            </a>
+        @endif
         @if($isActionable)
             <button type="button" class="case-card__action-btn"
                     data-case-action="{{ $case['actionable'] }}"

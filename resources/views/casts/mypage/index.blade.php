@@ -61,16 +61,13 @@
             </div>
         </div>
 
-        {{-- ===== Likes（ハートアイコン＋件数のみ） ===== --}}
-        <div class="flex items-center gap-2 mb-5">
-            <x-ui.icon name="like" class="text-[20px] text-accent-text" />
-            <span class="font-bold text-[16px] text-text-main">{{ $likeCount }}</span>
-            <span class="text-[11px] text-text-sub">ライク</span>
-        </div>
-
-        {{-- ===== Name ===== --}}
-        <div class="mb-4">
-            <h1 class="app-title text-[24px] text-text-main leading-tight">{{ $displayName }}</h1>
+        {{-- ===== Name + Likes（横並び。ライクのラベル無し） ===== --}}
+        <div class="flex items-center justify-between gap-3 mb-5">
+            <h1 class="app-title text-[24px] text-text-main leading-tight truncate min-w-0">{{ $displayName }}</h1>
+            <div class="flex items-center gap-1.5 shrink-0">
+                <x-ui.icon name="like" class="text-[18px] text-accent-text" />
+                <span class="font-bold text-[14px] text-text-main">{{ $likeCount }}</span>
+            </div>
         </div>
 
         {{-- ===== Bonus badge ===== --}}
@@ -81,16 +78,12 @@
             </x-ui.badge>
         </div>
 
-        {{-- ===== Sub-page menu（採用・入金管理 / レビューのみ。本人確認とプロフィール編集は DETAILS タブ内に移動） ===== --}}
+        {{-- ===== Sub-page menu（採用・入金管理のみ。本人確認/プロフィール編集は DETAILS 内、レビューは採用・入金管理から店舗別導線へ） ===== --}}
         <div class="flex flex-col gap-3">
             <x-ui.menu-card icon="settings"
                             sub="EMPLOYMENT & PAYMENT"
                             title="採用・入金管理"
                             href="{{ route('cast.mypage.management') }}" />
-            <x-ui.menu-card icon="super"
-                            sub="REVIEWS"
-                            title="レビュー一覧"
-                            href="{{ route('cast.mypage.reviews') }}" />
         </div>
     </div>
 
@@ -111,7 +104,7 @@
 
         {{-- Gallery panel：元の機能を維持（並び替え / アップロード / 再切り抜き / 削除） --}}
         <div data-tab-panel="gallery" class="is-active">
-            <ul class="responsive-gallery gallery-grid" id="gallery-list"
+            <ul id="gallery-list"
                 data-sort-save-url="{{ route('cast.mypage.images.order') }}"
                 data-empty-image-url="{{ asset('assets/images/common/no-image.png') }}">
                 @for($i = 0; $i < 8; $i++)
@@ -126,7 +119,7 @@
                                 <span class="photo-slot-badge">MAIN</span>
                             @endif
                         @else
-                            <span class="photo-slot-empty"><i class="fas fa-image"></i></span>
+                            <span class="photo-slot-empty" aria-label="画像を追加"><i class="fas fa-plus"></i></span>
                         @endif
                     </div>
                 </li>
@@ -382,4 +375,56 @@ window.MYPAGE_GALLERY_CONFIG = {
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
 <link rel="stylesheet" href="{{ asset('assets/css/cast_profile.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
+{{-- Instagram風グリッドへの上書き（#gallery-list 配下のみ。色は触らずレイアウトだけ） --}}
+<style>
+    #gallery-list {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2px;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+    #gallery-list .gallery-grid-item {
+        aspect-ratio: 1 / 1;
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+        position: relative;
+    }
+    #gallery-list .photo-slot {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        border-radius: 0;
+        overflow: hidden;
+        cursor: pointer;
+    }
+    #gallery-list .photo-slot > img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    #gallery-list .photo-slot-empty {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        opacity: 0.4;
+    }
+    #gallery-list .photo-slot-badge {
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        font-size: 9px;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 4px;
+        line-height: 1;
+    }
+</style>
 @endpush
