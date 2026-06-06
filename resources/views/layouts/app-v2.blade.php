@@ -208,7 +208,20 @@
             border-bottom-color: rgba(168, 85, 247, 0.20) !important;
         }
 
-        /* --- 旧 layouts.app の content-wrapper / animate-fadeIn を v2 でも再現 --- */
+        /* --- 旧 layouts.app の main / content-wrapper / animate-fadeIn を v2 でも再現 ---
+             ヘッダー/フッターが fixed で被さるため、旧 app.css と同じく main に
+             padding-top: --header-height、padding-bottom: --footer-height を確保する。 --}}
+        */
+        main#main-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 0;
+            min-height: 100vh;
+            padding-top: var(--header-height, 60px);
+            padding-bottom: calc(var(--footer-height, 75px) + env(safe-area-inset-bottom, 0px));
+            box-sizing: border-box;
+        }
         .content-wrapper {
             width: 100%;
             max-width: 100%;

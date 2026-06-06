@@ -24,7 +24,7 @@
 @endphp
 
 @section('content')
-<div class="pt-14 pb-24">
+<div>
 
     <div class="px-5 pt-4 pb-6">
 
