@@ -109,6 +109,9 @@ CLAUDE.md から本ファイルを参照させ、画面移行のたびに先頭�
 | `close` | `ph-bold ph-x` |
 | `plus` | `ph-bold ph-plus` |
 | `check` | `ph-bold ph-check` |
+| `list` | `ph-bold ph-list`（ハンバーガー / メニュー） |
+| `bell` | `ph-bold ph-bell`（通知） |
+| `task` | `ph-fill ph-check-circle`（タスク） |
 
 > 読み込みは npm パッケージ `@phosphor-icons/web` を `resources/js/app.js` で import する想定（CDN webfont 廃止）。
 

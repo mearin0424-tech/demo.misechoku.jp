@@ -1,7 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.app-v2')
 
 @section('title', 'マイページ')
-@section('body-class', 'page-cast-mypage bg-base text-text-main')
+@section('body-class', 'page-cast-mypage')
 
 @php
     $displayName = $cast['nickname'] ?? $cast['name'] ?? '--';
@@ -23,13 +23,8 @@
     $word        = trim((string) ($cast['word'] ?? ''));
 @endphp
 
-@section('header')
-    <x-ui.assets />
-    <x-ui.header title="{{ $displayName }}" :back="false" :share="false" />
-@endsection
-
 @section('content')
-<div class="bg-base text-text-main pb-24">
+<div class="pb-24">
 
     {{-- Hero image --}}
     <div class="relative w-full h-[220px] overflow-hidden">
@@ -97,47 +92,48 @@
     </div>
 
     {{-- Tabs --}}
-    <div data-tabs data-tabs-scope class="border-t border-b border-line-accent/40 sticky top-[56px] z-30 bg-base/90 backdrop-blur-md">
-        <div class="flex relative">
-            <button type="button" data-tab="gallery"
-                    class="flex-1 py-3 flex justify-center items-center transition-colors text-accent-text">
-                <span class="app-title text-[12px] tracking-widest">GALLERY</span>
-            </button>
-            <button type="button" data-tab="details"
-                    class="flex-1 py-3 flex justify-center items-center transition-colors text-text-sub">
-                <span class="app-title text-[12px] tracking-widest">DETAILS</span>
-            </button>
+    <div data-tabs-scope>
+        <div data-tabs class="border-t border-b border-line-accent/40 bg-base/90 backdrop-blur-md">
+            <div class="flex">
+                <button type="button" data-tab="gallery"
+                        class="is-active flex-1 py-3 flex justify-center items-center transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
+                    <span class="app-title text-[12px] tracking-widest">GALLERY</span>
+                </button>
+                <button type="button" data-tab="details"
+                        class="flex-1 py-3 flex justify-center items-center transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
+                    <span class="app-title text-[12px] tracking-widest">DETAILS</span>
+                </button>
+            </div>
         </div>
-    </div>
 
-    {{-- Gallery panel --}}
-    <div data-tab-panel="gallery" class="is-active">
-        <div class="grid grid-cols-3 gap-[2px]">
-            @for($i = 0; $i < 9; $i++)
-                @php $img = $subImages[$i] ?? null; @endphp
-                <div class="aspect-[4/5] relative bg-surface-from overflow-hidden">
-                    @if($img && !empty($img['url']))
-                        <img src="{{ $img['url'] }}" alt="" class="w-full h-full object-cover">
-                        @if($i === 0)
-                            <span class="absolute top-1 left-1 text-[9px] font-bold text-on-accent-strong bg-gradient-to-r from-accent-grad-from to-accent-grad-to px-1.5 py-0.5 rounded">MAIN</span>
+        {{-- Gallery panel --}}
+        <div data-tab-panel="gallery" class="is-active">
+            <div class="grid grid-cols-3 gap-[2px]">
+                @for($i = 0; $i < 9; $i++)
+                    @php $img = $subImages[$i] ?? null; @endphp
+                    <div class="aspect-[4/5] relative bg-surface-from overflow-hidden">
+                        @if($img && !empty($img['url']))
+                            <img src="{{ $img['url'] }}" alt="" class="w-full h-full object-cover">
+                            @if($i === 0)
+                                <span class="absolute top-1 left-1 text-[9px] font-bold text-on-accent-strong bg-gradient-to-r from-accent-grad-from to-accent-grad-to px-1.5 py-0.5 rounded">MAIN</span>
+                            @endif
+                        @else
+                            <div class="absolute inset-0 flex items-center justify-center text-text-sub/60">
+                                <x-ui.icon name="plus" class="text-2xl" />
+                            </div>
                         @endif
-                    @else
-                        <div class="absolute inset-0 flex items-center justify-center text-text-sub/60">
-                            <x-ui.icon name="plus" class="text-2xl" />
-                        </div>
-                    @endif
-                </div>
-            @endfor
+                    </div>
+                @endfor
+            </div>
+            <div class="px-5 pt-5 flex justify-center">
+                <x-ui.button variant="grad" as="a" href="{{ route('cast.profile.edit') }}" icon="plus">
+                    ギャラリーを編集
+                </x-ui.button>
+            </div>
         </div>
-        <div class="px-5 pt-5 flex justify-center">
-            <x-ui.button variant="grad" as="a" href="{{ route('cast.profile.edit') }}" icon="plus">
-                ギャラリーを編集
-            </x-ui.button>
-        </div>
-    </div>
 
-    {{-- Details panel --}}
-    <div data-tab-panel="details" class="p-4 flex flex-col gap-4">
+        {{-- Details panel --}}
+        <div data-tab-panel="details" class="p-4 flex flex-col gap-4">
 
         <x-ui.card class="p-5">
             <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
@@ -216,6 +212,7 @@
             <x-ui.button variant="grad" as="a" href="{{ route('cast.profile.edit') }}">
                 プロフィールを編集
             </x-ui.button>
+        </div>
         </div>
     </div>
 

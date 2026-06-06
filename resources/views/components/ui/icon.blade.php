@@ -17,6 +17,9 @@
         'close'    => 'ph-bold ph-x',
         'plus'     => 'ph-bold ph-plus',
         'check'    => 'ph-bold ph-check',
+        'list'     => 'ph-bold ph-list',
+        'bell'     => 'ph-bold ph-bell',
+        'task'     => 'ph-fill ph-check-circle',
     ];
     // 未定義の名前は ? を出してミスを可視化（無音で消えない）
     $icon = $map[$name] ?? 'ph-bold ph-question';
