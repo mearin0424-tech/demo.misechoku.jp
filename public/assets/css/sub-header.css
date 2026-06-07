@@ -69,9 +69,9 @@
     padding: 0;
 }
 
-/* --- タブ下コンテンツ：サブヘッダー直下にわずか隙間（8px）（main が既に header 分 padding を持つため sub-header 分のみ） --- */
+/* --- タブ下コンテンツ：サブヘッダー直下に隙間なく配置（main が既に header 分 padding を持つため sub-header 分のみ） --- */
 .tab-page-body {
-    margin-top: calc(var(--sub-header-height) + 8px);
+    margin-top: var(--sub-header-height);
     padding: 0 0 calc(var(--footer-height) + 16px);
     padding-top: 0;
     box-sizing: border-box;
@@ -100,6 +100,6 @@
         padding: 13px 4px;
     }
     .tab-page-body {
-        margin-top: calc(var(--sub-header-height) + 6px);
+        margin-top: var(--sub-header-height);
     }
 }
