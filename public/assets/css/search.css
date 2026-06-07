@@ -45,7 +45,7 @@ body.page-search .contents.search-page-body {
 }
 
 body.page-search .contents.tab-page-body {
-    margin-top: calc(var(--sub-header-height) + 8px);
+    margin-top: var(--sub-header-height);
 }
 
 body.page-search .contents.search-page-body {

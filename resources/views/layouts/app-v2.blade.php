@@ -498,8 +498,10 @@
         }
         .content-wrapper {
             width: 100%;
-            max-width: 100%;
+            max-width: var(--max-content-width, 430px);
             min-width: 0;
+            margin-left: auto;
+            margin-right: auto;
             padding: 0 var(--content-padding-x, 16px);
             box-sizing: border-box;
             overflow-x: hidden;
