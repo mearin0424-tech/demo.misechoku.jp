@@ -152,11 +152,13 @@ main {
     flex-direction: column;
 }
 
-/* 各ページのコンテンツラッパー（アプリ幅に収め、余白は変数で統一） */
+/* 各ページのコンテンツラッパー（レスポンシブ幅・余白を自己完結で統一） */
 .content-wrapper {
     width: 100%;
-    max-width: 100%;
+    max-width: var(--max-content-width);
     min-width: 0;
+    margin-left: auto;
+    margin-right: auto;
     padding: 0 var(--content-padding-x);
     box-sizing: border-box;
     overflow-x: hidden;
