@@ -47,7 +47,7 @@
 }
 
 .support-column-breadcrumb a {
-    color: var(--color-gold, #eba8c8);
+    color: var(--color-gold, #a78bfa);
     text-decoration: none;
 }
 

@@ -8,8 +8,8 @@
     min-width: 0;
     overflow: hidden;
     background:
-        radial-gradient(circle at 0% 0%, rgba(var(--accent-rgb, 214, 112, 162), 0.18), transparent 55%),
-        radial-gradient(circle at 100% 0%, rgba(var(--accent-rgb, 214, 112, 162), 0.28), transparent 62%),
+        radial-gradient(circle at 0% 0%, rgba(168, 85, 247, 0.18), transparent 55%),
+        radial-gradient(circle at 100% 0%, rgba(168, 85, 247, 0.28), transparent 62%),
         rgba(10, 10, 10, 0.92);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
@@ -24,7 +24,7 @@
     z-index: 1500;
     box-shadow:
         0 10px 30px rgba(0, 0, 0, 0.65),
-        0 0 18px rgba(var(--accent-rgb, 214, 112, 162), 0.22);
+        0 0 18px rgba(168, 85, 247, 0.22);
 }
 
 /* 画像編集モーダル表示中はヘッダーを隠す */
@@ -97,7 +97,7 @@ body.is-image-editing #global-header {
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 14px rgba(var(--accent-rgb, 214, 112, 162), 0.18);
+    text-shadow: 0 0 14px rgba(168, 85, 247, 0.18);
 }
 
 .header-talk-identity {
@@ -148,7 +148,7 @@ body.is-image-editing #global-header {
     border-radius: 999px;
     padding: 2px;
     background:
-        radial-gradient(circle at 0% 0%, rgba(var(--accent-rgb, 214, 112, 162), 0.08), transparent 60%),
+        radial-gradient(circle at 0% 0%, rgba(168, 85, 247, 0.08), transparent 60%),
         rgba(10, 10, 10, 0.9);
     overflow: hidden;
     max-width: 100%;
@@ -171,13 +171,13 @@ body.is-image-editing #global-header {
 }
 .demo-pill-switch__segment:hover {
     color: var(--gold-light);
-    background: rgba(var(--accent-rgb, 214, 112, 162), 0.18);
+    background: rgba(168, 85, 247, 0.18);
 }
 .demo-pill-switch__segment.is-active {
     background: linear-gradient(135deg, var(--gold-light), var(--gold-deep));
     color: #1a1206;
     box-shadow:
-        0 0 14px rgba(var(--accent-rgb, 214, 112, 162), 0.5),
+        0 0 14px rgba(168, 85, 247, 0.5),
         0 4px 14px rgba(0, 0, 0, 0.4);
 }
 .demo-pill-switch__segment.is-active:hover {
@@ -221,13 +221,13 @@ body.is-image-editing #global-header {
 .header-icon-btn:hover,
 .header-icon-btn:focus-visible {
     color: var(--gold-light);
-    background-color: rgba(var(--accent-rgb, 214, 112, 162), 0.10) !important;
+    background-color: rgba(168, 85, 247, 0.10) !important;
     box-shadow: none;
 }
 
 .header-icon-btn:active {
     color: var(--gold);
-    background-color: rgba(var(--accent-rgb, 214, 112, 162), 0.18) !important;
+    background-color: rgba(168, 85, 247, 0.18) !important;
 }
 
 /* 戻るボタン */
@@ -313,7 +313,7 @@ body.is-image-editing #global-header {
     transition: background 0.15s ease;
 }
 a.notif-popup-item:hover {
-    background: rgba(var(--accent-rgb, 214, 112, 162), 0.06);
+    background: rgba(168, 85, 247, 0.06);
     text-decoration: none;
     color: var(--color-text-header);
 }

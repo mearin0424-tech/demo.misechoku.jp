@@ -91,7 +91,7 @@
     <meta name="apple-mobile-web-app-title" content="ミセチョク">
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="{{ asset('assets/images/pwa/icon-192.png') }}">
-    <link rel="icon" href="data:image/svg+xml,{{ rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#050505"/><text x="16" y="22" font-size="18" text-anchor="middle" fill="#D670A2">店</text></svg>') }}" type="image/svg+xml">
+    <link rel="icon" href="data:image/svg+xml,{{ rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#050505"/><text x="16" y="22" font-size="18" text-anchor="middle" fill="#a855f7">店</text></svg>') }}" type="image/svg+xml">
     <title>{{ $resolvedTitle }}</title>
 
     {{-- 共通: Font Awesome（sidebar partial が依存） / Swiper / Noto Sans JP --}}
@@ -115,17 +115,18 @@
             --header-height: 60px;
             --sub-header-height: 46px;
 
-            /* layout-header.css / layout-sidebar.css 等が var(--gold) を参照しているため、
-               旧ゴールド系トークンの実体をモーブピンク（accent / accent-text / accent-grad-to）に差し替える。
-               これでヘッダー文字色・サイドメニューのラベル・アイコン・hover が全部モーブピンクになる。 */
-            --gold:               var(--accent-text, #eba8c8);
-            --gold-light:         var(--accent-grad-from, #f2cadf);
-            --gold-deep:          var(--accent-grad-to, #b0507f);
+            /* layout-header.css / layout-sidebar.css 等が var(--gold) を参照する。
+               アンビエント紫はオリジナルのまま保持（=> ヘッダータイトル・サイドメニュー・アイコンの hover が紫）。
+               ボタン／バッジ／FAB はそれ自体が bg-accent / text-accent-text を使うので、
+               --accent 側のモーブピンクで描画される（このブロックでは触らない）。 */
+            --gold:               #a78bfa;
+            --gold-light:         #c4b5fd;
+            --gold-deep:          #7c3aed;
             --color-text-header:  #f5f5f5;
             --color-text-muted:   #a0a0a0;
             --color-text:         #f5f5f5;
-            --color-border:        rgba(var(--accent-rgb, 214, 112, 162), 0.20);
-            --color-border-strong: rgba(var(--accent-rgb, 214, 112, 162), 0.45);
+            --color-border:        rgba(168, 85, 247, 0.20);
+            --color-border-strong: rgba(168, 85, 247, 0.45);
             --color-card-strong:  #1a1a1a;
         }
         /* タブレット：少し広げる（タブレットでもモバイルアプリ的な見え方を維持） */
@@ -181,7 +182,7 @@
             align-items: center !important;
             gap: 6px !important;
             padding: 8px 16px !important;
-            background: linear-gradient(135deg, var(--color-accent-grad-from, #f2cadf), var(--color-accent-grad-to, #b0507f)) !important;
+            background: linear-gradient(135deg, var(--color-accent-grad-from, #c4b5fd), var(--color-accent-grad-to, #7c3aed)) !important;
             color: #fff !important;
             border-radius: 999px !important;
             cursor: pointer !important;
@@ -404,7 +405,7 @@
             width: 100% !important;
             max-width: 100% !important;
             background:
-                radial-gradient(circle at top, rgba(var(--accent-rgb, 214, 112, 162), 0.10), transparent 40%),
+                radial-gradient(circle at top, rgba(168, 85, 247, 0.10), transparent 40%),
                 linear-gradient(180deg, var(--color-surface-from, #1a1a1a) 0%, var(--color-base, #050505) 100%) !important;
         }
 
@@ -423,44 +424,44 @@
             padding-right: max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             background:
                 /* 上端だけに紫グローを残し、ヘッダー下端 = サブヘッダー上端でぴったり同色にする */
-                linear-gradient(180deg, rgba(var(--accent-rgb, 214, 112, 162), 0.22) 0%, rgba(var(--accent-rgb, 214, 112, 162), 0) 100%),
+                linear-gradient(180deg, rgba(168, 85, 247, 0.22) 0%, rgba(168, 85, 247, 0) 100%),
                 rgba(10, 10, 10, 0.92) !important;
             /* 下端 1px のアクセント線は消す（サブヘッダーがある場合に隙間に見える） */
             border-bottom: 0 !important;
             /* 下方向の重い影は出さない。サブヘッダーがあるページではこの影が継ぎ目に見えるため。
                紫の周辺グローだけ薄く残してヘッダーの存在感を維持する */
-            box-shadow: 0 0 18px rgba(var(--accent-rgb, 214, 112, 162), 0.18) !important;
+            box-shadow: 0 0 18px rgba(168, 85, 247, 0.18) !important;
         }
         .header-icon-btn:hover,
         .header-icon-btn:focus-visible {
-            background-color: rgba(var(--accent-rgb, 214, 112, 162), 0.10) !important;
+            background-color: rgba(168, 85, 247, 0.10) !important;
         }
         .header-icon-btn:active {
-            background-color: rgba(var(--accent-rgb, 214, 112, 162), 0.18) !important;
+            background-color: rgba(168, 85, 247, 0.18) !important;
         }
 
         /* --- サイドメニュー本体：背景グラデ・シャドウを紫トーンへ + 右端はビューポート右端固定 --- */
         #side-menu {
             right: 0 !important;
             background:
-                radial-gradient(circle at 0% 0%, rgba(var(--accent-rgb, 214, 112, 162), 0.20), transparent 55%),
+                radial-gradient(circle at 0% 0%, rgba(168, 85, 247, 0.20), transparent 55%),
                 linear-gradient(180deg, rgba(20, 20, 20, 0.96), rgba(10, 10, 10, 0.98)) !important;
             box-shadow:
                 -12px 0 36px rgba(0,0,0,0.65),
-                -2px 0 18px rgba(var(--accent-rgb, 214, 112, 162), 0.28) !important;
-            border-left: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.35) !important;
+                -2px 0 18px rgba(168, 85, 247, 0.28) !important;
+            border-left: 1px solid rgba(168, 85, 247, 0.35) !important;
         }
         .sidebar-header {
-            border-bottom-color: rgba(var(--accent-rgb, 214, 112, 162), 0.25) !important;
+            border-bottom-color: rgba(168, 85, 247, 0.25) !important;
         }
         .sidebar-footer {
-            border-top-color: rgba(var(--accent-rgb, 214, 112, 162), 0.25) !important;
+            border-top-color: rgba(168, 85, 247, 0.25) !important;
         }
         .sidebar-sub-menu a:hover {
-            background: rgba(var(--accent-rgb, 214, 112, 162), 0.14) !important;
+            background: rgba(168, 85, 247, 0.14) !important;
         }
         .btn-sidebar-close:hover {
-            background: rgba(var(--accent-rgb, 214, 112, 162), 0.18) !important;
+            background: rgba(168, 85, 247, 0.18) !important;
         }
     </style>
 
@@ -475,14 +476,14 @@
         #header-task-popup,
         #header-notification-popup {
             background: linear-gradient(to bottom right, var(--color-surface-from), var(--color-base)) !important;
-            border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.4) !important;
+            border: 1px solid rgba(168, 85, 247, 0.4) !important;
             box-shadow: var(--shadow-card-3d) !important;
             border-radius: var(--radius-card) !important;
             opacity: 1 !important;
         }
         .task-popup-header {
-            background: rgba(var(--accent-rgb, 214, 112, 162), 0.12) !important;
-            border-bottom: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.30) !important;
+            background: rgba(168, 85, 247, 0.12) !important;
+            border-bottom: 1px solid rgba(168, 85, 247, 0.30) !important;
         }
         .task-popup-header h4 {
             color: var(--color-accent-text) !important;
@@ -490,20 +491,20 @@
             letter-spacing: 0.10em !important;
         }
         .notif-popup-section-label {
-            background: rgba(var(--accent-rgb, 214, 112, 162), 0.08) !important;
+            background: rgba(168, 85, 247, 0.08) !important;
             color: var(--color-accent-text) !important;
-            border-bottom-color: rgba(var(--accent-rgb, 214, 112, 162), 0.20) !important;
+            border-bottom-color: rgba(168, 85, 247, 0.20) !important;
         }
         .notif-popup-item {
-            border-bottom-color: rgba(var(--accent-rgb, 214, 112, 162), 0.20) !important;
+            border-bottom-color: rgba(168, 85, 247, 0.20) !important;
             color: var(--color-text-main) !important;
         }
         a.notif-popup-item:hover {
-            background: rgba(var(--accent-rgb, 214, 112, 162), 0.10) !important;
+            background: rgba(168, 85, 247, 0.10) !important;
         }
         .notif-popup-empty {
             color: var(--color-text-sub) !important;
-            border-bottom-color: rgba(var(--accent-rgb, 214, 112, 162), 0.20) !important;
+            border-bottom-color: rgba(168, 85, 247, 0.20) !important;
         }
 
         /* --- 旧 layouts.app の main / content-wrapper / animate-fadeIn を v2 でも再現 ---

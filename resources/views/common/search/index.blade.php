@@ -86,6 +86,36 @@
     @if($showAiTab)
         {{-- パネル：AI --}}
         <div id="pane-ai" class="tab-pane {{ $activeTab === 'pane-ai' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-ai' ? 'display:none' : '' }}">
+            {{-- 自由入力 AIチャット（テンプレ駆動・LLM非使用） --}}
+            @if($prefix === 'cast')
+                <section
+                    class="ai-chat"
+                    data-ai-chat-root
+                    data-endpoint="{{ route('cast.search.ai-chat') }}"
+                    data-avatar="{{ asset('assets/images/guide/guide-character.png') }}"
+                >
+                    <header class="ai-chat__header">
+                        <div class="ai-chat__header-icon"><i class="fas fa-sparkles"></i></div>
+                        <div class="ai-chat__header-text">
+                            <p class="ai-chat__header-title">AI コンシェルジュ <span class="ai-chat__badge">BETA</span></p>
+                            <p class="ai-chat__header-sub">自由に話しかけてみてね。あなたに合うお店を見つけるよ。</p>
+                        </div>
+                    </header>
+                    <div class="ai-chat__thread" data-ai-thread aria-live="polite"></div>
+                    <div class="ai-chat__quick-replies" data-ai-quick-replies></div>
+                    <form class="ai-chat__form" data-ai-form autocomplete="off">
+                        <input
+                            type="text" class="ai-chat__input" data-ai-input
+                            name="message" maxlength="500" required
+                            placeholder="例: 六本木で未経験OK、時給4500円以上"
+                        >
+                        <button type="submit" class="ai-chat__send" data-ai-send aria-label="送信">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </section>
+            @endif
+
             @if(empty($personalityType))
                 <div class="ai-recommend__intro-card">
                     <div class="ai-recommend__intro-title">接客タイプ診断結果をご利用いただくと、おすすめの精度を高められます</div>
@@ -123,5 +153,8 @@
 <script src="{{ asset('assets/js/search-detail.js') }}"></script>
 @if($showAiTab)
 <script src="{{ asset('assets/js/ai-recommend.js') }}"></script>
+@if($prefix === 'cast')
+<script src="{{ asset('assets/js/ai-chat.js') }}"></script>
+@endif
 @endif
 @endpush

@@ -97,8 +97,8 @@
 
         body.page-auth-login #bg-layer {
             background:
-                radial-gradient(circle at 20% 20%, rgba(var(--accent-rgb, 214, 112, 162), 0.12), transparent 24%),
-                radial-gradient(circle at 80% 74%, rgba(var(--accent-rgb, 214, 112, 162), 0.16), transparent 28%),
+                radial-gradient(circle at 20% 20%, rgba(168, 85, 247, 0.12), transparent 24%),
+                radial-gradient(circle at 80% 74%, rgba(168, 85, 247, 0.16), transparent 28%),
                 linear-gradient(180deg, rgba(74, 18, 42, 0.68), rgba(56, 13, 31, 0.94));
         }
 
@@ -168,7 +168,7 @@
         .role-login-bg-glow-left {
             top: 10%;
             left: 8%;
-            background: rgba(var(--accent-rgb, 214, 112, 162), 0.1);
+            background: rgba(168, 85, 247, 0.1);
         }
 
         .role-login-bg-glow-right {
@@ -217,7 +217,7 @@
         }
 
         .role-login-alert-info {
-            border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.24);
+            border: 1px solid rgba(168, 85, 247, 0.24);
             background: rgba(255, 255, 255, 0.05);
             color: #f8ead0;
         }
@@ -230,7 +230,7 @@
 
         .role-login-card {
             overflow: hidden;
-            border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.24);
+            border: 1px solid rgba(168, 85, 247, 0.24);
             border-radius: 30px;
             background: linear-gradient(155deg, rgba(255, 240, 245, 0.06), rgba(92, 23, 53, 0.88));
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
@@ -243,7 +243,7 @@
         .role-login-tabs {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            border-bottom: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.18);
+            border-bottom: 1px solid rgba(168, 85, 247, 0.18);
         }
 
         .role-login-tab {
@@ -272,7 +272,7 @@
             bottom: 0;
             height: 2px;
             background: linear-gradient(90deg, var(--gold), var(--gold-deep));
-            box-shadow: 0 0 12px rgba(var(--accent-rgb, 214, 112, 162), 0.5);
+            box-shadow: 0 0 12px rgba(168, 85, 247, 0.5);
         }
 
         .role-login-card-body {
@@ -301,7 +301,7 @@
         }
 
         .role-login-role.is-active {
-            border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.45);
+            border-color: rgba(168, 85, 247, 0.45);
             color: var(--gold-light);
             background: rgba(35, 15, 18, 0.95);
         }
@@ -355,8 +355,8 @@
 
         .role-login-input-wrap input:focus {
             outline: none;
-            border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.56);
-            box-shadow: 0 0 0 3px rgba(var(--accent-rgb, 214, 112, 162), 0.16);
+            border-color: rgba(168, 85, 247, 0.56);
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.16);
         }
 
         .role-login-submit,
@@ -384,7 +384,7 @@
             background: linear-gradient(145deg, var(--gold), var(--gold-deep));
             color: #2a1406;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(var(--accent-rgb, 214, 112, 162), 0.3);
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
         }
 
         .role-login-links {
@@ -395,7 +395,7 @@
         }
 
         .role-login-secondary {
-            border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.22);
+            border: 1px solid rgba(168, 85, 247, 0.22);
             background: rgba(255, 255, 255, 0.04);
             color: #fff4d6;
         }

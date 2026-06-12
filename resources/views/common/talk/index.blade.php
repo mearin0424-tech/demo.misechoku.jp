@@ -46,7 +46,7 @@
                             <div class="flex justify-between items-center mt-1">
                                 <span class="talk-status">{{ $talk['status_label'] ?? 'やり取り中' }}</span>
                                 @if(!empty($talk['has_fulltime_request_badge']))
-                                    <span class="unread-badge" style="background:linear-gradient(135deg,#f2cadf,#eba8c8 45%,#b0507f);color:#2a1406;">本入店希望</span>
+                                    <span class="unread-badge" style="background:linear-gradient(135deg,#c4b5fd,#a78bfa 45%,#7c3aed);color:#2a1406;">本入店希望</span>
                                 @endif
                             </div>
                         </div>
@@ -82,7 +82,7 @@
                                     <div class="request-meta-row">
                                         <span class="request-status">{{ $talk['status_label'] ?? $requestTabText }}</span>
                                         @if(!empty($talk['has_fulltime_request_badge']))
-                                            <span class="unread-badge" style="margin-left:8px; background:linear-gradient(135deg,#f2cadf,#eba8c8 45%,#b0507f);color:#2a1406;">本入店希望</span>
+                                            <span class="unread-badge" style="margin-left:8px; background:linear-gradient(135deg,#c4b5fd,#a78bfa 45%,#7c3aed);color:#2a1406;">本入店希望</span>
                                         @endif
                                     </div>
                                     <div class="request-msg-preview">{{ $talk['last_message'] }}</div>
@@ -116,7 +116,7 @@
                                 <div class="flex justify-between items-center mt-1">
                                     <span class="talk-status">{{ $talk['status_label'] ?? $requestTabText }}</span>
                                     @if(!empty($talk['has_fulltime_request_badge']))
-                                        <span class="unread-badge" style="background:linear-gradient(135deg,#f2cadf,#eba8c8 45%,#b0507f);color:#2a1406;">本入店希望</span>
+                                        <span class="unread-badge" style="background:linear-gradient(135deg,#c4b5fd,#a78bfa 45%,#7c3aed);color:#2a1406;">本入店希望</span>
                                     @endif
                                 </div>
                             </div>

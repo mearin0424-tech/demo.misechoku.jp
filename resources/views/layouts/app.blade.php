@@ -37,7 +37,7 @@
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="{{ asset('assets/images/pwa/icon-192.png') }}">
     {{-- ファビコン（データURIで404防止。色はアプリのゴールド・ダーク） --}}
-    <link rel="icon" href="data:image/svg+xml,{{ rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#050505"/><text x="16" y="22" font-size="18" text-anchor="middle" fill="#d670a2">店</text></svg>') }}" type="image/svg+xml">
+    <link rel="icon" href="data:image/svg+xml,{{ rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#050505"/><text x="16" y="22" font-size="18" text-anchor="middle" fill="#a855f7">店</text></svg>') }}" type="image/svg+xml">
     <title>{{ $resolvedTitle }}</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -61,55 +61,54 @@
          ============================================================ --}}
     <style>
         :root {
-            /* gold 系トークンの実体はテーマ色（モーブピンク既定）へ。
-               テーマを切り替えれば --accent-text などが追従し、サイドメニュー／ヘッダーの色も自動で変わる。 */
-            --gold:                var(--accent-text, #eba8c8);
-            --gold-light:          var(--accent-grad-from, #f2cadf);
-            --gold-deep:           var(--accent-grad-to, #b0507f);
-            /* 境界線とカードトーン：モーブピンク */
-            --color-border:        rgba(var(--accent-rgb, 214, 112, 162), 0.20);
-            --color-border-strong: rgba(var(--accent-rgb, 214, 112, 162), 0.45);
+            /* gold（旧ゴールド系トークン）の実体は紫アクセント。アンビエントは紫のまま保持する。
+               モーブピンクはボタン／バッジ／FAB のみ（--accent 経由）に効かせる。 */
+            --gold:                #a78bfa;
+            --gold-light:          #c4b5fd;
+            --gold-deep:           #7c3aed;
+            --color-border:        rgba(168, 85, 247, 0.20);
+            --color-border-strong: rgba(168, 85, 247, 0.45);
             --color-card-strong:   #1a1a1a;
         }
 
         /* --- ヘッダー：背景ラジアル・シャドウを紫に --- */
         #global-header {
             background:
-                radial-gradient(circle at 0% 0%, rgba(var(--accent-rgb, 214, 112, 162), 0.20), transparent 55%),
-                radial-gradient(circle at 100% 0%, rgba(var(--accent-rgb, 214, 112, 162), 0.30), transparent 62%),
+                radial-gradient(circle at 0% 0%, rgba(168, 85, 247, 0.20), transparent 55%),
+                radial-gradient(circle at 100% 0%, rgba(168, 85, 247, 0.30), transparent 62%),
                 rgba(10, 10, 10, 0.92) !important;
             box-shadow:
                 0 10px 30px rgba(0,0,0,0.65),
-                0 0 18px rgba(var(--accent-rgb, 214, 112, 162), 0.25) !important;
+                0 0 18px rgba(168, 85, 247, 0.25) !important;
         }
         .header-icon-btn:hover,
         .header-icon-btn:focus-visible {
-            background-color: rgba(var(--accent-rgb, 214, 112, 162), 0.10) !important;
+            background-color: rgba(168, 85, 247, 0.10) !important;
         }
         .header-icon-btn:active {
-            background-color: rgba(var(--accent-rgb, 214, 112, 162), 0.18) !important;
+            background-color: rgba(168, 85, 247, 0.18) !important;
         }
 
         /* --- サイドメニュー：背景ラジアル・シャドウを紫に --- */
         #side-menu {
             background:
-                radial-gradient(circle at 0% 0%, rgba(var(--accent-rgb, 214, 112, 162), 0.20), transparent 55%),
+                radial-gradient(circle at 0% 0%, rgba(168, 85, 247, 0.20), transparent 55%),
                 linear-gradient(180deg, rgba(20, 20, 20, 0.96), rgba(10, 10, 10, 0.98)) !important;
             box-shadow:
                 -12px 0 36px rgba(0,0,0,0.65),
-                -2px 0 18px rgba(var(--accent-rgb, 214, 112, 162), 0.28) !important;
-            border-left: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.35) !important;
+                -2px 0 18px rgba(168, 85, 247, 0.28) !important;
+            border-left: 1px solid rgba(168, 85, 247, 0.35) !important;
         }
-        .sidebar-header { border-bottom-color: rgba(var(--accent-rgb, 214, 112, 162), 0.25) !important; }
-        .sidebar-footer { border-top-color: rgba(var(--accent-rgb, 214, 112, 162), 0.25) !important; }
-        .sidebar-sub-menu a:hover { background: rgba(var(--accent-rgb, 214, 112, 162), 0.14) !important; }
-        .btn-sidebar-close:hover { background: rgba(var(--accent-rgb, 214, 112, 162), 0.18) !important; }
+        .sidebar-header { border-bottom-color: rgba(168, 85, 247, 0.25) !important; }
+        .sidebar-footer { border-top-color: rgba(168, 85, 247, 0.25) !important; }
+        .sidebar-sub-menu a:hover { background: rgba(168, 85, 247, 0.14) !important; }
+        .btn-sidebar-close:hover { background: rgba(168, 85, 247, 0.18) !important; }
 
         /* --- 通知 / やることリスト ポップアップ：mypage と同様にカード調＋紫枠 --- */
         #header-task-popup,
         #header-notification-popup {
             background: linear-gradient(to bottom right, #1a1a1a, #050505) !important;
-            border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.4) !important;
+            border: 1px solid rgba(168, 85, 247, 0.4) !important;
             box-shadow:
                 6px 6px 16px rgba(0,0,0,.9),
                 -2px -2px 6px rgba(255,255,255,.06),
@@ -118,20 +117,20 @@
             opacity: 1 !important;
         }
         .task-popup-header {
-            background: rgba(var(--accent-rgb, 214, 112, 162), 0.12) !important;
-            border-bottom: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.30) !important;
+            background: rgba(168, 85, 247, 0.12) !important;
+            border-bottom: 1px solid rgba(168, 85, 247, 0.30) !important;
         }
         .notif-popup-section-label {
-            background: rgba(var(--accent-rgb, 214, 112, 162), 0.08) !important;
-            border-bottom-color: rgba(var(--accent-rgb, 214, 112, 162), 0.20) !important;
+            background: rgba(168, 85, 247, 0.08) !important;
+            border-bottom-color: rgba(168, 85, 247, 0.20) !important;
         }
-        .notif-popup-item { border-bottom-color: rgba(var(--accent-rgb, 214, 112, 162), 0.20) !important; }
-        a.notif-popup-item:hover { background: rgba(var(--accent-rgb, 214, 112, 162), 0.10) !important; }
-        .notif-popup-empty { border-bottom-color: rgba(var(--accent-rgb, 214, 112, 162), 0.20) !important; }
+        .notif-popup-item { border-bottom-color: rgba(168, 85, 247, 0.20) !important; }
+        a.notif-popup-item:hover { background: rgba(168, 85, 247, 0.10) !important; }
+        .notif-popup-empty { border-bottom-color: rgba(168, 85, 247, 0.20) !important; }
 
         /* --- ボトムナビ：active 色は --gold 経由で自動的に紫になる。
               ただし `#bottom-nav` の境界色だけ raw rgba になっているケースに備えて上書き --- */
-        #bottom-nav { border-top-color: rgba(var(--accent-rgb, 214, 112, 162), 0.25) !important; }
+        #bottom-nav { border-top-color: rgba(168, 85, 247, 0.25) !important; }
     </style>
 
     <script src="{{ asset('assets/js/app.js') }}" defer></script>

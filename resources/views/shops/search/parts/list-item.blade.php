@@ -22,6 +22,15 @@
                         <i class="fas fa-route"></i> {{ $item['distance_label'] }}
                     </span>
                 @endif
+                @if(!empty($item['match_summary']) && ($sort ?? '') === 'relevance')
+                    <span class="match-badge" title="{{ implode(' / ', (array) ($item['match_reasons'] ?? [])) }}"
+                          style="margin-left:6px; padding:2px 8px; border-radius:999px;
+                                 background:linear-gradient(135deg, rgba(168,85,247,.18), rgba(124,58,237,.25));
+                                 border:1px solid rgba(168,85,247,.45);
+                                 color:#e6dffc; font-size:0.7rem; font-weight:700; letter-spacing:0.02em;">
+                        <i class="fas fa-bullseye" style="margin-right:3px;"></i>{{ $item['match_summary'] }}
+                    </span>
+                @endif
             </div>
             @if($hitokoto !== '' || $hitokotoTime !== '')
                 <div class="shop-cast-search__line2 @if($hitokoto === '') shop-cast-search__line2--time-only @endif">

@@ -53,6 +53,7 @@ use App\Http\Controllers\Casts\ProfileController as CastProfile;
 use App\Http\Controllers\Casts\MypageController as CastMypage;
 use App\Http\Controllers\Casts\SearchController as CastSearch;
 use App\Http\Controllers\Casts\RecruitmentController as CastRecruit;
+use App\Http\Controllers\Casts\AiChatController as CastAiChat;
 
 /*
 |--------------------------------------------------------------------------
@@ -531,6 +532,7 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
     Route::get('/search', fn () => redirect()->route('cast.search.index', ['tab' => 'list']));
     Route::get('/search/{tab}', [CastSearch::class, 'index'])->name('search.index')->where('tab', 'search|ai|timeline|list');
     Route::post('/search-preferences', [CastSearch::class, 'savePreferences'])->name('search-preferences.save');
+    Route::post('/search/ai-chat', [CastAiChat::class, 'respond'])->name('search.ai-chat');
     Route::get('/recruit/{id}', [CastRecruit::class, 'show'])->name('recruit.show');
     
     Route::get('/interaction', [ShopInteraction::class, 'index'])->name('interaction.index');

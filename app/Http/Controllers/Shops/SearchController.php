@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Shops;
 
 use App\Http\Controllers\Common\SearchController as BaseSearchController;
+use App\Services\SearchScoringService;
 use App\Services\UserLocationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -12,18 +13,19 @@ use Illuminate\Support\Facades\Schema;
 class SearchController extends BaseSearchController
 {
     private const SORT_OPTIONS = [
-        'hitokoto' => 'ひとこと最終更新が新しい順',
-        'new'      => '新着登録順',
-        'name'     => '名前（あいうえお順）',
-        'age_asc'  => '年齢が若い順',
-        'age_desc' => '年齢が高い順',
+        'relevance' => 'おすすめ順（マッチ度が高い順）',
+        'hitokoto'  => 'ひとこと最終更新が新しい順',
+        'new'       => '新着登録順',
+        'name'      => '名前（あいうえお順）',
+        'age_asc'   => '年齢が若い順',
+        'age_desc'  => '年齢が高い順',
     ];
 
     public function index(Request $request)
     {
-        $sort = (string) $request->query('sort', 'hitokoto');
+        $sort = (string) $request->query('sort', 'relevance');
         if (!array_key_exists($sort, self::SORT_OPTIONS)) {
-            $sort = 'hitokoto';
+            $sort = 'relevance';
         }
 
         $items = $this->buildSearchItems($request, $sort);
@@ -84,6 +86,7 @@ class SearchController extends BaseSearchController
             'cast_profiles.nickname',
             'cast_profiles.name',
             'cast_profiles.birthday',
+            'cast_profiles.exp',
             'cast_profiles.pref',
             'cast_profiles.city',
             'cast_profiles.pr',
@@ -167,24 +170,48 @@ class SearchController extends BaseSearchController
             : ($legacyHasFilter ? $queryDistanceKm : $persistedMaxKm);
         $useDistance = $origin && $distanceKmLimit > 0;
 
-        return $rows->get()
-            ->filter(function ($row) use ($normalizedKeyword) {
-                if ($normalizedKeyword === '') {
+        $allRows = $rows->get();
+
+        // --- スコアリング用コンテキストの一括ロード ---
+        $scoring = app(SearchScoringService::class);
+        $prefs   = app(\App\Services\ShopSearchPreferenceService::class)->loadAll();
+
+        $keywordTokens = $scoring->tokenize($normalizedKeyword);
+        $castIds = $allRows->pluck('id')->map(fn ($v) => (string) $v)->values()->all();
+        $castTagsByCastId  = $scoring->loadCastTagsByCastIds($castIds);
+        $castPrefsByCastId = $scoring->loadCastPrefsByCastIds($castIds);
+
+        $scoringContext = [
+            'keywordTokens'    => $keywordTokens,
+            'normalize'        => fn (string $s) => $this->normalizeSearchText($s),
+            'prefs'            => $prefs,
+            'castTagsByCastId' => $castTagsByCastId,
+            'castPrefsByCastId'=> $castPrefsByCastId,
+        ];
+
+        // キーワード絞り込み: 入力をトークン化し、各トークンが少なくとも1つのフィールドに含まれること
+        // （AND-of-tokens / OR-of-fields）。ヒット順位はスコアで決定。
+        $items = $allRows
+            ->filter(function ($row) use ($keywordTokens) {
+                if ($keywordTokens === []) {
                     return true;
                 }
-
-                $haystack = implode(' ', array_filter([
+                $haystack = $this->normalizeSearchText(implode(' ', array_filter([
                     $row->nickname,
                     $row->name,
                     $row->pref,
                     $row->city,
                     $row->pr,
                     $row->hitokoto_body ?? null,
-                ]));
-
-                return str_contains($this->normalizeSearchText($haystack), $normalizedKeyword);
+                ])));
+                foreach ($keywordTokens as $token) {
+                    if (!str_contains($haystack, $token)) {
+                        return false;
+                    }
+                }
+                return true;
             })
-            ->map(function ($row) use ($userLocation, $origin) {
+            ->map(function ($row) use ($userLocation, $origin, $scoring, $scoringContext) {
                 $birthday = $row->birthday ? Carbon::parse($row->birthday) : null;
                 $hitokotoTs = null;
                 if (!empty($row->hitokoto_updated_at)) {
@@ -192,7 +219,6 @@ class SearchController extends BaseSearchController
                 } elseif (!empty($row->hitokoto_created_at)) {
                     $hitokotoTs = Carbon::parse($row->hitokoto_created_at);
                 }
-                // cast_posts が無い／本文が空で PR を表示している場合は、一覧の「最終更新」にプロフィール更新を使う
                 if ($hitokotoTs === null && !empty($row->profile_updated_at)) {
                     $hitokotoTs = Carbon::parse($row->profile_updated_at);
                 }
@@ -207,6 +233,9 @@ class SearchController extends BaseSearchController
                     )
                     : null;
 
+                // 一致度スコア（店舗の保存条件 + キーワード重み付け）
+                $sc = $scoring->scoreCastRow($row, $scoringContext);
+
                 return [
                     'id'                  => $row->id,
                     'name'                => $this->castDisplayName($row),
@@ -217,8 +246,16 @@ class SearchController extends BaseSearchController
                     'pr'                  => (string) ($row->pr ?? ''),
                     'hitokoto'            => $hitokotoBody,
                     'hitokoto_updated_at' => $hitokotoTs?->locale('ja')->diffForHumans(),
+                    'hitokoto_ts'         => $hitokotoTs?->getTimestamp(),
                     'distance_km'         => $distanceKm,
                     'distance_label'      => $distanceKm !== null ? $userLocation->formatDistance($distanceKm) : null,
+                    'match_score'         => $sc['score'],
+                    'match_count'         => $sc['matched'],
+                    'match_total'         => $sc['total'],
+                    'match_reasons'       => $sc['reasons'],
+                    'match_summary'       => $sc['total'] > 0
+                        ? "条件 {$sc['matched']}/{$sc['total']} 件一致"
+                        : null,
                 ];
             })
             ->filter(function ($item) use ($useDistance, $distanceKmLimit) {
@@ -226,7 +263,6 @@ class SearchController extends BaseSearchController
                     return true;
                 }
                 $km = $item['distance_km'] ?? null;
-                // 距離不明（lat/lng 未登録）は除外しない方針：表示機会を残す
                 if ($km === null) {
                     return true;
                 }
@@ -234,6 +270,25 @@ class SearchController extends BaseSearchController
             })
             ->values()
             ->all();
+
+        // 'relevance' ソートのみ PHP 側で再ソート。ほかは DB 側のORDER BYに従う。
+        if ($sort === 'relevance') {
+            usort($items, function ($a, $b) {
+                if ($a['match_score'] !== $b['match_score']) {
+                    return $b['match_score'] <=> $a['match_score'];
+                }
+                // 同点はひとこと更新の新しい順
+                return ($b['hitokoto_ts'] ?? 0) <=> ($a['hitokoto_ts'] ?? 0);
+            });
+        }
+
+        // hitokoto_ts は内部用なので返却前に落とす
+        foreach ($items as &$it) {
+            unset($it['hitokoto_ts']);
+        }
+        unset($it);
+
+        return $items;
     }
 
     public function savePreferences(\Illuminate\Http\Request $request, \App\Services\ShopSearchPreferenceService $prefs)

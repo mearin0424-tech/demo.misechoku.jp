@@ -68,7 +68,7 @@
     font-family: var(--font-sans);
     font-size: 1.4rem;
     margin-bottom: 8px;
-    color: var(--color-gold, #eba8c8);
+    color: var(--color-gold, #a78bfa);
 }
 
 .support-column-lead {
@@ -87,7 +87,7 @@
     background: rgba(20, 7, 15, 0.9);
     border-radius: 16px;
     padding: 0;
-    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.4);
+    border: 1px solid rgba(168, 85, 247, 0.4);
     overflow: hidden;
 }
 
@@ -146,13 +146,13 @@
     display: inline-block;
     padding: 6px 10px;
     border-radius: 8px;
-    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.35);
+    border: 1px solid rgba(168, 85, 247, 0.35);
     color: #efe3e3;
     font-size: 0.85rem;
 }
 
 .support-column-pagination .pagination li.active span {
-    background: rgba(var(--accent-rgb, 214, 112, 162), 0.2);
+    background: rgba(168, 85, 247, 0.2);
     color: #f0e0a0;
 }
 </style>

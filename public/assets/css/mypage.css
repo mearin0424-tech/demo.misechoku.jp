@@ -4,8 +4,8 @@
 
 :root {
     --mypage-gold: var(--gold);
-    --mypage-gold-soft: rgba(var(--accent-rgb, 214, 112, 162), 0.16);
-    --mypage-gold-border: rgba(var(--accent-rgb, 214, 112, 162), 0.5);
+    --mypage-gold-soft: rgba(168, 85, 247, 0.16);
+    --mypage-gold-border: rgba(168, 85, 247, 0.5);
     --mypage-card-bg: var(--color-card);
     --mypage-section-spacing: 20px;
 }
@@ -86,7 +86,7 @@
 
 .btn-add-icon:hover {
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(var(--accent-rgb, 214, 112, 162), 0.4);
+    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
 }
 
 .btn-add-icon:active {
@@ -136,7 +136,7 @@
 }
 
 .shop-word-bubble:hover {
-    border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.55);
+    border-color: rgba(168, 85, 247, 0.55);
     box-shadow: 0 3px 12px rgba(0, 0, 0, 0.25);
 }
 
@@ -219,7 +219,7 @@
     width: 22px;
     height: 22px;
     border-radius: 50%;
-    background: rgba(var(--accent-rgb, 214, 112, 162), 0.18);
+    background: rgba(168, 85, 247, 0.18);
     color: var(--mypage-gold);
     font-size: 0.62rem;
 }
@@ -250,7 +250,7 @@
 }
 
 .mypage-review-card:hover {
-    border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.55);
+    border-color: rgba(168, 85, 247, 0.55);
     box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
     transform: translateY(-1px);
 }
@@ -364,7 +364,7 @@
 }
 
 .mypage-stat-panel:hover {
-    border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.55);
+    border-color: rgba(168, 85, 247, 0.55);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
@@ -538,7 +538,7 @@ a.btn-outline-gold {
     padding: 10px 18px;
     border-radius: 12px;
     border: 1px solid var(--color-border-strong);
-    background: rgba(var(--accent-rgb, 214, 112, 162), 0.12);
+    background: rgba(168, 85, 247, 0.12);
     color: var(--gold-light);
     font-size: 0.9rem;
     font-weight: 600;
@@ -547,7 +547,7 @@ a.btn-outline-gold {
 }
 .btn-personality-test:hover {
     border-color: var(--gold);
-    background: rgba(var(--accent-rgb, 214, 112, 162), 0.2);
+    background: rgba(168, 85, 247, 0.2);
     color: var(--color-text-header);
 }
 .btn-personality-test i {
@@ -603,9 +603,9 @@ a.btn-outline-gold {
     text-decoration: none;
     margin-bottom: 12px;
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
-    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.35);
+    border: 1px solid rgba(168, 85, 247, 0.35);
     background:
-        radial-gradient(circle at top left, rgba(var(--accent-rgb, 214, 112, 162), 0.16), transparent 55%),
+        radial-gradient(circle at top left, rgba(168, 85, 247, 0.16), transparent 55%),
         radial-gradient(circle at bottom right, rgba(16, 4, 6, 0.9), rgba(10, 2, 4, 0.95));
     box-sizing: border-box;
     width: 100%;
@@ -623,8 +623,8 @@ a.btn-outline-gold {
     transform: translateY(-1px);
     box-shadow:
         0 10px 26px rgba(0, 0, 0, 0.6),
-        0 0 14px rgba(var(--accent-rgb, 214, 112, 162), 0.38);
-    border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.8);
+        0 0 14px rgba(168, 85, 247, 0.38);
+    border-color: rgba(168, 85, 247, 0.8);
     background:
         radial-gradient(circle at top left, rgba(196, 181, 253, 0.22), transparent 60%),
         radial-gradient(circle at bottom right, rgba(16, 4, 6, 0.96), rgba(10, 2, 4, 1));
@@ -759,7 +759,7 @@ a.btn-outline-gold {
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(to right, transparent, rgba(var(--accent-rgb, 214, 112, 162), 0.05), transparent);
+    background: linear-gradient(to right, transparent, rgba(168, 85, 247, 0.05), transparent);
     transform: translateX(-100%);
     transition: transform 0.7s ease-out;
     pointer-events: none;
@@ -792,8 +792,8 @@ a.btn-outline-gold {
 }
 .cast-mypage-menu-buttons .menu-btn:hover .menu-btn-icon {
     transform: scale(1.05);
-    background-color: rgba(var(--accent-rgb, 214, 112, 162), 0.1);
-    border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.3);
+    background-color: rgba(168, 85, 247, 0.1);
+    border-color: rgba(168, 85, 247, 0.3);
 }
 
 .cast-mypage-menu-buttons .menu-btn-text {
@@ -855,7 +855,7 @@ a.btn-outline-gold {
 
 /* 現在のページのメニュー項目 */
 .cast-mypage-menu-buttons .menu-btn.is-current {
-    border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.6);
+    border-color: rgba(168, 85, 247, 0.6);
 }
 .cast-mypage-menu-buttons .menu-btn.is-current .menu-btn-label {
     color: var(--gold);
@@ -864,8 +864,8 @@ a.btn-outline-gold {
     color: #ffffff;
 }
 .cast-mypage-menu-buttons .menu-btn.is-current .menu-btn-icon {
-    background-color: rgba(var(--accent-rgb, 214, 112, 162), 0.1);
-    border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.3);
+    background-color: rgba(168, 85, 247, 0.1);
+    border-color: rgba(168, 85, 247, 0.3);
 }
 .cast-mypage-menu-buttons .menu-btn.is-current .menu-btn-arrow {
     background: linear-gradient(to bottom right, var(--gold), var(--gold-deep));
@@ -949,7 +949,7 @@ a.btn-outline-gold {
 .doc-status.status-pending,
 .doc-status.pending {
     background: rgba(250, 204, 21, 0.14);
-    color: #f2cadf;
+    color: #c4b5fd;
 }
 
 .doc-status.status-ng {
@@ -1050,7 +1050,7 @@ a.btn-outline-gold {
 
 .gallery-edit-section .photo-slot:hover {
     border-color: var(--mypage-gold);
-    box-shadow: 0 4px 16px rgba(var(--accent-rgb, 214, 112, 162), 0.2);
+    box-shadow: 0 4px 16px rgba(168, 85, 247, 0.2);
 }
 
 .gallery-edit-section .photo-slot img {
@@ -1080,7 +1080,7 @@ a.btn-outline-gold {
 /* Image Library 並び替え（ドラッグ・長押し） */
 .gallery-sortable-ghost {
     opacity: 0.4;
-    background: rgba(var(--accent-rgb, 214, 112, 162), 0.15);
+    background: rgba(168, 85, 247, 0.15);
     border-radius: 12px;
 }
 .gallery-sortable-chosen {
@@ -1089,7 +1089,7 @@ a.btn-outline-gold {
 }
 .gallery-sortable-drag {
     opacity: 1;
-    box-shadow: 0 8px 24px rgba(var(--accent-rgb, 214, 112, 162), 0.25);
+    box-shadow: 0 8px 24px rgba(168, 85, 247, 0.25);
 }
 
 /* --- モーダル --- */
@@ -1370,7 +1370,7 @@ a.btn-outline-gold {
     padding: 10px 14px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.3);
+    border: 1px solid rgba(168, 85, 247, 0.3);
     color: var(--color-text);
     font-size: 0.85rem;
     text-decoration: none;
@@ -1439,9 +1439,9 @@ a.btn-outline-gold {
 .mypage-status-metric {
     padding: 14px 12px;
     border-radius: 16px;
-    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.24);
+    border: 1px solid rgba(168, 85, 247, 0.24);
     background:
-        radial-gradient(circle at top left, rgba(var(--accent-rgb, 214, 112, 162), 0.14), transparent 50%),
+        radial-gradient(circle at top left, rgba(168, 85, 247, 0.14), transparent 50%),
         rgba(255, 255, 255, 0.03);
 }
 
@@ -1476,9 +1476,9 @@ a.btn-outline-gold {
     gap: 12px;
     padding: 14px;
     border-radius: 18px;
-    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.22);
+    border: 1px solid rgba(168, 85, 247, 0.22);
     background:
-        radial-gradient(circle at top left, rgba(var(--accent-rgb, 214, 112, 162), 0.1), transparent 48%),
+        radial-gradient(circle at top left, rgba(168, 85, 247, 0.1), transparent 48%),
         rgba(255, 255, 255, 0.03);
 }
 
@@ -1486,7 +1486,7 @@ a.btn-outline-gold {
     width: 44px;
     height: 44px;
     border-radius: 14px;
-    background: rgba(var(--accent-rgb, 214, 112, 162), 0.12);
+    background: rgba(168, 85, 247, 0.12);
     color: var(--mypage-gold);
     font-size: 1rem;
     display: flex;
@@ -1548,7 +1548,7 @@ a.btn-outline-gold {
     padding: 18px 16px;
     margin-bottom: 16px;
     border-radius: 20px;
-    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.3);
+    border: 1px solid rgba(168, 85, 247, 0.3);
     background:
         radial-gradient(circle at top left, rgba(196, 181, 253, 0.18), transparent 46%),
         linear-gradient(180deg, rgba(30, 12, 14, 0.96), rgba(18, 6, 8, 0.96));

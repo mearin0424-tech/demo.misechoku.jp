@@ -33,7 +33,7 @@
     .error-page-title {
         font-size: 16px;
         font-weight: 700;
-        color: var(--color-accent-text, #f2cadf);
+        color: var(--color-accent-text, #c4b5fd);
         letter-spacing: 0.06em;
         margin-bottom: 8px;
     }
@@ -49,7 +49,7 @@
         gap: 8px;
         padding: 12px 22px;
         border-radius: 999px;
-        background: linear-gradient(to right, var(--color-accent-grad-from, #eba8c8), var(--color-accent-grad-to, #b0507f));
+        background: linear-gradient(to right, var(--color-accent-grad-from, #a78bfa), var(--color-accent-grad-to, #7c3aed));
         color: var(--color-on-accent-strong, #fff);
         font-weight: 700;
         text-decoration: none;

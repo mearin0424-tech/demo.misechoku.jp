@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Casts;
 
 use App\Http\Controllers\Common\SearchController as BaseSearchController;
 use App\Services\AdminMasterService;
+use App\Services\SearchScoringService;
 use App\Services\UserLocationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -14,11 +15,12 @@ use Illuminate\Support\Facades\Schema;
 class SearchController extends BaseSearchController
 {
     private const SORT_OPTIONS = [
-        'hitokoto' => 'ひとこと最終更新が新しい順',
-        'new'      => '新着登録順',
-        'name'     => '店舗名（あいうえお順）',
-        'wage'     => '時給が高い順',
-        'reward'   => '採用報酬が高い順',
+        'relevance' => 'おすすめ順（マッチ度が高い順）',
+        'hitokoto'  => 'ひとこと最終更新が新しい順',
+        'new'       => '新着登録順',
+        'name'      => '店舗名（あいうえお順）',
+        'wage'      => '時給が高い順',
+        'reward'    => '採用報酬が高い順',
     ];
 
     public function __construct(private readonly AdminMasterService $adminMasterService)
@@ -33,9 +35,9 @@ class SearchController extends BaseSearchController
         $tab = in_array($tab, ['list', 'ai'], true) ? $tab : 'list';
         $activeTab = 'pane-' . $tab;
 
-        $sort = (string) $request->query('sort', 'hitokoto');
+        $sort = (string) $request->query('sort', 'relevance');
         if (!array_key_exists($sort, self::SORT_OPTIONS)) {
-            $sort = 'hitokoto';
+            $sort = 'relevance';
         }
 
         $items = $this->buildSearchItems($request, $sort);
@@ -142,23 +144,29 @@ class SearchController extends BaseSearchController
                 ->whereIn('industries.name', $industries);
         }
 
+        // スコアリングサービスとキーワードトークンを準備
+        $scoring = app(SearchScoringService::class);
+        $keywordTokens = $scoring->tokenize($normalizedKeyword);
+        $scoringContext = [
+            'keywordTokens' => $keywordTokens,
+            'normalize'     => fn (string $s) => $this->normalizeSearchText($s),
+        ];
+
         $items = $rows->get()
-            ->filter(function ($row) use ($normalizedKeyword, $areas, $hourlyWage, $reward, $jobTagFilters, $shopTagFilters) {
-                if ($normalizedKeyword === '') {
-                    $matchesKeyword = true;
-                } else {
-                    $haystack = implode(' ', array_filter([
+            ->filter(function ($row) use ($keywordTokens, $areas, $hourlyWage, $reward, $jobTagFilters, $shopTagFilters) {
+                // キーワード絞り込み: 全トークンが少なくとも1つのフィールドに含まれること
+                if ($keywordTokens !== []) {
+                    $haystack = $this->normalizeSearchText(implode(' ', array_filter([
                         $row->shop_name,
                         $row->pref,
                         $row->city,
                         $row->shop_post_body ?? null,
-                    ]));
-
-                    $matchesKeyword = str_contains($this->normalizeSearchText($haystack), $normalizedKeyword);
-                }
-
-                if (!$matchesKeyword) {
-                    return false;
+                    ])));
+                    foreach ($keywordTokens as $token) {
+                        if (!str_contains($haystack, $token)) {
+                            return false;
+                        }
+                    }
                 }
 
                 $areaLabel = $this->formatAreaLabel($row->pref ?? '', $row->city ?? '');
@@ -184,10 +192,12 @@ class SearchController extends BaseSearchController
 
                 return true;
             })
-            ->map(function ($row) {
+            ->map(function ($row) use ($scoring, $scoringContext) {
                 $hitokotoUpdatedAt = $row->shop_post_updated_at
                     ? Carbon::parse($row->shop_post_updated_at)
                     : ($row->shop_post_created_at ? Carbon::parse($row->shop_post_created_at) : null);
+
+                $sc = $scoring->scoreShopRow($row, $scoringContext);
 
                 return [
                     'id'                  => $row->id,
@@ -199,10 +209,13 @@ class SearchController extends BaseSearchController
                     'main_img'            => $this->getShopImages((string) $row->id)[0] ?? asset('assets/images/common/no-image.png'),
                     'hitokoto'            => (string) ($row->shop_post_body ?? ''),
                     'hitokoto_updated_at' => $hitokotoUpdatedAt?->locale('ja')->diffForHumans(),
+                    'hitokoto_ts'         => $hitokotoUpdatedAt?->getTimestamp(),
                     'hourly_wage'         => $this->searchRowHourlyWage($row),
                     'reward'              => $this->searchRowReward($row),
                     'latitude'            => $row->latitude !== null ? (float) $row->latitude : null,
                     'longitude'           => $row->longitude !== null ? (float) $row->longitude : null,
+                    'match_score'         => $sc['score'],
+                    'match_reasons'       => $sc['reasons'],
                 ];
             })
             ->values()
@@ -272,6 +285,22 @@ class SearchController extends BaseSearchController
                 return $km <= $effectiveMaxKm;
             }));
         }
+
+        // 'relevance' ソート: マッチスコア DESC、同点はひとこと更新の新しい順
+        if ($sort === 'relevance') {
+            usort($items, function ($a, $b) {
+                if (($a['match_score'] ?? 0) !== ($b['match_score'] ?? 0)) {
+                    return ($b['match_score'] ?? 0) <=> ($a['match_score'] ?? 0);
+                }
+                return ($b['hitokoto_ts'] ?? 0) <=> ($a['hitokoto_ts'] ?? 0);
+            });
+        }
+
+        // 内部用キーは返却前に落とす
+        foreach ($items as &$it) {
+            unset($it['hitokoto_ts']);
+        }
+        unset($it);
 
         return $items;
     }

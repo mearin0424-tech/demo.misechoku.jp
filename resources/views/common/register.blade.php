@@ -21,14 +21,14 @@
     gap: 8px;
     padding: 10px 12px;
     margin-bottom: 14px;
-    border: 1px dashed rgba(var(--accent-rgb, 214, 112, 162), .35);
+    border: 1px dashed rgba(168, 85, 247, .35);
     border-radius: 10px;
-    background: rgba(var(--accent-rgb, 214, 112, 162), .05);
+    background: rgba(168, 85, 247, .05);
     color: #e6dffc;
     font-size: 0.86rem;
     cursor: pointer;
 }
-.register-skip-toggle input { accent-color: #eba8c8; }
+.register-skip-toggle input { accent-color: #a78bfa; }
 .register-field-compact input { max-width: 280px; }
 </style>
 @endpush
@@ -665,19 +665,19 @@
 
         body.page-auth-register.page-auth-register-cast {
             background:
-                radial-gradient(circle at top left, rgba(var(--accent-rgb, 214, 112, 162), 0.18), transparent 32%),
+                radial-gradient(circle at top left, rgba(168, 85, 247, 0.18), transparent 32%),
                 linear-gradient(180deg, #050505 0%, #050505 45%, #050505 100%);
         }
 
         body.page-auth-register.page-auth-register-shop {
             background:
-                radial-gradient(circle at top right, rgba(var(--accent-rgb, 214, 112, 162), 0.18), transparent 32%),
+                radial-gradient(circle at top right, rgba(168, 85, 247, 0.18), transparent 32%),
                 linear-gradient(180deg, #11060a 0%, #1a0a11 45%, #120406 100%);
         }
 
         body.page-auth-register #bg-layer {
             background:
-                radial-gradient(circle at 15% 10%, rgba(var(--accent-rgb, 214, 112, 162), 0.08), transparent 22%),
+                radial-gradient(circle at 15% 10%, rgba(168, 85, 247, 0.08), transparent 22%),
                 radial-gradient(circle at 82% 16%, rgba(255, 255, 255, 0.04), transparent 18%),
                 radial-gradient(circle at 50% 100%, rgba(122, 24, 44, 0.22), transparent 30%);
         }
@@ -690,7 +690,7 @@
 
         .register-hero,
         .register-card {
-            border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.18);
+            border: 1px solid rgba(168, 85, 247, 0.18);
             border-radius: 28px;
             background:
                 linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
@@ -727,8 +727,8 @@
         }
 
         .register-role.is-active {
-            border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.42);
-            color: #eba8c8;
+            border-color: rgba(168, 85, 247, 0.42);
+            color: #a78bfa;
             background: rgba(35, 15, 18, 0.95);
         }
 
@@ -839,8 +839,8 @@
         }
 
         .register-chip input:checked + span {
-            border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.5);
-            background: rgba(var(--accent-rgb, 214, 112, 162), 0.18);
+            border-color: rgba(168, 85, 247, 0.5);
+            background: rgba(168, 85, 247, 0.18);
             color: #f8e7b0;
         }
 
@@ -899,7 +899,7 @@
             width: 100%;
             padding: 12px 14px;
             border-radius: 14px;
-            border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.18);
+            border: 1px solid rgba(168, 85, 247, 0.18);
             background: rgba(255, 255, 255, 0.04);
             color: #fff;
             font-size: 16px; /* iOSズーム回避 */
@@ -934,7 +934,7 @@
         .register-field textarea:focus {
             outline: none;
             border-color: rgba(196, 181, 253, 0.72);
-            box-shadow: 0 0 0 3px rgba(var(--accent-rgb, 214, 112, 162), 0.12);
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.12);
         }
 
         .register-plan-grid {
@@ -948,7 +948,7 @@
             align-items: flex-start;
             padding: 14px 16px;
             border-radius: 18px;
-            border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.16);
+            border: 1px solid rgba(168, 85, 247, 0.16);
             background: rgba(255, 255, 255, 0.03);
             cursor: pointer;
         }
@@ -956,7 +956,7 @@
         .register-plan-option input {
             width: auto;
             margin-top: 3px;
-            accent-color: #eba8c8;
+            accent-color: #a78bfa;
         }
 
         .register-plan-option strong {
@@ -988,7 +988,7 @@
         .register-check input {
             width: auto;
             margin-top: 4px;
-            accent-color: #eba8c8;
+            accent-color: #a78bfa;
         }
 
         .register-check a,
@@ -1027,7 +1027,7 @@
         }
 
         .register-secondary {
-            border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.26);
+            border: 1px solid rgba(168, 85, 247, 0.26);
             background: rgba(255, 255, 255, 0.04);
             color: #fff4d6;
         }
@@ -1062,7 +1062,7 @@
             padding: 28px 32px;
             border-radius: 18px;
             background: rgba(20, 14, 8, 0.92);
-            border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.32);
+            border: 1px solid rgba(168, 85, 247, 0.32);
             box-shadow: 0 24px 48px rgba(0, 0, 0, 0.55);
             color: #fff4d6;
             text-align: center;
@@ -1084,7 +1084,7 @@
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            border: 3px solid rgba(var(--accent-rgb, 214, 112, 162), 0.22);
+            border: 3px solid rgba(168, 85, 247, 0.22);
             border-top-color: #f4df9c;
             animation: register-submit-spin 0.9s linear infinite;
         }

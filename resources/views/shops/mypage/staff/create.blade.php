@@ -28,14 +28,14 @@
 
     .staff-form-card {
         background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-        border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.3);
+        border: 1px solid rgba(168, 85, 247, 0.3);
         border-radius: 16px;
         padding: 22px 20px;
         display: flex; flex-direction: column; gap: 16px;
     }
     .staff-form-field { display: flex; flex-direction: column; gap: 6px; }
     .staff-form-field label {
-        font-size: 0.8rem; font-weight: 700; color: #f2cadf;
+        font-size: 0.8rem; font-weight: 700; color: #c4b5fd;
         letter-spacing: 0.04em;
     }
     .staff-form-field label .req {
@@ -43,8 +43,8 @@
     }
     .staff-form-field input,
     .staff-form-field select {
-        background: rgba(var(--accent-rgb, 214, 112, 162), 0.10);
-        border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.4);
+        background: rgba(168, 85, 247, 0.10);
+        border: 1px solid rgba(168, 85, 247, 0.4);
         color: #f5f5f5;
         border-radius: 10px;
         padding: 11px 14px;
@@ -56,13 +56,13 @@
     .staff-form-field input:focus,
     .staff-form-field select:focus {
         outline: none;
-        border-color: #eba8c8;
-        box-shadow: inset 0 2px 4px rgba(0,0,0,.4), 0 0 0 3px rgba(var(--accent-rgb, 214, 112, 162), .2);
+        border-color: #a78bfa;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,.4), 0 0 0 3px rgba(168, 85, 247, .2);
     }
     .staff-form-field select {
         background-image:
-            linear-gradient(45deg, transparent 50%, #f2cadf 50%),
-            linear-gradient(135deg, #f2cadf 50%, transparent 50%);
+            linear-gradient(45deg, transparent 50%, #c4b5fd 50%),
+            linear-gradient(135deg, #c4b5fd 50%, transparent 50%);
         background-position:
             calc(100% - 18px) 50%,
             calc(100% - 13px) 50%;
@@ -82,7 +82,7 @@
     }
     .staff-form-submit {
         flex: 1; padding: 13px 16px;
-        background: linear-gradient(135deg, #eba8c8, #b0507f);
+        background: linear-gradient(135deg, #a78bfa, #7c3aed);
         color: #fff; font-weight: 800; font-size: 0.95rem;
         border: 1px solid rgba(255,255,255,.12);
         border-radius: 999px;

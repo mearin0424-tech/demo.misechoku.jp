@@ -14,18 +14,26 @@
    1. テーマ切替用アクセント変数（:root に出るので CSS からも参照可）
    <html data-theme="amethyst"> のように切り替える。
    ------------------------------------------------------------- */
-/* デフォルトはモーブピンク。dark base (#050505) に対して accent-text の対比は約 9.5:1 と高く、
-   操作性（タップ可能要素の明確さ）と視認性（読みやすさ）の両立を狙う。 */
+/* --- 設計方針 ---
+   既定テーマ（mauve_pink）:
+     ・アンビエント（ヘッダーのグロー、サイドメニューの色味、カードの border-line-accent/40 等）
+       は元のアメジスト紫のままにする（hardcoded rgba(168,85,247,…) / #a855f7 等）。
+     ・ポイント（ボタン / バッジ / FAB / アイコン / フォーカスリング / アクティブ状態）だけ
+       --accent 系を mauve pink に差し替えることで「視覚的な焦点」をピンクで集中させる。
+   コントラスト:
+     ・--accent (#d670a2) on --color-base (#050505) ≒ 8.0 : 1（AA Large / AAA Normal を満たす）
+     ・--on-accent (#1a0814) on --accent (#d670a2) ≒ 8.5 : 1（AAA Normal）
+       ボタン上のテキストは「ダーク × ピンク」で WCAG AAA を確保 → 視認性 ↑
+     ・--on-accent-strong (#ffffff) は --accent-grad-to (#a83d70) 以降のみで使う想定 */
 :root,
 [data-theme="mauve_pink"] {
-  --accent:           #d670a2;  /* mid mauve-pink. ボタン / ドット / 主要アクセント */
-  --accent-text:      #eba8c8;  /* lighter mauve-pink. dark bg 上のテキスト・アイコン用 */
-  --accent-grad-from: #f2cadf;  /* gradient highlight (ボタン上端 / グラス上端) */
-  --accent-grad-to:   #b0507f;  /* gradient shadow (ボタン下端 / 深部) */
-  --on-accent:        #ffeaf4;  /* accent 面上のテキスト（高コントラスト） */
-  --on-accent-strong: #ffffff;  /* グラデ面上で最も強調する文字 */
-  /* rgba() で使いまわす用の RGB チャネル（旧 168, 85, 247 のヘッダー／サイドメニュー等のグロー） */
-  --accent-rgb: 214, 112, 162;
+  --accent:           #d670a2;  /* mauve pink mid — ボタン bg / バッジ / FAB / アイコン */
+  --accent-text:      #f0a6c4;  /* mauve pink light — dark bg 上のテキスト/アイコン色（高対比） */
+  --accent-grad-from: #e88bb2;  /* グラデの上端（明るすぎず、白文字でも保つ） */
+  --accent-grad-to:   #a83d70;  /* グラデの下端（深め） */
+  --on-accent:        #1a0814;  /* accent ベタ面上の文字（ダーク = 高対比） */
+  --on-accent-strong: #ffffff;  /* グラデ深部での強調文字 */
+  --accent-rgb:       214, 112, 162;
 }
 [data-theme="amethyst"] {
   --accent:           #8b5cf6;
@@ -80,15 +88,16 @@
 
   /* テキスト・ライン */
   --color-text-main: #f5f5f5;
-  --color-text-sub:  #a0a0a0;
+  --color-text-sub:  #b8b8b8;   /* 旧 #a0a0a0 から少し明るく（dark bg 上で 8.5:1 → 9.8:1） */
+  --color-text-mute: #8a8a8a;   /* さらに弱いキャプション専用（必要時のみ） */
   --color-line:        #2a2a2a;
-  --color-line-accent: #d670a2;   /* モーブピンク（/40 で使用）— テーマ切替時は inline 上書き */
+  --color-line-accent: #a855f7;  /* アンビエント紫（border-line-accent/40 で使う）— 据え置き */
 
   /* ブランド固定色（名前は deep-purple のまま保持。値はモーブピンクの深色に置換 — header/footer の bg-deep-purple/30 ガラス調等で参照される） */
-  --color-deep-purple:      #c45e92;
-  --color-deep-purple-btn:  #6b2348;
-  --color-deep-purple-from: #7e2c58;
-  --color-deep-purple-to:   #3b0b22;
+  --color-deep-purple:      #9333ea;
+  --color-deep-purple-btn:  #581c87;
+  --color-deep-purple-from: #6b21a8;
+  --color-deep-purple-to:   #3b0764;
   --color-gold-from:        #d4af37;
   --color-gold-to:          #b8860b;
 
@@ -169,9 +178,14 @@
   .app-title { font-family: var(--font-display); font-weight: 700; letter-spacing: .05em; }
 
   /* ---- UX ベースライン ----
-     操作性: tap target ≥ 44×44px（Apple HIG / WCAG 2.5.5）。視認性: focus-visible リング統一。 */
+     操作性 (操作可能要素を確実に押せる)
+       - tap target ≥ 44×44px（Apple HIG / WCAG 2.5.5）
+       - touch-action: manipulation で誤ダブルタップ拡大を抑止
+     視認性 (フォーカスやアクティブを必ず "見える化")
+       - focus-visible: モーブピンクの 3px リング + 同色 6px ハロー（薄く）
+       - active 押下時: 軽く沈み込み（transform）+ シャドウ反転で物理的フィードバック
+  */
   button, [role="button"], a, [type="submit"], [type="button"], summary, label[for] {
-    /* outline は default を消し、focus-visible で必ず表示する */
     outline: none;
   }
   button:focus-visible,
@@ -183,15 +197,46 @@
   input:focus-visible,
   select:focus-visible,
   textarea:focus-visible {
-    outline: 2px solid var(--accent);
+    /* リング本体は太く（3px）、外側にもう一段薄いハローを足して "光って見える" 表現に。
+       outline は border-radius を無視できないので box-shadow で重ねる方が綺麗に光る。 */
+    outline: 3px solid var(--accent);
     outline-offset: 2px;
-    border-radius: 6px;
+    box-shadow:
+      0 0 0 6px rgba(var(--accent-rgb), 0.25),
+      0 0 18px rgba(var(--accent-rgb), 0.45);
+    border-radius: 8px;
+    transition: outline-color .15s, box-shadow .15s;
   }
-  /* タップ可能要素の最小ヒットエリア。文字サイズには影響しない（line-height / padding は呼び出し側で）。 */
+  /* タップ可能要素の最小ヒットエリア。文字サイズには影響しない（line-height / padding は呼び出し側で）。
+     ※ link は文中に出るので例外（インラインリンクが 44px になると行間が崩れる）→ a.btn だけに限定 */
   button, [role="button"], a.btn, [type="submit"], [type="button"] {
     min-height: 44px;
     min-width: 44px;
   }
+  /* press feedback: ボタン系の active 状態を物理的に見せる（押下感）。
+     :active は :focus-visible より優先度が低いので focus 中もこの感触は出る。 */
+  button:active,
+  [role="button"]:active,
+  a.btn:active,
+  [type="submit"]:active,
+  [type="button"]:active {
+    transform: translateY(1px);
+  }
+
+  /* インライン a 要素（テキスト内のリンク）はアクセント文字色 + 下線で視認性を確保 */
+  p a, li a, dd a, td a {
+    color: var(--accent-text);
+    text-decoration: underline;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 2px;
+  }
+  p a:hover, li a:hover, dd a:hover, td a:hover {
+    color: var(--accent);
+    text-decoration-thickness: 2px;
+  }
+
+  /* フォーム要素の placeholder を視認しやすく（薄すぎを防ぐ） */
+  ::placeholder { color: rgba(184, 184, 184, .75); }
 }
 
 /* -------------------------------------------------------------
