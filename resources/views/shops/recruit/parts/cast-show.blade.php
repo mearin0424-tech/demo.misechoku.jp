@@ -67,10 +67,10 @@
         {{-- ボーナス金バッジ --}}
         @if($showBonusMain)
             <div class="mb-5">
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#D4AF37] to-[#B8860B] text-[#111] font-bold border border-amber-400/40 shadow-[inset_0_4px_6px_rgba(255,255,255,0.4),inset_0_-6px_6px_rgba(0,0,0,0.4),0_8px_16px_rgba(0,0,0,0.7)]">
+                <x-ui.badge variant="gold">
                     <span class="text-[10px] tracking-wider opacity-90">ボーナス金</span>
                     <span class="text-[18px] tracking-wider font-extrabold">¥{{ number_format($noruma) }}</span>
-                </div>
+                </x-ui.badge>
                 @if($bonusConditionsText !== '')
                     <p class="text-[11px] text-text-sub mt-2">達成条件：{{ $bonusConditionsText }}</p>
                 @endif

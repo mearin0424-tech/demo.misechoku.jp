@@ -26,7 +26,7 @@
     }
     .job-edit-v2__top {
         position: sticky;
-        top: 0;
+        top: var(--header-height, 60px);
         z-index: 40;
         display: flex;
         align-items: center;

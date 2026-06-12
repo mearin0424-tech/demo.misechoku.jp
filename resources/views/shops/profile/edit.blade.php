@@ -31,7 +31,7 @@
 
     .shop-profile-edit__top {
         position: sticky;
-        top: 0;
+        top: var(--header-height, 60px);
         z-index: 50;
         display: flex;
         align-items: center;
@@ -41,7 +41,7 @@
         background: rgba(10, 10, 10, 0.95);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        border-bottom: 1px solid #1f1a14;
+        border-bottom: 1px solid var(--color-line, #2a2a2a);
     }
 
     .shop-profile-edit__back {

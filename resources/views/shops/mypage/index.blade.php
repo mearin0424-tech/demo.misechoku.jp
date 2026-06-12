@@ -76,12 +76,17 @@
             <h1 class="app-title text-[24px] text-text-main leading-tight">{{ $displayName }}</h1>
         </div>
 
-        {{-- ===== Sub-page menu（採用・入金管理のみ） ===== --}}
+        {{-- ===== Sub-page menu ===== --}}
         <div class="flex flex-col gap-3">
             <x-ui.menu-card icon="settings"
                             sub="EMPLOYMENT & PAYMENT"
                             title="採用・入金管理"
                             href="{{ route('shop.mypage.management') }}"
+                            class="shop-mypage-menu-card" />
+            <x-ui.menu-card icon="staff"
+                            sub="STAFF ACCOUNTS"
+                            title="スタッフ管理"
+                            href="{{ route('shop.mypage.staff.index') }}"
                             class="shop-mypage-menu-card" />
         </div>
     </div>

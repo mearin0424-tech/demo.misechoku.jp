@@ -46,6 +46,7 @@ use App\Http\Controllers\Shops\ProfileController as ShopProfile;
 use App\Http\Controllers\Shops\RecruitmentController as ShopRecruit;
 use App\Http\Controllers\Shops\ReviewController as ShopReview;
 use App\Http\Controllers\Shops\InteractionController as ShopInteraction;
+use App\Http\Controllers\Shops\StaffController as ShopStaff;
 
 // 繧ｭ繝｣繧ｹ繝亥・
 use App\Http\Controllers\Casts\ProfileController as CastProfile;
@@ -497,6 +498,14 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
         Route::post('/payment/bank', [ShopMypage::class, 'updateBank'])->name('payment.bank.update');
         Route::post('/deposit/approve', [ShopMypage::class, 'approveDeposit'])->name('deposit.approve');
         Route::post('/deposit/pay', [ShopMypage::class, 'payToPlatform'])->name('deposit.pay');
+
+        // スタッフ管理（1店舗に複数の店舗ログインアカウントを持たせる）
+        Route::prefix('staff')->name('staff.')->group(function () {
+            Route::get('/', [ShopStaff::class, 'index'])->name('index');
+            Route::get('/create', [ShopStaff::class, 'create'])->name('create');
+            Route::post('/', [ShopStaff::class, 'store'])->name('store');
+            Route::delete('/{id}', [ShopStaff::class, 'destroy'])->name('destroy')->where('id', 'm[0-9]+');
+        });
     });
 
     // 繝ｬ繝薙Η繝ｼ蜈ｬ髢九・髱櫁｡ｨ遉ｺ縺ｮ蛻・ｊ譖ｿ縺茨ｼ・eviews 逕ｻ髱｢縺ｮ JS 縺九ｉ菴ｿ逕ｨ・・

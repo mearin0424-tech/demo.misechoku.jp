@@ -187,16 +187,10 @@
             word-break: break-all !important;
         }
 
-        /* Fix 1 + 2: SEARCH 画面のサブヘッダー（top:60px, h:47px）が
-           「指定中の条件」「AI チャット先頭」を覆っていたので padding-top を確保 */
-        body.page-search .search-filter-box,
-        body.page-search-ai .search-filter-box {
-            padding-top: calc(var(--sub-header-height, 47px) + 10px) !important;
-        }
-        body.page-search-ai .ai-recommend,
-        body.page-search-ai .ai-recommend__chat {
-            padding-top: var(--sub-header-height, 47px) !important;
-        }
+        /* Fix 1 + 2: SEARCH 画面の上余白
+           タブあり（cast）は .tab-page-body の margin-top で sub-header を回避済み。
+           タブなし（shop）はサブヘッダーが無く、main の padding-top で global-header を回避済み。
+           → 二重余白を防ぐため、ここでの padding-top 強制は撤去 */
 
         /* Fix 3: /cast/profile/edit の身長・体重・3サイズフィールド
            input と単位（cm/kg）を横並びに */

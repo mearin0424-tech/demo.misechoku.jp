@@ -12,7 +12,7 @@
 @endphp
 
 {{-- ボトムナビゲーション --}}
-<nav id="bottom-nav" class="fixed-ui bottom-0 bg-[#1a1a1a] border-t border-[#2a2a2a] h-[var(--footer-height)] z-[1000] flex items-center justify-around px-2">
+<nav id="bottom-nav" class="fixed-ui bottom-0 bg-base border-t border-line h-[var(--footer-height)] z-[1000] flex items-center justify-around px-2">
     {{-- ホーム（おすすめのスワイプ表示） --}}
     <a href="{{ route($prefix . '.home') }}" class="nav-item {{ $isHome ? 'active' : '' }}">
         <i class="fas fa-home"></i>

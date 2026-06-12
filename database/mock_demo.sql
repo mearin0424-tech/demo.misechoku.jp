@@ -1349,12 +1349,12 @@ INSERT INTO `shop_license_documents` (`id`, `shop_id`, `type`, `image_path`, `st
 
 CREATE TABLE `shop_managers` (
   `id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '主キー (m00000001~)',
-  `shop_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `shop_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '所属する shops.id（1店舗で複数アカウント可）',
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ログイン用メールアドレス（全shop_managersでユニーク）',
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `role` tinyint NOT NULL DEFAULT '0',
-  `status` tinyint NOT NULL DEFAULT '0',
+  `role` tinyint NOT NULL DEFAULT '0' COMMENT '権限 (1:オーナー, 2:スタッフ)',
+  `status` tinyint NOT NULL DEFAULT '0' COMMENT '稼働 (0:停止, 1:有効)',
   `last_login_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
@@ -2040,6 +2040,7 @@ ALTER TABLE `shop_license_documents`
 --
 ALTER TABLE `shop_managers`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `shop_managers_email_unique` (`email`),
   ADD KEY `shop_managers_shop_id_foreign` (`shop_id`);
 
 --

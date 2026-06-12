@@ -5,16 +5,16 @@
     <div class="flex justify-between items-center px-4 py-3">
         @if($back)
             <a href="{{ $backHref ?? 'javascript:history.back()' }}"
-               class="w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md bg-black/50 text-white border border-white/20 shadow-md hover:scale-105 active:scale-95 transition">
+               class="w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md bg-base/50 text-text-main border border-line-accent/40 shadow-md hover:scale-105 active:scale-95 transition">
                 <x-ui.icon name="back" class="text-xl" />
             </a>
         @else <span class="w-10 h-10"></span> @endif
 
-        <div data-header-title class="app-title font-bold tracking-widest text-[15px] text-white">{{ $title }}</div>
+        <div data-header-title class="app-title font-bold tracking-widest text-[15px] text-text-main">{{ $title }}</div>
 
         @if($share)
             <button type="button"
-                class="w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md bg-black/50 text-white border border-white/20 shadow-md hover:scale-105 active:scale-95 transition">
+                class="w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md bg-base/50 text-text-main border border-line-accent/40 shadow-md hover:scale-105 active:scale-95 transition">
                 <x-ui.icon name="share" class="text-lg" />
             </button>
         @else <span class="w-10 h-10"></span> @endif
