@@ -13,7 +13,7 @@
             <span class="block app-title text-[15px] tracking-wide text-text-main">{{ $title }}</span>
         </span>
     </span>
-    <span class="shrink-0 w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-white/50 group-hover:text-white group-hover:border-white/50 transition-colors">
+    <span class="shrink-0 w-8 h-8 rounded-full border border-line-accent/30 flex items-center justify-center text-text-sub group-hover:text-text-main group-hover:border-line-accent/60 transition-colors">
         <x-ui.icon name="forward" class="text-base" />
     </span>
 </a>

@@ -8,6 +8,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ShopManager extends Authenticatable
 {
+    /** 権限: オーナー（店舗運営の全権限） */
+    public const ROLE_OWNER = 1;
+
+    /** 権限: スタッフ（日常業務のみ。スタッフ管理・店舗削除は不可） */
+    public const ROLE_STAFF = 2;
+
+    /** 稼働ステータス: 有効 */
+    public const STATUS_ACTIVE = 1;
+
+    /** 稼働ステータス: 無効 */
+    public const STATUS_DISABLED = 0;
+
     protected $table = 'shop_managers';
 
     protected $primaryKey = 'id';

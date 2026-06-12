@@ -26,10 +26,10 @@
     /* プレビューバー（sticky） */
     .recruit-ref-preview-sticky {
         position: sticky;
-        top: 0;
+        top: var(--header-height, 60px);
         z-index: 50;
         background: #110f0d;
-        border-bottom: 1px solid #2a2015;
+        border-bottom: 1px solid var(--color-line, #2a2a2a);
         padding: 12px 16px;
     }
     .recruit-ref-preview-sticky > p {

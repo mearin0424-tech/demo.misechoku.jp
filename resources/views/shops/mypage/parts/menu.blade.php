@@ -38,5 +38,20 @@
                 <i class="fas fa-chevron-right"></i>
             </div>
         </a>
+        <a href="{{ route('shop.mypage.staff.index') }}" class="menu-btn job {{ $current === 'staff' ? 'is-current' : '' }}">
+            <div class="menu-btn-shine"></div>
+            <div class="menu-btn-content">
+                <div class="menu-btn-icon">
+                    <i class="fas fa-id-badge"></i>
+                </div>
+                <div class="menu-btn-text">
+                    <p class="menu-btn-title">スタッフ管理</p>
+                    <p class="menu-btn-meta">1店舗で複数アカウントが使えます</p>
+                </div>
+            </div>
+            <div class="menu-btn-arrow">
+                <i class="fas fa-chevron-right"></i>
+            </div>
+        </a>
     </div>
 </div>

@@ -123,7 +123,7 @@
     $isInterviewOfferLocked = in_array(($currentStatusCode ?? ''), ['hired', 'rejected'], true);
 @endphp
 
-<div id="talk-room-container" class="flex flex-col h-full bg-[#050505]">
+<div id="talk-room-container" class="flex flex-col h-full bg-base">
     <div class="talk-room-header">
         <div class="talk-room-shop-badges">
                 <span class="talk-status-label">
