@@ -2111,11 +2111,12 @@ body.page-home .rc-action-label { display: none !important; }
 
 body.page-home main,
 body.page-home #main-content {
-    /* ヘッダー／フッター下のクリア余白を解除し、画像を表示領域の端まで広げる */
+    /* SWIPE は他画面と同じ --max-content-width に揃える。ヘッダー／フッター下の padding は解除して
+       カード画像をその領域の端まで広げる（コンテンツ幅は他画面と一致、内側余白だけゼロ） */
     padding-top: 0 !important;
     padding-bottom: 0 !important;
     width: 100%;
-    max-width: 100%;
+    max-width: var(--max-content-width, 430px);
     overflow: hidden;
 }
 body.page-home .content-wrapper {

@@ -12,7 +12,7 @@
 @endphp
 <nav data-bottom-nav data-nav-style="{{ $style }}"
      {{ $attributes->merge(['class' => 'fixed bottom-0 left-0 w-full z-50 pb-safe bg-deep-purple/30 backdrop-blur-md border-t border-line-accent/40 shadow-footer']) }}>
-    <div class="flex justify-around items-center pt-3 pb-2 px-2 max-w-[430px] mx-auto">
+    <div class="flex justify-around items-center pt-3 pb-2 px-2 max-w-[var(--max-content-width)] mx-auto">
         @foreach($items as $item)
             <a href="{{ $item['href'] }}"
                class="nav-item flex flex-col items-center p-2 transition-all duration-300 {{ $active === $item['id'] ? 'is-active' : '' }}">

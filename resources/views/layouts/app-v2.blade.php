@@ -106,11 +106,14 @@
          layout-sidebar.css の `right: max(0px, calc(50vw - var(--max-content-width)/2))` を 0 に解決させる。 --}}
     <style>
         :root {
-            /* --max-content-width は 430px のまま保持（chat-input-area / sub-header-wrapper / .content-wrapper
-               などが幅計算に使うため）。サイドバーの右端だけは別途 #side-menu に right:0 を直接当てる。 */
+            /* メインコンテンツの最大幅。スマホがメイン、タブレットでやや広げる（モバイル感は維持）。
+               header / sub-header / main / content-wrapper / bottom-nav すべてがこの値を共有する。
+               サイドバー右端だけは別途 #side-menu に right:0 を直接当てる。 */
             --max-content-width: 430px;
+            --content-padding-x: 16px;
             --footer-height: 75px;
             --header-height: 60px;
+            --sub-header-height: 46px;
 
             /* layout-header.css / layout-sidebar.css が var(--gold) 等で参照する旧ゴールド系トークンを、
                mypage のアクセント紫（#A78BFA / #A855F7 / #8B5CF6）に上書きする。
@@ -124,6 +127,14 @@
             --color-border:       rgba(168, 85, 247, 0.20);
             --color-border-strong: rgba(168, 85, 247, 0.45);
             --color-card-strong:  #1a1a1a;
+        }
+        /* タブレット：少し広げる（タブレットでもモバイルアプリ的な見え方を維持） */
+        @media (min-width: 600px) {
+            :root { --max-content-width: 600px; }
+        }
+        /* 大きめタブレット〜デスクトップ：720px で頭打ち */
+        @media (min-width: 1024px) {
+            :root { --max-content-width: 720px; }
         }
 
         /* --- 認証/ログイン画面：ヘッダー・フッター・サイドメニュー・キャラガイドを非表示にして
@@ -352,16 +363,16 @@
         }
 
         /* --- サブヘッダー（TALK / LIKES 等のタブ）をヘッダーと同じく
-              全幅展開＋中身は 430px センターに揃え、ヘッダー直下に密着させる --- */
+              全幅展開＋中身は --max-content-width センターに揃え、ヘッダー直下に密着させる。
+              左右ガターは #global-header と同じ計算式（16px or 中央寄せ）でブレなく揃える。 --- */
         .sub-header-wrapper {
             top: var(--header-height, 60px) !important;
             left: 0 !important;
             transform: none !important;
             width: 100% !important;
             max-width: 100% !important;
-            /* 中身を 430px センターに押し込む（モバイルでは 0 ガター） */
-            padding-left:  max(0px, calc(50vw - 215px)) !important;
-            padding-right: max(0px, calc(50vw - 215px)) !important;
+            padding-left:  max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
+            padding-right: max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             z-index: 1600 !important;
             background: rgba(10, 10, 10, 0.98) !important;
             margin-top: 0 !important;
@@ -371,10 +382,7 @@
             background-color: rgba(10, 10, 10, 0.98) !important;
         }
 
-        /* --- TALK ROOM：内側の入れ子（負マージン＋ボルドー背景）を撤去して全画面化＋ニュートラル黒へ --- */
-        body.page-talk-room main#main-content {
-            max-width: 100% !important;
-        }
+        /* --- TALK ROOM：他画面と同じ --max-content-width に揃えつつ、内側コンテナはフル幅で背景を敷く --- */
         body.page-talk-room #talk-room-container {
             margin: 0 !important;
             width: 100% !important;
@@ -384,15 +392,15 @@
                 linear-gradient(180deg, var(--color-surface-from, #1a1a1a) 0%, var(--color-base, #050505) 100%) !important;
         }
 
-        /* --- ヘッダー本体：背景は全幅、中身は 430px センター（ボトムナビと幅が揃う） + 紫グラデ＆シャドウ --- */
+        /* --- ヘッダー本体：背景は全幅、中身は --max-content-width センター（sub-header / bottom-nav と幅が揃う） + 紫グラデ＆シャドウ --- */
         #global-header {
             width: 100% !important;
             max-width: 100% !important;
             left: 0 !important;
             transform: none !important;
-            /* 左右パディングで中身を 430px の中央エリアに押し込む（モバイルでは 15px ガター） */
-            padding-left:  max(15px, calc(50vw - 215px)) !important;
-            padding-right: max(15px, calc(50vw - 215px)) !important;
+            /* 左右パディングは sub-header と同じ計算式で完全一致させる（モバイルでは 16px ガター） */
+            padding-left:  max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
+            padding-right: max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             background:
                 radial-gradient(circle at 0% 0%, rgba(168, 85, 247, 0.20), transparent 55%),
                 radial-gradient(circle at 100% 0%, rgba(168, 85, 247, 0.30), transparent 62%),
@@ -567,9 +575,9 @@
         {{-- オコジョガイド：表示／文言は運営管理画面で設定 --}}
         @include('layouts.parts.character-guide')
 
-        {{-- メイン（サイドバーの right 位置と揃えるため max-w-[430px] で中央寄せ）
+        {{-- メイン：--max-content-width に追従して中央寄せ（モバイル430 → タブレット600 → デスクトップ720）。
              旧 layouts.app と同じ条件で content-wrapper を被せ、移行画面のレイアウトを大きく崩さないようにする。 --}}
-        <main id="main-content" class="max-w-[430px] mx-auto">
+        <main id="main-content" class="max-w-[var(--max-content-width)] mx-auto">
             @if(request()->routeIs('cast.recruit.show', 'shop.castprofileview.show', 'cast.mypage.index', 'shop.mypage.index', 'share.cast.show', 'share.recruit.show'))
                 @yield('content')
             @else
@@ -585,7 +593,7 @@
              ============================================================ --}}
         <nav data-bottom-nav data-nav-style="neon"
              class="fixed bottom-0 left-0 w-full z-50 h-[75px] pb-[env(safe-area-inset-bottom)] box-border bg-deep-purple/30 backdrop-blur-md border-t border-line-accent/40 shadow-footer">
-            <div class="flex justify-around items-center h-full px-2 max-w-[430px] mx-auto">
+            <div class="flex justify-around items-center h-full px-2 max-w-[var(--max-content-width)] mx-auto">
                 <a href="{{ route($navPrefix . '.home') }}"
                    class="nav-item flex flex-col items-center justify-center transition-all duration-300 {{ $navIsHome ? 'is-active' : '' }}">
                     <span class="nav-icon-wrap flex items-center justify-center mb-1 transition-all">
