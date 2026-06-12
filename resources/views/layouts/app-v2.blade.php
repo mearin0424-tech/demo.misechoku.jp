@@ -344,8 +344,11 @@
             bottom: calc(var(--footer-height, 75px) + 16px + env(safe-area-inset-bottom, 0px)) !important;
         }
 
-        /* --- TALK ROOM 専用：ボトムナビを隠し、メッセージ入力欄をフッター位置（最下部）に固定。
-              さらに main / body のスクロールを抑止して二重スクロールバーを解消する --- */
+        /* --- TALK ROOM 専用：ボトムナビを隠し、メッセージ入力欄をルームコンテナ最下部に固定。
+              さらに main / body のスクロールを抑止して二重スクロールバーを解消する。
+              chat-input-area は position: fixed ではなく、position: relative の #talk-room-container を
+              基準に position: absolute で貼り付けることで、祖先要素の transform / filter / backdrop-filter
+              による「fixed が absolute 化する」問題を避け、スクロール中もブレずに最下部に貼り付く。 --- */
         body.page-talk-room { overflow: hidden; }
         body.page-talk-room nav[data-bottom-nav] { display: none !important; }
         body.page-talk-room main#main-content {
@@ -357,14 +360,23 @@
         body.page-talk-room #talk-room-container {
             height: calc(100vh - var(--header-height, 60px)) !important;
             min-height: 0 !important;
+            position: relative !important;     /* chat-input-area の absolute 基準 */
         }
         body.page-talk-room #talk-room-container .chat-input-area {
-            bottom: 0 !important;              /* フッターの位置まで降ろす */
+            position: absolute !important;     /* 祖先 transform/filter で fixed が壊れる問題を回避 */
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            top: auto !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            transform: none !important;        /* talk.css の translateX(-50%) を無効化（left:0/right:0 で全幅化） */
         }
 
         /* --- サブヘッダー（TALK / LIKES 等のタブ）をヘッダーと同じく
-              全幅展開＋中身は --max-content-width センターに揃え、ヘッダー直下に密着させる。
-              左右ガターは #global-header と同じ計算式（16px or 中央寄せ）でブレなく揃える。 --- */
+              全幅展開＋中身は --max-content-width センターに揃え、ヘッダー直下に "1本のバー" として密着させる。
+              左右ガターは #global-header と同じ計算式（16px or 中央寄せ）でブレなく揃える。
+              背景・blur をヘッダーと完全に揃え、間の継ぎ目を消す。 --- */
         .sub-header-wrapper {
             top: var(--header-height, 60px) !important;
             left: 0 !important;
@@ -374,12 +386,16 @@
             padding-left:  max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             padding-right: max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             z-index: 1600 !important;
-            background: rgba(10, 10, 10, 0.98) !important;
+            /* ヘッダーと完全に同じ背景（同 rgba + 同 blur）にして継ぎ目を消す */
+            background: rgba(10, 10, 10, 0.92) !important;
+            backdrop-filter: blur(18px) !important;
+            -webkit-backdrop-filter: blur(18px) !important;
             margin-top: 0 !important;
+            border-top: 0 !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
         }
         .sub-header-tabs {
-            background-color: rgba(10, 10, 10, 0.98) !important;
+            background-color: transparent !important;
         }
 
         /* --- TALK ROOM：他画面と同じ --max-content-width に揃えつつ、内側コンテナはフル幅で背景を敷く --- */
@@ -392,7 +408,8 @@
                 linear-gradient(180deg, var(--color-surface-from, #1a1a1a) 0%, var(--color-base, #050505) 100%) !important;
         }
 
-        /* --- ヘッダー本体：背景は全幅、中身は --max-content-width センター（sub-header / bottom-nav と幅が揃う） + 紫グラデ＆シャドウ --- */
+        /* --- ヘッダー本体：背景は全幅、中身は --max-content-width センター（sub-header / bottom-nav と幅が揃う） + 紫グラデ。
+              下端の border / 強い影は撤去して、サブヘッダーと "1 本のバー" のように地続きに見せる。 --- */
         #global-header {
             width: 100% !important;
             max-width: 100% !important;
@@ -405,9 +422,11 @@
                 radial-gradient(circle at 0% 0%, rgba(168, 85, 247, 0.20), transparent 55%),
                 radial-gradient(circle at 100% 0%, rgba(168, 85, 247, 0.30), transparent 62%),
                 rgba(10, 10, 10, 0.92) !important;
-            box-shadow:
-                0 10px 30px rgba(0,0,0,0.65),
-                0 0 18px rgba(168, 85, 247, 0.25) !important;
+            /* 下端 1px のアクセント線は消す（サブヘッダーがある場合に隙間に見える） */
+            border-bottom: 0 !important;
+            /* 下方向の重い影は出さない。サブヘッダーがあるページではこの影が継ぎ目に見えるため。
+               紫の周辺グローだけ薄く残してヘッダーの存在感を維持する */
+            box-shadow: 0 0 18px rgba(168, 85, 247, 0.18) !important;
         }
         .header-icon-btn:hover,
         .header-icon-btn:focus-visible {
