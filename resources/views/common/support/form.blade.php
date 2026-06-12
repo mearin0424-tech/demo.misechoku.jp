@@ -111,7 +111,7 @@
     font-family: var(--font-sans);
     font-size: 1.4rem;
     margin-bottom: 8px;
-    color: var(--color-gold, #a78bfa);
+    color: var(--color-gold, #eba8c8);
 }
 
 .support-form-lead {
@@ -124,12 +124,12 @@
     background: rgba(20, 7, 15, 0.9);
     border-radius: 16px;
     padding: 16px 14px 18px;
-    border: 1px solid rgba(168, 85, 247, 0.4);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.4);
 }
-.support-form-faq { margin-top: 16px; background: rgba(20, 7, 15, 0.9); border-radius: 16px; padding: 14px 12px; border: 1px solid rgba(168, 85, 247, 0.4); }
+.support-form-faq { margin-top: 16px; background: rgba(20, 7, 15, 0.9); border-radius: 16px; padding: 14px 12px; border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.4); }
 .support-form-faq-title { font-size: 1rem; margin-bottom: 8px; color: #f9f5f5; }
 .support-faq-list { display: flex; flex-direction: column; gap: 10px; }
-.support-faq-item { background: rgba(8, 4, 6, 0.75); border-radius: 12px; border: 1px solid rgba(168, 85, 247, 0.24); padding: 4px 8px; }
+.support-faq-item { background: rgba(8, 4, 6, 0.75); border-radius: 12px; border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.24); padding: 4px 8px; }
 .support-faq-question { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 0.88rem; padding: 10px 6px; cursor: pointer; }
 .support-faq-question::-webkit-details-marker { display: none; }
 .support-faq-question i { font-size: 0.8rem; opacity: 0.7; transition: transform 0.2s ease; }
@@ -148,7 +148,7 @@
     font-size: 0.8rem;
     padding: 8px 10px;
     border-radius: 8px;
-    background: rgba(168, 85, 247, 0.12);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.12);
     color: #f5e9c4;
     margin-bottom: 16px;
 }
@@ -173,7 +173,7 @@
 .support-form-group textarea {
     width: 100%;
     border-radius: 10px;
-    border: 1px solid rgba(168, 85, 247, 0.4);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.4);
     background: rgba(8, 4, 6, 0.9);
     padding: 8px 10px;
     font-size: 0.85rem;

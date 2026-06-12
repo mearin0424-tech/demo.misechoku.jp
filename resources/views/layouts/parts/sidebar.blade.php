@@ -66,20 +66,20 @@
 <style>
 .sidebar-header { 
     padding: 20px; 
-    border-bottom: 1px solid rgba(168, 85, 247, 0.16); 
+    border-bottom: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.16); 
     display: flex; 
     justify-content: space-between; 
     align-items: center; 
 }
 .btn-sidebar-close { background: none; border: none; color: #F5E6E6; font-size: 1.2rem; cursor: pointer; border-radius: 999px; padding: 4px; transition: background 0.2s ease, color 0.2s ease; }
-.btn-sidebar-close:hover { background: rgba(168, 85, 247, 0.15); color: #e6dffc; }
+.btn-sidebar-close:hover { background: rgba(var(--accent-rgb, 214, 112, 162), 0.15); color: #e6dffc; }
 .sidebar-logo { height: 30px; }
 .sidebar-content { flex: 1; overflow-y: auto; padding: 20px; }
 .sidebar-section { margin-bottom: 30px; }
 
 .menu-label-header { 
     font-size: 10px; 
-    color: rgba(168, 85, 247, 0.7); 
+    color: rgba(var(--accent-rgb, 214, 112, 162), 0.7); 
     margin-bottom: 15px; 
     letter-spacing: 2px; 
     font-weight: 600;
@@ -103,13 +103,13 @@
     transition: background 0.2s ease, color 0.2s ease, transform 0.12s ease, box-shadow 0.12s ease;
 }
 .sidebar-sub-menu a:hover {
-    background: rgba(168, 85, 247, 0.12);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.12);
     color: #F5E6E6;
     transform: translateY(-1px);
     box-shadow: 0 4px 14px rgba(0,0,0,0.45);
 }
 .sidebar-sub-menu a i, .menu-summary i:first-child { 
-    color: #a78bfa; 
+    color: #eba8c8; 
     width: 20px; 
     text-align: center; 
 }
@@ -130,7 +130,7 @@
     opacity: 0.5;
 }
 
-.sidebar-footer { padding: 20px; border-top: 1px solid rgba(168, 85, 247, 0.16); }
+.sidebar-footer { padding: 20px; border-top: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.16); }
 .btn-logout {
     width: 100%; padding: 12px; background: rgba(32, 7, 10, 0.9);
     border: 1px solid rgba(248, 113, 113, 0.7); color: #fecaca;
@@ -150,9 +150,9 @@
 
 .pwa-install-btn {
     width: 100%; padding: 12px 16px; background: radial-gradient(circle at 0% 0%, rgba(196, 181, 253, 0.25), rgba(18,4,5,0.98));
-    border: 1px solid rgba(168, 85, 247, 0.7); color: #e6dffc; border-radius: 999px;
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.7); color: #e6dffc; border-radius: 999px;
     cursor: pointer; font-size: 0.95rem; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px;
     transition: 0.3s;
 }
-.pwa-install-btn:hover { background: rgba(168, 85, 247, 0.15); color: #e5c84a; }
+.pwa-install-btn:hover { background: rgba(var(--accent-rgb, 214, 112, 162), 0.15); color: #e5c84a; }
 </style>

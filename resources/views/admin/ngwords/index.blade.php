@@ -167,6 +167,6 @@
     font-size: 0.95rem;
     color: var(--admin-text);
 }
-.ngword-edit-card { border-left: 4px solid #a78bfa; }
+.ngword-edit-card { border-left: 4px solid #eba8c8; }
 </style>
 @endpush

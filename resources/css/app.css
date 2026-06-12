@@ -14,7 +14,19 @@
    1. テーマ切替用アクセント変数（:root に出るので CSS からも参照可）
    <html data-theme="amethyst"> のように切り替える。
    ------------------------------------------------------------- */
+/* デフォルトはモーブピンク。dark base (#050505) に対して accent-text の対比は約 9.5:1 と高く、
+   操作性（タップ可能要素の明確さ）と視認性（読みやすさ）の両立を狙う。 */
 :root,
+[data-theme="mauve_pink"] {
+  --accent:           #d670a2;  /* mid mauve-pink. ボタン / ドット / 主要アクセント */
+  --accent-text:      #eba8c8;  /* lighter mauve-pink. dark bg 上のテキスト・アイコン用 */
+  --accent-grad-from: #f2cadf;  /* gradient highlight (ボタン上端 / グラス上端) */
+  --accent-grad-to:   #b0507f;  /* gradient shadow (ボタン下端 / 深部) */
+  --on-accent:        #ffeaf4;  /* accent 面上のテキスト（高コントラスト） */
+  --on-accent-strong: #ffffff;  /* グラデ面上で最も強調する文字 */
+  /* rgba() で使いまわす用の RGB チャネル（旧 168, 85, 247 のヘッダー／サイドメニュー等のグロー） */
+  --accent-rgb: 214, 112, 162;
+}
 [data-theme="amethyst"] {
   --accent:           #8b5cf6;
   --accent-text:      #a78bfa;
@@ -22,21 +34,25 @@
   --accent-grad-to:   #7c3aed;
   --on-accent:        #e6dffc;
   --on-accent-strong: #f4f2fa;
+  --accent-rgb:       168, 85, 247;
 }
 [data-theme="lilac"] {
   --accent: #d8b4e2; --accent-text: #d8b4e2;
   --accent-grad-from: #f3e8f6; --accent-grad-to: #c997d6;
   --on-accent: #111111; --on-accent-strong: #111111;
+  --accent-rgb: 216, 180, 226;
 }
 [data-theme="light_blue"] {
   --accent: #7dd3fc; --accent-text: #7dd3fc;
   --accent-grad-from: #bae6fd; --accent-grad-to: #38bdf8;
   --on-accent: #111111; --on-accent-strong: #111111;
+  --accent-rgb: 125, 211, 252;
 }
 [data-theme="light_pink"] {
   --accent: #f9a8d4; --accent-text: #f9a8d4;
   --accent-grad-from: #fbcfe8; --accent-grad-to: #f472b6;
   --on-accent: #111111; --on-accent-strong: #111111;
+  --accent-rgb: 249, 168, 212;
 }
 
 /* -------------------------------------------------------------
@@ -50,6 +66,8 @@
   --color-accent-grad-to:   var(--accent-grad-to);
   --color-on-accent:        var(--on-accent);
   --color-on-accent-strong: var(--on-accent-strong);
+  /* --accent-rgb はテーマで定義（モーブピンク既定）。
+     CSS から rgba(var(--accent-rgb), .40) のように使う */
 }
 
 /* -------------------------------------------------------------
@@ -64,13 +82,13 @@
   --color-text-main: #f5f5f5;
   --color-text-sub:  #a0a0a0;
   --color-line:        #2a2a2a;
-  --color-line-accent: #a855f7;   /* /40 で使用 */
+  --color-line-accent: #d670a2;   /* モーブピンク（/40 で使用）— テーマ切替時は inline 上書き */
 
-  /* ブランド固定色 */
-  --color-deep-purple:      #9333ea;
-  --color-deep-purple-btn:  #581c87;
-  --color-deep-purple-from: #6b21a8;
-  --color-deep-purple-to:   #3b0764;
+  /* ブランド固定色（名前は deep-purple のまま保持。値はモーブピンクの深色に置換 — header/footer の bg-deep-purple/30 ガラス調等で参照される） */
+  --color-deep-purple:      #c45e92;
+  --color-deep-purple-btn:  #6b2348;
+  --color-deep-purple-from: #7e2c58;
+  --color-deep-purple-to:   #3b0b22;
   --color-gold-from:        #d4af37;
   --color-gold-to:          #b8860b;
 
@@ -109,9 +127,12 @@
   0%   { opacity: 0; transform: translateY(30px); }
   100% { opacity: 1; transform: translateY(0); }
 }
+/* NOTE: transform を含めない。`animation-fill-mode: forwards` で transform: scale(1) が残ると、
+   その要素が position: fixed の "containing block" になり、子の sub-header-wrapper の top 計算が
+   ビューポート基準でなくこの要素基準になる（→ ヘッダー直下に張り付かず下にズレる）ため。 */
 @keyframes fadeIn {
-  0%   { opacity: 0; transform: scale(.95); }
-  100% { opacity: 1; transform: scale(1); }
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 /* -------------------------------------------------------------
@@ -142,8 +163,35 @@
     background-color: var(--color-base);
     color: var(--color-text-main);
     font-family: var(--font-sans);
+    /* iOS で誤ダブルタップ拡大しないように、行間で押しやすく */
+    touch-action: manipulation;
   }
   .app-title { font-family: var(--font-display); font-weight: 700; letter-spacing: .05em; }
+
+  /* ---- UX ベースライン ----
+     操作性: tap target ≥ 44×44px（Apple HIG / WCAG 2.5.5）。視認性: focus-visible リング統一。 */
+  button, [role="button"], a, [type="submit"], [type="button"], summary, label[for] {
+    /* outline は default を消し、focus-visible で必ず表示する */
+    outline: none;
+  }
+  button:focus-visible,
+  a:focus-visible,
+  [role="button"]:focus-visible,
+  [type="submit"]:focus-visible,
+  [type="button"]:focus-visible,
+  summary:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  /* タップ可能要素の最小ヒットエリア。文字サイズには影響しない（line-height / padding は呼び出し側で）。 */
+  button, [role="button"], a.btn, [type="submit"], [type="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 /* -------------------------------------------------------------

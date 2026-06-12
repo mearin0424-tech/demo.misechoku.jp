@@ -22,7 +22,7 @@
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    background: rgba(168, 85, 247, 0.12);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.12);
     color: var(--gold);
     display: flex;
     align-items: center;
@@ -174,7 +174,7 @@
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    background: rgba(168, 85, 247, 0.12);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.12);
     color: var(--gold);
     display: flex;
     align-items: center;
@@ -292,9 +292,9 @@
 .recruit-type-regular .recruit-type-label,
 .recruit-type-trial .recruit-type-label,
 .recruit-type-help .recruit-type-label {
-    background: rgba(168, 85, 247, 0.15);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.15);
     color: var(--gold);
-    border: 1px solid rgba(168, 85, 247, 0.25);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.25);
 }
 .recruit-type-wage {
     color: var(--color-text-header);
@@ -328,10 +328,10 @@
 .recruit-btn-edit:hover { background: rgba(255, 255, 255, 0.1); }
 .recruit-btn-preview {
     background: transparent;
-    border: 1px solid rgba(168, 85, 247, 0.5);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.5);
     color: var(--gold);
 }
-.recruit-btn-preview:hover { border-color: var(--gold); background: rgba(168, 85, 247, 0.08); }
+.recruit-btn-preview:hover { border-color: var(--gold); background: rgba(var(--accent-rgb, 214, 112, 162), 0.08); }
 .recruit-btn:active { transform: scale(0.98); }
 
 /* ステータスバッジ（求人公開中 / 公開停止中） */
@@ -344,9 +344,9 @@
     display: inline-block;
 }
 .status-active {
-    background: rgba(168, 85, 247, 0.12);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.12);
     color: var(--gold);
-    border: 1px solid rgba(168, 85, 247, 0.3);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.3);
 }
 .status-inactive {
     background: rgba(255, 255, 255, 0.05);
@@ -435,8 +435,8 @@
     margin-left: 8px;
     padding: 3px 8px;
     border-radius: 999px;
-    background: rgba(168, 85, 247, 0.12);
-    border: 1px solid rgba(168, 85, 247, 0.24);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.12);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.24);
     color: var(--gold);
     font-size: 0.62rem;
     font-weight: 700;
@@ -452,7 +452,7 @@
 .recruit-preview-summary,
 .recruit-bottom-actions {
     background: linear-gradient(180deg, rgba(26, 12, 14, 0.96), rgba(18, 4, 5, 0.96));
-    border: 1px solid rgba(168, 85, 247, 0.22);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.22);
     border-radius: 22px;
     box-shadow: 0 12px 36px rgba(0,0,0,0.38);
 }
@@ -497,7 +497,7 @@
     min-height: 44px;
     padding: 10px 16px;
     border-radius: 14px;
-    border: 1px solid rgba(168, 85, 247, 0.28);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.28);
     background: rgba(255,255,255,0.03);
     color: #f6eeee;
     text-decoration: none;
@@ -506,8 +506,8 @@
 }
 
 .recruit-ghost-btn:hover {
-    background: rgba(168, 85, 247, 0.08);
-    border-color: rgba(168, 85, 247, 0.42);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.08);
+    border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.42);
 }
 
 .recruit-anchor-nav {
@@ -534,7 +534,7 @@
 }
 
 .recruit-anchor-link:hover {
-    border-color: rgba(168, 85, 247, 0.32);
+    border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.32);
     color: var(--gold);
 }
 
@@ -714,7 +714,7 @@
 }
 .benefit-tag:hover { border-color: rgba(255,255,255,0.2); color: #ccc; }
 .benefit-tag.selected {
-    background: rgba(168, 85, 247, 0.15);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.15);
     border-color: var(--gold);
     color: var(--gold);
 }
@@ -764,7 +764,7 @@
     display: inline-block;
     padding: 4px 10px;
     margin-bottom: 8px;
-    background: rgba(168, 85, 247, 0.95);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.95);
     color: #050505;
     font-size: 0.7rem;
     font-weight: 700;
@@ -796,10 +796,10 @@
     position: relative;
     z-index: 5;
     background: linear-gradient(180deg, #1A0C0E 0%, #050505 100%);
-    border: 1px solid rgba(168, 85, 247, 0.3);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.3);
     border-radius: 24px;
     padding: 24px 20px;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 20px rgba(168, 85, 247, 0.08);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 20px rgba(var(--accent-rgb, 214, 112, 162), 0.08);
 }
 .recruit-salary-catch {
     text-align: center;
@@ -821,8 +821,8 @@
     justify-content: center;
     padding: 20px 0;
     margin-bottom: 20px;
-    border-top: 1px solid rgba(168, 85, 247, 0.2);
-    border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+    border-top: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.2);
+    border-bottom: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.2);
 }
 .recruit-salary-label {
     font-size: 0.8rem;
@@ -836,7 +836,7 @@
     justify-content: center;
     gap: 4px;
     color: transparent;
-    background: linear-gradient(135deg, #E5C158, #e6dffc, #7c3aed);
+    background: linear-gradient(135deg, #E5C158, #e6dffc, #b0507f);
     -webkit-background-clip: text;
     background-clip: text;
 }
@@ -864,7 +864,7 @@
     font-size: 0.75rem;
     font-weight: 700;
     background: #050505;
-    border: 1px solid rgba(168, 85, 247, 0.4);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.4);
     color: var(--gold);
 }
 
@@ -878,7 +878,7 @@
     color: #fff;
     margin: 0 0 16px 0;
     padding-bottom: 10px;
-    border-bottom: 2px solid rgba(168, 85, 247, 0.3);
+    border-bottom: 2px solid rgba(var(--accent-rgb, 214, 112, 162), 0.3);
     font-family: var(--font-serif);
 }
 .recruit-block-title i { color: var(--gold); font-size: 1.1rem; }
@@ -904,7 +904,7 @@
     -webkit-backdrop-filter: blur(12px);
     border-radius: 20px;
     padding: 24px 20px;
-    border: 1px solid rgba(168, 85, 247, 0.2);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.2);
     box-shadow: 0 8px 24px rgba(0,0,0,0.35);
     margin-bottom: 20px;
 }
@@ -921,7 +921,7 @@
 .recruit-type-card-new.is-main {
     border: 2px solid var(--gold);
     background: #1A0C0E;
-    box-shadow: 0 8px 28px rgba(168, 85, 247, 0.2);
+    box-shadow: 0 8px 28px rgba(var(--accent-rgb, 214, 112, 162), 0.2);
 }
 .recruit-type-card-new:not(.is-main) {
     border: 1px solid rgba(61, 26, 31, 0.9);
@@ -962,7 +962,7 @@
     border-radius: 14px;
     padding: 16px;
     background: rgba(0,0,0,0.4);
-    border: 1px solid rgba(168, 85, 247, 0.2);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.2);
 }
 .recruit-type-bonus-box .bonus-label {
     font-size: 0.7rem;
@@ -983,7 +983,7 @@
 .recruit-table-wrap {
     overflow: hidden;
     border-radius: 16px;
-    border: 1px solid rgba(168, 85, 247, 0.15);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.15);
 }
 .recruit-table {
     width: 100%;
@@ -995,7 +995,7 @@
     padding: 16px 14px;
     text-align: left;
     vertical-align: top;
-    border-bottom: 1px solid rgba(168, 85, 247, 0.1);
+    border-bottom: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.1);
 }
 .recruit-table tr:last-child th,
 .recruit-table tr:last-child td { border-bottom: none; }
@@ -1021,7 +1021,7 @@
 }
 .recruit-mini-card {
     background: rgba(26, 12, 14, 0.9);
-    border: 1px solid rgba(168, 85, 247, 0.2);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.2);
     border-radius: 20px;
     padding: 20px;
 }
@@ -1068,7 +1068,7 @@
     z-index: 2;
     color: var(--gold);
     font-size: 2rem;
-    filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.8));
+    filter: drop-shadow(0 0 10px rgba(var(--accent-rgb, 214, 112, 162), 0.8));
 }
 
 /* 固定フッターCTA */
@@ -1083,7 +1083,7 @@
     background: rgba(18, 4, 5, 0.95);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-top: 1px solid rgba(168, 85, 247, 0.2);
+    border-top: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.2);
     box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
     z-index: 100;
     display: flex;
@@ -1096,7 +1096,7 @@
     height: 56px;
     flex-shrink: 0;
     border-radius: 16px;
-    border: 2px solid rgba(168, 85, 247, 0.3);
+    border: 2px solid rgba(var(--accent-rgb, 214, 112, 162), 0.3);
     background: #1A0C0E;
     color: var(--gold);
     display: flex;
@@ -1107,7 +1107,7 @@
 }
 .recruit-cta-heart:hover { border-color: var(--gold); transform: scale(1.05); }
 .recruit-cta-heart.is-active {
-    background: linear-gradient(135deg, #E5C158, #e6dffc, #7c3aed);
+    background: linear-gradient(135deg, #E5C158, #e6dffc, #b0507f);
     color: #1A0B0E;
     border-color: #F5D77B;
 }
@@ -1126,9 +1126,9 @@
     border: none;
     cursor: pointer;
     transition: filter 0.2s, transform 0.12s;
-    background: linear-gradient(135deg, #E5C158, #e6dffc, #7c3aed);
+    background: linear-gradient(135deg, #E5C158, #e6dffc, #b0507f);
     color: #1A0B0E;
-    box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
+    box-shadow: 0 4px 20px rgba(var(--accent-rgb, 214, 112, 162), 0.4);
 }
 .recruit-cta-btn:hover { filter: brightness(1.08); }
 .recruit-cta-btn:active { transform: scale(0.98); }
@@ -1136,10 +1136,10 @@
 /* Recruit Status ページ（プレビュー風に統一） */
 .recruit-status-page .recruit-status-card {
     background: linear-gradient(180deg, #1A0C0E 0%, #050505 100%);
-    border: 1px solid rgba(168, 85, 247, 0.25);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.25);
     border-radius: 24px;
     padding: 24px 20px;
-    box-shadow: 0 12px 36px rgba(0,0,0,0.5), 0 0 20px rgba(168, 85, 247, 0.06);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.5), 0 0 20px rgba(var(--accent-rgb, 214, 112, 162), 0.06);
 }
 .recruit-status-card-head {
     display: flex;
@@ -1158,8 +1158,8 @@
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    border: 1px solid rgba(168, 85, 247, 0.4);
-    background: rgba(168, 85, 247, 0.1);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.4);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.1);
     color: var(--gold);
     display: flex;
     align-items: center;
@@ -1169,7 +1169,7 @@
     transition: background 0.2s, border-color 0.2s, transform 0.15s;
 }
 .recruit-share-icon-btn:hover {
-    background: rgba(168, 85, 247, 0.2);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.2);
     border-color: var(--gold);
 }
 .recruit-share-icon-btn:active { transform: scale(0.95); }
@@ -1192,31 +1192,31 @@
     gap: 12px;
     margin-top: 20px;
     padding-top: 20px;
-    border-top: 1px solid rgba(168, 85, 247, 0.2);
+    border-top: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.2);
 }
 .recruit-btn-edit {
     background: #1A0C0E;
-    border: 1px solid rgba(168, 85, 247, 0.35);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.35);
     color: #F5E6E6;
 }
-.recruit-btn-edit:hover { background: rgba(168, 85, 247, 0.1); border-color: var(--gold); }
+.recruit-btn-edit:hover { background: rgba(var(--accent-rgb, 214, 112, 162), 0.1); border-color: var(--gold); }
 .recruit-btn-preview {
-    background: linear-gradient(135deg, #E5C158, #7c3aed);
+    background: linear-gradient(135deg, #E5C158, #b0507f);
     color: #1A0B0E;
     border: none;
-    box-shadow: 0 4px 16px rgba(168, 85, 247, 0.35);
+    box-shadow: 0 4px 16px rgba(var(--accent-rgb, 214, 112, 162), 0.35);
 }
 .recruit-btn-preview:hover { filter: brightness(1.08); }
-.toggle-btn.active { background: linear-gradient(135deg, #E5C158, #7c3aed); box-shadow: 0 0 12px rgba(168, 85, 247, 0.4); }
-.recruit-type-regular { border: 2px solid rgba(168, 85, 247, 0.5); background: #1A0C0E; box-shadow: 0 6px 20px rgba(168, 85, 247, 0.15); }
+.toggle-btn.active { background: linear-gradient(135deg, #E5C158, #b0507f); box-shadow: 0 0 12px rgba(var(--accent-rgb, 214, 112, 162), 0.4); }
+.recruit-type-regular { border: 2px solid rgba(var(--accent-rgb, 214, 112, 162), 0.5); background: #1A0C0E; box-shadow: 0 6px 20px rgba(var(--accent-rgb, 214, 112, 162), 0.15); }
 .recruit-type-regular .recruit-type-label { background: var(--gold); color: #050505; }
 .recruit-type-trial,
 .recruit-type-help { border: 1px solid rgba(61, 26, 31, 0.9); background: #050505; }
 .recruit-type-trial .recruit-type-label,
-.recruit-type-help .recruit-type-label { background: rgba(61, 26, 31, 0.95); color: var(--gold); border: 1px solid rgba(168, 85, 247, 0.3); }
+.recruit-type-help .recruit-type-label { background: rgba(61, 26, 31, 0.95); color: var(--gold); border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.3); }
 .recruit-store-message {
     background: rgba(0,0,0,0.35);
-    border: 1px solid rgba(168, 85, 247, 0.2);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.2);
     border-radius: 16px;
     padding: 18px;
 }
@@ -1239,13 +1239,13 @@
     color: var(--color-text-header);
     margin: 0 0 8px 0;
     padding-bottom: 8px;
-    border-bottom: 2px solid rgba(168, 85, 247, 0.25);
+    border-bottom: 2px solid rgba(var(--accent-rgb, 214, 112, 162), 0.25);
 }
 .recruit-status-section-icon {
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    background: rgba(168, 85, 247, 0.12);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.12);
     color: var(--gold);
     display: flex;
     align-items: center;
@@ -1276,7 +1276,7 @@
 .recruit-status-table td {
     padding: 12px 14px;
     text-align: left;
-    border-bottom: 1px solid rgba(168, 85, 247, 0.1);
+    border-bottom: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.1);
 }
 .recruit-status-table tr:last-child th,
 .recruit-status-table tr:last-child td { border-bottom: none; }
@@ -1310,8 +1310,8 @@
     font-weight: 700;
 }
 .recruit-status-badge-1 { background: rgba(96, 165, 250, 0.2); color: #93c5fd; border: 1px solid rgba(96, 165, 250, 0.4); }
-.recruit-status-badge-2 { background: rgba(167, 139, 250, 0.2); color: #c4b5fd; border: 1px solid rgba(167, 139, 250, 0.4); }
-.recruit-status-badge-3 { background: rgba(168, 85, 247, 0.2); color: var(--gold); border: 1px solid rgba(168, 85, 247, 0.4); }
+.recruit-status-badge-2 { background: rgba(167, 139, 250, 0.2); color: #f2cadf; border: 1px solid rgba(167, 139, 250, 0.4); }
+.recruit-status-badge-3 { background: rgba(var(--accent-rgb, 214, 112, 162), 0.2); color: var(--gold); border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.4); }
 .recruit-status-badge-4 { background: rgba(34, 197, 94, 0.2); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.4); }
 .recruit-status-badge-5 { background: rgba(255, 255, 255, 0.06); color: var(--color-text); border: 1px solid var(--color-border); }
 .recruit-status-link {
@@ -1393,8 +1393,8 @@
     gap: 8px;
     padding: 12px 16px;
     border-radius: 12px;
-    border: 1px solid rgba(168, 85, 247, 0.5);
-    background: rgba(168, 85, 247, 0.1);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.5);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.1);
     color: var(--gold);
     font-size: 0.8rem;
     font-weight: 600;
@@ -1402,7 +1402,7 @@
     transition: background 0.2s, border-color 0.2s;
 }
 .recruit-share-copy-btn:hover {
-    background: rgba(168, 85, 247, 0.18);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.18);
     border-color: var(--gold);
 }
 .recruit-share-copy-btn.is-copied {
@@ -1626,7 +1626,7 @@
     height: 4px;
 }
 .recruit-shop-gallery-scroll::-webkit-scrollbar-thumb {
-    background: rgba(168, 85, 247, 0.45);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.45);
     border-radius: 999px;
 }
 .recruit-shop-gallery-item {
@@ -1634,7 +1634,7 @@
     max-width: 360px;
     border-radius: 18px;
     overflow: hidden;
-    border: 1px solid rgba(168, 85, 247, 0.3);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.3);
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     scroll-snap-align: start;
     background: #050505;
@@ -1658,7 +1658,7 @@
     background: rgba(26, 12, 14, 0.9);
     border-radius: 16px;
     padding: 14px 14px 16px;
-    border: 1px solid rgba(168, 85, 247, 0.25);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.25);
 }
 .recruit-shop-info-item .label {
     font-size: 0.75rem;

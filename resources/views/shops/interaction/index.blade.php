@@ -116,7 +116,7 @@
     margin: 28px 0 32px;
     padding: 16px 14px 18px;
     border-radius: 14px;
-    background: linear-gradient(180deg, rgba(168, 85, 247, 0.06), rgba(255,255,255,0.02));
+    background: linear-gradient(180deg, rgba(var(--accent-rgb, 214, 112, 162), 0.06), rgba(255,255,255,0.02));
     border: 1px solid var(--color-border);
 }
 .recommend-section__head {
@@ -148,7 +148,7 @@
     align-items: center;
     justify-content: center;
 }
-.recommend-section__info-btn:hover { background: rgba(168, 85, 247, 0.10); }
+.recommend-section__info-btn:hover { background: rgba(var(--accent-rgb, 214, 112, 162), 0.10); }
 .recommend-section__empty {
     margin: 0;
     padding: 18px 4px;
@@ -169,7 +169,7 @@
     color: inherit;
     transition: border-color 0.15s ease, background 0.15s ease;
 }
-.recommend-item__link:hover { border-color: var(--color-border-strong); background: rgba(168, 85, 247, 0.06); }
+.recommend-item__link:hover { border-color: var(--color-border-strong); background: rgba(var(--accent-rgb, 214, 112, 162), 0.06); }
 .recommend-item__thumb {
     width: 48px; height: 48px; flex: 0 0 auto;
     border-radius: 8px; object-fit: cover;

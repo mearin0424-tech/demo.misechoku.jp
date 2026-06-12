@@ -17,12 +17,12 @@
         --lp-text-sub:      #a0a0a0;
         --lp-text-mute:     #6b6b6b;
 
-        --lp-accent:        #a78bfa;   /* amethyst light */
-        --lp-accent-deep:   #7c3aed;   /* amethyst deep */
-        --lp-accent-glow:   rgba(168, 85, 247, 0.55);
-        --lp-accent-soft:   rgba(168, 85, 247, 0.12);
+        --lp-accent:        #eba8c8;   /* amethyst light */
+        --lp-accent-deep:   #b0507f;   /* amethyst deep */
+        --lp-accent-glow:   rgba(var(--accent-rgb, 214, 112, 162), 0.55);
+        --lp-accent-soft:   rgba(var(--accent-rgb, 214, 112, 162), 0.12);
         --lp-line:          #2a2a2a;
-        --lp-line-accent:   rgba(168, 85, 247, 0.40);
+        --lp-line-accent:   rgba(var(--accent-rgb, 214, 112, 162), 0.40);
 
         --lp-gold-from:     #f6d36a;
         --lp-gold:          #d4af37;
@@ -46,7 +46,7 @@
     body.lp-welcome {
         background:
             radial-gradient(60% 40% at 80% 0%, rgba(124, 58, 237, .25), transparent 70%),
-            radial-gradient(50% 30% at 0% 30%, rgba(168, 85, 247, .15), transparent 70%),
+            radial-gradient(50% 30% at 0% 30%, rgba(var(--accent-rgb, 214, 112, 162), .15), transparent 70%),
             radial-gradient(40% 30% at 100% 60%, rgba(212, 175, 55, .08), transparent 70%),
             var(--lp-bg);
         background-attachment: fixed;
@@ -112,7 +112,7 @@
         border: 1px solid var(--lp-line-accent);
         border-radius: 6px; pointer-events: none;
         background:
-            linear-gradient(135deg, rgba(168,85,247,.08), transparent 40%),
+            linear-gradient(135deg, rgba(var(--accent-rgb, 214, 112, 162),.08), transparent 40%),
             linear-gradient(315deg, rgba(212,175,55,.06), transparent 40%);
     }
     .lp-hero::after {
@@ -122,7 +122,7 @@
         border-radius: 50%;
         box-shadow:
             0 0 12px var(--lp-gold-glow),
-            180px 60px 0 -1px rgba(168,85,247,.8), 180px 60px 8px rgba(168,85,247,.5),
+            180px 60px 0 -1px rgba(var(--accent-rgb, 214, 112, 162),.8), 180px 60px 8px rgba(var(--accent-rgb, 214, 112, 162),.5),
             -30px 220px 0 -2px rgba(255,255,255,.6), -30px 220px 8px rgba(255,255,255,.3),
             220px 280px 0 -1px var(--lp-gold), 220px 280px 8px var(--lp-gold-glow);
         animation: lp-twinkle 3.6s ease-in-out infinite;
@@ -140,7 +140,7 @@
         font-weight: 700; color: var(--lp-accent);
         padding: 6px 16px; border-radius: 999px;
         border: 1px solid var(--lp-line-accent);
-        background: rgba(168, 85, 247, .08);
+        background: rgba(var(--accent-rgb, 214, 112, 162), .08);
         backdrop-filter: blur(4px);
         margin-bottom: 22px;
         text-transform: uppercase;
@@ -429,7 +429,7 @@
     @media (min-width: 768px) { .lp-voices { grid-template-columns: repeat(2, 1fr); } }
     .lp-voice {
         position: relative;
-        background: linear-gradient(135deg, rgba(168,85,247,.08), rgba(5,5,5,.7));
+        background: linear-gradient(135deg, rgba(var(--accent-rgb, 214, 112, 162),.08), rgba(5,5,5,.7));
         border: 1px solid var(--lp-line-accent);
         border-radius: 18px;
         padding: 22px 20px 20px;

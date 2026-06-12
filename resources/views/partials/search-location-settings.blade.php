@@ -237,23 +237,23 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
     margin: 16px 0 16px;
     padding: 14px 16px;
     border-radius: 14px;
-    border: 1px solid rgba(168, 85, 247, 0.22);
-    background: linear-gradient(180deg, rgba(168, 85, 247, 0.06), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.22);
+    background: linear-gradient(180deg, rgba(var(--accent-rgb, 214, 112, 162), 0.06), rgba(255, 255, 255, 0.02));
     color: #e6dffc;
     cursor: pointer;
     text-align: left;
     transition: border-color 0.15s ease, background 0.15s ease;
 }
 .search-location-trigger:hover {
-    border-color: rgba(168, 85, 247, 0.45);
-    background: rgba(168, 85, 247, 0.10);
+    border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.45);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.10);
 }
 .search-location-trigger__icon {
     width: 36px; height: 36px; flex-shrink: 0;
     border-radius: 50%;
     display: inline-flex; align-items: center; justify-content: center;
-    background: rgba(168, 85, 247, 0.15);
-    color: #a78bfa;
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.15);
+    color: #eba8c8;
 }
 .search-location-trigger__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .search-location-trigger__title { font-size: 0.92rem; font-weight: 800; color: #e6dffc; }
@@ -261,7 +261,7 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
     font-size: 0.74rem; color: rgba(196, 181, 253, 0.62);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.search-location-trigger__chevron { color: rgba(168, 85, 247, 0.7); }
+.search-location-trigger__chevron { color: rgba(var(--accent-rgb, 214, 112, 162), 0.7); }
 
 /* ===== ダイアログ ===== */
 .search-location-dialog-overlay {
@@ -377,7 +377,7 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
 .search-location-card__badge {
     font-size: 0.62rem; letter-spacing: 0.14em; font-weight: 800;
     padding: 2px 8px; border-radius: 4px;
-    background: linear-gradient(135deg, #E8C372, #a78bfa);
+    background: linear-gradient(135deg, #E8C372, #eba8c8);
     color: #1a1015;
 }
 .search-location-card__sub {
@@ -411,7 +411,7 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
     padding: 0 14px;
     border: 0;
     border-radius: 10px;
-    background: linear-gradient(135deg, #E8C372, #a78bfa);
+    background: linear-gradient(135deg, #E8C372, #eba8c8);
     color: #1a1015;
     font-size: 0.82rem; font-weight: 800;
     cursor: pointer;
@@ -484,7 +484,7 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
     max-height: 220px;
     overflow-y: auto;
     background: var(--color-card-strong, #1a1a1a);
-    border: 1px solid var(--color-border-strong, rgba(168, 85, 247, 0.4));
+    border: 1px solid var(--color-border-strong, rgba(var(--accent-rgb, 214, 112, 162), 0.4));
     border-radius: 10px;
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
 }
@@ -502,10 +502,10 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
 }
 .search-location-suggest-item:hover,
 .search-location-suggest-item.is-active {
-    background: rgba(168, 85, 247, 0.12);
-    color: var(--color-text-header, #c4b5fd);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.12);
+    color: var(--color-text-header, #f2cadf);
 }
-.search-location-suggest-item i { color: var(--gold, #a78bfa); font-size: 0.78rem; }
+.search-location-suggest-item i { color: var(--gold, #eba8c8); font-size: 0.78rem; }
 .search-location-suggest-empty {
     padding: 10px;
     font-size: 0.78rem;
@@ -548,7 +548,7 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
     font-size: 0.78rem;
     color: rgba(232, 195, 114, 0.85);
 }
-.search-location-current strong { color: #c4b5fd; font-weight: 800; }
+.search-location-current strong { color: #f2cadf; font-weight: 800; }
 
 /* ===== 半径スライダー ===== */
 .search-location-radius {
@@ -619,7 +619,7 @@ MyPage 上はトリガーボタンのみを表示し、押下でダイアログ�
     padding: 12px 18px;
     border-radius: 12px;
     border: 0;
-    background: linear-gradient(135deg, #E8C372, #a78bfa);
+    background: linear-gradient(135deg, #E8C372, #eba8c8);
     color: #1a1015;
     font-size: 0.98rem; font-weight: 800;
     cursor: pointer;

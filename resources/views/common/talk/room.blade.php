@@ -24,9 +24,9 @@
         margin: 12px 0;
     }
     .result-template-button {
-        border: 1px solid rgba(168, 85, 247, 0.40);
-        background: rgba(168, 85, 247, 0.08);
-        color: #c4b5fd;
+        border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.40);
+        background: rgba(var(--accent-rgb, 214, 112, 162), 0.08);
+        color: #f2cadf;
         border-radius: 999px;
         padding: 8px 14px;
         font-size: 0.82rem;
@@ -36,8 +36,8 @@
         transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
     }
     .result-template-button:hover {
-        background: rgba(168, 85, 247, 0.16);
-        border-color: rgba(168, 85, 247, 0.65);
+        background: rgba(var(--accent-rgb, 214, 112, 162), 0.16);
+        border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.65);
         transform: translateY(-1px);
     }
     .result-template-button:active {
@@ -47,7 +47,7 @@
         width: 100%;
         min-height: 140px;
         border-radius: 14px;
-        border: 1px solid rgba(168, 85, 247, 0.30);
+        border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.30);
         background: linear-gradient(to bottom right, #1a1a1a, #050505);
         color: #f5f5f5;
         padding: 14px;
@@ -57,8 +57,8 @@
     }
     .result-message-textarea:focus {
         outline: none;
-        border-color: rgba(168, 85, 247, 0.55);
-        box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 0 3px rgba(168, 85, 247, 0.12);
+        border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.55);
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 0 3px rgba(var(--accent-rgb, 214, 112, 162), 0.12);
     }
     .hired-wage-field-wrap {
         display: none;
@@ -70,7 +70,7 @@
     .hired-wage-field-wrap label {
         display: block;
         font-size: 0.80rem;
-        color: #c4b5fd;
+        color: #f2cadf;
         font-weight: 600;
         letter-spacing: 0.04em;
         margin-bottom: 6px;
@@ -78,7 +78,7 @@
     .hired-wage-field-wrap input {
         width: 100%;
         border-radius: 12px;
-        border: 1px solid rgba(168, 85, 247, 0.30);
+        border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.30);
         background: linear-gradient(to bottom right, #1a1a1a, #050505);
         color: #f5f5f5;
         padding: 10px 14px;
@@ -87,8 +87,8 @@
     }
     .hired-wage-field-wrap input:focus {
         outline: none;
-        border-color: rgba(168, 85, 247, 0.55);
-        box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 0 3px rgba(168, 85, 247, 0.12);
+        border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.55);
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 0 3px rgba(var(--accent-rgb, 214, 112, 162), 0.12);
     }
 </style>
 @endpush
@@ -580,7 +580,7 @@
         <div id="hired-hourly-wage-wrap" class="hired-wage-field-wrap" aria-hidden="true">
             <label for="hired-hourly-wage-input">採用時給（円・確定）</label>
             <input type="text" id="hired-hourly-wage-input" inputmode="numeric" placeholder="例: 5000" autocomplete="off">
-            <p style="margin-top:6px; font-size:12px; color:#c4b5fd;">採用確定時は入力必須です。</p>
+            <p style="margin-top:6px; font-size:12px; color:#f2cadf;">採用確定時は入力必須です。</p>
         </div>
         <div id="result-employment-kind-wrap" class="hired-wage-field-wrap is-visible" aria-hidden="false">
             <label for="result-employment-kind">採用区分</label>

@@ -18,7 +18,7 @@
     --admin-card: #ffffff;
     --admin-card-hover: #fbf3e5;        /* 行 hover：薄いシャンパン */
     --admin-sidebar: #ffffff;
-    --admin-sidebar-shine: linear-gradient(180deg, rgba(168, 85, 247, 0.08), transparent 60%);
+    --admin-sidebar-shine: linear-gradient(180deg, rgba(var(--accent-rgb, 214, 112, 162), 0.08), transparent 60%);
     --admin-header: #ffffff;
 
     /* 罫線（ベージュ系） */
@@ -48,12 +48,12 @@
     --admin-primary-border: #ebcdd7;
 
     /* シャンパンゴールド（特別なアクセント・プレミアム表現用） */
-    --admin-gold-bright: #a78bfa;
-    --admin-gold-deep: #7c3aed;
+    --admin-gold-bright: #eba8c8;
+    --admin-gold-deep: #b0507f;
     --admin-gold-darker: #92590a;      /* 白背景でも読めるゴールド系テキスト */
     --admin-gold-soft: #fdf6e3;
     --admin-gold-border: #f0d480;
-    --admin-gold-grad: linear-gradient(145deg, #a78bfa, #7c3aed);
+    --admin-gold-grad: linear-gradient(145deg, #eba8c8, #b0507f);
 
     /* レガシー名（dashboard等のview側がvarで参照しているため互換維持） */
     --admin-blue: #4A122A;
@@ -61,9 +61,9 @@
     --admin-green: #16a34a;
     --admin-yellow: #d97706;
     --admin-red: #dc2626;
-    --admin-gold: #7c3aed;
+    --admin-gold: #b0507f;
     --admin-gold-strong: #92590a;
-    --admin-gold-mid: #7c3aed;
+    --admin-gold-mid: #b0507f;
 
     /* ステータス（success/warning/danger は意味色のため維持。info はブランドのボルドー寄りに） */
     --status-success-bg: #ecfdf5;
@@ -71,7 +71,7 @@
     --status-success-bd: #a7f3d0;
     --status-warning-bg: #fffbeb;
     --status-warning-fg: #b45309;
-    --status-warning-bd: #c4b5fd;
+    --status-warning-bd: #f2cadf;
     --status-danger-bg: #fef2f2;
     --status-danger-fg: #b91c1c;
     --status-danger-bd: #fecaca;
@@ -3263,8 +3263,8 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(74, 18, 42, 0.05));
-    border: 1px solid rgba(168, 85, 247, 0.25);
+    background: linear-gradient(135deg, rgba(var(--accent-rgb, 214, 112, 162), 0.08), rgba(74, 18, 42, 0.05));
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.25);
     border-radius: 14px;
     padding: 14px 16px;
 }
@@ -3337,7 +3337,7 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
     display: flex;
     align-items: flex-start;
     gap: 18px;
-    background: linear-gradient(135deg, rgba(74, 18, 42, 0.04), rgba(168, 85, 247, 0.06));
+    background: linear-gradient(135deg, rgba(74, 18, 42, 0.04), rgba(var(--accent-rgb, 214, 112, 162), 0.06));
     border: 1px dashed rgba(74, 18, 42, 0.35);
 }
 .admin-private-gate__icon {
@@ -3390,7 +3390,7 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
     font-size: 0.95rem;
 }
 .admin-private-gate__field input:focus {
-    outline: 2px solid rgba(168, 85, 247, 0.45);
+    outline: 2px solid rgba(var(--accent-rgb, 214, 112, 162), 0.45);
     outline-offset: 1px;
 }
 .admin-private-gate__error {
@@ -3417,8 +3417,8 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
     gap: 6px;
     padding: 6px 12px;
     border-radius: 999px;
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.16), rgba(168, 85, 247, 0.08));
-    border: 1px solid rgba(168, 85, 247, 0.55);
+    background: linear-gradient(135deg, rgba(var(--accent-rgb, 214, 112, 162), 0.16), rgba(var(--accent-rgb, 214, 112, 162), 0.08));
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.55);
     color: #6e4f15;
     font-weight: 700;
     font-size: 0.8rem;
@@ -3441,8 +3441,8 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
 
 /* 非公開情報パネル（解除後の本体） */
 .admin-private-section {
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.05), rgba(255, 255, 255, 0.9));
-    border: 1px solid rgba(168, 85, 247, 0.4);
+    background: linear-gradient(135deg, rgba(var(--accent-rgb, 214, 112, 162), 0.05), rgba(255, 255, 255, 0.9));
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.4);
     box-shadow: 0 6px 24px rgba(74, 18, 42, 0.06);
 }
 
@@ -3476,13 +3476,13 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
     gap: 12px;
     padding: 18px 20px;
     border-radius: 16px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(168, 85, 247, 0.08));
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(var(--accent-rgb, 214, 112, 162), 0.08));
     border: 1px solid rgba(74, 18, 42, 0.10);
     box-shadow: var(--admin-shadow);
 }
 .admin-role-card.is-locked {
-    background: linear-gradient(135deg, rgba(74, 18, 42, 0.04), rgba(168, 85, 247, 0.10));
-    border: 1px solid rgba(168, 85, 247, 0.45);
+    background: linear-gradient(135deg, rgba(74, 18, 42, 0.04), rgba(var(--accent-rgb, 214, 112, 162), 0.10));
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.45);
 }
 .admin-role-card__head {
     display: flex;
@@ -3503,7 +3503,7 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
     letter-spacing: 0.06em;
 }
 .admin-role-card.is-locked .admin-role-card__badge {
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(168, 85, 247, 0.06));
+    background: linear-gradient(135deg, rgba(var(--accent-rgb, 214, 112, 162), 0.2), rgba(var(--accent-rgb, 214, 112, 162), 0.06));
     color: #6e4f15;
 }
 .admin-role-card__title {
@@ -3600,8 +3600,8 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
     transition: border-color 0.15s ease, background 0.15s ease;
 }
 .role-permission-item:hover {
-    border-color: rgba(168, 85, 247, 0.55);
-    background: rgba(168, 85, 247, 0.05);
+    border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.55);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.05);
 }
 .role-permission-item.is-disabled {
     cursor: not-allowed;
@@ -3695,7 +3695,7 @@ a.btn-action.btn-action-danger:hover {
 }
 .spec-tab:hover { color: var(--admin-text); background: rgba(255, 255, 255, 0.5); }
 .spec-tab.is-active {
-    background: linear-gradient(135deg, #ffffff, rgba(168, 85, 247, 0.12));
+    background: linear-gradient(135deg, #ffffff, rgba(var(--accent-rgb, 214, 112, 162), 0.12));
     color: #4a122a;
     box-shadow: var(--admin-shadow);
 }
@@ -3725,8 +3725,8 @@ a.btn-action.btn-action-danger:hover {
     box-shadow: 0 4px 16px rgba(74, 18, 42, 0.04);
 }
 .spec-card--task {
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.05), rgba(255, 255, 255, 0.95));
-    border: 1px solid rgba(168, 85, 247, 0.35);
+    background: linear-gradient(135deg, rgba(var(--accent-rgb, 214, 112, 162), 0.05), rgba(255, 255, 255, 0.95));
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.35);
 }
 .spec-card__head {
     display: flex;
@@ -3771,7 +3771,7 @@ a.btn-action.btn-action-danger:hover {
     padding: 12px 14px;
     background: rgba(74, 18, 42, 0.04);
     border-radius: 10px;
-    border-left: 3px solid rgba(168, 85, 247, 0.55);
+    border-left: 3px solid rgba(var(--accent-rgb, 214, 112, 162), 0.55);
 }
 .spec-readonly__row {
     display: grid;
@@ -3818,7 +3818,7 @@ a.btn-action.btn-action-danger:hover {
 .spec-field textarea { resize: vertical; line-height: 1.6; }
 .spec-field input:focus,
 .spec-field textarea:focus {
-    outline: 2px solid rgba(168, 85, 247, 0.45);
+    outline: 2px solid rgba(var(--accent-rgb, 214, 112, 162), 0.45);
     outline-offset: 1px;
 }
 .spec-field__inline {
@@ -3870,7 +3870,7 @@ a.btn-action.btn-action-danger:hover {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 .spec-toggle input:checked ~ .spec-toggle__track {
-    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    background: linear-gradient(135deg, #eba8c8, #b0507f);
 }
 .spec-toggle input:checked ~ .spec-toggle__track .spec-toggle__thumb {
     transform: translateX(20px);
@@ -3906,7 +3906,7 @@ a.btn-action.btn-action-danger:hover {
     text-align: right;
     font-size: 0.92rem;
 }
-.sort-order-input:focus { outline: 2px solid rgba(168, 85, 247, 0.45); outline-offset: 1px; }
+.sort-order-input:focus { outline: 2px solid rgba(var(--accent-rgb, 214, 112, 162), 0.45); outline-offset: 1px; }
 .sort-order-save {
     width: 28px;
     height: 28px;
@@ -3915,11 +3915,11 @@ a.btn-action.btn-action-danger:hover {
     justify-content: center;
     border: 0;
     border-radius: 6px;
-    background: rgba(168, 85, 247, 0.18);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.18);
     color: #4a122a;
     cursor: pointer;
 }
-.sort-order-save:hover { background: rgba(168, 85, 247, 0.35); }
+.sort-order-save:hover { background: rgba(var(--accent-rgb, 214, 112, 162), 0.35); }
 
 .u-w-60 { width: 60px; }
 .u-w-100 { width: 100px; }
@@ -3934,10 +3934,10 @@ a.btn-action.btn-action-danger:hover {
     transition: background-color 0.15s ease, box-shadow 0.15s ease;
 }
 .admin-table-clickable .admin-row-clickable:hover {
-    background-color: rgba(168, 85, 247, 0.08);
+    background-color: rgba(var(--accent-rgb, 214, 112, 162), 0.08);
 }
 .admin-table-clickable .admin-row-clickable:focus {
-    outline: 2px solid rgba(168, 85, 247, 0.5);
+    outline: 2px solid rgba(var(--accent-rgb, 214, 112, 162), 0.5);
     outline-offset: -2px;
 }
 .admin-row-clickable__link {
@@ -3971,8 +3971,8 @@ a.btn-action.btn-action-danger:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.18), rgba(168, 85, 247, 0.06));
-    color: #7c3aed;
+    background: linear-gradient(135deg, rgba(var(--accent-rgb, 214, 112, 162), 0.18), rgba(var(--accent-rgb, 214, 112, 162), 0.06));
+    color: #b0507f;
     font-size: 1.1rem;
 }
 .admin-public-link-card__body {
@@ -4014,8 +4014,8 @@ a.btn-action.btn-action-danger:hover {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    border: 1px solid rgba(168, 85, 247, 0.55);
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.18), rgba(168, 85, 247, 0.06));
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.55);
+    background: linear-gradient(135deg, rgba(var(--accent-rgb, 214, 112, 162), 0.18), rgba(var(--accent-rgb, 214, 112, 162), 0.06));
     color: #6e4f15;
     cursor: pointer;
     transition: background 0.15s ease, transform 0.1s ease;
@@ -4023,7 +4023,7 @@ a.btn-action.btn-action-danger:hover {
     font-size: 0.92rem;
 }
 .admin-info-btn:hover {
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.32), rgba(168, 85, 247, 0.12));
+    background: linear-gradient(135deg, rgba(var(--accent-rgb, 214, 112, 162), 0.32), rgba(var(--accent-rgb, 214, 112, 162), 0.12));
     transform: scale(1.05);
 }
 .admin-info-btn[aria-expanded="true"] {
@@ -4076,13 +4076,13 @@ a.btn-action.btn-action-danger:hover {
     gap: 8px;
     padding: 12px 14px;
     border-bottom: 1px solid rgba(74, 18, 42, 0.08);
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.10), rgba(255, 255, 255, 0.6));
+    background: linear-gradient(135deg, rgba(var(--accent-rgb, 214, 112, 162), 0.10), rgba(255, 255, 255, 0.6));
     color: #4a122a;
     font-size: 0.86rem;
     font-weight: 800;
     letter-spacing: 0.04em;
 }
-.admin-info-popover__head i { color: #7c3aed; }
+.admin-info-popover__head i { color: #b0507f; }
 .admin-info-popover__head strong { flex: 1; font-weight: 800; }
 .admin-info-popover__close {
     width: 26px;
@@ -4118,7 +4118,7 @@ a.btn-action.btn-action-danger:hover {
 .admin-info-popover__body a {
     color: #4a122a;
     text-decoration: underline;
-    text-decoration-color: rgba(168, 85, 247, 0.7);
+    text-decoration-color: rgba(var(--accent-rgb, 214, 112, 162), 0.7);
     text-underline-offset: 2px;
 }
 .u-text-muted { color: var(--admin-muted); }
@@ -4136,8 +4136,8 @@ a.btn-action.btn-action-danger:hover {
     padding: 16px 20px;
     margin: 0 0 18px;
     border-radius: 16px;
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(74, 18, 42, 0.04));
-    border: 1px solid rgba(168, 85, 247, 0.4);
+    background: linear-gradient(135deg, rgba(var(--accent-rgb, 214, 112, 162), 0.08), rgba(74, 18, 42, 0.04));
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.4);
     box-shadow: 0 4px 16px rgba(74, 18, 42, 0.04);
 }
 .screen-role-banner__col {
@@ -4261,19 +4261,19 @@ a.btn-action.btn-action-danger:hover {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba(168, 85, 247, 0.18);
-    color: #7c3aed;
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.18);
+    color: #b0507f;
 }
 .sales-kpi-card.is-primary .sales-kpi-card__icon {
     background: rgba(196, 181, 253, 0.2);
-    color: #c4b5fd;
+    color: #f2cadf;
 }
 .sales-kpi-card__title {
     font-size: 0.84rem;
     font-weight: 800;
     color: var(--admin-text);
 }
-.sales-kpi-card.is-primary .sales-kpi-card__title { color: #c4b5fd; }
+.sales-kpi-card.is-primary .sales-kpi-card__title { color: #f2cadf; }
 .sales-kpi-card__sub {
     margin: 0;
     font-size: 0.7rem;
@@ -4289,7 +4289,7 @@ a.btn-action.btn-action-danger:hover {
     font-variant-numeric: tabular-nums;
     line-height: 1.2;
 }
-.sales-kpi-card.is-primary .sales-kpi-card__value { color: #c4b5fd; }
+.sales-kpi-card.is-primary .sales-kpi-card__value { color: #f2cadf; }
 .sales-kpi-card__unit {
     font-size: 0.78rem;
     margin-left: 4px;
@@ -4305,7 +4305,7 @@ a.btn-action.btn-action-danger:hover {
 }
 .sales-kpi-card__trend.is-up { color: #047857; }
 .sales-kpi-card__trend.is-down { color: #b91c1c; }
-.sales-kpi-card.is-primary .sales-kpi-card__trend { color: #c4b5fd; }
+.sales-kpi-card.is-primary .sales-kpi-card__trend { color: #f2cadf; }
 .sales-kpi-card.is-primary .sales-kpi-card__trend.is-down { color: #fca5a5; }
 .sales-kpi-card__trend span {
     margin-left: 4px;

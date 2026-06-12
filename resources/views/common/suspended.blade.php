@@ -52,7 +52,7 @@
     padding: 32px 24px;
     border-radius: 22px;
     background: linear-gradient(180deg, rgba(74, 18, 42, 0.94), rgba(35, 8, 21, 0.95));
-    border: 1px solid rgba(168, 85, 247, 0.45);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.45);
     box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
     color: #e6dffc;
     text-align: center;
@@ -73,7 +73,7 @@
 .suspended-card__title {
     font-size: 1.35rem;
     font-weight: 800;
-    color: #c4b5fd;
+    color: #f2cadf;
     margin: 0 0 12px;
     font-family: var(--font-sans);
     letter-spacing: 0.06em;
@@ -107,10 +107,10 @@
     transition: transform 0.1s ease, background 0.15s ease;
 }
 .btn-suspended-primary {
-    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    background: linear-gradient(135deg, #eba8c8, #b0507f);
     color: #2a1406;
     border: 0;
-    box-shadow: 0 4px 16px rgba(168, 85, 247, 0.3);
+    box-shadow: 0 4px 16px rgba(var(--accent-rgb, 214, 112, 162), 0.3);
 }
 .btn-suspended-primary:hover { transform: translateY(-1px); color: #2a1406; }
 .btn-suspended-secondary {
@@ -128,7 +128,7 @@
     background: rgba(255, 255, 255, 0.06);
     padding: 1px 8px;
     border-radius: 6px;
-    color: #c4b5fd;
+    color: #f2cadf;
 }
 </style>
 @endsection

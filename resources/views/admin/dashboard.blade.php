@@ -143,7 +143,7 @@
 
         $registrationChart = $buildLineChart($chartData, [
             ['key' => 'cast_new', 'label' => 'キャスト', 'color' => '#4A122A', 'text_color' => '#4A122A'],
-            ['key' => 'shop_new', 'label' => '店舗', 'color' => '#7c3aed', 'text_color' => '#92590a'],
+            ['key' => 'shop_new', 'label' => '店舗', 'color' => '#b0507f', 'text_color' => '#92590a'],
         ]);
         $transactionChart = $buildDualChart($chartData);
         $allKpis = array_merge($registrationKpis, $transactionKpis);

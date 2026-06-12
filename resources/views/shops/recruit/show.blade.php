@@ -35,7 +35,7 @@
     .recruit-ref-preview-sticky > p {
         margin: 0 0 12px;
         font-size: 11px;
-        color: #a78bfa;
+        color: #eba8c8;
         font-weight: 800;
     }
     .recruit-ref-preview-row {
@@ -65,7 +65,7 @@
         transition: background 0.25s ease;
         flex-shrink: 0;
     }
-    .recruit-ref-switch-track.is-on { background: #a78bfa; }
+    .recruit-ref-switch-track.is-on { background: #eba8c8; }
     .recruit-ref-switch-knob {
         display: block;
         width: 16px;
@@ -82,21 +82,21 @@
         font-weight: 800;
         color: #71717a;
     }
-    .recruit-ref-switch-label.is-on { color: #a78bfa; }
+    .recruit-ref-switch-label.is-on { color: #eba8c8; }
     .recruit-ref-preview-edit {
         display: inline-flex;
         align-items: center;
         gap: 6px;
         padding: 6px 14px;
-        border: 1px solid #a78bfa;
+        border: 1px solid #eba8c8;
         border-radius: 999px;
-        color: #a78bfa;
+        color: #eba8c8;
         font-size: 12px;
         font-weight: 800;
         text-decoration: none;
         transition: background 0.15s ease;
     }
-    .recruit-ref-preview-edit:hover { background: rgba(168, 85, 247, .1); }
+    .recruit-ref-preview-edit:hover { background: rgba(var(--accent-rgb, 214, 112, 162), .1); }
     .recruit-ref-flash { font-size: 11px; color: #86efac; margin-top: 10px; margin-bottom: 0; }
 
     .recruit-ref-hero-wrap { position: relative; }
@@ -197,7 +197,7 @@
         cursor: pointer;
         transition: background 0.2s, transform 0.2s;
     }
-    .recruit-ref-dot.is-active { background: #a78bfa; transform: scale(1.15); }
+    .recruit-ref-dot.is-active { background: #eba8c8; transform: scale(1.15); }
     .recruit-ref-thumbs--carousel {
         position: absolute;
         right: 12px;
@@ -216,31 +216,31 @@
         overflow: hidden;
         flex-shrink: 0;
     }
-    .recruit-ref-thumbs--carousel button.is-active img { border-color: #a78bfa; box-shadow: 0 0 0 1px #a78bfa; }
-    .recruit-ref-thumbs--carousel img { width: 2.5rem; height: 2.5rem; border-radius: 8px; border: 1px solid rgba(168, 85, 247, .5); object-fit: cover; display: block; }
+    .recruit-ref-thumbs--carousel button.is-active img { border-color: #eba8c8; box-shadow: 0 0 0 1px #eba8c8; }
+    .recruit-ref-thumbs--carousel img { width: 2.5rem; height: 2.5rem; border-radius: 8px; border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), .5); object-fit: cover; display: block; }
 
     .recruit-ref-thumbs { position: absolute; right: 12px; bottom: 12px; display: flex; gap: 6px; z-index: 12; align-items: center; }
-    .recruit-ref-thumbs img { width: 2.5rem; height: 2.5rem; border-radius: 8px; border: 1px solid rgba(168, 85, 247, .5); object-fit: cover; }
+    .recruit-ref-thumbs img { width: 2.5rem; height: 2.5rem; border-radius: 8px; border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), .5); object-fit: cover; }
     .recruit-ref-thumb-more { width: 2.5rem; height: 2.5rem; border-radius: 8px; border: 1px solid #2a2015; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: #fff; }
 
-    .recruit-ref-head { padding: 16px var(--content-padding-x, 12px) 20px; border-bottom: 1px solid rgba(168, 85, 247, 0.16); }
+    .recruit-ref-head { padding: 16px var(--content-padding-x, 12px) 20px; border-bottom: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.16); }
     .recruit-ref-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
     .recruit-ref-chip { font-size: 10px; padding: 2px 8px; border-radius: 2px; font-weight: 700; background: #27272a; color: #d4d4d8; border: 1px solid #3f3f46; }
-    .recruit-ref-chip.gold-outline { background: transparent; color: #a78bfa; border: 1px solid #a78bfa; }
+    .recruit-ref-chip.gold-outline { background: transparent; color: #eba8c8; border: 1px solid #eba8c8; }
 
     .recruit-ref-title { margin: 0 0 8px; font-size: 1.5rem; line-height: 1.25; font-weight: 800; color: #fff; letter-spacing: .02em; font-family: var(--font-sans); }
-    .recruit-ref-catch { margin: 0 0 20px; font-size: 0.875rem; font-weight: 800; color: #a78bfa; letter-spacing: 0.02em; }
+    .recruit-ref-catch { margin: 0 0 20px; font-size: 0.875rem; font-weight: 800; color: #eba8c8; letter-spacing: 0.02em; }
 
     .recruit-job-toggle { background: #110f0d; padding: 4px; border-radius: 8px; display: flex; border: 1px solid #2a2015; margin-bottom: 16px; }
     .recruit-job-toggle button { flex: 1; border: none; background: transparent; color: #71717a; padding: 10px 4px; font-size: 12px; font-weight: 800; border-radius: 6px; cursor: pointer; transition: color .15s, background .15s; }
-    .recruit-job-toggle button.is-active { background: #2a2210; color: #a78bfa; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+    .recruit-job-toggle button.is-active { background: #2a2210; color: #eba8c8; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
 
     /* ヒーロー直下の単一時給カード（時給・ボーナスは目立たせる） */
     .recruit-ref-pay-highlight {
-        background: linear-gradient(135deg, rgba(168, 85, 247, 0.18), rgba(74, 18, 42, 0.5));
+        background: linear-gradient(135deg, rgba(var(--accent-rgb, 214, 112, 162), 0.18), rgba(74, 18, 42, 0.5));
         border-radius: 14px;
         padding: 18px 20px;
-        border: 1px solid rgba(168, 85, 247, 0.55);
+        border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.55);
         margin-bottom: 18px;
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 226, 163, 0.18);
         position: relative;
@@ -254,27 +254,27 @@
         pointer-events: none;
     }
     .recruit-ref-pay-highlight .label {
-        font-size: 0.7rem; font-weight: 800; color: #c4b5fd; margin-bottom: 6px; display: block;
+        font-size: 0.7rem; font-weight: 800; color: #f2cadf; margin-bottom: 6px; display: block;
         letter-spacing: 0.08em; text-transform: uppercase;
     }
     .recruit-ref-pay-highlight .line { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
-    .recruit-ref-pay-highlight .yen { color: #c4b5fd; font-weight: 900; font-size: 1.05rem; }
+    .recruit-ref-pay-highlight .yen { color: #f2cadf; font-weight: 900; font-size: 1.05rem; }
     .recruit-ref-pay-highlight .num {
         font-size: 2.4rem; font-weight: 900; color: #fff; letter-spacing: -0.02em;
         text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
     }
-    .recruit-ref-pay-highlight .tilde { font-size: 1rem; color: #c4b5fd; font-weight: 700; }
+    .recruit-ref-pay-highlight .tilde { font-size: 1rem; color: #f2cadf; font-weight: 700; }
 
     .recruit-ref-tags { display: flex; flex-wrap: wrap; gap: 6px; }
     .recruit-ref-tags span { font-size: 10px; padding: 4px 10px; border-radius: 999px; font-weight: 700; }
-    .recruit-ref-tags span.gold { background: rgba(168, 85, 247, .1); border: 1px solid rgba(168, 85, 247, .3); color: #a78bfa; }
+    .recruit-ref-tags span.gold { background: rgba(var(--accent-rgb, 214, 112, 162), .1); border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), .3); color: #eba8c8; }
     .recruit-ref-tags span.dim { background: #1a1714; border: 1px solid #3a2a18; color: #d4d4d8; font-weight: 600; }
 
     .recruit-ref-body { padding: 16px var(--content-padding-x, 12px) 32px; display: flex; flex-direction: column; gap: 32px; }
 
-    .recruit-ref-h2 { margin: 0 0 12px; font-size: 0.875rem; font-weight: 800; color: #a78bfa; display: flex; align-items: center; gap: 8px; }
+    .recruit-ref-h2 { margin: 0 0 12px; font-size: 0.875rem; font-weight: 800; color: #eba8c8; display: flex; align-items: center; gap: 8px; }
     .recruit-ref-h2-lg { margin: 0 0 16px; font-size: 1.125rem; font-weight: 800; color: #fff; display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
-    .recruit-ref-h2-lg .bar { width: 4px; height: 1.25rem; background: #a78bfa; border-radius: 1px; flex-shrink: 0; margin-top: 2px; }
+    .recruit-ref-h2-lg .bar { width: 4px; height: 1.25rem; background: #eba8c8; border-radius: 1px; flex-shrink: 0; margin-top: 2px; }
     .recruit-ref-subtle { font-size: 11px; font-weight: 600; color: #71717a; }
 
     .recruit-ref-msg { font-size: 0.875rem; color: #d4d4d8; line-height: 1.75; font-weight: 500; background: #110f0d; padding: 20px; border-radius: 12px; border: 1px solid #1f1a14; white-space: pre-wrap; margin-bottom: 16px; }
@@ -298,8 +298,8 @@
         color: #d4d4d8;
         font-family: inherit;
     }
-    .recruit-ref-share-row .recruit-ref-share-btn--gold { border-color: #a78bfa; color: #a78bfa; }
-    .recruit-ref-share-row .recruit-ref-share-btn--gold:hover { background: rgba(168, 85, 247, .1); }
+    .recruit-ref-share-row .recruit-ref-share-btn--gold { border-color: #eba8c8; color: #eba8c8; }
+    .recruit-ref-share-row .recruit-ref-share-btn--gold:hover { background: rgba(var(--accent-rgb, 214, 112, 162), .1); }
     .recruit-ref-share-row .recruit-ref-share-btn--line { border-color: rgba(6,199,85,.5); color: #06C755; }
     .recruit-ref-share-row .recruit-ref-share-btn--line:hover { background: rgba(6,199,85,.1); }
     .recruit-ref-share-row .recruit-ref-share-btn--muted:hover { background: #27272a; }
@@ -309,17 +309,17 @@
         border-radius: 14px;
         padding: 18px 20px;
         margin-bottom: 18px;
-        background: linear-gradient(135deg, rgba(168, 85, 247, 0.22), rgba(74, 18, 42, 0.55));
-        border: 1px solid rgba(168, 85, 247, 0.6);
+        background: linear-gradient(135deg, rgba(var(--accent-rgb, 214, 112, 162), 0.22), rgba(74, 18, 42, 0.55));
+        border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.6);
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 226, 163, 0.2);
     }
-    .recruit-ref-bonus-card__head { display: flex; align-items: center; gap: 8px; color: #c4b5fd; margin-bottom: 10px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+    .recruit-ref-bonus-card__head { display: flex; align-items: center; gap: 8px; color: #f2cadf; margin-bottom: 10px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
     .recruit-ref-bonus-card__amount { display: flex; align-items: baseline; gap: 6px; margin-bottom: 10px; }
     .recruit-ref-bonus-card__amount .num {
         font-size: 2.0rem; font-weight: 900; color: #fff; letter-spacing: -0.02em;
         text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
     }
-    .recruit-ref-bonus-card__amount .suffix { font-size: 1rem; font-weight: 800; color: #c4b5fd; }
+    .recruit-ref-bonus-card__amount .suffix { font-size: 1rem; font-weight: 800; color: #f2cadf; }
     .recruit-ref-bonus-card__cond {
         font-size: 10px;
         color: #a1a1aa;
@@ -329,7 +329,7 @@
         border: 1px solid #3a2a18;
         line-height: 1.55;
     }
-    .recruit-ref-bonus-card__cond strong { color: #a78bfa; font-weight: 800; }
+    .recruit-ref-bonus-card__cond strong { color: #eba8c8; font-weight: 800; }
 
     .recruit-ref-inforow { display: flex; padding: 14px 0; border-bottom: 1px solid #1f1a14; font-size: 0.875rem; }
     .recruit-ref-inforow:last-child { border-bottom: none; }
@@ -337,7 +337,7 @@
     .recruit-ref-inforow .v { flex: 1; color: #e4e4e7; font-weight: 600; line-height: 1.6; }
 
     .recruit-ref-tag-matrix { margin-top: 24px; background: #110f0d; border-radius: 12px; border: 1px solid #1f1a14; padding: 16px; }
-    .recruit-ref-tag-matrix > p { margin: 0 0 12px; font-size: 12px; font-weight: 800; color: #a78bfa; }
+    .recruit-ref-tag-matrix > p { margin: 0 0 12px; font-size: 12px; font-weight: 800; color: #eba8c8; }
     .recruit-ref-tag-matrix-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
     @media (min-width: 480px) {
         .recruit-ref-tag-matrix-row { flex-direction: row; align-items: flex-start; gap: 12px; }
@@ -365,7 +365,7 @@
         width: 100%; height: 10rem; border-radius: 8px; background: #18181b; border: 1px solid #2a2015;
         display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
     }
-    .recruit-ref-map-placeholder i { font-size: 2rem; color: #a78bfa; }
+    .recruit-ref-map-placeholder i { font-size: 2rem; color: #eba8c8; }
 
     .recruit-ref-map-link {
         width: 100%;
@@ -374,15 +374,15 @@
         justify-content: center;
         gap: 8px;
         padding: 10px;
-        border: 1px solid #a78bfa;
+        border: 1px solid #eba8c8;
         border-radius: 8px;
-        color: #a78bfa;
+        color: #eba8c8;
         font-size: 11px;
         font-weight: 800;
         text-decoration: none;
         transition: background 0.15s ease;
     }
-    .recruit-ref-map-link:hover { background: rgba(168, 85, 247, .1); }
+    .recruit-ref-map-link:hover { background: rgba(var(--accent-rgb, 214, 112, 162), .1); }
 
     /* =================================================================
        Brushup overrides — 暗さ軽減・ブランド色（ボルドー×シャンパンゴールド）統一
@@ -391,7 +391,7 @@
     /* 1. ベース：純黒からボルドー寄り暗色へ */
     .recruit-ref-shell {
         background: linear-gradient(180deg, #2a0d18 0%, #1a0a0e 100%);
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(168, 85, 247, 0.06);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(var(--accent-rgb, 214, 112, 162), 0.06);
     }
     .recruit-ref-wrap { background: transparent; }
 
@@ -400,109 +400,109 @@
         background: rgba(42, 13, 24, 0.92);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
-        border-bottom-color: rgba(168, 85, 247, 0.22);
+        border-bottom-color: rgba(var(--accent-rgb, 214, 112, 162), 0.22);
     }
-    .recruit-ref-preview-sticky > p { color: #a78bfa; }
+    .recruit-ref-preview-sticky > p { color: #eba8c8; }
     .recruit-ref-switch-track { background: #4a1d28; }
-    .recruit-ref-switch-track.is-on { background: linear-gradient(135deg, #a78bfa, #7c3aed); }
+    .recruit-ref-switch-track.is-on { background: linear-gradient(135deg, #eba8c8, #b0507f); }
     .recruit-ref-switch-label { color: #b5a69d; }
-    .recruit-ref-switch-label.is-on { color: #a78bfa; }
-    .recruit-ref-preview-edit { border-color: #a78bfa; color: #a78bfa; }
-    .recruit-ref-preview-edit:hover { background: rgba(168, 85, 247, 0.12); }
+    .recruit-ref-switch-label.is-on { color: #eba8c8; }
+    .recruit-ref-preview-edit { border-color: #eba8c8; color: #eba8c8; }
+    .recruit-ref-preview-edit:hover { background: rgba(var(--accent-rgb, 214, 112, 162), 0.12); }
 
     /* 3. ヒーロー */
     .recruit-ref-hero { background: #1a0a0e; }
-    .recruit-ref-dot.is-active { background: #a78bfa; }
-    .recruit-ref-thumbs--carousel button.is-active img { border-color: #a78bfa; box-shadow: 0 0 0 1px #a78bfa; }
+    .recruit-ref-dot.is-active { background: #eba8c8; }
+    .recruit-ref-thumbs--carousel button.is-active img { border-color: #eba8c8; box-shadow: 0 0 0 1px #eba8c8; }
     .recruit-ref-thumbs--carousel img,
-    .recruit-ref-thumbs img { border-color: rgba(168, 85, 247, 0.55); }
-    .recruit-ref-thumb-more { background: rgba(26, 10, 14, 0.7); border-color: rgba(168, 85, 247, 0.28); }
+    .recruit-ref-thumbs img { border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.55); }
+    .recruit-ref-thumb-more { background: rgba(26, 10, 14, 0.7); border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.28); }
 
     /* 4. ヘッダ部 */
-    .recruit-ref-head { border-bottom-color: rgba(168, 85, 247, 0.16); }
+    .recruit-ref-head { border-bottom-color: rgba(var(--accent-rgb, 214, 112, 162), 0.16); }
     .recruit-ref-chip {
-        background: rgba(168, 85, 247, 0.08);
+        background: rgba(var(--accent-rgb, 214, 112, 162), 0.08);
         color: #eae0d5;
-        border-color: rgba(168, 85, 247, 0.22);
+        border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.22);
     }
-    .recruit-ref-chip.gold-outline { color: #a78bfa; border-color: #a78bfa; }
-    .recruit-ref-catch { color: #a78bfa; }
+    .recruit-ref-chip.gold-outline { color: #eba8c8; border-color: #eba8c8; }
+    .recruit-ref-catch { color: #eba8c8; }
 
     /* 5. ジョブタイプ切替 */
     .recruit-job-toggle {
         background: rgba(0, 0, 0, 0.35);
-        border-color: rgba(168, 85, 247, 0.22);
+        border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.22);
     }
     .recruit-job-toggle button { color: #b5a69d; }
     .recruit-job-toggle button.is-active {
-        background: rgba(168, 85, 247, 0.16);
-        color: #a78bfa;
+        background: rgba(var(--accent-rgb, 214, 112, 162), 0.16);
+        color: #eba8c8;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     }
 
     /* 6. 時給ハイライト */
     .recruit-ref-pay-highlight {
         background: linear-gradient(135deg, #2d1018 0%, #1f0810 100%);
-        border-color: rgba(168, 85, 247, 0.55);
+        border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.55);
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
     }
     .recruit-ref-pay-highlight .label,
-    .recruit-ref-pay-highlight .yen { color: #a78bfa; }
+    .recruit-ref-pay-highlight .yen { color: #eba8c8; }
     .recruit-ref-pay-highlight .tilde { color: #c8b8b0; }
 
     /* 7. タグピル */
-    .recruit-ref-tags span.gold { background: rgba(168, 85, 247, 0.1); border-color: rgba(168, 85, 247, 0.32); color: #a78bfa; }
-    .recruit-ref-tags span.dim { background: rgba(255, 255, 255, 0.04); border-color: rgba(168, 85, 247, 0.18); color: #eae0d5; font-weight: 600; }
+    .recruit-ref-tags span.gold { background: rgba(var(--accent-rgb, 214, 112, 162), 0.1); border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.32); color: #eba8c8; }
+    .recruit-ref-tags span.dim { background: rgba(255, 255, 255, 0.04); border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.18); color: #eae0d5; font-weight: 600; }
 
     /* 8. セクション見出し・本文 */
-    .recruit-ref-h2 { color: #a78bfa; }
-    .recruit-ref-h2-lg .bar { background: #a78bfa; }
+    .recruit-ref-h2 { color: #eba8c8; }
+    .recruit-ref-h2-lg .bar { background: #eba8c8; }
     .recruit-ref-subtle { color: #b5a69d; }
     .recruit-ref-msg {
         background: #2a0d18;
-        border-color: rgba(168, 85, 247, 0.22);
+        border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.22);
         color: #eae0d5;
-        box-shadow: inset 0 1px 0 rgba(168, 85, 247, 0.04);
+        box-shadow: inset 0 1px 0 rgba(var(--accent-rgb, 214, 112, 162), 0.04);
     }
 
     /* 9. シェアボタン */
-    .recruit-ref-share-row .recruit-ref-share-btn { color: #eae0d5; border-color: rgba(168, 85, 247, 0.32); }
-    .recruit-ref-share-row .recruit-ref-share-btn--gold { border-color: #a78bfa; color: #a78bfa; }
-    .recruit-ref-share-row .recruit-ref-share-btn--gold:hover { background: rgba(168, 85, 247, 0.12); }
+    .recruit-ref-share-row .recruit-ref-share-btn { color: #eae0d5; border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.32); }
+    .recruit-ref-share-row .recruit-ref-share-btn--gold { border-color: #eba8c8; color: #eba8c8; }
+    .recruit-ref-share-row .recruit-ref-share-btn--gold:hover { background: rgba(var(--accent-rgb, 214, 112, 162), 0.12); }
 
     /* 10. 入店ボーナスカード */
     .recruit-ref-bonus-card {
         background: linear-gradient(135deg, #4a1d28 0%, #2a0d18 100%);
-        border-color: rgba(168, 85, 247, 0.45);
-        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(168, 85, 247, 0.1);
+        border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.45);
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(var(--accent-rgb, 214, 112, 162), 0.1);
     }
-    .recruit-ref-bonus-card__head { color: #a78bfa; }
+    .recruit-ref-bonus-card__head { color: #eba8c8; }
     .recruit-ref-bonus-card__cond {
         background: rgba(0, 0, 0, 0.3);
-        border-color: rgba(168, 85, 247, 0.22);
+        border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.22);
         color: #c8b8b0;
     }
-    .recruit-ref-bonus-card__cond strong { color: #a78bfa; }
+    .recruit-ref-bonus-card__cond strong { color: #eba8c8; }
 
     /* 11. 情報行（k/v） */
-    .recruit-ref-inforow { border-bottom-color: rgba(168, 85, 247, 0.14); }
+    .recruit-ref-inforow { border-bottom-color: rgba(var(--accent-rgb, 214, 112, 162), 0.14); }
     .recruit-ref-inforow .k { color: #b5a69d; }
     .recruit-ref-inforow .v { color: #eae0d5; }
 
     /* 12. タグマトリクス */
     .recruit-ref-tag-matrix {
         background: #2a0d18;
-        border-color: rgba(168, 85, 247, 0.18);
+        border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.18);
     }
-    .recruit-ref-tag-matrix > p { color: #a78bfa; }
+    .recruit-ref-tag-matrix > p { color: #eba8c8; }
     .recruit-ref-tag-matrix-row .cat { color: #b5a69d; }
 
     /* 13. マップリンク */
-    .recruit-ref-map-link { color: #a78bfa; border-color: rgba(168, 85, 247, 0.5); }
-    .recruit-ref-map-link:hover { background: rgba(168, 85, 247, 0.12); }
+    .recruit-ref-map-link { color: #eba8c8; border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.5); }
+    .recruit-ref-map-link:hover { background: rgba(var(--accent-rgb, 214, 112, 162), 0.12); }
 
     /* 14. キャッチコピー強調 */
-    .recruit-ref-catch-hero .rc-msg-em { color: #c4b5fd; }
+    .recruit-ref-catch-hero .rc-msg-em { color: #f2cadf; }
 
     /* 15. CTA / 応募ボタンの色味（必要なら別途上書き） */
 
@@ -535,7 +535,7 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.32);
         transition: background 0.15s ease, transform 0.12s ease;
     }
-    .recruit-ref-hero-arrow:hover { background: rgba(168, 85, 247, 0.65); color: #1a0a0e; }
+    .recruit-ref-hero-arrow:hover { background: rgba(var(--accent-rgb, 214, 112, 162), 0.65); color: #1a0a0e; }
     .recruit-ref-hero-arrow:active { transform: translateY(-50%) scale(0.94); }
     .recruit-ref-hero-arrow--prev { left: 12px; }
     .recruit-ref-hero-arrow--next { right: 12px; }
@@ -558,7 +558,7 @@
         font-weight: 800;
         letter-spacing: 0.18em;
         color: #2a1406;
-        background: linear-gradient(135deg, #c4b5fd, #a78bfa);
+        background: linear-gradient(135deg, #f2cadf, #eba8c8);
         border-radius: 999px;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     }
@@ -577,7 +577,7 @@
         height: 28px;
         border-radius: 999px;
         background: rgba(0, 0, 0, 0.35);
-        border: 1px solid rgba(168, 85, 247, 0.25);
+        border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.25);
         overflow: visible;
     }
     .recruit-ref-bonus-progress-fill {
@@ -587,8 +587,8 @@
         bottom: 0;
         width: 14%;
         border-radius: 999px;
-        background: linear-gradient(90deg, rgba(168, 85, 247, 0.85) 0%, rgba(255, 226, 163, 0.5) 100%);
-        box-shadow: 0 0 12px rgba(168, 85, 247, 0.5);
+        background: linear-gradient(90deg, rgba(var(--accent-rgb, 214, 112, 162), 0.85) 0%, rgba(255, 226, 163, 0.5) 100%);
+        box-shadow: 0 0 12px rgba(var(--accent-rgb, 214, 112, 162), 0.5);
     }
     .recruit-ref-bonus-progress-marker {
         position: absolute;
@@ -602,7 +602,7 @@
     }
     .recruit-ref-bonus-progress-marker small { font-size: 8px; opacity: 0.72; margin-left: 4px; }
     .recruit-ref-bonus-progress-marker--start { left: 10px; }
-    .recruit-ref-bonus-progress-marker--end { right: 10px; color: #c4b5fd; }
+    .recruit-ref-bonus-progress-marker--end { right: 10px; color: #f2cadf; }
 
     /* インフォ行レイアウト改善 (A3) */
     .recruit-ref-inforow .k {
@@ -626,7 +626,7 @@
         gap: 6px;
     }
     .recruit-ref-tag-matrix-row .cat i {
-        color: #a78bfa;
+        color: #eba8c8;
         font-size: 11px;
     }
     /* タグ折りたたみ (C9) */
@@ -636,16 +636,16 @@
         gap: 4px;
         padding: 4px 10px;
         border-radius: 999px;
-        border: 1px dashed rgba(168, 85, 247, 0.4);
+        border: 1px dashed rgba(var(--accent-rgb, 214, 112, 162), 0.4);
         background: transparent;
-        color: #a78bfa;
+        color: #eba8c8;
         font-size: 10px;
         font-weight: 800;
         cursor: pointer;
         font-family: inherit;
         letter-spacing: 0.04em;
     }
-    .recruit-ref-tag-more:hover { background: rgba(168, 85, 247, 0.1); }
+    .recruit-ref-tag-more:hover { background: rgba(var(--accent-rgb, 214, 112, 162), 0.1); }
     .recruit-ref-tag-more .less-text { display: none; }
     .recruit-ref-tag-more[aria-expanded="true"] .more-text { display: none; }
     .recruit-ref-tag-more[aria-expanded="true"] .less-text { display: inline; }
@@ -677,16 +677,16 @@
         gap: 6px;
         margin: 12px 0 16px;
         padding: 7px 14px;
-        border: 1px solid rgba(168, 85, 247, 0.4);
+        border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.4);
         border-radius: 999px;
         background: rgba(0, 0, 0, 0.25);
-        color: #a78bfa;
+        color: #eba8c8;
         font-size: 11px;
         font-weight: 800;
         cursor: pointer;
         font-family: inherit;
     }
-    .recruit-ref-msg-toggle:hover { background: rgba(168, 85, 247, 0.12); }
+    .recruit-ref-msg-toggle:hover { background: rgba(var(--accent-rgb, 214, 112, 162), 0.12); }
     .recruit-ref-msg-toggle .recruit-ref-msg-toggle__less { display: none; }
     .recruit-ref-msg-toggle[aria-expanded="true"] .recruit-ref-msg-toggle__more { display: none; }
     .recruit-ref-msg-toggle[aria-expanded="true"] .recruit-ref-msg-toggle__less { display: inline-flex; align-items: center; gap: 6px; }
@@ -718,7 +718,7 @@
         background: linear-gradient(to top, rgba(26, 10, 14, 0.98) 0%, rgba(26, 10, 14, 0.86) 70%, rgba(26, 10, 14, 0) 100%);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        border-top: 1px solid rgba(168, 85, 247, 0.18);
+        border-top: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.18);
     }
     .recruit-cta-row {
         display: flex;
@@ -737,20 +737,20 @@
         align-self: stretch;
         width: 48px;
         border-radius: 14px;
-        border: 1px solid rgba(168, 85, 247, 0.4);
+        border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.4);
         background: rgba(0, 0, 0, 0.4);
-        color: #c4b5fd;
+        color: #f2cadf;
         font-size: 1.05rem;
         cursor: pointer;
         transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
     }
     .recruit-cta-heart:hover {
-        background: rgba(168, 85, 247, 0.12);
-        border-color: rgba(168, 85, 247, 0.65);
+        background: rgba(var(--accent-rgb, 214, 112, 162), 0.12);
+        border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.65);
     }
     .recruit-cta-heart.is-active {
-        background: rgba(168, 85, 247, 0.22);
-        border-color: rgba(168, 85, 247, 0.85);
+        background: rgba(var(--accent-rgb, 214, 112, 162), 0.22);
+        border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.85);
         color: #fff1cc;
     }
     .recruit-cta-btn {
@@ -776,26 +776,26 @@
     }
     .recruit-cta-btn i { font-size: 0.95rem; }
     .recruit-cta-btn--primary {
-        background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%);
+        background: linear-gradient(135deg, #f2cadf 0%, #eba8c8 100%);
         color: #2a1406;
-        box-shadow: 0 6px 18px rgba(168, 85, 247, 0.32);
+        box-shadow: 0 6px 18px rgba(var(--accent-rgb, 214, 112, 162), 0.32);
     }
-    .recruit-cta-btn--primary:hover { box-shadow: 0 8px 22px rgba(168, 85, 247, 0.42); color: #2a1406; }
+    .recruit-cta-btn--primary:hover { box-shadow: 0 8px 22px rgba(var(--accent-rgb, 214, 112, 162), 0.42); color: #2a1406; }
     .recruit-cta-btn--help {
-        background: rgba(168, 85, 247, 0.16);
-        border-color: rgba(168, 85, 247, 0.7);
+        background: rgba(var(--accent-rgb, 214, 112, 162), 0.16);
+        border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.7);
         color: #f5e1a8;
     }
-    .recruit-cta-btn--help:hover { background: rgba(168, 85, 247, 0.26); color: #fff1cc; }
+    .recruit-cta-btn--help:hover { background: rgba(var(--accent-rgb, 214, 112, 162), 0.26); color: #fff1cc; }
     .recruit-cta-btn--ghost {
         background: rgba(255, 255, 255, 0.04);
-        border-color: rgba(168, 85, 247, 0.28);
+        border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.28);
         color: #d6c6c6;
     }
     .recruit-cta-btn--ghost:hover {
         background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(168, 85, 247, 0.5);
-        color: #c4b5fd;
+        border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.5);
+        color: #f2cadf;
     }
 </style>
 @endpush
@@ -1362,12 +1362,12 @@
 
                         <div class="recruit-ref-inforow"><span class="k">給与</span><span class="v">
                             @if($regularWage > 0 && $hasTrial)
-                                <span style="color:#a78bfa;font-weight:800;">体入: {{ number_format((int) $recruit['trial_hourly_wage']) }}円〜</span><br>
+                                <span style="color:#eba8c8;font-weight:800;">体入: {{ number_format((int) $recruit['trial_hourly_wage']) }}円〜</span><br>
                                 <span style="color:#e4e4e7;">本入: {{ number_format($regularWage) }}円〜</span>
                             @elseif($regularWage > 0)
-                                <span style="color:#a78bfa;font-weight:800;">本入: {{ number_format($regularWage) }}円〜</span>
+                                <span style="color:#eba8c8;font-weight:800;">本入: {{ number_format($regularWage) }}円〜</span>
                             @elseif($hasTrial)
-                                <span style="color:#a78bfa;font-weight:800;">体入: {{ number_format((int) $recruit['trial_hourly_wage']) }}円〜</span>
+                                <span style="color:#eba8c8;font-weight:800;">体入: {{ number_format((int) $recruit['trial_hourly_wage']) }}円〜</span>
                             @else
                                 —
                             @endif
@@ -1421,7 +1421,7 @@
                                 </div>
                             @endif
 
-                            <div class="recruit-ref-inforow"><span class="k">給与</span><span class="v"><span style="color:#a78bfa;font-weight:800;">{{ number_format((int) $recruit['help_hourly_wage']) }}円〜</span></span></div>
+                            <div class="recruit-ref-inforow"><span class="k">給与</span><span class="v"><span style="color:#eba8c8;font-weight:800;">{{ number_format((int) $recruit['help_hourly_wage']) }}円〜</span></span></div>
                             <div class="recruit-ref-inforow"><span class="k">給与備考</span><span class="v" style="white-space:pre-wrap;">{{ ($jobNotesHelp !== '' ? $jobNotesHelp : $salaryNotesMain) !== '' ? ($jobNotesHelp !== '' ? $jobNotesHelp : $salaryNotesMain) : '—' }}</span></div>
                             <div class="recruit-ref-inforow"><span class="k">勤務時間</span><span class="v">{{ $recruit['working_hours'] ?: '—' }}</span></div>
                             <div class="recruit-ref-inforow"><span class="k">勤務日・シフト</span><span class="v">{{ $recruit['working_days'] ?: '—' }}</span></div>
@@ -1489,7 +1489,7 @@
                         @endphp
                         @if($gTags !== [])
                         <div style="margin-top:14px;padding-top:14px;border-top:1px solid #1f1a14;">
-                            <p style="margin:0 0 8px;font-size:11px;font-weight:800;color:#a78bfa;">{{ $gLabel }}</p>
+                            <p style="margin:0 0 8px;font-size:11px;font-weight:800;color:#eba8c8;">{{ $gLabel }}</p>
                             <div class="recruit-ref-tag-matrix-pills">
                                 @foreach($gTags as $t)
                                     <span>{{ $t }}</span>
@@ -1517,7 +1517,7 @@
                         <p style="font-size:0.875rem;font-weight:800;color:#fafafa;margin:0 0 6px;">{{ $addressLine }}</p>
                     @endif
                     @if(!empty($recruit['nearest_station'] ?? $shop['nearest_station'] ?? null))
-                        <p style="font-size:12px;color:#a78bfa;margin:0 0 14px;"><i class="fas fa-train-subway"></i> {{ $recruit['nearest_station'] ?? $shop['nearest_station'] }}</p>
+                        <p style="font-size:12px;color:#eba8c8;margin:0 0 14px;"><i class="fas fa-train-subway"></i> {{ $recruit['nearest_station'] ?? $shop['nearest_station'] }}</p>
                     @endif
                     <div class="recruit-ref-map-placeholder" aria-hidden="true"><i class="fas fa-map-marker-alt"></i></div>
                     @if($addressLine !== '')
