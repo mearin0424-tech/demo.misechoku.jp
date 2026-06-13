@@ -96,23 +96,30 @@
         </div>
     </div>
 
-    {{-- ===== Tabs ===== --}}
+    {{-- ===== Tabs：GALLERY / JOB / SHOP の3タブ構成（キャスト視点のプロフィールと統一） ===== --}}
     <div data-tabs-scope>
-        <div data-tabs class="border-t border-b border-line-accent/40 bg-base/90 backdrop-blur-md">
+        <div data-tabs class="border-t border-b border-line-accent/40 bg-base/90 backdrop-blur-md sticky top-0 z-10">
             <div class="flex">
                 <button type="button" data-tab="gallery"
-                        class="is-active flex-1 py-3 flex justify-center items-center transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
-                    <span class="app-title text-[12px] tracking-widest">GALLERY</span>
+                        class="flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
+                    <i class="fas fa-images text-[14px]"></i>
+                    <span class="app-title text-[10px] tracking-widest">GALLERY</span>
                 </button>
-                <button type="button" data-tab="details"
-                        class="flex-1 py-3 flex justify-center items-center transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
-                    <span class="app-title text-[12px] tracking-widest">DETAILS</span>
+                <button type="button" data-tab="job"
+                        class="is-active flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
+                    <i class="fas fa-briefcase text-[14px]"></i>
+                    <span class="app-title text-[10px] tracking-widest">JOB</span>
+                </button>
+                <button type="button" data-tab="shop"
+                        class="flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
+                    <i class="fas fa-store text-[14px]"></i>
+                    <span class="app-title text-[10px] tracking-widest">SHOP</span>
                 </button>
             </div>
         </div>
 
-        {{-- Gallery panel：元の機能を維持 --}}
-        <div data-tab-panel="gallery" class="is-active">
+        {{-- ========== Gallery panel ========== --}}
+        <div data-tab-panel="gallery">
             <ul id="gallery-list"
                 data-sort-save-url="{{ route('shop.profile.images.order') }}"
                 data-empty-image-url="{{ asset('assets/images/common/no-image.png') }}">
@@ -134,17 +141,157 @@
             </ul>
         </div>
 
-        {{-- Details panel：jobdescription + ShopInformation + Licenses をまとめる --}}
-        <div data-tab-panel="details">
+        {{-- ========== JOB panel：求人管理（cast-show.blade.php の JOB タブと同じ構造） ========== --}}
+        <div data-tab-panel="job" class="is-active">
             <div class="p-4 flex flex-col gap-4">
+                @php $js = $jobSummary ?? []; @endphp
 
-                {{-- 求人票の管理 --}}
+                {{-- 求人票の管理 メインCTA --}}
                 <x-ui.menu-card icon="settings"
                                 sub="JOB DESCRIPTION"
                                 title="求人票の管理"
                                 href="{{ route('shop.jobdescription') }}"
                                 class="shop-mypage-menu-card" />
 
+                {{-- 求人ステータス + 応募数の概要バー --}}
+                <x-ui.card class="p-4">
+                    <div class="flex items-center justify-between gap-3 flex-wrap">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide
+                                {{ ($js['is_published'] ?? false)
+                                    ? 'bg-green-500/15 text-green-300 border border-green-400/40'
+                                    : 'bg-gray-700/30 text-text-sub border border-line' }}">
+                                <i class="fas {{ ($js['is_published'] ?? false) ? 'fa-circle-check' : 'fa-pause' }} text-[10px]"></i>
+                                {{ $js['status_label'] ?? '未設定' }}
+                            </span>
+                            <a href="{{ route('shop.recruits.edit') }}" class="text-[11px] font-bold text-accent-text underline">編集</a>
+                        </div>
+                        <div class="flex items-center gap-4 text-[11px]">
+                            <span><span class="text-text-sub">応募</span> <strong class="text-text-main">{{ number_format($js['applicant_count'] ?? 0) }}</strong></span>
+                            <span><span class="text-text-sub">採用</span> <strong class="text-text-main">{{ number_format($js['hired_count'] ?? 0) }}</strong></span>
+                        </div>
+                    </div>
+                </x-ui.card>
+
+                {{-- BONUS card --}}
+                @if(($js['bonus_reward'] ?? 0) > 0 || !empty($js['bonus_condition'] ?? ''))
+                    <x-ui.card class="p-5">
+                        <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
+                            <i class="fas fa-gift"></i> BONUS
+                        </h3>
+                        <div class="flex flex-col gap-3">
+                            <div class="flex justify-between items-center border-b border-line pb-2">
+                                <span class="text-[12px] text-text-sub font-medium">ボーナス金</span>
+                                <span class="text-[14px] font-extrabold text-amber-400">¥{{ number_format((int) ($js['bonus_reward'] ?? 0)) }}</span>
+                            </div>
+                            @if(!empty($js['bonus_condition'] ?? ''))
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-[12px] text-text-sub font-medium">達成条件</span>
+                                    <span class="text-[13px] text-text-main leading-relaxed">{{ $js['bonus_condition'] }}</span>
+                                </div>
+                            @endif
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                {{-- WAGE card --}}
+                @if(($js['regular_wage'] ?? 0) > 0 || ($js['trial_wage'] ?? 0) > 0 || ($js['help_wage'] ?? 0) > 0)
+                    <x-ui.card class="p-5">
+                        <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
+                            <i class="fas fa-yen-sign"></i> WAGE
+                        </h3>
+                        <div class="flex flex-col gap-3">
+                            @if(($js['regular_wage'] ?? 0) > 0)
+                                <div class="flex justify-between items-center border-b border-line pb-2">
+                                    <span class="text-[12px] text-text-sub font-medium">本入り時給</span>
+                                    <span class="text-[13px] font-bold text-text-main">¥{{ number_format($js['regular_wage']) }}</span>
+                                </div>
+                            @endif
+                            @if(($js['trial_wage'] ?? 0) > 0)
+                                <div class="flex justify-between items-center border-b border-line pb-2">
+                                    <span class="text-[12px] text-text-sub font-medium">体入時給</span>
+                                    <span class="text-[13px] font-bold text-text-main">¥{{ number_format($js['trial_wage']) }}</span>
+                                </div>
+                            @endif
+                            @if(($js['help_wage'] ?? 0) > 0)
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[12px] text-text-sub font-medium">ヘルプ時給</span>
+                                    <span class="text-[13px] font-bold text-text-main">¥{{ number_format($js['help_wage']) }}</span>
+                                </div>
+                            @endif
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                {{-- SHIFT card：勤務条件 --}}
+                @if(!empty($js['working_hours'] ?? '') || !empty($js['working_days'] ?? '') || !empty($js['regular_holiday'] ?? '') || !empty($js['qualification'] ?? ''))
+                    <x-ui.card class="p-5">
+                        <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
+                            <i class="fas fa-calendar-check"></i> SHIFT
+                        </h3>
+                        <div class="flex flex-col gap-3">
+                            @if(!empty($js['working_hours'] ?? ''))
+                                <div class="flex justify-between items-start border-b border-line pb-2 gap-3">
+                                    <span class="text-[12px] text-text-sub font-medium shrink-0">勤務時間</span>
+                                    <span class="text-[13px] font-bold text-text-main text-right">{{ $js['working_hours'] }}</span>
+                                </div>
+                            @endif
+                            @if(!empty($js['working_days'] ?? ''))
+                                <div class="flex justify-between items-start border-b border-line pb-2 gap-3">
+                                    <span class="text-[12px] text-text-sub font-medium shrink-0">勤務日数</span>
+                                    <span class="text-[13px] font-bold text-text-main text-right">{{ $js['working_days'] }}</span>
+                                </div>
+                            @endif
+                            @if(!empty($js['regular_holiday'] ?? ''))
+                                <div class="flex justify-between items-start border-b border-line pb-2 gap-3">
+                                    <span class="text-[12px] text-text-sub font-medium shrink-0">定休日</span>
+                                    <span class="text-[13px] font-bold text-text-main text-right">{{ $js['regular_holiday'] }}</span>
+                                </div>
+                            @endif
+                            @if(!empty($js['qualification'] ?? ''))
+                                <div class="flex justify-between items-start gap-3">
+                                    <span class="text-[12px] text-text-sub font-medium shrink-0">応募資格</span>
+                                    <span class="text-[13px] font-bold text-text-main text-right">{{ $js['qualification'] }}</span>
+                                </div>
+                            @endif
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                {{-- ABOUT card：店長メッセージ + 仕事内容 --}}
+                @if(!empty($js['pr_message'] ?? '') || !empty($js['job_content'] ?? ''))
+                    <x-ui.card class="p-5">
+                        <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
+                            <i class="fas fa-comment-dots"></i> ABOUT
+                        </h3>
+                        @if(!empty($js['pr_message'] ?? ''))
+                            <div class="text-[13px] text-text-main leading-relaxed whitespace-pre-line">{{ $js['pr_message'] }}</div>
+                        @endif
+                        @if(!empty($js['job_content'] ?? ''))
+                            <div class="@if(!empty($js['pr_message'] ?? '')) mt-3 pt-3 border-t border-line @endif">
+                                <span class="text-[12px] text-text-sub font-medium block mb-1">仕事内容</span>
+                                <div class="text-[13px] text-text-main leading-relaxed whitespace-pre-line">{{ $js['job_content'] }}</div>
+                            </div>
+                        @endif
+                    </x-ui.card>
+                @endif
+
+                {{-- 未設定時のガイダンス --}}
+                @if(empty($js['regular_wage'] ?? 0) && empty($js['bonus_reward'] ?? 0) && empty($js['pr_message'] ?? '') && empty($js['working_hours'] ?? ''))
+                    <div class="p-5 rounded-card border border-dashed border-line-accent/40 text-center">
+                        <i class="fas fa-circle-info text-accent-text text-[20px] mb-2 block"></i>
+                        <p class="text-[12px] text-text-sub leading-relaxed">
+                            まだ求人票の詳細が登録されていません。<br>
+                            上の <strong class="text-accent-text">求人票の管理</strong> から入力してください。
+                        </p>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        {{-- ========== SHOP panel：店舗情報 + 許可証 ========== --}}
+        <div data-tab-panel="shop">
+            <div class="p-4 flex flex-col gap-4">
                 {{-- Shop Information --}}
                 <x-ui.card class="p-5">
                     <div class="flex items-center justify-between mb-4">

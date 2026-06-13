@@ -691,7 +691,11 @@ class MypageController extends Controller
     }
 
     /**
-     * キャスト側の振込先口座情報登録（デモ用）
+     * キャスト側の振込先口座情報登録
+     *
+     * 入力された口座情報は BillingManagementService::saveCastBankAccount() を経由して
+     * bank_accounts テーブル（holder_type = cast）に永続化される。
+     * 採用ボーナス振込時の振込先として参照される。
      */
     public function updateBank(\Illuminate\Http\Request $request)
     {
@@ -859,7 +863,7 @@ class MypageController extends Controller
             ->first();
 
         if (!$castRow) {
-            // データ不在時は空のモック相当を返す
+            // プロフィール未登録キャスト向けの空の既定値（プレースホルダ）
             return $this->buildEmptyCast();
         }
 

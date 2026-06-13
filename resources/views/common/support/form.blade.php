@@ -7,42 +7,59 @@
     <div class="support-form-header">
         <h1 class="support-form-title">問い合わせ窓口</h1>
         <p class="support-form-lead">
-            ミセチョクに関するご質問・ご要望・不具合のご連絡などはこちらからお送りいただく想定です。<br>
-            デモ環境のため、以下のフォームは送信されませんが、画面イメージとしてご確認いただけます。
+            ミセチョクに関するご質問・ご要望・不具合のご連絡などはこちらからお送りください。<br>
+            内容を確認のうえ、ご記入いただいたメールアドレス宛に運営よりご返信いたします。
         </p>
     </div>
 
-    <div class="support-form-card">
-        <div class="support-form-alert">
-            <i class="fas fa-info-circle"></i>
-            <span>このデモでは、送信ボタンを押しても実際の送信処理は行われません。</span>
+    @if(session('support_inquiry_success'))
+        <div class="support-form-success" role="status">
+            <i class="fas fa-check-circle"></i>
+            <span>{{ session('support_inquiry_success') }}</span>
         </div>
+    @endif
 
-        <form onsubmit="event.preventDefault(); (window.appToast || window.alert)('デモ環境のため送信は行われません。', 'info', 3000);">
+    <div class="support-form-card">
+        @if ($errors->any())
+            <div class="support-form-errors" role="alert">
+                <i class="fas fa-exclamation-circle"></i>
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('pages.support.form.submit') }}" novalidate>
+            @csrf
+
             <div class="support-form-group">
-                <label for="support-type">お問い合わせ種別</label>
-                <select id="support-type" name="type" disabled>
-                    <option>アカウント・ログインについて</option>
-                    <option>機能や使い方について</option>
-                    <option>不具合の報告</option>
-                    <option>ご意見・ご要望</option>
-                    <option>その他</option>
+                <label for="support-type">お問い合わせ種別<span class="req">必須</span></label>
+                <select id="support-type" name="category" required>
+                    @foreach(\App\Models\SupportInquiry::CATEGORY_LABELS as $value => $label)
+                        <option value="{{ $value }}" @selected(old('category') === $value)>{{ $label }}</option>
+                    @endforeach
                 </select>
             </div>
 
             <div class="support-form-group">
-                <label for="support-email">返信用メールアドレス</label>
-                <input id="support-email" type="email" name="email" placeholder="example@mail.com" disabled>
+                <label for="support-email">返信用メールアドレス<span class="req">必須</span></label>
+                <input id="support-email" type="email" name="email" maxlength="255" required
+                       placeholder="example@mail.com" value="{{ old('email') }}"
+                       autocomplete="email">
             </div>
 
             <div class="support-form-group">
-                <label for="support-body">お問い合わせ内容</label>
-                <textarea id="support-body" name="body" rows="5" placeholder="できるだけ詳しい状況・日時・ご利用環境などをご記入ください。" disabled></textarea>
+                <label for="support-body">お問い合わせ内容<span class="req">必須</span></label>
+                <textarea id="support-body" name="body" rows="6" minlength="10" maxlength="2000" required
+                          placeholder="できるだけ詳しい状況・日時・ご利用環境などをご記入ください。">{{ old('body') }}</textarea>
+                <p class="support-form-hint">10〜2000 文字。バグ報告の場合は端末・ブラウザ・発生時刻も記載してください。</p>
             </div>
 
-            <button type="submit" class="support-form-submit" disabled>
+            <button type="submit" class="support-form-submit">
                 <i class="fas fa-paper-plane"></i>
-                この内容で送信する（デモ）
+                この内容で送信する
             </button>
         </form>
     </div>
@@ -56,7 +73,7 @@
                     <i class="fas fa-chevron-down"></i>
                 </summary>
                 <div class="support-faq-answer">
-                    メールアドレス・パスワードに誤りがないかをご確認ください。デモ環境では再設定機能は画面イメージのみです。
+                    メールアドレス・パスワードに誤りがないかをご確認ください。それでも解決しない場合は、上記フォームより「アカウント・ログインについて」を選択しお問い合わせください。
                 </div>
             </details>
             <details class="support-faq-item">
@@ -104,7 +121,7 @@
 }
 
 .support-form-header {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
 
 .support-form-title {
@@ -116,9 +133,39 @@
 
 .support-form-lead {
     font-size: 0.9rem;
-    line-height: 1.6;
+    line-height: 1.65;
     color: #c0c0c0;
 }
+
+.support-form-success {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(110, 231, 183, 0.5);
+    background: rgba(16, 185, 129, 0.10);
+    color: #a7f3d0;
+    font-size: 0.86rem;
+    line-height: 1.55;
+}
+.support-form-success i { margin-top: 1px; }
+
+.support-form-errors {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(248, 113, 113, 0.5);
+    background: rgba(220, 38, 38, 0.08);
+    color: #fecaca;
+    font-size: 0.82rem;
+    line-height: 1.55;
+}
+.support-form-errors ul { margin: 0; padding-left: 4px; list-style: none; display: flex; flex-direction: column; gap: 2px; }
 
 .support-form-card {
     background: rgba(20, 7, 15, 0.9);
@@ -141,31 +188,26 @@
     }
 }
 
-.support-form-alert {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    font-size: 0.8rem;
-    padding: 8px 10px;
-    border-radius: 8px;
-    background: rgba(168, 85, 247, 0.12);
-    color: #f5e9c4;
-    margin-bottom: 16px;
-}
-
-.support-form-alert i {
-    margin-top: 1px;
-}
-
 .support-form-group {
     margin-bottom: 14px;
 }
 
 .support-form-group label {
     display: block;
-    font-size: 0.8rem;
+    font-size: 0.82rem;
+    font-weight: 600;
     margin-bottom: 4px;
     color: #f5f5f5;
+}
+.support-form-group label .req {
+    margin-left: 6px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    color: #fca5a5;
+    background: rgba(220, 38, 38, 0.12);
+    padding: 1px 6px;
+    border-radius: 6px;
+    vertical-align: middle;
 }
 
 .support-form-group input,
@@ -175,38 +217,55 @@
     border-radius: 10px;
     border: 1px solid rgba(168, 85, 247, 0.4);
     background: rgba(8, 4, 6, 0.9);
-    padding: 8px 10px;
-    font-size: 0.85rem;
+    padding: 9px 11px;
+    font-size: 0.88rem;
     color: #f5f5f5;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.support-form-group input:focus,
+.support-form-group select:focus,
+.support-form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent, #d670a2);
+    box-shadow: 0 0 0 3px rgba(214, 112, 162, 0.20);
 }
 
 .support-form-group textarea {
     resize: vertical;
-    min-height: 120px;
+    min-height: 130px;
 }
 
 .support-form-group input::placeholder,
 .support-form-group textarea::placeholder {
-    color: #9b8585;
+    color: rgba(255, 255, 255, 0.40);
+}
+
+.support-form-hint {
+    margin: 4px 2px 0;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.45;
 }
 
 .support-form-submit {
     width: 100%;
-    margin-top: 4px;
-    padding: 10px 12px;
+    margin-top: 6px;
+    padding: 12px 16px;
     border-radius: 999px;
-    border: none;
+    border: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    background: linear-gradient(135deg, #4a1a2a, #b91c1c);
-    color: #f5f5f5;
-    opacity: 0.6;
-    cursor: not-allowed;
+    font-size: 0.95rem;
+    font-weight: 800;
+    background: var(--accent, #d670a2);
+    color: var(--on-accent, #1a0814);
+    cursor: pointer;
+    box-shadow: 0 6px 14px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.20), inset 0 -1px 0 rgba(0,0,0,.18);
+    transition: filter .15s ease, transform .12s ease;
 }
+.support-form-submit:hover { filter: brightness(1.06); }
+.support-form-submit:active { transform: scale(.97); box-shadow: 0 2px 5px rgba(0,0,0,.45), inset 0 2px 4px rgba(0,0,0,.2); }
 </style>
 @endpush
-

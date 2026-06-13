@@ -50,7 +50,7 @@ class PageController extends Controller
     }
 
     /**
-     * お問い合わせ窓口（デモ用ダミーページ）
+     * お問い合わせ窓口（送信先: SupportInquiryController@store / support_inquiries テーブル）
      */
     public function supportForm()
     {

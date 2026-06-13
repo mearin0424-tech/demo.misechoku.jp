@@ -1229,4 +1229,30 @@ CREATE TABLE IF NOT EXISTS `user_talk_templates` (
   KEY `user_talk_templates_owner_idx` (`owner_type`, `owner_id`, `sort_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- -----------------------------------------------------------------------------
+-- support_inquiries : サポート問い合わせフォーム送信内容
+--   - キャスト / 店舗 / 未ログイン（ゲスト）からの問い合わせを保存
+--   - 運営は admin 画面で確認 → 対応ステータスを更新
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `support_inquiries` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `sender_type` varchar(16) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'cast / shop / guest',
+  `sender_id` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '認証済の場合のキャスト/店舗ID',
+  `category` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'account / feature / bug / feedback / other',
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '返信用メールアドレス',
+  `body` text COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '問い合わせ本文',
+  `status` varchar(16) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'new' COMMENT 'new / in_progress / resolved / dismissed',
+  `assigned_admin_id` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '担当運営アカウントID',
+  `admin_note` text COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '運営側メモ（応対履歴）',
+  `user_agent` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '送信時 UA（バグ報告調査用）',
+  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '送信元 IP（スパム調査用）',
+  `responded_at` timestamp NULL DEFAULT NULL COMMENT '運営が最初に返信/対応した日時',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `support_inquiries_status_idx` (`status`, `created_at`),
+  KEY `support_inquiries_sender_idx` (`sender_type`, `sender_id`),
+  KEY `support_inquiries_category_idx` (`category`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET foreign_key_checks = 1;

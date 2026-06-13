@@ -17,6 +17,7 @@
             'items' => [
                 ['label' => 'お知らせ管理', 'route' => 'admin.notices.index', 'icon' => 'fa-bell', 'badge' => null, 'badge_class' => '', 'permission' => 'content.notices'],
                 ['label' => 'コラム管理', 'route' => 'admin.columns.index', 'icon' => 'fa-pen-nib', 'badge' => null, 'badge_class' => '', 'permission' => 'content.columns'],
+                ['label' => 'サポート問合せ', 'route' => 'admin.support-inquiries.index', 'icon' => 'fa-envelope-open-text', 'badge' => null, 'badge_class' => '', 'permission' => 'content.notices'],
             ],
         ],
         [
@@ -120,7 +121,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Noto+Sans+JP:wght@300;400;500;600;700;800&family=Shippori+Mincho:wght@500;600;700&display=swap">
+    {{-- メインアプリと同じ Noto Sans JP + Montserrat（DESIGN.md §3 と統一） --}}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700;800;900&family=Montserrat:wght@400;600;700;800&display=swap">
     <link rel="stylesheet" href="{{ asset('assets/css/admin.css') }}">
     @stack('admin-styles')
 </head>

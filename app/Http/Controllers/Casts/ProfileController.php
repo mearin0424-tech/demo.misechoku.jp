@@ -144,7 +144,13 @@ class ProfileController extends Controller
     }
 
     /**
-     * プロフィール更新（モック：保存せず成功のみ返す。全項目を受け取り将来のDB用）
+     * プロフィール更新
+     *
+     * 受け取った全項目を以下のテーブルへ永続化する:
+     *   - cast_profiles  ：基本属性（ニックネーム / 生年月日 / 住所 / 身体情報 / 自己紹介 等）
+     *   - cast_tag_relations ：ルックスタグ・性格タグ（syncCastTags 経由）
+     *   - cast_search_preferences ：希望業種（industry_ids JSON）
+     * ホーム表示用画像が 0 枚の場合はバリデーションエラーで戻す。
      */
     public function update(Request $request)
     {

@@ -250,6 +250,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('/columns/{column}', [AdminColumn::class, 'destroy'])->name('columns.destroy');
         });
 
+        // サポート問い合わせ管理
+        Route::middleware('admin.permission:content.notices')->group(function () {
+            Route::get('/support-inquiries', [\App\Http\Controllers\Admin\SupportInquiryController::class, 'index'])->name('support-inquiries.index');
+            Route::get('/support-inquiries/{inquiry}', [\App\Http\Controllers\Admin\SupportInquiryController::class, 'show'])->name('support-inquiries.show');
+            Route::post('/support-inquiries/{inquiry}/status', [\App\Http\Controllers\Admin\SupportInquiryController::class, 'updateStatus'])->name('support-inquiries.status');
+            Route::post('/support-inquiries/{inquiry}/note', [\App\Http\Controllers\Admin\SupportInquiryController::class, 'updateNote'])->name('support-inquiries.note');
+        });
+
         // 隲区ｱゅ・謖ｯ霎ｼ繧ｿ繧ｹ繧ｯ邂｡逅・
         Route::get('/tasks', [AdminTask::class, 'index'])
             ->middleware('admin.permission:dashboard.view')
@@ -346,6 +354,9 @@ Route::name('pages.')->group(function () {
     Route::get('/support/notices', [SupportNoticeController::class, 'index'])->name('support.notices');
     Route::get('/support/notices/{slug}', [SupportNoticeController::class, 'show'])->name('support.notices.show');
     Route::get('/support/form', [PageController::class, 'supportForm'])->name('support.form');
+    Route::post('/support/form', [\App\Http\Controllers\Common\SupportInquiryController::class, 'store'])
+        ->middleware('throttle:5,60')  // 1 ユーザー 60 分 5 件まで（連投スパム対策）
+        ->name('support.form.submit');
 });
 
 // 停止中アカウント向けランディング

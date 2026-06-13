@@ -17,7 +17,8 @@ class BankController extends Controller
      * 運営側口座情報設定画面
      *
      * お店に発行する請求書に記載される振込先口座を登録する。
-     * 現時点ではデモのためセッション保存のみ。
+     * 入力された口座情報は BillingManagementService::saveAdminBankAccount() を経由して
+     * bank_accounts テーブル（holder_type = system_account）に永続化される。
      */
     public function index()
     {

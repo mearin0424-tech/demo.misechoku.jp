@@ -1,110 +1,100 @@
 /* ============================================================
-   ミセチョク 管理画面 ライトテーマ デザインシステム
+   ミセチョク 管理画面 デザインシステム
    ------------------------------------------------------------
-   モバイルファースト（基準幅: 390〜430px）。
-   タブレット（≥640px）・デスクトップ（≥1024px）に向けて拡張。
+   メインアプリ（front）と同じ ダーク × アメジスト × ゴールド の
+   カラーパレット／タイポグラフィを共有。
+   レイアウト寸法（sidebar-width / content-pad / header-h 等）は
+   admin 用のまま維持し、機能・構造には一切影響を与えない。
    ============================================================ */
 
 /* ----------------------------------------------------------------
-   1. デザイントークン
+   1. デザイントークン — メインアプリと統一
    ---------------------------------------------------------------- */
 :root {
-    /* 表面・背景（ワイン×ベージュ×ゴールド調・ライトモード） */
-    --admin-bg: #faf6ee;                /* 温かみのあるシャンパン・クリーム */
-    --admin-bg-gradient: linear-gradient(180deg, #faf6ee 0%, #f5ede0 100%);
-    --admin-surface: #ffffff;           /* カード・パネルは白で抜けを保つ */
-    --admin-surface-alt: #f7efe1;       /* 入力背景・hover 用ベージュ */
-    --admin-surface-soft: #f0e6d4;      /* 強調セクション背景 */
-    --admin-card: #ffffff;
-    --admin-card-hover: #fbf3e5;        /* 行 hover：薄いシャンパン */
-    --admin-sidebar: #ffffff;
-    --admin-sidebar-shine: linear-gradient(180deg, rgba(168, 85, 247, 0.08), transparent 60%);
-    --admin-header: #ffffff;
+    /* === 表面・背景：ダークモード（メインアプリと同じ） === */
+    --admin-bg: #0a0a0a;                                   /* メインの --dark-bg と統一 */
+    --admin-bg-gradient: linear-gradient(180deg, #0a0a0a 0%, #050505 100%);
+    --admin-surface: #141414;                              /* メインの --surface と統一 */
+    --admin-surface-alt: rgba(255, 255, 255, 0.04);
+    --admin-surface-soft: rgba(168, 85, 247, 0.08);
+    --admin-card: #1a1a1a;                                 /* メインの --color-card-strong と統一 */
+    --admin-card-hover: rgba(168, 85, 247, 0.06);
+    --admin-sidebar: rgba(20, 20, 20, 0.96);
+    --admin-sidebar-shine: linear-gradient(180deg, rgba(168, 85, 247, 0.18), transparent 60%);
+    --admin-header: rgba(10, 10, 10, 0.92);
 
-    /* 罫線（ベージュ系） */
-    --admin-line: #e8dccd;
-    --admin-line-soft: #f1e8d8;
-    --admin-line-strong: #d4c5b0;
+    /* === 罫線：アメジスト透過（メインと同じ） === */
+    --admin-line: rgba(168, 85, 247, 0.20);                /* メインの --color-border と統一 */
+    --admin-line-soft: rgba(168, 85, 247, 0.10);
+    --admin-line-strong: rgba(168, 85, 247, 0.40);         /* メインの --color-border-strong と統一 */
 
-    /* 影 */
-    --admin-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.08);
-    --admin-shadow-lg: 0 4px 6px -2px rgba(15, 23, 42, 0.05), 0 12px 24px -8px rgba(15, 23, 42, 0.12);
-    --admin-shadow-popover: 0 10px 30px rgba(15, 23, 42, 0.18), 0 4px 12px rgba(15, 23, 42, 0.08);
+    /* === 影：ダーク背景向けに深く調整 === */
+    --admin-shadow: 0 2px 6px rgba(0, 0, 0, 0.40), 0 1px 2px rgba(0, 0, 0, 0.30);
+    --admin-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.55), 0 4px 8px rgba(0, 0, 0, 0.35);
+    --admin-shadow-popover: 0 12px 40px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(168, 85, 247, 0.25);
 
-    /* テキスト */
-    --admin-text: #0f172a;
-    --admin-sub: #475569;
-    --admin-muted: #64748b;
-    --admin-disabled: #94a3b8;
-    --admin-accent: #0f172a;
-    --admin-ink: #ffffff;
+    /* === テキスト：ダーク背景向け === */
+    --admin-text: #f5f5f5;                                 /* メインの --color-text-header と統一 */
+    --admin-sub: #a0a0a0;                                  /* メインの --color-text-muted と統一 */
+    --admin-muted: #6b6b6b;
+    --admin-disabled: #525252;
+    --admin-accent: #f5f5f5;
+    --admin-ink: #0a0a0a;                                  /* アメジスト/ゴールド面の上に置く文字色 */
 
-    /* ============================================================
-       theme 整合ガイド：
-       - admin 側 = bordeaux (deep wine #4A122A) を「運営ブランド」として使う
-       - front (mobile) 側 = mauve pink (#d670a2) を「ユーザー向けアクセント」として使う
-       - 両者は同じ「赤系・落ち着いた華やかさ」のファミリーで関連性は保ちつつ、
-         画面用途で読み分ける。具体的には:
-           * 管理画面の sidebar / header / 行 hover / 主要 CTA = bordeaux
-           * 管理者がユーザー向け面にプレビュー/送信する要素 = mauve（front と一致）
-       - mauve を admin で使うときは下の --admin-accent-mauve を経由する。
-       ============================================================ */
+    /* === アクセント：アメジスト（メインの --gold ファミリーと完全一致） === */
+    --admin-primary: #a78bfa;                              /* メインの --gold と統一 */
+    --admin-primary-hover: #c4b5fd;
+    --admin-primary-active: #7c3aed;
+    --admin-primary-soft: rgba(168, 85, 247, 0.12);
+    --admin-primary-soft-hover: rgba(168, 85, 247, 0.22);
+    --admin-primary-border: rgba(168, 85, 247, 0.40);
 
-    /* アクセント（app.cssと同じボルドー＋シャンパンゴールド色調・ライトモード版） */
-    --admin-primary: #4A122A;          /* ボルドー（プライマリ） */
-    --admin-primary-hover: #5e1838;
-    --admin-primary-active: #380e1f;
-    --admin-primary-soft: #fdf4f7;     /* very light bordeaux tint */
-    --admin-primary-soft-hover: #fae9f0;
-    --admin-primary-border: #ebcdd7;
-
-    /* front 側 --accent と同じ mauve pink。ユーザー向けプレビュー等で使用 */
+    /* === mauve pink：front 側 --accent と同じ。ユーザー向け要素プレビュー用 === */
     --admin-accent-mauve: #d670a2;
     --admin-accent-mauve-hover: #c05d8e;
-    --admin-accent-mauve-soft: #fbe9f1;
+    --admin-accent-mauve-soft: rgba(214, 112, 162, 0.16);
 
-    /* シャンパンゴールド（特別なアクセント・プレミアム表現用）
-       実体は mauve light/deep（紫ファミリー）。「gold」名称はレガシー互換。
-       front の --bonus-gold-* とは別系統（front 側は採用ボーナスのみで使う） */
-    --admin-gold-bright: #a78bfa;
-    --admin-gold-deep: #7c3aed;
-    --admin-gold-darker: #92590a;      /* 白背景でも読めるゴールド系テキスト */
-    --admin-gold-soft: #fdf6e3;
-    --admin-gold-border: #f0d480;
-    --admin-gold-grad: linear-gradient(145deg, #a78bfa, #7c3aed);
+    /* === ゴールド（プレミアム表現用・実ゴールド） === */
+    --admin-gold-bright: #d4af37;                          /* DESIGN.md の --color-gold-from と統一 */
+    --admin-gold-deep: #b8860b;                            /* --color-gold-to と統一 */
+    --admin-gold-darker: #b8860b;
+    --admin-gold-soft: rgba(212, 175, 55, 0.12);
+    --admin-gold-border: rgba(212, 175, 55, 0.45);
+    --admin-gold-grad: linear-gradient(145deg, #f6d36a, #d4af37 60%, #b8860b);
 
-    /* レガシー名（dashboard等のview側がvarで参照しているため互換維持） */
-    --admin-blue: #4A122A;
-    --admin-purple: #4A122A;
-    --admin-green: #16a34a;
-    --admin-yellow: #d97706;
-    --admin-red: #dc2626;
-    --admin-gold: #7c3aed;
-    --admin-gold-strong: #92590a;
-    --admin-gold-mid: #7c3aed;
+    /* === レガシー名（view側 var 参照のため互換維持） === */
+    --admin-blue: #a78bfa;
+    --admin-purple: #a78bfa;
+    --admin-green: #6ee7b7;
+    --admin-yellow: #fcd34d;
+    --admin-red: #fca5a5;
+    --admin-gold: #d4af37;
+    --admin-gold-strong: #b8860b;
+    --admin-gold-mid: #d4af37;
 
-    /* ステータス（success/warning/danger は意味色のため維持。info はブランドのボルドー寄りに） */
-    --status-success-bg: #ecfdf5;
-    --status-success-fg: #047857;
-    --status-success-bd: #a7f3d0;
-    --status-warning-bg: #fffbeb;
-    --status-warning-fg: #b45309;
-    --status-warning-bd: #c4b5fd;
-    --status-danger-bg: #fef2f2;
-    --status-danger-fg: #b91c1c;
-    --status-danger-bd: #fecaca;
-    --status-info-bg: #fdf4f7;
-    --status-info-fg: #4A122A;
-    --status-info-bd: #ebcdd7;
-    --status-neutral-bg: #f0e6d4;
-    --status-neutral-fg: #5b4a3a;
-    --status-neutral-bd: #d4c5b0;
+    /* === ステータス：ダークモードで読みやすい色に再調整 === */
+    --status-success-bg: rgba(22, 163, 74, 0.18);
+    --status-success-fg: #86efac;
+    --status-success-bd: rgba(22, 163, 74, 0.40);
+    --status-warning-bg: rgba(217, 119, 6, 0.18);
+    --status-warning-fg: #fcd34d;
+    --status-warning-bd: rgba(217, 119, 6, 0.45);
+    --status-danger-bg: rgba(185, 28, 28, 0.20);
+    --status-danger-fg: #fca5a5;
+    --status-danger-bd: rgba(185, 28, 28, 0.45);
+    --status-info-bg: rgba(168, 85, 247, 0.14);
+    --status-info-fg: #c4b5fd;
+    --status-info-bd: rgba(168, 85, 247, 0.40);
+    --status-neutral-bg: rgba(255, 255, 255, 0.05);
+    --status-neutral-fg: #a0a0a0;
+    --status-neutral-bd: rgba(255, 255, 255, 0.12);
 
-    --font-admin-sans: "Noto Sans JP", "Hiragino Sans", "Meiryo", system-ui, -apple-system, sans-serif;
-    --font-admin-serif: var(--font-admin-sans);
-    --font-admin-eyebrow: var(--font-admin-sans);
+    /* === タイポグラフィ：メインと統一 === */
+    --font-admin-sans:     "Noto Sans JP", system-ui, -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Meiryo", sans-serif;
+    --font-admin-serif:    var(--font-admin-sans);
+    --font-admin-eyebrow:  "Montserrat", var(--font-admin-sans);   /* DESIGN.md §3 と統一 */
 
-    /* レイアウト寸法 */
+    /* === レイアウト寸法（admin 維持・触らない） === */
     --admin-sidebar-width: 240px;
     --admin-content-pad: 12px;
     --admin-header-h: 56px;
@@ -980,7 +970,7 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
 .form-control.is-invalid,
 .admin-input.is-invalid {
     border-color: var(--admin-red);
-    background: #fff7f7;
+    background: var(--status-danger-bg);
 }
 
 /* ----------------------------------------------------------------
@@ -1253,9 +1243,9 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
     font-weight: 700;
 }
 
-/* デュアル軸チャートの棒（ボルドー） */
+/* デュアル軸チャートの棒（アメジスト） */
 .dashboard-chart-bar {
-    fill: #4A122A;
+    fill: #a78bfa;
     opacity: 0.92;
 }
 
@@ -3403,7 +3393,7 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
     padding: 0 12px;
     border: 1px solid rgba(74, 18, 42, 0.18);
     border-radius: 10px;
-    background: #fff;
+    background: var(--admin-surface);
     color: var(--admin-text);
     font-size: 0.95rem;
 }
@@ -3612,7 +3602,7 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
     align-items: flex-start;
     padding: 10px 12px;
     border-radius: 12px;
-    background: #fff;
+    background: var(--admin-surface);
     border: 1px solid rgba(74, 18, 42, 0.08);
     cursor: pointer;
     transition: border-color 0.15s ease, background 0.15s ease;
@@ -3713,7 +3703,7 @@ a.btn-action.btn-action-danger:hover {
 }
 .spec-tab:hover { color: var(--admin-text); background: rgba(255, 255, 255, 0.5); }
 .spec-tab.is-active {
-    background: linear-gradient(135deg, #ffffff, rgba(168, 85, 247, 0.12));
+    background: linear-gradient(135deg, var(--admin-surface), rgba(168, 85, 247, 0.12));
     color: var(--admin-primary);
     box-shadow: var(--admin-shadow);
 }
@@ -3828,7 +3818,7 @@ a.btn-action.btn-action-danger:hover {
     padding: 8px 10px;
     border: 1px solid rgba(74, 18, 42, 0.18);
     border-radius: 8px;
-    background: #fff;
+    background: var(--admin-surface);
     color: var(--admin-text);
     font-size: 0.92rem;
     font-family: inherit;
@@ -3883,7 +3873,7 @@ a.btn-action.btn-action-danger:hover {
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: #fff;
+    background: var(--admin-surface);
     transition: transform 0.15s ease;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
@@ -3917,7 +3907,7 @@ a.btn-action.btn-action-danger:hover {
     padding: 4px 8px;
     border: 1px solid rgba(74, 18, 42, 0.18);
     border-radius: 6px;
-    background: #fff;
+    background: var(--admin-surface);
     color: var(--admin-text);
     font-variant-numeric: tabular-nums;
     font-weight: 700;
@@ -4066,7 +4056,7 @@ a.btn-action.btn-action-danger:hover {
     left: 0;
     z-index: 30;
     width: min(420px, calc(100vw - 32px));
-    background: #fff;
+    background: var(--admin-surface);
     border-radius: 14px;
     border: 1px solid rgba(74, 18, 42, 0.12);
     box-shadow: 0 18px 40px rgba(74, 18, 42, 0.18);
@@ -4083,7 +4073,7 @@ a.btn-action.btn-action-danger:hover {
     left: 14px;
     width: 12px;
     height: 12px;
-    background: #fff;
+    background: var(--admin-surface);
     border-top: 1px solid rgba(74, 18, 42, 0.12);
     border-left: 1px solid rgba(74, 18, 42, 0.12);
     transform: rotate(45deg);
@@ -4255,7 +4245,7 @@ a.btn-action.btn-action-danger:hover {
 .sales-kpi-card {
     padding: 16px 18px;
     border-radius: 16px;
-    background: #fff;
+    background: var(--admin-surface);
     border: 1px solid rgba(74, 18, 42, 0.08);
     box-shadow: var(--admin-shadow);
     display: flex;
@@ -4419,7 +4409,7 @@ a.btn-action.btn-action-danger:hover {
     font-weight: 500;
 }
 .dashboard-updated-bar__time {
-    font-family: "Lato", "Noto Sans JP", sans-serif;
+    font-family: "Noto Sans JP", system-ui, sans-serif;
     font-variant-numeric: tabular-nums;
     font-weight: 700;
     color: var(--admin-text);
@@ -4702,7 +4692,7 @@ a.dashboard-kpi-card:hover .dashboard-kpi-card__arrow,
     transition: width .3s ease;
 }
 .deposit-summary-progress__text {
-    font-family: "Lato", "Noto Sans JP", sans-serif;
+    font-family: "Noto Sans JP", system-ui, sans-serif;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }
@@ -4841,7 +4831,7 @@ a.dashboard-kpi-card:hover .dashboard-kpi-card__arrow,
 }
 .verification-preview__image-wrap {
     position: relative;
-    background: #0f172a;
+    background: #0a0a0a;
     overflow: auto;
     display: flex; align-items: center; justify-content: center;
     min-height: 320px;
@@ -4921,7 +4911,7 @@ a.dashboard-kpi-card:hover .dashboard-kpi-card__arrow,
     border-radius: 4px;
     border: 1px solid var(--admin-line-strong);
     background: var(--admin-surface);
-    font-family: "Lato", "Noto Sans JP", sans-serif;
+    font-family: "Noto Sans JP", system-ui, sans-serif;
     font-size: 10px;
     color: var(--admin-text);
 }
@@ -5158,9 +5148,9 @@ section[id^="sec-"] {
     letter-spacing: 0.02em;
 }
 .manager-role-badge--owner {
-    background: linear-gradient(135deg, #fdf6e3, #f0d480);
-    color: #92590a;
-    border: 1px solid #e4c463;
+    background: linear-gradient(135deg, #f6d36a, #d4af37 60%, #b8860b);
+    color: #1a0f00;
+    border: 1px solid rgba(212, 175, 55, 0.65);
 }
 .manager-role-badge--owner i { color: #b8860b; font-size: 10px; }
 .manager-role-badge--staff {
@@ -5291,7 +5281,7 @@ section[id^="sec-"] {
     color: var(--admin-sub);
     font-size: 12px;
     font-weight: 800;
-    font-family: "Lato", "Noto Sans JP", sans-serif;
+    font-family: "Noto Sans JP", system-ui, sans-serif;
 }
 
 .sales-rank-item__body {
@@ -5348,7 +5338,7 @@ section[id^="sec-"] {
 .sales-rank-item__meta strong {
     color: var(--admin-text);
     font-weight: 800;
-    font-family: "Lato", "Noto Sans JP", sans-serif;
+    font-family: "Noto Sans JP", system-ui, sans-serif;
 }
 .sales-rank-item__commission {
     margin-left: auto;
@@ -5428,9 +5418,9 @@ section[id^="sec-"] {
     border-color: var(--admin-primary-border);
 }
 .audience-chip--guest {
-    background: #f3f4f6;
-    color: #4b5563;
-    border-color: #d1d5db;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--admin-sub);
+    border-color: rgba(255, 255, 255, 0.18);
 }
 
 /* ============================================================
@@ -5575,7 +5565,7 @@ section[id^="sec-"] {
     word-break: break-all;
 }
 .bank-current-item__value code {
-    font-family: "Lato", "Noto Sans JP", monospace;
+    font-family: "Noto Sans JP", ui-monospace, monospace;
     font-size: 13px;
     background: var(--admin-surface-alt);
     padding: 1px 6px;

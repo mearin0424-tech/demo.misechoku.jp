@@ -180,13 +180,44 @@ class MypageController extends Controller
             $subImages = [];
         }
 
+        // 求人票サマリ用に必要なカラムを動的に取得（マルチスキーマ対応）
+        $jobCols = ['id', 'working_hours', 'working_day', 'regular_holiday'];
+        foreach (['qualification', 'pr', 'job_content', 'catch_copy',
+                  'regular_hourly_wage', 'hourly_wage_regular',
+                  'trial_hourly_wage', 'help_hourly_wage',
+                  'bonus_reward', 'noruma_reward', 'bonus_condition',
+                  'regular_status', 'status'] as $optCol) {
+            if (Schema::hasColumn('shop_jobs', $optCol)) {
+                $jobCols[] = $optCol;
+            }
+        }
         $jobRowQ = DB::table('shop_jobs')
             ->where('shop_id', $shopId)
-            ->select('working_hours', 'working_day', 'regular_holiday');
+            ->select($jobCols);
         if (Schema::hasColumn('shop_jobs', 'job_type') && !Schema::hasColumn('shop_jobs', 'regular_status')) {
             $jobRowQ->where('job_type', 1);
         }
         $jobRow = $jobRowQ->first();
+
+        // 求人票の表示用サマリ
+        $jobSummary = [
+            'is_published'    => $recruitStatus === '掲載中',
+            'status_label'    => $recruitStatus,
+            'catch_copy'      => trim((string) ($jobRow->catch_copy ?? '')),
+            'pr_message'      => trim((string) ($jobRow->pr ?? '')),
+            'job_content'     => trim((string) ($jobRow->job_content ?? '')),
+            'regular_wage'    => (int) ($jobRow->regular_hourly_wage ?? $jobRow->hourly_wage_regular ?? 0),
+            'trial_wage'      => (int) ($jobRow->trial_hourly_wage ?? 0),
+            'help_wage'       => (int) ($jobRow->help_hourly_wage ?? 0),
+            'bonus_reward'    => (int) ($jobRow->bonus_reward ?? $jobRow->noruma_reward ?? 0),
+            'bonus_condition' => trim((string) ($jobRow->bonus_condition ?? '')),
+            'working_hours'   => trim((string) ($jobRow->working_hours ?? '')),
+            'working_days'    => trim((string) ($jobRow->working_day ?? '')),
+            'regular_holiday' => trim((string) ($jobRow->regular_holiday ?? '')),
+            'qualification'   => trim((string) ($jobRow->qualification ?? '')),
+            'applicant_count' => $applicantCount,
+            'hired_count'     => $hiredCount,
+        ];
         $industryNames = $this->resolveShopIndustryNames($shopId, $row?->industry_id ?? null);
         $shopTagGroups = $this->resolveShopInfoTagGroups($shopId);
 
@@ -255,6 +286,7 @@ class MypageController extends Controller
                 'hired_count' => $hiredCount,
                 'payment_pending_count' => $paymentPendingCount,
             ],
+            'jobSummary' => $jobSummary,
         ]);
     }
 
@@ -295,7 +327,11 @@ class MypageController extends Controller
     }
 
     /**
-     * 店舗側の振込先口座情報登録（デモ用）
+     * 店舗側の振込先口座情報登録
+     *
+     * 入力された口座情報は BillingManagementService::saveShopBankAccount() を経由して
+     * bank_accounts テーブル（holder_type = shop）に永続化される。
+     * 請求書発行・入金確認フローで参照される。
      */
     public function updateBank(Request $request)
     {
@@ -379,7 +415,10 @@ class MypageController extends Controller
 
     /**
      * 営業許可証・風営許可証のアップロード
-     * ※ 現段階ではモックとしてストレージに保存し、審査・承認は別途運営画面で行う想定
+     *
+     * 提出ファイルは storage に保存し、shop_license_documents テーブルに status=pending で登録される。
+     * 承認/差戻しは運営画面（Admin\VerificationController）で行う。
+     * 承認済みドキュメントは取り下げないと差し替え不可。
      */
     public function uploadDocument(Request $request)
     {

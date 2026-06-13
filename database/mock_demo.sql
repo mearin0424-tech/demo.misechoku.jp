@@ -1743,6 +1743,30 @@ CREATE TABLE `user_talk_templates` (
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `support_inquiries`
+-- サポート問い合わせフォーム送信内容
+--
+
+CREATE TABLE `support_inquiries` (
+  `id` bigint UNSIGNED NOT NULL,
+  `sender_type` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'cast / shop / guest',
+  `sender_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `category` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'account / feature / bug / feedback / other',
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `body` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'new' COMMENT 'new / in_progress / resolved / dismissed',
+  `assigned_admin_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `admin_note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ip_address` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `responded_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 --
 -- ダンプしたテーブルのインデックス
 --
@@ -2146,6 +2170,15 @@ ALTER TABLE `user_talk_templates`
   ADD KEY `user_talk_templates_owner_idx` (`owner_type`,`owner_id`,`sort_order`);
 
 --
+-- テーブルのインデックス `support_inquiries`
+--
+ALTER TABLE `support_inquiries`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `support_inquiries_status_idx` (`status`,`created_at`),
+  ADD KEY `support_inquiries_sender_idx` (`sender_type`,`sender_id`),
+  ADD KEY `support_inquiries_category_idx` (`category`);
+
+--
 -- ダンプしたテーブルの AUTO_INCREMENT
 --
 
@@ -2435,6 +2468,12 @@ ALTER TABLE `talk_blocks`
 -- テーブルの AUTO_INCREMENT `user_talk_templates`
 --
 ALTER TABLE `user_talk_templates`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- テーブルの AUTO_INCREMENT `support_inquiries`
+--
+ALTER TABLE `support_inquiries`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 -- --------------------------------------------------------
