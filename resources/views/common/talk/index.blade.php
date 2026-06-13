@@ -31,7 +31,7 @@
             @forelse($ongoingTalks as $index => $talk)
                 <div class="talk-item" data-partner-id="{{ $talk['partner_id'] }}" data-original-index="{{ $index }}">
                     <a href="{{ route($targetRoute, $talk['partner_id']) }}" class="talk-item-main">
-                        <img src="{{ $talk['avatar'] }}" class="talk-avatar" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($talk['name']) }}&background=4d1a1a&color=fff';">
+                        <img loading="lazy" decoding="async" src="{{ $talk['avatar'] }}" class="talk-avatar" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($talk['name']) }}&background=4d1a1a&color=fff';">
                         <div class="talk-info">
                             <div class="talk-header">
                                 <span class="talk-name">{{ $talk['name'] }}</span>
@@ -71,7 +71,7 @@
                             <div class="request-upper-link">
                         @endif
                             <div class="request-main">
-                                <img src="{{ $talk['avatar'] }}" class="request-img">
+                                <img loading="lazy" decoding="async" src="{{ $talk['avatar'] }}" class="request-img">
                                 <div class="request-content">
                                     <div class="request-top-row">
                                         <div class="name">{{ $talk['name'] }}@if(isset($talk['age']) && $talk['age'] !== null) ({{ $talk['age'] }})@endif</div>
@@ -101,7 +101,7 @@
                 @else
                     <div class="talk-item" data-partner-id="{{ $talk['partner_id'] }}">
                         <a href="{{ route($targetRoute, $talk['partner_id']) }}" class="talk-item-main">
-                            <img src="{{ $talk['avatar'] }}" class="talk-avatar" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($talk['name']) }}&background=4d1a1a&color=fff';">
+                            <img loading="lazy" decoding="async" src="{{ $talk['avatar'] }}" class="talk-avatar" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($talk['name']) }}&background=4d1a1a&color=fff';">
                             <div class="talk-info">
                                 <div class="talk-header">
                                     <span class="talk-name">{{ $talk['name'] }}</span>

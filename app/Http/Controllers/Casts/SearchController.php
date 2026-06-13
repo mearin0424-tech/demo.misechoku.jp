@@ -302,6 +302,9 @@ class SearchController extends BaseSearchController
         }
         unset($it);
 
+        // KEEP/LIKE 初期状態を付与
+        $items = $this->attachFavoriteStates($items, 'shop');
+
         return $items;
     }
 

@@ -10,7 +10,7 @@
                 12の質問であなたの強みを診断します！
             </p>
 
-            <img src="{{ asset('assets/images/guide/guide-character.png') }}" alt="オコジョガイド" id="top-image">
+            <img loading="lazy" decoding="async" src="{{ asset('assets/images/guide/guide-character.png') }}" alt="オコジョガイド" id="top-image">
             <br><br>
             <button id="start-btn" type="button" disabled>読み込み中...</button>
         </div>
@@ -25,7 +25,7 @@
             <h2>あなたの接客タイプは...</h2>
             <h3 id="result-type-title"></h3>
 
-            <img id="result-image" src="" alt="診断結果イラスト" style="display: none;">
+            <img loading="lazy" decoding="async" id="result-image" src="" alt="診断結果イラスト" style="display: none;">
 
             <div class="result-section">
                 <p class="section-title">あなたの強み</p>

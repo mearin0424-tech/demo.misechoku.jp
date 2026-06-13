@@ -674,8 +674,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (btn) btn.disabled = false;
                     if (res.ok) { closeBankModal(); window.location.reload(); return; }
                     var errs = res.body && res.body.errors ? Object.values(res.body.errors).flat() : [];
-                    alert(errs.length ? errs.join(' ') : (res.body && res.body.message ? res.body.message : '保存に失敗しました。'));
-                }).catch(function () { if (btn) btn.disabled = false; alert('保存に失敗しました。'); });
+                    (window.appToast || window.alert)(errs.length ? errs.join(' ') : (res.body && res.body.message ? res.body.message : '保存に失敗しました。'), 'error');
+                }).catch(function () { if (btn) btn.disabled = false; (window.appToast || window.alert)('保存に失敗しました。', 'error'); });
         });
     }
 
@@ -803,7 +803,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var fd = new FormData(); fd.append('_token', csrfToken);
         fetch(depositConfirmUrl, { method: 'POST', headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, body: fd })
             .then(function (r) { return r.json(); }).then(function () { window.location.reload(); })
-            .catch(function () { alert('処理に失敗しました。'); });
+            .catch(function () { (window.appToast || window.alert)('処理に失敗しました。', 'error'); });
     }
 
     document.querySelectorAll('[data-case-action]').forEach(function (btn) {

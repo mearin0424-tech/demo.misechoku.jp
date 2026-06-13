@@ -1,23 +1,41 @@
-@php $profileRoute = $profileRoute ?? 'shop.castprofileview.show'; @endphp
-<a href="{{ route($profileRoute, $c['id']) }}" class="cast-list-card">
-    <div class="card-thumb">
-        <img src="{{ $c['img'] ?? asset('assets/images/common/no-image.png') }}" alt="{{ $c['name'] }}" onerror="this.onerror=null; this.src='{{ asset('assets/images/common/user-default.svg') }}'">
-    </div>
-    <div class="card-info">
-        <div class="info-header info-header-one-line">
-            <span class="name serif-font">{{ $c['name'] }}</span>
-            @if(isset($c['age']))
-            <span class="age numeric-font opacity-70">({{ $c['age'] }})</span>
-            @endif
-            @if(!empty($c['is_match']))
-                <span class="match-badge text-gold font-bold"><i class="fas fa-heart"></i> マッチング中</span>
-            @endif
+@php
+    $profileRoute = $profileRoute ?? 'shop.castprofileview.show';
+    $isCastPortal = (bool) ($isCastPortal ?? false);
+    $itemType = $isCastPortal ? 'shop' : 'cast';
+    $locLine = trim((string) (($c['pref'] ?? '') . ($c['city'] ?? '')));
+@endphp
+<li class="connection-item connection-item--clickable tl-row tl-row--{{ $itemType }} tl-row--has-actions" data-fav-remove-on-deactivate>
+    <a href="{{ route($profileRoute, $c['id']) }}" class="connection-item__link tl-row__link">
+        <div class="tl-row__thumb-wrap">
+            <img loading="lazy" decoding="async" src="{{ $c['img'] ?? asset('assets/images/common/no-image.png') }}"
+                 alt="" class="tl-row__thumb"
+                 onerror="this.onerror=null; this.src='{{ asset('assets/images/common/user-default.svg') }}'">
         </div>
-        @if(empty($c['is_match']))
-        <div class="info-sub opacity-70">
-            {{ $c['created_at'] ?? '' }} にライク
+        <div class="tl-row__body">
+            <h3 class="tl-row__name">
+                {{ $c['name'] ?? '' }}
+                @if(!empty($c['age']))
+                    <span class="tl-row__age">{{ $c['age'] }}歳</span>
+                @endif
+                @if(!empty($c['is_match']))
+                    <span class="tl-row__match-badge"><i class="fas fa-heart"></i> マッチング中</span>
+                @endif
+            </h3>
+            <div class="tl-row__meta">
+                @if($locLine !== '')
+                    <span class="tl-row__loc"><i class="fas fa-map-marker-alt"></i>{{ $locLine }}</span>
+                @endif
+                @if(empty($c['is_match']) && !empty($c['created_at']))
+                    <span class="tl-row__time"><i class="fas fa-heart"></i>{{ $c['created_at'] }} にライク</span>
+                @endif
+            </div>
         </div>
-        @endif
+    </a>
+    <div class="tl-row__actions" aria-label="クイックアクション">
+        <button type="button" class="tl-row__action-btn tl-row__action-btn--like"
+                data-fav-toggle data-action="like" data-item-type="{{ $itemType }}" data-item-id="{{ $c['id'] }}"
+                aria-label="いいねを取り消す" aria-pressed="true">
+            <i class="fas fa-heart" aria-hidden="true"></i>
+        </button>
     </div>
-    <div class="card-arrow"><i class="fas fa-chevron-right"></i></div>
-</a>
+</li>

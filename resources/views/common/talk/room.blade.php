@@ -728,7 +728,7 @@
         .then(function (r) { return r.json(); })
         .then(function (data) {
             if (!data.success || !data.request_target) {
-                window.alert(data.message || 'データの取得に失敗しました。');
+                (window.appToast || window.alert)(data.message || 'データの取得に失敗しました。', 'error');
                 return;
             }
             pendingReviewApplicationId = applicationId;
@@ -737,7 +737,7 @@
             showBonusConfirmModal(applicationId, pendingReviewTarget);
         })
         .catch(function () {
-            window.alert('読み込みに失敗しました。');
+            (window.appToast || window.alert)('読み込みに失敗しました。', 'error');
         });
     }
 
@@ -893,7 +893,7 @@
                 window.location.reload();
             })
             .catch(function (err) {
-                window.alert(err.message || '勤務完了報告に失敗しました。');
+                (window.appToast || window.alert)(err.message || '勤務完了報告に失敗しました。', 'error');
             });
         });
     }
@@ -966,7 +966,7 @@
                 closeBonusModal();
                 if (pendingReviewApplicationId && pendingReviewTarget) {
                     if (pendingReviewTarget.review_exists) {
-                        window.alert('レビュー投稿は完了しています。');
+                        (window.appToast || window.alert)('レビュー投稿は完了しています。', 'info');
                         return;
                     }
                     showReviewModalWithTarget(pendingReviewApplicationId, pendingReviewTarget);

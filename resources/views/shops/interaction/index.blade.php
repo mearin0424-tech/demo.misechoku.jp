@@ -6,37 +6,66 @@
 {{-- 共通サブヘッダーおよび画面専用CSSの読み込み --}}
 <link rel="stylesheet" href="{{ asset('assets/css/sub-header.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/interaction.css') }}">
+{{-- タイムライン行スタイル + KEEP/LIKE トースト --}}
+<link rel="stylesheet" href="{{ asset('assets/css/search.css') }}">
 @endpush
+
+@php
+    $isCastPortal = !empty($isCastPortal);
+    $keepLabel = $isCastPortal ? 'キープ中のお店' : 'キープ中のキャスト';
+    // ポータル別：cast portal 側は「店舗から受け取った LIKE」、shop portal 側は「自分が送った LIKE」を出す
+    $likeCasts = $isCastPortal ? ($receivedLikeCasts ?? []) : ($sentLikeCasts ?? []);
+    $likeLabel = $isCastPortal ? '受け取ったいいね' : '送ったいいね';
+    $emptyKeepMsg = $isCastPortal ? 'お気に入り登録したお店はいません。' : 'お気に入り登録したキャストはいません。';
+    $emptyLikeMsg = $isCastPortal ? 'まだお店からいいねは届いていません。' : 'まだ「いいね」を送っていません。';
+@endphp
 
 @section('content')
 <div class="has-sub-header">
     @include('layouts.parts.sub-header', [
         'tabs' => [
-            ['id' => 'pane-keep', 'label' => 'キープ', 'active' => true],
+            ['id' => 'pane-keep', 'label' => $keepLabel, 'active' => true],
+            ['id' => 'pane-like', 'label' => $likeLabel, 'active' => false],
         ]
     ])
 </div>
 
-<div class="tab-content-container contents tab-page-body">
+<div class="tab-content-container tab-page-body">
 
     {{-- タブ：キープ (KEEP) --}}
     <div id="pane-keep" class="tab-pane active">
         @if (empty($keepCasts))
             <div class="no-data-wrapper">
                 <i class="fas fa-star opacity-10 text-5xl mb-3 block"></i>
-                <p class="no-data-msg">
-                    @if(!empty($isCastPortal))
-                        お気に入り登録したお店はいません。
-                    @else
-                        お気に入り登録したキャストはいません。
-                    @endif
-                </p>
+                <p class="no-data-msg">{{ $emptyKeepMsg }}</p>
             </div>
         @else
-            @foreach($keepCasts as $c)
-                @include('shops.interaction.keep', ['c' => $c, 'profileRoute' => $profileRoute ?? 'shop.castprofileview.show'])
-            @endforeach
+            <ul class="connection-list connection-list--interaction">
+                @foreach($keepCasts as $c)
+                    @include('shops.interaction.keep', ['c' => $c, 'profileRoute' => $profileRoute ?? 'shop.castprofileview.show', 'isCastPortal' => $isCastPortal])
+                @endforeach
+            </ul>
         @endif
+    </div>
+
+    {{-- タブ：ライク (LIKE) --}}
+    <div id="pane-like" class="tab-pane">
+        @if (empty($likeCasts))
+            <div class="no-data-wrapper">
+                <i class="fas fa-heart opacity-10 text-5xl mb-3 block"></i>
+                <p class="no-data-msg">{{ $emptyLikeMsg }}</p>
+            </div>
+        @else
+            <ul class="connection-list connection-list--interaction">
+                @foreach($likeCasts as $c)
+                    @include('shops.interaction.like', ['c' => $c, 'profileRoute' => $profileRoute ?? 'shop.castprofileview.show', 'isCastPortal' => $isCastPortal])
+                @endforeach
+            </ul>
+        @endif
+    </div>
+
+    {{-- おすすめは両タブ共通で常時表示 --}}
+    <div class="interaction-recommend-wrap">
 
         {{-- おすすめ（条件が似ているお店／キャスト） --}}
         @php
@@ -242,6 +271,7 @@
 @push('scripts')
 {{-- 共通タブ切り替えJSの読み込み --}}
 <script src="{{ asset('assets/js/sub-header.js') }}"></script>
+<script src="{{ asset('assets/js/favorite-quick.js') }}"></script>
 <script>
 (function () {
     var modal = document.querySelector('[data-recommend-info-modal]');

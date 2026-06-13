@@ -322,12 +322,12 @@
                 var nameInput = form.querySelector('input[name="updater_name"]');
                 var unlock = form.querySelector('input[name="confirm_unlock"]');
                 if (!nameInput || nameInput.value.trim() === '') {
-                    alert('更新者名を入力してください。');
+                    (window.appToast || window.alert)('更新者名を入力してください。', 'error');
                     e.preventDefault();
                     return;
                 }
                 if (!unlock || !unlock.checked) {
-                    alert('「ロックを解除して更新する」にチェックしてください。');
+                    (window.appToast || window.alert)('「ロックを解除して更新する」にチェックしてください。', 'error');
                     e.preventDefault();
                     return;
                 }

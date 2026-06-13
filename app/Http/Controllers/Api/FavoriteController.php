@@ -59,10 +59,8 @@ class FavoriteController extends Controller
             return response()->json(['error' => 'Invalid target combination'], 422);
         }
 
-        // キャスト -> 店舗 LIKE は廃止
-        if ($action === 'like' && $senderType === Favorite::SENDER_CAST && $itemType === 'shop') {
-            return response()->json(['error' => 'Cast to shop like is disabled'], 422);
-        }
+        // 対称設計：cast → shop も shop → cast も LIKE 可能。
+        // 連打抑制（1日1回）は下の処理で双方向に共通適用される。
 
         $actionType = match ($action) {
             'keep' => Favorite::ACTION_KEEP,
@@ -114,14 +112,19 @@ class FavoriteController extends Controller
             $isActive = true;
         }
 
-        // 表示用の最新いいね数（受け手側に届いた LIKE をカウント。
-        // LIKE は仕様上 sender_type='shop' のみ なので絞り込みも一貫。）
+        // 表示用の最新いいね数。
+        // - キャスト宛 = sender_type=shop からの LIKE 件数
+        // - 店舗宛   = sender_type=cast からの LIKE 件数
         $likeCount = null;
         if ($action === 'like') {
             $likeCount = (int) DB::table('favorites')
                 ->where('action_type', Favorite::ACTION_LIKE)
-                ->when($itemType === 'cast', fn ($q) => $q->where('cast_id', $itemId))
-                ->when($itemType === 'shop', fn ($q) => $q->where('shop_id', $itemId))
+                ->when($itemType === 'cast', function ($q) use ($itemId) {
+                    $q->where('cast_id', $itemId)->where('sender_type', Favorite::SENDER_SHOP);
+                })
+                ->when($itemType === 'shop', function ($q) use ($itemId) {
+                    $q->where('shop_id', $itemId)->where('sender_type', Favorite::SENDER_CAST);
+                })
                 ->count();
         }
 

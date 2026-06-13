@@ -51,7 +51,7 @@
         'search'      => 'SEARCH',
         'mypage'      => 'MY PAGE',
         'talk'        => 'TALK',
-        'interaction' => 'CONNECTION',
+        'interaction' => 'KEEPS',
         'manage'      => 'MANAGEMENT',
         'register'    => 'ENTRY',
         'profile'     => 'PROFILE',

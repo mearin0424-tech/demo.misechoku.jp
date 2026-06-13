@@ -38,21 +38,25 @@
     }
   }
 
+  var toast = function (msg, variant) {
+    if (window.appToast) { window.appToast(msg, variant); } else { window.alert(msg); }
+  };
+
   function enableNotifications() {
     if (!('Notification' in window) || !('serviceWorker' in navigator)) {
-      alert('このブラウザは Push 通知に対応していません。');
+      toast('このブラウザは Push 通知に対応していません。', 'error');
       return Promise.resolve();
     }
     if (Notification.permission === 'granted') {
       return subscribeAndSend();
     }
     if (Notification.permission === 'denied') {
-      alert('通知がブロックされています。ブラウザ設定で許可してください。');
+      toast('通知がブロックされています。ブラウザ設定で許可してください。', 'error');
       return Promise.resolve();
     }
     return Notification.requestPermission().then(function (perm) {
       if (perm !== 'granted') {
-        alert('通知が許可されませんでした。');
+        toast('通知が許可されませんでした。', 'error');
         return;
       }
       return subscribeAndSend();
@@ -98,10 +102,10 @@
       })
       .then(function () {
         if (typeof window.showPushEnabled === 'function') window.showPushEnabled();
-        alert('通知を有効にしました。「テスト通知」で送信できます。');
+        toast('通知を有効にしました。「テスト通知」で送信できます。');
       })
       .catch(function (err) {
-        alert('エラー: ' + (err.message || '不明なエラー'));
+        toast('エラー: ' + (err.message || '不明なエラー'), 'error');
       });
   }
 
@@ -122,14 +126,14 @@
           if (typeof window.showPushTestResult === 'function') {
             window.showPushTestResult(data.message);
           } else {
-            alert(data.message);
+            toast(data.message);
           }
         } else {
-          alert(data.message || '送信に失敗しました');
+          toast(data.message || '送信に失敗しました', 'error');
         }
       })
       .catch(function () {
-        alert('リクエストに失敗しました');
+        toast('リクエストに失敗しました', 'error');
       });
   }
 

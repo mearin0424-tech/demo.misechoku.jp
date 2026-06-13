@@ -18,7 +18,7 @@
             <span>このデモでは、送信ボタンを押しても実際の送信処理は行われません。</span>
         </div>
 
-        <form onsubmit="event.preventDefault(); alert('デモ環境のため送信は行われません。');">
+        <form onsubmit="event.preventDefault(); (window.appToast || window.alert)('デモ環境のため送信は行われません。', 'info', 3000);">
             <div class="support-form-group">
                 <label for="support-type">お問い合わせ種別</label>
                 <select id="support-type" name="type" disabled>
@@ -65,7 +65,7 @@
                     <i class="fas fa-chevron-down"></i>
                 </summary>
                 <div class="support-faq-answer">
-                    つながり（LIKES）タブとトーク画面から、やりとり中の相手を一覧で確認できます。
+                    つながり（KEEPS）タブとトーク画面から、やりとり中の相手を一覧で確認できます。
                 </div>
             </details>
             <details class="support-faq-item">

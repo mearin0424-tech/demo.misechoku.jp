@@ -1,21 +1,39 @@
-@php $profileRoute = $profileRoute ?? 'shop.castprofileview.show'; @endphp
-<a href="{{ route($profileRoute, $c['id']) }}" class="cast-list-card">
-    <div class="card-thumb">
-        <img src="{{ $c['img'] ?? asset('assets/images/common/no-image.png') }}" alt="{{ $c['name'] }}" onerror="this.onerror=null; this.src='{{ asset('assets/images/common/user-default.svg') }}'">
+@php
+    $profileRoute = $profileRoute ?? 'shop.castprofileview.show';
+    $isCastPortal = (bool) ($isCastPortal ?? false);
+    // ポータル別：店舗ポータルは「キャスト」を keep（item_type=cast）、キャストポータルは「お店」を keep（item_type=shop）
+    $itemType = $isCastPortal ? 'shop' : 'cast';
+    $locLine = trim((string) (($c['pref'] ?? '') . ($c['city'] ?? '')));
+@endphp
+<li class="connection-item connection-item--clickable tl-row tl-row--{{ $itemType }} tl-row--has-actions" data-fav-remove-on-deactivate>
+    <a href="{{ route($profileRoute, $c['id']) }}" class="connection-item__link tl-row__link">
+        <div class="tl-row__thumb-wrap">
+            <img loading="lazy" decoding="async" src="{{ $c['img'] ?? asset('assets/images/common/no-image.png') }}"
+                 alt="" class="tl-row__thumb"
+                 onerror="this.onerror=null; this.src='{{ asset('assets/images/common/user-default.svg') }}'">
+        </div>
+        <div class="tl-row__body">
+            <h3 class="tl-row__name">
+                {{ $c['name'] ?? '' }}
+                @if(!empty($c['age']))
+                    <span class="tl-row__age">{{ $c['age'] }}歳</span>
+                @endif
+            </h3>
+            <div class="tl-row__meta">
+                @if($locLine !== '')
+                    <span class="tl-row__loc"><i class="fas fa-map-marker-alt"></i>{{ $locLine }}</span>
+                @endif
+                @if(!empty($c['updated_at']))
+                    <span class="tl-row__time"><i class="fas fa-bookmark"></i>{{ $c['updated_at'] }} 保存</span>
+                @endif
+            </div>
+        </div>
+    </a>
+    <div class="tl-row__actions" aria-label="クイックアクション">
+        <button type="button" class="tl-row__action-btn tl-row__action-btn--keep"
+                data-fav-toggle data-action="keep" data-item-type="{{ $itemType }}" data-item-id="{{ $c['id'] }}"
+                aria-label="キープを解除" aria-pressed="true">
+            <i class="fas fa-star" aria-hidden="true"></i>
+        </button>
     </div>
-    <div class="card-info">
-        <div class="info-header">
-            <span class="name serif-font">{{ $c['name'] }}</span>
-            @if(isset($c['age']))
-            <span class="age numeric-font opacity-70">({{ $c['age'] }})</span>
-            @endif
-        </div>
-        <div class="info-sub opacity-70">
-            {{ $c['updated_at'] ?? '' }} に保存
-        </div>
-        <div class="info-specs numeric-font opacity-70">
-            {{ $c['pref'] ?? '' }}{{ $c['city'] ?? '' }}
-        </div>
-    </div>
-    <div class="card-arrow"><i class="fas fa-chevron-right"></i></div>
-</a>
+</li>

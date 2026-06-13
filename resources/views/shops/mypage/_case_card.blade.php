@@ -15,7 +15,7 @@
 <article class="case-card {{ $isActionable ? 'is-actionable' : '' }} {{ $isCompleted ? 'is-completed' : '' }}">
     <header class="case-card__head">
         @if(!empty($case['cast_avatar_url']))
-            <img src="{{ $case['cast_avatar_url'] }}" alt="" class="case-card__avatar">
+            <img loading="lazy" decoding="async" src="{{ $case['cast_avatar_url'] }}" alt="" class="case-card__avatar">
         @else
             <div class="case-card__icon">
                 <i class="fas {{ $isCompleted ? 'fa-check' : 'fa-user' }}"></i>

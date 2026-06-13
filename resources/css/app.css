@@ -277,4 +277,41 @@
   /* スワイプ中のカード（behaviors.js が transform を直接当てる。色味だけ補助） */
   [data-swipe-card] { will-change: transform; touch-action: pan-y; }
   [data-swipe-card].is-leaving { transition: transform .3s ease, opacity .3s ease; }
+
+  /* グローバル トースト（alert() の置き換え） */
+  .app-toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(var(--footer-height, 75px) + 24px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%) translateY(8px);
+    padding: 11px 18px;
+    border-radius: 999px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #f5f5f5;
+    background: rgba(20, 20, 20, 0.94);
+    border: 1px solid rgba(168, 85, 247, 0.45);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    pointer-events: none;
+    opacity: 0;
+    z-index: 4000;
+    max-width: calc(100vw - 32px);
+    text-align: center;
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .app-toast.is-visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .app-toast.is-error {
+    color: #fecaca;
+    border-color: rgba(248, 113, 113, 0.6);
+    background: rgba(40, 12, 12, 0.94);
+  }
+  .app-toast.is-info {
+    color: #c4b5fd;
+    border-color: rgba(196, 181, 253, 0.45);
+  }
 }

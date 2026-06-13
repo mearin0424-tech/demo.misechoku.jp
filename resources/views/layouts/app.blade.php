@@ -280,7 +280,7 @@
 
         window.triggerPwaInstall = function() {
           if (!deferredPrompt) {
-            alert('ブラウザのメニュー（⋮）から「アプリをインストール」または「ホーム画面に追加」を選んでください。');
+            (window.appToast || window.alert)('ブラウザのメニュー（⋮）から「アプリをインストール」または「ホーム画面に追加」を選んでください。', 'info', 4500);
             return false;
           }
           deferredPrompt.prompt();

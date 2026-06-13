@@ -272,6 +272,9 @@
         </main>
     </div>
 
+    {{-- グローバル トースト：alert() の置き換えに使う window.appToast(msg, variant) --}}
+    <script src="{{ asset('assets/js/app-toast.js') }}" defer></script>
+
     <script>
         (function () {
             var sidebar = document.getElementById('admin-sidebar');

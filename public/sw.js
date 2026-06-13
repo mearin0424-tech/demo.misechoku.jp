@@ -2,7 +2,7 @@
  * ミセチョク PWA Service Worker
  * 静的アセットをキャッシュし、オフラインでも基本動作をサポート
  */
-const CACHE_NAME = 'misechoku-v5';
+const CACHE_NAME = 'misechoku-v6-d-batch';
 const BADGE_CACHE = 'misechoku-badge';
 const BADGE_KEY_URL = '/__pwa_badge_count__';
 const STATIC_ASSETS = [
@@ -10,11 +10,15 @@ const STATIC_ASSETS = [
   '/login',
   '/shop/home',
   '/assets/css/app.css',
+  '/assets/css/tailwind.css',
   '/assets/css/layout-header.css',
   '/assets/css/layout-footer.css',
   '/assets/css/layout-sidebar.css',
+  '/assets/css/sub-header.css',
   '/assets/css/character-guide.css',
   '/assets/js/app.js',
+  '/assets/js/app-toast.js',
+  '/assets/js/favorite-quick.js',
   '/assets/js/character-guide.js',
   '/manifest.json',
   '/assets/images/pwa/icon-192.png',

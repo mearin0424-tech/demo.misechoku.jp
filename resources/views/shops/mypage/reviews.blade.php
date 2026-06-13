@@ -199,12 +199,12 @@
             if (data.success) {
                 location.reload();
             } else {
-                alert('更新に失敗しました');
+                (window.appToast || window.alert)('更新に失敗しました', 'error');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('通信エラーが発生しました');
+            (window.appToast || window.alert)('通信エラーが発生しました', 'error');
         });
     }
 </script>

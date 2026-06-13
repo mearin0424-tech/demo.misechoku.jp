@@ -344,10 +344,10 @@
                 }
                 hideModal();
             } else {
-                alert((res && res.message) || '保存に失敗しました');
+                (window.appToast || window.alert)((res && res.message) || '保存に失敗しました', 'error');
             }
         })
-        .catch(function () { alert('保存に失敗しました'); })
+        .catch(function () { (window.appToast || window.alert)('保存に失敗しました', 'error'); })
         .finally(function () { saveBtn.disabled = false; });
     });
 })();

@@ -25,6 +25,11 @@
         <div class="shop-word-bubble">
             <p>{{ $shop['word'] ?? '' }}</p>
         </div>
+        @php $shopLikeCount = (int) ($shop['like_cnt'] ?? 0); @endphp
+        <div class="shop-like-badge" title="キャストから受け取ったLIKE">
+            <i class="fas fa-heart"></i>
+            <span>{{ number_format($shopLikeCount) }}</span>
+        </div>
     </div>
 
     <div class="profile-actions">

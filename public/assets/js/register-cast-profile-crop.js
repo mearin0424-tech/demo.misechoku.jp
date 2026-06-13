@@ -58,7 +58,7 @@
             };
             reader.onerror = function() {
                 pendingFile = null;
-                alert('画像の読み込みに失敗しました');
+                (window.appToast||window.alert)('画像の読み込みに失敗しました', 'error');
             };
             reader.readAsDataURL(file);
         });
@@ -83,14 +83,14 @@
                 imageSmoothingQuality: 'high',
             });
             if (!canvas) {
-                alert('画像のトリミングに失敗しました');
+                (window.appToast||window.alert)('画像のトリミングに失敗しました', 'error');
                 btn.disabled = false;
                 return;
             }
             canvas.toBlob(function(blob) {
                 btn.disabled = false;
                 if (!blob) {
-                    alert('画像の加工に失敗しました');
+                    (window.appToast||window.alert)('画像の加工に失敗しました', 'error');
                     return;
                 }
                 var base = (pendingFile.name || 'profile').replace(/\.[^.]+$/, '');
@@ -100,7 +100,7 @@
                     dt.items.add(new File([blob], outName, { type: 'image/jpeg' }));
                     input.files = dt.files;
                 } catch (err) {
-                    alert('ブラウザが画像の差し替えに対応していません。別のブラウザでお試しください。');
+                    (window.appToast||window.alert)('ブラウザが画像の差し替えに対応していません。別のブラウザでお試しください。', 'error');
                     return;
                 }
                 closeModal();

@@ -226,3 +226,26 @@
     cursor: pointer;
     font-size: 1.1rem;
 }
+
+/* ============================================================
+   ショッププロフィール：受け取った LIKE 数バッジ
+   ============================================================ */
+.shop-like-badge {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(214, 112, 162, 0.18), rgba(214, 112, 162, 0.32));
+    border: 1px solid rgba(214, 112, 162, 0.55);
+    color: #ffd5e6;
+    font-size: 13px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    box-shadow: 0 0 12px rgba(214, 112, 162, 0.25);
+}
+.shop-like-badge i {
+    font-size: 11px;
+    color: #ff8fbe;
+}

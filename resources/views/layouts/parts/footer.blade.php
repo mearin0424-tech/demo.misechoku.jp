@@ -28,7 +28,7 @@
     {{-- つながり (Interaction) --}}
     <a href="{{ route($prefix .'.interaction.index') }}" class="nav-item {{ $isInteraction ? 'active' : '' }}">
         <i class="fas fa-users"></i>
-        <span>LIKES</span>
+        <span>KEEPS</span>
     </a>
 
     {{-- メッセージ (Talk) --}}

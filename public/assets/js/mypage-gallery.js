@@ -122,7 +122,7 @@
                         openEditModal(file, slotIndex);
                     })
                     .catch(function () {
-                        alert('画像の読み込みに失敗しました。');
+                        (window.appToast||window.alert)('画像の読み込みに失敗しました。', 'error');
                     });
             });
         }
@@ -173,9 +173,9 @@
                     if (window.persistGalleryOrder && list) window.persistGalleryOrder(list);
                     closeGalleryPreview();
                 } else {
-                    alert(res.message || '削除に失敗しました');
+                    (window.appToast||window.alert)(res.message || '削除に失敗しました', "error");
                 }
-            }).catch(function() { alert('削除に失敗しました'); });
+            }).catch(function() { (window.appToast||window.alert)('削除に失敗しました', 'error'); });
         });
 
         function resolveSlotIndex() {
@@ -312,12 +312,12 @@
                         // 失敗時は再切り抜きフラグもクリア
                         _recropReplacingId = null;
                         var msg = (res && res.message) || (res.errors && res.errors.image && res.errors.image[0]) || 'アップロードに失敗しました';
-                        alert(msg);
+                        (window.appToast||window.alert)(msg, "error");
                     }
                 })
                 .catch(function() {
                     _recropReplacingId = null;
-                    alert('アップロードに失敗しました');
+                    (window.appToast||window.alert)('アップロードに失敗しました', 'error');
                 })
                 .finally(function() {
                     _galleryUploadSlotIndex = null;
@@ -421,7 +421,7 @@
                         }
                         canvas.toBlob(function(blob) {
                             if (!blob) {
-                                alert('画像の加工に失敗しました');
+                                (window.appToast||window.alert)('画像の加工に失敗しました', 'error');
                                 btn.disabled = false;
                                 return;
                             }
@@ -443,7 +443,7 @@
                                 performUpload(blob, _pendingUploadFile.name, _pendingUploadSlotIndex);
                             })
                             .catch(function(err) {
-                                alert(err && err.message ? err.message : '画像の加工に失敗しました');
+                                (window.appToast||window.alert)(err && err.message ? err.message : '画像の加工に失敗しました', "error");
                             })
                             .finally(function() {
                                 btn.disabled = false;
@@ -454,7 +454,7 @@
                 try {
                     cropAndUpload();
                 } catch (e) {
-                    alert(e && e.message ? e.message : '画像の加工に失敗しました');
+                    (window.appToast||window.alert)(e && e.message ? e.message : '画像の加工に失敗しました', "error");
                     btn.disabled = false;
                 }
             });

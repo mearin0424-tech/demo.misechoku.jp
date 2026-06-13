@@ -347,6 +347,7 @@ class ProfileController extends Controller
         $industry = $this->resolveIndustryLabelsByShopId($shopId);
 
         return [
+            'id' => $shopId,
             'name' => trim((string) ($profile?->shop_name ?? '')) ?: '店舗',
             'word' => '',
             'main_img' => $mainImage,
@@ -358,6 +359,8 @@ class ProfileController extends Controller
             'nearest_stations' => [],
             'tag_groups' => [],
             'sub_images' => $subImages,
+            // LIKE 数：キャスト（sender_type=cast）からこのお店宛のLIKE件数
+            'like_cnt' => $this->countLikesForShop($shopId),
         ] + [
             'industry' => '',
             'zip' => '',
@@ -367,6 +370,7 @@ class ProfileController extends Controller
             'nearest_stations' => [],
             'tag_groups' => [],
             'sub_images' => [],
+            'like_cnt' => 0,
         ];
     }
 
@@ -490,7 +494,8 @@ class ProfileController extends Controller
             'img' => $images[0] ?? asset('assets/images/common/no-image.png'),
             'is_applied' => true,
             'is_kept' => true,
-            'like_cnt' => 0,
+            // LIKE 数：店舗（sender_type=shop）からこのキャスト宛のLIKE件数
+            'like_cnt' => $this->countLikesForCast($castId),
             'pref' => $row->pref ?? '',
             'city' => $row->city ?? '',
             'height' => $row->height,
@@ -604,6 +609,37 @@ class ProfileController extends Controller
         return DB::table('casts')
             ->where('id', $castId)
             ->exists();
+    }
+
+    /**
+     * このキャスト宛の LIKE 件数（店舗→キャスト方向）。
+     * favorites テーブル: action_type=LIKE, sender_type=SHOP, cast_id=$castId
+     */
+    private function countLikesForCast(string $castId): int
+    {
+        if (!Schema::hasTable('favorites')) {
+            return 0;
+        }
+        return (int) DB::table('favorites')
+            ->where('action_type', \App\Models\Favorite::ACTION_LIKE)
+            ->where('sender_type', \App\Models\Favorite::SENDER_SHOP)
+            ->where('cast_id', $castId)
+            ->count();
+    }
+
+    /**
+     * この店舗宛の LIKE 件数（キャスト→店舗方向）。
+     */
+    private function countLikesForShop(string $shopId): int
+    {
+        if (!Schema::hasTable('favorites')) {
+            return 0;
+        }
+        return (int) DB::table('favorites')
+            ->where('action_type', \App\Models\Favorite::ACTION_LIKE)
+            ->where('sender_type', \App\Models\Favorite::SENDER_CAST)
+            ->where('shop_id', $shopId)
+            ->count();
     }
 
     private function assetPathForStored(?string $path): string

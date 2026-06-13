@@ -5,7 +5,7 @@
     $items = [
         ['id' => 'swipe',  'icon' => 'home',   'label' => 'SWIPE',  'href' => '#'],
         ['id' => 'search', 'icon' => 'search', 'label' => 'SEARCH', 'href' => '#'],
-        ['id' => 'likes',  'icon' => 'likes',  'label' => 'LIKES',  'href' => '#'],
+        ['id' => 'likes',  'icon' => 'likes',  'label' => 'KEEPS',  'href' => '#'],
         ['id' => 'talk',   'icon' => 'talk',   'label' => 'TALK',   'href' => '#'],
         ['id' => 'mypage', 'icon' => 'mypage', 'label' => 'MY PAGE','href' => '#'],
     ];

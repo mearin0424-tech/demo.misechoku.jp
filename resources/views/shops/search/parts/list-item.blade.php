@@ -4,11 +4,11 @@
     $hitokotoTime = (string) ($item['hitokoto_updated_at'] ?? '');
     $area = trim(implode(' ', array_filter([(string) ($item['pref'] ?? ''), (string) ($item['city'] ?? '')])));
 @endphp
-<li class="connection-item connection-item--clickable connection-item--search connection-item--shop-cast-list tl-row tl-row--cast">
+<li class="connection-item connection-item--clickable connection-item--search connection-item--shop-cast-list tl-row tl-row--cast tl-row--has-actions">
     <a href="{{ $profileUrl }}" class="connection-item__link tl-row__link">
         {{-- 丸型アイコン --}}
         <div class="tl-row__thumb-wrap">
-            <img src="{{ $item['img'] ?? asset('assets/images/common/no-image.png') }}" alt="" class="tl-row__thumb">
+            <img loading="lazy" decoding="async" src="{{ $item['img'] ?? asset('assets/images/common/no-image.png') }}" alt="" class="tl-row__thumb">
         </div>
 
         <div class="tl-row__body">
@@ -52,4 +52,24 @@
             @endif
         </div>
     </a>
+    @php
+        $isKeeping = (bool) ($item['is_keeping'] ?? false);
+        $isLiked = (bool) ($item['is_liked'] ?? false);
+        $likeCount = (int) ($item['like_count'] ?? 0);
+        $keepCount = (int) ($item['keep_count'] ?? 0);
+    @endphp
+    <div class="tl-row__actions" aria-label="クイックアクション">
+        <button type="button" class="tl-row__action-btn tl-row__action-btn--keep"
+                data-fav-toggle data-action="keep" data-item-type="cast" data-item-id="{{ $item['id'] }}"
+                aria-label="キープ" aria-pressed="{{ $isKeeping ? 'true' : 'false' }}">
+            <i class="fas fa-star" aria-hidden="true"></i>
+            @if($keepCount > 0)<span class="tl-row__action-count">{{ $keepCount > 99 ? '99+' : $keepCount }}</span>@endif
+        </button>
+        <button type="button" class="tl-row__action-btn tl-row__action-btn--like"
+                data-fav-toggle data-action="like" data-item-type="cast" data-item-id="{{ $item['id'] }}"
+                aria-label="いいね" aria-pressed="{{ $isLiked ? 'true' : 'false' }}">
+            <i class="fas fa-heart" aria-hidden="true"></i>
+            @if($likeCount > 0)<span class="tl-row__action-count">{{ $likeCount > 99 ? '99+' : $likeCount }}</span>@endif
+        </button>
+    </div>
 </li>

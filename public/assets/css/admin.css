@@ -39,6 +39,17 @@
     --admin-accent: #0f172a;
     --admin-ink: #ffffff;
 
+    /* ============================================================
+       theme 整合ガイド：
+       - admin 側 = bordeaux (deep wine #4A122A) を「運営ブランド」として使う
+       - front (mobile) 側 = mauve pink (#d670a2) を「ユーザー向けアクセント」として使う
+       - 両者は同じ「赤系・落ち着いた華やかさ」のファミリーで関連性は保ちつつ、
+         画面用途で読み分ける。具体的には:
+           * 管理画面の sidebar / header / 行 hover / 主要 CTA = bordeaux
+           * 管理者がユーザー向け面にプレビュー/送信する要素 = mauve（front と一致）
+       - mauve を admin で使うときは下の --admin-accent-mauve を経由する。
+       ============================================================ */
+
     /* アクセント（app.cssと同じボルドー＋シャンパンゴールド色調・ライトモード版） */
     --admin-primary: #4A122A;          /* ボルドー（プライマリ） */
     --admin-primary-hover: #5e1838;
@@ -47,7 +58,14 @@
     --admin-primary-soft-hover: #fae9f0;
     --admin-primary-border: #ebcdd7;
 
-    /* シャンパンゴールド（特別なアクセント・プレミアム表現用） */
+    /* front 側 --accent と同じ mauve pink。ユーザー向けプレビュー等で使用 */
+    --admin-accent-mauve: #d670a2;
+    --admin-accent-mauve-hover: #c05d8e;
+    --admin-accent-mauve-soft: #fbe9f1;
+
+    /* シャンパンゴールド（特別なアクセント・プレミアム表現用）
+       実体は mauve light/deep（紫ファミリー）。「gold」名称はレガシー互換。
+       front の --bonus-gold-* とは別系統（front 側は採用ボーナスのみで使う） */
     --admin-gold-bright: #a78bfa;
     --admin-gold-deep: #7c3aed;
     --admin-gold-darker: #92590a;      /* 白背景でも読めるゴールド系テキスト */
@@ -5598,4 +5616,39 @@ section[id^="sec-"] {
 }
 .policy-switcher__tab i {
     font-size: 12px;
+}
+
+/* グローバル トースト（admin 専用：明るい背景に合わせたカラー） */
+.app-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%) translateY(8px);
+    padding: 11px 18px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--admin-ink);
+    background: var(--admin-primary);
+    border: 1px solid var(--admin-primary-active);
+    box-shadow: var(--admin-shadow-popover);
+    pointer-events: none;
+    opacity: 0;
+    z-index: 4000;
+    max-width: calc(100vw - 32px);
+    text-align: center;
+    transition: opacity .2s ease, transform .2s ease;
+}
+.app-toast.is-visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+.app-toast.is-error {
+    background: var(--admin-red);
+    border-color: #991b1b;
+}
+.app-toast.is-info {
+    background: var(--admin-yellow);
+    color: #422006;
+    border-color: #b45309;
 }

@@ -8,11 +8,11 @@
         : trim((string) (($item['pref'] ?? '') . ' ' . ($item['city'] ?? '')));
     $locationIcon = $nearestStation !== '' ? 'fa-train' : 'fa-map-marker-alt';
 @endphp
-<li class="connection-item connection-item--clickable connection-item--shop-rich tl-row tl-row--shop">
+<li class="connection-item connection-item--clickable connection-item--shop-rich tl-row tl-row--shop tl-row--has-actions">
     <a href="{{ $recruitUrl }}" class="connection-item__link tl-row__link">
         {{-- 丸型アイコン --}}
         <div class="tl-row__thumb-wrap">
-            <img src="{{ $item['main_img'] ?? asset('assets/images/common/no-image.png') }}" alt="" class="tl-row__thumb">
+            <img loading="lazy" decoding="async" src="{{ $item['main_img'] ?? asset('assets/images/common/no-image.png') }}" alt="" class="tl-row__thumb">
             @if(!empty($item['is_excellent']))
                 <span class="tl-row__crown" role="img" aria-label="優良店" title="優良店">
                     <i class="fas fa-crown" aria-hidden="true"></i>
@@ -66,4 +66,24 @@
             @endif
         </div>
     </a>
+    @php
+        $isKeeping = (bool) ($item['is_keeping'] ?? false);
+        $isLiked = (bool) ($item['is_liked'] ?? false);
+        $likeCount = (int) ($item['like_count'] ?? 0);
+        $keepCount = (int) ($item['keep_count'] ?? 0);
+    @endphp
+    <div class="tl-row__actions" aria-label="クイックアクション">
+        <button type="button" class="tl-row__action-btn tl-row__action-btn--keep"
+                data-fav-toggle data-action="keep" data-item-type="shop" data-item-id="{{ $item['id'] }}"
+                aria-label="キープ" aria-pressed="{{ $isKeeping ? 'true' : 'false' }}">
+            <i class="fas fa-star" aria-hidden="true"></i>
+            @if($keepCount > 0)<span class="tl-row__action-count">{{ $keepCount > 99 ? '99+' : $keepCount }}</span>@endif
+        </button>
+        <button type="button" class="tl-row__action-btn tl-row__action-btn--like"
+                data-fav-toggle data-action="like" data-item-type="shop" data-item-id="{{ $item['id'] }}"
+                aria-label="いいね" aria-pressed="{{ $isLiked ? 'true' : 'false' }}">
+            <i class="fas fa-heart" aria-hidden="true"></i>
+            @if($likeCount > 0)<span class="tl-row__action-count">{{ $likeCount > 99 ? '99+' : $likeCount }}</span>@endif
+        </button>
+    </div>
 </li>

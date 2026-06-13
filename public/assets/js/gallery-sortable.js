@@ -91,7 +91,7 @@
             return result;
         }).catch(function (error) {
             console.error(error);
-            alert('画像の並び順保存に失敗しました。');
+            (window.appToast||window.alert)('画像の並び順保存に失敗しました。', 'error');
         });
     }
 

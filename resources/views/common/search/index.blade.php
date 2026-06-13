@@ -4,7 +4,7 @@
 @section('body-class', request()->is('cast/*') && ($activeTab ?? null) === 'pane-ai' ? 'page-search page-search-ai' : 'page-search')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/search.css') }}?v=20260613-row-layout">
+<link rel="stylesheet" href="{{ asset('assets/css/search.css') }}?v=20260614-toast">
 <link rel="stylesheet" href="{{ asset('assets/css/sub-header.css') }}">
 @endpush
 
@@ -60,7 +60,7 @@
 </div>
 @endif
 
-<div class="contents {{ !empty($tabsForHeader) ? 'tab-page-body' : 'search-page-body' }}">
+<div class="{{ !empty($tabsForHeader) ? 'tab-page-body' : 'search-page-body' }}">
     {{-- 検索パネル：タイムライン＋一覧を統合した画面 --}}
     <div id="pane-list" class="tab-pane {{ $activeTab === 'pane-list' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-list' ? 'display:none' : '' }}">
         <div class="search-filter-box">
@@ -151,6 +151,7 @@
 @push('scripts')
 <script src="{{ asset('assets/js/sub-header.js') }}"></script>
 <script src="{{ asset('assets/js/search-detail.js') }}"></script>
+<script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260614-toast"></script>
 @if($showAiTab)
 <script src="{{ asset('assets/js/ai-recommend.js') }}"></script>
 @if($prefix === 'cast')

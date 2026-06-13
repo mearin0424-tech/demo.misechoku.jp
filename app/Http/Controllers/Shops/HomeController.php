@@ -304,6 +304,7 @@ class HomeController extends Controller
         }
 
         $keptShopIds = [];
+        $likedShopIds = [];
         if (Schema::hasTable('favorites') && auth()->guard('member')->check()) {
             $castId = (string) auth()->guard('member')->id();
             if ($castId !== '') {
@@ -314,9 +315,20 @@ class HomeController extends Controller
                     ->whereNotNull('shop_id')
                     ->pluck('shop_id')
                     ->all();
+
+                // D-2 で cast → shop LIKE 解禁。本日 LIKE 済みは UI で active 表示する
+                $likedShopIds = DB::table('favorites')
+                    ->where('cast_id', $castId)
+                    ->where('action_type', Favorite::ACTION_LIKE)
+                    ->where('sender_type', Favorite::SENDER_CAST)
+                    ->whereDate('created_at', now()->toDateString())
+                    ->whereNotNull('shop_id')
+                    ->pluck('shop_id')
+                    ->all();
             }
         }
         $keptShopMap = array_fill_keys($keptShopIds, true);
+        $likedShopMap = array_fill_keys($likedShopIds, true);
 
         $items = [];
         foreach ($rows as $row) {
@@ -418,6 +430,7 @@ class HomeController extends Controller
                 'review_count' => $hasReviews ? (int) ($row->review_count ?? 0) : 0,
                 'is_premium' => isset($premiumShopIds[$row->id]),
                 'is_kept' => isset($keptShopMap[$row->id]),
+                'is_liked' => isset($likedShopMap[$row->id]),
                 'recruit_bonus_lines' => $bonusLines,
                 'signup_bonus_range' => $this->discoverySignupBonusRange($bonusLines),
                 'trial_hourly_range' => $this->discoveryHourlyPair($trialHourly, $meta, 'trial'),

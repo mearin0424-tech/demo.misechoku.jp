@@ -40,7 +40,7 @@
         ];
         $engBySecond = [
             'home' => 'SWIPE', 'login' => 'LOGIN', 'search' => 'SEARCH', 'mypage' => 'MY PAGE',
-            'talk' => 'TALK', 'interaction' => 'CONNECTION', 'manage' => 'MANAGEMENT',
+            'talk' => 'TALK', 'interaction' => 'KEEPS', 'manage' => 'MANAGEMENT',
             'register' => 'ENTRY', 'profile' => 'PROFILE', 'recruit' => 'RECRUIT', 'recruits' => 'RECRUIT',
             'setting' => 'SETTING', 'support' => 'SUPPORT', 'official' => 'OFFICIAL',
             'share' => 'SHARE', 'column' => 'COLUMN',
@@ -580,6 +580,8 @@
 
     {{-- アプリ既存 JS（CSRFやサイドメニュー開閉などはここに集約） --}}
     <script src="{{ asset('assets/js/app.js') }}" defer></script>
+    {{-- グローバル トースト：alert() の置き換えに使う window.appToast(msg, variant) --}}
+    <script src="{{ asset('assets/js/app-toast.js') }}" defer></script>
 
     {{-- 新デザインシステム（tailwind.css / Phosphor / Montserrat / behaviors.js）
          x-ui.assets は @push 経由なので、必ず @stack('head-styles') より前に呼ぶ（後だとスタックが空のまま head が確定する）。 --}}
@@ -640,7 +642,7 @@
                     <span class="nav-icon-wrap flex items-center justify-center mb-1 transition-all">
                         <x-ui.icon name="likes" class="nav-icon text-[22px] transition-all" />
                     </span>
-                    <span class="app-title text-[10px] font-bold tracking-wider">LIKES</span>
+                    <span class="app-title text-[10px] font-bold tracking-wider">KEEPS</span>
                 </a>
                 <a href="{{ route($navPrefix . '.talk.index') }}"
                    class="nav-item flex flex-col items-center justify-center transition-all duration-300 {{ $navIsTalk ? 'is-active' : '' }}">
