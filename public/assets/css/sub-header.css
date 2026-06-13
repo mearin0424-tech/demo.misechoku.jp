@@ -1,6 +1,6 @@
 /* --- サブヘッダー（タブ）：グローバルヘッダー直下に固定（ビューポート基準）
        高さは --sub-header-height にぴったり合わせ、border-bottom も含めて box-sizing で内包。
-       これで .tab-page-body { margin-top: var(--sub-header-height) } が完全に隙間なく揃う。 --- */
+       境界はゴールドの極薄ライン1pxで明示し、コンテンツとの分離をはっきりさせる。 --- */
 .sub-header-wrapper {
     position: fixed;
     top: var(--header-height);
@@ -13,8 +13,11 @@
     background: rgba(10, 10, 10, 0.92);
     margin: 0;
     padding: 0;
-    /* border-bottom は撤去（高さの不一致を生む）。サブヘッダーとコンテンツの分離は背景色 + 影で表現する */
+    /* 細いゴールドラインで境界を明示。高さに影響しないよう box-shadow で代替 */
     border-bottom: 0;
+    box-shadow:
+        inset 0 -1px 0 rgba(168, 85, 247, 0.18),  /* 下端の極細ライン */
+        0 2px 6px rgba(0, 0, 0, 0.20);             /* 影は控えめに */
     box-sizing: border-box;
 }
 
@@ -73,11 +76,12 @@
     padding: 0;
 }
 
-/* --- タブ下コンテンツ：サブヘッダー直下に隙間なく配置（main が既に header 分 padding を持つため sub-header 分のみ） --- */
+/* --- タブ下コンテンツ：サブヘッダー直下に配置。
+       サブヘッダーの影＋下線とコンテンツが視覚的に詰まらないよう、
+       padding-top で 8px のブリージング・スペースを設ける。 --- */
 .tab-page-body {
     margin-top: var(--sub-header-height);
-    padding: 0 0 calc(var(--footer-height) + 16px);
-    padding-top: 0;
+    padding: 8px 0 calc(var(--footer-height) + 16px);
     box-sizing: border-box;
     min-height: 200px;
     width: 100%;
@@ -105,5 +109,6 @@
     }
     .tab-page-body {
         margin-top: var(--sub-header-height);
+        /* base 側で padding-top: 8px を維持する（上書きしない） */
     }
 }

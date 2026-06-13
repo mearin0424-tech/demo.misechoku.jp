@@ -3635,3 +3635,354 @@ body.page-home .cast-name .age {
     opacity: 0.85 !important;
 }
 
+/* ============================================================================
+   TIKTOK-MODE (2026-06-13 v3)
+   ・アイコン = 右下に "縦スタック"（TikTok / Reels）。底辺横一列の footer 干渉を解消。
+   ・体入時給・ヘルプ時給を縦積み、その横（カードの内側）にアイコン縦列。
+   ・アイコン位置は footer の高さを差し引いた safe-area で計算。
+   ・cast カードでも recruit カードでも、底面右の column 配置に統一。
+   ============================================================================ */
+
+/* ----- アクションを右下の縦スタックへ ----- */
+body.page-home .card-actions-overlay,
+body.page-home .rc-actions {
+    position: absolute !important;
+    /* 右端から少し離す */
+    right: 14px !important;
+    left: auto !important;
+    /* footer の上に出す。これで底辺ナビと絶対に被らない。 */
+    bottom: calc(var(--footer-height, 75px) + 14px + env(safe-area-inset-bottom, 0)) !important;
+    top: auto !important;
+    transform: none !important;
+    /* TikTok 風の縦列。下にプライマリ（message）が来るよう order を上書き。 */
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+    z-index: 40 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+}
+
+/* ----- like / keep のサイズ：縦スタック向けに 52px に微調整 ----- */
+body.page-home .action-circle-btn.like,
+body.page-home .action-circle-btn.keep,
+body.page-home .rc-actions .action-circle-btn.keep {
+    width: 52px !important;
+    height: 52px !important;
+    min-width: 52px !important;
+    min-height: 52px !important;
+}
+body.page-home .action-circle-btn.like i,
+body.page-home .action-circle-btn.keep i,
+body.page-home .rc-actions .action-circle-btn.keep i {
+    font-size: 1.4rem !important;
+}
+body.page-home .action-circle-btn.like .action-icon,
+body.page-home .action-circle-btn.keep .action-icon,
+body.page-home .rc-actions .action-circle-btn.keep .action-icon {
+    width: 24px !important;
+    height: 24px !important;
+}
+
+/* ----- message：プライマリ。 60px、縦スタックの 1 番下（thumb-reach）----- */
+body.page-home .action-btn-message,
+body.page-home .action-circle-btn.message {
+    width: 60px !important;
+    height: 60px !important;
+    min-width: 60px !important;
+    min-height: 60px !important;
+    order: 99 !important;  /* 縦列で常に最下段（プライマリを親指の近くに） */
+}
+body.page-home .action-btn-message i,
+body.page-home .action-circle-btn.message i { font-size: 1.45rem !important; }
+body.page-home .action-btn-message .action-icon,
+body.page-home .action-circle-btn.message .action-icon {
+    width: 26px !important;
+    height: 26px !important;
+}
+
+/* 求人 (shop カードの "求人" 円) は LIKE と KEEP の間あたりに */
+body.page-home .card-recruit-btn {
+    width: 52px !important;
+    height: 52px !important;
+    min-width: 52px !important;
+    min-height: 52px !important;
+    font-size: 0.7rem !important;
+    order: 5 !important;
+}
+
+/* ----- 通常 cast カード：底面左に情報、右の縦アイコン列ぶん padding-right 確保 ----- */
+body.page-home .cast-card:not(.cast-card--recruit) .card-bottom-info {
+    /* 底面ボタン高 (約 60 + 52 + 52 + gap 24 = 188px + 余白) を下に確保 */
+    padding-top: 60px !important;
+    padding-left: 16px !important;
+    /* アイコン列幅 (≈ 60 + 右マージン 14) + 余白 = 80px */
+    padding-right: 80px !important;
+    padding-bottom: calc(var(--footer-height, 75px) + 14px + env(safe-area-inset-bottom, 0)) !important;
+    background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.94) 0%,
+        rgba(0, 0, 0, 0.72) 32%,
+        rgba(0, 0, 0, 0.36) 65%,
+        transparent 100%
+    ) !important;
+}
+
+/* ----- 求人カード：bottom-bar も右にアイコンぶん空けて、footer の上へ ----- */
+body.page-home .cast-card--recruit .rc-bottom-bar {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: calc(var(--footer-height, 75px) + 14px + env(safe-area-inset-bottom, 0)) !important;
+    padding: 0 80px 6px 14px !important;  /* 右側 80px をアイコン列に空ける */
+    background: transparent !important;
+}
+
+/* 求人カードの大グラデは ::before (画像下部) で既に作っているので OK だが、
+   bottom-bar が上に上がるぶん、グラデを少し上に伸ばして文字の足元を黒くする */
+body.page-home .cast-card--recruit::before {
+    bottom: calc(var(--footer-height, 75px) + env(safe-area-inset-bottom, 0)) !important;
+    top: min(40%, calc(60% - 140px)) !important;
+}
+
+/* ----- 体入時給・ヘルプ時給：縦積み（vertical stack）----- */
+/* "label + amount" の 1 行を 2 段に重ねる構造に変更。
+   旧：体入時給 と ヘルプ時給 が横並びの 2 カラム
+   新：体入時給 (label + amount) を 1 行、ヘルプ時給 (label + amount) を次の行に */
+body.page-home .cast-card--recruit .rc-wage-panel {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
+    padding: 4px 0 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+}
+body.page-home .cast-card--recruit .rc-wage-panel__trial,
+body.page-home .cast-card--recruit .rc-wage-panel__help {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: baseline !important;
+    flex-wrap: nowrap !important;
+    gap: 10px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+}
+body.page-home .cast-card--recruit .rc-wage-panel__trial-label,
+body.page-home .cast-card--recruit .rc-wage-panel__help-label {
+    flex: 0 0 auto !important;
+    min-width: 76px !important;        /* "体入時給" "ヘルプ時給" の幅で揃える */
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+    color: rgba(255, 255, 255, 0.62) !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+}
+body.page-home .cast-card--recruit .rc-wage-panel__trial-amount,
+body.page-home .cast-card--recruit .rc-wage-panel__help-amount {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    font-size: clamp(1.05rem, 4.4vw, 1.32rem) !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+    line-height: 1.1 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+}
+/* ヘルプ時給は体入より少し弱める（情報階層） */
+body.page-home .cast-card--recruit .rc-wage-panel__help-amount {
+    font-size: clamp(0.94rem, 3.6vw, 1.12rem) !important;
+    color: rgba(255, 255, 255, 0.88) !important;
+}
+
+/* ----- 入店祝い金ピル：縦積みの上に乗せる、コンパクトに ----- */
+body.page-home .cast-card--recruit .rc-signup-bonus-pill {
+    padding: 6px 12px !important;
+    margin-bottom: 6px !important;
+    max-width: 100% !important;
+    width: fit-content !important;
+}
+body.page-home .cast-card--recruit .rc-signup-bonus-pill__label {
+    font-size: 0.58rem !important;
+    letter-spacing: 0.08em !important;
+}
+body.page-home .cast-card--recruit .rc-signup-bonus-pill__nums {
+    font-size: clamp(0.92rem, 3.8vw, 1.08rem) !important;
+}
+
+/* ----- info（店名・エリア）も左に詰める ----- */
+body.page-home .cast-card--recruit .rc-info {
+    padding: 0 !important;
+    margin: 0 0 6px !important;
+}
+body.page-home .cast-card--recruit .rc-bottom-bar__stack {
+    gap: 4px !important;
+}
+
+/* ----- bonus pill / 評価バッジ群との余白を詰める ----- */
+body.page-home .cast-card--recruit .rc-badges {
+    margin-bottom: 4px !important;
+    gap: 6px !important;
+}
+
+/* ----- スワイプガイド：完全非表示（縦列との競合回避） ----- */
+body.page-home .discovery-swipe-guide,
+body.page-home .card-swipe-hint,
+body.page-home .rc-swipe-hint { display: none !important; }
+
+/* ============================================================================
+   POLISH (v4) — 78 → 85 points
+   写真は full-bleed のまま、CSS だけで詰めの仕上げ。
+   ============================================================================ */
+
+/* === 1. 写真が 1 枚しかない場合のページネーションを完全非表示 === */
+/* :has() で「弾が 1 つしかない時のみ親ごと隠す」。
+   modern browsers (Chrome 105+ / Safari 15.4+ / Firefox 121+) は全部 OK。 */
+body.page-home .photo-pagination:has(.swiper-pagination-bullet:only-child) {
+    display: none !important;
+}
+/* 念のため：bullet がそもそも 0 個の photo-pagination も隠す */
+body.page-home .photo-pagination:empty {
+    display: none !important;
+}
+
+/* === 2. タッチデバイスでの "sticky hover" を分離 === */
+/* :hover はタッチで押した瞬間に発火し、別をタップするまで残るので、
+   タッチデバイスでは hover の lift / brightness を一切無効化する。 */
+@media (hover: none) {
+    body.page-home .action-circle-btn.like:hover,
+    body.page-home .action-circle-btn.keep:hover,
+    body.page-home .rc-actions .action-circle-btn.keep:hover,
+    body.page-home .action-btn-message:hover,
+    body.page-home .action-circle-btn.message:hover,
+    body.page-home .card-recruit-btn:hover {
+        transform: none !important;
+        filter: none !important;
+    }
+    /* hover で変えていた background / box-shadow も "押したまま残らない" よう既定状態へ戻す */
+    body.page-home .action-circle-btn.like:not(.is-active):hover,
+    body.page-home .action-circle-btn.keep:not(.is-active):hover {
+        background: #ffffff !important;
+        box-shadow:
+            0 6px 14px rgba(0, 0, 0, 0.42),
+            inset 0 1px 0 rgba(255, 255, 255, 0.65),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.06) !important;
+    }
+    body.page-home .action-btn-message:hover,
+    body.page-home .action-circle-btn.message:hover {
+        background: var(--accent, #d670a2) !important;
+        box-shadow:
+            0 10px 24px rgba(0, 0, 0, 0.5),
+            0 0 0 4px rgba(var(--accent-rgb, 214, 112, 162), 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.20) !important;
+    }
+}
+
+/* === 3. 賞金フォントの "本気度" 引き上げ ===
+   tabular-nums で桁が揃い、lining-nums でベースラインに揃う Apple Wallet 感。
+   ss01 はフォントによっては "1" の serif が消えるスタイル変種。 */
+body.page-home .rc-wage-panel__trial-amount,
+body.page-home .rc-wage-panel__help-amount,
+body.page-home .cast-card--recruit .rc-signup-bonus-pill__nums {
+    font-feature-settings: 'tnum' 1, 'lnum' 1, 'pnum' 0, 'ss01' 1, 'cv11' 1;
+    font-variant-numeric: tabular-nums lining-nums;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* === 4. 入店祝い金ピルの "改行崩れ" 対策 ===
+   "¥30,000～¥50,000円" 級の長い文字列でも 1 行強制。
+   max-width も少し緩めて切れにくく。 */
+body.page-home .cast-card--recruit .rc-signup-bonus-pill {
+    white-space: nowrap !important;
+    max-width: 100% !important;
+}
+body.page-home .cast-card--recruit .rc-signup-bonus-pill__nums {
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* === 5. アクティブカードの上端に "interactivity hint"（iOS modal handle 風） ===
+   微細な白いライン 1 本で「カードはここに居る」「触れる」と暗示。
+   ::after を使うが、.home-photo-wrap::after との競合を避けるため
+   .cast-card 直下に当てる（home-photo-wrap の内側ではない）。 */
+body.page-home .main-swiper .swiper-slide-active .cast-card:not(.cast-card--recruit)::after,
+body.page-home .main-swiper .swiper-slide-active .cast-card--recruit::after {
+    content: '';
+    position: absolute;
+    top: 22px;                    /* pagination (top: 10px + height: 1.5px) の 10px 下 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    z-index: 50;
+    pointer-events: none;
+    /* ほんの軽い pulse（やり過ぎ厳禁） */
+    animation: handlePulse 2.4s ease-in-out infinite;
+}
+@keyframes handlePulse {
+    0%, 100% { opacity: 0.55; }
+    50%      { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+    body.page-home .main-swiper .swiper-slide-active .cast-card:not(.cast-card--recruit)::after,
+    body.page-home .main-swiper .swiper-slide-active .cast-card--recruit::after {
+        animation: none !important;
+    }
+}
+
+/* === 6. ラベル「体入時給」「ヘルプ時給」の min-width を文字幅に最適化 ===
+   "体入時給" 4 字 / "ヘルプ時給" 5 字。0.68rem ≒ 10.9px × 5 = 54.5px。
+   min-width 76px は過剰だったので 62px に詰めて、金額をもう少し左に寄せる。 */
+body.page-home .cast-card--recruit .rc-wage-panel__trial-label,
+body.page-home .cast-card--recruit .rc-wage-panel__help-label {
+    min-width: 62px !important;
+}
+
+/* === 7. アクション間の subtle thumb-arc ===
+   完全な直列ではなく、最下段 (message) と中段 (keep) を 2px ずつ内側にずらして、
+   親指の自然な arc に沿わせる。やり過ぎない、目視では気付かないレベル。 */
+body.page-home .action-circle-btn.like {
+    /* 最上段：右端寄り（thumb 伸ばしきり） */
+    margin-right: 0 !important;
+}
+body.page-home .action-circle-btn.keep,
+body.page-home .rc-actions .action-circle-btn.keep {
+    /* 中段：少し左へ */
+    margin-right: 2px !important;
+}
+body.page-home .card-recruit-btn {
+    margin-right: 2px !important;
+}
+body.page-home .action-btn-message,
+body.page-home .action-circle-btn.message {
+    /* 最下段プライマリ：thumb 軌道の自然な位置（少し内側）*/
+    margin-right: 3px !important;
+}
+
+/* === 8. アクティブカードの "次へ進める" 余韻 ===
+   非アクティブカードは scale 0.97 だが、それだとフラットすぎるので
+   下にちらっと「次のカードがいる」感じを subtle drop shadow で示唆。 */
+body.page-home .main-swiper .swiper-slide-active .cast-card {
+    box-shadow:
+        0 28px 56px -18px rgba(0, 0, 0, 0.75),
+        0 0 0 1px rgba(var(--accent-rgb, 214, 112, 162), 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+/* === 9. 念のため：左下情報の右端が action 列に "ギリギリ" にならないよう一段余裕 === */
+body.page-home .cast-card:not(.cast-card--recruit) .card-bottom-info {
+    padding-right: 84px !important;  /* 80 → 84 で 4px の余裕 */
+}
+body.page-home .cast-card--recruit .rc-bottom-bar {
+    padding-right: 84px !important;  /* 同上 */
+}
+

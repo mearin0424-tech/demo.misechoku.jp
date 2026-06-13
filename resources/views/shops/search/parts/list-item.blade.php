@@ -10,15 +10,12 @@
             <img src="{{ $item['img'] ?? asset('assets/images/common/no-image.png') }}" alt="" class="tl-row__thumb tl-row__thumb--round">
         </div>
         <div class="tl-row__body">
-            <div class="tl-row__head">
-                <h3 class="tl-row__name">
-                    {{ $item['name'] ?? '' }}@if(!empty($item['age']))<span class="tl-row__age">{{ $item['age'] }}</span>@endif
-                </h3>
-                @if($hitokotoTime !== '')
-                    <time class="tl-row__time">{{ $hitokotoTime }}</time>
+            {{-- 1行目：名前 + 年齢 + 位置 + （あれば）距離 --}}
+            <div class="tl-row__line1">
+                <h3 class="tl-row__name">{{ $item['name'] ?? '' }}</h3>
+                @if(!empty($item['age']))
+                    <span class="tl-row__age">{{ $item['age'] }}歳</span>
                 @endif
-            </div>
-            <div class="tl-row__meta">
                 @if($area !== '')
                     <span class="tl-row__loc">
                         <i class="fas fa-map-marker-alt" aria-hidden="true"></i>{{ $area }}
@@ -29,14 +26,25 @@
                         <i class="fas fa-route"></i>{{ $item['distance_label'] }}
                     </span>
                 @endif
-                @if(!empty($item['match_summary']) && ($sort ?? '') === 'relevance')
-                    <span class="tl-row__match" title="{{ implode(' / ', (array) ($item['match_reasons'] ?? [])) }}">
-                        <i class="fas fa-bullseye" aria-hidden="true"></i>{{ $item['match_summary'] }}
-                    </span>
-                @endif
             </div>
+
+            {{-- 2行目以降：ひとこと --}}
             @if($hitokoto !== '')
                 <p class="tl-row__msg">{{ preg_replace('/\s+/u', ' ', $hitokoto) }}</p>
+            @endif
+
+            {{-- 最下部：控えめな最終更新（あればマッチ度も） --}}
+            @if($hitokotoTime !== '' || !empty($item['match_summary']))
+                <div class="tl-row__foot">
+                    @if(!empty($item['match_summary']) && ($sort ?? '') === 'relevance')
+                        <span class="tl-row__match" title="{{ implode(' / ', (array) ($item['match_reasons'] ?? [])) }}">
+                            <i class="fas fa-bullseye" aria-hidden="true"></i>{{ $item['match_summary'] }}
+                        </span>
+                    @endif
+                    @if($hitokotoTime !== '')
+                        <time class="tl-row__time">{{ $hitokotoTime }}</time>
+                    @endif
+                </div>
             @endif
         </div>
     </a>

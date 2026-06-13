@@ -19,13 +19,9 @@
             @endif
         </div>
         <div class="tl-row__body">
-            <div class="tl-row__head">
+            {{-- 1行目：名前 + 業種 + 位置 + （あれば）評価／距離 --}}
+            <div class="tl-row__line1">
                 <h3 class="tl-row__name">{{ $item['shop_name'] }}</h3>
-                @if($hitokotoTime !== '')
-                    <time class="tl-row__time">{{ $hitokotoTime }}</time>
-                @endif
-            </div>
-            <div class="tl-row__meta">
                 @if(!empty($item['industry_label']))
                     <span class="tl-row__industry">{{ $item['industry_label'] }}</span>
                 @endif
@@ -45,8 +41,24 @@
                     </span>
                 @endif
             </div>
+
+            {{-- 2行目以降：ひとこと --}}
             @if($hitokoto !== '')
                 <p class="tl-row__msg">{{ preg_replace('/\s+/u', ' ', $hitokoto) }}</p>
+            @endif
+
+            {{-- 最下部：控えめな最終更新（あればマッチ度も） --}}
+            @if($hitokotoTime !== '' || !empty($item['match_summary']))
+                <div class="tl-row__foot">
+                    @if(!empty($item['match_summary']) && ($sort ?? '') === 'relevance')
+                        <span class="tl-row__match" title="{{ implode(' / ', (array) ($item['match_reasons'] ?? [])) }}">
+                            <i class="fas fa-bullseye" aria-hidden="true"></i>{{ $item['match_summary'] }}
+                        </span>
+                    @endif
+                    @if($hitokotoTime !== '')
+                        <time class="tl-row__time">{{ $hitokotoTime }}</time>
+                    @endif
+                </div>
             @endif
         </div>
     </a>

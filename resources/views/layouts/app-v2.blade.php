@@ -393,7 +393,11 @@
             -webkit-backdrop-filter: blur(18px) !important;
             margin-top: 0 !important;
             border-top: 0 !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+            /* 下端にゴールドの極細ライン + 軽い影でコンテンツとの境界を明示。
+               コンテンツに被って暗く落ちないよう影は控えめに。 */
+            box-shadow:
+                inset 0 -1px 0 rgba(168, 85, 247, 0.22),
+                0 2px 6px rgba(0, 0, 0, 0.20) !important;
         }
         .sub-header-tabs {
             background-color: transparent !important;
