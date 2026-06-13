@@ -3345,3 +3345,293 @@ body.page-home .cast-card:not(.cast-card--recruit) .card-bottom-info {
     }
 }
 
+/* ============================================================================
+   TINDER-MODE (2026-06-13 v2)
+   - 写真ページネーション：限界まで薄く（1.5px / 白 8% / active 55%）
+   - アクションを "右側スタック → 底辺の横一列" に再配置（Tinder / Bumble 配列）
+   - like / keep を "白丸 + mauve アイコン"、message を mauve fill の大型円に
+   - 文字情報は底辺ボタンの上に詰めて、フッタ全体が "底のレイヤー" として整列
+   - swipe-guide / discovery-swipe-guide はオフ（アクション行と被るので不要）
+   ============================================================================ */
+
+/* ----- 写真ページネーション：限りなく薄く ----- */
+body.page-home .photo-pagination.swiper-pagination-bullets {
+    top: 10px !important;
+    left: 14px !important;
+    right: 14px !important;
+    gap: 3px !important;
+}
+body.page-home .photo-pagination .swiper-pagination-bullet {
+    height: 1.5px !important;
+    background: rgba(255, 255, 255, 0.10) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+body.page-home .photo-pagination .swiper-pagination-bullet-active {
+    background: rgba(255, 255, 255, 0.55) !important;
+    box-shadow: none !important;
+}
+
+/* ----- アクションを底辺の横一列に再配置（Tinder 配列） -----
+   既存の "右側 50% 縦配置" を完全に上書き */
+body.page-home .card-actions-overlay,
+body.page-home .rc-actions {
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0)) !important;
+    transform: none !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 22px !important;
+    max-width: 100% !important;
+    z-index: 40 !important;
+    padding: 0 16px !important;
+    box-sizing: border-box !important;
+}
+
+/* 求人カードのアクションラベル（"キープ" "メッセージ"）は Tinder には無い → 非表示に */
+body.page-home .rc-actions .rc-action-label,
+body.page-home .rc-action-label {
+    display: none !important;
+}
+body.page-home .rc-actions .rc-action-item {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ----- like / keep：白い丸 + 中に mauve のアイコン（Tinder 配色） ----- */
+body.page-home .action-circle-btn.like,
+body.page-home .action-circle-btn.keep,
+body.page-home .rc-actions .action-circle-btn.keep {
+    width: 54px !important;
+    height: 54px !important;
+    min-width: 54px !important;
+    min-height: 54px !important;
+    border-radius: 50% !important;
+    background: #ffffff !important;
+    border: 0 !important;
+    color: var(--accent, #d670a2) !important;
+    padding: 0 !important;
+    font-size: 0 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow:
+        0 6px 14px rgba(0, 0, 0, 0.42),
+        inset 0 1px 0 rgba(255, 255, 255, 0.65),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.06) !important;
+    transition: transform .15s cubic-bezier(.22,.85,.36,1.18), background .2s ease, color .2s ease, box-shadow .2s ease;
+}
+body.page-home .action-circle-btn.like i,
+body.page-home .action-circle-btn.keep i,
+body.page-home .rc-actions .action-circle-btn.keep i {
+    font-size: 1.5rem !important;
+    color: var(--accent, #d670a2) !important;
+    text-shadow: none !important;
+    line-height: 1 !important;
+}
+body.page-home .action-circle-btn.like .action-icon,
+body.page-home .action-circle-btn.keep .action-icon,
+body.page-home .rc-actions .action-circle-btn.keep .action-icon {
+    width: 26px !important;
+    height: 26px !important;
+    color: var(--accent, #d670a2) !important;
+    fill: var(--accent, #d670a2) !important;
+    stroke: var(--accent, #d670a2) !important;
+    stroke-width: 1.8 !important;
+    filter: none !important;
+}
+
+/* hover：ほんのり持ち上げ＋影が深まる */
+body.page-home .action-circle-btn.like:hover,
+body.page-home .action-circle-btn.keep:hover,
+body.page-home .rc-actions .action-circle-btn.keep:hover {
+    transform: translateY(-2px) scale(1.04);
+    background: #ffffff !important;
+    color: var(--accent, #d670a2) !important;
+    box-shadow:
+        0 10px 22px rgba(0, 0, 0, 0.48),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.06) !important;
+}
+body.page-home .action-circle-btn.like:active,
+body.page-home .action-circle-btn.keep:active,
+body.page-home .rc-actions .action-circle-btn.keep:active {
+    transform: scale(0.92);
+    box-shadow:
+        0 2px 5px rgba(0, 0, 0, 0.4),
+        inset 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ACTIVE 状態：mauve fill + 白アイコン（"押された"が一目）＋ heart burst */
+body.page-home .action-circle-btn.like.is-active,
+body.page-home .action-circle-btn.keep.is-active,
+body.page-home .rc-actions .action-circle-btn.keep.is-active {
+    background: var(--accent, #d670a2) !important;
+    color: #ffffff !important;
+    box-shadow:
+        0 8px 22px rgba(var(--accent-rgb, 214, 112, 162), 0.45),
+        0 0 0 4px rgba(var(--accent-rgb, 214, 112, 162), 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.30),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18) !important;
+}
+body.page-home .action-circle-btn.like.is-active i,
+body.page-home .action-circle-btn.keep.is-active i,
+body.page-home .rc-actions .action-circle-btn.keep.is-active i {
+    color: #ffffff !important;
+    text-shadow: none !important;
+    animation: heartBurst 0.45s cubic-bezier(.22,.85,.36,1.18);
+}
+body.page-home .action-circle-btn.like.is-active .action-icon,
+body.page-home .action-circle-btn.keep.is-active .action-icon,
+body.page-home .rc-actions .action-circle-btn.keep.is-active .action-icon {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+}
+
+/* like のカウントは Tinder 風には不要 → 視覚的に控えめに */
+body.page-home .action-circle-btn.like .action-btn-count {
+    display: none !important;
+}
+
+/* ----- MESSAGE：中央の大きな mauve fill 円（Tinder の "Like" 相当のメイン） ----- */
+body.page-home .action-btn-message,
+body.page-home .action-circle-btn.message {
+    width: 66px !important;
+    height: 66px !important;
+    min-width: 66px !important;
+    min-height: 66px !important;
+    border-radius: 50% !important;
+    background: var(--accent, #d670a2) !important;
+    color: var(--on-accent, #1a0814) !important;
+    border: 0 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow:
+        0 10px 24px rgba(0, 0, 0, 0.5),
+        0 0 0 4px rgba(var(--accent-rgb, 214, 112, 162), 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.28),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.20) !important;
+    transition: transform .15s cubic-bezier(.22,.85,.36,1.18), box-shadow .2s ease, filter .15s ease;
+}
+body.page-home .action-btn-message i,
+body.page-home .action-circle-btn.message i {
+    font-size: 1.55rem !important;
+    color: var(--on-accent, #1a0814) !important;
+    text-shadow: none !important;
+}
+body.page-home .action-btn-message .action-icon,
+body.page-home .action-circle-btn.message .action-icon {
+    width: 28px !important;
+    height: 28px !important;
+    color: var(--on-accent, #1a0814) !important;
+    filter: none !important;
+}
+body.page-home .action-btn-message:hover,
+body.page-home .action-circle-btn.message:hover {
+    transform: translateY(-3px) scale(1.04);
+    filter: brightness(1.06);
+    box-shadow:
+        0 14px 28px rgba(0, 0, 0, 0.55),
+        0 0 0 8px rgba(var(--accent-rgb, 214, 112, 162), 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.32),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.20) !important;
+}
+body.page-home .action-btn-message:active,
+body.page-home .action-circle-btn.message:active {
+    transform: scale(0.94);
+    box-shadow:
+        0 3px 8px rgba(0, 0, 0, 0.5),
+        inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* ----- 求人ボタン (shop カード上の "求人" 円)：白丸スタイルに揃える ----- */
+body.page-home .card-recruit-btn {
+    width: 54px !important;
+    height: 54px !important;
+    min-width: 54px !important;
+    min-height: 54px !important;
+    border-radius: 50% !important;
+    background: #ffffff !important;
+    color: var(--accent, #d670a2) !important;
+    border: 0 !important;
+    font-weight: 800 !important;
+    font-size: 0.74rem !important;
+    box-shadow:
+        0 6px 14px rgba(0, 0, 0, 0.42),
+        inset 0 1px 0 rgba(255, 255, 255, 0.65),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.06) !important;
+    transition: transform .15s cubic-bezier(.22,.85,.36,1.18), box-shadow .2s ease;
+}
+body.page-home .card-recruit-btn:hover {
+    transform: translateY(-2px) scale(1.04);
+    filter: none;
+}
+body.page-home .card-recruit-btn:active { transform: scale(.92); }
+
+/* ----- 下端情報パネル：底辺アクション行が出るぶん、テキスト領域を上へ ----- */
+body.page-home .cast-card:not(.cast-card--recruit) .card-bottom-info {
+    padding-top: 56px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    padding-bottom: 110px !important;  /* アクション行 (54-66px + 余白) のぶん下を空ける */
+    background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.92) 0%,
+        rgba(0, 0, 0, 0.68) 38%,
+        rgba(0, 0, 0, 0.32) 68%,
+        transparent 100%
+    ) !important;
+}
+/* 求人カードの bottom-bar も同様に上げる */
+body.page-home .cast-card--recruit .rc-bottom-bar {
+    bottom: 110px !important;
+    padding-bottom: 6px !important;
+    background: transparent !important;
+}
+/* 求人カードの背景グラデは card 全体側で */
+body.page-home .cast-card--recruit::before {
+    bottom: 0 !important;
+}
+
+/* ----- スワイプガイド (中央のチップ)：底辺がアクション行で埋まったので非表示 ----- */
+body.page-home .discovery-swipe-guide {
+    display: none !important;
+}
+/* "swipe hint" の小さいシェブロンも消す（情報過剰） */
+body.page-home .card-swipe-hint,
+body.page-home .rc-swipe-hint {
+    display: none !important;
+}
+
+/* ----- カード本体：active のみ subtle scale (Tinder の "前面感") ----- */
+body.page-home .main-swiper .swiper-slide:not(.swiper-slide-active) .cast-card {
+    transform: scale(0.97) !important;
+    opacity: 0.92;
+    transition: transform .4s cubic-bezier(.22,.85,.36,1.18), opacity .4s ease;
+}
+body.page-home .main-swiper .swiper-slide-active .cast-card {
+    transform: scale(1) !important;
+    opacity: 1;
+}
+
+/* ----- 名前タイポ：Tinder は大きく・clean ----- */
+body.page-home .cast-name,
+body.page-home .rc-shop-name,
+body.page-home .card-shop-name-main {
+    font-size: clamp(1.18rem, 4.2vw, 1.5rem) !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.015em !important;
+    line-height: 1.18 !important;
+    margin-bottom: 6px !important;
+}
+body.page-home .cast-name .age {
+    font-size: 0.74em !important;
+    font-weight: 400 !important;
+    opacity: 0.85 !important;
+}
+

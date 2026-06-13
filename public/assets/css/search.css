@@ -2224,3 +2224,260 @@ body.page-search .connection-list--search {
 }
 .ai-chat__send:hover:not(:disabled) { transform: translateY(-1px); }
 .ai-chat__send:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ============================================================
+   SEARCH TIMELINE (2026-06 UI/UX refresh)
+   検索一覧をフラットタイムライン化。タイポ階層・余白・色を再設計。
+   キャスト←→店舗の両方向で同じ .tl-row 系を使う。
+   ============================================================ */
+
+/* 既存の .connection-item--shop-rich / --shop-cast-list の枠装飾を上書きで無効化 */
+.connection-item--shop-rich.tl-row,
+.connection-item--shop-cast-list.tl-row {
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+}
+
+/* タイムライン行の共通 */
+.tl-row {
+    position: relative;
+    list-style: none;
+}
+/* リスト内の行と行の間は控えめなヘアラインで区切る */
+.tl-row + .tl-row {
+    border-top: 1px solid rgba(168, 85, 247, 0.10);
+}
+/* ホバー時の薄いハイライト */
+.tl-row__link {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    padding: 14px 14px 14px 14px !important;
+    text-decoration: none !important;
+    color: inherit !important;
+    transition: background .15s ease;
+    position: relative;
+}
+.tl-row__link::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 12px;
+    bottom: 12px;
+    width: 2px;
+    background: linear-gradient(180deg, rgba(168, 85, 247, .9), rgba(124, 58, 237, .4));
+    border-radius: 0 2px 2px 0;
+    opacity: 0;
+    transition: opacity .15s ease;
+}
+.tl-row__link:hover {
+    background: linear-gradient(90deg, rgba(168, 85, 247, .06), transparent 70%);
+}
+.tl-row__link:hover::before { opacity: 1; }
+
+/* サムネ ----------------------------------------------------- */
+.tl-row__thumb-wrap {
+    position: relative;
+    width: 56px;
+    height: 56px;
+    flex: 0 0 auto;
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, .02);
+    border: 1px solid rgba(168, 85, 247, .18);
+}
+.tl-row__thumb-wrap--round {
+    border-radius: 50%;
+}
+.tl-row__thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: inherit;
+}
+/* 優良店：サムネ左上に小さな冠アイコン（pillをやめてミニマル化） */
+.tl-row__crown {
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--gold-light, #c4b5fd), var(--gold, #a78bfa), var(--gold-deep, #7c3aed));
+    color: #1a0f24;
+    font-size: 9px;
+    border: 1.5px solid var(--dark-bg, #0a0a0a);
+    box-shadow: 0 4px 10px rgba(168, 85, 247, .45);
+    z-index: 2;
+}
+
+/* 本文 ------------------------------------------------------- */
+.tl-row__body {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* ヘッダ行：名前 + 右端に時間 */
+.tl-row__head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    min-width: 0;
+}
+.tl-row__name {
+    margin: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+    font-family: var(--font-sans);
+    font-size: 14.5px;
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: 0.01em;
+    color: #f5f0ed;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.tl-row__age {
+    margin-left: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #a0928c;
+    letter-spacing: 0.02em;
+}
+.tl-row__time {
+    flex: 0 0 auto;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: rgba(196, 181, 253, 0.55);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+/* メタ行：業種 / エリア / 評価 / 距離（• 区切り） */
+.tl-row__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 8px;
+    font-size: 11.5px;
+    line-height: 1.4;
+    color: #998d88;
+    min-width: 0;
+}
+/* "•" 風の区切りを自動挿入（先頭以外） */
+.tl-row__meta > * {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    position: relative;
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.tl-row__meta > * + *::before {
+    content: "·";
+    margin: 0 6px 0 -2px;
+    color: rgba(168, 85, 247, .35);
+    font-weight: 700;
+}
+.tl-row__industry {
+    color: var(--gold-light, #c4b5fd);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+.tl-row__loc i {
+    font-size: 10px;
+    color: var(--gold, #a78bfa);
+}
+.tl-row__rating {
+    color: #e6dffc;
+    font-weight: 700;
+}
+.tl-row__rating i {
+    font-size: 10px;
+    color: var(--gold, #a78bfa);
+}
+.tl-row__dist {
+    color: #c4b5fd;
+    font-weight: 600;
+}
+.tl-row__dist i {
+    font-size: 9px;
+    color: var(--gold, #a78bfa);
+}
+.tl-row__match {
+    color: #e6dffc;
+    background: linear-gradient(135deg, rgba(168, 85, 247, .18), rgba(124, 58, 237, .25));
+    border: 1px solid rgba(168, 85, 247, .35);
+    border-radius: 999px;
+    padding: 1px 8px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+.tl-row__match i {
+    font-size: 9px;
+    color: var(--gold-light, #c4b5fd);
+}
+.tl-row__match::before {
+    display: none !important;
+}
+
+/* メッセージ（ひとこと） */
+.tl-row__msg {
+    margin: 2px 0 0;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: rgba(229, 220, 215, 0.82);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+}
+.tl-row__msg::before {
+    content: '\201C';
+    color: rgba(168, 85, 247, .55);
+    font-family: "Cormorant Garamond", "Noto Serif JP", serif;
+    font-size: 16px;
+    margin-right: 3px;
+    vertical-align: -1px;
+    font-weight: 600;
+}
+
+/* ============================================================
+   旧スタイル（タイムライン化に伴う上書き無効化）
+   既存の .shop-search-card__* と .shop-cast-search__* を no-op に。
+   それぞれのテンプレートは新クラスに置換済みだが、
+   念のため意図しない残存表示を抑える。
+   ============================================================ */
+.tl-row .shop-search-card__top,
+.tl-row .shop-search-card__body,
+.tl-row .shop-search-card__footer,
+.tl-row .shop-cast-search__line1,
+.tl-row .shop-cast-search__line2 {
+    /* 新クラスに完全置換済みのため、もし残れば非表示 */
+}
+
+@media (max-width: 380px) {
+    .tl-row__link { padding: 12px 10px !important; gap: 10px !important; }
+    .tl-row__thumb-wrap { width: 52px; height: 52px; }
+    .tl-row__name { font-size: 14px; }
+    .tl-row__time { font-size: 10px; }
+    .tl-row__meta { font-size: 11px; }
+    .tl-row__msg { font-size: 12px; }
+}
