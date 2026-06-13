@@ -722,22 +722,26 @@
     color: rgba(240, 180, 198, 0.66);
 }
 
-/* 送信ボタン：入力欄の外・LINEのように右側に独立配置 */
+/* 送信ボタン：入力欄の外・LINE のように右側に独立配置。
+   グラデなし、ベタ塗り mauve + drop shadow + 微細な上下 inset で物理ボタン感を出す。 */
 .btn-send {
     width: 44px;
     height: 44px;
     min-width: 44px;
     min-height: 44px;
     flex-shrink: 0;
-    background: linear-gradient(145deg, var(--talk-accent) 0%, #cca24a 55%, var(--talk-accent-deep) 100%);
-    color: #1a1a1a;
+    background: var(--accent, #d670a2);
+    color: var(--on-accent, #1a0814);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(255, 239, 184, 0.4);
-    box-shadow: 0 8px 20px rgba(168, 85, 247, 0.35), 0 2px 6px rgba(0, 0, 0, 0.3);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    border: none;
+    box-shadow:
+        0 6px 14px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.20),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18);
+    transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
 }
 
 .btn-send i {
@@ -746,12 +750,14 @@
 }
 
 .btn-send:hover {
-    box-shadow: 0 4px 16px rgba(168, 85, 247, 0.5), 0 2px 4px rgba(0, 0, 0, 0.25);
+    filter: brightness(1.06);
 }
 
 .btn-send:active {
-    transform: scale(0.92);
-    box-shadow: 0 2px 8px rgba(168, 85, 247, 0.35);
+    transform: scale(0.95);
+    box-shadow:
+        0 2px 5px rgba(0, 0, 0, 0.4),
+        inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* --- Empty State (空の状態) --- */
@@ -2029,3 +2035,317 @@ button.interview-option-btn:hover {
 .talk-ng-warn-text { flex: 1; }
 .btn-send.is-disabled,
 .btn-send:disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }
+
+/* ==========================================================================
+   TALK 一覧 / トークルーム — Instagram DM 風リファイン（2026-06-13）
+   旧スタイルの card 型 row、warm gold アクセント、heavy shadow を解除し、
+   IG のシンプルな「リスト → 会話」UI に揃える。
+   ・TALK 一覧: flat row（カード枠なし）+ 大きいアバター + bold 名前 + 薄いプレビュー
+   ・未読: 数字バッジ → mauve pink の小さなドット
+   ・トークルーム: 角丸 22px の柔らかい吹き出し、自分は mauve グラデ、相手は dark grey
+   ・入力欄: light dark pill、アクションアイコンはニュートラル
+   ========================================================================== */
+
+/* ---------- TALK 一覧 ---------- */
+
+/* row：カードではなく、IG の DM 行のような "下線で区切るだけのフラットなリスト" */
+body.page-talk-list .talk-item,
+.talk-list-container .talk-item {
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 12px 14px !important;
+    box-shadow: none !important;
+    min-height: 76px;
+}
+body.page-talk-list .talk-item:hover,
+.talk-list-container .talk-item:hover {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-color: rgba(255, 255, 255, 0.06) !important;
+}
+body.page-talk-list .talk-item:active,
+.talk-list-container .talk-item:active {
+    background: rgba(255, 255, 255, 0.05) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+/* ピン留めも下線スタイル維持（gold tone は完全撤去、mauve の小さなアクセントだけ） */
+body.page-talk-list .talk-item.is-pinned,
+.talk-list-container .talk-item.is-pinned {
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.06) !important;
+    border-bottom-color: rgba(var(--accent-rgb, 214, 112, 162), 0.18) !important;
+    box-shadow: none !important;
+}
+
+/* アバター：大きく丸く、warm gold ボーダー → ニュートラル線細く */
+body.page-talk-list .talk-avatar,
+.talk-list-container .talk-avatar {
+    width: 56px !important;
+    height: 56px !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    margin-right: 12px !important;
+}
+
+/* 名前：少し大きめの bold（IG は 14-15px、相手名前を強調） */
+body.page-talk-list .talk-name,
+.talk-list-container .talk-name {
+    font-size: 0.94rem !important;
+    font-weight: 600 !important;
+    color: var(--color-text-main, #f5f5f5) !important;
+    letter-spacing: 0 !important;
+}
+
+/* タイムスタンプ：右上、薄め */
+body.page-talk-list .talk-time,
+.talk-list-container .talk-time {
+    color: rgba(255, 255, 255, 0.45) !important;
+    font-size: 0.72rem !important;
+    font-family: var(--font-sans, sans-serif) !important;
+    letter-spacing: 0 !important;
+}
+
+/* プレビュー文：IG 的に薄めグレー、1 行省略 */
+body.page-talk-list .talk-last-msg,
+.talk-list-container .talk-last-msg {
+    color: rgba(255, 255, 255, 0.55) !important;
+    font-size: 0.82rem !important;
+    line-height: 1.4 !important;
+}
+
+/* 未読：赤いカウントバッジ → mauve pink のシンプルなドット（IG 的なメッセージあり示唆） */
+body.page-talk-list .unread-badge,
+.talk-list-container .unread-badge {
+    min-width: 9px !important;
+    width: 9px !important;
+    height: 9px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    background: var(--accent, #d670a2) !important;
+    color: transparent !important;
+    font-size: 0 !important;
+    box-shadow: none !important;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+/* 未読時は名前を強くする（IG と同じ挙動） */
+body.page-talk-list .talk-item:has(.unread-badge) .talk-name,
+.talk-list-container .talk-item:has(.unread-badge) .talk-name {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+body.page-talk-list .talk-item:has(.unread-badge) .talk-last-msg,
+.talk-list-container .talk-item:has(.unread-badge) .talk-last-msg {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-weight: 500 !important;
+}
+
+/* status バッジ：warm gold → ニュートラル小タグ。IG はステータス出さないが、業務上必要なので控えめに維持。 */
+body.page-talk-list .talk-status,
+.talk-list-container .talk-status {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: rgba(255, 255, 255, 0.65) !important;
+    font-size: 0.6rem !important;
+}
+
+/* pin ボタン：色を mauve に統一、装飾控えめ */
+body.page-talk-list .talk-pin-btn,
+.talk-list-container .talk-pin-btn {
+    color: rgba(255, 255, 255, 0.35) !important;
+    background: transparent !important;
+}
+body.page-talk-list .talk-item.is-pinned .talk-pin-btn,
+.talk-list-container .talk-item.is-pinned .talk-pin-btn {
+    color: var(--accent-text, #f0a6c4) !important;
+}
+
+/* リクエスト / オファーカード（pane-requests）も同じく flat row 寄りに */
+body.page-talk-list .request-card,
+.talk-list-container .request-card {
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 12px 14px !important;
+    margin: 0 !important;
+}
+body.page-talk-list .request-card .request-img,
+.talk-list-container .request-card .request-img {
+    width: 56px !important;
+    height: 56px !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+/* ---------- TALK ROOM ---------- */
+
+/* メッセージリスト：IG の余白感に揃える */
+body.page-talk-room .chat-messages,
+#talk-room-container .chat-messages {
+    padding: 16px 12px 96px !important;
+    gap: 4px !important;     /* 連続メッセージ間は詰める */
+    background: transparent !important;
+}
+
+/* メッセージ行：基本 4px gap、グループの先頭だけ広めに（連続発言を密集させる IG スタイル）。
+   このアプリでは "グループ先頭" の検出ロジックが無いので、汎用的に 6px gap で固定。 */
+body.page-talk-room .message-row,
+#talk-room-container .message-row {
+    margin-bottom: 6px !important;
+}
+
+/* アバター：相手側の左の小さい円。IG は相手メッセージのグループ末尾だけ表示。
+   ここでは無理に消さず、サイズだけ控えめに。 */
+body.page-talk-room .msg-avatar,
+#talk-room-container .msg-avatar {
+    width: 30px !important;
+    height: 30px !important;
+    border: 0 !important;
+}
+
+/* 吹き出し本体：22px 角丸、シャドウ最小限。 */
+body.page-talk-room .message-bubble,
+#talk-room-container .message-bubble {
+    padding: 9px 14px !important;
+    border-radius: 22px !important;
+    font-size: 0.92rem !important;
+    line-height: 1.45 !important;
+    letter-spacing: 0 !important;
+    box-shadow: none !important;
+}
+
+/* 相手の吹き出し：ニュートラル dark gray（IG の theirs バブル相当） */
+body.page-talk-room .msg-left .message-bubble,
+#talk-room-container .msg-left .message-bubble {
+    background: #262626 !important;
+    color: #f5f5f5 !important;
+    border: 0 !important;
+    /* テール: 左下だけ少しだけ詰める */
+    border-radius: 22px 22px 22px 6px !important;
+}
+
+/* 自分の吹き出し：mauve pink のベタ塗り（グラデなし）。IG の "blue bubble" と同じく flat solid。 */
+body.page-talk-room .msg-right .message-bubble,
+#talk-room-container .msg-right .message-bubble {
+    background: var(--accent, #d670a2) !important;
+    color: var(--on-accent, #1a0814) !important;
+    font-weight: 500 !important;
+    border: 0 !important;
+    /* テール: 右下だけ詰める */
+    border-radius: 22px 22px 6px 22px !important;
+}
+
+/* 時刻表示：IG はバブル外側右に超小さく出す。グループ末尾だけ。
+   ここでは既存の .msg-time をそのまま控えめに整える。 */
+body.page-talk-room .msg-time,
+#talk-room-container .msg-time {
+    font-size: 0.66rem !important;
+    color: rgba(255, 255, 255, 0.35) !important;
+    font-family: var(--font-sans, sans-serif) !important;
+}
+body.page-talk-room .msg-right .msg-time,
+#talk-room-container .msg-right .msg-time {
+    color: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* 既読/送信ステータス：mauve に統一 */
+body.page-talk-room .msg-status,
+#talk-room-container .msg-status {
+    color: var(--accent-text, #f0a6c4) !important;
+    font-size: 0.62rem !important;
+}
+
+/* ---------- INPUT BAR ---------- */
+
+/* 入力エリア全体：ヘッダーと同じ深い透過 dark + 上線だけ、heavy shadow 撤去 */
+body.page-talk-room #talk-room-container .chat-input-area,
+#talk-room-container .chat-input-area {
+    padding: 8px 12px 10px !important;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0)) !important;
+    background: rgba(10, 10, 10, 0.94) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow: none !important;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+/* 入力 pill：light dark、border 細く、内側 shadow 撤去（IG のシンプルな入力欄） */
+body.page-talk-room .chat-input-wrapper,
+#talk-room-container .chat-input-wrapper {
+    background: #1c1c1c !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 22px !important;
+    padding: 8px 16px !important;
+    min-height: 40px !important;
+    box-shadow: none !important;
+}
+body.page-talk-room .chat-input-wrapper:focus-within,
+#talk-room-container .chat-input-wrapper:focus-within {
+    border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.50) !important;
+    box-shadow: none !important;
+}
+body.page-talk-room .chat-input-wrapper textarea,
+#talk-room-container .chat-input-wrapper textarea {
+    color: #f5f5f5 !important;
+    font-size: 0.92rem !important;
+    line-height: 1.4 !important;
+}
+body.page-talk-room .chat-input-wrapper textarea::placeholder,
+#talk-room-container .chat-input-wrapper textarea::placeholder {
+    color: rgba(255, 255, 255, 0.32) !important;
+}
+
+/* 左の "+"（アクションメニューを開く）ボタン：IG の camera icon 位置と同じ。
+   warm dark + 紫文字 → ニュートラル dark + 白に */
+body.page-talk-room .btn-chat-action,
+#talk-room-container .btn-chat-action {
+    background: #1c1c1c !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    width: 40px !important;
+    height: 40px !important;
+}
+body.page-talk-room .btn-chat-action:hover,
+#talk-room-container .btn-chat-action:hover {
+    background: #232323 !important;
+}
+
+/* 送信ボタン：他画面の primary CTA と同じ mauve グラデ（既に統一済み）。
+   IG だと "send" 文字 + 矢印アイコンだが、現状の paper-plane アイコンで OK。 */
+body.page-talk-room .btn-send,
+#talk-room-container .btn-send {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* talk-room-header：ニュートラルな bar に。warm gold アクセントは撤去 */
+body.page-talk-room .talk-room-header,
+#talk-room-container .talk-room-header {
+    background: rgba(10, 10, 10, 0.96) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow: none !important;
+    padding: 10px 14px !important;
+}
+
+/* talk-result-panel（採用結果テンプレ）：warm gold → ニュートラル + mauve アクセント */
+body.page-talk-room .talk-result-panel,
+#talk-room-container .talk-result-panel {
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: #161616 !important;
+    box-shadow: none !important;
+}
+
+/* 名前バッジ（trial/help）の warm chip → ニュートラル */
+body.page-talk-room .talk-job-kind-badge,
+#talk-room-container .talk-job-kind-badge {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    color: var(--color-text-main, #f5f5f5) !important;
+}

@@ -89,7 +89,7 @@
 .sidebar-sub-menu { list-style: none; padding: 0; margin: 0; }
 .sidebar-sub-menu li { margin-bottom: 15px; }
 .sidebar-sub-menu a, .menu-summary { 
-    color: #D6C6C6; 
+    color: #c0c0c0; 
     text-decoration: none; 
     font-size: 0.95rem; 
     display: flex; 

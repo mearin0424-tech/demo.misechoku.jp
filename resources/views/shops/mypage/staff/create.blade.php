@@ -82,19 +82,16 @@
     }
     .staff-form-submit {
         flex: 1; padding: 13px 16px;
-        background: linear-gradient(135deg, #a78bfa, #7c3aed);
-        color: #fff; font-weight: 800; font-size: 0.95rem;
-        border: 1px solid rgba(255,255,255,.12);
+        background: var(--accent, #d670a2);
+        color: var(--on-accent, #1a0814); font-weight: 800; font-size: 0.95rem;
+        border: 0;
         border-radius: 999px;
         cursor: pointer;
-        box-shadow:
-            inset 0 2px 4px rgba(255,255,255,.3),
-            inset 0 -3px 4px rgba(0,0,0,.35),
-            0 8px 20px rgba(124,58,237,.45);
-        transition: transform .15s ease;
+        box-shadow: 0 6px 14px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.20), inset 0 -1px 0 rgba(0,0,0,.18);
+        transition: filter .15s ease, transform .12s ease;
     }
-    .staff-form-submit:hover { transform: translateY(-1px); }
-    .staff-form-submit:active { transform: translateY(1px); }
+    .staff-form-submit:hover { filter: brightness(1.06); }
+    .staff-form-submit:active { transform: scale(.97); box-shadow: 0 2px 5px rgba(0,0,0,.45), inset 0 2px 4px rgba(0,0,0,.2); }
     .staff-form-cancel {
         flex: 0 0 auto; padding: 13px 22px;
         background: transparent;

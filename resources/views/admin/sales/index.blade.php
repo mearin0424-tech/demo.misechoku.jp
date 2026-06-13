@@ -170,72 +170,154 @@
     </section>
 
     {{-- Top 店舗・キャスト --}}
+    @php
+        $maxShopCommission = !empty($topShops) ? max(array_column($topShops, 'commission')) ?: 1 : 1;
+        $maxCastCommission = !empty($topCasts) ? max(array_column($topCasts, 'commission')) ?: 1 : 1;
+        $medalIcon = ['🥇', '🥈', '🥉'];
+    @endphp
     <div class="sales-top-grid">
         <section class="admin-panel">
-            <h2 class="admin-panel-title">店舗別 仲介料貢献（{{ $periodLabel }}・上位{{ count($topShops) }}店舗）</h2>
+            <div class="u-flex-between u-mb-12">
+                <h2 class="admin-panel-title u-mb-0">店舗別 仲介料貢献（{{ $periodLabel }}・上位{{ count($topShops) }}店舗）</h2>
+                @if(!empty($topShops))
+                    <button type="button" class="btn-action btn-action-secondary" data-sales-csv="shops"
+                        title="CSV ファイルとしてダウンロード">
+                        <i class="fas fa-file-csv"></i> CSV
+                    </button>
+                @endif
+            </div>
             @if(empty($topShops))
                 <p class="admin-note u-mb-0">対象期間に取引のある店舗はありません。</p>
             @else
-                <div class="table-wrapper">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th class="u-w-60">#</th>
-                                <th>店舗</th>
-                                <th>件数</th>
-                                <th>仲介料</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($topShops as $i => $shop)
-                                <tr>
-                                    <td>{{ $i + 1 }}</td>
-                                    <td>
-                                        <a href="{{ route('admin.shops.show', $shop['id']) }}">{{ $shop['name'] }}</a>
-                                        <code class="u-text-muted u-fs-xs">{{ $shop['id'] }}</code>
-                                    </td>
-                                    <td>{{ number_format($shop['count']) }} 件</td>
-                                    <td><strong>{{ number_format($shop['commission']) }}</strong> 円</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                <ol class="sales-rank-list" id="sales-rank-shops">
+                    @foreach($topShops as $i => $shop)
+                        @php
+                            $pct = max(2, round($shop['commission'] / max($maxShopCommission, 1) * 100));
+                            $isTop = $i < 3;
+                        @endphp
+                        <li class="sales-rank-item {{ $isTop ? 'is-top is-rank-' . ($i + 1) : '' }}"
+                            data-name="{{ $shop['name'] }}" data-id="{{ $shop['id'] }}"
+                            data-count="{{ $shop['count'] }}" data-commission="{{ $shop['commission'] }}">
+                            <span class="sales-rank-item__rank">
+                                @if($isTop)
+                                    <span class="sales-rank-item__medal" aria-hidden="true">{{ $medalIcon[$i] }}</span>
+                                @else
+                                    <span class="sales-rank-item__num">{{ $i + 1 }}</span>
+                                @endif
+                            </span>
+                            <div class="sales-rank-item__body">
+                                <div class="sales-rank-item__head">
+                                    <a href="{{ route('admin.shops.show', $shop['id']) }}" class="sales-rank-item__name">{{ $shop['name'] }}</a>
+                                    <code class="sales-rank-item__id">{{ $shop['id'] }}</code>
+                                </div>
+                                <div class="sales-rank-item__bar">
+                                    <div class="sales-rank-item__bar-fill" style="width: {{ $pct }}%"></div>
+                                </div>
+                                <div class="sales-rank-item__meta">
+                                    <span>取引 <strong>{{ number_format($shop['count']) }}</strong> 件</span>
+                                    <span class="sales-rank-item__commission">仲介料 <strong>{{ number_format($shop['commission']) }}</strong> 円</span>
+                                </div>
+                            </div>
+                        </li>
+                    @endforeach
+                </ol>
             @endif
         </section>
 
         <section class="admin-panel">
-            <h2 class="admin-panel-title">キャスト別 仲介料貢献（{{ $periodLabel }}・上位{{ count($topCasts) }}名）</h2>
+            <div class="u-flex-between u-mb-12">
+                <h2 class="admin-panel-title u-mb-0">キャスト別 仲介料貢献（{{ $periodLabel }}・上位{{ count($topCasts) }}名）</h2>
+                @if(!empty($topCasts))
+                    <button type="button" class="btn-action btn-action-secondary" data-sales-csv="casts"
+                        title="CSV ファイルとしてダウンロード">
+                        <i class="fas fa-file-csv"></i> CSV
+                    </button>
+                @endif
+            </div>
             @if(empty($topCasts))
                 <p class="admin-note u-mb-0">対象期間に取引のあるキャストはいません。</p>
             @else
-                <div class="table-wrapper">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th class="u-w-60">#</th>
-                                <th>キャスト</th>
-                                <th>件数</th>
-                                <th>仲介料</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($topCasts as $i => $cast)
-                                <tr>
-                                    <td>{{ $i + 1 }}</td>
-                                    <td>
-                                        <a href="{{ route('admin.casts.show', $cast['id']) }}">{{ $cast['name'] }}</a>
-                                        <code class="u-text-muted u-fs-xs">{{ $cast['id'] }}</code>
-                                    </td>
-                                    <td>{{ number_format($cast['count']) }} 件</td>
-                                    <td><strong>{{ number_format($cast['commission']) }}</strong> 円</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                <ol class="sales-rank-list" id="sales-rank-casts">
+                    @foreach($topCasts as $i => $cast)
+                        @php
+                            $pct = max(2, round($cast['commission'] / max($maxCastCommission, 1) * 100));
+                            $isTop = $i < 3;
+                        @endphp
+                        <li class="sales-rank-item {{ $isTop ? 'is-top is-rank-' . ($i + 1) : '' }}"
+                            data-name="{{ $cast['name'] }}" data-id="{{ $cast['id'] }}"
+                            data-count="{{ $cast['count'] }}" data-commission="{{ $cast['commission'] }}">
+                            <span class="sales-rank-item__rank">
+                                @if($isTop)
+                                    <span class="sales-rank-item__medal" aria-hidden="true">{{ $medalIcon[$i] }}</span>
+                                @else
+                                    <span class="sales-rank-item__num">{{ $i + 1 }}</span>
+                                @endif
+                            </span>
+                            <div class="sales-rank-item__body">
+                                <div class="sales-rank-item__head">
+                                    <a href="{{ route('admin.casts.show', $cast['id']) }}" class="sales-rank-item__name">{{ $cast['name'] }}</a>
+                                    <code class="sales-rank-item__id">{{ $cast['id'] }}</code>
+                                </div>
+                                <div class="sales-rank-item__bar">
+                                    <div class="sales-rank-item__bar-fill sales-rank-item__bar-fill--cast" style="width: {{ $pct }}%"></div>
+                                </div>
+                                <div class="sales-rank-item__meta">
+                                    <span>取引 <strong>{{ number_format($cast['count']) }}</strong> 件</span>
+                                    <span class="sales-rank-item__commission">仲介料 <strong>{{ number_format($cast['commission']) }}</strong> 円</span>
+                                </div>
+                            </div>
+                        </li>
+                    @endforeach
+                </ol>
             @endif
         </section>
     </div>
 </div>
+@endsection
+
+@push('admin-scripts')
+<script>
+// CSV エクスポート（クライアントサイド）
+document.addEventListener('DOMContentLoaded', function () {
+    function exportCsv(scope) {
+        var listId = scope === 'shops' ? 'sales-rank-shops' : 'sales-rank-casts';
+        var list = document.getElementById(listId);
+        if (!list) return;
+        var headerLabel = scope === 'shops' ? '店舗名' : 'キャスト名';
+        var rows = [['順位', headerLabel, 'ID', '取引件数', '仲介料(円)']];
+        Array.prototype.forEach.call(list.querySelectorAll('.sales-rank-item'), function (li, idx) {
+            rows.push([
+                idx + 1,
+                li.dataset.name || '',
+                li.dataset.id || '',
+                li.dataset.count || '0',
+                li.dataset.commission || '0',
+            ]);
+        });
+        var csv = rows.map(function (r) {
+            return r.map(function (v) {
+                var s = String(v == null ? '' : v).replace(/"/g, '""');
+                return /[,"\n]/.test(s) ? '"' + s + '"' : s;
+            }).join(',');
+        }).join('\n');
+        // BOM 付与で Excel が UTF-8 を正しく読む
+        var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        var dt = new Date();
+        var stamp = dt.getFullYear() + ('0'+(dt.getMonth()+1)).slice(-2) + ('0'+dt.getDate()).slice(-2);
+        a.href = url;
+        a.download = 'sales_top_' + scope + '_' + stamp + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    document.querySelectorAll('[data-sales-csv]').forEach(function (btn) {
+        btn.addEventListener('click', function () { exportCsv(btn.dataset.salesCsv); });
+    });
+});
+</script>
+@endpush
 @endsection

@@ -26,6 +26,19 @@
     $businessHours   = trim((string) ($recruit['business_hours'] ?? $shop['business_hours_shop'] ?? ''));
     $nearestStation  = trim((string) ($shop['nearest_station'] ?? ''));
     $workingHours    = trim((string) ($recruit['working_hours'] ?? ''));
+
+    // ----- 店舗プロファイル系の追加情報 -----
+    $industryName    = trim((string) ($shop['industry_name'] ?? ''));
+    $shopWord        = trim((string) ($shop['word'] ?? ''));
+    $shopConcept     = trim((string) ($shop['concept'] ?? ''));
+    $openDate        = trim((string) ($recruit['open_date'] ?? ''));
+    $shopTagGroups   = isset($tagGroups) && is_array($tagGroups) ? $tagGroups : (array) ($shop['tag_groups'] ?? []);
+
+    // ----- 求人系（勤務条件）の追加情報 -----
+    $workingDays     = trim((string) ($recruit['working_days'] ?? ''));
+    $regularHoliday  = trim((string) ($recruit['regular_holiday'] ?? ''));
+    $qualification   = trim((string) ($recruit['qualification'] ?? ''));
+    $jobContent      = trim((string) ($recruit['job_content'] ?? ''));
 @endphp
 
 <div class="pb-6">
@@ -57,10 +70,17 @@
             </div>
         </div>
 
-        {{-- エリア表示 --}}
-        @if($areaChip !== '')
-            <div class="flex items-center gap-2 mb-4 text-text-sub text-[12px]">
-                <i class="fas fa-map-marker-alt"></i>{{ $areaChip }}
+        {{-- エリア + 業種 --}}
+        @if($areaChip !== '' || $industryName !== '')
+            <div class="flex items-center gap-2 mb-4 text-text-sub text-[12px] flex-wrap">
+                @if($areaChip !== '')
+                    <span class="inline-flex items-center gap-1.5"><i class="fas fa-map-marker-alt"></i>{{ $areaChip }}</span>
+                @endif
+                @if($industryName !== '')
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/10 border border-line-accent/40 text-accent-text font-bold tracking-wide">
+                        <i class="fas fa-tag text-[10px]"></i>{{ $industryName }}
+                    </span>
+                @endif
             </div>
         @endif
 
@@ -122,23 +142,30 @@
         @endif
     </div>
 
-    {{-- Tabs --}}
+    {{-- Tabs: GALLERY / JOB / SHOP --}}
     <div data-tabs-scope>
-        <div data-tabs class="border-t border-b border-line-accent/40 bg-base/90 backdrop-blur-md">
+        <div data-tabs class="border-t border-b border-line-accent/40 bg-base/90 backdrop-blur-md sticky top-0 z-10">
             <div class="flex">
                 <button type="button" data-tab="gallery"
-                        class="is-active flex-1 py-3 flex justify-center items-center transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
-                    <span class="app-title text-[12px] tracking-widest">GALLERY</span>
+                        class="flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
+                    <i class="fas fa-images text-[14px]"></i>
+                    <span class="app-title text-[10px] tracking-widest">GALLERY</span>
                 </button>
-                <button type="button" data-tab="details"
-                        class="flex-1 py-3 flex justify-center items-center transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
-                    <span class="app-title text-[12px] tracking-widest">DETAILS</span>
+                <button type="button" data-tab="job"
+                        class="is-active flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
+                    <i class="fas fa-briefcase text-[14px]"></i>
+                    <span class="app-title text-[10px] tracking-widest">JOB</span>
+                </button>
+                <button type="button" data-tab="shop"
+                        class="flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
+                    <i class="fas fa-store text-[14px]"></i>
+                    <span class="app-title text-[10px] tracking-widest">SHOP</span>
                 </button>
             </div>
         </div>
 
-        {{-- GALLERY：登録済み画像のみ表示（空スロットは出さない） --}}
-        <div data-tab-panel="gallery" class="is-active">
+        {{-- ========== GALLERY ========== --}}
+        <div data-tab-panel="gallery">
             @if(count($galleryImages) > 0)
                 <ul id="profile-gallery-list">
                     @foreach($galleryImages as $i => $img)
@@ -158,8 +185,8 @@
             @endif
         </div>
 
-        {{-- DETAILS --}}
-        <div data-tab-panel="details">
+        {{-- ========== JOB（求人情報） ========== --}}
+        <div data-tab-panel="job" class="is-active">
             <div class="p-4 flex flex-col gap-4">
 
                 {{-- BONUS card --}}
@@ -216,7 +243,7 @@
                 @endif
 
                 {{-- ABOUT / Message card --}}
-                @if($messageBody !== '' || $jobSupplementMain !== '')
+                @if($messageBody !== '' || $jobSupplementMain !== '' || $jobContent !== '')
                     <x-ui.card class="p-5">
                         <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
                             <i class="fas fa-comment-dots"></i> ABOUT
@@ -224,16 +251,52 @@
                         @if($messageBody !== '')
                             <div class="text-[13px] text-text-main leading-relaxed whitespace-pre-line">{{ $messageBody }}</div>
                         @endif
-                        @if($jobSupplementMain !== '')
+                        @php $jobBody = $jobSupplementMain !== '' ? $jobSupplementMain : $jobContent; @endphp
+                        @if($jobBody !== '')
                             <div class="mt-3 pt-3 border-t border-line">
                                 <span class="text-[12px] text-text-sub font-medium block mb-1">仕事内容</span>
-                                <div class="text-[13px] text-text-main leading-relaxed whitespace-pre-line">{{ $jobSupplementMain }}</div>
+                                <div class="text-[13px] text-text-main leading-relaxed whitespace-pre-line">{{ $jobBody }}</div>
                             </div>
                         @endif
                     </x-ui.card>
                 @endif
 
-                {{-- FEATURES card --}}
+                {{-- SHIFT / 勤務条件 card --}}
+                @if($workingHours !== '' || $workingDays !== '' || $regularHoliday !== '' || $qualification !== '')
+                    <x-ui.card class="p-5">
+                        <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
+                            <i class="fas fa-calendar-check"></i> SHIFT
+                        </h3>
+                        <div class="flex flex-col gap-3">
+                            @if($workingHours !== '')
+                                <div class="flex justify-between items-center border-b border-line pb-2">
+                                    <span class="text-[12px] text-text-sub font-medium">勤務時間</span>
+                                    <span class="text-[13px] font-bold text-text-main text-right">{{ $workingHours }}</span>
+                                </div>
+                            @endif
+                            @if($workingDays !== '')
+                                <div class="flex justify-between items-center border-b border-line pb-2">
+                                    <span class="text-[12px] text-text-sub font-medium">勤務日数</span>
+                                    <span class="text-[13px] font-bold text-text-main text-right">{{ $workingDays }}</span>
+                                </div>
+                            @endif
+                            @if($regularHoliday !== '')
+                                <div class="flex justify-between items-center border-b border-line pb-2">
+                                    <span class="text-[12px] text-text-sub font-medium">定休日</span>
+                                    <span class="text-[13px] font-bold text-text-main text-right">{{ $regularHoliday }}</span>
+                                </div>
+                            @endif
+                            @if($qualification !== '')
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[12px] text-text-sub font-medium">応募資格</span>
+                                    <span class="text-[13px] font-bold text-text-main text-right">{{ $qualification }}</span>
+                                </div>
+                            @endif
+                        </div>
+                    </x-ui.card>
+                @endif
+
+                {{-- FEATURES card（求人タグ：働き方・歓迎条件・待遇） --}}
                 @if($hasFeatureMatrix)
                     <x-ui.card class="p-5">
                         <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
@@ -248,6 +311,81 @@
                                         </div>
                                         <div class="flex flex-wrap gap-1.5">
                                             @foreach((array) $storeFeatures[$key] as $tag)
+                                                <span class="inline-flex items-center px-2 py-1 rounded bg-accent/10 border border-line-accent/30 text-[11px] text-text-main">{{ $tag }}</span>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </x-ui.card>
+                @endif
+
+            </div>
+        </div>
+
+        {{-- ========== SHOP（店舗プロフィール） ========== --}}
+        <div data-tab-panel="shop">
+            <div class="p-4 flex flex-col gap-4">
+
+                {{-- SHOP INFO card --}}
+                <x-ui.card class="p-5">
+                    <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
+                        <i class="fas fa-store"></i> SHOP INFO
+                    </h3>
+                    <div class="flex flex-col gap-3">
+                        <div class="flex justify-between items-center border-b border-line pb-2">
+                            <span class="text-[12px] text-text-sub font-medium">店名</span>
+                            <span class="text-[13px] font-bold text-text-main text-right">{{ $shopName }}</span>
+                        </div>
+                        @if($industryName !== '')
+                            <div class="flex justify-between items-center border-b border-line pb-2">
+                                <span class="text-[12px] text-text-sub font-medium">業種</span>
+                                <span class="text-[13px] font-bold text-text-main text-right">{{ $industryName }}</span>
+                            </div>
+                        @endif
+                        @if($openDate !== '')
+                            <div class="flex justify-between items-center">
+                                <span class="text-[12px] text-text-sub font-medium">開店日</span>
+                                <span class="text-[13px] font-bold text-text-main text-right">{{ $openDate }}</span>
+                            </div>
+                        @endif
+                    </div>
+                </x-ui.card>
+
+                {{-- WORD（店長のひとこと） --}}
+                @if($shopWord !== '' || $shopConcept !== '')
+                    <x-ui.card class="p-5">
+                        <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
+                            <i class="fas fa-quote-left"></i> WORD
+                        </h3>
+                        @if($shopWord !== '')
+                            <div class="text-[13px] text-text-main leading-relaxed whitespace-pre-line">{{ $shopWord }}</div>
+                        @endif
+                        @if($shopConcept !== '')
+                            <div class="@if($shopWord !== '') mt-3 pt-3 border-t border-line @endif">
+                                <span class="text-[11px] text-text-sub uppercase tracking-wider block mb-1">CONCEPT</span>
+                                <div class="text-[13px] text-text-main leading-relaxed whitespace-pre-line">{{ $shopConcept }}</div>
+                            </div>
+                        @endif
+                    </x-ui.card>
+                @endif
+
+                {{-- AMBIENCE（店内雰囲気・設備タグ） --}}
+                @if(!empty($shopTagGroups))
+                    <x-ui.card class="p-5">
+                        <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
+                            <i class="fas fa-sparkles"></i> AMBIENCE
+                        </h3>
+                        <div class="flex flex-col gap-3">
+                            @foreach($shopTagGroups as $group)
+                                @if(!empty($group['tags']))
+                                    <div>
+                                        <div class="text-[10px] text-text-sub uppercase tracking-wider mb-1">
+                                            {{ $group['label'] ?? '' }}
+                                        </div>
+                                        <div class="flex flex-wrap gap-1.5">
+                                            @foreach($group['tags'] as $tag)
                                                 <span class="inline-flex items-center px-2 py-1 rounded bg-accent/10 border border-line-accent/30 text-[11px] text-text-main">{{ $tag }}</span>
                                             @endforeach
                                         </div>
@@ -273,19 +411,13 @@
                         @if($nearestStation !== '')
                             <div class="flex justify-between items-center border-t border-line pt-2">
                                 <span class="text-[12px] text-text-sub font-medium">最寄り駅</span>
-                                <span class="text-[13px] font-bold text-text-main">{{ $nearestStation }}</span>
+                                <span class="text-[13px] font-bold text-text-main text-right">{{ $nearestStation }}</span>
                             </div>
                         @endif
                         @if($businessHours !== '')
                             <div class="flex justify-between items-center border-t border-line pt-2">
                                 <span class="text-[12px] text-text-sub font-medium">営業時間</span>
-                                <span class="text-[13px] font-bold text-text-main">{{ $businessHours }}</span>
-                            </div>
-                        @endif
-                        @if($workingHours !== '')
-                            <div class="flex justify-between items-center border-t border-line pt-2">
-                                <span class="text-[12px] text-text-sub font-medium">勤務時間</span>
-                                <span class="text-[13px] font-bold text-text-main">{{ $workingHours }}</span>
+                                <span class="text-[13px] font-bold text-text-main text-right">{{ $businessHours }}</span>
                             </div>
                         @endif
                     </div>

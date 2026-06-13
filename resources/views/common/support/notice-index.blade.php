@@ -45,7 +45,7 @@
 <style>
 .support-notice-page {
     padding: 24px 16px 32px;
-    color: #f9f5f5;
+    color: #f5f5f5;
 }
 
 @media (min-width: 768px) {

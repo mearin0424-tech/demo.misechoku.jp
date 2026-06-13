@@ -16,11 +16,11 @@
     margin: 0 0 16px;
     text-align: center;
 }
-.summary-label { font-size: 0.8rem; color: var(--color-gold); margin-bottom: 10px; }
+.summary-label { font-size: 0.8rem; color: var(--accent-text, #f0a6c4); margin-bottom: 10px; }
 .summary-main { display: flex; align-items: center; justify-content: center; gap: 15px; }
-.avg-score-big { font-size: 3rem; font-weight: 600; color: #F5E6E6; font-family: var(--font-serif); letter-spacing: 0.06em; }
-.stars-gold-big { color: var(--color-gold); font-size: 1.2rem; }
-.total-count-text { font-size: 0.75rem; color: #A89090; margin-top: 5px; }
+.avg-score-big { font-size: 3rem; font-weight: 600; color: #f5f5f5; font-family: var(--font-serif); letter-spacing: 0.06em; }
+.stars-gold-big { color: var(--accent-text, #f0a6c4); font-size: 1.2rem; }
+.total-count-text { font-size: 0.75rem; color: #909090; margin-top: 5px; }
 
 /* レビューカード */
 .review-card {
@@ -31,7 +31,7 @@
     border: 1px solid var(--color-border);
     transition: background 0.18s ease, border-color 0.18s ease, transform 0.12s ease, box-shadow 0.12s ease;
 }
-.review-card.is-hidden { opacity: 0.6; background: #1a1a1a; }
+.review-card.is-hidden { opacity: 0.6; background: var(--color-surface-from, #1a1a1a); }
 
 .review-card:hover {
     border-color: rgba(168, 85, 247, 0.55);
@@ -51,7 +51,7 @@
 
 .rev-bubble-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .rev-name { font-weight: bold; color: #fff; font-size: 0.95rem; }
-.rev-score-small { color: var(--color-gold); font-size: 0.85rem; font-weight: bold; }
+.rev-score-small { color: var(--accent-text, #f0a6c4); font-size: 0.85rem; font-weight: bold; }
 
 .rev-comment { font-size: 0.9rem; color: var(--color-text); line-height: 1.6; margin-bottom: 15px; }
 
@@ -65,7 +65,7 @@
     align-items: center;
     gap: 4px;
     font-size: 0.75rem;
-    color: var(--color-gold);
+    color: var(--accent-text, #f0a6c4);
     cursor: pointer;
 }
 .rev-details-block {
@@ -77,7 +77,7 @@
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.06em;
-    color: var(--color-gold);
+    color: var(--accent-text, #f0a6c4);
     margin: 0 0 10px;
 }
 .rev-details-list {
@@ -95,7 +95,7 @@
     gap: 10px;
     font-size: 0.8rem;
     margin-bottom: 8px;
-    color: #c4b8b8;
+    color: #b8b8b8;
 }
 .detail-row:last-child {
     margin-bottom: 0;
@@ -113,7 +113,7 @@
     text-align: right;
 }
 .detail-stars {
-    color: var(--color-gold);
+    color: var(--accent-text, #f0a6c4);
     font-size: 0.68rem;
     letter-spacing: -0.02em;
     white-space: nowrap;
@@ -121,7 +121,7 @@
 .detail-val {
     min-width: 2rem;
     font-weight: 700;
-    color: var(--color-gold);
+    color: var(--accent-text, #f0a6c4);
     font-size: 0.82rem;
 }
 
@@ -131,7 +131,7 @@
     width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #444;
     background: transparent; color: #ccc; font-size: 0.8rem; cursor: pointer;
 }
-.plan-label { display: block; font-size: 0.6rem; color: var(--color-gold); margin-top: 2px; }
+.plan-label { display: block; font-size: 0.6rem; color: var(--accent-text, #f0a6c4); margin-top: 2px; }
 
 /* --------------------------------------------------------------------------
    共通: 星評価（partials/review_stars）— 店舗レビュー一覧で色を上書き
@@ -158,7 +158,7 @@
 body.page-shop-mypage-reviews #global-header .header-title-main.header-title-serif {
     font-style: italic;
     letter-spacing: 0.18em;
-    color: #e8d5c4;
+    color: var(--accent-text, #f0a6c4);
     font-weight: 500;
 }
 
@@ -184,7 +184,7 @@ body.page-shop-mypage-reviews #global-header .header-title-main.header-title-ser
 .shop-review-summary__label {
     margin: 0 0 0.75rem;
     font-size: 0.875rem;
-    color: #c4b4b4;
+    color: #b8b8b8;
     letter-spacing: 0.14em;
 }
 
@@ -199,7 +199,7 @@ body.page-shop-mypage-reviews #global-header .header-title-main.header-title-ser
 .shop-review-summary__score {
     font-size: 3.75rem;
     font-weight: 300;
-    color: #f5e6e6;
+    color: #f5f5f5;
     letter-spacing: -0.04em;
     line-height: 1;
     font-family: var(--font-serif, 'Shippori Mincho', serif);
@@ -215,17 +215,17 @@ body.page-shop-mypage-reviews #global-header .header-title-main.header-title-ser
 .shop-review-summary__count {
     margin: 0.35rem 0 0;
     font-size: 0.8125rem;
-    color: #9a8a8a;
+    color: #909090;
 }
 
 .shop-review-summary__count span {
     font-weight: 700;
-    color: #c4b8b8;
+    color: #b8b8b8;
 }
 
 .shop-mypage-reviews-page .review-stars .review-star--full,
 .shop-mypage-reviews-page .review-stars .review-star--half {
-    color: #fff;
+    color: var(--accent-text, #f0a6c4);
 }
 
 .shop-mypage-reviews-page .review-stars .review-star--full {
@@ -233,7 +233,7 @@ body.page-shop-mypage-reviews #global-header .header-title-main.header-title-ser
 }
 
 .shop-mypage-reviews-page .review-stars .review-star--empty {
-    color: #4a3429;
+    color: #3a3a3a;
 }
 
 .shop-review-items {
@@ -247,7 +247,7 @@ body.page-shop-mypage-reviews #global-header .header-title-main.header-title-ser
     border: 1px dashed rgba(168, 85, 247, 0.22);
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.03);
-    color: #b6a3a3;
+    color: #a0a0a0;
 }
 
 /* 1 件 1 件のレビューをカードとして区切る */
@@ -290,7 +290,7 @@ body.page-shop-mypage-reviews #global-header .header-title-main.header-title-ser
 }
 
 .shop-review-item__surface--interactive:focus-visible {
-    outline: 2px solid rgba(196, 154, 91, 0.55);
+    outline: 2px solid var(--accent, #d670a2);
     outline-offset: 2px;
 }
 
@@ -332,7 +332,7 @@ body.page-shop-mypage-reviews #global-header .header-title-main.header-title-ser
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #b6a3a3;
+    color: #a0a0a0;
     font-size: 1.05rem;
     background: #2a2a2a;
 }
@@ -498,7 +498,7 @@ body.page-shop-mypage-reviews #global-header .header-title-main.header-title-ser
     border-radius: 8px;
     border: 1px solid rgba(168, 85, 247, 0.35);
     background: transparent;
-    color: #f5e0c4;
+    color: #f0a6c4;
     font-size: 0.8rem;
     font-weight: 700;
     cursor: pointer;

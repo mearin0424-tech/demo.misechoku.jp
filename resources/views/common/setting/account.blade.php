@@ -171,10 +171,10 @@
 
 @push('styles')
 <style>
-.setting-page { padding: 24px var(--content-padding-x, 16px) 32px; color: #f9f5f5; }
+.setting-page { padding: 24px var(--content-padding-x, 16px) 32px; color: #f5f5f5; }
 .setting-header { margin-bottom: 18px; }
 .setting-title { font-family: var(--font-sans); font-size: 1.4rem; margin-bottom: 8px; color: var(--mypage-gold, #a78bfa); }
-.setting-lead { font-size: 0.86rem; line-height: 1.6; color: #d1c1c1; }
+.setting-lead { font-size: 0.86rem; line-height: 1.6; color: #c0c0c0; }
 
 .setting-flash {
     margin: 0 0 14px;
@@ -213,7 +213,7 @@
 .setting-section--danger .setting-section-title i { color: #fca5a5; }
 
 .setting-form-group { margin-bottom: 12px; }
-.setting-form-group label { display: block; font-size: 0.78rem; margin-bottom: 6px; color: #f5e0c4; font-weight: 700; }
+.setting-form-group label { display: block; font-size: 0.78rem; margin-bottom: 6px; color: #f0a6c4; font-weight: 700; }
 .setting-form-group input,
 .setting-form-group textarea {
     width: 100%;
@@ -235,7 +235,7 @@
 .setting-form-group input:disabled { opacity: 0.7; cursor: not-allowed; }
 .setting-form-group textarea { resize: vertical; min-height: 100px; }
 .setting-form-group input::placeholder,
-.setting-form-group textarea::placeholder { color: #8d7878; }
+.setting-form-group textarea::placeholder { color: #666666; }
 .setting-error { color: #fca5a5; font-size: 0.78rem; margin: 6px 0 0; }
 
 .setting-submit {
@@ -246,26 +246,28 @@
     border: 0;
     font-size: 0.92rem;
     font-weight: 800;
-    color: #2a1406;
-    background: linear-gradient(135deg, #c4b5fd, #a78bfa 50%, #7c3aed);
+    color: var(--on-accent, #1a0814);
+    background: var(--accent, #d670a2);
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
+    box-shadow: 0 6px 14px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.20), inset 0 -1px 0 rgba(0,0,0,.18);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    transition: filter .15s ease, transform .12s ease;
 }
-.setting-submit:hover { transform: translateY(-1px); }
+.setting-submit:hover { filter: brightness(1.06); }
+.setting-submit:active { transform: scale(.97); box-shadow: 0 2px 5px rgba(0,0,0,.45), inset 0 2px 4px rgba(0,0,0,.2); }
 .setting-submit-danger {
-    background: linear-gradient(135deg, #ef4444, #b91c1c);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+    background: #dc2626;
+    color: #ffffff;
+    box-shadow: 0 6px 14px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.18), inset 0 -1px 0 rgba(0,0,0,.20);
 }
 
 .setting-row { padding: 4px 0; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .setting-row-main { flex: 1; min-width: 0; }
 .setting-row-label { font-size: 0.92rem; margin-bottom: 4px; font-weight: 700; color: #e6dffc; }
-.setting-row-desc { font-size: 0.78rem; color: #b69f9f; line-height: 1.55; }
+.setting-row-desc { font-size: 0.78rem; color: #a0a0a0; line-height: 1.55; }
 .setting-linked { color: #6ee7b7; margin-left: 6px; font-size: 0.78rem; font-weight: 800; }
 
 .setting-btn {
@@ -304,7 +306,7 @@
 }
 .withdraw-warning i { margin-top: 2px; color: #fca5a5; }
 .withdraw-warning-small { margin-top: 4px; font-size: 0.75rem; opacity: 0.8; }
-.withdraw-check { display: flex; align-items: flex-start; gap: 8px; font-size: 0.82rem; color: #f9f5f5; margin: 4px 0 12px; cursor: pointer; }
+.withdraw-check { display: flex; align-items: flex-start; gap: 8px; font-size: 0.82rem; color: #f5f5f5; margin: 4px 0 12px; cursor: pointer; }
 .withdraw-check input { margin-top: 3px; accent-color: #ef4444; }
 </style>
 @endpush

@@ -20,6 +20,53 @@
         <div class="admin-alert admin-alert-success">{{ session('status') }}</div>
     @endif
 
+    @php
+        $totalScreens = 0;
+        $enabledScreens = 0;
+        $emptyMessageScreens = 0;
+        foreach ($grouped as $rows) {
+            foreach ($rows as $row) {
+                $totalScreens++;
+                if (!empty($row['enabled'])) $enabledScreens++;
+                if (empty(trim((string)($row['message'] ?? '')))) $emptyMessageScreens++;
+            }
+        }
+    @endphp
+    <section class="dashboard-kpi-grid character-guide-kpis">
+        <article class="dashboard-kpi-card">
+            <div class="dashboard-kpi-head">
+                <div class="dashboard-kpi-title">対応画面（合計）</div>
+                <i class="fas fa-window-restore"></i>
+            </div>
+            <div class="dashboard-kpi-main">
+                <span class="dashboard-kpi-value">{{ number_format($totalScreens) }}</span>
+                <span class="dashboard-kpi-unit">画面</span>
+            </div>
+        </article>
+        <article class="dashboard-kpi-card">
+            <div class="dashboard-kpi-head">
+                <div class="dashboard-kpi-title">表示ON</div>
+                <i class="fas fa-toggle-on"></i>
+            </div>
+            <div class="dashboard-kpi-main">
+                <span class="dashboard-kpi-value">{{ number_format($enabledScreens) }}</span>
+                <span class="dashboard-kpi-unit">画面</span>
+            </div>
+            <div class="dashboard-kpi-trend is-up">オコジョ登場</div>
+        </article>
+        <article class="dashboard-kpi-card {{ $emptyMessageScreens > 0 ? 'character-guide-kpi--attention' : '' }}">
+            <div class="dashboard-kpi-head">
+                <div class="dashboard-kpi-title">セリフ未設定</div>
+                <i class="fas fa-comment-slash"></i>
+            </div>
+            <div class="dashboard-kpi-main">
+                <span class="dashboard-kpi-value">{{ number_format($emptyMessageScreens) }}</span>
+                <span class="dashboard-kpi-unit">画面</span>
+            </div>
+            <div class="dashboard-kpi-trend">空欄でも保存可</div>
+        </article>
+    </section>
+
     <form method="POST" action="{{ route('admin.character-guide.update') }}">
         @csrf
         @method('PUT')

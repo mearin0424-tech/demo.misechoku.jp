@@ -88,7 +88,7 @@
         required
     >
     @unless($isManagement)
-        <small style="display:block; margin-top:6px; color:#7c8ba3;">口座番号は7桁または8桁の数字で入力してください。</small>
+        <small style="display:block; margin-top:6px; color:#a0a0a0;">口座番号は7桁または8桁の数字で入力してください。</small>
     @endunless
 </div>
 <div class="{{ $rowClass }}">
@@ -103,6 +103,6 @@
         required
     >
     @unless($isManagement)
-        <small style="display:block; margin-top:6px; color:#7c8ba3;">銀行側の登録カナ表記に合わせて入力してください。</small>
+        <small style="display:block; margin-top:6px; color:#a0a0a0;">銀行側の登録カナ表記に合わせて入力してください。</small>
     @endunless
 </div>

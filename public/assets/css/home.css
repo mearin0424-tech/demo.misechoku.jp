@@ -423,7 +423,7 @@ body.no-scroll main#main-content .content-wrapper {
 .card-rating-star {
     color: var(--gold-light);
     font-size: clamp(0.75rem, 2.4vw, 0.88rem);
-    text-shadow: 0 0 6px rgba(245, 197, 66, 0.5);
+    text-shadow: 0 0 6px rgba(var(--accent-rgb, 214, 112, 162), 0.5);
     line-height: 1;
 }
 
@@ -531,12 +531,12 @@ body.no-scroll main#main-content .content-wrapper {
     font-size: clamp(0.68rem, 2.1vw, 0.78rem);
     font-weight: 600;
     color: var(--color-text-header);
-    background: rgba(248, 231, 176, 0.12);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.12);
     padding: 1px 7px;
     border-radius: 4px;
-    border: 1px solid rgba(248, 231, 176, 0.2);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.2);
     white-space: nowrap;
-    text-shadow: 0 0 6px rgba(248, 231, 176, 0.3);
+    text-shadow: 0 0 6px rgba(var(--accent-rgb, 214, 112, 162), 0.3);
 }
 
 .cast-name {
@@ -581,7 +581,7 @@ body.no-scroll main#main-content .content-wrapper {
 .card-recruit-bonus-line:not(.is-muted) .card-recruit-bonus-amount {
     color: var(--color-text-header);
     font-weight: 700;
-    text-shadow: 0 0 8px rgba(248, 231, 176, 0.35);
+    text-shadow: 0 0 8px rgba(var(--accent-rgb, 214, 112, 162), 0.35);
 }
 .card-recruit-bonus-line.is-muted .card-recruit-bonus-amount {
     color: #888;
@@ -621,7 +621,7 @@ body.no-scroll main#main-content .content-wrapper {
 }
 .card-rating-stars .star.filled {
     color: var(--gold-light);
-    text-shadow: 0 0 6px rgba(245,197,66,0.6);
+    text-shadow: 0 0 6px rgba(var(--accent-rgb, 214, 112, 162),0.6);
 }
 .card-rating-stars .star.empty {
     color: rgba(255,255,255,0.25);
@@ -654,7 +654,7 @@ body.no-scroll main#main-content .content-wrapper {
     font-size: clamp(0.8rem, 2.5vw, 0.95rem);
     font-weight: 700;
     color: var(--color-text-header);
-    text-shadow: 0 0 8px rgba(248, 231, 176, 0.4);
+    text-shadow: 0 0 8px rgba(var(--accent-rgb, 214, 112, 162), 0.4);
 }
 
 .card-tags-row {
@@ -2345,207 +2345,275 @@ body.page-home .distance-badge {
 }
 
 /* ==========================================================================
-   SWIPE カード UX 改善（2026-06-12）
-   既存スタイルは保持し、ここで上書きする。改善ポイント:
-   1. プライマリ CTA を明確化（メッセージ = モーブピンク fill）
-   2. like / keep のアクティブ色を mauve pink 統一（赤・ゴールドの混在を解消）
-   3. 全アクションボタンに視認性の高い枠線 + 強い影で写真背景でも埋もれない
-   4. 写真ページネーション：アクティブドットをアクセント色に
-   5. スワイプガイド：もっと目立たせる（不透明度UP・大きく・本数追加）
-   6. タグピル：背景を濃く・コントラスト向上
-   7. 下端グラデ：上端の二重スクリムを軽減して写真を活かす
-   8. focus-visible を維持しつつ、ボタンの :active 押し込みを物理的に
+   SWIPE カード — シンプル版（2026-06-13）
+   方針:
+   ・ネオン／グロー／ハローは一切なし。ドロップシャドウは控えめ 1 段だけ。
+   ・写真ページネーションのバー（左右 / 上下の "今ここ" インジケーター）は最小限。
+   ・店名・キャスト名は控えめサイズに（写真をもっと目立たせる）。
+   ・文字エリアはカード下部に収め、グラデは "薄く・短く"。
+   ・テキストの "下からふわっ" モーション (cardContentRise) を完全停止。
    ========================================================================== */
 
-/* --- アクションボタン共通：写真背景でも消えないコントラスト --- */
-body.page-home .action-circle-btn,
-body.page-home .action-btn-message,
-body.page-home .rc-actions .action-circle-btn {
-    /* 暗いガラスの上に白アイコンで明確な対比 */
-    background: rgba(0, 0, 0, 0.55) !important;
-    border: 1px solid rgba(255, 255, 255, 0.32) !important;
-    color: #ffffff !important;
-    box-shadow:
-        0 6px 18px rgba(0, 0, 0, 0.55),
-        inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
-    transition: transform .15s ease, background .2s ease, box-shadow .2s ease, border-color .2s ease;
+/* === 1. テキストの立ち上がりアニメーション停止 ===
+   既存の cardContentRise はテキストを下から上に・blur 付きで現すが、
+   「最初から表示」したいので opacity:0 状態と animation を解除する。 */
+body.page-home .cast-card .card-bottom-info > *,
+body.page-home .cast-card--recruit .rc-bottom-bar__stack > *,
+body.page-home .cast-card--recruit .rc-info > * {
+    opacity: 1 !important;
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+    will-change: auto !important;
 }
-body.page-home .action-circle-btn:hover,
-body.page-home .action-btn-message:hover {
-    border-color: rgba(255, 255, 255, 0.5) !important;
-    background: rgba(0, 0, 0, 0.68) !important;
-}
-body.page-home .action-circle-btn:active,
-body.page-home .action-btn-message:active {
-    transform: scale(0.93);
-    box-shadow:
-        0 2px 6px rgba(0, 0, 0, 0.55),
-        inset 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+body.page-home .cast-card--recruit .rc-manager-msg { opacity: 1 !important; animation: none !important; }
+/* swipe hint の "ふわっ" もシンプルに：表示／非表示のみ */
+body.page-home .main-swiper .swiper-slide-active .cast-card .card-swipe-hint,
+body.page-home .main-swiper .swiper-slide-active .cast-card .rc-swipe-hint {
+    animation: none !important;
 }
 
-/* --- プライマリ CTA: メッセージボタン --- */
-/* 「会話を始める」が最大のアクション。背景をモーブピンク fill、外側にハロー。
-   cast カードでは .action-btn-message、求人カードでは .action-circle-btn.message なので両方をターゲットする。 */
+/* === 2. 写真ページネーション（カード上端の細いバー）を控えめに ===
+   旧: 4px 高 + mauve pink + 8px グロー
+   新: 2px 高 + 白薄 + 白濃（active のみ）。色アクセント無し、グロー無し。
+   位置はそのまま（home.css の冒頭で top:12px 指定）。 */
+body.page-home .photo-pagination .swiper-pagination-bullet {
+    height: 2px !important;
+    background: rgba(255, 255, 255, 0.22) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+body.page-home .photo-pagination .swiper-pagination-bullet-active {
+    background: rgba(255, 255, 255, 0.85) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* === 3. like / keep — 〇の枠を撤去。フラットアイコンだけ ===
+   アイコン単体で表示し、写真に対する視認性は text-shadow（影をアイコン自体に落とす）で確保。 */
+body.page-home .action-circle-btn,
+body.page-home .rc-actions .action-circle-btn {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: #ffffff !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: 44px !important;       /* タップ判定だけ確保 */
+    min-height: 44px !important;
+    padding: 8px !important;
+    border-radius: 0 !important;
+    transition: color .15s ease, transform .12s ease;
+}
+body.page-home .action-circle-btn i,
+body.page-home .rc-actions .action-circle-btn i {
+    /* 写真に対しても見えるよう、アイコン自体に深い影を落とす */
+    font-size: 1.7rem !important;
+    text-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.85),
+        0 0 8px rgba(0, 0, 0, 0.55);
+}
+body.page-home .action-circle-btn:hover,
+body.page-home .rc-actions .action-circle-btn:hover {
+    color: var(--accent-text, #f0a6c4) !important;
+    background: transparent !important;
+}
+body.page-home .action-circle-btn:active,
+body.page-home .rc-actions .action-circle-btn:active {
+    transform: scale(0.88);
+    background: transparent !important;
+    box-shadow: none !important;
+}
+/* like / keep アクティブ：アイコンが mauve に塗り潰される（ハートが赤くなるのと同じ感覚） */
+body.page-home .action-circle-btn.like.is-active,
+body.page-home .action-circle-btn.keep.is-active {
+    background: transparent !important;
+    border: 0 !important;
+    color: var(--accent, #d670a2) !important;
+    box-shadow: none !important;
+}
+body.page-home .action-circle-btn.like.is-active i,
+body.page-home .action-circle-btn.keep.is-active i {
+    text-shadow:
+        0 0 10px rgba(var(--accent-rgb), 0.55),
+        0 1px 2px rgba(0, 0, 0, 0.85);
+}
+body.page-home .action-circle-btn.like.is-active .action-btn-count {
+    color: var(--accent-text, #f0a6c4) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+    font-weight: 700;
+}
+
+/* === 4. プライマリ CTA（メッセージボタン）— 唯一の "立体感ある solid CTA"。
+   グラデなし。ベタ mauve + 強めの drop shadow + 上端の微細ハイライトで物理ボタン感を出す。 */
 body.page-home .action-btn-message,
 body.page-home .action-circle-btn.message {
-    background: var(--accent) !important;       /* mauve pink */
-    border: 2px solid rgba(255, 255, 255, 0.85) !important;
-    color: var(--on-accent) !important;          /* 暗マウブ（コントラスト確保） */
+    background: var(--accent, #d670a2) !important;
+    border: 0 !important;
+    color: var(--on-accent, #1a0814) !important;
     box-shadow:
-        0 0 0 4px rgba(var(--accent-rgb), 0.30),  /* ハロー */
-        0 8px 22px rgba(var(--accent-rgb), 0.45),
-        inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+        0 6px 14px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.20),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+body.page-home .action-btn-message i,
+body.page-home .action-circle-btn.message i {
+    text-shadow: none !important;
+    font-size: 1.3rem !important;
 }
 body.page-home .action-btn-message:hover,
 body.page-home .action-circle-btn.message:hover {
-    background: var(--accent) !important;
-    filter: brightness(1.08);
+    background: var(--accent, #d670a2) !important;
+    filter: brightness(1.06);
+}
+body.page-home .action-btn-message:active,
+body.page-home .action-circle-btn.message:active {
+    transform: scale(0.95);
     box-shadow:
-        0 0 0 6px rgba(var(--accent-rgb), 0.35),
-        0 10px 26px rgba(var(--accent-rgb), 0.50),
-        inset 0 1px 0 rgba(255, 255, 255, 0.40) !important;
+        0 2px 5px rgba(0, 0, 0, 0.45),
+        inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
 }
 
-/* --- LIKE: 赤からモーブピンクへ統一 --- */
-body.page-home .action-circle-btn.like:hover {
-    background: rgba(var(--accent-rgb), 0.35) !important;
-    border-color: rgba(var(--accent-rgb), 0.7) !important;
-}
-body.page-home .action-circle-btn.like.is-active {
-    background: var(--accent) !important;
-    border-color: rgba(255, 255, 255, 0.65) !important;
-    color: var(--on-accent) !important;
-    box-shadow:
-        0 0 0 3px rgba(var(--accent-rgb), 0.30),
-        0 8px 22px rgba(var(--accent-rgb), 0.45),
-        inset 0 1px 0 rgba(255, 255, 255, 0.30) !important;
-}
-body.page-home .action-circle-btn.like.is-active .action-btn-count {
-    color: var(--on-accent) !important;
-    opacity: 1 !important;
-}
-
-/* --- KEEP: ゴールド系からモーブピンクへ --- */
-body.page-home .action-circle-btn.keep:hover {
-    background: rgba(var(--accent-rgb), 0.35) !important;
-    border-color: rgba(var(--accent-rgb), 0.7) !important;
-}
-body.page-home .action-circle-btn.keep.is-active {
-    background: var(--accent) !important;
-    border-color: rgba(255, 255, 255, 0.65) !important;
-    color: var(--on-accent) !important;
-    box-shadow:
-        0 0 0 3px rgba(var(--accent-rgb), 0.30),
-        0 8px 22px rgba(var(--accent-rgb), 0.45),
-        inset 0 1px 0 rgba(255, 255, 255, 0.30) !important;
-}
-
-/* --- 求人ボタン（◯求人）：紫アクセント円形 → 同じく mauve pink 系 --- */
+/* === 5. 求人ボタン（◯求人）— ベタ塗りの mauve + 物理ボタン感 === */
 body.page-home .card-recruit-btn {
-    background: linear-gradient(145deg, var(--accent-grad-from), var(--accent-grad-to)) !important;
-    color: var(--on-accent-strong) !important;
-    border: 2px solid rgba(255, 255, 255, 0.7) !important;
+    background: var(--accent, #d670a2) !important;
+    color: var(--on-accent, #1a0814) !important;
+    border: 0 !important;
     box-shadow:
-        0 0 0 3px rgba(var(--accent-rgb), 0.25),
-        0 6px 18px rgba(var(--accent-rgb), 0.45),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+        0 6px 14px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.20),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18) !important;
 }
 body.page-home .card-recruit-btn:hover {
-    filter: brightness(1.1);
-    box-shadow:
-        0 0 0 5px rgba(var(--accent-rgb), 0.30),
-        0 8px 22px rgba(var(--accent-rgb), 0.55),
-        inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
+    filter: brightness(1.06);
+}
+body.page-home .card-recruit-btn:active {
+    transform: scale(0.95);
 }
 
-/* --- 写真ページネーション：アクティブを mauve pink にして "今どこ" を即わかる --- */
-body.page-home .photo-pagination .swiper-pagination-bullet {
-    height: 4px !important;
-    background: rgba(255, 255, 255, 0.30) !important;
-}
-body.page-home .photo-pagination .swiper-pagination-bullet-active {
-    background: var(--accent) !important;
-    box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.65);
-    transform: scaleY(1.0);
-}
-
-/* --- スワイプガイド：もっと目立たせる（2 段重ね chevron で動きを感じさせる） --- */
+/* === 7. スワイプガイド — 落ち着いた白薄、グロー無し === */
 body.page-home .discovery-swipe-guide {
-    opacity: 0.85;
+    opacity: 0.55;
 }
 body.page-home .discovery-swipe-guide i {
-    color: var(--accent-text);
-    font-size: 1.2rem;
-    text-shadow: 0 2px 8px rgba(var(--accent-rgb), 0.55);
+    color: #ffffff;
+    font-size: 0.95rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 body.page-home .card-swipe-hint {
-    color: rgba(255, 255, 255, 0.75) !important;
+    color: rgba(255, 255, 255, 0.55) !important;
 }
 body.page-home .card-chevron-anim {
-    font-size: 0.95rem !important;
-    color: var(--accent-text) !important;
-    text-shadow: 0 2px 8px rgba(var(--accent-rgb), 0.55);
+    font-size: 0.78rem !important;
+    color: rgba(255, 255, 255, 0.55) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
 }
 
-/* --- タグピル：写真の上でも読めるよう不透明度を上げる --- */
+/* === 8. タグピル — 暗ガラスのシンプル仕上げ。色付きボーダー無し === */
 body.page-home .tag-pill {
-    background: rgba(0, 0, 0, 0.55) !important;
-    border: 1px solid rgba(var(--accent-rgb), 0.45) !important;
-    color: #f5f5f5 !important;
-    backdrop-filter: blur(10px);
-    font-weight: 600;
-    padding: 3px 10px !important;
-    letter-spacing: 0.02em;
+    background: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    color: #ffffff !important;
+    backdrop-filter: blur(8px);
+    font-weight: 500;
+    padding: 2px 8px !important;
+    font-size: clamp(0.7rem, 2.2vw, 0.78rem) !important;
 }
 
-/* --- 下端情報パネル：グラデを単一に整理（::after と二重に落ちていたのを軽く） --- */
+/* === 9. 下端グラデ — 写真を活かす。短く・低く立ち上がる ===
+   キャスト・店舗カード用 ::after + .card-bottom-info の二重グラデを
+   "情報エリア下部だけ濃く" に整理。 */
 body.page-home .cast-card:not(.cast-card--recruit) .home-photo-wrap::after {
-    height: 14%;  /* 旧 20% → 14% に短くして写真を活かす */
+    height: 10%;
     background: linear-gradient(
         to top,
-        rgba(0, 0, 0, 0.72) 0%,
-        rgba(0, 0, 0, 0.22) 60%,
-        transparent 100%
+        rgba(0, 0, 0, 0.55) 0%,
+        rgba(0, 0, 0, 0.0) 100%
     );
 }
 body.page-home .card-bottom-info {
     background: linear-gradient(
         to top,
-        rgba(0, 0, 0, 0.94) 0%,
-        rgba(0, 0, 0, 0.72) 38%,
-        rgba(0, 0, 0, 0.30) 72%,
+        rgba(0, 0, 0, 0.88) 0%,
+        rgba(0, 0, 0, 0.62) 45%,
+        rgba(0, 0, 0, 0.18) 80%,
         transparent 100%
     );
+    min-height: auto !important;
+    padding-top: 36px !important;
+    padding-bottom: 14px !important;
+}
+body.page-home .cast-card:not(.cast-card--recruit) .card-bottom-info {
+    min-height: auto !important;
+    padding-top: 34px !important;
+    padding-bottom: 14px !important;
 }
 
-/* --- キャスト名：もう少し読みやすく（影で輪郭を作る） --- */
-body.page-home .cast-name,
+/* === 10. 名前・店名サイズを控えめに（写真をもっと目立たせる） ===
+   旧: 1.22–1.72rem（モバイルで 5.2vw）
+   新: 0.98–1.18rem（モバイルで 3.6vw）。
+   サブテキストも詰める。 */
+body.page-home .cast-name {
+    font-size: clamp(0.98rem, 3.6vw, 1.18rem) !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+    margin-bottom: 2px !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+    letter-spacing: 0 !important;
+}
+body.page-home .cast-name .age {
+    font-size: 0.86em !important;
+    opacity: 0.8 !important;
+    margin-left: 4px !important;
+}
 body.page-home .rc-shop-name {
-    text-shadow:
-        0 2px 6px rgba(0, 0, 0, 0.85),
-        0 0 18px rgba(0, 0, 0, 0.55);
-    letter-spacing: 0.02em;
+    font-size: clamp(0.95rem, 3.4vw, 1.12rem) !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+    margin-bottom: 2px !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85) !important;
+    letter-spacing: 0 !important;
+}
+body.page-home .card-shop-name-main {
+    font-size: clamp(0.95rem, 3.4vw, 1.12rem) !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+    margin-bottom: 3px !important;
+}
+body.page-home .card-shop-name-sub {
+    font-size: clamp(0.7rem, 2.2vw, 0.78rem) !important;
+    margin-bottom: 3px !important;
+}
+body.page-home .card-location {
+    font-size: clamp(0.74rem, 2.4vw, 0.82rem) !important;
+    margin-bottom: 4px !important;
+}
+body.page-home .card-shop-meta {
+    font-size: clamp(0.7rem, 2.2vw, 0.78rem) !important;
+    margin-bottom: 6px !important;
 }
 
-/* --- 求人カード：店長メッセージ枠 — mauve pink で強調文字 --- */
+/* 求人カードのキャッチ強調文字（店長メッセージ内）も控えめに */
 body.page-home .cast-card--recruit .rc-msg-em {
     color: var(--accent-text) !important;
-    text-shadow: 0 0 12px rgba(var(--accent-rgb), 0.55);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7) !important;
 }
 
-/* --- 求人カードのアクションラベル（キープ／メッセージの下に出る小さい文字）を読みやすく --- */
+/* 求人カードのアクションラベル */
 body.page-home .rc-action-label {
-    color: rgba(255, 255, 255, 0.92) !important;
-    font-weight: 700;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
     letter-spacing: 0.04em;
-    font-size: 0.62rem !important;
+    font-size: 0.6rem !important;
 }
 
-/* --- アクションボタン群：余白を一定にして縦リズムを揃える --- */
+/* アクションボタン群：余白統一 */
 body.page-home .card-actions-overlay,
 body.page-home .rc-actions {
-    gap: 12px !important;
+    gap: 10px !important;
 }

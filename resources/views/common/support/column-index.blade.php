@@ -51,7 +51,7 @@
 <style>
 .support-column-page {
     padding: 24px 16px 32px;
-    color: #f9f5f5;
+    color: #f5f5f5;
 }
 
 @media (min-width: 768px) {
@@ -74,7 +74,7 @@
 .support-column-lead {
     font-size: 0.9rem;
     line-height: 1.6;
-    color: #d1c1c1;
+    color: #c0c0c0;
 }
 
 .support-column-list {
@@ -116,13 +116,13 @@
 
 .support-column-item-meta {
     font-size: 0.72rem;
-    color: #b69f9f;
+    color: #a0a0a0;
     margin-bottom: 8px;
 }
 
 .support-column-empty {
     font-size: 0.9rem;
-    color: #b69f9f;
+    color: #a0a0a0;
     text-align: center;
     padding: 24px 8px;
 }

@@ -65,7 +65,7 @@
         transition: background 0.25s ease;
         flex-shrink: 0;
     }
-    .recruit-ref-switch-track.is-on { background: #a78bfa; }
+    .recruit-ref-switch-track.is-on { background: var(--accent, #d670a2); }
     .recruit-ref-switch-knob {
         display: block;
         width: 16px;
@@ -557,7 +557,7 @@
         font-size: 9px;
         font-weight: 800;
         letter-spacing: 0.18em;
-        color: #2a1406;
+        color: #1a0814;
         background: linear-gradient(135deg, #c4b5fd, #a78bfa);
         border-radius: 999px;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
@@ -777,10 +777,10 @@
     .recruit-cta-btn i { font-size: 0.95rem; }
     .recruit-cta-btn--primary {
         background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%);
-        color: #2a1406;
+        color: #1a0814;
         box-shadow: 0 6px 18px rgba(168, 85, 247, 0.32);
     }
-    .recruit-cta-btn--primary:hover { box-shadow: 0 8px 22px rgba(168, 85, 247, 0.42); color: #2a1406; }
+    .recruit-cta-btn--primary:hover { box-shadow: 0 8px 22px rgba(168, 85, 247, 0.42); color: #1a0814; }
     .recruit-cta-btn--help {
         background: rgba(168, 85, 247, 0.16);
         border-color: rgba(168, 85, 247, 0.7);
@@ -790,7 +790,7 @@
     .recruit-cta-btn--ghost {
         background: rgba(255, 255, 255, 0.04);
         border-color: rgba(168, 85, 247, 0.28);
-        color: #d6c6c6;
+        color: #c0c0c0;
     }
     .recruit-cta-btn--ghost:hover {
         background: rgba(255, 255, 255, 0.08);

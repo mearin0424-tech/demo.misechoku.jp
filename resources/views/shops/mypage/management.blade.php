@@ -183,7 +183,7 @@
         width: 32px; height: 32px; border-radius: 50%; background: rgba(168, 85, 247, 0.14); color: #a78bfa;
         display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
     }
-    .mypage-mini-row__name { flex: 1; font-size: 0.88rem; font-weight: 700; color: #f5e0c4; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mypage-mini-row__name { flex: 1; font-size: 0.88rem; font-weight: 700; color: #f0a6c4; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .mypage-mini-row__sub { font-size: 0.7rem; color: rgba(201,184,184,0.6); }
     .mypage-mini-row__status { flex: 0 0 auto; font-size: 0.7rem; padding: 3px 8px; border-radius: 999px; background: rgba(168, 85, 247, 0.1); color: #a78bfa; }
     .mypage-mini-row__status.is-rejected { background: rgba(220,38,38,0.12); color: #fca5a5; }
@@ -231,7 +231,7 @@
     .deposit-cta-bar__btn {
         flex: 0 0 auto; margin-left: auto; padding: 12px 18px; border-radius: 999px;
         background: linear-gradient(135deg, #c4b5fd, #a78bfa 48%, #7c3aed);
-        color: #2a1406; border: 0; font-weight: 900; font-size: 0.92rem; cursor: pointer;
+        color: #1a0814; border: 0; font-weight: 900; font-size: 0.92rem; cursor: pointer;
         box-shadow: 0 6px 16px rgba(168, 85, 247, 0.45);
         display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
     }
@@ -243,12 +243,12 @@
     .shop-action-modal[hidden] { display: none; }
     @media (min-width: 640px) { .shop-action-modal { justify-content: center; } }
     .shop-action-modal-backdrop { position: absolute; inset: 0; cursor: pointer; }
-    .shop-action-modal-panel { position: relative; width: 100%; max-width: min(28rem, calc(100vw - 2rem)); max-height: 90vh; background: #160d0d; border-top-left-radius: 1.5rem; border-top-right-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); overflow: hidden; box-sizing: border-box; }
-    .shop-action-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); background: #1a1111; }
-    .shop-action-modal-title { margin: 0; font-size: 1.05rem; font-weight: 700; color: #cda766; letter-spacing: 0.04em; }
-    .shop-action-modal-close { width: 2.5rem; height: 2.5rem; border: none; background: transparent; color: #a89b9b; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .shop-action-modal-panel { position: relative; width: 100%; max-width: min(28rem, calc(100vw - 2rem)); max-height: 90vh; background: #0a0a0a; border-top-left-radius: 1.5rem; border-top-right-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); overflow: hidden; box-sizing: border-box; }
+    .shop-action-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); background: #141414; }
+    .shop-action-modal-title { margin: 0; font-size: 1.05rem; font-weight: 700; color: #d670a2; letter-spacing: 0.04em; }
+    .shop-action-modal-close { width: 2.5rem; height: 2.5rem; border: none; background: transparent; color: #a0a0a0; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .shop-action-modal-body { overflow-y: auto; overflow-x: hidden; padding: 1.5rem; min-width: 0; flex: 1 1 auto; box-sizing: border-box; }
-    .shop-action-modal-note { font-size: 0.78rem; line-height: 1.7; color: #a89b9b; margin: 0 0 1.2rem; padding: 0.9rem; background: #231818; border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.08); }
+    .shop-action-modal-note { font-size: 0.78rem; line-height: 1.7; color: #a0a0a0; margin: 0 0 1.2rem; padding: 0.9rem; background: #1a1a1a; border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.08); }
     .shop-action-modal-checklist { display: grid; gap: 10px; margin-bottom: 1rem; }
     .shop-action-modal-check {
         display: flex; align-items: flex-start; gap: 10px;
@@ -262,15 +262,15 @@
     .shop-action-modal-check span { flex: 1; cursor: pointer; }
     .shop-action-modal-check:has(input:checked) { background: rgba(168, 85, 247, 0.1); border-color: rgba(168, 85, 247, 0.45); }
     .shop-action-modal-field { margin-bottom: 1rem; }
-    .shop-action-modal-label { display: block; font-size: 0.74rem; font-weight: 600; color: #a89b9b; margin-bottom: 6px; }
-    .shop-action-modal-input { width: 100%; padding: 12px 14px; border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.12); background: #231818; color: #fff; font-size: 0.92rem; box-sizing: border-box; }
+    .shop-action-modal-label { display: block; font-size: 0.74rem; font-weight: 600; color: #a0a0a0; margin-bottom: 6px; }
+    .shop-action-modal-input { width: 100%; padding: 12px 14px; border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.12); background: #1a1a1a; color: #fff; font-size: 0.92rem; box-sizing: border-box; }
     .shop-action-modal-input:focus { outline: none; border-color: rgba(168, 85, 247, 0.55); }
     .shop-action-modal-error { color: #fca5a5; font-size: 0.82rem; line-height: 1.5; display: none; margin: 0 0 0.6rem; }
     .shop-action-modal-error.show { display: block; }
-    .shop-action-modal-footer { display: flex; gap: 0.75rem; padding: 1.1rem 1.5rem; background: #1a1111; border-top: 1px solid rgba(255,255,255,0.08); }
+    .shop-action-modal-footer { display: flex; gap: 0.75rem; padding: 1.1rem 1.5rem; background: #141414; border-top: 1px solid rgba(255,255,255,0.08); }
     .shop-action-modal-btn { flex: 1; padding: 13px 1rem; border-radius: 0.75rem; font-size: 0.9rem; font-weight: 700; cursor: pointer; border: 0; }
-    .shop-action-modal-btn-cancel { background: transparent; border: 1px solid rgba(255,255,255,0.12); color: #d4c8c8; }
-    .shop-action-modal-btn-submit { background: linear-gradient(135deg, #c4b5fd, #a78bfa 48%, #7c3aed); color: #2a1406; box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35); }
+    .shop-action-modal-btn-cancel { background: transparent; border: 1px solid rgba(255,255,255,0.12); color: #d4d4d4; }
+    .shop-action-modal-btn-submit { background: linear-gradient(135deg, #c4b5fd, #a78bfa 48%, #7c3aed); color: #1a0814; box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35); }
     .shop-action-modal-btn-submit:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
 </style>
 @endpush

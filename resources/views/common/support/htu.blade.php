@@ -96,7 +96,7 @@
 <style>
 .support-htu-page {
     padding: 24px 16px 32px;
-    color: #f9f5f5;
+    color: #f5f5f5;
 }
 @media (min-width: 768px) {
     .support-htu-page {
@@ -124,13 +124,13 @@
     padding: 3px 8px;
     border-radius: 999px;
     border: 1px solid rgba(168, 85, 247, 0.6);
-    color: #f9f5f5;
+    color: #f5f5f5;
 }
 
 .support-htu-lead {
     font-size: 0.9rem;
     line-height: 1.6;
-    color: #d1c1c1;
+    color: #c0c0c0;
 }
 
 .support-htu-steps {

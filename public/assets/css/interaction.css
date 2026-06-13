@@ -74,8 +74,8 @@
 .card-info { flex: 1; min-width: 0; }
 .info-header { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; }
 .info-header .name { font-size: 1.1rem; color: #fff; font-weight: bold; margin-right: 2px; }
-.info-sub { font-size: 0.8rem; margin: 4px 0; color: #d1c1c1; }
-.info-specs { font-size: 0.75rem; color: #d1c1c1; letter-spacing: 0.05em; }
+.info-sub { font-size: 0.8rem; margin: 4px 0; color: #c0c0c0; }
+.info-specs { font-size: 0.75rem; color: #c0c0c0; letter-spacing: 0.05em; }
 
 /* ライク：名前とマッチング中を1行に */
 .info-header-one-line { flex-wrap: nowrap; }

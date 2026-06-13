@@ -101,9 +101,12 @@
             <div class="admin-alert admin-alert-error">{{ $errors->first() }}</div>
         @endif
 
-        {{-- KPI --}}
-        <section class="dashboard-kpi-grid">
-            <article class="dashboard-kpi-card">
+        {{-- KPI（クリックで下のフィルタと同期） --}}
+        <section class="dashboard-kpi-grid deposit-kpi-grid" data-deposit-kpis>
+            <button type="button"
+                class="dashboard-kpi-card dashboard-kpi-card--link"
+                data-kpi-filter="pay_check"
+                aria-pressed="false">
                 <div class="dashboard-kpi-head">
                     <div class="dashboard-kpi-title">店舗入金照合待ち</div>
                     <i class="fas fa-hourglass-half"></i>
@@ -112,8 +115,12 @@
                     <span class="dashboard-kpi-value">{{ number_format($summary['payment_confirmation_pending'] ?? 0) }}</span>
                     <span class="dashboard-kpi-unit">件</span>
                 </div>
-            </article>
-            <article class="dashboard-kpi-card">
+                <div class="dashboard-kpi-trend">クリックで絞り込み</div>
+            </button>
+            <button type="button"
+                class="dashboard-kpi-card dashboard-kpi-card--link"
+                data-kpi-filter="transfer"
+                aria-pressed="false">
                 <div class="dashboard-kpi-head">
                     <div class="dashboard-kpi-title">キャスト振込待ち</div>
                     <i class="fas fa-paper-plane"></i>
@@ -122,7 +129,22 @@
                     <span class="dashboard-kpi-value">{{ number_format($summary['cast_transfer_pending'] ?? 0) }}</span>
                     <span class="dashboard-kpi-unit">件</span>
                 </div>
-            </article>
+                <div class="dashboard-kpi-trend is-up">運営が今すぐ振込可</div>
+            </button>
+            <button type="button"
+                class="dashboard-kpi-card dashboard-kpi-card--link {{ ($summary['unconfirmed_cast_over_7days'] ?? 0) > 0 ? 'is-critical' : '' }}"
+                data-kpi-filter="alert"
+                aria-pressed="false">
+                <div class="dashboard-kpi-head">
+                    <div class="dashboard-kpi-title">要確認（7日）</div>
+                    <i class="fas fa-triangle-exclamation"></i>
+                </div>
+                <div class="dashboard-kpi-main">
+                    <span class="dashboard-kpi-value">{{ number_format($summary['unconfirmed_cast_over_7days'] ?? 0) }}</span>
+                    <span class="dashboard-kpi-unit">件</span>
+                </div>
+                <div class="dashboard-kpi-trend is-down">キャスト未確認 7日超</div>
+            </button>
             <article class="dashboard-kpi-card">
                 <div class="dashboard-kpi-head">
                     <div class="dashboard-kpi-title">請求総額</div>
@@ -145,12 +167,20 @@
             <div class="admin-page-toolbar-filters" data-deposit-filters>
                 @foreach ($filterChips as $chip)
                     <button type="button"
-                        class="admin-filter-chip {{ $chip['key'] === 'all' ? 'is-active' : '' }}"
+                        class="admin-filter-chip {{ $chip['key'] === 'all' ? 'is-active' : '' }} {{ $chip['key'] === 'alert' && ($catCounts['alert'] ?? 0) > 0 ? 'is-critical' : '' }}"
                         data-deposit-filter="{{ $chip['key'] }}">
                         <span>{{ $chip['label'] }}</span>
                         <strong>{{ $catCounts[$chip['key']] ?? 0 }}</strong>
                     </button>
                 @endforeach
+                <div class="deposit-bulk-toggle" role="group" aria-label="一括表示制御">
+                    <button type="button" class="deposit-bulk-toggle__btn" data-deposit-bulk="collapse" title="すべて折りたたむ">
+                        <i class="fas fa-compress-alt"></i><span class="u-vh-mobile">折りたたむ</span>
+                    </button>
+                    <button type="button" class="deposit-bulk-toggle__btn" data-deposit-bulk="expand" title="すべて展開">
+                        <i class="fas fa-expand-alt"></i><span class="u-vh-mobile">展開</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -186,6 +216,17 @@
                             <i class="fas {{ $actor['icon'] }}"></i> {{ $actor['label'] }}
                         </span>
                         <span class="billing-status-chip">{{ $deposit['status_label'] }}</span>
+                        @php
+                            $doneSteps = 0;
+                            foreach ($stepDefs as $s) { if ($sc >= $s['min_status']) $doneSteps++; }
+                            $totalSteps = count($stepDefs);
+                        @endphp
+                        <span class="deposit-summary-progress" aria-label="進捗 {{ $doneSteps }}/{{ $totalSteps }}">
+                            <span class="deposit-summary-progress__bar">
+                                <span style="width: {{ round($doneSteps / max($totalSteps, 1) * 100) }}%"></span>
+                            </span>
+                            <span class="deposit-summary-progress__text">STEP {{ $doneSteps }}/{{ $totalSteps }}</span>
+                        </span>
                         <span class="deposit-summary-amount">¥{{ number_format($deposit['invoice_amount']) }}</span>
                     </div>
                 </summary>
@@ -591,11 +632,18 @@ document.addEventListener('DOMContentLoaded', function () {
         if (emptyHint) emptyHint.hidden = visible !== 0 || rows.length === 0;
     }
 
+    function activateChip(filterKey) {
+        chips.forEach(function (c) {
+            var on = c.getAttribute('data-deposit-filter') === filterKey;
+            c.classList.toggle('is-active', on);
+        });
+        currentFilter = filterKey;
+        apply();
+    }
+
     chips.forEach(function (chip) {
         chip.addEventListener('click', function () {
-            currentFilter = chip.getAttribute('data-deposit-filter');
-            chips.forEach(function (c) { c.classList.toggle('is-active', c === chip); });
-            apply();
+            activateChip(chip.getAttribute('data-deposit-filter'));
         });
     });
     if (searchInput) {
@@ -604,6 +652,39 @@ document.addEventListener('DOMContentLoaded', function () {
             apply();
         });
     }
+
+    // ============== KPIクリック → フィルタ同期 ==============
+    var kpiButtons = document.querySelectorAll('[data-deposit-kpis] [data-kpi-filter]');
+    kpiButtons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var key = btn.getAttribute('data-kpi-filter') || 'all';
+            // KPI 自身のトグル: 同じKPIをもう一度押したら all に戻す
+            var already = btn.getAttribute('aria-pressed') === 'true';
+            var nextKey = already ? 'all' : key;
+            kpiButtons.forEach(function (b) {
+                var on = !already && b === btn;
+                b.classList.toggle('is-active', on);
+                b.setAttribute('aria-pressed', on ? 'true' : 'false');
+            });
+            activateChip(nextKey);
+            // 視覚的フィードバック: 一覧位置までスクロール
+            var first = document.querySelector('[data-deposit-row]');
+            if (first) first.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    // ============== 一括展開／折りたたみ ==============
+    var bulkButtons = document.querySelectorAll('[data-deposit-bulk]');
+    bulkButtons.forEach(function (b) {
+        b.addEventListener('click', function () {
+            var mode = b.getAttribute('data-deposit-bulk');
+            rows.forEach(function (row) {
+                if (row.style.display === 'none') return; // フィルタで非表示の行はスキップ
+                if (mode === 'expand') row.open = true;
+                if (mode === 'collapse') row.open = false;
+            });
+        });
+    });
 });
 </script>
 @endpush

@@ -108,11 +108,11 @@
 }
 .btn-suspended-primary {
     background: linear-gradient(135deg, #a78bfa, #7c3aed);
-    color: #2a1406;
+    color: #1a0814;
     border: 0;
     box-shadow: 0 4px 16px rgba(168, 85, 247, 0.3);
 }
-.btn-suspended-primary:hover { transform: translateY(-1px); color: #2a1406; }
+.btn-suspended-primary:hover { transform: translateY(-1px); color: #1a0814; }
 .btn-suspended-secondary {
     background: transparent;
     border: 1px solid rgba(196, 181, 253, 0.35);

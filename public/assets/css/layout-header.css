@@ -63,23 +63,47 @@ body.is-image-editing #global-header {
     letter-spacing: 0.5px;
 }
 
-/* 左右・中央のレイアウト固定 */
+/* ============================================================
+   左右・中央のレイアウト
+   方針:
+   - 左右はそれぞれ "中身ぴったり" のサイズ (flex: 0 0 auto)。
+     左: BACK ボタンまたはトークアバター（無い時は 0）
+     右: 3 つのアイコンボタン (アクションが多い)
+   - タイトルは position: absolute で "ビューポート中央" に固定。
+     左右の中身に左右されず、常にヘッダー中央に文字が揃う。
+   - max-width で左右に必要な余白を確保し、長いタイトルは省略表示 (…)。
+   - これで「右3つのアイコンがタイトルに被る」状態を完全に解消。
+   ============================================================ */
 .header-left {
-    flex: 1;
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
     gap: 8px;
-    min-width: 80px;
+    min-width: 0;
+    /* 他要素の上に来るよう z-index を持たせる（タイトルが absolute なので重なり順を明示） */
+    position: relative;
+    z-index: 2;
 }
 
 .header-center-title {
-    flex: 2;
+    /* position: absolute で常にヘッダーのど真ん中。
+       左右の幅は計 ~130px ずつ確保し、タイトルが入り込まないようにする。 */
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
+    /* 両側に 130px ずつ "アイコン用余白" を確保（右 3 つのアイコン分 + 余裕）。
+       これより長いタイトルは省略表示される。 */
+    max-width: calc(100% - 260px);
     min-width: 0;
     overflow: hidden;
+    /* タッチ対象として右側のアイコンに必ず触れるよう、タイトル領域は pointer-events 透過 */
+    pointer-events: none;
+    z-index: 1;
 }
 
 /* ヘッダタイトル：ゴールド・グラデーション */
@@ -186,15 +210,22 @@ body.is-image-editing #global-header {
 }
 
 .header-right {
-    flex: 1;
+    /* 中身ぴったりサイズ。margin-left: auto で常にヘッダー右端に張り付く。
+       gap も 15px → 10px に詰めて、横幅 = 3 × 36 + 2 × 10 = 128px に収める。 */
+    flex: 0 0 auto;
+    margin-left: auto;
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
     min-width: 0;
+    /* タイトルより手前。pointer-events も必ず受け取れるように。 */
+    position: relative;
+    z-index: 2;
 }
 
-/* ヘッダー右側のアイコンボタン共通スタイル */
+/* ヘッダー右側のアイコンボタン：フラットアイコンのみ。
+   円の枠も背景もつけず、アイコンの色変化だけで状態を表す（IG / iOS のナビアイコン と同じ思想）。 */
 .header-icon-btn {
     background: transparent !important;
     border: 0 !important;
@@ -202,14 +233,14 @@ body.is-image-editing #global-header {
     margin: 0;
     width: 36px;
     height: 36px;
-    border-radius: 8px;
+    border-radius: 0;        /* 角丸不要（背景がないので関係ない） */
     color: var(--color-text);
     cursor: pointer;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: color 0.15s ease, background-color 0.15s ease;
+    transition: color 0.15s ease, transform 0.12s ease;
     box-shadow: none;
 }
 
@@ -220,14 +251,16 @@ body.is-image-editing #global-header {
 
 .header-icon-btn:hover,
 .header-icon-btn:focus-visible {
-    color: var(--gold-light);
-    background-color: rgba(168, 85, 247, 0.10) !important;
+    /* 背景つけない。アイコン色を mauve に変えるだけ */
+    color: var(--accent-text, #f0a6c4);
+    background-color: transparent !important;
     box-shadow: none;
 }
 
 .header-icon-btn:active {
-    color: var(--gold);
-    background-color: rgba(168, 85, 247, 0.18) !important;
+    color: var(--accent, #d670a2);
+    background-color: transparent !important;
+    transform: scale(0.92);
 }
 
 /* 戻るボタン */

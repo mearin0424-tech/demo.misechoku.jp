@@ -377,7 +377,8 @@ body.page-search-ai .ai-recommend {
     background: rgba(168, 85, 247, 0.06);
 }
 
-/* 詳細検索 FAB（センター寄せ app の右端に追従。tablet 以上でも viewport 右端ではなく app 右端に貼り付く） */
+/* 詳細検索 FAB（センター寄せ app の右端に追従）
+   グラデなし。ベタ塗り mauve + drop shadow + 上下 inset で立体感（.btn-send と同じ式）。 */
 .search-detail-fab {
     position: fixed;
     /* 50% (viewport center) + min(50vw, app幅/2) で app の右端を取り、そこから 16px + FAB幅(52px) 戻す */
@@ -390,16 +391,16 @@ body.page-search-ai .ai-recommend {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(145deg, #c4b5fd, var(--gold) 45%, var(--gold-deep));
-    color: #2a1406;
+    background: var(--accent, #d670a2);
+    color: var(--on-accent, #1a0814);
     font-size: 1.15rem;
     cursor: pointer;
     box-shadow:
-        inset 0 1px 0 rgba(255, 245, 214, 0.55),
-        inset 0 -1px 0 rgba(112, 72, 10, 0.4),
-        0 6px 18px rgba(0, 0, 0, 0.55);
+        0 8px 18px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18);
     z-index: 95;
-    transition: transform 0.15s, filter 0.15s;
+    transition: transform 0.15s, filter 0.15s, box-shadow 0.15s;
 }
 
 /* 詳細検索モーダル(1100)より前面で、開いたあとも FAB で開閉できる */
@@ -408,11 +409,13 @@ body.page-search-ai .search-detail-fab {
     z-index: 1110;
 }
 .search-detail-fab:hover {
-    filter: brightness(1.05);
-    transform: scale(1.04);
+    filter: brightness(1.06);
 }
 .search-detail-fab:active {
     transform: scale(0.96);
+    box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.45),
+        inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 .search-detail-fab__badge {
     position: absolute;
@@ -1674,7 +1677,7 @@ body.page-search .connection-list--search {
     padding: 0 16px;
     border-radius: 999px;
     background: linear-gradient(135deg, var(--gold-light), var(--gold) 50%, var(--gold-deep));
-    color: #2a1406;
+    color: #1a0814;
     font-size: 0.82rem;
     font-weight: 800;
     text-decoration: none;
@@ -1751,7 +1754,7 @@ body.page-search .connection-list--search {
 /* ユーザ側（右）：プライマリのゴールド・グラデーション */
 .ai-recommend__message--user .ai-recommend__bubble {
     background: linear-gradient(135deg, var(--gold-light), var(--gold) 50%, var(--gold-deep));
-    color: #2a1406;
+    color: #1a0814;
     font-weight: 600;
     border: 0;
     border-radius: 18px 6px 18px 18px;
@@ -1768,7 +1771,7 @@ body.page-search .connection-list--search {
 }
 
 .ai-recommend__message--user .ai-recommend__bubble strong {
-    color: #2a1406;
+    color: #1a0814;
 }
 
 .ai-recommend__options {
@@ -1906,7 +1909,7 @@ body.page-search .connection-list--search {
     padding: 11px 14px;
     border-radius: 12px;
     background: linear-gradient(135deg, var(--gold-light), var(--gold) 50%, var(--gold-deep));
-    color: #2a1406;
+    color: #1a0814;
     font-family: var(--font-sans);
     font-size: 0.86rem;
     font-weight: 800;

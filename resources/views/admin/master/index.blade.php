@@ -39,29 +39,50 @@
             <div class="admin-card-head">
                 <div>
                     <h2>マスタを選択</h2>
-                    <p>編集したいマスタを選択してください。</p>
+                    <p>編集したいマスタを選択してください。一覧から直接クリックでも、ドロップダウンからでも選べます。</p>
                 </div>
             </div>
 
-            <div class="admin-master-select-row">
-                <label class="admin-master-select-label" style="flex:1;">
-                    <span>マスタ</span>
-                    <select
-                        id="master-catalog-select"
-                        onchange="if(this.value){window.location.href=this.value;}"
-                    >
-                        <option value="">マスタを選択してください</option>
-                        @foreach ($catalogs as $catalog)
-                            <option
-                                value="{{ route('admin.masters.index', ['catalog' => $catalog['key']]) }}"
-                                @selected(($selectedCatalog['key'] ?? null) === $catalog['key'])
-                            >
-                                {{ $catalog['title'] }}（{{ $catalog['count'] }}件）
-                            </option>
-                        @endforeach
-                    </select>
-                </label>
+            {{-- カードグリッドで素早く切り替え --}}
+            <div class="master-catalog-grid">
+                @foreach ($catalogs as $catalog)
+                    @php $isSelected = ($selectedCatalog['key'] ?? null) === $catalog['key']; @endphp
+                    <a href="{{ route('admin.masters.index', ['catalog' => $catalog['key']]) }}"
+                       class="master-catalog-card {{ $isSelected ? 'is-selected' : '' }}">
+                        <div class="master-catalog-card__icon"><i class="fas fa-database"></i></div>
+                        <div class="master-catalog-card__body">
+                            <p class="master-catalog-card__title">{{ $catalog['title'] }}</p>
+                            <p class="master-catalog-card__meta"><strong>{{ number_format($catalog['count']) }}</strong> 件</p>
+                        </div>
+                        @if($isSelected)
+                            <i class="fas fa-check master-catalog-card__check" aria-hidden="true"></i>
+                        @endif
+                    </a>
+                @endforeach
             </div>
+
+            <details class="master-catalog-fallback">
+                <summary>ドロップダウンから選択</summary>
+                <div class="admin-master-select-row u-mt-12">
+                    <label class="admin-master-select-label" style="flex:1;">
+                        <span>マスタ</span>
+                        <select
+                            id="master-catalog-select"
+                            onchange="if(this.value){window.location.href=this.value;}"
+                        >
+                            <option value="">マスタを選択してください</option>
+                            @foreach ($catalogs as $catalog)
+                                <option
+                                    value="{{ route('admin.masters.index', ['catalog' => $catalog['key']]) }}"
+                                    @selected(($selectedCatalog['key'] ?? null) === $catalog['key'])
+                                >
+                                    {{ $catalog['title'] }}（{{ $catalog['count'] }}件）
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
+                </div>
+            </details>
         </section>
 
         @if ($selectedCatalog)

@@ -1,4 +1,6 @@
-/* --- サブヘッダー（タブ）：グローバルヘッダー直下に固定（ビューポート基準） --- */
+/* --- サブヘッダー（タブ）：グローバルヘッダー直下に固定（ビューポート基準）
+       高さは --sub-header-height にぴったり合わせ、border-bottom も含めて box-sizing で内包。
+       これで .tab-page-body { margin-top: var(--sub-header-height) } が完全に隙間なく揃う。 --- */
 .sub-header-wrapper {
     position: fixed;
     top: var(--header-height);
@@ -6,19 +8,21 @@
     transform: translateX(-50%);
     width: 100%;
     max-width: var(--max-content-width);
+    height: var(--sub-header-height);   /* 明示的に高さ指定 */
     z-index: 1400;
     background: rgba(10, 10, 10, 0.92);
     margin: 0;
     padding: 0;
-    border-bottom: 1px solid var(--color-border);
+    /* border-bottom は撤去（高さの不一致を生む）。サブヘッダーとコンテンツの分離は背景色 + 影で表現する */
+    border-bottom: 0;
     box-sizing: border-box;
 }
 
 .sub-header-tabs {
     display: flex;
-    height: var(--sub-header-height);
+    height: 100%;                       /* wrapper を 100% 埋める → 厳密に --sub-header-height */
     align-items: stretch;
-    background-color: rgba(10, 10, 10, 0.92);
+    background-color: transparent;       /* wrapper 側で背景を持つので透過 */
 }
 
 .sub-header-tabs .tab-item {

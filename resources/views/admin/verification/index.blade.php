@@ -63,9 +63,11 @@
             <div class="admin-alert admin-alert-error">{{ $errors->first() }}</div>
         @endif
 
-        {{-- サマリー：未処理件数を強調表示 --}}
-        <section class="dashboard-kpi-grid">
-            <article class="dashboard-kpi-card">
+        {{-- サマリー：未処理件数を強調表示（クリックでタブ＋フィルタに遷移） --}}
+        <section class="dashboard-kpi-grid verification-kpi-grid" data-verif-kpis>
+            <button type="button"
+                class="dashboard-kpi-card dashboard-kpi-card--link {{ ($summary['cast_pending'] ?? 0) > 0 ? 'is-attention' : '' }}"
+                data-jump-tab="cast" data-jump-filter="pending">
                 <div class="dashboard-kpi-head">
                     <div class="dashboard-kpi-title">本人確認 未処理</div>
                     <i class="fas fa-id-card"></i>
@@ -74,8 +76,11 @@
                     <span class="dashboard-kpi-value">{{ $summary['cast_pending'] ?? 0 }}</span>
                     <span class="dashboard-kpi-unit">件</span>
                 </div>
-            </article>
-            <article class="dashboard-kpi-card">
+                <div class="dashboard-kpi-trend">キャストタブ・未承認</div>
+            </button>
+            <button type="button"
+                class="dashboard-kpi-card dashboard-kpi-card--link {{ ($summary['shop_pending'] ?? 0) > 0 ? 'is-attention' : '' }}"
+                data-jump-tab="shop" data-jump-filter="pending">
                 <div class="dashboard-kpi-head">
                     <div class="dashboard-kpi-title">店舗書類 未処理</div>
                     <i class="fas fa-folder-open"></i>
@@ -84,8 +89,11 @@
                     <span class="dashboard-kpi-value">{{ $summary['shop_pending'] ?? 0 }}</span>
                     <span class="dashboard-kpi-unit">件</span>
                 </div>
-            </article>
-            <article class="dashboard-kpi-card">
+                <div class="dashboard-kpi-trend">店舗タブ・未承認</div>
+            </button>
+            <button type="button"
+                class="dashboard-kpi-card dashboard-kpi-card--link {{ $shopExpiredCount > 0 ? 'is-critical' : '' }}"
+                data-jump-tab="shop" data-jump-expiry="expired">
                 <div class="dashboard-kpi-head">
                     <div class="dashboard-kpi-title">店舗書類 期限切れ</div>
                     <i class="fas fa-triangle-exclamation"></i>
@@ -94,7 +102,8 @@
                     <span class="dashboard-kpi-value">{{ $shopExpiredCount }}</span>
                     <span class="dashboard-kpi-unit">件</span>
                 </div>
-            </article>
+                <div class="dashboard-kpi-trend is-down">即フォロー推奨</div>
+            </button>
         </section>
 
         {{-- タブ切替（キャスト / 店舗） --}}
@@ -215,12 +224,53 @@
                                     @endif
                                 </td>
                                 <td>
-                                    @if(!empty($document['front_url']))
-                                        <a href="{{ $document['front_url'] }}" target="_blank" rel="noopener">表面</a>
-                                    @endif
-                                    @if(!empty($document['back_url']))
-                                        <br><a href="{{ $document['back_url'] }}" target="_blank" rel="noopener">裏面</a>
-                                    @endif
+                                    @php
+                                        $profileFields = [];
+                                        if (!empty($document['real_name'])) $profileFields[] = '氏名: ' . $document['real_name'];
+                                        if (!empty($document['birthday'])) $profileFields[] = '生年月日: ' . $document['birthday'];
+                                        if (!empty($document['tel'])) $profileFields[] = '電話: ' . $document['tel'];
+                                        if (!empty($document['address'])) $profileFields[] = '住所: ' . ($document['zip'] ? '〒' . $document['zip'] . ' ' : '') . $document['address'];
+                                        $profileText = implode("\n", $profileFields);
+                                        $previewApprove = $document['status_code'] !== 2
+                                            ? route('admin.verification.cast.approve', ['document' => $document['id']])
+                                            : '';
+                                    @endphp
+                                    <div class="verification-thumbs">
+                                        @if(!empty($document['front_url']))
+                                            <button type="button" class="verification-thumb"
+                                                data-verif-preview
+                                                data-image="{{ $document['front_url'] }}"
+                                                data-side="表面"
+                                                data-target-name="{{ $document['target_name'] }}"
+                                                data-type-label="{{ $document['type_label'] }}"
+                                                data-profile="{{ $profileText }}"
+                                                data-approve-action="{{ $previewApprove }}"
+                                                data-reject-action="{{ route('admin.verification.cast.reject', ['document' => $document['id']]) }}"
+                                                data-reject-title="キャスト本人確認書類を却下"
+                                                data-reject-subject="{{ $document['target_name'] }} / {{ $document['type_label'] }}"
+                                                data-template-group="document_reject_cast">
+                                                <img src="{{ $document['front_url'] }}" alt="表面" loading="lazy">
+                                                <span>表面</span>
+                                            </button>
+                                        @endif
+                                        @if(!empty($document['back_url']))
+                                            <button type="button" class="verification-thumb"
+                                                data-verif-preview
+                                                data-image="{{ $document['back_url'] }}"
+                                                data-side="裏面"
+                                                data-target-name="{{ $document['target_name'] }}"
+                                                data-type-label="{{ $document['type_label'] }}"
+                                                data-profile="{{ $profileText }}"
+                                                data-approve-action="{{ $previewApprove }}"
+                                                data-reject-action="{{ route('admin.verification.cast.reject', ['document' => $document['id']]) }}"
+                                                data-reject-title="キャスト本人確認書類を却下"
+                                                data-reject-subject="{{ $document['target_name'] }} / {{ $document['type_label'] }}"
+                                                data-template-group="document_reject_cast">
+                                                <img src="{{ $document['back_url'] }}" alt="裏面" loading="lazy">
+                                                <span>裏面</span>
+                                            </button>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td>
                                     @if(!empty($document['ng_reason']))
@@ -381,8 +431,32 @@
                                     @endif
                                 </td>
                                 <td>
+                                    @php
+                                        $shopProfileFields = [];
+                                        if (!empty($document['shop_name'])) $shopProfileFields[] = '店舗名: ' . $document['shop_name'];
+                                        if (!empty($document['tel'])) $shopProfileFields[] = '電話: ' . $document['tel'];
+                                        if (!empty($document['address'])) $shopProfileFields[] = '住所: ' . ($document['zip'] ? '〒' . $document['zip'] . ' ' : '') . $document['address'];
+                                        $shopProfileText = implode("\n", $shopProfileFields);
+                                        $previewShopApprove = $document['status_code'] !== 2
+                                            ? route('admin.verification.shopdoc.approve', ['document' => $document['id']])
+                                            : '';
+                                    @endphp
                                     @if(!empty($document['file_url']))
-                                        <a href="{{ $document['file_url'] }}" target="_blank" rel="noopener">ファイル確認</a>
+                                        <button type="button" class="verification-thumb"
+                                            data-verif-preview
+                                            data-image="{{ $document['file_url'] }}"
+                                            data-side="書類"
+                                            data-target-name="{{ $document['target_name'] }}"
+                                            data-type-label="{{ $document['type_label'] }}"
+                                            data-profile="{{ $shopProfileText }}"
+                                            data-approve-action="{{ $previewShopApprove }}"
+                                            data-reject-action="{{ route('admin.verification.shopdoc.reject', ['document' => $document['id']]) }}"
+                                            data-reject-title="店舗提出書類を却下"
+                                            data-reject-subject="{{ $document['target_name'] }} / {{ $document['type_label'] }}"
+                                            data-template-group="document_reject_shop">
+                                            <img src="{{ $document['file_url'] }}" alt="書類" loading="lazy">
+                                            <span>ファイル</span>
+                                        </button>
                                     @else
                                         -
                                     @endif
@@ -438,6 +512,45 @@
         </div>
     </div>
 
+    {{-- 書類プレビューモーダル（画像 + 登録情報照合 + 承認/却下） --}}
+    <div id="verification-preview-modal" class="verification-preview-overlay" hidden>
+        <div class="verification-preview" role="dialog" aria-modal="true" aria-labelledby="verification-preview-title">
+            <header class="verification-preview__head">
+                <div class="verification-preview__head-text">
+                    <h3 id="verification-preview-title" class="verification-preview__title">—</h3>
+                    <p class="verification-preview__subtitle" data-preview-subtitle>—</p>
+                </div>
+                <button type="button" class="verification-preview__close" data-preview-close aria-label="閉じる">
+                    <i class="fas fa-xmark"></i>
+                </button>
+            </header>
+            <div class="verification-preview__body">
+                <div class="verification-preview__image-wrap">
+                    <img data-preview-image alt="書類画像" />
+                    <div class="verification-preview__zoom-hint"><i class="fas fa-magnifying-glass-plus"></i> クリックで拡大表示</div>
+                </div>
+                <aside class="verification-preview__side">
+                    <div class="verification-preview__section">
+                        <h4 class="verification-preview__section-title"><i class="fas fa-user-check"></i> 登録情報（書類と照合）</h4>
+                        <pre class="verification-preview__profile" data-preview-profile>—</pre>
+                    </div>
+                    <div class="verification-preview__actions">
+                        <form method="POST" data-preview-approve-form style="display:none;">
+                            @csrf
+                            <button type="submit" class="btn-action manage verification-preview__approve">
+                                <i class="fas fa-circle-check"></i> 承認する
+                            </button>
+                        </form>
+                        <button type="button" class="btn-action btn-action-secondary verification-preview__reject" data-preview-reject>
+                            <i class="fas fa-circle-xmark"></i> 却下する
+                        </button>
+                    </div>
+                    <p class="verification-preview__hint"><kbd>Esc</kbd> または背景クリックで閉じる</p>
+                </aside>
+            </div>
+        </div>
+    </div>
+
     {{-- 却下モーダル --}}
     <div id="verification-reject-modal" class="verification-modal-overlay" style="display:none;">
         <div class="verification-modal" role="dialog" aria-modal="true" aria-labelledby="verification-reject-title">
@@ -471,13 +584,114 @@ document.addEventListener('DOMContentLoaded', function () {
     // ============== タブ切替 ==============
     var tabs = document.querySelectorAll('[data-verif-tab]');
     var panels = document.querySelectorAll('[data-verif-panel]');
+    function activateTab(key) {
+        tabs.forEach(function (t) { t.classList.toggle('is-active', t.getAttribute('data-verif-tab') === key); });
+        panels.forEach(function (p) { p.classList.toggle('is-active', p.getAttribute('data-verif-panel') === key); });
+    }
     tabs.forEach(function (tab) {
         tab.addEventListener('click', function () {
-            var key = tab.getAttribute('data-verif-tab');
-            tabs.forEach(function (t) { t.classList.toggle('is-active', t === tab); });
-            panels.forEach(function (p) { p.classList.toggle('is-active', p.getAttribute('data-verif-panel') === key); });
+            activateTab(tab.getAttribute('data-verif-tab'));
         });
     });
+
+    // ============== KPI クリックで タブ + フィルタ 連動 ==============
+    var kpis = document.querySelectorAll('[data-verif-kpis] [data-jump-tab]');
+    kpis.forEach(function (kpi) {
+        kpi.addEventListener('click', function () {
+            var tabKey = kpi.getAttribute('data-jump-tab') || 'cast';
+            var filterKey = kpi.getAttribute('data-jump-filter') || '';
+            var expiryKey = kpi.getAttribute('data-jump-expiry') || '';
+            activateTab(tabKey);
+            var tableId = tabKey === 'shop' ? 'shop-verification-table' : 'cast-verification-table';
+            if (filterKey) {
+                var targetChip = document.querySelector('[data-verif-quickfilter="' + filterKey + '"][data-target-table="' + tableId + '"]');
+                if (targetChip) targetChip.click();
+            }
+            if (expiryKey) {
+                var expChip = document.querySelector('[data-verif-expiry-filter="' + expiryKey + '"][data-target-table="' + tableId + '"]');
+                if (expChip) expChip.click();
+            }
+            var panel = document.querySelector('[data-verif-panel="' + tabKey + '"]');
+            if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    // ============== 書類プレビューモーダル ==============
+    var preview = document.getElementById('verification-preview-modal');
+    if (preview) {
+        var prevTitle    = preview.querySelector('#verification-preview-title');
+        var prevSubtitle = preview.querySelector('[data-preview-subtitle]');
+        var prevImage    = preview.querySelector('[data-preview-image]');
+        var prevProfile  = preview.querySelector('[data-preview-profile]');
+        var prevApproveForm   = preview.querySelector('[data-preview-approve-form]');
+        var prevRejectBtn     = preview.querySelector('[data-preview-reject]');
+        var prevImgWrap  = preview.querySelector('.verification-preview__image-wrap');
+
+        function openPreview(btn) {
+            prevTitle.textContent = (btn.dataset.targetName || '—') + ' / ' + (btn.dataset.typeLabel || '—');
+            prevSubtitle.textContent = '面: ' + (btn.dataset.side || '—');
+            prevImage.src = btn.dataset.image || '';
+            prevImage.alt = btn.dataset.side || '書類';
+            prevProfile.textContent = btn.dataset.profile || '登録情報なし';
+
+            // 承認: action が空（既に承認済み）の場合は非表示
+            var approveAction = btn.dataset.approveAction || '';
+            if (approveAction) {
+                prevApproveForm.action = approveAction;
+                prevApproveForm.style.display = '';
+            } else {
+                prevApproveForm.style.display = 'none';
+            }
+
+            // 却下ボタンに既存の却下フローのパラメータを渡す
+            prevRejectBtn.dataset.rejectAction   = btn.dataset.rejectAction || '';
+            prevRejectBtn.dataset.rejectTitle    = btn.dataset.rejectTitle || '書類を却下';
+            prevRejectBtn.dataset.rejectSubject  = btn.dataset.rejectSubject || '';
+            prevRejectBtn.dataset.templateGroup  = btn.dataset.templateGroup || '';
+
+            // ズームリセット
+            prevImage.classList.remove('is-zoom');
+            preview.hidden = false;
+            document.body.style.overflow = 'hidden';
+        }
+        function closePreview() {
+            preview.hidden = true;
+            prevImage.src = '';
+            document.body.style.overflow = '';
+        }
+
+        document.querySelectorAll('[data-verif-preview]').forEach(function (btn) {
+            btn.addEventListener('click', function () { openPreview(btn); });
+        });
+        preview.addEventListener('click', function (e) {
+            if (e.target === preview || e.target.closest('[data-preview-close]')) closePreview();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (preview.hidden) return;
+            if (e.key === 'Escape') closePreview();
+        });
+        // 画像クリックでズーム
+        if (prevImage) {
+            prevImage.addEventListener('click', function () {
+                prevImage.classList.toggle('is-zoom');
+            });
+        }
+        // 却下ボタンは既存の却下モーダルフローを起動
+        prevRejectBtn.addEventListener('click', function () {
+            closePreview();
+            // 既存の verification-reject-trigger と同じデータ属性を持つので、合成イベントで再利用
+            var ev = new Event('click', { bubbles: true });
+            // 一時要素を作って既存ハンドラに流す
+            var stub = document.createElement('button');
+            stub.classList.add('verification-reject-trigger');
+            Object.keys(prevRejectBtn.dataset).forEach(function (k) {
+                stub.dataset[k] = prevRejectBtn.dataset[k];
+            });
+            document.body.appendChild(stub);
+            stub.dispatchEvent(ev);
+            document.body.removeChild(stub);
+        });
+    }
 
     // ============== 却下モーダル ==============
     var rejectTemplates = @json($rejectTemplates ?? []);

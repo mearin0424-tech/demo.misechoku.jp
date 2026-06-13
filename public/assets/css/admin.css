@@ -749,7 +749,7 @@ a.btn-action {
 a.btn-action.manage {
     background: var(--admin-gold-grad);
     border: 1px solid rgba(255, 240, 197, 0.55);
-    color: #2a1406;
+    color: #1a0814;
     box-shadow:
         inset 0 1px 0 rgba(255, 245, 214, 0.55),
         inset 0 -1px 0 rgba(112, 72, 10, 0.4),
@@ -759,7 +759,7 @@ a.btn-action.manage {
 a.btn-action.manage:hover {
     background: linear-gradient(145deg, #e6c373, #c9981b);
     border-color: rgba(255, 240, 197, 0.75);
-    color: #2a1406;
+    color: #1a0814;
     filter: brightness(1.02);
 }
 .btn-action.manage:disabled,
@@ -833,7 +833,7 @@ a.btn-action.warning:hover {
     border-radius: 8px;
     border: 1px solid rgba(255, 240, 197, 0.55);
     background: var(--admin-gold-grad);
-    color: #2a1406;
+    color: #1a0814;
     font-size: 0.92rem;
     font-weight: 700;
     cursor: pointer;
@@ -848,7 +848,7 @@ a.btn-action.warning:hover {
 .btn-primary:hover {
     background: linear-gradient(145deg, #e6c373, #c9981b);
     border-color: rgba(255, 240, 197, 0.75);
-    color: #2a1406;
+    color: #1a0814;
     filter: brightness(1.02);
 }
 
@@ -1418,7 +1418,7 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
     border-radius: 8px;
     border: 1px solid rgba(255, 240, 197, 0.55);
     background: var(--admin-gold-grad);
-    color: #2a1406;
+    color: #1a0814;
     font-size: 0.8rem;
     font-weight: 700;
     cursor: pointer;
@@ -1433,7 +1433,7 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
 }
 .task-action-button:hover {
     background: linear-gradient(145deg, #e6c373, #c9981b);
-    color: #2a1406;
+    color: #1a0814;
     filter: brightness(1.02);
 }
 .task-action-button.is-critical { border-color: var(--admin-red); background: var(--admin-red); color: #ffffff; }
@@ -1632,7 +1632,7 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
     padding: 11px 16px;
     border-radius: 8px;
     background: var(--admin-gold-grad);
-    color: #2a1406;
+    color: #1a0814;
     text-decoration: none;
     font-weight: 700;
     font-size: 0.88rem;
@@ -1647,7 +1647,7 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
 }
 .invoice-template-dl:hover {
     background: linear-gradient(145deg, #e6c373, #c9981b);
-    color: #2a1406;
+    color: #1a0814;
     filter: brightness(1.02);
 }
 .invoice-pending-count {
@@ -2152,7 +2152,7 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
     border: 1px solid rgba(255, 240, 197, 0.55);
     border-radius: 8px;
     background: var(--admin-gold-grad);
-    color: #2a1406;
+    color: #1a0814;
     font-weight: 700;
     cursor: pointer;
     font-size: 0.9rem;
@@ -2164,7 +2164,7 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
 }
 .admin-master-submit:hover {
     background: linear-gradient(145deg, #e6c373, #c9981b);
-    color: #2a1406;
+    color: #1a0814;
     filter: brightness(1.02);
 }
 .admin-master-records { min-width: 0; }
@@ -4371,3 +4371,1231 @@ a.btn-action.btn-action-danger:hover {
     }
 }
 
+/* ============================================================
+   ダッシュボード追加スタイル
+   - 更新時刻バー
+   - KPIカードのリンク化（hover + 矢印）
+   - タスク行の緊急度ストライプ
+   ============================================================ */
+
+/* --- データ更新時刻バー --- */
+.dashboard-updated-bar {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin: -4px 0 14px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-line);
+    font-size: 12px; color: var(--admin-sub);
+    box-shadow: var(--admin-shadow);
+}
+.dashboard-updated-bar__icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--admin-primary-soft);
+    color: var(--admin-primary);
+    font-size: 10px;
+}
+.dashboard-updated-bar__label {
+    font-weight: 500;
+}
+.dashboard-updated-bar__time {
+    font-family: "Lato", "Noto Sans JP", sans-serif;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--admin-text);
+    letter-spacing: 0.02em;
+}
+.dashboard-updated-bar__refresh {
+    display: inline-flex; align-items: center; gap: 4px;
+    margin-left: 4px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--admin-primary-soft);
+    color: var(--admin-primary);
+    font-size: 11px; font-weight: 700;
+    text-decoration: none;
+    border: 1px solid var(--admin-primary-border);
+    transition: background .15s ease;
+}
+.dashboard-updated-bar__refresh:hover {
+    background: var(--admin-primary-soft-hover);
+}
+
+/* --- KPI カードのリンク化 --- */
+a.dashboard-kpi-card,
+.dashboard-kpi-card--link {
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease;
+    cursor: pointer;
+}
+a.dashboard-kpi-card:hover,
+.dashboard-kpi-card--link:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--admin-shadow-lg);
+    border-color: var(--admin-primary-border);
+}
+a.dashboard-kpi-card:focus-visible,
+.dashboard-kpi-card--link:focus-visible {
+    outline: 2px solid var(--admin-primary);
+    outline-offset: 2px;
+}
+.dashboard-kpi-card__arrow {
+    position: absolute;
+    right: 14px; bottom: 12px;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--admin-primary-soft);
+    color: var(--admin-primary);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity .2s ease, transform .2s ease;
+}
+a.dashboard-kpi-card:hover .dashboard-kpi-card__arrow,
+.dashboard-kpi-card--link:hover .dashboard-kpi-card__arrow {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* --- タスク行の緊急度ストライプ --- */
+.task-row {
+    position: relative;
+}
+.task-row--critical > td:first-child,
+.task-row--high > td:first-child {
+    position: relative;
+}
+.task-row--critical > td:first-child::before,
+.task-row--high > td:first-child::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 0 2px 2px 0;
+}
+.task-row--critical > td:first-child::before {
+    background: var(--status-danger-fg);
+    box-shadow: 0 0 8px rgba(220, 38, 38, .35);
+}
+.task-row--high > td:first-child::before {
+    background: var(--status-warning-fg);
+}
+.task-row--critical {
+    background: linear-gradient(90deg, rgba(220, 38, 38, .03), transparent 60%);
+}
+.task-row--high {
+    background: linear-gradient(90deg, rgba(180, 83, 9, .025), transparent 60%);
+}
+
+/* テーブル外の縦カードレイアウト（モバイル）でもストライプを表示できるよう、左ボーダーを併用 */
+@media (max-width: 720px) {
+    .task-row--critical {
+        border-left: 3px solid var(--status-danger-fg);
+    }
+    .task-row--high {
+        border-left: 3px solid var(--status-warning-fg);
+    }
+    .task-row--critical > td:first-child::before,
+    .task-row--high > td:first-child::before {
+        display: none;
+    }
+}
+
+/* ============================================================
+   請求書発行画面 — KPIタブ + 検索ツールバー + 緊急強調
+   ============================================================ */
+
+/* KPIをボタンとして使うときの基本リセット */
+.invoice-filter-kpis button.dashboard-kpi-card {
+    border: 1px solid var(--admin-line);
+    background: var(--admin-surface);
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+}
+.invoice-filter-kpis .dashboard-kpi-card.is-active {
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px var(--admin-primary-soft);
+    background: var(--admin-primary-soft);
+}
+.invoice-filter-kpis .dashboard-kpi-card.is-critical {
+    border-color: var(--status-danger-bd);
+    background: linear-gradient(180deg, var(--status-danger-bg), var(--admin-surface));
+}
+.invoice-filter-kpis .dashboard-kpi-card.is-critical .dashboard-kpi-value {
+    color: var(--status-danger-fg);
+}
+
+/* ツールバー（検索＋ソート） */
+.invoice-toolbar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-line);
+    border-radius: 10px;
+}
+.invoice-toolbar__search {
+    flex: 1 1 220px;
+    position: relative;
+    display: flex; align-items: center;
+}
+.invoice-toolbar__search i {
+    position: absolute; left: 12px;
+    color: var(--admin-muted);
+    font-size: 12px;
+}
+.invoice-toolbar__search input {
+    width: 100%;
+    padding: 8px 12px 8px 32px;
+    border: 1px solid var(--admin-line);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    background: var(--admin-surface-alt);
+    color: var(--admin-text);
+}
+.invoice-toolbar__search input:focus {
+    outline: none;
+    border-color: var(--admin-primary);
+    background: var(--admin-surface);
+    box-shadow: 0 0 0 3px var(--admin-primary-soft);
+}
+.invoice-toolbar__sort {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--admin-sub);
+}
+.invoice-toolbar__sort select {
+    padding: 7px 10px;
+    border: 1px solid var(--admin-line);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    background: var(--admin-surface);
+    color: var(--admin-text);
+}
+.invoice-toolbar__hits {
+    margin-left: auto;
+    font-size: 12px; color: var(--admin-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* 7日経過カードは赤ストライプ＋微パルス */
+.invoice-pending-card.is-overdue-card {
+    border-left: 4px solid var(--status-danger-fg);
+    background: linear-gradient(90deg, var(--status-danger-bg), var(--admin-surface) 65%);
+    animation: invoice-overdue-pulse 2.6s ease-in-out infinite;
+}
+@keyframes invoice-overdue-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+    50% { box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12); }
+}
+
+/* ============================================================
+   入金・振込管理画面の追加スタイル
+   ============================================================ */
+
+.deposit-kpi-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+.deposit-kpi-grid button.dashboard-kpi-card {
+    border: 1px solid var(--admin-line);
+    background: var(--admin-surface);
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+}
+.deposit-kpi-grid .dashboard-kpi-card.is-active {
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px var(--admin-primary-soft);
+    background: var(--admin-primary-soft);
+}
+.deposit-kpi-grid .dashboard-kpi-card.is-critical {
+    border-color: var(--status-danger-bd);
+    background: linear-gradient(180deg, var(--status-danger-bg), var(--admin-surface));
+    animation: invoice-overdue-pulse 2.6s ease-in-out infinite;
+}
+.deposit-kpi-grid .dashboard-kpi-card.is-critical .dashboard-kpi-value {
+    color: var(--status-danger-fg);
+}
+
+.billing-alert-unconfirmed {
+    border-left: 4px solid var(--status-danger-fg) !important;
+    animation: invoice-overdue-pulse 2.6s ease-in-out infinite;
+}
+
+.admin-filter-chip.is-critical {
+    border-color: var(--status-danger-bd);
+    background: var(--status-danger-bg);
+    color: var(--status-danger-fg);
+}
+.admin-filter-chip.is-critical strong {
+    color: var(--status-danger-fg);
+}
+
+.deposit-bulk-toggle {
+    margin-left: auto;
+    display: inline-flex; gap: 4px;
+}
+.deposit-bulk-toggle__btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--admin-line);
+    border-radius: 8px;
+    background: var(--admin-surface);
+    color: var(--admin-sub);
+    font-size: 12px; font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+.deposit-bulk-toggle__btn:hover {
+    background: var(--admin-surface-alt);
+    color: var(--admin-text);
+    border-color: var(--admin-line-strong);
+}
+
+.deposit-summary-progress {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--admin-muted);
+    letter-spacing: 0.02em;
+}
+.deposit-summary-progress__bar {
+    display: inline-block;
+    width: 56px; height: 5px;
+    border-radius: 999px;
+    background: var(--admin-line-soft);
+    overflow: hidden;
+    position: relative;
+}
+.deposit-summary-progress__bar > span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--admin-gold-bright), var(--admin-gold-deep));
+    border-radius: inherit;
+    transition: width .3s ease;
+}
+.deposit-summary-progress__text {
+    font-family: "Lato", "Noto Sans JP", sans-serif;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .u-vh-mobile {
+        position: absolute;
+        width: 1px; height: 1px;
+        padding: 0; margin: -1px;
+        overflow: hidden; clip: rect(0,0,0,0);
+        border: 0;
+    }
+    .deposit-bulk-toggle {
+        margin-left: 0;
+    }
+}
+
+/* ============================================================
+   身分証・書類審査画面の追加スタイル
+   ============================================================ */
+
+/* KPI ボタン化 */
+.verification-kpi-grid button.dashboard-kpi-card {
+    border: 1px solid var(--admin-line);
+    background: var(--admin-surface);
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+}
+.verification-kpi-grid .dashboard-kpi-card.is-attention {
+    border-color: var(--status-warning-bd);
+    background: linear-gradient(180deg, var(--status-warning-bg), var(--admin-surface));
+}
+.verification-kpi-grid .dashboard-kpi-card.is-attention .dashboard-kpi-value {
+    color: var(--status-warning-fg);
+}
+.verification-kpi-grid .dashboard-kpi-card.is-critical {
+    border-color: var(--status-danger-bd);
+    background: linear-gradient(180deg, var(--status-danger-bg), var(--admin-surface));
+    animation: invoice-overdue-pulse 2.6s ease-in-out infinite;
+}
+.verification-kpi-grid .dashboard-kpi-card.is-critical .dashboard-kpi-value {
+    color: var(--status-danger-fg);
+}
+
+/* 提出物セル：サムネイル化 */
+.verification-thumbs {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.verification-thumb {
+    display: inline-flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 4px;
+    border: 1px solid var(--admin-line);
+    border-radius: 8px;
+    background: var(--admin-surface);
+    cursor: pointer;
+    font: inherit;
+    color: var(--admin-sub);
+    transition: border-color .15s ease, transform .15s ease;
+}
+.verification-thumb:hover {
+    border-color: var(--admin-primary);
+    transform: translateY(-1px);
+}
+.verification-thumb img {
+    width: 56px; height: 56px;
+    object-fit: cover;
+    border-radius: 6px;
+    display: block;
+}
+.verification-thumb span {
+    font-size: 10px;
+    font-weight: 600;
+}
+
+/* プレビューモーダル */
+.verification-preview-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15, 23, 42, 0.78);
+    backdrop-filter: blur(4px);
+    z-index: 1100;
+    display: flex; align-items: center; justify-content: center;
+    padding: 18px;
+    animation: verifPreviewFade .15s ease-out;
+}
+@keyframes verifPreviewFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.verification-preview {
+    background: var(--admin-surface);
+    border-radius: 14px;
+    width: min(1080px, 100%);
+    max-height: calc(100vh - 36px);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    box-shadow: var(--admin-shadow-popover);
+}
+.verification-preview__head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--admin-line);
+    background: var(--admin-surface-alt);
+}
+.verification-preview__head-text { flex: 1; min-width: 0; }
+.verification-preview__title {
+    margin: 0;
+    font-size: 1rem; font-weight: 800;
+    color: var(--admin-text);
+}
+.verification-preview__subtitle {
+    margin: 2px 0 0;
+    font-size: 12px; color: var(--admin-sub);
+}
+.verification-preview__close {
+    flex: 0 0 auto;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-line);
+    color: var(--admin-sub);
+    cursor: pointer;
+    font-size: 14px;
+}
+.verification-preview__close:hover {
+    background: var(--admin-surface-alt);
+    color: var(--admin-text);
+}
+.verification-preview__body {
+    display: grid; grid-template-columns: 1.5fr 1fr;
+    flex: 1;
+    overflow: hidden;
+}
+.verification-preview__image-wrap {
+    position: relative;
+    background: #0f172a;
+    overflow: auto;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 320px;
+}
+.verification-preview__image-wrap img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+    cursor: zoom-in;
+    transition: transform .25s ease;
+}
+.verification-preview__image-wrap img.is-zoom {
+    cursor: zoom-out;
+    transform: scale(1.8);
+    max-width: none;
+    max-height: none;
+}
+.verification-preview__zoom-hint {
+    position: absolute;
+    bottom: 10px; left: 50%; transform: translateX(-50%);
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.65);
+    color: #fff;
+    font-size: 11px;
+    pointer-events: none;
+}
+.verification-preview__side {
+    padding: 16px;
+    border-left: 1px solid var(--admin-line);
+    overflow-y: auto;
+    display: flex; flex-direction: column; gap: 14px;
+    background: var(--admin-bg);
+}
+.verification-preview__section-title {
+    margin: 0 0 8px;
+    font-size: 12px; font-weight: 700;
+    color: var(--admin-sub);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.verification-preview__section-title i {
+    color: var(--admin-primary);
+    margin-right: 4px;
+}
+.verification-preview__profile {
+    margin: 0;
+    padding: 10px 12px;
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-line);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--admin-text);
+    white-space: pre-wrap;
+    line-height: 1.7;
+}
+.verification-preview__actions {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-top: auto;
+}
+.verification-preview__approve {
+    width: 100%;
+}
+.verification-preview__reject {
+    width: 100%;
+}
+.verification-preview__hint {
+    margin: 0;
+    font-size: 11px;
+    color: var(--admin-muted);
+    text-align: center;
+}
+.verification-preview__hint kbd {
+    padding: 1px 5px;
+    border-radius: 4px;
+    border: 1px solid var(--admin-line-strong);
+    background: var(--admin-surface);
+    font-family: "Lato", "Noto Sans JP", sans-serif;
+    font-size: 10px;
+    color: var(--admin-text);
+}
+
+@media (max-width: 720px) {
+    .verification-preview__body {
+        grid-template-columns: 1fr;
+    }
+    .verification-preview__image-wrap {
+        min-height: 240px;
+        max-height: 50vh;
+    }
+    .verification-preview__side {
+        border-left: none;
+        border-top: 1px solid var(--admin-line);
+    }
+}
+
+/* ============================================================
+   問合せ管理画面の追加スタイル
+   ============================================================ */
+
+/* KPI ボタン化（再利用） */
+.inquiry-kpi-grid button.dashboard-kpi-card {
+    border: 1px solid var(--admin-line);
+    background: var(--admin-surface);
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+}
+.inquiry-kpi-grid .dashboard-kpi-card.is-attention {
+    border-color: var(--status-warning-bd);
+    background: linear-gradient(180deg, var(--status-warning-bg), var(--admin-surface));
+}
+.inquiry-kpi-grid .dashboard-kpi-card.is-attention .dashboard-kpi-value {
+    color: var(--status-warning-fg);
+}
+.inquiry-kpi-grid .dashboard-kpi-card.is-critical {
+    border-color: var(--status-danger-bd);
+    background: linear-gradient(180deg, var(--status-danger-bg), var(--admin-surface));
+    animation: invoice-overdue-pulse 2.6s ease-in-out infinite;
+}
+.inquiry-kpi-grid .dashboard-kpi-card.is-critical .dashboard-kpi-value {
+    color: var(--status-danger-fg);
+}
+
+/* 行クリック可能 */
+.inquiry-table tr.inquiry-row {
+    cursor: pointer;
+    transition: background .12s ease;
+}
+.inquiry-table tr.inquiry-row:hover {
+    background: var(--admin-card-hover);
+}
+.inquiry-table tr.inquiry-row--warning > td:first-child {
+    position: relative;
+}
+.inquiry-table tr.inquiry-row--critical > td:first-child {
+    position: relative;
+}
+.inquiry-table tr.inquiry-row--warning > td:first-child::before {
+    content: "";
+    position: absolute; left: 0; top: 4px; bottom: 4px; width: 3px;
+    background: var(--status-warning-fg);
+    border-radius: 0 2px 2px 0;
+}
+.inquiry-table tr.inquiry-row--critical > td:first-child::before {
+    content: "";
+    position: absolute; left: 0; top: 4px; bottom: 4px; width: 3px;
+    background: var(--status-danger-fg);
+    box-shadow: 0 0 6px rgba(220, 38, 38, .35);
+    border-radius: 0 2px 2px 0;
+}
+.inquiry-table tr.inquiry-row--critical {
+    background: linear-gradient(90deg, rgba(220, 38, 38, .03), transparent 60%);
+}
+
+/* 経過時間セル */
+.inquiry-age {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 12px;
+    white-space: nowrap;
+}
+.inquiry-age i {
+    margin-right: 4px;
+    font-size: 10px;
+}
+.inquiry-age--normal { color: var(--admin-sub); }
+.inquiry-age--warning {
+    color: var(--status-warning-fg);
+}
+.inquiry-age--critical {
+    color: var(--status-danger-fg);
+}
+.inquiry-age--closed { color: var(--admin-muted); }
+
+/* ============================================================
+   店舗管理画面の追加スタイル
+   ============================================================ */
+
+.shop-kpi-grid {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+.shop-kpi-grid button.dashboard-kpi-card {
+    border: 1px solid var(--admin-line);
+    background: var(--admin-surface);
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+}
+.shop-kpi-grid .dashboard-kpi-card.is-active {
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px var(--admin-primary-soft);
+    background: var(--admin-primary-soft);
+}
+.shop-kpi-grid .dashboard-kpi-card.is-attention {
+    border-color: var(--status-warning-bd);
+    background: linear-gradient(180deg, var(--status-warning-bg), var(--admin-surface));
+}
+.shop-kpi-grid .dashboard-kpi-card.is-attention .dashboard-kpi-value {
+    color: var(--status-warning-fg);
+}
+.shop-kpi-grid .dashboard-kpi-card.is-critical {
+    border-color: var(--status-danger-bd);
+    background: linear-gradient(180deg, var(--status-danger-bg), var(--admin-surface));
+}
+.shop-kpi-grid .dashboard-kpi-card.is-critical .dashboard-kpi-value {
+    color: var(--status-danger-fg);
+}
+
+/* 最終ログインセル：年齢別に色分け */
+.shop-login {
+    font-size: 12px;
+    line-height: 1.5;
+}
+.shop-login__date {
+    display: block;
+    font-variant-numeric: tabular-nums;
+    color: var(--admin-text);
+}
+.shop-login__age {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--admin-surface-alt);
+    color: var(--admin-sub);
+    margin-top: 2px;
+}
+.shop-login__age i { margin-right: 3px; font-size: 9px; }
+.shop-login--warning .shop-login__age {
+    background: var(--status-warning-bg);
+    color: var(--status-warning-fg);
+}
+.shop-login--critical .shop-login__age {
+    background: var(--status-danger-bg);
+    color: var(--status-danger-fg);
+}
+.shop-login__none {
+    color: var(--admin-muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+.shop-login--never .shop-login__none {
+    color: var(--status-warning-fg);
+}
+
+/* ============================================================
+   店舗詳細画面：アンカーナビ + 詳細表示
+   ============================================================ */
+
+.admin-anchor-nav {
+    position: sticky;
+    top: 60px;
+    z-index: 5;
+    display: flex; flex-wrap: wrap; gap: 6px;
+    padding: 8px 10px;
+    margin: -6px -2px 16px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--admin-line);
+    border-radius: 12px;
+    box-shadow: var(--admin-shadow);
+}
+.admin-anchor-nav__link {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--admin-surface);
+    color: var(--admin-sub);
+    font-size: 12px; font-weight: 700;
+    text-decoration: none;
+    border: 1px solid var(--admin-line);
+    transition: all .15s ease;
+}
+.admin-anchor-nav__link:hover {
+    background: var(--admin-primary-soft);
+    color: var(--admin-primary);
+    border-color: var(--admin-primary-border);
+}
+.admin-anchor-nav__link i { font-size: 11px; }
+.admin-anchor-nav__link--private {
+    background: var(--admin-gold-soft);
+    color: var(--admin-gold-darker);
+    border-color: var(--admin-gold-border);
+}
+.admin-anchor-nav__count {
+    background: var(--admin-primary);
+    color: var(--admin-ink);
+    border-radius: 999px;
+    padding: 0 6px;
+    font-size: 10px;
+    min-width: 18px;
+    text-align: center;
+    margin-left: 2px;
+}
+
+/* セクション着地をナビ高さぶんずらす */
+section[id^="sec-"] {
+    scroll-margin-top: 130px;
+}
+
+/* 管理者リスト：権限バッジ */
+.manager-role-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+.manager-role-badge--owner {
+    background: linear-gradient(135deg, #fdf6e3, #f0d480);
+    color: #92590a;
+    border: 1px solid #e4c463;
+}
+.manager-role-badge--owner i { color: #b8860b; font-size: 10px; }
+.manager-role-badge--staff {
+    background: var(--admin-primary-soft);
+    color: var(--admin-primary);
+    border: 1px solid var(--admin-primary-border);
+}
+
+/* 入金履歴：金額右寄せ */
+.u-text-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+    .admin-anchor-nav {
+        position: static;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+    }
+    .admin-anchor-nav__link {
+        white-space: nowrap;
+    }
+}
+
+/* ============================================================
+   キャスト管理画面（一覧）
+   - shop-kpi-grid と挙動共有、見た目もほぼ同じ
+   ============================================================ */
+.cast-kpi-grid {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+.cast-kpi-grid button.dashboard-kpi-card {
+    border: 1px solid var(--admin-line);
+    background: var(--admin-surface);
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+}
+.cast-kpi-grid .dashboard-kpi-card.is-active {
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px var(--admin-primary-soft);
+    background: var(--admin-primary-soft);
+}
+.cast-kpi-grid .dashboard-kpi-card.is-attention {
+    border-color: var(--status-warning-bd);
+    background: linear-gradient(180deg, var(--status-warning-bg), var(--admin-surface));
+}
+.cast-kpi-grid .dashboard-kpi-card.is-attention .dashboard-kpi-value {
+    color: var(--status-warning-fg);
+}
+.cast-kpi-grid .dashboard-kpi-card.is-critical {
+    border-color: var(--status-danger-bd);
+    background: linear-gradient(180deg, var(--status-danger-bg), var(--admin-surface));
+}
+.cast-kpi-grid .dashboard-kpi-card.is-critical .dashboard-kpi-value {
+    color: var(--status-danger-fg);
+}
+
+/* 薄型アラート（情報密度を下げない注意喚起） */
+.admin-alert.admin-alert-thin {
+    padding: 8px 14px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 8px;
+    display: flex; align-items: center; gap: 8px;
+}
+.admin-alert.admin-alert-thin i {
+    font-size: 14px;
+    flex: 0 0 auto;
+}
+.admin-alert.admin-alert-thin em {
+    font-style: normal;
+    font-weight: 700;
+    color: var(--admin-primary);
+}
+
+/* ============================================================
+   売上管理：貢献ランキング（バー＋メダル）
+   ============================================================ */
+
+.sales-rank-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex; flex-direction: column;
+    gap: 8px;
+}
+.sales-rank-item {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-line-soft);
+    border-radius: 10px;
+    align-items: center;
+    transition: border-color .15s ease, transform .15s ease;
+}
+.sales-rank-item:hover {
+    border-color: var(--admin-primary-border);
+    transform: translateY(-1px);
+}
+.sales-rank-item.is-top {
+    background: linear-gradient(135deg, var(--admin-gold-soft) 0%, var(--admin-surface) 70%);
+    border-color: var(--admin-gold-border);
+}
+.sales-rank-item.is-rank-1 {
+    box-shadow: 0 4px 14px rgba(168, 85, 247, .15);
+}
+
+.sales-rank-item__rank {
+    display: flex; align-items: center; justify-content: center;
+    min-width: 38px; height: 38px;
+}
+.sales-rank-item__medal {
+    font-size: 22px;
+    line-height: 1;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,.12));
+}
+.sales-rank-item__num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--admin-surface-alt);
+    color: var(--admin-sub);
+    font-size: 12px;
+    font-weight: 800;
+    font-family: "Lato", "Noto Sans JP", sans-serif;
+}
+
+.sales-rank-item__body {
+    min-width: 0;
+}
+.sales-rank-item__head {
+    display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 6px;
+}
+.sales-rank-item__name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--admin-text);
+    text-decoration: none;
+}
+.sales-rank-item__name:hover {
+    color: var(--admin-primary);
+    text-decoration: underline;
+}
+.sales-rank-item__id {
+    font-size: 11px;
+    color: var(--admin-muted);
+    background: var(--admin-surface-alt);
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+.sales-rank-item__bar {
+    height: 6px;
+    background: var(--admin-line-soft);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+.sales-rank-item__bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--admin-primary), var(--admin-primary-hover));
+    border-radius: inherit;
+    transition: width .4s ease-out;
+}
+.sales-rank-item__bar-fill--cast {
+    background: linear-gradient(90deg, var(--admin-gold-bright), var(--admin-gold-deep));
+}
+.sales-rank-item.is-rank-1 .sales-rank-item__bar-fill {
+    background: linear-gradient(90deg, var(--admin-gold-bright), var(--admin-gold-deep));
+}
+
+.sales-rank-item__meta {
+    display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--admin-sub);
+    font-variant-numeric: tabular-nums;
+}
+.sales-rank-item__meta strong {
+    color: var(--admin-text);
+    font-weight: 800;
+    font-family: "Lato", "Noto Sans JP", sans-serif;
+}
+.sales-rank-item__commission {
+    margin-left: auto;
+}
+.sales-rank-item__commission strong {
+    font-size: 14px;
+    color: var(--admin-primary);
+}
+
+@media (max-width: 640px) {
+    .sales-rank-item__meta {
+        gap: 8px;
+    }
+    .sales-rank-item__commission {
+        margin-left: 0;
+    }
+}
+
+/* ============================================================
+   コンテンツ系（お知らせ・コラム）共通スタイル
+   ============================================================ */
+
+.content-kpi-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+.content-kpi-grid button.dashboard-kpi-card {
+    border: 1px solid var(--admin-line);
+    background: var(--admin-surface);
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+}
+.content-kpi-grid .dashboard-kpi-card.is-active {
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px var(--admin-primary-soft);
+    background: var(--admin-primary-soft);
+}
+
+/* ツールバー＋新規作成CTAを横並びに */
+.admin-toolbar-with-cta {
+    display: flex; gap: 12px; align-items: stretch;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+.admin-toolbar-with-cta .admin-page-toolbar {
+    flex: 1; min-width: 240px;
+    margin-bottom: 0;
+}
+.admin-toolbar-with-cta .btn-action {
+    align-self: flex-start;
+    flex: 0 0 auto;
+}
+
+/* 閲覧対象チップ */
+.audience-chips {
+    display: inline-flex; gap: 4px; flex-wrap: wrap;
+}
+.audience-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    border: 1px solid;
+}
+.audience-chip i { font-size: 9px; }
+.audience-chip--cast {
+    background: var(--admin-gold-soft);
+    color: var(--admin-gold-darker);
+    border-color: var(--admin-gold-border);
+}
+.audience-chip--shop {
+    background: var(--admin-primary-soft);
+    color: var(--admin-primary);
+    border-color: var(--admin-primary-border);
+}
+.audience-chip--guest {
+    background: #f3f4f6;
+    color: #4b5563;
+    border-color: #d1d5db;
+}
+
+/* ============================================================
+   マスタ：カタログ選択カードグリッド
+   ============================================================ */
+.master-catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+.master-catalog-card {
+    position: relative;
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-line);
+    border-radius: 10px;
+    text-decoration: none;
+    color: inherit;
+    transition: all .15s ease;
+}
+.master-catalog-card:hover {
+    background: var(--admin-card-hover);
+    border-color: var(--admin-primary-border);
+    transform: translateY(-1px);
+}
+.master-catalog-card.is-selected {
+    border-color: var(--admin-primary);
+    background: var(--admin-primary-soft);
+    box-shadow: 0 0 0 3px rgba(74, 18, 42, .08);
+}
+.master-catalog-card__icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--admin-primary-soft);
+    color: var(--admin-primary);
+    font-size: 14px;
+}
+.master-catalog-card__body { flex: 1; min-width: 0; }
+.master-catalog-card__title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--admin-text);
+}
+.master-catalog-card__meta {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: var(--admin-sub);
+    font-variant-numeric: tabular-nums;
+}
+.master-catalog-card__check {
+    color: var(--admin-primary);
+    font-size: 14px;
+}
+.master-catalog-fallback {
+    margin-top: 14px;
+    border-top: 1px dashed var(--admin-line);
+    padding-top: 10px;
+}
+.master-catalog-fallback summary {
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--admin-sub);
+    user-select: none;
+}
+
+/* ============================================================
+   オコジョガイド：警告タイル
+   ============================================================ */
+.character-guide-kpis .dashboard-kpi-card.character-guide-kpi--attention {
+    border-color: var(--status-warning-bd);
+    background: linear-gradient(180deg, var(--status-warning-bg), var(--admin-surface));
+}
+.character-guide-kpis .dashboard-kpi-card.character-guide-kpi--attention .dashboard-kpi-value {
+    color: var(--status-warning-fg);
+}
+
+/* ============================================================
+   通知・タスク仕様：タブバッジ
+   ============================================================ */
+.spec-tab__badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--admin-surface-alt);
+    color: var(--admin-sub);
+    font-size: 10px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.spec-tab.is-active .spec-tab__badge {
+    background: var(--admin-primary);
+    color: var(--admin-ink);
+}
+
+/* ============================================================
+   運営アカウント：タイトルのメタ表示
+   ============================================================ */
+.admin-panel-title-meta {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--admin-sub);
+    margin-left: 6px;
+}
+
+/* ============================================================
+   運営口座：現在の登録内容カード
+   ============================================================ */
+.bank-current-card {
+    background: linear-gradient(135deg, var(--status-success-bg), var(--admin-surface));
+    border: 1px solid var(--status-success-bd);
+}
+.bank-current-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+.bank-current-item {
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-line);
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+.bank-current-item__label {
+    display: block;
+    font-size: 11px;
+    color: var(--admin-muted);
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.bank-current-item__value {
+    display: block;
+    font-size: 13px;
+    color: var(--admin-text);
+    font-weight: 700;
+    word-break: break-all;
+}
+.bank-current-item__value code {
+    font-family: "Lato", "Noto Sans JP", monospace;
+    font-size: 13px;
+    background: var(--admin-surface-alt);
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+/* ============================================================
+   規約：3種類間切替タブ
+   ============================================================ */
+.policy-switcher {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+    padding: 6px;
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-line);
+    border-radius: 12px;
+    box-shadow: var(--admin-shadow);
+}
+.policy-switcher__tab {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--admin-sub);
+    text-decoration: none;
+    transition: all .15s ease;
+}
+.policy-switcher__tab:hover {
+    background: var(--admin-surface-alt);
+    color: var(--admin-text);
+}
+.policy-switcher__tab.is-active {
+    background: var(--admin-primary);
+    color: var(--admin-ink);
+}
+.policy-switcher__tab i {
+    font-size: 12px;
+}

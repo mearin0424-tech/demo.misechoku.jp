@@ -48,7 +48,7 @@
 
                     <button type="button" id="open-word-edit-btn"
                             aria-label="ひとことを編集"
-                            class="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center bg-accent/20 text-accent-text border border-line-accent/40 hover:bg-accent/30 transition-colors">
+                            class="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center bg-accent text-on-accent shadow-[0_3px_8px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.18)] hover:brightness-110 active:scale-95 transition-all">
                         <x-ui.icon name="edit" class="text-xs" />
                     </button>
 

@@ -81,7 +81,7 @@
         color: var(--color-text-muted); z-index: 1;
     }
     .case-pipeline__step.is-done .case-pipeline__bullet {
-        background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: #1a1206; border-color: var(--gold);
+        background: var(--accent, #d670a2); color: var(--on-accent, #1a0814); border-color: var(--accent, #d670a2);
     }
     .case-pipeline__step.is-current .case-pipeline__bullet {
         background: rgba(168, 85, 247, 0.22); color: var(--gold-light); border-color: var(--gold);
@@ -125,12 +125,13 @@
     .case-card__action-btn {
         display: inline-flex; align-items: center; gap: 6px;
         padding: 8px 14px; border-radius: 999px;
-        background: linear-gradient(135deg, var(--gold-light), var(--gold) 50%, var(--gold-deep));
-        color: #1a1206; border: 0; font-weight: 800; font-size: 0.82rem; cursor: pointer;
-        box-shadow: 0 3px 10px rgba(168, 85, 247, 0.4);
+        background: var(--accent, #d670a2);
+        color: var(--on-accent, #1a0814); border: 0; font-weight: 800; font-size: 0.82rem; cursor: pointer;
+        box-shadow: 0 6px 14px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.20), inset 0 -1px 0 rgba(0,0,0,.18);
         margin-left: auto;
     }
-    .case-card__action-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(168, 85, 247, 0.5); }
+    .case-card__action-btn:hover { filter: brightness(1.06); }
+    .case-card__action-btn:active { transform: scale(.97); box-shadow: 0 2px 4px rgba(0,0,0,.4), inset 0 2px 4px rgba(0,0,0,.2); }
     .case-card__view-talk {
         display: inline-flex; align-items: center; gap: 4px;
         font-size: 0.74rem; color: var(--color-text-muted); text-decoration: none;
@@ -170,9 +171,11 @@
         bottom: var(--footer-height, 60px); z-index: 90;
         width: min(100vw, var(--max-content-width, 430px)); max-width: 100%;
         padding: 10px var(--content-padding-x, 16px) calc(10px + env(safe-area-inset-bottom, 0));
-        background: linear-gradient(180deg, rgba(74,18,42,0.98), rgba(35,8,21,1));
-        border-top: 1px solid rgba(168, 85, 247, 0.55);
+        background: rgba(10, 10, 10, 0.96);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
         box-shadow: 0 -8px 24px rgba(0,0,0,0.45);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
         animation: deposit-cta-slide-up 0.3s ease;
     }
     @keyframes deposit-cta-slide-up {
@@ -187,12 +190,13 @@
     .deposit-cta-bar__label { font-size: 0.7rem; color: rgba(196, 181, 253, 0.78); font-weight: 600; }
     .deposit-cta-bar__btn {
         flex: 0 0 auto; margin-left: auto; padding: 12px 18px; border-radius: 999px;
-        background: linear-gradient(135deg, #c4b5fd, #a78bfa 48%, #7c3aed);
-        color: #2a1406; border: 0; font-weight: 900; font-size: 0.92rem; cursor: pointer;
-        box-shadow: 0 6px 16px rgba(168, 85, 247, 0.45);
+        background: var(--accent, #d670a2);
+        color: var(--on-accent, #1a0814); border: 0; font-weight: 900; font-size: 0.92rem; cursor: pointer;
+        box-shadow: 0 6px 14px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.20), inset 0 -1px 0 rgba(0,0,0,.18);
         display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
     }
-    .deposit-cta-bar__btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(168, 85, 247, 0.55); }
+    .deposit-cta-bar__btn:hover { filter: brightness(1.06); }
+    .deposit-cta-bar__btn:active { transform: scale(.96); box-shadow: 0 2px 5px rgba(0,0,0,.45), inset 0 2px 4px rgba(0,0,0,.2); }
     body:has(.deposit-cta-bar) .cast-mypage-sub-page { padding-bottom: calc(var(--footer-height, 60px) + 80px) !important; }
 
     /* 振込先口座アコーディオン */
@@ -221,14 +225,16 @@
     .payment-bank-accordion__body { padding: 12px 16px 16px; border-top: 1px solid rgba(168, 85, 247, 0.16); background: rgba(0,0,0,0.18); }
 
     .payment-bank-unregistered { background: rgba(26,17,17,0.95); border: 1px dashed rgba(255,255,255,0.12); border-radius: 1rem; padding: 1.6rem 1.2rem; display: flex; flex-direction: column; align-items: center; text-align: center; }
-    .payment-bank-unregistered-icon { width: 44px; height: 44px; border-radius: 50%; background: #2a1d1d; display: flex; align-items: center; justify-content: center; margin-bottom: 0.8rem; color: #a89b9b; font-size: 1.1rem; }
-    .payment-bank-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 0.8rem; background: #3a2828; color: #cda766; }
-    .payment-bank-unregistered-text { font-size: 0.84rem; line-height: 1.7; color: #d4c8c8; margin: 0 0 1rem; }
-    .payment-bank-register-btn { width: 100%; padding: 12px 24px; border-radius: 12px; font-weight: 700; color: #110a0a; background: linear-gradient(to right, #cda766, #b38f4a); box-shadow: 0 4px 15px rgba(205,167,102,0.3); border: none; cursor: pointer; }
+    .payment-bank-unregistered-icon { width: 44px; height: 44px; border-radius: 50%; background: #2a1d1d; display: flex; align-items: center; justify-content: center; margin-bottom: 0.8rem; color: #a0a0a0; font-size: 1.1rem; }
+    .payment-bank-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 0.8rem; background: #3a2828; color: #d670a2; }
+    .payment-bank-unregistered-text { font-size: 0.84rem; line-height: 1.7; color: #d4d4d4; margin: 0 0 1rem; }
+    .payment-bank-register-btn { width: 100%; padding: 12px 24px; border-radius: 12px; font-weight: 700; color: var(--on-accent, #1a0814); background: var(--accent, #d670a2); box-shadow: 0 6px 14px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.20), inset 0 -1px 0 rgba(0,0,0,.18); border: none; cursor: pointer; transition: filter .15s, transform .12s; }
+    .payment-bank-register-btn:hover { filter: brightness(1.06); }
+    .payment-bank-register-btn:active { transform: scale(.97); box-shadow: 0 2px 5px rgba(0,0,0,.45), inset 0 2px 4px rgba(0,0,0,.2); }
     .payment-bank-data-rows { display: flex; flex-direction: column; gap: 0; }
     .payment-bank-data-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
     .payment-bank-data-row:last-child { border-bottom: none; }
-    .payment-bank-data-label { font-size: 0.74rem; color: #a89b9b; }
+    .payment-bank-data-label { font-size: 0.74rem; color: #a0a0a0; }
     .payment-bank-data-value { font-size: 0.86rem; font-weight: 500; color: #fff; }
     .payment-bank-change-btn { font-size: 0.78rem; padding: 8px 14px; border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 9999px; background: transparent; color: #a78bfa; cursor: pointer; }
 
@@ -237,20 +243,22 @@
     .payment-bank-modal[hidden] { display: none; }
     @media (min-width: 640px) { .payment-bank-modal { justify-content: center; } }
     .payment-bank-modal-backdrop { position: absolute; inset: 0; cursor: pointer; }
-    .payment-bank-modal-panel { position: relative; width: 100%; max-width: min(28rem, calc(100vw - 2rem)); max-height: 90vh; background: #160d0d; border-top-left-radius: 1.5rem; border-top-right-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); overflow: hidden; box-sizing: border-box; }
-    .payment-bank-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); background: #1a1111; }
-    .payment-bank-modal-title { margin: 0; font-size: 1.05rem; font-weight: 700; color: #cda766; letter-spacing: 0.04em; }
-    .payment-bank-modal-close { width: 2.5rem; height: 2.5rem; border: none; background: transparent; color: #a89b9b; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .payment-bank-modal-panel { position: relative; width: 100%; max-width: min(28rem, calc(100vw - 2rem)); max-height: 90vh; background: #0a0a0a; border-top-left-radius: 1.5rem; border-top-right-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); overflow: hidden; box-sizing: border-box; }
+    .payment-bank-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); background: #141414; }
+    .payment-bank-modal-title { margin: 0; font-size: 1.05rem; font-weight: 700; color: #d670a2; letter-spacing: 0.04em; }
+    .payment-bank-modal-close { width: 2.5rem; height: 2.5rem; border: none; background: transparent; color: #a0a0a0; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .payment-bank-modal-body { overflow-y: auto; overflow-x: hidden; padding: 1.5rem; min-width: 0; flex: 1 1 auto; box-sizing: border-box; }
-    .payment-bank-modal-note { font-size: 0.74rem; line-height: 1.7; color: #a89b9b; margin: 0 0 1.5rem; padding: 1rem; background: #231818; border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.08); }
+    .payment-bank-modal-note { font-size: 0.74rem; line-height: 1.7; color: #a0a0a0; margin: 0 0 1.5rem; padding: 1rem; background: #1a1a1a; border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.08); }
     .payment-bank-modal-grid { display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; }
     .payment-bank-modal-grid .bank-form-row { margin: 0; min-width: 0; }
-    .payment-bank-modal-grid .bank-label { display: block; font-size: 0.74rem; font-weight: 500; color: #a89b9b; margin-bottom: 6px; margin-left: 4px; }
-    .payment-bank-modal-grid .bank-input { width: 100%; min-width: 0; max-width: 100%; padding: 14px 1rem; border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.08); background: #231818; color: #fff; font-size: 0.86rem; box-sizing: border-box; }
-    .payment-bank-modal-footer { display: flex; gap: 0.75rem; padding: 1.25rem 1.5rem; background: #1a1111; border-top: 1px solid rgba(255,255,255,0.08); }
+    .payment-bank-modal-grid .bank-label { display: block; font-size: 0.74rem; font-weight: 500; color: #a0a0a0; margin-bottom: 6px; margin-left: 4px; }
+    .payment-bank-modal-grid .bank-input { width: 100%; min-width: 0; max-width: 100%; padding: 14px 1rem; border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.08); background: #1a1a1a; color: #fff; font-size: 0.86rem; box-sizing: border-box; }
+    .payment-bank-modal-footer { display: flex; gap: 0.75rem; padding: 1.25rem 1.5rem; background: #141414; border-top: 1px solid rgba(255,255,255,0.08); }
     .payment-bank-modal-btn { flex: 1; padding: 14px 1rem; border-radius: 0.75rem; font-size: 0.86rem; font-weight: 700; cursor: pointer; }
-    .payment-bank-modal-btn-cancel { background: transparent; border: 1px solid rgba(255,255,255,0.08); color: #d4c8c8; }
-    .payment-bank-modal-btn-submit { background: linear-gradient(to right, #cda766, #b38f4a); color: #110a0a; border: none; box-shadow: 0 4px 15px rgba(205,167,102,0.2); }
+    .payment-bank-modal-btn-cancel { background: transparent; border: 1px solid rgba(255,255,255,0.08); color: #d4d4d4; }
+    .payment-bank-modal-btn-submit { background: var(--accent, #d670a2); color: var(--on-accent, #1a0814); border: none; box-shadow: 0 6px 14px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.20), inset 0 -1px 0 rgba(0,0,0,.18); transition: filter .15s, transform .12s; }
+    .payment-bank-modal-btn-submit:hover { filter: brightness(1.06); }
+    .payment-bank-modal-btn-submit:active { transform: scale(.97); box-shadow: 0 2px 5px rgba(0,0,0,.45), inset 0 2px 4px rgba(0,0,0,.2); }
 
     /* 進行中／不採用の応募リスト（mini） */
     .mypage-mini-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
@@ -262,7 +270,7 @@
         text-decoration: none; color: inherit;
     }
     .mypage-mini-row:hover { border-color: rgba(168, 85, 247, 0.3); background: rgba(168, 85, 247, 0.04); }
-    .mypage-mini-row__name { flex: 1; font-size: 0.88rem; font-weight: 700; color: #f5e0c4; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mypage-mini-row__name { flex: 1; font-size: 0.88rem; font-weight: 700; color: #f0a6c4; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .mypage-mini-row__status { flex: 0 0 auto; font-size: 0.7rem; padding: 3px 8px; border-radius: 999px; background: rgba(168, 85, 247, 0.1); color: #a78bfa; }
     .mypage-mini-row__status.is-rejected { background: rgba(220,38,38,0.12); color: #fca5a5; }
     .mypage-mini-row__chev { color: rgba(196, 181, 253, 0.4); font-size: 0.72rem; }
@@ -287,7 +295,7 @@
 
             {{-- 獲得ボーナス金合計バッジ（旧 mypage 上部から移設。x-ui.badge variant="gold" のデザイン踏襲） --}}
             <div style="margin: 4px 0 18px;">
-                <div style="display:inline-flex;align-items:center;gap:10px;padding:8px 18px;border-radius:999px;background:linear-gradient(to right,#a78bfa,#7c3aed);color:#111;border:1px solid rgba(168, 85, 247, 0.4);font-weight:700;box-shadow:inset 0 4px 6px rgba(255,255,255,0.4),inset 0 -6px 6px rgba(0,0,0,0.4),0 8px 16px rgba(0,0,0,0.7);">
+                <div style="display:inline-flex;align-items:center;gap:10px;padding:8px 18px;border-radius:999px;background:var(--accent, #d670a2);color:var(--on-accent, #1a0814);border:0;font-weight:700;box-shadow:0 6px 14px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.20),inset 0 -1px 0 rgba(0,0,0,.18);">
                     <span style="font-size:10px;letter-spacing:0.08em;opacity:0.9;">獲得ボーナス金合計</span>
                     <span style="font-size:18px;letter-spacing:0.04em;font-weight:800;">¥{{ number_format($bonusTotal) }}</span>
                 </div>
@@ -350,7 +358,7 @@
                     <ul class="mypage-mini-list">
                         @foreach($rejectedApplications as $app)
                             <a href="{{ $app['link'] ?? '#' }}" class="mypage-mini-row">
-                                <i class="fas fa-store" style="color:#a89b9b;"></i>
+                                <i class="fas fa-store" style="color:#a0a0a0;"></i>
                                 <span class="mypage-mini-row__name">{{ $app['shop_name'] }}</span>
                                 <span class="mypage-mini-row__status is-rejected">{{ $app['status_label'] }}</span>
                                 <i class="fas fa-chevron-right mypage-mini-row__chev"></i>

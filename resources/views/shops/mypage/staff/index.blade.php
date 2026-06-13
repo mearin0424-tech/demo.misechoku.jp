@@ -40,18 +40,15 @@
     .staff-btn-primary {
         display: inline-flex; align-items: center; gap: 8px;
         padding: 10px 18px; border-radius: 999px;
-        background: linear-gradient(135deg, #a78bfa, #7c3aed);
-        color: #fff; font-weight: 700; font-size: 0.88rem;
+        background: var(--accent, #d670a2);
+        color: var(--on-accent, #1a0814); font-weight: 700; font-size: 0.88rem;
         text-decoration: none;
-        box-shadow:
-            inset 0 2px 4px rgba(255,255,255,.3),
-            inset 0 -3px 4px rgba(0,0,0,.35),
-            0 8px 20px rgba(124,58,237,.45);
-        border: 1px solid rgba(255,255,255,.12);
-        transition: transform .15s ease;
+        box-shadow: 0 6px 14px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.20), inset 0 -1px 0 rgba(0,0,0,.18);
+        border: 0;
+        transition: filter .15s ease, transform .12s ease;
     }
-    .staff-btn-primary:hover { transform: translateY(-1px); }
-    .staff-btn-primary:active { transform: translateY(1px); }
+    .staff-btn-primary:hover { filter: brightness(1.06); }
+    .staff-btn-primary:active { transform: scale(.97); box-shadow: 0 2px 5px rgba(0,0,0,.45), inset 0 2px 4px rgba(0,0,0,.2); }
 
     .staff-list { display: flex; flex-direction: column; gap: 12px; }
     .staff-card {
@@ -65,10 +62,10 @@
     .staff-card__avatar {
         flex: 0 0 auto;
         width: 44px; height: 44px; border-radius: 50%;
-        background: linear-gradient(135deg, #a78bfa, #7c3aed);
+        background: var(--accent, #d670a2);
         display: inline-flex; align-items: center; justify-content: center;
-        color: #fff; font-weight: 800; font-size: 1rem;
-        box-shadow: 0 0 12px rgba(168, 85, 247, .45);
+        color: var(--on-accent, #1a0814); font-weight: 800; font-size: 1rem;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, .35);
     }
     .staff-card__main { flex: 1 1 auto; min-width: 0; }
     .staff-card__name {
@@ -92,9 +89,9 @@
         letter-spacing: 0.04em;
     }
     .staff-badge--owner {
-        background: linear-gradient(135deg, #f6d36a, #b8860b);
-        color: #2a1d0f;
-        box-shadow: 0 0 8px rgba(212, 175, 55, .35);
+        background: var(--accent, #d670a2);
+        color: var(--on-accent, #1a0814);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, .3);
     }
     .staff-badge--staff {
         background: rgba(168, 85, 247, 0.18);

@@ -92,19 +92,19 @@
 
 @push('styles')
 <style>
-.setting-page { padding: 24px 16px 32px; color: #f9f5f5; }
+.setting-page { padding: 24px 16px 32px; color: #f5f5f5; }
 @media (min-width: 768px) { .setting-page { padding: 32px 24px 40px; } }
 .setting-header { margin-bottom: 24px; }
 .setting-title { font-family: var(--font-sans); font-size: 1.4rem; margin-bottom: 8px; color: var(--color-gold, #a78bfa); }
-.setting-lead { font-size: 0.9rem; line-height: 1.6; color: #d1c1c1; }
+.setting-lead { font-size: 0.9rem; line-height: 1.6; color: #c0c0c0; }
 .setting-section { margin-bottom: 18px; background: rgba(20, 7, 15, 0.9); border-radius: 16px; padding: 14px 12px 10px; border: 1px solid rgba(168, 85, 247, 0.4); }
 @media (min-width: 768px) { .setting-section { padding: 16px 16px 12px; } }
-.setting-section-title { font-size: 0.95rem; margin-bottom: 8px; color: #f9f5f5; }
+.setting-section-title { font-size: 0.95rem; margin-bottom: 8px; color: #f5f5f5; }
 .setting-row { padding: 10px 4px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .setting-row + .setting-row { border-top: 1px solid rgba(255,255,255,0.05); }
 .setting-row-main { flex: 1; min-width: 0; }
 .setting-row-label { font-size: 0.9rem; margin-bottom: 2px; }
-.setting-row-desc { font-size: 0.78rem; color: #b69f9f; }
+.setting-row-desc { font-size: 0.78rem; color: #a0a0a0; }
 .setting-check { font-size: 0.86rem; color: #f5f5f5; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
 .setting-check input { width: 16px; height: 16px; }
 .setting-alert { padding: 12px 14px; border-radius: 12px; margin-bottom: 16px; }
@@ -112,10 +112,10 @@
 .setting-alert-error { background: rgba(185,28,28,0.2); border: 1px solid rgba(248,113,113,0.5); color: #fecaca; }
 .setting-btn { display: inline-block; padding: 10px 18px; border-radius: 12px; font-size: 0.88rem; font-weight: 600; text-decoration: none; border: none; transition: opacity 0.2s; cursor: pointer; }
 .setting-btn:hover { opacity: 0.9; }
-.setting-btn-install { background: #a855f7; color: #fff; }
-.setting-btn-push { background: #1f2937; color: #f9f5f5; border: 1px solid rgba(168, 85, 247, 0.55); }
-.setting-btn-test { background: #065f46; color: #ecfdf5; border: 1px solid rgba(52,211,153,0.65); }
-.setting-guide { margin: 2px 4px 8px; font-size: 0.78rem; color: #d6c6c6; }
-.setting-guest-note { color: #b69f9f; font-size: 0.9rem; margin-bottom: 20px; }
+.setting-btn-install { background: var(--accent, #d670a2); color: var(--on-accent, #1a0814); box-shadow: 0 6px 14px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.20), inset 0 -1px 0 rgba(0,0,0,.18); }
+.setting-btn-push    { background: rgba(255,255,255,0.06); color: var(--color-text-main, #f5f5f5); border: 1px solid rgba(168, 85, 247, 0.40); }
+.setting-btn-test    { background: rgba(16, 185, 129, 0.12); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.45); }
+.setting-guide { margin: 2px 4px 8px; font-size: 0.78rem; color: #c0c0c0; }
+.setting-guest-note { color: #a0a0a0; font-size: 0.9rem; margin-bottom: 20px; }
 </style>
 @endpush

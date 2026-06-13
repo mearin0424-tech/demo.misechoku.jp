@@ -72,8 +72,28 @@
         </div>
     @endif
 
+    {{-- スティッキーアンカーナビ --}}
+    <nav class="admin-anchor-nav" aria-label="セクション">
+        <a href="#sec-overview" class="admin-anchor-nav__link"><i class="fas fa-circle-info"></i> 概要</a>
+        <a href="#sec-public" class="admin-anchor-nav__link"><i class="fas fa-eye"></i> 公開情報</a>
+        <a href="#sec-operation" class="admin-anchor-nav__link"><i class="fas fa-chart-line"></i> 運用実績</a>
+        <a href="#sec-apps" class="admin-anchor-nav__link"><i class="fas fa-paper-plane"></i> 応募履歴
+            @if(!empty($applications) && $applications->count() > 0)
+                <span class="admin-anchor-nav__count">{{ $applications->count() }}</span>
+            @endif
+        </a>
+        <a href="#sec-history" class="admin-anchor-nav__link"><i class="fas fa-file-invoice-dollar"></i> 入金・振込履歴
+            @if(!empty($depositRows) && $depositRows->count() > 0)
+                <span class="admin-anchor-nav__count">{{ $depositRows->count() }}</span>
+            @endif
+        </a>
+        @if($isUnlocked)
+            <a href="#sec-private" class="admin-anchor-nav__link admin-anchor-nav__link--private"><i class="fas fa-lock-open"></i> 非公開情報</a>
+        @endif
+    </nav>
+
     {{-- ヘッダー（公開情報の概要） --}}
-    <section class="admin-panel admin-detail-hero">
+    <section class="admin-panel admin-detail-hero" id="sec-overview">
         <div class="admin-detail-hero__main">
             <div class="admin-detail-hero__title-row">
                 <h2 class="admin-panel-title u-mb-0">{{ $displayName }}</h2>
@@ -109,7 +129,7 @@
     </section>
 
     {{-- 公開プロフィール導線（アプリ内で公開されている情報はそちらで確認） --}}
-    <section class="admin-panel admin-public-link-card">
+    <section class="admin-panel admin-public-link-card" id="sec-public">
         <div class="admin-public-link-card__icon"><i class="fas fa-eye"></i></div>
         <div class="admin-public-link-card__body">
             <h2 class="admin-panel-title u-mb-0">公開プロフィール</h2>
@@ -123,7 +143,7 @@
     </section>
 
     {{-- 運用実績（常時表示） --}}
-    <section class="admin-panel">
+    <section class="admin-panel" id="sec-operation">
         <h2 class="admin-panel-title">運用実績（請求／振込フロー）</h2>
         @if($operationSummary)
             <div class="admin-summary-grid">
@@ -143,7 +163,7 @@
     </section>
 
     {{-- 取引履歴（応募一覧） --}}
-    <section class="admin-panel">
+    <section class="admin-panel" id="sec-apps">
         <h2 class="admin-panel-title">応募・採用履歴（{{ $applications->count() }} 件）</h2>
         @if($applications->isEmpty())
             <p class="admin-note u-mb-0">応募履歴はありません。</p>
@@ -172,6 +192,13 @@
                                     7 => '本入店不採用',
                                     default => '—',
                                 };
+                                // 進行系: warning(オレンジ) / 採用系: success(緑) / 不採用: danger(赤) / 不明: inactive
+                                $appStatusBadge = match ($appStatus) {
+                                    1, 2, 3 => 'is-warning',
+                                    4, 6    => 'is-success',
+                                    5, 7    => 'is-danger',
+                                    default => 'is-inactive',
+                                };
                             @endphp
                             <tr>
                                 <td>{{ $app->created_at ? \Illuminate\Support\Carbon::parse($app->created_at)->format('Y-m-d') : '—' }}</td>
@@ -182,7 +209,7 @@
                                         {{ $app->shop_name ?: '—' }}
                                     @endif
                                 </td>
-                                <td>{{ $appStatusLabel }}</td>
+                                <td><span class="admin-status-badge {{ $appStatusBadge }}">{{ $appStatusLabel }}</span></td>
                                 <td>{{ $app->result_date ? \Illuminate\Support\Carbon::parse($app->result_date)->format('Y-m-d') : '—' }}</td>
                             </tr>
                         @endforeach
@@ -193,7 +220,7 @@
     </section>
 
     {{-- 入金・振込履歴 --}}
-    <section class="admin-panel">
+    <section class="admin-panel" id="sec-history">
         <h2 class="admin-panel-title">入金・振込履歴（{{ $depositRows->count() }} 件）</h2>
         @if($depositRows->isEmpty())
             <p class="admin-note u-mb-0">入金・振込履歴はありません。</p>
@@ -238,7 +265,7 @@
     ])
 
     @if($isUnlocked)
-        <section class="admin-panel admin-private-section">
+        <section class="admin-panel admin-private-section" id="sec-private">
             <div class="u-flex-between u-mb-12">
                 <h2 class="admin-panel-title u-mb-0">非公開情報（連絡先・本人情報）</h2>
                 <span class="admin-private-status__pill admin-private-status__pill--inline">

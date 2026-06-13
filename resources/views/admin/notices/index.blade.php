@@ -3,6 +3,21 @@
 @section('title', 'お知らせ管理')
 
 @section('content')
+    @php
+        $publishedCount = 0;
+        $draftCount = 0;
+        $scheduledCount = 0;
+        foreach ($notices as $n) {
+            if (!$n->is_published) {
+                $draftCount++;
+            } elseif ($n->published_at && $n->published_at->isFuture()) {
+                $scheduledCount++;
+            } else {
+                $publishedCount++;
+            }
+        }
+    @endphp
+
     <div class="admin-page">
         @include('admin.parts.page-title', [
             'eyebrow' => 'NOTICES',
@@ -14,12 +29,65 @@
         ])
 
         @if(session('status'))
-            <div class="admin-alert">
-                {{ session('status') }}
-            </div>
+            <div class="admin-alert admin-alert-success">{{ session('status') }}</div>
         @endif
 
-        <div class="admin-form-actions" style="margin-bottom: 16px;">
+        {{-- KPI（クリックでフィルタ） --}}
+        <section class="dashboard-kpi-grid content-kpi-grid" data-notice-kpis>
+            <button type="button" class="dashboard-kpi-card dashboard-kpi-card--link is-active" data-notice-filter="all" aria-pressed="true">
+                <div class="dashboard-kpi-head">
+                    <div class="dashboard-kpi-title">登録数（合計）</div>
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div class="dashboard-kpi-main">
+                    <span class="dashboard-kpi-value">{{ number_format($notices->total() ?? $notices->count()) }}</span>
+                    <span class="dashboard-kpi-unit">件</span>
+                </div>
+            </button>
+            <button type="button" class="dashboard-kpi-card dashboard-kpi-card--link" data-notice-filter="published" aria-pressed="false">
+                <div class="dashboard-kpi-head">
+                    <div class="dashboard-kpi-title">公開中</div>
+                    <i class="fas fa-eye"></i>
+                </div>
+                <div class="dashboard-kpi-main">
+                    <span class="dashboard-kpi-value">{{ number_format($publishedCount) }}</span>
+                    <span class="dashboard-kpi-unit">件</span>
+                </div>
+                <div class="dashboard-kpi-trend is-up">ユーザーが閲覧可</div>
+            </button>
+            <button type="button" class="dashboard-kpi-card dashboard-kpi-card--link" data-notice-filter="scheduled" aria-pressed="false">
+                <div class="dashboard-kpi-head">
+                    <div class="dashboard-kpi-title">予約公開</div>
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="dashboard-kpi-main">
+                    <span class="dashboard-kpi-value">{{ number_format($scheduledCount) }}</span>
+                    <span class="dashboard-kpi-unit">件</span>
+                </div>
+                <div class="dashboard-kpi-trend">公開待ち</div>
+            </button>
+            <button type="button" class="dashboard-kpi-card dashboard-kpi-card--link" data-notice-filter="draft" aria-pressed="false">
+                <div class="dashboard-kpi-head">
+                    <div class="dashboard-kpi-title">下書き</div>
+                    <i class="fas fa-pen"></i>
+                </div>
+                <div class="dashboard-kpi-main">
+                    <span class="dashboard-kpi-value">{{ number_format($draftCount) }}</span>
+                    <span class="dashboard-kpi-unit">件</span>
+                </div>
+            </button>
+        </section>
+
+        <div class="admin-toolbar-with-cta">
+            <div class="admin-page-toolbar">
+                <div class="admin-page-toolbar-row">
+                    <div class="admin-page-toolbar-search">
+                        <i class="fas fa-magnifying-glass"></i>
+                        <input type="search" id="notice-search" placeholder="タイトル・本文で検索" autocomplete="off">
+                    </div>
+                    <div class="invoice-toolbar__hits" id="notice-hits" aria-live="polite"></div>
+                </div>
+            </div>
             <a href="{{ route('admin.notices.create') }}" class="btn-action manage">
                 <i class="fas fa-plus"></i> 新規作成
             </a>
@@ -37,21 +105,42 @@
                         <th></th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="notice-table-body">
                     @forelse($notices as $notice)
-                        <tr>
+                        @php
+                            if (!$notice->is_published) {
+                                $statusKey = 'draft';
+                                $statusBadge = 'is-inactive';
+                                $statusIcon = 'fa-pen';
+                                $statusText = '下書き／非公開';
+                            } elseif ($notice->published_at && $notice->published_at->isFuture()) {
+                                $statusKey = 'scheduled';
+                                $statusBadge = 'is-warning';
+                                $statusIcon = 'fa-clock';
+                                $statusText = '予約公開';
+                            } else {
+                                $statusKey = 'published';
+                                $statusBadge = 'is-success';
+                                $statusIcon = 'fa-eye';
+                                $statusText = '公開中';
+                            }
+                            $search = mb_strtolower(($notice->title ?? '') . ' ' . substr(strip_tags((string) ($notice->body ?? '')), 0, 200));
+                        @endphp
+                        <tr data-notice-row data-status="{{ $statusKey }}" data-search="{{ $search }}">
                             <td>{{ $notice->id }}</td>
                             <td>{{ $notice->title }}</td>
-                            <td>{{ $notice->status_label }}</td>
                             <td>
-                                @php
-                                    $targets = array_filter([
-                                        $notice->visible_to_cast ? 'キャスト' : null,
-                                        $notice->visible_to_shop ? '店舗' : null,
-                                        $notice->visible_to_guest ? '未ログイン' : null,
-                                    ]);
-                                @endphp
-                                {{ count($targets) ? implode(' / ', $targets) : '-' }}
+                                <span class="admin-status-badge {{ $statusBadge }}"><i class="fas {{ $statusIcon }}"></i> {{ $statusText }}</span>
+                            </td>
+                            <td>
+                                <div class="audience-chips">
+                                    @if($notice->visible_to_cast)<span class="audience-chip audience-chip--cast"><i class="fas fa-user"></i> キャスト</span>@endif
+                                    @if($notice->visible_to_shop)<span class="audience-chip audience-chip--shop"><i class="fas fa-store"></i> 店舗</span>@endif
+                                    @if($notice->visible_to_guest)<span class="audience-chip audience-chip--guest"><i class="fas fa-globe"></i> 未ログイン</span>@endif
+                                    @if(!$notice->visible_to_cast && !$notice->visible_to_shop && !$notice->visible_to_guest)
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </div>
                             </td>
                             <td>
                                 @if($notice->published_at)
@@ -74,6 +163,9 @@
                             <td colspan="6" class="text-center">お知らせが登録されていません。</td>
                         </tr>
                     @endforelse
+                    <tr id="notice-empty-row" hidden>
+                        <td colspan="6" class="text-center text-muted">条件に一致するお知らせはありません。</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -85,3 +177,48 @@
         @endif
     </div>
 @endsection
+
+@push('admin-scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var kpis = document.querySelectorAll('[data-notice-kpis] [data-notice-filter]');
+    var rows = document.querySelectorAll('[data-notice-row]');
+    var searchInput = document.getElementById('notice-search');
+    var hitsEl = document.getElementById('notice-hits');
+    var emptyRow = document.getElementById('notice-empty-row');
+    var state = { filter: 'all', search: '' };
+
+    function refresh() {
+        var visible = 0;
+        rows.forEach(function (r) {
+            var statusMatch = state.filter === 'all' || r.dataset.status === state.filter;
+            var searchMatch = !state.search || (r.dataset.search || '').indexOf(state.search) !== -1;
+            var show = statusMatch && searchMatch;
+            r.hidden = !show;
+            if (show) visible++;
+        });
+        if (hitsEl) hitsEl.textContent = visible + ' 件表示中';
+        if (emptyRow) emptyRow.hidden = visible !== 0 || rows.length === 0;
+    }
+
+    kpis.forEach(function (k) {
+        k.addEventListener('click', function () {
+            state.filter = k.getAttribute('data-notice-filter') || 'all';
+            kpis.forEach(function (kk) {
+                var on = kk === k;
+                kk.classList.toggle('is-active', on);
+                kk.setAttribute('aria-pressed', on ? 'true' : 'false');
+            });
+            refresh();
+        });
+    });
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            state.search = searchInput.value.trim().toLowerCase();
+            refresh();
+        });
+    }
+    refresh();
+});
+</script>
+@endpush

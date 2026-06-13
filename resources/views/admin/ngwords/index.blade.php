@@ -71,6 +71,14 @@
         @endif
 
         {{-- 一覧 --}}
+        @php
+            $activeCount = 0;
+            $inactiveCount = 0;
+            foreach ($words as $w) {
+                if ((int) ($w->is_active ?? 0) === 1) $activeCount++;
+                else $inactiveCount++;
+            }
+        @endphp
         <section class="admin-card admin-card-wide">
             <div class="admin-card-head">
                 <div>
@@ -78,6 +86,27 @@
                     <p>削除すると一覧上は「無効」と表示され、検出処理からは除外されます。</p>
                 </div>
             </div>
+
+            <div class="admin-page-toolbar" style="margin-top:0;">
+                <div class="admin-page-toolbar-row">
+                    <div class="admin-page-toolbar-search">
+                        <i class="fas fa-magnifying-glass"></i>
+                        <input type="search" id="ngword-search" placeholder="NGワード本文で検索" autocomplete="off">
+                    </div>
+                </div>
+                <div class="admin-page-toolbar-filters" data-ngword-filters>
+                    <button type="button" class="admin-filter-chip is-active" data-ngword-filter="all">
+                        <span>すべて</span><strong>{{ $words->count() }}</strong>
+                    </button>
+                    <button type="button" class="admin-filter-chip" data-ngword-filter="active">
+                        <span>有効</span><strong>{{ $activeCount }}</strong>
+                    </button>
+                    <button type="button" class="admin-filter-chip" data-ngword-filter="inactive">
+                        <span>無効</span><strong>{{ $inactiveCount }}</strong>
+                    </button>
+                </div>
+            </div>
+
             <div class="table-wrapper">
                 <table class="admin-table">
                     <thead>
@@ -89,10 +118,13 @@
                             <th class="u-w-140">操作</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="ngword-table-body">
                         @forelse($words as $word)
                             @php $isActive = (int) ($word->is_active ?? 0) === 1; @endphp
-                            <tr class="{{ $isActive ? '' : 'is-suspended' }}">
+                            <tr class="{{ $isActive ? '' : 'is-suspended' }}"
+                                data-ngword-row
+                                data-status="{{ $isActive ? 'active' : 'inactive' }}"
+                                data-search="{{ mb_strtolower((string) $word->word) }}">
                                 <td><code>{{ $word->id }}</code></td>
                                 <td>{{ $word->word }}</td>
                                 <td>
@@ -126,12 +158,53 @@
                                 <td colspan="5" class="text-center">登録されているNGワードはありません。</td>
                             </tr>
                         @endforelse
+                        <tr id="ngword-empty-row" hidden>
+                            <td colspan="5" class="text-center text-muted">条件に一致するNGワードはありません。</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
         </section>
     </div>
 @endsection
+
+@push('admin-scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var rows = document.querySelectorAll('[data-ngword-row]');
+    var chips = document.querySelectorAll('[data-ngword-filters] [data-ngword-filter]');
+    var searchInput = document.getElementById('ngword-search');
+    var emptyRow = document.getElementById('ngword-empty-row');
+    var state = { filter: 'all', search: '' };
+
+    function refresh() {
+        var visible = 0;
+        rows.forEach(function (r) {
+            var statusMatch = state.filter === 'all' || r.dataset.status === state.filter;
+            var searchMatch = !state.search || (r.dataset.search || '').indexOf(state.search) !== -1;
+            var show = statusMatch && searchMatch;
+            r.hidden = !show;
+            if (show) visible++;
+        });
+        if (emptyRow) emptyRow.hidden = visible !== 0 || rows.length === 0;
+    }
+    chips.forEach(function (c) {
+        c.addEventListener('click', function () {
+            state.filter = c.getAttribute('data-ngword-filter') || 'all';
+            chips.forEach(function (cc) { cc.classList.toggle('is-active', cc === c); });
+            refresh();
+        });
+    });
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            state.search = searchInput.value.trim().toLowerCase();
+            refresh();
+        });
+    }
+    refresh();
+});
+</script>
+@endpush
 
 @push('admin-styles')
 <style>

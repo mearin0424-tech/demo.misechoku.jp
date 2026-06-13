@@ -37,13 +37,13 @@
 <style>
 .support-column-page.support-column-detail {
     padding: 20px 16px 40px;
-    color: #f9f5f5;
+    color: #f5f5f5;
 }
 
 .support-column-breadcrumb {
     font-size: 0.78rem;
     margin-bottom: 20px;
-    color: #b69f9f;
+    color: #a0a0a0;
 }
 
 .support-column-breadcrumb a {

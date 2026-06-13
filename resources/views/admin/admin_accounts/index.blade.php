@@ -68,8 +68,22 @@
         </section>
 
         {{-- 運営アカウント一覧 --}}
+        @php
+            $totalAdmins = is_object($admins) ? $admins->count() : count($admins);
+            $activeAdmins = 0; $superCount = 0; $opCount = 0;
+            foreach ($admins as $a) {
+                if ((int) ($a->is_active ?? 0) === 1) $activeAdmins++;
+                if (($a->role ?? '') === 'admin') $superCount++;
+                else $opCount++;
+            }
+        @endphp
         <section class="admin-panel">
-            <h2 class="admin-panel-title">運営アカウント一覧</h2>
+            <h2 class="admin-panel-title">
+                運営アカウント一覧
+                <span class="admin-panel-title-meta">
+                    （合計 {{ number_format($totalAdmins) }} 名・スーパー管理者 {{ $superCount }}・オペレーター {{ $opCount }}・うち有効 {{ $activeAdmins }}）
+                </span>
+            </h2>
             <div class="table-wrapper">
                 <table class="admin-table">
                     <thead>

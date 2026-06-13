@@ -163,16 +163,35 @@
             ',
         ])
 
+        {{-- データ更新時刻（鮮度の可視化） --}}
+        @if(!empty($dashboardUpdatedAt))
+            <div class="dashboard-updated-bar" aria-label="データ更新時刻">
+                <span class="dashboard-updated-bar__icon"><i class="fas fa-rotate"></i></span>
+                <span class="dashboard-updated-bar__label">データ更新</span>
+                <strong class="dashboard-updated-bar__time">{{ $dashboardUpdatedAt }}</strong>
+                <a href="{{ route('admin.dashboard') }}" class="dashboard-updated-bar__refresh" aria-label="再読み込み">
+                    <i class="fas fa-arrows-rotate"></i>更新
+                </a>
+            </div>
+        @endif
+
         @if (session('status'))
             <div class="admin-alert admin-alert-success">{{ session('status') }}</div>
         @endif
 
         {{-- ============================================================
-             KPI（4枚）
+             KPI（4枚）— 各カードは詳細画面へのリンク
              ============================================================ --}}
         <section class="dashboard-kpi-grid">
             @foreach ($allKpis as $kpi)
-                <article class="dashboard-kpi-card">
+                @php
+                    $kpiHref = $kpi['href'] ?? null;
+                    $kpiTag  = $kpiHref ? 'a' : 'article';
+                @endphp
+                <{{ $kpiTag }}
+                    class="dashboard-kpi-card {{ $kpiHref ? 'dashboard-kpi-card--link' : '' }}"
+                    @if($kpiHref) href="{{ $kpiHref }}" @endif
+                >
                     <div class="dashboard-kpi-head">
                         <div class="dashboard-kpi-title">{{ $kpi['title'] }}</div>
                         <i class="fas {{ $kpi['icon'] }}"></i>
@@ -195,7 +214,10 @@
                             <span class="dashboard-kpi-trend-caption">{{ $kpi['trend_caption'] }}</span>
                         @endif
                     </div>
-                </article>
+                    @if($kpiHref)
+                        <span class="dashboard-kpi-card__arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
+                    @endif
+                </{{ $kpiTag }}>
             @endforeach
         </section>
 
@@ -341,7 +363,7 @@
                     </thead>
                     <tbody>
                         @foreach ($tasks as $task)
-                            <tr class="task-row" data-category="{{ $task['cat_id'] }}">
+                            <tr class="task-row task-row--{{ $task['urgency'] ?? 'normal' }}" data-category="{{ $task['cat_id'] }}" data-urgency="{{ $task['urgency'] ?? 'normal' }}">
                                 <td data-label="カテゴリ">
                                     <span class="task-category-badge tone-{{ $task['cat_id'] }}">{{ $task['category'] }}</span>
                                 </td>

@@ -267,8 +267,8 @@
         border-radius: 999px;
         font-size: 0.62rem;
         font-weight: 800;
-        background: linear-gradient(135deg, var(--gold-light, #c4b5fd), var(--gold, #a78bfa));
-        color: #1a1206;
+        background: var(--accent, #d670a2);
+        color: var(--on-accent, #1a0814);
     }
     .shop-profile-edit__station-row:not(:first-child) .is-main-pill { display: none; }
     .shop-profile-edit__station-set-main {
@@ -295,9 +295,9 @@
     .shop-profile-edit__station-set-main i { font-size: 0.66rem; }
     /* メイン（先頭）の行は「設定済み」状態にして無効化 */
     .shop-profile-edit__station-row:first-child .shop-profile-edit__station-set-main {
-        background: linear-gradient(135deg, var(--gold-light, #c4b5fd), var(--gold, #a78bfa));
-        border-color: var(--gold, #a78bfa);
-        color: #1a1206;
+        background: var(--accent, #d670a2);
+        border-color: var(--accent, #d670a2);
+        color: var(--on-accent, #1a0814);
         cursor: default;
         pointer-events: none;
     }
@@ -481,16 +481,17 @@
         font-size: 0.875rem;
         font-weight: 800;
         cursor: pointer;
-        color: #141210;
-        background: linear-gradient(to right, #a78bfa, #b8942b);
-        box-shadow: 0 4px 15px rgba(168, 85, 247, 0.15);
-        transition: opacity 0.15s ease, transform 0.15s ease;
+        color: var(--on-accent, #1a0814);
+        background: var(--accent, #d670a2);
+        box-shadow: 0 6px 14px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.20), inset 0 -1px 0 rgba(0,0,0,.18);
+        transition: filter 0.15s ease, transform 0.15s ease;
     }
     .shop-profile-edit__submit:hover {
-        opacity: 0.92;
+        filter: brightness(1.06);
     }
     .shop-profile-edit__submit:active {
-        transform: scale(0.99);
+        transform: scale(0.97);
+        box-shadow: 0 2px 5px rgba(0,0,0,.45), inset 0 2px 4px rgba(0,0,0,.2);
     }
 </style>
 @endpush

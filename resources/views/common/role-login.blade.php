@@ -382,7 +382,7 @@
         .role-login-submit {
             border: none;
             background: linear-gradient(145deg, var(--gold), var(--gold-deep));
-            color: #2a1406;
+            color: #1a0814;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
         }

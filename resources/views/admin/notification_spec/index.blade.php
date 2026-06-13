@@ -21,22 +21,41 @@
         <div class="admin-alert admin-alert-success">{{ session('status') }}</div>
     @endif
 
+    @php
+        $countByEnabled = function ($byGroup) {
+            $total = 0; $enabled = 0;
+            foreach ($byGroup ?? [] as $items) {
+                foreach ($items as $it) {
+                    $total++;
+                    if (!empty($it['current_enabled'])) $enabled++;
+                }
+            }
+            return ['total' => $total, 'enabled' => $enabled];
+        };
+        $notifSummary = $countByEnabled($notificationsByGroup ?? []);
+        $remindSummary = $countByEnabled($remindersByGroup ?? []);
+        $taskSummary = $countByEnabled($tasksByGroup ?? []);
+    @endphp
+
     {{-- タブ切り替え --}}
     <div class="spec-tabs" role="tablist">
         <a href="{{ route('admin.notification-spec.index', ['tab' => 'notifications']) }}"
            class="spec-tab {{ $tab === 'notifications' ? 'is-active' : '' }}" role="tab"
            aria-selected="{{ $tab === 'notifications' ? 'true' : 'false' }}">
             <i class="fas fa-bell"></i> 通知
+            <span class="spec-tab__badge">{{ $notifSummary['enabled'] }}/{{ $notifSummary['total'] }} 有効</span>
         </a>
         <a href="{{ route('admin.notification-spec.index', ['tab' => 'reminders']) }}"
            class="spec-tab {{ $tab === 'reminders' ? 'is-active' : '' }}" role="tab"
            aria-selected="{{ $tab === 'reminders' ? 'true' : 'false' }}">
             <i class="fas fa-clock-rotate-left"></i> リマインダー通知
+            <span class="spec-tab__badge">{{ $remindSummary['enabled'] }}/{{ $remindSummary['total'] }} 有効</span>
         </a>
         <a href="{{ route('admin.notification-spec.index', ['tab' => 'tasks']) }}"
            class="spec-tab {{ $tab === 'tasks' ? 'is-active' : '' }}" role="tab"
            aria-selected="{{ $tab === 'tasks' ? 'true' : 'false' }}">
             <i class="fas fa-list-check"></i> 未済タスク
+            <span class="spec-tab__badge">{{ $taskSummary['total'] }} 件</span>
         </a>
     </div>
 

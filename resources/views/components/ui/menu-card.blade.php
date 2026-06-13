@@ -4,16 +4,14 @@
    {{ $attributes->merge(['class' => 'group flex items-center justify-between gap-3 p-4 rounded-panel border border-line-accent/40 bg-gradient-to-br from-surface-from to-base shadow-card-3d transition-all duration-300']) }}>
     <span class="flex items-center gap-3">
         @isset($icon)
-            <span class="w-11 h-11 rounded-xl flex items-center justify-center bg-black/20 border border-line-accent/40 shadow-input-dark">
-                <x-ui.icon :name="$icon" class="text-lg text-accent-text" />
-            </span>
+            {{-- 左アイコン：枠なし・フラット（mauve light）。サイズは大きめに取って視認性確保。 --}}
+            <x-ui.icon :name="$icon" class="text-[22px] text-accent-text shrink-0 w-9 text-center" />
         @endisset
         <span class="min-w-0">
             @isset($sub)<span class="block text-[9px] font-bold tracking-[0.1em] uppercase text-text-sub">{{ $sub }}</span>@endisset
             <span class="block app-title text-[15px] tracking-wide text-text-main">{{ $title }}</span>
         </span>
     </span>
-    <span class="shrink-0 w-8 h-8 rounded-full border border-line-accent/30 flex items-center justify-center text-text-sub group-hover:text-text-main group-hover:border-line-accent/60 transition-colors">
-        <x-ui.icon name="forward" class="text-base" />
-    </span>
+    {{-- 右シェブロン：枠なし・フラット --}}
+    <x-ui.icon name="forward" class="text-text-sub group-hover:text-accent-text group-hover:translate-x-0.5 transition-all text-base shrink-0" />
 </a>

@@ -57,7 +57,7 @@
 <style>
 .setting-page {
     padding: 24px 16px 32px;
-    color: #f9f5f5;
+    color: #f5f5f5;
 }
 @media (min-width: 768px) {
     .setting-page {
@@ -73,13 +73,13 @@
     font-family: var(--font-sans);
     font-size: 1.4rem;
     margin-bottom: 8px;
-    color: var(--color-gold, #a78bfa);
+    color: var(--accent-text, #f0a6c4);
 }
 
 .setting-lead {
     font-size: 0.9rem;
     line-height: 1.6;
-    color: #d1c1c1;
+    color: #c0c0c0;
 }
 
 .setting-card {
@@ -126,7 +126,8 @@
 }
 
 .plan-item--active {
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.22), rgba(24, 16, 6, 0.95));
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.10);
+    border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.45);
 }
 
 .plan-item-header {
@@ -143,7 +144,7 @@
 
 .plan-price {
     font-size: 0.8rem;
-    color: #d1c1c1;
+    color: #c0c0c0;
 }
 
 .plan-badge {
@@ -164,7 +165,7 @@
     padding-left: 0;
     margin: 0;
     font-size: 0.8rem;
-    color: #efe3e3;
+    color: #d4d4d4;
 }
 
 .plan-features li + li {

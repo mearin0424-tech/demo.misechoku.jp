@@ -27,9 +27,9 @@
     text-align: center;
 }
 .identity-pattern-tab.is-active {
-    background: linear-gradient(135deg, #a78bfa, #7c3aed);
-    color: #2a1406;
-    box-shadow: 0 4px 14px rgba(168, 85, 247, .25);
+    background: var(--accent, #d670a2);
+    color: var(--on-accent, #1a0814);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .20), inset 0 -1px 0 rgba(0, 0, 0, .18);
 }
 .identity-pattern-tab:not(.is-active):hover { background: rgba(255,255,255,.06); color: #e6dffc; }
 .identity-pattern-help {
@@ -70,7 +70,7 @@
     font-weight: 700;
 }
 .identity-form-section__pill.is-approved { background: rgba(16,185,129,.18); color: #6ee7b7; }
-.identity-form-section__pill.is-pending  { background: rgba(234,179,8,.16);  color: #c4b5fd; }
+.identity-form-section__pill.is-pending  { background: rgba(234,179,8,.16);  color: #fde047; }
 .identity-form-section__pill.is-rejected { background: rgba(220,38,38,.16);  color: #fca5a5; }
 .identity-status-overall {
     padding: 12px 14px;
@@ -83,8 +83,8 @@
     background: rgba(168, 85, 247, .06);
 }
 .identity-status-overall.is-verified {
-    background: linear-gradient(135deg, rgba(16,185,129,.12), rgba(16,185,129,.04));
-    border-color: rgba(16,185,129,.45);
+    background: rgba(16, 185, 129, .10);
+    border-color: rgba(16, 185, 129, .45);
 }
 .identity-status-overall i { font-size: 1.4rem; color: #c4b5fd; }
 .identity-status-overall.is-verified i { color: #6ee7b7; }

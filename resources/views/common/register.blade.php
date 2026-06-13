@@ -672,7 +672,7 @@
         body.page-auth-register.page-auth-register-shop {
             background:
                 radial-gradient(circle at top right, rgba(168, 85, 247, 0.18), transparent 32%),
-                linear-gradient(180deg, #11060a 0%, #1a0a11 45%, #120406 100%);
+                linear-gradient(180deg, #0a0a0a 0%, #141414 45%, #0a0a0a 100%);
         }
 
         body.page-auth-register #bg-layer {
@@ -694,7 +694,7 @@
             border-radius: 28px;
             background:
                 linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
-                linear-gradient(135deg, rgba(38, 13, 18, 0.96), rgba(18, 6, 10, 0.98));
+                linear-gradient(135deg, rgba(20, 20, 20, 0.96), rgba(10, 10, 10, 0.98));
             box-shadow:
                 0 22px 60px rgba(0, 0, 0, 0.36),
                 inset 0 1px 0 rgba(255, 255, 255, 0.08);
@@ -720,7 +720,7 @@
             border: 1px solid #3d1a1f;
             border-radius: 14px;
             background: rgba(18, 4, 5, 0.58);
-            color: #a89090;
+            color: #a0a0a0;
             text-decoration: none;
             font-size: 0.8rem;
             font-weight: 700;
@@ -743,7 +743,7 @@
             margin: 0;
             font-size: clamp(1.5rem, 4vw, 1.9rem);
             line-height: 1.4;
-            color: #fff4d6;
+            color: var(--accent-text, #f0a6c4);
         }
 
         .register-form {
@@ -763,13 +763,13 @@
         .register-alert-success {
             border: 1px solid rgba(134, 239, 172, 0.28);
             background: rgba(20, 83, 45, 0.42);
-            color: #dcfce7;
+            color: #bbf7d0;
         }
 
         .register-alert-error {
             border: 1px solid rgba(255, 177, 177, 0.3);
             background: rgba(122, 24, 44, 0.42);
-            color: #fff1f2;
+            color: #fff;
         }
 
         .register-card {
@@ -787,7 +787,7 @@
         .register-card-head h2 {
             margin: 0;
             font-size: 1.05rem;
-            color: #fff4d6;
+            color: var(--accent-text, #f0a6c4);
         }
 
         .register-grid {
@@ -841,7 +841,7 @@
         .register-chip input:checked + span {
             border-color: rgba(168, 85, 247, 0.5);
             background: rgba(168, 85, 247, 0.18);
-            color: #f8e7b0;
+            color: var(--accent-text, #f0a6c4);
         }
 
         .register-three-size {
@@ -865,24 +865,24 @@
             align-items: center;
             gap: 6px;
             cursor: pointer;
-            color: #f8f1e1;
+            color: #f5f5f5;
         }
 
         .register-field {
             display: flex;
             flex-direction: column;
             gap: 8px;
-            color: #f8f1e1;
+            color: #f5f5f5;
             font-size: 0.84rem;
         }
 
         .register-field span {
-            color: #f8f1e1;
+            color: #f5f5f5;
         }
 
         .register-field em {
             font-style: normal;
-            color: #f6d98b;
+            color: var(--accent-text, #f0a6c4);
             font-size: 0.73rem;
             margin-left: 6px;
         }
@@ -961,7 +961,7 @@
 
         .register-plan-option strong {
             display: block;
-            color: #fff5da;
+            color: var(--accent-text, #f0a6c4);
         }
 
         .register-plan-option.is-disabled {
@@ -973,14 +973,14 @@
             display: block;
             margin-top: 4px;
             font-size: 0.72rem;
-            color: #c9b8b8;
+            color: #a0a0a0;
         }
 
         .register-check {
             display: flex;
             gap: 12px;
             align-items: flex-start;
-            color: #f6ead0;
+            color: #f5f5f5;
             font-size: 0.84rem;
             line-height: 1.8;
         }
@@ -993,7 +993,7 @@
 
         .register-check a,
         .register-login-link {
-            color: #f6d98b;
+            color: var(--accent-text, #f0a6c4);
             text-decoration: none;
         }
 
@@ -1020,16 +1020,19 @@
 
         .register-submit {
             border: none;
-            background: linear-gradient(135deg, #f4df9c, #c99722);
-            color: #2a1208;
-            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
+            background: var(--accent, #d670a2);
+            color: var(--on-accent, #1a0814);
+            box-shadow: 0 6px 14px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.20), inset 0 -1px 0 rgba(0,0,0,.18);
             cursor: pointer;
+            transition: filter .15s, transform .12s;
         }
+        .register-submit:hover { filter: brightness(1.06); }
+        .register-submit:active { transform: scale(.97); box-shadow: 0 2px 5px rgba(0,0,0,.45), inset 0 2px 4px rgba(0,0,0,.2); }
 
         .register-secondary {
             border: 1px solid rgba(168, 85, 247, 0.26);
             background: rgba(255, 255, 255, 0.04);
-            color: #fff4d6;
+            color: var(--accent-text, #f0a6c4);
         }
 
         .register-submit:hover,
@@ -1064,7 +1067,7 @@
             background: rgba(20, 14, 8, 0.92);
             border: 1px solid rgba(168, 85, 247, 0.32);
             box-shadow: 0 24px 48px rgba(0, 0, 0, 0.55);
-            color: #fff4d6;
+            color: var(--accent-text, #f0a6c4);
             text-align: center;
             max-width: min(92vw, 360px);
         }

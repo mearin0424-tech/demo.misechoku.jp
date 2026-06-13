@@ -95,7 +95,7 @@
 <style>
 .support-form-page {
     padding: 24px 16px 32px;
-    color: #f9f5f5;
+    color: #f5f5f5;
 }
 @media (min-width: 768px) {
     .support-form-page {
@@ -117,7 +117,7 @@
 .support-form-lead {
     font-size: 0.9rem;
     line-height: 1.6;
-    color: #d1c1c1;
+    color: #c0c0c0;
 }
 
 .support-form-card {
@@ -127,7 +127,7 @@
     border: 1px solid rgba(168, 85, 247, 0.4);
 }
 .support-form-faq { margin-top: 16px; background: rgba(20, 7, 15, 0.9); border-radius: 16px; padding: 14px 12px; border: 1px solid rgba(168, 85, 247, 0.4); }
-.support-form-faq-title { font-size: 1rem; margin-bottom: 8px; color: #f9f5f5; }
+.support-form-faq-title { font-size: 1rem; margin-bottom: 8px; color: #f5f5f5; }
 .support-faq-list { display: flex; flex-direction: column; gap: 10px; }
 .support-faq-item { background: rgba(8, 4, 6, 0.75); border-radius: 12px; border: 1px solid rgba(168, 85, 247, 0.24); padding: 4px 8px; }
 .support-faq-question { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 0.88rem; padding: 10px 6px; cursor: pointer; }
@@ -165,7 +165,7 @@
     display: block;
     font-size: 0.8rem;
     margin-bottom: 4px;
-    color: #f9f5f5;
+    color: #f5f5f5;
 }
 
 .support-form-group input,
@@ -177,7 +177,7 @@
     background: rgba(8, 4, 6, 0.9);
     padding: 8px 10px;
     font-size: 0.85rem;
-    color: #f9f5f5;
+    color: #f5f5f5;
 }
 
 .support-form-group textarea {
@@ -203,7 +203,7 @@
     font-size: 0.9rem;
     font-weight: 600;
     background: linear-gradient(135deg, #4a1a2a, #b91c1c);
-    color: #f9f5f5;
+    color: #f5f5f5;
     opacity: 0.6;
     cursor: not-allowed;
 }

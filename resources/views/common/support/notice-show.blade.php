@@ -32,7 +32,7 @@
 <style>
 .support-notice-detail {
     padding: 20px 16px 40px;
-    color: #f9f5f5;
+    color: #f5f5f5;
 }
 </style>
 @endpush

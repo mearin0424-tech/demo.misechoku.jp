@@ -64,8 +64,23 @@
         </div>
     @endif
 
+    {{-- スティッキーアンカーナビ --}}
+    <nav class="admin-anchor-nav" aria-label="セクション">
+        <a href="#sec-overview" class="admin-anchor-nav__link"><i class="fas fa-circle-info"></i> 概要</a>
+        <a href="#sec-public" class="admin-anchor-nav__link"><i class="fas fa-eye"></i> 公開情報</a>
+        <a href="#sec-operation" class="admin-anchor-nav__link"><i class="fas fa-chart-line"></i> 運用実績</a>
+        <a href="#sec-history" class="admin-anchor-nav__link"><i class="fas fa-file-invoice-dollar"></i> 入金履歴
+            @if(!empty($applicationDeposits) && $applicationDeposits->count() > 0)
+                <span class="admin-anchor-nav__count">{{ $applicationDeposits->count() }}</span>
+            @endif
+        </a>
+        @if($isUnlocked)
+            <a href="#sec-private" class="admin-anchor-nav__link admin-anchor-nav__link--private"><i class="fas fa-lock-open"></i> 非公開情報</a>
+        @endif
+    </nav>
+
     {{-- ヘッダー --}}
-    <section class="admin-panel admin-detail-hero">
+    <section class="admin-panel admin-detail-hero" id="sec-overview">
         <div class="admin-detail-hero__main">
             <div class="admin-detail-hero__title-row">
                 <h2 class="admin-panel-title u-mb-0">{{ $displayName }}</h2>
@@ -101,7 +116,7 @@
     </section>
 
     {{-- 公開プロフィール／求人情報 導線（アプリ内で公開されている情報はそちらで確認） --}}
-    <section class="admin-panel admin-public-link-card">
+    <section class="admin-panel admin-public-link-card" id="sec-public">
         <div class="admin-public-link-card__icon"><i class="fas fa-eye"></i></div>
         <div class="admin-public-link-card__body">
             <h2 class="admin-panel-title u-mb-0">公開プロフィール／求人情報</h2>
@@ -116,7 +131,7 @@
     </section>
 
     {{-- 運用実績 --}}
-    <section class="admin-panel">
+    <section class="admin-panel" id="sec-operation">
         <h2 class="admin-panel-title">運用実績（請求／入金フロー）</h2>
         @if($operationSummary)
             <div class="admin-summary-grid">
@@ -136,7 +151,7 @@
     </section>
 
     {{-- 入金履歴 --}}
-    <section class="admin-panel">
+    <section class="admin-panel" id="sec-history">
         <h2 class="admin-panel-title">請求・入金履歴（{{ $applicationDeposits->count() }} 件）</h2>
         @if($applicationDeposits->isEmpty())
             <p class="admin-note u-mb-0">請求・入金履歴はありません。</p>
@@ -152,10 +167,33 @@
                             <th>請求日</th>
                             <th>入金確認</th>
                             <th>完了日</th>
+                            <th>ステータス</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($applicationDeposits as $d)
+                            @php
+                                $hasInvoice = !empty($d->invoice_issued_at);
+                                $hasShopPaid = !empty($d->shop_payment_confirmed_at);
+                                $hasCompleted = !empty($d->completed_at);
+                                if ($hasCompleted) {
+                                    $statusKey = 'completed';
+                                    $statusLabel = '完了';
+                                    $statusClass = 'is-success';
+                                } elseif ($hasShopPaid) {
+                                    $statusKey = 'paid';
+                                    $statusLabel = '入金確認済';
+                                    $statusClass = 'is-info';
+                                } elseif ($hasInvoice) {
+                                    $statusKey = 'issued';
+                                    $statusLabel = '請求書発行済';
+                                    $statusClass = 'is-warning';
+                                } else {
+                                    $statusKey = 'pending';
+                                    $statusLabel = '請求未発行';
+                                    $statusClass = 'is-inactive';
+                                }
+                            @endphp
                             <tr>
                                 <td>{{ $d->invoice_number ?: '—' }}</td>
                                 <td>
@@ -163,11 +201,12 @@
                                         <a href="{{ route('admin.casts.show', $d->cast_id) }}">{{ $d->cast_nickname ?: $d->cast_id }}</a>
                                     @else — @endif
                                 </td>
-                                <td>{{ $d->invoice_amount !== null ? number_format($d->invoice_amount) . ' 円' : '—' }}</td>
-                                <td>{{ $d->bonus_amount !== null ? number_format($d->bonus_amount) . ' 円' : '—' }}</td>
+                                <td class="u-text-num">{{ $d->invoice_amount !== null ? number_format($d->invoice_amount) . ' 円' : '—' }}</td>
+                                <td class="u-text-num">{{ $d->bonus_amount !== null ? number_format($d->bonus_amount) . ' 円' : '—' }}</td>
                                 <td>{{ $d->invoice_issued_at ? \Illuminate\Support\Carbon::parse($d->invoice_issued_at)->format('Y-m-d') : '—' }}</td>
                                 <td>{{ $d->shop_payment_confirmed_at ? \Illuminate\Support\Carbon::parse($d->shop_payment_confirmed_at)->format('Y-m-d') : '—' }}</td>
                                 <td>{{ $d->completed_at ? \Illuminate\Support\Carbon::parse($d->completed_at)->format('Y-m-d') : '—' }}</td>
+                                <td><span class="admin-status-badge {{ $statusClass }}">{{ $statusLabel }}</span></td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -185,7 +224,7 @@
     ])
 
     @if($isUnlocked)
-        <section class="admin-panel admin-private-section">
+        <section class="admin-panel admin-private-section" id="sec-private">
             <div class="u-flex-between u-mb-12">
                 <h2 class="admin-panel-title u-mb-0">非公開情報（連絡先・口座・運営メモ）</h2>
                 <span class="admin-private-status__pill admin-private-status__pill--inline">
@@ -240,6 +279,10 @@
                         </thead>
                         <tbody>
                             @foreach($managers as $m)
+                                @php
+                                    $isOwner = (int) ($m->role ?? 0) === 1;
+                                    $isMgrActive = (int) ($m->status ?? 0) === 1;
+                                @endphp
                                 <tr>
                                     <td>{{ $m->name ?: '—' }}</td>
                                     <td>
@@ -247,8 +290,16 @@
                                             <a href="mailto:{{ $m->email }}">{{ $m->email }}</a>
                                         @else — @endif
                                     </td>
-                                    <td>{{ (int) ($m->role ?? 0) === 1 ? 'オーナー' : 'スタッフ' }}</td>
-                                    <td>{{ (int) ($m->status ?? 0) === 1 ? '有効' : '無効' }}</td>
+                                    <td>
+                                        @if($isOwner)
+                                            <span class="manager-role-badge manager-role-badge--owner"><i class="fas fa-crown"></i> オーナー</span>
+                                        @else
+                                            <span class="manager-role-badge manager-role-badge--staff">スタッフ</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <span class="admin-status-badge {{ $isMgrActive ? 'is-success' : 'is-inactive' }}">{{ $isMgrActive ? '有効' : '無効' }}</span>
+                                    </td>
                                     <td>{{ $m->last_login_at ? \Illuminate\Support\Carbon::parse($m->last_login_at)->format('Y-m-d H:i') : '—' }}</td>
                                     <td>{{ $m->created_at ? \Illuminate\Support\Carbon::parse($m->created_at)->format('Y-m-d') : '—' }}</td>
                                 </tr>

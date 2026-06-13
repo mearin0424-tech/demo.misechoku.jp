@@ -23,6 +23,23 @@
 
 @section('content')
     <div class="admin-page policy-doc-admin">
+        @php
+            $policyTabs = [
+                'about'   => ['label' => '運営協会',         'icon' => 'fa-landmark'],
+                'terms'   => ['label' => '利用規約',         'icon' => 'fa-file-contract'],
+                'privacy' => ['label' => 'プライバシーポリシー', 'icon' => 'fa-user-shield'],
+            ];
+            $currentKey = (string) $document->key;
+        @endphp
+        <nav class="policy-switcher" aria-label="規約切替">
+            @foreach ($policyTabs as $key => $meta)
+                <a href="{{ route('admin.policies.show', ['key' => $key]) }}"
+                   class="policy-switcher__tab {{ $currentKey === $key ? 'is-active' : '' }}">
+                    <i class="fas {{ $meta['icon'] }}"></i> {{ $meta['label'] }}
+                </a>
+            @endforeach
+        </nav>
+
         <div class="policy-doc-admin__toolbar">
             <div>
                 @include('admin.parts.page-title', ['eyebrow' => 'POLICY', 'title' => $document->title])

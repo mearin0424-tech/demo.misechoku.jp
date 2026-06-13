@@ -82,6 +82,7 @@ class DashboardController extends Controller
                 'trend_caption' => '今月の新規',
                 'is_up' => ($castThisMonthNew - $castPrevMonthNew) >= 0,
                 'icon' => 'fa-users',
+                'href' => route('admin.casts.index'),
             ],
             [
                 'id' => 'shop',
@@ -94,6 +95,7 @@ class DashboardController extends Controller
                 'trend_caption' => '今月の新規',
                 'is_up' => ($shopThisMonthNew - $shopPrevMonthNew) >= 0,
                 'icon' => 'fa-building',
+                'href' => route('admin.shops.index'),
             ],
         ];
 
@@ -111,6 +113,7 @@ class DashboardController extends Controller
                 'trend_caption' => '前月比',
                 'is_up' => ($trxCountThisMonth - $trxCountPrevMonth) >= 0,
                 'icon' => 'fa-chart-line',
+                'href' => route('admin.sales.index'),
             ],
             [
                 'id' => 'trx_amount',
@@ -123,6 +126,7 @@ class DashboardController extends Controller
                 'trend_caption' => '前月比',
                 'is_up' => ($trxAmountThisMonth - $trxAmountPrevMonth) >= 0,
                 'icon' => 'fa-yen-sign',
+                'href' => route('admin.sales.index'),
             ],
         ];
 
@@ -203,7 +207,16 @@ class DashboardController extends Controller
             ['id' => 'error', 'title' => '振込エラー', 'count' => collect($tasks)->where('cat_id', 'error')->count()],
         ];
 
-        return view('admin.dashboard', compact('registrationKpis', 'transactionKpis', 'chartData', 'taskSummary', 'tasks'));
+        $dashboardUpdatedAt = now()->format('Y/m/d H:i');
+
+        return view('admin.dashboard', compact(
+            'registrationKpis',
+            'transactionKpis',
+            'chartData',
+            'taskSummary',
+            'tasks',
+            'dashboardUpdatedAt'
+        ));
     }
 
     /** 直近3ヶ月の取引が全て status>=5（確定）で1件以上ある店舗の数 */
