@@ -159,14 +159,26 @@
     .case-card__waiting--done { color: var(--color-success); }
     .case-card__waiting--done i { color: var(--color-success); }
 
-    /* セクション見出し */
+    /* セクション見出し：ラベル＋ホライズンの構成（cast 側と同じ） */
     .mypage-stage-heading {
-        margin: 22px 0 10px;
-        font-size: 0.78rem; font-weight: 800;
-        color: rgba(168, 85, 247, 0.85); letter-spacing: 0.08em; text-transform: uppercase;
-        display: flex; align-items: center; gap: 8px;
+        margin: 28px 0 12px;
+        font-size: 0.72rem; font-weight: 800;
+        color: var(--accent-text, #f0a6c4); letter-spacing: 0.14em; text-transform: uppercase;
+        display: flex; align-items: center; gap: 10px;
     }
-    .mypage-stage-heading i { color: #a78bfa; font-size: 0.7rem; }
+    .mypage-stage-heading i {
+        color: var(--accent-text, #f0a6c4);
+        font-size: 0.7rem;
+        flex-shrink: 0;
+        opacity: 0.85;
+    }
+    .mypage-stage-heading::after {
+        content: '';
+        flex: 1 1 auto;
+        height: 1px;
+        background: linear-gradient(to right, rgba(var(--accent-rgb, 214, 112, 162), 0.35), transparent);
+        opacity: 0.6;
+    }
 
     /* 進行中／不採用の応募リスト（mini） */
     .mypage-mini-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }

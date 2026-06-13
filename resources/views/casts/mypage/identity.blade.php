@@ -72,24 +72,59 @@
 .identity-form-section__pill.is-approved { background: rgba(16,185,129,.18); color: #6ee7b7; }
 .identity-form-section__pill.is-pending  { background: rgba(234,179,8,.16);  color: #fde047; }
 .identity-form-section__pill.is-rejected { background: rgba(220,38,38,.16);  color: #fca5a5; }
+/* === 本人確認ステータス：ページのヒーローカード === */
 .identity-status-overall {
-    padding: 12px 14px;
-    border-radius: 12px;
+    padding: 18px 20px 20px;
+    border-radius: 18px;
     border: 1px solid rgba(168, 85, 247, .35);
-    margin-bottom: 16px;
+    margin-bottom: 22px;
     display: flex;
     align-items: center;
-    gap: 10px;
-    background: rgba(168, 85, 247, .06);
+    gap: 14px;
+    background:
+        linear-gradient(180deg, rgba(168, 85, 247, 0.12), rgba(168, 85, 247, 0.03));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 .identity-status-overall.is-verified {
-    background: rgba(16, 185, 129, .10);
-    border-color: rgba(16, 185, 129, .45);
+    background:
+        linear-gradient(180deg, rgba(16, 185, 129, 0.14), rgba(16, 185, 129, 0.03));
+    border-color: rgba(16, 185, 129, .50);
+    box-shadow:
+        0 4px 16px rgba(16, 185, 129, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
-.identity-status-overall i { font-size: 1.4rem; color: #c4b5fd; }
-.identity-status-overall.is-verified i { color: #6ee7b7; }
-.identity-status-overall__text { color: #e6dffc; font-weight: 700; }
-.identity-status-overall__text small { display: block; color: #C9B8B8; font-weight: 500; font-size: 0.78rem; margin-top: 2px; }
+/* アイコン：丸枠なしのフラット、サイズ大きく */
+.identity-status-overall i {
+    flex-shrink: 0;
+    font-size: 2.1rem;
+    color: #c4b5fd;
+    filter: drop-shadow(0 2px 8px rgba(168, 85, 247, 0.35));
+}
+.identity-status-overall.is-verified i {
+    color: #6ee7b7;
+    filter: drop-shadow(0 2px 8px rgba(16, 185, 129, 0.45));
+}
+/* メインテキスト：大きく */
+.identity-status-overall__text {
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 1.05rem;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+}
+.identity-status-overall__text small {
+    display: block;
+    color: rgba(255, 255, 255, 0.62);
+    font-weight: 500;
+    font-size: 0.76rem;
+    margin-top: 4px;
+    letter-spacing: 0;
+    line-height: 1.5;
+}
 </style>
 @endpush
 
@@ -112,9 +147,9 @@
 
             <div class="mypage-detail-box">
                 <div class="mypage-section">
-                    <h2 class="section-title section-title-gold">本人確認の状況</h2>
+                    {{-- h2 "本人確認の状況" は eyebrow と status hero と triple-redundant なので撤去 --}}
 
-                    {{-- 全体ステータス --}}
+                    {{-- 全体ステータス（このカードがページの "hero" として機能する） --}}
                     <div class="identity-status-overall {{ $isVerified ? 'is-verified' : '' }}">
                         <i class="fas {{ $isVerified ? 'fa-circle-check' : 'fa-clock' }}"></i>
                         <div class="identity-status-overall__text">

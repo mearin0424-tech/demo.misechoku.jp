@@ -138,14 +138,28 @@
     }
     .case-card__view-talk:hover { color: var(--color-text-header); text-decoration: underline; }
 
-    /* セクション見出し */
+    /* セクション見出し：左に小さなアクセント線、右に細い区切り線。
+       "ラベル＋ホライズン" の構成で、CTA でも見出しでもない中庸な存在感に。 */
     .mypage-stage-heading {
-        margin: 22px 0 10px;
-        font-size: 0.78rem; font-weight: 800;
-        color: rgba(168, 85, 247, 0.85); letter-spacing: 0.08em; text-transform: uppercase;
-        display: flex; align-items: center; gap: 8px;
+        margin: 28px 0 12px;
+        font-size: 0.72rem; font-weight: 800;
+        color: var(--accent-text, #f0a6c4); letter-spacing: 0.14em; text-transform: uppercase;
+        display: flex; align-items: center; gap: 10px;
     }
-    .mypage-stage-heading i { color: #a78bfa; font-size: 0.7rem; }
+    .mypage-stage-heading i {
+        color: var(--accent-text, #f0a6c4);
+        font-size: 0.7rem;
+        flex-shrink: 0;
+        opacity: 0.85;
+    }
+    /* 右に伸びる細い区切り線（label + horizon の構成） */
+    .mypage-stage-heading::after {
+        content: '';
+        flex: 1 1 auto;
+        height: 1px;
+        background: linear-gradient(to right, rgba(var(--accent-rgb, 214, 112, 162), 0.35), transparent);
+        opacity: 0.6;
+    }
 
     /* チェックボックス */
     .deposit-precheck { display: grid; gap: 14px; }
@@ -274,6 +288,42 @@
     .mypage-mini-row__status { flex: 0 0 auto; font-size: 0.7rem; padding: 3px 8px; border-radius: 999px; background: rgba(168, 85, 247, 0.1); color: #a78bfa; }
     .mypage-mini-row__status.is-rejected { background: rgba(220,38,38,0.12); color: #fca5a5; }
     .mypage-mini-row__chev { color: rgba(196, 181, 253, 0.4); font-size: 0.72rem; }
+
+    /* === ボーナスヒーローカード（採用・入金管理の "視覚的主役"） === */
+    .employment-bonus-hero {
+        margin: 4px 0 22px;
+        padding: 16px 20px 18px;
+        border-radius: 18px;
+        background:
+            linear-gradient(180deg, rgba(var(--accent-rgb, 214, 112, 162), 0.14), rgba(var(--accent-rgb, 214, 112, 162), 0.04));
+        border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.32);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow:
+            0 4px 16px rgba(0, 0, 0, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .employment-bonus-hero__label {
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        color: var(--accent-text, #f0a6c4);
+        font-weight: 700;
+        text-transform: uppercase;
+        opacity: 0.95;
+    }
+    .employment-bonus-hero__amount {
+        font-size: clamp(1.6rem, 6.5vw, 2.1rem);
+        font-weight: 900;
+        color: #ffffff;
+        font-feature-settings: 'tnum' 1, 'lnum' 1;
+        font-variant-numeric: tabular-nums lining-nums;
+        letter-spacing: -0.02em;
+        line-height: 1;
+        text-shadow: 0 2px 8px rgba(var(--accent-rgb, 214, 112, 162), 0.30);
+    }
 </style>
 @endpush
 
@@ -293,12 +343,11 @@
                 $bonusTotal = $bonusTotal ?? 0;
             @endphp
 
-            {{-- 獲得ボーナス金合計バッジ（旧 mypage 上部から移設。x-ui.badge variant="gold" のデザイン踏襲） --}}
-            <div style="margin: 4px 0 18px;">
-                <div style="display:inline-flex;align-items:center;gap:10px;padding:8px 18px;border-radius:999px;background:var(--accent, #d670a2);color:var(--on-accent, #1a0814);border:0;font-weight:700;box-shadow:0 6px 14px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.20),inset 0 -1px 0 rgba(0,0,0,.18);">
-                    <span style="font-size:10px;letter-spacing:0.08em;opacity:0.9;">獲得ボーナス金合計</span>
-                    <span style="font-size:18px;letter-spacing:0.04em;font-weight:800;">¥{{ number_format($bonusTotal) }}</span>
-                </div>
+            {{-- 獲得ボーナス金合計：ピル → ヒーローカードへ格上げ。
+                 ラベル小・金額大の縦積みで "総額が主役" の印象を作る。 --}}
+            <div class="employment-bonus-hero">
+                <span class="employment-bonus-hero__label">獲得ボーナス金合計</span>
+                <span class="employment-bonus-hero__amount">¥{{ number_format($bonusTotal) }}</span>
             </div>
 
             <div class="mypage-detail-box">

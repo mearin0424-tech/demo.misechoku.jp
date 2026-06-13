@@ -6,13 +6,17 @@
 @endphp
 <li class="connection-item connection-item--clickable connection-item--search connection-item--shop-cast-list tl-row tl-row--cast">
     <a href="{{ $profileUrl }}" class="connection-item__link tl-row__link">
-        <div class="tl-row__thumb-wrap tl-row__thumb-wrap--round">
-            <img src="{{ $item['img'] ?? asset('assets/images/common/no-image.png') }}" alt="" class="tl-row__thumb tl-row__thumb--round">
+        {{-- 丸型アイコン --}}
+        <div class="tl-row__thumb-wrap">
+            <img src="{{ $item['img'] ?? asset('assets/images/common/no-image.png') }}" alt="" class="tl-row__thumb">
         </div>
+
         <div class="tl-row__body">
-            {{-- 1行目：名前 + 年齢 + 位置 + （あれば）距離 --}}
-            <div class="tl-row__line1">
-                <h3 class="tl-row__name">{{ $item['name'] ?? '' }}</h3>
+            {{-- 1行目：アイコンの隣に来る「名前」のみで強くフォーカス --}}
+            <h3 class="tl-row__name">{{ $item['name'] ?? '' }}</h3>
+
+            {{-- 2行目：年齢・位置・距離（メタ情報を分離） --}}
+            <div class="tl-row__meta">
                 @if(!empty($item['age']))
                     <span class="tl-row__age">{{ $item['age'] }}歳</span>
                 @endif
@@ -28,7 +32,7 @@
                 @endif
             </div>
 
-            {{-- 2行目以降：ひとこと --}}
+            {{-- 3行目以降：ひとこと --}}
             @if($hitokoto !== '')
                 <p class="tl-row__msg">{{ preg_replace('/\s+/u', ' ', $hitokoto) }}</p>
             @endif

@@ -1417,12 +1417,37 @@ a.btn-outline-gold {
     color: var(--gold);
 }
 
+/* h1 ページタイトル "採用・入金管理" / "本人確認" 等。
+   global-header が既に英タイトル ("MANAGEMENT" / "IDENTITY" / "REVIEWS" 等) を
+   出しているので、ページ本体側は "小さな mauve kicker" に格下げして "ドーン" を回避。
+   per-page の inline override（shop-management-shell 等）にも勝つよう !important。 */
 .mypage-page-title {
-    font-size: 1.5rem;
-    color: var(--color-text-header);
-    margin: 0 0 20px 0;
-    font-weight: 700;
-    font-family: var(--font-serif);
+    font-family: var(--font-sans, sans-serif) !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.16em !important;
+    line-height: 1 !important;
+    color: var(--accent-text, #f0a6c4) !important;
+    margin: 0 0 18px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    opacity: 0.92;
+    text-transform: none;
+}
+.mypage-page-title::before {
+    content: '';
+    flex-shrink: 0;
+    display: inline-block;
+    width: 28px;
+    height: 1px;
+    background: var(--accent-text, #f0a6c4);
+    opacity: 0.45;
+}
+/* serif-font クラスが付いていても sans に強制（kicker に serif は合わない） */
+.mypage-page-title.serif-font {
+    font-family: var(--font-sans, sans-serif) !important;
 }
 .cast-mypage-placeholder {
     padding: 24px 16px;
