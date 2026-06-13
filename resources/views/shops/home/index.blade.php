@@ -4,7 +4,7 @@
 @section('body-class', 'no-scroll page-home')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260510-card-flip-rise">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260613-card-refresh">
 @endpush
 
 @php
@@ -83,8 +83,11 @@
                             data-item-id="{{ $item['id'] }}"
                             data-item-type="shop"
                             data-action="keep"
+                            aria-label="キープ"
                         >
-                            <i class="fas fa-bookmark"></i>
+                            <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M6 4a2 2 0 0 0-2 2v15.382a.6.6 0 0 0 .89.527L12 17.5l7.11 4.41A.6.6 0 0 0 20 21.382V6a2 2 0 0 0-2-2H6Z"/>
+                            </svg>
                         </button>
                         <span class="rc-action-label">キープ</span>
                     </div>
@@ -94,7 +97,9 @@
                             class="action-circle-btn message stop-propagation"
                             aria-label="メッセージを送る"
                         >
-                            <i class="fas fa-comment-dots"></i>
+                            <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/>
+                            </svg>
                         </a>
                         <span class="rc-action-label">メッセージ</span>
                     </div>
@@ -201,7 +206,9 @@
 
                 {{-- 4. スワイプ誘導ガイド（上向きキャレット・常時バウンス） --}}
                 <div class="discovery-swipe-guide" aria-hidden="true">
-                    <i class="fas fa-chevron-up"></i>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="18 15 12 9 6 15"/>
+                    </svg>
                 </div>
 
                 @else
@@ -236,8 +243,11 @@
                         data-item-id="{{ $item['id'] }}"
                         data-item-type="{{ $itemType === 'recruit' ? 'shop' : 'cast' }}"
                         data-action="like"
+                        aria-label="いいね"
                     >
-                        <i class="fas fa-heart"></i>
+                        <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/>
+                        </svg>
                         <span class="action-btn-count">{{ $item['like_count'] ?? 0 }}</span>
                     </button>
                     <button
@@ -246,11 +256,16 @@
                         data-item-id="{{ $item['id'] }}"
                         data-item-type="{{ $itemType === 'recruit' ? 'shop' : 'cast' }}"
                         data-action="keep"
+                        aria-label="キープ"
                     >
-                        <i class="fas fa-bookmark"></i>
+                        <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M6 4a2 2 0 0 0-2 2v15.382a.6.6 0 0 0 .89.527L12 17.5l7.11 4.41A.6.6 0 0 0 20 21.382V6a2 2 0 0 0-2-2H6Z"/>
+                        </svg>
                     </button>
                     <a href="{{ route($talkRoute, ['id' => $item['id'], 'talk_topic' => 'other', 'initiate' => 1]) }}" class="action-btn-message stop-propagation" aria-label="メッセージを送る">
-                        <i class="fas fa-comment-dots"></i>
+                        <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/>
+                        </svg>
                     </a>
                     @if($isShop)
                     <a href="{{ route('cast.recruit.show', $item['id']) }}" class="card-recruit-btn stop-propagation">求人</a>
@@ -291,7 +306,9 @@
                     </div>
                 </div>
                 <div class="discovery-swipe-guide" aria-hidden="true">
-                    <i class="fas fa-chevron-up"></i>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="18 15 12 9 6 15"/>
+                    </svg>
                 </div>
 
                 @endif
@@ -331,5 +348,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/home.js') }}?v=20260510-card-flip-rise"></script>
+<script src="{{ asset('assets/js/home.js') }}?v=20260613-card-refresh"></script>
 @endpush

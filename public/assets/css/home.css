@@ -2617,3 +2617,210 @@ body.page-home .card-actions-overlay,
 body.page-home .rc-actions {
     gap: 10px !important;
 }
+
+/* ============================================================
+   SWIPE CARD REFRESH (2026-06)
+   ・ページネーションを細線化
+   ・アクションをスタイリッシュ SVG ライン化
+   ・カードに薄いアメジストのリム＋ボトムグラデ微調整
+   ============================================================ */
+
+/* ---------- ① 画像切替バー：細い 2px ライン化 ---------- */
+.photo-pagination.swiper-pagination-bullets {
+    top: 10px !important;
+    left: 14px !important;
+    right: 14px !important;
+    gap: 4px !important;
+    /* バー領域の中央のラインのみ薄く強調 */
+    padding: 0 !important;
+}
+.photo-pagination .swiper-pagination-bullet {
+    flex: 1 1 0;
+    width: auto !important;
+    height: 2px !important;            /* 旧 3px → 2px */
+    margin: 0 !important;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16) !important;  /* 未選択は控えめ */
+    opacity: 1;
+    transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+.photo-pagination .swiper-pagination-bullet-active {
+    background: linear-gradient(90deg, #c4b5fd, #a78bfa) !important;  /* アメジスト光 */
+    box-shadow:
+        0 0 6px rgba(168, 85, 247, 0.55),
+        0 0 12px rgba(168, 85, 247, 0.28);
+    transform: none;
+}
+
+/* ---------- ② アクションボタン：薄ガラス＋ライン SVG ---------- */
+:root {
+    --home-action-size: 50px;          /* 56 → 50 で軽快に */
+}
+
+.action-circle-btn {
+    width: var(--home-action-size) !important;
+    height: var(--home-action-size) !important;
+    min-width: var(--home-action-size) !important;
+    min-height: var(--home-action-size) !important;
+    border-radius: 50% !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    background: rgba(15, 5, 25, 0.42) !important;
+    backdrop-filter: blur(10px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(120%) !important;
+    color: #fff !important;
+    font-size: 0 !important;            /* もし FA が残っていても消す */
+    box-shadow:
+        0 6px 20px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+    overflow: visible;
+    position: relative;
+}
+.action-circle-btn:hover {
+    background: rgba(168, 85, 247, 0.22) !important;
+    border-color: rgba(255, 255, 255, 0.38) !important;
+    transform: scale(1.06);
+}
+.action-circle-btn:active { transform: scale(0.93); }
+
+.action-circle-btn .action-icon {
+    width: 22px;
+    height: 22px;
+    color: #fff;
+    transition: transform .25s ease, color .25s ease, filter .25s ease;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .45));
+}
+
+/* like：未押下は白ライン、押下で塗りつぶし＋赤グロー */
+.action-circle-btn.like.is-active {
+    background: linear-gradient(135deg, rgba(248, 113, 113, 0.95), rgba(220, 38, 38, 0.95)) !important;
+    border-color: rgba(254, 226, 226, 0.55) !important;
+    box-shadow:
+        0 8px 24px rgba(220, 38, 38, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+}
+.action-circle-btn.like.is-active .action-icon {
+    fill: #fff;
+    transform: scale(1.06);
+}
+
+/* keep：押下でゴールド／アメジスト発光 */
+.action-circle-btn.keep.is-active {
+    background: linear-gradient(135deg, var(--gold-light), var(--gold)) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+    color: #1a0f24 !important;
+    box-shadow:
+        0 8px 24px rgba(168, 85, 247, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+}
+.action-circle-btn.keep.is-active .action-icon {
+    fill: #1a0f24;
+    stroke: #1a0f24;
+}
+
+/* like ボタンのカウント表示 */
+.action-circle-btn.like {
+    flex-direction: column;
+    gap: 0 !important;
+    padding-top: 6px !important;
+    padding-bottom: 4px !important;
+}
+.action-circle-btn.like .action-btn-count {
+    font-size: 0.68rem !important;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    opacity: 0.95;
+}
+
+/* メッセージボタン（既存の action-btn-message を SVG 化に合わせ刷新） */
+.action-btn-message {
+    width: var(--home-action-size) !important;
+    height: var(--home-action-size) !important;
+    min-width: var(--home-action-size) !important;
+    min-height: var(--home-action-size) !important;
+    border-radius: 50% !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    background: rgba(15, 5, 25, 0.42) !important;
+    backdrop-filter: blur(10px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(120%) !important;
+    color: #fff !important;
+    font-size: 0 !important;
+    box-shadow:
+        0 6px 20px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+.action-btn-message .action-icon { width: 22px; height: 22px; color: #fff; }
+.action-btn-message:hover {
+    background: rgba(168, 85, 247, 0.22) !important;
+    border-color: rgba(255, 255, 255, 0.38) !important;
+}
+
+/* 求人カードのラベル位置（円ボタンの下） */
+.rc-actions .rc-action-label {
+    font-size: 0.62rem !important;
+    color: rgba(255, 255, 255, 0.78);
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+/* ---------- ③ カード本体：アメジストのヘアラインを乗せて引き締め ---------- */
+.cast-card {
+    /* 既存の box-shadow に薄いリングを足す（リムライト） */
+    box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(168, 85, 247, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+.main-swiper .swiper-slide-active .cast-card {
+    box-shadow:
+        0 32px 64px -16px rgba(0, 0, 0, 0.65),
+        0 0 0 1px rgba(168, 85, 247, 0.40),
+        0 0 24px -6px rgba(168, 85, 247, 0.40),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 下部グラデーション：黒一色→アメジスト混じりの落ち着いた階調 */
+.cast-card:not(.cast-card--recruit) .card-bottom-info {
+    background: linear-gradient(
+        to top,
+        rgba(8, 4, 14, 0.92) 0%,
+        rgba(15, 8, 24, 0.78) 36%,
+        rgba(20, 10, 30, 0.45) 70%,
+        transparent 100%
+    ) !important;
+}
+
+/* 求人カード下部の rc-bottom-bar も同色階調に */
+.rc-bottom-bar {
+    background: linear-gradient(
+        to top,
+        rgba(8, 4, 14, 0.95) 0%,
+        rgba(15, 8, 24, 0.78) 50%,
+        transparent 100%
+    ) !important;
+}
+
+/* ---------- ④ スワイプガイド：SVG＋細チップ ---------- */
+.discovery-swipe-guide {
+    width: auto !important;
+    height: auto !important;
+    background: transparent !important;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255, 255, 255, 0.62);
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
+}
+.discovery-swipe-guide svg {
+    width: 16px;
+    height: 16px;
+    animation: hg-bounce 1.8s ease-in-out infinite;
+    filter: drop-shadow(0 0 4px rgba(168, 85, 247, 0.4));
+}
+@keyframes hg-bounce {
+    0%, 100% { transform: translateY(0); opacity: 0.65; }
+    50%      { transform: translateY(-4px); opacity: 1; }
+}
+
