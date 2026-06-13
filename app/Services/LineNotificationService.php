@@ -59,7 +59,8 @@ class LineNotificationService
 
         try {
             $response = $this->lineMessage->sendText($lineUserId, $message);
-            $success = $response->isSucceeded();
+            // LineMessageService は ['success' => bool, 'error' => ?string] を返すよう刷新済み
+            $success = is_array($response) && !empty($response['success']);
         } catch (\Throwable $e) {
             $success = false;
         }
