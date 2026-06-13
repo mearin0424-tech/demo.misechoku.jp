@@ -1373,6 +1373,29 @@ INSERT INTO `shop_managers` (`id`, `shop_id`, `name`, `email`, `password`, `role
 -- --------------------------------------------------------
 
 --
+-- テーブルの構造 `notifications`
+-- ユーザー宛おしらせ（インボックス）
+--
+
+CREATE TABLE `notifications` (
+  `id` bigint UNSIGNED NOT NULL,
+  `user_type` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'cast / shop_manager / admin',
+  `user_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '機能キー (例: talk.message_received)',
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `body` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `payload` json DEFAULT NULL,
+  `read_at` timestamp NULL DEFAULT NULL COMMENT '既読時刻 (NULL=未読)',
+  `dispatched_push_at` timestamp NULL DEFAULT NULL,
+  `dispatched_line_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- テーブルの構造 `shop_posts`
 --
 
@@ -2042,6 +2065,20 @@ ALTER TABLE `shop_managers`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `shop_managers_email_unique` (`email`),
   ADD KEY `shop_managers_shop_id_foreign` (`shop_id`);
+
+--
+-- テーブルのインデックス `notifications`
+--
+ALTER TABLE `notifications`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `notifications_user_idx` (`user_type`, `user_id`, `read_at`),
+  ADD KEY `notifications_created_idx` (`created_at`);
+
+--
+-- AUTO_INCREMENT for `notifications`
+--
+ALTER TABLE `notifications`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- テーブルのインデックス `shop_posts`

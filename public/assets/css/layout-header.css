@@ -439,3 +439,118 @@ body.page-talk.page-talk-room .header-left {
         font-size: 0.65rem;
     }
 }
+
+/* ============================================================
+   おしらせ／やることリスト（2026-06 本番対応）
+   ============================================================ */
+
+/* 「全て既読」ボタン */
+.notif-popup-readall {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--gold-light, #c4b5fd);
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: background .15s ease, border-color .15s ease;
+}
+.notif-popup-readall:hover {
+    background: rgba(168, 85, 247, 0.12);
+    border-color: var(--gold-light, #c4b5fd);
+}
+
+/* 未読アイテム強調 */
+.notif-popup-item {
+    position: relative;
+    padding-left: 22px !important;
+}
+.notif-popup-item.is-unread {
+    background: rgba(168, 85, 247, 0.08);
+}
+.notif-popup-item.is-unread .notif-popup-item__title {
+    font-weight: 700;
+    color: #f5f5f5;
+}
+.notif-popup-item__dot {
+    position: absolute;
+    left: 8px;
+    top: 14px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--gold-light, #c4b5fd);
+    box-shadow: 0 0 6px rgba(168, 85, 247, 0.65);
+    animation: notif-dot-pulse 1.8s ease-in-out infinite;
+}
+@keyframes notif-dot-pulse {
+    0%, 100% { opacity: 0.85; transform: scale(1); }
+    50%      { opacity: 0.45; transform: scale(0.86); }
+}
+.notif-popup-item__time {
+    margin-top: 3px;
+    font-size: 0.66rem;
+    color: rgba(196, 181, 253, 0.6);
+}
+
+/* ====== やることリスト ====== */
+.task-popup-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border-bottom: 1px solid var(--color-border);
+    text-decoration: none;
+    color: var(--color-text-header);
+    font-size: 0.84rem;
+    transition: background .15s ease;
+    position: relative;
+}
+a.task-popup-item:hover {
+    background: rgba(168, 85, 247, 0.06);
+    text-decoration: none;
+    color: var(--color-text-header);
+}
+.task-popup-item > i:first-child {
+    flex: 0 0 auto;
+    font-size: 1rem;
+    color: var(--gold-light, #c4b5fd);
+}
+.task-popup-item__text {
+    flex: 1;
+    line-height: 1.45;
+}
+.task-popup-item__chev {
+    flex: 0 0 auto;
+    font-size: 0.7rem;
+    color: rgba(196, 181, 253, 0.45);
+}
+
+/* 緊急度別の左ボーダー */
+.task-popup-item--high {
+    border-left: 3px solid #f87171;
+    background: linear-gradient(90deg, rgba(248, 113, 113, 0.06), transparent 60%);
+}
+.task-popup-item--high > i:first-child { color: #f87171; }
+
+.task-popup-item--normal {
+    border-left: 3px solid transparent;
+}
+
+/* 空状態 */
+.task-popup-empty {
+    text-align: center;
+    padding: 28px 16px;
+    color: var(--color-text-muted);
+    font-size: 0.82rem;
+}
+.task-popup-empty i {
+    display: block;
+    font-size: 1.8rem;
+    color: #6ee7b7;
+    margin-bottom: 8px;
+    opacity: 0.85;
+}
+.task-popup-empty p { margin: 0; }

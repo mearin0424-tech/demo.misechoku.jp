@@ -271,6 +271,34 @@ CREATE TABLE IF NOT EXISTS `shop_managers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -----------------------------------------------------------------------------
+-- notifications：ユーザー宛おしらせ（インボックス）
+--   user_type: 'cast' | 'shop_manager' | 'admin'
+--   type:      機能キー（例: talk.message_received, billing.invoice_issued）
+--   url:       タップで遷移する詳細URL（任意）
+--   payload:   付随データ（JSON, 任意）
+--   read_at:   既読時刻（NULL=未読）
+--   dispatched_push_at: PWA Push 配信済み時刻（重複配信防止）
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `notifications` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_type` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `body` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `payload` json DEFAULT NULL,
+  `read_at` timestamp NULL DEFAULT NULL,
+  `dispatched_push_at` timestamp NULL DEFAULT NULL,
+  `dispatched_line_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `notifications_user_idx` (`user_type`, `user_id`, `read_at`),
+  KEY `notifications_created_idx` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------------------------
 -- shop_images
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `shop_images` (

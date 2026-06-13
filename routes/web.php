@@ -16,6 +16,7 @@ use App\Http\Controllers\Auth\Cast\LoginController as CastLogin;
 use App\Http\Controllers\Auth\LineLoginController as LineLogin;
 use App\Http\Controllers\LineWebhookController;
 use App\Http\Controllers\Common\TalkController as TalkController;
+use App\Http\Controllers\Common\NotificationController as CommonNotification;
 
 // 邂｡逅・・ｼ医ヰ繝・け繧ｪ繝輔ぅ繧ｹ・・
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
@@ -350,6 +351,15 @@ Route::name('pages.')->group(function () {
 // 停止中アカウント向けランディング
 Route::get('/account/suspended', [\App\Http\Controllers\Common\SuspendedController::class, 'show'])
     ->name('account.suspended');
+
+// おしらせ既読 API（ログイン中のロール自動判定。cast/shop/admin 共通）
+Route::prefix('notifications')->name('notifications.')->group(function () {
+    Route::get('/unread-count', [CommonNotification::class, 'unreadCount'])->name('unread-count');
+    Route::post('/{id}/read', [CommonNotification::class, 'markRead'])
+        ->whereNumber('id')
+        ->name('read');
+    Route::post('/read-all', [CommonNotification::class, 'markAllRead'])->name('read-all');
+});
 
 Route::prefix('share')->name('share.')->group(function () {
     Route::get('/recruit/{id}', [CastRecruit::class, 'publicShow'])->name('recruit.show');

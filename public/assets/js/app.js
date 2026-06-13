@@ -68,6 +68,86 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // --- 通知の既読化 ---
+    function csrf() {
+        var el = document.querySelector('meta[name="csrf-token"]');
+        return el ? el.getAttribute('content') : '';
+    }
+    function updateBellBadge(unreadCount) {
+        var bell = document.getElementById('btn-header-notification');
+        if (!bell) return;
+        var badge = bell.querySelector('.badge-notify');
+        if (unreadCount > 0) {
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'badge-notify';
+                bell.appendChild(badge);
+            }
+            badge.textContent = String(unreadCount);
+        } else if (badge) {
+            badge.remove();
+        }
+    }
+
+    // 個別アイテムクリックで既読化（リンクの場合は遷移前にPOST→そのまま遷移）
+    if (notiPopup) {
+        notiPopup.addEventListener('click', function (e) {
+            // 全て既読
+            var allBtn = e.target.closest('[data-notif-mark-all]');
+            if (allBtn) {
+                e.preventDefault();
+                fetch('/notifications/read-all', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'X-CSRF-TOKEN': csrf(),
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    },
+                }).then(function (r) { return r.json(); }).then(function (d) {
+                    if (d && d.success) {
+                        notiPopup.querySelectorAll('[data-notif-item].is-unread').forEach(function (el) {
+                            el.classList.remove('is-unread');
+                            var dot = el.querySelector('.notif-popup-item__dot');
+                            if (dot) dot.remove();
+                        });
+                        allBtn.remove();
+                        updateBellBadge(d.unread_count || 0);
+                    }
+                }).catch(function () {});
+                return;
+            }
+
+            // 個別既読
+            var item = e.target.closest('[data-notif-item]');
+            if (item && item.classList.contains('is-unread')) {
+                var id = item.getAttribute('data-notif-id');
+                if (id) {
+                    // beacon があれば優先（離脱前送信）
+                    var body = new FormData();
+                    body.append('_token', csrf());
+                    if (navigator.sendBeacon) {
+                        navigator.sendBeacon('/notifications/' + id + '/read', body);
+                    } else {
+                        fetch('/notifications/' + id + '/read', {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: {
+                                'X-CSRF-TOKEN': csrf(),
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                            keepalive: true,
+                        }).catch(function () {});
+                    }
+                    item.classList.remove('is-unread');
+                    var dot = item.querySelector('.notif-popup-item__dot');
+                    if (dot) dot.remove();
+                }
+                // a タグなら遷移は止めない
+            }
+        });
+    }
+
     // --- 4. 画面外クリックですべて閉じる ---
     window.addEventListener('click', function(e) {
         // ポップアップの中身自体をクリックした場合は閉じない

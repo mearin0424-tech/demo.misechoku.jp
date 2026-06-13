@@ -38,6 +38,7 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\InjectHeaderBadges::class,
         ],
 
         'api' => [
@@ -73,5 +74,7 @@ class Kernel extends HttpKernel
         //'check.redirect' => \App\Http\Middleware\CheckRedirectAfterLogin::class,
         'device.redirect' => \App\Http\Middleware\DeviceRedirect::class,
 
+        // ヘッダーのおしらせ・やることリストを全認証画面に注入
+        'header.badges' => \App\Http\Middleware\InjectHeaderBadges::class,
     ];
 }

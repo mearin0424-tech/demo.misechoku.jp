@@ -336,12 +336,46 @@ class BillingManagementService
             $mailSent = $this->sendInvoiceMail($depositId, $deposit->shop_email);
         }
 
+        // 店舗マネージャー宛おしらせ：請求書発行
+        $this->notifyInvoiceIssued($deposit);
+
         return [
             'success' => true,
             'message' => $mailSent
                 ? '請求書を発行し、店舗へ送付しました。'
                 : '請求書を発行しました。メール送付は現在のメール設定に依存するため、店舗画面からも確認できるようにしています。',
         ];
+    }
+
+    /**
+     * 店舗マネージャーに「請求書が発行されました」のおしらせを送る。
+     */
+    private function notifyInvoiceIssued(object $deposit): void
+    {
+        try {
+            $shopId = null;
+            if (!empty($deposit->shop_job_application_id)) {
+                $row = \DB::table('shop_job_applications as sja')
+                    ->join('shop_jobs as sj', 'sja.shop_job_id', '=', 'sj.id')
+                    ->where('sja.id', $deposit->shop_job_application_id)
+                    ->value('sj.shop_id');
+                $shopId = $row ? (string) $row : null;
+            }
+            if (!$shopId) return;
+
+            $notifier = app(\App\Services\NotificationService::class);
+            $amount = number_format((int) ($deposit->invoice_amount ?? 0));
+            $notifier->createForShop(
+                $shopId,
+                'billing.invoice_issued',
+                '請求書が発行されました',
+                "請求番号 #{$deposit->id} ・ 金額 ¥{$amount} ・ 期限内のお支払いをお願いします",
+                route('shop.mypage.management', ['tab' => 'payment']),
+                ['deposit_id' => $deposit->id],
+            );
+        } catch (\Throwable $e) {
+            \Log::warning('Invoice issued notify failed: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -631,7 +665,37 @@ class BillingManagementService
 
         $this->appendHistory($depositId, self::STATUS_CAST_TRANSFERRED);
 
+        // キャスト宛おしらせ：振込実行通知
+        $this->notifyCastTransferred($depositId);
+
         return ['success' => true, 'message' => 'キャストへの振込を記録しました。キャストの入金確認をお待ちください。'];
+    }
+
+    /**
+     * キャストに「振込完了しました」のおしらせを送る。
+     */
+    private function notifyCastTransferred(int $depositId): void
+    {
+        try {
+            $row = \DB::table('application_deposits as ad')
+                ->join('shop_job_applications as sja', 'ad.shop_job_application_id', '=', 'sja.id')
+                ->where('ad.id', $depositId)
+                ->select('sja.cast_id', 'ad.cast_transfer_amount')
+                ->first();
+            if (!$row || empty($row->cast_id)) return;
+
+            $amount = number_format((int) ($row->cast_transfer_amount ?? 0));
+            app(\App\Services\NotificationService::class)->createForCast(
+                (string) $row->cast_id,
+                'billing.cast_transferred',
+                '採用ボーナスを振込みました',
+                "金額 ¥{$amount} を登録口座へ振込みました。入金をご確認ください。",
+                \Route::has('cast.mypage.management') ? route('cast.mypage.management') : null,
+                ['deposit_id' => $depositId],
+            );
+        } catch (\Throwable $e) {
+            \Log::warning('Cast transferred notify failed: ' . $e->getMessage());
+        }
     }
 
     /**

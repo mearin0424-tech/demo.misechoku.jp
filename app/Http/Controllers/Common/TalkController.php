@@ -37,6 +37,7 @@ class TalkController extends Controller
         private readonly NotificationPreferenceService $notificationPreferenceService,
         private readonly PushNotificationService $pushNotificationService,
         private readonly ShopJobApplicationJobSnapshotService $shopJobApplicationJobSnapshotService,
+        private readonly \App\Services\NotificationService $notificationService,
     ) {
     }
 
@@ -1744,26 +1745,41 @@ class TalkController extends Controller
     ): void {
         try {
             if ($isCastPortal) {
+                // キャスト→店舗：店舗マネージャー全員に通知
                 $managerIds = DB::table('shop_managers')
                     ->where('shop_id', $shopId)
                     ->pluck('id');
                 foreach ($managerIds as $managerId) {
                     $prefs = $this->notificationPreferenceService->get('shop_manager', (string) $managerId);
-                    if (!($prefs['push_enabled'] ?? true)) {
-                        continue;
-                    }
-                    $this->pushNotificationService->sendToUser('shop_manager', (string) $managerId, $title, $body, $url);
+                    $alsoPush = (bool) ($prefs['push_enabled'] ?? true);
+                    // インボックスへ永続化＋Push（許可時のみ）
+                    $this->notificationService->createForShopManager(
+                        (string) $managerId,
+                        'talk.message_received',
+                        $title,
+                        $body,
+                        $url,
+                        ['cast_id' => $castId, 'shop_id' => $shopId],
+                        $alsoPush
+                    );
                 }
                 return;
             }
 
+            // 店舗→キャスト
             $prefs = $this->notificationPreferenceService->get('cast', $castId);
-            if (!($prefs['push_enabled'] ?? true)) {
-                return;
-            }
-            $this->pushNotificationService->sendToUser('cast', $castId, $title, $body, $url);
+            $alsoPush = (bool) ($prefs['push_enabled'] ?? true);
+            $this->notificationService->createForCast(
+                $castId,
+                'talk.message_received',
+                $title,
+                $body,
+                $url,
+                ['cast_id' => $castId, 'shop_id' => $shopId],
+                $alsoPush
+            );
         } catch (\Throwable $e) {
-            Log::warning('Talk push notify failed: ' . $e->getMessage());
+            Log::warning('Talk notify failed: ' . $e->getMessage());
         }
     }
 

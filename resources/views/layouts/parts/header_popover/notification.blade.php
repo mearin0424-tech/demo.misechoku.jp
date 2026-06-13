@@ -1,7 +1,14 @@
-<div id="header-notification-popup" class="header-popup stop-propagation" style="display:none;">
+<div id="header-notification-popup" class="header-popup stop-propagation" style="display:none;" data-notification-popup>
     <div class="task-popup-header">
         <h4>お知らせ</h4>
-        <button class="btn-close-popup" onclick="togglePopup('header-notification-popup')">&times;</button>
+        <div style="display:flex; gap:6px; align-items:center;">
+            @if(!empty($notifications) && collect($notifications)->where('is_unread', true)->count() > 0)
+                <button type="button" class="notif-popup-readall" data-notif-mark-all aria-label="すべて既読にする">
+                    全て既読
+                </button>
+            @endif
+            <button class="btn-close-popup" onclick="togglePopup('header-notification-popup')">&times;</button>
+        </div>
     </div>
     <div class="notification-popup-content">
         <div class="notif-popup-section-label">運営からのお知らせ</div>
@@ -36,19 +43,32 @@
         </div>
         @if(isset($notifications) && count($notifications) > 0)
             @foreach($notifications as $item)
-                @php $url = $item['url'] ?? null; @endphp
+                @php $url = $item['url'] ?? null; $unread = !empty($item['is_unread']); @endphp
                 @if($url)
-                    <a href="{{ $url }}" class="notif-popup-item">
+                    <a href="{{ $url }}"
+                       class="notif-popup-item {{ $unread ? 'is-unread' : '' }}"
+                       data-notif-item
+                       data-notif-id="{{ $item['id'] }}">
+                        @if($unread)<span class="notif-popup-item__dot" aria-hidden="true"></span>@endif
                         <div class="notif-popup-item__title">{{ $item['title'] }}</div>
                         @if(!empty($item['body']))
                             <div class="notif-popup-item__meta">{{ $item['body'] }}</div>
                         @endif
+                        @if(!empty($item['created_at_label']))
+                            <div class="notif-popup-item__time">{{ $item['created_at_label'] }}</div>
+                        @endif
                     </a>
                 @else
-                    <div class="notif-popup-item">
+                    <div class="notif-popup-item {{ $unread ? 'is-unread' : '' }}"
+                         data-notif-item
+                         data-notif-id="{{ $item['id'] }}">
+                        @if($unread)<span class="notif-popup-item__dot" aria-hidden="true"></span>@endif
                         <div class="notif-popup-item__title">{{ $item['title'] }}</div>
                         @if(!empty($item['body']))
                             <div class="notif-popup-item__meta">{{ $item['body'] }}</div>
+                        @endif
+                        @if(!empty($item['created_at_label']))
+                            <div class="notif-popup-item__time">{{ $item['created_at_label'] }}</div>
                         @endif
                     </div>
                 @endif
