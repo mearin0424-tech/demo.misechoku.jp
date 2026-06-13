@@ -147,7 +147,7 @@
     padding: 6px 10px;
     border-radius: 8px;
     border: 1px solid rgba(168, 85, 247, 0.35);
-    color: #efe3e3;
+    color: #d4d4d4;
     font-size: 0.85rem;
 }
 

@@ -253,7 +253,7 @@
     .payment-bank-change-btn { font-size: 0.78rem; padding: 8px 14px; border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 9999px; background: transparent; color: #a78bfa; cursor: pointer; }
 
     /* 口座登録モーダル */
-    .payment-bank-modal { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); padding: 0; }
+    .payment-bank-modal { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; background: rgba(0, 0, 0, 0.78); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); padding: 0; }
     .payment-bank-modal[hidden] { display: none; }
     @media (min-width: 640px) { .payment-bank-modal { justify-content: center; } }
     .payment-bank-modal-backdrop { position: absolute; inset: 0; cursor: pointer; }
@@ -289,40 +289,79 @@
     .mypage-mini-row__status.is-rejected { background: rgba(220,38,38,0.12); color: #fca5a5; }
     .mypage-mini-row__chev { color: rgba(196, 181, 253, 0.4); font-size: 0.72rem; }
 
-    /* === ボーナスヒーローカード（採用・入金管理の "視覚的主役"） === */
+    /* === ボーナスヒーローカード — サービスの肝。ページの視覚 MVP として
+           リッチなゴールドで堂々と "稼げる感" を打ち出す。 === */
     .employment-bonus-hero {
-        margin: 4px 0 22px;
-        padding: 16px 20px 18px;
-        border-radius: 18px;
+        position: relative;
+        margin: 4px 0 26px;
+        padding: 22px 24px 24px;
+        border-radius: 22px;
         background:
-            linear-gradient(180deg, rgba(var(--accent-rgb, 214, 112, 162), 0.14), rgba(var(--accent-rgb, 214, 112, 162), 0.04));
-        border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.32);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
+            radial-gradient(circle at 0% 0%, rgba(246, 211, 106, 0.22), transparent 55%),
+            radial-gradient(circle at 100% 100%, rgba(184, 134, 11, 0.15), transparent 60%),
+            linear-gradient(180deg, rgba(246, 211, 106, 0.10), rgba(35, 26, 8, 0.85));
+        border: 1px solid rgba(246, 211, 106, 0.45);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
         box-shadow:
-            0 4px 16px rgba(0, 0, 0, 0.25),
-            inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            0 10px 28px rgba(0, 0, 0, 0.45),
+            0 0 36px rgba(246, 211, 106, 0.18),
+            inset 0 1px 0 rgba(255, 255, 255, 0.12),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.15);
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 6px;
+        overflow: hidden;
     }
+    /* 右上の subtle shimmer（ゴールドが光ってる感じ） */
+    .employment-bonus-hero::after {
+        content: '';
+        position: absolute;
+        top: -20px; right: -20px;
+        width: 110px; height: 110px;
+        background: radial-gradient(circle, rgba(255, 245, 220, 0.22), transparent 65%);
+        pointer-events: none;
+        z-index: 0;
+    }
+    .employment-bonus-hero > * { position: relative; z-index: 1; }
     .employment-bonus-hero__label {
-        font-size: 10px;
-        letter-spacing: 0.12em;
-        color: var(--accent-text, #f0a6c4);
-        font-weight: 700;
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        color: var(--bonus-gold, #f6d36a);
+        font-weight: 800;
         text-transform: uppercase;
-        opacity: 0.95;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-shadow: 0 0 12px rgba(246, 211, 106, 0.4);
     }
+    .employment-bonus-hero__label::before {
+        content: '◆';
+        color: var(--bonus-gold, #f6d36a);
+        font-size: 0.85em;
+        text-shadow: 0 0 6px rgba(246, 211, 106, 0.7);
+    }
+    /* 金額はゴールドグラデーションテキスト + 強グロー */
     .employment-bonus-hero__amount {
-        font-size: clamp(1.6rem, 6.5vw, 2.1rem);
+        font-size: clamp(2.2rem, 8.8vw, 2.8rem);
         font-weight: 900;
-        color: #ffffff;
-        font-feature-settings: 'tnum' 1, 'lnum' 1;
+        background: linear-gradient(135deg,
+            var(--bonus-gold-light, #fff5dc) 0%,
+            var(--bonus-gold, #f6d36a) 45%,
+            var(--bonus-gold-mid, #e3b94a) 75%,
+            var(--bonus-gold-deep, #b8860b) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+        font-feature-settings: 'tnum' 1, 'lnum' 1, 'ss01' 1;
         font-variant-numeric: tabular-nums lining-nums;
-        letter-spacing: -0.02em;
+        letter-spacing: -0.025em;
         line-height: 1;
-        text-shadow: 0 2px 8px rgba(var(--accent-rgb, 214, 112, 162), 0.30);
+        filter:
+            drop-shadow(0 0 24px rgba(246, 211, 106, 0.35))
+            drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
     }
 </style>
 @endpush

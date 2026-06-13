@@ -80,6 +80,8 @@
                 <input type="date" name="expired_at" class="bank-input">
             </div>
         @endif
+        <p class="cast-identity-error" role="alert" hidden></p>
+        <p class="cast-identity-success" role="status" hidden></p>
         <div class="text-right" style="margin-top:10px;">
             <button type="submit" class="btn-action manage">
                 <i class="fas fa-upload"></i>

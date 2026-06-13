@@ -97,17 +97,17 @@
 
         body.page-auth-login #bg-layer {
             background:
-                radial-gradient(circle at 20% 20%, rgba(168, 85, 247, 0.12), transparent 24%),
-                radial-gradient(circle at 80% 74%, rgba(168, 85, 247, 0.16), transparent 28%),
-                linear-gradient(180deg, rgba(74, 18, 42, 0.68), rgba(56, 13, 31, 0.94));
+                radial-gradient(circle at 20% 20%, rgba(168, 85, 247, 0.14), transparent 24%),
+                radial-gradient(circle at 80% 74%, rgba(168, 85, 247, 0.18), transparent 28%),
+                linear-gradient(180deg, #0a0a0a 0%, #050505 100%);
         }
 
         body.page-auth-login {
             background:
-                radial-gradient(circle at top, rgba(255, 166, 201, 0.16), transparent 36%),
-                linear-gradient(180deg, var(--color-main) 0%, var(--dark-bg) 100%);
-            color: var(--color-text);
-            font-family: "Helvetica Neue", Arial, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+                radial-gradient(circle at top, rgba(var(--accent-rgb, 214, 112, 162), 0.10), transparent 36%),
+                linear-gradient(180deg, #050505 0%, #0a0a0a 100%);
+            color: #f5f5f5;
+            font-family: "Noto Sans JP", "Hiragino Sans", "Meiryo", sans-serif;
         }
 
         body.page-auth-login main {
@@ -153,7 +153,7 @@
         }
 
         .role-login-bg-overlay {
-            background: linear-gradient(180deg, rgba(74, 18, 42, 0.62) 0%, rgba(56, 13, 31, 0.84) 45%, rgba(56, 13, 31, 0.98) 100%);
+            background: linear-gradient(180deg, rgba(10, 10, 10, 0.62) 0%, rgba(5, 5, 5, 0.84) 45%, rgba(5, 5, 5, 0.98) 100%);
         }
 
         .role-login-bg-glow {
@@ -203,7 +203,9 @@
             margin: 0;
             font-size: clamp(1.4rem, 4vw, 1.7rem);
             line-height: 1.4;
-            color: #f9efcf;
+            color: #ffffff;
+            font-weight: 700;
+            letter-spacing: -0.01em;
         }
 
         .role-login-alert {
@@ -217,23 +219,23 @@
         }
 
         .role-login-alert-info {
-            border: 1px solid rgba(168, 85, 247, 0.24);
-            background: rgba(255, 255, 255, 0.05);
-            color: #f8ead0;
+            border: 1px solid rgba(168, 85, 247, 0.40);
+            background: rgba(168, 85, 247, 0.10);
+            color: var(--accent-text, #f0a6c4);
         }
 
         .role-login-alert-error {
-            border: 1px solid rgba(255, 177, 177, 0.32);
-            background: rgba(122, 24, 44, 0.42);
-            color: #fff1f2;
+            border: 1px solid rgba(248, 113, 113, 0.45);
+            background: rgba(220, 38, 38, 0.15);
+            color: #fecaca;
         }
 
         .role-login-card {
             overflow: hidden;
-            border: 1px solid rgba(168, 85, 247, 0.24);
+            border: 1px solid rgba(168, 85, 247, 0.30);
             border-radius: 30px;
-            background: linear-gradient(155deg, rgba(255, 240, 245, 0.06), rgba(92, 23, 53, 0.88));
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(155deg, rgba(255, 255, 255, 0.04), rgba(10, 10, 10, 0.86));
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
             max-width: 100%;
@@ -253,26 +255,30 @@
             justify-content: center;
             min-height: 56px;
             padding: 16px 12px;
-            color: #a89090;
+            color: rgba(255, 255, 255, 0.55);
             text-decoration: none;
             font-size: 0.82rem;
             font-weight: 700;
             letter-spacing: 0.18em;
+            transition: color 0.2s ease;
         }
+        .role-login-tab:hover { color: rgba(255, 255, 255, 0.85); }
 
         .role-login-tab.is-active {
-            color: var(--gold-light);
+            color: var(--accent-text, #f0a6c4);
         }
 
         .role-login-tab.is-active::after {
             content: '';
             position: absolute;
-            left: 0;
-            right: 0;
+            left: 50%;
+            transform: translateX(-50%);
             bottom: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--gold), var(--gold-deep));
-            box-shadow: 0 0 12px rgba(168, 85, 247, 0.5);
+            width: 50%;
+            height: 3px;
+            background: var(--accent, #d670a2);
+            border-radius: 3px 3px 0 0;
+            box-shadow: 0 0 12px rgba(var(--accent-rgb, 214, 112, 162), 0.45);
         }
 
         .role-login-card-body {
@@ -290,20 +296,25 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-height: 42px;
-            border: 1px solid #3d1a1f;
+            min-height: 44px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 14px;
-            background: rgba(18, 4, 5, 0.58);
-            color: #a89090;
+            background: rgba(255, 255, 255, 0.04);
+            color: rgba(255, 255, 255, 0.75);
             text-decoration: none;
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             font-weight: 700;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+        }
+        .role-login-role:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: #ffffff;
         }
 
         .role-login-role.is-active {
-            border-color: rgba(168, 85, 247, 0.45);
-            color: var(--gold-light);
-            background: rgba(35, 15, 18, 0.95);
+            border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.55);
+            color: var(--accent-text, #f0a6c4);
+            background: rgba(var(--accent-rgb, 214, 112, 162), 0.10);
         }
 
         .role-login-copy {
@@ -326,9 +337,9 @@
         .role-login-field > span,
         .role-login-label-row span {
             margin-left: 2px;
-            color: var(--gold-light);
+            color: var(--accent-text, #f0a6c4);
             font-size: 0.72rem;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.14em;
         }
 
@@ -341,22 +352,24 @@
             min-height: 54px;
             padding: 0 16px;
             border-radius: 16px;
-            border: 1px solid #3d1a1f;
-            background: rgba(18, 4, 5, 0.5);
-            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            background: rgba(0, 0, 0, 0.35);
+            color: #ffffff;
             font-size: 0.94rem;
             box-sizing: border-box;
             max-width: 100%;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .role-login-input-wrap input::placeholder {
-            color: rgba(214, 198, 198, 0.48);
+            color: rgba(255, 255, 255, 0.40);
         }
 
-        .role-login-input-wrap input:focus {
+        .role-login-input-wrap input:focus,
+        .role-login-input-wrap input:focus-visible {
             outline: none;
-            border-color: rgba(168, 85, 247, 0.56);
-            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.16);
+            border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.60);
+            box-shadow: 0 0 0 3px rgba(var(--accent-rgb, 214, 112, 162), 0.22);
         }
 
         .role-login-submit,
@@ -371,20 +384,23 @@
             border-radius: 16px;
             text-decoration: none;
             font-weight: 700;
-            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-        }
-
-        .role-login-submit:hover,
-        .role-login-secondary:hover {
-            transform: translateY(-1px);
+            transition: filter 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
         }
 
         .role-login-submit {
-            border: none;
-            background: linear-gradient(145deg, var(--gold), var(--gold-deep));
-            color: #1a0814;
+            border: 0;
+            background: var(--accent, #d670a2);
+            color: var(--on-accent, #1a0814);
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+            box-shadow:
+                0 6px 14px rgba(0, 0, 0, 0.45),
+                inset 0 1px 0 rgba(255, 255, 255, 0.20),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.18);
+        }
+        .role-login-submit:hover { filter: brightness(1.06); }
+        .role-login-submit:active {
+            transform: scale(0.97);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.45), inset 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .role-login-links {
@@ -395,17 +411,23 @@
         }
 
         .role-login-secondary {
-            border: 1px solid rgba(168, 85, 247, 0.22);
+            border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.40);
             background: rgba(255, 255, 255, 0.04);
-            color: #fff4d6;
+            color: var(--accent-text, #f0a6c4);
+        }
+        .role-login-secondary:hover {
+            background: rgba(var(--accent-rgb, 214, 112, 162), 0.10);
+            border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.60);
         }
 
         .role-login-back {
             text-align: center;
-            color: rgba(246, 217, 139, 0.9);
+            color: rgba(255, 255, 255, 0.55);
             text-decoration: none;
             font-size: 0.84rem;
+            transition: color 0.2s;
         }
+        .role-login-back:hover { color: var(--accent-text, #f0a6c4); }
 
         @media (max-width: 640px) {
             .role-login-page {

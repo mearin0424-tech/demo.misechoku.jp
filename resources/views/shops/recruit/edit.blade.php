@@ -58,30 +58,61 @@
     .job-edit-v2__title-sub { margin: 2px 0 0; font-size: 9px; font-weight: 700; color: var(--je-gold); letter-spacing: 0.06em; }
     .job-edit-v2__spacer { width: 2rem; flex-shrink: 0; }
 
-    .job-edit-v2__form { padding: 20px; display: flex; flex-direction: column; gap: 36px; }
+    .job-edit-v2__form {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;  /* 36 → 32 でセクション間を少し詰める */
+        counter-reset: jobedit-section;  /* CSS counter で section 番号を自動採番 */
+    }
 
+    /* セクション見出し — STEP 番号 + 細い区切り線で "今どこ" を可視化 */
     .job-edit-v2__sec-title {
         display: flex;
         align-items: center;
-        gap: 8px;
-        margin: 0 0 20px;
+        gap: 10px;
+        margin: 0 0 18px;
         padding-bottom: 10px;
         border-bottom: 1px solid rgba(168, 85, 247, 0.18);
         font-size: 1rem;
         font-family: var(--font-sans);
         font-weight: 700;
         color: #fff;
-        letter-spacing: 0.04em;
+        letter-spacing: 0.02em;
+        counter-increment: jobedit-section;
+        /* 上から sticky header (60px) + sub-header(46px) で被るぶんを補う */
+        scroll-margin-top: 120px;
     }
+    /* 番号バッジ：STEP のような視覚タグ */
     .job-edit-v2__sec-title::before {
-        content: '';
-        width: 4px;
-        height: 1.1rem;
-        background: #a78bfa;
-        border-radius: 2px;
+        content: counter(jobedit-section, decimal-leading-zero);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        height: 22px;
+        padding: 0 7px;
+        border-radius: 6px;
+        background: rgba(168, 85, 247, 0.18);
+        border: 1px solid rgba(168, 85, 247, 0.40);
+        color: var(--accent-text, #f0a6c4);
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        font-family: var(--font-sans);
+        font-variant-numeric: tabular-nums;
         flex-shrink: 0;
     }
-    .job-edit-v2__sec-title i { font-size: 0.9rem; color: #a78bfa; }
+    .job-edit-v2__sec-title i { font-size: 0.9rem; color: var(--accent-text, #f0a6c4); }
+    /* セクション見出し直後の field group は subtle in-card 感覚 */
+    .job-edit-v2__sec-title + * { animation: jobedit-section-enter 0.4s ease-out both; }
+    @keyframes jobedit-section-enter {
+        from { opacity: 0.6; transform: translateY(3px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .job-edit-v2__sec-title + * { animation: none; }
+    }
 
     .job-edit-v2__field { margin-bottom: 22px; }
     .job-edit-v2__field:last-child { margin-bottom: 0; }

@@ -67,8 +67,8 @@
 
 .support-column-body {
     font-size: 0.92rem;
-    line-height: 1.85;
-    color: #efe3e3;
+    line-height: 1.65;
+    color: #d4d4d4;
     word-break: break-word;
 }
 </style>

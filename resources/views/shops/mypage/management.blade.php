@@ -145,12 +145,14 @@
     .case-card__action-btn {
         display: inline-flex; align-items: center; gap: 6px;
         padding: 8px 14px; border-radius: 999px;
-        background: linear-gradient(135deg, var(--gold-light), var(--gold) 50%, var(--gold-deep));
-        color: #1a1206; border: 0; font-weight: 800; font-size: 0.82rem; cursor: pointer;
-        box-shadow: 0 3px 10px rgba(168, 85, 247, 0.4);
+        background: var(--accent, #d670a2);
+        color: var(--on-accent, #1a0814); border: 0; font-weight: 800; font-size: 0.82rem; cursor: pointer;
+        box-shadow: 0 6px 14px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.20), inset 0 -1px 0 rgba(0,0,0,.18);
         margin-left: auto;
+        transition: filter .15s, transform .12s;
     }
-    .case-card__action-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(168, 85, 247, 0.5); }
+    .case-card__action-btn:hover { filter: brightness(1.06); }
+    .case-card__action-btn:active { transform: scale(.97); box-shadow: 0 2px 5px rgba(0,0,0,.45), inset 0 2px 4px rgba(0,0,0,.2); }
     .case-card__view-talk {
         display: inline-flex; align-items: center; gap: 4px;
         font-size: 0.74rem; color: var(--color-text-muted); text-decoration: none;
@@ -225,8 +227,10 @@
         bottom: var(--footer-height, 60px); z-index: 90;
         width: min(100vw, var(--max-content-width, 430px)); max-width: 100%;
         padding: 10px var(--content-padding-x, 16px) calc(10px + env(safe-area-inset-bottom, 0));
-        background: linear-gradient(180deg, rgba(74,18,42,0.98), rgba(35,8,21,1));
-        border-top: 1px solid rgba(168, 85, 247, 0.55);
+        background: rgba(10, 10, 10, 0.96);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
         box-shadow: 0 -8px 24px rgba(0,0,0,0.45);
         animation: deposit-cta-slide-up 0.3s ease;
     }
@@ -251,7 +255,7 @@
     body:has(.deposit-cta-bar) .shop-management-shell { padding-bottom: calc(var(--footer-height, 60px) + 80px) !important; }
 
     /* モーダル（承認・入金処理共通） */
-    .shop-action-modal { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); padding: 0; }
+    .shop-action-modal { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; background: rgba(0, 0, 0, 0.78); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); padding: 0; }
     .shop-action-modal[hidden] { display: none; }
     @media (min-width: 640px) { .shop-action-modal { justify-content: center; } }
     .shop-action-modal-backdrop { position: absolute; inset: 0; cursor: pointer; }

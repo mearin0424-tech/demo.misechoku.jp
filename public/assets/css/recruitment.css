@@ -1761,7 +1761,7 @@
     align-items: center;
     justify-content: space-between;
 }
-.rsm-title { margin: 0; color: #C8A951; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.08em; }
+.rsm-title { margin: 0; color: var(--accent-text, #f0a6c4); font-size: 0.9rem; font-weight: 700; letter-spacing: 0.08em; }
 .rsm-header-actions { display: flex; align-items: center; gap: 2px; }
 .rsm-icon-btn {
     width: 32px;
@@ -1769,7 +1769,7 @@
     border: none;
     border-radius: 8px;
     background: transparent;
-    color: #C8A951;
+    color: var(--accent-text, #f0a6c4);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1818,7 +1818,7 @@
     cursor: pointer;
 }
 .rsm-segment button.is-active { background: #2A221E; color: #fff; }
-.rsm-segment button.is-p1-active { color: #C8A951; }
+.rsm-segment button.is-p1-active { color: var(--accent-text, #f0a6c4); }
 .rsm-segment button.is-p2-active { color: #60A5FA; }
 .rsm-search { position: relative; display: flex; align-items: center; }
 .rsm-search i { position: absolute; left: 11px; color: #8A7C74; font-size: 12px; }
@@ -1876,16 +1876,16 @@
     font-size: 10px;
     font-weight: 700;
 }
-.rsm-pattern.is-p1 { color: #C8A951; border-color: rgba(200, 169, 81, 0.45); background: rgba(200, 169, 81, 0.16); }
+.rsm-pattern.is-p1 { color: var(--accent-text, #f0a6c4); border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.45); background: rgba(var(--accent-rgb, 214, 112, 162), 0.16); }
 .rsm-pattern.is-p2 { color: #60A5FA; border-color: rgba(96, 165, 250, 0.45); background: rgba(96, 165, 250, 0.16); }
 .rsm-side { display: flex; justify-content: flex-end; align-items: flex-start; }
 .rsm-talk-link {
     width: 30px;
     height: 30px;
     border-radius: 999px;
-    border: 1px solid rgba(200, 169, 81, 0.3);
-    color: #C8A951;
-    background: rgba(200, 169, 81, 0.12);
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.30);
+    color: var(--accent-text, #f0a6c4);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.12);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1939,7 +1939,7 @@
 .rsm-detail-row span { color: #8A7C74; }
 .rsm-detail-row strong { color: #B5A69D; font-weight: 600; }
 .rsm-detail-row strong.is-muted { color: #5A4D45; }
-.rsm-detail-row strong.is-gold { color: #C8A951; }
+.rsm-detail-row strong.is-gold { color: var(--accent-text, #f0a6c4); }
 .rsm-detail-row strong.is-hired { color: #34d399; }
 .rsm-reason-wrap {
     margin-top: 4px;
@@ -1967,7 +1967,7 @@
 .rsm-applied-title {
     font-size: 10px;
     font-weight: 700;
-    color: #C8A951;
+    color: var(--accent-text, #f0a6c4);
     letter-spacing: 0.04em;
     margin-bottom: 6px;
 }
@@ -2009,9 +2009,9 @@
 .rsm-hired-wage-submit {
     flex-shrink: 0;
     border-radius: 8px;
-    border: 1px solid rgba(200, 169, 81, 0.45);
-    background: rgba(200, 169, 81, 0.2);
-    color: #C8A951;
+    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.45);
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.20);
+    color: var(--accent-text, #f0a6c4);
     font-size: 11px;
     font-weight: 700;
     padding: 8px 12px;

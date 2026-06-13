@@ -1098,13 +1098,15 @@ a.btn-outline-gold {
     box-shadow: 0 8px 24px rgba(168, 85, 247, 0.25);
 }
 
-/* --- モーダル --- */
+/* --- モーダル：アプリ共通の overlay 規格（rgba(0,0,0,0.78) + blur(6px)） --- */
 .mypage-modal-overlay {
     display: none;
     position: fixed;
     inset: 0;
     z-index: 3000;
-    background: rgba(0, 0, 0, 0.88);
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     justify-content: center;
     align-items: center;
     padding: max(12px, var(--content-padding-x));
@@ -1415,6 +1417,21 @@ a.btn-outline-gold {
 .cast-mypage-back-link:hover {
     opacity: 0.9;
     color: var(--gold);
+}
+
+/* ============================================================
+   BONUS GOLD トークン — ボーナス金専用の "本物のゴールド"
+   var(--gold) はアンビエント紫に再定義されているため、ボーナス専用に
+   "リッチなカジノチップ風ゴールド" を新規定義する。
+   ・採用ボーナス = サービスの売りなので、ここだけ "金色" で堂々と。
+   ============================================================ */
+:root {
+    --bonus-gold-light: #fff5dc;   /* ハイライト（角の白光） */
+    --bonus-gold-pale:  #f0e6a8;   /* 淡い金、グラデの起点 */
+    --bonus-gold:       #f6d36a;   /* メインの金 */
+    --bonus-gold-mid:   #e3b94a;   /* ミッドトーン */
+    --bonus-gold-deep:  #b8860b;   /* シャドウ側、深い金 */
+    --bonus-gold-glow:  rgba(246, 211, 106, 0.45);
 }
 
 /* h1 ページタイトル "採用・入金管理" / "本人確認" 等。

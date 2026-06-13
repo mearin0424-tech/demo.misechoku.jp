@@ -60,7 +60,7 @@
 
 .talk-item:hover {
     background: linear-gradient(180deg, rgba(30, 30, 30, 0.98), rgba(20, 20, 20, 1));
-    border-color: rgba(255, 214, 226, 0.28);
+    border-color: rgba(168, 85, 247, 0.40);  /* pink/mauve 混在 → mauve 統一 */
 }
 
 .talk-item:active {
@@ -162,7 +162,7 @@
     flex: 1;
     text-align: center;
     padding: 15px 0;
-    color: #b5a69d;
+    color: #a0a0a0;
     font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
@@ -764,7 +764,7 @@
 .no-messages {
     text-align: center;
     padding: 72px 20px;
-    color: #b5a69d;
+    color: #a0a0a0;
 }
 
 .no-messages i {
@@ -2172,6 +2172,11 @@ body.page-talk-list .request-card,
     box-shadow: none !important;
     padding: 12px 14px !important;
     margin: 0 !important;
+}
+/* hover も talk-item と統一（subtle 白 0.03） */
+body.page-talk-list .request-card:hover,
+.talk-list-container .request-card:hover {
+    background: rgba(255, 255, 255, 0.03) !important;
 }
 body.page-talk-list .request-card .request-img,
 .talk-list-container .request-card .request-img {

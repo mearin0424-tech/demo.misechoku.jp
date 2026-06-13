@@ -926,7 +926,7 @@
 
         .register-field input::placeholder,
         .register-field textarea::placeholder {
-            color: rgba(214, 198, 198, 0.48);
+            color: rgba(255, 255, 255, 0.40);
         }
 
         .register-field input:focus,

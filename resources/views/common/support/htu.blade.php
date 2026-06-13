@@ -148,7 +148,7 @@
 .support-htu-feature-card { background: rgba(20, 7, 15, 0.9); border-radius: 16px; padding: 14px 12px; border: 1px solid rgba(168, 85, 247, 0.4); }
 .support-htu-feature-title { font-size: 0.95rem; display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 .support-htu-feature-title i { color: var(--color-gold, #a78bfa); }
-.support-htu-feature-body { font-size: 0.82rem; line-height: 1.7; color: #efe3e3; }
+.support-htu-feature-body { font-size: 0.82rem; line-height: 1.65; color: #d4d4d4; }
 
 .support-htu-step {
     background: rgba(20, 7, 15, 0.9);
@@ -185,8 +185,8 @@
 .support-htu-step-body {
     margin-top: 4px;
     font-size: 0.85rem;
-    line-height: 1.7;
-    color: #efe3e3;
+    line-height: 1.65;
+    color: #d4d4d4;
 }
 </style>
 @endpush

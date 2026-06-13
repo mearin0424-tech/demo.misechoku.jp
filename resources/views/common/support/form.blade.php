@@ -134,7 +134,7 @@
 .support-faq-question::-webkit-details-marker { display: none; }
 .support-faq-question i { font-size: 0.8rem; opacity: 0.7; transition: transform 0.2s ease; }
 .support-faq-item[open] .support-faq-question i { transform: rotate(180deg); }
-.support-faq-answer { padding: 0 6px 10px; font-size: 0.82rem; line-height: 1.7; color: #efe3e3; }
+.support-faq-answer { padding: 0 6px 10px; font-size: 0.82rem; line-height: 1.65; color: #d4d4d4; }
 @media (min-width: 768px) {
     .support-form-card {
         padding: 18px 20px 22px;

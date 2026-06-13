@@ -2048,18 +2048,9 @@ body.page-home .card-rating-num {
     color: rgba(255, 255, 255, 0.72);
 }
 
-/* ボーナスバッジ：仕様どおりゴールド立体グラデを維持 */
-body.page-home .rc-signup-bonus-pill {
-    background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%) !important;
-    border: 1px solid rgba(168, 85, 247, 0.55);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 245, 214, 0.55),
-        inset 0 -1px 0 rgba(112, 72, 10, 0.4),
-        0 6px 18px rgba(0, 0, 0, 0.55);
-    color: #1a1206;
-}
-body.page-home .rc-signup-bonus-pill__label,
-body.page-home .rc-signup-bonus-pill__nums { color: #1a1206 !important; text-shadow: none; }
+/* NOTE: 旧 "ゴールド" 名義の紫グラデルールはここに以前あったが、
+   ファイル末尾の TINDER-MODE/POLISH/BRUSHUP 系で正しい real-gold グラデに上書き済み。
+   重複定義を避けるため空ブロックを残す（specificity 履歴の温存）。 */
 
 /* 時給情報 */
 body.page-home .rc-wage-panel__trial-label,
@@ -3230,26 +3221,35 @@ body.page-home .cast-card--recruit .rc-wage-panel__help-label {
     text-transform: uppercase !important;
 }
 
-/* ===== 12. 入店祝い金ピル：ゴールドグラデを撤去 → mauve frosted pill ===== */
+/* ===== 12. 入店祝い金ピル — サービスの売り = GOLD で堂々と。
+       mauve は他の UI と区別する "コンテンツの主役" としてゴールドに戻す。 ===== */
 body.page-home .cast-card--recruit .rc-signup-bonus-pill {
-    background: rgba(var(--accent-rgb, 214, 112, 162), 0.18) !important;
-    color: var(--accent-text, #f0a6c4) !important;
-    border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.40) !important;
+    background: linear-gradient(105deg,
+        #f0e6a8 0%,
+        #fff5dc 25%,
+        #f6d36a 55%,
+        #e3b94a 80%,
+        #b8860b 100%) !important;
+    color: #1a1206 !important;
+    border: 1px solid rgba(255, 252, 230, 0.65) !important;
     box-shadow:
-        0 4px 12px rgba(var(--accent-rgb, 214, 112, 162), 0.18),
-        inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+        0 0 16px rgba(246, 211, 106, 0.5),
+        0 4px 14px rgba(0, 0, 0, 0.40),
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.10) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
     padding: 7px 14px !important;
 }
 body.page-home .cast-card--recruit .rc-signup-bonus-pill__label {
-    color: var(--accent-text, #f0a6c4) !important;
-    opacity: 0.95 !important;
-    font-weight: 700 !important;
+    color: #1a1206 !important;
+    opacity: 0.85 !important;
+    font-weight: 800 !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 body.page-home .cast-card--recruit .rc-signup-bonus-pill__nums {
-    color: #ffffff !important;
-    text-shadow: 0 0 12px rgba(var(--accent-rgb, 214, 112, 162), 0.40);
+    color: #1a1206 !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) !important;
     font-weight: 900 !important;
 }
 

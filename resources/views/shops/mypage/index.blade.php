@@ -10,6 +10,7 @@
     $iconImage         = ($subImages[0]['url'] ?? null) ?? asset('assets/images/common/no-image.png');
     $hasGoodPayerBadge = !empty($shopData['badges']['good_payer'] ?? false);
     $reviewAvg         = number_format($shopData['review_avg'] ?? 0, 1);
+    $reviewCount       = (int) ($shopData['review_count'] ?? 0);
 @endphp
 
 @section('content')
@@ -52,22 +53,26 @@
 
         {{-- ===== 優良店バッヂ + レビュー（2カラム）===== --}}
         <div class="grid grid-cols-2 gap-3 mb-5">
-            {{-- 優良店バッヂ（未付与なら opacity を落としてグレー寄りに） --}}
+            {{-- 優良店バッヂ：未付与時は opacity 50% + 縮小感で、付与時との差を強く見せる --}}
             <button type="button" id="open-good-payer-badge-modal"
                     aria-haspopup="dialog" aria-controls="modal-good-payer-badge"
                     aria-label="優良店バッヂの説明を開く"
-                    class="flex flex-col items-center justify-center gap-1 p-3 rounded-panel bg-gradient-to-br from-surface-from to-base shadow-card-3d transition-all duration-300 {{ $hasGoodPayerBadge ? 'border border-amber-400/50' : 'border border-line opacity-70' }}">
-                <i class="fas fa-crown text-[20px] {{ $hasGoodPayerBadge ? 'text-amber-400' : 'text-text-sub' }}"></i>
+                    class="flex flex-col items-center justify-center gap-1 p-3 rounded-panel bg-gradient-to-br from-surface-from to-base shadow-card-3d transition-all duration-300 {{ $hasGoodPayerBadge ? 'border border-amber-400/60 ring-1 ring-amber-400/30' : 'border border-line opacity-50' }}">
+                <i class="fas fa-crown text-[20px] {{ $hasGoodPayerBadge ? 'text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]' : 'text-text-sub' }}"></i>
                 <span class="app-title text-[9px] tracking-widest text-text-sub">優良店</span>
-                <span class="text-[12px] font-bold {{ $hasGoodPayerBadge ? 'text-text-main' : 'text-text-sub' }}">{{ $hasGoodPayerBadge ? '優良店' : '未付与' }}</span>
+                <span class="text-[12px] font-bold {{ $hasGoodPayerBadge ? 'text-amber-400' : 'text-text-sub' }}">{{ $hasGoodPayerBadge ? '取得済' : '未取得' }}</span>
             </button>
 
-            {{-- レビュー一覧へのリンク（cast/mypage と違い shop は残す） --}}
+            {{-- レビュー：平均値 + 件数（"15件のレビュー" 等で社会的証明を出す） --}}
             <a href="{{ route('shop.mypage.review.index') }}"
                class="flex flex-col items-center justify-center gap-1 p-3 rounded-panel border border-line-accent/40 bg-gradient-to-br from-surface-from to-base shadow-card-3d transition-all duration-300">
                 <i class="fas fa-star text-[20px] text-amber-400"></i>
                 <span class="app-title text-[9px] tracking-widest text-text-sub">レビュー</span>
-                <span class="text-[12px] font-bold text-text-main">{{ $reviewAvg }} <i class="fas fa-chevron-right ml-1 text-[10px] text-accent-text"></i></span>
+                <span class="text-[12px] font-bold text-text-main inline-flex items-baseline gap-1">
+                    {{ $reviewAvg }}
+                    <span class="text-[10px] font-normal text-text-sub">({{ $reviewCount }}件)</span>
+                    <i class="fas fa-chevron-right ml-0.5 text-[10px] text-accent-text"></i>
+                </span>
             </a>
         </div>
 
@@ -223,7 +228,7 @@
                                         <div class="text-[10px] text-text-sub uppercase tracking-wider mb-1">{{ $gLabel }}</div>
                                         <div class="flex flex-wrap gap-1.5">
                                             @foreach($gTags as $t)
-                                                <span class="inline-flex items-center px-2 py-1 rounded bg-accent/10 border border-line-accent/30 text-[11px] text-text-main">{{ $t }}</span>
+                                                <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-accent/10 border border-line-accent/40 text-[12px] font-medium text-text-main">{{ $t }}</span>
                                             @endforeach
                                         </div>
                                     </div>

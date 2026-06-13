@@ -237,7 +237,7 @@
 
     /* ヒーロー直下の単一時給カード（時給・ボーナスは目立たせる） */
     .recruit-ref-pay-highlight {
-        background: linear-gradient(135deg, rgba(168, 85, 247, 0.18), rgba(74, 18, 42, 0.5));
+        background: linear-gradient(135deg, rgba(168, 85, 247, 0.18), rgba(168, 85, 247, 0.15));
         border-radius: 14px;
         padding: 18px 20px;
         border: 1px solid rgba(168, 85, 247, 0.55);
@@ -309,7 +309,7 @@
         border-radius: 14px;
         padding: 18px 20px;
         margin-bottom: 18px;
-        background: linear-gradient(135deg, rgba(168, 85, 247, 0.22), rgba(74, 18, 42, 0.55));
+        background: linear-gradient(135deg, rgba(168, 85, 247, 0.22), rgba(168, 85, 247, 0.18));
         border: 1px solid rgba(168, 85, 247, 0.6);
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 226, 163, 0.2);
     }
@@ -390,7 +390,7 @@
 
     /* 1. ベース：純黒からボルドー寄り暗色へ */
     .recruit-ref-shell {
-        background: linear-gradient(180deg, #2a0d18 0%, #1a0a0e 100%);
+        background: linear-gradient(180deg, #141414 0%, #0a0a0a 100%);
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(168, 85, 247, 0.06);
     }
     .recruit-ref-wrap { background: transparent; }
@@ -403,15 +403,15 @@
         border-bottom-color: rgba(168, 85, 247, 0.22);
     }
     .recruit-ref-preview-sticky > p { color: #a78bfa; }
-    .recruit-ref-switch-track { background: #4a1d28; }
+    .recruit-ref-switch-track { background: #2a2a2a; }
     .recruit-ref-switch-track.is-on { background: linear-gradient(135deg, #a78bfa, #7c3aed); }
-    .recruit-ref-switch-label { color: #b5a69d; }
+    .recruit-ref-switch-label { color: #a0a0a0; }
     .recruit-ref-switch-label.is-on { color: #a78bfa; }
     .recruit-ref-preview-edit { border-color: #a78bfa; color: #a78bfa; }
     .recruit-ref-preview-edit:hover { background: rgba(168, 85, 247, 0.12); }
 
     /* 3. ヒーロー */
-    .recruit-ref-hero { background: #1a0a0e; }
+    .recruit-ref-hero { background: #0a0a0a; }
     .recruit-ref-dot.is-active { background: #a78bfa; }
     .recruit-ref-thumbs--carousel button.is-active img { border-color: #a78bfa; box-shadow: 0 0 0 1px #a78bfa; }
     .recruit-ref-thumbs--carousel img,
@@ -422,7 +422,7 @@
     .recruit-ref-head { border-bottom-color: rgba(168, 85, 247, 0.16); }
     .recruit-ref-chip {
         background: rgba(168, 85, 247, 0.08);
-        color: #eae0d5;
+        color: #f5f5f5;
         border-color: rgba(168, 85, 247, 0.22);
     }
     .recruit-ref-chip.gold-outline { color: #a78bfa; border-color: #a78bfa; }
@@ -433,7 +433,7 @@
         background: rgba(0, 0, 0, 0.35);
         border-color: rgba(168, 85, 247, 0.22);
     }
-    .recruit-job-toggle button { color: #b5a69d; }
+    .recruit-job-toggle button { color: #a0a0a0; }
     .recruit-job-toggle button.is-active {
         background: rgba(168, 85, 247, 0.16);
         color: #a78bfa;
@@ -452,27 +452,27 @@
 
     /* 7. タグピル */
     .recruit-ref-tags span.gold { background: rgba(168, 85, 247, 0.1); border-color: rgba(168, 85, 247, 0.32); color: #a78bfa; }
-    .recruit-ref-tags span.dim { background: rgba(255, 255, 255, 0.04); border-color: rgba(168, 85, 247, 0.18); color: #eae0d5; font-weight: 600; }
+    .recruit-ref-tags span.dim { background: rgba(255, 255, 255, 0.04); border-color: rgba(168, 85, 247, 0.18); color: #f5f5f5; font-weight: 600; }
 
     /* 8. セクション見出し・本文 */
     .recruit-ref-h2 { color: #a78bfa; }
     .recruit-ref-h2-lg .bar { background: #a78bfa; }
-    .recruit-ref-subtle { color: #b5a69d; }
+    .recruit-ref-subtle { color: #a0a0a0; }
     .recruit-ref-msg {
-        background: #2a0d18;
+        background: #141414;
         border-color: rgba(168, 85, 247, 0.22);
-        color: #eae0d5;
+        color: #f5f5f5;
         box-shadow: inset 0 1px 0 rgba(168, 85, 247, 0.04);
     }
 
     /* 9. シェアボタン */
-    .recruit-ref-share-row .recruit-ref-share-btn { color: #eae0d5; border-color: rgba(168, 85, 247, 0.32); }
+    .recruit-ref-share-row .recruit-ref-share-btn { color: #f5f5f5; border-color: rgba(168, 85, 247, 0.32); }
     .recruit-ref-share-row .recruit-ref-share-btn--gold { border-color: #a78bfa; color: #a78bfa; }
     .recruit-ref-share-row .recruit-ref-share-btn--gold:hover { background: rgba(168, 85, 247, 0.12); }
 
     /* 10. 入店ボーナスカード */
     .recruit-ref-bonus-card {
-        background: linear-gradient(135deg, #4a1d28 0%, #2a0d18 100%);
+        background: linear-gradient(135deg, #2a2a2a 0%, #141414 100%);
         border-color: rgba(168, 85, 247, 0.45);
         box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(168, 85, 247, 0.1);
     }
@@ -486,16 +486,16 @@
 
     /* 11. 情報行（k/v） */
     .recruit-ref-inforow { border-bottom-color: rgba(168, 85, 247, 0.14); }
-    .recruit-ref-inforow .k { color: #b5a69d; }
-    .recruit-ref-inforow .v { color: #eae0d5; }
+    .recruit-ref-inforow .k { color: #a0a0a0; }
+    .recruit-ref-inforow .v { color: #f5f5f5; }
 
     /* 12. タグマトリクス */
     .recruit-ref-tag-matrix {
-        background: #2a0d18;
+        background: #141414;
         border-color: rgba(168, 85, 247, 0.18);
     }
     .recruit-ref-tag-matrix > p { color: #a78bfa; }
-    .recruit-ref-tag-matrix-row .cat { color: #b5a69d; }
+    .recruit-ref-tag-matrix-row .cat { color: #a0a0a0; }
 
     /* 13. マップリンク */
     .recruit-ref-map-link { color: #a78bfa; border-color: rgba(168, 85, 247, 0.5); }
@@ -535,13 +535,13 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.32);
         transition: background 0.15s ease, transform 0.12s ease;
     }
-    .recruit-ref-hero-arrow:hover { background: rgba(168, 85, 247, 0.65); color: #1a0a0e; }
+    .recruit-ref-hero-arrow:hover { background: rgba(168, 85, 247, 0.65); color: #0a0a0a; }
     .recruit-ref-hero-arrow:active { transform: translateY(-50%) scale(0.94); }
     .recruit-ref-hero-arrow--prev { left: 12px; }
     .recruit-ref-hero-arrow--next { right: 12px; }
     .recruit-ref-hero-fallback {
         width: 100%; height: 100%;
-        background: linear-gradient(135deg, #4a1d28 0%, #2a0d18 50%, #1a0a0e 100%);
+        background: linear-gradient(135deg, #2a2a2a 0%, #141414 50%, #0a0a0a 100%);
     }
 
     /* 時給ハイライト：RANGE バッジ (A1) */
@@ -564,7 +564,7 @@
     }
     .recruit-ref-pay-empty {
         font-size: 0.9rem;
-        color: #b5a69d;
+        color: #a0a0a0;
         font-weight: 700;
     }
 

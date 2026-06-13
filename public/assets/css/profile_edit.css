@@ -239,3 +239,53 @@
 }
 .radio-label input { margin: 0; }
 .form-submit-section { margin-top: 24px; }
+
+/* === エラー状態の汎用スタイル（プロフィール編集系で共通利用） ===
+   - .is-error class または [aria-invalid="true"] でフィールドを赤枠化
+   - .field-error / .form-error-message で行下に赤エラー文を表示
+   - サーバーサイドの $errors->has() と組み合わせて使う想定 */
+.cast-input.is-error,
+.cast-select.is-error,
+.cast-textarea.is-error,
+.edit-input.is-error,
+.edit-select.is-error,
+.edit-textarea.is-error,
+input[aria-invalid="true"],
+select[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+    border-color: rgba(248, 113, 113, 0.70) !important;
+    background: rgba(220, 38, 38, 0.06) !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.18) !important;
+}
+.field-error,
+.form-error-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: 6px;
+    padding: 0 2px;
+    font-size: 0.74rem;
+    color: #fca5a5;
+    line-height: 1.45;
+}
+.field-error::before,
+.form-error-message::before {
+    content: "⚠";
+    flex-shrink: 0;
+    font-size: 0.85em;
+    line-height: 1;
+    margin-top: 1px;
+}
+
+/* フォーム全体の上部に出すアラート（複数件まとめ） */
+.form-errors-banner {
+    margin: 0 0 18px;
+    padding: 12px 14px;
+    border: 1px solid rgba(248, 113, 113, 0.45);
+    background: rgba(220, 38, 38, 0.10);
+    border-radius: 12px;
+    color: #fecaca;
+    font-size: 0.82rem;
+    line-height: 1.6;
+}
+.form-errors-banner ul { margin: 4px 0 0; padding-left: 1.1em; }

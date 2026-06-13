@@ -188,15 +188,15 @@
 .cast-edit-page { padding: 12px 0 0; }
 .cast-edit-form { position: relative; padding: 0 0 108px; }
 .cast-edit-section { margin: 0 0 14px; padding: 14px; border-radius: 14px; background: rgba(26, 10, 14, .8); border: 1px solid rgba(74, 29, 40, .4); }
-.cast-edit-section h3 { margin: 0 0 12px; font-size: 14px; color: #c8a951; font-weight: 700; display: flex; gap: 8px; align-items: center; }
+.cast-edit-section h3 { margin: 0 0 12px; font-size: 14px; color: var(--accent-text, #f0a6c4); font-weight: 700; display: flex; gap: 8px; align-items: center; }
 .field { margin-bottom: 12px; }
 .field:last-child { margin-bottom: 0; }
 .field > label { display: block; margin-bottom: 6px; font-size: 0.78rem; font-weight: 700; color: rgba(232, 213, 163, 0.78); letter-spacing: 0.04em; }
 .required { color: #f87171; margin-left: 4px; }
 .cast-input, .cast-select {
     width: 100%;
-    background: #110c0a;
-    border: 1px solid #4a1d28;
+    background: #050505;
+    border: 1px solid #2a2a2a;
     border-radius: 10px;
     padding: 12px 14px;
     color: #fff;
@@ -210,24 +210,34 @@
 .cast-input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(79%) sepia(29%) saturate(566%) hue-rotate(5deg) brightness(91%) contrast(89%); cursor: pointer; }
 .cast-textarea { resize: vertical; line-height: 1.6; }
 .min-h100 { min-height: 110px; }
-.cast-input:focus, .cast-select:focus { border-color: #c8a951; box-shadow: 0 0 0 3px rgba(200, 169, 81, 0.18); }
+.cast-input:focus, .cast-select:focus { border-color: var(--accent, #d670a2); box-shadow: 0 0 0 3px rgba(var(--accent-rgb, 214, 112, 162), 0.22); }
 .cast-input::placeholder { color: rgba(255, 255, 255, 0.28); font-weight: 500; }
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .tag-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .tag-chip { position: relative; display: inline-flex; }
 .tag-chip input { position: absolute; opacity: 0; pointer-events: none; }
-.tag-chip span { padding: 7px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; border: 1px solid rgba(255, 255, 255, .05); background: rgba(17, 12, 10, .8); color: #b5a69d; }
-.tag-looks input:checked + span { background: rgba(90, 28, 44, .8); border-color: rgba(200, 169, 81, .4); color: #eae0d5; }
-.tag-personality input:checked + span { background: rgba(26, 42, 58, .8); border-color: rgba(74, 144, 226, .4); color: #d0e3f0; }
+.tag-chip span { padding: 7px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; border: 1px solid rgba(255, 255, 255, .05); background: rgba(10, 10, 10, 0.8); color: #a0a0a0; }
+/* ルックス / 内面の選択チップ：意図的にカラー区分（ルックス=mauve、内面=cool blue）。
+   ただし旧 warm wine (#5a1c2c) / 旧 gold (#c8a951) を撤去して新テーマに整合させる。 */
+.tag-looks input:checked + span {
+    background: rgba(var(--accent-rgb, 214, 112, 162), 0.18);
+    border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.45);
+    color: var(--accent-text, #f0a6c4);
+}
+.tag-personality input:checked + span {
+    background: rgba(56, 132, 220, 0.16);
+    border-color: rgba(56, 132, 220, 0.45);
+    color: #93c5fd;
+}
 .radio-like-row { display: flex; gap: 18px; flex-wrap: wrap; }
 .radio-like { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
 .radio-like input { position: absolute; opacity: 0; pointer-events: none; }
-.radio-like .dot { width: 16px; height: 16px; border-radius: 50%; border: 1px solid #4a1d28; background: #110c0a; position: relative; }
-.radio-like input:checked + .dot { border-color: #c8a951; }
-.radio-like input:checked + .dot::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #c8a951; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
-.radio-like span:last-child { color: #b5a69d; font-size: 12px; font-weight: 600; }
+.radio-like .dot { width: 16px; height: 16px; border-radius: 50%; border: 1px solid #2a2a2a; background: #050505; position: relative; }
+.radio-like input:checked + .dot { border-color: var(--accent, #d670a2); }
+.radio-like input:checked + .dot::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent, #d670a2); position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+.radio-like span:last-child { color: #a0a0a0; font-size: 12px; font-weight: 600; }
 .radio-like input:checked + .dot + span { color: #fff; }
-.save-bar { position: absolute; left: 0; right: 0; bottom: 0; padding: 24px 16px 16px; background: linear-gradient(to top, #110c0a 35%, rgba(17, 12, 10, .92) 65%, rgba(17, 12, 10, 0)); }
+.save-bar { position: absolute; left: 0; right: 0; bottom: 0; padding: 24px 16px 16px; background: linear-gradient(to top, #050505 35%, rgba(5, 5, 5, 0.92) 65%, rgba(5, 5, 5, 0)); }
 .save-btn { width: 100%; border: 1px solid #a63253; border-radius: 16px; background: linear-gradient(135deg, #8a2542, #5a1628); color: #fff; font-weight: 700; letter-spacing: .08em; padding: 14px; display: inline-flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, .45); }
 </style>
 @endsection

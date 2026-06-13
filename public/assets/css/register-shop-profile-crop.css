@@ -26,7 +26,7 @@
 .register-shop-crop-inner h3 {
     margin: 0;
     font-size: 1.1rem;
-    color: #fff4d6;
+    color: var(--accent-text, #f0a6c4);
 }
 
 .register-shop-crop-guide {
@@ -73,7 +73,7 @@
 .register-shop-crop-btn-secondary {
     border: 1px solid rgba(168, 85, 247, 0.26);
     background: rgba(255, 255, 255, 0.04);
-    color: #fff4d6;
+    color: var(--accent-text, #f0a6c4);
 }
 
 .register-shop-crop-btn-primary {

@@ -125,6 +125,91 @@
     letter-spacing: 0;
     line-height: 1.5;
 }
+
+/* === C-1: 本人確認 UX polish === */
+/* ファイル選択ボタン：ファイル名が長くても崩れない flex row */
+.identity-form-section .bank-form-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+    margin-bottom: 12px;
+}
+.identity-form-section .bank-form-row .bank-label {
+    flex-basis: 100%;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.78);
+    margin-bottom: 2px;
+}
+/* ファイル選択ボタン：mauve outline、選択済みは緑 */
+.identity-form-section .file-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border-radius: 999px;
+    border: 1px solid rgba(168, 85, 247, 0.40);
+    color: rgba(255, 255, 255, 0.88);
+    background: rgba(168, 85, 247, 0.06);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+.identity-form-section .file-upload-btn:hover {
+    background: rgba(168, 85, 247, 0.14);
+    border-color: rgba(168, 85, 247, 0.65);
+}
+.identity-form-section .file-upload-btn.is-selected {
+    color: #6ee7b7;
+    border-color: rgba(110, 231, 183, 0.55);
+    background: rgba(16, 185, 129, 0.10);
+}
+.identity-form-section .file-upload-btn.is-selected i::before {
+    content: "\f00c";  /* fa-check */
+}
+.identity-form-section .file-name-display {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.55);
+    word-break: break-all;
+}
+.identity-form-section .file-name-display.is-set {
+    color: #d4d4d4;
+}
+/* インラインエラー（alert の置き換え）*/
+.cast-identity-error {
+    margin: 10px 0 0;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(248, 113, 113, 0.45);
+    background: rgba(220, 38, 38, 0.08);
+    color: #fecaca;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+}
+.cast-identity-error::before {
+    content: "⚠";
+    flex-shrink: 0;
+    color: #fca5a5;
+}
+.cast-identity-error[hidden] { display: none; }
+/* 成功メッセージ */
+.cast-identity-success {
+    margin: 10px 0 0;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(110, 231, 183, 0.45);
+    background: rgba(16, 185, 129, 0.08);
+    color: #a7f3d0;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+.cast-identity-success[hidden] { display: none; }
 </style>
 @endpush
 
@@ -242,10 +327,31 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // 各カテゴリのフォーム送信
+    // 各カテゴリのフォーム送信（インラインエラー + 成功表示）
     document.querySelectorAll('form.cast-identity-form').forEach(function (form) {
+        var errorEl = form.querySelector('.cast-identity-error');
+        var successEl = form.querySelector('.cast-identity-success');
+        var showError = function (text) {
+            if (!errorEl) return;
+            errorEl.textContent = text;
+            errorEl.hidden = false;
+            if (successEl) successEl.hidden = true;
+        };
+        var showSuccess = function (text) {
+            if (!successEl) return;
+            successEl.textContent = text;
+            successEl.hidden = false;
+            if (errorEl) errorEl.hidden = true;
+        };
+        var clearMessages = function () {
+            if (errorEl) errorEl.hidden = true;
+            if (successEl) successEl.hidden = true;
+        };
         form.addEventListener('submit', function (e) {
             e.preventDefault();
+            clearMessages();
+            var submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
             var formData = new FormData(form);
             fetch('{{ route("cast.mypage.identity.upload") }}', {
                 method: 'POST',
@@ -258,25 +364,38 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             })
             .then(function (res) {
-                var msgEl = document.getElementById('cast-identity-message');
-                if (msgEl) {
-                    msgEl.style.display = 'block';
-                    msgEl.textContent = res && res.message ? res.message : 'アップロードしました。';
-                }
-                window.location.reload();
+                showSuccess(res && res.message ? res.message : 'アップロードしました。');
+                setTimeout(function () { window.location.reload(); }, 600);
             }).catch(function (error) {
+                if (submitBtn) submitBtn.disabled = false;
                 var messages = error && error.errors ? Object.values(error.errors).flat() : [];
-                alert(messages[0] || (error && error.message) || 'アップロードに失敗しました。時間をおいて再度お試しください。');
+                showError(messages[0] || (error && error.message) || 'アップロードに失敗しました。時間をおいて再度お試しください。');
             });
         });
     });
 
-    /* === Fix 4: カスタムファイル選択ボタンに名前表示を追従 === */
+    /* ファイル選択：ファイル名 + 選択済みチェック + 画像サムネ */
     document.querySelectorAll('input[type="file"].bank-input').forEach(function (input) {
         input.addEventListener('change', function () {
             var nameDisplay = document.getElementById(input.id + '_name');
-            if (!nameDisplay) return;
-            nameDisplay.textContent = (input.files && input.files[0] && input.files[0].name) || '選択されていません';
+            var uploadBtn = input.previousElementSibling;
+            while (uploadBtn && !uploadBtn.classList.contains('file-upload-btn')) {
+                uploadBtn = uploadBtn.previousElementSibling;
+            }
+            var file = input.files && input.files[0];
+            if (file) {
+                if (nameDisplay) {
+                    nameDisplay.textContent = file.name;
+                    nameDisplay.classList.add('is-set');
+                }
+                if (uploadBtn) uploadBtn.classList.add('is-selected');
+            } else {
+                if (nameDisplay) {
+                    nameDisplay.textContent = '選択されていません';
+                    nameDisplay.classList.remove('is-set');
+                }
+                if (uploadBtn) uploadBtn.classList.remove('is-selected');
+            }
         });
     });
 });

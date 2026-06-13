@@ -59,6 +59,19 @@
         border-color: #a78bfa;
         box-shadow: inset 0 2px 4px rgba(0,0,0,.4), 0 0 0 3px rgba(168, 85, 247, .2);
     }
+    .staff-form-field input.is-error,
+    .staff-form-field select.is-error,
+    .staff-form-field input[aria-invalid="true"] {
+        border-color: rgba(248, 113, 113, 0.70);
+        background: rgba(220, 38, 38, 0.06);
+    }
+    .staff-form-field input.is-error:focus,
+    .staff-form-field input[aria-invalid="true"]:focus {
+        box-shadow: inset 0 2px 4px rgba(0,0,0,.4), 0 0 0 3px rgba(220, 38, 38, 0.18);
+    }
+    .staff-form-field input.is-valid {
+        border-color: rgba(110, 231, 183, 0.55);
+    }
     .staff-form-field select {
         background-image:
             linear-gradient(45deg, transparent 50%, #c4b5fd 50%),
@@ -75,7 +88,10 @@
     }
     .staff-form-field__error {
         font-size: 0.76rem; color: #fca5a5; margin-top: 2px;
+        display: flex; align-items: flex-start; gap: 4px;
     }
+    .staff-form-field__error::before { content: "⚠"; }
+    .staff-form-field__error[hidden] { display: none; }
 
     .staff-form-actions {
         display: flex; gap: 10px; margin-top: 8px;
@@ -113,15 +129,18 @@
             <h1 class="mypage-page-title">スタッフを追加</h1>
             <p class="staff-form-lead">新しい店舗ログインアカウントを発行します。</p>
 
-            @if ($errors->any())
+            @if ($errors->has('shop') || $errors->has('manager_limit'))
                 <div class="staff-form-flash--error">
-                    @foreach ($errors->all() as $error)
+                    @foreach ($errors->get('shop') as $error)
+                        {{ $error }}<br>
+                    @endforeach
+                    @foreach ($errors->get('manager_limit') as $error)
                         {{ $error }}<br>
                     @endforeach
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('shop.mypage.staff.store') }}" class="staff-form-card" autocomplete="off">
+            <form method="POST" action="{{ route('shop.mypage.staff.store') }}" class="staff-form-card" autocomplete="off" novalidate>
                 @csrf
 
                 <div class="staff-form-field">
@@ -131,8 +150,11 @@
                         value="{{ old('name') }}"
                         maxlength="255" required
                         placeholder="例：山田 花子"
+                        aria-describedby="staff-name-error"
+                        @error('name') aria-invalid="true" class="is-error" @enderror
                     >
                     <p class="staff-form-field__hint">店舗内・運営とのやり取りで使う名前です。</p>
+                    <p class="staff-form-field__error" id="staff-name-error" @error('name') @else hidden @enderror>@error('name'){{ $message }}@enderror</p>
                 </div>
 
                 <div class="staff-form-field">
@@ -143,8 +165,11 @@
                         maxlength="255" required
                         autocomplete="off"
                         placeholder="staff@example.com"
+                        aria-describedby="staff-email-error"
+                        @error('email') aria-invalid="true" class="is-error" @enderror
                     >
                     <p class="staff-form-field__hint">このメールアドレスでログインします。</p>
+                    <p class="staff-form-field__error" id="staff-email-error" @error('email') @else hidden @enderror>@error('email'){{ $message }}@enderror</p>
                 </div>
 
                 <div class="staff-form-field">
@@ -154,7 +179,10 @@
                         minlength="8" required
                         autocomplete="new-password"
                         placeholder="8文字以上"
+                        aria-describedby="staff-password-error"
+                        @error('password') aria-invalid="true" class="is-error" @enderror
                     >
+                    <p class="staff-form-field__error" id="staff-password-error" @error('password') @else hidden @enderror>@error('password'){{ $message }}@enderror</p>
                 </div>
 
                 <div class="staff-form-field">
@@ -163,7 +191,9 @@
                         type="password" id="staff-password-confirm" name="password_confirmation"
                         minlength="8" required
                         autocomplete="new-password"
+                        aria-describedby="staff-password-confirm-error"
                     >
+                    <p class="staff-form-field__error" id="staff-password-confirm-error" hidden></p>
                 </div>
 
                 <div class="staff-form-field">
@@ -190,3 +220,82 @@
     </section>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var form = document.querySelector('form.staff-form-card');
+    if (!form) return;
+    var nameInput = form.querySelector('#staff-name');
+    var emailInput = form.querySelector('#staff-email');
+    var pwInput = form.querySelector('#staff-password');
+    var pwConfirmInput = form.querySelector('#staff-password-confirm');
+
+    var setError = function (input, msg) {
+        if (!input) return;
+        var errId = input.getAttribute('aria-describedby');
+        var errEl = errId ? document.getElementById(errId) : null;
+        if (msg) {
+            input.classList.add('is-error');
+            input.classList.remove('is-valid');
+            input.setAttribute('aria-invalid', 'true');
+            if (errEl) { errEl.textContent = msg; errEl.hidden = false; }
+        } else {
+            input.classList.remove('is-error');
+            input.classList.add('is-valid');
+            input.removeAttribute('aria-invalid');
+            if (errEl) { errEl.textContent = ''; errEl.hidden = true; }
+        }
+    };
+
+    var validateName = function () {
+        var v = (nameInput.value || '').trim();
+        if (!v) { setError(nameInput, '表示名を入力してください。'); return false; }
+        setError(nameInput, '');
+        return true;
+    };
+    var validateEmail = function () {
+        var v = (emailInput.value || '').trim();
+        if (!v) { setError(emailInput, 'メールアドレスを入力してください。'); return false; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+            setError(emailInput, 'メールアドレスの形式が正しくありません。'); return false;
+        }
+        setError(emailInput, '');
+        return true;
+    };
+    var validatePw = function () {
+        var v = pwInput.value || '';
+        if (!v) { setError(pwInput, 'パスワードを入力してください。'); return false; }
+        if (v.length < 8) { setError(pwInput, '8文字以上で入力してください。'); return false; }
+        setError(pwInput, '');
+        if (pwConfirmInput.value) validatePwConfirm();
+        return true;
+    };
+    var validatePwConfirm = function () {
+        var v = pwConfirmInput.value || '';
+        if (!v) { setError(pwConfirmInput, '確認用パスワードを入力してください。'); return false; }
+        if (v !== pwInput.value) { setError(pwConfirmInput, 'パスワードが一致しません。'); return false; }
+        setError(pwConfirmInput, '');
+        return true;
+    };
+
+    if (nameInput) nameInput.addEventListener('blur', validateName);
+    if (emailInput) emailInput.addEventListener('blur', validateEmail);
+    if (pwInput) pwInput.addEventListener('input', validatePw);
+    if (pwConfirmInput) pwConfirmInput.addEventListener('input', validatePwConfirm);
+
+    form.addEventListener('submit', function (e) {
+        var ok = true;
+        if (!validateName()) ok = false;
+        if (!validateEmail()) ok = false;
+        if (!validatePw()) ok = false;
+        if (!validatePwConfirm()) ok = false;
+        if (!ok) {
+            e.preventDefault();
+            var firstErr = form.querySelector('.is-error');
+            if (firstErr) firstErr.focus();
+        }
+    });
+});
+</script>
+@endpush

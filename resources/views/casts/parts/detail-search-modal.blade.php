@@ -927,6 +927,7 @@
     cursor: pointer;
 }
 .detail-search-location-range:focus { outline: none; }
+.detail-search-location-range:focus-visible { outline: 2px solid var(--accent, #d670a2); outline-offset: 4px; border-radius: 4px; }
 .detail-search-location-range::-webkit-slider-runnable-track {
     width: 100%; height: 16px;
     background: rgba(0, 0, 0, 0.35);

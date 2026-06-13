@@ -44,39 +44,55 @@ class InjectHeaderBadges
 
         [$userType, $userId] = $resolved;
 
-        // 1. やることリスト
-        $todoList = match ($userType) {
-            'cast'         => $this->tasks->forCast($userId),
-            'shop_manager' => $this->tasks->forShop($this->shopIdForManager($userId) ?? ''),
-            default        => [],
-        };
+        // 1. やることリスト（失敗時は空配列で握り潰してヘッダー崩壊を防止）
+        try {
+            $todoList = match ($userType) {
+                'cast'         => $this->tasks->forCast($userId),
+                'shop_manager' => $this->tasks->forShop($this->shopIdForManager($userId) ?? ''),
+                default        => [],
+            };
+        } catch (\Throwable) {
+            $todoList = [];
+        }
 
-        // 2. 個人宛おしらせ（最新20件）
-        $notificationsCollection = $this->notifications->latestForUser($userType, $userId, 20);
-        $notifications = $notificationsCollection->map(function ($n) {
-            return [
-                'id'           => $n->id,
-                'title'        => $n->title,
-                'body'         => $n->body,
-                'url'          => $n->url,
-                'is_unread'    => $n->isUnread(),
-                'created_at'   => $n->created_at,
-                'created_at_label' => optional($n->created_at)->diffForHumans(),
-            ];
-        })->all();
+        // 2. 個人宛おしらせ（最新20件）— テーブル未作成・カラム不一致でも壊さない
+        $notifications = [];
+        $unreadPersonal = 0;
+        try {
+            $notificationsCollection = $this->notifications->latestForUser($userType, $userId, 20);
+            $notifications = $notificationsCollection
+                ->map(function ($n) {
+                    // 必ず配列で返す。null/未設定でも 'id' 等のキーは存在させる
+                    return [
+                        'id'               => $n->id ?? null,
+                        'title'            => (string) ($n->title ?? ''),
+                        'body'             => $n->body ?? null,
+                        'url'              => $n->url ?? null,
+                        'is_unread'        => method_exists($n, 'isUnread') ? $n->isUnread() : empty($n->read_at),
+                        'created_at'       => $n->created_at ?? null,
+                        'created_at_label' => $n->created_at ? optional($n->created_at)->diffForHumans() : null,
+                    ];
+                })
+                ->all();
+            $unreadPersonal = $notificationsCollection->whereNull('read_at')->count();
+        } catch (\Throwable) {
+            // notifications テーブルが未作成 / 旧スキーマ / 権限エラー等。ヘッダーは空で表示。
+            $notifications = [];
+            $unreadPersonal = 0;
+        }
 
         // 3. 公式お知らせ（ロール別・公開中）
-        $operationalNotices = $this->loadOperationalNotices($userType);
-
-        // 4. 未読バッジ件数 = 個人宛未読 + 未確認の公式お知らせ
-        $unreadPersonal = $notificationsCollection->whereNull('read_at')->count();
-        $unreadNewsCount = $unreadPersonal; // 公式お知らせの既読管理は後段で実装するため一旦個人宛のみ
+        try {
+            $operationalNotices = $this->loadOperationalNotices($userType);
+        } catch (\Throwable) {
+            $operationalNotices = [];
+        }
 
         View::share([
             'todoList'           => $todoList,
             'notifications'      => $notifications,
             'operationalNotices' => $operationalNotices,
-            'unreadNewsCount'    => $unreadNewsCount,
+            'unreadNewsCount'    => $unreadPersonal,
         ]);
 
         return $next($request);

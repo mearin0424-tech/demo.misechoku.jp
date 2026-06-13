@@ -112,8 +112,8 @@ img { max-width: 100%; height: auto; }
 input, select, textarea, button { font-family: inherit; }
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #d4c5b0; border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
-::-webkit-scrollbar-thumb:hover { background: #b8a589; background-clip: padding-box; border: 2px solid transparent; }
+::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.18); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(15, 23, 42, 0.32); background-clip: padding-box; border: 2px solid transparent; }
 
 /* ----------------------------------------------------------------
    3. レイアウト骨格（モバイル基準）
@@ -2432,9 +2432,9 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
     border-color: var(--admin-gold-border);
 }
 .actor-pill.is-shop {
-    background: #fbeae3;
-    color: #86432a;
-    border-color: #f1d4c8;
+    background: var(--status-info-bg);
+    color: var(--status-info-fg);
+    border-color: var(--status-info-bd);
 }
 .actor-pill.is-done {
     background: var(--status-success-bg);
@@ -3348,8 +3348,8 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #4a122a, #6e1b3f);
-    color: #f6e2b3;
+    background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-hover));
+    color: #ffffff;
     font-size: 1.4rem;
     box-shadow: var(--admin-shadow);
 }
@@ -3419,7 +3419,7 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
     border-radius: 999px;
     background: linear-gradient(135deg, rgba(168, 85, 247, 0.16), rgba(168, 85, 247, 0.08));
     border: 1px solid rgba(168, 85, 247, 0.55);
-    color: #6e4f15;
+    color: var(--admin-gold-deep);
     font-weight: 700;
     font-size: 0.8rem;
 }
@@ -3496,8 +3496,8 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
     align-self: flex-start;
     padding: 4px 10px;
     border-radius: 999px;
-    background: rgba(74, 18, 42, 0.06);
-    color: #4a122a;
+    background: var(--status-info-bg);
+    color: var(--admin-primary);
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.06em;
@@ -3540,7 +3540,7 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
 }
 .admin-role-card__pill.is-locked {
     background: rgba(74, 18, 42, 0.1);
-    color: #4a122a;
+    color: var(--admin-primary);
 }
 .admin-role-card__pill.is-editable {
     background: rgba(16, 185, 129, 0.14);
@@ -3579,7 +3579,7 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
     font-size: 0.78rem;
     letter-spacing: 0.08em;
     font-weight: 800;
-    color: #4a122a;
+    color: var(--admin-primary);
     padding: 0 6px;
     margin-bottom: 8px;
 }
@@ -3609,7 +3609,7 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
 }
 .role-permission-item input[type=checkbox] {
     margin-top: 4px;
-    accent-color: #4a122a;
+    accent-color: var(--admin-primary);
 }
 .role-permission-item__body {
     display: flex;
@@ -3696,7 +3696,7 @@ a.btn-action.btn-action-danger:hover {
 .spec-tab:hover { color: var(--admin-text); background: rgba(255, 255, 255, 0.5); }
 .spec-tab.is-active {
     background: linear-gradient(135deg, #ffffff, rgba(168, 85, 247, 0.12));
-    color: #4a122a;
+    color: var(--admin-primary);
     box-shadow: var(--admin-shadow);
 }
 .spec-tab i { font-size: 0.95rem; }
@@ -3749,7 +3749,7 @@ a.btn-action.btn-action-danger:hover {
 .spec-card__condition-label {
     display: inline-block;
     font-weight: 700;
-    color: #4a122a;
+    color: var(--admin-primary);
     margin-right: 6px;
     font-size: 0.7rem;
     letter-spacing: 0.06em;
@@ -3782,7 +3782,7 @@ a.btn-action.btn-action-danger:hover {
 .spec-readonly__label {
     font-size: 0.78rem;
     font-weight: 700;
-    color: #4a122a;
+    color: var(--admin-primary);
 }
 .spec-readonly__label i { margin-right: 4px; }
 .spec-readonly__value {
@@ -3916,7 +3916,7 @@ a.btn-action.btn-action-danger:hover {
     border: 0;
     border-radius: 6px;
     background: rgba(168, 85, 247, 0.18);
-    color: #4a122a;
+    color: var(--admin-primary);
     cursor: pointer;
 }
 .sort-order-save:hover { background: rgba(168, 85, 247, 0.35); }
@@ -3946,7 +3946,7 @@ a.btn-action.btn-action-danger:hover {
     text-decoration: none;
 }
 .admin-row-clickable__link:hover {
-    color: #4a122a;
+    color: var(--admin-primary);
     text-decoration: underline;
 }
 .admin-table-clickable tr.is-suspended:hover {
@@ -4027,9 +4027,9 @@ a.btn-action.btn-action-danger:hover {
     transform: scale(1.05);
 }
 .admin-info-btn[aria-expanded="true"] {
-    background: linear-gradient(135deg, #4a122a, #6e1b3f);
+    background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-hover));
     color: #e6dffc;
-    border-color: #4a122a;
+    border-color: var(--admin-primary);
 }
 .u-visually-hidden {
     position: absolute;
@@ -4077,7 +4077,7 @@ a.btn-action.btn-action-danger:hover {
     padding: 12px 14px;
     border-bottom: 1px solid rgba(74, 18, 42, 0.08);
     background: linear-gradient(135deg, rgba(168, 85, 247, 0.10), rgba(255, 255, 255, 0.6));
-    color: #4a122a;
+    color: var(--admin-primary);
     font-size: 0.86rem;
     font-weight: 800;
     letter-spacing: 0.04em;
@@ -4108,7 +4108,7 @@ a.btn-action.btn-action-danger:hover {
 .admin-info-popover__body ul,
 .admin-info-popover__body ol { margin: 0 0 8px; padding-left: 18px; }
 .admin-info-popover__body li { margin-bottom: 4px; line-height: 1.6; }
-.admin-info-popover__body strong { color: #4a122a; }
+.admin-info-popover__body strong { color: var(--admin-primary); }
 .admin-info-popover__body code {
     background: rgba(74, 18, 42, 0.06);
     padding: 1px 6px;
@@ -4116,7 +4116,7 @@ a.btn-action.btn-action-danger:hover {
     font-size: 0.86em;
 }
 .admin-info-popover__body a {
-    color: #4a122a;
+    color: var(--admin-primary);
     text-decoration: underline;
     text-decoration-color: rgba(168, 85, 247, 0.7);
     text-underline-offset: 2px;
@@ -4155,7 +4155,7 @@ a.btn-action.btn-action-danger:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #4a122a, #6e1b3f);
+    background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-hover));
     color: #f6e2b3;
     font-size: 1.2rem;
 }
@@ -4172,7 +4172,7 @@ a.btn-action.btn-action-danger:hover {
     color: var(--admin-text);
     margin: 2px 0 4px;
 }
-.screen-role-banner__title strong { color: #4a122a; }
+.screen-role-banner__title strong { color: var(--admin-primary); }
 .screen-role-banner__lead {
     margin: 0;
     font-size: 0.85rem;
@@ -4220,7 +4220,7 @@ a.btn-action.btn-action-danger:hover {
 }
 .sales-period-tab:hover { color: var(--admin-text); background: rgba(255,255,255,0.6); }
 .sales-period-tab.is-active {
-    background: linear-gradient(135deg, #4a122a, #6e1b3f);
+    background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-hover));
     color: #f6e2b3;
     box-shadow: var(--admin-shadow);
 }
@@ -4245,7 +4245,7 @@ a.btn-action.btn-action-danger:hover {
     gap: 4px;
 }
 .sales-kpi-card.is-primary {
-    background: linear-gradient(135deg, #4a122a, #6e1b3f);
+    background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-hover));
     color: #e6dffc;
     border: 0;
 }

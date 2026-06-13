@@ -978,7 +978,9 @@ body.page-search .connection-list--search {
 .detail-search-modal__overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.72);  /* 0.6 → 0.72 で他モーダルと濃度を統一 */
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     cursor: default;
 }
 .detail-search-modal__window {
@@ -1060,12 +1062,22 @@ body.page-search .connection-list--search {
     background: rgba(255, 255, 255, 0.05);
     color: #fff;
 }
+/* 検索ボタン（このモーダル経由）：アプリ共通の mauve solid + 物理ボタン感 */
 .detail-search-modal__btn--submit {
-    background: var(--gold);
-    color: var(--color-main);
+    background: var(--accent, #d670a2);
+    color: var(--on-accent, #1a0814);
+    box-shadow:
+        0 6px 14px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.20),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18);
+    transition: filter 0.15s, transform 0.12s, box-shadow 0.15s;
 }
 .detail-search-modal__btn--submit:hover {
-    filter: brightness(1.1);
+    filter: brightness(1.06);
+}
+.detail-search-modal__btn--submit:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.45), inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* ---------- 詳細検索フォーム ---------- */
@@ -1178,7 +1190,7 @@ body.page-search .connection-list--search {
 }
 .detail-search-location-option__icon {
     font-size: 0.75rem;
-    color: #b5a69d;
+    color: #a0a0a0;
     transition: color 0.2s;
 }
 .detail-search-location-option.is-selected {
@@ -1594,9 +1606,14 @@ body.page-search .connection-list--search {
     color: var(--color-text-muted);
 }
 
+/* 検索画面下部の "この条件で検索" 大ボタン：mauve solid（旧紫グラデを撤去） */
 .detail-search-modal__footer--search .detail-search-modal__btn--submit {
-    background: linear-gradient(90deg, var(--gold), var(--gold-deep));
-    box-shadow: 0 0 15px rgba(168, 85, 247, 0.25);
+    background: var(--accent, #d670a2);
+    color: var(--on-accent, #1a0814);
+    box-shadow:
+        0 6px 14px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.20),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18);
 }
 
 @media (max-width: 480px) {

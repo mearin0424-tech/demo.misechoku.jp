@@ -51,8 +51,8 @@
     max-width: 520px;
     padding: 32px 24px;
     border-radius: 22px;
-    background: linear-gradient(180deg, rgba(74, 18, 42, 0.94), rgba(35, 8, 21, 0.95));
-    border: 1px solid rgba(168, 85, 247, 0.45);
+    background: linear-gradient(180deg, rgba(20, 20, 20, 0.94), rgba(10, 10, 10, 0.95));
+    border: 1px solid rgba(248, 113, 113, 0.40);
     box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
     color: #e6dffc;
     text-align: center;
