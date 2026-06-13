@@ -2251,9 +2251,13 @@ body.page-search .connection-list--search {
 .tl-row + .tl-row {
     border-top: 1px solid rgba(168, 85, 247, 0.10);
 }
-/* ホバー時の薄いハイライト */
-.tl-row__link {
+/* ホバー時の薄いハイライト
+   セレクタ詳細度を上げ、既存の .connection-item--shop-rich .connection-item__link
+   （column 指定）に必ず勝つようにする */
+.tl-row.tl-row .tl-row__link,
+li.connection-item.tl-row a.tl-row__link {
     display: flex !important;
+    flex-direction: row !important;     /* 親の column 指定を確実に上書き */
     align-items: flex-start !important;
     gap: 12px !important;
     padding: 12px 12px 10px !important;
@@ -2261,6 +2265,8 @@ body.page-search .connection-list--search {
     color: inherit !important;
     transition: background .15s ease;
     position: relative;
+    width: 100%;
+    box-sizing: border-box;
 }
 .tl-row__link::before {
     content: '';
