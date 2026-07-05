@@ -49,7 +49,7 @@ class TalkController extends Controller
         $isCastPortal = request()->is('cast/*');
 
         if ($isCastPortal) {
-            $profileRoute = 'cast.recruit.show';
+            $profileRoute = 'cast.shopprofile.show';
         } else {
             $profileRoute = 'shop.castprofileview.show';
         }

@@ -150,7 +150,7 @@
                 <x-ui.menu-card icon="settings"
                                 sub="JOB DESCRIPTION"
                                 title="求人票の管理"
-                                href="{{ route('shop.jobdescription') }}"
+                                href="{{ route('shop.recruits.show') }}"
                                 class="shop-mypage-menu-card" />
 
                 {{-- 求人ステータス + 応募数の概要バー --}}

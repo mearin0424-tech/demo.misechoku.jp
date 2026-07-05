@@ -11,7 +11,7 @@
     $itemType = $itemType ?? 'cast';
     $isShop = ($itemType === 'shop');
     $isRecruit = ($itemType === 'recruit');
-    $detailRoute = $isRecruit ? 'cast.recruit.show' : ($isShop ? 'cast.recruit.show' : 'shop.castprofileview.show');
+    $detailRoute = $isRecruit ? 'cast.shopprofile.show' : ($isShop ? 'cast.shopprofile.show' : 'shop.castprofileview.show');
     $talkRoute = ($isRecruit || $isShop) ? 'cast.talk.room' : 'shop.talk.room';
 @endphp
 @section('content')
@@ -23,7 +23,7 @@
             <div
                 class="swiper-slide cast-card glass-card {{ $isRecruit ? 'cast-card--recruit' : '' }}"
                 @if($isRecruit)
-                data-detail-url="{{ route('cast.recruit.show', $item['id']) }}"
+                data-detail-url="{{ route('cast.shopprofile.show', $item['id']) }}"
                 @endif
             >
                 @php
@@ -268,7 +268,7 @@
                         </svg>
                     </a>
                     @if($isShop)
-                    <a href="{{ route('cast.recruit.show', $item['id']) }}" class="card-recruit-btn stop-propagation">求人</a>
+                    <a href="{{ route('cast.shopprofile.show', $item['id']) }}" class="card-recruit-btn stop-propagation">求人</a>
                     @endif
                 </div>
 

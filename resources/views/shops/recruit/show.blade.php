@@ -1032,551 +1032,72 @@
 <script type="application/ld+json">{!! json_encode($ldJsonLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
 @endpush
 
-@if(!empty($forCast))
-    {{-- 求職者向け：MyPage 同様の Instagram 風プロフィール（read-only + アクション） --}}
-    @include('shops.recruit.parts.cast-show')
+@php
+    // 店舗側プレビューでもキャストと同じレイアウトを使うため、常に共通の @php 変数を用いて
+    // cast-show パーシャルを include する。店舗プレビュー時はプレビュー用のバナーを先頭に付ける。
+    $isShopPreview = empty($forCast);
+@endphp
 
-    @push('scripts')
-    <script>
-    (function () {
-        'use strict';
-        var overlay = document.getElementById('lightbox-overlay');
-        var img = document.getElementById('lightbox-image');
-        function openLightbox(src) {
-            if (!overlay || !img || !src) return;
-            img.src = src;
-            overlay.classList.add('is-open');
-            document.body.style.overflow = 'hidden';
-        }
-        window.closeLightbox = function (e) {
-            if (e && e.target && !e.target.classList.contains('lightbox-overlay') && !e.target.closest('.lightbox-close')) return;
-            if (!overlay || !img) return;
-            overlay.classList.remove('is-open');
-            img.src = '';
-            document.body.style.overflow = '';
-        };
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('#profile-gallery-list .js-lightbox-target').forEach(function (el) {
-                el.addEventListener('click', function (ev) {
-                    ev.preventDefault();
-                    var src = el.getAttribute('data-image-url') || (el.querySelector('img') && el.querySelector('img').currentSrc) || '';
-                    openLightbox(src);
-                });
+@if($isShopPreview)
+    {{-- 店舗側：求人プレビュー（キャストが実際に見る画面と同一の見た目） --}}
+    <div class="recruit-ref-preview-sticky">
+        <p>店舗プロフィールプレビュー（求職者からの見え方）</p>
+        <div class="recruit-ref-preview-row">
+            <form method="post" action="{{ route('shop.recruits.toggle-status') }}" class="recruit-ref-publish-form">
+                @csrf
+                @if(!empty($horizontalShopJobs))
+                    <input type="hidden" name="job_type" value="1">
+                @endif
+                <button type="submit" class="recruit-ref-switch" title="タップで公開／非公開を切り替えます" aria-label="{{ $isPublishActive ? '公開中。クリックで非公開にします' : '非公開。クリックで公開します' }}">
+                    <span class="recruit-ref-switch-track {{ $isPublishActive ? 'is-on' : '' }}">
+                        <span class="recruit-ref-switch-knob"></span>
+                    </span>
+                    <span class="recruit-ref-switch-label {{ $isPublishActive ? 'is-on' : '' }}">{{ $isPublishActive ? '公開中' : '非公開' }}</span>
+                </button>
+            </form>
+            <a href="{{ route('shop.recruits.edit') }}" class="recruit-ref-preview-edit"><i class="fas fa-pen"></i> 編集</a>
+        </div>
+        @if(session('message'))
+            <p class="recruit-ref-flash" role="status">{{ session('message') }}</p>
+        @endif
+    </div>
+@endif
+
+{{-- キャスト側／店舗プレビュー共通：Instagram 風のプロフィール表示 --}}
+@include('shops.recruit.parts.cast-show')
+
+@push('scripts')
+<script>
+(function () {
+    'use strict';
+    var overlay = document.getElementById('lightbox-overlay');
+    var img = document.getElementById('lightbox-image');
+    function openLightbox(src) {
+        if (!overlay || !img || !src) return;
+        img.src = src;
+        overlay.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+    }
+    window.closeLightbox = function (e) {
+        if (e && e.target && !e.target.classList.contains('lightbox-overlay') && !e.target.closest('.lightbox-close')) return;
+        if (!overlay || !img) return;
+        overlay.classList.remove('is-open');
+        img.src = '';
+        document.body.style.overflow = '';
+    };
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('#profile-gallery-list .js-lightbox-target').forEach(function (el) {
+            el.addEventListener('click', function (ev) {
+                ev.preventDefault();
+                var src = el.getAttribute('data-image-url') || (el.querySelector('img') && el.querySelector('img').currentSrc) || '';
+                openLightbox(src);
             });
         });
-    })();
-    </script>
-    @endpush
-@else
-<div class="recruit-detail-page animate-fadeIn recruit-ref-wrap">
-    <div class="recruit-ref-shell">
+    });
+})();
+</script>
+@endpush
 
-        @if(empty($forCast))
-            <div class="recruit-ref-preview-sticky">
-                <p>求人票プレビュー（求職者からの見え方）</p>
-                <div class="recruit-ref-preview-row">
-                    <form method="post" action="{{ route('shop.recruits.toggle-status') }}" class="recruit-ref-publish-form">
-                        @csrf
-                        @if(!empty($horizontalShopJobs))
-                            <input type="hidden" name="job_type" value="1">
-                        @endif
-                        <button type="submit" class="recruit-ref-switch" title="タップで公開／非公開を切り替えます" aria-label="{{ $isPublishActive ? '公開中。クリックで非公開にします' : '非公開。クリックで公開します' }}">
-                            <span class="recruit-ref-switch-track {{ $isPublishActive ? 'is-on' : '' }}">
-                                <span class="recruit-ref-switch-knob"></span>
-                            </span>
-                            <span class="recruit-ref-switch-label {{ $isPublishActive ? 'is-on' : '' }}">{{ $isPublishActive ? '公開中' : '非公開' }}</span>
-                        </button>
-                    </form>
-                    <a href="{{ route('shop.recruits.edit') }}" class="recruit-ref-preview-edit"><i class="fas fa-pen"></i> 編集</a>
-                </div>
-                @if(session('message'))
-                    <p class="recruit-ref-flash" role="status">{{ session('message') }}</p>
-                @endif
-            </div>
-        @endif
-
-        <div class="recruit-ref-hero-wrap">
-            <div class="recruit-ref-hero" id="top" aria-roledescription="carousel">
-                @php $shopNameForAlt = $recruit['store_name'] ?? ($shop['name'] ?? '店舗'); @endphp
-                @if(count($galleryImages) > 0)
-                    <div class="recruit-ref-hero-carousel" id="recruit-hero-carousel">
-                        @foreach($galleryImages as $hi => $imgUrl)
-                            <div class="recruit-ref-hero-slide" data-hero-slide="{{ $hi }}" role="group" aria-roledescription="slide" aria-label="{{ $hi + 1 }} / {{ count($galleryImages) }}">
-                                <img src="{{ $imgUrl }}" alt="{{ $shopNameForAlt }} 店舗イメージ {{ $hi + 1 }}（{{ $areaChip ?: '日本' }}）" class="js-lightbox-target" loading="{{ $hi === 0 ? 'eager' : 'lazy' }}">
-                            </div>
-                        @endforeach
-                    </div>
-                @else
-                    <div class="recruit-ref-hero-carousel" id="recruit-hero-carousel">
-                        <div class="recruit-ref-hero-slide">
-                            @if(!empty($recruit['hero_image']))
-                                <img src="{{ $recruit['hero_image'] }}" alt="{{ $shopNameForAlt }} 店舗イメージ" class="js-lightbox-target">
-                            @else
-                                <div class="recruit-ref-hero-fallback" aria-hidden="true"></div>
-                            @endif
-                        </div>
-                    </div>
-                @endif
-
-                @if(count($galleryImages) > 1)
-                    <button type="button" class="recruit-ref-hero-arrow recruit-ref-hero-arrow--prev" id="recruit-hero-prev" aria-label="前の写真を表示">
-                        <i class="fas fa-chevron-left" aria-hidden="true"></i>
-                    </button>
-                    <button type="button" class="recruit-ref-hero-arrow recruit-ref-hero-arrow--next" id="recruit-hero-next" aria-label="次の写真を表示">
-                        <i class="fas fa-chevron-right" aria-hidden="true"></i>
-                    </button>
-                @endif
-                @if(!empty($usesJobTypes))
-                    @foreach(['trial' => $recruit_trial, 'help' => $recruit_help] as $vkHero => $rvHero)
-                        @php $coh = $rvHero['catch_hero_overlay'] ?? ['show' => false]; @endphp
-                        <div class="recruit-ref-catch-hero" data-recruit-catch-hero="{{ $vkHero }}" @if($vkHero !== 'trial') hidden @endif aria-label="キャッチコピー">
-                            @if(!empty($coh['show']))
-                                <div class="recruit-ref-catch-hero__backdrop">
-                                    <div>
-                                        @if(!empty($coh['line1_html']))
-                                            <p class="recruit-ref-catch-hero__line1">{!! $coh['line1_html'] !!}</p>
-                                        @endif
-                                        @if(!empty($coh['line2']))
-                                            <p class="recruit-ref-catch-hero__line2">{{ $coh['line2'] }}</p>
-                                        @endif
-                                        @if(!empty($coh['badge']))
-                                            <p class="recruit-ref-catch-hero__badge">{{ $coh['badge'] }}</p>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
-                    @endforeach
-                @else
-                    @php $coh = $recruit['catch_hero_overlay'] ?? ['show' => false]; @endphp
-                    <div class="recruit-ref-catch-hero" data-recruit-catch-hero="single" aria-label="キャッチコピー">
-                        @if(!empty($coh['show']))
-                            <div class="recruit-ref-catch-hero__backdrop">
-                                <div>
-                                    @if(!empty($coh['line1_html']))
-                                        <p class="recruit-ref-catch-hero__line1">{!! $coh['line1_html'] !!}</p>
-                                    @endif
-                                    @if(!empty($coh['line2']))
-                                        <p class="recruit-ref-catch-hero__line2">{{ $coh['line2'] }}</p>
-                                    @endif
-                                    @if(!empty($coh['badge']))
-                                        <p class="recruit-ref-catch-hero__badge">{{ $coh['badge'] }}</p>
-                                    @endif
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-                @endif
-                <div class="recruit-ref-hero-overlay"></div>
-                @if(count($galleryImages) > 1)
-                    <div class="recruit-ref-dots" id="recruit-hero-dots" role="tablist" aria-label="店舗写真の切り替え">
-                        @foreach($galleryImages as $hi => $_)
-                            <button type="button" class="recruit-ref-dot {{ $hi === 0 ? 'is-active' : '' }}" data-hero-goto="{{ $hi }}" aria-label="写真 {{ $hi + 1 }}" role="tab"></button>
-                        @endforeach
-                    </div>
-                    <div class="recruit-ref-thumbs recruit-ref-thumbs--carousel" id="recruit-hero-thumbs">
-                        @foreach($galleryImages as $hi => $imgUrl)
-                            <button type="button" data-hero-goto="{{ $hi }}" class="{{ $hi === 0 ? 'is-active' : '' }}" aria-label="サムネイル {{ $hi + 1 }}">
-                                <img src="{{ $imgUrl }}" alt="" width="40" height="40" loading="lazy">
-                            </button>
-                        @endforeach
-                    </div>
-                @endif
-            </div>
-        </div>
-
-        <div class="recruit-ref-head">
-            <div class="recruit-ref-chips">
-                @if($areaChip !== '')
-                    <span class="recruit-ref-chip">{{ $areaChip }}</span>
-                @endif
-                @if(!empty($shop['industry_name'] ?? null))
-                    <span class="recruit-ref-chip gold-outline">{{ $shop['industry_name'] }}</span>
-                @endif
-            </div>
-
-            <div class="recruit-ref-title-row">
-                <h1 class="recruit-ref-title">{{ $recruit['store_name'] ?? ($shop['name'] ?? '—') }}</h1>
-                @if(!empty($shareUrlResolved ?? null))
-                    @include('partials.share-menu', [
-                        'shareUrl' => $shareUrlResolved,
-                        'shareTitle' => $shareTitleResolved ?? '',
-                        'shareText' => $shareText ?? '',
-                        'menuId' => 'recruit-share-menu',
-                    ])
-                @endif
-            </div>
-
-            @if(!empty($distanceLabel ?? null))
-                <div style="margin: 6px 0 8px;">
-                    <span class="distance-badge">
-                        <i class="fas fa-route"></i> 現在位置から {{ $distanceLabel }}
-                    </span>
-                </div>
-            @endif
-
-            @if($usesJobTypes)
-                <div class="recruit-job-toggle" id="recruit-job-toggle" role="tablist" aria-label="求人の種類">
-                    <button type="button" class="is-active" data-job-type="trial">新規入店</button>
-                    <button type="button" data-job-type="help">ヘルプ</button>
-                </div>
-                @foreach(['trial' => $recruit_trial, 'help' => $recruit_help] as $vk => $rv)
-                    <div class="recruit-variant-head" data-variant-head="{{ $vk }}" @if($vk !== 'trial') hidden @endif>
-                        @include('shops.recruit.preview-variant-head', ['rv' => $rv, 'vk' => $vk])
-                    </div>
-                @endforeach
-            @else
-                @if($hasHelp)
-                    <div class="recruit-job-toggle" id="recruit-job-toggle" role="tablist" aria-label="募集枠">
-                        <button type="button" class="is-active" data-job-type="main">新規入店・本入店</button>
-                        <button type="button" data-job-type="help">ヘルプ</button>
-                    </div>
-                @endif
-
-                <div id="recruit-panel-main" data-job-panel="main">
-                    <div class="recruit-ref-pay-highlight">
-                        <div class="recruit-ref-pay-highlight__head">
-                            <span class="label">{{ $regularWage > 0 ? '本入時給' : ($hasTrial ? '新規時給' : '本入時給') }}</span>
-                            @if(($regularWage > 0 && $regularWageMax !== null && $regularWageMax > $regularWage) || ($hasTrial && $trialWageMax !== null && $trialWageMax > (int) $recruit['trial_hourly_wage']))
-                                <span class="recruit-ref-pay-range-badge">RANGE</span>
-                            @endif
-                        </div>
-                        <div class="line">
-                            @if($regularWage > 0)
-                                <span class="yen">¥</span><span class="num">{{ number_format($regularWage) }}</span>
-                                @if($regularWageMax !== null && $regularWageMax > $regularWage)
-                                    <span class="tilde">〜</span><span class="yen">¥</span><span class="num">{{ number_format($regularWageMax) }}</span>
-                                @else
-                                    <span class="tilde">〜</span>
-                                @endif
-                            @elseif($hasTrial)
-                                @php $tw = (int) $recruit['trial_hourly_wage']; @endphp
-                                <span class="yen">¥</span><span class="num">{{ number_format($tw) }}</span>
-                                @if($trialWageMax !== null && $trialWageMax > $tw)
-                                    <span class="tilde">〜</span><span class="yen">¥</span><span class="num">{{ number_format($trialWageMax) }}</span>
-                                @else
-                                    <span class="tilde">〜</span>
-                                @endif
-                            @else
-                                <span class="recruit-ref-pay-empty">求人編集で入力してください</span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-
-                @if($hasHelp)
-                    <div id="recruit-panel-help" data-job-panel="help" hidden>
-                        <div class="recruit-ref-pay-highlight">
-                            <div class="recruit-ref-pay-highlight__head">
-                                <span class="label">ヘルプ時給</span>
-                                @if($helpWageMax !== null && $helpWageMax > (int) $recruit['help_hourly_wage'])
-                                    <span class="recruit-ref-pay-range-badge">RANGE</span>
-                                @endif
-                            </div>
-                            <div class="line">
-                                @php $hw = (int) $recruit['help_hourly_wage']; @endphp
-                                <span class="yen">¥</span><span class="num">{{ number_format($hw) }}</span>
-                                @if($helpWageMax !== null && $helpWageMax > $hw)
-                                    <span class="tilde">〜</span><span class="yen">¥</span><span class="num">{{ number_format($helpWageMax) }}</span>
-                                @else
-                                    <span class="tilde">〜</span>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
-                <div class="recruit-ref-tags" aria-label="特徴タグ">
-                    @foreach($pillTags as $i => $tag)
-                        @php $ts = (string) $tag; $t = strpos($ts, '#') === 0 ? $ts : '#' . $ts; @endphp
-                        <span class="{{ $i < 2 ? 'gold' : 'dim' }}">{{ $t }}</span>
-                    @endforeach
-                </div>
-            @endif
-        </div>
-
-        <div class="recruit-ref-body">
-
-            @if($usesJobTypes)
-                @foreach(['trial' => $recruit_trial, 'help' => $recruit_help] as $vk => $rv)
-                    <div class="recruit-variant-body" data-variant-body="{{ $vk }}" @if($vk !== 'trial') hidden @endif>
-                        @include('shops.recruit.preview-variant-body', ['rv' => $rv, 'vk' => $vk, 'matrixLabels' => $matrixLabels])
-                    </div>
-                @endforeach
-            @else
-                <section id="section-message" aria-labelledby="section-message-heading">
-                    <h2 id="section-message-heading" class="recruit-ref-h2"><i class="fas fa-comment-dots" aria-hidden="true"></i> 店長からのメッセージ</h2>
-                    <div class="recruit-ref-msg recruit-ref-msg--pre {{ $messageNeedsClip ? 'is-clipped' : '' }}" data-recruit-clip>
-                        {{ $messageBody !== '' ? $messageBody : '店長からのメッセージは求人編集から入力できます。' }}
-                    </div>
-                    @if($messageNeedsClip)
-                        <button type="button" class="recruit-ref-msg-toggle" data-recruit-clip-toggle aria-expanded="false">
-                            <span class="recruit-ref-msg-toggle__more"><i class="fas fa-chevron-down"></i> 続きを読む</span>
-                            <span class="recruit-ref-msg-toggle__less"><i class="fas fa-chevron-up"></i> 折りたたむ</span>
-                        </button>
-                    @endif
-
-                    {{-- 共有ボタンはページ上部のタイトル横に集約済み（partials.share-menu） --}}
-                </section>
-
-                <section id="requirements" aria-labelledby="section-requirements-heading">
-                    <h2 id="section-requirements-heading" class="recruit-ref-h2-lg">
-                        <span class="bar" aria-hidden="true"></span>
-                        募集要項
-                        <span id="recruit-req-sub" class="recruit-ref-subtle">（新規入店）</span>
-                    </h2>
-
-                    <div id="recruit-req-main">
-                        @if($showBonusMain)
-                            <div class="recruit-ref-bonus-card" aria-labelledby="recruit-bonus-title">
-                                <div id="recruit-bonus-title" class="recruit-ref-bonus-card__head">
-                                    <i class="fas fa-gift" aria-hidden="true"></i>
-                                    <span>入店ボーナス</span>
-                                </div>
-                                <div class="recruit-ref-bonus-card__amount">
-                                    @if($noruma > 0)
-                                        <span class="num">{{ number_format($noruma) }}</span>
-                                        <span class="suffix">円支給</span>
-                                    @else
-                                        <span class="num" style="font-size:1rem;">条件のみ設定されています</span>
-                                    @endif
-                                </div>
-                                @if($bonusDays !== '' || $bonusHours !== '')
-                                    <div class="recruit-ref-bonus-progress" role="img" aria-label="入店ボーナス達成までの目安">
-                                        <div class="recruit-ref-bonus-progress-track">
-                                            <div class="recruit-ref-bonus-progress-fill"></div>
-                                            <span class="recruit-ref-bonus-progress-marker recruit-ref-bonus-progress-marker--start" aria-hidden="true">入店</span>
-                                            <span class="recruit-ref-bonus-progress-marker recruit-ref-bonus-progress-marker--end" aria-hidden="true">
-                                                達成
-                                                @if($bonusDays !== '')<small>{{ $bonusDays }}日</small>@endif
-                                                @if($bonusHours !== '')<small>{{ $bonusHours }}h</small>@endif
-                                            </span>
-                                        </div>
-                                    </div>
-                                @endif
-                                @if($bonusConditionsText !== '')
-                                    <div class="recruit-ref-bonus-card__cond"><strong>条件:</strong> {{ $bonusConditionsText }}</div>
-                                @endif
-                            </div>
-                        @endif
-
-                        <div class="recruit-ref-inforow"><span class="k">給与</span><span class="v">
-                            @if($regularWage > 0 && $hasTrial)
-                                <span style="color:#a78bfa;font-weight:800;">体入: {{ number_format((int) $recruit['trial_hourly_wage']) }}円〜</span><br>
-                                <span style="color:#e4e4e7;">本入: {{ number_format($regularWage) }}円〜</span>
-                            @elseif($regularWage > 0)
-                                <span style="color:#a78bfa;font-weight:800;">本入: {{ number_format($regularWage) }}円〜</span>
-                            @elseif($hasTrial)
-                                <span style="color:#a78bfa;font-weight:800;">体入: {{ number_format((int) $recruit['trial_hourly_wage']) }}円〜</span>
-                            @else
-                                —
-                            @endif
-                        </span></div>
-                        <div class="recruit-ref-inforow"><span class="k">給与備考</span><span class="v" style="white-space:pre-wrap;color:#d4d4d8;">{{ $salaryNotesMain !== '' ? $salaryNotesMain : '—' }}</span></div>
-                        <div class="recruit-ref-inforow"><span class="k">勤務時間</span><span class="v">{{ $recruit['working_hours'] ?: '—' }}</span></div>
-                        <div class="recruit-ref-inforow"><span class="k">勤務日・シフト</span><span class="v">{{ $recruit['working_days'] ?: '—' }}</span></div>
-                        <div class="recruit-ref-inforow"><span class="k">応募資格</span><span class="v">{{ $recruit['qualification'] ?? '—' }}</span></div>
-                        <div class="recruit-ref-inforow"><span class="k">控除</span><span class="v">10.21%（源泉所得税）</span></div>
-
-                        @if($hasFeatureMatrix)
-                            <div class="recruit-ref-tag-matrix">
-                                <p><i class="fas fa-tags" aria-hidden="true"></i> 特徴・アピールタグ</p>
-                                @foreach($matrixLabels as $key => $label)
-                                    @php
-                                        $tags = $storeFeatures[$key] ?? [];
-                                        $iconClass = $matrixIcons[$key] ?? 'fa-tag';
-                                    @endphp
-                                    @if(!empty($tags))
-                                        <div class="recruit-ref-tag-matrix-row">
-                                            <span class="cat"><i class="fas {{ $iconClass }}" aria-hidden="true"></i>{{ $label }}</span>
-                                            <div class="recruit-ref-tag-matrix-pills" data-recruit-tag-collapse="{{ count((array) $tags) > 6 ? 'true' : 'false' }}">
-                                                @foreach((array) $tags as $tagIndex => $t)
-                                                    <span @if(count((array) $tags) > 6 && $tagIndex >= 6) data-tag-extra hidden @endif>{{ $t }}</span>
-                                                @endforeach
-                                                @if(count((array) $tags) > 6)
-                                                    <button type="button" class="recruit-ref-tag-more" data-recruit-tag-toggle aria-expanded="false">
-                                                        <span class="more-text">+{{ count((array) $tags) - 6 }}件</span>
-                                                        <span class="less-text">折りたたむ</span>
-                                                    </button>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    @endif
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
-
-                    @if($hasHelp)
-                        <div id="recruit-req-help" hidden>
-                            @if($noruma > 0)
-                                <div class="recruit-ref-bonus-card">
-                                    <div class="recruit-ref-bonus-card__head"><i class="fas fa-gift"></i><span>入店ボーナス</span></div>
-                                    <div class="recruit-ref-bonus-card__amount">
-                                        <span class="num">{{ number_format($noruma) }}</span><span class="suffix">円支給</span>
-                                    </div>
-                                    @if($bonusConditionsText !== '')
-                                        <div class="recruit-ref-bonus-card__cond"><strong>条件:</strong> {{ $bonusConditionsText }}</div>
-                                    @endif
-                                </div>
-                            @endif
-
-                            <div class="recruit-ref-inforow"><span class="k">給与</span><span class="v"><span style="color:#a78bfa;font-weight:800;">{{ number_format((int) $recruit['help_hourly_wage']) }}円〜</span></span></div>
-                            <div class="recruit-ref-inforow"><span class="k">給与備考</span><span class="v" style="white-space:pre-wrap;">{{ ($jobNotesHelp !== '' ? $jobNotesHelp : $salaryNotesMain) !== '' ? ($jobNotesHelp !== '' ? $jobNotesHelp : $salaryNotesMain) : '—' }}</span></div>
-                            <div class="recruit-ref-inforow"><span class="k">勤務時間</span><span class="v">{{ $recruit['working_hours'] ?: '—' }}</span></div>
-                            <div class="recruit-ref-inforow"><span class="k">勤務日・シフト</span><span class="v">{{ $recruit['working_days'] ?: '—' }}</span></div>
-                            <div class="recruit-ref-inforow"><span class="k">応募資格</span><span class="v">{{ $recruit['qualification'] ?? '—' }}</span></div>
-                            <div class="recruit-ref-inforow"><span class="k">控除</span><span class="v">10.21%（源泉所得税）</span></div>
-
-                            @if($hasFeatureMatrix)
-                                <div class="recruit-ref-tag-matrix">
-                                    <p>特徴・アピールタグ</p>
-                                    @foreach($matrixLabels as $key => $label)
-                                        @php $tags = $storeFeatures[$key] ?? []; @endphp
-                                        @if(!empty($tags))
-                                            <div class="recruit-ref-tag-matrix-row">
-                                                <span class="cat">{{ $label }}</span>
-                                                <div class="recruit-ref-tag-matrix-pills">
-                                                    @foreach((array) $tags as $t)
-                                                        <span>{{ $t }}</span>
-                                                    @endforeach
-                                                </div>
-                                            </div>
-                                        @endif
-                                    @endforeach
-                                </div>
-                            @endif
-                        </div>
-                    @endif
-                </section>
-            @endif
-
-            @if(empty($usesJobTypes) && $jobSupplementMain !== '')
-                <section id="section-job-supplement" class="recruit-ref-job-supplement" aria-labelledby="section-job-supplement-heading">
-                    <h2 id="section-job-supplement-heading" class="recruit-ref-h2"><i class="fas fa-briefcase" aria-hidden="true"></i> お仕事内容について補足</h2>
-                    <div class="recruit-ref-msg recruit-ref-msg--pre {{ $jobSupplementNeedsClip ? 'is-clipped' : '' }}" data-recruit-clip>{!! nl2br(e($jobSupplementMain)) !!}</div>
-                    @if($jobSupplementNeedsClip)
-                        <button type="button" class="recruit-ref-msg-toggle" data-recruit-clip-toggle aria-expanded="false">
-                            <span class="recruit-ref-msg-toggle__more"><i class="fas fa-chevron-down"></i> 続きを読む</span>
-                            <span class="recruit-ref-msg-toggle__less"><i class="fas fa-chevron-up"></i> 折りたたむ</span>
-                        </button>
-                    @endif
-                </section>
-            @endif
-
-            <section id="info" aria-labelledby="section-info-heading">
-                <h2 id="section-info-heading" class="recruit-ref-h2-lg">店舗情報</h2>
-
-                <div class="recruit-ref-inforow"><span class="k">店名</span><span class="v">{{ $shop['name'] ?? ($recruit['store_name'] ?? '—') }}</span></div>
-                <div class="recruit-ref-inforow"><span class="k">業種</span><span class="v">{{ $shop['industry_name'] ?? '未設定' }}</span></div>
-                <div class="recruit-ref-inforow"><span class="k">営業時間</span><span class="v">{{ $shop['business_hours_shop'] ?? '' ?: '—' }}</span></div>
-                <div class="recruit-ref-inforow"><span class="k">定休日</span><span class="v">{{ $recruit['regular_holiday'] ?: '—' }}</span></div>
-                @if(!empty($recruit['store_atmosphere']))
-                    <div class="recruit-ref-inforow"><span class="k">店舗の雰囲気</span><span class="v" style="white-space:pre-wrap;">{{ $recruit['store_atmosphere'] }}</span></div>
-                @endif
-
-                @if(!empty($tagGroups))
-                    @foreach($tagGroups as $group)
-                        @php
-                            $gLabel = (string) ($group['label'] ?? '');
-                            if (str_contains($gLabel, 'ご利用プラン')) {
-                                continue;
-                            }
-                            $gTags = array_values(array_filter(
-                                (array) ($group['tags'] ?? []),
-                                static fn ($t) => ! str_contains((string) $t, 'ご利用プラン')
-                            ));
-                        @endphp
-                        @if($gTags !== [])
-                        <div style="margin-top:14px;padding-top:14px;border-top:1px solid #1f1a14;">
-                            <p style="margin:0 0 8px;font-size:11px;font-weight:800;color:#a78bfa;">{{ $gLabel }}</p>
-                            <div class="recruit-ref-tag-matrix-pills">
-                                @foreach($gTags as $t)
-                                    <span>{{ $t }}</span>
-                                @endforeach
-                            </div>
-                        </div>
-                        @endif
-                    @endforeach
-                @endif
-
-                <div class="recruit-ref-concept" style="margin-top:16px;">
-                    <p class="label">お店の紹介文</p>
-                    <div class="body">
-                        @if(!empty(trim($shop['concept'] ?? '')))
-                            {!! nl2br(e($shop['concept'])) !!}
-                        @else
-                            <span style="opacity:.65;">プロフィール編集から入力すると、求人票などに反映されます。</span>
-                        @endif
-                    </div>
-                </div>
-
-                <h2 class="recruit-ref-h2-lg" style="margin-top:28px;"><span class="bar" aria-hidden="true"></span> 交通アクセス</h2>
-                <div class="recruit-ref-card">
-                    @if($addressLine !== '')
-                        <p style="font-size:0.875rem;font-weight:800;color:#fafafa;margin:0 0 6px;">{{ $addressLine }}</p>
-                    @endif
-                    @if(!empty($recruit['nearest_station'] ?? $shop['nearest_station'] ?? null))
-                        <p style="font-size:12px;color:#a78bfa;margin:0 0 14px;"><i class="fas fa-train-subway"></i> {{ $recruit['nearest_station'] ?? $shop['nearest_station'] }}</p>
-                    @endif
-                    <div class="recruit-ref-map-placeholder" aria-hidden="true"><i class="fas fa-map-marker-alt"></i></div>
-                    @if($addressLine !== '')
-                        <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($addressLine) }}" target="_blank" rel="noopener noreferrer" class="recruit-ref-map-link">
-                            <i class="fas fa-map"></i> マップアプリで開く
-                        </a>
-                    @endif
-                </div>
-            </section>
-
-            @if(!empty($forCast))
-                @php
-                    $ctaShopId = $shop['id'] ?? $shop['shop_id'] ?? $recruit['id'] ?? $recruit['shop_id'] ?? null;
-                    $ctaHasHelp = $usesJobTypes
-                        ? !empty($recruit_help['help_hourly_wage']) || !empty($recruit_help['hourly_wage'])
-                        : !empty($recruit['help_hourly_wage']);
-                    $ctaHasTrial = $usesJobTypes
-                        ? !empty($recruit_trial['trial_hourly_wage']) || !empty($recruit_trial['hourly_wage'])
-                        : (!empty($recruit['trial_hourly_wage']) || $regularWage > 0);
-                @endphp
-                @if(!empty($ctaShopId))
-                    <div class="recruit-footer-cta">
-                        <div class="recruit-cta-row">
-                            <button
-                                type="button"
-                                class="recruit-cta-heart {{ !empty($recruit['is_kept']) ? 'is-active' : '' }}"
-                                aria-label="キープ"
-                                data-item-id="{{ $shop['id'] ?? '' }}"
-                                data-item-type="shop"
-                                data-action="keep"
-                            ><i class="fas fa-bookmark"></i></button>
-                            <div class="recruit-cta-actions">
-                                @if($ctaHasHelp)
-                                    <a href="{{ route('cast.talk.room', ['id' => $ctaShopId, 'job_kind' => 'help', 'talk_topic' => 'help', 'initiate' => 1]) }}" class="recruit-cta-btn recruit-cta-btn--help">
-                                        <i class="fas fa-hand-holding-heart"></i>
-                                        <span>ヘルプ求人に応募する</span>
-                                    </a>
-                                @endif
-                                @if($ctaHasTrial)
-                                    <a href="{{ route('cast.talk.room', ['id' => $ctaShopId, 'job_kind' => 'trial', 'talk_topic' => 'new_hire', 'initiate' => 1]) }}" class="recruit-cta-btn recruit-cta-btn--primary">
-                                        <i class="fas fa-paper-plane"></i>
-                                        <span>新規採用に応募する</span>
-                                    </a>
-                                @endif
-                                <a href="{{ route('cast.talk.room', ['id' => $ctaShopId, 'talk_topic' => 'other', 'initiate' => 1]) }}" class="recruit-cta-btn recruit-cta-btn--ghost">
-                                    <i class="fas fa-comment-dots"></i>
-                                    <span>まずは話を聞いてみる</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-            @endif
-        </div>
-    </div>
-</div>
-
-{{-- 画像フルスクリーン表示は layouts/app.blade.php の #global-lightbox-overlay を共有利用 --}}
-@endif
 @endsection
 
 @push('scripts')

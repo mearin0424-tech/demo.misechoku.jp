@@ -14,16 +14,18 @@ use Illuminate\Support\Facades\Schema;
 class RecruitmentController extends Controller
 {
     /**
-     * 求人情報詳細
+     * 店舗プロフィール表示（GALLERY / JOB / SHOP 統合）
      * ルートの {id} は以下どちらも許容する:
      * - 数値ID (1, 2, 3, ...)
      * - 店舗ID文字列 (s00000001 など)
+     *
+     * 求人（shop_jobs）が未登録／非公開であっても、店舗プロフィールが存在すれば表示する。
      */
     public function show(Request $request, $id)
     {
         $numericId = $this->normalizeRouteIdToNumeric($id);
-        $data = $this->getRecruitDataFromDatabase($numericId, true);
-        abort_if(empty($data['recruit']), 404);
+        $data = $this->getRecruitDataFromDatabase($numericId, false);
+        abort_if(empty($data['shop']), 404);
 
         $initialJobPanel = $request->query('job', '');
         $initialJobPanel = in_array($initialJobPanel, ['fulltime', 'help'], true) ? $initialJobPanel : '';

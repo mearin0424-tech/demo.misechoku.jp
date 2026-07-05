@@ -159,7 +159,7 @@
 
             {{-- メインコンテンツ（プロフィール詳細は content-wrapper を使わず幅をアプリ全体に統一） --}}
             <main id="main-content">
-                @if(request()->routeIs('cast.recruit.show', 'shop.castprofileview.show', 'cast.mypage.index', 'share.cast.show', 'share.recruit.show'))
+                @if(request()->routeIs('cast.shopprofile.show', 'shop.castprofileview.show', 'cast.mypage.index', 'shop.recruits.show', 'share.cast.show', 'share.recruit.show'))
                     @yield('content')
                 @else
                     <div class="content-wrapper animate-fadeIn">

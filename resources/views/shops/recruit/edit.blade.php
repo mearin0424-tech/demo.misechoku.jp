@@ -33,9 +33,15 @@
         justify-content: space-between;
         gap: 12px;
         padding: 12px 16px;
-        background: rgba(40, 18, 30, 0.92);
-        backdrop-filter: blur(10px);
-        border-bottom: 1px solid rgba(168, 85, 247, 0.22);
+        /* 完全不透明にして下の notice が透けて重なって見えないようにする */
+        background: #1a0e18;
+        border-bottom: 1px solid rgba(168, 85, 247, 0.35);
+        box-shadow: 0 6px 14px -8px rgba(0, 0, 0, 0.6);
+    }
+    /* サブヘッダーの下に来る要素は sticky ヘッダーの高さぶんスクロールマージンを持たせる */
+    .job-edit-v2__notice,
+    .job-edit-v2__form section {
+        scroll-margin-top: calc(var(--header-height, 60px) + 68px);
     }
     .job-edit-v2__back {
         color: #a1a1aa;
@@ -412,17 +418,18 @@
         position: fixed;
         left: 50%;
         transform: translateX(-50%);
+        /* ボトムナビ(75px)の直上に隙間なく貼り付ける */
         bottom: var(--footer-height, 75px);
         width: 100%;
         max-width: var(--max-content-width);
         z-index: 35;
         display: flex;
         justify-content: center;
-        padding: 14px var(--content-padding-x, 16px);
-        padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-        background: rgba(40, 18, 30, 0.95);
-        backdrop-filter: blur(10px);
-        border-top: 1px solid rgba(168, 85, 247, 0.22);
+        padding: 12px var(--content-padding-x, 16px) 12px;
+        /* 完全不透明化：下のボトムナビに合流して見えるように */
+        background: #1a0e18;
+        border-top: 1px solid rgba(168, 85, 247, 0.35);
+        box-shadow: 0 -8px 20px -8px rgba(0, 0, 0, 0.75);
         box-sizing: border-box;
     }
     .job-edit-v2__footer-inner {
@@ -590,7 +597,7 @@
                     <div class="job-edit-v2__kind-body" style="padding-top:12px;">
 
                         <div class="job-edit-v2__preview-row" style="margin-top:0;">
-                            <a href="{{ route('shop.jobdescription') }}" class="job-edit-v2__preview-link" target="_blank" rel="noopener">
+                            <a href="{{ route('shop.recruits.show') }}" class="job-edit-v2__preview-link" target="_blank" rel="noopener">
                                 <i class="fas fa-eye"></i>
                                 求職者からの見え方を確認
                             </a>
@@ -928,7 +935,7 @@
                     </div>
 
                     <div class="job-edit-v2__preview-row">
-                        <a href="{{ route('shop.jobdescription') }}" class="job-edit-v2__preview-link" target="_blank" rel="noopener">
+                        <a href="{{ route('shop.recruits.show') }}" class="job-edit-v2__preview-link" target="_blank" rel="noopener">
                             <i class="fas fa-eye"></i>
                             求職者からの見え方を確認
                         </a>
@@ -1090,7 +1097,7 @@
 
         <div class="job-edit-v2__footer">
             <div class="job-edit-v2__footer-inner">
-                <a href="{{ route('shop.jobdescription') }}" class="job-edit-v2__btn-cancel">キャンセル</a>
+                <a href="{{ route('shop.recruits.show') }}" class="job-edit-v2__btn-cancel">キャンセル</a>
                 <button type="submit" form="recruit-form" class="job-edit-v2__btn-save">
                     <i class="fas fa-check"></i> 保存する
                 </button>

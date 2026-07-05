@@ -1,5 +1,5 @@
 @php
-    $recruitUrl = Route::has('cast.recruit.show') ? route('cast.recruit.show', $item['id']) : '#';
+    $recruitUrl = Route::has('cast.shopprofile.show') ? route('cast.shopprofile.show', $item['id']) : '#';
     $hitokoto = trim((string) ($item['hitokoto'] ?? ''));
     $hitokotoTime = (string) ($item['hitokoto_updated_at'] ?? '');
     $nearestStation = trim((string) ($item['nearest_station'] ?? ''));

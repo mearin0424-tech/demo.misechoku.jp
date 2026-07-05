@@ -7,8 +7,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Minishlink\WebPush\Subscription;
-use Minishlink\WebPush\WebPush;
 
 class PushController extends Controller
 {
@@ -62,83 +60,6 @@ class PushController extends Controller
             Log::warning('Push subscribe error: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to save subscription'], 500);
         }
-    }
-
-    public function sendTest(Request $request): JsonResponse
-    {
-        $publicKey = config('services.push.vapid_public');
-        $privateKey = config('services.push.vapid_private');
-        $subject = config('services.push.subject');
-
-        if (empty($publicKey) || empty($privateKey)) {
-            return response()->json([
-                'ok' => false,
-                'message' => 'VAPID キーが未設定です。.env に VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY を設定し、php artisan push:vapid で生成してください。',
-            ], 503);
-        }
-
-        [$userType, $userId] = $this->resolveActor();
-        $query = DB::table('push_subscriptions');
-        if ($userType && $userId) {
-            $query->where('user_type', $userType)->where('user_id', $userId);
-        }
-
-        $subscriptions = $query->get();
-        if ($subscriptions->isEmpty()) {
-            return response()->json([
-                'ok' => false,
-                'message' => '購読がありません。先に「通知を有効にする」を押してからテストしてください。',
-            ], 404);
-        }
-
-        $payload = json_encode([
-            'title' => 'ミセチョク',
-            'body' => 'テスト通知です。',
-            'url' => url('/shop/home'),
-            'badge' => 1,
-        ]);
-
-        $webPush = new WebPush([
-            'VAPID' => [
-                'subject' => $subject,
-                'publicKey' => $publicKey,
-                'privateKey' => $privateKey,
-            ],
-        ]);
-
-        $sent = 0;
-        $failed = 0;
-
-        foreach ($subscriptions as $row) {
-            try {
-                $subscription = Subscription::create([
-                    'endpoint' => $row->endpoint,
-                    'keys' => [
-                        'p256dh' => $row->public_key,
-                        'auth' => $row->auth_token,
-                    ],
-                ]);
-                $result = $webPush->sendOneNotification($subscription, $payload);
-                if (method_exists($result, 'isSuccess') && $result->isSuccess()) {
-                    $sent++;
-                } else {
-                    $failed++;
-                    if (method_exists($result, 'isSubscriptionExpired') && $result->isSubscriptionExpired()) {
-                        DB::table('push_subscriptions')->where('id', $row->id)->delete();
-                    }
-                }
-            } catch (\Throwable $e) {
-                Log::warning('Push send error: ' . $e->getMessage());
-                $failed++;
-            }
-        }
-
-        return response()->json([
-            'ok' => true,
-            'message' => "送信: {$sent} 件、失敗: {$failed} 件",
-            'sent' => $sent,
-            'failed' => $failed,
-        ]);
     }
 
     private function resolveActor(): array

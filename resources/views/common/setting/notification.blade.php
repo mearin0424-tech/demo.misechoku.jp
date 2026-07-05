@@ -72,13 +72,6 @@
                 </div>
                 <button type="button" id="push-enable-btn" class="setting-btn setting-btn-push">通知を有効化</button>
             </div>
-            <div class="setting-row">
-                <div class="setting-row-main">
-                    <div class="setting-row-label">Pushテスト</div>
-                    <div class="setting-row-desc">現在ログイン中のアカウント宛にテスト通知を送信します。</div>
-                </div>
-                <button type="button" id="push-test-btn" class="setting-btn setting-btn-test">テスト通知</button>
-            </div>
             <div class="setting-row" style="justify-content:flex-end;">
                 <button type="submit" class="setting-btn setting-btn-test">設定を保存</button>
             </div>

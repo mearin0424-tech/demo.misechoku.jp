@@ -607,7 +607,7 @@
         {{-- メイン：--max-content-width に追従して中央寄せ（モバイル430 → タブレット600 → デスクトップ720）。
              旧 layouts.app と同じ条件で content-wrapper を被せ、移行画面のレイアウトを大きく崩さないようにする。 --}}
         <main id="main-content" class="max-w-[var(--max-content-width)] mx-auto">
-            @if(request()->routeIs('cast.recruit.show', 'shop.castprofileview.show', 'cast.mypage.index', 'shop.mypage.index', 'share.cast.show', 'share.recruit.show'))
+            @if(request()->routeIs('cast.shopprofile.show', 'shop.castprofileview.show', 'cast.mypage.index', 'shop.mypage.index', 'shop.recruits.show', 'share.cast.show', 'share.recruit.show'))
                 @yield('content')
             @else
                 <div class="content-wrapper animate-fadeIn">

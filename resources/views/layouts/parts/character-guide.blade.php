@@ -20,8 +20,13 @@
     }
 @endphp
 
-{{-- オコジョガイド：右下浮遊デザイン。閉じるボタンはキャラクター右下に配置（吹き出し外） --}}
-<div id="character-guide" class="discovery-guide {{ $shouldShow ? '' : 'is-hidden' }}">
+{{-- オコジョガイド：右下浮遊デザイン。閉じるボタンはキャラクター右下に配置（吹き出し外）
+     data-server-enabled は運営管理での ON/OFF を JS に伝えるためのフラグ。
+     オンボーディング等の外部から updateCharacterMessage を呼んでも、無効化された画面では
+     表示させないためのゲート。 --}}
+<div id="character-guide"
+     class="discovery-guide {{ $shouldShow ? '' : 'is-hidden' }}"
+     data-server-enabled="{{ $shouldShow ? '1' : '0' }}">
     {{-- 左側の吹き出し --}}
     <div class="guide-speech-bubble">
         <p id="character-message-content">{!! nl2br(e($resolvedGuideMessage)) !!}</p>

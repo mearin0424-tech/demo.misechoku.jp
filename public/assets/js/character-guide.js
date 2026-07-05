@@ -78,6 +78,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!messageContent || !characterGuide) return;
         if (document.body.classList.contains('page-home')) return;
 
+        // 運営管理（character_guide_settings）で「非表示」に設定された画面では、
+        // 外部（オンボーディング等）からの updateCharacterMessage 呼び出しでも
+        // オコジョを強制表示しない。設定情報を単一の真実にする。
+        var serverEnabled = characterGuide.getAttribute('data-server-enabled') === '1';
+        if (!serverEnabled) {
+            return;
+        }
+
         if (newMessage && newMessage.trim() !== "") {
             messageContent.innerHTML = newMessage.replace(/\n/g, '<br>');
             characterGuide.classList.remove('is-hidden');

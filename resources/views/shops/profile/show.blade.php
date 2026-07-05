@@ -34,7 +34,7 @@
 
     <div class="profile-actions">
         @if($isOwn ?? false)
-            <a href="{{ route('shop.jobdescription') }}" class="btn-gold">求人票を見る</a>
+            <a href="{{ route('shop.recruits.show') }}" class="btn-gold">求人票を見る</a>
         @endif
         <a href="#" class="btn-outline-gold">お問合せ</a>
     </div>

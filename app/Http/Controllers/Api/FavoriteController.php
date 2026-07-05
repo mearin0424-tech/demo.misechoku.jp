@@ -4,13 +4,19 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Favorite;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class FavoriteController extends Controller
 {
+    public function __construct(private readonly NotificationService $notifications)
+    {
+    }
+
     /**
      * スワイプ画面からの「いいね」「キープ」をトグルする簡易API
      *
@@ -96,6 +102,7 @@ class FavoriteController extends Controller
                     'sender_type' => $senderType,
                     'created_at' => $now,
                 ]);
+                $this->notifyLikeReceived($senderType, (string) ($castId ?? ''), (string) ($shopId ?? ''));
             }
             $isActive = true;
         } elseif ($existing) {
@@ -136,5 +143,44 @@ class FavoriteController extends Controller
             'is_active' => $isActive,
             'like_count' => $likeCount,
         ]);
+    }
+
+    /**
+     * LIKE を受け取った側にお知らせ通知（インボックス＋許可時は Push）。
+     * - cast → shop: 店舗マネージャー全員に通知
+     * - shop → cast: 対象キャストに通知
+     */
+    private function notifyLikeReceived(string $senderType, string $castId, string $shopId): void
+    {
+        try {
+            if ($senderType === Favorite::SENDER_CAST && $shopId !== '') {
+                $castName = (string) (DB::table('cast_profiles')->where('cast_id', $castId)->value('nickname') ?? '');
+                $displayName = $castName !== '' ? $castName : 'キャスト';
+                $this->notifications->createForShop(
+                    $shopId,
+                    'favorite.like_received',
+                    'いいねが届きました',
+                    "{$displayName}さんからいいねが届きました。",
+                    url('/shop/interaction'),
+                    ['cast_id' => $castId, 'shop_id' => $shopId]
+                );
+                return;
+            }
+
+            if ($senderType === Favorite::SENDER_SHOP && $castId !== '') {
+                $shopName = (string) (DB::table('shop_profiles')->where('shop_id', $shopId)->value('shop_name') ?? '');
+                $displayName = $shopName !== '' ? $shopName : '店舗';
+                $this->notifications->createForCast(
+                    $castId,
+                    'favorite.like_received',
+                    'いいねが届きました',
+                    "{$displayName}からいいねが届きました。",
+                    url('/cast/interaction'),
+                    ['cast_id' => $castId, 'shop_id' => $shopId]
+                );
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Favorite notify failed: ' . $e->getMessage());
+        }
     }
 }

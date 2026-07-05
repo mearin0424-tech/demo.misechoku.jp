@@ -422,7 +422,6 @@ Route::middleware('signed')->group(function () {
 Route::prefix('api/push')->name('push.')->group(function () {
     Route::get('vapid-public-key', [\App\Http\Controllers\Api\PushController::class, 'vapidPublicKey'])->name('vapid');
     Route::post('subscribe', [\App\Http\Controllers\Api\PushController::class, 'subscribe'])->name('subscribe');
-    Route::post('send-test', [\App\Http\Controllers\Api\PushController::class, 'sendTest'])->name('send-test');
 });
 
 Route::prefix('api/favorites')->name('api.favorites.')->group(function () {
@@ -503,9 +502,6 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
         Route::post('/toggle-status', [ShopRecruit::class, 'toggleStatus'])->name('toggle-status');
     });
 
-    // 豎ゆｺｺ逾ｨ・・ecruits/show 縺ｨ蜷後§蜀・ｮｹ繧・shop/jobdescription 縺ｧ謠蝉ｾ幢ｼ・
-    Route::get('/jobdescription/{id?}', [ShopRecruit::class, 'show'])->name('jobdescription');
-
     // 繝槭う繝壹・繧ｸ
     Route::prefix('mypage')->name('mypage.')->group(function () {
         Route::get('/', [ShopMypage::class, 'index'])->name('index');
@@ -554,7 +550,7 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
     Route::get('/search/{tab}', [CastSearch::class, 'index'])->name('search.index')->where('tab', 'search|ai|timeline|list');
     Route::post('/search-preferences', [CastSearch::class, 'savePreferences'])->name('search-preferences.save');
     Route::post('/search/ai-chat', [CastAiChat::class, 'respond'])->name('search.ai-chat');
-    Route::get('/recruit/{id}', [CastRecruit::class, 'show'])->name('recruit.show');
+    Route::get('/shopprofiles/{id}', [CastRecruit::class, 'show'])->name('shopprofile.show');
     
     Route::get('/interaction', [ShopInteraction::class, 'index'])->name('interaction.index');
     Route::get('/mypage', [CastMypage::class, 'index'])->name('mypage.index');

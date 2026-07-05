@@ -60,10 +60,10 @@
         @endif
 
         <div class="notif-popup-section-label">あなたへの通知</div>
-        {{-- Push 通知テスト（PWA） --}}
+        {{-- PWA プッシュ通知：この端末で通知を受け取りたい場合のみ有効化。
+             実際の通知テストはトーク送信・レビュー投稿・LIKE 等の本番フローで実行できる。 --}}
         <div class="notif-popup-pushrow">
-            <button type="button" id="push-enable-btn" class="app-btn app-btn--ghost app-btn--sm notif-popup-push-btn">通知を有効にする</button>
-            <button type="button" id="push-test-btn" class="app-btn app-btn--outline app-btn--sm notif-popup-push-btn">テスト通知を送る</button>
+            <button type="button" id="push-enable-btn" class="app-btn app-btn--ghost app-btn--sm notif-popup-push-btn">この端末で通知を受け取る</button>
         </div>
         @if(!empty($notifications) && count($notifications) > 0)
             @foreach($notifications as $item)

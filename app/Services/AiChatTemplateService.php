@@ -302,7 +302,7 @@ class AiChatTemplateService
             'wage'       => $wage,
             'reward'     => $reward,
             'reason'     => $this->reasonText($row, $intent),
-            'url'        => url('/cast/recruit/' . $row->id),
+            'url'        => url('/cast/shopprofiles/' . $row->id),
         ];
     }
 

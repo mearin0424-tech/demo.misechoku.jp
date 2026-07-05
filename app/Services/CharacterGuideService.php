@@ -22,7 +22,7 @@ class CharacterGuideService
         // キャスト向け
         'cast.home'                       => ['label' => 'キャスト：ホーム（スワイプ）',     'group' => 'cast',   'default_enabled' => false],
         'cast.search.index'               => ['label' => 'キャスト：店舗検索（一覧/AI）',   'group' => 'cast',   'default_enabled' => false],
-        'cast.recruit.show'               => ['label' => 'キャスト：求人詳細',               'group' => 'cast',   'default_enabled' => false],
+        'cast.shopprofile.show'           => ['label' => 'キャスト：店舗プロフィール',       'group' => 'cast',   'default_enabled' => false],
         'cast.mypage.index'               => ['label' => 'キャスト：マイページ',             'group' => 'cast',   'default_enabled' => false],
         'cast.profile.edit'               => ['label' => 'キャスト：プロフィール編集',       'group' => 'cast',   'default_enabled' => false],
         'cast.mypage.management'          => ['label' => 'キャスト：採用・入金管理',         'group' => 'cast',   'default_enabled' => false],
@@ -33,8 +33,7 @@ class CharacterGuideService
         // 店舗向け
         'shop.home'                       => ['label' => '店舗：ホーム',                     'group' => 'shop',   'default_enabled' => false],
         'shop.search.index'               => ['label' => '店舗：キャスト検索',               'group' => 'shop',   'default_enabled' => false],
-        'shop.jobdescription'             => ['label' => '店舗：求人プレビュー',             'group' => 'shop',   'default_enabled' => false],
-        'shop.recruits.show'              => ['label' => '店舗：求人票（管理表示）',         'group' => 'shop',   'default_enabled' => false],
+        'shop.recruits.show'              => ['label' => '店舗：求人プレビュー（プロフィール）', 'group' => 'shop', 'default_enabled' => false],
         'shop.recruits.edit'              => ['label' => '店舗：求人票編集',                 'group' => 'shop',   'default_enabled' => false],
         'shop.mypage.index'               => ['label' => '店舗：マイページ',                 'group' => 'shop',   'default_enabled' => false],
         'shop.mypage.management'          => ['label' => '店舗：採用・入金管理',             'group' => 'shop',   'default_enabled' => false],

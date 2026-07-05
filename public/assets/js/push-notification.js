@@ -102,38 +102,10 @@
       })
       .then(function () {
         if (typeof window.showPushEnabled === 'function') window.showPushEnabled();
-        toast('通知を有効にしました。「テスト通知」で送信できます。');
+        toast('この端末で通知を受け取れるようになりました。');
       })
       .catch(function (err) {
         toast('エラー: ' + (err.message || '不明なエラー'), 'error');
-      });
-  }
-
-  function sendTestNotification() {
-    fetch('/api/push/send-test', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': getCsrfToken(),
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-      },
-      body: '{}',
-    })
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        if (data.ok) {
-          if (typeof window.showPushTestResult === 'function') {
-            window.showPushTestResult(data.message);
-          } else {
-            toast(data.message);
-          }
-        } else {
-          toast(data.message || '送信に失敗しました', 'error');
-        }
-      })
-      .catch(function () {
-        toast('リクエストに失敗しました', 'error');
       });
   }
 
@@ -154,15 +126,10 @@
     document.querySelectorAll('#push-enable-btn').forEach(function (btnEnable) {
       btnEnable.addEventListener('click', function () { enableNotifications(); });
     });
-
-    document.querySelectorAll('#push-test-btn').forEach(function (btnTest) {
-      btnTest.addEventListener('click', function () { sendTestNotification(); });
-    });
   });
 
   window.MisechokuPush = {
     enable: enableNotifications,
-    sendTest: sendTestNotification,
     setBadge: setAppBadge,
   };
 })();

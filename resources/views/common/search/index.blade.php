@@ -38,7 +38,7 @@
                 'area' => trim((string) (($item['pref'] ?? '') . ' ' . ($item['city'] ?? ''))),
                 'text' => trim((string) (($item['catch'] ?? '') . ' ' . ($item['overview'] ?? ''))),
                 'image' => $item['main_img'] ?? asset('assets/images/common/no-image.png'),
-                'url' => Route::has('cast.recruit.show') && !empty($item['id']) ? route('cast.recruit.show', $item['id']) : '#',
+                'url' => Route::has('cast.shopprofile.show') && !empty($item['id']) ? route('cast.shopprofile.show', $item['id']) : '#',
             ];
         }
 

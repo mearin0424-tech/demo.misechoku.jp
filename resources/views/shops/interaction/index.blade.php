@@ -72,7 +72,7 @@
             $recommendItems = $recommendItems ?? [];
             $recommendType = $recommendType ?? 'shop';
             $recommendLogic = $recommendLogic ?? [];
-            $recommendDetailRoute = $recommendDetailRoute ?? 'cast.recruit.show';
+            $recommendDetailRoute = $recommendDetailRoute ?? 'cast.shopprofile.show';
             $recommendTitle = $recommendType === 'shop' ? '条件が似ているお店' : '条件が似ているキャスト';
             $recommendEmpty = $recommendType === 'shop'
                 ? '今は条件に合うお店が見つかりませんでした。'
@@ -189,9 +189,9 @@
 .recommend-item__link {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px;
-    border-radius: 10px;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 12px;
     background: rgba(255,255,255,0.03);
     border: 1px solid var(--color-border);
     text-decoration: none;
@@ -200,8 +200,8 @@
 }
 .recommend-item__link:hover { border-color: var(--color-border-strong); background: rgba(168, 85, 247, 0.06); }
 .recommend-item__thumb {
-    width: 48px; height: 48px; flex: 0 0 auto;
-    border-radius: 8px; object-fit: cover;
+    width: 56px; height: 56px; flex: 0 0 auto;
+    border-radius: 10px; object-fit: cover;
     background: var(--color-card-strong);
 }
 .recommend-item__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }

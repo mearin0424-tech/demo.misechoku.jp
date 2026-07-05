@@ -97,7 +97,7 @@ class InteractionController extends Controller
                 }
             }
 
-            $profileRoute = 'cast.recruit.show';
+            $profileRoute = 'cast.shopprofile.show';
             $showReceivedLike = true;
         } else {
             // お店側：キャストのキープ・ライク
@@ -189,7 +189,7 @@ class InteractionController extends Controller
             $recommendItems = $castIdForReco ? $recommendation->recommendShopsForCast($castIdForReco, 6) : [];
             $recommendType = 'shop';
             $recommendLogic = \App\Services\RecommendationService::castRecommendLogicLines();
-            $recommendDetailRoute = 'cast.recruit.show';
+            $recommendDetailRoute = 'cast.shopprofile.show';
         } else {
             $shopUser = Auth::guard('shop')->user();
             $shopIdForReco = $shopUser ? (string) $shopUser->shop_id : null;

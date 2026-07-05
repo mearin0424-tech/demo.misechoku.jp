@@ -1,11 +1,8 @@
-{{-- 求人プロフィール：cast 側からの閲覧専用ビュー（MyPage 同様の Instagram 風） --}}
+{{-- 店舗プロフィール：cast 側からの閲覧専用ビュー（MyPage 同様の Instagram 風） --}}
 @php
     $shopName     = $shop['name'] ?? ($recruit['store_name'] ?? '店舗');
     $iconImage    = $shop['main_img'] ?? ($galleryImages[0] ?? asset('assets/images/common/no-image.png'));
     $catchCopy    = trim((string) ($recruit['catch_copy'] ?? ''));
-    $catchTrunc   = $catchCopy !== ''
-        ? (mb_strlen($catchCopy) > 80 ? mb_substr($catchCopy, 0, 80) . '…' : $catchCopy)
-        : '';
     $totalSlots   = max(9, count($galleryImages));
     $likeCount    = (int) ($recruit['like_cnt'] ?? $shop['like_cnt'] ?? 0);
     $ctaShopId    = $shop['id'] ?? $shop['shop_id'] ?? $recruit['id'] ?? $recruit['shop_id'] ?? null;
@@ -39,105 +36,155 @@
     $regularHoliday  = trim((string) ($recruit['regular_holiday'] ?? ''));
     $qualification   = trim((string) ($recruit['qualification'] ?? ''));
     $jobContent      = trim((string) ($recruit['job_content'] ?? ''));
+    $bonusRemarks    = trim((string) ($recruit['bonus_remarks'] ?? ''));
+    $bonusDaysLocal  = trim((string) ($recruit['bonus_total_working_days'] ?? $recruit['bonus_working_days'] ?? ''));
+    $bonusHoursLocal = trim((string) ($recruit['bonus_total_working_hours'] ?? $recruit['bonus_working_hours'] ?? ''));
+    $bonusExtraLocal = trim((string) ($recruit['bonus_other_conditions'] ?? $recruit['bonus_condition'] ?? ''));
+    $storeAtmosphere = trim((string) ($recruit['store_atmosphere'] ?? ''));
+    $catchCopyMain   = $catchCopy;
+
+    // ----- ヘッダー用：アピールひとこと（hitokoto を最優先、なければ catch_copy） -----
+    $appealLine      = $shopWord !== '' ? $shopWord : $catchCopy;
+    $appealTrunc     = $appealLine !== ''
+        ? (mb_strlen($appealLine) > 90 ? mb_substr($appealLine, 0, 90) . '…' : $appealLine)
+        : '';
+
+    // ----- ヘッダー用：最有力の時給表示（本入り→体入の順で採用） -----
+    $primaryWageDisp = $regularWageDisp ?: ($trialWageDisp ?: $helpWageDisp);
+    $primaryWageLabel = $regularWageDisp
+        ? '本入り時給'
+        : ($trialWageDisp ? '体入時給' : ($helpWageDisp ? 'ヘルプ時給' : '時給'));
 @endphp
 
 <div class="pb-6">
 
-    <div class="px-5 pt-4 pb-6">
+    <div class="px-5 pt-4 pb-5">
 
-        {{-- アイコン + 紹介文（catch_copy） --}}
-        <div class="flex items-start gap-3 mb-5">
+        {{-- 1. 店名 + アバター + エリア/業種/ライク --}}
+        <div class="flex items-start gap-3 mb-4">
             <div class="w-[84px] h-[84px] rounded-2xl overflow-hidden border-2 border-line-accent/40 shadow-card-3d bg-surface-from shrink-0">
                 <img src="{{ $iconImage }}" alt="" class="w-full h-full object-cover">
             </div>
-            <div class="flex-1 min-w-0">
-                <div class="relative bg-gradient-to-br from-surface-from to-base border border-line-accent/40 rounded-2xl shadow-card-3d p-3">
-                    <span class="absolute top-5 -left-[8px] w-0 h-0 border-y-[8px] border-y-transparent border-r-[10px] border-r-line-accent/40"></span>
-                    <span class="absolute top-5 -left-[6px] w-0 h-0 border-y-[7px] border-y-transparent border-r-[9px] border-r-surface-from"></span>
-                    <p class="text-[13px] leading-relaxed {{ $catchTrunc === '' ? 'text-text-sub' : 'text-text-main' }}">
-                        {{ $catchTrunc !== '' ? $catchTrunc : 'キャッチコピー未設定' }}
-                    </p>
+            <div class="flex-1 min-w-0 flex flex-col gap-1.5">
+                <div class="flex items-center justify-between gap-2">
+                    <h1 class="app-title text-[22px] text-text-main leading-tight truncate min-w-0">{{ $shopName }}</h1>
+                    <div class="flex items-center gap-1 shrink-0">
+                        <i class="fas fa-heart text-[15px] text-discovery-pink"></i>
+                        <span class="font-bold text-[13px] text-text-main">{{ number_format($likeCount) }}</span>
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        {{-- 名前（店舗名）+ ライク --}}
-        <div class="flex items-center justify-between gap-3 mb-3">
-            <h1 class="app-title text-[24px] text-text-main leading-tight truncate min-w-0">{{ $shopName }}</h1>
-            <div class="flex items-center gap-1.5 shrink-0">
-                <i class="fas fa-heart text-[18px] text-discovery-pink"></i>
-                <span class="font-bold text-[14px] text-text-main">{{ number_format($likeCount) }}</span>
-            </div>
-        </div>
-
-        {{-- エリア + 業種 --}}
-        @if($areaChip !== '' || $industryName !== '')
-            <div class="flex items-center gap-2 mb-4 text-text-sub text-[12px] flex-wrap">
-                @if($areaChip !== '')
-                    <span class="inline-flex items-center gap-1.5"><i class="fas fa-map-marker-alt"></i>{{ $areaChip }}</span>
+                @if($areaChip !== '' || $industryName !== '')
+                    <div class="flex items-center gap-1.5 text-text-sub text-[12px] flex-wrap">
+                        @if($areaChip !== '')
+                            <span class="inline-flex items-center gap-1"><i class="fas fa-map-marker-alt text-[10px]"></i>{{ $areaChip }}</span>
+                        @endif
+                        @if($industryName !== '')
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/10 border border-line-accent/40 text-accent-text font-bold tracking-wide text-[10.5px]">
+                                <i class="fas fa-tag text-[9px]"></i>{{ $industryName }}
+                            </span>
+                        @endif
+                    </div>
                 @endif
-                @if($industryName !== '')
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/10 border border-line-accent/40 text-accent-text font-bold tracking-wide">
-                        <i class="fas fa-tag text-[10px]"></i>{{ $industryName }}
-                    </span>
+            </div>
+        </div>
+
+        {{-- 2. アピールひとこと（hitokoto または catch_copy） --}}
+        @if($appealTrunc !== '')
+            <div class="relative mb-4 rounded-2xl border border-line-accent/40 bg-gradient-to-br from-surface-from to-base shadow-card-3d px-4 py-3">
+                <i class="fas fa-quote-left absolute top-2 left-3 text-accent-text/50 text-[12px]" aria-hidden="true"></i>
+                <p class="pl-6 text-[13.5px] leading-relaxed text-text-main">{{ $appealTrunc }}</p>
+            </div>
+        @endif
+
+        {{-- 3. 主要情報タイル：ボーナス金 / 時給（あるものだけ表示） --}}
+        @if($showBonusMain || $primaryWageDisp)
+            <div class="grid @if($showBonusMain && $primaryWageDisp) grid-cols-2 @else grid-cols-1 @endif gap-2.5 mb-4">
+                @if($showBonusMain)
+                    <div class="rounded-2xl border border-line-accent/40 bg-gradient-to-br from-gold-from/15 to-gold-to/10 px-3 py-3 shadow-card-3d">
+                        <div class="flex items-center gap-1.5 text-[10px] tracking-widest text-text-sub uppercase">
+                            <i class="fas fa-gift text-amber-400"></i> BONUS
+                        </div>
+                        <div class="mt-1 flex items-baseline gap-0.5">
+                            <span class="text-[11px] font-bold text-amber-300">¥</span>
+                            <span class="text-[22px] font-extrabold tracking-tight text-amber-300 leading-none">{{ number_format($noruma) }}</span>
+                        </div>
+                        @if($bonusConditionsText !== '')
+                            <p class="mt-1 text-[10px] text-text-sub leading-snug line-clamp-2">{{ $bonusConditionsText }}</p>
+                        @endif
+                    </div>
+                @endif
+                @if($primaryWageDisp)
+                    <div class="rounded-2xl border border-line-accent/40 bg-gradient-to-br from-surface-from to-base px-3 py-3 shadow-card-3d">
+                        <div class="flex items-center gap-1.5 text-[10px] tracking-widest text-text-sub uppercase">
+                            <i class="fas fa-yen-sign text-accent-text"></i> WAGE
+                        </div>
+                        <div class="mt-1 text-[19px] font-extrabold tracking-tight text-text-main leading-none">{{ $primaryWageDisp }}</div>
+                        <p class="mt-1 text-[10px] text-text-sub leading-snug">{{ $primaryWageLabel }}</p>
+                    </div>
                 @endif
             </div>
         @endif
 
-        {{-- ボーナス金バッジ --}}
-        @if($showBonusMain)
-            <div class="mb-5">
-                <x-ui.badge variant="gold">
-                    <span class="text-[10px] tracking-wider opacity-90">ボーナス金</span>
-                    <span class="text-[18px] tracking-wider font-extrabold">¥{{ number_format($noruma) }}</span>
-                </x-ui.badge>
-                @if($bonusConditionsText !== '')
-                    <p class="text-[11px] text-text-sub mt-2">達成条件：{{ $bonusConditionsText }}</p>
-                @endif
-            </div>
-        @endif
-
-        {{-- アクション CTA --}}
+        {{-- 4. アクション CTA：TALK を最上位に、応募系・KEEP・共有を横に --}}
+        @php
+            $isShopPreview = $isShopPreview ?? empty($forCast);
+            // 店舗プレビュー時は cast.talk.room が member 認証必須のため、リンク先を '#' にして
+            // クリックしても遷移しないようにし、プレビュー用の注釈を出す
+            $mkTalkHref = function (array $params) use ($isShopPreview) {
+                return $isShopPreview ? '#' : route('cast.talk.room', $params);
+            };
+        @endphp
         @if(!empty($ctaShopId))
-            <div class="flex flex-col gap-2 mb-3">
-                @if($ctaHasTrial)
-                    <a href="{{ route('cast.talk.room', ['id' => $ctaShopId, 'job_kind' => 'trial', 'talk_topic' => 'new_hire', 'initiate' => 1]) }}"
-                       class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold bg-gradient-to-r from-accent-grad-from to-accent-grad-to text-on-accent-strong shadow-btn-3d active:translate-y-1.5 active:shadow-btn-3d-active transition-all duration-300">
-                        <i class="fas fa-paper-plane"></i> 新規採用に応募する
-                    </a>
+            <div class="flex flex-col gap-2 mb-2">
+                {{-- 最重要：TALK 遷移（求人未登録でも常に表示） --}}
+                <a href="{{ $mkTalkHref(['id' => $ctaShopId, 'talk_topic' => 'other', 'initiate' => 1]) }}"
+                   @if($isShopPreview) aria-disabled="true" title="プレビュー：求職者はここからトークに遷移します" onclick="return false;" @endif
+                   class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold bg-gradient-to-r from-accent-grad-from to-accent-grad-to text-on-accent-strong shadow-btn-3d active:translate-y-1.5 active:shadow-btn-3d-active transition-all duration-300 {{ $isShopPreview ? 'cursor-default opacity-95' : '' }}">
+                    <i class="fas fa-comment-dots"></i> トークで話を聞いてみる
+                </a>
+
+                {{-- 応募系（求人が登録されている場合のみ） --}}
+                @if($ctaHasTrial || $ctaHasHelp)
+                    <div class="flex gap-2">
+                        @if($ctaHasTrial)
+                            <a href="{{ $mkTalkHref(['id' => $ctaShopId, 'job_kind' => 'trial', 'talk_topic' => 'new_hire', 'initiate' => 1]) }}"
+                               @if($isShopPreview) aria-disabled="true" onclick="return false;" @endif
+                               class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-full font-bold text-[12.5px] border border-line-accent/40 bg-accent/10 text-accent-text transition-all duration-300 {{ $isShopPreview ? 'cursor-default' : '' }}">
+                                <i class="fas fa-paper-plane text-[11px]"></i> 新規採用に応募
+                            </a>
+                        @endif
+                        @if($ctaHasHelp)
+                            <a href="{{ $mkTalkHref(['id' => $ctaShopId, 'job_kind' => 'help', 'talk_topic' => 'help', 'initiate' => 1]) }}"
+                               @if($isShopPreview) aria-disabled="true" onclick="return false;" @endif
+                               class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-full font-bold text-[12.5px] border border-line-accent/40 bg-accent/10 text-accent-text transition-all duration-300 {{ $isShopPreview ? 'cursor-default' : '' }}">
+                                <i class="fas fa-hand-holding-heart text-[11px]"></i> ヘルプ応募
+                            </a>
+                        @endif
+                    </div>
                 @endif
-                @if($ctaHasHelp)
-                    <a href="{{ route('cast.talk.room', ['id' => $ctaShopId, 'job_kind' => 'help', 'talk_topic' => 'help', 'initiate' => 1]) }}"
-                       class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold border border-line-accent/40 bg-accent/10 text-accent-text transition-all duration-300">
-                        <i class="fas fa-hand-holding-heart"></i> ヘルプ求人に応募する
-                    </a>
-                @endif
+
+                {{-- KEEP + 共有 --}}
                 <div class="flex gap-2">
                     <button type="button"
-                            class="recruit-cta-heart flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full font-bold border border-line-accent/40 bg-base/60 text-text-main transition-all duration-300 {{ !empty($recruit['is_kept']) ? 'bg-accent/15 text-accent-text border-accent' : '' }}"
+                            @if($isShopPreview) disabled title="プレビュー：求職者はここでキープできます" @endif
+                            class="recruit-cta-heart flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full font-bold text-[12.5px] border border-line-accent/40 bg-base/60 text-text-main transition-all duration-300 {{ !empty($recruit['is_kept']) ? 'bg-accent/15 text-accent-text border-accent' : '' }} {{ $isShopPreview ? 'opacity-70 cursor-default' : '' }}"
                             aria-label="キープ"
                             data-item-id="{{ $shop['id'] ?? '' }}"
                             data-item-type="shop"
                             data-action="keep">
                         <i class="fas fa-bookmark"></i> KEEP
                     </button>
-                    <a href="{{ route('cast.talk.room', ['id' => $ctaShopId, 'talk_topic' => 'other', 'initiate' => 1]) }}"
-                       class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full font-bold border border-line-accent/40 bg-base/60 text-text-main transition-all duration-300">
-                        <i class="fas fa-comment-dots"></i> 話を聞く
-                    </a>
+                    @if(!empty($shareUrlResolved))
+                        <div class="flex-1 flex items-center justify-center">
+                            @include('partials.share-menu', [
+                                'shareUrl' => $shareUrlResolved,
+                                'shareTitle' => $shareTitleResolved,
+                                'shareText' => $shareTextResolved,
+                                'menuId' => 'recruit-share-menu',
+                            ])
+                        </div>
+                    @endif
                 </div>
-            </div>
-        @endif
-
-        {{-- 共有 --}}
-        @if(!empty($shareUrlResolved))
-            <div class="flex justify-end mb-3">
-                @include('partials.share-menu', [
-                    'shareUrl' => $shareUrlResolved,
-                    'shareTitle' => $shareTitleResolved,
-                    'shareText' => $shareTextResolved,
-                    'menuId' => 'recruit-share-menu',
-                ])
             </div>
         @endif
     </div>
@@ -147,12 +194,12 @@
         <div data-tabs class="border-t border-b border-line-accent/40 bg-base/90 backdrop-blur-md sticky top-0 z-10">
             <div class="flex">
                 <button type="button" data-tab="gallery"
-                        class="flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
+                        class="is-active flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
                     <i class="fas fa-images text-[14px]"></i>
                     <span class="app-title text-[10px] tracking-widest">GALLERY</span>
                 </button>
                 <button type="button" data-tab="job"
-                        class="is-active flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
+                        class="flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
                     <i class="fas fa-briefcase text-[14px]"></i>
                     <span class="app-title text-[10px] tracking-widest">JOB</span>
                 </button>
@@ -165,7 +212,7 @@
         </div>
 
         {{-- ========== GALLERY ========== --}}
-        <div data-tab-panel="gallery">
+        <div data-tab-panel="gallery" class="is-active">
             @if(count($galleryImages) > 0)
                 <ul id="profile-gallery-list">
                     @foreach($galleryImages as $i => $img)
@@ -186,11 +233,21 @@
         </div>
 
         {{-- ========== JOB（求人情報） ========== --}}
-        <div data-tab-panel="job" class="is-active">
+        <div data-tab-panel="job">
             <div class="p-4 flex flex-col gap-4">
 
+                {{-- CATCH（キャッチコピー：header で hitokoto を優先表示している場合、こちらで catch_copy も掲載） --}}
+                @if($catchCopyMain !== '' && $shopWord !== '' && $catchCopyMain !== $shopWord)
+                    <x-ui.card class="p-5">
+                        <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-3 flex items-center gap-2">
+                            <i class="fas fa-bullhorn"></i> CATCH
+                        </h3>
+                        <p class="text-[13.5px] leading-relaxed text-text-main whitespace-pre-line">{{ $catchCopyMain }}</p>
+                    </x-ui.card>
+                @endif
+
                 {{-- BONUS card --}}
-                @if($showBonusMain || $bonusConditionsText !== '')
+                @if($showBonusMain || $bonusConditionsText !== '' || $bonusRemarks !== '')
                     <x-ui.card class="p-5">
                         <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
                             <i class="fas fa-gift"></i> BONUS
@@ -200,10 +257,28 @@
                                 <span class="text-[12px] text-text-sub font-medium">ボーナス金</span>
                                 <span class="text-[14px] font-extrabold text-amber-400">¥{{ number_format($noruma) }}</span>
                             </div>
-                            @if($bonusConditionsText !== '')
+                            @if($bonusDaysLocal !== '')
+                                <div class="flex justify-between items-center border-b border-line pb-2">
+                                    <span class="text-[12px] text-text-sub font-medium">達成勤務日数</span>
+                                    <span class="text-[13px] font-bold text-text-main text-right">{{ $bonusDaysLocal }}日以上</span>
+                                </div>
+                            @endif
+                            @if($bonusHoursLocal !== '')
+                                <div class="flex justify-between items-center border-b border-line pb-2">
+                                    <span class="text-[12px] text-text-sub font-medium">達成勤務時間</span>
+                                    <span class="text-[13px] font-bold text-text-main text-right">{{ $bonusHoursLocal }}時間以上</span>
+                                </div>
+                            @endif
+                            @if($bonusExtraLocal !== '')
+                                <div class="flex flex-col gap-1 border-b border-line pb-2">
+                                    <span class="text-[12px] text-text-sub font-medium">その他の条件</span>
+                                    <span class="text-[13px] text-text-main leading-relaxed whitespace-pre-line">{{ $bonusExtraLocal }}</span>
+                                </div>
+                            @endif
+                            @if($bonusRemarks !== '')
                                 <div class="flex flex-col gap-1">
-                                    <span class="text-[12px] text-text-sub font-medium">達成条件</span>
-                                    <span class="text-[13px] text-text-main leading-relaxed">{{ $bonusConditionsText }}</span>
+                                    <span class="text-[12px] text-text-sub font-medium">備考</span>
+                                    <span class="text-[13px] text-text-main leading-relaxed whitespace-pre-line">{{ $bonusRemarks }}</span>
                                 </div>
                             @endif
                         </div>
@@ -354,7 +429,7 @@
                 </x-ui.card>
 
                 {{-- WORD（店長のひとこと） --}}
-                @if($shopWord !== '' || $shopConcept !== '')
+                @if($shopWord !== '' || $shopConcept !== '' || $storeAtmosphere !== '')
                     <x-ui.card class="p-5">
                         <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
                             <i class="fas fa-quote-left"></i> WORD
@@ -366,6 +441,12 @@
                             <div class="@if($shopWord !== '') mt-3 pt-3 border-t border-line @endif">
                                 <span class="text-[11px] text-text-sub uppercase tracking-wider block mb-1">CONCEPT</span>
                                 <div class="text-[13px] text-text-main leading-relaxed whitespace-pre-line">{{ $shopConcept }}</div>
+                            </div>
+                        @endif
+                        @if($storeAtmosphere !== '')
+                            <div class="@if($shopWord !== '' || $shopConcept !== '') mt-3 pt-3 border-t border-line @endif">
+                                <span class="text-[11px] text-text-sub uppercase tracking-wider block mb-1">ATMOSPHERE</span>
+                                <div class="text-[13px] text-text-main leading-relaxed whitespace-pre-line">{{ $storeAtmosphere }}</div>
                             </div>
                         @endif
                     </x-ui.card>

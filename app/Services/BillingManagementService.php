@@ -1686,6 +1686,22 @@ class BillingManagementService
         if (!empty($detailRows)) {
             DB::table('review_details')->insert($detailRows);
         }
+
+        // レビュー投稿を店舗マネージャーに通知（インボックス＋Push）
+        try {
+            $castName = (string) ($application->cast_name ?? DB::table('cast_profiles')->where('cast_id', $application->cast_id)->value('nickname') ?? '');
+            $displayName = $castName !== '' ? $castName : 'キャスト';
+            app(\App\Services\NotificationService::class)->createForShop(
+                (string) $application->shop_id,
+                'review.posted',
+                'キャストからレビューが届きました',
+                "{$displayName}さんが勤務レビューを投稿しました。",
+                url('/shop/mypage/reviews'),
+                ['cast_id' => (string) $application->cast_id, 'shop_id' => (string) $application->shop_id, 'review_id' => $reviewId]
+            );
+        } catch (\Throwable $e) {
+            \Log::warning('Review notify failed: ' . $e->getMessage());
+        }
     }
 
     private function mapDepositRow(object $row): array
