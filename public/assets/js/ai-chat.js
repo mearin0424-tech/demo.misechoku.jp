@@ -35,6 +35,7 @@
 
         var endpoint = root.getAttribute('data-endpoint');
         var avatar = root.getAttribute('data-avatar') || '';
+        var personalityType = (root.getAttribute('data-personality-type') || '').trim();
         var thread = root.querySelector('[data-ai-thread]');
         var form = root.querySelector('[data-ai-form]');
         var input = root.querySelector('[data-ai-input]');
@@ -179,8 +180,9 @@
                 var reward = r.reward ? '採用報酬 ' + r.reward.toLocaleString() + '円' : '';
                 var meta = [area, wage, reward].filter(Boolean).join(' / ');
 
+                // 同一タブで遷移（戻るとsessionStorageから会話が復元される）
                 wrap.insertAdjacentHTML('beforeend',
-                    '<a href="' + escapeHtml(r.url) + '" class="ai-chat__card" target="_blank" rel="noopener">' +
+                    '<a href="' + escapeHtml(r.url) + '" class="ai-chat__card">' +
                     '  <div class="ai-chat__card-thumb">' +
                     '    <img src="' + escapeHtml(r.image) + '" alt="' + escapeHtml(r.name || '') + '" loading="lazy">' +
                     '  </div>' +
@@ -327,16 +329,20 @@
         // 起動時
         // ------------------------------------------------------------
         function initialGreeting() {
-            var greet = 'こんにちは✨ あなたにピッタリのお店、AIが一緒に探すよ！\n例えば「六本木で時給高いお店」「未経験OKでノルマ緩いところ」みたいに教えてくれると見つけやすいよ💎';
+            var greet = personalityType
+                ? 'こんにちは✨ あなたにピッタリのお店、AIが一緒に探すよ！\n接客タイプ診断（' + personalityType + '）も登録済みだから、タイプに合わせた提案もできるよ💎\n「六本木で時給高いお店」「私のタイプに合うお店」みたいに気軽に聞いてね！'
+                : 'こんにちは✨ あなたにピッタリのお店、AIが一緒に探すよ！\n例えば「六本木で時給高いお店」「未経験OKでノルマ緩いところ」みたいに教えてくれると見つけやすいよ💎';
             appendAi(greet, { instant: true, silent: true });
             transcript.push({ role: 'ai', content: greet, ts: Date.now() });
             saveTranscript();
-            renderQuickReplies([
+            var quick = [
                 '六本木で時給高いお店',
                 '未経験OKのお店',
                 'ノルマ無しで働きたい',
                 '銀座のクラブを見る',
-            ]);
+            ];
+            if (personalityType) quick.unshift('私の接客タイプに合うお店');
+            renderQuickReplies(quick);
         }
 
         injectResetButton();

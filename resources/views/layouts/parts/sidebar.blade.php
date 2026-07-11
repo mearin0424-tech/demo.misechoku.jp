@@ -2,6 +2,11 @@
     $isCast = Request::is('cast*');
     $isShop = Request::is('shop*');
     $typePath = $isCast ? 'cast' : 'shop';
+
+    // 書類系の未済判定：ヘッダー共有の $todoList（InjectHeaderBadges）から算出
+    $sidebarTodos = collect($todoList ?? []);
+    $identityPendingBadge = $sidebarTodos->whereIn('key', ['cast.identity_unsubmitted', 'cast.identity_rejected', 'cast.identity_pending'])->isNotEmpty();
+    $licensePendingBadge  = $sidebarTodos->whereIn('key', ['shop.license_unsubmitted', 'shop.license_rejected', 'shop.license_pending'])->isNotEmpty();
 @endphp
 
 <aside id="side-menu">
@@ -22,6 +27,31 @@
                 <i class="fas fa-download"></i> アプリをインストール
             </button>
         </div>
+
+        {{-- VERIFICATION セクション：一度完了すれば開かない書類系はサイドメニューに集約。
+             未完了の間は「未済」バッジを表示（やることリストにも常時掲載される） --}}
+        @if($isCast || $isShop)
+        <div class="sidebar-section">
+            <div class="menu-label-header">VERIFICATION</div>
+            <ul class="sidebar-sub-menu">
+                @if($isCast)
+                    <li>
+                        <a href="{{ route('cast.mypage.identity') }}">
+                            <i class="fas fa-id-card"></i> 本人確認
+                            @if($identityPendingBadge)<span class="sidebar-badge-pending">未済</span>@endif
+                        </a>
+                    </li>
+                @else
+                    <li>
+                        <a href="{{ route('shop.mypage.index') }}#license-section">
+                            <i class="fas fa-file-shield"></i> ライセンス（許可証）管理
+                            @if($licensePendingBadge)<span class="sidebar-badge-pending">未済</span>@endif
+                        </a>
+                    </li>
+                @endif
+            </ul>
+        </div>
+        @endif
 
         {{-- SETTING セクション --}}
         <div class="sidebar-section">
@@ -108,10 +138,24 @@
     transform: translateY(-1px);
     box-shadow: 0 4px 14px rgba(0,0,0,0.45);
 }
-.sidebar-sub-menu a i, .menu-summary i:first-child { 
-    color: #a78bfa; 
-    width: 20px; 
-    text-align: center; 
+.sidebar-sub-menu a i, .menu-summary i:first-child {
+    color: #a78bfa;
+    width: 20px;
+    text-align: center;
+}
+
+/* 書類系の「未済」バッジ */
+.sidebar-badge-pending {
+    margin-left: auto;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    background: rgba(248, 113, 113, 0.16);
+    border: 1px solid rgba(248, 113, 113, 0.45);
+    color: #fca5a5;
+    white-space: nowrap;
 }
 
 .menu-summary {

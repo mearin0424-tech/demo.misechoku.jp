@@ -4,7 +4,7 @@
 @section('body-class', request()->is('cast/*') && ($activeTab ?? null) === 'pane-ai' ? 'page-search page-search-ai' : 'page-search')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/search.css') }}?v=20260614-toast">
+<link rel="stylesheet" href="{{ asset('assets/css/search.css') }}?v=20260712-ai">
 <link rel="stylesheet" href="{{ asset('assets/css/sub-header.css') }}">
 @endpush
 
@@ -22,7 +22,7 @@
     if ($showAiTab) {
         $tabsForHeader = [
             ['id' => 'pane-list', 'label' => '検索', 'url' => route('cast.search.index', ['tab' => 'list']), 'active' => $activeTab === 'pane-list'],
-            ['id' => 'pane-ai', 'label' => 'AIレコメンド', 'url' => route('cast.search.index', ['tab' => 'ai']), 'active' => $activeTab === 'pane-ai'],
+            ['id' => 'pane-ai', 'label' => 'AIコンシェルジュ', 'url' => route('cast.search.index', ['tab' => 'ai']), 'active' => $activeTab === 'pane-ai'],
         ];
     }
 
@@ -30,28 +30,6 @@
     $aiPersonalityTestUrl = $showAiTab
         ? asset('personality-test') . '?' . http_build_query(['return_to' => $aiTabUrl])
         : null;
-    $aiRecommendItems = $showAiTab ? collect($items)->map(function (array $item) use ($prefix) {
-        if ($prefix === 'cast') {
-            return [
-                'id' => (string) ($item['id'] ?? ''),
-                'name' => (string) ($item['shop_name'] ?? 'ショップ'),
-                'area' => trim((string) (($item['pref'] ?? '') . ' ' . ($item['city'] ?? ''))),
-                'text' => trim((string) (($item['catch'] ?? '') . ' ' . ($item['overview'] ?? ''))),
-                'image' => $item['main_img'] ?? asset('assets/images/common/no-image.png'),
-                'url' => Route::has('cast.shopprofile.show') && !empty($item['id']) ? route('cast.shopprofile.show', $item['id']) : '#',
-            ];
-        }
-
-        return [
-            'id' => (string) ($item['id'] ?? ''),
-            'name' => (string) ($item['name'] ?? 'キャスト'),
-            'area' => trim((string) (($item['pref'] ?? '') . ' ' . ($item['city'] ?? ''))),
-            'text' => (string) ($item['pr'] ?? ''),
-            'image' => $item['img'] ?? asset('assets/images/common/no-image.png'),
-            'age' => $item['age'] ?? null,
-            'url' => Route::has('shop.castprofileview.show') && !empty($item['id']) ? route('shop.castprofileview.show', $item['id']) : '#',
-        ];
-    })->values()->all() : [];
 @endphp
 
 @if(!empty($tabsForHeader))
@@ -84,24 +62,42 @@
     </div>
 
     @if($showAiTab)
-        {{-- パネル：AI --}}
+        {{-- パネル：AIコンシェルジュ（TALK 同様の全画面チャット。入力欄は最下部固定） --}}
         <div id="pane-ai" class="tab-pane {{ $activeTab === 'pane-ai' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-ai' ? 'display:none' : '' }}">
-            {{-- 自由入力 AIチャット（テンプレ駆動・LLM非使用） --}}
-            @if($prefix === 'cast')
-                <section
-                    class="ai-chat"
-                    data-ai-chat-root
-                    data-endpoint="{{ route('cast.search.ai-chat') }}"
-                    data-avatar="{{ asset('assets/images/guide/guide-character.png') }}"
-                >
-                    <header class="ai-chat__header">
-                        <div class="ai-chat__header-icon"><i class="fas fa-sparkles"></i></div>
-                        <div class="ai-chat__header-text">
-                            <p class="ai-chat__header-title">AI コンシェルジュ <span class="ai-chat__badge">BETA</span></p>
-                            <p class="ai-chat__header-sub">自由に話しかけてみてね。あなたに合うお店を見つけるよ。</p>
-                        </div>
-                    </header>
-                    <div class="ai-chat__thread" data-ai-thread aria-live="polite"></div>
+            <section
+                class="ai-chat"
+                data-ai-chat-root
+                data-endpoint="{{ route('cast.search.ai-chat') }}"
+                data-avatar="{{ asset('assets/images/guide/guide-character.png') }}"
+                data-personality-type="{{ $personalityType ?? '' }}"
+            >
+                <header class="ai-chat__header">
+                    <div class="ai-chat__header-icon"><i class="fas fa-sparkles"></i></div>
+                    <div class="ai-chat__header-text">
+                        <p class="ai-chat__header-title">AI コンシェルジュ <span class="ai-chat__badge">BETA</span></p>
+                        <p class="ai-chat__header-sub">条件・気分・悩み、なんでも話しかけてOK。あなたに合うお店を一緒に探すよ。</p>
+                    </div>
+                </header>
+
+                {{-- 接客タイプ診断の状態ストリップ（登録済み: タイプ表示 / 未登録: 診断導線） --}}
+                <div class="ai-chat__notice">
+                    @if(!empty($personalityType))
+                        <span class="ai-chat__notice-label">
+                            <i class="fas fa-user-check"></i> 接客タイプ <strong>{{ $personalityType }}</strong> 登録済み
+                        </span>
+                        <a href="{{ $aiPersonalityTestUrl }}" target="_blank" rel="noopener noreferrer" class="ai-chat__notice-link">再診断する</a>
+                    @else
+                        <span class="ai-chat__notice-label">
+                            <i class="fas fa-wand-magic-sparkles"></i> 接客タイプ診断でおすすめの精度が上がります
+                        </span>
+                        <a href="{{ $aiPersonalityTestUrl }}" target="_blank" rel="noopener noreferrer" class="ai-chat__notice-link">診断する</a>
+                    @endif
+                </div>
+
+                <div class="ai-chat__thread" data-ai-thread aria-live="polite"></div>
+
+                {{-- コンポーザー：クイックリプライ + 入力欄（チャット最下部に固定） --}}
+                <div class="ai-chat__composer">
                     <div class="ai-chat__quick-replies" data-ai-quick-replies></div>
                     <form class="ai-chat__form" data-ai-form autocomplete="off">
                         <input
@@ -113,36 +109,8 @@
                             <i class="fas fa-paper-plane"></i>
                         </button>
                     </form>
-                </section>
-            @endif
-
-            @if(empty($personalityType))
-                <div class="ai-recommend__intro-card">
-                    <div class="ai-recommend__intro-title">接客タイプ診断結果をご利用いただくと、おすすめの精度を高められます</div>
-                    <p class="ai-recommend__intro-text">
-                        AIレコメンドでは診断ロジックは実行せず、保存済みの診断結果のみを読み込みます。<br>
-                        まだ未登録の場合は、先に接客タイプ診断をご実施ください。
-                    </p>
-                    <a href="{{ $aiPersonalityTestUrl }}" target="_blank" rel="noopener noreferrer" class="ai-recommend__intro-link">
-                        接客タイプ診断を開く
-                    </a>
                 </div>
-            @endif
-            <div
-                class="ai-recommend"
-                data-ai-recommend-root
-                data-role="{{ $prefix }}"
-                data-avatar="{{ asset('assets/images/guide/guide-character.png') }}"
-            >
-                <div class="ai-recommend__chat" data-ai-chat aria-live="polite"></div>
-            </div>
-
-            <script type="application/json" id="ai-recommend-data">{!! json_encode([
-                'role' => $prefix,
-                'items' => $aiRecommendItems,
-                'personalityType' => $personalityType ?? null,
-                'personalityTestUrl' => $aiPersonalityTestUrl,
-            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+            </section>
         </div>
     @endif
 </div>
@@ -153,9 +121,6 @@
 <script src="{{ asset('assets/js/search-detail.js') }}"></script>
 <script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260614-toast"></script>
 @if($showAiTab)
-<script src="{{ asset('assets/js/ai-recommend.js') }}"></script>
-@if($prefix === 'cast')
-<script src="{{ asset('assets/js/ai-chat.js') }}"></script>
-@endif
+<script src="{{ asset('assets/js/ai-chat.js') }}?v=20260712-ai"></script>
 @endif
 @endpush

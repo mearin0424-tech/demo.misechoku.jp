@@ -49,6 +49,21 @@ class AiConciergeService
 - 医療・法律・税務の具体的助言は避け、必要なら「専門家に相談」と促す。
 PROMPT;
 
+    /**
+     * 接客タイプ診断（4文字コード）の各軸の意味。
+     * LLM が「私のタイプに合うお店」等の相談に答えられるようコンテキストに添える。
+     */
+    private const PERSONALITY_AXES = [
+        'L' => 'リード型（会話を主導して場を盛り上げる）',
+        'F' => 'フォロワー型（聞き役でお客様のペースに合わせる）',
+        'C' => '恋人型（女性らしさ・疑似恋愛が武器）',
+        'P' => 'パートナー型（知性と対等な会話が武器）',
+        'I' => '懐型（人懐っこく一気に距離を詰める）',
+        'O' => '領域型（プロの距離感・ミステリアスさを保つ）',
+        'H' => 'ハンター型（短期集中で大きな結果を出す）',
+        'R' => 'リレーション型（マメな連絡で関係をじっくり育てる）',
+    ];
+
     public function __construct(
         private readonly AiChatTemplateService $template,
         private readonly LlmChatService $llm,
@@ -60,9 +75,10 @@ PROMPT;
      *
      * @param  string $userMessage
      * @param  array<int, array{role:string, content:string}> $history
+     * @param  ?string $personalityType 登録済みの接客タイプ診断（例: LCIR）
      * @return array{reply: string, recommendations: array<int, array<string,mixed>>, quick_replies: array<int, string>, source: 'llm'|'template'}
      */
-    public function respond(string $userMessage, array $history = []): array
+    public function respond(string $userMessage, array $history = [], ?string $personalityType = null): array
     {
         $userMessage = trim($userMessage);
         if ($userMessage === '') {
@@ -81,7 +97,7 @@ PROMPT;
         if ($this->llm->isEnabled()) {
             $llmReply = $this->llm->chat(
                 self::SYSTEM_PROMPT,
-                $this->buildMessages($userMessage, $history, $intent, $recs),
+                $this->buildMessages($userMessage, $history, $intent, $recs, $personalityType),
             );
         }
 
@@ -109,7 +125,7 @@ PROMPT;
      * @param  array<int, array<string,mixed>> $recs
      * @return array<int, array{role:string, content:string}>
      */
-    private function buildMessages(string $userMessage, array $history, array $intent, array $recs): array
+    private function buildMessages(string $userMessage, array $history, array $intent, array $recs, ?string $personalityType = null): array
     {
         $out = [];
 
@@ -136,7 +152,7 @@ PROMPT;
 
         // 候補店舗を "developer / system 補足" として最後の user メッセージに
         // インジェクション形式で添える（履歴に残さない）
-        $context = $this->formatShopsContext($intent, $recs);
+        $context = $this->formatShopsContext($intent, $recs, $personalityType);
         if ($context !== '') {
             // 末尾の user メッセージにコンテキストを追加
             $lastIdx = count($out) - 1;
@@ -151,11 +167,20 @@ PROMPT;
      * @param  array<string,mixed> $intent
      * @param  array<int, array<string,mixed>> $recs
      */
-    private function formatShopsContext(array $intent, array $recs): string
+    private function formatShopsContext(array $intent, array $recs, ?string $personalityType = null): string
     {
         $lines = [];
         $lines[] = '（開発者からの補足。ユーザには見えない）';
         $lines[] = '解析された希望条件: ' . $this->intentSummary($intent);
+        if ($personalityType !== null && $personalityType !== '') {
+            $axes = array_filter(array_map(
+                fn (string $c) => self::PERSONALITY_AXES[$c] ?? null,
+                str_split($personalityType),
+            ));
+            $lines[] = '相談者の接客タイプ診断: ' . $personalityType
+                . '（' . implode(' / ', $axes) . '）'
+                . '。「私のタイプに合うお店」等と聞かれたらこの特性を踏まえて候補の魅力を語ること。';
+        }
         if (empty($recs)) {
             $lines[] = '### 候補店舗（この中からのみ紹介できる）';
             $lines[] = '（該当なし。条件を緩める提案をしてください）';

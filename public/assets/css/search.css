@@ -82,10 +82,20 @@ body.page-search-ai #pane-ai.tab-pane.active {
     overflow: hidden;
 }
 
-body.page-search-ai .ai-recommend {
+/* AIコンシェルジュ：TALK 同様の全画面チャット。
+   スレッドが伸縮スクロールし、コンポーザー（入力欄）が常に最下部に固定される */
+body.page-search-ai .ai-chat {
     flex: 1 1 auto;
     min-height: 0;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    margin: 10px 10px 0;
+}
+
+body.page-search-ai .ai-chat__thread {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
 }
 
 /* タイムラインカード（他タブのカードと統一） */
@@ -1856,324 +1866,6 @@ body.page-search .connection-list--search {
     }
 }
 
-/* ========== AIレコメンド ========== */
-.ai-recommend {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    min-height: calc(100vh - var(--header-height) - var(--footer-height) - 56px);
-    padding: 4px 0 calc(var(--footer-height) + 16px);
-}
-
-.ai-recommend__chat {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.ai-recommend__intro-card {
-    margin: 0 0 14px;
-    padding: 16px;
-    border-radius: 18px;
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
-}
-
-.ai-recommend__intro-title {
-    font-family: var(--font-sans);
-    font-size: 0.95rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    line-height: 1.6;
-    color: var(--color-text-header);
-    margin-bottom: 8px;
-}
-
-.ai-recommend__intro-text {
-    margin: 0;
-    font-family: var(--font-sans);
-    font-size: 0.85rem;
-    line-height: 1.9;
-    letter-spacing: 0.01em;
-    color: var(--color-text);
-}
-
-.ai-recommend__intro-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-sans);
-    margin-top: 14px;
-    min-height: 42px;
-    padding: 0 16px;
-    border-radius: 999px;
-    background: linear-gradient(135deg, var(--gold-light), var(--gold) 50%, var(--gold-deep));
-    color: #1a0814;
-    font-size: 0.82rem;
-    font-weight: 800;
-    text-decoration: none;
-    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
-}
-
-.ai-recommend__message {
-    max-width: 88%;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    animation: fadeIn 0.25s ease;
-}
-
-.ai-recommend__message--ai {
-    align-self: flex-start;
-    margin-left: 0;
-}
-
-.ai-recommend__message--user {
-    align-self: flex-end;
-    margin-left: auto;
-}
-
-.ai-recommend__bubble-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-}
-
-.ai-recommend__message--user .ai-recommend__bubble-row {
-    justify-content: flex-end;
-}
-
-.ai-recommend__avatar {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    background: linear-gradient(135deg, var(--gold-light), var(--gold-deep));
-    border: 2px solid rgba(255, 255, 255, 0.4);
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.ai-recommend__avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-.ai-recommend__bubble {
-    padding: 12px 15px;
-    border-radius: 18px;
-    font-family: var(--font-sans);
-    font-size: 0.95rem;
-    font-weight: 400;
-    line-height: 1.85;
-    letter-spacing: 0.01em;
-    word-break: break-word;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
-}
-
-/* AI 側（左）：本体テーマと同じガラス調＋ゴールド枠 */
-.ai-recommend__message--ai .ai-recommend__bubble {
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    color: var(--color-text-header);
-    border: 1px solid rgba(168, 85, 247, 0.3);
-    border-radius: 6px 18px 18px 18px;
-}
-
-/* ユーザ側（右）：プライマリのゴールド・グラデーション */
-.ai-recommend__message--user .ai-recommend__bubble {
-    background: linear-gradient(135deg, var(--gold-light), var(--gold) 50%, var(--gold-deep));
-    color: #1a0814;
-    font-weight: 600;
-    border: 0;
-    border-radius: 18px 6px 18px 18px;
-    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
-}
-
-.ai-recommend__message--typing .ai-recommend__bubble {
-    color: rgba(240, 180, 198, 0.7);
-}
-
-.ai-recommend__bubble strong {
-    font-weight: 800;
-    color: var(--gold-light);
-}
-
-.ai-recommend__message--user .ai-recommend__bubble strong {
-    color: #1a0814;
-}
-
-.ai-recommend__options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding-left: 52px;
-}
-
-.ai-recommend__options--grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-/* 選択肢ボタン：ゴーストゴールド（他画面のチップと統一感） */
-.ai-recommend__option {
-    width: auto;
-    min-height: 42px;
-    padding: 10px 14px;
-    border: 1px solid rgba(168, 85, 247, 0.4);
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.04);
-    color: var(--gold-light);
-    font-family: var(--font-sans);
-    font-size: 0.83rem;
-    font-weight: 600;
-    line-height: 1.6;
-    letter-spacing: 0.01em;
-    cursor: pointer;
-    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-}
-.ai-recommend__option:hover {
-    background: rgba(168, 85, 247, 0.12);
-    border-color: rgba(168, 85, 247, 0.65);
-    color: #fff;
-}
-.ai-recommend__option:active {
-    transform: scale(0.97);
-}
-
-.ai-recommend__options--grid .ai-recommend__option {
-    width: 100%;
-    padding: 10px 6px;
-    font-size: 0.76rem;
-}
-
-.ai-recommend__option--wide {
-    width: 100%;
-}
-
-.ai-recommend__cards {
-    width: min(100%, 560px);
-    margin-left: 52px;
-    display: grid;
-    gap: 12px;
-}
-
-.ai-recommend__card {
-    overflow: hidden;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-    border: 1px solid rgba(168, 85, 247, 0.28);
-    border-radius: 18px;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
-}
-
-.ai-recommend__card-media {
-    position: relative;
-    height: 142px;
-    background: rgba(5, 5, 5, 0.45);
-}
-
-.ai-recommend__card-media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.ai-recommend__card-badge {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    padding: 4px 8px;
-    border-radius: 999px;
-    background: rgba(20, 6, 12, 0.85);
-    border: 1px solid rgba(168, 85, 247, 0.4);
-    color: var(--gold-light);
-    font-size: 0.68rem;
-    font-weight: 700;
-}
-
-.ai-recommend__card-body {
-    padding: 14px;
-}
-
-.ai-recommend__card-title {
-    margin: 0 0 8px;
-    font-family: var(--font-sans);
-    font-size: 1rem;
-    line-height: 1.6;
-    letter-spacing: 0.03em;
-    color: var(--color-text-header);
-}
-
-.ai-recommend__reason {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 8px;
-    padding: 5px 9px;
-    border-radius: 999px;
-    background: rgba(168, 85, 247, 0.18);
-    border: 1px solid rgba(168, 85, 247, 0.4);
-    color: var(--gold-light);
-    font-family: var(--font-sans);
-    font-size: 0.74rem;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-}
-
-.ai-recommend__card-desc {
-    margin: 0 0 10px;
-    font-family: var(--font-sans);
-    font-size: 0.85rem;
-    line-height: 1.8;
-    letter-spacing: 0.01em;
-    color: var(--color-text);
-}
-
-.ai-recommend__card-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    margin-top: 12px;
-    padding: 11px 14px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--gold-light), var(--gold) 50%, var(--gold-deep));
-    color: #1a0814;
-    font-family: var(--font-sans);
-    font-size: 0.86rem;
-    font-weight: 800;
-    letter-spacing: 0.01em;
-    text-decoration: none;
-    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
-}
-
-@media (max-width: 640px) {
-    .ai-recommend__message,
-    .ai-recommend__cards {
-        max-width: 100%;
-    }
-
-    .ai-recommend__message--ai,
-    .ai-recommend__cards {
-        margin-left: 0;
-    }
-
-    .ai-recommend__options,
-    .ai-recommend__cards {
-        padding-left: 0;
-        margin-left: 0;
-    }
-
-    .ai-recommend__options--grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
 @media (min-width: 375px) and (max-width: 430px) {
     .search-filter-box {
         padding: 10px 10px 12px;
@@ -2265,6 +1957,51 @@ body.page-search .connection-list--search {
 .ai-chat__header-sub {
     margin: 2px 0 0;
     font-size: 0.74rem; color: #a0a0a0; line-height: 1.4;
+}
+
+/* 接客タイプ診断の状態ストリップ（ヘッダー直下・控えめ） */
+.ai-chat__notice {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 7px 14px;
+    background: rgba(168, 85, 247, 0.07);
+    border-bottom: 1px solid rgba(168, 85, 247, 0.18);
+}
+.ai-chat__notice-label {
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    color: rgba(196, 181, 253, 0.85);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.ai-chat__notice-label strong {
+    color: #e6dffc;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+}
+.ai-chat__notice-link {
+    flex: 0 0 auto;
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(168, 85, 247, 0.45);
+    background: rgba(168, 85, 247, 0.12);
+    color: #e6dffc;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: background .15s ease, border-color .15s ease;
+}
+.ai-chat__notice-link:hover {
+    background: rgba(168, 85, 247, 0.24);
+    border-color: rgba(168, 85, 247, 0.75);
 }
 
 /* リセットボタン（会話を初期化） */
@@ -2448,13 +2185,26 @@ body.page-search .connection-list--search {
     padding-left: 6px;
 }
 
-/* クイックリプライ（chip） */
-.ai-chat__quick-replies {
-    display: flex; flex-wrap: wrap; gap: 6px;
-    padding: 6px 14px 12px;
-    min-height: 0;
+/* コンポーザー：クイックリプライ + 入力フォーム（スレッド下に固定） */
+.ai-chat__composer {
+    flex: 0 0 auto;
+    background: rgba(0, 0, 0, 0.35);
+    border-top: 1px solid rgba(168, 85, 247, 0.3);
 }
+
+/* クイックリプライ（chip）：横スクロール1行でコンポーザーの高さを圧縮 */
+.ai-chat__quick-replies {
+    display: flex; flex-wrap: nowrap; gap: 6px;
+    padding: 0 14px;
+    min-height: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.ai-chat__quick-replies::-webkit-scrollbar { display: none; }
+.ai-chat__quick-replies:not(:empty) { padding-top: 10px; }
 .ai-chat__quick {
+    flex: 0 0 auto;
     padding: 7px 14px;
     border-radius: 999px;
     background: rgba(168, 85, 247, 0.10);
@@ -2464,6 +2214,7 @@ body.page-search .connection-list--search {
     cursor: pointer;
     transition: background .15s ease;
     font-family: inherit;
+    white-space: nowrap;
 }
 .ai-chat__quick:hover {
     background: rgba(168, 85, 247, 0.22);
@@ -2473,9 +2224,7 @@ body.page-search .connection-list--search {
 /* 入力フォーム */
 .ai-chat__form {
     display: flex; gap: 8px;
-    padding: 12px 14px;
-    background: rgba(0, 0, 0, 0.35);
-    border-top: 1px solid rgba(168, 85, 247, 0.3);
+    padding: 10px 14px calc(12px + env(safe-area-inset-bottom, 0px));
 }
 .ai-chat__input {
     flex: 1 1 auto; min-width: 0;

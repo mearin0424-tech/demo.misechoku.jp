@@ -220,13 +220,15 @@ body.is-image-editing #global-header {
 
 .header-right {
     /* 中身ぴったりサイズ。margin-left: auto で常にヘッダー右端に張り付く。
-       gap も 15px → 10px に詰めて、横幅 = 3 × 36 + 2 × 10 = 128px に収める。 */
+       gap 4px + 右側の負マージンで、アイコン群をさらに右端へ寄せてタイトル領域を広げる。
+       （ボタン自体が 38px あるためタップ領域は十分） */
     flex: 0 0 auto;
     margin-left: auto;
+    margin-right: -6px;
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 10px;
+    gap: 4px;
     min-width: 0;
     /* タイトルより手前。pointer-events も必ず受け取れるように。 */
     position: relative;
@@ -968,7 +970,7 @@ body.page-talk.page-talk-room .header-left {
         padding-left: var(--content-padding-x);
         padding-right: var(--content-padding-x);
     }
-    .header-right { gap: 6px; }
+    .header-right { gap: 3px; margin-right: -5px; }
     .header-icon-btn {
         width: 36px;
         height: 36px;
@@ -989,7 +991,7 @@ body.page-talk.page-talk-room .header-left {
 }
 @media (max-width: 360px) {
     .header-left { min-width: 44px; }
-    .header-right { gap: 4px; }
+    .header-right { gap: 2px; margin-right: -5px; }
     .header-icon-btn {
         width: 34px;
         height: 34px;

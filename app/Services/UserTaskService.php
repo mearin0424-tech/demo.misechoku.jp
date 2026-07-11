@@ -24,7 +24,7 @@ class UserTaskService
     {
         $tasks = [];
 
-        // (a) 本人確認書類が未提出 or 差戻し
+        // (a) 本人確認書類：承認完了までは常に「未済」としてタスクに出し続ける
         $identityStatus = $this->getCastIdentityStatus($castId);
         if ($identityStatus === 'unsubmitted') {
             $tasks[] = [
@@ -39,6 +39,13 @@ class UserTaskService
                 'text'    => '本人確認書類が差戻しされました。再提出してください',
                 'url'     => $this->safeRoute('cast.mypage.identity'),
                 'urgency' => 'high',
+            ];
+        } elseif ($identityStatus === 'pending') {
+            $tasks[] = [
+                'key'     => 'cast.identity_pending',
+                'text'    => '本人確認書類を審査中です（承認されるまで一部機能が制限されます）',
+                'url'     => $this->safeRoute('cast.mypage.identity'),
+                'urgency' => 'normal',
             ];
         }
 
@@ -88,21 +95,30 @@ class UserTaskService
     {
         $tasks = [];
 
-        // (a) 許可書類が未提出 or 差戻し
+        // (a) 許可書類：全書類が承認されるまで常に「未済」としてタスクに出し続ける
         $licenseStatus = $this->getShopLicenseStatus($shopId);
+        $licenseUrl = $this->safeRoute('shop.mypage.index');
+        $licenseUrl = $licenseUrl ? $licenseUrl . '#license-section' : null;
         if ($licenseStatus === 'unsubmitted') {
             $tasks[] = [
                 'key'     => 'shop.license_unsubmitted',
                 'text'    => '営業に必要な許可書類を提出してください',
-                'url'     => $this->safeRoute('shop.mypage.index'),
+                'url'     => $licenseUrl,
                 'urgency' => 'high',
             ];
         } elseif ($licenseStatus === 'rejected') {
             $tasks[] = [
                 'key'     => 'shop.license_rejected',
                 'text'    => '許可書類が差戻しされました。再提出してください',
-                'url'     => $this->safeRoute('shop.mypage.index'),
+                'url'     => $licenseUrl,
                 'urgency' => 'high',
+            ];
+        } elseif ($licenseStatus === 'pending') {
+            $tasks[] = [
+                'key'     => 'shop.license_pending',
+                'text'    => '許可書類を審査中です（承認されるまで一部機能が制限されます）',
+                'url'     => $licenseUrl,
+                'urgency' => 'normal',
             ];
         }
 

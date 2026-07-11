@@ -48,11 +48,13 @@ class InjectHeaderBadges
     private const TASK_CATEGORIES = [
         'cast.identity_unsubmitted'      => ['icon' => 'fa-id-card',      'label' => '本人確認'],
         'cast.identity_rejected'         => ['icon' => 'fa-id-card',      'label' => '本人確認'],
+        'cast.identity_pending'          => ['icon' => 'fa-id-card',      'label' => '本人確認'],
         'cast.bank_account_unset'        => ['icon' => 'fa-building-columns', 'label' => '口座情報'],
         'cast.talk_unread'               => ['icon' => 'fa-comment-dots', 'label' => 'トーク'],
         'cast.deposit_unconfirmed'       => ['icon' => 'fa-yen-sign',     'label' => '入金確認'],
         'shop.license_unsubmitted'       => ['icon' => 'fa-file-shield',  'label' => '許可書類'],
         'shop.license_rejected'          => ['icon' => 'fa-file-shield',  'label' => '許可書類'],
+        'shop.license_pending'           => ['icon' => 'fa-file-shield',  'label' => '許可書類'],
         'shop.bank_account_unset'        => ['icon' => 'fa-building-columns', 'label' => '口座情報'],
         'shop.talk_unread'               => ['icon' => 'fa-comment-dots', 'label' => 'トーク'],
         'shop.deposit_pending_approval'  => ['icon' => 'fa-file-circle-check', 'label' => '入金依頼'],

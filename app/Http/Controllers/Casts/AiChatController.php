@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Services\AiConciergeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * キャストの「AI コンシェルジュ」自由入力チャットの受け口。
@@ -35,7 +37,11 @@ class AiChatController extends Controller
             $history[] = ['role' => $role, 'content' => $content];
         }
 
-        $response = $concierge->respond((string) $data['message'], $history);
+        $response = $concierge->respond(
+            (string) $data['message'],
+            $history,
+            $this->currentCastPersonalityType(),
+        );
 
         return response()->json([
             'success'         => true,
@@ -44,5 +50,39 @@ class AiChatController extends Controller
             'quick_replies'   => $response['quick_replies'],
             'source'          => $response['source'] ?? 'template',
         ]);
+    }
+
+    /**
+     * 登録済みの接客タイプ診断結果（例: LCIR）を取得。未登録・不正値は null。
+     */
+    private function currentCastPersonalityType(): ?string
+    {
+        $castId = (string) auth()->guard('member')->id();
+        if ($castId === '' || !Schema::hasTable('cast_profiles')) {
+            return null;
+        }
+
+        $row = DB::table('cast_profiles')
+            ->where('cast_id', $castId)
+            ->select(
+                Schema::hasColumn('cast_profiles', 'personality_type')
+                    ? 'personality_type'
+                    : DB::raw('NULL as personality_type'),
+                Schema::hasColumn('cast_profiles', 'memo')
+                    ? 'memo'
+                    : DB::raw('NULL as memo')
+            )
+            ->first();
+        if (!$row) {
+            return null;
+        }
+
+        $type = $row->personality_type ?? null;
+        if (!is_string($type) || $type === '') {
+            $memo = json_decode((string) ($row->memo ?? ''), true);
+            $type = is_array($memo) ? ($memo['personality_type'] ?? null) : null;
+        }
+
+        return is_string($type) && preg_match('/^[LF][CP][IO][HR]$/', $type) ? $type : null;
     }
 }

@@ -25,7 +25,7 @@
             </div>
 
             <div class="flex-1 min-w-0">
-                <div class="relative bg-gradient-to-br from-surface-from to-base border border-line-accent/40 rounded-2xl shadow-card-3d p-3 pr-9">
+                <div class="relative bg-gradient-to-br from-surface-from to-base border border-line-accent/40 rounded-2xl shadow-card-3d p-3">
                     {{-- 吹き出しのしっぽ --}}
                     <span class="absolute top-5 -left-[8px] w-0 h-0 border-y-[8px] border-y-transparent border-r-[10px] border-r-line-accent/40"></span>
                     <span class="absolute top-5 -left-[6px] w-0 h-0 border-y-[7px] border-y-transparent border-r-[9px] border-r-surface-from"></span>
@@ -36,16 +36,16 @@
                         {{ $word !== '' ? $word : $wordPlaceholder }}
                     </p>
 
-                    <button type="button" id="open-word-edit-btn"
-                            aria-label="ひとことを編集"
-                            class="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center bg-accent text-on-accent shadow-[0_3px_8px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.18)] hover:brightness-110 active:scale-95 transition-all">
-                        <x-ui.icon name="edit" class="text-xs" />
-                    </button>
-
-                    <div class="mt-2 pt-2 border-t border-line">
+                    {{-- 最終更新 + 控えめな編集ボタン（右端） --}}
+                    <div class="mt-2 pt-2 border-t border-line flex items-center justify-between gap-2">
                         <span id="display-word-updated" class="text-[10px] text-text-sub">
                             最終更新 {{ $shopData['appeal_updated_at'] ?? '未設定' }}
                         </span>
+                        <button type="button" id="open-word-edit-btn"
+                                aria-label="ひとことを編集"
+                                class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] text-text-sub hover:text-accent-text hover:bg-accent/10 active:scale-95 transition-all">
+                            <x-ui.icon name="edit" class="text-[10px]" />編集
+                        </button>
                     </div>
                 </div>
             </div>
@@ -73,14 +73,14 @@
             </div>
         </div>
 
-        {{-- ===== 管理メニュー：2カラムのコンパクトタイル（5項目） =====
+        {{-- ===== 管理メニュー：2カラムのコンパクトタイル（4項目） =====
+             ライセンス（許可証）管理はサイドメニュー（VERIFICATION）へ移設。
              縦積みの大型カードをやめて高さを圧縮し、ギャラリーを
              ファーストビュー付近まで引き上げる。
              要対応バッジはヘッダー共有の $todoList（InjectHeaderBadges）から算出 --}}
         @php
             $todos = collect($todoList ?? []);
             $mgmtActionCount = $todos->whereIn('key', ['shop.deposit_pending_approval', 'shop.invoice_pending_payment'])->count();
-            $licenseNeedsAction = $todos->whereIn('key', ['shop.license_unsubmitted', 'shop.license_rejected'])->isNotEmpty();
         @endphp
         <div class="mypage-menu-grid mb-1">
             <a href="{{ route('shop.recruits.show') }}" class="mypage-tile">
@@ -102,13 +102,6 @@
                 <i class="fas fa-users mypage-tile__icon"></i>
                 <span class="mypage-tile__label">スタッフ・アカウント<span class="mypage-tile__sub">STAFF</span></span>
             </a>
-            <button type="button" class="mypage-tile mypage-tile--wide" data-open-license>
-                <i class="fas fa-file-shield mypage-tile__icon"></i>
-                <span class="mypage-tile__label">ライセンス（許可証）管理<span class="mypage-tile__sub">LICENSE</span></span>
-                @if($licenseNeedsAction)
-                    <span class="mypage-tile__badge mypage-tile__badge--urgent" aria-label="要対応">!</span>
-                @endif
-            </button>
         </div>
     </div>
 
@@ -594,19 +587,22 @@ window.MYPAGE_GALLERY_CONFIG = {
 </script>
 <script src="{{ asset('assets/js/mypage-gallery.js') }}"></script>
 
-{{-- ライセンス管理タイル：SHOP タブを開いて許可証セクションへスクロール --}}
+{{-- #license-section ハッシュ：SHOP タブを開いて許可証セクションへスクロール
+     （サイドメニュー VERIFICATION・やることリストからの遷移用） --}}
 <script>
 (function () {
     'use strict';
-    var licenseBtn = document.querySelector('[data-open-license]');
-    if (!licenseBtn) return;
-    licenseBtn.addEventListener('click', function () {
+    function openLicenseSection() {
         var shopTab = document.querySelector('[data-tab="shop"]');
         if (shopTab) shopTab.click();
         window.setTimeout(function () {
             var section = document.getElementById('license-section');
             if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 60);
+    }
+    if (window.location.hash === '#license-section') openLicenseSection();
+    window.addEventListener('hashchange', function () {
+        if (window.location.hash === '#license-section') openLicenseSection();
     });
 })();
 </script>

@@ -35,7 +35,7 @@
             </div>
 
             <div class="flex-1 min-w-0">
-                <div class="relative bg-gradient-to-br from-surface-from to-base border border-line-accent/40 rounded-2xl shadow-card-3d p-3 pr-9">
+                <div class="relative bg-gradient-to-br from-surface-from to-base border border-line-accent/40 rounded-2xl shadow-card-3d p-3">
                     {{-- 吹き出しのしっぽ（アイコン側に向く） --}}
                     <span class="absolute top-5 -left-[8px] w-0 h-0 border-y-[8px] border-y-transparent border-r-[10px] border-r-line-accent/40"></span>
                     <span class="absolute top-5 -left-[6px] w-0 h-0 border-y-[7px] border-y-transparent border-r-[9px] border-r-surface-from"></span>
@@ -46,16 +46,16 @@
                         {{ $word !== '' ? $word : $wordPlaceholder }}
                     </p>
 
-                    <button type="button" id="open-word-edit-btn"
-                            aria-label="ひとことを編集"
-                            class="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center bg-accent text-on-accent shadow-[0_3px_8px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.18)] hover:brightness-110 active:scale-95 transition-all">
-                        <x-ui.icon name="edit" class="text-xs" />
-                    </button>
-
-                    <div class="mt-2 pt-2 border-t border-line">
+                    {{-- 最終更新 + 控えめな編集ボタン（右端） --}}
+                    <div class="mt-2 pt-2 border-t border-line flex items-center justify-between gap-2">
                         <span id="display-word-updated" class="text-[10px] text-text-sub">
                             最終更新 {{ $cast['appeal_updated_at'] ?? '未設定' }}
                         </span>
+                        <button type="button" id="open-word-edit-btn"
+                                aria-label="ひとことを編集"
+                                class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] text-text-sub hover:text-accent-text hover:bg-accent/10 active:scale-95 transition-all">
+                            <x-ui.icon name="edit" class="text-[10px]" />編集
+                        </button>
                     </div>
                 </div>
             </div>
@@ -70,37 +70,22 @@
             </div>
         </div>
 
-        {{-- ===== 管理メニュー：2カラムのコンパクトタイル（店舗 MyPage と同パターン） =====
-             要対応バッジはヘッダー共有の $todoList（InjectHeaderBadges）から算出。
-             プロフィール編集/本人確認を DETAILS の奥から一等地に引き上げ、
-             かつ高さを圧縮してギャラリーをファーストビューに近づける --}}
+        {{-- ===== 管理メニュー =====
+             プロフィール編集 → DETAILS タブ内、本人確認 → サイドメニュー、
+             レビュー → 採用・入金管理の案件カード内リンクに集約したため、
+             ここは日常的に開く「採用・入金管理」のみ。
+             要対応バッジはヘッダー共有の $todoList（InjectHeaderBadges）から算出 --}}
         @php
             $castTodos = collect($todoList ?? []);
             $castMgmtCount = $castTodos->whereIn('key', ['cast.deposit_unconfirmed'])->count();
-            $identityNeedsAction = $castTodos->whereIn('key', ['cast.identity_unsubmitted', 'cast.identity_rejected'])->isNotEmpty();
         @endphp
         <div class="mypage-menu-grid mb-1">
-            <a href="{{ route('cast.profile.edit') }}" class="mypage-tile">
-                <i class="fas fa-user-pen mypage-tile__icon"></i>
-                <span class="mypage-tile__label">プロフィール編集<span class="mypage-tile__sub">PROFILE</span></span>
-            </a>
-            <a href="{{ route('cast.mypage.management') }}" class="mypage-tile">
+            <a href="{{ route('cast.mypage.management') }}" class="mypage-tile mypage-tile--wide">
                 <i class="fas fa-yen-sign mypage-tile__icon"></i>
                 <span class="mypage-tile__label">採用・入金管理<span class="mypage-tile__sub">PAYMENT</span></span>
                 @if($castMgmtCount > 0)
                     <span class="mypage-tile__badge mypage-tile__badge--urgent" aria-label="要対応 {{ $castMgmtCount }}件">{{ $castMgmtCount }}</span>
                 @endif
-            </a>
-            <a href="{{ route('cast.mypage.identity') }}" class="mypage-tile">
-                <i class="fas fa-id-card mypage-tile__icon"></i>
-                <span class="mypage-tile__label">本人確認<span class="mypage-tile__sub">IDENTITY</span></span>
-                @if($identityNeedsAction)
-                    <span class="mypage-tile__badge mypage-tile__badge--urgent" aria-label="要対応">!</span>
-                @endif
-            </a>
-            <a href="{{ route('cast.mypage.reviews') }}" class="mypage-tile">
-                <i class="fas fa-star mypage-tile__icon"></i>
-                <span class="mypage-tile__label">レビュー<span class="mypage-tile__sub">REVIEWS</span></span>
             </a>
         </div>
     </div>
@@ -148,6 +133,16 @@
         {{-- Details panel --}}
         <div data-tab-panel="details">
             <div class="p-4 flex flex-col gap-4">
+
+                {{-- プロフィール編集（DETAILS の内容を編集する入口としてここに配置） --}}
+                <a href="{{ route('cast.profile.edit') }}"
+                   class="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-line-accent/40 bg-gradient-to-br from-surface-from to-base shadow-card-3d hover:border-accent/60 active:scale-[0.99] transition-all">
+                    <span class="flex items-center gap-2.5 min-w-0">
+                        <i class="fas fa-user-pen text-accent-text text-[14px]"></i>
+                        <span class="text-[13px] font-bold text-text-main">プロフィールを編集する</span>
+                    </span>
+                    <i class="fas fa-chevron-right text-text-sub text-[11px] shrink-0"></i>
+                </a>
 
                 <x-ui.card class="p-5">
                     <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
@@ -222,7 +217,7 @@
                     </div>
                 </x-ui.card>
 
-                {{-- 本人確認 / プロフィール編集はページ上部の管理タイルに集約済み --}}
+                {{-- 本人確認はサイドメニュー（VERIFICATION）に集約済み --}}
 
             </div>
         </div>
