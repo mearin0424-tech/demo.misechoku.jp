@@ -1,0 +1,133 @@
+/* =====================================================================
+   ui-consistency.css — ボタン / CTA の役割ベース統一（全画面 override）
+
+   読み込み順: 各ページ CSS（@stack('styles')）の後。
+   ここは「レガシー CSS の色・深度のブレを役割ルールに揃える」ためだけの
+   上書き専用ファイル。新しい見た目の定義は DESIGN.md / app.css に置くこと。
+
+   ── 役割ルール（DESIGN.md §10 と同期）──────────────────────
+   1. Primary CTA（保存・送信・応募・TALK 等。1画面に原則1つ）
+      → アクセントグラデ（--accent-grad-from → --accent-grad-to）
+        文字 --on-accent(-strong)、立体（inset ハイライト + ドロップ影）
+   2. Secondary（補助導線・チップ・キャンセル）
+      → フラット。薄い accent 面 + accent 枠 + 文字 --accent-text
+   3. Ghost（小さな編集・閉じる等のユーティリティ）
+      → 枠なしフラット。text-sub、hover で accent
+   4. Destructive → danger トークン（赤アウトライン。確定操作のみベタ赤）
+   5. ゴールドは金銭・実績の「表示」専用（ボーナス額・優良店・KEEP アクティブ）。
+      ボタン背景には使わない
+   6. ネオングローは「状態フィードバック」専用（LIKE/KEEP アクティブ・
+      フォーカスリング・ナビのアクティブ）。装飾目的では使わない
+   7. ポイント要素（ボタン/バッジ/アクティブ状態）のハードコード紫
+      （#a78bfa / #7c3aed 等）は var(--accent) 系へ（テーマ追従）。
+      アンビエント（枠・面のうっすら紫）はアメジストのまま維持
+   ===================================================================== */
+
+/* ------------------------------------------------------------------
+   1. Primary CTA：ゴールド系ボタンをアクセントに統一
+      （.btn-gold-submit が正のレシピ。同じ影・押下感に揃える）
+   ------------------------------------------------------------------ */
+.btn-gold,
+.profile-actions .btn-gold,
+.btn-gold-luxe {
+    background: linear-gradient(135deg, var(--accent-grad-from), var(--accent-grad-to)) !important;
+    color: var(--on-accent-strong, #fff) !important;
+    border: 0 !important;
+    box-shadow:
+        0 6px 14px rgba(0, 0, 0, .45),
+        inset 0 1px 0 rgba(255, 255, 255, .20),
+        inset 0 -1px 0 rgba(0, 0, 0, .18) !important;
+}
+.btn-gold:hover,
+.btn-gold-luxe:hover {
+    filter: brightness(1.06);
+    opacity: 1;
+}
+.btn-gold:active,
+.btn-gold-luxe:active {
+    transform: scale(.97);
+    box-shadow:
+        0 2px 5px rgba(0, 0, 0, .45),
+        inset 0 2px 4px rgba(0, 0, 0, .2) !important;
+}
+
+/* ------------------------------------------------------------------
+   2. AI コンシェルジュ：ポイント要素をアクセント追従に
+      （装飾グローは除去。深度は Primary と同じ立体レシピ）
+   ------------------------------------------------------------------ */
+.ai-chat__send,
+.ai-chat__bubble--user,
+.ai-chat__header-icon,
+.ai-chat__avatar {
+    background: linear-gradient(135deg, var(--accent-grad-from), var(--accent-grad-to));
+}
+.ai-chat__send {
+    color: var(--on-accent-strong, #fff);
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, .45),
+        inset 0 1px 0 rgba(255, 255, 255, .25),
+        inset 0 -1px 0 rgba(0, 0, 0, .18);
+}
+.ai-chat__bubble--user {
+    color: var(--on-accent-strong, #fff);
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, .35),
+        inset 0 1px 0 rgba(255, 255, 255, .18);
+}
+.ai-chat__header-icon {
+    color: var(--on-accent-strong, #fff);
+    box-shadow:
+        inset 0 2px 4px rgba(255, 255, 255, .3),
+        0 2px 8px rgba(0, 0, 0, .4); /* 0 0 14px の装飾グローを廃止 */
+}
+.ai-chat__avatar {
+    box-shadow: none;
+    border: 1px solid rgba(var(--accent-rgb), .35);
+}
+.ai-chat__dot { background: rgba(var(--accent-rgb), .75); }
+.ai-chat__input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .2);
+}
+/* BETA バッジ：ゴールド → フラットな accent チップ（ゴールドは金銭表示専用） */
+.ai-chat__badge {
+    background: rgba(var(--accent-rgb), .15);
+    border: 1px solid rgba(var(--accent-rgb), .45);
+    color: var(--accent-text);
+}
+.ai-chat__source,
+.ai-chat__card-reason,
+.ai-chat__card-cta,
+.ai-chat__quick,
+.ai-chat__notice-link { color: var(--accent-text); }
+
+/* ------------------------------------------------------------------
+   3. アクティブ状態（タブ / セグメント / トグル）：hue をアクセントに統一
+      形状・深度は各画面のまま。グローは状態フィードバックなので許容
+   ------------------------------------------------------------------ */
+.segment-btn.active {
+    color: var(--accent-text);
+    border-color: rgba(var(--accent-rgb), .55);
+}
+.sub-nav-btn.active {
+    background: var(--accent);
+    color: var(--on-accent);
+    border-color: var(--accent);
+}
+.sub-nav-mini .sub-nav-btn.active { color: var(--accent-text); }
+.sub-nav-mini .sub-nav-btn.active::after {
+    background: var(--accent);
+    box-shadow: 0 0 8px rgba(var(--accent-rgb), .4);
+}
+/* 求人票編集のトグル（旧: 金×紫の混色グラデ） */
+.toggle-btn.active {
+    background: linear-gradient(135deg, var(--accent-grad-from), var(--accent-grad-to)) !important;
+    color: var(--on-accent-strong, #fff);
+    box-shadow: 0 0 12px rgba(var(--accent-rgb), .4) !important;
+}
+
+/* ------------------------------------------------------------------
+   4. こまかな hue 修正
+   ------------------------------------------------------------------ */
+/* サイドメニュー「アプリをインストール」hover の黄色文字 → accent */
+.pwa-install-btn:hover { color: var(--accent-text) !important; }

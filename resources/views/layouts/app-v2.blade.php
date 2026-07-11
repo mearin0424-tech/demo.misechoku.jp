@@ -590,6 +590,9 @@
     <x-ui.assets />
     @stack('styles')
     @stack('head-styles')
+
+    {{-- ボタン/CTA の役割ベース統一（全ページCSSの後に読み込んで上書き。DESIGN.md §10） --}}
+    <link rel="stylesheet" href="{{ asset('assets/css/ui-consistency.css') }}?v={{ $assetVersion }}">
 </head>
 <body class="@yield('body-class') bg-base text-text-main"
       data-notification-badge="{{ isset($unreadNewsCount) ? (int) $unreadNewsCount : 0 }}">

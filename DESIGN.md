@@ -182,3 +182,29 @@ keyframes はコンパイル済み CSS にのみ存在する。**画面側に `<
 - 画面内の `<style>` での keyframes / 色定義
 - 文字列連結によるクラス生成（`'bg-' + x`）。purge で消える
 - 画面ごとの色分岐（テーマは `data-theme` に一元化）
+
+---
+
+## 10. ボタン / CTA の役割ルール（色・深度の使い分け）
+
+「意味のある違い」だけを許可する。同じ役割は全画面で同じ見た目にする。
+レガシー CSS のブレは `public/assets/css/ui-consistency.css`（全ページ CSS の後に
+読み込む上書き専用ファイル）で吸収する。新規画面はこの表に従って直接組む。
+
+| 役割 | 色 | 深度 | レシピ |
+|---|---|---|---|
+| **Primary CTA**（保存・送信・応募・TALK。1画面に原則1つ） | アクセントグラデ `from-accent-grad-from to-accent-grad-to` + `text-on-accent(-strong)` | **立体**（inset ハイライト + ドロップ影） | `.btn-gold-submit` / `x-ui.button` が正 |
+| **Secondary**（補助導線・チップ・キャンセル） | 薄い accent 面 `bg-accent/10` + 枠 `border-line-accent/40` + `text-accent-text` | **フラット** | `x-ui.button variant=outline` |
+| **Ghost**（小さな編集・閉じる等） | 枠なし。`text-text-sub` → hover `text-accent-text` | **フラット** | MyPage ひとこと「編集」ボタンが正 |
+| **Destructive**（削除・ログアウト） | danger トークン（赤アウトライン。確定操作のみベタ赤） | フラット（確定ボタンのみ立体可） | `.btn-logout` / `x-ui.button variant=danger` |
+| **金銭・実績の表示**（ボーナス額・優良店・KEEP アクティブ） | ゴールド（`--color-gold-from/to`, `#f6d36a` 系） | バッジは立体可 | **ボタン背景には使わない** |
+| **感情アクション**（LIKE） | ピンク（`#ff8fbf → var(--accent)`） | アクティブ時のみグロー | `.fav-circle--like` |
+
+**深度の原則：**
+- 立体（3D）＝「押すと何かが起こる主要アクション」だけ
+- ネオングロー＝「状態フィードバック」だけ（LIKE/KEEP アクティブ・focus ring・ナビ active）。装飾目的で光らせない
+- それ以外はフラット
+
+**hue の原則：**
+- ポイント要素（ボタン・バッジ・アクティブ状態）＝ `var(--accent)` 系（テーマ追従。ハードコード禁止）
+- アンビエント（枠線・面のうっすら紫）＝ アメジスト固定（`rgba(168,85,247,…)`）— 既存設計どおり

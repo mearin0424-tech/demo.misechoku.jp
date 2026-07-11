@@ -73,24 +73,16 @@
             </div>
         </div>
 
-        {{-- ===== 管理メニュー：2カラムのコンパクトタイル（4項目） =====
-             ライセンス（許可証）管理はサイドメニュー（VERIFICATION）へ移設。
-             縦積みの大型カードをやめて高さを圧縮し、ギャラリーを
-             ファーストビュー付近まで引き上げる。
+        {{-- ===== 管理メニュー：2タイルのみ =====
+             求人票 → JOB タブ内、プロファイル → PROFILE タブ内、
+             ライセンス → サイドメニュー（VERIFICATION）に集約し、
+             トップは日常業務の「採用・入金管理」「スタッフ」だけに絞る。
              要対応バッジはヘッダー共有の $todoList（InjectHeaderBadges）から算出 --}}
         @php
             $todos = collect($todoList ?? []);
             $mgmtActionCount = $todos->whereIn('key', ['shop.deposit_pending_approval', 'shop.invoice_pending_payment'])->count();
         @endphp
         <div class="mypage-menu-grid mb-1">
-            <a href="{{ route('shop.recruits.show') }}" class="mypage-tile">
-                <i class="fas fa-briefcase mypage-tile__icon"></i>
-                <span class="mypage-tile__label">求人票<span class="mypage-tile__sub">JOB</span></span>
-            </a>
-            <a href="{{ route('shop.profile.edit') }}" class="mypage-tile">
-                <i class="fas fa-store mypage-tile__icon"></i>
-                <span class="mypage-tile__label">プロファイル<span class="mypage-tile__sub">SHOP</span></span>
-            </a>
             <a href="{{ route('shop.mypage.management') }}" class="mypage-tile">
                 <i class="fas fa-yen-sign mypage-tile__icon"></i>
                 <span class="mypage-tile__label">採用・入金管理<span class="mypage-tile__sub">PAYMENT</span></span>
@@ -105,7 +97,7 @@
         </div>
     </div>
 
-    {{-- ===== Tabs：GALLERY / JOB / SHOP の3タブ構成（キャスト視点のプロフィールと統一） ===== --}}
+    {{-- ===== Tabs：GALLERY / JOB / PROFILE の3タブ構成（キャスト MyPage とデザイン・名称を統一） ===== --}}
     <div data-tabs-scope>
         <div data-tabs class="border-t border-b border-line-accent/40 bg-base/90 backdrop-blur-md sticky top-0 z-10">
             <div class="flex">
@@ -121,8 +113,8 @@
                 </button>
                 <button type="button" data-tab="shop"
                         class="flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
-                    <i class="fas fa-store text-[14px]"></i>
-                    <span class="app-title text-[10px] tracking-widest">SHOP</span>
+                    <i class="fas fa-address-card text-[14px]"></i>
+                    <span class="app-title text-[10px] tracking-widest">PROFILE</span>
                 </button>
             </div>
         </div>
@@ -155,14 +147,17 @@
             <div class="p-4 flex flex-col gap-4">
                 @php $js = $jobSummary ?? []; @endphp
 
-                {{-- 求人票の管理 メインCTA --}}
-                <x-ui.menu-card icon="settings"
-                                sub="JOB DESCRIPTION"
-                                title="求人票の管理"
-                                href="{{ route('shop.recruits.show') }}"
-                                class="shop-mypage-menu-card" />
+                {{-- 求人票を編集（タブの内容を編集する入口。キャスト MyPage と同パターン） --}}
+                <a href="{{ route('shop.recruits.edit') }}"
+                   class="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-line-accent/40 bg-gradient-to-br from-surface-from to-base shadow-card-3d hover:border-accent/60 active:scale-[0.99] transition-all">
+                    <span class="flex items-center gap-2.5 min-w-0">
+                        <i class="fas fa-pen-to-square text-accent-text text-[14px]"></i>
+                        <span class="text-[13px] font-bold text-text-main">求人票を編集する</span>
+                    </span>
+                    <i class="fas fa-chevron-right text-text-sub text-[11px] shrink-0"></i>
+                </a>
 
-                {{-- 求人ステータス + 応募数の概要バー --}}
+                {{-- 求人ステータス + 応募数の概要バー（公開設定・応募状況の管理へ） --}}
                 <x-ui.card class="p-4">
                     <div class="flex items-center justify-between gap-3 flex-wrap">
                         <div class="flex items-center gap-2">
@@ -173,7 +168,7 @@
                                 <i class="fas {{ ($js['is_published'] ?? false) ? 'fa-circle-check' : 'fa-pause' }} text-[10px]"></i>
                                 {{ $js['status_label'] ?? '未設定' }}
                             </span>
-                            <a href="{{ route('shop.recruits.edit') }}" class="text-[11px] font-bold text-accent-text underline">編集</a>
+                            <a href="{{ route('shop.recruits.show') }}" class="text-[11px] font-bold text-accent-text underline">ステータス管理</a>
                         </div>
                         <div class="flex items-center gap-4 text-[11px]">
                             <span><span class="text-text-sub">応募</span> <strong class="text-text-main">{{ number_format($js['applicant_count'] ?? 0) }}</strong></span>
@@ -291,7 +286,7 @@
                         <i class="fas fa-circle-info text-accent-text text-[20px] mb-2 block"></i>
                         <p class="text-[12px] text-text-sub leading-relaxed">
                             まだ求人票の詳細が登録されていません。<br>
-                            上の <strong class="text-accent-text">求人票の管理</strong> から入力してください。
+                            上の <strong class="text-accent-text">求人票を編集する</strong> から入力してください。
                         </p>
                     </div>
                 @endif
@@ -301,14 +296,22 @@
         {{-- ========== SHOP panel：店舗情報 + 許可証 ========== --}}
         <div data-tab-panel="shop">
             <div class="p-4 flex flex-col gap-4">
+                {{-- プロファイルを編集（タブの内容を編集する入口。キャスト MyPage と同パターン） --}}
+                <a href="{{ route('shop.profile.edit') }}"
+                   class="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-line-accent/40 bg-gradient-to-br from-surface-from to-base shadow-card-3d hover:border-accent/60 active:scale-[0.99] transition-all">
+                    <span class="flex items-center gap-2.5 min-w-0">
+                        <i class="fas fa-store text-accent-text text-[14px]"></i>
+                        <span class="text-[13px] font-bold text-text-main">プロファイルを編集する</span>
+                    </span>
+                    <i class="fas fa-chevron-right text-text-sub text-[11px] shrink-0"></i>
+                </a>
+
                 {{-- Shop Information --}}
                 <x-ui.card class="p-5">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="app-title text-[13px] tracking-widest text-accent-text flex items-center gap-2">
                             <i class="fas fa-store text-lg"></i> SHOP INFORMATION
                         </h3>
-                        <button type="button" id="open-profile-edit-btn"
-                                class="text-[11px] font-bold text-accent-text border border-line-accent/40 rounded-full px-3 py-1 hover:bg-accent/10 transition-colors">編集</button>
                     </div>
 
                     <div class="flex flex-col gap-3">
@@ -700,11 +703,6 @@ window.MYPAGE_GALLERY_CONFIG = {
     }
     if (closeBadgeTop) closeBadgeTop.addEventListener('click', hideBadgeModal);
 
-    // === プロフィール編集導線（既存挙動） ===
-    var profileEditBtn = document.getElementById('open-profile-edit-btn');
-    if (profileEditBtn) profileEditBtn.addEventListener('click', function () {
-        location.href = @json(route('shop.profile.edit'));
-    });
 })();
 </script>
 @endpush

@@ -92,15 +92,18 @@
 
     {{-- ===== Tabs ===== --}}
     <div data-tabs-scope>
-        <div data-tabs class="border-t border-b border-line-accent/40 bg-base/90 backdrop-blur-md">
+        {{-- タブ：店舗 MyPage とデザイン・名称を統一（アイコン + 英字ラベル） --}}
+        <div data-tabs class="border-t border-b border-line-accent/40 bg-base/90 backdrop-blur-md sticky top-0 z-10">
             <div class="flex">
                 <button type="button" data-tab="gallery"
-                        class="is-active flex-1 py-3 flex justify-center items-center transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
-                    <span class="app-title text-[12px] tracking-widest">GALLERY</span>
+                        class="is-active flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
+                    <i class="fas fa-images text-[14px]"></i>
+                    <span class="app-title text-[10px] tracking-widest">GALLERY</span>
                 </button>
                 <button type="button" data-tab="details"
-                        class="flex-1 py-3 flex justify-center items-center transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
-                    <span class="app-title text-[12px] tracking-widest">DETAILS</span>
+                        class="flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
+                    <i class="fas fa-address-card text-[14px]"></i>
+                    <span class="app-title text-[10px] tracking-widest">PROFILE</span>
                 </button>
             </div>
         </div>
