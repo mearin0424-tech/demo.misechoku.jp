@@ -1030,14 +1030,26 @@ body.page-search .connection-list--search {
     background: rgba(255, 255, 255, 0.08);
 }
 .detail-search-modal__body {
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 16px 20px 24px;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(168, 85, 247, 0.35) transparent;
+}
+.detail-search-modal__body::-webkit-scrollbar {
+    width: 6px;
+}
+.detail-search-modal__body::-webkit-scrollbar-thumb {
+    background: rgba(168, 85, 247, 0.35);
+    border-radius: 999px;
 }
 .detail-search-modal__footer {
     display: flex;
     gap: 12px;
-    padding: 16px 20px;
+    padding: 16px 20px calc(16px + env(safe-area-inset-bottom, 0px));
     border-top: 1px solid var(--color-border);
     background: rgba(0, 0, 0, 0.2);
     flex-shrink: 0;
@@ -1324,6 +1336,12 @@ body.page-search .connection-list--search {
 .detail-search-chip:hover {
     border-color: var(--color-gold);
 }
+/* キーボードナビゲーション時の可視フォーカス */
+.detail-search-chip:focus-within {
+    outline: 2px solid var(--gold-light, #c4b5fd);
+    outline-offset: 2px;
+    border-color: var(--gold-light, #c4b5fd);
+}
 .detail-search-chip input {
     position: absolute;
     opacity: 0;
@@ -1445,6 +1463,205 @@ body.page-search .connection-list--search {
     color: var(--gold);
     font-size: 0.72rem;
     white-space: nowrap;
+}
+
+/* ============================================================
+   クイックフィルタチップ（検索バー直下・ワンタップ絞り込み）
+   ============================================================ */
+.search-quick-chips {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 8px 0 4px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+.search-quick-chips::-webkit-scrollbar { display: none; }
+.search-quick-chip {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(168, 85, 247, 0.28);
+    background: rgba(20, 14, 22, 0.72);
+    color: rgba(196, 181, 253, 0.85);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.search-quick-chip i { font-size: 0.72rem; color: var(--gold, #a78bfa); }
+.search-quick-chip:hover {
+    background: rgba(168, 85, 247, 0.14);
+    border-color: var(--gold-light, #c4b5fd);
+    color: #fff;
+}
+.search-quick-chip:active { transform: scale(0.96); }
+.search-quick-chip:focus-visible {
+    outline: 2px solid var(--gold-light, #c4b5fd);
+    outline-offset: 2px;
+}
+.search-quick-chip.is-active {
+    background: linear-gradient(135deg, rgba(214, 112, 162, 0.85), rgba(168, 85, 247, 0.80));
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.40);
+}
+.search-quick-chip.is-active i { color: #fff; }
+.search-quick-chip[hidden] { display: none; }
+
+/* ============================================================
+   アコーディオン頭：選択件数チップ（JS で挿入）
+   ============================================================ */
+.detail-search-accordion__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: 10px;
+    padding: 2px 10px;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.24), rgba(214, 112, 162, 0.18));
+    border: 1px solid rgba(168, 85, 247, 0.55);
+    color: var(--gold-light, #c4b5fd);
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    animation: detail-search-count-in 0.22s ease-out;
+}
+@keyframes detail-search-count-in {
+    from { opacity: 0; transform: translateX(6px) scale(0.9); }
+    to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+/* 選択がある accordion は頭を強調 */
+.detail-search-accordion.has-selection > .detail-search-accordion__head {
+    color: #f8f8f8;
+}
+.detail-search-accordion.has-selection {
+    border-color: rgba(168, 85, 247, 0.45);
+    box-shadow: inset 0 0 0 1px rgba(168, 85, 247, 0.12);
+}
+
+/* ============================================================
+   複数選択タグ：検索フィルタ + 選択済みチップの上部固定
+   （JS が .detail-search-chips--filterable を付与）
+   ============================================================ */
+.detail-search-chips__toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 10px;
+    padding: 0;
+}
+.detail-search-chips__searchbox {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(10, 10, 10, 0.65);
+    border: 1px solid rgba(168, 85, 247, 0.25);
+    border-radius: 999px;
+    color: var(--color-text-muted);
+    font-size: 0.82rem;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    min-width: 0;
+}
+.detail-search-chips__searchbox:focus-within {
+    border-color: var(--gold-light, #c4b5fd);
+    background: rgba(20, 12, 22, 0.9);
+    color: #fff;
+}
+.detail-search-chips__searchbox > i {
+    color: rgba(196, 181, 253, 0.7);
+    font-size: 0.82rem;
+}
+.detail-search-chips__search {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    color: inherit;
+    font-size: 0.86rem;
+    font-family: inherit;
+    padding: 0;
+}
+.detail-search-chips__search::placeholder { color: rgba(196, 181, 253, 0.42); }
+.detail-search-chips__clear {
+    background: transparent;
+    border: 0;
+    color: rgba(196, 181, 253, 0.7);
+    cursor: pointer;
+    font-size: 0.82rem;
+    padding: 2px 4px;
+}
+.detail-search-chips__clear:hover { color: #fff; }
+.detail-search-chips__meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 10px;
+    background: rgba(168, 85, 247, 0.14);
+    border: 1px solid rgba(168, 85, 247, 0.30);
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--gold-light, #c4b5fd);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.detail-search-chips__meta-selected { color: #f5f5f5; }
+.detail-search-chips__meta-sep { opacity: 0.5; margin: 0 2px; }
+
+.detail-search-chips__more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 10px 0 0;
+    padding: 8px 14px;
+    background: transparent;
+    border: 1px dashed rgba(168, 85, 247, 0.40);
+    border-radius: 999px;
+    color: var(--gold-light, #c4b5fd);
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+.detail-search-chips__more:hover {
+    background: rgba(168, 85, 247, 0.10);
+    border-color: var(--gold-light, #c4b5fd);
+}
+.detail-search-chips__more[hidden] { display: none; }
+
+/* フィルタ対象のチップコンテナ：フィルタ後の空白除去 */
+.detail-search-chips--filterable {
+    min-height: 30px;
+}
+
+/* 選択済みチップ：先頭に配置＋強調枠 */
+.detail-search-chip.is-pinned {
+    background: rgba(168, 85, 247, 0.22);
+    border-color: var(--gold-light, #c4b5fd);
+    color: #fff;
+    box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.2) inset;
+    position: relative;
+}
+.detail-search-chip.is-pinned::before {
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free', 'Font Awesome 5 Free';
+    font-weight: 900;
+    margin-right: 5px;
+    color: var(--gold-light, #c4b5fd);
+    font-size: 0.72rem;
 }
 
 .detail-search-chips--search {
@@ -2048,6 +2265,57 @@ body.page-search .connection-list--search {
 .ai-chat__header-sub {
     margin: 2px 0 0;
     font-size: 0.74rem; color: #a0a0a0; line-height: 1.4;
+}
+
+/* リセットボタン（会話を初期化） */
+.ai-chat__reset {
+    flex: 0 0 auto;
+    width: 32px; height: 32px;
+    border-radius: 999px;
+    background: transparent;
+    border: 1px solid rgba(168, 85, 247, 0.30);
+    color: rgba(196, 181, 253, 0.75);
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.82rem;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.ai-chat__reset:hover {
+    background: rgba(168, 85, 247, 0.15);
+    color: #f5f5f5;
+    border-color: var(--gold-light, #c4b5fd);
+}
+.ai-chat__reset:focus-visible {
+    outline: 2px solid var(--gold-light, #c4b5fd);
+    outline-offset: 2px;
+}
+
+/* AI 生成メタ（LLM か template か） */
+.ai-chat__meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 6px;
+}
+.ai-chat__source {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.20), rgba(214, 112, 162, 0.14));
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    border-radius: 999px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--gold-light, #c4b5fd);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.ai-chat__source i { font-size: 0.6rem; }
+
+/* 文字だんだん出す時のカーソル風装飾は使わない（回線遅延時にチラつくため） */
+.ai-chat__body {
+    display: inline;
 }
 
 .ai-chat__thread {

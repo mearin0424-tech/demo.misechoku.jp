@@ -428,8 +428,8 @@
                     </div>
                 </x-ui.card>
 
-                {{-- WORD（店長のひとこと） --}}
-                @if($shopWord !== '' || $shopConcept !== '' || $storeAtmosphere !== '')
+                {{-- WORD（店長のひとこと・雰囲気） --}}
+                @if($shopWord !== '' || $storeAtmosphere !== '')
                     <x-ui.card class="p-5">
                         <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
                             <i class="fas fa-quote-left"></i> WORD
@@ -437,14 +437,8 @@
                         @if($shopWord !== '')
                             <div class="text-[13px] text-text-main leading-relaxed whitespace-pre-line">{{ $shopWord }}</div>
                         @endif
-                        @if($shopConcept !== '')
-                            <div class="@if($shopWord !== '') mt-3 pt-3 border-t border-line @endif">
-                                <span class="text-[11px] text-text-sub uppercase tracking-wider block mb-1">CONCEPT</span>
-                                <div class="text-[13px] text-text-main leading-relaxed whitespace-pre-line">{{ $shopConcept }}</div>
-                            </div>
-                        @endif
                         @if($storeAtmosphere !== '')
-                            <div class="@if($shopWord !== '' || $shopConcept !== '') mt-3 pt-3 border-t border-line @endif">
+                            <div class="@if($shopWord !== '') mt-3 pt-3 border-t border-line @endif">
                                 <span class="text-[11px] text-text-sub uppercase tracking-wider block mb-1">ATMOSPHERE</span>
                                 <div class="text-[13px] text-text-main leading-relaxed whitespace-pre-line">{{ $storeAtmosphere }}</div>
                             </div>

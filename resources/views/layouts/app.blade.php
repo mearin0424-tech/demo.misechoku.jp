@@ -51,6 +51,8 @@
     <link rel="stylesheet" href="{{ asset('assets/css/layout-footer.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/layout-sidebar.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/character-guide.css') }}?v={{ $assetVersion }}">
+    {{-- 操作モーダルの視認性一括改善 --}}
+    <link rel="stylesheet" href="{{ asset('assets/css/modal-readability.css') }}?v={{ $assetVersion }}">
 
     {{-- ============================================================
          全画面の配色を mypage のデザインシステム（紫アクセント）へ寄せる。

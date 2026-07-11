@@ -481,6 +481,7 @@
 @push('head-styles')
 {{-- 旧 CSS deps（ギャラリーモーダル / cropper / licenses） --}}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+<link rel="stylesheet" href="{{ asset('assets/css/image-editor.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/shop-license-documents.css') }}?v=20260505">
 
@@ -562,6 +563,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script src="{{ asset('assets/js/gallery-sortable.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+<script src="{{ asset('assets/js/image-editor.js') }}"></script>
 <script>
 window.MYPAGE_GALLERY_CONFIG = {
     csrfToken: @json(csrf_token()),

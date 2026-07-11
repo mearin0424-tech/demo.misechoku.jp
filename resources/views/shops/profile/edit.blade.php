@@ -4,6 +4,7 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/form-enhance.css') }}">
 <style>
     /* Shop Information / 求人票系と揃えた店舗プロフィール編集 */
     .shop-profile-edit {
@@ -498,6 +499,7 @@
 
 @push('scripts')
 <script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
+<script src="{{ asset('assets/js/form-enhance.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var lastCb = document.querySelector('.js-biz-close-last');
@@ -691,7 +693,8 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
         @endif
 
-        <form id="shop-profile-edit-form" action="{{ route('shop.profile.update') }}" method="POST" class="h-adr shop-profile-edit__form">
+        <form id="shop-profile-edit-form" action="{{ route('shop.profile.update') }}" method="POST" class="h-adr shop-profile-edit__form"
+              data-form-guard data-completion-meter>
             @csrf
             <span class="p-country-name" style="display:none;">Japan</span>
 

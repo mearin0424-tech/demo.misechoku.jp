@@ -5,6 +5,7 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/profile_edit.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/form-enhance.css') }}">
 <style>
     .input-hint {
         margin-top: 6px;
@@ -17,6 +18,7 @@
 
 @push('scripts')
 <script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
+<script src="{{ asset('assets/js/form-enhance.js') }}"></script>
 @endpush
 
 @section('content')
@@ -32,7 +34,8 @@
         $selectedNightExp = old('exp', old('night_work_exp', $profile['exp'] ?? ($profile['night_work_exp'] ?? 'none')));
     @endphp
 
-    <form action="{{ route($updateRoute ?? 'cast.profile.update') }}" method="POST" class="cast-edit-form h-adr">
+    <form action="{{ route($updateRoute ?? 'cast.profile.update') }}" method="POST" class="cast-edit-form h-adr"
+          data-form-guard data-completion-meter>
         @csrf
         <span class="p-country-name" style="display:none;">Japan</span>
 

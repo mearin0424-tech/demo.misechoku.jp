@@ -6,6 +6,7 @@
 @if ($role === 'shop')
 @push('styles')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+<link rel="stylesheet" href="{{ asset('assets/css/image-editor.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/register-shop-profile-crop.css') }}">
 @endpush
 @endif
@@ -13,6 +14,7 @@
 @if ($role === 'cast')
 @push('styles')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+<link rel="stylesheet" href="{{ asset('assets/css/image-editor.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/register-cast-profile-crop.css') }}">
 <style>
 .register-skip-toggle {
@@ -38,10 +40,12 @@
     <script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
     @if ($role === 'shop')
     <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+    <script src="{{ asset('assets/js/image-editor.js') }}"></script>
     <script src="{{ asset('assets/js/register-shop-profile-crop.js') }}"></script>
     @endif
     @if ($role === 'cast')
     <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+    <script src="{{ asset('assets/js/image-editor.js') }}"></script>
     <script src="{{ asset('assets/js/register-cast-profile-crop.js') }}"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function () {

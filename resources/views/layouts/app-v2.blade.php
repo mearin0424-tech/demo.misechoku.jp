@@ -577,6 +577,8 @@
 
     {{-- キャラクターガイド（オコジョ）専用CSS --}}
     <link rel="stylesheet" href="{{ asset('assets/css/character-guide.css') }}?v={{ $assetVersion }}">
+    {{-- 操作モーダルの視認性一括改善（各モーダル CSS の後に読み込んで override する） --}}
+    <link rel="stylesheet" href="{{ asset('assets/css/modal-readability.css') }}?v={{ $assetVersion }}">
 
     {{-- アプリ既存 JS（CSRFやサイドメニュー開閉などはここに集約） --}}
     <script src="{{ asset('assets/js/app.js') }}" defer></script>

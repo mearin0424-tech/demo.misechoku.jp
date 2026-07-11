@@ -198,6 +198,14 @@
                 $actor = $isUnconfirmedOver7
                     ? ['cls' => 'is-admin', 'icon' => 'fa-triangle-exclamation', 'label' => '運営フォロー（キャスト未確認）']
                     : $resolveActor($sc);
+                // 進行中で 5 日以上更新がない案件は停滞チップを表示（オペレーション上の見逃し防止）
+                $stallDays = null;
+                if (!$isCompleted && !empty($deposit['updated_at_label'])) {
+                    try {
+                        $d = \Carbon\Carbon::parse($deposit['updated_at_label'])->diffInDays(now());
+                        if ($d >= 5) $stallDays = $d;
+                    } catch (\Throwable $e) { /* 非表示 */ }
+                }
             @endphp
 
             <details
@@ -215,6 +223,11 @@
                         <span class="actor-pill {{ $actor['cls'] }}">
                             <i class="fas {{ $actor['icon'] }}"></i> {{ $actor['label'] }}
                         </span>
+                        @if($stallDays !== null)
+                            <span class="actor-pill is-admin-soft" title="{{ $stallDays }}日間ステータス更新がありません">
+                                <i class="fas fa-hourglass-half"></i> {{ $stallDays }}日停滞
+                            </span>
+                        @endif
                         <span class="billing-status-chip">{{ $deposit['status_label'] }}</span>
                         @php
                             $doneSteps = 0;

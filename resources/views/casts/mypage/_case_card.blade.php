@@ -5,8 +5,51 @@
     $isCompleted = (bool) ($case['is_completed'] ?? false);
     $isActionable = !empty($case['actionable']);
     $deposit = $case['deposit'] ?? null;
+
+    // ---- 今誰のボールか（キャスト視点）----
+    //   0: あなた（ボーナス申請）   1: 店舗（承認）   2: 運営（請求書）
+    //   3: 店舗（入金）             4: 運営（振込）   5: あなた（受領確認） 6: 完了
+    $actor = match (true) {
+        $isCompleted          => ['cls' => 'case-actor--done',  'icon' => 'fa-circle-check',    'label' => '完了'],
+        $progressIndex === 0  => ['cls' => 'case-actor--you',   'icon' => 'fa-hand-point-right', 'label' => 'あなたの番'],
+        $progressIndex === 1  => ['cls' => 'case-actor--shop',  'icon' => 'fa-store',           'label' => '店舗の対応待ち'],
+        $progressIndex === 2  => ['cls' => 'case-actor--admin', 'icon' => 'fa-headset',         'label' => '運営の対応待ち'],
+        $progressIndex === 3  => ['cls' => 'case-actor--shop',  'icon' => 'fa-store',           'label' => '店舗の入金待ち'],
+        $progressIndex === 4  => ['cls' => 'case-actor--admin', 'icon' => 'fa-headset',         'label' => '運営の振込待ち'],
+        $progressIndex === 5  => ['cls' => 'case-actor--you',   'icon' => 'fa-hand-point-right', 'label' => 'あなたの番'],
+        default               => ['cls' => 'case-actor--admin', 'icon' => 'fa-circle-question',  'label' => '確認中'],
+    };
+
+    // ---- 現在ステージの説明 + 次に起こること ----
+    $currentStage = $stages[$progressIndex] ?? null;
+    $nextStage    = $stages[$progressIndex + 1] ?? null;
+    $nowNote = match ($progressIndex) {
+        0 => '採用が確定しました。ボーナス申請を行うと入金フローが始まります。',
+        1 => '申請内容を店舗が確認しています。承認されると運営が請求書を発行します。',
+        2 => '運営が店舗宛の請求書を準備しています。',
+        3 => '店舗が請求書のお支払いを進めています。入金が確認されると振込準備に入ります。',
+        4 => '店舗の入金を確認しました。運営からあなたの口座へ振込を実行します。',
+        5 => 'あなたの口座へ振込済みです。通帳・アプリで着金を確認して「入金を確認しました」を押してください。',
+        default => null,
+    };
+
+    // ---- 停滞警告（5日以上更新なし・進行中のみ）----
+    $stallDays = null;
+    if (!$isCompleted && !empty($deposit['updated_at_label'])) {
+        try {
+            $lastUpdated = \Carbon\Carbon::parse($deposit['updated_at_label']);
+            $days = $lastUpdated->diffInDays(now());
+            if ($days >= 5) $stallDays = $days;
+        } catch (\Throwable $e) { /* パース不可なら非表示 */ }
+    }
 @endphp
 <article class="case-card {{ $isActionable ? 'is-actionable' : '' }} {{ $isCompleted ? 'is-completed' : '' }}">
+    <span class="case-actor {{ $actor['cls'] }}">
+        <i class="fas {{ $actor['icon'] }}" aria-hidden="true"></i>{{ $actor['label'] }}
+        @if($stallDays !== null)
+            <span class="case-stall"><i class="fas fa-triangle-exclamation"></i>{{ $stallDays }}日停滞</span>
+        @endif
+    </span>
     <header class="case-card__head">
         <div class="case-card__icon">
             <i class="fas {{ $isCompleted ? 'fa-check' : 'fa-store' }}"></i>
@@ -49,6 +92,27 @@
             </li>
         @endforeach
     </ol>
+
+    {{-- 現在ステージの説明 + 次に起こること --}}
+    @if(!$isCompleted && $nowNote !== null)
+        <div class="case-now {{ $isActionable ? 'case-now--action' : '' }}">
+            <i class="fas {{ $isActionable ? 'fa-bolt' : 'fa-circle-info' }} case-now__icon" aria-hidden="true"></i>
+            <span class="case-now__body">
+                @if($currentStage)
+                    <span class="case-now__stage">{{ $currentStage['label'] }}</span>
+                @endif
+                {{ $nowNote }}
+                @if($nextStage)
+                    <span class="case-now__next"><i class="fas fa-arrow-right"></i>次のステップ: {{ $nextStage['label'] }}（{{ $nextStage['desc'] ?? '' }}）</span>
+                @endif
+            </span>
+        </div>
+    @elseif($isCompleted)
+        <div class="case-now case-now--done">
+            <i class="fas fa-circle-check case-now__icon" aria-hidden="true"></i>
+            <span class="case-now__body">全てのステップが完了しました。お疲れさまでした！</span>
+        </div>
+    @endif
 
     {{-- 数値ハイライト：入金フローが始まっていれば表示 --}}
     @if($deposit)

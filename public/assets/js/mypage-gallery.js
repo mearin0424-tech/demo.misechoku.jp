@@ -328,51 +328,60 @@
         }
 
         function openEditModal(file, slotIndex) {
-            if (editConfirmBtn) {
-                editConfirmBtn.disabled = false;
+            var resolvedSlot = slotIndex != null ? slotIndex : resolveSlotIndex();
+
+            // ===== モダンパス: MisechokuImageEditor =====
+            if (window.MisechokuImageEditor && typeof window.MisechokuImageEditor.open === 'function') {
+                _pendingUploadFile = file;
+                _pendingUploadSlotIndex = resolvedSlot;
+
+                window.MisechokuImageEditor.open(file, {
+                    title: '写真を編集',
+                    aspectRatio: cropAspectRatio,
+                    outputWidth: cropMaxWidth,
+                    outputHeight: cropMaxHeight,
+                    outputFormat: 'image/jpeg',
+                    outputQuality: 0.9,
+                    enableFilters: true,
+                    enableRotate: true,
+                    enableFlip: true,
+                }).then(function (blob) {
+                    performUpload(blob, file.name || 'upload.jpg', resolvedSlot);
+                }).catch(function (err) {
+                    _recropReplacingId = null;
+                    _pendingUploadFile = null;
+                    _pendingUploadSlotIndex = null;
+                    if (err && err.message && err.message !== 'cancelled') {
+                        (window.appToast || window.alert)(err.message, 'error');
+                    }
+                });
+                return;
             }
+
+            // ===== 旧パス: 単機能 Cropper モーダル =====
+            if (editConfirmBtn) editConfirmBtn.disabled = false;
             if (!editModal || !editPreviewImg) {
-                // フォールバック：そのままアップロード
-                var fallbackIndex = slotIndex != null ? slotIndex : resolveSlotIndex();
-                performUpload(file, file.name, fallbackIndex);
+                performUpload(file, file.name, resolvedSlot);
                 return;
             }
             _pendingUploadFile = file;
-            _pendingUploadSlotIndex = slotIndex != null ? slotIndex : resolveSlotIndex();
+            _pendingUploadSlotIndex = resolvedSlot;
             _pendingZoom = 1;
-            if (_cropper) {
-                _cropper.destroy();
-                _cropper = null;
-            }
+            if (_cropper) { _cropper.destroy(); _cropper = null; }
 
             var reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 editPreviewImg.src = e.target.result;
-                if (_cropper) {
-                    _cropper.destroy();
-                    _cropper = null;
-                }
+                if (_cropper) { _cropper.destroy(); _cropper = null; }
                 if (window.Cropper) {
                     _cropper = new Cropper(editPreviewImg, {
-                        aspectRatio: cropAspectRatio,
-                        viewMode: 1,
-                        dragMode: 'move',
-                        autoCropArea: 1,
-                        zoomable: true,
-                        movable: true,
-                        scalable: false,
-                        rotatable: false,
-                        responsive: true,
-                        background: false,
-                        toggleDragModeOnDblclick: false,
+                        aspectRatio: cropAspectRatio, viewMode: 1, dragMode: 'move', autoCropArea: 1,
+                        zoomable: true, movable: true, scalable: false, rotatable: false,
+                        responsive: true, background: false, toggleDragModeOnDblclick: false,
                     });
                 }
-                if (editModal) {
-                    editModal.style.display = 'flex';
-                }
-                try {
-                    document.body.classList.add('is-image-editing');
-                } catch (e) {}
+                if (editModal) editModal.style.display = 'flex';
+                try { document.body.classList.add('is-image-editing'); } catch (_) {}
             };
             reader.readAsDataURL(file);
         }

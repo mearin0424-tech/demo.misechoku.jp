@@ -5,6 +5,7 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/recruitment.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/form-enhance.css') }}">
 <style>
     .job-edit-v2 {
         --je-bg: transparent;
@@ -561,7 +562,11 @@
             </div>
         @endif
 
-        <form id="recruit-form" action="{{ route('shop.recruits.update') }}" method="POST">
+        {{-- 入力完成度メーター（form-enhance.js が挿入する） --}}
+        <div id="recruit-meter-host" style="padding: 12px 16px 0;"></div>
+
+        <form id="recruit-form" action="{{ route('shop.recruits.update') }}" method="POST"
+              data-form-guard data-completion-meter data-completion-target="#recruit-meter-host">
             @csrf
             @method('PUT')
             {{-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1108,6 +1113,7 @@
 @endsection
 
 @push('scripts')
+<script src="{{ asset('assets/js/form-enhance.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var form = document.getElementById('recruit-form');

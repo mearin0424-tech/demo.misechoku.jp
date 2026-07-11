@@ -1,0 +1,131 @@
+/* =====================================================================
+   操作モーダル 視認性一括改善 (2026-07)
+   既存モーダル群の「文字が小さい・コントラスト不足・背景が薄い」を
+   後追いの override でまとめて引き上げる。
+   対象:
+     - .shop-action-modal-*      … 店舗の承認・入金報告モーダル
+     - .recommend-info-modal__*  … インタラクションの表示ロジック説明
+     - .review-modal-*           … レビュー投稿モーダル
+     - 汎用 .app-modal-* があれば同様（未定義でも無害）
+   ===================================================================== */
+
+/* ---------- 共通: バックドロップを濃く・ブラー強化 ---------- */
+.shop-action-modal,
+.recommend-info-modal__overlay {
+    background: rgba(0, 0, 0, 0.86) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* ---------- 店舗 承認・入金モーダル ---------- */
+.shop-action-modal-panel {
+    background: #121016 !important;                     /* #0a0a0a → 少し持ち上げ */
+    border-color: rgba(168, 85, 247, 0.35) !important;  /* 枠を強調 */
+    box-shadow:
+        0 25px 60px -12px rgba(0, 0, 0, 0.8),
+        0 0 0 1px rgba(255, 255, 255, 0.04) !important;
+}
+.shop-action-modal-header {
+    background: #1a1520 !important;
+    border-bottom-color: rgba(168, 85, 247, 0.28) !important;
+}
+.shop-action-modal-title {
+    font-size: 1.14rem !important;
+    color: #f5f0f5 !important;         /* ピンク→白ベースで読みやすく */
+    font-weight: 800 !important;
+}
+.shop-action-modal-note {
+    font-size: 0.88rem !important;      /* 0.78 → 0.88 */
+    line-height: 1.8 !important;
+    color: #d6d0ca !important;          /* #a0a0a0 → 高コントラスト */
+    background: #1d1822 !important;
+    border-color: rgba(168, 85, 247, 0.22) !important;
+}
+.shop-action-modal-check {
+    font-size: 0.92rem !important;      /* 0.86 → 0.92 */
+    color: #f5f0ed !important;
+    line-height: 1.65 !important;
+}
+.shop-action-modal-label {
+    font-size: 0.82rem !important;      /* 0.74 → 0.82 */
+    color: #cfc4bd !important;
+    font-weight: 700 !important;
+}
+.shop-action-modal-input {
+    font-size: 1rem !important;
+    background: #221c28 !important;
+    border-color: rgba(168, 85, 247, 0.30) !important;
+}
+.shop-action-modal-input::placeholder { color: #8d8590 !important; }
+.shop-action-modal-error {
+    font-size: 0.88rem !important;
+    color: var(--color-danger, #fca5a5) !important;
+}
+.shop-action-modal-btn { font-size: 0.98rem !important; }
+.shop-action-modal-close {
+    color: #cfc4bd !important;
+}
+.shop-action-modal-close:hover { color: #fff !important; }
+
+/* ---------- おすすめ表示ロジック説明モーダル ---------- */
+.recommend-info-modal__panel {
+    background: #14101a !important;
+    border-color: rgba(168, 85, 247, 0.40) !important;
+}
+.recommend-info-modal__title {
+    font-size: 1.1rem !important;
+    color: #f5f0f5 !important;
+}
+.recommend-info-modal__list li {
+    font-size: 0.9rem !important;       /* 0.82 → 0.9 */
+    line-height: 1.75 !important;
+    color: #e8e2dc !important;
+    background: rgba(255, 255, 255, 0.045) !important;
+}
+.recommend-info-modal__close {
+    color: #cfc4bd !important;
+    font-size: 1.6rem !important;
+}
+
+/* ---------- レビュー投稿モーダル ---------- */
+.review-modal-title {
+    font-size: 1.2rem !important;
+    color: #f5f0f5 !important;
+    font-weight: 600 !important;
+}
+.review-modal-intro {
+    font-size: 0.95rem !important;
+    color: #e8e2dc !important;
+    line-height: 1.8 !important;
+}
+.review-modal-body label,
+.review-modal-body .review-item-label {
+    font-size: 0.92rem !important;
+    color: #f0eae5 !important;
+}
+.review-modal-body textarea,
+.review-modal-body input[type="text"] {
+    font-size: 1rem !important;
+}
+
+/* ---------- ライトボックス / 画像プレビュー ---------- */
+.lightbox-overlay {
+    background: rgba(0, 0, 0, 0.92) !important;
+}
+.lightbox-close {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 1.3rem !important;
+    background: rgba(30, 24, 34, 0.9) !important;
+    border: 1px solid rgba(168, 85, 247, 0.4) !important;
+    color: #fff !important;
+    border-radius: 999px !important;
+}
+
+/* ---------- 全モーダル共通: フォーカスリング ---------- */
+.shop-action-modal-panel button:focus-visible,
+.recommend-info-modal__panel button:focus-visible,
+.review-modal-wrap button:focus-visible {
+    outline: 2px solid var(--gold-light, #c4b5fd) !important;
+    outline-offset: 2px;
+}

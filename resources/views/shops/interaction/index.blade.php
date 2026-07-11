@@ -36,7 +36,7 @@
     <div id="pane-keep" class="tab-pane active">
         @if (empty($keepCasts))
             <div class="no-data-wrapper">
-                <i class="fas fa-star opacity-10 text-5xl mb-3 block"></i>
+                <i class="fas fa-star text-5xl mb-3 block" style="color: rgba(196,181,253,0.35); filter: drop-shadow(0 4px 8px rgba(168,85,247,0.15));"></i>
                 <p class="no-data-msg">{{ $emptyKeepMsg }}</p>
             </div>
         @else
@@ -52,7 +52,7 @@
     <div id="pane-like" class="tab-pane">
         @if (empty($likeCasts))
             <div class="no-data-wrapper">
-                <i class="fas fa-heart opacity-10 text-5xl mb-3 block"></i>
+                <i class="fas fa-heart text-5xl mb-3 block" style="color: rgba(245,163,196,0.4); filter: drop-shadow(0 4px 8px rgba(214,112,162,0.20));"></i>
                 <p class="no-data-msg">{{ $emptyLikeMsg }}</p>
             </div>
         @else
@@ -95,7 +95,7 @@
                     @foreach($recommendItems as $r)
                         <li class="recommend-item">
                             <a href="{{ route($recommendDetailRoute, ['id' => $r['id']]) }}" class="recommend-item__link">
-                                <img src="{{ $r['image'] }}" alt="" class="recommend-item__thumb">
+                                <img src="{{ $r['image'] }}" alt="{{ $r['name'] ?? '' }}" class="recommend-item__thumb" loading="lazy">
                                 <div class="recommend-item__body">
                                     <div class="recommend-item__name">
                                         {{ $r['name'] }}

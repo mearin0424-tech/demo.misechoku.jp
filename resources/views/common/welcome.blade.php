@@ -209,6 +209,131 @@
     .lp-hero__badge--gold i { color: var(--lp-gold); }
 
     /* =========================================================
+       Hero CTA — ファーストビューで登録導線を完結させる
+       ========================================================= */
+    .lp-hero__cta {
+        margin-top: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        position: relative;
+        z-index: 1;
+    }
+    .lp-hero__cta-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: min(360px, 100%);
+        padding: 17px 28px;
+        border-radius: 999px;
+        font-family: var(--font-sans);
+        font-size: 1.02rem;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        text-decoration: none;
+        color: #1a0f2e;
+        background: linear-gradient(135deg, #e9d5ff 0%, var(--lp-accent) 45%, var(--lp-accent-deep) 100%);
+        box-shadow: var(--lp-shadow-btn);
+        transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.15s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .lp-hero__cta-primary::after {
+        content: '';
+        position: absolute;
+        top: 0; left: -80%;
+        width: 60%; height: 100%;
+        background: linear-gradient(105deg, transparent, rgba(255,255,255,0.45), transparent);
+        transform: skewX(-20deg);
+        animation: lp-cta-sheen 3.6s ease-in-out infinite;
+    }
+    @keyframes lp-cta-sheen {
+        0%, 60%, 100% { left: -80%; }
+        75%           { left: 130%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .lp-hero__cta-primary::after { animation: none; }
+    }
+    .lp-hero__cta-primary:hover { transform: translateY(-2px); filter: brightness(1.05); }
+    .lp-hero__cta-primary:active { transform: translateY(1px); }
+    .lp-hero__cta-primary i { font-size: 1.1rem; }
+
+    .lp-hero__cta-micro {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.74rem;
+        font-weight: 700;
+        color: var(--lp-text-sub);
+        letter-spacing: 0.04em;
+    }
+    .lp-hero__cta-micro i { color: var(--lp-gold); font-size: 0.7rem; margin-right: 3px; }
+
+    .lp-hero__cta-shop {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--lp-text-sub);
+        text-decoration: none;
+        border-bottom: 1px dashed var(--lp-line-accent);
+        padding-bottom: 2px;
+        transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    .lp-hero__cta-shop:hover { color: var(--lp-accent); border-color: var(--lp-accent); }
+    .lp-hero__cta-shop i { margin-right: 4px; color: var(--lp-accent); }
+
+    /* =========================================================
+       Mid-page CTA band — 感情の高まった位置での再誘導
+       ========================================================= */
+    .lp-cta-band {
+        margin: 0 var(--lp-content-pad);
+        padding: 30px 22px;
+        border-radius: 18px;
+        text-align: center;
+        background:
+            radial-gradient(80% 100% at 50% 0%, rgba(168, 85, 247, 0.22), transparent 70%),
+            linear-gradient(180deg, var(--lp-surface-from), var(--lp-surface-to));
+        border: 1px solid var(--lp-line-accent);
+        box-shadow: var(--lp-shadow-card);
+        position: relative;
+        overflow: hidden;
+    }
+    .lp-cta-band::before {
+        content: '✦';
+        position: absolute;
+        top: 12px; right: 16px;
+        color: var(--lp-gold);
+        font-size: 0.8rem;
+        opacity: 0.7;
+    }
+    .lp-cta-band__title {
+        margin: 0 0 6px;
+        font-family: var(--font-sans);
+        font-size: 1.12rem;
+        font-weight: 900;
+        color: var(--lp-text);
+        line-height: 1.5;
+    }
+    .lp-cta-band__title .lp-gold {
+        background: linear-gradient(135deg, var(--lp-gold-from), var(--lp-gold-to));
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .lp-cta-band__sub {
+        margin: 0 0 18px;
+        font-size: 0.8rem;
+        color: var(--lp-text-sub);
+        line-height: 1.7;
+    }
+    .lp-cta-band .lp-hero__cta-primary { width: min(320px, 100%); }
+    .lp-cta-band__micro {
+        display: block;
+        margin-top: 10px;
+        font-size: 0.7rem;
+        color: var(--lp-text-mute);
+    }
+
+    /* =========================================================
        Stats — 数字で見るミセチョク（信頼感の補強）
        ========================================================= */
     .lp-stats {
@@ -745,6 +870,21 @@
             <span class="lp-hero__badge"><i class="fas fa-user-secret"></i> 匿名OK</span>
             <span class="lp-hero__badge lp-hero__badge--gold"><i class="fas fa-gift"></i> 採用報酬あり</span>
         </div>
+
+        {{-- ファーストビュー CTA：スクロールさせずに登録導線を完結 --}}
+        <div class="lp-hero__cta">
+            <a href="{{ route('cast.register') }}" class="lp-hero__cta-primary">
+                <i class="fas fa-sparkles"></i> 無料でお店を探してみる
+            </a>
+            <span class="lp-hero__cta-micro">
+                <span><i class="fas fa-stopwatch"></i>登録は30秒</span>
+                <span><i class="fas fa-yen-sign"></i>ずっと無料</span>
+                <span><i class="fas fa-user-secret"></i>匿名OK</span>
+            </span>
+            <a href="{{ route('welcome.shop') }}" class="lp-hero__cta-shop">
+                <i class="fas fa-store"></i>掲載をご希望の店舗さまはこちら
+            </a>
+        </div>
     </header>
 
     {{-- Stats（信頼の数字） --}}
@@ -867,6 +1007,18 @@
             </div>
         </div>
     </section>
+
+    {{-- 中間 CTA：先輩の声で感情が動いたタイミングで再誘導 --}}
+    <div class="lp-cta-band" role="region" aria-label="無料登録の案内">
+        <h2 class="lp-cta-band__title">
+            次にお祝い金を受け取るのは、<br><span class="lp-gold">あなた</span>かもしれません。
+        </h2>
+        <p class="lp-cta-band__sub">最大10万円のお祝い金。登録も利用もずっと無料です。</p>
+        <a href="{{ route('cast.register') }}" class="lp-hero__cta-primary">
+            <i class="fas fa-sparkles"></i> 30秒で無料登録する
+        </a>
+        <span class="lp-cta-band__micro">しつこい連絡は一切ありません。匿名のままお店を探せます。</span>
+    </div>
 
     {{-- FAQ --}}
     <section class="lp-section lp-section--alt" aria-labelledby="lp-faq-title">
@@ -992,11 +1144,11 @@
 <div class="lp-fixed-cta" role="region" aria-label="キャスト新規登録">
     <div class="lp-fixed-cta__inner">
         <div class="lp-fixed-cta__pitch">
-            <strong>無料登録</strong>
-            <span>30秒で完了</span>
+            <strong>お祝い金 最大10万円</strong>
+            <span>登録30秒・ずっと無料</span>
         </div>
         <a href="{{ route('cast.register') }}" class="lp-fixed-cta__btn">
-            <i class="fas fa-user-plus"></i> キャストとしてはじめる
+            <i class="fas fa-sparkles"></i> 無料ではじめる
         </a>
     </div>
     <p class="lp-fixed-cta__shop">

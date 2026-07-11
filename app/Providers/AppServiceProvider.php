@@ -5,10 +5,6 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
 use App\Services\AdminOperationalSummaryService;
-use App\Services\DocumentReviewService;
-use App\Services\ReviewPortalService;
-use App\Models\Notice;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\View;
 
@@ -41,53 +37,11 @@ class AppServiceProvider extends ServiceProvider
             return preg_match('/Mobile|Android|iPhone|iPad/', $userAgent);
         });
 
-        View::composer('*', function ($view) {
-            $notifications = [];
-            $operationalNotices = [];
-            $unreadNewsCount = 0;
-
-            $todoList = [];
-            if (request()->is('shop/*') && Auth::guard('shop')->check()) {
-                $shopId = (string) Auth::guard('shop')->user()->shop_id;
-                $reviewPortalService = app(ReviewPortalService::class);
-                $notifications = $reviewPortalService->getShopReviewNotifications($shopId);
-                $unreadNewsCount = count($notifications);
-                $todoList = app(DocumentReviewService::class)->getShopPortalTodoMessages($shopId);
-            }
-
-            try {
-                $noticeQuery = Notice::query()
-                    ->published()
-                    ->orderByDesc('published_at')
-                    ->orderByDesc('id');
-
-                if (request()->is('cast/*')) {
-                    $noticeQuery->forCast();
-                } elseif (request()->is('shop/*')) {
-                    $noticeQuery->forShop();
-                } else {
-                    $noticeQuery->forGuest();
-                }
-
-                $operationalNotices = $noticeQuery
-                    ->limit(5)
-                    ->get(['title', 'slug', 'body', 'published_at'])
-                    ->map(fn (Notice $notice) => [
-                        'title' => $notice->title,
-                        'body' => $notice->body,
-                        'url' => route('pages.support.notices.show', ['slug' => $notice->slug]),
-                        'published_at' => optional($notice->published_at)->format('Y/m/d'),
-                    ])
-                    ->all();
-            } catch (\Throwable $e) {
-                $operationalNotices = [];
-            }
-
-            $view->with('notifications', $notifications);
-            $view->with('operationalNotices', $operationalNotices);
-            $view->with('unreadNewsCount', $unreadNewsCount);
-            $view->with('todoList', $todoList);
-        });
+        // ヘッダーバッジ用の $notifications / $operationalNotices / $unreadNewsCount / $todoList
+        // は App\Http\Middleware\InjectHeaderBadges が View::share() で全ページに注入する。
+        // ここで view composer を再宣言すると上書きが発生し、実データが表示されなくなる
+        // （旧実装ではレビュー通知のみ・書類 TODO のみで、TALK/LIKE 等の新規通知が消えていた）。
+        // 追加のバッジデータが必要になったら、middleware 側で共有すること。
 
         View::composer('layouts.admin', function ($view) {
             $svc = app(AdminOperationalSummaryService::class);

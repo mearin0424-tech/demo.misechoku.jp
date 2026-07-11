@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="{{ asset('assets/css/recruitment.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/management.css') }}?v=20260508">
+<link rel="stylesheet" href="{{ asset('assets/css/case-flow.css') }}">
 <style>
     /* ========================================================
        採用・入金 統合タイムライン（店舗側）

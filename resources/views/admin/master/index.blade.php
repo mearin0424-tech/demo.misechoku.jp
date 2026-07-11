@@ -218,7 +218,46 @@
                                                     </form>
                                                 </td>
                                             @endif
-                                            <td class="cell-main">{{ $item->name }}</td>
+                                            <td class="cell-main">
+                                                {{-- 表示モード：クリックでその場編集に切替 --}}
+                                                <button type="button"
+                                                        class="master-inline-name"
+                                                        data-inline-edit-toggle
+                                                        title="クリックして名称を編集">
+                                                    <span class="master-inline-name__text">{{ $item->name }}</span>
+                                                    <i class="fas fa-pen master-inline-name__icon" aria-hidden="true"></i>
+                                                </button>
+                                                {{-- 編集モード：name 以外のフィールドは hidden で現値を送る（バリデーション対応） --}}
+                                                <form method="POST"
+                                                      action="{{ route('admin.masters.catalogs.update', [$selectedCatalog['key'], $item->id]) }}"
+                                                      class="master-inline-form"
+                                                      hidden>
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <input type="hidden" name="current_sort" value="{{ $selectedSort }}">
+                                                    @foreach ($selectedCatalog['fields'] as $fieldIdx => $field)
+                                                        @if ($fieldIdx === 0)
+                                                            {{-- 先頭フィールド（名称/設問など）をその場編集の対象にする --}}
+                                                            <input type="text"
+                                                                   name="{{ $field['input'] }}"
+                                                                   value="{{ $item->{$field['column']} ?? $item->name }}"
+                                                                   class="master-inline-form__input"
+                                                                   aria-label="{{ $field['label'] }}"
+                                                                   required>
+                                                        @else
+                                                            <input type="hidden"
+                                                                   name="{{ $field['input'] }}"
+                                                                   value="{{ $item->{$field['column']} ?? '' }}">
+                                                        @endif
+                                                    @endforeach
+                                                    <button type="submit" class="master-inline-form__save" title="保存">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                    <button type="button" class="master-inline-form__cancel" data-inline-edit-cancel title="キャンセル">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
                                             @if ($hasDirectory)
                                                 <td>{{ $item->directory ?? '-' }}</td>
                                             @endif
@@ -242,7 +281,7 @@
                                                     <form
                                                         method="POST"
                                                         action="{{ route('admin.masters.catalogs.destroy', [$selectedCatalog['key'], $item->id]) }}"
-                                                        onsubmit="return confirm('この項目を削除しますか？');"
+                                                        onsubmit="return confirm('「{{ addslashes($item->name) }}」を削除しますか？\nこの操作は取り消せません。');"
                                                         style="display:inline;"
                                                     >
                                                         @csrf
@@ -305,6 +344,133 @@
             }
             recordSearchInput.addEventListener('input', applyRecordSearch);
         }
+
+        // ---- インライン名称編集：表示テキスト ⇔ フォームの切替 ----
+        document.querySelectorAll('[data-inline-edit-toggle]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var cell = btn.closest('.cell-main');
+                if (!cell) return;
+                var form = cell.querySelector('.master-inline-form');
+                if (!form) return;
+                // 他の編集中セルを閉じる
+                document.querySelectorAll('.master-inline-form:not([hidden])').forEach(function (f) {
+                    f.hidden = true;
+                    var b = f.closest('.cell-main').querySelector('[data-inline-edit-toggle]');
+                    if (b) b.hidden = false;
+                });
+                btn.hidden = true;
+                form.hidden = false;
+                var input = form.querySelector('.master-inline-form__input');
+                if (input) { input.focus(); input.select(); }
+            });
+        });
+        document.querySelectorAll('[data-inline-edit-cancel]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var form = btn.closest('.master-inline-form');
+                if (!form) return;
+                form.hidden = true;
+                var toggle = form.closest('.cell-main').querySelector('[data-inline-edit-toggle]');
+                if (toggle) toggle.hidden = false;
+            });
+        });
+        // Escape でキャンセル
+        document.addEventListener('keydown', function (e) {
+            if (e.key !== 'Escape') return;
+            var open = document.querySelector('.master-inline-form:not([hidden])');
+            if (!open) return;
+            open.hidden = true;
+            var toggle = open.closest('.cell-main').querySelector('[data-inline-edit-toggle]');
+            if (toggle) toggle.hidden = false;
+        });
+
+        // ---- 編集フォームへ自動スクロール（?edit= でリロードされた直後） ----
+        var editForm = document.querySelector('.admin-master-form-edit');
+        if (editForm) {
+            window.setTimeout(function () {
+                editForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                var firstInput = editForm.querySelector('input[type="text"]');
+                if (firstInput) firstInput.focus();
+            }, 120);
+        }
     })();
 </script>
+@endpush
+
+@push('admin-styles')
+<style>
+    /* ---- インライン名称編集 ---- */
+    .master-inline-name {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: transparent;
+        border: 0;
+        padding: 4px 6px;
+        margin: -4px -6px;
+        border-radius: 6px;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+        text-align: left;
+        transition: background 0.15s ease;
+    }
+    .master-inline-name:hover {
+        background: rgba(168, 85, 247, 0.10);
+    }
+    .master-inline-name:hover .master-inline-name__icon { opacity: 1; }
+    .master-inline-name__icon {
+        font-size: 0.68rem;
+        color: #a78bfa;
+        opacity: 0;
+        transition: opacity 0.15s ease;
+    }
+    .master-inline-form {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .master-inline-form[hidden] { display: none; }
+    .master-inline-form__input {
+        min-width: 160px;
+        padding: 6px 10px;
+        border-radius: 8px;
+        border: 1px solid rgba(168, 85, 247, 0.5);
+        background: rgba(20, 14, 24, 0.9);
+        color: #fff;
+        font-size: 0.9rem;
+    }
+    .master-inline-form__input:focus {
+        outline: 2px solid rgba(196, 181, 253, 0.6);
+        outline-offset: 1px;
+    }
+    .master-inline-form__save,
+    .master-inline-form__cancel {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.78rem;
+        transition: filter 0.15s ease;
+    }
+    .master-inline-form__save {
+        background: linear-gradient(135deg, #6ee7b7, #34d399);
+        color: #052e1c;
+    }
+    .master-inline-form__save:hover { filter: brightness(1.08); }
+    .master-inline-form__cancel {
+        background: transparent;
+        border-color: rgba(255, 255, 255, 0.18);
+        color: #a1a1aa;
+    }
+    .master-inline-form__cancel:hover { color: #fff; border-color: rgba(255, 255, 255, 0.4); }
+
+    /* 編集中の項目行をハイライト */
+    .master-record-row:has(.admin-row-icon-btn.is-active) {
+        background: rgba(168, 85, 247, 0.07);
+    }
+</style>
 @endpush

@@ -6,6 +6,7 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/review-modal.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/case-flow.css') }}">
 <style>
     /* ========================================================
        採用・入金 統合タイムライン

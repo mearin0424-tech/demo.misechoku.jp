@@ -124,12 +124,182 @@
         updateDistanceOutput();
     }
 
+    // ---------------------------------------------------------------------
+    // 手順: accordion / chip filter の共通ヘルパ
+    // ---------------------------------------------------------------------
+    var CHIP_FILTER_THRESHOLD = 10; // これ以上のチップ数なら検索 UI を挿入
+    var CHIP_INITIAL_VISIBLE = 8;    // 未選択チップの初期表示件数
+
+    function injectAccordionCountChip(block) {
+        var head = block.querySelector('[data-accordion-trigger]');
+        if (!head) return null;
+        // 既存の badge を優先。無ければ挿入
+        var badge = head.querySelector('[data-accordion-count]');
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'detail-search-accordion__count';
+            badge.setAttribute('data-accordion-count', '');
+            badge.hidden = true;
+            // アイコン (icon) の直前に入れる
+            var icon = head.querySelector('.detail-search-accordion__icon');
+            if (icon) {
+                head.insertBefore(badge, icon);
+            } else {
+                head.appendChild(badge);
+            }
+        }
+        return badge;
+    }
+
+    function updateAccordionCount(block) {
+        var head = block.querySelector('[data-accordion-trigger]');
+        var badge = head ? head.querySelector('[data-accordion-count]') : null;
+        if (!badge) return;
+        var checked = block.querySelectorAll('input[type="checkbox"]:checked, input[type="radio"]:checked[value]:not([value=""])');
+        // radio の "指定なし" 相当 (value 空) は数えない
+        var count = 0;
+        checked.forEach(function (el) {
+            if (el.type === 'radio' && el.value === '') return;
+            count++;
+        });
+        if (count > 0) {
+            badge.hidden = false;
+            badge.textContent = count + '件選択';
+            block.classList.add('has-selection');
+        } else {
+            badge.hidden = true;
+            badge.textContent = '';
+            block.classList.remove('has-selection');
+        }
+    }
+
+    function setupChipFilter(chipsContainer) {
+        if (!chipsContainer || chipsContainer.dataset.chipFilterInit === '1') return;
+        var chips = chipsContainer.querySelectorAll('.detail-search-chip');
+        if (chips.length < CHIP_FILTER_THRESHOLD) return;
+
+        chipsContainer.dataset.chipFilterInit = '1';
+        chipsContainer.classList.add('detail-search-chips--filterable');
+
+        // 検索入力 + カウンタバー
+        var toolbar = document.createElement('div');
+        toolbar.className = 'detail-search-chips__toolbar';
+        toolbar.innerHTML = ''
+            + '<label class="detail-search-chips__searchbox">'
+            +   '<i class="fas fa-search" aria-hidden="true"></i>'
+            +   '<input type="text" class="detail-search-chips__search" placeholder="キーワードで絞り込み..." aria-label="タグを検索">'
+            +   '<button type="button" class="detail-search-chips__clear" hidden aria-label="検索をクリア"><i class="fas fa-times"></i></button>'
+            + '</label>'
+            + '<span class="detail-search-chips__meta">'
+            +   '<span class="detail-search-chips__meta-selected" data-chip-selected-count>0</span>'
+            +   '<span class="detail-search-chips__meta-sep">/</span>'
+            +   '<span>' + chips.length + '</span>'
+            + '</span>';
+        chipsContainer.parentNode.insertBefore(toolbar, chipsContainer);
+
+        // 「もっと見る」ボタン
+        var moreBtn = document.createElement('button');
+        moreBtn.type = 'button';
+        moreBtn.className = 'detail-search-chips__more';
+        moreBtn.textContent = 'もっと見る（残り ' + Math.max(0, chips.length - CHIP_INITIAL_VISIBLE) + ' 件）';
+        chipsContainer.parentNode.insertBefore(moreBtn, chipsContainer.nextSibling);
+
+        var searchInput = toolbar.querySelector('.detail-search-chips__search');
+        var clearBtn = toolbar.querySelector('.detail-search-chips__clear');
+        var selectedCount = toolbar.querySelector('[data-chip-selected-count]');
+        var isExpanded = false;
+        var currentQuery = '';
+
+        function chipLabel(chip) {
+            var span = chip.querySelector('span');
+            return span ? span.textContent.trim().toLowerCase() : '';
+        }
+
+        function chipChecked(chip) {
+            var input = chip.querySelector('input[type="checkbox"], input[type="radio"]');
+            return input ? input.checked : false;
+        }
+
+        function refresh() {
+            var q = currentQuery;
+            var shownUnselected = 0;
+            var selectedTotal = 0;
+            chips.forEach(function (chip) {
+                var label = chipLabel(chip);
+                var checked = chipChecked(chip);
+                var matches = q === '' || label.indexOf(q) !== -1;
+                // 選択済み: 常に表示（先頭に集約）
+                chip.classList.toggle('is-pinned', checked);
+                if (checked) {
+                    chip.style.display = matches ? '' : 'none';
+                    selectedTotal++;
+                    return;
+                }
+                // 未選択
+                if (!matches) {
+                    chip.style.display = 'none';
+                    return;
+                }
+                if (isExpanded || shownUnselected < CHIP_INITIAL_VISIBLE) {
+                    chip.style.display = '';
+                    shownUnselected++;
+                } else {
+                    chip.style.display = 'none';
+                }
+            });
+            var hiddenUnselected = 0;
+            chips.forEach(function (chip) {
+                if (!chipChecked(chip)) {
+                    var label = chipLabel(chip);
+                    var matches = q === '' || label.indexOf(q) !== -1;
+                    if (matches && chip.style.display === 'none') hiddenUnselected++;
+                }
+            });
+            moreBtn.textContent = isExpanded ? '折りたたむ' : ('もっと見る（残り ' + hiddenUnselected + ' 件）');
+            moreBtn.hidden = hiddenUnselected === 0 && isExpanded === false;
+            // pinnedを CSS の :nth-child order で並び替えたく、簡易対応で checked → 先頭に DOM 移動
+            var frag = document.createDocumentFragment();
+            var later = document.createDocumentFragment();
+            chips.forEach(function (chip) {
+                if (chipChecked(chip)) frag.appendChild(chip);
+                else later.appendChild(chip);
+            });
+            chipsContainer.appendChild(frag);
+            chipsContainer.appendChild(later);
+            if (selectedCount) selectedCount.textContent = String(selectedTotal);
+            if (clearBtn) clearBtn.hidden = currentQuery === '';
+        }
+
+        searchInput.addEventListener('input', function () {
+            currentQuery = searchInput.value.trim().toLowerCase();
+            refresh();
+        });
+        clearBtn.addEventListener('click', function () {
+            searchInput.value = '';
+            currentQuery = '';
+            searchInput.focus();
+            refresh();
+        });
+        moreBtn.addEventListener('click', function () {
+            isExpanded = !isExpanded;
+            refresh();
+        });
+
+        // change 時にも再描画（選択したチップは先頭に固定）
+        chipsContainer.addEventListener('change', refresh);
+        refresh();
+    }
+
     if (modal) {
         modal.querySelectorAll('[data-accordion]').forEach(function (block) {
             var head = block.querySelector('[data-accordion-trigger]');
             var body = block.querySelector('.detail-search-accordion__body');
             var icon = block.querySelector('.detail-search-accordion__icon');
             if (!head || !body) return;
+
+            // 選択件数チップをヘッド左に注入
+            injectAccordionCountChip(block);
+            updateAccordionCount(block);
 
             function syncAccordion(isOpen) {
                 body.hidden = !isOpen;
@@ -138,10 +308,23 @@
                 if (icon) icon.textContent = isOpen ? '−' : '+';
             }
 
-            syncAccordion(block.getAttribute('data-open') === 'true');
+            // タグ大量セクションはデフォルトで閉じる（data-open の値をリスペクトしつつ、選択がある場合は開く）
+            var initialOpen = block.getAttribute('data-open') === 'true';
+            var hasSelection = block.querySelectorAll('input[type="checkbox"]:checked').length > 0;
+            if (hasSelection) initialOpen = true;
+            syncAccordion(initialOpen);
+
             head.addEventListener('click', function () {
                 syncAccordion(body.hidden);
             });
+
+            // change 時にヘッドのカウントを更新
+            block.addEventListener('change', function () { updateAccordionCount(block); });
+        });
+
+        // チップ数が多いコンテナに検索フィルタ UI を挿入
+        modal.querySelectorAll('.detail-search-chips').forEach(function (container) {
+            setupChipFilter(container);
         });
     }
 
@@ -329,4 +512,109 @@
             });
         }
     }
+
+    // ---------------------------------------------------------------------
+    // クイックフィルタチップ（モーダル内フォームを単一の真実としてトグル）
+    //   data-quick-actions='[{"type":"select|input|radio|checkbox|checkLabel", ...}]'
+    //   - select:     {type, name, value}    … select の値を set / クリア
+    //   - input:      {type, name, value}    … text/number 入力を set / クリア
+    //   - radio:      {type, name, value}    … 該当 value を checked / 解除（"" があればそちらへ）
+    //   - checkbox:   {type, name, value}    … 該当 value の checkbox を toggle
+    //   - checkLabel: {type, name, label}    … name のグループから label テキストに部分一致する
+    //                                          checkbox を探して toggle（タグIDが動的な場合用）
+    //   対象が見つからない action を含むチップは自動非表示。
+    // ---------------------------------------------------------------------
+    function quickResolveTargets(action) {
+        if (!form) return null;
+        if (action.type === 'select') {
+            var sel = form.querySelector('select[name="' + action.name + '"]');
+            return sel ? [sel] : null;
+        }
+        if (action.type === 'input') {
+            var inp = form.querySelector('input[name="' + action.name + '"]');
+            return inp ? [inp] : null;
+        }
+        if (action.type === 'radio') {
+            var radio = form.querySelector('input[type="radio"][name="' + action.name + '"][value="' + action.value + '"]');
+            return radio ? [radio] : null;
+        }
+        if (action.type === 'checkbox') {
+            var cb = form.querySelector('input[type="checkbox"][name="' + action.name + '"][value="' + action.value + '"]');
+            return cb ? [cb] : null;
+        }
+        if (action.type === 'checkLabel') {
+            var boxes = form.querySelectorAll('input[type="checkbox"][name="' + action.name + '"]');
+            for (var i = 0; i < boxes.length; i++) {
+                var label = boxes[i].closest('label');
+                var text = label ? label.textContent : '';
+                if (text && text.indexOf(action.label) !== -1) return [boxes[i]];
+            }
+            return null;
+        }
+        return null;
+    }
+
+    function quickIsActive(action, el) {
+        if (action.type === 'select' || action.type === 'input') return el.value === String(action.value);
+        return el.checked === true;
+    }
+
+    function quickApply(action, el, activate) {
+        if (action.type === 'select' || action.type === 'input') {
+            el.value = activate ? String(action.value) : '';
+        } else if (action.type === 'radio') {
+            if (activate) {
+                el.checked = true;
+            } else {
+                // 「指定なし」(value="") の radio があればそこへ戻す
+                var noneRadio = form.querySelector('input[type="radio"][name="' + el.name + '"][value=""]');
+                if (noneRadio) noneRadio.checked = true;
+                else el.checked = false;
+            }
+        } else {
+            el.checked = activate;
+        }
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function initQuickChips() {
+        var chips = document.querySelectorAll('[data-quick-chip]');
+        if (!chips.length || !form) return;
+
+        chips.forEach(function (chip) {
+            var actions;
+            try {
+                actions = JSON.parse(chip.getAttribute('data-quick-actions') || '[]');
+            } catch (e) { actions = []; }
+            if (!actions.length) { chip.hidden = true; return; }
+
+            // 対象が 1 つでも見つからなければチップごと隠す（タグ未登録環境で壊れない）
+            var resolved = actions.map(function (a) {
+                var t = quickResolveTargets(a);
+                return t ? { action: a, el: t[0] } : null;
+            });
+            if (resolved.some(function (r) { return r === null; })) {
+                chip.hidden = true;
+                return;
+            }
+
+            function syncState() {
+                var active = resolved.every(function (r) { return quickIsActive(r.action, r.el); });
+                chip.classList.toggle('is-active', active);
+                chip.setAttribute('aria-pressed', active ? 'true' : 'false');
+            }
+
+            chip.addEventListener('click', function () {
+                var active = resolved.every(function (r) { return quickIsActive(r.action, r.el); });
+                resolved.forEach(function (r) { quickApply(r.action, r.el, !active); });
+                syncState();
+                doSearch(buildSearchParams());
+            });
+
+            // モーダル側の変更にも追従
+            form.addEventListener('change', syncState);
+            syncState();
+        });
+    }
+    initQuickChips();
 })();

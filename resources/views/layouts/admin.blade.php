@@ -213,8 +213,10 @@
                     </button>
                     <div class="admin-breadcrumb">
                         <span class="admin-breadcrumb-current">{{ $headerSection }}</span>
-                        <span>/</span>
-                        <span>{{ $headerDetail }}</span>
+                        @if(!empty($headerDetail) && $headerDetail !== $headerSection)
+                            <span class="admin-breadcrumb-sep" aria-hidden="true">/</span>
+                            <span>{{ $headerDetail }}</span>
+                        @endif
                     </div>
                 </div>
 

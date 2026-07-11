@@ -13,12 +13,17 @@ class UploadImageRequest extends FormRequest
 
     public function rules()
     {
+        // 8MB まで許容（スマホの高解像度撮影を許容）。クライアント側の image-editor.js が
+        // 1MB 前後に再圧縮するため通常はこの上限には達しないが、フォールバック経路と
+        // 未編集アップロードのために余裕を持たせる。
+        // dimensions: 極端に巨大な画像はメモリ圧迫の温床なので上限を切る。
         return [
             'image' => [
                 'required',
-                'image',                   // 画像ファイルであること
-                'mimes:jpeg,jpg,png,gif,webp', // 許可する拡張子
-                'max:2048',                // サイズ制限 (2MB)
+                'image',
+                'mimes:jpeg,jpg,png,gif,webp',
+                'max:8192',
+                'dimensions:max_width=6000,max_height=6000',
             ],
         ];
     }
@@ -26,9 +31,11 @@ class UploadImageRequest extends FormRequest
     public function messages()
     {
         return [
-            'image.image' => '画像ファイルを選択してください。',
-            'image.mimes' => '許可されていないファイル形式です。',
-            'image.max'   => 'ファイルサイズは2MB以内でアップロードしてください。',
+            'image.required'   => '画像を選択してください。',
+            'image.image'      => '画像ファイルを選択してください。',
+            'image.mimes'      => 'JPEG/PNG/GIF/WebP 形式のみアップロードできます。iPhone の HEIC 形式は端末側で JPEG に変換してからお試しください。',
+            'image.max'        => '画像は 8MB 以下のファイルをご利用ください。',
+            'image.dimensions' => '画像サイズが大きすぎます。6000×6000 ピクセル以下のファイルをご利用ください。',
         ];
     }
 }

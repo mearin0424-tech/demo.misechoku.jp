@@ -119,22 +119,37 @@
 
     {{-- 右側：タスク / 通知 / ハンバーガーメニュー --}}
     <div class="header-right">
-        <button id="btn-header-task" class="header-icon-btn">
-            <i class="fas fa-check-circle"></i>
-            @if(isset($todoList) && count($todoList) > 0)
-                <span class="badge-notify">{{ count($todoList) }}</span>
+        @php
+            $taskTotal = isset($todoList) ? count($todoList) : 0;
+            $taskHigh  = isset($taskHighCount) ? (int) $taskHighCount : 0;
+            $bellCount = isset($unreadNewsCount) ? (int) $unreadNewsCount : 0;
+        @endphp
+        <button id="btn-header-task"
+                class="header-icon-btn {{ $taskHigh > 0 ? 'is-urgent' : '' }} {{ $taskTotal > 0 ? 'has-badge' : '' }}"
+                aria-label="やることリスト（{{ $taskTotal }}件）"
+                aria-haspopup="true">
+            <i class="fas fa-list-check header-icon-btn__ico"></i>
+            @if($taskTotal > 0)
+                <span class="header-badge {{ $taskHigh > 0 ? 'is-urgent' : '' }}" aria-hidden="true">
+                    {{ $taskTotal > 99 ? '99+' : $taskTotal }}
+                </span>
             @endif
         </button>
 
-        <button id="btn-header-notification" class="header-icon-btn">
-            <i class="fas fa-bell"></i>
-            @if(isset($unreadNewsCount) && $unreadNewsCount > 0)
-                <span class="badge-notify">{{ $unreadNewsCount }}</span>
+        <button id="btn-header-notification"
+                class="header-icon-btn {{ $bellCount > 0 ? 'has-badge is-ringing' : '' }}"
+                aria-label="お知らせ（未読 {{ $bellCount }}件）"
+                aria-haspopup="true">
+            <i class="fas fa-bell header-icon-btn__ico"></i>
+            @if($bellCount > 0)
+                <span class="header-badge is-accent" aria-hidden="true">
+                    {{ $bellCount > 99 ? '99+' : $bellCount }}
+                </span>
             @endif
         </button>
 
-        <button id="btn-header-menu" class="header-icon-btn">
-            <i class="fas fa-bars"></i>
+        <button id="btn-header-menu" class="header-icon-btn" aria-label="メニュー">
+            <i class="fas fa-bars header-icon-btn__ico"></i>
         </button>
     </div>
 </header>

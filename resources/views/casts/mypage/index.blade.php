@@ -153,7 +153,7 @@
                         <div class="flex flex-col gap-1">
                             <span class="text-[12px] text-text-sub font-medium">自己PR</span>
                             <span class="text-[13px] font-medium text-text-main leading-relaxed">
-                                {!! !empty($cast['pr'] ?? '') ? nl2br(e($cast['pr'])) : '<span class="text-text-sub">--</span>' !!}
+                                {!! !empty($cast['pr'] ?? '') ? nl2br(e($cast['pr'])) : '<span class="text-text-sub italic">自己PRはまだ未設定です</span>' !!}
                             </span>
                         </div>
                     </div>
@@ -358,6 +358,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="{{ asset('assets/js/gallery-sortable.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+<script src="{{ asset('assets/js/image-editor.js') }}"></script>
 <script>
 window.MYPAGE_GALLERY_CONFIG = {
     csrfToken: @json(csrf_token()),
@@ -375,6 +376,7 @@ window.MYPAGE_GALLERY_CONFIG = {
 @push('head-styles')
 {{-- ===== ギャラリー機能の依存CSS（モーダル・並び替え・cropper） ===== --}}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+<link rel="stylesheet" href="{{ asset('assets/css/image-editor.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/cast_profile.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 {{-- ギャラリーグリッドへの上書き（#gallery-list 配下のみ。色は触らずレイアウトだけ） --}}

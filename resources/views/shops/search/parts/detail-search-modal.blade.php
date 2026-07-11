@@ -65,12 +65,17 @@
     $nightWorkExpLabels = ['any' => '指定なし', 'yes' => '経験あり', 'none' => '未経験'];
 @endphp
 
-<div id="detail-search-modal" class="detail-search-modal" aria-hidden="true">
-    <div class="detail-search-modal__overlay" aria-hidden="true"></div>
+<div id="detail-search-modal"
+     class="detail-search-modal"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="detail-search-modal-title"
+     aria-hidden="true">
+    <div class="detail-search-modal__overlay" data-close-modal aria-hidden="true"></div>
     <div class="detail-search-modal__window detail-search-modal__window--search">
         <div class="detail-search-modal__header detail-search-modal__header--search">
             <div class="detail-search-modal__header-line" aria-hidden="true"></div>
-            <h2 class="detail-search-modal__title">詳細検索</h2>
+            <h2 id="detail-search-modal-title" class="detail-search-modal__title">詳細検索</h2>
             <button type="button" class="detail-search-modal__close" data-close-modal aria-label="詳細検索を閉じる">&times;</button>
         </div>
 
@@ -222,13 +227,13 @@
                     </div>
                 </div>
 
-                {{-- 出勤頻度・時間帯 --}}
-                <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="出勤頻度・時間帯">
-                    <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="false">
+                {{-- 出勤頻度・時間帯（短いのでデフォルト開く） --}}
+                <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="出勤頻度・時間帯" data-open="true">
+                    <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="true">
                         <span>希望の出勤頻度・時間帯</span>
-                        <span class="detail-search-accordion__icon">+</span>
+                        <span class="detail-search-accordion__icon">−</span>
                     </button>
-                    <div class="detail-search-accordion__body" hidden>
+                    <div class="detail-search-accordion__body">
                         <div class="detail-search-subsection">
                             <span class="detail-search-subsection__label">出勤頻度</span>
                             <div class="detail-search-chips detail-search-chips--search">
@@ -258,13 +263,13 @@
                     </div>
                 </div>
 
-                {{-- 経験 --}}
-                <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="ナイトワーク経験">
-                    <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="false">
+                {{-- 経験（短いのでデフォルト開く） --}}
+                <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="ナイトワーク経験" data-open="true">
+                    <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="true">
                         <span>ナイトワーク経験</span>
-                        <span class="detail-search-accordion__icon">+</span>
+                        <span class="detail-search-accordion__icon">−</span>
                     </button>
-                    <div class="detail-search-accordion__body" hidden>
+                    <div class="detail-search-accordion__body">
                         <div class="detail-search-chips detail-search-chips--search">
                             @foreach($nightWorkExpLabels as $key => $label)
                                 @php $checked = ($nightWorkExp === '' && $key === 'any') || $nightWorkExp === $key; @endphp

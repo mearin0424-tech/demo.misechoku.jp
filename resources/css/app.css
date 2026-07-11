@@ -106,6 +106,19 @@
   --color-input-light-text: #1a1a1a;
   --color-input-light-sub:  #666666;
 
+  /* セマンティックカラー（状態表現：success / warn / danger）
+     アプリの主要アクセントとは別軸で、状態通知や書類承認・失敗などに使う。
+     暗背景 (#050505) 上で contrast >=4.5:1 を満たす。テーマスイッチには追従しない。 */
+  --color-success:      #6ee7b7;    /* 承認済み / 成功 バッジ・アイコン */
+  --color-success-bg:   rgba(110, 231, 183, 0.14);
+  --color-success-line: rgba(110, 231, 183, 0.40);
+  --color-warn:         #fcd34d;    /* 保留 / 注意 */
+  --color-warn-bg:      rgba(252, 211, 77, 0.14);
+  --color-warn-line:    rgba(252, 211, 77, 0.40);
+  --color-danger:       #fca5a5;    /* 差戻し / エラー */
+  --color-danger-bg:    rgba(248, 113, 113, 0.14);
+  --color-danger-line:  rgba(248, 113, 113, 0.40);
+
   /* タイポグラフィ */
   --font-display: "Montserrat", "Noto Sans JP", sans-serif;
   --font-sans:    "Noto Sans JP", sans-serif;

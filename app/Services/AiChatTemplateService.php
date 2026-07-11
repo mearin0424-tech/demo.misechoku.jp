@@ -60,10 +60,9 @@ class AiChatTemplateService
             return $this->fallbackGreeting();
         }
 
-        $intent = $this->extractIntent($userMessage);
-        $shops = $this->pickShops($intent, 3);
+        $grounded = $this->buildGroundedContext($userMessage);
 
-        if ($shops === []) {
+        if ($grounded['recommendations'] === []) {
             return [
                 'reply' => $this->randomPick([
                     'うーん、その条件にピッタリのお店が見つからなかった💦 もう少し条件を緩めて聞いてみてくれる？',
@@ -81,10 +80,54 @@ class AiChatTemplateService
         }
 
         return [
-            'reply'           => $this->pickReplyTemplate($intent, count($shops)),
-            'recommendations' => array_map(fn ($s) => $this->toRecommendation($s, $intent), $shops),
-            'quick_replies'   => $this->pickQuickReplies($intent),
+            'reply'           => $this->pickReplyTemplate($grounded['intent'], count($grounded['recommendations'])),
+            'recommendations' => $grounded['recommendations'],
+            'quick_replies'   => $this->pickQuickReplies($grounded['intent']),
         ];
+    }
+
+    /**
+     * ユーザー発話から intent と候補店舗を作り、外部（LLM 連携等）から利用できるように返す。
+     *
+     * @return array{
+     *   intent: array<string,mixed>,
+     *   recommendations: array<int, array<string,mixed>>
+     * }
+     */
+    public function buildGroundedContext(string $userMessage, int $limit = 3): array
+    {
+        $userMessage = trim($userMessage);
+        if ($userMessage === '') {
+            return ['intent' => $this->extractIntent(''), 'recommendations' => []];
+        }
+        $intent = $this->extractIntent($userMessage);
+        $shops  = $this->pickShops($intent, $limit);
+
+        return [
+            'intent'          => $intent,
+            'recommendations' => array_map(fn ($s) => $this->toRecommendation($s, $intent), $shops),
+        ];
+    }
+
+    /**
+     * intent + 件数からテンプレのオープニング/クロージング文を生成（LLM 失敗時の fallback）。
+     *
+     * @param array<string,mixed> $intent
+     */
+    public function buildTemplateReply(array $intent, int $count): string
+    {
+        return $this->pickReplyTemplate($intent, $count);
+    }
+
+    /**
+     * intent からクイックリプライ候補を返す（外部からも利用できるように公開）。
+     *
+     * @param array<string,mixed> $intent
+     * @return array<int, string>
+     */
+    public function buildQuickReplies(array $intent): array
+    {
+        return $this->pickQuickReplies($intent);
     }
 
     // =================================================================
