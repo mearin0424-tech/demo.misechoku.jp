@@ -35,6 +35,8 @@ class InjectHeaderBadges
         'favorite.like_received'     => ['icon' => 'fa-heart',            'color' => 'pink',    'label' => 'いいね'],
         'favorite.keep_received'     => ['icon' => 'fa-bookmark',         'color' => 'gold',    'label' => 'キープ'],
         'review.posted'              => ['icon' => 'fa-star',             'color' => 'gold',    'label' => 'レビュー'],
+        'document.approved'          => ['icon' => 'fa-id-card',          'color' => 'success', 'label' => '書類審査'],
+        'document.rejected'          => ['icon' => 'fa-id-card',          'color' => 'muted',   'label' => '書類審査'],
         'billing.request'            => ['icon' => 'fa-file-invoice-yen', 'color' => 'accent',  'label' => '請求'],
         'billing.paid'               => ['icon' => 'fa-yen-sign',         'color' => 'success', 'label' => '入金'],
         'billing.transferred'        => ['icon' => 'fa-money-bill-transfer', 'color' => 'success', 'label' => '振込'],

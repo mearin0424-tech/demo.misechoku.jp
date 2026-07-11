@@ -414,6 +414,14 @@ class DocumentReviewService
         ]);
 
         $this->syncCastLegacyStatus($document->cast_id);
+
+        // 審査結果を本人に通知（インボックス + Push）
+        $this->notifyCastDocumentResult(
+            (string) $document->cast_id,
+            'document.approved',
+            '本人確認書類が承認されました',
+            '提出いただいた本人確認書類の審査が完了しました。全ての機能をご利用いただけます。'
+        );
     }
 
     public function rejectCastDocument(int $documentId, string $reason): void
@@ -426,6 +434,14 @@ class DocumentReviewService
         ]);
 
         $this->syncCastLegacyStatus($document->cast_id);
+
+        // 差戻し理由つきで本人に通知
+        $this->notifyCastDocumentResult(
+            (string) $document->cast_id,
+            'document.rejected',
+            '本人確認書類が差戻しされました',
+            '差戻し理由: ' . mb_strimwidth($reason, 0, 200, '…') . "\nお手数ですが再提出をお願いします。"
+        );
     }
 
     public function approveShopDocument(int $documentId): void
@@ -438,6 +454,13 @@ class DocumentReviewService
         ]);
 
         $this->syncShopLegacyStatus($document->shop_id);
+
+        $this->notifyShopDocumentResult(
+            (string) $document->shop_id,
+            'document.approved',
+            '提出書類が承認されました',
+            '提出いただいた書類の審査が完了しました。全ての書類が承認されると求人を公開できます。'
+        );
     }
 
     public function rejectShopDocument(int $documentId, string $reason): void
@@ -450,6 +473,51 @@ class DocumentReviewService
         ]);
 
         $this->syncShopLegacyStatus($document->shop_id);
+
+        $this->notifyShopDocumentResult(
+            (string) $document->shop_id,
+            'document.rejected',
+            '提出書類が差戻しされました',
+            '差戻し理由: ' . mb_strimwidth($reason, 0, 200, '…') . "\nお手数ですが再提出をお願いします。"
+        );
+    }
+
+    /**
+     * 書類審査結果のキャスト向け通知。通知失敗は審査処理を巻き戻さない。
+     */
+    private function notifyCastDocumentResult(string $castId, string $type, string $title, string $body): void
+    {
+        try {
+            app(NotificationService::class)->createForCast(
+                $castId,
+                $type,
+                $title,
+                $body,
+                route('cast.mypage.identity'),
+                ['cast_id' => $castId]
+            );
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Cast document notify failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * 書類審査結果の店舗向け通知（マネージャー全員）。
+     */
+    private function notifyShopDocumentResult(string $shopId, string $type, string $title, string $body): void
+    {
+        try {
+            app(NotificationService::class)->createForShop(
+                $shopId,
+                $type,
+                $title,
+                $body,
+                route('shop.mypage.index'),
+                ['shop_id' => $shopId]
+            );
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Shop document notify failed: ' . $e->getMessage());
+        }
     }
 
     public function getDashboardTasks(): array

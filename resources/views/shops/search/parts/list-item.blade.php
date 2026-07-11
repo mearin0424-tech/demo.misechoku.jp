@@ -62,7 +62,7 @@
         <button type="button" class="tl-row__action-btn tl-row__action-btn--keep"
                 data-fav-toggle data-action="keep" data-item-type="cast" data-item-id="{{ $item['id'] }}"
                 aria-label="キープ" aria-pressed="{{ $isKeeping ? 'true' : 'false' }}">
-            <i class="fas fa-star" aria-hidden="true"></i>
+            <i class="fas fa-bookmark" aria-hidden="true"></i>
             @if($keepCount > 0)<span class="tl-row__action-count">{{ $keepCount > 99 ? '99+' : $keepCount }}</span>@endif
         </button>
         <button type="button" class="tl-row__action-btn tl-row__action-btn--like"

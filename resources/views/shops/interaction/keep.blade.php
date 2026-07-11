@@ -33,7 +33,7 @@
         <button type="button" class="tl-row__action-btn tl-row__action-btn--keep"
                 data-fav-toggle data-action="keep" data-item-type="{{ $itemType }}" data-item-id="{{ $c['id'] }}"
                 aria-label="キープを解除" aria-pressed="true">
-            <i class="fas fa-star" aria-hidden="true"></i>
+            <i class="fas fa-bookmark" aria-hidden="true"></i>
         </button>
     </div>
 </li>

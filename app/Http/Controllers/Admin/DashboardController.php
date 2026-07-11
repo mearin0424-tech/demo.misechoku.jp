@@ -205,6 +205,8 @@ class DashboardController extends Controller
             ['id' => 'deposit', 'title' => '入金確認', 'count' => collect($tasks)->where('cat_id', 'deposit')->count()],
             ['id' => 'transfer', 'title' => '振込実行', 'count' => collect($tasks)->where('cat_id', 'transfer')->count()],
             ['id' => 'error', 'title' => '振込エラー', 'count' => collect($tasks)->where('cat_id', 'error')->count()],
+            // 保持期間ポリシー超過の書類削除候補（DocumentReviewService::getPurgeCandidateTasks）
+            ['id' => 'purge', 'title' => '削除候補', 'count' => collect($tasks)->where('cat_id', 'purge')->count()],
         ];
 
         $dashboardUpdatedAt = now()->format('Y/m/d H:i');

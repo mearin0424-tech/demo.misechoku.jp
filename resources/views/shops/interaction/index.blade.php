@@ -36,7 +36,7 @@
     <div id="pane-keep" class="tab-pane active">
         @if (empty($keepCasts))
             <div class="no-data-wrapper">
-                <i class="fas fa-star text-5xl mb-3 block" style="color: rgba(196,181,253,0.35); filter: drop-shadow(0 4px 8px rgba(168,85,247,0.15));"></i>
+                <i class="fas fa-bookmark text-5xl mb-3 block" style="color: rgba(196,181,253,0.35); filter: drop-shadow(0 4px 8px rgba(168,85,247,0.15));"></i>
                 <p class="no-data-msg">{{ $emptyKeepMsg }}</p>
             </div>
         @else

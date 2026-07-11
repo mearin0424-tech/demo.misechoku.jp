@@ -84,28 +84,10 @@ class FavoriteController extends Controller
         $now = now();
         $isActive = false;
 
-        if ($action === 'like') {
-            // LIKE は 1 日 1 回まで（連打抑制）。同方向の本日 LIKE が既にあれば加えない。
-            $hasLikedToday = DB::table('favorites')
-                ->where('action_type', Favorite::ACTION_LIKE)
-                ->where('sender_type', $senderType)
-                ->whereDate('created_at', $now->toDateString())
-                ->when(!empty($castId), fn ($q) => $q->where('cast_id', $castId))
-                ->when(!empty($shopId), fn ($q) => $q->where('shop_id', $shopId))
-                ->exists();
-
-            if (!$hasLikedToday) {
-                DB::table('favorites')->insert([
-                    'cast_id' => $castId,
-                    'shop_id' => $shopId,
-                    'action_type' => Favorite::ACTION_LIKE,
-                    'sender_type' => $senderType,
-                    'created_at' => $now,
-                ]);
-                $this->notifyLikeReceived($senderType, (string) ($castId ?? ''), (string) ($shopId ?? ''));
-            }
-            $isActive = true;
-        } elseif ($existing) {
+        // LIKE / KEEP とも純粋なトグル。
+        //   既存行あり → 削除（取り消し）
+        //   既存行なし → 追加（LIKE は通知付き。ただし同ペアへの通知は 1 日 1 回まで）
+        if ($existing) {
             DB::table('favorites')->where('id', $existing->id)->delete();
             $isActive = false;
         } else {
@@ -117,6 +99,10 @@ class FavoriteController extends Controller
                 'created_at' => $now,
             ]);
             $isActive = true;
+
+            if ($action === 'like' && !$this->hasNotifiedLikeToday((string) ($castId ?? ''), (string) ($shopId ?? ''))) {
+                $this->notifyLikeReceived($senderType, (string) ($castId ?? ''), (string) ($shopId ?? ''));
+            }
         }
 
         // 表示用の最新いいね数。
@@ -143,6 +129,28 @@ class FavoriteController extends Controller
             'is_active' => $isActive,
             'like_count' => $likeCount,
         ]);
+    }
+
+    /**
+     * 同ペア（cast × shop）への LIKE 通知を本日すでに送っているか。
+     * トグル連打による通知スパムを防ぐ（favorites 行は消えるため notifications 側で判定）。
+     */
+    private function hasNotifiedLikeToday(string $castId, string $shopId): bool
+    {
+        if ($castId === '' || $shopId === '') {
+            return false;
+        }
+        try {
+            return DB::table('notifications')
+                ->where('type', 'favorite.like_received')
+                ->whereDate('created_at', now()->toDateString())
+                ->where('payload->cast_id', $castId)
+                ->where('payload->shop_id', $shopId)
+                ->exists();
+        } catch (\Throwable $e) {
+            // notifications 未整備環境では常に未通知扱い
+            return false;
+        }
     }
 
     /**

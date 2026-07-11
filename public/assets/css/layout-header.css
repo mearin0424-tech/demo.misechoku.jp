@@ -86,24 +86,22 @@ body.is-image-editing #global-header {
 }
 
 .header-center-title {
-    /* position: absolute で常にヘッダーのど真ん中。
-       左右の幅は計 ~130px ずつ確保し、タイトルが入り込まないようにする。 */
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    /* 旧: position absolute の画面中央固定。右アイコン群 (~134px) が予約幅 130px を
+       超えるため、長いタイトルがアイコンに被っていた。
+       新: 通常のフレックスアイテムとして左右の「間」に配置。flex レイアウトが
+       スペースを保証するため、タイトルとアイコンは構造的に重ならない。 */
+    position: static;
+    transform: none;
+    flex: 1 1 auto;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    /* 両側に 130px ずつ "アイコン用余白" を確保（右 3 つのアイコン分 + 余裕）。
-       これより長いタイトルは省略表示される。 */
-    max-width: calc(100% - 260px);
     min-width: 0;
     overflow: hidden;
-    /* タッチ対象として右側のアイコンに必ず触れるよう、タイトル領域は pointer-events 透過 */
+    padding: 0 8px;
+    /* タイトル領域はタップ対象にしない（誤タップ防止） */
     pointer-events: none;
-    z-index: 1;
 }
 
 /* ヘッダタイトル：ゴールド・グラデーション */
@@ -111,17 +109,28 @@ body.is-image-editing #global-header {
     color: var(--gold);
     font-weight: 600;
     text-align: center;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.16em;
     font-size: 0.95rem;
     line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    max-width: 100%;
     background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 45%, var(--gold-deep) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: 0 0 14px rgba(168, 85, 247, 0.18);
+}
+
+/* 幅が狭いほど字間・サイズを詰め、省略される前にできるだけ収める */
+@media (max-width: 480px) {
+    .header-title-main { letter-spacing: 0.10em; font-size: 0.88rem; }
+    .header-title-main.header-title-serif { letter-spacing: 0.12em; }
+}
+@media (max-width: 360px) {
+    .header-title-main { letter-spacing: 0.06em; font-size: 0.82rem; }
+    .header-title-main.header-title-serif { letter-spacing: 0.08em; }
 }
 
 .header-talk-identity {
@@ -160,7 +169,7 @@ body.is-image-editing #global-header {
 .header-title-main.header-title-serif {
     font-family: var(--font-serif);
     font-weight: 600;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
 }
 

@@ -340,10 +340,18 @@ function initActionButtons() {
                     this.style.transform = 'scale(1.2)';
                     setTimeout(() => this.style.transform = 'scale(1)', 200);
                 })
-                .catch(() => {
-                    // エラー時もエフェクトは動かす（UX優先、実際の保存はサーバーログで確認）
-                    this.style.transform = 'scale(1.2)';
-                    setTimeout(() => this.style.transform = 'scale(1)', 200);
+                .catch((res) => {
+                    // 失敗を握りつぶさず、原因別にフィードバックする
+                    if (res && res.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                    if (res && res.status === 419) {
+                        (window.appToast || window.alert)('セッションの有効期限が切れました。再読み込みします…');
+                        setTimeout(() => window.location.reload(), 900);
+                        return;
+                    }
+                    (window.appToast || window.alert)('通信エラーで保存できませんでした。もう一度お試しください。', 'error');
                 });
         });
     });

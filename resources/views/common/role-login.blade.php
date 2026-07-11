@@ -39,9 +39,16 @@
 
                 <div class="role-login-card-body">
                     <div class="role-login-role-switch">
-                        <a href="{{ route('login.demo') }}" class="role-login-role {{ $role === 'cast' ? 'is-active' : '' }}">キャスト</a>
-                        <a href="{{ route('login.demo') }}" class="role-login-role {{ $role === 'shop' ? 'is-active' : '' }}">店舗</a>
-                        <a href="{{ route('login.demo') }}" class="role-login-role">運営</a>
+                        <a href="{{ route('login.demo') }}" class="role-login-role {{ $role === 'cast' ? 'is-active' : '' }}">
+                            <i class="fas fa-user role-login-role__icon" aria-hidden="true"></i>
+                            <span class="role-login-role__label">キャスト</span>
+                            <span class="role-login-role__sub">お仕事を探す</span>
+                        </a>
+                        <a href="{{ route('login.demo') }}" class="role-login-role {{ $role === 'shop' ? 'is-active' : '' }}">
+                            <i class="fas fa-store role-login-role__icon" aria-hidden="true"></i>
+                            <span class="role-login-role__label">店舗</span>
+                            <span class="role-login-role__sub">キャストを探す</span>
+                        </a>
                     </div>
 
                     <div class="role-login-copy">
@@ -54,18 +61,21 @@
                         <label class="role-login-field">
                             <span>メールアドレス</span>
                             <div class="role-login-input-wrap">
-                                <input type="email" name="email" value="{{ old('email') }}" placeholder="example@misechoku.jp">
+                                <i class="fas fa-envelope role-login-input-icon" aria-hidden="true"></i>
+                                <input type="email" name="email" value="{{ old('email') }}" placeholder="example@misechoku.jp" autocomplete="email">
                             </div>
                         </label>
 
                         <label class="role-login-field">
                             <span>パスワード</span>
                             <div class="role-login-input-wrap">
-                                <input type="password" name="password" placeholder="••••••••">
+                                <i class="fas fa-lock role-login-input-icon" aria-hidden="true"></i>
+                                <input type="password" name="password" placeholder="••••••••" autocomplete="current-password">
                             </div>
                         </label>
 
                         <button type="submit" class="role-login-submit">
+                            <i class="fas fa-right-to-bracket" aria-hidden="true"></i>
                             <span>ログイン</span>
                         </button>
                     </form>
@@ -287,34 +297,69 @@
 
         .role-login-role-switch {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 18px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
         .role-login-role {
-            display: inline-flex;
+            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 44px;
+            gap: 3px;
+            min-height: 84px;
+            padding: 12px 8px;
             border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 14px;
+            border-radius: 18px;
             background: rgba(255, 255, 255, 0.04);
             color: rgba(255, 255, 255, 0.75);
             text-decoration: none;
-            font-size: 0.82rem;
+            font-size: 0.86rem;
             font-weight: 700;
-            transition: background 0.2s, border-color 0.2s, color 0.2s;
+            transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s, box-shadow 0.2s;
         }
         .role-login-role:hover {
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.07);
             color: #ffffff;
+            transform: translateY(-1px);
+        }
+        .role-login-role:focus-visible {
+            outline: 2px solid var(--accent-text, #f0a6c4);
+            outline-offset: 2px;
+        }
+
+        .role-login-role__icon {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.45);
+            margin-bottom: 2px;
+            transition: color 0.2s, transform 0.2s;
+        }
+        .role-login-role__label {
+            font-size: 0.9rem;
+            letter-spacing: 0.06em;
+        }
+        .role-login-role__sub {
+            font-size: 0.64rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.40);
+            letter-spacing: 0.04em;
         }
 
         .role-login-role.is-active {
-            border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.55);
+            border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.60);
+            color: #fff;
+            background:
+                radial-gradient(100% 100% at 50% 0%, rgba(var(--accent-rgb, 214, 112, 162), 0.22), transparent 75%),
+                rgba(var(--accent-rgb, 214, 112, 162), 0.08);
+            box-shadow: 0 8px 20px rgba(var(--accent-rgb, 214, 112, 162), 0.18);
+        }
+        .role-login-role.is-active .role-login-role__icon {
             color: var(--accent-text, #f0a6c4);
-            background: rgba(var(--accent-rgb, 214, 112, 162), 0.10);
+            transform: scale(1.1);
+        }
+        .role-login-role.is-active .role-login-role__sub {
+            color: rgba(var(--accent-rgb, 214, 112, 162), 0.85);
         }
 
         .role-login-copy {
@@ -347,10 +392,24 @@
             position: relative;
         }
 
+        .role-login-input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.88rem;
+            color: rgba(255, 255, 255, 0.35);
+            pointer-events: none;
+            transition: color 0.2s;
+        }
+        .role-login-input-wrap:focus-within .role-login-input-icon {
+            color: var(--accent-text, #f0a6c4);
+        }
+
         .role-login-input-wrap input {
             width: 100%;
             min-height: 54px;
-            padding: 0 16px;
+            padding: 0 16px 0 44px;
             border-radius: 16px;
             border: 1px solid rgba(255, 255, 255, 0.10);
             background: rgba(0, 0, 0, 0.35);
@@ -440,9 +499,8 @@
                 padding: 20px 18px;
             }
 
-            .role-login-role-switch {
-                grid-template-columns: 1fr;
-            }
+            /* 2 択なのでモバイルでも横並びを維持（縦積みにしない） */
+            .role-login-role { min-height: 76px; }
         }
 
         @media (max-width: 360px) {

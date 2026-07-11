@@ -40,6 +40,19 @@ class VerificationController extends Controller
     }
 
     /**
+     * 一覧に戻る際、直前のフィルタ状態（focus / cast_status 等のクエリ）を保持する。
+     * リファラが verification 画面ならそこへ、そうでなければ素の一覧へ。
+     */
+    private function backToIndex(string $flash)
+    {
+        $referer = (string) request()->headers->get('referer', '');
+        if ($referer !== '' && str_contains($referer, '/admin/verification')) {
+            return redirect($referer)->with('status', $flash);
+        }
+        return redirect()->route('admin.verification.index')->with('status', $flash);
+    }
+
+    /**
      * キャスト本人確認の承認
      */
     public function approveCast(Request $request, int $document)
@@ -47,9 +60,7 @@ class VerificationController extends Controller
         $this->documentReviewService->approveCastDocument($document);
         $this->opLog->record('verification.cast.approve', 'cast_identity_document', (string) $document, '本人確認書類を承認');
 
-        return redirect()
-            ->route('admin.verification.index')
-            ->with('status', 'キャストの本人確認書類を承認しました。');
+        return $this->backToIndex('キャストの本人確認書類を承認しました。本人へ通知済みです。');
     }
 
     public function rejectCast(Request $request, int $document)
@@ -63,9 +74,7 @@ class VerificationController extends Controller
             'ng_reason' => (string) $data['ng_reason'],
         ]);
 
-        return redirect()
-            ->route('admin.verification.index')
-            ->with('status', 'キャストの本人確認書類を却下しました。');
+        return $this->backToIndex('キャストの本人確認書類を却下しました。差戻し理由を本人へ通知済みです。');
     }
 
     /**
@@ -76,9 +85,7 @@ class VerificationController extends Controller
         $this->documentReviewService->approveShopDocument($document);
         $this->opLog->record('verification.shop.approve', 'shop_license_document', (string) $document, '店舗書類を承認');
 
-        return redirect()
-            ->route('admin.verification.index')
-            ->with('status', '店舗提出書類を承認しました。');
+        return $this->backToIndex('店舗提出書類を承認しました。店舗へ通知済みです。');
     }
 
     public function rejectShopDocument(Request $request, int $document)
@@ -92,9 +99,7 @@ class VerificationController extends Controller
             'ng_reason' => (string) $data['ng_reason'],
         ]);
 
-        return redirect()
-            ->route('admin.verification.index')
-            ->with('status', '店舗提出書類を却下しました。');
+        return $this->backToIndex('店舗提出書類を却下しました。差戻し理由を店舗へ通知済みです。');
     }
 
     /**
@@ -106,9 +111,7 @@ class VerificationController extends Controller
         $this->documentReviewService->purgeCastDocument($document);
         $this->opLog->record('verification.cast.purge', 'cast_identity_document', (string) $document, '本人確認書類を完全削除');
 
-        return redirect()
-            ->route('admin.verification.index')
-            ->with('status', 'キャストの本人確認書類を完全削除しました。');
+        return $this->backToIndex('キャストの本人確認書類を完全削除しました。');
     }
 
     /**
@@ -119,9 +122,7 @@ class VerificationController extends Controller
         $this->documentReviewService->purgeShopDocument($document);
         $this->opLog->record('verification.shop.purge', 'shop_license_document', (string) $document, '店舗書類を完全削除');
 
-        return redirect()
-            ->route('admin.verification.index')
-            ->with('status', '店舗提出書類を完全削除しました。');
+        return $this->backToIndex('店舗提出書類を完全削除しました。');
     }
 
     /**

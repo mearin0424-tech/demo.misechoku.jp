@@ -39,7 +39,14 @@
             });
 
             if (res.status === 401) {
-                window.location.href = '/login.demo';
+                // 未ログイン → ログイン画面へ（route('login.demo') = /login）
+                window.location.href = '/login';
+                return;
+            }
+            if (res.status === 419) {
+                // CSRF トークン失効（長時間放置後など）→ リロードで再取得
+                showToast('セッションの有効期限が切れました。再読み込みします…');
+                setTimeout(function () { window.location.reload(); }, 900);
                 return;
             }
             if (res.status === 422) {

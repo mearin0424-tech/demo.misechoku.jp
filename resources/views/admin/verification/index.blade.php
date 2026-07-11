@@ -203,13 +203,19 @@
                                         @endif
                                     </div>
                                 </td>
+                                @php
+                                    $isDocExpired = !empty($document['expired_at'])
+                                        && \Illuminate\Support\Carbon::parse((string) $document['expired_at'])->isPast();
+                                @endphp
                                 <td>
                                     @if(!empty($document['category_label']) && $document['category_label'] !== '—')
                                         <div class="text-xs text-muted">{{ $document['category_label'] }}</div>
                                     @endif
                                     {{ $document['type_label'] }}
                                     @if(!empty($document['expired_at_label']))
-                                        <div class="text-xs text-muted">有効期限: {{ $document['expired_at_label'] }}</div>
+                                        <div class="text-xs {{ $isDocExpired ? '' : 'text-muted' }}" @if($isDocExpired) style="color:#b91c1c; font-weight:700;" @endif>
+                                            @if($isDocExpired)<i class="fas fa-triangle-exclamation"></i> 期限切れ: @else 有効期限: @endif{{ $document['expired_at_label'] }}
+                                        </div>
                                     @endif
                                 </td>
                                 <td>
@@ -282,7 +288,9 @@
                                 <td class="text-sm text-muted">{{ $document['updated_at_label'] ?: '-' }}</td>
                                 <td style="min-width:200px;">
                                     @if($document['status_code'] !== 2)
-                                        <form method="POST" action="{{ route('admin.verification.cast.approve', ['document' => $document['id']]) }}" style="display:inline-block; margin-bottom:6px;">
+                                        <form method="POST" action="{{ route('admin.verification.cast.approve', ['document' => $document['id']]) }}"
+                                              style="display:inline-block; margin-bottom:6px;"
+                                              onsubmit="return confirm('本人確認書類を承認します。\n対象: {{ $document['target_name'] }} / {{ $document['type_label'] }}{{ $isDocExpired ? '\n\n⚠ この書類は有効期限切れです。本当に承認しますか？' : '' }}\n\n承認するとキャスト本人に通知されます。');">
                                             @csrf
                                             <button type="submit" class="btn-action manage">承認</button>
                                         </form>
@@ -471,7 +479,10 @@
                                 <td class="text-sm text-muted">{{ $document['updated_at_label'] ?: '-' }}</td>
                                 <td style="min-width:200px;">
                                     @if($document['status_code'] !== 2)
-                                        <form method="POST" action="{{ route('admin.verification.shopdoc.approve', ['document' => $document['id']]) }}" style="display:inline-block; margin-bottom:6px;">
+                                        @php $isShopDocExpired = ($document['expiry_filter_key'] ?? '') === 'expired'; @endphp
+                                        <form method="POST" action="{{ route('admin.verification.shopdoc.approve', ['document' => $document['id']]) }}"
+                                              style="display:inline-block; margin-bottom:6px;"
+                                              onsubmit="return confirm('店舗提出書類を承認します。\n対象: {{ $document['target_name'] }} / {{ $document['type_label'] }}{{ $isShopDocExpired ? '\n\n⚠ この書類は有効期限切れです。本当に承認しますか？' : '' }}\n\n承認すると店舗に通知されます。');">
                                             @csrf
                                             <button type="submit" class="btn-action manage">承認</button>
                                         </form>

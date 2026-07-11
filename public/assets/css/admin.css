@@ -1390,6 +1390,10 @@ textarea.admin-input { resize: vertical; min-height: 96px; line-height: 1.6; }
 .task-category-badge.tone-deposit { color: var(--status-success-fg); background: var(--status-success-bg); border-color: var(--status-success-bd); }
 .task-category-badge.tone-transfer { color: var(--status-warning-fg); background: var(--status-warning-bg); border-color: var(--status-warning-bd); }
 .task-category-badge.tone-error { color: var(--status-danger-fg); background: var(--status-danger-bg); border-color: var(--status-danger-bd); }
+/* 削除候補（保持期間ポリシー超過の書類）: 個人情報関連なので danger 系で注意喚起 */
+.task-category-badge.tone-purge { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+/* 請求書発行（従来未定義でデフォルト灰色だったため追加） */
+.task-category-badge.tone-invoice { color: #92590a; background: #fffbeb; border-color: #fde68a; }
 .task-target { display: flex; align-items: center; gap: 10px; }
 .task-target-avatar {
     width: 28px; height: 28px;
