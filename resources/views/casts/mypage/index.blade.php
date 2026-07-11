@@ -62,23 +62,46 @@
         </div>
 
         {{-- ===== Name + Likes（横並び。ライクのラベル無し） ===== --}}
-        <div class="flex items-center justify-between gap-3 mb-5">
+        <div class="flex items-center justify-between gap-3 mb-4">
             <h1 class="app-title text-[24px] text-text-main leading-tight truncate min-w-0">{{ $displayName }}</h1>
-            <div class="flex items-center gap-1.5 shrink-0">
+            <div class="flex items-center gap-1.5 shrink-0" title="受け取ったいいね">
                 <x-ui.icon name="like" class="text-[18px] text-discovery-pink" />
                 <span class="font-bold text-[14px] text-text-main">{{ $likeCount }}</span>
             </div>
         </div>
 
-        {{-- 獲得ボーナス金合計バッジは「採用・入金管理」画面に移設 --}}
-
-        {{-- ===== Sub-page menu（採用・入金管理のみ。本人確認/プロフィール編集は DETAILS 内、レビューは採用・入金管理から店舗別導線へ） ===== --}}
-        <div class="flex flex-col gap-3">
-            <x-ui.menu-card icon="settings"
-                            sub="EMPLOYMENT & PAYMENT"
-                            title="採用・入金管理"
-                            href="{{ route('cast.mypage.management') }}"
-                            class="mypage-menu-card" />
+        {{-- ===== 管理メニュー：2カラムのコンパクトタイル（店舗 MyPage と同パターン） =====
+             要対応バッジはヘッダー共有の $todoList（InjectHeaderBadges）から算出。
+             プロフィール編集/本人確認を DETAILS の奥から一等地に引き上げ、
+             かつ高さを圧縮してギャラリーをファーストビューに近づける --}}
+        @php
+            $castTodos = collect($todoList ?? []);
+            $castMgmtCount = $castTodos->whereIn('key', ['cast.deposit_unconfirmed'])->count();
+            $identityNeedsAction = $castTodos->whereIn('key', ['cast.identity_unsubmitted', 'cast.identity_rejected'])->isNotEmpty();
+        @endphp
+        <div class="mypage-menu-grid mb-1">
+            <a href="{{ route('cast.profile.edit') }}" class="mypage-tile">
+                <i class="fas fa-user-pen mypage-tile__icon"></i>
+                <span class="mypage-tile__label">プロフィール編集<span class="mypage-tile__sub">PROFILE</span></span>
+            </a>
+            <a href="{{ route('cast.mypage.management') }}" class="mypage-tile">
+                <i class="fas fa-yen-sign mypage-tile__icon"></i>
+                <span class="mypage-tile__label">採用・入金管理<span class="mypage-tile__sub">PAYMENT</span></span>
+                @if($castMgmtCount > 0)
+                    <span class="mypage-tile__badge mypage-tile__badge--urgent" aria-label="要対応 {{ $castMgmtCount }}件">{{ $castMgmtCount }}</span>
+                @endif
+            </a>
+            <a href="{{ route('cast.mypage.identity') }}" class="mypage-tile">
+                <i class="fas fa-id-card mypage-tile__icon"></i>
+                <span class="mypage-tile__label">本人確認<span class="mypage-tile__sub">IDENTITY</span></span>
+                @if($identityNeedsAction)
+                    <span class="mypage-tile__badge mypage-tile__badge--urgent" aria-label="要対応">!</span>
+                @endif
+            </a>
+            <a href="{{ route('cast.mypage.reviews') }}" class="mypage-tile">
+                <i class="fas fa-star mypage-tile__icon"></i>
+                <span class="mypage-tile__label">レビュー<span class="mypage-tile__sub">REVIEWS</span></span>
+            </a>
         </div>
     </div>
 
@@ -199,16 +222,7 @@
                     </div>
                 </x-ui.card>
 
-                <x-ui.menu-card icon="check"
-                                sub="IDENTITY"
-                                title="本人確認"
-                                href="{{ route('cast.mypage.identity') }}"
-                                class="mypage-menu-card" />
-                <x-ui.menu-card icon="mypage"
-                                sub="PROFILE"
-                                title="プロフィールを編集"
-                                href="{{ route('cast.profile.edit') }}"
-                                class="mypage-menu-card" />
+                {{-- 本人確認 / プロフィール編集はページ上部の管理タイルに集約済み --}}
 
             </div>
         </div>
@@ -379,6 +393,7 @@ window.MYPAGE_GALLERY_CONFIG = {
 <link rel="stylesheet" href="{{ asset('assets/css/image-editor.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/cast_profile.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/mypage-tiles.css') }}">
 {{-- ギャラリーグリッドへの上書き（#gallery-list 配下のみ。色は触らずレイアウトだけ） --}}
 <style>
     #gallery-list {

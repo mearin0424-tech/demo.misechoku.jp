@@ -2836,14 +2836,42 @@ li.connection-item.tl-row a.tl-row__link {
     box-shadow: 0 0 8px rgba(214, 112, 162, 0.40);
 }
 
-/* アクション分の右側スペースを確保（リンク本体がアクションに被らない） */
+/* アクション分の右側スペースを確保（リンク本体がアクションに被らない）
+   検索行は「控えめ LIKE 1 ボタン」のみになったため余白を縮小 */
 .tl-row--has-actions .tl-row__link {
-    padding-right: 108px !important;    /* keep + like の 2 ボタン(各40px) + gap + 右端余白 */
+    padding-right: 60px !important;
 }
-/* KEEPS/LIKES など 1 ボタンだけの行は右余白を詰める */
+/* KEEPS/LIKES など 40px ボタン 1 個の行 */
 .tl-row--interaction.tl-row--has-actions .tl-row__link,
 .connection-list--interaction .tl-row--has-actions .tl-row__link {
     padding-right: 64px !important;
+}
+
+/* 控えめ LIKE（検索一覧用）：小さめ + 透過。押されている時だけピンクに */
+.tl-row__action-btn--subtle {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    flex: 0 0 32px;
+    font-size: 0.8rem;
+    background: transparent;
+    border-color: rgba(168, 85, 247, 0.20);
+    color: rgba(255, 255, 255, 0.42);
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+.tl-row__action-btn--subtle:hover {
+    background: rgba(214, 112, 162, 0.12);
+    color: rgba(255, 255, 255, 0.85);
+    border-color: rgba(214, 112, 162, 0.45);
+}
+.tl-row__action-btn--subtle.tl-row__action-btn--like[aria-pressed="true"] {
+    background: transparent;
+    color: var(--accent, #d670a2);
+    border-color: rgba(214, 112, 162, 0.55);
+    box-shadow: none;
 }
 
 @media (max-width: 380px) {
@@ -2855,8 +2883,16 @@ li.connection-item.tl-row a.tl-row__link {
         flex: 0 0 36px;
         font-size: 0.88rem;
     }
+    .tl-row__action-btn--subtle {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        min-height: 30px;
+        flex: 0 0 30px;
+        font-size: 0.74rem;
+    }
     .tl-row__actions { gap: 6px; right: 10px; }
-    .tl-row--has-actions .tl-row__link { padding-right: 96px !important; }
+    .tl-row--has-actions .tl-row__link { padding-right: 52px !important; }
     .tl-row--interaction.tl-row--has-actions .tl-row__link,
     .connection-list--interaction .tl-row--has-actions .tl-row__link {
         padding-right: 58px !important;

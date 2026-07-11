@@ -7,6 +7,7 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/recruitment.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/fav-actions.css') }}">
 <style>
     /* アプリの max-content-width に追従させ、追加の幅制限・余分なネストを掛けない */
     .recruit-ref-shell { width: 100%; max-width: 100%; margin: 0; min-height: auto; background: transparent; box-shadow: none; position: relative; }
@@ -1101,6 +1102,8 @@
 @endsection
 
 @push('scripts')
+{{-- KEEP アイコンボタン（data-fav-toggle）のトグル + トースト --}}
+<script src="{{ asset('assets/js/favorite-quick.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var usesJobTypes = @json($usesJobTypes ?? false);

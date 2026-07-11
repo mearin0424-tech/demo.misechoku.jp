@@ -13,19 +13,18 @@ use Illuminate\Support\Facades\Schema;
 class SearchController extends BaseSearchController
 {
     private const SORT_OPTIONS = [
-        'relevance' => 'おすすめ順（マッチ度が高い順）',
-        'hitokoto'  => 'ひとこと最終更新が新しい順',
-        'new'       => '新着登録順',
-        'name'      => '名前（あいうえお順）',
+        'hitokoto'  => 'ひとこと更新が新しい順',
+        'distance'  => '距離が近い順',
         'age_asc'   => '年齢が若い順',
-        'age_desc'  => '年齢が高い順',
+        'new'       => '新着登録順',
+        'relevance' => 'おすすめ（マッチ度が高い順）',
     ];
 
     public function index(Request $request)
     {
-        $sort = (string) $request->query('sort', 'relevance');
+        $sort = (string) $request->query('sort', 'hitokoto');
         if (!array_key_exists($sort, self::SORT_OPTIONS)) {
-            $sort = 'relevance';
+            $sort = 'hitokoto';
         }
 
         $items = $this->buildSearchItems($request, $sort);
@@ -271,7 +270,8 @@ class SearchController extends BaseSearchController
             ->values()
             ->all();
 
-        // 'relevance' ソートのみ PHP 側で再ソート。ほかは DB 側のORDER BYに従う。
+        // 'relevance' / 'distance' は PHP 側で再ソート（距離は SQL 後に計算されるため）。
+        // ほかは DB 側の ORDER BY に従う。
         if ($sort === 'relevance') {
             usort($items, function ($a, $b) {
                 if ($a['match_score'] !== $b['match_score']) {
@@ -279,6 +279,18 @@ class SearchController extends BaseSearchController
                 }
                 // 同点はひとこと更新の新しい順
                 return ($b['hitokoto_ts'] ?? 0) <=> ($a['hitokoto_ts'] ?? 0);
+            });
+        } elseif ($sort === 'distance') {
+            usort($items, function ($a, $b) {
+                $ka = $a['distance_km'] ?? null;
+                $kb = $b['distance_km'] ?? null;
+                // 距離不明（位置未登録）は最後尾。同士はひとこと更新の新しい順
+                if ($ka === null && $kb === null) {
+                    return ($b['hitokoto_ts'] ?? 0) <=> ($a['hitokoto_ts'] ?? 0);
+                }
+                if ($ka === null) return 1;
+                if ($kb === null) return -1;
+                return $ka <=> $kb;
             });
         }
 
@@ -319,17 +331,11 @@ class SearchController extends BaseSearchController
             case 'new':
                 $rows->orderByDesc('casts.created_at')->orderByDesc('casts.id');
                 break;
-            case 'name':
-                $rows->orderByRaw('COALESCE(cast_profiles.nickname, cast_profiles.name)')
-                    ->orderBy('casts.id');
-                break;
             case 'age_asc':
                 $rows->orderByDesc('cast_profiles.birthday')->orderByDesc('casts.id');
                 break;
-            case 'age_desc':
-                $rows->orderBy('cast_profiles.birthday')->orderByDesc('casts.id');
-                break;
             case 'hitokoto':
+            case 'distance': // 距離は SQL 後に PHP で再ソート。SQL 側は既定並びで取得
             default:
                 if ($castPostsHasUpdatedAt) {
                     // ひとこと最終更新が新しい順。未投稿のキャストは最後に回す。

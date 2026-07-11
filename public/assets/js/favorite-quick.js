@@ -61,16 +61,13 @@
 
             const data = await res.json();
             const isActive = !!data.is_active;
-            const wasActive = btn.getAttribute('aria-pressed') === 'true';
             btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
 
-            // 受け手側のカウント表示があれば、増減を反映（LIKE は API から like_count を貰える）
-            if (typeof data.like_count === 'number' && payload.action === 'like') {
-                updateCount(btn, data.like_count);
-            } else if (wasActive !== isActive) {
-                // KEEP は API から count を返さないので推測で増減
-                bumpCount(btn, isActive ? 1 : -1);
-            }
+            // カウントバッジは検索リストでは表示しない方針
+            //（KEEP 数は本人以外に非公開・LIKE 数はスワイプ/プロフィール画面のみ）。
+            // 既存のバッジ要素が残っていれば掃除だけする。
+            const staleCount = btn.querySelector('.tl-row__action-count');
+            if (staleCount) staleCount.remove();
 
             // interaction 一覧では「解除した」=「行が消える」UX に寄せる
             if (!isActive) {
@@ -106,31 +103,6 @@
         } finally {
             btn.classList.remove('is-busy');
         }
-    }
-
-    function getCountEl(btn) {
-        return btn.querySelector('.tl-row__action-count');
-    }
-    function setCountText(el, n) {
-        el.textContent = n > 99 ? '99+' : String(n);
-    }
-    function updateCount(btn, n) {
-        let el = getCountEl(btn);
-        if (n > 0) {
-            if (!el) {
-                el = document.createElement('span');
-                el.className = 'tl-row__action-count';
-                btn.appendChild(el);
-            }
-            setCountText(el, n);
-        } else if (el) {
-            el.remove();
-        }
-    }
-    function bumpCount(btn, delta) {
-        const el = getCountEl(btn);
-        const current = el ? parseInt(el.textContent, 10) || 0 : 0;
-        updateCount(btn, Math.max(0, current + delta));
     }
 
     let toastTimer = null;

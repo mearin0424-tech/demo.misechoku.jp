@@ -1,0 +1,103 @@
+/* =====================================================================
+   MyPage 管理メニュー：コンパクトタイル（店舗 / キャスト共通）
+   - 2 カラムグリッドで縦占有を最小化し、ギャラリーを上に引き上げる
+   - data 由来の「要対応」ドット/カウントバッジ対応
+   ===================================================================== */
+
+.mypage-menu-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.mypage-tile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--color-line, #2a2a2a);
+    background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.012));
+    color: var(--color-text-main, #f5f5f5);
+    text-decoration: none;
+    font: inherit;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.12s ease;
+    min-width: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+.mypage-tile:hover {
+    border-color: rgba(168, 85, 247, 0.45);
+    background: rgba(168, 85, 247, 0.07);
+}
+.mypage-tile:active { transform: scale(0.98); }
+.mypage-tile:focus-visible {
+    outline: 2px solid var(--gold-light, #c4b5fd);
+    outline-offset: 2px;
+}
+.mypage-tile--wide { grid-column: 1 / -1; }
+
+.mypage-tile__icon {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.82rem;
+    background: rgba(168, 85, 247, 0.12);
+    color: var(--gold-light, #c4b5fd);
+    border: 1px solid rgba(168, 85, 247, 0.25);
+}
+
+.mypage-tile__label {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.mypage-tile__sub {
+    font-size: 0.56rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    color: rgba(196, 181, 253, 0.55);
+}
+
+/* 要対応バッジ：右上の小型カウント。urgent は赤系で警告 */
+.mypage-tile__badge {
+    position: absolute;
+    top: -6px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.62rem;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    background: linear-gradient(145deg, var(--gold-light, #f2d371), var(--gold-deep, #b98a2f));
+    color: #1a0f00;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(10, 10, 10, 0.9);
+    pointer-events: none;
+}
+.mypage-tile__badge--urgent {
+    background: linear-gradient(145deg, #fca5a5, #e15c5c);
+    color: #2a0808;
+}
+
+/* 後方互換：既存の shop-mypage-* クラス名でも同じ見た目に */
+.shop-mypage-menu-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.shop-mypage-tile { position: relative; }

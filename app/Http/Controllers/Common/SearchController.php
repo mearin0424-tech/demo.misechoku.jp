@@ -88,27 +88,21 @@ abstract class SearchController extends Controller
             }
         }
 
-        // 受け手側の合計 LIKE / KEEP 数（社会的証明）
-        // itemType=cast の場合：cast_id 毎の受信 LIKE 数（sender_type=shop の LIKE）
-        // itemType=shop の場合：shop_id 毎の受信 LIKE 数（sender_type=cast の LIKE）
+        // 受け手側の合計 LIKE 数（スワイプ / プロフィール画面で表示する）。
+        // KEEP 数はプライベートな保存リストのため、本人以外に一切出さない
+        // （表示だけでなくペイロードにも含めない）。
         $oppositeSender = $itemType === 'cast' ? Favorite::SENDER_SHOP : Favorite::SENDER_CAST;
         $countRows = DB::table('favorites')
-            ->select($favoriteColumn . ' as target_id', 'action_type', DB::raw('COUNT(*) as cnt'))
-            ->whereIn('action_type', [Favorite::ACTION_KEEP, Favorite::ACTION_LIKE])
+            ->select($favoriteColumn . ' as target_id', DB::raw('COUNT(*) as cnt'))
+            ->where('action_type', Favorite::ACTION_LIKE)
             ->where('sender_type', $oppositeSender)
             ->whereIn($favoriteColumn, $ids)
-            ->groupBy('target_id', 'action_type')
+            ->groupBy('target_id')
             ->get();
 
         $likeCounts = [];
-        $keepCounts = [];
         foreach ($countRows as $r) {
-            $targetId = (string) $r->target_id;
-            if ($r->action_type === Favorite::ACTION_LIKE) {
-                $likeCounts[$targetId] = (int) $r->cnt;
-            } elseif ($r->action_type === Favorite::ACTION_KEEP) {
-                $keepCounts[$targetId] = (int) $r->cnt;
-            }
+            $likeCounts[(string) $r->target_id] = (int) $r->cnt;
         }
 
         foreach ($items as &$it) {
@@ -118,9 +112,6 @@ abstract class SearchController extends Controller
             // 既存の like_count を上書きしない（home.js 側で別ソース提供しているケースに配慮）
             if (!isset($it['like_count'])) {
                 $it['like_count'] = $likeCounts[$id] ?? 0;
-            }
-            if (!isset($it['keep_count'])) {
-                $it['keep_count'] = $keepCounts[$id] ?? 0;
             }
         }
         unset($it);

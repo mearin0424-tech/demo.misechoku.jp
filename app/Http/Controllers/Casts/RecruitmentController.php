@@ -408,6 +408,20 @@ class RecruitmentController extends Controller
     private function buildRecruitViewData(array $data, int $id, bool $forCast, bool $isPublicShare, string $initialJobPanel = ''): array
     {
         $shopName = $data['shop']['name'] ?? $data['recruit']['store_name'] ?? '店舗';
+
+        // プロフィール画面に表示する受信 LIKE 数（キャスト → この店舗）
+        if (is_array($data['shop'] ?? null) && !isset($data['shop']['like_cnt'])) {
+            $likeShopId = 's' . str_pad((string) $id, 8, '0', STR_PAD_LEFT);
+            try {
+                $data['shop']['like_cnt'] = (int) DB::table('favorites')
+                    ->where('shop_id', $likeShopId)
+                    ->where('action_type', 'LIKE')
+                    ->where('sender_type', 'cast')
+                    ->count();
+            } catch (\Throwable) {
+                $data['shop']['like_cnt'] = 0;
+            }
+        }
         $shareUrl = route('share.recruit.show', ['id' => $id]);
         $shareText = trim((string) ($data['recruit']['catch_copy'] ?? ''));
         if ($shareText === '') {

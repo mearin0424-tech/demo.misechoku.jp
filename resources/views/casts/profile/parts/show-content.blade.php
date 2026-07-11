@@ -25,46 +25,43 @@
 
     <div class="px-5 pt-4 pb-6">
 
-        {{-- ===== アイコン + 紹介文（読み取り専用の吹き出し） ===== --}}
-        <div class="flex items-start gap-3 mb-5">
+        {{-- ===== ヘッダー：アイコン + 名前/年齢 + ライク数 + 場所 ===== --}}
+        <div class="flex items-start gap-3 mb-4">
             <div class="w-[84px] h-[84px] rounded-full overflow-hidden border-2 border-line-accent/40 shadow-card-3d bg-surface-from shrink-0">
                 <img src="{{ $iconImage }}" alt="" class="w-full h-full object-cover">
             </div>
-            <div class="flex-1 min-w-0">
-                <div class="relative bg-gradient-to-br from-surface-from to-base border border-line-accent/40 rounded-2xl shadow-card-3d p-3">
-                    <span class="absolute top-5 -left-[8px] w-0 h-0 border-y-[8px] border-y-transparent border-r-[10px] border-r-line-accent/40"></span>
-                    <span class="absolute top-5 -left-[6px] w-0 h-0 border-y-[7px] border-y-transparent border-r-[9px] border-r-surface-from"></span>
-                    <p class="text-[13px] leading-relaxed {{ $intro === '' ? 'text-text-sub' : 'text-text-main' }}">
-                        {{ $intro !== '' ? $introTrunc : 'プロフィール紹介文は未設定です' }}
-                    </p>
+            <div class="flex-1 min-w-0 flex flex-col gap-1.5">
+                <div class="flex items-center justify-between gap-2">
+                    <h1 class="app-title text-[22px] text-text-main leading-tight truncate min-w-0">
+                        {{ $castDisplayName }}@if($age)<span class="text-[16px] text-text-sub ml-1">({{ $age }})</span>@endif
+                    </h1>
+                    <div class="flex items-center gap-1 shrink-0" title="受け取ったいいね">
+                        <i class="fas fa-heart text-[15px] text-discovery-pink"></i>
+                        <span class="font-bold text-[13px] text-text-main">{{ number_format($likeCount) }}</span>
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        {{-- ===== 名前 + ライク（横並び） ===== --}}
-        <div class="flex items-center justify-between gap-3 mb-3">
-            <h1 class="app-title text-[24px] text-text-main leading-tight truncate min-w-0">
-                {{ $castDisplayName }}@if($age)<span class="text-[18px] text-text-sub ml-1">({{ $age }})</span>@endif
-            </h1>
-            <div class="flex items-center gap-1.5 shrink-0">
-                <i class="fas fa-heart text-[18px] text-discovery-pink"></i>
-                <span class="font-bold text-[14px] text-text-main">{{ number_format($likeCount) }}</span>
-            </div>
-        </div>
-
-        {{-- ===== 場所 / 距離 ===== --}}
-        @if($location !== '' || !empty($distanceLabel ?? null))
-            <div class="flex flex-wrap items-center gap-2 mb-5 text-[12px] text-text-sub">
-                <span class="inline-flex items-center gap-1">
-                    <i class="fas fa-map-marker-alt"></i>{{ $location !== '' ? $location : '位置情報未設定' }}
-                </span>
-                @if(!empty($distanceLabel ?? null))
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/10 border border-line-accent/30 text-accent-text">
-                        <i class="fas fa-route"></i> {{ $distanceLabel }}
-                    </span>
+                @if($location !== '' || !empty($distanceLabel ?? null))
+                    <div class="flex flex-wrap items-center gap-1.5 text-[12px] text-text-sub">
+                        <span class="inline-flex items-center gap-1">
+                            <i class="fas fa-map-marker-alt text-[10px]"></i>{{ $location !== '' ? $location : '位置情報未設定' }}
+                        </span>
+                        @if(!empty($distanceLabel ?? null))
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/10 border border-line-accent/30 text-accent-text text-[10.5px] font-bold">
+                                <i class="fas fa-route text-[9px]"></i> {{ $distanceLabel }}
+                            </span>
+                        @endif
+                    </div>
                 @endif
             </div>
-        @endif
+        </div>
+
+        {{-- ===== 自己PR（引用スタイルの callout — 店舗プロフィールと統一） ===== --}}
+        <div class="relative mb-4 rounded-2xl border border-line-accent/40 bg-gradient-to-br from-surface-from to-base shadow-card-3d px-4 py-3">
+            <i class="fas fa-quote-left absolute top-2 left-3 text-accent-text/50 text-[12px]" aria-hidden="true"></i>
+            <p class="pl-6 text-[13.5px] leading-relaxed {{ $intro === '' ? 'text-text-sub italic' : 'text-text-main' }}">
+                {{ $intro !== '' ? $introTrunc : '自己PRはまだ未設定です' }}
+            </p>
+        </div>
 
         {{-- ===== アクション ===== --}}
         @if($isOwn)
@@ -73,15 +70,29 @@
                 <i class="fas fa-pen"></i> プロフィール編集
             </a>
         @elseif($showInteractionActions)
-            <div class="flex gap-3 mb-3">
+            @php $favCastId = (string) ($cast['id'] ?? $cast['cast_id'] ?? ''); @endphp
+            <div class="fav-actions-row">
+                {{-- 最重要 CTA: トークでメッセージ --}}
+                @if($favCastId !== '' && Route::has('shop.talk.room'))
+                    <a href="{{ route('shop.talk.room', ['id' => $favCastId, 'talk_topic' => 'other', 'initiate' => 1]) }}"
+                       class="fav-actions-row__primary inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold bg-gradient-to-r from-accent-grad-from to-accent-grad-to text-on-accent-strong shadow-btn-3d active:translate-y-1.5 active:shadow-btn-3d-active transition-all duration-300">
+                        <i class="fas fa-comment-dots"></i> メッセージを送る
+                    </a>
+                @endif
+                {{-- アイコンオンリーの KEEP / LIKE（favorite-quick.js が処理） --}}
                 <button type="button" id="btn-profile-keep"
-                        aria-pressed="{{ ($cast['is_kept'] ?? false) ? 'true' : 'false' }}"
-                        class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-full font-bold border border-line-accent/40 bg-base/60 text-text-main transition-all duration-300 {{ ($cast['is_kept'] ?? false) ? 'bg-accent/15 text-accent-text border-accent' : '' }}">
-                    <i class="fas fa-bookmark"></i> <span>KEEP</span>
+                        class="fav-circle fav-circle--keep"
+                        data-fav-toggle data-action="keep" data-item-type="cast" data-item-id="{{ $favCastId }}"
+                        aria-label="キープ" aria-pressed="{{ ($cast['is_kept'] ?? false) ? 'true' : 'false' }}">
+                    <i class="fas fa-bookmark" aria-hidden="true"></i>
+                    <span class="fav-circle__cap">KEEP</span>
                 </button>
-                <button type="button" id="btn-profile-like" data-count="{{ $likeCount }}"
-                        class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-full font-bold bg-gradient-to-r from-accent-grad-from to-accent-grad-to text-on-accent-strong shadow-btn-3d active:translate-y-1.5 active:shadow-btn-3d-active transition-all duration-300">
-                    <i class="fas fa-heart"></i> <span>LIKE</span>
+                <button type="button" id="btn-profile-like"
+                        class="fav-circle fav-circle--like"
+                        data-fav-toggle data-action="like" data-item-type="cast" data-item-id="{{ $favCastId }}"
+                        aria-label="いいね" aria-pressed="{{ ($cast['is_liked'] ?? false) ? 'true' : 'false' }}">
+                    <i class="fas fa-heart" aria-hidden="true"></i>
+                    <span class="fav-circle__cap">LIKE</span>
                 </button>
             </div>
         @endif

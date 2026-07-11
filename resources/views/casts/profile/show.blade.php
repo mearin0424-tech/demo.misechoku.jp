@@ -7,6 +7,7 @@
 @section('canonical', $shareUrl ?? url()->current())
 
 @push('head-styles')
+<link rel="stylesheet" href="{{ asset('assets/css/fav-actions.css') }}">
 <style>
     /* ===== プロフィールギャラリー：Instagram 風 3 列（cast/mypage と同パターン） ===== */
     #profile-gallery-list {
@@ -117,6 +118,9 @@
 @endsection
 
 @push('scripts')
+{{-- KEEP / LIKE トグル（data-fav-toggle）+ トースト。従来の #btn-profile-keep/like は
+     ハンドラ未実装の死にボタンだったため、共通機構に載せ替え --}}
+<script src="{{ asset('assets/js/favorite-quick.js') }}"></script>
 <script>
 (function () {
     'use strict';

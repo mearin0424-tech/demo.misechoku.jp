@@ -15,12 +15,10 @@ use Illuminate\Support\Facades\Schema;
 class SearchController extends BaseSearchController
 {
     private const SORT_OPTIONS = [
-        'relevance' => 'おすすめ順（マッチ度が高い順）',
-        'hitokoto'  => 'ひとこと最終更新が新しい順',
+        'hitokoto'  => 'ひとこと更新が新しい順',
+        'distance'  => '距離が近い順',
         'new'       => '新着登録順',
-        'name'      => '店舗名（あいうえお順）',
-        'wage'      => '時給が高い順',
-        'reward'    => '採用報酬が高い順',
+        'relevance' => 'おすすめ（マッチ度が高い順）',
     ];
 
     public function __construct(private readonly AdminMasterService $adminMasterService)
@@ -35,9 +33,9 @@ class SearchController extends BaseSearchController
         $tab = in_array($tab, ['list', 'ai'], true) ? $tab : 'list';
         $activeTab = 'pane-' . $tab;
 
-        $sort = (string) $request->query('sort', 'relevance');
+        $sort = (string) $request->query('sort', 'hitokoto');
         if (!array_key_exists($sort, self::SORT_OPTIONS)) {
-            $sort = 'relevance';
+            $sort = 'hitokoto';
         }
 
         $items = $this->buildSearchItems($request, $sort);
@@ -286,13 +284,25 @@ class SearchController extends BaseSearchController
             }));
         }
 
-        // 'relevance' ソート: マッチスコア DESC、同点はひとこと更新の新しい順
+        // 'relevance' / 'distance' は PHP 側で再ソート（距離は SQL 後に計算されるため）
         if ($sort === 'relevance') {
             usort($items, function ($a, $b) {
                 if (($a['match_score'] ?? 0) !== ($b['match_score'] ?? 0)) {
                     return ($b['match_score'] ?? 0) <=> ($a['match_score'] ?? 0);
                 }
                 return ($b['hitokoto_ts'] ?? 0) <=> ($a['hitokoto_ts'] ?? 0);
+            });
+        } elseif ($sort === 'distance') {
+            usort($items, function ($a, $b) {
+                $ka = $a['distance_km'] ?? null;
+                $kb = $b['distance_km'] ?? null;
+                // 距離不明（位置未登録）は最後尾。同士はひとこと更新の新しい順
+                if ($ka === null && $kb === null) {
+                    return ($b['hitokoto_ts'] ?? 0) <=> ($a['hitokoto_ts'] ?? 0);
+                }
+                if ($ka === null) return 1;
+                if ($kb === null) return -1;
+                return $ka <=> $kb;
             });
         }
 

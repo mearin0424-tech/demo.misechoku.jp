@@ -17,6 +17,12 @@
         margin: 0 calc(-1 * var(--content-padding-x, 16px));
         padding-bottom: calc(var(--footer-height, 75px) + 96px + env(safe-area-inset-bottom, 0px));
     }
+    /* サブヘッダーは共通 sub-header.css と同じ「fixed + viewport 基準」方式。
+       sticky は祖先 .content-wrapper の overflow-x: hidden がスクロールコンテキストを
+       作るため viewport にピン留めされず下にズレる（既知の落とし穴）。 */
+    .job-edit-v2 {
+        --je-subheader-h: 56px;
+    }
     .job-edit-v2__shell {
         max-width: 100%;
         margin: 0 auto;
@@ -24,25 +30,32 @@
         background: var(--je-panel);
         backdrop-filter: blur(8px);
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+        /* fixed 化したサブヘッダーの高さぶんコンテンツを下げる */
+        padding-top: var(--je-subheader-h);
     }
     .job-edit-v2__top {
-        position: sticky;
+        position: fixed;
         top: var(--header-height, 60px);
-        z-index: 40;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: var(--max-content-width);
+        height: var(--je-subheader-h, 56px);
+        box-sizing: border-box;
+        z-index: 1400; /* グローバルヘッダー(1500)より下、コンテンツより上 */
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        padding: 12px 16px;
-        /* 完全不透明にして下の notice が透けて重なって見えないようにする */
+        padding: 0 16px;
         background: #1a0e18;
         border-bottom: 1px solid rgba(168, 85, 247, 0.35);
         box-shadow: 0 6px 14px -8px rgba(0, 0, 0, 0.6);
     }
-    /* サブヘッダーの下に来る要素は sticky ヘッダーの高さぶんスクロールマージンを持たせる */
+    /* アンカースクロール時、fixed ヘッダー2段ぶんのマージンを確保 */
     .job-edit-v2__notice,
     .job-edit-v2__form section {
-        scroll-margin-top: calc(var(--header-height, 60px) + 68px);
+        scroll-margin-top: calc(var(--header-height, 60px) + var(--je-subheader-h, 56px) + 12px);
     }
     .job-edit-v2__back {
         color: #a1a1aa;

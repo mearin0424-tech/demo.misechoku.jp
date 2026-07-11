@@ -163,19 +163,10 @@
                     </div>
                 @endif
 
-                {{-- KEEP + 共有 --}}
-                <div class="flex gap-2">
-                    <button type="button"
-                            @if($isShopPreview) disabled title="プレビュー：求職者はここでキープできます" @endif
-                            class="recruit-cta-heart flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full font-bold text-[12.5px] border border-line-accent/40 bg-base/60 text-text-main transition-all duration-300 {{ !empty($recruit['is_kept']) ? 'bg-accent/15 text-accent-text border-accent' : '' }} {{ $isShopPreview ? 'opacity-70 cursor-default' : '' }}"
-                            aria-label="キープ"
-                            data-item-id="{{ $shop['id'] ?? '' }}"
-                            data-item-type="shop"
-                            data-action="keep">
-                        <i class="fas fa-bookmark"></i> KEEP
-                    </button>
+                {{-- KEEP（アイコンオンリー） + 共有 --}}
+                <div class="flex items-center justify-end gap-3" style="margin-bottom: 22px;">
                     @if(!empty($shareUrlResolved))
-                        <div class="flex-1 flex items-center justify-center">
+                        <div class="flex items-center">
                             @include('partials.share-menu', [
                                 'shareUrl' => $shareUrlResolved,
                                 'shareTitle' => $shareTitleResolved,
@@ -184,6 +175,18 @@
                             ])
                         </div>
                     @endif
+                    <button type="button"
+                            @if($isShopPreview) disabled title="プレビュー：求職者はここでキープできます" @endif
+                            class="fav-circle fav-circle--keep {{ $isShopPreview ? 'opacity-70' : '' }}"
+                            aria-label="キープ"
+                            aria-pressed="{{ !empty($recruit['is_kept']) ? 'true' : 'false' }}"
+                            @unless($isShopPreview) data-fav-toggle @endunless
+                            data-item-id="{{ $shop['id'] ?? '' }}"
+                            data-item-type="shop"
+                            data-action="keep">
+                        <i class="fas fa-bookmark" aria-hidden="true"></i>
+                        <span class="fav-circle__cap">KEEP</span>
+                    </button>
                 </div>
             </div>
         @endif

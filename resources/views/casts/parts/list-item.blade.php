@@ -67,23 +67,14 @@
         </div>
     </a>
     @php
-        $isKeeping = (bool) ($item['is_keeping'] ?? false);
         $isLiked = (bool) ($item['is_liked'] ?? false);
-        $likeCount = (int) ($item['like_count'] ?? 0);
-        $keepCount = (int) ($item['keep_count'] ?? 0);
     @endphp
+    {{-- 検索行のアクションは控えめな LIKE のみ（KEEP はプロフィール画面内でのみ操作可能） --}}
     <div class="tl-row__actions" aria-label="クイックアクション">
-        <button type="button" class="tl-row__action-btn tl-row__action-btn--keep"
-                data-fav-toggle data-action="keep" data-item-type="shop" data-item-id="{{ $item['id'] }}"
-                aria-label="キープ" aria-pressed="{{ $isKeeping ? 'true' : 'false' }}">
-            <i class="fas fa-bookmark" aria-hidden="true"></i>
-            @if($keepCount > 0)<span class="tl-row__action-count">{{ $keepCount > 99 ? '99+' : $keepCount }}</span>@endif
-        </button>
-        <button type="button" class="tl-row__action-btn tl-row__action-btn--like"
+        <button type="button" class="tl-row__action-btn tl-row__action-btn--like tl-row__action-btn--subtle"
                 data-fav-toggle data-action="like" data-item-type="shop" data-item-id="{{ $item['id'] }}"
                 aria-label="いいね" aria-pressed="{{ $isLiked ? 'true' : 'false' }}">
             <i class="fas fa-heart" aria-hidden="true"></i>
-            @if($likeCount > 0)<span class="tl-row__action-count">{{ $likeCount > 99 ? '99+' : $likeCount }}</span>@endif
         </button>
     </div>
 </li>

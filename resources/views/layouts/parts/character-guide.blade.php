@@ -39,3 +39,20 @@
         </button>
     </div>
 </div>
+{{-- フラッシュ防止：character-guide.js（ページ末尾・DOMContentLoaded 後）を待たず、
+     要素直後の同期スクリプトで「このページで閉じた履歴」を描画前に反映する。
+     これが無いと、一度閉じたページで「一瞬表示→消える」チラつきが発生する。 --}}
+<script>
+(function () {
+    try {
+        var el = document.getElementById('character-guide');
+        if (!el) return;
+        var raw = sessionStorage.getItem('character-guide-dismissed');
+        if (!raw) return;
+        var paths = JSON.parse(raw);
+        if (Array.isArray(paths) && paths.indexOf(window.location.pathname) !== -1) {
+            el.classList.add('is-dismissed');
+        }
+    } catch (e) { /* sessionStorage 不可環境では何もしない */ }
+})();
+</script>

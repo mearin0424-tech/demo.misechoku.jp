@@ -51,48 +51,64 @@
             </div>
         </div>
 
-        {{-- ===== 優良店バッヂ + レビュー（2カラム）===== --}}
-        <div class="grid grid-cols-2 gap-3 mb-5">
-            {{-- 優良店バッヂ：未付与時は opacity 50% + 縮小感で、付与時との差を強く見せる --}}
-            <button type="button" id="open-good-payer-badge-modal"
-                    aria-haspopup="dialog" aria-controls="modal-good-payer-badge"
-                    aria-label="優良店バッヂの説明を開く"
-                    class="flex flex-col items-center justify-center gap-1 p-3 rounded-panel bg-gradient-to-br from-surface-from to-base shadow-card-3d transition-all duration-300 {{ $hasGoodPayerBadge ? 'border border-amber-400/60 ring-1 ring-amber-400/30' : 'border border-line opacity-50' }}">
-                <i class="fas fa-crown text-[20px] {{ $hasGoodPayerBadge ? 'text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]' : 'text-text-sub' }}"></i>
-                <span class="app-title text-[9px] tracking-widest text-text-sub">優良店</span>
-                <span class="text-[12px] font-bold {{ $hasGoodPayerBadge ? 'text-amber-400' : 'text-text-sub' }}">{{ $hasGoodPayerBadge ? '取得済' : '未取得' }}</span>
-            </button>
-
-            {{-- レビュー：平均値 + 件数（"15件のレビュー" 等で社会的証明を出す） --}}
-            <a href="{{ route('shop.mypage.review.index') }}"
-               class="flex flex-col items-center justify-center gap-1 p-3 rounded-panel border border-line-accent/40 bg-gradient-to-br from-surface-from to-base shadow-card-3d transition-all duration-300">
-                <i class="fas fa-star text-[20px] text-amber-400"></i>
-                <span class="app-title text-[9px] tracking-widest text-text-sub">レビュー</span>
-                <span class="text-[12px] font-bold text-text-main inline-flex items-baseline gap-1">
+        {{-- ===== 店舗名 + 控えめバッヂ行 =====
+             旧: 優良店/レビューの大型2カラムカード → 目立ちすぎのため
+             店舗名の下の小型チップに格下げ（情報は維持、占有面積を1/4に） --}}
+        <div class="mb-4">
+            <h1 class="app-title text-[24px] text-text-main leading-tight mb-1.5">{{ $displayName }}</h1>
+            <div class="flex flex-wrap items-center gap-2">
+                <a href="{{ route('shop.mypage.review.index') }}"
+                   class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border border-line text-[11px] font-bold text-text-main hover:border-line-accent/60 transition-colors">
+                    <i class="fas fa-star text-[10px] text-amber-400/80"></i>
                     {{ $reviewAvg }}
-                    <span class="text-[10px] font-normal text-text-sub">({{ $reviewCount }}件)</span>
-                    <i class="fas fa-chevron-right ml-0.5 text-[10px] text-accent-text"></i>
-                </span>
+                    <span class="font-normal text-text-sub">({{ $reviewCount }})</span>
+                </a>
+                <button type="button" id="open-good-payer-badge-modal"
+                        aria-haspopup="dialog" aria-controls="modal-good-payer-badge"
+                        aria-label="優良店バッヂの説明を開く"
+                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[11px] font-bold transition-colors {{ $hasGoodPayerBadge ? 'border-amber-400/50 text-amber-300' : 'border-line text-text-sub hover:border-line-accent/40' }}">
+                    <i class="fas fa-crown text-[10px] {{ $hasGoodPayerBadge ? 'text-amber-400' : 'text-text-sub/70' }}"></i>
+                    優良店{{ $hasGoodPayerBadge ? '' : '（未取得）' }}
+                </button>
+            </div>
+        </div>
+
+        {{-- ===== 管理メニュー：2カラムのコンパクトタイル（5項目） =====
+             縦積みの大型カードをやめて高さを圧縮し、ギャラリーを
+             ファーストビュー付近まで引き上げる。
+             要対応バッジはヘッダー共有の $todoList（InjectHeaderBadges）から算出 --}}
+        @php
+            $todos = collect($todoList ?? []);
+            $mgmtActionCount = $todos->whereIn('key', ['shop.deposit_pending_approval', 'shop.invoice_pending_payment'])->count();
+            $licenseNeedsAction = $todos->whereIn('key', ['shop.license_unsubmitted', 'shop.license_rejected'])->isNotEmpty();
+        @endphp
+        <div class="mypage-menu-grid mb-1">
+            <a href="{{ route('shop.recruits.show') }}" class="mypage-tile">
+                <i class="fas fa-briefcase mypage-tile__icon"></i>
+                <span class="mypage-tile__label">求人票<span class="mypage-tile__sub">JOB</span></span>
             </a>
-        </div>
-
-        {{-- ===== 店舗名 ===== --}}
-        <div class="mb-5">
-            <h1 class="app-title text-[24px] text-text-main leading-tight">{{ $displayName }}</h1>
-        </div>
-
-        {{-- ===== Sub-page menu ===== --}}
-        <div class="flex flex-col gap-3">
-            <x-ui.menu-card icon="settings"
-                            sub="EMPLOYMENT & PAYMENT"
-                            title="採用・入金管理"
-                            href="{{ route('shop.mypage.management') }}"
-                            class="shop-mypage-menu-card" />
-            <x-ui.menu-card icon="staff"
-                            sub="STAFF ACCOUNTS"
-                            title="スタッフ管理"
-                            href="{{ route('shop.mypage.staff.index') }}"
-                            class="shop-mypage-menu-card" />
+            <a href="{{ route('shop.profile.edit') }}" class="mypage-tile">
+                <i class="fas fa-store mypage-tile__icon"></i>
+                <span class="mypage-tile__label">プロファイル<span class="mypage-tile__sub">SHOP</span></span>
+            </a>
+            <a href="{{ route('shop.mypage.management') }}" class="mypage-tile">
+                <i class="fas fa-yen-sign mypage-tile__icon"></i>
+                <span class="mypage-tile__label">採用・入金管理<span class="mypage-tile__sub">PAYMENT</span></span>
+                @if($mgmtActionCount > 0)
+                    <span class="mypage-tile__badge mypage-tile__badge--urgent" aria-label="要対応 {{ $mgmtActionCount }}件">{{ $mgmtActionCount }}</span>
+                @endif
+            </a>
+            <a href="{{ route('shop.mypage.staff.index') }}" class="mypage-tile">
+                <i class="fas fa-users mypage-tile__icon"></i>
+                <span class="mypage-tile__label">スタッフ・アカウント<span class="mypage-tile__sub">STAFF</span></span>
+            </a>
+            <button type="button" class="mypage-tile mypage-tile--wide" data-open-license>
+                <i class="fas fa-file-shield mypage-tile__icon"></i>
+                <span class="mypage-tile__label">ライセンス（許可証）管理<span class="mypage-tile__sub">LICENSE</span></span>
+                @if($licenseNeedsAction)
+                    <span class="mypage-tile__badge mypage-tile__badge--urgent" aria-label="要対応">!</span>
+                @endif
+            </button>
         </div>
     </div>
 
@@ -101,12 +117,12 @@
         <div data-tabs class="border-t border-b border-line-accent/40 bg-base/90 backdrop-blur-md sticky top-0 z-10">
             <div class="flex">
                 <button type="button" data-tab="gallery"
-                        class="flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
+                        class="is-active flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
                     <i class="fas fa-images text-[14px]"></i>
                     <span class="app-title text-[10px] tracking-widest">GALLERY</span>
                 </button>
                 <button type="button" data-tab="job"
-                        class="is-active flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
+                        class="flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
                     <i class="fas fa-briefcase text-[14px]"></i>
                     <span class="app-title text-[10px] tracking-widest">JOB</span>
                 </button>
@@ -119,7 +135,7 @@
         </div>
 
         {{-- ========== Gallery panel ========== --}}
-        <div data-tab-panel="gallery">
+        <div data-tab-panel="gallery" class="is-active">
             <ul id="gallery-list"
                 data-sort-save-url="{{ route('shop.profile.images.order') }}"
                 data-empty-image-url="{{ asset('assets/images/common/no-image.png') }}">
@@ -142,7 +158,7 @@
         </div>
 
         {{-- ========== JOB panel：求人管理（cast-show.blade.php の JOB タブと同じ構造） ========== --}}
-        <div data-tab-panel="job" class="is-active">
+        <div data-tab-panel="job">
             <div class="p-4 flex flex-col gap-4">
                 @php $js = $jobSummary ?? []; @endphp
 
@@ -385,7 +401,7 @@
                     @endif
 
                     {{-- Licenses（同じデザインで色違い：amber/champagne 系。partial の構造は触らず外側だけ薄く違う色味の枠で包む） --}}
-                    <div class="mt-5 pt-5 border-t border-amber-400/30 shop-mypage-license-wrap">
+                    <div id="license-section" class="mt-5 pt-5 border-t border-amber-400/30 shop-mypage-license-wrap" style="scroll-margin-top: 120px;">
                         @include('shops.mypage.partials.shop-license-documents', ['documents' => $documents ?? []])
                     </div>
                 </x-ui.card>
@@ -485,6 +501,7 @@
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/shop-license-documents.css') }}?v=20260505">
 
+<link rel="stylesheet" href="{{ asset('assets/css/mypage-tiles.css') }}">
 <style>
     /* ===== Instagram風グリッド ===== */
     #gallery-list {
@@ -576,6 +593,23 @@ window.MYPAGE_GALLERY_CONFIG = {
 };
 </script>
 <script src="{{ asset('assets/js/mypage-gallery.js') }}"></script>
+
+{{-- ライセンス管理タイル：SHOP タブを開いて許可証セクションへスクロール --}}
+<script>
+(function () {
+    'use strict';
+    var licenseBtn = document.querySelector('[data-open-license]');
+    if (!licenseBtn) return;
+    licenseBtn.addEventListener('click', function () {
+        var shopTab = document.querySelector('[data-tab="shop"]');
+        if (shopTab) shopTab.click();
+        window.setTimeout(function () {
+            var section = document.getElementById('license-section');
+            if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 60);
+    });
+})();
+</script>
 
 {{-- ひとこと編集 + 優良店バッヂモーダル + プロフィール編集導線 --}}
 <script>
