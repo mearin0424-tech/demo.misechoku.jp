@@ -4785,6 +4785,9 @@ a.dashboard-kpi-card:hover .dashboard-kpi-card__arrow,
     padding: 18px;
     animation: verifPreviewFade .15s ease-out;
 }
+/* display:flex が UA の [hidden]{display:none} を上書きしてしまい、
+   閉じた状態でも全画面オーバーレイがクリックを吸収するのを防ぐ */
+.verification-preview-overlay[hidden] { display: none !important; }
 @keyframes verifPreviewFade {
     from { opacity: 0; }
     to { opacity: 1; }
