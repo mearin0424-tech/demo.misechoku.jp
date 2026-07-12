@@ -28,12 +28,13 @@
             </button>
         </div>
 
-        {{-- ACCOUNT セクション：アカウント管理（アカウント設定・書類系・スタッフ管理を集約）。
+        {{-- ACCOUNT セクション：アカウント管理（設定・書類系を集約）。
+             メニュー名は改行しない短い名称に統一。スタッフ追加は「アカウント管理」内から。
              書類系は未完了の間「未済」バッジを表示（やることリストにも常時掲載される） --}}
         <div class="sidebar-section">
             <div class="menu-label-header">ACCOUNT</div>
             <ul class="sidebar-sub-menu">
-                <li><a href="{{ route('setting.account') }}"><i class="fas fa-cog"></i> アカウント設定</a></li>
+                <li><a href="{{ route('setting.account') }}"><i class="fas fa-cog"></i> アカウント管理</a></li>
                 @if($isCast)
                     <li>
                         <a href="{{ route('cast.mypage.identity') }}">
@@ -42,19 +43,8 @@
                         </a>
                     </li>
                 @endif
-                @if($isShop)
-                    <li>
-                        <a href="{{ route('shop.mypage.index') }}#license-section">
-                            <i class="fas fa-file-shield"></i> ライセンス（許可証）管理
-                            @if($licensePendingBadge)<span class="sidebar-badge-pending">未済</span>@endif
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('shop.mypage.staff.index') }}">
-                            <i class="fas fa-users"></i> スタッフ・アカウント管理
-                        </a>
-                    </li>
-                @endif
+                {{-- 許可証管理はサイドメニューから撤去（MyPage PROFILE タブ内・非公開アラート・
+                     やることリストからの導線で十分なため） --}}
             </ul>
         </div>
 

@@ -1065,3 +1065,65 @@
 .license-manage-withdraw-form .license-manage-btn--danger-fill {
     width: 100%;
 }
+
+/* =====================================================================
+   2026-07-12 見やすさ改善
+   - 見出し：英字ラベルのみ → アイコン + 日本語 + 説明
+   - 書類の長文説明は「この書類について」の折りたたみに格納
+   ===================================================================== */
+.license-section__head { margin-bottom: 14px; }
+.license-section__title {
+    margin: 0 0 4px;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--color-text-main, #f5f5f5);
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+.license-section__title i {
+    color: var(--accent-text, #a78bfa);
+    font-size: 0.85rem;
+}
+.license-section__title-en {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    color: rgba(var(--accent-rgb, 139, 92, 246), 0.65);
+}
+.license-section__lead {
+    margin: 0;
+    font-size: 0.76rem;
+    line-height: 1.7;
+    color: var(--color-text-sub, #b8b8b8);
+}
+
+.license-accordion__hint {
+    margin: 0 0 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.02);
+}
+.license-accordion__hint summary {
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 12px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--accent-text, #a78bfa);
+    -webkit-tap-highlight-color: transparent;
+}
+.license-accordion__hint summary::-webkit-details-marker { display: none; }
+.license-accordion__hint summary i { font-size: 0.7rem; }
+.license-accordion__hint-body {
+    padding: 0 12px 12px;
+    font-size: 0.76rem;
+    line-height: 1.8;
+    color: var(--color-text-sub, #b8b8b8);
+}
+.license-accordion__hint-body p { margin: 0 0 0.6em; }
+.license-accordion__hint-body p:last-child { margin-bottom: 0; }

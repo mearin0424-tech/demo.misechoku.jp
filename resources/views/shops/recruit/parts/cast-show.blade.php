@@ -160,35 +160,13 @@
         @if(!empty($ctaShopId))
             <div class="flex flex-col gap-2 mb-2">
                 {{-- 最重要：TALK 遷移（求人未登録でも常に表示） --}}
-                {{-- シンプルなソリッド1色のプライマリ（グラデ・重い立体は使わない） --}}
-                <a href="{{ $mkTalkHref(['id' => $ctaShopId, 'talk_topic' => 'other', 'initiate' => 1]) }}"
-                   @if($isShopPreview) aria-disabled="true" title="プレビュー：求職者はここからトークに遷移します" onclick="return false;" @endif
-                   class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold bg-accent text-on-accent shadow-[0_4px_12px_rgba(0,0,0,0.4)] active:scale-[0.98] transition-transform duration-150 {{ $isShopPreview ? 'cursor-default' : '' }}">
-                    <i class="fas fa-comment-dots"></i> トークで話を聞いてみる
-                </a>
-
-                {{-- 応募系（求人が登録されている場合のみ） --}}
-                @if($ctaHasTrial || $ctaHasHelp)
-                    <div class="flex gap-2">
-                        @if($ctaHasTrial)
-                            <a href="{{ $mkTalkHref(['id' => $ctaShopId, 'job_kind' => 'trial', 'talk_topic' => 'new_hire', 'initiate' => 1]) }}"
-                               @if($isShopPreview) aria-disabled="true" onclick="return false;" @endif
-                               class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-full font-bold text-[12.5px] border border-line-accent/40 bg-accent/10 text-accent-text transition-all duration-300 {{ $isShopPreview ? 'cursor-default' : '' }}">
-                                <i class="fas fa-paper-plane text-[11px]"></i> 新規採用に応募
-                            </a>
-                        @endif
-                        @if($ctaHasHelp)
-                            <a href="{{ $mkTalkHref(['id' => $ctaShopId, 'job_kind' => 'help', 'talk_topic' => 'help', 'initiate' => 1]) }}"
-                               @if($isShopPreview) aria-disabled="true" onclick="return false;" @endif
-                               class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-full font-bold text-[12.5px] border border-line-accent/40 bg-accent/10 text-accent-text transition-all duration-300 {{ $isShopPreview ? 'cursor-default' : '' }}">
-                                <i class="fas fa-hand-holding-heart text-[11px]"></i> ヘルプ応募
-                            </a>
-                        @endif
-                    </div>
-                @endif
-
-                {{-- LIKE / KEEP / 共有：CTA 直下に中央寄せの均等3アイコン列 --}}
-                <div class="flex items-start justify-center gap-8 pt-2" style="margin-bottom: 18px;">
+                {{-- トーク / LIKE / KEEP / 共有 の横一列。トークが flex-1 で最も目立つ Primary --}}
+                <div class="fav-actions-row" style="margin-bottom: 20px;">
+                    <a href="{{ $mkTalkHref(['id' => $ctaShopId, 'talk_topic' => 'other', 'initiate' => 1]) }}"
+                       @if($isShopPreview) aria-disabled="true" title="プレビュー：求職者はここからトークに遷移します" onclick="return false;" @endif
+                       class="fav-actions-row__primary inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-full font-bold bg-accent text-on-accent shadow-[0_4px_12px_rgba(0,0,0,0.4)] active:scale-[0.98] transition-transform duration-150 {{ $isShopPreview ? 'cursor-default' : '' }}">
+                        <i class="fas fa-comment-dots"></i> トークする
+                    </a>
                     <button type="button"
                             @if($isShopPreview) disabled title="プレビュー：求職者はここでいいねできます" @endif
                             class="fav-circle fav-circle--like {{ $isShopPreview ? 'opacity-70' : '' }}"
@@ -214,7 +192,7 @@
                         <span class="fav-circle__cap">KEEP</span>
                     </button>
                     @if(!empty($shareUrlResolved))
-                        <div class="flex flex-col items-center">
+                        <div class="shrink-0 flex flex-col items-center">
                             @include('partials.share-menu', [
                                 'shareUrl' => $shareUrlResolved,
                                 'shareTitle' => $shareTitleResolved,
@@ -224,6 +202,28 @@
                         </div>
                     @endif
                 </div>
+
+                {{-- 応募系（求人が登録されている場合のみ） --}}
+                @if($ctaHasTrial || $ctaHasHelp)
+                    <div class="flex gap-2">
+                        @if($ctaHasTrial)
+                            <a href="{{ $mkTalkHref(['id' => $ctaShopId, 'job_kind' => 'trial', 'talk_topic' => 'new_hire', 'initiate' => 1]) }}"
+                               @if($isShopPreview) aria-disabled="true" onclick="return false;" @endif
+                               class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-full font-bold text-[12.5px] border border-line-accent/40 bg-accent/10 text-accent-text transition-all duration-300 {{ $isShopPreview ? 'cursor-default' : '' }}">
+                                <i class="fas fa-paper-plane text-[11px]"></i> 新規採用に応募
+                            </a>
+                        @endif
+                        @if($ctaHasHelp)
+                            <a href="{{ $mkTalkHref(['id' => $ctaShopId, 'job_kind' => 'help', 'talk_topic' => 'help', 'initiate' => 1]) }}"
+                               @if($isShopPreview) aria-disabled="true" onclick="return false;" @endif
+                               class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-full font-bold text-[12.5px] border border-line-accent/40 bg-accent/10 text-accent-text transition-all duration-300 {{ $isShopPreview ? 'cursor-default' : '' }}">
+                                <i class="fas fa-hand-holding-heart text-[11px]"></i> ヘルプ応募
+                            </a>
+                        @endif
+                    </div>
+                @endif
+
+                {{-- LIKE / KEEP / 共有 はトークと同じ横一列（上）に統合済み --}}
             </div>
         @endif
     </div>

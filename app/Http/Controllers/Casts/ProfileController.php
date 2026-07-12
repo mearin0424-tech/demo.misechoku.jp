@@ -488,6 +488,12 @@ class ProfileController extends Controller
             ];
         }
 
+        // ひとこと（cast_posts.body）：プロフィールヘッダーの吹き出しに表示
+        $word = '';
+        if (Schema::hasTable('cast_posts')) {
+            $word = trim((string) (DB::table('cast_posts')->where('cast_id', $castId)->value('body') ?? ''));
+        }
+
         // 閲覧中の店舗が実際に KEEP / LIKE 済みか（行が存在 = アクティブ）。
         // 旧実装は is_kept を true 固定・is_liked 未提供で、他画面との表示ズレの原因だった。
         $isKeptByViewer = false;
@@ -528,6 +534,7 @@ class ProfileController extends Controller
             'hip' => $row->hip,
             'pr' => $row->pr ?? '',
             'intro' => $row->pr ?? '',
+            'word' => $word,
             'industry_names' => $industryNames,
             'desired_job' => $industryNames, // backward compatible key
             'my_field' => $looksTags !== [] ? implode(' / ', $looksTags) : '',

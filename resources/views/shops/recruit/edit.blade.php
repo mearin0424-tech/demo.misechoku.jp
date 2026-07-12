@@ -9,7 +9,7 @@
 <style>
     .job-edit-v2 {
         --je-bg: transparent;
-        --je-panel: rgba(20, 12, 18, 0.55);
+        --je-panel: rgba(18, 18, 18, 0.55); /* 旧ワイン色 rgba(20,12,18) → ニュートラルな暗色 */
         --je-field: rgba(255, 255, 255, 0.05);
         --je-border: rgba(168, 85, 247, 0.22);
         --je-gold: #a78bfa;
@@ -48,8 +48,10 @@
         justify-content: space-between;
         gap: 12px;
         padding: 0 16px;
-        background: #1a0e18;
-        border-bottom: 1px solid rgba(168, 85, 247, 0.35);
+        background: rgba(10, 10, 10, 0.95); /* EDIT PROFILE のサブヘッダーと同トーン */
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--color-line, #2a2a2a);
         box-shadow: 0 6px 14px -8px rgba(0, 0, 0, 0.6);
     }
     /* アンカースクロール時、fixed ヘッダー2段ぶんのマージンを確保 */
@@ -440,9 +442,11 @@
         display: flex;
         justify-content: center;
         padding: 12px var(--content-padding-x, 16px) 12px;
-        /* 完全不透明化：下のボトムナビに合流して見えるように */
-        background: #1a0e18;
-        border-top: 1px solid rgba(168, 85, 247, 0.35);
+        /* ボトムナビに合流して見えるニュートラルな暗色（旧ワイン色 #1a0e18 を廃止） */
+        background: rgba(10, 10, 10, 0.97);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(168, 85, 247, 0.30);
         box-shadow: 0 -8px 20px -8px rgba(0, 0, 0, 0.75);
         box-sizing: border-box;
     }
@@ -454,35 +458,44 @@
     .job-edit-v2__btn-cancel {
         flex: 0 0 auto;
         padding: 12px 18px;
-        border-radius: 8px;
+        border-radius: 999px;
         font-size: 0.875rem;
         font-weight: 700;
         color: #a1a1aa;
         text-decoration: none;
-        border: none;
+        border: 1px solid rgba(255, 255, 255, 0.14);
         background: transparent;
         cursor: pointer;
         font-family: inherit;
+        transition: color 0.15s ease, border-color 0.15s ease;
     }
-    .job-edit-v2__btn-cancel:hover { color: #fff; background: #18181b; }
+    .job-edit-v2__btn-cancel:hover { color: #fff; border-color: rgba(255, 255, 255, 0.35); }
+    /* 保存 = Primary CTA（DESIGN.md §10：アクセントグラデ + 立体。混色グラデ・hover明暗は廃止） */
     .job-edit-v2__btn-save {
         flex: 1;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
-        padding: 12px 16px;
+        padding: 13px 16px;
         border: none;
-        border-radius: 8px;
-        font-size: 0.875rem;
+        border-radius: 999px;
+        font-size: 0.9rem;
         font-weight: 800;
         cursor: pointer;
-        color: #141210;
-        background: linear-gradient(to right, #a78bfa, #b8942b);
-        box-shadow: 0 4px 15px rgba(168, 85, 247, 0.15);
+        color: var(--on-accent-strong, #fff);
+        background: linear-gradient(135deg, var(--accent-grad-from), var(--accent-grad-to));
+        box-shadow:
+            0 6px 14px rgba(0, 0, 0, .45),
+            inset 0 1px 0 rgba(255, 255, 255, .20),
+            inset 0 -1px 0 rgba(0, 0, 0, .18);
         font-family: inherit;
+        transition: transform 0.12s ease, box-shadow 0.12s ease;
     }
-    .job-edit-v2__btn-save:hover { opacity: 0.92; }
+    .job-edit-v2__btn-save:active {
+        transform: scale(0.98);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, .45), inset 0 2px 4px rgba(0, 0, 0, .2);
+    }
 
     /* 上部に表示する案内ノーティス（読みやすさ向上のためボックス＋アイコン） */
     .job-edit-v2__notice {

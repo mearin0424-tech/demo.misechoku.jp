@@ -1,13 +1,24 @@
 @extends('layouts.app-v2')
 
-@section('title', 'アカウント設定')
+@section('title', 'アカウント管理')
 
 @section('content')
 <div class="setting-page">
     <div class="setting-header">
-        <h1 class="setting-title">アカウント設定</h1>
-        <p class="setting-lead">メールアドレス変更・パスワード変更・LINE連携・退会手続きをここで行います。</p>
+        <h1 class="setting-title">アカウント管理</h1>
+        <p class="setting-lead">メールアドレス変更・パスワード変更・LINE連携{{ request()->is('shop*') ? '・スタッフ管理' : '' }}・退会手続きをここで行います。</p>
     </div>
+
+    {{-- スタッフ・アカウント管理（店舗のみ）：サイドメニューから本ページ内に集約 --}}
+    @if(request()->is('shop*'))
+        <section class="setting-section">
+            <h2 class="setting-section-title"><i class="fas fa-users"></i> スタッフ・アカウント管理</h2>
+            <p class="setting-lead" style="margin-bottom:12px;">1つのお店で複数のログインアカウントを使えます。追加・削除はオーナー権限のみ行えます。</p>
+            <a href="{{ route('shop.mypage.staff.index') }}" class="setting-submit" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none;">
+                <i class="fas fa-user-gear"></i> スタッフ一覧・追加へ
+            </a>
+        </section>
+    @endif
 
     @if(session('message'))
         <div class="setting-flash setting-flash--success" role="status">

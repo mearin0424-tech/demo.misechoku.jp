@@ -3,7 +3,14 @@
 @endphp
 
 <div class="shop-mypage-section license-section" id="license-section">
-    <h3 class="shop-mypage-section-label">Licenses</h3>
+    {{-- タイトル：英字ラベルのみ → アイコン + 日本語 + 一言説明のわかりやすい見出しに --}}
+    <div class="license-section__head">
+        <h3 class="license-section__title">
+            <i class="fas fa-file-shield" aria-hidden="true"></i>許可証の登録
+            <span class="license-section__title-en">LICENSES</span>
+        </h3>
+        <p class="license-section__lead">掲載に必要な書類です。すべて承認されると求人票を公開できます。</p>
+    </div>
 
     @if(session('message'))
         <p class="license-section__flash">{{ session('message') }}</p>
@@ -81,14 +88,19 @@
                 </button>
 
                 <div class="license-accordion__body" id="{{ $accordionId }}-body" @if(!$defaultOpen) hidden @endif>
-                    {{-- 注釈文（最上部） --}}
-                    <div class="license-accordion__desc">
-                        @if($descriptionHtml !== null)
-                            {!! $descriptionHtml !!}
-                        @elseif(!empty($description))
-                            <p>{{ $description }}</p>
-                        @endif
-                    </div>
+                    {{-- 注釈文：常時表示すると文字が多く見づらいため、折りたたみのヒントに格納 --}}
+                    @if($descriptionHtml !== null || !empty($description))
+                        <details class="license-accordion__hint">
+                            <summary><i class="fas fa-circle-info" aria-hidden="true"></i> この書類について</summary>
+                            <div class="license-accordion__hint-body">
+                                @if($descriptionHtml !== null)
+                                    {!! $descriptionHtml !!}
+                                @elseif(!empty($description))
+                                    <p>{{ $description }}</p>
+                                @endif
+                            </div>
+                        </details>
+                    @endif
 
                     @if($isRejected && !empty($ngReason))
                         <p class="license-accordion__ng">差し戻し理由: {{ $ngReason }}</p>
