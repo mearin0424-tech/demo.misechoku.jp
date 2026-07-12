@@ -379,7 +379,7 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/home.js') }}?v=20260712-like-unify"></script>
+<script src="{{ asset('assets/js/home.js') }}?v=20260712-motion"></script>
 {{-- LIKE / KEEP の共通トグル（全画面この1本に統一） --}}
-<script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260712-like-unify"></script>
+<script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260712-optimistic"></script>
 @endpush

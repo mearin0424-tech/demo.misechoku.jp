@@ -107,6 +107,80 @@ a.btn {
     transition-timing-function: var(--ease-out);
 }
 
+/* ==================================================================
+   Step2: SWIPE — Tinder 級のカード遷移と状態フィードバック
+   ================================================================== */
+/* Swiper の遷移カーブを標準イージングに統一（縦カード・写真とも） */
+body.page-home .swiper-wrapper {
+    transition-timing-function: var(--ease-out) !important;
+}
+/* LIKE / KEEP がアクティブになった瞬間、アイコンがポップ */
+body.page-home .action-circle-btn.is-active .action-icon {
+    animation: motion-pop 320ms var(--ease-spring);
+}
+@keyframes motion-pop {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.35); }
+    100% { transform: scale(1); }
+}
+
+/* ==================================================================
+   Step3: SEARCH / 一覧 — 行のプレス感・パネルの出現
+   ================================================================== */
+.tl-row {
+    transition: transform 120ms var(--ease-out);
+}
+.tl-row:active { transform: scale(0.985); }
+/* 並び替えパネル：右上 origin のポップイン */
+.search-sort-panel {
+    animation: motion-pop-in var(--dur-fast) var(--ease-out);
+    transform-origin: top right;
+}
+/* 詳細検索モーダル：背景フェード + ウィンドウはシートアップ */
+.detail-search-modal.is-open {
+    animation: motion-fade var(--dur-fast) ease-out;
+}
+.detail-search-modal.is-open .detail-search-modal__window {
+    animation: motion-sheet-up var(--dur-med) var(--ease-out);
+}
+
+/* ==================================================================
+   Step4: TALK — メッセージの出現
+   ================================================================== */
+.message-row {
+    animation: motion-msg-in var(--dur-med) var(--ease-out);
+}
+@keyframes motion-msg-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to   { opacity: 1; transform: none; }
+}
+
+/* ==================================================================
+   Step5: MyPage / プロフィール — ライトボックス
+   ================================================================== */
+.lightbox-overlay.is-open {
+    animation: motion-fade var(--dur-fast) ease-out;
+}
+.lightbox-overlay.is-open .lightbox-image {
+    animation: motion-scale-in var(--dur-med) var(--ease-spring);
+}
+
+/* ==================================================================
+   Step6: フォーム — エラー時のシェイク（気づきやすさ）
+   ================================================================== */
+input.is-error,
+select.is-error,
+textarea.is-error,
+input[aria-invalid="true"] {
+    animation: motion-shake 320ms var(--ease-out);
+}
+@keyframes motion-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    50% { transform: translateX(4px); }
+    75% { transform: translateX(-2px); }
+}
+
 /* ------------------------------------------------------------------
    8. reduced motion：すべて即時に
    ------------------------------------------------------------------ */

@@ -32,7 +32,9 @@
       "PowerShell(\\(Get-Content \"public\\\\assets\\\\css\\\\home.css\" | Measure-Object -Line\\).Lines)",
       "PowerShell(php -l app\\\\Http\\\\Controllers\\\\Shops\\\\HomeController.php; php -l app\\\\Http\\\\Controllers\\\\Casts\\\\RecruitmentController.php)",
       "PowerShell(php -l app\\\\Http\\\\Controllers\\\\Casts\\\\ProfileController.php)",
-      "PowerShell(php -l routes\\\\web.php; php -l app\\\\Http\\\\Controllers\\\\Shops\\\\InteractionController.php; php -l app\\\\Http\\\\Controllers\\\\Admin\\\\DepositController.php; php -l app\\\\Services\\\\BillingManagementService.php; php -l app\\\\Http\\\\Controllers\\\\Admin\\\\VerificationController.php; php -l app\\\\Http\\\\Controllers\\\\Admin\\\\ShopController.php; php -l app\\\\Http\\\\Controllers\\\\Admin\\\\InquiryController.php)"
+      "PowerShell(php -l routes\\\\web.php; php -l app\\\\Http\\\\Controllers\\\\Shops\\\\InteractionController.php; php -l app\\\\Http\\\\Controllers\\\\Admin\\\\DepositController.php; php -l app\\\\Services\\\\BillingManagementService.php; php -l app\\\\Http\\\\Controllers\\\\Admin\\\\VerificationController.php; php -l app\\\\Http\\\\Controllers\\\\Admin\\\\ShopController.php; php -l app\\\\Http\\\\Controllers\\\\Admin\\\\InquiryController.php)",
+      "PowerShell(node --check public\\\\assets\\\\js\\\\favorite-quick.js)",
+      "PowerShell(node --check public\\\\assets\\\\js\\\\motion.js; node --check public\\\\assets\\\\js\\\\home.js)"
     ]
   }
 }

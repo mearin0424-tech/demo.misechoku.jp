@@ -34,6 +34,11 @@
         '.mypage-mini-row',
         '.staff-card',
         '.notif-popup__item',
+        '.gallery-grid-item',
+        '.profile-gallery-item',
+        '.support-htu-feature-card',
+        '.support-htu-step',
+        '.support-htu-faq-item',
     ].join(', ');
 
     function initReveal(root) {

@@ -273,7 +273,7 @@
 @push('scripts')
 {{-- 共通タブ切り替えJSの読み込み --}}
 <script src="{{ asset('assets/js/sub-header.js') }}"></script>
-<script src="{{ asset('assets/js/favorite-quick.js') }}"></script>
+<script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260712-optimistic"></script>
 <script>
 (function () {
     var modal = document.querySelector('[data-recommend-info-modal]');

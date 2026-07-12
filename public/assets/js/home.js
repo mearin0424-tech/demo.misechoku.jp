@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // DISCOVERY 仕様：シームレスな無限ループ（末尾→先頭、先頭→末尾）
         loop: slideCount >= 2,
         rewind: false,
-        speed: 400,
+        speed: 460, /* 少し長め + motion.css の ease-out で "ぬるっと" 止まる */
         mousewheel: {
             enabled: true,
             sensitivity: 0.8,
