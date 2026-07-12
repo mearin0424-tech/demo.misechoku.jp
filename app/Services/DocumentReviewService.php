@@ -1199,6 +1199,20 @@ class DocumentReviewService
     }
 
     /**
+     * 保存パスの実ファイルがディスク上に存在するかを返す。
+     */
+    public function storedFileExists(?string $storedPath): bool
+    {
+        $resolved = $this->resolveDocumentDiskPath($storedPath);
+        if ($resolved === null) {
+            return false;
+        }
+        [$disk, $relative] = $resolved;
+
+        return Storage::disk($disk)->exists($relative);
+    }
+
+    /**
      * ファイルが新形式（private ディスク）に保存されているかを返す。
      */
     public function isPrivateStored(?string $storedPath): bool
@@ -1234,7 +1248,9 @@ class DocumentReviewService
         if (empty($path)) {
             return null;
         }
-        if ($this->isPrivateStored($path)) {
+        // 旧形式（public/...）でも実ファイルが無い場合は認証付きルートに回し、
+        // コントローラ側でプレースホルダー画像を返す（/storage 直リンク 404 を防止）
+        if ($this->isPrivateStored($path) || !$this->storedFileExists($path)) {
             return route('admin.verification.cast.file', ['document' => $document->id, 'side' => $side]);
         }
         return $this->documentUrl($path);
@@ -1251,7 +1267,7 @@ class DocumentReviewService
         if (empty($path)) {
             return null;
         }
-        if ($this->isPrivateStored($path)) {
+        if ($this->isPrivateStored($path) || !$this->storedFileExists($path)) {
             return route('admin.verification.shopdoc.file', ['document' => $document->id]);
         }
         return $this->documentUrl($path);

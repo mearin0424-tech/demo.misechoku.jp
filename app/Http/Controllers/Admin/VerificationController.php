@@ -168,22 +168,46 @@ class VerificationController extends Controller
 
     private function streamDocument(?string $storedPath)
     {
+        // ファイル未配置（モックデータ等）でも 404 にせず、プレースホルダー画像を返す。
+        // 画像が無いことを理由に承認・却下の審査操作がブロックされないようにするため。
         if (empty($storedPath)) {
-            abort(404, 'ファイルが見つかりません。');
+            return $this->placeholderImageResponse();
         }
         $resolved = $this->documentReviewService->resolveDocumentDiskPath($storedPath);
         if ($resolved === null) {
-            abort(404, 'ファイルが見つかりません。');
+            return $this->placeholderImageResponse();
         }
         [$disk, $relative] = $resolved;
         if (!Storage::disk($disk)->exists($relative)) {
-            abort(404, 'ファイルが見つかりません。');
+            return $this->placeholderImageResponse();
         }
         $absolute = Storage::disk($disk)->path($relative);
         $mime = @mime_content_type($absolute) ?: 'application/octet-stream';
+        // 画像・PDF 以外（モックの .txt 等）は <img> で表示できないためプレースホルダーに差し替え
+        if (!str_starts_with($mime, 'image/') && $mime !== 'application/pdf') {
+            return $this->placeholderImageResponse();
+        }
         return response()->file($absolute, [
             'Content-Type' => $mime,
             'Content-Disposition' => 'inline; filename*=UTF-8\'\'' . rawurlencode(basename($relative)),
+            'Cache-Control' => 'private, no-store',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
+    private function placeholderImageResponse()
+    {
+        $svg = <<<'SVG'
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" viewBox="0 0 640 400">
+  <rect width="640" height="400" fill="#1f2430"/>
+  <rect x="12" y="12" width="616" height="376" fill="none" stroke="#4b5563" stroke-width="2" stroke-dasharray="10 8" rx="14"/>
+  <text x="320" y="180" fill="#9ca3af" font-size="26" font-family="sans-serif" text-anchor="middle">ファイルなし</text>
+  <text x="320" y="222" fill="#6b7280" font-size="16" font-family="sans-serif" text-anchor="middle">（モックデータ／実ファイル未配置。審査操作は可能です）</text>
+</svg>
+SVG;
+
+        return response($svg, 200, [
+            'Content-Type' => 'image/svg+xml; charset=UTF-8',
             'Cache-Control' => 'private, no-store',
             'X-Content-Type-Options' => 'nosniff',
         ]);

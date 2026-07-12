@@ -4,7 +4,7 @@
 @section('body-class', 'no-scroll page-home')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260712-swipe-flat">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260713-meta-plain">
 @endpush
 
 @php

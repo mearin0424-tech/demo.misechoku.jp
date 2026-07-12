@@ -2376,12 +2376,28 @@ body.page-talk-room .chat-input-wrapper:focus-within,
     box-shadow: none !important;
 }
 
-/* ---- 自動送信メッセージ：専用背景（アクセント淡色）+ チップ ---- */
+/* ---- 自動送信メッセージ：システム通知カードとして人の発言と明確に区別 ----
+   - アクセント淡色の背景 + 破線ボーダー（人のバブルは実線/ベタ）
+   - しっぽ（吹き出しの三角）を消して「通知カード」の形にする
+   - 角丸を均一にし、左に太いアクセントラインを敷く */
 body.page-talk-room .message-bubble-auto,
 #talk-room-container .message-bubble-auto {
-    background: linear-gradient(180deg, rgba(var(--accent-rgb, 139, 92, 246), 0.12), rgba(var(--accent-rgb, 139, 92, 246), 0.05)) !important;
-    border: 1px solid rgba(var(--accent-rgb, 139, 92, 246), 0.38) !important;
+    background: linear-gradient(180deg, rgba(var(--accent-rgb, 139, 92, 246), 0.14), rgba(var(--accent-rgb, 139, 92, 246), 0.05)) !important;
+    border: 1px dashed rgba(var(--accent-rgb, 139, 92, 246), 0.55) !important;
+    border-left: 3px solid rgba(var(--accent-rgb, 139, 92, 246), 0.75) !important;
+    border-radius: 14px !important;
     color: var(--color-text-main, #f5f5f5) !important;
+    box-shadow: none !important;
+}
+/* 通知カードに吹き出しのしっぽは付けない */
+#talk-room-container .message-bubble-auto .message-bubble-tail {
+    display: none !important;
+}
+/* 自動送信のアバター（ロボット）もアクセントで明示 */
+#talk-room-container .msg-avatar-auto {
+    background: rgba(var(--accent-rgb, 139, 92, 246), 0.18) !important;
+    border: 1px solid rgba(var(--accent-rgb, 139, 92, 246), 0.5) !important;
+    color: var(--accent-text, #a78bfa) !important;
 }
 .auto-msg-chip {
     display: inline-flex;

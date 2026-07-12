@@ -10,7 +10,7 @@
 @section('body-class', 'page-talk page-talk-room')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260713-talk-refresh">
+<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260713-talk-auto-msg">
 @if($isCast)
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/review-modal.css') }}">
@@ -219,7 +219,8 @@
                         <div class="message-bubble message-bubble-interview message-bubble-auto">
                             <div class="interview-card-head">
                                 <div class="interview-title">
-                                    <span>【自動送信】面談候補日をお送りします</span>
+                                    <span class="auto-msg-chip"><i class="fas fa-robot" aria-hidden="true"></i>自動送信</span>
+                                    <span>面談候補日をお送りします</span>
                                 </div>
                                 <span class="interview-badge">日程調整</span>
                             </div>
@@ -281,7 +282,8 @@
                         <div class="message-bubble message-bubble-interview message-bubble-confirmed message-bubble-auto">
                             <div class="interview-card-head">
                                 <div class="interview-title">
-                                    <span>【自動送信】面談日が確定しました。</span>
+                                    <span class="auto-msg-chip"><i class="fas fa-robot" aria-hidden="true"></i>自動送信</span>
+                                    <span>面談日が確定しました</span>
                                 </div>
                             </div>
                             <p class="interview-body-copy">以下の日時で面談日が確定しました。</p>
@@ -334,7 +336,8 @@
                         <div class="message-bubble message-bubble-interview message-bubble-cancel-request message-bubble-auto">
                             <div class="interview-card-head">
                                 <div class="interview-title">
-                                    <span>【自動送信】面談キャンセル依頼</span>
+                                    <span class="auto-msg-chip"><i class="fas fa-robot" aria-hidden="true"></i>自動送信</span>
+                                    <span>面談キャンセル依頼</span>
                                 </div>
                                 <span class="interview-badge">確認待ち</span>
                             </div>

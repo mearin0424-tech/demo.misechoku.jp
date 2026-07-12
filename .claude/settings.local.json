@@ -37,7 +37,9 @@
       "PowerShell(node --check public\\\\assets\\\\js\\\\motion.js; node --check public\\\\assets\\\\js\\\\home.js)",
       "PowerShell(php artisan view:cache 2>&1 | Select-Object -Last 12)",
       "PowerShell(php artisan view:clear 2>&1 | Select-Object -Last 2; php artisan route:clear 2>&1 | Select-Object -Last 2; php artisan cache:clear 2>&1 | Select-Object -Last 2)",
-      "PowerShell(Get-Content *)"
+      "PowerShell(Get-Content *)",
+      "PowerShell(php -l app/Services/DocumentReviewService.php; php -l app/Http/Controllers/Admin/VerificationController.php)",
+      "PowerShell(Out-Null *)"
     ]
   }
 }

@@ -169,8 +169,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::middleware('admin.permission:master.masters')->group(function () {
             Route::get('/masters', [AdminMaster::class, 'index'])->name('masters.index');
             Route::post('/masters/catalogs/{catalogKey}', [AdminMaster::class, 'storeCatalog'])->name('masters.catalogs.store');
-            Route::patch('/masters/catalogs/{catalogKey}/{recordId}', [AdminMaster::class, 'updateCatalog'])->name('masters.catalogs.update');
-            Route::patch('/masters/catalogs/{catalogKey}/{recordId}/sort-order', [AdminMaster::class, 'updateSortOrder'])->name('masters.catalogs.sort-order');
+            // NOTE: {recordId} より先に定義すること（/reorder が recordId として解釈されるのを防ぐ）
+            Route::patch('/masters/catalogs/{catalogKey}/reorder', [AdminMaster::class, 'reorderCatalog'])->name('masters.catalogs.reorder');
+            Route::patch('/masters/catalogs/{catalogKey}/{recordId}', [AdminMaster::class, 'updateCatalog'])->name('masters.catalogs.update')->whereNumber('recordId');
             Route::delete('/masters/catalogs/{catalogKey}/{recordId}', [AdminMaster::class, 'destroyCatalog'])->name('masters.catalogs.destroy');
         });
 
@@ -564,6 +565,7 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
     Route::get('/mypage/reviews', [CastMypage::class, 'reviews'])->name('mypage.reviews');
     Route::post('/mypage/payment/bank', [CastMypage::class, 'updateBank'])->name('mypage.payment.bank.update');
     Route::get('/mypage/identity', [CastMypage::class, 'identity'])->name('mypage.identity');
+    Route::post('/mypage/identity/remind', [CastMypage::class, 'identityRemind'])->name('mypage.identity.remind');
     Route::post('/mypage/identity/upload', [CastMypage::class, 'uploadIdentity'])->name('mypage.identity.upload');
     Route::post('/mypage/images/upload', [CastMypage::class, 'uploadImage'])->name('mypage.images.upload');
     Route::post('/mypage/images/order', [CastMypage::class, 'updateImageOrder'])->name('mypage.images.order');

@@ -72,6 +72,69 @@
 .identity-form-section__pill.is-approved { background: rgba(16,185,129,.18); color: #6ee7b7; }
 .identity-form-section__pill.is-pending  { background: rgba(234,179,8,.16);  color: #fde047; }
 .identity-form-section__pill.is-rejected { background: rgba(220,38,38,.16);  color: #fca5a5; }
+/* フラッシュメッセージ */
+.identity-flash {
+    margin: 0 0 14px;
+    padding: 11px 14px;
+    border-radius: 12px;
+    background: rgba(var(--accent-rgb, 139, 92, 246), 0.12);
+    border: 1px solid rgba(var(--accent-rgb, 139, 92, 246), 0.4);
+    color: var(--color-text-main, #f5f5f5);
+    font-size: 0.84rem;
+    line-height: 1.6;
+}
+
+/* 審査中バリアント（warn トーン） */
+.identity-status-overall.is-pending-review {
+    background: linear-gradient(180deg, rgba(252, 211, 77, 0.10), rgba(252, 211, 77, 0.02));
+    border-color: rgba(252, 211, 77, 0.45);
+}
+.identity-status-overall.is-pending-review i {
+    color: var(--color-warn, #fcd34d);
+    filter: drop-shadow(0 2px 8px rgba(252, 211, 77, 0.3));
+}
+
+/* 承認催促 */
+.identity-remind {
+    margin: -8px 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.identity-remind__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(var(--accent-rgb, 139, 92, 246), 0.5);
+    background: rgba(var(--accent-rgb, 139, 92, 246), 0.12);
+    color: var(--accent-text, #a78bfa);
+    font-size: 0.88rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+}
+.identity-remind__btn:active { transform: scale(0.98); }
+.identity-remind__note {
+    margin: 0;
+    font-size: 0.72rem;
+    color: var(--color-text-sub, #b8b8b8);
+    text-align: center;
+}
+.identity-remind__done {
+    margin: 0;
+    padding: 11px 14px;
+    border-radius: 12px;
+    border: 1px dashed rgba(var(--accent-rgb, 139, 92, 246), 0.4);
+    color: var(--color-text-sub, #b8b8b8);
+    font-size: 0.8rem;
+    text-align: center;
+}
+.identity-remind__done i { color: var(--accent-text, #a78bfa); margin-right: 4px; }
+
 /* === 本人確認ステータス：ページのヒーローカード === */
 .identity-status-overall {
     padding: 18px 20px 20px;
@@ -237,20 +300,48 @@
                 <div class="mypage-section">
                     {{-- h2 "本人確認の状況" は eyebrow と status hero と triple-redundant なので撤去 --}}
 
-                    {{-- 全体ステータス（このカードがページの "hero" として機能する） --}}
-                    <div class="identity-status-overall {{ $isVerified ? 'is-verified' : '' }}">
-                        <i class="fas {{ $isVerified ? 'fa-circle-check' : 'fa-clock' }}"></i>
+                    @if(session('status'))
+                        <p class="identity-flash" role="status">{{ session('status') }}</p>
+                    @endif
+
+                    {{-- 全体ステータス（このカードがページの "hero" として機能する）
+                         完了 / 審査中 / 未提出・差戻し の3状態を明確に分ける --}}
+                    @php $isPendingReview = !$isVerified && ($identityStatus ?? '') === 'pending'; @endphp
+                    <div class="identity-status-overall {{ $isVerified ? 'is-verified' : '' }} {{ $isPendingReview ? 'is-pending-review' : '' }}">
+                        <i class="fas {{ $isVerified ? 'fa-circle-check' : ($isPendingReview ? 'fa-hourglass-half' : 'fa-clock') }}"></i>
                         <div class="identity-status-overall__text">
-                            {{ $isVerified ? '本人確認 完了' : '本人確認 未完了' }}
-                            <small>
-                                @if($isVerified)
-                                    すべての書類が承認されています。
-                                @else
-                                    下記のいずれかのパターンで書類を提出してください。
-                                @endif
-                            </small>
+                            @if($isVerified)
+                                本人確認 完了
+                                <small>すべての書類が承認されています。</small>
+                            @elseif($isPendingReview)
+                                審査中です
+                                <small>書類は提出済みです。運営が内容を確認しています（通常1〜2営業日）。承認されるまで一部機能が制限されます。</small>
+                            @else
+                                本人確認 未完了
+                                <small>下記のいずれかのパターンで書類を提出してください。</small>
+                            @endif
                         </div>
                     </div>
+
+                    {{-- 審査中：運営へ承認を催促できる（24時間に1回まで） --}}
+                    @if($isPendingReview)
+                        <div class="identity-remind">
+                            @if(!empty($identityRemindSentRecently))
+                                <p class="identity-remind__done">
+                                    <i class="fas fa-paper-plane"></i> 承認の催促を送信済みです（24時間に1回まで送信できます）
+                                </p>
+                            @else
+                                <form method="POST" action="{{ route('cast.mypage.identity.remind') }}"
+                                      onsubmit="return confirm('運営へ本人確認の承認催促を送信します。よろしいですか？');">
+                                    @csrf
+                                    <button type="submit" class="identity-remind__btn">
+                                        <i class="fas fa-paper-plane"></i> 運営に承認を催促する
+                                    </button>
+                                </form>
+                                <p class="identity-remind__note">審査が長引いている場合、運営へ確認の連絡を送れます。</p>
+                            @endif
+                        </div>
+                    @endif
 
                     {{-- パターン切替タブ --}}
                     <div class="identity-pattern-tabs" role="tablist">

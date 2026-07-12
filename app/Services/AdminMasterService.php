@@ -237,23 +237,27 @@ class AdminMasterService
     }
 
     /**
-     * 表示順 (sort_order) のみを更新する。
+     * ドラッグ＆ドロップの並び順どおりに sort_order を 1 から振り直す。
+     *
+     * @param  int[]  $orderedIds  画面上の並び順の ID 配列
      */
-    public function updateCatalogSortOrder(string $key, int $recordId, int $sortOrder): void
+    public function reorderCatalogRecords(string $key, array $orderedIds): void
     {
         $catalog = $this->getCatalogDefinition($key);
-        if (!$catalog || !Schema::hasTable($catalog['table'])) {
+        if (!$catalog || !Schema::hasTable($catalog['table']) || !Schema::hasColumn($catalog['table'], 'sort_order')) {
             return;
         }
-        if (!Schema::hasColumn($catalog['table'], 'sort_order')) {
-            return;
-        }
-        DB::table($catalog['table'])
-            ->where('id', $recordId)
-            ->update([
-                'sort_order' => $sortOrder,
-                'updated_at' => now(),
-            ]);
+
+        DB::transaction(function () use ($catalog, $orderedIds) {
+            foreach (array_values($orderedIds) as $index => $id) {
+                DB::table($catalog['table'])
+                    ->where('id', $id)
+                    ->update([
+                        'sort_order' => $index + 1,
+                        'updated_at' => now(),
+                    ]);
+            }
+        });
     }
 
     /**

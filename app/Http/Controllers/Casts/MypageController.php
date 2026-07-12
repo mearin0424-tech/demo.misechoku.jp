@@ -391,7 +391,60 @@ class MypageController extends Controller
             'categoryDocuments' => $identityData['category_documents'] ?? [],
             'allowedTypes' => $identityData['allowed_types'] ?? [],
             'typeLabels' => $identityData['type_labels'] ?? [],
+            'identityRemindSentRecently' => $this->identityRemindSentRecently($castId),
         ]);
+    }
+
+    /**
+     * 審査中の本人確認について、運営へ承認の催促を送る。
+     * 実体は support_inquiries への登録（運営の問い合わせ一覧に届く）。連打防止で24時間に1回まで。
+     */
+    public function identityRemind(Request $request)
+    {
+        $castId = $this->currentCastId();
+        $identityData = $this->documentReviewService->getCastIdentityPageData($castId);
+
+        if (($identityData['status'] ?? '') !== 'pending') {
+            return back()->with('status', '審査中の書類がないため、催促は送信できません。');
+        }
+        if ($this->identityRemindSentRecently($castId)) {
+            return back()->with('status', '催促は24時間に1回まで送信できます。すでに送信済みです。');
+        }
+        if (!Schema::hasTable('support_inquiries')) {
+            return back()->with('status', '現在この機能は利用できません。問い合わせフォームをご利用ください。');
+        }
+
+        $email = '';
+        if (Schema::hasColumn('casts', 'email')) {
+            $email = (string) (DB::table('casts')->where('id', $castId)->value('email') ?? '');
+        }
+
+        DB::table('support_inquiries')->insert([
+            'sender_type' => 'cast',
+            'sender_id'   => $castId,
+            'category'    => 'account',
+            'email'       => $email !== '' ? $email : 'no-reply@misechoku.jp',
+            'body'        => "【本人確認 承認催促】\nキャストID: {$castId}\n提出済みの本人確認書類の審査状況の確認をお願いします。",
+            'status'      => 'new',
+            'created_at'  => now(),
+            'updated_at'  => now(),
+        ]);
+
+        return back()->with('status', '運営へ承認の催促を送信しました。審査完了までいましばらくお待ちください。');
+    }
+
+    /** 直近24時間以内に催促済みか */
+    private function identityRemindSentRecently(string $castId): bool
+    {
+        if (!Schema::hasTable('support_inquiries')) {
+            return false;
+        }
+        return DB::table('support_inquiries')
+            ->where('sender_type', 'cast')
+            ->where('sender_id', $castId)
+            ->where('body', 'like', '【本人確認 承認催促】%')
+            ->where('created_at', '>=', now()->subDay())
+            ->exists();
     }
 
     /**

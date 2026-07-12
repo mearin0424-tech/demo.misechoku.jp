@@ -125,10 +125,10 @@
 <style>
 .cg-list { display: flex; flex-direction: column; gap: 14px; }
 .cg-item {
-    border: 1px solid rgba(74, 18, 42, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
     padding: 14px 16px;
-    background: #fff;
+    background: rgba(255, 255, 255, 0.02);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -154,8 +154,9 @@
 }
 .cg-item__route {
     font-size: 0.7rem;
-    color: var(--admin-muted);
-    background: rgba(74, 18, 42, 0.04);
+    color: #a1a1aa;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     padding: 2px 8px;
     border-radius: 6px;
     width: fit-content;
@@ -181,7 +182,7 @@
 .cg-item__toggle-track {
     width: 44px;
     height: 24px;
-    background: rgba(0,0,0,0.18);
+    background: rgba(255,255,255,0.18);
     border-radius: 999px;
     position: relative;
     transition: background 0.2s ease;
@@ -199,7 +200,7 @@
     transition: transform 0.2s ease;
 }
 .cg-item__toggle input[type="checkbox"]:checked ~ .cg-item__toggle-track {
-    background: #4a122a;
+    background: #8b5cf6;
 }
 .cg-item__toggle input[type="checkbox"]:checked ~ .cg-item__toggle-track .cg-item__toggle-thumb {
     transform: translateX(20px);
@@ -223,16 +224,16 @@
 .cg-item__field-label {
     font-size: 0.72rem;
     font-weight: 700;
-    color: var(--admin-muted);
+    color: #a1a1aa;
     letter-spacing: 0.05em;
 }
 .cg-item__field textarea {
     width: 100%;
     min-height: 60px;
     padding: 10px 12px;
-    border: 1px solid rgba(74, 18, 42, 0.18);
+    border: 1px solid rgba(168, 85, 247, 0.30);
     border-radius: 10px;
-    background: #fff;
+    background: rgba(255, 255, 255, 0.05);
     font-size: 0.92rem;
     color: var(--admin-text);
     resize: vertical;
@@ -250,7 +251,7 @@
 .cg-save-bar {
     position: sticky;
     bottom: 0;
-    background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0.96) 35%);
+    background: linear-gradient(180deg, rgba(10,10,10,0), rgba(10,10,10,0.96) 35%);
     padding: 16px 0 8px;
     margin-top: 8px;
     text-align: right;

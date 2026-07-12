@@ -5,10 +5,6 @@
 @section('content')
     @php
         $editingRecord = $selectedCatalog['editing_record'] ?? null;
-        $sortLabels = [
-            'created_desc' => '登録日順',
-            'name_asc' => 'あいうえお順',
-        ];
         $hasDirectory = $selectedCatalog
             ? collect($selectedCatalog['fields'])->contains(fn ($field) => $field['input'] === 'directory')
             : false;
@@ -16,14 +12,20 @@
             ? (!empty($selectedCatalog['uses_del_flg']) || !empty($selectedCatalog['uses_is_active']))
             : false;
         $hasSortOrder = $selectedCatalog ? !empty($selectedCatalog['uses_sort_order']) : false;
+        // ドラッグ並び替えは「表示順」表示のときのみ有効（あいうえお順表示中は並び順が意味を持たないため）
+        $canReorder = $hasSortOrder && $selectedSort === 'created_desc';
+        $sortLabels = [
+            'created_desc' => $hasSortOrder ? '表示順' : '登録日順',
+            'name_asc' => 'あいうえお順',
+        ];
     @endphp
     <div class="admin-page">
         @include('admin.parts.page-title', [
             'eyebrow' => 'MASTER',
             'title' => 'マスタコントロール',
             'info' => '
-                <p>管理したいマスタを選択して、項目の<strong>追加・編集・削除・表示順の変更</strong>を行います。</p>
-                <p>表示順の数値が小さいほど画面上で先頭に並びます。</p>
+                <p>管理したいマスタを選択して、項目の<strong>追加・編集・削除・並び替え</strong>を行います。</p>
+                <p>一覧の <i class="fas fa-grip-lines"></i> をドラッグ（スマホは長押しして移動）すると表示順を並び替えでき、離した時点で自動保存されます。</p>
             ',
         ])
 
@@ -132,8 +134,14 @@
                     <div class="admin-master-records">
                         <div class="admin-records-head">
                             <div>
-                                <div class="admin-records-title">登録済み一覧</div>
-                                <div class="admin-records-copy">表示順は数値が小さいほど上に並びます。空欄の場合は登録日順で表示されます。</div>
+                                <div class="admin-records-title">登録済み一覧 <span class="master-count-chip">{{ number_format($selectedCatalog['records']->count()) }}件</span></div>
+                                @if ($canReorder)
+                                    <div class="admin-records-copy"><i class="fas fa-grip-lines"></i> をドラッグ（スマホは長押し）して表示順を並び替えできます。並び替えると自動で保存されます。</div>
+                                @elseif ($hasSortOrder)
+                                    <div class="admin-records-copy">並び替えは「表示順」タブに切り替えると行えます。</div>
+                                @else
+                                    <div class="admin-records-copy">このマスタは登録日の新しい順に表示されます。</div>
+                                @endif
                             </div>
                             <div class="admin-records-toolbar">
                                 <label class="admin-search-box">
@@ -158,13 +166,23 @@
                             </div>
                         </div>
                         {{-- テーブル → レコードカードのリスト（スマホでも横スクロールなしで全操作可能） --}}
-                        <ul class="master-list" id="master-records-body">
+                        <ul class="master-list {{ $canReorder ? 'is-sortable' : '' }}" id="master-records-body"
+                            @if ($canReorder) data-reorder-url="{{ route('admin.masters.catalogs.reorder', $selectedCatalog['key']) }}" @endif>
                             @forelse ($selectedCatalog['records'] as $item)
                                 <li class="master-record-row master-item {{ $editingRecord && $editingRecord->id === $item->id ? 'is-editing' : '' }}"
+                                    data-record-id="{{ $item->id }}"
                                     data-search="{{ strtolower(trim(($item->id ?? '') . ' ' . $item->name . ' ' . ($item->directory ?? '') . ' ' . (($item->is_active ?? 1) ? '有効' : '無効') . ' ' . ($item->created_at ? \Illuminate\Support\Carbon::parse($item->created_at)->format('Y-m-d') : ''))) }}">
 
-                                    {{-- 1段目：名称（タップでその場編集） + 操作 --}}
+                                    {{-- 1段目：ドラッグハンドル + 名称（タップでその場編集） + 操作 --}}
                                     <div class="master-item__row">
+                                        @if ($canReorder)
+                                            <button type="button" class="master-item__drag" data-drag-handle
+                                                    title="ドラッグして並び替え（スマホは長押し）"
+                                                    aria-label="ドラッグして並び替え">
+                                                <i class="fas fa-grip-lines" aria-hidden="true"></i>
+                                            </button>
+                                            <span class="master-item__pos" data-pos-chip>{{ $loop->iteration }}</span>
+                                        @endif
                                         <div class="master-item__name" data-name-cell>
                                             <button type="button"
                                                     class="master-inline-name"
@@ -235,18 +253,6 @@
                                             <span class="master-item__chip"><i class="fas fa-folder"></i>{{ $item->directory }}</span>
                                         @endif
                                         <span class="master-item__chip">{{ $item->created_at ? \Illuminate\Support\Carbon::parse($item->created_at)->format('Y-m-d') : '-' }}</span>
-                                        @if ($hasSortOrder)
-                                            <form method="POST" action="{{ route('admin.masters.catalogs.sort-order', [$selectedCatalog['key'], $item->id]) }}" class="sort-order-form">
-                                                @csrf
-                                                @method('PATCH')
-                                                <input type="hidden" name="current_sort" value="{{ $selectedSort }}">
-                                                <span class="sort-order-label">表示順</span>
-                                                <input type="number" name="sort_order" value="{{ $item->sort_order ?? 0 }}" min="0" max="99999" class="sort-order-input" aria-label="表示順" inputmode="numeric">
-                                                <button type="submit" class="sort-order-save" title="表示順を保存">
-                                                    <i class="fas fa-check"></i>
-                                                </button>
-                                            </form>
-                                        @endif
                                     </div>
                                 </li>
                             @empty
@@ -337,6 +343,151 @@
                 if (firstInput) firstInput.focus();
             }, 120);
         }
+
+        // ---- ドラッグ＆ドロップ並び替え（PC: そのままドラッグ / スマホ: 長押しして移動） ----
+        (function () {
+            var list = document.getElementById('master-records-body');
+            if (!list || !list.dataset.reorderUrl) return;
+            var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            var csrf = csrfMeta ? csrfMeta.content : '';
+
+            var toast = document.createElement('div');
+            toast.className = 'master-reorder-toast';
+            document.body.appendChild(toast);
+            var toastTimer = null;
+            function showToast(message, isError) {
+                toast.textContent = message;
+                toast.classList.toggle('is-error', !!isError);
+                toast.classList.add('is-show');
+                clearTimeout(toastTimer);
+                toastTimer = setTimeout(function () { toast.classList.remove('is-show'); }, 2600);
+            }
+
+            function allRows() {
+                return Array.prototype.slice.call(list.querySelectorAll('.master-record-row'));
+            }
+            function visibleRows() {
+                return allRows().filter(function (r) { return !r.classList.contains('is-hidden'); });
+            }
+            function currentOrder() {
+                return allRows().map(function (r) { return r.dataset.recordId; }).join(',');
+            }
+            function updatePositions() {
+                allRows().forEach(function (row, i) {
+                    var chip = row.querySelector('[data-pos-chip]');
+                    if (chip) chip.textContent = i + 1;
+                });
+            }
+
+            var dragging = null;
+            var orderBeforeDrag = '';
+            var holdTimer = null;
+            var startY = 0;
+
+            function startDrag(row) {
+                dragging = row;
+                orderBeforeDrag = currentOrder();
+                row.classList.add('is-dragging');
+                document.body.classList.add('master-reorder-active');
+                if (navigator.vibrate) navigator.vibrate(12);
+            }
+
+            function moveAt(clientY) {
+                if (!dragging) return;
+                // 画面端に近づいたら自動スクロール
+                if (clientY < 90) window.scrollBy(0, -14);
+                else if (clientY > window.innerHeight - 90) window.scrollBy(0, 14);
+
+                var siblings = visibleRows().filter(function (r) { return r !== dragging; });
+                for (var i = 0; i < siblings.length; i++) {
+                    var rect = siblings[i].getBoundingClientRect();
+                    if (clientY < rect.top + rect.height / 2) {
+                        if (dragging.nextElementSibling !== siblings[i]) {
+                            list.insertBefore(dragging, siblings[i]);
+                            updatePositions();
+                        }
+                        return;
+                    }
+                }
+                var last = siblings[siblings.length - 1];
+                if (last && last.nextElementSibling !== dragging) {
+                    list.insertBefore(dragging, last.nextElementSibling);
+                    updatePositions();
+                }
+            }
+
+            function endDrag() {
+                clearTimeout(holdTimer);
+                holdTimer = null;
+                if (!dragging) return;
+                var row = dragging;
+                dragging = null;
+                row.classList.remove('is-dragging');
+                document.body.classList.remove('master-reorder-active');
+                var newOrder = currentOrder();
+                if (newOrder === orderBeforeDrag) return;
+                persist(newOrder.split(','), orderBeforeDrag);
+            }
+
+            function persist(ids, previousOrder) {
+                fetch(list.dataset.reorderUrl, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrf,
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ ids: ids }),
+                }).then(function (res) {
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    showToast('表示順を保存しました');
+                }).catch(function () {
+                    // 失敗時は元の並びに戻す
+                    var byId = {};
+                    allRows().forEach(function (r) { byId[r.dataset.recordId] = r; });
+                    previousOrder.split(',').forEach(function (id) {
+                        if (byId[id]) list.appendChild(byId[id]);
+                    });
+                    var empties = list.querySelectorAll('.master-list__empty');
+                    empties.forEach(function (li) { list.appendChild(li); });
+                    updatePositions();
+                    showToast('並び替えの保存に失敗しました', true);
+                });
+            }
+
+            list.querySelectorAll('[data-drag-handle]').forEach(function (handle) {
+                handle.addEventListener('pointerdown', function (e) {
+                    if (dragging) return;
+                    var row = handle.closest('.master-record-row');
+                    if (!row) return;
+                    startY = e.clientY;
+                    try { handle.setPointerCapture(e.pointerId); } catch (_) {}
+                    if (e.pointerType === 'touch') {
+                        // スマホ: 長押し（300ms）でドラッグ開始。それまでに大きく動いたらスクロール扱い
+                        holdTimer = setTimeout(function () { startDrag(row); }, 300);
+                    } else {
+                        startDrag(row);
+                        e.preventDefault();
+                    }
+                });
+                handle.addEventListener('pointermove', function (e) {
+                    if (!dragging) {
+                        if (holdTimer && Math.abs(e.clientY - startY) > 12) {
+                            clearTimeout(holdTimer);
+                            holdTimer = null;
+                        }
+                        return;
+                    }
+                    e.preventDefault();
+                    moveAt(e.clientY);
+                });
+                handle.addEventListener('pointerup', endDrag);
+                handle.addEventListener('pointercancel', endDrag);
+                // ハンドル上ではブラウザのスクロール・選択を無効化（touch-action は CSS 側でも指定）
+                handle.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+            });
+        })();
     })();
 </script>
 @endpush
@@ -505,24 +656,78 @@
         border-radius: 12px;
     }
 
-    /* 表示順フォームはメタ行の右端へ */
-    .sort-order-form {
-        margin-left: auto;
+    /* ---- ドラッグ＆ドロップ並び替え ---- */
+    .master-count-chip {
+        display: inline-block;
+        margin-left: 8px;
+        padding: 2px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(168, 85, 247, 0.35);
+        background: rgba(168, 85, 247, 0.10);
+        color: #c4b5fd;
+        font-size: 0.7rem;
+        font-weight: 700;
+        vertical-align: 2px;
+    }
+    .master-item__drag {
+        flex: 0 0 auto;
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        background: rgba(255, 255, 255, 0.03);
+        color: #a1a1aa;
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        justify-content: center;
+        cursor: grab;
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
     }
-    .sort-order-label { font-size: 0.68rem; color: #a1a1aa; }
-    .sort-order-input { width: 72px; min-height: 36px !important; text-align: right; }
-    .sort-order-save {
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        border: 1px solid rgba(110, 231, 183, 0.4);
-        background: rgba(110, 231, 183, 0.12);
-        color: #6ee7b7;
-        cursor: pointer;
+    .master-item__drag:active { cursor: grabbing; color: #c4b5fd; border-color: rgba(168, 85, 247, 0.5); }
+    .master-item__pos {
+        flex: 0 0 auto;
+        min-width: 26px;
+        text-align: center;
+        font-size: 0.72rem;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+        color: #c4b5fd;
     }
+    .master-item.is-dragging {
+        border-color: rgba(168, 85, 247, 0.65);
+        background: rgba(168, 85, 247, 0.10);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+        opacity: 0.96;
+        position: relative;
+        z-index: 3;
+    }
+    body.master-reorder-active {
+        user-select: none;
+        -webkit-user-select: none;
+        overscroll-behavior: contain;
+    }
+    .master-reorder-toast {
+        position: fixed;
+        left: 50%;
+        bottom: 28px;
+        transform: translateX(-50%) translateY(8px);
+        background: #1a1a1a;
+        border: 1px solid rgba(168, 85, 247, 0.5);
+        color: #f5f5f5;
+        padding: 10px 18px;
+        border-radius: 999px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        z-index: 1000;
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        pointer-events: none;
+    }
+    .master-reorder-toast.is-show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .master-reorder-toast.is-error { border-color: #e15c5c; color: #fecaca; }
 
     /* ---- 検索・並び替えツールバー：スマホでは縦積み ---- */
     @media (max-width: 640px) {
@@ -531,7 +736,6 @@
         .admin-sort-switch { display: flex; }
         .admin-sort-switch .admin-sort-link { flex: 1; text-align: center; padding: 10px 8px; }
         .admin-master-layout { display: flex; flex-direction: column; }
-        .sort-order-form { margin-left: 0; width: 100%; justify-content: flex-end; }
     }
 </style>
 @endpush
