@@ -16,29 +16,7 @@
         @include('common.search.sort-panel')
     </div>
 
-    {{-- クイックフィルタ：モーダルを開かずワンタップで絞り込み（モーダル内フォームと同期） --}}
-    <div class="search-quick-chips" role="group" aria-label="クイック絞り込み">
-        <button type="button" class="search-quick-chip"
-                data-quick-chip
-                data-quick-actions='[{"type":"select","name":"hourly_wage","value":"4000"}]'>
-            <i class="fas fa-yen-sign" aria-hidden="true"></i>時給4,000円〜
-        </button>
-        <button type="button" class="search-quick-chip"
-                data-quick-chip
-                data-quick-actions='[{"type":"checkLabel","name":"welcome_tag_ids[]","label":"未経験"}]'>
-            <i class="fas fa-seedling" aria-hidden="true"></i>未経験OK
-        </button>
-        <button type="button" class="search-quick-chip"
-                data-quick-chip
-                data-quick-actions='[{"type":"checkLabel","name":"work_style_tag_ids[]","label":"ノルマ"}]'>
-            <i class="fas fa-face-smile" aria-hidden="true"></i>ノルマなし
-        </button>
-        <button type="button" class="search-quick-chip"
-                data-quick-chip
-                data-quick-actions='[{"type":"checkLabel","name":"welcome_tag_ids[]","label":"体入"}]'>
-            <i class="fas fa-door-open" aria-hidden="true"></i>体入OK
-        </button>
-    </div>
+    {{-- クイックフィルタ（簡易検索チップ）は廃止。絞り込みは詳細検索（保存機能つき）に一本化 --}}
 
     <div class="search-filter-summary" id="search-condition-summary" style="display: none;">
         <span class="search-filter-summary__label">指定中の条件：</span>

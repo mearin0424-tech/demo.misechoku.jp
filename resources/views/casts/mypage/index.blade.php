@@ -40,20 +40,21 @@
                     <span class="absolute top-5 -left-[8px] w-0 h-0 border-y-[8px] border-y-transparent border-r-[10px] border-r-line-accent/40"></span>
                     <span class="absolute top-5 -left-[6px] w-0 h-0 border-y-[7px] border-y-transparent border-r-[9px] border-r-surface-from"></span>
 
+                    {{-- 本文が主役：最低2〜3行ぶんの高さを確保 --}}
                     <p id="display-word"
                        data-placeholder="{{ $wordPlaceholder }}"
-                       class="text-[13px] leading-relaxed {{ $word === '' ? 'text-text-sub' : 'text-text-main' }}">
+                       class="min-h-[52px] text-[13px] leading-relaxed {{ $word === '' ? 'text-text-sub' : 'text-text-main' }}">
                         {{ $word !== '' ? $word : $wordPlaceholder }}
                     </p>
 
-                    {{-- 最終更新 + 控えめな編集ボタン（右端） --}}
-                    <div class="mt-2 pt-2 border-t border-line flex items-center justify-between gap-2">
-                        <span id="display-word-updated" class="text-[10px] text-text-sub">
+                    {{-- 最終更新 + 編集：1行のコンパクトなフッターに圧縮 --}}
+                    <div class="mt-1.5 pt-1 border-t border-line flex items-center justify-between gap-2 leading-none">
+                        <span id="display-word-updated" class="text-[10px] text-text-sub leading-none">
                             最終更新 {{ $cast['appeal_updated_at'] ?? '未設定' }}
                         </span>
                         <button type="button" id="open-word-edit-btn"
                                 aria-label="ひとことを編集"
-                                class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] text-text-sub hover:text-accent-text hover:bg-accent/10 active:scale-95 transition-all">
+                                class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] leading-none text-text-sub hover:text-accent-text hover:bg-accent/10 active:scale-95 transition-all">
                             <x-ui.icon name="edit" class="text-[10px]" />編集
                         </button>
                     </div>
@@ -78,7 +79,21 @@
         @php
             $castTodos = collect($todoList ?? []);
             $castMgmtCount = $castTodos->whereIn('key', ['cast.deposit_unconfirmed'])->count();
+            $identityTodo = $castTodos->first(fn ($t) => in_array($t['key'] ?? '', ['cast.identity_unsubmitted', 'cast.identity_rejected'], true));
         @endphp
+
+        {{-- 本人確認が未提出/差戻しのときはページ上部で明示（店舗側の求人非公開アラートと同部品） --}}
+        @if($identityTodo)
+            <div class="mypage-alert" role="alert">
+                <span class="mypage-alert__icon"><i class="fas fa-id-card"></i></span>
+                <span class="mypage-alert__body">
+                    <p class="mypage-alert__title">本人確認が完了していません</p>
+                    <p class="mypage-alert__text">{{ $identityTodo['text'] ?? '本人確認書類を提出してください' }}</p>
+                </span>
+                <a href="{{ route('cast.mypage.identity') }}" class="mypage-alert__btn">本人確認へ</a>
+            </div>
+        @endif
+
         <div class="mypage-menu-grid mb-1">
             <a href="{{ route('cast.mypage.management') }}" class="mypage-tile mypage-tile--wide">
                 <i class="fas fa-yen-sign mypage-tile__icon"></i>
@@ -185,10 +200,12 @@
                         <x-ui.icon name="super" class="text-lg" /> STYLE &amp; TAGS
                     </h3>
                     <div class="flex flex-col gap-3">
-                        <div class="flex justify-between items-center border-b border-line pb-2">
-                            <span class="text-[12px] text-text-sub font-medium">接客タイプ</span>
-                            <span class="text-[13px] font-bold text-text-main">{{ $cast['personality_type'] ?: '--' }}</span>
-                        </div>
+                        {{-- 接客タイプ：目立つカード（タップで解説 / 診断やり直し導線つき） --}}
+                        @include('casts.profile.parts.personality-type', [
+                            'typeCode'  => $cast['personality_type'] ?? '',
+                            'canRetest' => true,
+                            'retestUrl' => asset('personality-test') . '?' . http_build_query(['return_to' => route('cast.mypage.index')]),
+                        ])
                         <div class="flex justify-between items-center border-b border-line pb-2">
                             <span class="text-[12px] text-text-sub font-medium">ルックス</span>
                             <span class="text-[13px] font-bold text-text-main">{{ $cast['my_field'] ?? '--' }}</span>

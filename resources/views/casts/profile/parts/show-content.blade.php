@@ -186,10 +186,11 @@
                         <i class="fas fa-tags"></i> STYLE &amp; TAGS
                     </h3>
                     <div class="flex flex-col gap-3">
-                        <div class="flex justify-between items-center border-b border-line pb-2">
-                            <span class="text-[12px] text-text-sub font-medium">接客タイプ</span>
-                            <span class="text-[13px] font-bold text-text-main">{{ $cast['personality_type'] ?? '--' }}</span>
-                        </div>
+                        {{-- 接客タイプ：目立つカード（タップで解説。他者表示なので再診断導線なし） --}}
+                        @include('casts.profile.parts.personality-type', [
+                            'typeCode'  => $cast['personality_type'] ?? '',
+                            'canRetest' => false,
+                        ])
                         <div class="flex justify-between items-center border-b border-line pb-2">
                             <span class="text-[12px] text-text-sub font-medium">ルックス</span>
                             <span class="text-[13px] font-bold text-text-main">{{ $cast['my_field'] ?? '--' }}</span>

@@ -101,3 +101,75 @@
 /* 後方互換：既存の shop-mypage-* クラス名でも同じ見た目に */
 .shop-mypage-menu-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .shop-mypage-tile { position: relative; }
+
+/* =====================================================================
+   MyPage 要対応アラート（フラット / danger トーン）
+   求人非公開・書類未承認など「気づかないと機会損失になる状態」を
+   ページ上部で明確に知らせるための共通部品。
+   ===================================================================== */
+.mypage-alert {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 12px;
+    background: var(--color-danger-bg, rgba(248, 113, 113, 0.14));
+    border: 1px solid var(--color-danger-line, rgba(248, 113, 113, 0.40));
+    margin: 0 0 12px;
+}
+.mypage-alert__icon {
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(248, 113, 113, 0.16);
+    color: #fca5a5;
+    font-size: 0.9rem;
+}
+.mypage-alert__body { flex: 1 1 180px; min-width: 0; }
+.mypage-alert__title {
+    margin: 0 0 2px;
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: #fecaca;
+}
+.mypage-alert__text {
+    margin: 0;
+    font-size: 0.72rem;
+    line-height: 1.6;
+    color: var(--color-text-sub, #b8b8b8);
+}
+.mypage-alert__btn {
+    flex: 0 0 auto;
+    margin-left: auto;
+    padding: 9px 16px;
+    border-radius: 999px;
+    background: #e15c5c;
+    color: #fff;
+    font-size: 0.74rem;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: filter 0.15s ease;
+}
+.mypage-alert__btn:hover { filter: brightness(1.08); }
+
+/* タブボタン右上の警告ミニバッジ（例: JOB タブの「非公開」） */
+.tab-alert-badge {
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: #e15c5c;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: 0.04em;
+    pointer-events: none;
+}

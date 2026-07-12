@@ -197,12 +197,14 @@ keyframes はコンパイル済み CSS にのみ存在する。**画面側に `<
 | **Secondary**（補助導線・チップ・キャンセル） | 薄い accent 面 `bg-accent/10` + 枠 `border-line-accent/40` + `text-accent-text` | **フラット** | `x-ui.button variant=outline` |
 | **Ghost**（小さな編集・閉じる等） | 枠なし。`text-text-sub` → hover `text-accent-text` | **フラット** | MyPage ひとこと「編集」ボタンが正 |
 | **Destructive**（削除・ログアウト） | danger トークン（赤アウトライン。確定操作のみベタ赤） | フラット（確定ボタンのみ立体可） | `.btn-logout` / `x-ui.button variant=danger` |
-| **金銭・実績の表示**（ボーナス額・優良店・KEEP アクティブ） | ゴールド（`--color-gold-from/to`, `#f6d36a` 系） | バッジは立体可 | **ボタン背景には使わない** |
+| **金銭・実績の表示**（ボーナス額・優良店・KEEP アクティブ） | ゴールド（`--color-gold-from/to`, `#f6d36a` 系） | **フラット** | **ボタン背景には使わない** |
 | **感情アクション**（LIKE） | ピンク（`#ff8fbf → var(--accent)`） | アクティブ時のみグロー | `.fav-circle--like` |
 
 **深度の原則：**
 - 立体（3D）＝「押すと何かが起こる主要アクション」だけ
 - ネオングロー＝「状態フィードバック」だけ（LIKE/KEEP アクティブ・focus ring・ナビ active）。装飾目的で光らせない
+- **バッジは常にフラット**（ベタ塗り + 暗背景からの切り抜きリングのみ。グラデ・立体影は禁止）。
+  通常カウント = accent ベタ / 未済・緊急・要対応 = danger ベタ（#e15c5c）
 - それ以外はフラット
 
 **hue の原則：**

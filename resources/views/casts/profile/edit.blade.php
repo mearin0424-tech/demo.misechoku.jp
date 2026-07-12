@@ -190,11 +190,12 @@
 <style>
 .cast-edit-page { padding: 12px 0 0; }
 .cast-edit-form { position: relative; padding: 0 0 108px; }
-.cast-edit-section { margin: 0 0 14px; padding: 14px; border-radius: 14px; background: rgba(26, 10, 14, .8); border: 1px solid rgba(74, 29, 40, .4); }
+/* セクションカード：他画面のカード（surface + アンビエント紫枠）と同じトーンに統一 */
+.cast-edit-section { margin: 0 0 14px; padding: 14px; border-radius: 14px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012)); border: 1px solid rgba(168, 85, 247, 0.25); }
 .cast-edit-section h3 { margin: 0 0 12px; font-size: 14px; color: var(--accent-text, #f0a6c4); font-weight: 700; display: flex; gap: 8px; align-items: center; }
 .field { margin-bottom: 12px; }
 .field:last-child { margin-bottom: 0; }
-.field > label { display: block; margin-bottom: 6px; font-size: 0.78rem; font-weight: 700; color: rgba(232, 213, 163, 0.78); letter-spacing: 0.04em; }
+.field > label { display: block; margin-bottom: 6px; font-size: 0.78rem; font-weight: 700; color: var(--color-text-sub, #b8b8b8); letter-spacing: 0.04em; }
 .required { color: #f87171; margin-left: 4px; }
 .cast-input, .cast-select {
     width: 100%;
@@ -210,7 +211,7 @@
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 .cast-input[type="date"] { min-height: 44px; color-scheme: dark; font-variant-numeric: tabular-nums; }
-.cast-input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(79%) sepia(29%) saturate(566%) hue-rotate(5deg) brightness(91%) contrast(89%); cursor: pointer; }
+.cast-input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) opacity(.75); cursor: pointer; }
 .cast-textarea { resize: vertical; line-height: 1.6; }
 .min-h100 { min-height: 110px; }
 .cast-input:focus, .cast-select:focus { border-color: var(--accent, #d670a2); box-shadow: 0 0 0 3px rgba(var(--accent-rgb, 214, 112, 162), 0.22); }
@@ -241,6 +242,30 @@
 .radio-like span:last-child { color: #a0a0a0; font-size: 12px; font-weight: 600; }
 .radio-like input:checked + .dot + span { color: #fff; }
 .save-bar { position: absolute; left: 0; right: 0; bottom: 0; padding: 24px 16px 16px; background: linear-gradient(to top, #050505 35%, rgba(5, 5, 5, 0.92) 65%, rgba(5, 5, 5, 0)); }
-.save-btn { width: 100%; border: 1px solid #a63253; border-radius: 16px; background: linear-gradient(135deg, #8a2542, #5a1628); color: #fff; font-weight: 700; letter-spacing: .08em; padding: 14px; display: inline-flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, .45); }
+/* 保存 = Primary CTA（DESIGN.md §10：アクセントグラデ + 立体） */
+.save-btn {
+    width: 100%;
+    border: 0;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--accent-grad-from), var(--accent-grad-to));
+    color: var(--on-accent-strong, #fff);
+    font-weight: 700;
+    letter-spacing: .08em;
+    padding: 14px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    box-shadow:
+        0 6px 14px rgba(0, 0, 0, .45),
+        inset 0 1px 0 rgba(255, 255, 255, .20),
+        inset 0 -1px 0 rgba(0, 0, 0, .18);
+    transition: filter .15s ease, transform .12s ease;
+}
+.save-btn:hover { filter: brightness(1.06); }
+.save-btn:active {
+    transform: scale(.98);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .45), inset 0 2px 4px rgba(0, 0, 0, .2);
+}
 </style>
 @endsection

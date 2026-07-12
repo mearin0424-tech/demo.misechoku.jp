@@ -30,20 +30,21 @@
                     <span class="absolute top-5 -left-[8px] w-0 h-0 border-y-[8px] border-y-transparent border-r-[10px] border-r-line-accent/40"></span>
                     <span class="absolute top-5 -left-[6px] w-0 h-0 border-y-[7px] border-y-transparent border-r-[9px] border-r-surface-from"></span>
 
+                    {{-- 本文が主役：最低2〜3行ぶんの高さを確保 --}}
                     <p id="display-word"
                        data-placeholder="{{ $wordPlaceholder }}"
-                       class="text-[13px] leading-relaxed {{ $word === '' ? 'text-text-sub' : 'text-text-main' }}">
+                       class="min-h-[52px] text-[13px] leading-relaxed {{ $word === '' ? 'text-text-sub' : 'text-text-main' }}">
                         {{ $word !== '' ? $word : $wordPlaceholder }}
                     </p>
 
-                    {{-- 最終更新 + 控えめな編集ボタン（右端） --}}
-                    <div class="mt-2 pt-2 border-t border-line flex items-center justify-between gap-2">
-                        <span id="display-word-updated" class="text-[10px] text-text-sub">
+                    {{-- 最終更新 + 編集：1行のコンパクトなフッターに圧縮 --}}
+                    <div class="mt-1.5 pt-1 border-t border-line flex items-center justify-between gap-2 leading-none">
+                        <span id="display-word-updated" class="text-[10px] text-text-sub leading-none">
                             最終更新 {{ $shopData['appeal_updated_at'] ?? '未設定' }}
                         </span>
                         <button type="button" id="open-word-edit-btn"
                                 aria-label="ひとことを編集"
-                                class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] text-text-sub hover:text-accent-text hover:bg-accent/10 active:scale-95 transition-all">
+                                class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] leading-none text-text-sub hover:text-accent-text hover:bg-accent/10 active:scale-95 transition-all">
                             <x-ui.icon name="edit" class="text-[10px]" />編集
                         </button>
                     </div>
@@ -72,6 +73,34 @@
                 </button>
             </div>
         </div>
+
+        @php
+            $isJobPublished  = (bool) ($jobSummary['is_published'] ?? false);
+            $licenseApproved = (int) ($shopData['approval'] ?? 0) === 1;
+        @endphp
+
+        {{-- ===== 求人非公開アラート：気づかないと機会損失になるためページ最上部で明示 =====
+             許可証未承認が原因の場合は、許可証登録（PROFILE タブ内 #license-section）へ直接誘導 --}}
+        @unless($isJobPublished)
+            <div class="mypage-alert" role="alert">
+                <span class="mypage-alert__icon"><i class="fas fa-eye-slash"></i></span>
+                <span class="mypage-alert__body">
+                    <p class="mypage-alert__title">求人票が非公開になっています</p>
+                    <p class="mypage-alert__text">
+                        @if(!$licenseApproved)
+                            掲載には営業許可証の承認が必要です。許可証を提出し、運営の承認をお待ちください。
+                        @else
+                            現在、キャストの検索・スワイプにお店が表示されません。公開設定を確認してください。
+                        @endif
+                    </p>
+                </span>
+                @if(!$licenseApproved)
+                    <a href="#license-section" class="mypage-alert__btn">許可証を登録する</a>
+                @else
+                    <a href="{{ route('shop.recruits.show') }}" class="mypage-alert__btn">公開設定へ</a>
+                @endif
+            </div>
+        @endunless
 
         {{-- ===== 管理メニュー：2タイルのみ =====
              求人票 → JOB タブ内、プロファイル → PROFILE タブ内、
@@ -107,9 +136,12 @@
                     <span class="app-title text-[10px] tracking-widest">GALLERY</span>
                 </button>
                 <button type="button" data-tab="job"
-                        class="flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
+                        class="relative flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
                     <i class="fas fa-briefcase text-[14px]"></i>
                     <span class="app-title text-[10px] tracking-widest">JOB</span>
+                    @unless($isJobPublished)
+                        <span class="tab-alert-badge">非公開</span>
+                    @endunless
                 </button>
                 <button type="button" data-tab="shop"
                         class="flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
@@ -175,6 +207,18 @@
                             <span><span class="text-text-sub">採用</span> <strong class="text-text-main">{{ number_format($js['hired_count'] ?? 0) }}</strong></span>
                         </div>
                     </div>
+
+                    {{-- 非公開時の理由と次アクション --}}
+                    @unless($isJobPublished)
+                        <p class="mt-2.5 pt-2.5 border-t border-line text-[11px] leading-relaxed text-text-sub">
+                            @if(!$licenseApproved)
+                                <i class="fas fa-file-shield text-danger text-[10px] mr-1"></i>掲載には営業許可証の承認が必要です。
+                                <a href="#license-section" class="font-bold text-accent-text underline">許可証を登録する</a>
+                            @else
+                                <i class="fas fa-circle-info text-[10px] mr-1"></i>公開すると検索・スワイプに表示されます。上の「ステータス管理」から公開できます。
+                            @endif
+                        </p>
+                    @endunless
                 </x-ui.card>
 
                 {{-- BONUS card --}}
@@ -606,6 +650,17 @@ window.MYPAGE_GALLERY_CONFIG = {
     if (window.location.hash === '#license-section') openLicenseSection();
     window.addEventListener('hashchange', function () {
         if (window.location.hash === '#license-section') openLicenseSection();
+    });
+    // 同一ページ内のリンク（非公開アラート等）は hashchange が発火しないケースがあるため click でも開く
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest('a[href*="#license-section"]');
+        if (!a) return;
+        var url = new URL(a.getAttribute('href'), window.location.href);
+        if (url.pathname === window.location.pathname) {
+            e.preventDefault();
+            if (window.location.hash !== '#license-section') window.location.hash = 'license-section';
+            openLicenseSection();
+        }
     });
 })();
 </script>

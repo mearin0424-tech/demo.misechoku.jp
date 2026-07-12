@@ -59,43 +59,54 @@
     .case-card__meta strong { color: var(--color-text-header); font-weight: 800; }
     .case-card__meta-muted { color: var(--color-text-muted); }
 
-    /* 横長 7 ステップパイプライン */
+    /* 横長 7 ステップパイプライン（2026-07 refresh）
+       - 済み = accent ベタ + ✓ / 現在 = accent リング + ソフトハロー / 未来 = ニュートラル
+       - コネクタはドットの左右に "すき間" を作って、洗練された点線的リズムに */
     .case-pipeline {
-        list-style: none; margin: 0 0 10px; padding: 2px 0 4px;
-        display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; position: relative;
+        list-style: none; margin: 0 0 12px; padding: 4px 0 2px;
+        display: grid; grid-template-columns: repeat(7, 1fr); position: relative;
     }
-    .case-pipeline__step { position: relative; text-align: center; padding-top: 22px; font-size: 0.6rem; }
+    .case-pipeline__step { position: relative; text-align: center; padding-top: 27px; font-size: 0.6rem; }
     .case-pipeline__step::after {
-        content: ''; position: absolute; top: 8px; left: 50%; right: -50%;
-        height: 2px; background: rgba(168, 85, 247, 0.16); z-index: 0;
+        content: ''; position: absolute; top: 9px;
+        left: calc(50% + 13px); right: calc(-50% + 13px);
+        height: 2px; border-radius: 2px;
+        background: rgba(255, 255, 255, 0.10); z-index: 0;
     }
     .case-pipeline__step:last-child::after { display: none; }
-    .case-pipeline__step.is-done::after,
-    .case-pipeline__step.is-current::after { background: var(--gold); }
+    .case-pipeline__step.is-done::after { background: rgba(var(--accent-rgb, 214, 112, 162), 0.75); }
+    .case-pipeline__step.is-current::after {
+        background: linear-gradient(to right, rgba(var(--accent-rgb, 214, 112, 162), 0.6), rgba(255, 255, 255, 0.10));
+    }
 
     .case-pipeline__bullet {
         position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-        width: 18px; height: 18px; border-radius: 50%;
+        width: 20px; height: 20px; border-radius: 50%;
         display: inline-flex; align-items: center; justify-content: center;
-        font-size: 0.6rem; font-weight: 800;
-        background: rgba(255,255,255,0.04); border: 2px solid rgba(168, 85, 247, 0.28);
+        font-size: 0.58rem; font-weight: 800;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1.5px solid rgba(255, 255, 255, 0.16);
         color: var(--color-text-muted); z-index: 1;
+        transition: background .2s ease, border-color .2s ease;
     }
     .case-pipeline__step.is-done .case-pipeline__bullet {
         background: var(--accent, #d670a2); color: var(--on-accent, #1a0814); border-color: var(--accent, #d670a2);
+        font-size: 0.52rem;
     }
     .case-pipeline__step.is-current .case-pipeline__bullet {
-        background: rgba(168, 85, 247, 0.22); color: var(--gold-light); border-color: var(--gold);
-        animation: case-pulse 1.6s ease-in-out infinite;
-        box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.18);
+        background: #0e0e0e;
+        border: 2px solid var(--accent, #d670a2);
+        color: var(--accent-text, #f0a6c4);
+        box-shadow: 0 0 0 4px rgba(var(--accent-rgb, 214, 112, 162), 0.14);
+        animation: case-pulse 2s ease-in-out infinite;
     }
     @keyframes case-pulse {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.45); }
-        50% { box-shadow: 0 0 0 5px rgba(168, 85, 247, 0); }
+        0%, 100% { box-shadow: 0 0 0 4px rgba(var(--accent-rgb, 214, 112, 162), 0.14); }
+        50%      { box-shadow: 0 0 0 7px rgba(var(--accent-rgb, 214, 112, 162), 0.05); }
     }
-    .case-pipeline__label { display: block; font-size: 0.58rem; color: var(--color-text-muted); line-height: 1.2; }
-    .case-pipeline__step.is-done .case-pipeline__label,
-    .case-pipeline__step.is-current .case-pipeline__label { color: var(--color-text-header); font-weight: 700; }
+    .case-pipeline__label { display: block; font-size: 0.58rem; color: var(--color-text-muted); line-height: 1.25; }
+    .case-pipeline__step.is-done .case-pipeline__label { color: var(--color-text-sub, #b8b8b8); }
+    .case-pipeline__step.is-current .case-pipeline__label { color: var(--accent-text, #f0a6c4); font-weight: 800; }
 
     .case-card__highlights {
         display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px;
@@ -180,40 +191,6 @@
     .deposit-check-row span { flex: 1; cursor: pointer; }
     .deposit-check-row:has(input:checked) { background: rgba(168, 85, 247, 0.1); border-color: rgba(168, 85, 247, 0.45); }
 
-    /* フローティング CTA */
-    .deposit-cta-bar {
-        position: fixed; left: 50%; transform: translateX(-50%);
-        bottom: var(--footer-height, 60px); z-index: 90;
-        width: min(100vw, var(--max-content-width, 430px)); max-width: 100%;
-        padding: 10px var(--content-padding-x, 16px) calc(10px + env(safe-area-inset-bottom, 0));
-        background: rgba(10, 10, 10, 0.96);
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 -8px 24px rgba(0,0,0,0.45);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        animation: deposit-cta-slide-up 0.3s ease;
-    }
-    @keyframes deposit-cta-slide-up {
-        from { transform: translate(-50%, 100%); opacity: 0; }
-        to { transform: translate(-50%, 0); opacity: 1; }
-    }
-    .deposit-cta-bar__inner { display: flex; align-items: center; gap: 12px; }
-    .deposit-cta-bar__info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-    .deposit-cta-bar__amount { display: inline-flex; align-items: baseline; gap: 4px; color: #c4b5fd; font-weight: 800; }
-    .deposit-cta-bar__amount strong { font-size: 1.05rem; font-weight: 900; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.4); overflow: hidden; text-overflow: ellipsis; max-width: 50vw; white-space: nowrap; }
-    .deposit-cta-bar__amount i { font-size: 0.9rem; color: #a78bfa; }
-    .deposit-cta-bar__label { font-size: 0.7rem; color: rgba(196, 181, 253, 0.78); font-weight: 600; }
-    .deposit-cta-bar__btn {
-        flex: 0 0 auto; margin-left: auto; padding: 12px 18px; border-radius: 999px;
-        background: var(--accent, #d670a2);
-        color: var(--on-accent, #1a0814); border: 0; font-weight: 900; font-size: 0.92rem; cursor: pointer;
-        box-shadow: 0 6px 14px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.20), inset 0 -1px 0 rgba(0,0,0,.18);
-        display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
-    }
-    .deposit-cta-bar__btn:hover { filter: brightness(1.06); }
-    .deposit-cta-bar__btn:active { transform: scale(.96); box-shadow: 0 2px 5px rgba(0,0,0,.45), inset 0 2px 4px rgba(0,0,0,.2); }
-    body:has(.deposit-cta-bar) .cast-mypage-sub-page { padding-bottom: calc(var(--footer-height, 60px) + 80px) !important; }
-
     /* 振込先口座アコーディオン */
     .payment-bank-section { padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08); margin-top: 18px; }
     .payment-bank-accordion {
@@ -290,62 +267,37 @@
     .mypage-mini-row__status.is-rejected { background: rgba(220,38,38,0.12); color: #fca5a5; }
     .mypage-mini-row__chev { color: rgba(196, 181, 253, 0.4); font-size: 0.72rem; }
 
-    /* === ボーナスヒーローカード — サービスの肝。ページの視覚 MVP として
-           リッチなゴールドで堂々と "稼げる感" を打ち出す。 === */
+    /* === 獲得ボーナス金合計 — 枠なしのタイポグラフィ主体デザイン。
+           カードで囲わず、ゴールドグラデの金額そのものを主役にする。
+           下辺のヘアライン（ゴールド→透明）だけでセクションを区切る。 === */
     .employment-bonus-hero {
-        position: relative;
-        margin: 4px 0 26px;
-        padding: 22px 24px 24px;
-        border-radius: 22px;
-        background:
-            radial-gradient(circle at 0% 0%, rgba(246, 211, 106, 0.22), transparent 55%),
-            radial-gradient(circle at 100% 100%, rgba(184, 134, 11, 0.15), transparent 60%),
-            linear-gradient(180deg, rgba(246, 211, 106, 0.10), rgba(35, 26, 8, 0.85));
-        border: 1px solid rgba(246, 211, 106, 0.45);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        box-shadow:
-            0 10px 28px rgba(0, 0, 0, 0.45),
-            0 0 36px rgba(246, 211, 106, 0.18),
-            inset 0 1px 0 rgba(255, 255, 255, 0.12),
-            inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+        margin: 2px 0 24px;
+        padding: 4px 2px 16px;
         display: flex;
         flex-direction: column;
-        gap: 6px;
-        overflow: hidden;
+        gap: 8px;
+        border-bottom: 1px solid transparent;
+        border-image: linear-gradient(to right, rgba(246, 211, 106, 0.45), rgba(246, 211, 106, 0.08) 70%, transparent) 1;
     }
-    /* 右上の subtle shimmer（ゴールドが光ってる感じ） */
-    .employment-bonus-hero::after {
-        content: '';
-        position: absolute;
-        top: -20px; right: -20px;
-        width: 110px; height: 110px;
-        background: radial-gradient(circle, rgba(255, 245, 220, 0.22), transparent 65%);
-        pointer-events: none;
-        z-index: 0;
-    }
-    .employment-bonus-hero > * { position: relative; z-index: 1; }
     .employment-bonus-hero__label {
         font-size: 11px;
         letter-spacing: 0.18em;
-        color: var(--bonus-gold, #f6d36a);
+        color: rgba(246, 211, 106, 0.85);
         font-weight: 800;
         text-transform: uppercase;
         margin: 0;
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        text-shadow: 0 0 12px rgba(246, 211, 106, 0.4);
     }
     .employment-bonus-hero__label::before {
         content: '◆';
-        color: var(--bonus-gold, #f6d36a);
-        font-size: 0.85em;
-        text-shadow: 0 0 6px rgba(246, 211, 106, 0.7);
+        font-size: 0.8em;
+        opacity: 0.8;
     }
-    /* 金額はゴールドグラデーションテキスト + 強グロー */
+    /* 金額：ゴールドグラデーションテキスト（フラット。強グローは廃止） */
     .employment-bonus-hero__amount {
-        font-size: clamp(2.2rem, 8.8vw, 2.8rem);
+        font-size: clamp(2.3rem, 9vw, 3rem);
         font-weight: 900;
         background: linear-gradient(135deg,
             var(--bonus-gold-light, #fff5dc) 0%,
@@ -356,13 +308,16 @@
         background-clip: text;
         -webkit-text-fill-color: transparent;
         color: transparent;
-        font-feature-settings: 'tnum' 1, 'lnum' 1, 'ss01' 1;
+        font-feature-settings: 'tnum' 1, 'lnum' 1;
         font-variant-numeric: tabular-nums lining-nums;
         letter-spacing: -0.025em;
         line-height: 1;
-        filter:
-            drop-shadow(0 0 24px rgba(246, 211, 106, 0.35))
-            drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+    }
+    .employment-bonus-hero__meta {
+        font-size: 0.7rem;
+        color: var(--color-text-muted, #a0a0a0);
+        letter-spacing: 0.04em;
     }
 </style>
 @endpush
@@ -371,7 +326,10 @@
 <div class="content-wrapper animate-fadeIn">
     <div class="cast-mypage-sub-page">
         <section class="mypage-area">
-            <h1 class="mypage-page-title serif-font">採用・入金管理</h1>
+            <header class="mypage-page-head">
+                <h1 class="mypage-page-head__title"><i class="fas fa-yen-sign"></i>採用・入金管理</h1>
+                <p class="mypage-page-head__desc">採用が決まったお店のボーナス申請から、振込完了までの進み具合をここで確認・操作できます。</p>
+            </header>
 
             @php
                 $hiredCases = $hiredCases ?? [];
@@ -383,11 +341,13 @@
                 $bonusTotal = $bonusTotal ?? 0;
             @endphp
 
-            {{-- 獲得ボーナス金合計：ピル → ヒーローカードへ格上げ。
-                 ラベル小・金額大の縦積みで "総額が主役" の印象を作る。 --}}
+            {{-- 獲得ボーナス金合計：枠なし。金額のタイポグラフィが主役 --}}
             <div class="employment-bonus-hero">
                 <span class="employment-bonus-hero__label">獲得ボーナス金合計</span>
                 <span class="employment-bonus-hero__amount">¥{{ number_format($bonusTotal) }}</span>
+                @if($completedCases->count() > 0)
+                    <span class="employment-bonus-hero__meta">完了した案件 {{ $completedCases->count() }} 件の累計</span>
+                @endif
             </div>
 
             <div class="mypage-detail-box">
@@ -516,26 +476,7 @@
     </div>
 </div>
 
-@php $primaryActionable = $activeCases->filter(fn ($c) => !empty($c['actionable']))->first(); @endphp
-@if($primaryActionable && !empty($castBank['exists']))
-    <div class="deposit-cta-bar" id="deposit-cta-bar"
-         data-application-id="{{ $primaryActionable['application_id'] }}"
-         data-action="{{ $primaryActionable['actionable'] }}">
-        <div class="deposit-cta-bar__inner">
-            <div class="deposit-cta-bar__info">
-                <span class="deposit-cta-bar__amount">
-                    <i class="fas fa-store"></i>
-                    <strong>{{ $primaryActionable['shop_name'] }}</strong>
-                </span>
-                <span class="deposit-cta-bar__label">{{ $primaryActionable['actionable_label'] }}</span>
-            </div>
-            <button type="button" class="deposit-cta-bar__btn" id="deposit-cta-bar-submit">
-                <i class="fas {{ $primaryActionable['actionable'] === 'request' ? 'fa-paper-plane' : 'fa-check-circle' }}"></i>
-                {{ $primaryActionable['actionable_label'] }}
-            </button>
-        </div>
-    </div>
-@endif
+{{-- 画面下部の固定 CTA 帯は廃止（「進行中の案件」カード内のアクションボタンで十分） --}}
 
 {{-- レビュー投稿モーダル --}}
 <div id="review-post-modal" class="payment-bank-modal" role="dialog" aria-labelledby="review-post-modal-title" aria-modal="true" hidden>
@@ -819,17 +760,6 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('[data-close-bonus-modal]').forEach(function (e) { e.addEventListener('click', closeBonusModal); });
     if (reviewModal) reviewModal.addEventListener('click', function (e) { if (e.target === reviewModal) closeReviewModal(); });
     if (bonusModal) bonusModal.addEventListener('click', function (e) { if (e.target === bonusModal) closeBonusModal(); });
-
-    var ctaBar = document.getElementById('deposit-cta-bar');
-    var ctaBtn = document.getElementById('deposit-cta-bar-submit');
-    if (ctaBar && ctaBtn) {
-        ctaBtn.addEventListener('click', function () {
-            var action = ctaBar.getAttribute('data-action');
-            var id = ctaBar.getAttribute('data-application-id');
-            if (action === 'request' && id) openReviewModal(id);
-            else if (action === 'confirm') confirmDepositReceived();
-        });
-    }
 
     var rf = document.getElementById('review-post-form');
     if (rf) {

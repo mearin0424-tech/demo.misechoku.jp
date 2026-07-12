@@ -131,3 +131,95 @@
    ------------------------------------------------------------------ */
 /* サイドメニュー「アプリをインストール」hover の黄色文字 → accent */
 .pwa-install-btn:hover { color: var(--accent-text) !important; }
+
+/* ==================================================================
+   5. バッジの統一（2026-07-12 フラット化）
+   ルール:
+     - 通常のカウント/お知らせ = accent ベタ（テーマ追従）
+     - 未済・緊急・要対応     = danger ベタ（赤）
+     - グラデーション・内側ハイライト・ドロップ影は使わない。
+       暗背景から切り抜くリング（0 0 0 2px）だけ許可。
+   ================================================================== */
+.header-badge,
+.header-badge.is-accent,
+.badge-notify {
+    background: var(--accent) !important;
+    color: var(--on-accent) !important;
+    box-shadow: 0 0 0 2px rgba(10, 10, 10, 0.9) !important;
+}
+.header-badge.is-urgent {
+    background: #e15c5c !important;
+    color: #fff !important;
+}
+.mypage-tile__badge {
+    background: var(--accent) !important;
+    color: var(--on-accent) !important;
+    box-shadow: 0 0 0 2px rgba(10, 10, 10, 0.9) !important;
+}
+.mypage-tile__badge--urgent {
+    background: #e15c5c !important;
+    color: #fff !important;
+}
+
+/* ==================================================================
+   6. プルダウン（<select>）の選択肢の可読性
+   ダーク UI で OS ネイティブのドロップダウンが白背景×白文字になる
+   問題への対処。color-scheme をダークに宣言し、option にも明示指定。
+   ================================================================== */
+:root { color-scheme: dark; }
+select option,
+select optgroup {
+    background-color: #141414;
+    color: #f5f5f5;
+}
+
+/* ==================================================================
+   7. ファイル選択ボタンの統一
+   役割は Secondary（補助操作）→ フラットな accent アウトラインで統一。
+   - カスタムラベル型（.file-upload-btn: 本人確認・許可証 等）
+   - 生の <input type="file">（::file-selector-button）
+   ================================================================== */
+.file-upload-btn {
+    background: rgba(var(--accent-rgb), 0.12) !important;
+    color: var(--accent-text) !important;
+    border: 1px solid rgba(var(--accent-rgb), 0.45) !important;
+    box-shadow: none !important;
+    border-radius: 999px !important;
+    transition: background .15s ease, border-color .15s ease;
+}
+.file-upload-btn:hover {
+    background: rgba(var(--accent-rgb), 0.22) !important;
+    border-color: rgba(var(--accent-rgb), 0.7) !important;
+}
+input[type="file"]::file-selector-button {
+    margin-right: 10px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(var(--accent-rgb), 0.45);
+    background: rgba(var(--accent-rgb), 0.12);
+    color: var(--accent-text);
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease;
+}
+input[type="file"]::file-selector-button:hover {
+    background: rgba(var(--accent-rgb), 0.22);
+    border-color: rgba(var(--accent-rgb), 0.7);
+}
+
+/* ==================================================================
+   8. フラット化の底上げ
+   立体（inset + drop shadow）は Primary CTA（保存・送信・トーク等）
+   だけに残す。バッジ・チップ・セカンダリ・ユーティリティはフラット。
+   ================================================================== */
+/* KEEP / LIKE のアクティブ状態：グラデ → ベタ（グローは状態FBなので残す） */
+.fav-circle--keep[aria-pressed="true"] {
+    background: #e8c25a !important;
+    box-shadow: 0 0 12px rgba(246, 211, 106, 0.35) !important;
+}
+.fav-circle--like[aria-pressed="true"] {
+    background: var(--accent) !important;
+    box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.4) !important;
+}

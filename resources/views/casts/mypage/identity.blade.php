@@ -228,7 +228,10 @@
 <div class="content-wrapper animate-fadeIn">
     <div class="cast-mypage-sub-page">
         <section class="mypage-area">
-            <h1 class="mypage-page-title serif-font">本人確認</h1>
+            <header class="mypage-page-head">
+                <h1 class="mypage-page-head__title"><i class="fas fa-id-card"></i>本人確認（書類の提出）</h1>
+                <p class="mypage-page-head__desc">安心してご利用いただくため、本人確認書類の提出をお願いしています。運営の承認が完了すると、すべての機能が利用できます。</p>
+            </header>
 
             <div class="mypage-detail-box">
                 <div class="mypage-section">

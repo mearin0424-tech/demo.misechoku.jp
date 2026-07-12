@@ -1476,56 +1476,6 @@ body.page-search .connection-list--search {
 }
 
 /* ============================================================
-   クイックフィルタチップ（検索バー直下・ワンタップ絞り込み）
-   ============================================================ */
-.search-quick-chips {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding: 8px 0 4px;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-}
-.search-quick-chips::-webkit-scrollbar { display: none; }
-.search-quick-chip {
-    flex: 0 0 auto;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 7px 14px;
-    border-radius: 999px;
-    border: 1px solid rgba(168, 85, 247, 0.28);
-    background: rgba(20, 14, 22, 0.72);
-    color: rgba(196, 181, 253, 0.85);
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
-    -webkit-tap-highlight-color: transparent;
-}
-.search-quick-chip i { font-size: 0.72rem; color: var(--gold, #a78bfa); }
-.search-quick-chip:hover {
-    background: rgba(168, 85, 247, 0.14);
-    border-color: var(--gold-light, #c4b5fd);
-    color: #fff;
-}
-.search-quick-chip:active { transform: scale(0.96); }
-.search-quick-chip:focus-visible {
-    outline: 2px solid var(--gold-light, #c4b5fd);
-    outline-offset: 2px;
-}
-.search-quick-chip.is-active {
-    background: linear-gradient(135deg, rgba(214, 112, 162, 0.85), rgba(168, 85, 247, 0.80));
-    border-color: rgba(255, 255, 255, 0.35);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.40);
-}
-.search-quick-chip.is-active i { color: #fff; }
-.search-quick-chip[hidden] { display: none; }
-
-/* ============================================================
    アコーディオン頭：選択件数チップ（JS で挿入）
    ============================================================ */
 .detail-search-accordion__count {

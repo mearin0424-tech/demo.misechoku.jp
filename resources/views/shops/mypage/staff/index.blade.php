@@ -6,17 +6,19 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <style>
-    .staff-shell { padding: 0 16px 32px; max-width: 720px; margin: 0 auto; }
-    .staff-shell .mypage-page-title {
-        font-family: var(--font-sans);
-        font-size: 1.2rem; font-weight: 700;
-        color: #e6dffc; margin: 16px 0 8px;
+    .staff-shell { padding: 12px 16px 32px; max-width: 720px; margin: 0 auto; }
+
+    /* 件数チップ（見出し右） */
+    .staff-count-chip {
+        display: inline-flex; align-items: center; gap: 5px;
+        margin-left: auto;
+        padding: 3px 10px; border-radius: 999px;
+        font-size: 0.7rem; font-weight: 700;
+        background: rgba(var(--accent-rgb, 214, 112, 162), 0.12);
+        border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.4);
+        color: var(--accent-text, #f0a6c4);
+        white-space: nowrap;
     }
-    .staff-shell .staff-lead {
-        color: #a0a0a0; font-size: 0.86rem; line-height: 1.85;
-        margin: 0 0 18px;
-    }
-    .staff-shell .staff-lead strong { color: #e6dffc; }
 
     .staff-flash {
         background: rgba(168, 85, 247, 0.12);
@@ -59,13 +61,19 @@
         display: flex; align-items: center; gap: 14px;
         position: relative;
     }
+    .staff-card.is-disabled { opacity: 0.6; }
     .staff-card__avatar {
         flex: 0 0 auto;
         width: 44px; height: 44px; border-radius: 50%;
         background: var(--accent, #d670a2);
         display: inline-flex; align-items: center; justify-content: center;
         color: var(--on-accent, #1a0814); font-weight: 800; font-size: 1rem;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, .35);
+    }
+    /* スタッフ権限のアバターはフラットな薄色（オーナーとの視覚差） */
+    .staff-card__avatar--staff {
+        background: rgba(var(--accent-rgb, 214, 112, 162), 0.14);
+        border: 1px solid rgba(var(--accent-rgb, 214, 112, 162), 0.4);
+        color: var(--accent-text, #f0a6c4);
     }
     .staff-card__main { flex: 1 1 auto; min-width: 0; }
     .staff-card__name {
@@ -91,7 +99,6 @@
     .staff-badge--owner {
         background: var(--accent, #d670a2);
         color: var(--on-accent, #1a0814);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, .3);
     }
     .staff-badge--staff {
         background: rgba(168, 85, 247, 0.18);
@@ -131,16 +138,43 @@
         opacity: .4; cursor: not-allowed;
     }
 
+    /* 末尾の「スタッフを追加」破線カード（オーナーのみ表示） */
+    .staff-add-card {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        padding: 14px;
+        border-radius: 16px;
+        border: 1px dashed rgba(var(--accent-rgb, 214, 112, 162), 0.45);
+        color: var(--accent-text, #f0a6c4);
+        font-size: 0.86rem; font-weight: 700;
+        text-decoration: none;
+        transition: background .15s ease, border-color .15s ease;
+    }
+    .staff-add-card:hover {
+        background: rgba(var(--accent-rgb, 214, 112, 162), 0.08);
+        border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.75);
+    }
+
     .staff-notice {
         margin-top: 18px;
         padding: 14px 16px;
         background: rgba(255,255,255,0.03);
-        border: 1px dashed rgba(168, 85, 247, 0.3);
+        border: 1px solid rgba(255,255,255,0.08);
         border-radius: 12px;
-        font-size: 0.78rem; line-height: 1.85;
+        font-size: 0.78rem; line-height: 1.7;
         color: #a0a0a0;
     }
-    .staff-notice strong { color: #c4b5fd; }
+    .staff-notice__title {
+        margin: 0 0 10px;
+        font-size: 0.78rem; font-weight: 800; color: #c4b5fd;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .staff-notice__row {
+        display: flex; align-items: flex-start; gap: 8px;
+        margin-bottom: 8px;
+    }
+    .staff-notice__row:last-child { margin-bottom: 0; }
+    .staff-notice__row .staff-badge { flex: 0 0 auto; margin-top: 1px; }
+    .staff-notice__row span:last-child:not(.staff-badge) { flex: 1; }
 </style>
 @endpush
 
@@ -148,11 +182,15 @@
 <div class="content-wrapper animate-fadeIn">
     <section class="mypage-area">
         <div class="staff-shell">
-            <h1 class="mypage-page-title">スタッフ管理</h1>
-            <p class="staff-lead">
-                1つのお店に対して<strong>複数のログインアカウント</strong>を持たせることができます。<br>
-                オーナー権限のスタッフのみ、アカウントの追加・削除が可能です。
-            </p>
+            <header class="mypage-page-head">
+                <h1 class="mypage-page-head__title">
+                    <i class="fas fa-users"></i>スタッフ・アカウント管理
+                    <span class="staff-count-chip"><i class="fas fa-user"></i>{{ count($managers) }} 名</span>
+                </h1>
+                <p class="mypage-page-head__desc">
+                    1つのお店で複数のログインアカウントを使えます。追加・削除ができるのは<strong style="color:#e6dffc;">オーナー権限</strong>のみです。
+                </p>
+            </header>
 
             @if (session('message'))
                 <div class="staff-flash">{{ session('message') }}</div>
@@ -185,8 +223,8 @@
                             ? \Carbon\Carbon::parse($manager->last_login_at)->format('Y/m/d H:i')
                             : null;
                     @endphp
-                    <article class="staff-card">
-                        <span class="staff-card__avatar">{{ $initial }}</span>
+                    <article class="staff-card {{ $isActive ? '' : 'is-disabled' }}">
+                        <span class="staff-card__avatar {{ $isOwnerRow ? '' : 'staff-card__avatar--staff' }}">{{ $initial }}</span>
                         <div class="staff-card__main">
                             <p class="staff-card__name">{{ $displayName }}</p>
                             <p class="staff-card__email">{{ $manager->email }}</p>
@@ -224,12 +262,25 @@
                         @endif
                     </article>
                 @endforeach
+
+                {{-- 一覧末尾にも追加導線（オーナーのみ） --}}
+                @if ($isOwner)
+                    <a href="{{ route('shop.mypage.staff.create') }}" class="staff-add-card">
+                        <i class="fas fa-plus"></i> スタッフを追加する
+                    </a>
+                @endif
             </div>
 
             <div class="staff-notice">
-                <strong>権限について</strong><br>
-                ・<strong>オーナー</strong>：スタッフの追加・削除、店舗情報の変更、すべての操作が可能<br>
-                ・<strong>スタッフ</strong>：応募者対応・メッセージ・求人ステータス変更など、日常業務のみ可能
+                <p class="staff-notice__title"><i class="fas fa-shield-halved"></i> 権限について</p>
+                <div class="staff-notice__row">
+                    <span class="staff-badge staff-badge--owner"><i class="fas fa-crown"></i> オーナー</span>
+                    <span>スタッフの追加・削除、店舗情報の変更を含む、すべての操作が可能</span>
+                </div>
+                <div class="staff-notice__row">
+                    <span class="staff-badge staff-badge--staff">スタッフ</span>
+                    <span>応募者対応・メッセージ・求人ステータス変更など、日常業務のみ可能</span>
+                </div>
             </div>
         </div>
     </section>

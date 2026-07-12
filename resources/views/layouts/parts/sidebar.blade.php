@@ -144,7 +144,7 @@
     text-align: center;
 }
 
-/* 書類系の「未済」バッジ */
+/* 書類系の「未済」バッジ（フラット統一ルール: 未済・緊急 = danger ベタ） */
 .sidebar-badge-pending {
     margin-left: auto;
     padding: 2px 8px;
@@ -152,9 +152,9 @@
     font-size: 0.62rem;
     font-weight: 800;
     letter-spacing: 0.06em;
-    background: rgba(248, 113, 113, 0.16);
-    border: 1px solid rgba(248, 113, 113, 0.45);
-    color: #fca5a5;
+    background: #e15c5c;
+    border: 0;
+    color: #fff;
     white-space: nowrap;
 }
 

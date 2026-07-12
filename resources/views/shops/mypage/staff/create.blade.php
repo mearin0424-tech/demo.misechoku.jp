@@ -6,15 +6,7 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <style>
-    .staff-form-shell { padding: 0 16px 32px; max-width: 560px; margin: 0 auto; }
-    .staff-form-shell .mypage-page-title {
-        font-family: var(--font-sans);
-        font-size: 1.2rem; font-weight: 700; color: #e6dffc;
-        margin: 16px 0 6px;
-    }
-    .staff-form-shell .staff-form-lead {
-        color: #a0a0a0; font-size: 0.84rem; margin: 0 0 18px;
-    }
+    .staff-form-shell { padding: 12px 16px 32px; max-width: 560px; margin: 0 auto; }
 
     .staff-form-flash--error {
         background: rgba(248, 113, 113, 0.12);
@@ -86,6 +78,58 @@
     .staff-form-field__hint {
         font-size: 0.74rem; color: #6b6b6b;
     }
+
+    /* パスワード表示切替 */
+    .staff-pw-wrap { position: relative; }
+    .staff-pw-wrap input { width: 100%; box-sizing: border-box; padding-right: 46px; }
+    .staff-pw-toggle {
+        position: absolute; top: 50%; right: 6px; transform: translateY(-50%);
+        width: 36px; height: 36px;
+        border: 0; background: transparent;
+        color: #8a8a8a; cursor: pointer;
+        display: inline-flex; align-items: center; justify-content: center;
+        border-radius: 8px;
+        min-width: 36px; min-height: 36px;
+    }
+    .staff-pw-toggle:hover { color: var(--accent-text, #f0a6c4); }
+
+    /* 権限：プルダウンではなく選択カード（違いがひと目で分かる） */
+    .staff-role-cards { display: flex; flex-direction: column; gap: 8px; }
+    .staff-role-card { position: relative; display: block; cursor: pointer; }
+    .staff-role-card input { position: absolute; opacity: 0; pointer-events: none; }
+    .staff-role-card__body {
+        display: flex; flex-direction: column; gap: 3px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.10);
+        background: rgba(255,255,255,0.02);
+        transition: border-color .15s ease, background .15s ease;
+    }
+    .staff-role-card:hover .staff-role-card__body {
+        border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.4);
+    }
+    .staff-role-card input:checked + .staff-role-card__body {
+        border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.7);
+        background: rgba(var(--accent-rgb, 214, 112, 162), 0.10);
+    }
+    .staff-role-card input:focus-visible + .staff-role-card__body {
+        outline: 2px solid var(--accent, #d670a2);
+        outline-offset: 2px;
+    }
+    .staff-role-card__title {
+        display: inline-flex; align-items: center; gap: 7px;
+        font-size: 0.88rem; font-weight: 800; color: #f5f5f5;
+    }
+    .staff-role-card__title i { color: var(--accent-text, #f0a6c4); font-size: 0.8rem; }
+    .staff-role-card__check {
+        margin-left: auto; font-size: 0.85rem;
+        color: rgba(255,255,255,0.18);
+        transition: color .15s ease;
+    }
+    .staff-role-card input:checked + .staff-role-card__body .staff-role-card__check {
+        color: var(--accent, #d670a2);
+    }
+    .staff-role-card__desc { font-size: 0.74rem; color: #a0a0a0; line-height: 1.6; }
     .staff-form-field__error {
         font-size: 0.76rem; color: #fca5a5; margin-top: 2px;
         display: flex; align-items: flex-start; gap: 4px;
@@ -126,8 +170,10 @@
 <div class="content-wrapper animate-fadeIn">
     <section class="mypage-area">
         <div class="staff-form-shell">
-            <h1 class="mypage-page-title">スタッフを追加</h1>
-            <p class="staff-form-lead">新しい店舗ログインアカウントを発行します。</p>
+            <header class="mypage-page-head">
+                <h1 class="mypage-page-head__title"><i class="fas fa-user-plus"></i>スタッフを追加</h1>
+                <p class="mypage-page-head__desc">新しい店舗ログインアカウントを発行します。メールアドレスとパスワードを、追加するスタッフ本人に共有してください。</p>
+            </header>
 
             @if ($errors->has('shop') || $errors->has('manager_limit'))
                 <div class="staff-form-flash--error">
@@ -174,39 +220,64 @@
 
                 <div class="staff-form-field">
                     <label for="staff-password">パスワード<span class="req">必須</span></label>
-                    <input
-                        type="password" id="staff-password" name="password"
-                        minlength="8" required
-                        autocomplete="new-password"
-                        placeholder="8文字以上"
-                        aria-describedby="staff-password-error"
-                        @error('password') aria-invalid="true" class="is-error" @enderror
-                    >
+                    <div class="staff-pw-wrap">
+                        <input
+                            type="password" id="staff-password" name="password"
+                            minlength="8" required
+                            autocomplete="new-password"
+                            placeholder="8文字以上"
+                            aria-describedby="staff-password-error"
+                            @error('password') aria-invalid="true" class="is-error" @enderror
+                        >
+                        <button type="button" class="staff-pw-toggle" data-pw-toggle="staff-password" aria-label="パスワードを表示">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                     <p class="staff-form-field__error" id="staff-password-error" @error('password') @else hidden @enderror>@error('password'){{ $message }}@enderror</p>
                 </div>
 
                 <div class="staff-form-field">
                     <label for="staff-password-confirm">パスワード（確認）<span class="req">必須</span></label>
-                    <input
-                        type="password" id="staff-password-confirm" name="password_confirmation"
-                        minlength="8" required
-                        autocomplete="new-password"
-                        aria-describedby="staff-password-confirm-error"
-                    >
+                    <div class="staff-pw-wrap">
+                        <input
+                            type="password" id="staff-password-confirm" name="password_confirmation"
+                            minlength="8" required
+                            autocomplete="new-password"
+                            aria-describedby="staff-password-confirm-error"
+                        >
+                        <button type="button" class="staff-pw-toggle" data-pw-toggle="staff-password-confirm" aria-label="パスワードを表示">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                     <p class="staff-form-field__error" id="staff-password-confirm-error" hidden></p>
                 </div>
 
                 <div class="staff-form-field">
-                    <label for="staff-role">権限<span class="req">必須</span></label>
-                    <select id="staff-role" name="role" required>
-                        <option value="{{ \App\Models\ShopManager::ROLE_STAFF }}" {{ old('role', \App\Models\ShopManager::ROLE_STAFF) == \App\Models\ShopManager::ROLE_STAFF ? 'selected' : '' }}>
-                            スタッフ（日常業務のみ）
-                        </option>
-                        <option value="{{ \App\Models\ShopManager::ROLE_OWNER }}" {{ old('role') == \App\Models\ShopManager::ROLE_OWNER ? 'selected' : '' }}>
-                            オーナー（全権限）
-                        </option>
-                    </select>
-                    <p class="staff-form-field__hint">スタッフ管理・店舗情報変更を任せる人はオーナーを選択してください。</p>
+                    <label>権限<span class="req">必須</span></label>
+                    <div class="staff-role-cards" role="radiogroup" aria-label="権限">
+                        <label class="staff-role-card">
+                            <input type="radio" name="role" value="{{ \App\Models\ShopManager::ROLE_STAFF }}"
+                                   {{ old('role', \App\Models\ShopManager::ROLE_STAFF) == \App\Models\ShopManager::ROLE_STAFF ? 'checked' : '' }}>
+                            <span class="staff-role-card__body">
+                                <span class="staff-role-card__title">
+                                    <i class="fas fa-user"></i>スタッフ
+                                    <i class="fas fa-circle-check staff-role-card__check" aria-hidden="true"></i>
+                                </span>
+                                <span class="staff-role-card__desc">応募者対応・メッセージ・求人ステータス変更など、日常業務のみ</span>
+                            </span>
+                        </label>
+                        <label class="staff-role-card">
+                            <input type="radio" name="role" value="{{ \App\Models\ShopManager::ROLE_OWNER }}"
+                                   {{ old('role') == \App\Models\ShopManager::ROLE_OWNER ? 'checked' : '' }}>
+                            <span class="staff-role-card__body">
+                                <span class="staff-role-card__title">
+                                    <i class="fas fa-crown"></i>オーナー
+                                    <i class="fas fa-circle-check staff-role-card__check" aria-hidden="true"></i>
+                                </span>
+                                <span class="staff-role-card__desc">スタッフの追加・削除、店舗情報の変更を含む全権限</span>
+                            </span>
+                        </label>
+                    </div>
                 </div>
 
                 <div class="staff-form-actions">
@@ -278,6 +349,19 @@ document.addEventListener('DOMContentLoaded', function () {
         setError(pwConfirmInput, '');
         return true;
     };
+
+    // パスワード表示切替
+    document.querySelectorAll('[data-pw-toggle]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var input = document.getElementById(btn.getAttribute('data-pw-toggle'));
+            if (!input) return;
+            var show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            btn.setAttribute('aria-label', show ? 'パスワードを隠す' : 'パスワードを表示');
+            var icon = btn.querySelector('i');
+            if (icon) icon.className = show ? 'fas fa-eye-slash' : 'fas fa-eye';
+        });
+    });
 
     if (nameInput) nameInput.addEventListener('blur', validateName);
     if (emailInput) emailInput.addEventListener('blur', validateEmail);
