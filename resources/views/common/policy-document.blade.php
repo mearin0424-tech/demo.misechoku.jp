@@ -9,7 +9,7 @@
 @section('body-class', 'is-policy-document')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('assets/css/policy-page.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/policy-page.css') }}?v=20260712-dark">
 @endpush
 
 @section('content')
@@ -56,15 +56,27 @@
         @endif
 
         @unless ($document->isAbout())
-            @forelse ($document->chapters as $chapter)
-                <article class="policy-doc-chapter">
-                    <h2 class="policy-doc-chapter-title">{{ $chapter->title }}</h2>
+            {{-- 章が多い文書（規約等）は冒頭に目次を出してジャンプできるように --}}
+            @if ($document->chapters->count() >= 4)
+                <nav class="policy-doc-toc" aria-label="目次">
+                    @foreach ($document->chapters as $i => $chapter)
+                        <a href="#policy-chapter-{{ $chapter->id }}">{{ $i + 1 }}. {{ $chapter->title }}</a>
+                    @endforeach
+                </nav>
+            @endif
+
+            @forelse ($document->chapters as $i => $chapter)
+                <article class="policy-doc-chapter" id="policy-chapter-{{ $chapter->id }}">
+                    <h2 class="policy-doc-chapter-title">
+                        <span class="policy-doc-chapter-num">{{ str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) }}</span>
+                        {{ $chapter->title }}
+                    </h2>
                     <div class="policy-md">
                         {!! MarkdownRenderer::toHtml($chapter->body) !!}
                     </div>
                 </article>
             @empty
-                <p style="color: var(--policy-text-muted, #5c524d); font-size: 0.88rem;">本文は準備中です。</p>
+                <p style="color: var(--policy-text-muted, #9d9aa4); font-size: 0.88rem;">本文は準備中です。</p>
             @endforelse
         @endunless
     </div>
