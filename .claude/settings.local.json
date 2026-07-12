@@ -28,7 +28,8 @@
       "Bash(xargs grep -l \"password_confirm\\\\|confirm.*password\")",
       "Bash(grep *)",
       "PowerShell(npm run *)",
-      "PowerShell(Remove-Item *)"
+      "PowerShell(Remove-Item *)",
+      "PowerShell(\\(Get-Content \"public\\\\assets\\\\css\\\\home.css\" | Measure-Object -Line\\).Lines)"
     ]
   }
 }

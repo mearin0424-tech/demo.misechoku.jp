@@ -4,7 +4,7 @@
 @section('body-class', 'no-scroll page-home')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260613-card-refresh">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260712-swipe-refresh">
 @endpush
 
 @php
@@ -95,13 +95,13 @@
                         <a
                             href="{{ route($talkRoute, ['id' => $item['id'], 'talk_topic' => 'other', 'initiate' => 1]) }}"
                             class="action-circle-btn message stop-propagation"
-                            aria-label="メッセージを送る"
+                            aria-label="トークを開始する"
                         >
                             <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/>
                             </svg>
                         </a>
-                        <span class="rc-action-label">メッセージ</span>
+                        <span class="rc-action-label">トーク</span>
                     </div>
                 </div>
 
@@ -145,17 +145,17 @@
                                 $locLine = $stationLine !== '' ? $stationLine : ($areaLine !== '' ? $areaLine : '六本木');
                                 $locIcon = $stationLine !== '' ? 'fa-train' : 'fa-map-marker-alt';
                             @endphp
-                            <div class="rc-meta">
+                            {{-- 業種チップと位置チップを分離表示 --}}
+                            <div class="rc-meta meta-chips">
                                 @if(!empty($item['industry_name']))
-                                <span class="rc-genre">{{ $item['industry_name'] }}</span>
+                                <span class="meta-chip meta-chip--genre">{{ $item['industry_name'] }}</span>
                                 @endif
-                                <i class="fas {{ $locIcon }} rc-mappin" aria-hidden="true"></i>
-                                <span>{{ $locLine }}</span>
-                                @if(!empty($item['distance_label']))
-                                    <span class="distance-badge" style="margin-left:6px;">
-                                        <i class="fas fa-route"></i> {{ $item['distance_label'] }}
-                                    </span>
-                                @endif
+                                <span class="meta-chip meta-chip--loc">
+                                    <i class="fas {{ $locIcon }}" aria-hidden="true"></i>{{ $locLine }}
+                                    @if(!empty($item['distance_label']))
+                                        <span class="meta-chip__dist"><i class="fas fa-route" aria-hidden="true"></i>{{ $item['distance_label'] }}</span>
+                                    @endif
+                                </span>
                             </div>
                         </div>
 
@@ -235,38 +235,48 @@
                     </div>
                 </div>
 
-                {{-- アクションボタン --}}
-                <div class="card-actions-overlay">
-                    <button
-                        type="button"
-                        class="action-circle-btn like stop-propagation {{ !empty($item['is_liked']) ? 'is-active' : '' }}"
-                        data-item-id="{{ $item['id'] }}"
-                        data-item-type="{{ $itemType === 'recruit' ? 'shop' : 'cast' }}"
-                        data-action="like"
-                        aria-label="いいね"
-                    >
-                        <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/>
-                        </svg>
-                        <span class="action-btn-count">{{ $item['like_count'] ?? 0 }}</span>
-                    </button>
-                    <button
-                        type="button"
-                        class="action-circle-btn keep stop-propagation {{ !empty($item['is_kept']) ? 'is-active' : '' }}"
-                        data-item-id="{{ $item['id'] }}"
-                        data-item-type="{{ $itemType === 'recruit' ? 'shop' : 'cast' }}"
-                        data-action="keep"
-                        aria-label="キープ"
-                    >
-                        <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M6 4a2 2 0 0 0-2 2v15.382a.6.6 0 0 0 .89.527L12 17.5l7.11 4.41A.6.6 0 0 0 20 21.382V6a2 2 0 0 0-2-2H6Z"/>
-                        </svg>
-                    </button>
-                    <a href="{{ route($talkRoute, ['id' => $item['id'], 'talk_topic' => 'other', 'initiate' => 1]) }}" class="action-btn-message stop-propagation" aria-label="メッセージを送る">
-                        <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/>
-                        </svg>
-                    </a>
+                {{-- アクションボタン（求人カードと同じラベル付き構造に統一） --}}
+                <div class="card-actions-overlay rc-actions stop-propagation">
+                    <div class="rc-action-item stop-propagation">
+                        <button
+                            type="button"
+                            class="action-circle-btn like stop-propagation {{ !empty($item['is_liked']) ? 'is-active' : '' }}"
+                            data-item-id="{{ $item['id'] }}"
+                            data-item-type="{{ $itemType === 'recruit' ? 'shop' : 'cast' }}"
+                            data-action="like"
+                            aria-label="いいね"
+                        >
+                            <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/>
+                            </svg>
+                            <span class="action-btn-count">{{ $item['like_count'] ?? 0 }}</span>
+                        </button>
+                        <span class="rc-action-label">いいね</span>
+                    </div>
+                    <div class="rc-action-item stop-propagation">
+                        <button
+                            type="button"
+                            class="action-circle-btn keep stop-propagation {{ !empty($item['is_kept']) ? 'is-active' : '' }}"
+                            data-item-id="{{ $item['id'] }}"
+                            data-item-type="{{ $itemType === 'recruit' ? 'shop' : 'cast' }}"
+                            data-action="keep"
+                            aria-label="キープ"
+                        >
+                            <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M6 4a2 2 0 0 0-2 2v15.382a.6.6 0 0 0 .89.527L12 17.5l7.11 4.41A.6.6 0 0 0 20 21.382V6a2 2 0 0 0-2-2H6Z"/>
+                            </svg>
+                        </button>
+                        <span class="rc-action-label">キープ</span>
+                    </div>
+                    <div class="rc-action-item stop-propagation">
+                        <a href="{{ route($talkRoute, ['id' => $item['id'], 'talk_topic' => 'other', 'initiate' => 1]) }}"
+                           class="action-circle-btn message stop-propagation" aria-label="トークを開始する">
+                            <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/>
+                            </svg>
+                        </a>
+                        <span class="rc-action-label">トーク</span>
+                    </div>
                     @if($isShop)
                     <a href="{{ route('cast.shopprofile.show', $item['id']) }}" class="card-recruit-btn stop-propagation">求人</a>
                     @endif
@@ -281,13 +291,17 @@
                         $bottomLoc = $bottomStation !== '' ? $bottomStation : ($bottomArea !== '' ? $bottomArea : '六本木');
                         $bottomIcon = $bottomStation !== '' ? 'fa-train' : 'fa-map-marker-alt';
                     @endphp
-                    <div class="card-location">
-                        <i class="fas {{ $bottomIcon }}"></i> {{ $bottomLoc }}
-                        @if(!empty($item['distance_label']))
-                            <span class="distance-badge" style="margin-left:6px;">
-                                <i class="fas fa-route"></i> {{ $item['distance_label'] }}
-                            </span>
+                    {{-- 業種チップと位置チップを分離表示（求人カードと同デザイン） --}}
+                    <div class="card-location meta-chips">
+                        @if(!empty($item['industry_name']))
+                        <span class="meta-chip meta-chip--genre">{{ $item['industry_name'] }}</span>
                         @endif
+                        <span class="meta-chip meta-chip--loc">
+                            <i class="fas {{ $bottomIcon }}" aria-hidden="true"></i>{{ $bottomLoc }}
+                            @if(!empty($item['distance_label']))
+                                <span class="meta-chip__dist"><i class="fas fa-route" aria-hidden="true"></i>{{ $item['distance_label'] }}</span>
+                            @endif
+                        </span>
                     </div>
                     @if($isShop && isset($item['rating']))
                     <div class="card-rating">

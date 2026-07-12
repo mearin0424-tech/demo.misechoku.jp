@@ -106,10 +106,10 @@
          layout-sidebar.css の `right: max(0px, calc(50vw - var(--max-content-width)/2))` を 0 に解決させる。 --}}
     <style>
         :root {
-            /* メインコンテンツの最大幅。スマホがメイン、タブレットでやや広げる（モバイル感は維持）。
+            /* メインコンテンツの最大幅。ヘッダー・フッターと同様に全画面で横幅いっぱいを使う。
                header / sub-header / main / content-wrapper / bottom-nav すべてがこの値を共有する。
-               サイドバー右端だけは別途 #side-menu に right:0 を直接当てる。 */
-            --max-content-width: 430px;
+               （固定要素の calc(50vw - w/2) 系は 0 に解決され、自然に全幅へ展開される） */
+            --max-content-width: 100%;
             --content-padding-x: 16px;
             --footer-height: 75px;
             --header-height: 60px;
@@ -129,13 +129,12 @@
             --color-border-strong: rgba(168, 85, 247, 0.45);
             --color-card-strong:  #1a1a1a;
         }
-        /* タブレット：少し広げる（タブレットでもモバイルアプリ的な見え方を維持） */
-        @media (min-width: 600px) {
-            :root { --max-content-width: 600px; }
+        /* タブレット〜デスクトップ：幅は 100% のまま、左右の余白だけ少し広げる */
+        @media (min-width: 768px) {
+            :root { --content-padding-x: 24px; }
         }
-        /* 大きめタブレット〜デスクトップ：720px で頭打ち */
         @media (min-width: 1024px) {
-            :root { --max-content-width: 720px; }
+            :root { --content-padding-x: 28px; }
         }
 
         /* --- 認証/ログイン画面：ヘッダー・フッター・サイドメニュー・キャラガイドを非表示にして

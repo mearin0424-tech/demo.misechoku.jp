@@ -3986,3 +3986,140 @@ body.page-home .cast-card--recruit .rc-bottom-bar {
     padding-right: 84px !important;  /* 同上 */
 }
 
+/* ============================================================================
+   SWIPE CARD REFRESH (2026-07-12)
+   ・LIKE / KEEP = 44px の控えめグラス円（枠・影も弱め）
+   ・トーク（message）= 62px アクセントグラデの立体プライマリ（DESIGN.md §10）
+   ・全ボタンにラベル付き縦スタック（rc-action-item）— cast / recruit 共通
+   ・業種チップと位置チップを分離（.meta-chips / .meta-chip）
+   ============================================================================ */
+
+/* ----- LIKE / KEEP：控えめグラス円 ----- */
+body.page-home .action-circle-btn.like,
+body.page-home .action-circle-btn.keep,
+body.page-home .rc-actions .action-circle-btn.keep {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    background: rgba(0, 0, 0, 0.42) !important;
+    border: 1px solid rgba(255, 255, 255, 0.26) !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.40) !important;
+}
+body.page-home .action-circle-btn.like .action-icon,
+body.page-home .action-circle-btn.keep .action-icon,
+body.page-home .rc-actions .action-circle-btn.keep .action-icon {
+    width: 19px !important;
+    height: 19px !important;
+}
+
+/* ----- トーク：立体プライマリ（迷わず押せる主 CTA）----- */
+body.page-home .action-btn-message,
+body.page-home .action-circle-btn.message {
+    width: 62px !important;
+    height: 62px !important;
+    min-width: 62px !important;
+    min-height: 62px !important;
+    background: linear-gradient(145deg, var(--accent-grad-from), var(--accent-grad-to)) !important;
+    border: 0 !important;
+    box-shadow:
+        0 10px 22px rgba(0, 0, 0, 0.55),
+        0 4px 14px rgba(var(--accent-rgb), 0.40),
+        inset 0 2px 3px rgba(255, 255, 255, 0.35),
+        inset 0 -3px 5px rgba(0, 0, 0, 0.30) !important;
+}
+body.page-home .action-circle-btn.message .action-icon,
+body.page-home .action-btn-message .action-icon {
+    width: 28px !important;
+    height: 28px !important;
+    color: var(--on-accent-strong, #fff);
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+}
+body.page-home .action-circle-btn.message:active {
+    transform: scale(0.94);
+    box-shadow:
+        0 3px 8px rgba(0, 0, 0, 0.5),
+        inset 0 3px 5px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* ----- ラベル付き縦アイテム（トークは常に最下段 = 親指の近く）----- */
+body.page-home .rc-action-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+}
+body.page-home .rc-action-item:has(.action-circle-btn.message) { order: 99; }
+body.page-home .rc-action-label {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.05em;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+}
+
+/* ----- LIKE カウント：ボタン右上の小バッジ（ラベルとの重なり回避）----- */
+body.page-home .action-btn-count {
+    position: absolute;
+    top: -4px;
+    right: -8px;
+    bottom: auto !important;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.58rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: none;
+}
+
+/* ----- 業種チップ / 位置チップ（cast / recruit 共通）----- */
+body.page-home .meta-chips {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+}
+body.page-home .meta-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.50);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    text-shadow: none;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+body.page-home .meta-chip--genre {
+    background: rgba(var(--accent-rgb), 0.24);
+    border-color: rgba(var(--accent-rgb), 0.55);
+}
+body.page-home .meta-chip i {
+    font-size: 0.64rem;
+    opacity: 0.85;
+}
+body.page-home .meta-chip__dist {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: 4px;
+    padding-left: 8px;
+    border-left: 1px solid rgba(255, 255, 255, 0.25);
+    font-weight: 600;
+    opacity: 0.85;
+}
+

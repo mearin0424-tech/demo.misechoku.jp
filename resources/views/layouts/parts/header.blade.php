@@ -128,7 +128,7 @@
                 class="header-icon-btn {{ $taskHigh > 0 ? 'is-urgent' : '' }} {{ $taskTotal > 0 ? 'has-badge' : '' }}"
                 aria-label="やることリスト（{{ $taskTotal }}件）"
                 aria-haspopup="true">
-            <i class="fas fa-circle-check header-icon-btn__ico"></i>
+            <i class="fas fa-check header-icon-btn__ico"></i>
             @if($taskTotal > 0)
                 <span class="header-badge {{ $taskHigh > 0 ? 'is-urgent' : '' }}" aria-hidden="true">
                     {{ $taskTotal > 99 ? '99+' : $taskTotal }}

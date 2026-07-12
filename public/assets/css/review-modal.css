@@ -5,7 +5,8 @@
   color: var(--color-text);
   display: flex;
   flex-direction: column;
-  max-width: var(--max-content-width, 28rem);
+  /* モーダルは読みやすさ優先で全幅追従させず 640px で頭打ち */
+  max-width: min(640px, 100%);
   margin: 0 auto;
 }
 
@@ -219,7 +220,7 @@
   background: linear-gradient(to top, var(--dark-bg), rgba(10, 10, 10, 0.95), transparent);
   padding: 2rem 1.25rem 1.5rem;
   z-index: 20;
-  max-width: var(--max-content-width, 28rem);
+  max-width: min(640px, 100%);
   margin: 0 auto;
 }
 
