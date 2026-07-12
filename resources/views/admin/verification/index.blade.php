@@ -17,6 +17,53 @@
     color: #c9b8b8;
     font-size: 0.72rem;
 }
+.verification-purge-guide { margin: 12px 0; }
+.verification-purge-guide .admin-accordion-title-main i {
+    color: #b91c1c;
+    margin-right: 4px;
+}
+.verification-purge-guide__lead {
+    font-size: 0.86rem;
+    line-height: 1.8;
+    margin: 0 0 14px;
+}
+.verification-purge-guide__badge {
+    display: inline-block;
+    background: #fee2e2;
+    color: #b91c1c;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+}
+.verification-purge-guide__cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px 24px;
+}
+.verification-purge-guide__cols h4 {
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin: 0 0 8px;
+}
+.verification-purge-guide__cols h4 i { margin-right: 4px; }
+.verification-purge-guide__cols ul,
+.verification-purge-guide__cols ol {
+    margin: 0;
+    padding-left: 1.4em;
+    font-size: 0.82rem;
+    line-height: 2;
+}
+.verification-purge-guide__caution {
+    margin: 14px 0 0;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(220, 38, 38, 0.07);
+    border: 1px solid rgba(220, 38, 38, 0.25);
+    color: #b91c1c;
+    font-size: 0.8rem;
+    line-height: 1.8;
+}
 </style>
 @endpush
 
@@ -106,6 +153,53 @@
             </button>
         </section>
 
+        {{-- データ漏洩防止（保持期間ポリシー / 削除候補）ガイド --}}
+        @php
+            $retentionApprovedDays = \App\Services\DocumentReviewService::RETENTION_APPROVED_DAYS;
+            $retentionRejectedDays = \App\Services\DocumentReviewService::RETENTION_REJECTED_DAYS;
+            $retentionPendingDays  = \App\Services\DocumentReviewService::RETENTION_PENDING_DAYS;
+        @endphp
+        <details class="admin-accordion verification-purge-guide">
+            <summary class="admin-accordion-summary">
+                <span class="admin-accordion-title">
+                    <span class="admin-accordion-title-main"><i class="fas fa-shield-halved"></i> データ漏洩防止のための対応 —「削除候補」とは</span>
+                    <span class="admin-accordion-title-sub">保持期間を過ぎた本人確認・許可証の画像は、運営の手で完全削除します</span>
+                </span>
+            </summary>
+            <div class="admin-accordion-body">
+                <p class="verification-purge-guide__lead">
+                    本人確認書類・営業許可証は<strong>審査のためだけにお預かりする機密情報</strong>です。
+                    審査が終わった後も画像を保管し続けると、万一の不正アクセス時に漏洩する情報が増えてしまうため、
+                    保持期間ポリシーを過ぎた書類には
+                    <span class="verification-purge-guide__badge">削除候補</span>
+                    バッジが表示されます。<strong>自動では削除されません。</strong>運営が確認のうえ手動で削除してください。
+                </p>
+                <div class="verification-purge-guide__cols">
+                    <div>
+                        <h4><i class="fas fa-clock"></i> 削除候補になる基準</h4>
+                        <ul>
+                            <li><strong>承認済み</strong>：承認日時から <strong>{{ $retentionApprovedDays }}日</strong> 経過</li>
+                            <li><strong>差戻し（却下）</strong>：最終更新から <strong>{{ $retentionRejectedDays }}日</strong> 経過</li>
+                            <li><strong>未審査のまま放置</strong>：最終更新から <strong>{{ $retentionPendingDays }}日</strong> 経過</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4><i class="fas fa-list-check"></i> 対応手順</h4>
+                        <ol>
+                            <li>「削除候補」バッジの付いた行を確認する</li>
+                            <li>確認チェック2つにチェックを入れる</li>
+                            <li>「完全削除」を実行する（提出画像の実ファイルと書類レコードが削除されます）</li>
+                        </ol>
+                    </div>
+                </div>
+                <p class="verification-purge-guide__caution">
+                    <i class="fas fa-triangle-exclamation"></i>
+                    削除は<strong>復元できません</strong>。また削除後は提出状況が「未提出」扱いに戻るため、
+                    再度確認が必要になった場合は本人・店舗に再提出を依頼してください。
+                </p>
+            </div>
+        </details>
+
         {{-- タブ切替（キャスト / 店舗） --}}
         <div class="admin-tabs" role="tablist">
             <button type="button" class="admin-tab {{ $defaultTab === 'cast' ? 'is-active' : '' }}" data-verif-tab="cast" role="tab">
@@ -156,7 +250,7 @@
             </div>
 
             <div class="table-wrapper u-mt-12">
-                <table class="admin-table">
+                <table class="admin-table admin-table--sticky-actions">
                     <thead>
                         <tr>
                             <th>キャスト</th>
@@ -369,7 +463,7 @@
                         <span>すべて</span>
                         <strong>{{ count($shopDocs) }}</strong>
                     </button>
-                    <button type="button" class="admin-filter-chip {{ $shopExpiredCount > 0 ? '' : '' }}"
+                    <button type="button" class="admin-filter-chip {{ $shopExpiredCount > 0 ? 'is-critical' : '' }}"
                         data-verif-expiry-filter="expired" data-target-table="shop-verification-table">
                         <i class="fas fa-triangle-exclamation"></i>
                         <span>期限切れのみ</span>
@@ -379,7 +473,7 @@
             </div>
 
             <div class="table-wrapper u-mt-12">
-                <table class="admin-table">
+                <table class="admin-table admin-table--sticky-actions">
                     <thead>
                         <tr>
                             <th>店舗</th>
@@ -807,6 +901,12 @@ document.addEventListener('DOMContentLoaded', function () {
             var willEnable = !chip.classList.contains('is-active');
             chip.classList.toggle('is-active', willEnable);
             filterState[tableId].expiry = willEnable ? chip.getAttribute('data-verif-expiry-filter') : 'all';
+            if (willEnable) {
+                // 期限切れは承認済み書類で起きることが多いため、
+                // ステータス絞り込み（既定=未承認）が併用されて 0 件に見えないよう「すべて」に切り替える
+                var allChip = document.querySelector('[data-target-table="' + tableId + '"][data-verif-quickfilter="all"]');
+                if (allChip) allChip.click();
+            }
             applyFilters(tableId);
         });
     });

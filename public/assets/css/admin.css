@@ -714,6 +714,28 @@ input, select, textarea, button { font-family: inherit; }
     font-size: 0.84rem;
 }
 .admin-table tbody tr:hover { background: var(--admin-card-hover); }
+/* 横スクロール時に最終列（操作）を右端に固定する。
+   border-collapse: collapse だと sticky セルの罫線が追従しないため separate に切替 */
+.admin-table--sticky-actions {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+.admin-table--sticky-actions thead th:last-child,
+.admin-table--sticky-actions tbody td:last-child {
+    position: sticky;
+    right: 0;
+    z-index: 2;
+    background: var(--admin-surface);
+    border-left: 1px solid var(--admin-line-soft);
+    box-shadow: -8px 0 10px -8px rgba(15, 23, 42, 0.18);
+}
+.admin-table--sticky-actions thead th:last-child {
+    z-index: 3;
+    background: var(--admin-surface-alt);
+}
+.admin-table--sticky-actions tbody tr:hover td:last-child { background: var(--admin-card-hover); }
+/* separate 化で thead の border-bottom と重なって二重線になるのを防ぐ */
+.admin-table--sticky-actions tbody tr:first-child td { border-top: 0; }
 .admin-table .text-muted, .admin-table .text-gray-400 { color: var(--admin-muted); }
 .text-center { text-align: center; }
 .text-right { text-align: right; }
@@ -3672,6 +3694,14 @@ a.btn-action.btn-action-danger:hover {
 /* 停止中の一覧行は薄く赤味掛けにする */
 .admin-table tr.is-suspended {
     background: linear-gradient(90deg, rgba(220, 38, 38, 0.06), rgba(220, 38, 38, 0.02));
+}
+
+/* 書類審査：有効期限切れの行を強調（is-suspended と同系統） */
+.admin-table tbody tr[data-expiry="expired"] {
+    background: linear-gradient(90deg, rgba(220, 38, 38, 0.07), rgba(220, 38, 38, 0.02));
+}
+.admin-table tbody tr[data-expiry="expired"]:hover {
+    background: rgba(220, 38, 38, 0.10);
 }
 .admin-table tr.is-suspended td:first-child code {
     background: rgba(220, 38, 38, 0.12);
