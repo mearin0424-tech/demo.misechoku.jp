@@ -70,7 +70,7 @@
                     <h1 class="app-title text-[22px] text-text-main leading-tight truncate min-w-0">{{ $shopName }}</h1>
                     <div class="flex items-center gap-1 shrink-0">
                         <i class="fas fa-heart text-[15px] text-discovery-pink"></i>
-                        <span class="font-bold text-[13px] text-text-main">{{ number_format($likeCount) }}</span>
+                        <span class="font-bold text-[13px] text-text-main" data-fav-count-target="shop:{{ $ctaShopId }}">{{ number_format($likeCount) }}</span>
                     </div>
                 </div>
                 @if($areaChip !== '' || $industryName !== '')
@@ -163,7 +163,7 @@
                     </div>
                 @endif
 
-                {{-- KEEP（アイコンオンリー） + 共有 --}}
+                {{-- LIKE / KEEP（アイコンオンリー） + 共有 --}}
                 <div class="flex items-center justify-end gap-3" style="margin-bottom: 22px;">
                     @if(!empty($shareUrlResolved))
                         <div class="flex items-center">
@@ -175,6 +175,18 @@
                             ])
                         </div>
                     @endif
+                    <button type="button"
+                            @if($isShopPreview) disabled title="プレビュー：求職者はここでいいねできます" @endif
+                            class="fav-circle fav-circle--like {{ $isShopPreview ? 'opacity-70' : '' }}"
+                            aria-label="いいね"
+                            aria-pressed="{{ !empty($shop['is_liked']) ? 'true' : 'false' }}"
+                            @unless($isShopPreview) data-fav-toggle @endunless
+                            data-item-id="{{ $shop['id'] ?? '' }}"
+                            data-item-type="shop"
+                            data-action="like">
+                        <i class="fas fa-heart" aria-hidden="true"></i>
+                        <span class="fav-circle__cap">LIKE</span>
+                    </button>
                     <button type="button"
                             @if($isShopPreview) disabled title="プレビュー：求職者はここでキープできます" @endif
                             class="fav-circle fav-circle--keep {{ $isShopPreview ? 'opacity-70' : '' }}"

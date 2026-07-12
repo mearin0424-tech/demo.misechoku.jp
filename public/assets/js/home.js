@@ -292,6 +292,11 @@ function initActionButtons() {
             if (this.classList.contains('message')) {
                 return;
             }
+            // LIKE / KEEP は favorite-quick.js（data-fav-toggle）に一本化。
+            // ここでは何もしない（document への委譲ハンドラが処理する）。
+            if (this.hasAttribute('data-fav-toggle')) {
+                return;
+            }
 
             e.preventDefault();
 

@@ -37,7 +37,7 @@
                     </h1>
                     <div class="flex items-center gap-1 shrink-0" title="受け取ったいいね">
                         <i class="fas fa-heart text-[15px] text-discovery-pink"></i>
-                        <span class="font-bold text-[13px] text-text-main">{{ number_format($likeCount) }}</span>
+                        <span class="font-bold text-[13px] text-text-main" data-fav-count-target="cast:{{ $favCastId ?? ($cast['id'] ?? '') }}">{{ number_format($likeCount) }}</span>
                     </div>
                 </div>
                 @if($location !== '' || !empty($distanceLabel ?? null))

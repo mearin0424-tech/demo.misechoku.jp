@@ -4123,3 +4123,70 @@ body.page-home .meta-chip__dist {
     opacity: 0.85;
 }
 
+/* ============================================================================
+   SWIPE FLAT PASS (2026-07-12b)
+   ネオン表現を撤去して他画面（fav-circle / Primary CTA）とデザインを統一。
+   - アイコンのグロー / グラデ文字を廃止 → 白ベタ
+   - アクティブ状態 = ベタ塗り（LIKE=accent / KEEP=gold）。外周グローなし
+   - トークの外周アクセントグローを外し、他画面と同じ物理シャドウに
+   - hover の明暗モーションなし
+   ============================================================================ */
+body.page-home .card-actions-overlay .action-circle-btn i,
+body.page-home .card-actions-overlay .action-btn-message i,
+body.page-home .rc-actions .action-circle-btn i,
+body.page-home .action-circle-btn .action-icon,
+body.page-home .action-btn-message .action-icon {
+    filter: none !important;
+}
+/* LIKE アイコンのグラデ文字表現を廃止（通常時は白、アクティブでベタ塗り背景に） */
+body.page-home .card-actions-overlay .action-circle-btn.like i {
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
+    -webkit-text-fill-color: currentColor !important;
+    color: #fff !important;
+}
+
+/* アクティブ状態：fav-circle と同じベタ塗り。グロー・グラデは使わない */
+body.page-home .action-circle-btn.like.is-active,
+body.page-home .action-circle-btn.like[aria-pressed="true"] {
+    background: var(--accent, #d670a2) !important;
+    border-color: var(--accent, #d670a2) !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.40) !important;
+}
+body.page-home .action-circle-btn.like.is-active .action-icon,
+body.page-home .action-circle-btn.like[aria-pressed="true"] .action-icon {
+    color: #fff;
+    fill: #fff;
+}
+body.page-home .action-circle-btn.keep.is-active,
+body.page-home .action-circle-btn.keep[aria-pressed="true"],
+body.page-home .rc-actions .action-circle-btn.keep.is-active,
+body.page-home .rc-actions .action-circle-btn.keep[aria-pressed="true"] {
+    background: #e8c25a !important;
+    border-color: #e8c25a !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.40) !important;
+}
+body.page-home .action-circle-btn.keep.is-active .action-icon,
+body.page-home .action-circle-btn.keep[aria-pressed="true"] .action-icon {
+    color: #1a1206;
+    fill: #1a1206;
+    stroke: #1a1206;
+}
+
+/* トーク：外周のアクセントグローを外し、他画面の Primary CTA と同じ物理シャドウ */
+body.page-home .action-btn-message,
+body.page-home .action-circle-btn.message {
+    box-shadow:
+        0 6px 14px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.20),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18) !important;
+}
+
+/* hover は拡大・明暗なし（押下フィードバックのみ） */
+body.page-home .card-actions-overlay .action-circle-btn:hover,
+body.page-home .rc-actions .action-circle-btn:hover {
+    transform: none;
+    filter: none;
+}
+

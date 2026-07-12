@@ -85,12 +85,13 @@ class HomeController extends Controller
             if (auth()->guard('shop')->check()) {
                 $shopId = (string) (auth()->guard('shop')->user()->shop_id ?? '');
                 if ($shopId !== '') {
+                    // LIKE は純粋なトグル（行が存在する = アクティブ）。
+                    // 旧仕様の「当日分のみ」判定は SEARCH 等との表示ズレの原因だったため撤去。
                     $likedTodayCastIds = DB::table('favorites')
                         ->where('shop_id', $shopId)
                         ->whereNotNull('cast_id')
                         ->where('action_type', Favorite::ACTION_LIKE)
                         ->where('sender_type', Favorite::SENDER_SHOP)
-                        ->whereDate('created_at', now()->toDateString())
                         ->pluck('cast_id')
                         ->all();
                 }
@@ -286,7 +287,7 @@ class HomeController extends Controller
                 ->keyBy('shop_id');
         }
 
-        // 店舗側求人カードの LIKE数（cast 発信の LIKE は廃止のため、現状常に 0 件）
+        // 店舗宛の LIKE 数（cast 発信の LIKE 件数）
         $likeCounts = [];
         if (Schema::hasTable('favorites')) {
             $likeRows = DB::table('favorites')
@@ -316,12 +317,11 @@ class HomeController extends Controller
                     ->pluck('shop_id')
                     ->all();
 
-                // D-2 で cast → shop LIKE 解禁。本日 LIKE 済みは UI で active 表示する
+                // LIKE は純粋なトグル（行が存在する = アクティブ）。当日限定判定は撤去。
                 $likedShopIds = DB::table('favorites')
                     ->where('cast_id', $castId)
                     ->where('action_type', Favorite::ACTION_LIKE)
                     ->where('sender_type', Favorite::SENDER_CAST)
-                    ->whereDate('created_at', now()->toDateString())
                     ->whereNotNull('shop_id')
                     ->pluck('shop_id')
                     ->all();

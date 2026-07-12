@@ -338,14 +338,18 @@ body.page-search-ai .ai-chat__thread {
 .search-filter-icon-btn:active {
     transform: scale(0.96);
 }
+/* 検索実行ボタン：他画面の Primary CTA と同じアクセントグラデ（旧: 黄色グラデ）。
+   hover での明暗モーションは付けない（押下フィードバックのみ） */
 .search-filter-icon-btn--gold {
     border: none;
-    background: linear-gradient(145deg, #e8c379, #c69a47);
-    color: #161110;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    background: linear-gradient(135deg, var(--accent-grad-from), var(--accent-grad-to));
+    color: var(--on-accent-strong, #fff);
+    box-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.20),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18);
 }
 .search-filter-icon-btn--gold:hover {
-    filter: brightness(1.06);
     border: none;
 }
 
@@ -2708,3 +2712,23 @@ li.connection-item.tl-row a.tl-row__link {
     .tl-row__line1 > * { font-size: 11px; }
     .tl-row__msg { font-size: 11.5px; }
 }
+
+/* ============================================================
+   一覧の LIKE 状態インジケーター（表示のみ・押せない）
+   操作はスワイプ / プロフィール詳細に集約（2026-07 LIKE 一本化）
+   ============================================================ */
+.tl-row__like-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.30);
+    pointer-events: none;
+    font-variant-numeric: tabular-nums;
+}
+.tl-row__like-indicator i { font-size: 0.78rem; }
+.tl-row__like-indicator.is-on {
+    color: var(--accent-text, #f0a6c4);
+}
+.tl-row__like-count { line-height: 1; }

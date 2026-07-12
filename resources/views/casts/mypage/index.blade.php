@@ -35,20 +35,20 @@
             </div>
 
             <div class="flex-1 min-w-0">
-                <div class="relative bg-gradient-to-br from-surface-from to-base border border-line-accent/40 rounded-2xl shadow-card-3d p-3">
+                {{-- 枠の高さはアイコン（84px）に揃える。区切り線なしのコンパクト構成 --}}
+                <div class="relative min-h-[84px] flex flex-col bg-gradient-to-br from-surface-from to-base border border-line-accent/40 rounded-2xl shadow-card-3d px-3 py-2.5">
                     {{-- 吹き出しのしっぽ（アイコン側に向く） --}}
                     <span class="absolute top-5 -left-[8px] w-0 h-0 border-y-[8px] border-y-transparent border-r-[10px] border-r-line-accent/40"></span>
                     <span class="absolute top-5 -left-[6px] w-0 h-0 border-y-[7px] border-y-transparent border-r-[9px] border-r-surface-from"></span>
 
-                    {{-- 本文が主役：最低2〜3行ぶんの高さを確保 --}}
                     <p id="display-word"
                        data-placeholder="{{ $wordPlaceholder }}"
-                       class="min-h-[52px] text-[13px] leading-relaxed {{ $word === '' ? 'text-text-sub' : 'text-text-main' }}">
+                       class="flex-1 text-[13px] leading-relaxed {{ $word === '' ? 'text-text-sub' : 'text-text-main' }}">
                         {{ $word !== '' ? $word : $wordPlaceholder }}
                     </p>
 
-                    {{-- 最終更新 + 編集：1行のコンパクトなフッターに圧縮 --}}
-                    <div class="mt-1.5 pt-1 border-t border-line flex items-center justify-between gap-2 leading-none">
+                    {{-- 最終更新 + 編集：区切り線なしの1行フッター --}}
+                    <div class="mt-1 flex items-center justify-between gap-2 leading-none">
                         <span id="display-word-updated" class="text-[10px] text-text-sub leading-none">
                             最終更新 {{ $cast['appeal_updated_at'] ?? '未設定' }}
                         </span>

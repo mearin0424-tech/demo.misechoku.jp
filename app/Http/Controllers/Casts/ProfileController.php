@@ -488,6 +488,22 @@ class ProfileController extends Controller
             ];
         }
 
+        // 閲覧中の店舗が実際に KEEP / LIKE 済みか（行が存在 = アクティブ）。
+        // 旧実装は is_kept を true 固定・is_liked 未提供で、他画面との表示ズレの原因だった。
+        $isKeptByViewer = false;
+        $isLikedByViewer = false;
+        $viewerShopId = (string) (auth()->guard('shop')->user()->shop_id ?? '');
+        if ($viewerShopId !== '' && Schema::hasTable('favorites')) {
+            $favRows = DB::table('favorites')
+                ->where('shop_id', $viewerShopId)
+                ->where('cast_id', $castId)
+                ->where('sender_type', 'shop')
+                ->pluck('action_type')
+                ->all();
+            $isKeptByViewer  = in_array('KEEP', $favRows, true);
+            $isLikedByViewer = in_array('LIKE', $favRows, true);
+        }
+
         return [
             'id' => $castId,
             'nickname' => $row->nickname ?? '',
@@ -499,7 +515,8 @@ class ProfileController extends Controller
             'images' => $images,
             'img' => $images[0] ?? asset('assets/images/common/no-image.png'),
             'is_applied' => true,
-            'is_kept' => true,
+            'is_kept' => $isKeptByViewer,
+            'is_liked' => $isLikedByViewer,
             // LIKE 数：店舗（sender_type=shop）からこのキャスト宛のLIKE件数
             'like_cnt' => $this->countLikesForCast($castId),
             'pref' => $row->pref ?? '',
@@ -584,6 +601,7 @@ class ProfileController extends Controller
             'img' => $images[0],
             'is_applied' => false,
             'is_kept' => false,
+            'is_liked' => false,
             'like_cnt' => 0,
             'pref' => '',
             'city' => '',

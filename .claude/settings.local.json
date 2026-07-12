@@ -29,7 +29,9 @@
       "Bash(grep *)",
       "PowerShell(npm run *)",
       "PowerShell(Remove-Item *)",
-      "PowerShell(\\(Get-Content \"public\\\\assets\\\\css\\\\home.css\" | Measure-Object -Line\\).Lines)"
+      "PowerShell(\\(Get-Content \"public\\\\assets\\\\css\\\\home.css\" | Measure-Object -Line\\).Lines)",
+      "PowerShell(php -l app\\\\Http\\\\Controllers\\\\Shops\\\\HomeController.php; php -l app\\\\Http\\\\Controllers\\\\Casts\\\\RecruitmentController.php)",
+      "PowerShell(php -l app\\\\Http\\\\Controllers\\\\Casts\\\\ProfileController.php)"
     ]
   }
 }

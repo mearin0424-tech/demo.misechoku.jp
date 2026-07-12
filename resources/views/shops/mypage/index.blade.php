@@ -25,20 +25,20 @@
             </div>
 
             <div class="flex-1 min-w-0">
-                <div class="relative bg-gradient-to-br from-surface-from to-base border border-line-accent/40 rounded-2xl shadow-card-3d p-3">
+                {{-- 枠の高さはアイコン（84px）に揃える。区切り線なしのコンパクト構成 --}}
+                <div class="relative min-h-[84px] flex flex-col bg-gradient-to-br from-surface-from to-base border border-line-accent/40 rounded-2xl shadow-card-3d px-3 py-2.5">
                     {{-- 吹き出しのしっぽ --}}
                     <span class="absolute top-5 -left-[8px] w-0 h-0 border-y-[8px] border-y-transparent border-r-[10px] border-r-line-accent/40"></span>
                     <span class="absolute top-5 -left-[6px] w-0 h-0 border-y-[7px] border-y-transparent border-r-[9px] border-r-surface-from"></span>
 
-                    {{-- 本文が主役：最低2〜3行ぶんの高さを確保 --}}
                     <p id="display-word"
                        data-placeholder="{{ $wordPlaceholder }}"
-                       class="min-h-[52px] text-[13px] leading-relaxed {{ $word === '' ? 'text-text-sub' : 'text-text-main' }}">
+                       class="flex-1 text-[13px] leading-relaxed {{ $word === '' ? 'text-text-sub' : 'text-text-main' }}">
                         {{ $word !== '' ? $word : $wordPlaceholder }}
                     </p>
 
-                    {{-- 最終更新 + 編集：1行のコンパクトなフッターに圧縮 --}}
-                    <div class="mt-1.5 pt-1 border-t border-line flex items-center justify-between gap-2 leading-none">
+                    {{-- 最終更新 + 編集：区切り線なしの1行フッター --}}
+                    <div class="mt-1 flex items-center justify-between gap-2 leading-none">
                         <span id="display-word-updated" class="text-[10px] text-text-sub leading-none">
                             最終更新 {{ $shopData['appeal_updated_at'] ?? '未設定' }}
                         </span>
@@ -102,26 +102,22 @@
             </div>
         @endunless
 
-        {{-- ===== 管理メニュー：2タイルのみ =====
+        {{-- ===== 管理メニュー =====
              求人票 → JOB タブ内、プロファイル → PROFILE タブ内、
-             ライセンス → サイドメニュー（VERIFICATION）に集約し、
-             トップは日常業務の「採用・入金管理」「スタッフ」だけに絞る。
+             ライセンス・スタッフ管理 → サイドメニュー（ACCOUNT）に集約。
+             トップは日常業務の「採用・入金管理」のみ（キャスト MyPage と同構成）。
              要対応バッジはヘッダー共有の $todoList（InjectHeaderBadges）から算出 --}}
         @php
             $todos = collect($todoList ?? []);
             $mgmtActionCount = $todos->whereIn('key', ['shop.deposit_pending_approval', 'shop.invoice_pending_payment'])->count();
         @endphp
         <div class="mypage-menu-grid mb-1">
-            <a href="{{ route('shop.mypage.management') }}" class="mypage-tile">
+            <a href="{{ route('shop.mypage.management') }}" class="mypage-tile mypage-tile--wide">
                 <i class="fas fa-yen-sign mypage-tile__icon"></i>
                 <span class="mypage-tile__label">採用・入金管理<span class="mypage-tile__sub">PAYMENT</span></span>
                 @if($mgmtActionCount > 0)
                     <span class="mypage-tile__badge mypage-tile__badge--urgent" aria-label="要対応 {{ $mgmtActionCount }}件">{{ $mgmtActionCount }}</span>
                 @endif
-            </a>
-            <a href="{{ route('shop.mypage.staff.index') }}" class="mypage-tile">
-                <i class="fas fa-users mypage-tile__icon"></i>
-                <span class="mypage-tile__label">スタッフ・アカウント<span class="mypage-tile__sub">STAFF</span></span>
             </a>
         </div>
     </div>

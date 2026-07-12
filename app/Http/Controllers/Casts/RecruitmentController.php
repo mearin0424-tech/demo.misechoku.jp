@@ -410,8 +410,8 @@ class RecruitmentController extends Controller
         $shopName = $data['shop']['name'] ?? $data['recruit']['store_name'] ?? '店舗';
 
         // プロフィール画面に表示する受信 LIKE 数（キャスト → この店舗）
+        $likeShopId = 's' . str_pad((string) $id, 8, '0', STR_PAD_LEFT);
         if (is_array($data['shop'] ?? null) && !isset($data['shop']['like_cnt'])) {
-            $likeShopId = 's' . str_pad((string) $id, 8, '0', STR_PAD_LEFT);
             try {
                 $data['shop']['like_cnt'] = (int) DB::table('favorites')
                     ->where('shop_id', $likeShopId)
@@ -420,6 +420,22 @@ class RecruitmentController extends Controller
                     ->count();
             } catch (\Throwable) {
                 $data['shop']['like_cnt'] = 0;
+            }
+        }
+        // 現在のキャストがこの店舗を LIKE 済みか（プロフィールの LIKE ボタン用。行が存在 = アクティブ）
+        if (is_array($data['shop'] ?? null) && !isset($data['shop']['is_liked'])) {
+            $data['shop']['is_liked'] = false;
+            if ($forCast && auth()->guard('member')->check()) {
+                try {
+                    $data['shop']['is_liked'] = DB::table('favorites')
+                        ->where('shop_id', $likeShopId)
+                        ->where('cast_id', (string) auth()->guard('member')->id())
+                        ->where('action_type', 'LIKE')
+                        ->where('sender_type', 'cast')
+                        ->exists();
+                } catch (\Throwable) {
+                    $data['shop']['is_liked'] = false;
+                }
             }
         }
         $shareUrl = route('share.recruit.show', ['id' => $id]);

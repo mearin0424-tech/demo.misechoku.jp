@@ -68,13 +68,14 @@
     </a>
     @php
         $isLiked = (bool) ($item['is_liked'] ?? false);
+        $likeCnt = $item['like_count'] ?? null;
     @endphp
-    {{-- 検索行のアクションは控えめな LIKE のみ（KEEP はプロフィール画面内でのみ操作可能） --}}
-    <div class="tl-row__actions" aria-label="クイックアクション">
-        <button type="button" class="tl-row__action-btn tl-row__action-btn--like tl-row__action-btn--subtle"
-                data-fav-toggle data-action="like" data-item-type="shop" data-item-id="{{ $item['id'] }}"
-                aria-label="いいね" aria-pressed="{{ $isLiked ? 'true' : 'false' }}">
+    {{-- 一覧の LIKE は状態表示のみ（操作はスワイプ / プロフィール詳細に集約） --}}
+    <div class="tl-row__actions">
+        <span class="tl-row__like-indicator {{ $isLiked ? 'is-on' : '' }}"
+              aria-label="いいね{{ $isLiked ? '済み' : '' }}{{ $likeCnt !== null ? '・' . number_format((int) $likeCnt) . '件' : '' }}">
             <i class="fas fa-heart" aria-hidden="true"></i>
-        </button>
+            @if($likeCnt !== null)<span class="tl-row__like-count">{{ number_format((int) $likeCnt) }}</span>@endif
+        </span>
     </div>
 </li>

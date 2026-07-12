@@ -44,12 +44,13 @@
     $pressedShadow  = 'active:shadow-[0_2px_5px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(0,0,0,0.2)]';
 
     // バリアント別の色 / 影
+    // hover での明暗（brightness）モーションは使わない。フィードバックは押下時のみ。
     $tone = match($variant) {
         'outline' => 'bg-transparent border border-line-accent/45 text-accent-text hover:bg-accent/10 hover:border-accent/60',
-        'danger'  => 'bg-[#dc2626] text-white hover:brightness-110 ' . $physicalShadow . ' ' . $pressedShadow,
+        'danger'  => 'bg-[#dc2626] text-white ' . $physicalShadow . ' ' . $pressedShadow,
         // 'grad' は後方互換（旧 gradient ボタン）。実装は solid と同じ。
-        'grad'    => 'bg-accent text-on-accent hover:brightness-110 ' . $physicalShadow . ' ' . $pressedShadow,
-        default   => 'bg-accent text-on-accent hover:brightness-110 ' . $physicalShadow . ' ' . $pressedShadow,
+        'grad'    => 'bg-accent text-on-accent ' . $physicalShadow . ' ' . $pressedShadow,
+        default   => 'bg-accent text-on-accent ' . $physicalShadow . ' ' . $pressedShadow,
     };
 
     $tag = $as === 'a' ? 'a' : 'button';

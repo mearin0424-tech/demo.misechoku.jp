@@ -62,6 +62,17 @@
             const data = await res.json();
             const isActive = !!data.is_active;
             btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            // スワイプカード等、is-active クラスで見た目を切り替える画面にも追従
+            btn.classList.toggle('is-active', isActive);
+
+            // LIKE カウント（スワイプ / プロフィールのみ表示）：サーバー値で同期
+            if (payload.action === 'like' && typeof data.like_count === 'number') {
+                const cntEl = btn.querySelector('[data-fav-count]');
+                if (cntEl) cntEl.textContent = data.like_count.toLocaleString();
+                // ボタン外のカウンタ（プロフィールヒーローの ❤ 数など）も同期
+                document.querySelectorAll('[data-fav-count-target="' + payload.item_type + ':' + payload.item_id + '"]')
+                    .forEach(function (el) { el.textContent = data.like_count.toLocaleString(); });
+            }
 
             // カウントバッジは検索リストでは表示しない方針
             //（KEEP 数は本人以外に非公開・LIKE 数はスワイプ/プロフィール画面のみ）。

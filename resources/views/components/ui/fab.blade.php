@@ -17,8 +17,7 @@
         'fixed bottom-[90px] right-5 w-14 h-14 rounded-full flex items-center justify-center'
         . ' bg-accent text-on-accent z-30'
         . ' shadow-[0_8px_18px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.22),inset_0_-1px_0_rgba(0,0,0,0.18)]'
-        . ' transition-[filter,transform] duration-150'
-        . ' hover:brightness-110'
+        . ' transition-transform duration-150'
         . ' active:scale-95 active:shadow-[0_2px_6px_rgba(0,0,0,0.45),inset_0_2px_4px_rgba(0,0,0,0.2)]'
     ]) }}>
     <x-ui.icon :name="$icon" class="text-2xl" />

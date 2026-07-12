@@ -214,6 +214,31 @@ input[type="file"]::file-selector-button:hover {
    立体（inset + drop shadow）は Primary CTA（保存・送信・トーク等）
    だけに残す。バッジ・チップ・セカンダリ・ユーティリティはフラット。
    ================================================================== */
+/* ------------------------------------------------------------------
+   8b. hover の明暗モーション廃止（2026-07-12）
+   ボタンは hover で明るく/暗くしない。フィードバックは押下（:active）
+   の沈み込みと focus ring のみで表現する。
+   ------------------------------------------------------------------ */
+.btn-gold:hover,
+.btn-gold-luxe:hover,
+.btn-gold-submit:hover,
+.save-btn:hover,
+.staff-btn-primary:hover,
+.payment-bank-register-btn:hover,
+.payment-bank-modal-btn-submit:hover,
+.case-card__action-btn:hover,
+.ai-chat__send:hover,
+.mypage-alert__btn:hover,
+.search-filter-icon-btn--gold:hover {
+    filter: none !important;
+    opacity: 1 !important;
+}
+/* Tailwind ユーティリティ由来（x-ui.button / fab の hover:brightness-110） */
+.hover\:brightness-110:hover {
+    --tw-brightness: brightness(1) !important;
+    filter: none !important;
+}
+
 /* KEEP / LIKE のアクティブ状態：グラデ → ベタ（グローは状態FBなので残す） */
 .fav-circle--keep[aria-pressed="true"] {
     background: #e8c25a !important;

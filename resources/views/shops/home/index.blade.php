@@ -4,7 +4,7 @@
 @section('body-class', 'no-scroll page-home')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260712-swipe-refresh">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260712-swipe-flat">
 @endpush
 
 @php
@@ -74,16 +74,36 @@
                     <div class="rc-img-gradient" aria-hidden="true"></div>
                 </div>
 
-                {{-- 2. アクションボタン（右側）※いいねは非表示 --}}
+                {{-- 2. アクションボタン（右側）。LIKE/KEEP は favorite-quick.js（data-fav-toggle）に一本化 --}}
                 <div class="card-actions-overlay rc-actions stop-propagation">
                     <div class="rc-action-item stop-propagation">
                         <button
                             type="button"
+                            class="action-circle-btn like stop-propagation {{ !empty($item['is_liked']) ? 'is-active' : '' }}"
+                            data-fav-toggle
+                            data-item-id="{{ $item['id'] }}"
+                            data-item-type="shop"
+                            data-action="like"
+                            aria-label="いいね"
+                            aria-pressed="{{ !empty($item['is_liked']) ? 'true' : 'false' }}"
+                        >
+                            <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/>
+                            </svg>
+                            <span class="action-btn-count" data-fav-count>{{ $item['like_count'] ?? 0 }}</span>
+                        </button>
+                        <span class="rc-action-label">いいね</span>
+                    </div>
+                    <div class="rc-action-item stop-propagation">
+                        <button
+                            type="button"
                             class="action-circle-btn keep stop-propagation {{ !empty($item['is_kept']) ? 'is-active' : '' }}"
+                            data-fav-toggle
                             data-item-id="{{ $item['id'] }}"
                             data-item-type="shop"
                             data-action="keep"
                             aria-label="キープ"
+                            aria-pressed="{{ !empty($item['is_kept']) ? 'true' : 'false' }}"
                         >
                             <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M6 4a2 2 0 0 0-2 2v15.382a.6.6 0 0 0 .89.527L12 17.5l7.11 4.41A.6.6 0 0 0 20 21.382V6a2 2 0 0 0-2-2H6Z"/>
@@ -235,21 +255,23 @@
                     </div>
                 </div>
 
-                {{-- アクションボタン（求人カードと同じラベル付き構造に統一） --}}
+                {{-- アクションボタン（求人カードと同じラベル付き構造。favorite-quick.js に一本化） --}}
                 <div class="card-actions-overlay rc-actions stop-propagation">
                     <div class="rc-action-item stop-propagation">
                         <button
                             type="button"
                             class="action-circle-btn like stop-propagation {{ !empty($item['is_liked']) ? 'is-active' : '' }}"
+                            data-fav-toggle
                             data-item-id="{{ $item['id'] }}"
                             data-item-type="{{ $itemType === 'recruit' ? 'shop' : 'cast' }}"
                             data-action="like"
                             aria-label="いいね"
+                            aria-pressed="{{ !empty($item['is_liked']) ? 'true' : 'false' }}"
                         >
                             <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/>
                             </svg>
-                            <span class="action-btn-count">{{ $item['like_count'] ?? 0 }}</span>
+                            <span class="action-btn-count" data-fav-count>{{ $item['like_count'] ?? 0 }}</span>
                         </button>
                         <span class="rc-action-label">いいね</span>
                     </div>
@@ -257,10 +279,12 @@
                         <button
                             type="button"
                             class="action-circle-btn keep stop-propagation {{ !empty($item['is_kept']) ? 'is-active' : '' }}"
+                            data-fav-toggle
                             data-item-id="{{ $item['id'] }}"
                             data-item-type="{{ $itemType === 'recruit' ? 'shop' : 'cast' }}"
                             data-action="keep"
                             aria-label="キープ"
+                            aria-pressed="{{ !empty($item['is_kept']) ? 'true' : 'false' }}"
                         >
                             <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M6 4a2 2 0 0 0-2 2v15.382a.6.6 0 0 0 .89.527L12 17.5l7.11 4.41A.6.6 0 0 0 20 21.382V6a2 2 0 0 0-2-2H6Z"/>
@@ -362,5 +386,7 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/home.js') }}?v=20260613-card-refresh"></script>
+<script src="{{ asset('assets/js/home.js') }}?v=20260712-like-unify"></script>
+{{-- LIKE / KEEP の共通トグル（全画面この1本に統一） --}}
+<script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260712-like-unify"></script>
 @endpush

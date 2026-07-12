@@ -28,12 +28,12 @@
             </button>
         </div>
 
-        {{-- VERIFICATION セクション：一度完了すれば開かない書類系はサイドメニューに集約。
-             未完了の間は「未済」バッジを表示（やることリストにも常時掲載される） --}}
-        @if($isCast || $isShop)
+        {{-- ACCOUNT セクション：アカウント管理（アカウント設定・書類系・スタッフ管理を集約）。
+             書類系は未完了の間「未済」バッジを表示（やることリストにも常時掲載される） --}}
         <div class="sidebar-section">
-            <div class="menu-label-header">VERIFICATION</div>
+            <div class="menu-label-header">ACCOUNT</div>
             <ul class="sidebar-sub-menu">
+                <li><a href="{{ route('setting.account') }}"><i class="fas fa-cog"></i> アカウント設定</a></li>
                 @if($isCast)
                     <li>
                         <a href="{{ route('cast.mypage.identity') }}">
@@ -41,23 +41,27 @@
                             @if($identityPendingBadge)<span class="sidebar-badge-pending">未済</span>@endif
                         </a>
                     </li>
-                @else
+                @endif
+                @if($isShop)
                     <li>
                         <a href="{{ route('shop.mypage.index') }}#license-section">
                             <i class="fas fa-file-shield"></i> ライセンス（許可証）管理
                             @if($licensePendingBadge)<span class="sidebar-badge-pending">未済</span>@endif
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ route('shop.mypage.staff.index') }}">
+                            <i class="fas fa-users"></i> スタッフ・アカウント管理
+                        </a>
+                    </li>
                 @endif
             </ul>
         </div>
-        @endif
 
         {{-- SETTING セクション --}}
         <div class="sidebar-section">
             <div class="menu-label-header">SETTING</div>
             <ul class="sidebar-sub-menu">
-                <li><a href="{{ route('setting.account') }}"><i class="fas fa-cog"></i> アカウント設定</a></li>
                 <li><a href="{{ url('/setting/notification') }}"><i class="fas fa-bell"></i> 通知設定</a></li>
                 @if(!$isCast)
                     <li><a href="{{ url('/subscription') }}"><i class="fas fa-crown"></i> プラン選択</a></li>
