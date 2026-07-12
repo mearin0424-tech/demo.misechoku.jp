@@ -21,14 +21,16 @@
        sticky は祖先 .content-wrapper の overflow-x: hidden がスクロールコンテキストを
        作るため viewport にピン留めされず下にズレる（既知の落とし穴）。 */
     .job-edit-v2 {
-        --je-subheader-h: 56px;
+        --je-subheader-h: 44px; /* 1行構成の細型サブヘッダー */
     }
     .job-edit-v2__shell {
         max-width: 100%;
         margin: 0 auto;
         min-height: 100%;
         background: var(--je-panel);
-        backdrop-filter: blur(8px);
+        /* NOTE: backdrop-filter は fixed 子要素（サブヘッダー・保存帯）の
+           containing block を作ってしまい、viewport 基準でなくなる（＝帯が
+           画面途中に浮く・ヘッダーが被る）ため使用禁止 */
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
         /* fixed 化したサブヘッダーの高さぶんコンテンツを下げる */
         padding-top: var(--je-subheader-h);
@@ -40,7 +42,7 @@
         transform: translateX(-50%);
         width: 100%;
         max-width: var(--max-content-width);
-        height: var(--je-subheader-h, 56px);
+        height: var(--je-subheader-h, 44px);
         box-sizing: border-box;
         z-index: 1400; /* グローバルヘッダー(1500)より下、コンテンツより上 */
         display: flex;
@@ -57,7 +59,7 @@
     /* アンカースクロール時、fixed ヘッダー2段ぶんのマージンを確保 */
     .job-edit-v2__notice,
     .job-edit-v2__form section {
-        scroll-margin-top: calc(var(--header-height, 60px) + var(--je-subheader-h, 56px) + 12px);
+        scroll-margin-top: calc(var(--header-height, 60px) + var(--je-subheader-h, 44px) + 12px);
     }
     .job-edit-v2__back {
         color: #a1a1aa;
@@ -68,16 +70,35 @@
         line-height: 1;
     }
     .job-edit-v2__back:hover { color: var(--je-gold); }
-    .job-edit-v2__title-wrap { text-align: center; flex: 1; min-width: 0; }
+    /* タイトル：2段積み → 1行（英字は小さな添えラベル）にして細型化 */
+    .job-edit-v2__title-wrap {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        text-align: left;
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+    }
     .job-edit-v2__title-en {
         margin: 0;
-        font-size: 0.875rem;
+        font-size: 0.6rem;
         font-weight: 800;
-        color: #fff;
+        color: rgba(var(--accent-rgb, 139, 92, 246), 0.75);
         letter-spacing: 0.18em;
         font-family: var(--font-sans);
+        flex-shrink: 0;
     }
-    .job-edit-v2__title-sub { margin: 2px 0 0; font-size: 9px; font-weight: 700; color: var(--je-gold); letter-spacing: 0.06em; }
+    .job-edit-v2__title-sub {
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
     .job-edit-v2__spacer { width: 2rem; flex-shrink: 0; }
 
     .job-edit-v2__form {
