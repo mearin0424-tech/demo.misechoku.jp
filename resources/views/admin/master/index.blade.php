@@ -35,54 +35,32 @@
             <div class="admin-alert admin-alert-error">{{ $error }}</div>
         @endif
 
+        {{-- マスタ選択：カードグリッドは縦を圧迫しスマホで扱いにくいため、
+             大きめのプルダウン1本に統一（選択で即遷移） --}}
         <section class="admin-card admin-card-wide">
-            <div class="admin-card-head">
-                <div>
-                    <h2>マスタを選択</h2>
-                    <p>編集したいマスタを選択してください。一覧から直接クリックでも、ドロップダウンからでも選べます。</p>
-                </div>
-            </div>
-
-            {{-- カードグリッドで素早く切り替え --}}
-            <div class="master-catalog-grid">
-                @foreach ($catalogs as $catalog)
-                    @php $isSelected = ($selectedCatalog['key'] ?? null) === $catalog['key']; @endphp
-                    <a href="{{ route('admin.masters.index', ['catalog' => $catalog['key']]) }}"
-                       class="master-catalog-card {{ $isSelected ? 'is-selected' : '' }}">
-                        <div class="master-catalog-card__icon"><i class="fas fa-database"></i></div>
-                        <div class="master-catalog-card__body">
-                            <p class="master-catalog-card__title">{{ $catalog['title'] }}</p>
-                            <p class="master-catalog-card__meta"><strong>{{ number_format($catalog['count']) }}</strong> 件</p>
-                        </div>
-                        @if($isSelected)
-                            <i class="fas fa-check master-catalog-card__check" aria-hidden="true"></i>
-                        @endif
-                    </a>
-                @endforeach
-            </div>
-
-            <details class="master-catalog-fallback">
-                <summary>ドロップダウンから選択</summary>
-                <div class="admin-master-select-row u-mt-12">
-                    <label class="admin-master-select-label" style="flex:1;">
-                        <span>マスタ</span>
-                        <select
-                            id="master-catalog-select"
-                            onchange="if(this.value){window.location.href=this.value;}"
+            <div class="master-picker">
+                <label class="master-picker__label" for="master-catalog-select">
+                    <i class="fas fa-database" aria-hidden="true"></i> 管理するマスタ
+                </label>
+                <select
+                    id="master-catalog-select"
+                    class="master-picker__select"
+                    onchange="if(this.value){window.location.href=this.value;}"
+                >
+                    <option value="">マスタを選択してください</option>
+                    @foreach ($catalogs as $catalog)
+                        <option
+                            value="{{ route('admin.masters.index', ['catalog' => $catalog['key']]) }}"
+                            @selected(($selectedCatalog['key'] ?? null) === $catalog['key'])
                         >
-                            <option value="">マスタを選択してください</option>
-                            @foreach ($catalogs as $catalog)
-                                <option
-                                    value="{{ route('admin.masters.index', ['catalog' => $catalog['key']]) }}"
-                                    @selected(($selectedCatalog['key'] ?? null) === $catalog['key'])
-                                >
-                                    {{ $catalog['title'] }}（{{ $catalog['count'] }}件）
-                                </option>
-                            @endforeach
-                        </select>
-                    </label>
-                </div>
-            </details>
+                            {{ $catalog['title'] }}（{{ number_format($catalog['count']) }}件）
+                        </option>
+                    @endforeach
+                </select>
+                @if ($selectedCatalog)
+                    <p class="master-picker__desc">{{ $selectedCatalog['description'] }}</p>
+                @endif
+            </div>
         </section>
 
         @if ($selectedCatalog)
@@ -179,138 +157,105 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="table-wrapper">
-                            <table class="admin-table master-records-table">
-                                <thead>
-                                    <tr>
-                                        <th class="u-w-60">ID</th>
-                                        @if ($hasSortOrder)
-                                            <th class="u-w-110">表示順</th>
-                                        @endif
-                                        <th>名称</th>
-                                        @if ($hasDirectory)
-                                            <th>ディレクトリ</th>
-                                        @endif
-                                        @if ($hasActive)
-                                            <th>状態</th>
-                                        @endif
-                                        <th>登録日</th>
-                                        <th class="u-w-140">操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="master-records-body">
-                                    @php
-                                        $columnCount = 4 + ($hasSortOrder ? 1 : 0) + ($hasDirectory ? 1 : 0) + ($hasActive ? 1 : 0);
-                                    @endphp
-                                    @forelse ($selectedCatalog['records'] as $item)
-                                        <tr class="master-record-row" data-search="{{ strtolower(trim(($item->id ?? '') . ' ' . $item->name . ' ' . ($item->directory ?? '') . ' ' . (($item->is_active ?? 1) ? '有効' : '無効') . ' ' . ($item->created_at ? \Illuminate\Support\Carbon::parse($item->created_at)->format('Y-m-d') : ''))) }}">
-                                            <td class="cell-id"><code>{{ $item->id }}</code></td>
-                                            @if ($hasSortOrder)
-                                                <td class="cell-sort-order">
-                                                    <form method="POST" action="{{ route('admin.masters.catalogs.sort-order', [$selectedCatalog['key'], $item->id]) }}" class="sort-order-form">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <input type="hidden" name="current_sort" value="{{ $selectedSort }}">
-                                                        <input type="number" name="sort_order" value="{{ $item->sort_order ?? 0 }}" min="0" max="99999" class="sort-order-input" aria-label="表示順">
-                                                        <button type="submit" class="sort-order-save" title="表示順を保存">
-                                                            <i class="fas fa-check"></i>
-                                                        </button>
-                                                    </form>
-                                                </td>
-                                            @endif
-                                            <td class="cell-main">
-                                                {{-- 表示モード：クリックでその場編集に切替 --}}
-                                                <button type="button"
-                                                        class="master-inline-name"
-                                                        data-inline-edit-toggle
-                                                        title="クリックして名称を編集">
-                                                    <span class="master-inline-name__text">{{ $item->name }}</span>
-                                                    <i class="fas fa-pen master-inline-name__icon" aria-hidden="true"></i>
+                        {{-- テーブル → レコードカードのリスト（スマホでも横スクロールなしで全操作可能） --}}
+                        <ul class="master-list" id="master-records-body">
+                            @forelse ($selectedCatalog['records'] as $item)
+                                <li class="master-record-row master-item {{ $editingRecord && $editingRecord->id === $item->id ? 'is-editing' : '' }}"
+                                    data-search="{{ strtolower(trim(($item->id ?? '') . ' ' . $item->name . ' ' . ($item->directory ?? '') . ' ' . (($item->is_active ?? 1) ? '有効' : '無効') . ' ' . ($item->created_at ? \Illuminate\Support\Carbon::parse($item->created_at)->format('Y-m-d') : ''))) }}">
+
+                                    {{-- 1段目：名称（タップでその場編集） + 操作 --}}
+                                    <div class="master-item__row">
+                                        <div class="master-item__name" data-name-cell>
+                                            <button type="button"
+                                                    class="master-inline-name"
+                                                    data-inline-edit-toggle
+                                                    title="タップして名称を編集">
+                                                <span class="master-inline-name__text">{{ $item->name }}</span>
+                                                <i class="fas fa-pen master-inline-name__icon" aria-hidden="true"></i>
+                                            </button>
+                                            {{-- 編集モード：name 以外のフィールドは hidden で現値を送る（バリデーション対応） --}}
+                                            <form method="POST"
+                                                  action="{{ route('admin.masters.catalogs.update', [$selectedCatalog['key'], $item->id]) }}"
+                                                  class="master-inline-form"
+                                                  hidden>
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="current_sort" value="{{ $selectedSort }}">
+                                                @foreach ($selectedCatalog['fields'] as $fieldIdx => $field)
+                                                    @if ($fieldIdx === 0)
+                                                        <input type="text"
+                                                               name="{{ $field['input'] }}"
+                                                               value="{{ $item->{$field['column']} ?? $item->name }}"
+                                                               class="master-inline-form__input"
+                                                               aria-label="{{ $field['label'] }}"
+                                                               required>
+                                                    @else
+                                                        <input type="hidden"
+                                                               name="{{ $field['input'] }}"
+                                                               value="{{ $item->{$field['column']} ?? '' }}">
+                                                    @endif
+                                                @endforeach
+                                                <button type="submit" class="master-inline-form__save" title="保存">
+                                                    <i class="fas fa-check"></i>
                                                 </button>
-                                                {{-- 編集モード：name 以外のフィールドは hidden で現値を送る（バリデーション対応） --}}
-                                                <form method="POST"
-                                                      action="{{ route('admin.masters.catalogs.update', [$selectedCatalog['key'], $item->id]) }}"
-                                                      class="master-inline-form"
-                                                      hidden>
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <input type="hidden" name="current_sort" value="{{ $selectedSort }}">
-                                                    @foreach ($selectedCatalog['fields'] as $fieldIdx => $field)
-                                                        @if ($fieldIdx === 0)
-                                                            {{-- 先頭フィールド（名称/設問など）をその場編集の対象にする --}}
-                                                            <input type="text"
-                                                                   name="{{ $field['input'] }}"
-                                                                   value="{{ $item->{$field['column']} ?? $item->name }}"
-                                                                   class="master-inline-form__input"
-                                                                   aria-label="{{ $field['label'] }}"
-                                                                   required>
-                                                        @else
-                                                            <input type="hidden"
-                                                                   name="{{ $field['input'] }}"
-                                                                   value="{{ $item->{$field['column']} ?? '' }}">
-                                                        @endif
-                                                    @endforeach
-                                                    <button type="submit" class="master-inline-form__save" title="保存">
-                                                        <i class="fas fa-check"></i>
-                                                    </button>
-                                                    <button type="button" class="master-inline-form__cancel" data-inline-edit-cancel title="キャンセル">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                </form>
-                                            </td>
-                                            @if ($hasDirectory)
-                                                <td>{{ $item->directory ?? '-' }}</td>
-                                            @endif
-                                            @if ($hasActive)
-                                                <td>
-                                                    <span class="admin-status-badge {{ ($item->is_active ?? 1) ? 'is-success' : 'is-inactive' }}">
-                                                        {{ ($item->is_active ?? 1) ? '有効' : '無効' }}
-                                                    </span>
-                                                </td>
-                                            @endif
-                                            <td>{{ $item->created_at ? \Illuminate\Support\Carbon::parse($item->created_at)->format('Y-m-d') : '-' }}</td>
-                                            <td>
-                                                <div class="u-flex u-gap-6">
-                                                    <a
-                                                        href="{{ route('admin.masters.index', ['catalog' => $selectedCatalog['key'], 'edit' => $item->id, 'sort' => $selectedSort]) }}"
-                                                        class="admin-row-icon-btn {{ $editingRecord && $editingRecord->id === $item->id ? 'is-active' : '' }}"
-                                                        title="編集"
-                                                    >
-                                                        <i class="fas fa-pen"></i>
-                                                    </a>
-                                                    <form
-                                                        method="POST"
-                                                        action="{{ route('admin.masters.catalogs.destroy', [$selectedCatalog['key'], $item->id]) }}"
-                                                        onsubmit="return confirm('「{{ addslashes($item->name) }}」を削除しますか？\nこの操作は取り消せません。');"
-                                                        style="display:inline;"
-                                                    >
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <input type="hidden" name="current_sort" value="{{ $selectedSort }}">
-                                                        <button
-                                                            type="submit"
-                                                            class="admin-row-icon-btn admin-row-icon-delete"
-                                                            title="削除"
-                                                        >
-                                                            <i class="fas fa-times"></i>
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr id="master-records-empty">
-                                            <td colspan="{{ $columnCount }}" class="text-center">まだ登録されていません。</td>
-                                        </tr>
-                                    @endforelse
-                                    @if ($selectedCatalog['records']->isNotEmpty())
-                                        <tr id="master-records-no-result" hidden>
-                                            <td colspan="{{ $columnCount }}" class="text-center">検索条件に一致する項目がありません。</td>
-                                        </tr>
-                                    @endif
-                                </tbody>
-                            </table>
-                        </div>
+                                                <button type="button" class="master-inline-form__cancel" data-inline-edit-cancel title="キャンセル">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                        <div class="master-item__actions">
+                                            <a href="{{ route('admin.masters.index', ['catalog' => $selectedCatalog['key'], 'edit' => $item->id, 'sort' => $selectedSort]) }}"
+                                               class="admin-row-icon-btn {{ $editingRecord && $editingRecord->id === $item->id ? 'is-active' : '' }}"
+                                               title="詳細編集">
+                                                <i class="fas fa-pen"></i>
+                                            </a>
+                                            <form method="POST"
+                                                  action="{{ route('admin.masters.catalogs.destroy', [$selectedCatalog['key'], $item->id]) }}"
+                                                  onsubmit="return confirm('「{{ addslashes($item->name) }}」を削除しますか？\nこの操作は取り消せません。');"
+                                                  style="display:inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <input type="hidden" name="current_sort" value="{{ $selectedSort }}">
+                                                <button type="submit" class="admin-row-icon-btn admin-row-icon-delete" title="削除">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    {{-- 2段目：メタ情報（ID / 状態 / 登録日 / ディレクトリ）+ 表示順 --}}
+                                    <div class="master-item__meta">
+                                        <span class="master-item__chip master-item__chip--id">ID {{ $item->id }}</span>
+                                        @if ($hasActive)
+                                            <span class="admin-status-badge {{ ($item->is_active ?? 1) ? 'is-success' : 'is-inactive' }}">
+                                                {{ ($item->is_active ?? 1) ? '有効' : '無効' }}
+                                            </span>
+                                        @endif
+                                        @if ($hasDirectory && !empty($item->directory))
+                                            <span class="master-item__chip"><i class="fas fa-folder"></i>{{ $item->directory }}</span>
+                                        @endif
+                                        <span class="master-item__chip">{{ $item->created_at ? \Illuminate\Support\Carbon::parse($item->created_at)->format('Y-m-d') : '-' }}</span>
+                                        @if ($hasSortOrder)
+                                            <form method="POST" action="{{ route('admin.masters.catalogs.sort-order', [$selectedCatalog['key'], $item->id]) }}" class="sort-order-form">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="current_sort" value="{{ $selectedSort }}">
+                                                <span class="sort-order-label">表示順</span>
+                                                <input type="number" name="sort_order" value="{{ $item->sort_order ?? 0 }}" min="0" max="99999" class="sort-order-input" aria-label="表示順" inputmode="numeric">
+                                                <button type="submit" class="sort-order-save" title="表示順を保存">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </li>
+                            @empty
+                                <li id="master-records-empty" class="master-list__empty">まだ登録されていません。</li>
+                            @endforelse
+                            @if ($selectedCatalog['records']->isNotEmpty())
+                                <li id="master-records-no-result" class="master-list__empty" hidden>検索条件に一致する項目がありません。</li>
+                            @endif
+                        </ul>
                     </div>
                 </div>
             </section>
@@ -348,14 +293,14 @@
         // ---- インライン名称編集：表示テキスト ⇔ フォームの切替 ----
         document.querySelectorAll('[data-inline-edit-toggle]').forEach(function (btn) {
             btn.addEventListener('click', function () {
-                var cell = btn.closest('.cell-main');
+                var cell = btn.closest('[data-name-cell]');
                 if (!cell) return;
                 var form = cell.querySelector('.master-inline-form');
                 if (!form) return;
                 // 他の編集中セルを閉じる
                 document.querySelectorAll('.master-inline-form:not([hidden])').forEach(function (f) {
                     f.hidden = true;
-                    var b = f.closest('.cell-main').querySelector('[data-inline-edit-toggle]');
+                    var b = f.closest('[data-name-cell]').querySelector('[data-inline-edit-toggle]');
                     if (b) b.hidden = false;
                 });
                 btn.hidden = true;
@@ -369,7 +314,7 @@
                 var form = btn.closest('.master-inline-form');
                 if (!form) return;
                 form.hidden = true;
-                var toggle = form.closest('.cell-main').querySelector('[data-inline-edit-toggle]');
+                var toggle = form.closest('[data-name-cell]').querySelector('[data-inline-edit-toggle]');
                 if (toggle) toggle.hidden = false;
             });
         });
@@ -379,7 +324,7 @@
             var open = document.querySelector('.master-inline-form:not([hidden])');
             if (!open) return;
             open.hidden = true;
-            var toggle = open.closest('.cell-main').querySelector('[data-inline-edit-toggle]');
+            var toggle = open.closest('[data-name-cell]').querySelector('[data-inline-edit-toggle]');
             if (toggle) toggle.hidden = false;
         });
 
@@ -468,9 +413,125 @@
     }
     .master-inline-form__cancel:hover { color: #fff; border-color: rgba(255, 255, 255, 0.4); }
 
-    /* 編集中の項目行をハイライト */
-    .master-record-row:has(.admin-row-icon-btn.is-active) {
-        background: rgba(168, 85, 247, 0.07);
+    /* ---- マスタ選択プルダウン（スマホでも押しやすい大型） ---- */
+    .master-picker { display: flex; flex-direction: column; gap: 8px; }
+    .master-picker__label {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #c4b5fd;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .master-picker__select {
+        width: 100%;
+        min-height: 48px;
+        font-size: 16px;
+        border-radius: 12px;
+        padding: 12px 40px 12px 14px;
+    }
+    .master-picker__desc {
+        margin: 0;
+        font-size: 0.78rem;
+        line-height: 1.7;
+        color: #a1a1aa;
+    }
+
+    /* ---- レコードカードリスト（テーブル廃止・スマホ横スクロールなし） ---- */
+    .master-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+    .master-item {
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.02);
+        padding: 10px 12px;
+    }
+    .master-item.is-editing {
+        border-color: rgba(168, 85, 247, 0.55);
+        background: rgba(168, 85, 247, 0.06);
+    }
+    .master-item.is-hidden { display: none; }
+    .master-item__row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .master-item__name { flex: 1; min-width: 0; }
+    .master-item__name .master-inline-name__text {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #f5f5f5;
+        word-break: break-all;
+    }
+    .master-item__actions {
+        flex: 0 0 auto;
+        display: flex;
+        gap: 6px;
+    }
+    /* タップしやすいサイズに拡大 */
+    .master-item__actions .admin-row-icon-btn {
+        width: 38px;
+        height: 38px;
+    }
+    .master-item__meta {
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+        font-size: 0.72rem;
+        color: #a1a1aa;
+    }
+    .master-item__chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 9px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        background: rgba(255, 255, 255, 0.03);
+        font-size: 0.7rem;
+        white-space: nowrap;
+    }
+    .master-item__chip--id { font-variant-numeric: tabular-nums; color: #c4b5fd; }
+    .master-item__chip i { font-size: 0.62rem; opacity: 0.7; }
+    .master-list__empty {
+        padding: 28px 12px;
+        text-align: center;
+        color: #a1a1aa;
+        font-size: 0.85rem;
+        border: 1px dashed rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
+    }
+
+    /* 表示順フォームはメタ行の右端へ */
+    .sort-order-form {
+        margin-left: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .sort-order-label { font-size: 0.68rem; color: #a1a1aa; }
+    .sort-order-input { width: 72px; min-height: 36px !important; text-align: right; }
+    .sort-order-save {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        border: 1px solid rgba(110, 231, 183, 0.4);
+        background: rgba(110, 231, 183, 0.12);
+        color: #6ee7b7;
+        cursor: pointer;
+    }
+
+    /* ---- 検索・並び替えツールバー：スマホでは縦積み ---- */
+    @media (max-width: 640px) {
+        .admin-records-toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
+        .admin-search-box { width: 100%; }
+        .admin-sort-switch { display: flex; }
+        .admin-sort-switch .admin-sort-link { flex: 1; text-align: center; padding: 10px 8px; }
+        .admin-master-layout { display: flex; flex-direction: column; }
+        .sort-order-form { margin-left: 0; width: 100%; justify-content: flex-end; }
     }
 </style>
 @endpush

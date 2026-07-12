@@ -4,7 +4,7 @@
 @section('body-class', 'page-talk page-talk-list')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260713-talk-refresh">
 <link rel="stylesheet" href="{{ asset('assets/css/sub-header.css') }}">
 @endpush
 

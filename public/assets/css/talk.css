@@ -2354,3 +2354,126 @@ body.page-talk-room .talk-job-kind-badge,
     border: 1px solid rgba(255, 255, 255, 0.10) !important;
     color: var(--color-text-main, #f5f5f5) !important;
 }
+
+/* ============================================================================
+   TALK REFRESH (2026-07-13)
+   - 新着が入力欄に隠れない（入力欄の実高さを JS が --talk-composer-h に反映）
+   - 入力欄フォーカスは控えめ（枠色の変化のみ。二重リング廃止）
+   - 自動送信メッセージは専用背景 + チップで一目で区別
+   - 面談候補日の選択・確定 UI を明確化
+   ============================================================================ */
+
+/* 新着がコンポーザーに被らないよう、実高さ + 余白ぶんを確保 */
+body.page-talk-room .chat-messages,
+#talk-room-container .chat-messages {
+    padding-bottom: calc(var(--talk-composer-h, 110px) + 20px) !important;
+}
+
+/* 入力欄フォーカス：旧ゴールドの太いリング → アクセント枠のみの控えめ表現 */
+body.page-talk-room .chat-input-wrapper:focus-within,
+#talk-room-container .chat-input-wrapper:focus-within {
+    border-color: rgba(var(--accent-rgb, 139, 92, 246), 0.55) !important;
+    box-shadow: none !important;
+}
+
+/* ---- 自動送信メッセージ：専用背景（アクセント淡色）+ チップ ---- */
+body.page-talk-room .message-bubble-auto,
+#talk-room-container .message-bubble-auto {
+    background: linear-gradient(180deg, rgba(var(--accent-rgb, 139, 92, 246), 0.12), rgba(var(--accent-rgb, 139, 92, 246), 0.05)) !important;
+    border: 1px solid rgba(var(--accent-rgb, 139, 92, 246), 0.38) !important;
+    color: var(--color-text-main, #f5f5f5) !important;
+}
+.auto-msg-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 6px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: rgba(var(--accent-rgb, 139, 92, 246), 0.20);
+    border: 1px solid rgba(var(--accent-rgb, 139, 92, 246), 0.45);
+    color: var(--accent-text, #a78bfa);
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+}
+.auto-msg-chip i { font-size: 0.6rem; }
+
+/* ---- 面談候補日：選択肢をラジオカード風に明確化 ---- */
+#talk-room-container .interview-option-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(0, 0, 0, 0.25);
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.12s ease;
+}
+#talk-room-container button.interview-option-btn { cursor: pointer; }
+#talk-room-container button.interview-option-btn:active { transform: scale(0.985); }
+#talk-room-container .interview-option-btn .interview-option-date {
+    font-weight: 800;
+    color: var(--color-text-main, #f5f5f5);
+}
+#talk-room-container .interview-option-btn .interview-option-time {
+    margin-left: 8px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent-text, #a78bfa);
+}
+/* 「選択する」= 押せることが分かるアクセントのピル */
+#talk-room-container button.interview-option-btn .interview-option-action {
+    flex: 0 0 auto;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: var(--accent, #8b5cf6);
+    color: var(--on-accent, #e6dffc);
+    font-size: 0.74rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+/* 決定済み：緑チェックで完了を明示 */
+#talk-room-container .interview-option-btn.is-selected {
+    border-color: rgba(110, 231, 183, 0.55);
+    background: rgba(110, 231, 183, 0.08);
+}
+#talk-room-container .interview-option-btn.is-selected .interview-option-action {
+    background: transparent;
+    color: var(--color-success, #6ee7b7);
+    padding: 0;
+}
+#talk-room-container .interview-option-btn.is-selected .interview-option-action::before {
+    content: '✓ ';
+}
+/* 確定日時の強調 */
+#talk-room-container .interview-confirmed-date {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--color-success, #6ee7b7);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---- 候補日入力モーダル：番号チップ + 必須ラベル ---- */
+.interview-option-no {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+    border-radius: 6px;
+    background: rgba(var(--accent-rgb, 139, 92, 246), 0.16);
+    color: var(--accent-text, #a78bfa);
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+.interview-option-req {
+    margin-left: 6px;
+    font-style: normal;
+    font-size: 0.62rem;
+    font-weight: 800;
+    color: #fca5a5;
+}

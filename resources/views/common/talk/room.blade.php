@@ -10,7 +10,7 @@
 @section('body-class', 'page-talk page-talk-room')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260713-talk-refresh">
 @if($isCast)
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/review-modal.css') }}">
@@ -352,8 +352,10 @@
                             $autoMessageBody = $isAutoMessage ? trim(mb_substr($displayContent, mb_strlen('【自動送信】'))) : $displayContent;
                         @endphp
                         @if($isAutoMessage)
+                            {{-- 自動送信：文字プレフィックスではなくチップ + 専用背景で一目で区別 --}}
                             <div class="message-bubble message-bubble-auto">
-                                <p class="m-0">【自動送信】<br>{!! nl2br(e($autoMessageBody)) !!}</p>
+                                <span class="auto-msg-chip"><i class="fas fa-robot" aria-hidden="true"></i>自動送信</span>
+                                <p class="m-0">{!! nl2br(e($autoMessageBody)) !!}</p>
                                 @if($isMineForLayout)<span class="message-bubble-tail" aria-hidden="true"><svg viewBox="0 0 8 12" fill="currentColor"><path d="M0 0V12C3 12 8 8 8 0H0Z"/></svg></span>@endif
                             </div>
                         @else
@@ -507,28 +509,27 @@
             <button type="button" class="interview-modal-close" aria-label="閉じる">&times;</button>
         </div>
         <p class="interview-modal-desc">
-            候補日を2〜3件入力してください。<br>
-            キャスト側の画面では、ここで入力した候補から1つ選べるUIを想定しています。
+            面談の候補日時を最大3件まで送れます。キャストはこの中から1つ選んで確定します。
         </p>
         <form id="interview-form">
             <div class="interview-option-group interview-option-group-grid">
-                <label>候補1</label>
-                <input type="date" name="option1_date">
-                <input type="time" name="option1_time">
+                <label><span class="interview-option-no">1</span>候補1 <em class="interview-option-req">必須</em></label>
+                <input type="date" name="option1_date" aria-label="候補1の日付" required>
+                <input type="time" name="option1_time" aria-label="候補1の時刻" required>
             </div>
             <div class="interview-option-group interview-option-group-grid">
-                <label>候補2（任意）</label>
-                <input type="date" name="option2_date">
-                <input type="time" name="option2_time">
+                <label><span class="interview-option-no">2</span>候補2（任意）</label>
+                <input type="date" name="option2_date" aria-label="候補2の日付">
+                <input type="time" name="option2_time" aria-label="候補2の時刻">
             </div>
             <div class="interview-option-group interview-option-group-grid">
-                <label>候補3（任意）</label>
-                <input type="date" name="option3_date">
-                <input type="time" name="option3_time">
+                <label><span class="interview-option-no">3</span>候補3（任意）</label>
+                <input type="date" name="option3_date" aria-label="候補3の日付">
+                <input type="time" name="option3_time" aria-label="候補3の時刻">
             </div>
             <div class="interview-modal-footer">
                 <button type="button" class="btn-interview-cancel">キャンセル</button>
-                <button type="submit" class="btn-interview-submit">面談候補を送信</button>
+                <button type="submit" class="btn-interview-submit"><i class="far fa-calendar-check"></i> 候補日を送信</button>
             </div>
         </form>
     </div>
@@ -670,6 +671,35 @@
 
 @if($isCast)
 @push('scripts')
+<script>
+{{-- 入力欄の実高さをメッセージ一覧の padding-bottom に反映（新着が入力欄に隠れない） --}}
+(function () {
+    'use strict';
+    var inputArea = document.querySelector('#talk-room-container .chat-input-area');
+    var messages = document.querySelector('#talk-room-container .chat-messages');
+    if (!inputArea || !messages) return;
+
+    function nearBottom() {
+        return messages.scrollHeight - messages.scrollTop - messages.clientHeight < 120;
+    }
+    function applyComposerHeight() {
+        var wasNearBottom = nearBottom();
+        messages.style.setProperty('--talk-composer-h', inputArea.offsetHeight + 'px');
+        // 末尾を見ている間は、入力欄が伸びても最後のメッセージに追従する
+        if (wasNearBottom) messages.scrollTop = messages.scrollHeight;
+    }
+    applyComposerHeight();
+    if ('ResizeObserver' in window) {
+        new ResizeObserver(applyComposerHeight).observe(inputArea);
+    }
+    // メッセージ追加（送信/受信）でも末尾へ追従
+    if ('MutationObserver' in window) {
+        new MutationObserver(function () {
+            if (nearBottom()) messages.scrollTop = messages.scrollHeight;
+        }).observe(messages, { childList: true });
+    }
+})();
+</script>
 <script>
 (function () {
     var reviewModal = document.getElementById('review-post-modal');
