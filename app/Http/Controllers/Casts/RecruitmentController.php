@@ -422,6 +422,45 @@ class RecruitmentController extends Controller
                 $data['shop']['like_cnt'] = 0;
             }
         }
+        // 優良店バッヂ（過去3ヶ月の請求をすべて期日内に入金した店舗）— キャストにも見せる
+        if (is_array($data['shop'] ?? null) && !isset($data['shop']['is_premium'])) {
+            try {
+                $badges = app(\App\Services\BillingManagementService::class)->getShopBadges($likeShopId);
+                $data['shop']['is_premium'] = !empty($badges['good_payer']);
+            } catch (\Throwable) {
+                $data['shop']['is_premium'] = false;
+            }
+        }
+
+        // レビュー概要 + 明細（キャストからも詳細を閲覧できるようにする）
+        if (is_array($data['shop'] ?? null) && !isset($data['shop']['review_avg'])) {
+            $data['shop']['review_avg'] = 0.0;
+            $data['shop']['review_count'] = 0;
+            $data['shop']['reviews'] = [];
+            try {
+                if (\Illuminate\Support\Facades\Schema::hasTable('reviews')) {
+                    $reviewRows = DB::table('reviews')
+                        ->where('shop_id', $likeShopId)
+                        ->orderByDesc('created_at')
+                        ->select('id', 'contents', 'eva', 'created_at')
+                        ->limit(50)
+                        ->get();
+                    $data['shop']['review_count'] = $reviewRows->count();
+                    $scored = $reviewRows->filter(fn ($r) => $r->eva !== null);
+                    $data['shop']['review_avg'] = $scored->isNotEmpty()
+                        ? round((float) $scored->avg('eva'), 1)
+                        : 0.0;
+                    $data['shop']['reviews'] = $reviewRows->take(5)->map(fn ($r) => [
+                        'score' => $r->eva !== null ? round((float) $r->eva, 1) : null,
+                        'text'  => trim((string) ($r->contents ?? '')),
+                        'date'  => $r->created_at ? \Carbon\Carbon::parse($r->created_at)->format('Y/m/d') : '',
+                    ])->values()->all();
+                }
+            } catch (\Throwable) {
+                // レビューが取得できなくてもプロフィール表示は継続
+            }
+        }
+
         // 現在のキャストがこの店舗を LIKE 済みか（プロフィールの LIKE ボタン用。行が存在 = アクティブ）
         if (is_array($data['shop'] ?? null) && !isset($data['shop']['is_liked'])) {
             $data['shop']['is_liked'] = false;

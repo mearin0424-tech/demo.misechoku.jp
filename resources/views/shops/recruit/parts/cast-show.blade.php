@@ -49,6 +49,12 @@
         ? (mb_strlen($appealLine) > 90 ? mb_substr($appealLine, 0, 90) . '…' : $appealLine)
         : '';
 
+    // ----- 優良店バッヂ / レビュー（キャストにも公開） -----
+    $isPremiumShop = !empty($shop['is_premium']);
+    $reviewAvg     = (float) ($shop['review_avg'] ?? 0);
+    $reviewCount   = (int) ($shop['review_count'] ?? 0);
+    $shopReviews   = (array) ($shop['reviews'] ?? []);
+
     // ----- ヘッダー用：最有力の時給表示（本入り→体入の順で採用） -----
     $primaryWageDisp = $regularWageDisp ?: ($trialWageDisp ?: $helpWageDisp);
     $primaryWageLabel = $regularWageDisp
@@ -77,27 +83,43 @@
             </div>
         </div>
 
-        {{-- 2. 店名 + ライク + エリア/業種 --}}
+        {{-- 2. 店名（+ 優良店バッヂ）+ ライク + レビュー/エリア/業種 --}}
         <div class="mb-4 flex flex-col gap-1.5">
             <div class="flex items-center justify-between gap-2">
-                <h1 class="app-title text-[22px] text-text-main leading-tight truncate min-w-0">{{ $shopName }}</h1>
+                <div class="flex items-center gap-2 min-w-0">
+                    <h1 class="app-title text-[22px] text-text-main leading-tight truncate min-w-0">{{ $shopName }}</h1>
+                    @if($isPremiumShop)
+                        {{-- 優良店バッヂ：金銭・実績の意味色（ゴールドベタ・フラット） --}}
+                        <span class="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-gold-from to-gold-to text-[11px] font-extrabold text-[#1a1206] tracking-wide"
+                              title="過去3ヶ月の採用ボーナスをすべて期日内に入金した店舗です">
+                            <i class="fas fa-crown text-[10px]"></i>優良店
+                        </span>
+                    @endif
+                </div>
                 <div class="flex items-center gap-1 shrink-0">
                     <i class="fas fa-heart text-[15px] text-discovery-pink"></i>
                     <span class="font-bold text-[13px] text-text-main" data-fav-count-target="shop:{{ $ctaShopId }}">{{ number_format($likeCount) }}</span>
                 </div>
             </div>
-            @if($areaChip !== '' || $industryName !== '')
-                <div class="flex items-center gap-1.5 text-text-sub text-[12px] flex-wrap">
-                    @if($areaChip !== '')
-                        <span class="inline-flex items-center gap-1"><i class="fas fa-map-marker-alt text-[10px]"></i>{{ $areaChip }}</span>
-                    @endif
-                    @if($industryName !== '')
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/10 border border-line-accent/40 text-accent-text font-bold tracking-wide text-[10.5px]">
-                            <i class="fas fa-tag text-[9px]"></i>{{ $industryName }}
-                        </span>
-                    @endif
-                </div>
-            @endif
+            <div class="flex items-center gap-1.5 text-text-sub text-[12px] flex-wrap">
+                @if($reviewCount > 0)
+                    {{-- レビュー：タップで明細（SHOP タブ内 REVIEWS）へ --}}
+                    <button type="button" data-open-shop-reviews
+                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border border-amber-400/50 bg-amber-400/10 text-[11.5px] font-extrabold text-amber-300">
+                        <i class="fas fa-star text-[10px]"></i>{{ number_format($reviewAvg, 1) }}
+                        <span class="font-bold text-amber-300/70">({{ $reviewCount }}件)</span>
+                        <i class="fas fa-chevron-right text-[8px] opacity-70"></i>
+                    </button>
+                @endif
+                @if($areaChip !== '')
+                    <span class="inline-flex items-center gap-1"><i class="fas fa-map-marker-alt text-[10px]"></i>{{ $areaChip }}</span>
+                @endif
+                @if($industryName !== '')
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/10 border border-line-accent/40 text-accent-text font-bold tracking-wide text-[10.5px]">
+                        <i class="fas fa-tag text-[9px]"></i>{{ $industryName }}
+                    </span>
+                @endif
+            </div>
         </div>
 
         {{-- 3. ボーナス金 / 時給：枠なしのタイポグラフィ主体（採用・入金管理の合計表示と同系統） --}}
@@ -420,6 +442,39 @@
         <div data-tab-panel="shop">
             <div class="p-4 flex flex-col gap-4">
 
+                {{-- REVIEWS：キャストからも明細を閲覧できる（ヘッダーのレビューチップから遷移） --}}
+                @if($reviewCount > 0)
+                    <x-ui.card class="p-5" id="shop-reviews-section" style="scroll-margin-top: 120px;">
+                        <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-3 flex items-center gap-2">
+                            <i class="fas fa-star text-amber-400"></i> REVIEWS
+                            <span class="ml-auto text-[12px] font-extrabold text-amber-300 normal-case tracking-normal">
+                                ★ {{ number_format($reviewAvg, 1) }} <span class="text-text-sub font-bold">/ {{ $reviewCount }}件</span>
+                            </span>
+                        </h3>
+                        <div class="flex flex-col gap-3">
+                            @foreach($shopReviews as $rv)
+                                <div class="pb-3 border-b border-line last:border-b-0 last:pb-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        @if($rv['score'] !== null)
+                                            <span class="text-[12px] font-extrabold text-amber-300">
+                                                @for($i = 1; $i <= 5; $i++){{ $i <= round($rv['score']) ? '★' : '☆' }}@endfor
+                                            </span>
+                                            <span class="text-[11px] font-bold text-text-main">{{ number_format($rv['score'], 1) }}</span>
+                                        @endif
+                                        @if($rv['date'] !== '')
+                                            <span class="ml-auto text-[10px] text-text-sub">{{ $rv['date'] }}</span>
+                                        @endif
+                                    </div>
+                                    @if($rv['text'] !== '')
+                                        <p class="text-[12.5px] text-text-main leading-relaxed">{{ $rv['text'] }}</p>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                        <p class="mt-3 text-[10px] text-text-sub">実際に勤務したキャストからのレビューです（直近{{ count($shopReviews) }}件を表示）</p>
+                    </x-ui.card>
+                @endif
+
                 {{-- SHOP INFO card --}}
                 <x-ui.card class="p-5">
                     <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
@@ -519,3 +574,20 @@
         <i class="fas fa-times"></i>
     </button>
 </div>
+
+{{-- ヘッダーのレビューチップ → SHOP タブを開いて REVIEWS 明細へスクロール --}}
+<script>
+(function () {
+    'use strict';
+    document.querySelectorAll('[data-open-shop-reviews]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var shopTab = document.querySelector('[data-tab="shop"]');
+            if (shopTab) shopTab.click();
+            window.setTimeout(function () {
+                var section = document.getElementById('shop-reviews-section');
+                if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 60);
+        });
+    });
+})();
+</script>

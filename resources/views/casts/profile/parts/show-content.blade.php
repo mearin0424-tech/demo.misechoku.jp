@@ -63,64 +63,67 @@
             </p>
         </div>
 
-        {{-- ===== アクション ===== --}}
+        {{-- ===== アクション（店舗プロフィールと同じ構成：シンプルな単色 Primary + 中央寄せアイコン列） ===== --}}
         @if($isOwn)
             <a href="{{ route('cast.profile.edit') }}"
-               class="flex w-full items-center justify-center gap-2 px-6 py-3 rounded-full font-bold bg-gradient-to-r from-accent-grad-from to-accent-grad-to text-on-accent-strong shadow-btn-3d transition-all duration-300 mb-5">
+               class="flex w-full items-center justify-center gap-2 px-6 py-3 rounded-full font-bold bg-accent text-on-accent shadow-[0_4px_12px_rgba(0,0,0,0.4)] active:scale-[0.98] transition-transform duration-150 mb-5">
                 <i class="fas fa-pen"></i> プロフィール編集
             </a>
         @elseif($showInteractionActions)
             @php $favCastId = (string) ($cast['id'] ?? $cast['cast_id'] ?? ''); @endphp
-            <div class="fav-actions-row">
-                {{-- 最重要 CTA: トークでメッセージ --}}
+            <div class="flex flex-col gap-2.5 mb-2">
+                {{-- 最重要 CTA: トークでメッセージ（グラデ・重い立体は使わない） --}}
                 @if($favCastId !== '' && Route::has('shop.talk.room'))
                     <a href="{{ route('shop.talk.room', ['id' => $favCastId, 'talk_topic' => 'other', 'initiate' => 1]) }}"
-                       class="fav-actions-row__primary inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold bg-gradient-to-r from-accent-grad-from to-accent-grad-to text-on-accent-strong shadow-btn-3d active:translate-y-1.5 active:shadow-btn-3d-active transition-all duration-300">
+                       class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold bg-accent text-on-accent shadow-[0_4px_12px_rgba(0,0,0,0.4)] active:scale-[0.98] transition-transform duration-150">
                         <i class="fas fa-comment-dots"></i> メッセージを送る
                     </a>
                 @endif
-                {{-- アイコンオンリーの KEEP / LIKE（favorite-quick.js が処理） --}}
-                <button type="button" id="btn-profile-keep"
-                        class="fav-circle fav-circle--keep"
-                        data-fav-toggle data-action="keep" data-item-type="cast" data-item-id="{{ $favCastId }}"
-                        aria-label="キープ" aria-pressed="{{ ($cast['is_kept'] ?? false) ? 'true' : 'false' }}">
-                    <i class="fas fa-bookmark" aria-hidden="true"></i>
-                    <span class="fav-circle__cap">KEEP</span>
-                </button>
-                <button type="button" id="btn-profile-like"
-                        class="fav-circle fav-circle--like"
-                        data-fav-toggle data-action="like" data-item-type="cast" data-item-id="{{ $favCastId }}"
-                        aria-label="いいね" aria-pressed="{{ ($cast['is_liked'] ?? false) ? 'true' : 'false' }}">
-                    <i class="fas fa-heart" aria-hidden="true"></i>
-                    <span class="fav-circle__cap">LIKE</span>
-                </button>
-            </div>
-        @endif
-
-        {{-- 共有メニュー --}}
-        @if(!empty($shareUrl) && !$isOwn)
-            <div class="flex justify-end mb-3">
-                @include('partials.share-menu', [
-                    'shareUrl' => $shareUrl,
-                    'shareTitle' => $shareTitle ?? ($castDisplayName . 'のプロフィール'),
-                    'shareText' => $shareText ?? $intro,
-                    'menuId' => 'cast-share-menu',
-                ])
+                {{-- LIKE / KEEP / 共有：CTA 直下に中央寄せの均等アイコン列 --}}
+                <div class="flex items-start justify-center gap-8 pt-2" style="margin-bottom: 18px;">
+                    <button type="button" id="btn-profile-like"
+                            class="fav-circle fav-circle--like"
+                            data-fav-toggle data-action="like" data-item-type="cast" data-item-id="{{ $favCastId }}"
+                            aria-label="いいね" aria-pressed="{{ ($cast['is_liked'] ?? false) ? 'true' : 'false' }}">
+                        <i class="fas fa-heart" aria-hidden="true"></i>
+                        <span class="fav-circle__cap">LIKE</span>
+                    </button>
+                    <button type="button" id="btn-profile-keep"
+                            class="fav-circle fav-circle--keep"
+                            data-fav-toggle data-action="keep" data-item-type="cast" data-item-id="{{ $favCastId }}"
+                            aria-label="キープ" aria-pressed="{{ ($cast['is_kept'] ?? false) ? 'true' : 'false' }}">
+                        <i class="fas fa-bookmark" aria-hidden="true"></i>
+                        <span class="fav-circle__cap">KEEP</span>
+                    </button>
+                    @if(!empty($shareUrl))
+                        <div class="flex flex-col items-center">
+                            @include('partials.share-menu', [
+                                'shareUrl' => $shareUrl,
+                                'shareTitle' => $shareTitle ?? ($castDisplayName . 'のプロフィール'),
+                                'shareText' => $shareText ?? $intro,
+                                'menuId' => 'cast-share-menu',
+                            ])
+                        </div>
+                    @endif
+                </div>
             </div>
         @endif
     </div>
 
     {{-- ===== Tabs ===== --}}
     <div data-tabs-scope>
-        <div data-tabs class="border-t border-b border-line-accent/40 bg-base/90 backdrop-blur-md">
+        {{-- タブ：MyPage と同じデザイン・名称（アイコン + 英字ラベル）に統一 --}}
+        <div data-tabs class="border-t border-b border-line-accent/40 bg-base/90 backdrop-blur-md sticky top-0 z-10">
             <div class="flex">
                 <button type="button" data-tab="gallery"
-                        class="is-active flex-1 py-3 flex justify-center items-center transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
-                    <span class="app-title text-[12px] tracking-widest">GALLERY</span>
+                        class="is-active flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
+                    <i class="fas fa-images text-[14px]"></i>
+                    <span class="app-title text-[10px] tracking-widest">GALLERY</span>
                 </button>
                 <button type="button" data-tab="details"
-                        class="flex-1 py-3 flex justify-center items-center transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
-                    <span class="app-title text-[12px] tracking-widest">DETAILS</span>
+                        class="flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors border-b-2 border-transparent text-text-sub [&.is-active]:text-accent-text [&.is-active]:border-accent">
+                    <i class="fas fa-address-card text-[14px]"></i>
+                    <span class="app-title text-[10px] tracking-widest">PROFILE</span>
                 </button>
             </div>
         </div>
@@ -163,9 +166,10 @@
                         @endif
                         <div class="flex justify-between items-center border-b border-line pb-2">
                             <span class="text-[12px] text-text-sub font-medium">身長 / 体重</span>
-                            <span class="text-[13px] font-bold text-text-main">
-                                @if(!empty($cast['height'])){{ $cast['height'] }}cm@else--@endif /
-                                @if(!empty($cast['weight'])){{ $cast['weight'] }}kg@else--@endif
+                            {{-- inline @else は直前に単語文字があると Blade にコンパイルされず
+                                 「cm@else--」がそのまま表示されるバグがあったため三項演算子に変更 --}}
+                            <span class="text-[13px] font-bold text-text-main text-right">
+                                {{ !empty($cast['height']) ? $cast['height'] . 'cm' : '--' }} / {{ !empty($cast['weight']) ? $cast['weight'] . 'kg' : '--' }}
                             </span>
                         </div>
                         <div class="flex justify-between items-center border-b border-line pb-2">
@@ -211,10 +215,10 @@
                             <span class="text-[12px] text-text-sub font-medium">ナイトワーク経験</span>
                             <span class="text-[13px] font-bold text-text-main">{{ $cast['night_work_label'] ?? '--' }}</span>
                         </div>
-                        <div class="flex justify-between items-center border-b border-line pb-2">
-                            <span class="text-[12px] text-text-sub font-medium">現職業</span>
-                            <span class="text-[13px] font-bold text-text-main">
-                                @if(!empty($cast['profession'])){!! nl2br(e($cast['profession'])) !!}@elseif(!empty($cast['current_job'])){!! nl2br(e($cast['current_job'])) !!}@else--@endif
+                        <div class="flex justify-between items-start gap-3 border-b border-line pb-2">
+                            <span class="text-[12px] text-text-sub font-medium shrink-0">現職業</span>
+                            <span class="text-[13px] font-bold text-text-main text-right">
+                                {!! nl2br(e(!empty($cast['profession']) ? $cast['profession'] : (!empty($cast['current_job']) ? $cast['current_job'] : '--'))) !!}
                             </span>
                         </div>
                         <div class="flex justify-between items-center">

@@ -4191,3 +4191,41 @@ body.page-home .rc-actions .action-circle-btn:hover {
     filter: none;
 }
 
+/* ============================================================================
+   優良店バッヂ / レビュー強調 (2026-07-12c)
+   - 優良店は店名の横にゴールドベタのバッヂ（金銭・実績の意味色。フラット）
+   - レビュー（★+件数）はひと回り大きく、アンバーで視認性を上げる
+   ============================================================================ */
+body.page-home .rc-premium-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    vertical-align: middle;
+    margin-left: 8px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #f6d36a, #e3b94a);
+    color: #1a1206;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    text-shadow: none;
+}
+body.page-home .rc-premium-inline i { font-size: 10px; }
+
+body.page-home .rc-rating-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.86rem;
+    font-weight: 800;
+    color: #fbd38d;
+}
+body.page-home .rc-rating-inline .rc-star { color: #f6d36a; font-size: 0.9rem; }
+body.page-home .rc-rating-inline .rc-review-cnt {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: rgba(251, 211, 141, 0.8);
+}
+

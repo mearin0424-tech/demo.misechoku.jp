@@ -137,27 +137,20 @@
                         @endphp
 
                         <div class="rc-info" aria-label="店舗情報">
-                            @if($hasRating || $hasPremium)
+                            @if($hasRating)
                             <div class="rc-badges">
-                                @if($hasRating)
                                 <div class="rc-rating-inline">
                                     <span class="rc-star" aria-hidden="true">★</span>
                                     <span class="rc-rating-val numeric-font">{{ number_format((float)$item['rating'], 1) }}</span>
                                     @if(isset($item['review_count']) && (int)$item['review_count'] > 0)
-                                    <span class="rc-review-cnt">({{ (int)$item['review_count'] }})</span>
+                                    <span class="rc-review-cnt">レビュー{{ (int)$item['review_count'] }}件</span>
                                     @endif
                                 </div>
-                                @endif
-                                @if($hasRating && $hasPremium)
-                                <span class="rc-badge-sep" aria-hidden="true">|</span>
-                                @endif
-                                @if($hasPremium)
-                                <span class="rc-badge-premium">優良認定店</span>
-                                @endif
                             </div>
                             @endif
 
-                            <h2 class="rc-shop-name serif-font">{{ $item['name'] }}</h2>
+                            {{-- 優良店バッヂは店名の横に（ゴールドベタで目立たせる） --}}
+                            <h2 class="rc-shop-name serif-font">{{ $item['name'] }}@if($hasPremium)<span class="rc-premium-inline"><i class="fas fa-crown" aria-hidden="true"></i>優良店</span>@endif</h2>
 
                             @php
                                 $stationLine = trim((string) ($item['nearest_station'] ?? ''));

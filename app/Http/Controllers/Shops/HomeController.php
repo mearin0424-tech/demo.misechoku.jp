@@ -54,6 +54,8 @@ class HomeController extends Controller
                 'cast_profiles.pref',
                 'cast_profiles.city',
                 'cast_profiles.pr',
+                'cast_profiles.exp',
+                'cast_profiles.profession',
                 'cast_profiles.latitude',
                 'cast_profiles.longitude',
                 DB::raw("(SELECT ci.image_path FROM cast_images ci WHERE ci.cast_id = casts.id ORDER BY ci.is_main DESC, ci.main_order IS NULL, ci.main_order, ci.id LIMIT 1) as main_image_path")
@@ -61,6 +63,24 @@ class HomeController extends Controller
             ->orderBy('casts.id')
             ->limit(20)
             ->get();
+
+        // プロフィールタグ（ルックス/内面）を一括取得。
+        // 場所（pref/city）は位置チップで別表示するため、タグには含めない
+        $tagNamesByCast = [];
+        $castIdsForTags = $rows->pluck('id')->all();
+        if ($castIdsForTags !== [] && Schema::hasTable('cast_tag_relations')) {
+            $tagTable = Schema::hasTable('cast_tags') ? 'cast_tags' : (Schema::hasTable('tags') ? 'tags' : null);
+            if ($tagTable !== null) {
+                DB::table('cast_tag_relations as r')
+                    ->join($tagTable . ' as t', 'r.tag_id', '=', 't.id')
+                    ->whereIn('r.cast_id', $castIdsForTags)
+                    ->select('r.cast_id', 't.name')
+                    ->get()
+                    ->each(function ($tr) use (&$tagNamesByCast) {
+                        $tagNamesByCast[(string) $tr->cast_id][] = (string) $tr->name;
+                    });
+            }
+        }
 
         $origin = $this->userLocation->getActiveLocation();
 
@@ -132,7 +152,7 @@ class HomeController extends Controller
                 'id' => $row->id,
                 'name' => $row->nickname ?: ($row->name ?: 'ゲスト'),
                 'age' => $birthday ? $birthday->age : null,
-                'tags' => $this->buildCastTags($row),
+                'tags' => $this->buildCastTags($row, $tagNamesByCast[(string) $row->id] ?? []),
                 'like_count' => $likeCounts[$row->id] ?? 0,
                 'is_liked' => isset($likedTodayCastMap[$row->id]),
                 'images' => $images,
@@ -812,20 +832,30 @@ class HomeController extends Controller
         return $images;
     }
 
-    private function buildCastTags(object $row): array
+    /**
+     * カード下部のタグ。場所（pref/city）は位置チップと重複するため入れず、
+     * 「経験の有無・職業・ルックス/内面タグ」など判断材料になる情報を優先する。
+     *
+     * @param array<int, string> $profileTags cast_tag_relations 由来のタグ名
+     */
+    private function buildCastTags(object $row, array $profileTags = []): array
     {
         $tags = [];
-        if (!empty($row->pref)) {
-            $tags[] = $row->pref;
+        $tags[] = ((int) ($row->exp ?? 0)) === 1 ? 'ナイトワーク経験あり' : '未経験';
+        if (!empty($row->profession)) {
+            $tags[] = mb_strimwidth(trim((string) $row->profession), 0, 12, '…');
         }
-        if (!empty($row->city)) {
-            $tags[] = $row->city;
-        }
-        if (!empty($row->pr)) {
-            $tags[] = mb_strimwidth(trim((string) $row->pr), 0, 16, '…');
+        foreach ($profileTags as $t) {
+            if (count($tags) >= 4) {
+                break;
+            }
+            $t = trim($t);
+            if ($t !== '' && !in_array($t, $tags, true)) {
+                $tags[] = $t;
+            }
         }
 
-        return !empty($tags) ? array_slice($tags, 0, 3) : ['プロフィール登録中'];
+        return $tags !== [] ? array_slice($tags, 0, 4) : ['プロフィール登録中'];
     }
 
     private function buildShopTags(object $row): array
