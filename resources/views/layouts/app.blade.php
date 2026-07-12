@@ -142,6 +142,11 @@
 
     {{-- ボタン/CTA の役割ベース統一（全ページCSSの後に読み込んで上書き。DESIGN.md §10） --}}
     <link rel="stylesheet" href="{{ asset('assets/css/ui-consistency.css') }}?v={{ $assetVersion }}">
+    {{-- 入力コンポーネントの全画面統一（文字列/文章/数値/日付/選択） --}}
+    <link rel="stylesheet" href="{{ asset('assets/css/form-controls.css') }}?v={{ $assetVersion }}">
+    {{-- モーション基盤（タブ/モーダル/画像/リビールのなめらか化。Step1） --}}
+    <link rel="stylesheet" href="{{ asset('assets/css/motion.css') }}?v={{ $assetVersion }}">
+    <script src="{{ asset('assets/js/motion.js') }}?v={{ $assetVersion }}" defer></script>
 </head>
     
 <body class="@yield('body-class')" data-notification-badge="{{ isset($unreadNewsCount) ? (int) $unreadNewsCount : 0 }}">

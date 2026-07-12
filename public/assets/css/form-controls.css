@@ -1,0 +1,186 @@
+/* =====================================================================
+   form-controls.css — 入力コンポーネントの全画面統一（2026-07-12）
+
+   読み込み順: 各ページ CSS の後（ui-consistency.css と同様の上書きレイヤ）。
+
+   ── ルール ──────────────────────────────────────────────
+   - 文字列 / 文章 / 数値 / 日付 : 同一の入力スタイル
+   - 1つ選択   : プルダウン（<select>）。radio は form 入力に使わない
+   - 複数選択  : タグ選択（checkbox を隠した .fc-tag チップ）
+   エントリー / 編集 / キャスト / 店舗 / 管理、すべての画面に適用。
+   （色・枠・フォーカスは !important で強制統一。padding / 角丸は
+     既定値のみ提供し、ピル型検索窓などページ固有の形状は尊重する）
+   ===================================================================== */
+
+/* ------------------------------------------------------------------
+   1. テキスト / 文章 / 数値 / 日付 / セレクト：共通ビジュアル
+   ------------------------------------------------------------------ */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="password"],
+input[type="number"],
+input[type="url"],
+input[type="search"],
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"],
+select,
+textarea {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(168, 85, 247, 0.30) !important;
+    color: var(--color-text-main, #f5f5f5) !important;
+    border-radius: 10px;
+    min-height: 44px;
+    font-family: inherit;
+    /* iOS のフォーカス時ズームを防ぐため 16px 以上 */
+    font-size: 16px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="url"]:focus,
+input[type="search"]:focus,
+input[type="date"]:focus,
+input[type="datetime-local"]:focus,
+input[type="time"]:focus,
+select:focus,
+textarea:focus {
+    background: rgba(255, 255, 255, 0.07) !important;
+    border-color: var(--accent, #8b5cf6) !important;
+    box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.35),
+        0 0 0 3px rgba(var(--accent-rgb, 139, 92, 246), 0.20) !important;
+    outline: none;
+}
+::placeholder {
+    color: rgba(184, 184, 184, 0.6) !important;
+    font-weight: 400;
+}
+
+/* 文章（textarea） */
+textarea {
+    min-height: 96px;
+    line-height: 1.7;
+    resize: vertical;
+}
+
+/* 日付・時刻：ネイティブ UI をダークに */
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"] {
+    color-scheme: dark;
+    font-variant-numeric: tabular-nums;
+}
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) opacity(0.75);
+    cursor: pointer;
+}
+
+/* 数値：スピナーは残しつつ tabular 数字 */
+input[type="number"] { font-variant-numeric: tabular-nums; }
+
+/* ------------------------------------------------------------------
+   2. 1つ選択 = プルダウン（select）：シェブロンつき統一スタイル
+   ------------------------------------------------------------------ */
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 38px !important;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--accent-text, #a78bfa) 50%),
+        linear-gradient(135deg, var(--accent-text, #a78bfa) 50%, transparent 50%) !important;
+    background-position:
+        calc(100% - 19px) 50%,
+        calc(100% - 14px) 50% !important;
+    background-size: 5px 5px, 5px 5px !important;
+    background-repeat: no-repeat !important;
+    cursor: pointer;
+}
+/* 選択肢リスト（OSネイティブ）もダークで統一 */
+select option,
+select optgroup {
+    background-color: #141414;
+    color: #f5f5f5;
+}
+
+/* ------------------------------------------------------------------
+   3. 複数選択 = タグ選択（.fc-tag：checkbox を隠したチップ）
+      既存の .tag-chip（プロフィール編集 / エントリー）もこの見た目に揃える
+   ------------------------------------------------------------------ */
+.fc-tag-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.fc-tag,
+.tag-chip,
+.detail-search-chip,
+.shop-profile-edit__chip,
+.register-chip {
+    position: relative;
+    display: inline-flex;
+    cursor: pointer;
+}
+.fc-tag input,
+.tag-chip input,
+.detail-search-chip input,
+.shop-profile-edit__chip input,
+.register-chip input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    min-height: 0 !important;
+}
+.fc-tag span,
+.tag-chip span,
+.detail-search-chip span,
+.shop-profile-edit__chip span,
+.register-chip span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 14px;
+    border-radius: 999px !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    color: var(--color-text-sub, #b8b8b8) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1.4;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    user-select: none;
+}
+.fc-tag:hover span,
+.tag-chip:hover span {
+    border-color: rgba(var(--accent-rgb, 139, 92, 246), 0.45) !important;
+}
+.fc-tag input:checked + span,
+.tag-chip input:checked + span {
+    background: rgba(var(--accent-rgb, 139, 92, 246), 0.18) !important;
+    border-color: rgba(var(--accent-rgb, 139, 92, 246), 0.65) !important;
+    color: var(--accent-text, #a78bfa) !important;
+}
+.fc-tag input:focus-visible + span,
+.tag-chip input:focus-visible + span {
+    outline: 2px solid var(--accent, #8b5cf6);
+    outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------
+   4. 素の checkbox / radio（同意・確認チェック等の単独用途のみ）
+   ------------------------------------------------------------------ */
+input[type="checkbox"],
+input[type="radio"] {
+    accent-color: var(--accent, #8b5cf6);
+    width: 18px;
+    height: 18px;
+    min-height: 0;
+    cursor: pointer;
+}

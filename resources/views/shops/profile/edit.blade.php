@@ -16,6 +16,7 @@
         --spe-gold: #a78bfa;
         --spe-muted: #71717a;
         --spe-hint: #52525b;
+        --spe-subheader-h: 56px;
         background: var(--spe-bg);
         min-height: 100%;
         margin: 0 calc(-1 * var(--content-padding-x, 16px));
@@ -28,21 +29,35 @@
         min-height: 100%;
         background: var(--spe-panel);
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        /* fixed 化したサブヘッダーの高さぶんコンテンツを下げる */
+        padding-top: var(--spe-subheader-h, 56px);
     }
 
+    /* サブヘッダー：祖先の overflow-x hidden により sticky が効かずズレて
+       コンテンツが隠れていたため、EDIT JOB と同じ fixed 方式に統一 */
     .shop-profile-edit__top {
-        position: sticky;
+        position: fixed;
         top: var(--header-height, 60px);
-        z-index: 50;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: var(--max-content-width);
+        height: var(--spe-subheader-h, 56px);
+        box-sizing: border-box;
+        z-index: 1400; /* グローバルヘッダー(1500)より下、コンテンツより上 */
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        padding: 12px 16px;
+        padding: 0 16px;
         background: rgba(10, 10, 10, 0.95);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         border-bottom: 1px solid var(--color-line, #2a2a2a);
+    }
+    /* アンカースクロール時、fixed ヘッダー2段ぶんのマージンを確保 */
+    .shop-profile-edit__form section {
+        scroll-margin-top: calc(var(--header-height, 60px) + var(--spe-subheader-h, 56px) + 12px);
     }
 
     .shop-profile-edit__back {
@@ -721,23 +736,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 <p class="shop-profile-edit__hint" style="margin:0 0 16px;">店舗の「ひとこと」はマイページから編集できます。</p>
 
                 <div class="shop-profile-edit__field">
-                    <span class="shop-profile-edit__label">業種</span>
-                    <div class="shop-profile-edit__chips">
-                        @php
-                            $selectedIndustryIds = collect(old('industry_ids', $shopData['industry_ids'] ?? []))
-                                ->map(fn ($id) => (int) $id)
-                                ->all();
-                            $selectedIndustryId = $selectedIndustryIds[0] ?? null;
-                        @endphp
+                    <label class="shop-profile-edit__label" for="shop-industry-select">業種（1つ選択）</label>
+                    @php
+                        $selectedIndustryIds = collect(old('industry_ids', $shopData['industry_ids'] ?? []))
+                            ->map(fn ($id) => (int) $id)
+                            ->all();
+                        $selectedIndustryId = $selectedIndustryIds[0] ?? null;
+                    @endphp
+                    {{-- 1つ選択はプルダウンに統一（入力コンポーネント規約）。name は既存API互換で industry_ids[] のまま --}}
+                    <select id="shop-industry-select" name="industry_ids[]" class="shop-profile-edit__input">
+                        <option value="">選択してください</option>
                         @foreach(($masters['industries'] ?? []) as $industry)
-                            <label class="shop-profile-edit__chip">
-                                <input type="radio" name="industry_ids[]" value="{{ $industry->id }}"
-                                    {{ (int) $industry->id === (int) $selectedIndustryId ? 'checked' : '' }}>
-                                <span>{{ $industry->name }}</span>
-                            </label>
+                            <option value="{{ $industry->id }}" {{ (int) $industry->id === (int) $selectedIndustryId ? 'selected' : '' }}>{{ $industry->name }}</option>
                         @endforeach
-                    </div>
-                    <p class="shop-profile-edit__hint">※1 つだけ選択してください。朝キャバとキャバクラ等、両方の営業形態を持つ店舗はメインの業種を 1 つ選んでください。</p>
+                    </select>
+                    <p class="shop-profile-edit__hint">朝キャバとキャバクラ等、両方の営業形態を持つ店舗はメインの業種を 1 つ選んでください。</p>
                 </div>
 
                 <div class="shop-profile-edit__field">

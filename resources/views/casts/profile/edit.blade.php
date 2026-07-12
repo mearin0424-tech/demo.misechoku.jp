@@ -165,17 +165,12 @@
                 <input type="text" name="profession" value="{{ old('profession', old('current_job', $profile['profession'] ?? ($profile['current_job'] ?? ''))) }}" class="cast-input">
             </div>
             <div class="field">
-                <label>ナイトワーク経験</label>
-                <div class="radio-like-row">
-                    <label class="radio-like">
-                        <input type="radio" name="exp" value="none" @checked($selectedNightExp === 'none')>
-                        <span class="dot"></span><span>無し</span>
-                    </label>
-                    <label class="radio-like">
-                        <input type="radio" name="exp" value="yes" @checked($selectedNightExp === 'yes')>
-                        <span class="dot"></span><span>有り</span>
-                    </label>
-                </div>
+                <label for="cast-exp">ナイトワーク経験</label>
+                {{-- 1つ選択はプルダウンに統一（入力コンポーネント規約） --}}
+                <select id="cast-exp" name="exp" class="cast-select">
+                    <option value="none" @selected($selectedNightExp === 'none')>無し</option>
+                    <option value="yes" @selected($selectedNightExp === 'yes')>有り</option>
+                </select>
             </div>
         </section>
 

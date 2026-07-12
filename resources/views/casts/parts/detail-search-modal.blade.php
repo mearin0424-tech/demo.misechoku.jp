@@ -133,19 +133,13 @@
                     </button>
                     <div class="detail-search-accordion__body" hidden>
                         <div class="detail-search-subsection">
-                            <span class="detail-search-subsection__label">出勤頻度</span>
-                            <div class="detail-search-chips detail-search-chips--search">
-                                <label class="detail-search-chip detail-search-chip--search">
-                                    <input type="radio" name="shift_frequency" value="" {{ $selectedShiftFrequency === '' ? 'checked' : '' }}>
-                                    <span>指定なし</span>
-                                </label>
+                            <span class="detail-search-subsection__label">出勤頻度（1つ選択）</span>
+                            <select name="shift_frequency" class="detail-search-select">
+                                <option value="" {{ $selectedShiftFrequency === '' ? 'selected' : '' }}>指定なし</option>
                                 @foreach(['週1回出勤', '週2回出勤', '週3回以上'] as $freq)
-                                    <label class="detail-search-chip detail-search-chip--search">
-                                        <input type="radio" name="shift_frequency" value="{{ $freq }}" {{ $selectedShiftFrequency === $freq ? 'checked' : '' }}>
-                                        <span>{{ $freq }}</span>
-                                    </label>
+                                    <option value="{{ $freq }}" {{ $selectedShiftFrequency === $freq ? 'selected' : '' }}>{{ $freq }}</option>
                                 @endforeach
-                            </div>
+                            </select>
                         </div>
                         <div class="detail-search-subsection">
                             <span class="detail-search-subsection__label">時間帯（複数選択可）</span>

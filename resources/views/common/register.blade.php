@@ -66,13 +66,15 @@
         });
 
         // 本人確認書類のパターン切替（A: 顔写真付き / B: 顔写真なし＋住所確認）
-        document.querySelectorAll('input[name="identity_category"]').forEach(function (radio) {
-            radio.addEventListener('change', function () {
+        // 1つ選択はプルダウン統一に伴い select の change で切り替える
+        var identityCategorySelect = document.querySelector('select[name="identity_category"]');
+        if (identityCategorySelect) {
+            identityCategorySelect.addEventListener('change', function () {
                 document.querySelectorAll('[data-identity-pane]').forEach(function (pane) {
-                    pane.hidden = pane.getAttribute('data-identity-pane') !== radio.value;
+                    pane.hidden = pane.getAttribute('data-identity-pane') !== identityCategorySelect.value;
                 });
             });
-        });
+        }
     });
     </script>
     @endif
@@ -300,13 +302,14 @@
                         <input type="text" name="profession" value="{{ old('profession', old('current_job')) }}" maxlength="40" placeholder="例：会社員 / 学生 / フリーター">
                     </label>
 
-                    <div class="register-field">
+                    <label class="register-field">
                         <span>ナイトワーク経験</span>
-                        <div class="register-radio-row">
-                            <label class="register-radio"><input type="radio" name="exp" value="none" @checked(old('exp', old('night_work_exp', '')) === 'none')> 無し</label>
-                            <label class="register-radio"><input type="radio" name="exp" value="yes" @checked(old('exp', old('night_work_exp')) === 'yes')> 有り</label>
-                        </div>
-                    </div>
+                        {{-- 1つ選択はプルダウンに統一（入力コンポーネント規約） --}}
+                        <select name="exp">
+                            <option value="none" @selected(old('exp', old('night_work_exp', 'none')) === 'none')>無し</option>
+                            <option value="yes" @selected(old('exp', old('night_work_exp')) === 'yes')>有り</option>
+                        </select>
+                    </label>
                     </div>{{-- /.register-skip-target --}}
                 </section>
 
@@ -339,19 +342,14 @@
                     </label>
 
                     <div class="register-skip-target" @if(old('identity_skip', '1') == '1') hidden @endif>
-                        <div class="register-field">
+                        <label class="register-field">
                             <span>提出パターン</span>
-                            <div class="register-radio-row">
-                                <label class="register-radio">
-                                    <input type="radio" name="identity_category" value="photo_id" @checked(old('identity_category', 'photo_id') === 'photo_id')>
-                                    パターンA：顔写真付き身分証 1枚
-                                </label>
-                                <label class="register-radio">
-                                    <input type="radio" name="identity_category" value="non_photo_id" @checked(old('identity_category') === 'non_photo_id')>
-                                    パターンB：顔写真なし身分証 ＋ 住所確認書類
-                                </label>
-                            </div>
-                        </div>
+                            {{-- 1つ選択はプルダウンに統一（入力コンポーネント規約） --}}
+                            <select name="identity_category">
+                                <option value="photo_id" @selected(old('identity_category', 'photo_id') === 'photo_id')>パターンA：顔写真付き身分証 1枚</option>
+                                <option value="non_photo_id" @selected(old('identity_category') === 'non_photo_id')>パターンB：顔写真なし身分証 ＋ 住所確認書類</option>
+                            </select>
+                        </label>
 
                         <div data-identity-pane="photo_id" @if(old('identity_category', 'photo_id') !== 'photo_id') hidden @endif>
                             <label class="register-field">
@@ -531,24 +529,14 @@
                     </div>
                     @endif
 
-                    <div class="register-field">
+                    <label class="register-field">
                         <span>ご利用プラン <em>必須</em></span>
-                        <div class="register-plan-grid">
-                            <label class="register-plan-option">
-                                <input type="radio" name="plan" value="basic" @checked(old('plan', 'basic') === 'basic')>
-                                <span>
-                                    <strong>Basic</strong>
-                                </span>
-                            </label>
-                            <label class="register-plan-option is-disabled">
-                                <input type="radio" name="plan" value="premium" disabled>
-                                <span>
-                                    <strong>Premium</strong>
-                                    <small class="register-plan-coming">実装中（近日公開）</small>
-                                </span>
-                            </label>
-                        </div>
-                    </div>
+                        {{-- 1つ選択はプルダウンに統一（入力コンポーネント規約） --}}
+                        <select name="plan" required>
+                            <option value="basic" @selected(old('plan', 'basic') === 'basic')>Basic</option>
+                            <option value="premium" disabled>Premium（実装中・近日公開）</option>
+                        </select>
+                    </label>
                 </section>
 
                 {{-- 店舗プロフィール画像（必須 1枚） --}}

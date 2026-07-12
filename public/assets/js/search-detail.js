@@ -162,6 +162,10 @@
             if (el.type === 'radio' && el.value === '') return;
             count++;
         });
+        // 1つ選択のプルダウン（出勤頻度など）も値ありなら件数に含める
+        block.querySelectorAll('select').forEach(function (sel) {
+            if (sel.name && sel.value !== '') count++;
+        });
         if (count > 0) {
             badge.hidden = false;
             badge.textContent = count + '件選択';

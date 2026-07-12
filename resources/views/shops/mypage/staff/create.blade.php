@@ -93,43 +93,7 @@
     }
     .staff-pw-toggle:hover { color: var(--accent-text, #f0a6c4); }
 
-    /* 権限：プルダウンではなく選択カード（違いがひと目で分かる） */
-    .staff-role-cards { display: flex; flex-direction: column; gap: 8px; }
-    .staff-role-card { position: relative; display: block; cursor: pointer; }
-    .staff-role-card input { position: absolute; opacity: 0; pointer-events: none; }
-    .staff-role-card__body {
-        display: flex; flex-direction: column; gap: 3px;
-        padding: 12px 14px;
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.10);
-        background: rgba(255,255,255,0.02);
-        transition: border-color .15s ease, background .15s ease;
-    }
-    .staff-role-card:hover .staff-role-card__body {
-        border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.4);
-    }
-    .staff-role-card input:checked + .staff-role-card__body {
-        border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.7);
-        background: rgba(var(--accent-rgb, 214, 112, 162), 0.10);
-    }
-    .staff-role-card input:focus-visible + .staff-role-card__body {
-        outline: 2px solid var(--accent, #d670a2);
-        outline-offset: 2px;
-    }
-    .staff-role-card__title {
-        display: inline-flex; align-items: center; gap: 7px;
-        font-size: 0.88rem; font-weight: 800; color: #f5f5f5;
-    }
-    .staff-role-card__title i { color: var(--accent-text, #f0a6c4); font-size: 0.8rem; }
-    .staff-role-card__check {
-        margin-left: auto; font-size: 0.85rem;
-        color: rgba(255,255,255,0.18);
-        transition: color .15s ease;
-    }
-    .staff-role-card input:checked + .staff-role-card__body .staff-role-card__check {
-        color: var(--accent, #d670a2);
-    }
-    .staff-role-card__desc { font-size: 0.74rem; color: #a0a0a0; line-height: 1.6; }
+    /* 権限は「1つ選択 = プルダウン」の入力コンポーネント規約に従い select で実装 */
     .staff-form-field__error {
         font-size: 0.76rem; color: #fca5a5; margin-top: 2px;
         display: flex; align-items: flex-start; gap: 4px;
@@ -253,31 +217,17 @@
                 </div>
 
                 <div class="staff-form-field">
-                    <label>権限<span class="req">必須</span></label>
-                    <div class="staff-role-cards" role="radiogroup" aria-label="権限">
-                        <label class="staff-role-card">
-                            <input type="radio" name="role" value="{{ \App\Models\ShopManager::ROLE_STAFF }}"
-                                   {{ old('role', \App\Models\ShopManager::ROLE_STAFF) == \App\Models\ShopManager::ROLE_STAFF ? 'checked' : '' }}>
-                            <span class="staff-role-card__body">
-                                <span class="staff-role-card__title">
-                                    <i class="fas fa-user"></i>スタッフ
-                                    <i class="fas fa-circle-check staff-role-card__check" aria-hidden="true"></i>
-                                </span>
-                                <span class="staff-role-card__desc">応募者対応・メッセージ・求人ステータス変更など、日常業務のみ</span>
-                            </span>
-                        </label>
-                        <label class="staff-role-card">
-                            <input type="radio" name="role" value="{{ \App\Models\ShopManager::ROLE_OWNER }}"
-                                   {{ old('role') == \App\Models\ShopManager::ROLE_OWNER ? 'checked' : '' }}>
-                            <span class="staff-role-card__body">
-                                <span class="staff-role-card__title">
-                                    <i class="fas fa-crown"></i>オーナー
-                                    <i class="fas fa-circle-check staff-role-card__check" aria-hidden="true"></i>
-                                </span>
-                                <span class="staff-role-card__desc">スタッフの追加・削除、店舗情報の変更を含む全権限</span>
-                            </span>
-                        </label>
-                    </div>
+                    <label for="staff-role">権限<span class="req">必須</span></label>
+                    {{-- 1つ選択はプルダウンに統一（入力コンポーネント規約） --}}
+                    <select id="staff-role" name="role" required>
+                        <option value="{{ \App\Models\ShopManager::ROLE_STAFF }}" {{ old('role', \App\Models\ShopManager::ROLE_STAFF) == \App\Models\ShopManager::ROLE_STAFF ? 'selected' : '' }}>
+                            スタッフ — 応募者対応・メッセージなど日常業務のみ
+                        </option>
+                        <option value="{{ \App\Models\ShopManager::ROLE_OWNER }}" {{ old('role') == \App\Models\ShopManager::ROLE_OWNER ? 'selected' : '' }}>
+                            オーナー — スタッフ管理・店舗情報変更を含む全権限
+                        </option>
+                    </select>
+                    <p class="staff-form-field__hint">スタッフ管理・店舗情報変更を任せる人はオーナーを選択してください。</p>
                 </div>
 
                 <div class="staff-form-actions">
