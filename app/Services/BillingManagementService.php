@@ -744,7 +744,7 @@ class BillingManagementService
         return ['success' => true, 'message' => '要返金フラグを設定しました。'];
     }
 
-    public function executeCastTransfer(int $depositId, array $payload): array
+    public function executeCastTransfer(int $depositId, array $payload, ?string $evidenceFilePath = null): array
     {
         $deposit = $this->findDepositById($depositId);
 
@@ -769,6 +769,11 @@ class BillingManagementService
             return ['success' => false, 'message' => 'キャスト振込記録前の確認項目を完了してください。'];
         }
 
+        // AD-109（completeTransfer）と同じく証跡画像必須（証跡なしの振込記録を防止）
+        if (!$evidenceFilePath) {
+            return ['success' => false, 'message' => '振込完了画面のスクリーンショット（証跡画像）をアップロードしてください。'];
+        }
+
         DB::table('application_deposits')
             ->where('id', $depositId)
             ->update($this->filterExistingColumns('application_deposits', [
@@ -776,6 +781,7 @@ class BillingManagementService
                 'cast_transferred_at' => Carbon::parse($payload['transferred_at']),
                 'cast_transfer_reference' => $payload['reference'] ?? null,
                 'cast_transfer_note' => $payload['note'] ?? null,
+                'cast_transfer_evidence_path' => $evidenceFilePath,
                 'updated_at' => now(),
             ]));
 

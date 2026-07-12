@@ -72,10 +72,25 @@ class ShopController extends Controller
             }
         }
 
+        // 書類確認状況：shops.approval 列は現行スキーマに存在しないため、
+        // shop_license_documents（全書類が承認済みか）から導出する。
+        // approval 列があるスキーマではそちらを優先（マルチスキーマ対応）。
+        $licenseApprovedByShop = [];
+        if (Schema::hasTable('shop_license_documents')) {
+            DB::table('shop_license_documents')
+                ->select('shop_id', 'status')
+                ->get()
+                ->groupBy('shop_id')
+                ->each(function ($rows, $sid) use (&$licenseApprovedByShop) {
+                    $licenseApprovedByShop[(string) $sid] = $rows->isNotEmpty()
+                        && $rows->every(fn ($r) => (int) $r->status === 2);
+                });
+        }
+
         $shops = $query
             ->orderByDesc('shops.created_at')
             ->get()
-            ->map(function ($shop) use ($operationSummaries, $horizontal) {
+            ->map(function ($shop) use ($operationSummaries, $horizontal, $hasApprovalColumn, $licenseApprovedByShop) {
                 $shopId = (string) $shop->id;
 
                 if ($horizontal) {
@@ -126,7 +141,10 @@ class ShopController extends Controller
                     'registered_at' => $shop->created_at,
                     'last_login_at' => $shop->latest_manager_login_at ?? null,
                     'account_status' => (int) ($shop->shop_account_status ?? 0),
-                    'document_status' => ((int) ($shop->approval ?? 0)) === 1 ? '確認済み' : '未確認',
+                    'document_status' => ($hasApprovalColumn
+                            ? ((int) ($shop->approval ?? 0)) === 1
+                            : ($licenseApprovedByShop[$shopId] ?? false))
+                        ? '確認済み' : '未確認',
                     'job_status' => $jobStatusLabel,
                     'job_status_key' => $jobStatusKey,
                     'hourly_wage_regular' => (int) ($shop->job_hourly_wage ?? 0),

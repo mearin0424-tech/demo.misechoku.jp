@@ -2728,7 +2728,8 @@ li.connection-item.tl-row a.tl-row__link {
     font-variant-numeric: tabular-nums;
 }
 .tl-row__like-indicator i { font-size: 0.78rem; }
+/* LIKE は意味色（ピンク）固定。テーマの紫には追従させない */
 .tl-row__like-indicator.is-on {
-    color: var(--accent-text, #f0a6c4);
+    color: #f0a6c4;
 }
 .tl-row__like-count { line-height: 1; }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-theme="amethyst">
 <head>
     @php
         $pageTitle = trim($__env->yieldContent('title'));

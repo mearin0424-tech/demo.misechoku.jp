@@ -447,6 +447,7 @@ CREATE TABLE IF NOT EXISTS `application_deposits` (
   `cast_transferred_at` timestamp NULL DEFAULT NULL,
   `cast_transfer_reference` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `cast_transfer_note` text COLLATE utf8mb4_unicode_ci,
+  `cast_transfer_evidence_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'キャスト振込の証跡画像パス（public disk）',
   `completed_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,

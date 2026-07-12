@@ -18,7 +18,7 @@
 @section('body-class', 'page-demo-login')
 
 @section('content')
-<div data-theme="lilac" class="bg-base flex flex-col justify-center items-center min-h-[100dvh] relative overflow-hidden">
+<div data-theme="amethyst" class="bg-base flex flex-col justify-center items-center min-h-[100dvh] relative overflow-hidden">
 
     {{-- 背景：薄いライラックグロー（テーマアクセントで自動追従） --}}
     <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">

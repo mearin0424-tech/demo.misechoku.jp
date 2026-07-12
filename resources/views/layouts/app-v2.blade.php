@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="ja" data-theme="mauve_pink">
+{{-- ポイント色（ボタン/アイコン/アクティブ状態）をアメジスト紫に統一（2026-07-12） --}}
+<html lang="ja" data-theme="amethyst">
 <head>
     @php
         $pageTitle = trim($__env->yieldContent('title'));

@@ -4147,11 +4147,12 @@ body.page-home .card-actions-overlay .action-circle-btn.like i {
     color: #fff !important;
 }
 
-/* アクティブ状態：fav-circle と同じベタ塗り。グロー・グラデは使わない */
+/* アクティブ状態：fav-circle と同じベタ塗り。グロー・グラデは使わない。
+   LIKE は意味色（ピンク）固定。テーマの紫には追従させない */
 body.page-home .action-circle-btn.like.is-active,
 body.page-home .action-circle-btn.like[aria-pressed="true"] {
-    background: var(--accent, #d670a2) !important;
-    border-color: var(--accent, #d670a2) !important;
+    background: #d670a2 !important;
+    border-color: #d670a2 !important;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.40) !important;
 }
 body.page-home .action-circle-btn.like.is-active .action-icon,

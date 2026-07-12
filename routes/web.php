@@ -551,8 +551,12 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
     Route::post('/search-preferences', [CastSearch::class, 'savePreferences'])->name('search-preferences.save');
     Route::post('/search/ai-chat', [CastAiChat::class, 'respond'])->name('search.ai-chat');
     Route::get('/shopprofiles/{id}', [CastRecruit::class, 'show'])->name('shopprofile.show');
-    
+    // 旧URL互換：/cast/shopprofileview/{id} → /cast/shopprofiles/{id}（shop.castprofileview.show との対称性確保）
+    Route::get('/shopprofileview/{id}', fn ($id) => redirect()->route('cast.shopprofile.show', ['id' => $id]))->name('shopprofileview.show');
+
     Route::get('/interaction', [ShopInteraction::class, 'index'])->name('interaction.index');
+    Route::get('/interaction/keep', [ShopInteraction::class, 'keep'])->name('interaction.keep');
+    Route::get('/interaction/like', [ShopInteraction::class, 'like'])->name('interaction.like');
     Route::get('/mypage', [CastMypage::class, 'index'])->name('mypage.index');
     Route::post('/mypage/word', [CastMypage::class, 'updateWord'])->name('mypage.word');
     Route::post('/mypage/search-location', [CastMypage::class, 'updateSearchLocation'])->name('mypage.search-location.update');

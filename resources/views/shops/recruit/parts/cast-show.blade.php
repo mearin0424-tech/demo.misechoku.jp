@@ -60,66 +60,67 @@
 
     <div class="px-5 pt-4 pb-5">
 
-        {{-- 1. 店名 + アバター + エリア/業種/ライク --}}
-        <div class="flex items-start gap-3 mb-4">
+        {{-- 1. アバター + ひとこと吹き出し（キャスト MyPage と同じ吹き出し式） --}}
+        <div class="flex items-start gap-3 mb-3">
             <div class="w-[84px] h-[84px] rounded-2xl overflow-hidden border-2 border-line-accent/40 shadow-card-3d bg-surface-from shrink-0">
                 <img src="{{ $iconImage }}" alt="" class="w-full h-full object-cover">
             </div>
-            <div class="flex-1 min-w-0 flex flex-col gap-1.5">
-                <div class="flex items-center justify-between gap-2">
-                    <h1 class="app-title text-[22px] text-text-main leading-tight truncate min-w-0">{{ $shopName }}</h1>
-                    <div class="flex items-center gap-1 shrink-0">
-                        <i class="fas fa-heart text-[15px] text-discovery-pink"></i>
-                        <span class="font-bold text-[13px] text-text-main" data-fav-count-target="shop:{{ $ctaShopId }}">{{ number_format($likeCount) }}</span>
-                    </div>
+            <div class="flex-1 min-w-0">
+                <div class="relative min-h-[84px] flex flex-col justify-center bg-gradient-to-br from-surface-from to-base border border-line-accent/40 rounded-2xl shadow-card-3d px-3 py-2.5">
+                    {{-- 吹き出しのしっぽ（アイコン側に向く） --}}
+                    <span class="absolute top-5 -left-[8px] w-0 h-0 border-y-[8px] border-y-transparent border-r-[10px] border-r-line-accent/40"></span>
+                    <span class="absolute top-5 -left-[6px] w-0 h-0 border-y-[7px] border-y-transparent border-r-[9px] border-r-surface-from"></span>
+                    <p class="text-[13px] leading-relaxed {{ $appealTrunc !== '' ? 'text-text-main' : 'text-text-sub' }}">
+                        {{ $appealTrunc !== '' ? $appealTrunc : 'ひとことはまだ登録されていません' }}
+                    </p>
                 </div>
-                @if($areaChip !== '' || $industryName !== '')
-                    <div class="flex items-center gap-1.5 text-text-sub text-[12px] flex-wrap">
-                        @if($areaChip !== '')
-                            <span class="inline-flex items-center gap-1"><i class="fas fa-map-marker-alt text-[10px]"></i>{{ $areaChip }}</span>
-                        @endif
-                        @if($industryName !== '')
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/10 border border-line-accent/40 text-accent-text font-bold tracking-wide text-[10.5px]">
-                                <i class="fas fa-tag text-[9px]"></i>{{ $industryName }}
-                            </span>
-                        @endif
-                    </div>
-                @endif
             </div>
         </div>
 
-        {{-- 2. アピールひとこと（hitokoto または catch_copy） --}}
-        @if($appealTrunc !== '')
-            <div class="relative mb-4 rounded-2xl border border-line-accent/40 bg-gradient-to-br from-surface-from to-base shadow-card-3d px-4 py-3">
-                <i class="fas fa-quote-left absolute top-2 left-3 text-accent-text/50 text-[12px]" aria-hidden="true"></i>
-                <p class="pl-6 text-[13.5px] leading-relaxed text-text-main">{{ $appealTrunc }}</p>
+        {{-- 2. 店名 + ライク + エリア/業種 --}}
+        <div class="mb-4 flex flex-col gap-1.5">
+            <div class="flex items-center justify-between gap-2">
+                <h1 class="app-title text-[22px] text-text-main leading-tight truncate min-w-0">{{ $shopName }}</h1>
+                <div class="flex items-center gap-1 shrink-0">
+                    <i class="fas fa-heart text-[15px] text-discovery-pink"></i>
+                    <span class="font-bold text-[13px] text-text-main" data-fav-count-target="shop:{{ $ctaShopId }}">{{ number_format($likeCount) }}</span>
+                </div>
             </div>
-        @endif
+            @if($areaChip !== '' || $industryName !== '')
+                <div class="flex items-center gap-1.5 text-text-sub text-[12px] flex-wrap">
+                    @if($areaChip !== '')
+                        <span class="inline-flex items-center gap-1"><i class="fas fa-map-marker-alt text-[10px]"></i>{{ $areaChip }}</span>
+                    @endif
+                    @if($industryName !== '')
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/10 border border-line-accent/40 text-accent-text font-bold tracking-wide text-[10.5px]">
+                            <i class="fas fa-tag text-[9px]"></i>{{ $industryName }}
+                        </span>
+                    @endif
+                </div>
+            @endif
+        </div>
 
-        {{-- 3. 主要情報タイル：ボーナス金 / 時給（あるものだけ表示） --}}
+        {{-- 3. ボーナス金 / 時給：枠なしのタイポグラフィ主体（採用・入金管理の合計表示と同系統） --}}
         @if($showBonusMain || $primaryWageDisp)
-            <div class="grid @if($showBonusMain && $primaryWageDisp) grid-cols-2 @else grid-cols-1 @endif gap-2.5 mb-4">
+            <div class="mb-4 pb-3 flex items-stretch gap-4"
+                 style="border-bottom: 1px solid transparent; border-image: linear-gradient(to right, rgba(246, 211, 106, 0.4), rgba(246, 211, 106, 0.06) 70%, transparent) 1;">
                 @if($showBonusMain)
-                    <div class="rounded-2xl border border-line-accent/40 bg-gradient-to-br from-gold-from/15 to-gold-to/10 px-3 py-3 shadow-card-3d">
-                        <div class="flex items-center gap-1.5 text-[10px] tracking-widest text-text-sub uppercase">
-                            <i class="fas fa-gift text-amber-400"></i> BONUS
-                        </div>
-                        <div class="mt-1 flex items-baseline gap-0.5">
-                            <span class="text-[11px] font-bold text-amber-300">¥</span>
-                            <span class="text-[22px] font-extrabold tracking-tight text-amber-300 leading-none">{{ number_format($noruma) }}</span>
-                        </div>
+                    <div class="flex-1 min-w-0 flex flex-col gap-1">
+                        <span class="text-[10px] font-extrabold tracking-[0.16em] text-amber-300/90 uppercase">入店ボーナス</span>
+                        <span class="text-[26px] font-black leading-none tracking-tight bg-gradient-to-br from-amber-200 via-amber-300 to-amber-500 bg-clip-text text-transparent"
+                              style="font-variant-numeric: tabular-nums;">¥{{ number_format($noruma) }}</span>
                         @if($bonusConditionsText !== '')
-                            <p class="mt-1 text-[10px] text-text-sub leading-snug line-clamp-2">{{ $bonusConditionsText }}</p>
+                            <span class="text-[10px] text-text-sub leading-snug line-clamp-1">{{ $bonusConditionsText }}</span>
                         @endif
                     </div>
                 @endif
+                @if($showBonusMain && $primaryWageDisp)
+                    <div class="w-px bg-line self-stretch"></div>
+                @endif
                 @if($primaryWageDisp)
-                    <div class="rounded-2xl border border-line-accent/40 bg-gradient-to-br from-surface-from to-base px-3 py-3 shadow-card-3d">
-                        <div class="flex items-center gap-1.5 text-[10px] tracking-widest text-text-sub uppercase">
-                            <i class="fas fa-yen-sign text-accent-text"></i> WAGE
-                        </div>
-                        <div class="mt-1 text-[19px] font-extrabold tracking-tight text-text-main leading-none">{{ $primaryWageDisp }}</div>
-                        <p class="mt-1 text-[10px] text-text-sub leading-snug">{{ $primaryWageLabel }}</p>
+                    <div class="flex-1 min-w-0 flex flex-col gap-1">
+                        <span class="text-[10px] font-extrabold tracking-[0.16em] text-accent-text uppercase">{{ $primaryWageLabel }}</span>
+                        <span class="text-[22px] font-extrabold leading-none tracking-tight text-text-main" style="font-variant-numeric: tabular-nums;">{{ $primaryWageDisp }}</span>
                     </div>
                 @endif
             </div>
@@ -137,9 +138,10 @@
         @if(!empty($ctaShopId))
             <div class="flex flex-col gap-2 mb-2">
                 {{-- 最重要：TALK 遷移（求人未登録でも常に表示） --}}
+                {{-- シンプルなソリッド1色のプライマリ（グラデ・重い立体は使わない） --}}
                 <a href="{{ $mkTalkHref(['id' => $ctaShopId, 'talk_topic' => 'other', 'initiate' => 1]) }}"
                    @if($isShopPreview) aria-disabled="true" title="プレビュー：求職者はここからトークに遷移します" onclick="return false;" @endif
-                   class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold bg-gradient-to-r from-accent-grad-from to-accent-grad-to text-on-accent-strong shadow-btn-3d active:translate-y-1.5 active:shadow-btn-3d-active transition-all duration-300 {{ $isShopPreview ? 'cursor-default opacity-95' : '' }}">
+                   class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold bg-accent text-on-accent shadow-[0_4px_12px_rgba(0,0,0,0.4)] active:scale-[0.98] transition-transform duration-150 {{ $isShopPreview ? 'cursor-default' : '' }}">
                     <i class="fas fa-comment-dots"></i> トークで話を聞いてみる
                 </a>
 
@@ -163,18 +165,8 @@
                     </div>
                 @endif
 
-                {{-- LIKE / KEEP（アイコンオンリー） + 共有 --}}
-                <div class="flex items-center justify-end gap-3" style="margin-bottom: 22px;">
-                    @if(!empty($shareUrlResolved))
-                        <div class="flex items-center">
-                            @include('partials.share-menu', [
-                                'shareUrl' => $shareUrlResolved,
-                                'shareTitle' => $shareTitleResolved,
-                                'shareText' => $shareTextResolved,
-                                'menuId' => 'recruit-share-menu',
-                            ])
-                        </div>
-                    @endif
+                {{-- LIKE / KEEP / 共有：CTA 直下に中央寄せの均等3アイコン列 --}}
+                <div class="flex items-start justify-center gap-8 pt-2" style="margin-bottom: 18px;">
                     <button type="button"
                             @if($isShopPreview) disabled title="プレビュー：求職者はここでいいねできます" @endif
                             class="fav-circle fav-circle--like {{ $isShopPreview ? 'opacity-70' : '' }}"
@@ -199,6 +191,16 @@
                         <i class="fas fa-bookmark" aria-hidden="true"></i>
                         <span class="fav-circle__cap">KEEP</span>
                     </button>
+                    @if(!empty($shareUrlResolved))
+                        <div class="flex flex-col items-center">
+                            @include('partials.share-menu', [
+                                'shareUrl' => $shareUrlResolved,
+                                'shareTitle' => $shareTitleResolved,
+                                'shareText' => $shareTextResolved,
+                                'menuId' => 'recruit-share-menu',
+                            ])
+                        </div>
+                    @endif
                 </div>
             </div>
         @endif
@@ -251,8 +253,8 @@
         <div data-tab-panel="job">
             <div class="p-4 flex flex-col gap-4">
 
-                {{-- CATCH（キャッチコピー：header で hitokoto を優先表示している場合、こちらで catch_copy も掲載） --}}
-                @if($catchCopyMain !== '' && $shopWord !== '' && $catchCopyMain !== $shopWord)
+                {{-- CATCH（キャッチコピー）：ヘッダーの吹き出しに表示済みの文言と重複しない場合のみ掲載 --}}
+                @if($catchCopyMain !== '' && $catchCopyMain !== $appealLine)
                     <x-ui.card class="p-5">
                         <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-3 flex items-center gap-2">
                             <i class="fas fa-bullhorn"></i> CATCH
@@ -443,21 +445,13 @@
                     </div>
                 </x-ui.card>
 
-                {{-- WORD（店長のひとこと・雰囲気） --}}
-                @if($shopWord !== '' || $storeAtmosphere !== '')
+                {{-- WORD カードは廃止（ひとことはヘッダーの吹き出しに集約）。雰囲気のみ掲載 --}}
+                @if($storeAtmosphere !== '')
                     <x-ui.card class="p-5">
-                        <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
-                            <i class="fas fa-quote-left"></i> WORD
+                        <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-3 flex items-center gap-2">
+                            <i class="fas fa-champagne-glasses"></i> ATMOSPHERE
                         </h3>
-                        @if($shopWord !== '')
-                            <div class="text-[13px] text-text-main leading-relaxed whitespace-pre-line">{{ $shopWord }}</div>
-                        @endif
-                        @if($storeAtmosphere !== '')
-                            <div class="@if($shopWord !== '') mt-3 pt-3 border-t border-line @endif">
-                                <span class="text-[11px] text-text-sub uppercase tracking-wider block mb-1">ATMOSPHERE</span>
-                                <div class="text-[13px] text-text-main leading-relaxed whitespace-pre-line">{{ $storeAtmosphere }}</div>
-                            </div>
-                        @endif
+                        <div class="text-[13px] text-text-main leading-relaxed whitespace-pre-line">{{ $storeAtmosphere }}</div>
                     </x-ui.card>
                 @endif
 

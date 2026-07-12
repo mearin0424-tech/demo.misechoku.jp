@@ -513,7 +513,7 @@
                             @if($sc === BMS::STATUS_SHOP_PAYMENT_CONFIRMED && !$task)
                                 <div class="billing-action-box">
                                     <h3 class="billing-action-title">キャスト振込記録</h3>
-                                    <form method="POST" action="{{ route('admin.deposits.cast-transfer.execute', $deposit['id']) }}" class="billing-inline-form">
+                                    <form method="POST" action="{{ route('admin.deposits.cast-transfer.execute', $deposit['id']) }}" class="billing-inline-form" enctype="multipart/form-data">
                                         @csrf
                                         <div class="admin-form-row" style="margin-bottom:0;">
                                             <label class="admin-label">振込日時</label>
@@ -526,6 +526,11 @@
                                         <div class="admin-form-row" style="margin-bottom:0;">
                                             <label class="admin-label">備考</label>
                                             <textarea name="note" class="admin-input" rows="3" placeholder="銀行窓口で実行、受付票確認済み"></textarea>
+                                        </div>
+                                        {{-- 証跡画像（AD-109 の振込完了と同じく必須。証跡なしの振込記録を防止） --}}
+                                        <div class="admin-form-row" style="margin-bottom:0;">
+                                            <label class="admin-label">振込完了画面のスクリーンショット <span style="color:#fca5a5;">必須</span></label>
+                                            <input type="file" name="evidence_screenshot" class="admin-input" accept="image/*" required>
                                         </div>
                                         <div class="billing-check-grid" data-check-group>
                                             <label class="billing-check-item"><input type="checkbox" name="confirm_transfer_amount" value="1" data-check-item> 金額を確認した</label>

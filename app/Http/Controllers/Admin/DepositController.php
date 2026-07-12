@@ -170,7 +170,8 @@ class DepositController extends Controller
     }
 
     /**
-     * 運営側：キャストへの振込実行（PaymentTask 未使用時の従来フロー）
+     * 運営側：キャストへの振込実行（PaymentTask 未使用時の従来フロー）。
+     * AD-109（transferComplete）と同じく証跡画像を必須にする。
      */
     public function transferCast(Request $request, int $deposit)
     {
@@ -178,13 +179,23 @@ class DepositController extends Controller
             'transferred_at' => 'required|date',
             'reference' => 'nullable|string|max:255',
             'note' => 'nullable|string|max:1000',
+            'evidence_screenshot' => 'required|file|image|max:10240',
             'confirm_transfer_amount' => 'required|accepted',
             'confirm_account_name' => 'required|accepted',
             'confirm_transfer_executed' => 'required|accepted',
             'confirm_receipt_checked' => 'required|accepted',
+        ], [
+            'evidence_screenshot.required' => '振込完了画面のスクリーンショットをアップロードしてください。',
+            'evidence_screenshot.image' => '画像ファイル（JPEG/PNG等）を指定してください。',
         ]);
 
-        $result = $this->billingManagementService->executeCastTransfer($deposit, $payload);
+        $path = $request->file('evidence_screenshot')->store('payment_evidence', 'public');
+
+        $result = $this->billingManagementService->executeCastTransfer($deposit, $payload, $path);
+
+        if (!$result['success']) {
+            Storage::disk('public')->delete($path);
+        }
 
         return redirect()
             ->route('admin.deposits.index')

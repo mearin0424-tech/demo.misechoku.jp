@@ -18,14 +18,16 @@
     $likeLabel = $isCastPortal ? '受け取ったいいね' : '送ったいいね';
     $emptyKeepMsg = $isCastPortal ? 'お気に入り登録したお店はいません。' : 'お気に入り登録したキャストはいません。';
     $emptyLikeMsg = $isCastPortal ? 'まだお店からいいねは届いていません。' : 'まだ「いいね」を送っていません。';
+    // /interaction/keep・/interaction/like からのディープリンク（?tab=）で初期タブを切替
+    $initialLike = request('tab') === 'like';
 @endphp
 
 @section('content')
 <div class="has-sub-header">
     @include('layouts.parts.sub-header', [
         'tabs' => [
-            ['id' => 'pane-keep', 'label' => $keepLabel, 'active' => true],
-            ['id' => 'pane-like', 'label' => $likeLabel, 'active' => false],
+            ['id' => 'pane-keep', 'label' => $keepLabel, 'active' => !$initialLike],
+            ['id' => 'pane-like', 'label' => $likeLabel, 'active' => $initialLike],
         ]
     ])
 </div>
@@ -33,7 +35,7 @@
 <div class="tab-content-container tab-page-body">
 
     {{-- タブ：キープ (KEEP) --}}
-    <div id="pane-keep" class="tab-pane active">
+    <div id="pane-keep" class="tab-pane {{ $initialLike ? '' : 'active' }}">
         @if (empty($keepCasts))
             <div class="no-data-wrapper">
                 <i class="fas fa-bookmark text-5xl mb-3 block" style="color: rgba(196,181,253,0.35); filter: drop-shadow(0 4px 8px rgba(168,85,247,0.15));"></i>
@@ -49,7 +51,7 @@
     </div>
 
     {{-- タブ：ライク (LIKE) --}}
-    <div id="pane-like" class="tab-pane">
+    <div id="pane-like" class="tab-pane {{ $initialLike ? 'active' : '' }}">
         @if (empty($likeCasts))
             <div class="no-data-wrapper">
                 <i class="fas fa-heart text-5xl mb-3 block" style="color: rgba(245,163,196,0.4); filter: drop-shadow(0 4px 8px rgba(214,112,162,0.20));"></i>

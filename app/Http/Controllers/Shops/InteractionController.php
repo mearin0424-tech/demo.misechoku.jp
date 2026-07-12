@@ -25,6 +25,26 @@ class InteractionController extends Controller
         }
     }
 
+    /**
+     * /interaction/keep・/interaction/like（KEEP / LIKE タブへのディープリンク）。
+     * 実体は index のタブなので、tab パラメータ付きで index へリダイレクトする。
+     */
+    public function keep()
+    {
+        return redirect()->route(
+            request()->is('cast/*') ? 'cast.interaction.index' : 'shop.interaction.index',
+            ['tab' => 'keep']
+        );
+    }
+
+    public function like()
+    {
+        return redirect()->route(
+            request()->is('cast/*') ? 'cast.interaction.index' : 'shop.interaction.index',
+            ['tab' => 'like']
+        );
+    }
+
     public function index()
     {
         $isCastPortal = request()->is('cast/*');

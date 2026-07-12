@@ -311,9 +311,16 @@
                                                 削除候補（{{ $document['purge_reason'] }}）
                                             </span>
                                             <form method="POST" action="{{ route('admin.verification.cast.purge', ['document' => $document['id']]) }}"
-                                                  style="display:inline-block; margin-top:4px;"
+                                                  style="display:block; margin-top:4px;"
                                                   onsubmit="return confirm('本人確認書類を完全に削除します。\n対象: {{ $document['target_name'] }} / {{ $document['type_label'] }}\n\nこの操作は取り消せません。よろしいですか？');">
                                                 @csrf
+                                                {{-- 不可逆操作の確認チェック（サーバー側でも必須検証） --}}
+                                                <label style="display:block; font-size:11px; margin:4px 0 2px; cursor:pointer;">
+                                                    <input type="checkbox" name="confirm_purge_policy" value="1" required> 保持期間ポリシーの削除対象であることを確認した
+                                                </label>
+                                                <label style="display:block; font-size:11px; margin:0 0 6px; cursor:pointer;">
+                                                    <input type="checkbox" name="confirm_purge_irreversible" value="1" required> 削除後は復元できないことを理解した
+                                                </label>
                                                 <button type="submit" class="btn-action" style="background:#b91c1c; color:#fff;">完全削除</button>
                                             </form>
                                         </div>
@@ -503,9 +510,16 @@
                                                 削除候補（{{ $document['purge_reason'] }}）
                                             </span>
                                             <form method="POST" action="{{ route('admin.verification.shopdoc.purge', ['document' => $document['id']]) }}"
-                                                  style="display:inline-block; margin-top:4px;"
+                                                  style="display:block; margin-top:4px;"
                                                   onsubmit="return confirm('店舗提出書類を完全に削除します。\n対象: {{ $document['target_name'] }} / {{ $document['type_label'] }}\n\nこの操作は取り消せません。よろしいですか？');">
                                                 @csrf
+                                                {{-- 不可逆操作の確認チェック（サーバー側でも必須検証） --}}
+                                                <label style="display:block; font-size:11px; margin:4px 0 2px; cursor:pointer;">
+                                                    <input type="checkbox" name="confirm_purge_policy" value="1" required> 保持期間ポリシーの削除対象であることを確認した
+                                                </label>
+                                                <label style="display:block; font-size:11px; margin:0 0 6px; cursor:pointer;">
+                                                    <input type="checkbox" name="confirm_purge_irreversible" value="1" required> 削除後は復元できないことを理解した
+                                                </label>
                                                 <button type="submit" class="btn-action" style="background:#b91c1c; color:#fff;">完全削除</button>
                                             </form>
                                         </div>

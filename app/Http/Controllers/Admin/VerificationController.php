@@ -108,6 +108,15 @@ class VerificationController extends Controller
      */
     public function purgeCast(Request $request, int $document)
     {
+        // 不可逆な破壊的操作のため、振込完了（AD-109）と同様に確認チェックを必須にする
+        $request->validate([
+            'confirm_purge_policy' => 'required|accepted',
+            'confirm_purge_irreversible' => 'required|accepted',
+        ], [
+            'confirm_purge_policy.required' => '保持期間ポリシー対象であることの確認にチェックを入れてください。',
+            'confirm_purge_irreversible.required' => '復元できないことの確認にチェックを入れてください。',
+        ]);
+
         $this->documentReviewService->purgeCastDocument($document);
         $this->opLog->record('verification.cast.purge', 'cast_identity_document', (string) $document, '本人確認書類を完全削除');
 
@@ -119,6 +128,15 @@ class VerificationController extends Controller
      */
     public function purgeShopDocument(Request $request, int $document)
     {
+        // 不可逆な破壊的操作のため、振込完了（AD-109）と同様に確認チェックを必須にする
+        $request->validate([
+            'confirm_purge_policy' => 'required|accepted',
+            'confirm_purge_irreversible' => 'required|accepted',
+        ], [
+            'confirm_purge_policy.required' => '保持期間ポリシー対象であることの確認にチェックを入れてください。',
+            'confirm_purge_irreversible.required' => '復元できないことの確認にチェックを入れてください。',
+        ]);
+
         $this->documentReviewService->purgeShopDocument($document);
         $this->opLog->record('verification.shop.purge', 'shop_license_document', (string) $document, '店舗書類を完全削除');
 
