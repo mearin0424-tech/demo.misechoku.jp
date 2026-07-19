@@ -4,7 +4,7 @@
 @section('body-class', 'no-scroll page-home')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260719-castloc">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260719-cardmicro">
 @endpush
 
 @php
@@ -112,10 +112,17 @@
                             </div>
                         @endif
 
-                        {{-- 1行目：店名（大きめ） --}}
-                        <h2 class="rc-shop-name serif-font">{{ $item['name'] }}</h2>
+                        {{-- 1行目：店名 + 評価レビュー数 --}}
+                        <div class="rc-name-row">
+                            <h2 class="rc-shop-name serif-font">{{ $item['name'] }}</h2>
+                            @if($hasRating)
+                                <span class="rc-rating-inline">
+                                    <span class="rc-star" aria-hidden="true">★</span>{{ number_format((float)$item['rating'], 1) }}@if((int)($item['review_count'] ?? 0) > 0)<span class="rc-review-cnt">({{ (int)$item['review_count'] }}件)</span>@endif
+                                </span>
+                            @endif
+                        </div>
 
-                        {{-- 2行目：業種 → 最寄り駅（間） → レビュー → 閲覧数（1行に統合して縦の情報量を1行減） --}}
+                        {{-- 2行目：業種 → 最寄り駅 → 自分からの距離（未設定なら「?km」+ヘルプ） --}}
                         <div class="rc-line rc-line--meta">
                             @if(!empty($item['industry_name']))
                                 <span class="rc-genre">{{ $item['industry_name'] }}</span>
@@ -123,20 +130,20 @@
                             <span class="rc-loc">
                                 <i class="fas {{ $stationLine !== '' ? 'fa-train' : 'fa-map-marker-alt' }}" aria-hidden="true"></i>{{ $stationLine !== '' ? $stationLine : ($areaLine !== '' ? $areaLine : 'エリア未設定') }}
                             </span>
-                            @if($hasRating)
-                                <span class="rc-rating-inline">
-                                    <span class="rc-star" aria-hidden="true">★</span>{{ number_format((float)$item['rating'], 1) }}@if((int)($item['review_count'] ?? 0) > 0)<span class="rc-review-cnt">({{ (int)$item['review_count'] }}件)</span>@endif
+                            @if(!empty($item['distance_label']))
+                                <span class="rc-dist"><i class="fas fa-route" aria-hidden="true"></i>自分から {{ $item['distance_label'] }}</span>
+                            @else
+                                <span class="rc-dist rc-dist--unset">
+                                    <i class="fas fa-route" aria-hidden="true"></i>自分から ?km
+                                    <button type="button" class="rc-dist__help stop-propagation"
+                                            data-open-distance-info
+                                            aria-haspopup="dialog" aria-controls="modal-distance-info"
+                                            aria-label="距離が表示されない理由を確認">
+                                        <i class="fas fa-circle-info" aria-hidden="true"></i>
+                                    </button>
                                 </span>
                             @endif
-                            <x-ui.view-count :count="(int) ($item['view_count'] ?? 0)" class="rc-views" />
                         </div>
-
-                        {{-- 3行目：自分からの距離（設定時のみ） --}}
-                        @if(!empty($item['distance_label']))
-                        <div class="rc-line rc-line--loc">
-                            <span class="rc-dist"><i class="fas fa-route" aria-hidden="true"></i>自分から {{ $item['distance_label'] }}</span>
-                        </div>
-                        @endif
 
                         {{-- 4行目：左=ボーナス金（ゴールドカード） / 右=時給（グラスカード）
                              ※ 右のアクション列（トーク等）と被らないよう、この行は
@@ -277,6 +284,42 @@
             @endforeach
         </div>
     </div>
+
+    {{-- 距離が表示されない理由の説明モーダル --}}
+    <div id="modal-distance-info" class="premium-info-modal" hidden role="dialog" aria-modal="true" aria-labelledby="distance-info-title">
+        <div class="premium-info-modal__overlay" data-close-distance-info></div>
+        <div class="premium-info-modal__panel">
+            <button type="button" class="premium-info-modal__close" data-close-distance-info aria-label="閉じる">×</button>
+            <h3 id="distance-info-title" class="premium-info-modal__title" style="color: var(--gold-light, #c4b5fd);">
+                <i class="fas fa-route" aria-hidden="true"></i> 距離を表示するには
+            </h3>
+            <p class="premium-info-modal__list" style="list-style: none; padding: 0; margin: 0;">
+                自分の住所またはパスポートモードで位置を指定すると距離が表示されます。
+            </p>
+            <p class="premium-info-modal__note">
+                位置は SEARCH 画面上部の「位置情報ピル」から設定できます。
+            </p>
+        </div>
+    </div>
+
+    @push('scripts')
+    <script>
+    (function () {
+        var modal = document.getElementById('modal-distance-info');
+        if (!modal) return;
+        function open(e) { if (e) { e.preventDefault(); e.stopPropagation(); } modal.hidden = false; document.body.style.overflow = 'hidden'; }
+        function close() { modal.hidden = true; document.body.style.overflow = ''; }
+        document.addEventListener('click', function (e) {
+            var trg = e.target.closest('[data-open-distance-info]');
+            if (trg) open(e);
+        }, true);
+        modal.addEventListener('click', function (e) {
+            if (e.target.closest('[data-close-distance-info]')) close();
+        });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !modal.hidden) close(); });
+    })();
+    </script>
+    @endpush
 
     {{-- 優良店バッヂの達成条件モーダル（スワイプカードのバッヂタップで開く） --}}
     <div id="modal-premium-info" class="premium-info-modal" hidden role="dialog" aria-modal="true" aria-labelledby="premium-info-title">

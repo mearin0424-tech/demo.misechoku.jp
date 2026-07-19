@@ -5031,3 +5031,83 @@ body.page-home .rc-loc--passport {
 body.page-home .rc-loc--passport i {
     color: var(--accent-text, #a78bfa) !important;
 }
+
+/* ============================================================================
+   SWIPE 求人カード 微調整 (2026-07-19f)
+   ・ボーナス金:時給 = 1:1
+   ・店名の隣にレビュー
+   ・閲覧数の表示を非表示化
+   ・距離未設定時の「?km + ヘルプボタン」
+   ============================================================================ */
+
+/* ボーナス金:時給 = 1:1（旧 60:40 を撤回） */
+body.page-home .rc-bonus-card {
+    flex: 1 1 0 !important;
+    padding: 9px 12px !important;
+}
+body.page-home .rc-wage-card {
+    flex: 1 1 0 !important;
+    padding: 8px 10px !important;
+}
+
+/* 1行目：店名 + レビュー（右端に寄せる） */
+body.page-home .rc-name-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 3px;
+}
+body.page-home .rc-name-row .rc-shop-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+}
+body.page-home .rc-name-row .rc-rating-inline {
+    flex: 0 0 auto;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+body.page-home .rc-name-row .rc-rating-inline .rc-star {
+    color: #f6d36a;
+    margin-right: 2px;
+    font-size: 0.9em;
+}
+body.page-home .rc-name-row .rc-review-cnt {
+    margin-left: 3px;
+    color: rgba(255, 255, 255, 0.72);
+    font-weight: 700;
+}
+
+/* 閲覧数は求人カード上では非表示（下部スタック内） */
+body.page-home .cast-card--recruit .view-count { display: none !important; }
+
+/* 距離未設定時：淡いグレー表示 + 隣に丸いヘルプボタン */
+body.page-home .rc-dist--unset {
+    color: rgba(255, 255, 255, 0.60) !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+body.page-home .rc-dist--unset i.fa-route {
+    color: rgba(255, 255, 255, 0.45) !important;
+}
+body.page-home .rc-dist__help {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.7rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+body.page-home .rc-dist__help:hover { background: rgba(255, 255, 255, 0.16); }
+body.page-home .rc-dist__help:active { transform: scale(0.92); }
