@@ -12,7 +12,8 @@
 <div class="content-wrapper animate-fadeIn">
     <div class="cast-mypage-sub-page">
         <section class="mypage-area">
-            <h1 class="mypage-page-title serif-font">レビュー一覧</h1>
+            {{-- タイトルはヘッダー中央に表示（統一方針） --}}
+            <p class="page-lead">お店に投稿したレビューの一覧です。</p>
 
             @if(!empty($filterShopId ?? null))
                 <div class="review-filter-chip" style="display:flex;align-items:center;gap:8px;padding:10px 14px;margin-bottom:14px;border-radius:999px;background:rgba(168, 85, 247, 0.10);border:1px solid rgba(168, 85, 247, 0.35);color:#e6dffc;font-size:0.8rem;">

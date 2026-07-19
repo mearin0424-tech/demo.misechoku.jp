@@ -226,6 +226,26 @@ class TalkController extends Controller
         $content = preg_replace('/\n{2,}/', "\n", $content);
         abort_if($content === '', 422, 'メッセージを入力してください。');
 
+        // スカウト上限：店舗→やりとりの無いキャストへの新規送信は1日 無料5件 / Premium30件まで。
+        // 既存キャストとのやりとり（履歴がある相手）は無制限。
+        if (!$isCastPortal) {
+            $planService = app(\App\Services\PlanSubscriptionService::class);
+            if ($planService->isScout((string) $checkShopId, (string) $checkCastId)) {
+                $quota = $planService->checkScoutQuota((string) $checkShopId);
+                if (!$quota['allowed']) {
+                    $msg = $quota['is_premium']
+                        ? "本日のスカウト送信上限（{$quota['limit']}件）に達しました。明日以降に再度お試しください。"
+                        : "本日のスカウト送信上限（{$quota['limit']}件）に達しました。Premiumプランなら1日" . \App\Services\PlanSubscriptionService::SCOUT_LIMIT_PREMIUM . '件まで送信できます。';
+                    return response()->json([
+                        'success' => false,
+                        'message' => $msg,
+                        'scout_limit_reached' => true,
+                        'upgrade_url' => route('subscription'),
+                    ], 429);
+                }
+            }
+        }
+
         // NGワード検査（電話・SNSハンドル・URL・連絡先誘導など）
         if ($ngHit = $this->detectNgWord($content)) {
             return response()->json([

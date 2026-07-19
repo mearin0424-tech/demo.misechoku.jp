@@ -309,17 +309,18 @@ body.theme-light .talk-ng-warn {
 
 /* クイック定型文パネル（room.blade 内スタイルの色を確実にライト基準へ） */
 body.theme-light .quick-reply-panel__label,
-body.theme-light .quick-reply-panel__status { color: #6d28d9; }
-body.theme-light .quick-reply-chip {
+body.theme-light .quick-reply-panel__status,
+body.theme-light .quick-reply-panel__edit { color: #6d28d9; }
+body.theme-light .quick-reply-card {
     background: #ffffff;
     border-color: rgba(124, 58, 237, 0.28);
     color: #241f33;
 }
-body.theme-light .quick-reply-chip--suggest {
+body.theme-light .quick-reply-card--suggest {
     background: rgba(124, 58, 237, 0.08);
     border-color: rgba(124, 58, 237, 0.45);
-    color: #4c2889;
 }
+body.theme-light .quick-reply-card--suggest .quick-reply-card__body { color: #4c2889; }
 
 /* --------------------------------------------------------------------------
    6. Tailwind ユーティリティ直書きページ（プロフィール詳細・設定など）の補正
@@ -640,16 +641,12 @@ body.theme-light .result-employment-kind-select {
    MyPage 系で唯一ライトモードにする業務ページ。ビュー内インラインの
    「ダーク前提の半透明白カード」を白面 + ラベンダー罫線に置き換える
    -------------------------------------------------------------------------- */
-body.theme-light .shop-management-shell .mypage-page-title { color: #241f33; }
-body.theme-light .case-summary-card,
-body.theme-light .case-card,
-body.theme-light .deposit-precheck-card,
-body.theme-light .payment-bank-accordion,
+/* ケースカード/サマリー/プリチェック/口座アコーディオンはビュー側インラインが
+   ライト前提の配色になったため、ここでは mini-row 系のみ補正する */
 body.theme-light .mypage-mini-row {
     background: #ffffff !important;
     border-color: rgba(124, 58, 237, 0.20) !important;
 }
-body.theme-light .case-summary-card.is-action .case-summary-card__value { color: #6d28d9; }
 body.theme-light .mypage-mini-row:hover {
     background: rgba(124, 58, 237, 0.05) !important;
     border-color: rgba(124, 58, 237, 0.35) !important;
@@ -709,3 +706,201 @@ body.theme-light .shop-action-modal-footer {
     border-top-color: rgba(124, 58, 237, 0.20) !important;
 }
 body.theme-light .shop-action-modal-close { color: #6d6685 !important; }
+
+/* --------------------------------------------------------------------------
+   13. サイドメニュー配下ページのライト徹底化 (2026-07-19)
+   対象: /setting/* /support/* /about /terms /privacy 等
+   各 blade の @push で直書きされたダーク色をライトへ強制上書きする
+   配色: 面=白、本文=#241f33、補助=#5f5876、アクセント=#6d28d9
+   -------------------------------------------------------------------------- */
+
+/* ===== 設定ページ（account / notification / subscription 共通 .setting-*） ===== */
+body.theme-light .setting-page { color: #241f33 !important; }
+body.theme-light .setting-title { color: #6d28d9 !important; }
+body.theme-light .setting-lead,
+body.theme-light .setting-guide,
+body.theme-light .setting-guest-note { color: #5f5876 !important; }
+body.theme-light .setting-section {
+    background: #ffffff !important;
+    border: 1px solid rgba(124, 58, 237, 0.20) !important;
+    box-shadow: 0 4px 14px rgba(76, 29, 149, 0.08) !important;
+}
+body.theme-light .setting-section--danger {
+    border-color: rgba(220, 38, 38, 0.35) !important;
+    background: #fff7f7 !important;
+}
+body.theme-light .setting-section-title { color: #241f33 !important; }
+body.theme-light .setting-section-title i { color: #6d28d9 !important; }
+body.theme-light .setting-section--danger .setting-section-title i { color: #b91c1c !important; }
+body.theme-light .setting-form-group label { color: #241f33 !important; font-weight: 700; }
+body.theme-light .setting-form-group input,
+body.theme-light .setting-form-group textarea {
+    background: #ffffff !important;
+    color: #241f33 !important;
+    border-color: rgba(124, 58, 237, 0.30) !important;
+    box-shadow: inset 0 1px 3px rgba(76, 29, 149, 0.06) !important;
+}
+body.theme-light .setting-form-group input:focus,
+body.theme-light .setting-form-group textarea:focus {
+    border-color: rgba(124, 58, 237, 0.55) !important;
+    box-shadow: inset 0 1px 3px rgba(76, 29, 149, 0.06), 0 0 0 3px rgba(124, 58, 237, 0.12) !important;
+}
+body.theme-light .setting-form-group input::placeholder,
+body.theme-light .setting-form-group textarea::placeholder {
+    color: rgba(95, 88, 118, 0.55) !important;
+}
+body.theme-light .setting-error { color: #b91c1c !important; }
+
+/* 行タイプ */
+body.theme-light .setting-row + .setting-row { border-top-color: rgba(124, 58, 237, 0.10) !important; }
+body.theme-light .setting-row-label { color: #241f33 !important; font-weight: 700; }
+body.theme-light .setting-row-desc { color: #5f5876 !important; }
+body.theme-light .setting-check { color: #241f33 !important; }
+body.theme-light .setting-linked { color: #059669 !important; }
+
+/* フラッシュ・アラート */
+body.theme-light .setting-flash--success,
+body.theme-light .setting-alert-success {
+    background: rgba(5, 150, 105, 0.08) !important;
+    border-color: rgba(5, 150, 105, 0.35) !important;
+    color: #047857 !important;
+}
+body.theme-light .setting-flash--success i,
+body.theme-light .setting-alert-success i { color: #059669 !important; }
+body.theme-light .setting-flash--error,
+body.theme-light .setting-alert-error {
+    background: rgba(220, 38, 38, 0.06) !important;
+    border-color: rgba(220, 38, 38, 0.35) !important;
+    color: #b91c1c !important;
+}
+body.theme-light .setting-flash--error i,
+body.theme-light .setting-alert-error i { color: #dc2626 !important; }
+
+/* ボタン系 */
+body.theme-light .setting-submit {
+    box-shadow: 0 6px 14px rgba(76, 29, 149, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.28) !important;
+}
+body.theme-light .setting-submit-danger { background: #dc2626 !important; color: #ffffff !important; }
+body.theme-light .setting-btn-unlink,
+body.theme-light .setting-btn-push {
+    background: #ffffff !important;
+    border-color: rgba(124, 58, 237, 0.30) !important;
+    color: #241f33 !important;
+}
+body.theme-light .setting-btn-unlink:hover { background: rgba(124, 58, 237, 0.06) !important; }
+body.theme-light .setting-btn-test {
+    background: rgba(5, 150, 105, 0.06) !important;
+    border-color: rgba(5, 150, 105, 0.40) !important;
+    color: #047857 !important;
+}
+
+/* 退会警告 */
+body.theme-light .withdraw-warning {
+    background: rgba(220, 38, 38, 0.06) !important;
+    border-color: rgba(220, 38, 38, 0.35) !important;
+    color: #b91c1c !important;
+}
+body.theme-light .withdraw-warning i { color: #dc2626 !important; }
+body.theme-light .withdraw-check { color: #241f33 !important; }
+
+/* ===== サブスクリプション（.plan-*） ===== */
+body.theme-light .plan-current,
+body.theme-light .plan-item {
+    background: #ffffff !important;
+    border: 1px solid rgba(124, 58, 237, 0.20) !important;
+    box-shadow: 0 4px 14px rgba(76, 29, 149, 0.08) !important;
+}
+body.theme-light .plan-item--active {
+    border-color: rgba(124, 58, 237, 0.55) !important;
+    background: rgba(124, 58, 237, 0.04) !important;
+}
+body.theme-light .plan-current-label,
+body.theme-light .plan-badge { color: #6d28d9 !important; }
+body.theme-light .plan-current-name,
+body.theme-light .plan-name,
+body.theme-light .plan-price { color: #241f33 !important; }
+
+/* ===== サポート系（column / notice / htu / form）追加補正 ===== */
+body.theme-light .support-column-title,
+body.theme-light .support-column-item-title,
+body.theme-light .support-notice-title,
+body.theme-light .support-notice-item-title,
+body.theme-light .support-form-title,
+body.theme-light .support-form-faq-title { color: #241f33 !important; }
+body.theme-light .support-column-lead,
+body.theme-light .support-column-item-meta,
+body.theme-light .support-notice-lead,
+body.theme-light .support-notice-item-meta,
+body.theme-light .support-column-empty,
+body.theme-light .support-form-lead,
+body.theme-light .support-form-note { color: #5f5876 !important; }
+body.theme-light .support-column-item,
+body.theme-light .support-notice-item,
+body.theme-light .support-column-item-link {
+    background: #ffffff !important;
+    border-color: rgba(124, 58, 237, 0.16) !important;
+}
+body.theme-light .support-column-item-link:hover,
+body.theme-light .support-notice-item:hover { background: rgba(124, 58, 237, 0.05) !important; }
+body.theme-light .support-column-breadcrumb,
+body.theme-light .support-notice-breadcrumb { color: #6d6685 !important; }
+body.theme-light .support-column-breadcrumb a,
+body.theme-light .support-notice-breadcrumb a { color: #6d28d9 !important; }
+body.theme-light .support-column-pagination .pagination li span,
+body.theme-light .support-column-pagination .pagination li a {
+    background: #ffffff !important;
+    color: #241f33 !important;
+    border-color: rgba(124, 58, 237, 0.24) !important;
+}
+body.theme-light .support-column-pagination .pagination li.active span {
+    background: #7c3aed !important;
+    color: #ffffff !important;
+    border-color: #7c3aed !important;
+}
+
+/* HTU */
+body.theme-light .htu-page,
+body.theme-light .htu-hero,
+body.theme-light .htu-section,
+body.theme-light .htu-block,
+body.theme-light .htu-card {
+    background: #ffffff !important;
+    color: #241f33 !important;
+    border-color: rgba(124, 58, 237, 0.20) !important;
+}
+body.theme-light .htu-title,
+body.theme-light .htu-heading,
+body.theme-light .htu-block-title { color: #241f33 !important; }
+body.theme-light .htu-lead,
+body.theme-light .htu-text,
+body.theme-light .htu-note { color: #5f5876 !important; }
+
+/* 問い合わせフォーム */
+body.theme-light .support-form-group label { color: #241f33 !important; }
+body.theme-light .support-form-group input,
+body.theme-light .support-form-group select,
+body.theme-light .support-form-group textarea {
+    background: #ffffff !important;
+    color: #241f33 !important;
+    border-color: rgba(124, 58, 237, 0.30) !important;
+}
+body.theme-light .support-form-card,
+body.theme-light .support-form-faq,
+body.theme-light .support-faq-item {
+    background: #ffffff !important;
+    border-color: rgba(124, 58, 237, 0.16) !important;
+    color: #241f33 !important;
+}
+
+/* ===== 規約・ポリシー本文の追加補正 ===== */
+body.theme-light .policy-doc-shell { color: #241f33 !important; }
+body.theme-light .policy-doc-shell h1,
+body.theme-light .policy-doc-shell h2,
+body.theme-light .policy-doc-shell h3 { color: #241f33 !important; }
+body.theme-light .policy-doc-shell a { color: #6d28d9 !important; }
+body.theme-light .policy-doc-toc a {
+    background: #ffffff !important;
+    border-color: rgba(124, 58, 237, 0.24) !important;
+    color: #241f33 !important;
+}
+body.theme-light .policy-doc-toc a:hover { background: rgba(124, 58, 237, 0.06) !important; }

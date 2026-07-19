@@ -468,3 +468,16 @@ input[type="file"]::file-selector-button:hover {
     border: 1px solid rgba(90, 50, 16, 0.5);
     color: #5a3210;
 }
+
+/* ============================================================
+   ページリード文（深い階層ページ共通）
+   タイトルはヘッダー中央に表示する方針のため、ページ内には
+   大見出しを置かず、この統一リード文だけを先頭に置く。
+   ============================================================ */
+.page-lead {
+    font-size: 0.78rem;
+    line-height: 1.75;
+    color: var(--color-text-sub, #5f5876);
+    margin: 14px 0 18px;
+}
+body.theme-light .page-lead { color: #5f5876; }

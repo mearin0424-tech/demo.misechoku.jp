@@ -55,7 +55,16 @@
       "Bash(sed -n '137,152p' resources/views/casts/mypage/employment.blade.php)",
       "Bash(php -l app/Http/Controllers/Common/TalkController.php)",
       "Bash(awk *)",
-      "Bash(php -l app/Http/Controllers/Shops/HomeController.php)"
+      "Bash(php -l app/Http/Controllers/Shops/HomeController.php)",
+      "PowerShell(php artisan view:clear)",
+      "Bash(python *)",
+      "Bash(php -l app/Http/Controllers/Common/SettingController.php)",
+      "Bash(php -l app/Services/PlanSubscriptionService.php)",
+      "Bash(php -l app/Models/ShopPlanSubscription.php)",
+      "Bash(php -l app/Services/UserTaskService.php)",
+      "Bash(php -l app/Http/Controllers/Admin/PlanSubscriptionController.php)",
+      "Bash(php -l app/Http/Controllers/Casts/SearchController.php)",
+      "Bash(php -l app/Http/Controllers/Shops/ViewerController.php)"
     ]
   }
 }

@@ -175,7 +175,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const detailUrl = wrap.getAttribute('data-detail-url');
         if (!detailUrl) return;
         if (wrap.closest('.cast-card--recruit')) return;
-        wrap.addEventListener('click', function () {
+        wrap.addEventListener('click', function (e) {
+            // <a href> / <button> は常に本来の動作を優先（トーク遷移・KEEPトグル等）
+            if (e && e.target && (e.target.closest('a[href]') || e.target.closest('button'))) return;
             if (isPhotoSwiping) return;
             window.location.href = detailUrl;
         });
@@ -185,6 +187,13 @@ document.addEventListener('DOMContentLoaded', function() {
         var recruitUrl = card.getAttribute('data-detail-url');
         if (!recruitUrl) return;
         card.addEventListener('click', function (e) {
+            // <a href>（トーク遷移CTA・求人ボタン等）は常にリンク先を優先。
+            // iOS Safari では .stop-propagation の touchstart 停止で
+            // <a> の click が合成イベントとして親へ来ることがあり、
+            // .stop-propagation 判定だけでは防ぎきれないため明示的に除外する
+            if (e.target.closest('a[href]')) return;
+            // 同様に <button>（優良店バッヂ・?km ヘルプ等）もカード遷移させない
+            if (e.target.closest('button')) return;
             if (e.target.closest('.stop-propagation')) return;
             if (e.target.closest('.photo-pagination')) return;
             if (isPhotoSwiping) return;

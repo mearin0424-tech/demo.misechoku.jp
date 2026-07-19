@@ -17,10 +17,8 @@
     $docNotSubmitted = $docTotal - $docApproved - $docPending - $docRejected;
 @endphp
 <div class="license-page">
-    <header class="license-page__head">
-        <h1 class="license-page__title"><i class="fas fa-file-shield" aria-hidden="true"></i>許可証の提出・管理</h1>
-        <p class="license-page__desc">掲載に必要な書類の提出状況です。すべて承認されると求人票を公開できます。</p>
-    </header>
+    {{-- タイトルはヘッダー中央に表示（統一方針）。ページ内はリード文のみ --}}
+    <p class="page-lead">掲載に必要な書類の提出状況です。すべて承認されると求人票を公開できます。</p>
 
     {{-- 提出状況サマリー：提出できているか・何を提出したかを一目で --}}
     <section class="license-summary" aria-label="提出状況サマリー">

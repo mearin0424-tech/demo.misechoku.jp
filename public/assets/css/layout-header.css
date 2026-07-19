@@ -84,18 +84,21 @@ body.is-image-editing #global-header {
 }
 
 .header-center-title {
-    /* 通常のフレックスアイテムとして左右の「間」に配置（アイコンと構造的に重ならない）。
-       タイトルは左寄せ（BACK ボタンがある画面はその直後から始まる）。 */
-    position: static;
-    transform: none;
-    flex: 1 1 auto;
+    /* タイトルはヘッダーの「真ん中」に絶対配置で統一（全画面共通方針）。
+       左右のアイコン群と重ならないよう max-width を制限し、超過はエリプシス。 */
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    text-align: left;
+    justify-content: center;
+    text-align: center;
+    max-width: min(calc(100vw - 250px), calc(var(--max-content-width, 430px) - 250px));
     min-width: 0;
+    z-index: 1;
     overflow: hidden;
-    padding: 0 8px;
+    padding: 0 4px;
     /* タイトル領域はタップ対象にしない（誤タップ防止） */
     pointer-events: none;
 }
@@ -104,7 +107,7 @@ body.is-image-editing #global-header {
 .header-title-main {
     color: #fff;
     font-weight: 700;
-    text-align: left;
+    text-align: center;
     letter-spacing: 0.16em;
     font-size: 0.95rem;
     line-height: 1.2;
@@ -163,6 +166,27 @@ body.is-image-editing #global-header {
     font-weight: 600;
     letter-spacing: 0.18em;
     text-transform: uppercase;
+}
+
+/* 和文タイトル（深い階層のメニュー名）：英字用の広い字間を詰め、
+   8文字以上（.is-long）はさらに縮小して中央のままエリプシスを回避する */
+.header-title-main.header-title-ja {
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    font-size: 0.92rem;
+    text-transform: none;
+}
+.header-title-main.header-title-ja.is-long {
+    font-size: 0.8rem;
+    letter-spacing: 0.02em;
+}
+@media (max-width: 480px) {
+    .header-title-main.header-title-ja { letter-spacing: 0.04em; font-size: 0.88rem; }
+    .header-title-main.header-title-ja.is-long { font-size: 0.76rem; letter-spacing: 0.01em; }
+}
+@media (max-width: 360px) {
+    .header-title-main.header-title-ja { letter-spacing: 0.02em; font-size: 0.82rem; }
+    .header-title-main.header-title-ja.is-long { font-size: 0.72rem; letter-spacing: 0; }
 }
 
 /* デモ用：キャスト／お店ピル型トグルスイッチ */

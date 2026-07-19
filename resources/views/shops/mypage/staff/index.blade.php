@@ -182,15 +182,11 @@
 <div class="content-wrapper animate-fadeIn">
     <section class="mypage-area">
         <div class="staff-shell">
-            <header class="mypage-page-head">
-                <h1 class="mypage-page-head__title">
-                    <i class="fas fa-users"></i>スタッフ・アカウント管理
-                    <span class="staff-count-chip"><i class="fas fa-user"></i>{{ count($managers) }} 名</span>
-                </h1>
-                <p class="mypage-page-head__desc">
-                    1つのお店で複数のログインアカウントを使えます。追加・削除ができるのは<strong style="color:#e6dffc;">オーナー権限</strong>のみです。
-                </p>
-            </header>
+            {{-- タイトルはヘッダー中央に表示（統一方針）。ページ内はチップ＋リード文のみ --}}
+            <p style="margin:14px 0 0;"><span class="staff-count-chip"><i class="fas fa-user"></i>{{ count($managers) }} 名</span></p>
+            <p class="page-lead">
+                1つのお店で複数のログインアカウントを使えます。追加・削除ができるのは<strong style="color:#e6dffc;">オーナー権限</strong>のみです。
+            </p>
 
             @if (session('message'))
                 <div class="staff-flash">{{ session('message') }}</div>

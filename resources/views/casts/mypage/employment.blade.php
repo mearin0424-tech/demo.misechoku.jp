@@ -6,7 +6,7 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/review-modal.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/css/case-flow.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/case-flow.css') }}?v=20260719-case-light">
 <style>
     /* ========================================================
        採用・入金 統合タイムライン
@@ -18,32 +18,45 @@
         margin-bottom: 16px;
     }
     .case-summary-card {
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(168, 85, 247, 0.2);
+        background: #ffffff;
+        border: 1px solid rgba(124, 58, 237, 0.20);
         border-radius: 12px;
         padding: 10px 12px;
         text-align: center;
+        position: relative;
+        cursor: default;
+        font: inherit;
+        width: 100%;
     }
-    .case-summary-card__label { display: block; font-size: 0.66rem; color: rgba(196, 181, 253, 0.7); letter-spacing: 0.06em; font-weight: 700; margin-bottom: 4px; }
-    .case-summary-card__value { display: block; font-size: 1.4rem; font-weight: 800; color: #c4b5fd; font-variant-numeric: tabular-nums; line-height: 1.1; }
-    .case-summary-card.is-action { border-color: rgba(168, 85, 247, 0.65); background: rgba(168, 85, 247, 0.10); }
-    .case-summary-card.is-action .case-summary-card__value { color: #c4b5fd; }
+    button.case-summary-card[data-scroll-target] { cursor: pointer; transition: transform .12s, box-shadow .15s; }
+    button.case-summary-card[data-scroll-target]:active { transform: scale(.96); }
+    .case-summary-card__label { display: block; font-size: 0.66rem; color: #6d6685; letter-spacing: 0.06em; font-weight: 700; margin-bottom: 4px; }
+    .case-summary-card__value { display: block; font-size: 1.4rem; font-weight: 800; color: #6d28d9; font-variant-numeric: tabular-nums; line-height: 1.1; }
+    /* 要対応 > 0 は暖色で最優先の注意喚起 */
+    .case-summary-card.is-action { border-color: rgba(217, 119, 6, 0.55); background: rgba(217, 119, 6, 0.07); }
+    .case-summary-card.is-action .case-summary-card__label { color: #b45309; }
+    .case-summary-card.is-action .case-summary-card__value { color: #b45309; }
+    .case-summary-card__hint {
+        display: block; font-size: 0.58rem; color: rgba(109, 102, 133, 0.75);
+        margin-top: 3px; font-weight: 600;
+    }
+    .case-summary-card.is-action .case-summary-card__hint { color: rgba(180, 83, 9, 0.8); }
 
     .case-card {
-        background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+        background: #ffffff;
         border: 1px solid var(--color-border);
         border-radius: 14px;
         padding: 12px;
         margin-bottom: 10px;
         position: relative;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+        box-shadow: 0 2px 10px rgba(76, 29, 149, 0.08);
     }
     .case-card.is-actionable {
         border-color: var(--color-border-strong);
-        background: linear-gradient(180deg, rgba(168, 85, 247, 0.10), rgba(168, 85, 247, 0.03));
-        box-shadow: 0 2px 14px rgba(168, 85, 247, 0.16), inset 0 1px 0 rgba(168, 85, 247, 0.08);
+        background: linear-gradient(180deg, rgba(168, 85, 247, 0.06), #ffffff 40%);
+        box-shadow: 0 2px 14px rgba(124, 58, 237, 0.18);
     }
-    .case-card.is-completed { opacity: 0.78; }
+    .case-card.is-completed { opacity: 0.82; }
 
     .case-card__head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
     .case-card__icon {
@@ -71,12 +84,12 @@
         content: ''; position: absolute; top: 9px;
         left: calc(50% + 13px); right: calc(-50% + 13px);
         height: 2px; border-radius: 2px;
-        background: rgba(255, 255, 255, 0.10); z-index: 0;
+        background: rgba(124, 58, 237, 0.14); z-index: 0;
     }
     .case-pipeline__step:last-child::after { display: none; }
     .case-pipeline__step.is-done::after { background: rgba(var(--accent-rgb, 214, 112, 162), 0.75); }
     .case-pipeline__step.is-current::after {
-        background: linear-gradient(to right, rgba(var(--accent-rgb, 214, 112, 162), 0.6), rgba(255, 255, 255, 0.10));
+        background: linear-gradient(to right, rgba(var(--accent-rgb, 214, 112, 162), 0.6), rgba(124, 58, 237, 0.14));
     }
 
     .case-pipeline__bullet {
@@ -84,19 +97,19 @@
         width: 20px; height: 20px; border-radius: 50%;
         display: inline-flex; align-items: center; justify-content: center;
         font-size: 0.58rem; font-weight: 800;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1.5px solid rgba(255, 255, 255, 0.16);
+        background: #ffffff;
+        border: 1.5px solid rgba(124, 58, 237, 0.28);
         color: var(--color-text-muted); z-index: 1;
         transition: background .2s ease, border-color .2s ease;
     }
     .case-pipeline__step.is-done .case-pipeline__bullet {
-        background: var(--accent, #d670a2); color: var(--on-accent, #1a0814); border-color: var(--accent, #d670a2);
+        background: var(--accent, #d670a2); color: var(--on-accent, #ffffff); border-color: var(--accent, #d670a2);
         font-size: 0.52rem;
     }
     .case-pipeline__step.is-current .case-pipeline__bullet {
-        background: #0e0e0e;
+        background: #ffffff;
         border: 2px solid var(--accent, #d670a2);
-        color: var(--accent-text, #f0a6c4);
+        color: var(--accent-text, #7c3aed);
         box-shadow: 0 0 0 4px rgba(var(--accent-rgb, 214, 112, 162), 0.14);
         animation: case-pulse 2s ease-in-out infinite;
     }
@@ -104,16 +117,16 @@
         0%, 100% { box-shadow: 0 0 0 4px rgba(var(--accent-rgb, 214, 112, 162), 0.14); }
         50%      { box-shadow: 0 0 0 7px rgba(var(--accent-rgb, 214, 112, 162), 0.05); }
     }
-    .case-pipeline__label { display: block; font-size: 0.58rem; color: var(--color-text-muted); line-height: 1.25; }
-    .case-pipeline__step.is-done .case-pipeline__label { color: var(--color-text-sub, #b8b8b8); }
-    .case-pipeline__step.is-current .case-pipeline__label { color: var(--accent-text, #f0a6c4); font-weight: 800; }
+    .case-pipeline__label { display: block; font-size: 0.6rem; color: var(--color-text-muted); line-height: 1.25; }
+    .case-pipeline__step.is-done .case-pipeline__label { color: var(--color-text-sub, #5f5876); }
+    .case-pipeline__step.is-current .case-pipeline__label { color: var(--accent-text, #7c3aed); font-weight: 800; }
 
     .case-card__highlights {
         display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px;
         margin: 8px 0 2px;
     }
     .case-card__highlight {
-        background: rgba(0,0,0,0.18); border-radius: 8px; padding: 6px 8px;
+        background: rgba(124, 58, 237, 0.06); border-radius: 8px; padding: 6px 8px;
         font-size: 0.68rem; color: var(--color-text-muted);
     }
     .case-card__highlight strong {
@@ -152,6 +165,9 @@
     }
     .case-card__view-talk:hover { color: var(--color-text-header); text-decoration: underline; }
 
+    /* 固定ヘッダー分のアンカー余白 */
+    .mypage-stage-heading, .case-card { scroll-margin-top: calc(var(--header-height, 60px) + 12px); }
+
     /* セクション見出し：左に小さなアクセント線、右に細い区切り線。
        "ラベル＋ホライズン" の構成で、CTA でも見出しでもない中庸な存在感に。 */
     .mypage-stage-heading {
@@ -177,27 +193,27 @@
 
     /* チェックボックス */
     .deposit-precheck { display: grid; gap: 14px; }
-    .deposit-precheck-card { padding: 18px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); }
-    .deposit-precheck-title { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 10px; font-weight: 700; }
-    .deposit-precheck-meta, .deposit-precheck-note { font-size: 0.82rem; line-height: 1.7; color: #cdbcbc; }
+    .deposit-precheck-card { padding: 18px; border-radius: 18px; border: 1px solid rgba(124, 58, 237, 0.20); background: #f7f4fc; }
+    .deposit-precheck-title { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 10px; font-weight: 700; color: #241f33; }
+    .deposit-precheck-meta, .deposit-precheck-note { font-size: 0.82rem; line-height: 1.7; color: #5f5876; }
     .deposit-checklist { display: grid; gap: 10px; margin-top: 12px; }
     .deposit-check-row {
         display: flex; align-items: flex-start; gap: 10px;
-        font-size: 0.9rem; color: #f7eded;
+        font-size: 0.9rem; color: #241f33;
         cursor: pointer; padding: 10px 12px; border-radius: 10px;
-        background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+        background: #ffffff; border: 1px solid rgba(124, 58, 237, 0.16);
         line-height: 1.5;
     }
-    .deposit-check-row:hover { background: rgba(168, 85, 247, 0.06); border-color: rgba(168, 85, 247, 0.22); }
-    .deposit-check-row input[type="checkbox"] { flex: 0 0 auto; margin-top: 2px; accent-color: #a78bfa; width: 18px; height: 18px; cursor: pointer; }
+    .deposit-check-row:hover { background: rgba(124, 58, 237, 0.05); border-color: rgba(124, 58, 237, 0.30); }
+    .deposit-check-row input[type="checkbox"] { flex: 0 0 auto; margin-top: 2px; accent-color: #7c3aed; width: 18px; height: 18px; cursor: pointer; }
     .deposit-check-row span { flex: 1; cursor: pointer; }
-    .deposit-check-row:has(input:checked) { background: rgba(168, 85, 247, 0.1); border-color: rgba(168, 85, 247, 0.45); }
+    .deposit-check-row:has(input:checked) { background: rgba(124, 58, 237, 0.08); border-color: rgba(124, 58, 237, 0.50); }
 
     /* 振込先口座アコーディオン */
-    .payment-bank-section { padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08); margin-top: 18px; }
+    .payment-bank-section { padding-top: 1rem; border-top: 1px solid var(--color-line, #e6e0f3); margin-top: 18px; }
     .payment-bank-accordion {
-        border: 1px solid rgba(168, 85, 247, 0.22); border-radius: 14px;
-        background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+        border: 1px solid rgba(124, 58, 237, 0.22); border-radius: 14px;
+        background: #ffffff;
         overflow: hidden;
     }
     .payment-bank-accordion__summary {
@@ -205,51 +221,51 @@
         padding: 14px 16px; user-select: none;
     }
     .payment-bank-accordion__summary::-webkit-details-marker { display: none; }
-    .payment-bank-accordion__summary:hover { background: rgba(168, 85, 247, 0.05); }
+    .payment-bank-accordion__summary:hover { background: rgba(124, 58, 237, 0.04); }
     .payment-bank-accordion__icon {
         width: 36px; height: 36px; flex: 0 0 auto;
-        border-radius: 50%; background: rgba(168, 85, 247, 0.14); color: #a78bfa;
+        border-radius: 50%; background: rgba(124, 58, 237, 0.10); color: #7c3aed;
         display: inline-flex; align-items: center; justify-content: center; font-size: 1rem;
     }
     .payment-bank-accordion__main { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-    .payment-bank-accordion__label { font-size: 0.72rem; font-weight: 700; color: rgba(168, 85, 247, 0.85); letter-spacing: 0.04em; }
-    .payment-bank-accordion__summary-text { font-size: 0.92rem; color: #e6dffc; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .payment-bank-accordion__chev { color: rgba(255,255,255,0.55); font-size: 0.85rem; transition: transform 0.2s ease; }
+    .payment-bank-accordion__label { font-size: 0.72rem; font-weight: 700; color: #6d28d9; letter-spacing: 0.04em; }
+    .payment-bank-accordion__summary-text { font-size: 0.92rem; color: #241f33; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .payment-bank-accordion__chev { color: rgba(76, 29, 149, 0.45); font-size: 0.85rem; transition: transform 0.2s ease; }
     .payment-bank-accordion[open] .payment-bank-accordion__chev { transform: rotate(180deg); }
-    .payment-bank-accordion__body { padding: 12px 16px 16px; border-top: 1px solid rgba(168, 85, 247, 0.16); background: rgba(0,0,0,0.18); }
+    .payment-bank-accordion__body { padding: 12px 16px 16px; border-top: 1px solid rgba(124, 58, 237, 0.16); background: #faf8fe; }
 
-    .payment-bank-unregistered { background: rgba(26,17,17,0.95); border: 1px dashed rgba(255,255,255,0.12); border-radius: 1rem; padding: 1.6rem 1.2rem; display: flex; flex-direction: column; align-items: center; text-align: center; }
-    .payment-bank-unregistered-icon { width: 44px; height: 44px; border-radius: 50%; background: #2a1d1d; display: flex; align-items: center; justify-content: center; margin-bottom: 0.8rem; color: #a0a0a0; font-size: 1.1rem; }
-    .payment-bank-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 0.8rem; background: #3a2828; color: #d670a2; }
-    .payment-bank-unregistered-text { font-size: 0.84rem; line-height: 1.7; color: #d4d4d4; margin: 0 0 1rem; }
+    .payment-bank-unregistered { background: #ffffff; border: 1px dashed rgba(217, 119, 6, 0.45); border-radius: 1rem; padding: 1.6rem 1.2rem; display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .payment-bank-unregistered-icon { width: 44px; height: 44px; border-radius: 50%; background: rgba(217, 119, 6, 0.10); display: flex; align-items: center; justify-content: center; margin-bottom: 0.8rem; color: #b45309; font-size: 1.1rem; }
+    .payment-bank-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 0.8rem; background: rgba(217, 119, 6, 0.12); color: #b45309; }
+    .payment-bank-unregistered-text { font-size: 0.84rem; line-height: 1.7; color: #5f5876; margin: 0 0 1rem; }
     .payment-bank-register-btn { width: 100%; padding: 12px 24px; border-radius: 12px; font-weight: 700; color: var(--on-accent, #1a0814); background: var(--accent, #d670a2); box-shadow: 0 6px 14px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.20), inset 0 -1px 0 rgba(0,0,0,.18); border: none; cursor: pointer; transition: filter .15s, transform .12s; }
     .payment-bank-register-btn:hover { filter: brightness(1.06); }
     .payment-bank-register-btn:active { transform: scale(.97); box-shadow: 0 2px 5px rgba(0,0,0,.45), inset 0 2px 4px rgba(0,0,0,.2); }
     .payment-bank-data-rows { display: flex; flex-direction: column; gap: 0; }
-    .payment-bank-data-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .payment-bank-data-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(124, 58, 237, 0.12); }
     .payment-bank-data-row:last-child { border-bottom: none; }
-    .payment-bank-data-label { font-size: 0.74rem; color: #a0a0a0; }
-    .payment-bank-data-value { font-size: 0.86rem; font-weight: 500; color: #fff; }
-    .payment-bank-change-btn { font-size: 0.78rem; padding: 8px 14px; border: 1px solid rgba(168, 85, 247, 0.4); border-radius: 9999px; background: transparent; color: #a78bfa; cursor: pointer; }
+    .payment-bank-data-label { font-size: 0.74rem; color: #6d6685; }
+    .payment-bank-data-value { font-size: 0.86rem; font-weight: 600; color: #241f33; }
+    .payment-bank-change-btn { font-size: 0.78rem; padding: 8px 14px; border: 1px solid rgba(124, 58, 237, 0.40); border-radius: 9999px; background: #ffffff; color: #6d28d9; cursor: pointer; }
 
-    /* 口座登録モーダル */
-    .payment-bank-modal { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; background: rgba(0, 0, 0, 0.78); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); padding: 0; }
+    /* モーダル共通（口座登録 / レビュー / ボーナス確認）：ライト画面に追従して白パネル */
+    .payment-bank-modal { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; background: rgba(20, 10, 35, 0.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); padding: 0; }
     .payment-bank-modal[hidden] { display: none; }
     @media (min-width: 640px) { .payment-bank-modal { justify-content: center; } }
     .payment-bank-modal-backdrop { position: absolute; inset: 0; cursor: pointer; }
-    .payment-bank-modal-panel { position: relative; width: 100%; max-width: min(28rem, calc(100vw - 2rem)); max-height: 90vh; background: #0a0a0a; border-top-left-radius: 1.5rem; border-top-right-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); overflow: hidden; box-sizing: border-box; }
-    .payment-bank-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); background: #141414; }
-    .payment-bank-modal-title { margin: 0; font-size: 1.05rem; font-weight: 700; color: #d670a2; letter-spacing: 0.04em; }
-    .payment-bank-modal-close { width: 2.5rem; height: 2.5rem; border: none; background: transparent; color: #a0a0a0; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .payment-bank-modal-panel { position: relative; width: 100%; max-width: min(28rem, calc(100vw - 2rem)); max-height: 90vh; background: #ffffff; border-top-left-radius: 1.5rem; border-top-right-radius: 1.5rem; border: 1px solid rgba(124, 58, 237, 0.30); display: flex; flex-direction: column; box-shadow: 0 25px 60px -12px rgba(76, 29, 149, 0.35); overflow: hidden; box-sizing: border-box; }
+    .payment-bank-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid rgba(124, 58, 237, 0.20); background: #f7f4fc; }
+    .payment-bank-modal-title { margin: 0; font-size: 1.05rem; font-weight: 700; color: #241f33; letter-spacing: 0.04em; }
+    .payment-bank-modal-close { width: 2.5rem; height: 2.5rem; border: none; background: transparent; color: #6d6685; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .payment-bank-modal-body { overflow-y: auto; overflow-x: hidden; padding: 1.5rem; min-width: 0; flex: 1 1 auto; box-sizing: border-box; }
-    .payment-bank-modal-note { font-size: 0.74rem; line-height: 1.7; color: #a0a0a0; margin: 0 0 1.5rem; padding: 1rem; background: #1a1a1a; border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.08); }
+    .payment-bank-modal-note { font-size: 0.74rem; line-height: 1.7; color: #5f5876; margin: 0 0 1.5rem; padding: 1rem; background: #f7f4fc; border-radius: 0.75rem; border: 1px solid rgba(124, 58, 237, 0.16); }
     .payment-bank-modal-grid { display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; }
     .payment-bank-modal-grid .bank-form-row { margin: 0; min-width: 0; }
-    .payment-bank-modal-grid .bank-label { display: block; font-size: 0.74rem; font-weight: 500; color: #a0a0a0; margin-bottom: 6px; margin-left: 4px; }
-    .payment-bank-modal-grid .bank-input { width: 100%; min-width: 0; max-width: 100%; padding: 14px 1rem; border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.08); background: #1a1a1a; color: #fff; font-size: 0.86rem; box-sizing: border-box; }
-    .payment-bank-modal-footer { display: flex; gap: 0.75rem; padding: 1.25rem 1.5rem; background: #141414; border-top: 1px solid rgba(255,255,255,0.08); }
+    .payment-bank-modal-grid .bank-label { display: block; font-size: 0.74rem; font-weight: 600; color: #5f5876; margin-bottom: 6px; margin-left: 4px; }
+    .payment-bank-modal-grid .bank-input { width: 100%; min-width: 0; max-width: 100%; padding: 14px 1rem; border-radius: 0.75rem; border: 1px solid rgba(124, 58, 237, 0.30); background: #ffffff; color: #241f33; font-size: 0.86rem; box-sizing: border-box; }
+    .payment-bank-modal-footer { display: flex; gap: 0.75rem; padding: 1.25rem 1.5rem; background: #f7f4fc; border-top: 1px solid rgba(124, 58, 237, 0.20); }
     .payment-bank-modal-btn { flex: 1; padding: 14px 1rem; border-radius: 0.75rem; font-size: 0.86rem; font-weight: 700; cursor: pointer; }
-    .payment-bank-modal-btn-cancel { background: transparent; border: 1px solid rgba(255,255,255,0.08); color: #d4d4d4; }
+    .payment-bank-modal-btn-cancel { background: transparent; border: 1px solid rgba(124, 58, 237, 0.25); color: #5f5876; }
     .payment-bank-modal-btn-submit { background: var(--accent, #d670a2); color: var(--on-accent, #1a0814); border: none; box-shadow: 0 6px 14px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.20), inset 0 -1px 0 rgba(0,0,0,.18); transition: filter .15s, transform .12s; }
     .payment-bank-modal-btn-submit:hover { filter: brightness(1.06); }
     .payment-bank-modal-btn-submit:active { transform: scale(.97); box-shadow: 0 2px 5px rgba(0,0,0,.45), inset 0 2px 4px rgba(0,0,0,.2); }
@@ -284,7 +300,7 @@
     .employment-bonus-hero__label {
         font-size: 11px;
         letter-spacing: 0.18em;
-        color: rgba(246, 211, 106, 0.85);
+        color: #a16207;
         font-weight: 800;
         text-transform: uppercase;
         margin: 0;
@@ -297,15 +313,15 @@
         font-size: 0.8em;
         opacity: 0.8;
     }
-    /* 金額：ゴールドグラデーションテキスト（フラット。強グローは廃止） */
+    /* 金額：ゴールドグラデーションテキスト（ライト背景向けに濃いめのゴールド） */
     .employment-bonus-hero__amount {
         font-size: clamp(2.3rem, 9vw, 3rem);
         font-weight: 900;
         background: linear-gradient(135deg,
-            var(--bonus-gold-light, #fff5dc) 0%,
-            var(--bonus-gold, #f6d36a) 45%,
-            var(--bonus-gold-mid, #e3b94a) 75%,
-            var(--bonus-gold-deep, #b8860b) 100%);
+            #d4a017 0%,
+            #b8860b 45%,
+            #9a6c08 75%,
+            #7c5405 100%);
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -328,10 +344,8 @@
 <div class="content-wrapper animate-fadeIn">
     <div class="cast-mypage-sub-page">
         <section class="mypage-area">
-            <header class="mypage-page-head">
-                <h1 class="mypage-page-head__title"><i class="fas fa-yen-sign"></i>採用・入金管理</h1>
-                <p class="mypage-page-head__desc">採用が決まったお店のボーナス申請から、振込完了までの進み具合をここで確認・操作できます。</p>
-            </header>
+            {{-- タイトルはヘッダー中央に表示（統一方針）。ページ内はリード文のみ --}}
+            <p class="page-lead">採用が決まったお店のボーナス申請から、振込完了までの進み具合をここで確認・操作できます。</p>
 
             @php
                 $hiredCases = $hiredCases ?? [];
@@ -353,20 +367,26 @@
             </div>
 
             <div class="mypage-detail-box">
-                {{-- サマリー --}}
+                {{-- サマリー（タップで該当セクションへ移動） --}}
                 <div class="case-summary">
-                    <div class="case-summary-card {{ $actionableCount > 0 ? 'is-action' : '' }}">
+                    <button type="button" class="case-summary-card {{ $actionableCount > 0 ? 'is-action' : '' }}"
+                            @if($actionableCount > 0) data-scroll-target=".case-card.is-actionable" @endif>
                         <span class="case-summary-card__label">要対応</span>
                         <span class="case-summary-card__value">{{ $actionableCount }}</span>
-                    </div>
-                    <div class="case-summary-card">
+                        @if($actionableCount > 0)
+                            <span class="case-summary-card__hint">タップで移動</span>
+                        @endif
+                    </button>
+                    <button type="button" class="case-summary-card"
+                            @if($activeCases->isNotEmpty()) data-scroll-target="#section-active-cases" @endif>
                         <span class="case-summary-card__label">進行中</span>
                         <span class="case-summary-card__value">{{ max($activeCases->count() - $actionableCount, 0) }}</span>
-                    </div>
-                    <div class="case-summary-card">
+                    </button>
+                    <button type="button" class="case-summary-card"
+                            @if($completedCases->isNotEmpty()) data-scroll-target="#section-completed-cases" @endif>
                         <span class="case-summary-card__label">完了</span>
                         <span class="case-summary-card__value">{{ $completedCases->count() }}</span>
-                    </div>
+                    </button>
                 </div>
 
                 @if(session('status'))
@@ -377,14 +397,14 @@
                 @endif
 
                 @if($activeCases->isNotEmpty())
-                    <h2 class="mypage-stage-heading"><i class="fas fa-fire"></i> 進行中の案件</h2>
+                    <h2 class="mypage-stage-heading" id="section-active-cases"><i class="fas fa-fire"></i> 進行中の案件</h2>
                     @foreach($activeCases as $case)
                         @include('casts.mypage._case_card', ['case' => $case])
                     @endforeach
                 @endif
 
                 @if($completedCases->isNotEmpty())
-                    <h2 class="mypage-stage-heading"><i class="fas fa-check-circle"></i> 完了した案件</h2>
+                    <h2 class="mypage-stage-heading" id="section-completed-cases"><i class="fas fa-check-circle"></i> 完了した案件</h2>
                     @foreach($completedCases as $case)
                         @include('casts.mypage._case_card', ['case' => $case])
                     @endforeach
@@ -597,6 +617,14 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var csrfToken = (document.querySelector('meta[name="csrf-token"]') && document.querySelector('meta[name="csrf-token"]').getAttribute('content')) || '';
+
+    // サマリーカード → 該当セクションへスクロール
+    document.querySelectorAll('.case-summary-card[data-scroll-target]').forEach(function (card) {
+        card.addEventListener('click', function () {
+            var target = document.querySelector(card.getAttribute('data-scroll-target'));
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
 
     // 口座モーダル
     var bankModal = document.getElementById('cast-bank-modal');

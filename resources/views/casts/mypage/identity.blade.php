@@ -350,10 +350,8 @@
 <div class="content-wrapper animate-fadeIn">
     <div class="cast-mypage-sub-page">
         <section class="mypage-area">
-            <header class="mypage-page-head">
-                <h1 class="mypage-page-head__title"><i class="fas fa-id-card"></i>本人確認（書類の提出）</h1>
-                <p class="mypage-page-head__desc">安心してご利用いただくため、本人確認書類の提出をお願いしています。運営の承認が完了すると、すべての機能が利用できます。</p>
-            </header>
+            {{-- タイトルはヘッダー中央に表示（統一方針）。ページ内はリード文のみ --}}
+            <p class="page-lead">安心してご利用いただくため、本人確認書類の提出をお願いしています。運営の承認が完了すると、すべての機能が利用できます。</p>
 
             <div class="mypage-detail-box">
                 <div class="mypage-section">

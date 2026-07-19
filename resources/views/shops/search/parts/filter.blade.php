@@ -12,7 +12,7 @@
             <button type="button" class="search-filter-icon-btn" id="search-sort-trigger" aria-label="並び替え" aria-expanded="false" aria-haspopup="true" aria-controls="search-sort-panel">
                 <i class="fas fa-sort-amount-down" aria-hidden="true"></i>
             </button>
-            <button type="button" class="search-filter-icon-btn search-topbar-toggle" id="search-topbar-toggle" aria-expanded="true" aria-controls="search-topbar-extra" aria-label="検索条件エリアを開閉">
+            <button type="button" class="search-filter-icon-btn search-topbar-toggle" id="search-topbar-toggle" aria-expanded="false" aria-controls="search-topbar-extra" aria-label="検索条件エリアを開閉">
                 <i class="fas fa-chevron-up" aria-hidden="true"></i>
             </button>
         </div>

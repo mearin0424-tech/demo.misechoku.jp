@@ -5,8 +5,8 @@
 @section('content')
 <div class="setting-page">
     <div class="setting-header">
-        <h1 class="setting-title">アカウント管理</h1>
-        <p class="setting-lead">メールアドレス変更・パスワード変更・LINE連携{{ request()->is('shop*') ? '・スタッフ管理' : '' }}・退会手続きをここで行います。</p>
+        {{-- タイトルはヘッダー中央に表示（統一方針）。ページ内はリード文のみ --}}
+        <p class="page-lead">メールアドレス変更・パスワード変更・LINE連携{{ request()->is('shop*') ? '・スタッフ管理' : '' }}・退会手続きをここで行います。</p>
     </div>
 
     {{-- スタッフ・アカウント管理（店舗のみ）：サイドメニューから本ページ内に集約 --}}

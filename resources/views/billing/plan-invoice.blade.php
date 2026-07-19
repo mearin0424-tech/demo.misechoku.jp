@@ -1,0 +1,93 @@
+{{--
+  Premiumプラン 請求書（PDF生成用・完全HTML）
+  $doc: SettingController::buildPlanDocData() / $printMode: dompdf 未導入時 true
+--}}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>請求書 {{ $doc['number'] }}</title>
+    <style>
+        body { margin: 0; padding: 0; color: #111827; font-family: "Helvetica Neue", Arial, "Hiragino Sans", "Meiryo", sans-serif; font-size: 11pt; }
+        .doc-wrap { max-width: 210mm; margin: 0 auto; padding: 16mm; box-sizing: border-box; }
+        .doc-header { border-bottom: 2px solid #111827; padding-bottom: 12pt; margin-bottom: 16pt; }
+        .doc-title { font-size: 22pt; font-weight: 800; letter-spacing: 0.3em; margin: 0 0 8pt; }
+        .doc-meta { font-size: 9pt; color: #4b5563; line-height: 1.6; }
+        .doc-issuer { text-align: right; font-size: 9pt; color: #4b5563; margin-top: 4pt; }
+        .doc-to-name { font-size: 14pt; font-weight: 800; margin: 0 0 4pt; }
+        .doc-to-addr { font-size: 9pt; color: #4b5563; line-height: 1.5; }
+        .doc-total { margin: 14pt 0; padding: 12pt 14pt; background: #eff6ff; border-radius: 8pt; }
+        .doc-total-label { font-size: 9pt; color: #1d4ed8; font-weight: 700; margin-bottom: 4pt; }
+        .doc-total-value { font-size: 18pt; font-weight: 800; }
+        .doc-table { width: 100%; border-collapse: collapse; margin-top: 8pt; font-size: 10pt; }
+        .doc-table th, .doc-table td { border: 1px solid #e5e7eb; padding: 10pt 12pt; text-align: left; vertical-align: top; }
+        .doc-table th { width: 30%; background: #f9fafb; color: #4b5563; font-weight: 700; }
+        .doc-bank { margin-top: 18pt; padding: 14pt 16pt; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8pt; }
+        .doc-bank-title { margin: 0 0 8pt; font-size: 12pt; font-weight: 800; }
+        .doc-bank-detail { font-size: 10pt; line-height: 1.7; color: #374151; }
+        .doc-note { margin-top: 14pt; font-size: 9pt; color: #6b7280; line-height: 1.7; }
+        .print-bar { position: fixed; top: 0; left: 0; right: 0; background: #111827; color: #fff; padding: 10px 16px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+        .print-bar button { background: #3b82f6; color: #fff; border: 0; border-radius: 6px; padding: 8px 18px; font-weight: 700; cursor: pointer; }
+        body.with-bar .doc-wrap { padding-top: 26mm; }
+        @media print { .print-bar { display: none; } body.with-bar .doc-wrap { padding-top: 16mm; } }
+    </style>
+</head>
+<body class="{{ !empty($printMode) ? 'with-bar' : '' }}">
+    @if(!empty($printMode))
+        <div class="print-bar">
+            <span>ブラウザの印刷から「PDFに保存」を選択してください</span>
+            <button type="button" onclick="window.print()">印刷 / PDF保存</button>
+        </div>
+    @endif
+    <div class="doc-wrap">
+        <div class="doc-header">
+            <h1 class="doc-title">請求書</h1>
+            <div class="doc-meta">
+                請求書番号: {{ $doc['number'] }}<br>
+                発行日: {{ optional($doc['issued_at'])->format('Y年n月j日') }}<br>
+                お支払い期限: {{ optional($doc['due_date'])->format('Y年n月j日') }}
+            </div>
+            <div class="doc-issuer">
+                {{ $doc['issuer_name'] }}
+                @if($doc['issuer_email'] !== '')<br>{{ $doc['issuer_email'] }}@endif
+            </div>
+        </div>
+
+        <div class="doc-to">
+            <p class="doc-to-name">{{ $doc['shop_name'] }} 御中</p>
+            <div class="doc-to-addr">
+                @if($doc['shop_address'] !== ''){{ $doc['shop_address'] }}<br>@endif
+                @if($doc['shop_email'] !== ''){{ $doc['shop_email'] }}@endif
+            </div>
+        </div>
+
+        <div class="doc-total">
+            <div class="doc-total-label">ご請求金額（税込）</div>
+            <div class="doc-total-value">¥{{ number_format($doc['amount']) }}</div>
+        </div>
+
+        <table class="doc-table">
+            <tr><th>品目</th><td>{{ $doc['plan_label'] }} 利用料</td></tr>
+            <tr><th>金額（税込）</th><td>¥{{ number_format($doc['amount']) }}</td></tr>
+            <tr><th>お支払い方法</th><td>銀行振込（振込手数料は貴店にてご負担ください）</td></tr>
+        </table>
+
+        @if(!empty($doc['admin_bank']))
+            <div class="doc-bank">
+                <p class="doc-bank-title">お振込先（プラン専用口座）</p>
+                <div class="doc-bank-detail">
+                    {{ $doc['admin_bank']['bank_name'] }} {{ $doc['admin_bank']['branch_name'] }}<br>
+                    口座番号: {{ $doc['admin_bank']['account_number'] }}<br>
+                    口座名義: {{ $doc['admin_bank']['account_name'] }}
+                </div>
+            </div>
+        @endif
+
+        <div class="doc-note">
+            ・運営にて入金を確認でき次第、Premium機能が有効になります。<br>
+            ・入金確認後、領収書をプラン設定画面からダウンロードいただけます。
+            @if($doc['footer_text'] !== '')<br>{{ $doc['footer_text'] }}@endif
+        </div>
+    </div>
+</body>
+</html>

@@ -160,6 +160,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/deposits/{deposit}/transfer-cast', [AdminDeposit::class, 'transferCast'])->name('deposits.cast-transfer.execute');
         });
 
+        // Premiumプラン入金管理（振込の目視確認 → 有効化）
+        Route::middleware('admin.permission:operations.deposits')->group(function () {
+            Route::get('/plans', [\App\Http\Controllers\Admin\PlanSubscriptionController::class, 'index'])->name('plans.index');
+            Route::post('/plans/{subscription}/confirm', [\App\Http\Controllers\Admin\PlanSubscriptionController::class, 'confirm'])->name('plans.confirm');
+            Route::get('/plans/{subscription}/invoice', [\App\Http\Controllers\Admin\PlanSubscriptionController::class, 'downloadInvoice'])->name('plans.invoice');
+            Route::get('/plans/{subscription}/receipt', [\App\Http\Controllers\Admin\PlanSubscriptionController::class, 'downloadReceipt'])->name('plans.receipt');
+        });
+
         // 螢ｲ荳顔ｮ｡逅・
         Route::get('/sales', [AdminSales::class, 'index'])
             ->middleware('admin.permission:analytics.sales')
@@ -402,6 +410,11 @@ Route::prefix('setting')->name('setting.')->group(function () {
 
 // 繝励Λ繝ｳ險ｭ螳夲ｼ亥ｺ苓・蟆ら畑繝ｻ繝・Δ逕ｨ・・
 Route::get('/subscription', [SettingController::class, 'subscription'])->name('subscription');
+// Premiumプラン：契約（入金待ち作成）→ 振込 → 運営の入金確認で有効化。請求書/領収書DL。
+Route::post('/subscription/contract', [SettingController::class, 'contractPlan'])->name('subscription.contract');
+Route::post('/subscription/cancel', [SettingController::class, 'cancelPlanContract'])->name('subscription.cancel');
+Route::get('/subscription/invoice', [SettingController::class, 'downloadPlanInvoice'])->name('subscription.invoice');
+Route::get('/subscription/receipt', [SettingController::class, 'downloadPlanReceipt'])->name('subscription.receipt');
 
 // 譛ｪ螳溯｣・判髱｢繝ｻ讖溯・逕ｨ・・aintenance-screen.png 繧定｡ｨ遉ｺ・・
 Route::get('/maintenance', function () {
@@ -508,6 +521,7 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
         Route::post('/word', [ShopMypage::class, 'updateWord'])->name('word');
         Route::post('/search-location', [ShopMypage::class, 'updateSearchLocation'])->name('search-location.update');
         Route::get('/management', [ShopRecruit::class, 'management'])->name('management');
+        Route::get('/viewers', [\App\Http\Controllers\Shops\ViewerController::class, 'index'])->name('viewers.index');
         Route::get('/reviews', [ShopReview::class, 'index'])->name('review.index');
         Route::get('/documents', [ShopMypage::class, 'documents'])->name('documents.index');
         Route::get('/documents/{type}', [ShopMypage::class, 'viewLicenseDocument'])->name('documents.show')->whereIn('type', ['business', 'entertainment']);

@@ -143,6 +143,18 @@ class UserTaskService
             ];
         }
 
+        // (c2) Premiumプランの振込待ち
+        $planPending = app(PlanSubscriptionService::class)->pendingFor($shopId);
+        if ($planPending !== null) {
+            $due = $planPending->payment_due_date ? $planPending->payment_due_date->format('n月j日') : '';
+            $tasks[] = [
+                'key'     => 'shop.plan_payment_pending',
+                'text'    => 'Premiumプランのお振込をお願いします' . ($due !== '' ? "（期限: {$due}）" : ''),
+                'url'     => $this->safeRoute('subscription'),
+                'urgency' => 'high',
+            ];
+        }
+
         // (d) 入金依頼の承認待ち（店舗にボールがある）
         $pendingApproval = $this->countShopPendingApproval($shopId);
         if ($pendingApproval > 0) {

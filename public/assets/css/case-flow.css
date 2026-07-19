@@ -42,23 +42,23 @@
     .case-actor--you { animation: none; }
 }
 
-/* 店舗の対応待ち */
+/* 店舗の対応待ち（掲載ページは常にライトテーマ想定の配色） */
 .case-actor--shop {
-    background: rgba(196, 181, 253, 0.12);
-    color: var(--gold-light, #c4b5fd);
-    border-color: rgba(196, 181, 253, 0.38);
+    background: rgba(124, 58, 237, 0.08);
+    color: #6d28d9;
+    border-color: rgba(124, 58, 237, 0.30);
 }
 /* 運営の対応待ち */
 .case-actor--admin {
-    background: rgba(125, 211, 252, 0.10);
-    color: #7dd3fc;
-    border-color: rgba(125, 211, 252, 0.35);
+    background: rgba(3, 105, 161, 0.08);
+    color: #0369a1;
+    border-color: rgba(3, 105, 161, 0.30);
 }
 /* キャストの対応待ち（店舗視点） */
 .case-actor--cast {
-    background: rgba(249, 168, 212, 0.10);
-    color: #f9a8d4;
-    border-color: rgba(249, 168, 212, 0.35);
+    background: rgba(190, 24, 93, 0.08);
+    color: #be185d;
+    border-color: rgba(190, 24, 93, 0.30);
 }
 /* 完了 */
 .case-actor--done {
@@ -95,7 +95,7 @@
 .case-now__icon {
     flex: 0 0 auto;
     margin-top: 1px;
-    color: var(--gold-light, #c4b5fd);
+    color: var(--gold-light, #8b5cf6);
     font-size: 0.78rem;
 }
 .case-now--action .case-now__icon { color: var(--accent-text, #f0a6c4); }

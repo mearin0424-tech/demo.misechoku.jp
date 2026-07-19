@@ -49,8 +49,9 @@
     <div id="pane-list" class="tab-pane {{ $activeTab === 'pane-list' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-list' ? 'display:none' : '' }}">
         {{-- 上部検索バー：スクロールしても固定（sticky）。
              探索拠点・詳細フィルター・指定中条件は開閉エリアに集約し、
-             閉じると検索窓1行だけになり結果一覧が広がる --}}
-        <div class="search-topbar" id="search-topbar">
+             閉じると検索窓1行だけになり結果一覧が広がる。
+             ※ デフォルトは「閉じ」状態で描画してちらつき防止（明示タップで開ける） --}}
+        <div class="search-topbar is-collapsed" id="search-topbar">
             <div class="search-filter-box">
                 @include($partsView . '.filter')
             </div>
@@ -133,28 +134,17 @@
 <script src="{{ asset('assets/js/search-detail.js') }}?v=20260712-form-unify"></script>
 <script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260719-keep-only"></script>
 <script>
-{{-- 上部検索バーの開閉（状態は localStorage に保持） --}}
+{{-- 上部検索バーの開閉：デフォルトは閉じ（HTML初期状態）→ タップで開閉するだけ。
+     localStorage 保存はやめて、SEARCH を開くたびに常に閉じた状態からスタートさせる --}}
 (function () {
     var bar = document.getElementById('search-topbar');
-    var extra = document.getElementById('search-topbar-extra');
     var btn = document.getElementById('search-topbar-toggle');
-    if (!bar || !extra || !btn) return;
-
-    var KEY = 'search-topbar-collapsed';
-
-    function apply(collapsed) {
-        bar.classList.toggle('is-collapsed', collapsed);
-        btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-    }
-
-    var saved = false;
-    try { saved = localStorage.getItem(KEY) === '1'; } catch (e) {}
-    apply(saved);
+    if (!bar || !btn) return;
 
     btn.addEventListener('click', function () {
         var collapsed = !bar.classList.contains('is-collapsed');
-        apply(collapsed);
-        try { localStorage.setItem(KEY, collapsed ? '1' : '0'); } catch (e) {}
+        bar.classList.toggle('is-collapsed', collapsed);
+        btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
     });
 })();
 </script>

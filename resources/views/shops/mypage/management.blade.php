@@ -6,16 +6,15 @@
 <link rel="stylesheet" href="{{ asset('assets/css/recruitment.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/management.css') }}?v=20260508">
-<link rel="stylesheet" href="{{ asset('assets/css/case-flow.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/case-flow.css') }}?v=20260719-case-light">
 <style>
     /* ========================================================
        採用・入金 統合タイムライン（店舗側）
        ======================================================== */
     .shop-management-shell { padding: 0 16px 16px; }
-    .shop-management-shell .mypage-page-title {
-        font-family: var(--font-sans);
-        font-size: 1.2rem; font-weight: 700; color: #e6dffc; margin: 16px 0 14px;
-    }
+
+    /* 固定ヘッダー分のアンカー余白 */
+    .mypage-stage-heading, .case-card { scroll-margin-top: calc(var(--header-height, 60px) + 12px); }
 
     .case-summary {
         display: grid;
@@ -24,32 +23,44 @@
         margin-bottom: 16px;
     }
     .case-summary-card {
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(168, 85, 247, 0.2);
+        background: #ffffff;
+        border: 1px solid rgba(124, 58, 237, 0.20);
         border-radius: 12px;
         padding: 10px 12px;
         text-align: center;
+        cursor: default;
+        font: inherit;
+        width: 100%;
     }
-    .case-summary-card__label { display: block; font-size: 0.66rem; color: rgba(196, 181, 253, 0.7); letter-spacing: 0.06em; font-weight: 700; margin-bottom: 4px; }
-    .case-summary-card__value { display: block; font-size: 1.4rem; font-weight: 800; color: #c4b5fd; font-variant-numeric: tabular-nums; line-height: 1.1; }
-    .case-summary-card.is-action { border-color: rgba(168, 85, 247, 0.65); background: rgba(168, 85, 247, 0.10); }
-    .case-summary-card.is-action .case-summary-card__value { color: #c4b5fd; }
+    button.case-summary-card[data-scroll-target] { cursor: pointer; transition: transform .12s, box-shadow .15s; }
+    button.case-summary-card[data-scroll-target]:active { transform: scale(.96); }
+    .case-summary-card__label { display: block; font-size: 0.66rem; color: #6d6685; letter-spacing: 0.06em; font-weight: 700; margin-bottom: 4px; }
+    .case-summary-card__value { display: block; font-size: 1.4rem; font-weight: 800; color: #6d28d9; font-variant-numeric: tabular-nums; line-height: 1.1; }
+    /* 要対応 > 0 は暖色で最優先の注意喚起 */
+    .case-summary-card.is-action { border-color: rgba(217, 119, 6, 0.55); background: rgba(217, 119, 6, 0.07); }
+    .case-summary-card.is-action .case-summary-card__label { color: #b45309; }
+    .case-summary-card.is-action .case-summary-card__value { color: #b45309; }
+    .case-summary-card__hint {
+        display: block; font-size: 0.58rem; color: rgba(109, 102, 133, 0.75);
+        margin-top: 3px; font-weight: 600;
+    }
+    .case-summary-card.is-action .case-summary-card__hint { color: rgba(180, 83, 9, 0.8); }
 
     .case-card {
-        background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+        background: #ffffff;
         border: 1px solid var(--color-border);
         border-radius: 14px;
         padding: 12px;
         margin-bottom: 10px;
         position: relative;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+        box-shadow: 0 2px 10px rgba(76, 29, 149, 0.08);
     }
     .case-card.is-actionable {
         border-color: var(--color-border-strong);
-        background: linear-gradient(180deg, rgba(168, 85, 247, 0.10), rgba(168, 85, 247, 0.03));
-        box-shadow: 0 2px 14px rgba(168, 85, 247, 0.16), inset 0 1px 0 rgba(168, 85, 247, 0.08);
+        background: linear-gradient(180deg, rgba(168, 85, 247, 0.06), #ffffff 40%);
+        box-shadow: 0 2px 14px rgba(124, 58, 237, 0.18);
     }
-    .case-card.is-completed { opacity: 0.78; }
+    .case-card.is-completed { opacity: 0.82; }
 
     .case-card__head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
     .case-card__icon {
@@ -88,14 +99,14 @@
         width: 18px; height: 18px; border-radius: 50%;
         display: inline-flex; align-items: center; justify-content: center;
         font-size: 0.6rem; font-weight: 800;
-        background: rgba(255,255,255,0.04); border: 2px solid rgba(168, 85, 247, 0.28);
+        background: #ffffff; border: 2px solid rgba(124, 58, 237, 0.28);
         color: var(--color-text-muted); z-index: 1;
     }
     .case-pipeline__step.is-done .case-pipeline__bullet {
-        background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: #1a1206; border-color: var(--gold);
+        background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: #ffffff; border-color: var(--gold);
     }
     .case-pipeline__step.is-current .case-pipeline__bullet {
-        background: rgba(168, 85, 247, 0.22); color: var(--gold-light); border-color: var(--gold);
+        background: #ffffff; color: var(--gold-deep, #6d28d9); border-color: var(--gold);
         animation: case-pulse 1.6s ease-in-out infinite;
         box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.18);
     }
@@ -103,7 +114,7 @@
         0%, 100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.45); }
         50% { box-shadow: 0 0 0 5px rgba(168, 85, 247, 0); }
     }
-    .case-pipeline__label { display: block; font-size: 0.58rem; color: var(--color-text-muted); line-height: 1.2; }
+    .case-pipeline__label { display: block; font-size: 0.6rem; color: var(--color-text-muted); line-height: 1.2; }
     .case-pipeline__step.is-done .case-pipeline__label,
     .case-pipeline__step.is-current .case-pipeline__label { color: var(--color-text-header); font-weight: 700; }
 
@@ -112,7 +123,7 @@
         margin: 8px 0 2px;
     }
     .case-card__highlight {
-        background: rgba(0,0,0,0.18); border-radius: 8px; padding: 6px 8px;
+        background: rgba(124, 58, 237, 0.06); border-radius: 8px; padding: 6px 8px;
         font-size: 0.68rem; color: var(--color-text-muted);
     }
     .case-card__highlight strong {
@@ -218,22 +229,20 @@
     .management-summary-note {
         margin: 12px 0; padding: 10px 14px;
         border-radius: 10px;
-        background: rgba(168, 85, 247, 0.10);
-        border: 1px solid rgba(168, 85, 247, 0.35);
-        color: #c4b5fd; font-size: 0.82rem; line-height: 1.5;
+        background: rgba(124, 58, 237, 0.08);
+        border: 1px solid rgba(124, 58, 237, 0.30);
+        color: #6d28d9; font-size: 0.82rem; line-height: 1.5;
     }
 
-    /* フローティング CTA */
+    /* フローティング CTA（ライト画面用の白バー） */
     .deposit-cta-bar {
         position: fixed; left: 50%; transform: translateX(-50%);
         bottom: var(--footer-height, 60px); z-index: 90;
         width: min(100vw, var(--max-content-width, 430px)); max-width: 100%;
         padding: 10px var(--content-padding-x, 16px) calc(10px + env(safe-area-inset-bottom, 0));
-        background: rgba(10, 10, 10, 0.96);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 -8px 24px rgba(0,0,0,0.45);
+        background: rgba(255, 255, 255, 0.97);
+        border-top: 1px solid var(--color-line, #e6e0f3);
+        box-shadow: 0 -8px 24px rgba(76, 29, 149, 0.15);
         animation: deposit-cta-slide-up 0.3s ease;
     }
     @keyframes deposit-cta-slide-up {
@@ -242,10 +251,10 @@
     }
     .deposit-cta-bar__inner { display: flex; align-items: center; gap: 12px; }
     .deposit-cta-bar__info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-    .deposit-cta-bar__amount { display: inline-flex; align-items: baseline; gap: 4px; color: #c4b5fd; font-weight: 800; }
-    .deposit-cta-bar__amount strong { font-size: 1.05rem; font-weight: 900; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.4); overflow: hidden; text-overflow: ellipsis; max-width: 50vw; white-space: nowrap; }
-    .deposit-cta-bar__amount i { font-size: 0.9rem; color: #a78bfa; }
-    .deposit-cta-bar__label { font-size: 0.7rem; color: rgba(196, 181, 253, 0.78); font-weight: 600; }
+    .deposit-cta-bar__amount { display: inline-flex; align-items: baseline; gap: 4px; color: #6d28d9; font-weight: 800; }
+    .deposit-cta-bar__amount strong { font-size: 1.05rem; font-weight: 900; color: #241f33; overflow: hidden; text-overflow: ellipsis; max-width: 50vw; white-space: nowrap; }
+    .deposit-cta-bar__amount i { font-size: 0.9rem; color: #7c3aed; }
+    .deposit-cta-bar__label { font-size: 0.7rem; color: #5f5876; font-weight: 600; }
     .deposit-cta-bar__btn {
         flex: 0 0 auto; margin-left: auto; padding: 12px 18px; border-radius: 999px;
         background: linear-gradient(135deg, #c4b5fd, #a78bfa 48%, #7c3aed);
@@ -256,38 +265,38 @@
     .deposit-cta-bar__btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(168, 85, 247, 0.55); }
     body:has(.deposit-cta-bar) .shop-management-shell { padding-bottom: calc(var(--footer-height, 60px) + 80px) !important; }
 
-    /* モーダル（承認・入金処理共通） */
-    .shop-action-modal { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; background: rgba(0, 0, 0, 0.78); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); padding: 0; }
+    /* モーダル（承認・入金処理共通）：ライト画面に追従して白パネル */
+    .shop-action-modal { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; background: rgba(20, 10, 35, 0.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); padding: 0; }
     .shop-action-modal[hidden] { display: none; }
     @media (min-width: 640px) { .shop-action-modal { justify-content: center; } }
     .shop-action-modal-backdrop { position: absolute; inset: 0; cursor: pointer; }
-    .shop-action-modal-panel { position: relative; width: 100%; max-width: min(28rem, calc(100vw - 2rem)); max-height: 90vh; background: #0a0a0a; border-top-left-radius: 1.5rem; border-top-right-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); overflow: hidden; box-sizing: border-box; }
-    .shop-action-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); background: #141414; }
-    .shop-action-modal-title { margin: 0; font-size: 1.05rem; font-weight: 700; color: #d670a2; letter-spacing: 0.04em; }
-    .shop-action-modal-close { width: 2.5rem; height: 2.5rem; border: none; background: transparent; color: #a0a0a0; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .shop-action-modal-panel { position: relative; width: 100%; max-width: min(28rem, calc(100vw - 2rem)); max-height: 90vh; background: #ffffff; border-top-left-radius: 1.5rem; border-top-right-radius: 1.5rem; border: 1px solid rgba(124, 58, 237, 0.30); display: flex; flex-direction: column; box-shadow: 0 25px 60px -12px rgba(76, 29, 149, 0.35); overflow: hidden; box-sizing: border-box; }
+    .shop-action-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid rgba(124, 58, 237, 0.20); background: #f7f4fc; }
+    .shop-action-modal-title { margin: 0; font-size: 1.05rem; font-weight: 700; color: #241f33; letter-spacing: 0.04em; }
+    .shop-action-modal-close { width: 2.5rem; height: 2.5rem; border: none; background: transparent; color: #6d6685; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .shop-action-modal-body { overflow-y: auto; overflow-x: hidden; padding: 1.5rem; min-width: 0; flex: 1 1 auto; box-sizing: border-box; }
-    .shop-action-modal-note { font-size: 0.78rem; line-height: 1.7; color: #a0a0a0; margin: 0 0 1.2rem; padding: 0.9rem; background: #1a1a1a; border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.08); }
+    .shop-action-modal-note { font-size: 0.78rem; line-height: 1.7; color: #5f5876; margin: 0 0 1.2rem; padding: 0.9rem; background: #f7f4fc; border-radius: 0.75rem; border: 1px solid rgba(124, 58, 237, 0.16); }
     .shop-action-modal-checklist { display: grid; gap: 10px; margin-bottom: 1rem; }
     .shop-action-modal-check {
         display: flex; align-items: flex-start; gap: 10px;
-        font-size: 0.86rem; color: #f7eded;
+        font-size: 0.86rem; color: #241f33;
         cursor: pointer; padding: 10px 12px; border-radius: 10px;
-        background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+        background: #ffffff; border: 1px solid rgba(124, 58, 237, 0.16);
         line-height: 1.5;
     }
-    .shop-action-modal-check:hover { background: rgba(168, 85, 247, 0.06); border-color: rgba(168, 85, 247, 0.22); }
-    .shop-action-modal-check input[type="checkbox"] { flex: 0 0 auto; margin-top: 2px; accent-color: #a78bfa; width: 18px; height: 18px; cursor: pointer; }
+    .shop-action-modal-check:hover { background: rgba(124, 58, 237, 0.05); border-color: rgba(124, 58, 237, 0.30); }
+    .shop-action-modal-check input[type="checkbox"] { flex: 0 0 auto; margin-top: 2px; accent-color: #7c3aed; width: 18px; height: 18px; cursor: pointer; }
     .shop-action-modal-check span { flex: 1; cursor: pointer; }
-    .shop-action-modal-check:has(input:checked) { background: rgba(168, 85, 247, 0.1); border-color: rgba(168, 85, 247, 0.45); }
+    .shop-action-modal-check:has(input:checked) { background: rgba(124, 58, 237, 0.08); border-color: rgba(124, 58, 237, 0.50); }
     .shop-action-modal-field { margin-bottom: 1rem; }
-    .shop-action-modal-label { display: block; font-size: 0.74rem; font-weight: 600; color: #a0a0a0; margin-bottom: 6px; }
-    .shop-action-modal-input { width: 100%; padding: 12px 14px; border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.12); background: #1a1a1a; color: #fff; font-size: 0.92rem; box-sizing: border-box; }
-    .shop-action-modal-input:focus { outline: none; border-color: rgba(168, 85, 247, 0.55); }
-    .shop-action-modal-error { color: #fca5a5; font-size: 0.82rem; line-height: 1.5; display: none; margin: 0 0 0.6rem; }
+    .shop-action-modal-label { display: block; font-size: 0.74rem; font-weight: 600; color: #5f5876; margin-bottom: 6px; }
+    .shop-action-modal-input { width: 100%; padding: 12px 14px; border-radius: 0.75rem; border: 1px solid rgba(124, 58, 237, 0.30); background: #ffffff; color: #241f33; font-size: 0.92rem; box-sizing: border-box; }
+    .shop-action-modal-input:focus { outline: none; border-color: rgba(124, 58, 237, 0.60); }
+    .shop-action-modal-error { color: #dc2626; font-size: 0.82rem; line-height: 1.5; display: none; margin: 0 0 0.6rem; }
     .shop-action-modal-error.show { display: block; }
-    .shop-action-modal-footer { display: flex; gap: 0.75rem; padding: 1.1rem 1.5rem; background: #141414; border-top: 1px solid rgba(255,255,255,0.08); }
+    .shop-action-modal-footer { display: flex; gap: 0.75rem; padding: 1.1rem 1.5rem; background: #f7f4fc; border-top: 1px solid rgba(124, 58, 237, 0.20); }
     .shop-action-modal-btn { flex: 1; padding: 13px 1rem; border-radius: 0.75rem; font-size: 0.9rem; font-weight: 700; cursor: pointer; border: 0; }
-    .shop-action-modal-btn-cancel { background: transparent; border: 1px solid rgba(255,255,255,0.12); color: #d4d4d4; }
+    .shop-action-modal-btn-cancel { background: transparent; border: 1px solid rgba(124, 58, 237, 0.25); color: #5f5876; }
     .shop-action-modal-btn-submit { background: linear-gradient(135deg, #c4b5fd, #a78bfa 48%, #7c3aed); color: #1a0814; box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35); }
     .shop-action-modal-btn-submit:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
 </style>
@@ -295,7 +304,8 @@
 
 @section('content')
 <div class="shop-management-shell animate-fadeIn">
-    <h1 class="mypage-page-title">採用・入金管理</h1>
+    {{-- タイトルはヘッダー中央に表示（統一方針）。ページ内はリード文のみ --}}
+    <p class="page-lead">採用が確定したキャストのボーナス申請から、入金・振込完了までの進み具合をここで確認・操作できます。</p>
 
     @php
         $hiredCases = $hiredCases ?? [];
@@ -307,20 +317,26 @@
         $primaryActionable = $activeCases->filter(fn ($c) => !empty($c['actionable']))->first();
     @endphp
 
-    {{-- サマリー --}}
+    {{-- サマリー（タップで該当セクションへ移動） --}}
     <div class="case-summary">
-        <div class="case-summary-card {{ $actionableCount > 0 ? 'is-action' : '' }}">
+        <button type="button" class="case-summary-card {{ $actionableCount > 0 ? 'is-action' : '' }}"
+                @if($actionableCount > 0) data-scroll-target=".case-card.is-actionable" @endif>
             <span class="case-summary-card__label">要対応</span>
             <span class="case-summary-card__value">{{ $actionableCount }}</span>
-        </div>
-        <div class="case-summary-card">
+            @if($actionableCount > 0)
+                <span class="case-summary-card__hint">タップで移動</span>
+            @endif
+        </button>
+        <button type="button" class="case-summary-card"
+                @if($activeCases->isNotEmpty()) data-scroll-target="#section-active-cases" @endif>
             <span class="case-summary-card__label">進行中</span>
             <span class="case-summary-card__value">{{ max($activeCases->count() - $actionableCount, 0) }}</span>
-        </div>
-        <div class="case-summary-card">
+        </button>
+        <button type="button" class="case-summary-card"
+                @if($completedCases->isNotEmpty()) data-scroll-target="#section-completed-cases" @endif>
             <span class="case-summary-card__label">完了</span>
             <span class="case-summary-card__value">{{ $completedCases->count() }}</span>
-        </div>
+        </button>
     </div>
 
     @if(session('status'))
@@ -331,14 +347,14 @@
     @endif
 
     @if($activeCases->isNotEmpty())
-        <h2 class="mypage-stage-heading"><i class="fas fa-fire"></i> 進行中の案件</h2>
+        <h2 class="mypage-stage-heading" id="section-active-cases"><i class="fas fa-fire"></i> 進行中の案件</h2>
         @foreach($activeCases as $case)
             @include('shops.mypage._case_card', ['case' => $case])
         @endforeach
     @endif
 
     @if($completedCases->isNotEmpty())
-        <h2 class="mypage-stage-heading"><i class="fas fa-check-circle"></i> 完了した案件</h2>
+        <h2 class="mypage-stage-heading" id="section-completed-cases"><i class="fas fa-check-circle"></i> 完了した案件</h2>
         @foreach($completedCases as $case)
             @include('shops.mypage._case_card', ['case' => $case])
         @endforeach
@@ -503,6 +519,14 @@
 document.addEventListener('DOMContentLoaded', function () {
     var approveModal = document.getElementById('shop-approve-modal');
     var payModal = document.getElementById('shop-pay-modal');
+
+    // サマリーカード → 該当セクションへスクロール
+    document.querySelectorAll('.case-summary-card[data-scroll-target]').forEach(function (card) {
+        card.addEventListener('click', function () {
+            var target = document.querySelector(card.getAttribute('data-scroll-target'));
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
 
     function openModal(el) { if (el) { el.removeAttribute('hidden'); document.body.style.overflow = 'hidden'; } }
     function closeModal(el) { if (el) { el.setAttribute('hidden', ''); document.body.style.overflow = ''; } }

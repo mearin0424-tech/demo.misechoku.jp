@@ -4,12 +4,18 @@ namespace App\Http\Controllers\Common;
 
 use App\Http\Controllers\Controller;
 use App\Models\CastProvider;
+use App\Models\ShopPlanSubscription;
+use App\Services\BillingManagementService;
+use App\Services\InvoiceTemplateSettingsService;
 use App\Services\NotificationPreferenceService;
+use App\Services\PlanSubscriptionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 
@@ -242,9 +248,179 @@ class SettingController extends Controller
         return redirect()->route('login.demo')->with('message', '退会手続きが完了しました。ご利用ありがとうございました。');
     }
 
-    public function subscription()
+    /* ============================================================
+       プラン（Premium）
+       契約 → 振込案内 → 運営の入金確認で有効化。請求書/領収書DL対応。
+       ============================================================ */
+
+    public function subscription(PlanSubscriptionService $planService, BillingManagementService $billing)
     {
-        return view('common.setting.subscription');
+        $shopId = $this->currentShopId();
+
+        $activeSub = $shopId ? $planService->activeFor($shopId) : null;
+        $pendingSub = $shopId ? $planService->pendingFor($shopId) : null;
+
+        return view('common.setting.subscription', [
+            'isShop' => $shopId !== null,
+            'activeSub' => $activeSub,
+            'pendingSub' => $pendingSub,
+            'prices' => PlanSubscriptionService::PRICES,
+            'scoutLimitFree' => PlanSubscriptionService::SCOUT_LIMIT_FREE,
+            'scoutLimitPremium' => PlanSubscriptionService::SCOUT_LIMIT_PREMIUM,
+            'adminBank' => $pendingSub ? $billing->getAdminBankAccount() : null,
+        ]);
+    }
+
+    /** ①プラン契約：入金待ちレコード作成 + 振込先/金額/期限を通知（メール/画面） */
+    public function contractPlan(Request $request, PlanSubscriptionService $planService, BillingManagementService $billing): RedirectResponse
+    {
+        $shopId = $this->currentShopId();
+        if ($shopId === null) {
+            return redirect()->route('subscription')->withErrors(['店舗アカウントでログインしてください。']);
+        }
+
+        $data = $request->validate([
+            'billing_cycle' => ['required', Rule::in([ShopPlanSubscription::CYCLE_MONTHLY, ShopPlanSubscription::CYCLE_YEARLY])],
+        ]);
+
+        $sub = $planService->contract($shopId, $data['billing_cycle']);
+
+        // メール通知（デモ環境でメール未設定でも画面遷移は止めない）
+        try {
+            $email = (string) (auth()->guard('shop')->user()->email ?? '');
+            $bank = $billing->getAdminBankAccount();
+            if ($email !== '' && $bank !== null) {
+                $body = "ミセチョク Premiumプランのお申し込みを受け付けました。\n\n"
+                    . "請求書番号: {$sub->invoice_number}\n"
+                    . 'お支払い金額: ¥' . number_format((int) $sub->amount) . "（{$sub->cycleLabel()}）\n"
+                    . '振込期限: ' . optional($sub->payment_due_date)->format('Y年n月j日') . "\n\n"
+                    . "【お振込先（プラン専用口座）】\n"
+                    . "{$bank->bank_name} {$bank->branch_name}\n"
+                    . "口座番号: {$bank->account_number}\n"
+                    . "口座名義: {$bank->account_name}\n\n"
+                    . "運営にて入金を確認でき次第、Premium機能が有効になります。\n"
+                    . '請求書はプラン設定画面からダウンロードできます。';
+                Mail::raw($body, function ($m) use ($email) {
+                    $m->to($email)->subject('【ミセチョク】Premiumプラン お振込のご案内');
+                });
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Premium plan mail failed: ' . $e->getMessage());
+        }
+
+        return redirect()->route('subscription')
+            ->with('message', 'Premiumプランのお申し込みを受け付けました。振込先・金額・期限をご確認のうえお振込ください。入金確認後に機能が有効になります。');
+    }
+
+    /** 入金前のキャンセル */
+    public function cancelPlanContract(PlanSubscriptionService $planService): RedirectResponse
+    {
+        $shopId = $this->currentShopId();
+        $pending = $shopId ? $planService->pendingFor($shopId) : null;
+        if ($pending) {
+            $planService->cancelPending($pending);
+            return redirect()->route('subscription')->with('message', 'お申し込みをキャンセルしました。');
+        }
+        return redirect()->route('subscription');
+    }
+
+    /** 請求書ダウンロード（契約後いつでも） */
+    public function downloadPlanInvoice(PlanSubscriptionService $planService, BillingManagementService $billing)
+    {
+        $shopId = $this->currentShopId();
+        $sub = $shopId ? ($planService->pendingFor($shopId) ?? $planService->activeFor($shopId)) : null;
+        if ($sub === null) {
+            return redirect()->route('subscription')->withErrors(['発行できる請求書がありません。']);
+        }
+
+        return $this->planDocumentResponse('invoice', $sub, $billing);
+    }
+
+    /** 領収書ダウンロード（入金確認後） */
+    public function downloadPlanReceipt(PlanSubscriptionService $planService, BillingManagementService $billing)
+    {
+        $shopId = $this->currentShopId();
+        $sub = null;
+        if ($shopId !== null && Schema::hasTable('shop_plan_subscriptions')) {
+            $sub = ShopPlanSubscription::query()
+                ->where('shop_id', $shopId)
+                ->whereNotNull('paid_confirmed_at')
+                ->orderByDesc('paid_confirmed_at')
+                ->first();
+        }
+        if ($sub === null) {
+            return redirect()->route('subscription')->withErrors(['入金確認後に領収書を発行できます。']);
+        }
+
+        return $this->planDocumentResponse('receipt', $sub, $billing);
+    }
+
+    /**
+     * プラン請求書/領収書のPDFレスポンス（dompdf未導入時は印刷用HTML）。
+     * 管理画面からも同じビュー・データ構造で発行する。
+     */
+    public static function buildPlanDocData(string $type, ShopPlanSubscription $sub, BillingManagementService $billing): array
+    {
+        $profile = DB::table('shop_profiles')->where('shop_id', $sub->shop_id)->first();
+        $shop = DB::table('shops')->where('id', $sub->shop_id)->first();
+        $template = app(InvoiceTemplateSettingsService::class)->getForInvoice();
+        $bank = $billing->getAdminBankAccount();
+
+        $address = trim(implode(' ', array_filter([
+            $profile->zip ?? null ? '〒' . $profile->zip : null,
+            $profile->pref ?? null,
+            $profile->city ?? null,
+            $profile->addr ?? null,
+            $profile->building ?? null,
+        ])));
+
+        return [
+            'type' => $type,
+            'number' => $type === 'receipt' ? (string) $sub->receipt_number : (string) $sub->invoice_number,
+            'issued_at' => $type === 'receipt' ? $sub->paid_confirmed_at : $sub->invoice_issued_at,
+            'due_date' => $sub->payment_due_date,
+            'shop_name' => (string) ($profile->shop_name ?? $sub->shop_id),
+            'shop_email' => (string) ($shop->email ?? ''),
+            'shop_address' => $address,
+            'plan_label' => 'Premiumプラン（' . $sub->cycleLabel() . '）',
+            'period_label' => ($sub->starts_at && $sub->ends_at)
+                ? $sub->starts_at->format('Y/m/d') . ' 〜 ' . $sub->ends_at->format('Y/m/d')
+                : '',
+            'amount' => (int) $sub->amount,
+            'paid_at' => $sub->paid_confirmed_at,
+            'issuer_name' => (string) ($template['issuer_name'] ?? 'ミセチョク運営事務局'),
+            'issuer_email' => (string) ($template['issuer_email'] ?? ''),
+            'footer_text' => (string) ($template['footer_text'] ?? ''),
+            'admin_bank' => $bank ? [
+                'bank_name' => $bank->bank_name,
+                'branch_name' => $bank->branch_name,
+                'account_number' => $bank->account_number,
+                'account_name' => $bank->account_name,
+            ] : null,
+        ];
+    }
+
+    private function planDocumentResponse(string $type, ShopPlanSubscription $sub, BillingManagementService $billing)
+    {
+        $doc = self::buildPlanDocData($type, $sub, $billing);
+        $view = $type === 'receipt' ? 'billing.plan-receipt' : 'billing.plan-invoice';
+        $filename = ($type === 'receipt' ? '領収書_' : '請求書_') . $doc['number'] . '.pdf';
+
+        if (!class_exists(\Barryvdh\DomPDF\Facade\Pdf::class)) {
+            // 印刷用HTML（ブラウザの印刷 → PDF保存）
+            return view($view, ['doc' => $doc, 'printMode' => true]);
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView($view, ['doc' => $doc, 'printMode' => false]);
+        $pdf->setPaper('a4', 'portrait');
+
+        return $pdf->download($filename);
+    }
+
+    private function currentShopId(): ?string
+    {
+        $manager = auth()->guard('shop')->user();
+        return ($manager && !empty($manager->shop_id)) ? (string) $manager->shop_id : null;
     }
 
     private function resolveActor(): array

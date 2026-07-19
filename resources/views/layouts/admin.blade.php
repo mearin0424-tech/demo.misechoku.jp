@@ -8,6 +8,7 @@
             'items' => [
                 ['label' => '請求書発行', 'route' => 'admin.invoices.index', 'icon' => 'fa-file-invoice', 'badge' => null, 'badge_class' => '', 'permission' => 'operations.invoices'],
                 ['label' => '入金確認・振込', 'route' => 'admin.deposits.index', 'icon' => 'fa-money-bill-wave', 'badge' => null, 'badge_class' => '', 'permission' => 'operations.deposits'],
+                ['label' => 'プラン入金管理', 'route' => 'admin.plans.index', 'icon' => 'fa-crown', 'badge' => null, 'badge_class' => '', 'permission' => 'operations.deposits'],
                 ['label' => '身分証・書類審査', 'route' => 'admin.verification.index', 'icon' => 'fa-id-card', 'badge' => null, 'badge_class' => '', 'permission' => 'operations.verification'],
                 ['label' => '問合せ対応', 'route' => 'admin.inquiries.index', 'icon' => 'fa-triangle-exclamation', 'badge' => null, 'badge_class' => '', 'permission' => 'operations.inquiries'],
             ],
@@ -86,6 +87,7 @@
         'admin.dashboard' => 'ダッシュボード',
         'admin.invoices.*' => 'オペレーション',
         'admin.deposits.*' => 'オペレーション',
+        'admin.plans.*' => 'オペレーション',
         'admin.verification.*' => 'オペレーション',
         'admin.tasks.*' => 'オペレーション',
         'admin.inquiries.*' => 'オペレーション',

@@ -23,12 +23,9 @@
 <div class="support-htu-page">
     {{-- ヘッダー --}}
     <header class="support-htu-header">
-        <h1 class="support-htu-title">
-            <i class="fas fa-book-open" aria-hidden="true"></i>
-            ご利用ガイド
-            <span class="support-htu-badge">{{ $roleLabel }}向け</span>
-        </h1>
-        <p class="support-htu-lead">
+        {{-- タイトルはヘッダー中央に表示（統一方針）。ページ内はバッジ＋リード文のみ --}}
+        <p class="support-htu-badge-row"><span class="support-htu-badge">{{ $roleLabel }}向け</span></p>
+        <p class="page-lead">
             初めてミセチョクを利用する{{ $roleLabel }}の方向けに、基本的な使い方をステップ形式でまとめました。
         </p>
     </header>
@@ -159,6 +156,7 @@
 
 /* ヘッダー */
 .support-htu-header { margin-bottom: 22px; }
+.support-htu-badge-row { margin: 14px 0 0; }
 .support-htu-title {
     font-family: var(--font-sans);
     font-size: 1.25rem;

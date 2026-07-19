@@ -256,8 +256,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     errorMsg.querySelector('.msg-status').innerHTML = '<i class="fas fa-exclamation-circle text-red-500"></i>';
                     errorMsg.querySelector('.msg-status').classList.remove('sending');
                 }
-                // サーバ側 NG 検出（422）の場合は本文を復元して警告表示
                 const msg = String((error && error.message) || '');
+                // スカウト送信上限（429）：本文を復元して案内を表示
+                if (msg.indexOf('スカウト送信上限') !== -1) {
+                    if (errorMsg) errorMsg.remove();
+                    messageInput.value = content;
+                    autoResize();
+                    (window.appToast || window.alert)(msg, 'error');
+                    isSubmitting = false;
+                    submitBtn.disabled = false;
+                    return;
+                }
+                // サーバ側 NG 検出（422）の場合は本文を復元して警告表示
                 if (msg.indexOf('使用できない表現') !== -1) {
                     if (errorMsg) errorMsg.remove();
                     messageInput.value = content;

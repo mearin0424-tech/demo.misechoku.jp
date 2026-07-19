@@ -9,8 +9,8 @@
 @section('content')
 <div class="support-column-page support-notice-page">
     <div class="support-column-header">
-        <h1 class="support-column-title">お知らせ</h1>
-        <p class="support-column-lead">
+        {{-- タイトルはヘッダー中央に表示（統一方針）。ページ内はリード文のみ --}}
+        <p class="page-lead">
             運営からのお知らせです。
             @if($isGuest)
                 <br>ログインすると、キャスト・店舗向けの内容をそれぞれのアプリ内からも閲覧できます。

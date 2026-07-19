@@ -11,8 +11,8 @@
 @section('content')
 <div class="support-column-page">
     <div class="support-column-header">
-        <h1 class="support-column-title">お役立ちコラム</h1>
-        <p class="support-column-lead">
+        {{-- タイトルはヘッダー中央に表示（統一方針）。ページ内はリード文のみ --}}
+        <p class="page-lead">
             ミセチョクの使い方や活用のヒントをまとめたコラムです。
             @if($isGuest)
                 <br>ログインすると、キャスト・店舗向けの記事をそれぞれのアプリ内からも閲覧できます。

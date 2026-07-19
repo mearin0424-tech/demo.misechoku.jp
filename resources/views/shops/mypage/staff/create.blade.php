@@ -134,10 +134,8 @@
 <div class="content-wrapper animate-fadeIn">
     <section class="mypage-area">
         <div class="staff-form-shell">
-            <header class="mypage-page-head">
-                <h1 class="mypage-page-head__title"><i class="fas fa-user-plus"></i>スタッフを追加</h1>
-                <p class="mypage-page-head__desc">新しい店舗ログインアカウントを発行します。メールアドレスとパスワードを、追加するスタッフ本人に共有してください。</p>
-            </header>
+            {{-- タイトルはヘッダー中央に表示（統一方針）。ページ内はリード文のみ --}}
+            <p class="page-lead">新しい店舗ログインアカウントを発行します。メールアドレスとパスワードを、追加するスタッフ本人に共有してください。</p>
 
             @if ($errors->has('shop') || $errors->has('manager_limit'))
                 <div class="staff-form-flash--error">

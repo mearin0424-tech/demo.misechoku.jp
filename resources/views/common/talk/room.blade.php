@@ -67,10 +67,10 @@
     .hired-wage-field-wrap.is-visible {
         display: block;
     }
-    /* ===== クイック定型文パネル（入力欄の下・横スクロールチップ） ===== */
+    /* ===== クイック定型文パネル：カードグリッド版 ===== */
     .quick-reply-panel {
         padding: 8px 0 2px;
-        max-height: 150px;
+        max-height: 240px;
         opacity: 1;
         overflow: hidden;
         transition: max-height 0.2s ease, opacity 0.15s ease, padding 0.2s ease;
@@ -81,15 +81,23 @@
         padding: 0;
         pointer-events: none;
     }
-    .quick-reply-panel__label {
+    .quick-reply-panel__head {
         display: flex;
         align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+    .quick-reply-panel__label {
+        display: inline-flex;
+        align-items: center;
         gap: 5px;
-        margin-bottom: 6px;
         font-size: 0.68rem;
         font-weight: 800;
         color: #6d28d9;
         letter-spacing: 0.03em;
+        min-width: 0;
+        overflow: hidden;
     }
     .quick-reply-panel__status {
         padding: 1px 8px;
@@ -101,36 +109,89 @@
         color: #6d28d9;
         white-space: nowrap;
     }
-    .quick-reply-panel__scroll {
-        display: flex;
+    .quick-reply-panel__edit {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(124, 58, 237, 0.35);
+        background: #ffffff;
+        color: #6d28d9;
+        font-size: 0.7rem;
+        font-weight: 800;
+        cursor: pointer;
+        min-height: 28px;
+    }
+    .quick-reply-panel__edit:active { transform: scale(0.96); }
+
+    /* カードグリッド：2列固定、パネル内スクロール */
+    .quick-reply-panel__grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 8px;
-        overflow-x: auto;
-        padding-bottom: 6px;
+        max-height: 180px;
+        overflow-y: auto;
+        padding: 2px 2px 8px;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
     }
-    .quick-reply-panel__scroll::-webkit-scrollbar { display: none; }
-    .quick-reply-chip {
-        flex: 0 0 auto;
-        padding: 8px 14px;
-        min-height: 40px;
-        border-radius: 999px;
+    .quick-reply-panel__grid::-webkit-scrollbar { display: none; }
+
+    .quick-reply-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        padding: 9px 11px;
+        border-radius: 12px;
         border: 1px solid rgba(124, 58, 237, 0.28);
         background: #ffffff;
         color: #241f33;
-        font-size: 0.8rem;
-        font-weight: 600;
+        text-align: left;
         cursor: pointer;
-        white-space: nowrap;
-        transition: background 0.12s ease, transform 0.1s ease;
+        min-height: 56px;
+        box-shadow: 0 2px 6px rgba(76, 29, 149, 0.06);
+        transition: background 0.12s ease, transform 0.1s ease, border-color 0.12s ease, box-shadow 0.15s ease;
     }
-    .quick-reply-chip--suggest {
+    .quick-reply-card:hover {
+        border-color: rgba(124, 58, 237, 0.55);
+        box-shadow: 0 4px 12px rgba(76, 29, 149, 0.12);
+    }
+    .quick-reply-card:active { transform: scale(0.98); }
+    .quick-reply-card__body {
+        font-size: 0.78rem;
+        line-height: 1.45;
+        color: inherit;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .quick-reply-card__slot-no {
+        display: inline-block;
+        font-size: 0.6rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        color: #a16207;
+        margin-bottom: 1px;
+    }
+    /* おすすめ（進行状況ベース）：淡バイオレット面 */
+    .quick-reply-card--suggest {
         background: rgba(124, 58, 237, 0.08);
-        border-color: rgba(124, 58, 237, 0.45);
+        border-color: rgba(124, 58, 237, 0.40);
+    }
+    .quick-reply-card--suggest .quick-reply-card__body {
         color: #4c2889;
         font-weight: 700;
     }
-    .quick-reply-chip:active { transform: scale(0.96); }
+    /* マイ定型文（スロット）：淡ゴールド面 */
+    .quick-reply-card--slot {
+        background: linear-gradient(180deg, rgba(246, 211, 106, 0.10), rgba(246, 211, 106, 0.04));
+        border-color: rgba(180, 83, 9, 0.30);
+    }
+    .quick-reply-card--slot .quick-reply-card__body { color: #241f33; }
 
     .hired-wage-field-wrap label {
         display: block;
@@ -171,7 +232,7 @@
     window.talkQuickTemplates = @json($quickTemplates ?? []);
     window.talkNgPayload = @json($ngWordPayload ?? ['patterns' => [], 'words' => []]);
 </script>
-<script src="{{ asset('assets/js/talk-room.js') }}"></script>
+<script src="{{ asset('assets/js/talk-room.js') }}?v=20260719-scout-limit"></script>
 @endpush
 
 @section('content')
@@ -439,7 +500,7 @@
                 </div>
             </div>
         @empty
-            <div class="text-center text-gray-500 mt-20">
+            <div class="text-center text-gray-500 mt-20 talk-empty-state">
                 <i class="fas fa-comments opacity-10 text-6xl mb-4 block"></i>
                 <p>メッセージはまだありません</p>
             </div>
@@ -492,18 +553,26 @@
             {{-- クイック定型文パネル：デフォルト表示。入力欄フォーカスで隠れてキーボード優先。
                  進行状況（応募〜面談〜採用）に応じた候補を先頭に、マイ定型文（4スロット）を後ろに並べる --}}
             <div id="quick-reply-panel" class="quick-reply-panel" aria-label="定型文パネル">
-                <div class="quick-reply-panel__label">
-                    <i class="fas fa-bolt" aria-hidden="true"></i>
-                    <span>{{ !empty($currentStatusLabel) ? 'いまの状況におすすめの定型文' : '定型文' }}</span>
-                    @if(!empty($currentStatusLabel))
-                        <span class="quick-reply-panel__status">{{ $currentStatusLabel }}</span>
-                    @endif
+                <div class="quick-reply-panel__head">
+                    <span class="quick-reply-panel__label">
+                        <i class="fas fa-bolt" aria-hidden="true"></i>
+                        <span>{{ !empty($currentStatusLabel) ? 'いまの状況におすすめの定型文' : '定型文' }}</span>
+                        @if(!empty($currentStatusLabel))
+                            <span class="quick-reply-panel__status">{{ $currentStatusLabel }}</span>
+                        @endif
+                    </span>
+                    {{-- マイ定型文の編集導線：既存の＋メニュー内「定型文を使う」を開く --}}
+                    <button type="button" class="quick-reply-panel__edit" id="quick-reply-open-editor" aria-label="マイ定型文を編集">
+                        <i class="fas fa-pen-to-square" aria-hidden="true"></i>編集
+                    </button>
                 </div>
-                <div class="quick-reply-panel__scroll" id="quick-reply-scroll">
+                <div class="quick-reply-panel__grid" id="quick-reply-scroll">
                     @foreach(($quickReplySuggestions ?? []) as $qr)
-                        <button type="button" class="quick-reply-chip quick-reply-chip--suggest"
+                        <button type="button" class="quick-reply-card quick-reply-card--suggest"
                                 data-quick-reply="{{ $qr }}"
-                                title="{{ $qr }}">{{ \Illuminate\Support\Str::limit($qr, 22) }}</button>
+                                title="{{ $qr }}">
+                            <span class="quick-reply-card__body">{{ $qr }}</span>
+                        </button>
                     @endforeach
                     {{-- マイ定型文（4スロット）は JS が window.talkQuickTemplates から追加 --}}
                 </div>
@@ -774,12 +843,33 @@
         if (!body || !scroll) return;
         var btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'quick-reply-chip quick-reply-chip--slot';
+        btn.className = 'quick-reply-card quick-reply-card--slot';
         btn.setAttribute('data-quick-reply', body);
         btn.title = body;
-        btn.textContent = body.length > 22 ? body.slice(0, 22) + '…' : body;
+        var bodyEl = document.createElement('span');
+        bodyEl.className = 'quick-reply-card__body';
+        bodyEl.textContent = body;
+        var slotLabel = document.createElement('span');
+        slotLabel.className = 'quick-reply-card__slot-no';
+        slotLabel.textContent = 'マイ定型文' + (slot && slot.slot ? slot.slot : '');
+        btn.appendChild(slotLabel);
+        btn.appendChild(bodyEl);
         scroll.appendChild(btn);
     });
+
+    // 「編集」ボタン → 既存の＋メニュー内「定型文を使う」（talkQuickTemplates 編集モーダル）を開く
+    var editBtn = document.getElementById('quick-reply-open-editor');
+    if (editBtn) {
+        editBtn.addEventListener('click', function () {
+            var templateSendBtn = document.getElementById('open-template-send-menu');
+            var actionMenuBtn = document.getElementById('open-talk-action-menu');
+            // ＋メニューを開き、その後で定型文モーダルを開くための順次発火
+            if (actionMenuBtn) actionMenuBtn.click();
+            setTimeout(function () {
+                if (templateSendBtn) templateSendBtn.click();
+            }, 40);
+        });
+    }
 
     // チップ → 入力欄へ挿入。フォーカスは奪わない（パネルを保ったまま送信ボタンで即送信できる）
     panel.addEventListener('click', function (e) {

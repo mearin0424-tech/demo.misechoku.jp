@@ -8,7 +8,7 @@
         $metaDescription = trim($__env->yieldContent('meta_description')) ?: 'ミセチョクのデモサイトです。';
         $metaImage = trim($__env->yieldContent('meta_image')) ?: asset('assets/images/pwa/icon-512.png');
         $canonicalUrl = trim($__env->yieldContent('canonical')) ?: url()->current();
-        $assetVersion = '20260719-view-medal';
+        $assetVersion = '20260719-deep-pages';
         $resolvedTitle = $metaTitle !== ''
             ? $metaTitle
             : ($pageTitle !== '' ? $pageTitle . ' | ' . config('app.name', 'ミセチョク') : config('app.name', 'ミセチョク'));
@@ -66,7 +66,8 @@
             || (request()->is('*/mypage*')
                 && !request()->is('*/mypage/management*')
                 && !request()->is('*/mypage/identity*')
-                && !request()->is('*/mypage/documents*'))
+                && !request()->is('*/mypage/documents*')
+                && !request()->is('*/mypage/viewers*'))
             // プロフィール詳細（キャスト/店舗）と公開共有ページは MyPage と同じダークテーマ
             || request()->is('*/castprofileview/*')
             || request()->is('*/shopprofiles/*')
@@ -514,7 +515,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/layout-sidebar.css') }}">
 
     {{-- ヘッダーのポップアップ（通知 / タスク）専用CSS：app.js が #btn-header-* で togglePopup する --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/layout-header.css') }}?v=20260719-purple-back">
+    <link rel="stylesheet" href="{{ asset('assets/css/layout-header.css') }}?v=20260719-center-title">
 
     {{-- 通知 / やることリスト ポップアップを mypage のカード調に上書き（不透明 + アクセント枠 + 3Dシャドウ） --}}
     <style>
@@ -641,7 +642,7 @@
     <script src="{{ asset('assets/js/motion.js') }}?v={{ $assetVersion }}" defer></script>
     @if($isLightTheme)
     {{-- ライトモード（薄ラベンダー基調）。全CSSの最後に読み込んで上書きする --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260719-light-8">
+    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260719-light-11">
     @endif
 </head>
 <body class="@yield('body-class') {{ $isLightTheme ? 'theme-light' : '' }} bg-base text-text-main"

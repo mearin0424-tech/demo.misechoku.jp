@@ -5082,32 +5082,39 @@ body.page-home .rc-name-row .rc-review-cnt {
 /* 閲覧数は求人カード上では非表示（下部スタック内） */
 body.page-home .cast-card--recruit .view-count { display: none !important; }
 
-/* 距離未設定時：淡いグレー表示 + 隣に丸いヘルプボタン */
-body.page-home .rc-dist--unset {
-    color: rgba(255, 255, 255, 0.60) !important;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+/* ============================================================================
+   SWIPE 画像フルブリード (2026-07-19)
+   ・横幅が狭い端末で画像下に黒領域が大きく出る問題:
+     contain（横幅フィット）→ cover（カード全面に表示・上基準でクロップ）へ変更
+   ・下部のテキスト帯は既存の黒グラデーション（下側60%）が可読性を担保する
+   ============================================================================ */
+body.page-home .home-photo,
+body.page-home .photo-swiper .swiper-slide img {
+    object-fit: cover !important;
+    object-position: top center !important;
+    width: 100% !important;
+    height: 100% !important;
 }
-body.page-home .rc-dist--unset i.fa-route {
-    color: rgba(255, 255, 255, 0.45) !important;
+
+/* ============================================================================
+   上下スワイプの「複数枚が別々に動いて見える」問題の解消 (2026-07-19)
+   原因: 隣接カードに scale(0.92)+rotateX+translateZ の3D演出がかかっており、
+   スワイプ中に「本体の移動」と「隣接カードの拡縮アニメ」が同時に走るため、
+   2枚以上が別々に動いているように見えていた。
+   → 3D/縮小演出を廃止し、フィード全体が1枚のシートとして動くフラット遷移に統一
+   ============================================================================ */
+body.page-home .main-swiper { perspective: none !important; }
+body.page-home .main-swiper .swiper-wrapper { transform-style: flat !important; }
+body.page-home .main-swiper .swiper-slide .cast-card {
+    transition: opacity 0.3s ease, box-shadow 0.3s ease !important;
+    will-change: opacity !important;
 }
-body.page-home .rc-dist__help {
-    flex: 0 0 auto;
-    width: 20px;
-    height: 20px;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    background: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 0.7rem;
-    cursor: pointer;
-    line-height: 1;
-    transition: background 0.15s ease, transform 0.1s ease;
+body.page-home .main-swiper .swiper-slide:not(.swiper-slide-active) .cast-card {
+    transform: none !important;
+    opacity: 0.45 !important;
+    filter: brightness(0.72) !important;
 }
-body.page-home .rc-dist__help:hover { background: rgba(255, 255, 255, 0.16); }
-body.page-home .rc-dist__help:active { transform: scale(0.92); }
+body.page-home .main-swiper .swiper-slide-active .cast-card {
+    transform: none !important;
+    filter: none !important;
+}

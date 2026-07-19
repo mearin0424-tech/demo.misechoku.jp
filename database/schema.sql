@@ -1270,4 +1270,31 @@ CREATE TABLE IF NOT EXISTS `support_inquiries` (
   KEY `support_inquiries_category_idx` (`category`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- -----------------------------------------------------------------------------
+-- 店舗有料プラン契約（Premium）
+--   - 振込 + 運営の目視確認で有効化（①契約=入金待ち → ②振込 → ③管理画面で入金確認済み → 機能開放）
+--   - 請求書番号 PLN-YYYYMM-xxxx / 領収書番号 RCT-YYYYMM-xxxx
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `shop_plan_subscriptions` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `shop_id` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `plan` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'premium',
+  `billing_cycle` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'monthly / yearly',
+  `amount` int UNSIGNED NOT NULL COMMENT '請求額（税込円） monthly=20000 / yearly=200000',
+  `status` tinyint NOT NULL DEFAULT '1' COMMENT '1=入金待ち 2=有効 3=期間満了 4=キャンセル',
+  `invoice_number` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '請求書番号 PLN-YYYYMM-xxxx',
+  `invoice_issued_at` datetime DEFAULT NULL COMMENT '請求書発行日時（契約時）',
+  `payment_due_date` date DEFAULT NULL COMMENT '振込期限（契約から7日）',
+  `paid_confirmed_at` datetime DEFAULT NULL COMMENT '運営が入金を目視確認した日時',
+  `confirmed_by` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '確認した運営アカウントID',
+  `receipt_number` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '領収書番号 RCT-YYYYMM-xxxx',
+  `starts_at` datetime DEFAULT NULL COMMENT 'Premium開始日時（入金確認時）',
+  `ends_at` datetime DEFAULT NULL COMMENT 'Premium終了日時（開始+1ヶ月/+1年）',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `sps_shop_status_idx` (`shop_id`,`status`),
+  KEY `sps_status_due_idx` (`status`,`payment_due_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET foreign_key_checks = 1;

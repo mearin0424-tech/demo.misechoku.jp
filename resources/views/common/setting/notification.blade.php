@@ -5,8 +5,8 @@
 @section('content')
 <div class="setting-page">
     <div class="setting-header">
-        <h1 class="setting-title">通知設定</h1>
-        <p class="setting-lead">ミセチョクからのリマインダー通知の受け取り方法を設定します。</p>
+        {{-- タイトルはヘッダー中央に表示（統一方針）。ページ内はリード文のみ --}}
+        <p class="page-lead">ミセチョクからのリマインダー通知の受け取り方法を設定します。</p>
     </div>
 
     @if (session('message'))

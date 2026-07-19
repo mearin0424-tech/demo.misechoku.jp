@@ -59,6 +59,16 @@
             </ul>
         </div>
 
+        {{-- PREMIUM セクション（店舗のみ）--}}
+        @if(!$isCast)
+            <div class="sidebar-section">
+                <div class="menu-label-header">PREMIUM</div>
+                <ul class="sidebar-sub-menu">
+                    <li><a href="{{ route('shop.mypage.viewers.index') }}"><i class="fas fa-eye"></i> 閲覧キャスト一覧</a></li>
+                </ul>
+            </div>
+        @endif
+
         {{-- SUPPORT セクション --}}
         <div class="sidebar-section">
             <div class="menu-label-header">SUPPORT</div>

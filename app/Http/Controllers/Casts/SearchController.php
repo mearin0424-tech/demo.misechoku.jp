@@ -290,9 +290,21 @@ class SearchController extends BaseSearchController
             }));
         }
 
+        // Premium店舗の優先表示（AIレコメンド＝relevance ソートで最上位グループに）
+        $premiumMap = app(\App\Services\PlanSubscriptionService::class)
+            ->premiumShopIdMap(array_column($items, 'id'));
+        foreach ($items as &$item) {
+            $item['is_premium'] = isset($premiumMap[(string) $item['id']]);
+        }
+        unset($item);
+
         // 'relevance' / 'distance' は PHP 側で再ソート（距離は SQL 後に計算されるため）
         if ($sort === 'relevance') {
             usort($items, function ($a, $b) {
+                // Premiumプラン店舗を優先表示（同グループ内はマッチ度順）
+                if (($a['is_premium'] ?? false) !== ($b['is_premium'] ?? false)) {
+                    return ($b['is_premium'] ?? false) <=> ($a['is_premium'] ?? false);
+                }
                 if (($a['match_score'] ?? 0) !== ($b['match_score'] ?? 0)) {
                     return ($b['match_score'] ?? 0) <=> ($a['match_score'] ?? 0);
                 }

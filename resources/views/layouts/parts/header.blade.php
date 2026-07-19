@@ -72,21 +72,67 @@
     $currentEngTitle = $resolveEnglishTitle();
 
     // ============================================================
+    // 深い階層（2階層以上）のページはメニュー名の日本語タイトルを
+    // ヘッダー中央に出して統一する（トップ5画面は英語ラベルのまま）
+    // ============================================================
+    $jaByRoute = [
+        'shop.mypage.viewers.index'   => '閲覧キャスト一覧',
+        'shop.mypage.review.index'    => 'レビュー一覧',
+        'shop.mypage.staff.index'     => 'スタッフ管理',
+        'shop.mypage.staff.create'    => 'スタッフを追加',
+        'shop.mypage.documents.index' => '許可証の提出・管理',
+    ];
+    $jaByLast = [
+        'management'   => '採用・入金管理',
+        'employment'   => '採用・入金管理',
+        'identity'     => '本人確認',
+        'account'      => 'アカウント管理',
+        'notification' => '通知設定',
+        'subscription' => 'プラン選択',
+        'form'         => '問い合わせ窓口',
+        'htu'          => 'ご利用ガイド',
+        'column'       => 'お役立ちコラム',
+        'notices'      => 'お知らせ',
+        'about'        => '運営会社',
+        'terms'        => '利用規約',
+        'privacy'      => 'プライバシーポリシー',
+        'reviews'      => 'レビュー一覧',
+    ];
+    $jaBySecond = [
+        'column'  => 'お役立ちコラム',
+        'notices' => 'お知らせ',
+    ];
+    $resolveJaTitle = function () use ($jaByRoute, $jaByLast, $jaBySecond, $routeName, $lastSegment, $secondSegment) {
+        if (isset($jaByRoute[$routeName])) return $jaByRoute[$routeName];
+        if (isset($jaByLast[$lastSegment])) return $jaByLast[$lastSegment];
+        if (isset($jaBySecond[$secondSegment])) return $jaBySecond[$secondSegment];
+        return '';
+    };
+    $currentJaTitle = !$isMainPage ? $resolveJaTitle() : '';
+
+    // ============================================================
     // 表示タイトル決定
     //   1. トークルーム → header_title（個人名）
-    //   2. それ以外 → 英語ラベル（あれば）
-    //   3. 英語が無い → header_title or @section('title') の和文
+    //   2. 深い階層 → 日本語メニュー名（あれば）
+    //   3. それ以外 → 英語ラベル（あれば）
+    //   4. どちらも無い → header_title or @section('title') の和文
     // ============================================================
     $headerTitleCustom = trim((string) ($__env->yieldContent('header_title') ?? ''));
     $headerTitleFromPage = isset($headerTitle) ? trim((string) $headerTitle) : '';
 
     if ($isTalkRoomPage) {
         $displayTitle = $headerTitleCustom !== '' ? $headerTitleCustom : ($headerTitleFromPage !== '' ? $headerTitleFromPage : 'TALK');
+    } elseif ($currentJaTitle !== '') {
+        $displayTitle = $currentJaTitle;
     } elseif ($currentEngTitle !== '') {
         $displayTitle = $currentEngTitle;
     } else {
         $displayTitle = $headerTitleCustom !== '' ? $headerTitleCustom : ($headerTitleFromPage !== '' ? $headerTitleFromPage : '');
     }
+
+    // 和文タイトルは字詰め・サイズを専用クラスで調整（8文字以上はさらに縮小）
+    $isJaTitle = (bool) preg_match('/[^\x20-\x7E]/u', $displayTitle);
+    $isLongTitle = mb_strlen($displayTitle) >= 8;
 
     $headerAvatar = trim((string) ($__env->yieldContent('header_avatar') ?? ''));
     $isCast = request()->is('cast/*');
@@ -108,10 +154,10 @@
         @endif
     </div>
 
-    {{-- 中央：ページタイトル（英語＋ゴールド・グラデーション、トークルーム以外） --}}
+    {{-- 中央：ページタイトル（ヘッダー中央に配置で統一。トークルーム以外） --}}
     <div class="header-center-title">
         @if(!$isTalkRoomPage)
-            <span class="header-title-main header-title-serif">
+            <span class="header-title-main header-title-serif {{ $isJaTitle ? 'header-title-ja' : '' }} {{ $isLongTitle ? 'is-long' : '' }}">
                 {{ $displayTitle }}
             </span>
         @endif
