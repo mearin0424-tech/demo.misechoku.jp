@@ -300,30 +300,15 @@ class ProfileController extends Controller
     }
 
     /**
-     * プロフィール詳細表示
-     * - cast/* から呼ばれた場合: お店のプロフィール（キャストがお店を閲覧）
-     * - shop/* から呼ばれた場合: キャストのプロフィール（お店がキャストを閲覧）
+     * キャスト詳細表示（お店 → キャストを閲覧）
+     * ルート: shop.castprofileview.show (/shop/castprofileview/{id})
+     *
+     * ※ 旧仕様ではキャスト側 (/cast/*) からのお店詳細も同メソッドで扱っていたが、
+     *   お店詳細は shops.recruit.show（cast-show partial）に一本化したため、
+     *   本メソッドは "お店 → キャスト" 専用となる。
      */
     public function show($id = null) {
         $id = $id ?? 1;
-
-        if (request()->is('cast/*')) {
-            // キャスト側 → お店の情報を表示
-            $shop = $this->buildShopDetailData((string) $id);
-            if (auth()->guard('member')->check()) {
-                $this->profileViews->record(
-                    ProfileView::TYPE_CAST,
-                    (string) auth()->guard('member')->id(),
-                    ProfileView::TYPE_SHOP,
-                    (string) $id
-                );
-            }
-            return view('shops.profile.show', [
-                'pageId' => 'shop_info',
-                'shop'   => $shop,
-                'isOwn'  => false,
-            ]);
-        }
 
         // お店側 → キャストの情報を表示（閲覧を記録）
         if (auth()->guard('shop')->check()) {
@@ -343,93 +328,6 @@ class ProfileController extends Controller
     public function publicShow(string $id)
     {
         return view('casts.profile.show', $this->buildCastProfileViewData($id, true));
-    }
-
-    private function buildShopDetailData(string $shopId): array
-    {
-        abort_unless(
-            DB::table('shops')->where('id', $shopId)->exists(),
-            404
-        );
-
-        $profile = DB::table('shop_profiles')
-            ->where('shop_id', $shopId)
-            ->first();
-
-        $imagePaths = DB::table('shop_images')
-            ->where('shop_id', $shopId)
-            ->orderByRaw('is_main DESC')
-            ->orderByRaw('main_order IS NULL')
-            ->orderBy('main_order')
-            ->orderBy('id')
-            ->pluck('image_path')
-            ->map(fn ($path) => $this->assetPathForStored($path))
-            ->filter()
-            ->values()
-            ->all();
-
-        $mainImage = $imagePaths[0] ?? asset('assets/images/common/no-image.png');
-        $subImages = count($imagePaths) > 1 ? array_slice($imagePaths, 1) : [];
-        $industry = $this->resolveIndustryLabelsByShopId($shopId);
-
-        return [
-            'id' => $shopId,
-            'name' => trim((string) ($profile?->shop_name ?? '')) ?: '店舗',
-            'word' => '',
-            'main_img' => $mainImage,
-            'industry' => $industry,
-            'zip' => (string) ($profile?->zip ?? ''),
-            'address' => trim((string) (($profile?->pref ?? '') . ($profile?->city ?? '') . ($profile?->town ?? '') . ($profile?->building ?? ''))),
-            'tel' => (string) ($profile?->tel ?? ''),
-            'business_hours_shop' => (string) ($profile?->business_hours_shop ?? ''),
-            'nearest_stations' => [],
-            'tag_groups' => [],
-            'sub_images' => $subImages,
-            // 閲覧数：このお店のプロフィールが閲覧された回数
-            'view_cnt' => $this->profileViews->countFor(ProfileView::TYPE_SHOP, $shopId),
-        ] + [
-            'industry' => '',
-            'zip' => '',
-            'address' => '',
-            'tel' => '',
-            'business_hours_shop' => '',
-            'nearest_stations' => [],
-            'tag_groups' => [],
-            'sub_images' => [],
-            'view_cnt' => 0,
-        ];
-    }
-
-    private function resolveIndustryLabelsByShopId(string $shopId): string
-    {
-        // industry_label が登録されていれば最優先で採用
-        if (Schema::hasColumn('shop_profiles', 'industry_label')) {
-            $label = trim((string) DB::table('shop_profiles')
-                ->where('shop_id', $shopId)
-                ->value('industry_label'));
-            if ($label !== '') {
-                return $label;
-            }
-        }
-
-        if (!Schema::hasTable('industries')) {
-            return '';
-        }
-
-        $names = DB::table('shop_profiles')
-            ->join('industries', 'shop_profiles.industry_id', '=', 'industries.id')
-            ->where('shop_profiles.shop_id', $shopId)
-            ->pluck('industries.name')
-            ->all();
-
-        $normalized = collect($names)
-            ->map(fn ($name) => trim((string) $name))
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
-
-        return implode(' / ', $normalized);
     }
 
     private function currentCastId(): string

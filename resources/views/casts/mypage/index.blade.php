@@ -421,6 +421,10 @@ window.MYPAGE_GALLERY_CONFIG = {
         margin: 0;
         overflow: hidden;
         position: relative;
+        /* 縦スクロールはブラウザに任せる（Sortable.js forceFallback で
+           touch イベントが独自処理される問題への対策）。
+           長押し（delay 380ms）後の並び替えドラッグには影響しない */
+        touch-action: pan-y;
     }
     #gallery-list .photo-slot {
         position: relative;

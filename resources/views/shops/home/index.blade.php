@@ -4,7 +4,7 @@
 @section('body-class', 'no-scroll page-home')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260719-actions-v2">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260719-castloc">
 @endpush
 
 @php
@@ -103,19 +103,26 @@
                             $areaLine = trim(($item['pref'] ?? '') . ' ' . ($item['city'] ?? ''));
                         @endphp
 
-                        {{-- 優良店バッヂ：店名の真上 --}}
+                        {{-- 優良店バッヂ：店名の真上（タップで達成条件モーダル） --}}
                         @if(!empty($item['is_premium']))
-                            <div class="rc-premium-row"><x-ui.premium-badge /></div>
+                            <div class="rc-premium-row">
+                                <button type="button" class="premium-badge-btn stop-propagation" data-open-premium-info aria-haspopup="dialog" aria-controls="modal-premium-info" aria-label="優良店バッヂの達成条件">
+                                    <x-ui.premium-badge />
+                                </button>
+                            </div>
                         @endif
 
                         {{-- 1行目：店名（大きめ） --}}
                         <h2 class="rc-shop-name serif-font">{{ $item['name'] }}</h2>
 
-                        {{-- 2行目：業種・レビュー（★値 + 件数はかっこ）・閲覧数 --}}
+                        {{-- 2行目：業種 → 最寄り駅（間） → レビュー → 閲覧数（1行に統合して縦の情報量を1行減） --}}
                         <div class="rc-line rc-line--meta">
                             @if(!empty($item['industry_name']))
                                 <span class="rc-genre">{{ $item['industry_name'] }}</span>
                             @endif
+                            <span class="rc-loc">
+                                <i class="fas {{ $stationLine !== '' ? 'fa-train' : 'fa-map-marker-alt' }}" aria-hidden="true"></i>{{ $stationLine !== '' ? $stationLine : ($areaLine !== '' ? $areaLine : 'エリア未設定') }}
+                            </span>
                             @if($hasRating)
                                 <span class="rc-rating-inline">
                                     <span class="rc-star" aria-hidden="true">★</span>{{ number_format((float)$item['rating'], 1) }}@if((int)($item['review_count'] ?? 0) > 0)<span class="rc-review-cnt">({{ (int)$item['review_count'] }}件)</span>@endif
@@ -124,15 +131,12 @@
                             <x-ui.view-count :count="(int) ($item['view_count'] ?? 0)" class="rc-views" />
                         </div>
 
-                        {{-- 3行目：最寄り駅・自分からの距離 --}}
+                        {{-- 3行目：自分からの距離（設定時のみ） --}}
+                        @if(!empty($item['distance_label']))
                         <div class="rc-line rc-line--loc">
-                            <span class="rc-loc">
-                                <i class="fas {{ $stationLine !== '' ? 'fa-train' : 'fa-map-marker-alt' }}" aria-hidden="true"></i>{{ $stationLine !== '' ? $stationLine : ($areaLine !== '' ? $areaLine : 'エリア未設定') }}
-                            </span>
-                            @if(!empty($item['distance_label']))
-                                <span class="rc-dist"><i class="fas fa-route" aria-hidden="true"></i>自分から {{ $item['distance_label'] }}</span>
-                            @endif
+                            <span class="rc-dist"><i class="fas fa-route" aria-hidden="true"></i>自分から {{ $item['distance_label'] }}</span>
                         </div>
+                        @endif
 
                         {{-- 4行目：左=ボーナス金（ゴールドカード） / 右=時給（グラスカード）
                              ※ 右のアクション列（トーク等）と被らないよう、この行は
@@ -214,38 +218,41 @@
                     <i class="fas fa-bookmark" aria-hidden="true"></i>
                 </button>
 
-                {{-- プロフィール情報（4行構成）
-                     1行目: 名前(年齢) / 2行目: 希望業種・経験有無 /
-                     3行目: エリア・距離 / 4行目: タグ --}}
+                {{-- プロフィール情報（3行構成）
+                     1行目: 名前(年齢) / 2行目: 希望業種・位置情報・経験有無 /
+                     3行目: 距離（設定時のみ）+ タグ --}}
                 <div class="card-bottom-info">
                     {{-- 1行目：名前（年齢はかっこ） --}}
                     <h2 class="cast-name serif-font">{{ $item['name'] }}@if(!$isShop && isset($item['age']))<span class="age">({{ $item['age'] }})</span>@endif</h2>
 
-                    {{-- 2行目：希望業種・経験有無 --}}
+                    {{-- 2行目：希望業種 → 位置情報（パスポート時は設定位置、通常は登録住所）→ 経験有無 --}}
+                    @php
+                        $locationLabel = trim((string) ($item['location_label'] ?? ''));
+                        $isPassport = ($item['location_mode'] ?? '') === 'passport';
+                    @endphp
                     <div class="cc-line cc-line--job">
                         @if(!empty($item['industry_name']))
                             <span class="cc-genre">{{ $item['industry_name'] }}</span>
+                        @endif
+                        @if($locationLabel !== '')
+                            <span class="rc-loc {{ $isPassport ? 'rc-loc--passport' : '' }}"
+                                  @if($isPassport) title="パスポートモード：本人が指定した位置" @endif>
+                                <i class="fas {{ $isPassport ? 'fa-plane-departure' : 'fa-map-marker-alt' }}" aria-hidden="true"></i>{{ $locationLabel }}
+                            </span>
                         @endif
                         @if(!$isShop && !empty($item['night_work_label']))
                             <span class="cc-exp {{ $item['night_work_label'] === '経験あり' ? 'is-exp' : '' }}">{{ $item['night_work_label'] }}</span>
                         @endif
                     </div>
 
-                    {{-- 3行目：エリア・自分からの距離 --}}
-                    @php
-                        $bottomStation = trim((string) ($item['nearest_station'] ?? ''));
-                        $bottomArea = trim(($item['pref'] ?? '') . ' ' . ($item['city'] ?? ''));
-                    @endphp
-                    <div class="cc-line cc-line--loc">
-                        <span class="rc-loc">
-                            <i class="fas {{ $bottomStation !== '' ? 'fa-train' : 'fa-map-marker-alt' }}" aria-hidden="true"></i>{{ $bottomStation !== '' ? $bottomStation : ($bottomArea !== '' ? $bottomArea : 'エリア未設定') }}
-                        </span>
-                        @if(!empty($item['distance_label']))
-                            <span class="rc-dist"><i class="fas fa-route" aria-hidden="true"></i>自分から {{ $item['distance_label'] }}</span>
-                        @endif
+                    {{-- 3行目：距離（探索拠点が設定されているときのみ） --}}
+                    @if(!empty($item['distance_label']))
+                    <div class="cc-line cc-line--dist">
+                        <span class="rc-dist"><i class="fas fa-route" aria-hidden="true"></i>自分から {{ $item['distance_label'] }}</span>
                     </div>
+                    @endif
 
-                    {{-- 4行目：タグ --}}
+                    {{-- タグ --}}
                     <div class="card-tags-row">
                         @foreach($item['tags'] ?? [] as $tag)
                             <span class="tag-pill">#{{ $tag }}</span>
@@ -270,6 +277,41 @@
             @endforeach
         </div>
     </div>
+
+    {{-- 優良店バッヂの達成条件モーダル（スワイプカードのバッヂタップで開く） --}}
+    <div id="modal-premium-info" class="premium-info-modal" hidden role="dialog" aria-modal="true" aria-labelledby="premium-info-title">
+        <div class="premium-info-modal__overlay" data-close-premium-info></div>
+        <div class="premium-info-modal__panel">
+            <button type="button" class="premium-info-modal__close" data-close-premium-info aria-label="閉じる">×</button>
+            <h3 id="premium-info-title" class="premium-info-modal__title">
+                <i class="fas fa-crown" aria-hidden="true"></i> 優良店バッヂの獲得条件
+            </h3>
+            <ul class="premium-info-modal__list">
+                <li>すべての案件が「店舗入金確認済み」まで完了している</li>
+                <li>請求書発行から店舗入金確認までが10日以内である</li>
+            </ul>
+            <p class="premium-info-modal__note">※ 条件は毎月見直され、基準を満たさなくなった場合はバッヂ表示が外れることがあります。</p>
+        </div>
+    </div>
+
+    @push('scripts')
+    <script>
+    (function () {
+        var modal = document.getElementById('modal-premium-info');
+        if (!modal) return;
+        function open(e) { if (e) { e.preventDefault(); e.stopPropagation(); } modal.hidden = false; document.body.style.overflow = 'hidden'; }
+        function close() { modal.hidden = true; document.body.style.overflow = ''; }
+        document.addEventListener('click', function (e) {
+            var trg = e.target.closest('[data-open-premium-info]');
+            if (trg) open(e);
+        }, true);
+        modal.addEventListener('click', function (e) {
+            if (e.target.closest('[data-close-premium-info]')) close();
+        });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !modal.hidden) close(); });
+    })();
+    </script>
+    @endpush
 
     {{-- 上下スワイプガイド：上向きに流れるシェブロン + ラベル。
          表示から数秒はしっかり見せ、その後は薄く残る（スワイプ操作で非表示） --}}

@@ -15,25 +15,25 @@
     {{-- スワイプ（おすすめのカードデッキ） --}}
     <a href="{{ route($prefix . '.home') }}" class="nav-item {{ $isHome ? 'active' : '' }}">
         <i class="fas fa-layer-group"></i>
-        <span>SWIPE</span>
+        <span>スワイプ</span>
     </a>
 
     {{-- さがす（統合検索画面へ） --}}
     <a href="{{ $prefix === 'cast' ? route('cast.search.index', ['tab' => 'list']) : route('shop.search.index') }}" class="nav-item {{ $isSearch ? 'active' : '' }}">
         <i class="fas fa-search"></i>
-        <span>SEARCH</span>
+        <span>さがす</span>
     </a>
 
-    {{-- メッセージ (Talk) --}}
+    {{-- トーク --}}
     <a href="{{ route($prefix .'.talk.index') }}" class="nav-item {{ $isTalk ? 'active' : '' }}">
         <i class="fas fa-comment-dots"></i>
-        <span>TALK</span>
+        <span>トーク</span>
     </a>
 
     {{-- マイページ --}}
     <a href="{{ route($prefix .'.mypage.index') }}" class="nav-item {{ $isMypage ? 'active' : '' }}">
         <i class="fas fa-user"></i>
-        <span>MY PAGE</span>
+        <span>マイページ</span>
     </a>
 </nav>
 

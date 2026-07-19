@@ -683,28 +683,28 @@
                     <span class="nav-icon-wrap flex items-center justify-center mb-1 transition-all">
                         <x-ui.icon name="swipe" class="nav-icon text-[22px] transition-all" />
                     </span>
-                    <span class="app-title text-[10px] font-bold tracking-wider">SWIPE</span>
+                    <span class="text-[10px] font-bold">スワイプ</span>
                 </a>
                 <a href="{{ $searchHref }}"
                    class="nav-item flex flex-col items-center justify-center transition-all duration-300 {{ $navIsSearch ? 'is-active' : '' }}">
                     <span class="nav-icon-wrap flex items-center justify-center mb-1 transition-all">
                         <x-ui.icon name="search" class="nav-icon text-[22px] transition-all" />
                     </span>
-                    <span class="app-title text-[10px] font-bold tracking-wider">SEARCH</span>
+                    <span class="text-[10px] font-bold">さがす</span>
                 </a>
                 <a href="{{ route($navPrefix . '.talk.index') }}"
                    class="nav-item flex flex-col items-center justify-center transition-all duration-300 {{ $navIsTalk ? 'is-active' : '' }}">
                     <span class="nav-icon-wrap flex items-center justify-center mb-1 transition-all">
                         <x-ui.icon name="talk" class="nav-icon text-[22px] transition-all" />
                     </span>
-                    <span class="app-title text-[10px] font-bold tracking-wider">TALK</span>
+                    <span class="text-[10px] font-bold">トーク</span>
                 </a>
                 <a href="{{ route($navPrefix . '.mypage.index') }}"
                    class="nav-item flex flex-col items-center justify-center transition-all duration-300 {{ $navIsMypage ? 'is-active' : '' }}">
                     <span class="nav-icon-wrap flex items-center justify-center mb-1 transition-all">
                         <x-ui.icon name="mypage" class="nav-icon text-[22px] transition-all" />
                     </span>
-                    <span class="app-title text-[10px] font-bold tracking-wider">MY PAGE</span>
+                    <span class="text-[10px] font-bold">マイページ</span>
                 </a>
             </div>
         </nav>

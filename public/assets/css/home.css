@@ -4826,3 +4826,208 @@ body.page-home .swipe-talk-cta i { font-size: 1.05rem; }
 
 /* 上下スワイプガイドが KEEP ブックマークと近づきすぎないよう少し下げる */
 body.page-home .swipe-updown-guide { top: 38%; }
+
+/* ============================================================================
+   SWIPE カード ブラッシュアップ (2026-07-19e)
+   ・キャッチコピー：文字小さく＆背景をもう少し透けた黒に
+   ・キャッチコピーとKEEPボタンの高さ（幅）を揃える → KEEP基準
+   ・写真ページネーション：小さいドットに戻す（極小バーから）
+   ・ボーナス金:時給の幅を 6:4 に
+   ・トークボタン：ネオン→立体（グラデ + inset ハイライト + 落ち影）
+   ・優良店バッヂの達成条件モーダル
+   ============================================================================ */
+
+/* --- キャッチコピー：文字サイズ縮小 + 透けた黒背景 + KEEPと同じ高さ --- */
+body.page-home .cast-card--recruit .rc-manager-msg {
+    /* KEEP バッジ (top: header+12, size:44) と縦位置を揃える */
+    top: calc(var(--header-height, 60px) + 12px) !important;
+    padding: 0 68px 0 12px !important; /* 右側は KEEP ボタン領域 (56px) を確保 */
+    align-items: center !important;
+    z-index: 20 !important;
+}
+body.page-home .cast-card--recruit .rc-manager-msg__backdrop {
+    max-width: 100% !important;
+    padding: 8px 12px !important;
+    min-height: 44px !important; /* KEEP と同じ高さ */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 14px !important;
+    background: linear-gradient(180deg,
+        rgba(0, 0, 0, 0.55) 0%,
+        rgba(0, 0, 0, 0.40) 100%) !important;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28) !important;
+}
+body.page-home .cast-card--recruit .rc-manager-msg__line1 {
+    font-size: clamp(0.66rem, 2.7vw, 0.82rem) !important;
+    font-weight: 700 !important;
+    line-height: 1.35 !important;
+    letter-spacing: 0.01em !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+body.page-home .cast-card--recruit .rc-manager-msg__line2 {
+    display: none !important;
+}
+
+/* --- 写真ページネーション：控えめな小さい丸に戻す --- */
+body.page-home .photo-pagination.swiper-pagination-bullets {
+    top: 14px !important;
+    left: 50% !important;
+    right: auto !important;
+    width: auto !important;
+    transform: translateX(-50%) !important;
+    display: flex !important;
+    gap: 5px !important;
+    justify-content: center !important;
+}
+body.page-home .photo-pagination .swiper-pagination-bullet {
+    flex: 0 0 auto !important;
+    width: 5px !important;
+    height: 5px !important;
+    margin: 0 !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.35) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45) !important;
+    transform: none !important;
+}
+body.page-home .photo-pagination .swiper-pagination-bullet-active {
+    width: 5px !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.55), 0 1px 2px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* --- ボーナス金:時給 = 6:4 --- */
+body.page-home .rc-line--money {
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 8px;
+}
+body.page-home .rc-bonus-card {
+    flex: 0 0 60%;
+    min-width: 0;
+    padding: 9px 12px;
+}
+body.page-home .rc-wage-card {
+    flex: 0 0 calc(40% - 8px);
+    min-width: 0;
+    padding: 8px 10px;
+}
+body.page-home .rc-bonus-card__amount {
+    font-size: clamp(1.28rem, 5.6vw, 1.7rem);
+}
+body.page-home .rc-wage-card__row {
+    justify-content: space-between;
+    gap: 6px;
+}
+body.page-home .rc-wage-card__row strong {
+    font-size: 0.86rem;
+}
+
+/* --- トークボタン：ネオン → 立体（グラデ + insetハイライト + 落ち影） --- */
+body.page-home .swipe-talk-cta {
+    background: linear-gradient(180deg,
+        var(--accent-grad-from, #a78bfa) 0%,
+        var(--accent-grad-to, #7c3aed) 100%) !important;
+    /* 外周アクセントグロー撤去 → 物理的な立体シャドウのみ */
+    box-shadow:
+        0 8px 18px rgba(0, 0, 0, 0.45),
+        0 2px 4px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.45),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.28) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    filter: none;
+    animation: none !important;
+}
+body.page-home .swipe-talk-cta:hover {
+    filter: brightness(1.06);
+}
+body.page-home .swipe-talk-cta:active {
+    transform: translateY(1px) scale(0.99) !important;
+    box-shadow:
+        0 3px 8px rgba(0, 0, 0, 0.5),
+        inset 0 2px 5px rgba(0, 0, 0, 0.35),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
+/* --- 優良店バッヂ達成条件モーダル --- */
+.premium-info-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 3600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+}
+.premium-info-modal[hidden] { display: none; }
+.premium-info-modal__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+.premium-info-modal__panel {
+    position: relative;
+    width: min(420px, 100%);
+    background: linear-gradient(180deg, #1a1a1a, #050505);
+    border: 1px solid rgba(246, 211, 106, 0.45);
+    border-radius: 18px;
+    padding: 20px 20px 16px;
+    color: #f5f5f5;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7);
+}
+.premium-info-modal__close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(255, 255, 255, 0.06);
+    color: #b8b8b8;
+    font-size: 1.05rem;
+    cursor: pointer;
+}
+.premium-info-modal__close:hover { background: rgba(255, 255, 255, 0.14); color: #ffffff; }
+.premium-info-modal__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #f6d36a;
+}
+.premium-info-modal__list {
+    margin: 0;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.86rem;
+    line-height: 1.7;
+    color: #f5f5f5;
+}
+.premium-info-modal__note {
+    margin: 10px 0 0;
+    font-size: 0.72rem;
+    line-height: 1.6;
+    color: #b8b8b8;
+}
+
+/* キャストカード：パスポートモード時の位置ラベル（設定位置）を微視覚差別化
+   通常時 = 白系、パスポート時 = 淡いアクセント色 + 飛行機アイコン */
+body.page-home .rc-loc--passport {
+    color: var(--accent-text, #a78bfa) !important;
+}
+body.page-home .rc-loc--passport i {
+    color: var(--accent-text, #a78bfa) !important;
+}

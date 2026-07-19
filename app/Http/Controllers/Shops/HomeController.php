@@ -116,6 +116,22 @@ class HomeController extends Controller
             ? DB::table('industries')->pluck('name', 'id')
             : collect();
 
+        // 各キャストのパスポートモード設定（設定していれば「設定位置ラベル」を表示に使う）
+        $passportLabelByCast = [];
+        if (Schema::hasTable('cast_search_preferences')) {
+            DB::table('cast_search_preferences')
+                ->whereIn('cast_id', $castIdsForTags)
+                ->where('mode', 'passport')
+                ->select('cast_id', 'passport_label')
+                ->get()
+                ->each(function ($r) use (&$passportLabelByCast) {
+                    $label = trim((string) ($r->passport_label ?? ''));
+                    if ($label !== '') {
+                        $passportLabelByCast[(string) $r->cast_id] = $label;
+                    }
+                });
+        }
+
         $items = [];
         foreach ($rows as $row) {
             $birthday = $row->birthday ? Carbon::parse($row->birthday) : null;
@@ -128,6 +144,7 @@ class HomeController extends Controller
             if ($origin && $maxDistanceKm > 0 && $distanceKm !== null && $distanceKm > $maxDistanceKm) {
                 continue;
             }
+            $passportLabel = $passportLabelByCast[(string) $row->id] ?? null;
             $items[] = [
                 'id' => $row->id,
                 'name' => $row->nickname ?: ($row->name ?: 'ゲスト'),
@@ -140,6 +157,9 @@ class HomeController extends Controller
                 'city' => $row->city ?? '',
                 'industry_name' => $row->industry_id !== null ? (string) ($industryNames[$row->industry_id] ?? '') : '',
                 'night_work_label' => ((int) ($row->exp ?? 0) === 1) ? '経験あり' : '未経験',
+                // パスポートモード時：設定位置ラベル / 通常時：登録住所(pref+city)
+                'location_label' => $passportLabel ?: trim(($row->pref ?? '') . ' ' . ($row->city ?? '')),
+                'location_mode' => $passportLabel ? 'passport' : 'profile',
                 'distance_km' => $distanceKm,
                 'distance_label' => $distanceKm !== null ? $this->userLocation->formatDistance($distanceKm) : null,
             ];

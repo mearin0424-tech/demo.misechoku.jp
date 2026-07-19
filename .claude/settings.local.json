@@ -53,7 +53,9 @@
       "Bash(sed -n '30,35p;84,90p;195,200p' resources/views/casts/mypage/employment.blade.php)",
       "Bash(sed -n '222,231p' resources/views/shops/mypage/management.blade.php)",
       "Bash(sed -n '137,152p' resources/views/casts/mypage/employment.blade.php)",
-      "Bash(php -l app/Http/Controllers/Common/TalkController.php)"
+      "Bash(php -l app/Http/Controllers/Common/TalkController.php)",
+      "Bash(awk *)",
+      "Bash(php -l app/Http/Controllers/Shops/HomeController.php)"
     ]
   }
 }
