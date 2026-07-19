@@ -5118,3 +5118,76 @@ body.page-home .main-swiper .swiper-slide-active .cast-card {
     transform: none !important;
     filter: none !important;
 }
+
+
+/* ============================================================================
+   SWIPEカードのKEEPボタン: 写真右上 → 名前行の右端へ (2026-07-19)
+   ・.swipe-keep-corner--inline: 名前行の中に置くバリアント
+     - position: static / サイズ 34px / 影薄め
+   ・店舗カードは .rc-name-row の右端に、キャストカードは .cast-name-row の右端に配置
+   ・.rc-rating-inline は 2行目 (.rc-line--meta) の右端へ (mlAuto)
+   ============================================================================ */
+
+/* 共通: 名前行に埋め込む KEEP ボタンの見た目 */
+body.page-home .swipe-keep-corner--inline {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    font-size: 0.86rem !important;
+    background: rgba(10, 10, 10, 0.35) !important;
+    border-color: rgba(255, 255, 255, 0.22) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.30) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    flex: 0 0 auto !important;
+    align-self: center !important;
+}
+body.page-home .swipe-keep-corner--inline.is-active,
+body.page-home .swipe-keep-corner--inline[aria-pressed="true"] {
+    background: linear-gradient(135deg, #f6d36a, #e3b94a) !important;
+    border-color: rgba(246, 211, 106, 0.9) !important;
+    color: #1a0f00 !important;
+    box-shadow: 0 0 10px rgba(246, 211, 106, 0.40) !important;
+}
+
+/* 店舗カード: 名前行のフレックスに align-items:center を強制 (baseline だと KEEP と縦揃えが崩れる) */
+body.page-home .rc-name-row {
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+}
+body.page-home .rc-name-row .rc-shop-name {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 店舗カード 2行目: 評価を右端に寄せる */
+body.page-home .rc-line--meta .rc-rating-inline {
+    margin-left: auto !important;
+    font-size: 0.82rem !important;
+    white-space: nowrap;
+    flex: 0 0 auto;
+}
+
+/* キャストカード: 名前行を新設 (KEEP を右端に) */
+body.page-home .cast-name-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+}
+body.page-home .cast-name-row .cast-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

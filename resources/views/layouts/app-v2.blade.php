@@ -72,6 +72,11 @@
             || request()->is('*/castprofileview/*')
             || request()->is('*/shopprofiles/*')
             || request()->is('share/*');
+        // ===== プレミアムホワイト（試験導入 2026-07-19）=====
+        // SWIPE (home) と MyPage を「白基調 + 高級感」プロトタイプで表示するためのフラグ。
+        // premium-white.css がここでのみ発動し、既存のダークスタイルを上書きする。
+        $isPremiumWhite = request()->routeIs('cast.home', 'shop.home', 'cast.mypage.index', 'shop.mypage.index');
+
         $isLightTheme = !$isDarkPage
             && !str_contains($bodyClassAttr, 'page-demo-login')
             && !str_contains($bodyClassAttr, 'page-auth-login');
@@ -642,10 +647,16 @@
     <script src="{{ asset('assets/js/motion.js') }}?v={{ $assetVersion }}" defer></script>
     @if($isLightTheme)
     {{-- ライトモード（薄ラベンダー基調）。全CSSの最後に読み込んで上書きする --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260719-light-11">
+    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260719-light-12">
+    @endif
+    @if($isPremiumWhite)
+    {{-- プレミアムホワイト（試験導入）: SWIPE / MyPage の白基調プロトタイプ。
+         セリフ体見出しのため Noto Serif JP も追加読み込み。ダークテーマ CSS の後に来て上書きする --}}
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('assets/css/premium-white.css') }}?v=20260719-pwhite-01">
     @endif
 </head>
-<body class="@yield('body-class') {{ $isLightTheme ? 'theme-light' : '' }} bg-base text-text-main"
+<body class="@yield('body-class') {{ $isLightTheme ? 'theme-light' : '' }} {{ $isPremiumWhite ? 'theme-premium-white' : '' }} bg-base text-text-main"
       data-notification-badge="{{ isset($unreadNewsCount) ? (int) $unreadNewsCount : 0 }}">
 
     {{-- サイドメニュー開閉用オーバーレイ（app.js が #menu-overlay を操作） --}}

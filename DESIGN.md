@@ -99,6 +99,7 @@ CLAUDE.md から本ファイルを参照させ、画面移行のたびに先頭�
 | `likes` | `ph-fill ph-heart` |
 | `talk` | `ph-fill ph-chat-teardrop-text` |
 | `mypage` | `ph-fill ph-user` |
+| `swipe` | `ph-fill ph-cards` |
 | `back` | `ph-bold ph-caret-left` |
 | `share` | `ph-bold ph-share-network` |
 | `like`（スワイプ） | `ph-fill ph-heart` |
@@ -114,6 +115,7 @@ CLAUDE.md から本ファイルを参照させ、画面移行のたびに先頭�
 | `task` | `ph-fill ph-check-circle`（タスク） |
 | `edit` | `ph-bold ph-pencil-simple`（編集） |
 | `staff` | `ph-fill ph-users-three`（スタッフ・チーム） |
+| `crown` | `ph-fill ph-crown-simple`（Premium） |
 
 > 読み込みは npm パッケージ `@phosphor-icons/web` を `resources/js/app.js` で import する想定（CDN webfont 廃止）。
 
@@ -141,6 +143,8 @@ keyframes はコンパイル済み CSS にのみ存在する。**画面側に `<
 | `x-ui.button`（primary） | `inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full font-bold bg-accent text-on-accent shadow-btn-3d active:translate-y-1.5 active:shadow-btn-3d-active transition-all duration-300` |
 | `x-ui.button`（grad） | 上記の `bg-accent` を `bg-gradient-to-r from-accent-grad-from to-accent-grad-to text-on-accent-strong` に置換 |
 | `x-ui.badge` | `px-4 py-2 rounded-full bg-accent text-on-accent shadow-badge-3d font-bold text-sm` |
+| `x-ui.premium-badge` | 優良店バッヂ（ゴールド・全画面統一）。props: `size` (sm/md/lg) / `off` (未達成表示) / `label` |
+| `x-ui.view-count` | 閲覧数メダル（M=千。1,000 銅 / 5,000 銀 / 10,000 金） |
 | `x-ui.fab` | `fixed bottom-[90px] right-5 w-14 h-14 rounded-full flex items-center justify-center bg-accent text-on-accent shadow-fab-3d active:translate-y-1.5 transition-all z-30` |
 | `x-ui.card` | `rounded-card overflow-hidden border border-line-accent/40 bg-gradient-to-br from-surface-from to-base shadow-card-3d transition-all duration-300`（flat 時は bg/shadow を外す） |
 | `x-ui.menu-card` | card に `p-4 flex items-center justify-between rounded-panel cursor-pointer group` |
@@ -166,6 +170,8 @@ keyframes はコンパイル済み CSS にのみ存在する。**画面側に `<
 | `data-tabs` / `data-tab-panel="..."` | タブ切替（例：gallery / details） |
 | `data-scroll-reveal` | スクロール量に応じたヘッダーの出し入れ（`isScrolled` 相当） |
 | `data-message-form` | メッセージ送信・吹き出し追加 |
+| `data-scroll-target="..."` | 押下で該当セレクタへ `scrollIntoView`（採用管理サマリーカードなど） |
+| `data-fav-toggle` | KEEP のトグル（capture-phase の delegation） |
 
 ---
 
@@ -174,7 +180,7 @@ keyframes はコンパイル済み CSS にのみ存在する。**画面側に `<
 **必ず守る：**
 - 本ファイルのトークンと `x-ui.*` だけで組む
 - アイコンは `<x-ui.icon name="...">`、アクションは data 属性
-- 1画面ずつ。完了後に `npm run build` を通し、purge 警告ゼロを確認 → 目視確認 → 移行チェックリストを更新
+- 1画面ずつ。完了後に `npm run tw:build` を通し、purge 警告ゼロを確認 → 目視確認 → 移行チェックリストを更新
 
 **禁止：**
 - 任意値（`bg-[#...]` `shadow-[...]` `text-[13px]` 等。`text-[13px]` のような一回限りのサイズは可だが色・影は不可）
@@ -199,6 +205,8 @@ keyframes はコンパイル済み CSS にのみ存在する。**画面側に `<
 | **Destructive**（削除・ログアウト） | danger トークン（赤アウトライン。確定操作のみベタ赤） | フラット（確定ボタンのみ立体可） | `.btn-logout` / `x-ui.button variant=danger` |
 | **金銭・実績の表示**（ボーナス額・優良店・KEEP アクティブ） | ゴールド（`--color-gold-from/to`, `#f6d36a` 系） | **フラット** | **ボタン背景には使わない** |
 | **感情アクション**（LIKE） | **固定ピンク（`#d670a2`）**。テーマには追従させない | アクティブ時のみグロー | `.fav-circle--like` |
+| **注意喚起カード**（要対応・振込待ち・未登録） | 暖色アンバー（`#b45309` / bg `rgba(217,119,6,0.07)`） | フラット | 採用管理サマリーカード `.case-summary-card.is-action` |
+| **Premium（ゴールド系）** | 濃ゴールド `#b8860b`（テキスト） + 淡ゴールド面 | フラット + 微グロー | `.plan-card--premium` / Premiumチップ |
 
 **深度の原則：**
 - 立体（3D）＝「押すと何かが起こる主要アクション」だけ
@@ -211,4 +219,121 @@ keyframes はコンパイル済み CSS にのみ存在する。**画面側に `<
 - ポイント要素（ボタン・アイコン・バッジ・アクティブ状態）＝ `var(--accent)` 系（テーマ追従。ハードコード禁止）。
   **既定テーマは `amethyst`（紫）**（2026-07-12 に mauve_pink から変更。導線アイコンを紫で統一）
 - アンビエント（枠線・面のうっすら紫）＝ アメジスト固定（`rgba(168,85,247,…)`）— 既存設計どおり
-- 例外（テーマに追従させない意味色）：ゴールド＝金銭、赤＝未済/危険、**LIKE＝固定ピンク**、ヘッダー上のアイコン＝白
+- 例外（テーマに追従させない意味色）：ゴールド＝金銭・Premium、赤＝未済/危険、アンバー＝要対応、**LIKE＝固定ピンク**、ヘッダー上のアイコン＝白
+
+---
+
+## 11. ライトモード（light-theme.css）
+
+ライト画面は薄ラベンダー基調（#f5f2fb）で、SWIPE・MyPage・プロフィール詳細・認証以外の全画面に適用される。
+
+### 判定と適用
+`layouts/app-v2.blade.php` で `$isLightTheme` を評価し、body に `theme-light` クラスを付与。
+上書きは `public/assets/css/light-theme.css` のみで完結させる（画面ごとに `<style>` を書かない）。
+
+### 章構成（`light-theme.css`）
+| 章 | 対象 |
+|---|---|
+| §1 | トークン反転（Tailwind `@theme` + 旧レイアウト変数） |
+| §2 | クローム（ヘッダー / サブヘッダー / ボトムナビ / サイドメニュー / トースト）は紫ダーク維持 |
+| §3 | 汎用補正（入力系・main 内の白ハードコード） |
+| §4 | SEARCH |
+| §5 | TALK 入力欄 |
+| §7 | モーダル・ポップオーバー |
+| §8 | OFFICIAL / SUPPORT |
+| §9 | TALK 詳細（面談モーダル・結果送信） |
+| §10 | プロフィール KEEP 円形ボタン |
+| §11 | 面談モーダル |
+| §12 | 採用・入金管理（サマリー・ケースカード・CTA バー・shop-action-modal） |
+| §13 | サイドメニュー配下ページ（settings・support・policy） |
+| §14 | ハードコード白/薄グレー文字の一括補正 + `.app-toast` 基本CSS |
+
+### 配色（ライト画面の正）
+| 用途 | 値 |
+|---|---|
+| ベース面 | `#f5f2fb`（薄ラベンダー）／カード面は `#ffffff` |
+| 本文 | `#241f33` |
+| 補助 | `#5f5876` |
+| 罫線 | `rgba(124, 58, 237, 0.16)` |
+| アクセント文字 | `#7c3aed`（`--gold` は紫に置換） |
+
+### 禁止事項
+- ライト画面の Blade `@push('styles')` に `color: #fff` `#f5f5f5` `#a0a0a0` を直書きしない
+- 万一混入した場合は §14 に追加して一括上書きする（個別 blade を編集しない）
+
+---
+
+## 12. タイトル方針（ヘッダー中央統一）
+
+**方針**：深階層ページのタイトルは **ヘッダー中央に日本語** で表示。ページ内には h1 を置かない。
+
+### 実装
+- `resources/views/layouts/parts/header.blade.php` の `$jaByRoute` / `$jaByLast` / `$jaBySecond` マップで route → 日本語タイトルを解決
+- タイトルは `.header-center-title`（absolute + translate で真ん中）に配置。左右アイコン群との重なりは max-width で回避、超過はエリプシス
+- 和文用クラス `.header-title-ja`（`.is-long` で自動縮小）と英字用 `.header-title-serif` を切替
+- トップ5画面（SWIPE / SEARCH / TALK / MYPAGE / KEEPS）と非対象ページは従来の英語ラベルのまま
+
+### 禁止
+- ページ内に大見出し h1 を新設（サブ見出し h2 は可）
+- タイトル的な `.mypage-page-title` `.setting-title` `.support-form-title` などを新規に書かない（既存の掃除も進める）
+
+---
+
+## 13. 説明文はオコジョガイドに集約
+
+**方針**：ページ内のリード文（説明文）は原則書かない。すべて `character_guide_settings` テーブル + `layouts/parts/character-guide.blade.php` に集約する。
+
+### 実装
+- テーブル: `character_guide_settings`（`route_name` UNIQUE / `is_enabled` / `message`）
+- サービス: `CharacterGuideService::getForRoute($routeName)` が現在のルートに対応するメッセージを返す
+- 管理画面: `/admin/character-guide` で全画面の ON/OFF・文言を編集
+- カタログの `group` 区分: `cast` / `shop` / `common`（設定・サポート）
+
+### 禁止
+- Blade に `p.page-lead` `.setting-lead` `.support-form-lead` を新規追加
+- 説明文用の独自 CSS を Blade `@push('styles')` に書く
+
+### 新規画面を追加したときの手順
+1. `CharacterGuideService::CATALOG` に `route_name => ['label', 'group', 'default_enabled']` を追加
+2. 開発者に SQL を渡す（`INSERT ... ON DUPLICATE KEY UPDATE` で route_name UNIQUE を利用）
+3. 管理画面「オコジョガイド設定」でメッセージを確認・編集
+
+---
+
+## 14. 管理画面のモバイル対応（admin-mobile.css）
+
+### 基盤
+`layouts/admin.blade.php` で `admin.css` の後に `admin-mobile.css` を読み込む。全画面に効く。
+
+### 主要パターン
+| クラス／属性 | 効果 |
+|---|---|
+| `admin-table--stack` + `<td data-label="…">` | 640px以下で thead を隠し、1行=1カードの縦積みに変換 |
+| `td.stack-actions` | 操作セル（ボタン群を全幅・縦積みで最下部に配置） |
+| `admin-page-toolbar-filters` | 折り返しをやめ、1行の横スクロール（フィルタチップ・ソート） |
+| `task-summary-row` | ダッシュボードのタスクチップ行も横スクロール化 |
+| `admin-task-popover` | 520px以下では画面全幅のシート表示 |
+
+### 使い方
+- 新規テーブルは **必ず `admin-table--stack` を付ける**（PC表示は `admin.css` の従来通り）
+- 各 `<td>` に `data-label="列名"` を付与（付けない td は「主見出しセル」扱いで左寄せ）
+- 操作列は `class="stack-actions"` にする
+- 空状態行（`<td colspan="…">`）は data-label 不要（自動でセンタリング）
+
+### 禁止
+- 管理画面の Blade 内に `<style>` でモバイル用 `@media` を書く（`admin-mobile.css` に集約）
+
+---
+
+## 15. グローバルトースト（`.app-toast`）
+
+- `window.appToast(msg, variant, duration)` で表示（`variant`: `success` / `error` / `info`）
+- CSS は `light-theme.css §14` に定義（ライト画面でもダーク画面でも読める濃色パネル + 白文字）
+- 色分け:
+  - success = 緑 `#059669`
+  - error = 赤 `#dc2626`
+  - info = アンバー `#b45309`
+
+### 禁止
+- 個別画面で `alert()` を使う（全て `window.appToast()` に置換）
+- トーストの色を画面独自に上書きする

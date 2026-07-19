@@ -1,0 +1,440 @@
+/* ==========================================================================
+   premium-white.css — 「白基調 × 高級感」プロトタイプ (2026-07-19)
+   対象: SWIPE (cast.home / shop.home) と MyPage (cast.mypage.index / shop.mypage.index)
+   コンセプト:
+     ・ベース色 = 象牙色オフホワイト #faf7f2（純白は事務っぽくなるので温色に）
+     ・カード面 = #ffffff + 極薄罫線 rgba(0,0,0,0.06) + 微弱シャドウ
+     ・本文 = #241f33（濃紫グレー） / 補助 = #6b6478
+     ・アクセント = ゴールド #b8860b / 紫 #7c3aed（既存トークン維持）
+     ・見出し = Noto Serif JP（店名・キャスト名・ページタイトル）
+     ・SWIPE 画像下部の黒グラデ → 半透明白グラス + 濃色文字（可読性確保）
+     ・ヘッダー / ボトムナビは既存の紫グラスクロームを維持（クローム統一）
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   §1 トークン
+   -------------------------------------------------------------------------- */
+body.theme-premium-white {
+    --pw-ivory:       #faf7f2;  /* ページ背景（オフホワイト） */
+    --pw-cream:       #f5f0e6;  /* 一段暗い象牙色（ヘアライン領域用） */
+    --pw-white:       #ffffff;  /* カード面 */
+    --pw-text:        #241f33;  /* 本文（濃紫グレー、既存 light-theme と統一） */
+    --pw-text-sub:    #6b6478;
+    --pw-text-mute:   #8b84a1;
+    --pw-hairline:    rgba(31, 20, 45, 0.08);       /* 極薄罫線 */
+    --pw-hairline-2:  rgba(31, 20, 45, 0.12);
+    --pw-gold:        #b8860b;
+    --pw-gold-light:  #d4a017;
+    --pw-gold-deep:   #7c5405;
+    --pw-gold-soft:   rgba(184, 134, 11, 0.14);     /* 淡ゴールド面 */
+    --pw-violet:      #7c3aed;                      /* 紫アクセント（既存維持） */
+    --pw-violet-soft: rgba(124, 58, 237, 0.08);
+    --pw-shadow-sm:   0 1px 2px rgba(31, 20, 45, 0.05);
+    --pw-shadow-md:   0 4px 14px rgba(31, 20, 45, 0.06), 0 1px 3px rgba(31, 20, 45, 0.04);
+    --pw-shadow-lift: 0 12px 32px rgba(31, 20, 45, 0.10), 0 2px 6px rgba(31, 20, 45, 0.05);
+    --pw-font-serif:  "Noto Serif JP", "Hiragino Mincho ProN", serif;
+}
+
+/* body 背景をオフホワイトに */
+body.theme-premium-white,
+body.theme-premium-white #app,
+body.theme-premium-white main#main-content {
+    background-color: var(--pw-ivory) !important;
+    color: var(--pw-text) !important;
+}
+
+/* セリフ体：主要見出しのみ（本文は既存の Noto Sans JP 維持） */
+body.theme-premium-white h1,
+body.theme-premium-white h2,
+body.theme-premium-white .rc-shop-name,
+body.theme-premium-white .cast-name,
+body.theme-premium-white .mypage-page-title,
+body.theme-premium-white .mypage-shop-name,
+body.theme-premium-white .app-title {
+    font-family: var(--pw-font-serif) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+    color: var(--pw-text) !important;
+}
+
+/* --------------------------------------------------------------------------
+   §2 SWIPE カード（page-home）
+   ・カード面を白に、影は柔らかく、上部にゴールドの細い額装ライン
+   ・画像下端の黒グラデを "白の霧" に置換
+   ・下部テキストエリアは白面 + 濃色文字
+   -------------------------------------------------------------------------- */
+
+/* カード本体 */
+body.theme-premium-white.page-home .cast-card,
+body.theme-premium-white.page-home .cast-card.glass-card,
+body.theme-premium-white.page-home .cast-card--recruit {
+    background: var(--pw-white) !important;
+    border: 1px solid var(--pw-hairline) !important;
+    box-shadow: var(--pw-shadow-lift) !important;
+    overflow: hidden !important;
+    position: relative;
+}
+/* 上端にゴールドの細ヘアライン（額装感） */
+body.theme-premium-white.page-home .cast-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 12%; right: 12%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(184, 134, 11, 0.45), transparent);
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* 画像下端のグラデ：黒→透明 を 白→透明 に反転 */
+body.theme-premium-white.page-home .home-photo-wrap::after,
+body.theme-premium-white.page-home .rc-img-wrap::after,
+body.theme-premium-white.page-home .cast-card:not(.cast-card--recruit) .home-photo-wrap::after {
+    background: linear-gradient(180deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(250, 247, 242, 0.35) 40%,
+        rgba(250, 247, 242, 0.88) 72%,
+        var(--pw-ivory) 100%) !important;
+    height: 45% !important;
+}
+
+/* 下部テキストエリアの背景（テキストが乗る帯） */
+body.theme-premium-white.page-home .rc-bottom-bar,
+body.theme-premium-white.page-home .card-bottom-info {
+    background: var(--pw-white) !important;
+    border-top: 1px solid var(--pw-hairline) !important;
+}
+
+/* 店名 / キャスト名 */
+body.theme-premium-white.page-home .rc-shop-name,
+body.theme-premium-white.page-home .cast-name {
+    color: var(--pw-text) !important;
+    text-shadow: none !important;
+}
+body.theme-premium-white.page-home .cast-name .age {
+    color: var(--pw-text-sub) !important;
+    font-family: var(--pw-font-serif) !important;
+}
+
+/* 業種チップ（既存はテーマ紫）— そのまま紫でOK、背景はサブトルに */
+body.theme-premium-white.page-home .rc-genre,
+body.theme-premium-white.page-home .cc-genre {
+    color: var(--pw-violet) !important;
+    background: var(--pw-violet-soft) !important;
+    padding: 2px 10px !important;
+    border-radius: 999px !important;
+    font-weight: 700 !important;
+}
+
+/* 位置情報・駅・距離・経験チップ */
+body.theme-premium-white.page-home .rc-loc,
+body.theme-premium-white.page-home .rc-dist,
+body.theme-premium-white.page-home .cc-exp {
+    color: var(--pw-text-sub) !important;
+}
+body.theme-premium-white.page-home .rc-loc i,
+body.theme-premium-white.page-home .rc-dist i {
+    color: var(--pw-text-mute) !important;
+}
+body.theme-premium-white.page-home .cc-exp {
+    background: rgba(184, 134, 11, 0.10) !important;
+    color: var(--pw-gold-deep) !important;
+    border: 1px solid rgba(184, 134, 11, 0.30) !important;
+}
+body.theme-premium-white.page-home .cc-exp.is-exp {
+    background: rgba(184, 134, 11, 0.18) !important;
+    color: var(--pw-gold-deep) !important;
+}
+
+/* 評価レビュー（★の色はゴールドキープ、テキストは濃色に） */
+body.theme-premium-white.page-home .rc-rating-inline {
+    color: var(--pw-text) !important;
+    font-weight: 700;
+}
+body.theme-premium-white.page-home .rc-rating-inline .rc-star {
+    color: var(--pw-gold) !important;
+}
+body.theme-premium-white.page-home .rc-rating-inline .rc-review-cnt {
+    color: var(--pw-text-sub) !important;
+}
+
+/* ボーナス金カード：ゴールドグラデを維持しつつ数値を濃く */
+body.theme-premium-white.page-home .rc-bonus-card {
+    background: linear-gradient(180deg, #fff8e6, #fdf1cc) !important;
+    border: 1px solid rgba(184, 134, 11, 0.40) !important;
+    box-shadow: var(--pw-shadow-sm) !important;
+}
+body.theme-premium-white.page-home .rc-bonus-card__label {
+    color: var(--pw-gold-deep) !important;
+}
+body.theme-premium-white.page-home .rc-bonus-card__amount {
+    color: var(--pw-gold-deep) !important;
+    text-shadow: none !important;
+}
+
+/* 時給カード：白 + 極薄罫線 */
+body.theme-premium-white.page-home .rc-wage-card {
+    background: var(--pw-white) !important;
+    border: 1px solid var(--pw-hairline-2) !important;
+    box-shadow: var(--pw-shadow-sm) !important;
+}
+body.theme-premium-white.page-home .rc-wage-card__row span {
+    color: var(--pw-text-sub) !important;
+}
+body.theme-premium-white.page-home .rc-wage-card__row strong {
+    color: var(--pw-text) !important;
+}
+
+/* タグピル（キャストカード） */
+body.theme-premium-white.page-home .tag-pill {
+    background: var(--pw-cream) !important;
+    border: 1px solid var(--pw-hairline) !important;
+    color: var(--pw-text-sub) !important;
+}
+
+/* キャッチコピー（オーナーからの一言） */
+body.theme-premium-white.page-home .rc-manager-msg,
+body.theme-premium-white.page-home .rc-manager-msg__backdrop {
+    background: rgba(255, 255, 255, 0.82) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(184, 134, 11, 0.25) !important;
+}
+body.theme-premium-white.page-home .rc-manager-msg__line1 {
+    color: var(--pw-text) !important;
+    text-shadow: none !important;
+}
+
+/* KEEPボタン（名前行内インライン、非アクティブ = 白ガラス） */
+body.theme-premium-white.page-home .swipe-keep-corner--inline {
+    background: var(--pw-white) !important;
+    border-color: rgba(184, 134, 11, 0.35) !important;
+    color: var(--pw-gold-deep) !important;
+    box-shadow: var(--pw-shadow-sm) !important;
+}
+body.theme-premium-white.page-home .swipe-keep-corner--inline.is-active,
+body.theme-premium-white.page-home .swipe-keep-corner--inline[aria-pressed="true"] {
+    background: linear-gradient(135deg, var(--pw-gold-light), var(--pw-gold)) !important;
+    color: #ffffff !important;
+    border-color: var(--pw-gold) !important;
+}
+
+/* 優良店バッヂ行の背景を白に馴染ませる */
+body.theme-premium-white.page-home .rc-premium-row {
+    background: transparent !important;
+}
+
+/* トークCTA：ゴールドグラデの高級ボタン */
+body.theme-premium-white.page-home .swipe-talk-cta {
+    background: linear-gradient(180deg, #242032, #0f0d18) !important;
+    color: #ffffff !important;
+    border: 1px solid var(--pw-gold) !important;
+    box-shadow:
+        0 8px 20px rgba(31, 20, 45, 0.18),
+        inset 0 1px 0 rgba(212, 160, 23, 0.35),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.30) !important;
+}
+body.theme-premium-white.page-home .swipe-talk-cta i {
+    color: var(--pw-gold-light) !important;
+}
+
+/* ページネーションのドット：白面用に濃色に */
+body.theme-premium-white.page-home .photo-pagination .swiper-pagination-bullet {
+    background: rgba(31, 20, 45, 0.30) !important;
+}
+body.theme-premium-white.page-home .photo-pagination .swiper-pagination-bullet-active {
+    background: var(--pw-gold) !important;
+}
+
+/* 上下スワイプ誘導キャレット：白面で見えるように濃色 */
+body.theme-premium-white.page-home .discovery-swipe-guide {
+    color: rgba(31, 20, 45, 0.35) !important;
+}
+
+/* 隣接カード（非アクティブ）: ダーク基調の "沈める" 演出を、白基調の "白フェード" に */
+body.theme-premium-white.page-home .main-swiper .swiper-slide:not(.swiper-slide-active) .cast-card {
+    opacity: 0.55 !important;
+    filter: saturate(0.9) brightness(1.02) !important;
+}
+
+/* --------------------------------------------------------------------------
+   §3 MyPage（page-cast-mypage / page-shop-mypage 相当）
+   ・ページ背景をオフホワイト、セクションを白カード + 極薄罫線に
+   ・見出しはセリフ体、金額系はゴールドキープ
+   -------------------------------------------------------------------------- */
+body.theme-premium-white .mypage-area,
+body.theme-premium-white .mypage-shell,
+body.theme-premium-white .cast-mypage-shell,
+body.theme-premium-white .shop-mypage-shell {
+    background: transparent !important;
+    color: var(--pw-text) !important;
+}
+
+/* ページタイトル・店名・ニックネーム */
+body.theme-premium-white .mypage-page-title,
+body.theme-premium-white .mypage-shop-name,
+body.theme-premium-white .mypage-user-name,
+body.theme-premium-white .mypage-hero__name {
+    color: var(--pw-text) !important;
+    text-shadow: none !important;
+}
+
+/* mypage-detail-box / mypage-section 系: 白カード + ヘアライン */
+body.theme-premium-white .mypage-detail-box,
+body.theme-premium-white .mypage-section,
+body.theme-premium-white .mypage-card,
+body.theme-premium-white .mypage-panel {
+    background: var(--pw-white) !important;
+    border: 1px solid var(--pw-hairline) !important;
+    box-shadow: var(--pw-shadow-md) !important;
+    border-radius: 14px !important;
+}
+
+/* セクション見出し（sr-only 相当は除外） */
+body.theme-premium-white .mypage-section-title,
+body.theme-premium-white .mypage-detail-title,
+body.theme-premium-white .mypage-detail-heading {
+    color: var(--pw-text) !important;
+    font-family: var(--pw-font-serif) !important;
+    font-weight: 600 !important;
+    border-bottom: 1px solid var(--pw-hairline) !important;
+}
+
+/* 本文・補助テキスト */
+body.theme-premium-white .mypage-detail-box p,
+body.theme-premium-white .mypage-detail-box li,
+body.theme-premium-white .mypage-desc,
+body.theme-premium-white .mypage-note {
+    color: var(--pw-text) !important;
+}
+body.theme-premium-white .mypage-sub,
+body.theme-premium-white .mypage-muted,
+body.theme-premium-white .mypage-label,
+body.theme-premium-white .mypage-detail-label {
+    color: var(--pw-text-sub) !important;
+}
+
+/* MyPage の帯・ヒーロー（自分の顔+名前が入る領域）: 白 + うっすらゴールドヘアライン */
+body.theme-premium-white .mypage-hero,
+body.theme-premium-white .cast-mypage-hero,
+body.theme-premium-white .shop-mypage-hero {
+    background: linear-gradient(180deg, #fffdf7, var(--pw-white)) !important;
+    border: 1px solid var(--pw-hairline) !important;
+    border-radius: 16px !important;
+    box-shadow: var(--pw-shadow-md) !important;
+    position: relative;
+    overflow: hidden;
+}
+body.theme-premium-white .mypage-hero::after,
+body.theme-premium-white .cast-mypage-hero::after,
+body.theme-premium-white .shop-mypage-hero::after {
+    content: '';
+    position: absolute;
+    left: 10%; right: 10%; top: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--pw-gold), transparent);
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* mypage の各種チップ / ステータス */
+body.theme-premium-white .mypage-chip,
+body.theme-premium-white .mypage-status-chip,
+body.theme-premium-white .mypage-page-title__chip,
+body.theme-premium-white .staff-count-chip,
+body.theme-premium-white .viewers-premium-chip {
+    background: var(--pw-cream) !important;
+    border: 1px solid var(--pw-hairline-2) !important;
+    color: var(--pw-text-sub) !important;
+}
+body.theme-premium-white .viewers-premium-chip {
+    background: var(--pw-gold-soft) !important;
+    color: var(--pw-gold-deep) !important;
+    border-color: rgba(184, 134, 11, 0.40) !important;
+}
+
+/* MyPage 内のリンク行（設定項目・書類提出・レビュー等） */
+body.theme-premium-white .mypage-menu-row,
+body.theme-premium-white .mypage-list-item,
+body.theme-premium-white .mypage-nav-item {
+    background: var(--pw-white) !important;
+    border: 1px solid var(--pw-hairline) !important;
+    color: var(--pw-text) !important;
+}
+body.theme-premium-white .mypage-menu-row:hover,
+body.theme-premium-white .mypage-list-item:hover {
+    background: var(--pw-cream) !important;
+}
+
+/* Gallery（画像グリッド）の背景色 */
+body.theme-premium-white .gallery-list,
+body.theme-premium-white .gallery-grid,
+body.theme-premium-white #gallery-list {
+    background: transparent !important;
+}
+body.theme-premium-white .gallery-grid-item {
+    background: var(--pw-cream) !important;
+    border: 1px solid var(--pw-hairline) !important;
+}
+
+/* 入力・編集ボタン（ひとこと編集など） */
+body.theme-premium-white .mypage-edit-btn,
+body.theme-premium-white .btn-edit,
+body.theme-premium-white .mypage-inline-edit-btn {
+    background: transparent !important;
+    color: var(--pw-violet) !important;
+}
+body.theme-premium-white .mypage-edit-btn:hover {
+    background: var(--pw-violet-soft) !important;
+}
+
+/* ボーナス累計などのゴールドテキスト（キャストMyPage の獲得ボーナス金合計） */
+body.theme-premium-white .employment-bonus-hero__label {
+    color: var(--pw-gold-deep) !important;
+}
+body.theme-premium-white .employment-bonus-hero__amount {
+    background: linear-gradient(135deg,
+        var(--pw-gold-light) 0%,
+        var(--pw-gold) 45%,
+        var(--pw-gold-deep) 75%,
+        #4a3202 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    filter: none !important;
+}
+body.theme-premium-white .employment-bonus-hero__meta {
+    color: var(--pw-text-sub) !important;
+}
+
+/* MyPage 内の閲覧数コンポーネント（.view-count） */
+body.theme-premium-white .view-count {
+    color: var(--pw-text-sub) !important;
+}
+
+/* トーク/入金管理などのミニロー */
+body.theme-premium-white .mypage-mini-row {
+    background: var(--pw-white) !important;
+    border-color: var(--pw-hairline) !important;
+}
+body.theme-premium-white .mypage-mini-row__name {
+    color: var(--pw-text) !important;
+}
+
+/* --------------------------------------------------------------------------
+   §4 グローバル : プレミアムホワイト画面の main 内テキストの受け皿
+   -------------------------------------------------------------------------- */
+body.theme-premium-white main#main-content {
+    color: var(--pw-text);
+}
+body.theme-premium-white main a {
+    color: var(--pw-violet);
+}
+
+/* ヘッダー・ボトムナビは既存の紫グラスクロームを維持 (light-theme.css §2 と同じ考え方) */
+body.theme-premium-white #global-header,
+body.theme-premium-white .sub-header-wrapper,
+body.theme-premium-white nav[data-bottom-nav],
+body.theme-premium-white #bottom-nav,
+body.theme-premium-white #side-menu {
+    /* 何もしない：既存の紫ダーククロームを尊重 */
+}

@@ -904,3 +904,223 @@ body.theme-light .policy-doc-toc a {
     color: #241f33 !important;
 }
 body.theme-light .policy-doc-toc a:hover { background: rgba(124, 58, 237, 0.06) !important; }
+
+
+/* ==========================================================================
+   §14 ハードコード白/薄グレー文字の一括補正 (2026-07-19)
+   各 blade の @push('styles') やレガシー talk.css/search.css に残る
+   「白 (#fff / #f5f5f5)」「淡グレー (#c0c0c0 / #a0a0a0 / #d4d4d4)」
+   を、白背景のライト画面で読める色 (#241f33 / #5f5876) に強制上書きする。
+   ダークページ (body.theme-light が付かない画面) には影響しない。
+   ========================================================================== */
+
+/* --- 通知設定 / アカウント管理 / 退会 (common/setting/*) --------------------- */
+body.theme-light .setting-page,
+body.theme-light .setting-check,
+body.theme-light .setting-section-title,
+body.theme-light .setting-current-value,
+body.theme-light .setting-form-help,
+body.theme-light .setting-modal-title,
+body.theme-light .withdraw-check {
+    color: #241f33 !important;
+}
+body.theme-light .setting-lead,
+body.theme-light .setting-guide,
+body.theme-light .setting-guest-note,
+body.theme-light .setting-row-desc,
+body.theme-light .setting-row-title-help,
+body.theme-light .withdraw-note,
+body.theme-light .withdraw-caution {
+    color: #5f5876 !important;
+}
+
+/* --- スタッフ管理 (shops/mypage/staff/*) ---------------------------------- */
+body.theme-light .staff-shell,
+body.theme-light .staff-form-shell,
+body.theme-light .staff-list-item-name,
+body.theme-light .staff-form-title,
+body.theme-light .staff-form-label {
+    color: #241f33 !important;
+}
+body.theme-light .staff-list-item-meta,
+body.theme-light .staff-form-help,
+body.theme-light .staff-form-cancel {
+    color: #5f5876 !important;
+}
+body.theme-light .staff-form-cancel:hover {
+    color: #241f33 !important;
+    border-color: rgba(124, 58, 237, 0.35) !important;
+}
+
+/* --- 問い合わせフォーム / FAQ (common/support/form) --------------------- */
+body.theme-light .support-form-page,
+body.theme-light .support-form-title,
+body.theme-light .support-form-faq-title,
+body.theme-light .support-form-label,
+body.theme-light .support-form-input,
+body.theme-light .support-form-textarea,
+body.theme-light .support-form-select {
+    color: #241f33 !important;
+}
+body.theme-light .support-form-lead,
+body.theme-light .support-form-help,
+body.theme-light .support-faq-question,
+body.theme-light .support-faq-answer,
+body.theme-light .support-form-note {
+    color: #5f5876 !important;
+}
+body.theme-light .support-form-input::placeholder,
+body.theme-light .support-form-textarea::placeholder {
+    color: rgba(95, 88, 118, 0.55) !important;
+}
+
+/* --- コラム/お知らせ一覧・詳細 (common/support/column-*, notice-*) --- */
+body.theme-light .support-column-page,
+body.theme-light .support-column-title,
+body.theme-light .support-column-item-title,
+body.theme-light .support-column-body,
+body.theme-light .support-notice-page {
+    color: #241f33 !important;
+}
+body.theme-light .support-column-lead,
+body.theme-light .support-column-item-meta,
+body.theme-light .support-column-item-excerpt,
+body.theme-light .support-column-empty,
+body.theme-light .support-column-back {
+    color: #5f5876 !important;
+}
+
+/* --- トーク一覧 (page-talk-list / talk-list-container) --------------------
+   talk.css の !important 白色を、白面で読める濃紫系に上書き。
+   ダークテーマ (body に theme-light が付かない画面) では従来どおり。 */
+body.theme-light.page-talk-list .talk-name,
+body.theme-light .talk-list-container .talk-name {
+    color: #241f33 !important;
+}
+body.theme-light.page-talk-list .talk-time,
+body.theme-light .talk-list-container .talk-time {
+    color: #6d6685 !important;
+}
+body.theme-light.page-talk-list .talk-last-msg,
+body.theme-light .talk-list-container .talk-last-msg {
+    color: #5f5876 !important;
+}
+body.theme-light.page-talk-list .talk-item:has(.unread-badge) .talk-name,
+body.theme-light .talk-list-container .talk-item:has(.unread-badge) .talk-name {
+    color: #1a1626 !important;
+    font-weight: 800 !important;
+}
+body.theme-light.page-talk-list .talk-item:has(.unread-badge) .talk-last-msg,
+body.theme-light .talk-list-container .talk-item:has(.unread-badge) .talk-last-msg {
+    color: #3a3352 !important;
+}
+/* status バッジ（やり取り中・面接中・採用など）: 薄ラベンダー面 + 濃紫文字 */
+body.theme-light.page-talk-list .talk-status,
+body.theme-light .talk-list-container .talk-status {
+    background: rgba(124, 58, 237, 0.08) !important;
+    border-color: rgba(124, 58, 237, 0.28) !important;
+    color: #6d28d9 !important;
+}
+/* トーク行の hover/active/pinned もライト面用に */
+body.theme-light.page-talk-list .talk-item:hover,
+body.theme-light .talk-list-container .talk-item:hover {
+    background: rgba(124, 58, 237, 0.05) !important;
+    border-color: rgba(124, 58, 237, 0.14) !important;
+}
+body.theme-light.page-talk-list .talk-item:active,
+body.theme-light .talk-list-container .talk-item:active {
+    background: rgba(124, 58, 237, 0.08) !important;
+}
+body.theme-light.page-talk-list .talk-item.is-pinned,
+body.theme-light .talk-list-container .talk-item.is-pinned {
+    background: rgba(212, 160, 23, 0.06) !important;
+    border-bottom-color: rgba(212, 160, 23, 0.30) !important;
+}
+
+/* --- トークルーム 定型文編集モーダル / 面談モーダル / 採用時給入力 -------
+   room.blade.php の @push('styles') と talk.css の白ハードコードを上書き */
+body.theme-light .talk-template-menu,
+body.theme-light .talk-template-menu-panel,
+body.theme-light .interview-menu-sheet,
+body.theme-light .talk-action-menu-sheet {
+    color: #241f33 !important;
+}
+body.theme-light .talk-template-menu-title,
+body.theme-light .interview-menu-title,
+body.theme-light .talk-action-menu-title,
+body.theme-light .talk-template-slot-title,
+body.theme-light .talk-template-slot-body,
+body.theme-light .result-template-title,
+body.theme-light .result-template-body,
+body.theme-light .hired-wage-field-wrap label {
+    color: #241f33 !important;
+}
+body.theme-light .talk-template-menu-desc,
+body.theme-light .talk-template-slot-hint,
+body.theme-light .interview-menu-desc,
+body.theme-light .result-template-hint,
+body.theme-light .result-template-button {
+    color: #5f5876 !important;
+}
+body.theme-light .hired-wage-field-wrap input,
+body.theme-light .result-message-textarea,
+body.theme-light .talk-template-slot-textarea,
+body.theme-light .talk-action-menu-input {
+    color: #241f33 !important;
+}
+body.theme-light .hired-wage-field-wrap input::placeholder,
+body.theme-light .result-message-textarea::placeholder,
+body.theme-light .talk-template-slot-textarea::placeholder,
+body.theme-light .talk-action-menu-input::placeholder {
+    color: rgba(95, 88, 118, 0.55) !important;
+}
+
+/* --- app-toast（グローバル通知トースト） -----------------------------------
+   フロント側には .app-toast の基本 CSS が無かったため、
+   ここで濃色パネル + 白文字の見やすい配色を提供。
+   ライト画面でもダーク画面でも読めるダーク配色に統一。 */
+.app-toast {
+    position: fixed;
+    left: 50%;
+    bottom: max(24px, calc(env(safe-area-inset-bottom, 0px) + 90px));
+    transform: translateX(-50%) translateY(8px);
+    padding: 12px 20px;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: #ffffff;
+    background: #241f33;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+    max-width: calc(100vw - 32px);
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 4000;
+    transition: opacity .2s ease, transform .2s ease;
+}
+.app-toast.is-visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+.app-toast.is-success { background: #059669; }
+.app-toast.is-error   { background: #dc2626; }
+.app-toast.is-info    { background: #b45309; color: #ffffff; }
+
+/* --- レビュー (review-modal.css を上書き) --------------------------------- */
+body.theme-light .review-modal-title,
+body.theme-light .review-rating-question,
+body.theme-light .review-comment-label,
+body.theme-light .review-comment-textarea {
+    color: #241f33 !important;
+}
+body.theme-light .review-modal-intro,
+body.theme-light .review-modal-loading,
+body.theme-light .review-footer-hint,
+body.theme-light .review-rating-value {
+    color: #5f5876 !important;
+}
+body.theme-light .review-comment-textarea::placeholder {
+    color: rgba(95, 88, 118, 0.55) !important;
+}

@@ -4,7 +4,7 @@
 @section('body-class', 'no-scroll page-home')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260719-fullbleed">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260719-keep-inline">
 @endpush
 
 @php
@@ -75,23 +75,9 @@
                 </div>
 
 
-                {{-- 2. KEEP：写真右上の小さなブックマーク（favorite-quick.js に一本化） --}}
-                <button
-                    type="button"
-                    class="swipe-keep-corner stop-propagation {{ !empty($item['is_kept']) ? 'is-active' : '' }}"
-                    data-fav-toggle
-                    data-item-id="{{ $item['id'] }}"
-                    data-item-type="shop"
-                    data-action="keep"
-                    aria-label="キープ"
-                    aria-pressed="{{ !empty($item['is_kept']) ? 'true' : 'false' }}"
-                >
-                    <i class="fas fa-bookmark" aria-hidden="true"></i>
-                </button>
-
-                {{-- 3. 下部スタック（4行構成）
-                     1行目: 店名 / 2行目: 業種・レビュー・閲覧数 /
-                     3行目: 最寄り駅・距離 / 4行目: 左=ボーナス金（大） 右=時給 --}}
+                {{-- 2. 下部スタック（4行構成）
+                     1行目: 店名 + KEEP（右端） / 2行目: 業種・最寄り駅・距離・評価 /
+                     3行目: 左=ボーナス金（大） 右=時給 / 4行目: トークCTA --}}
                 <div class="rc-bottom-bar" aria-label="店舗情報">
                     <div class="rc-bottom-bar__stack">
                         @php
@@ -112,17 +98,24 @@
                             </div>
                         @endif
 
-                        {{-- 1行目：店名 + 評価レビュー数 --}}
+                        {{-- 1行目：店名 + KEEP（右端） --}}
                         <div class="rc-name-row">
                             <h2 class="rc-shop-name serif-font">{{ $item['name'] }}</h2>
-                            @if($hasRating)
-                                <span class="rc-rating-inline">
-                                    <span class="rc-star" aria-hidden="true">★</span>{{ number_format((float)$item['rating'], 1) }}@if((int)($item['review_count'] ?? 0) > 0)<span class="rc-review-cnt">({{ (int)$item['review_count'] }}件)</span>@endif
-                                </span>
-                            @endif
+                            <button
+                                type="button"
+                                class="swipe-keep-corner swipe-keep-corner--inline stop-propagation {{ !empty($item['is_kept']) ? 'is-active' : '' }}"
+                                data-fav-toggle
+                                data-item-id="{{ $item['id'] }}"
+                                data-item-type="shop"
+                                data-action="keep"
+                                aria-label="キープ"
+                                aria-pressed="{{ !empty($item['is_kept']) ? 'true' : 'false' }}"
+                            >
+                                <i class="fas fa-bookmark" aria-hidden="true"></i>
+                            </button>
                         </div>
 
-                        {{-- 2行目：業種 → 最寄り駅 → 自分からの距離（未設定なら「?km」+ヘルプ） --}}
+                        {{-- 2行目：業種 → 最寄り駅 → 距離 → 評価レビュー数（右端） --}}
                         <div class="rc-line rc-line--meta">
                             @if(!empty($item['industry_name']))
                                 <span class="rc-genre">{{ $item['industry_name'] }}</span>
@@ -132,6 +125,11 @@
                             </span>
                             @if(!empty($item['distance_label']))
                                 <span class="rc-dist"><i class="fas fa-route" aria-hidden="true"></i>自分から {{ $item['distance_label'] }}</span>
+                            @endif
+                            @if($hasRating)
+                                <span class="rc-rating-inline">
+                                    <span class="rc-star" aria-hidden="true">★</span>{{ number_format((float)$item['rating'], 1) }}@if((int)($item['review_count'] ?? 0) > 0)<span class="rc-review-cnt">({{ (int)$item['review_count'] }}件)</span>@endif
+                                </span>
                             @endif
                         </div>
 
@@ -201,26 +199,26 @@
                     </div>
                 </div>
 
-                {{-- KEEP：写真右上の小さなブックマーク（favorite-quick.js に一本化） --}}
-                <button
-                    type="button"
-                    class="swipe-keep-corner stop-propagation {{ !empty($item['is_kept']) ? 'is-active' : '' }}"
-                    data-fav-toggle
-                    data-item-id="{{ $item['id'] }}"
-                    data-item-type="{{ $itemType === 'recruit' ? 'shop' : 'cast' }}"
-                    data-action="keep"
-                    aria-label="キープ"
-                    aria-pressed="{{ !empty($item['is_kept']) ? 'true' : 'false' }}"
-                >
-                    <i class="fas fa-bookmark" aria-hidden="true"></i>
-                </button>
-
                 {{-- プロフィール情報（3行構成）
-                     1行目: 名前(年齢) / 2行目: 希望業種・位置情報・経験有無 /
+                     1行目: 名前(年齢) + KEEP（右端） / 2行目: 希望業種・位置情報・経験有無 /
                      3行目: 距離（設定時のみ）+ タグ --}}
                 <div class="card-bottom-info">
-                    {{-- 1行目：名前（年齢はかっこ） --}}
-                    <h2 class="cast-name serif-font">{{ $item['name'] }}@if(!$isShop && isset($item['age']))<span class="age">({{ $item['age'] }})</span>@endif</h2>
+                    {{-- 1行目：名前（年齢はかっこ） + KEEP --}}
+                    <div class="cast-name-row">
+                        <h2 class="cast-name serif-font">{{ $item['name'] }}@if(!$isShop && isset($item['age']))<span class="age">({{ $item['age'] }})</span>@endif</h2>
+                        <button
+                            type="button"
+                            class="swipe-keep-corner swipe-keep-corner--inline stop-propagation {{ !empty($item['is_kept']) ? 'is-active' : '' }}"
+                            data-fav-toggle
+                            data-item-id="{{ $item['id'] }}"
+                            data-item-type="{{ $itemType === 'recruit' ? 'shop' : 'cast' }}"
+                            data-action="keep"
+                            aria-label="キープ"
+                            aria-pressed="{{ !empty($item['is_kept']) ? 'true' : 'false' }}"
+                        >
+                            <i class="fas fa-bookmark" aria-hidden="true"></i>
+                        </button>
+                    </div>
 
                     {{-- 2行目：希望業種 → 位置情報（パスポート時は設定位置、通常は登録住所）→ 経験有無 --}}
                     @php
