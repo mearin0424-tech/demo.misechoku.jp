@@ -45,8 +45,9 @@ final class SmokeRouteMatrix
         return [
             'shop home' => ['shop.home', [], 200],
             'shop search' => ['shop.search.index', [], 200],
-            'shop interaction index' => ['shop.interaction.index', [], 200],
-            'shop interaction keep' => ['shop.interaction.keep', [], 200],
+            'shop search keep' => ['shop.search.index', ['tab' => 'keep'], 200],
+            'shop interaction index (redirects to search keep tab)' => ['shop.interaction.index', [], 302],
+            'shop interaction keep (redirects to search keep tab)' => ['shop.interaction.keep', [], 302],
             'shop profile edit' => ['shop.profile.edit', [], 200],
             'shop recruits edit' => ['shop.recruits.edit', [], 200],
             'shop mypage index' => ['shop.mypage.index', [], 200],
@@ -62,12 +63,13 @@ final class SmokeRouteMatrix
             'cast home' => ['cast.home', [], 200],
             'cast search' => ['cast.search.index', ['tab' => 'list'], 200],
             'cast search ai' => ['cast.search.index', ['tab' => 'ai'], 200],
+            'cast search keep' => ['cast.search.index', ['tab' => 'keep'], 200],
             'cast profile edit' => ['cast.profile.edit', [], 200],
             'cast mypage index' => ['cast.mypage.index', [], 200],
             'cast mypage management' => ['cast.mypage.management', [], 200],
             'cast mypage reviews' => ['cast.mypage.reviews', [], 200],
             'cast mypage identity' => ['cast.mypage.identity', [], 200],
-            'cast interaction index' => ['cast.interaction.index', [], 200],
+            'cast interaction index (redirects to search keep tab)' => ['cast.interaction.index', [], 302],
             'cast talk index' => ['cast.talk.index', [], 200],
         ];
     }

@@ -6,7 +6,6 @@
     // ルート名に関わらず、URLのキーワードで判定するので確実です
     $isHome        = request()->is("*/home*");
     $isSearch      = request()->is("*/search*");
-    $isInteraction = request()->is("*/interaction*");
     $isTalk        = request()->is("*/talk*");
     $isMypage      = request()->is("*/mypage*");
 @endphp
@@ -23,12 +22,6 @@
     <a href="{{ $prefix === 'cast' ? route('cast.search.index', ['tab' => 'list']) : route('shop.search.index') }}" class="nav-item {{ $isSearch ? 'active' : '' }}">
         <i class="fas fa-search"></i>
         <span>SEARCH</span>
-    </a>
-
-    {{-- つながり (Interaction) --}}
-    <a href="{{ route($prefix .'.interaction.index') }}" class="nav-item {{ $isInteraction ? 'active' : '' }}">
-        <i class="fas fa-users"></i>
-        <span>KEEPS</span>
     </a>
 
     {{-- メッセージ (Talk) --}}

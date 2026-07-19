@@ -61,7 +61,6 @@
         $navPrefix       = request()->is('cast/*') ? 'cast' : 'shop';
         $navIsHome        = request()->is("*/home*");
         $navIsSearch      = request()->is("*/search*");
-        $navIsInteraction = request()->is("*/interaction*");
         $navIsTalk        = request()->is("*/talk*");
         $navIsMypage      = request()->is("*/mypage*");
         $searchHref = $navPrefix === 'cast'
@@ -650,13 +649,6 @@
                         <x-ui.icon name="search" class="nav-icon text-[22px] transition-all" />
                     </span>
                     <span class="app-title text-[10px] font-bold tracking-wider">SEARCH</span>
-                </a>
-                <a href="{{ route($navPrefix . '.interaction.index') }}"
-                   class="nav-item flex flex-col items-center justify-center transition-all duration-300 {{ $navIsInteraction ? 'is-active' : '' }}">
-                    <span class="nav-icon-wrap flex items-center justify-center mb-1 transition-all">
-                        <x-ui.icon name="likes" class="nav-icon text-[22px] transition-all" />
-                    </span>
-                    <span class="app-title text-[10px] font-bold tracking-wider">KEEPS</span>
                 </a>
                 <a href="{{ route($navPrefix . '.talk.index') }}"
                    class="nav-item flex flex-col items-center justify-center transition-all duration-300 {{ $navIsTalk ? 'is-active' : '' }}">

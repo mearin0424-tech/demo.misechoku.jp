@@ -2733,3 +2733,261 @@ li.connection-item.tl-row a.tl-row__link {
     color: #f0a6c4;
 }
 .tl-row__like-count { line-height: 1; }
+
+/* ==========================================================================
+   探索拠点ピル＋設定モーダル（SEARCH 画面用）
+   旧 app.css（app-v2 では未読込）から移植し、設定済み/未設定の視認性を強化。
+   ========================================================================== */
+.location-pill-wrap { padding: 10px 0 2px; }
+.location-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(168, 85, 247, 0.45);
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.16), rgba(20, 20, 20, 0.6));
+    color: #f5f5f5;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    max-width: 100%;
+    text-align: left;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    box-sizing: border-box;
+}
+.location-pill__icon { flex: 0 0 auto; font-size: 0.95rem; }
+.location-pill__icon--set { color: #4ade80; }
+.location-pill__icon--unset { color: #fbbf24; }
+.location-pill.is-unset {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.10), rgba(10, 10, 10, 0.9));
+    border: 1px dashed rgba(251, 191, 36, 0.55);
+    color: rgba(255, 255, 255, 0.85);
+}
+.location-pill__mode {
+    background: rgba(74, 222, 128, 0.14);
+    border: 1px solid rgba(74, 222, 128, 0.35);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    color: #4ade80;
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+.location-pill__label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: inherit;
+}
+.location-pill__label--unset {
+    white-space: normal;
+    line-height: 1.4;
+    font-weight: 600;
+    font-size: 0.74rem;
+}
+.location-pill__radius {
+    flex: 0 0 auto;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(168, 85, 247, 0.14);
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    color: #c4b5fd;
+    font-size: 0.68rem;
+    white-space: nowrap;
+}
+.location-pill__cta {
+    flex: 0 0 auto;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+.location-pill__cta--unset {
+    background: #fbbf24;
+    border-color: #fbbf24;
+    color: #1a1206;
+    font-weight: 800;
+}
+.location-pill__chev { flex: 0 0 auto; font-size: 0.7rem; color: rgba(255, 255, 255, 0.4); }
+
+/* モーダル */
+.location-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease;
+}
+.location-modal-overlay[aria-hidden="false"] {
+    opacity: 1;
+    pointer-events: auto;
+}
+.location-modal {
+    position: relative;
+    width: min(420px, 100%);
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    background: linear-gradient(180deg, var(--color-sub, #1a1a1a), var(--dark-bg, #050505));
+    border: 1px solid rgba(168, 85, 247, 0.45);
+    border-radius: 18px;
+    padding: 22px 22px 18px;
+    color: #f5f5f5;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7);
+    box-sizing: border-box;
+}
+.location-modal__close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.55);
+    cursor: pointer;
+}
+.location-modal__close:hover { background: rgba(255, 255, 255, 0.16); color: #f5f5f5; }
+.location-modal__title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #f5f5f5;
+    margin: 0 0 8px;
+    letter-spacing: 0.04em;
+}
+.location-modal__lead {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.7;
+    margin: 0 0 16px;
+}
+.location-modal__section { margin-bottom: 14px; }
+.location-modal__section-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--gold, #a78bfa);
+    margin: 0 0 8px;
+    letter-spacing: 0.04em;
+}
+.location-modal__btn-primary,
+.location-modal__btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.92rem;
+    cursor: pointer;
+    border: 0;
+    box-sizing: border-box;
+}
+.location-modal__btn-primary {
+    background: linear-gradient(135deg, var(--gold-light, #c4b5fd), var(--gold, #a78bfa));
+    color: #1a1206;
+}
+.location-modal__btn-primary:hover { filter: brightness(1.05); }
+.location-modal__btn-secondary {
+    background: transparent;
+    border: 1px solid rgba(168, 85, 247, 0.45);
+    color: #f5f5f5;
+}
+.location-modal__btn-secondary:hover { background: rgba(168, 85, 247, 0.08); }
+.location-modal__btn-ghost {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    padding: 5px 10px;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.78rem;
+    cursor: pointer;
+    margin-left: auto;
+}
+.location-modal__btn-ghost:hover { color: #f5f5f5; border-color: rgba(255, 255, 255, 0.35); }
+.location-modal__hint {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.45);
+    margin: 6px 0 0;
+}
+.location-modal__divider {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.74rem;
+    margin: 12px 0;
+    position: relative;
+}
+.location-modal__divider::before,
+.location-modal__divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 38%;
+    height: 1px;
+    background: rgba(168, 85, 247, 0.20);
+}
+.location-modal__divider::before { left: 0; }
+.location-modal__divider::after { right: 0; }
+.location-modal__form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+}
+.location-modal__input {
+    height: 42px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(168, 85, 247, 0.45);
+    background: rgba(255, 255, 255, 0.06);
+    color: #f5f5f5;
+    font-size: 0.92rem;
+}
+.location-modal__input:focus {
+    outline: 2px solid rgba(168, 85, 247, 0.45);
+    outline-offset: 1px;
+    background: rgba(255, 255, 255, 0.1);
+}
+.location-modal__current {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(168, 85, 247, 0.06);
+    border: 1px solid rgba(168, 85, 247, 0.20);
+    font-size: 0.82rem;
+}
+.location-modal__current-label { color: #f5f5f5; font-weight: 700; }
+.location-modal__message {
+    margin-top: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    background: rgba(248, 113, 113, 0.12);
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    color: #f87171;
+}
+.location-modal__message.is-success {
+    background: rgba(74, 222, 128, 0.12);
+    border-color: rgba(74, 222, 128, 0.4);
+    color: #4ade80;
+}

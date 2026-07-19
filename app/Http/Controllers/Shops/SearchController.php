@@ -22,6 +22,11 @@ class SearchController extends BaseSearchController
 
     public function index(Request $request)
     {
+        // 店舗側は {tab} ルートパラメータが無いためクエリで受ける（?tab=keep）
+        $tab = (string) $request->query('tab', 'list');
+        $tab = in_array($tab, ['list', 'keep'], true) ? $tab : 'list';
+        $activeTab = 'pane-' . $tab;
+
         $sort = (string) $request->query('sort', 'hitokoto');
         if (!array_key_exists($sort, self::SORT_OPTIONS)) {
             $sort = 'hitokoto';
@@ -29,14 +34,22 @@ class SearchController extends BaseSearchController
 
         $items = $this->buildSearchItems($request, $sort);
 
-        return $this->renderIndex([
+        $data = [
             'items'                  => $items,
+            'activeTab'              => $activeTab,
+            'searchTab'              => $tab,
             'sort'                   => $sort,
             'sortOptions'            => self::SORT_OPTIONS,
             'savedPreferences'       => app(\App\Services\ShopSearchPreferenceService::class)->loadAll(),
             'castTagsByCategory'     => $this->loadCastTagsByCategory(),
             'searchLocationSettings' => app(UserLocationService::class)->loadProfileSettings(),
-        ]);
+        ];
+
+        if ($tab === 'keep') {
+            $data += $this->buildKeepPaneData();
+        }
+
+        return $this->renderIndex($data);
     }
 
     private function loadCastTagsByCategory(): array

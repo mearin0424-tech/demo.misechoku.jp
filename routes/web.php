@@ -461,7 +461,7 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
 
     Route::get('/home', [ShopHome::class, 'index'])->name('home');
     Route::get('/search', [ShopSearch::class, 'index'])->name('search.index');
-    Route::get('/search/{tab}', fn ($tab) => redirect()->route('shop.search.index'))->where('tab', 'timeline|list');
+    Route::get('/search/{tab}', fn ($tab) => redirect()->route('shop.search.index', $tab === 'keep' ? ['tab' => 'keep'] : []))->where('tab', 'timeline|list|keep');
     Route::post('/search-preferences', [ShopSearch::class, 'savePreferences'])->name('search-preferences.save');
 
     // 繝医・繧ｯ
@@ -547,7 +547,7 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
     Route::post('/profile/update', [CastProfile::class, 'update'])->name('profile.update');
     Route::post('/profile/personality-type', [CastProfile::class, 'updatePersonalityType'])->name('profile.personality-type');
     Route::get('/search', fn () => redirect()->route('cast.search.index', ['tab' => 'list']));
-    Route::get('/search/{tab}', [CastSearch::class, 'index'])->name('search.index')->where('tab', 'search|ai|timeline|list');
+    Route::get('/search/{tab}', [CastSearch::class, 'index'])->name('search.index')->where('tab', 'search|ai|timeline|list|keep');
     Route::post('/search-preferences', [CastSearch::class, 'savePreferences'])->name('search-preferences.save');
     Route::post('/search/ai-chat', [CastAiChat::class, 'respond'])->name('search.ai-chat');
     Route::get('/shopprofiles/{id}', [CastRecruit::class, 'show'])->name('shopprofile.show');

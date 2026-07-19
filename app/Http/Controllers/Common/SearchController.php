@@ -24,6 +24,40 @@ abstract class SearchController extends Controller
     }
 
     /**
+     * SEARCH のキープタブ用データ（キープリスト + おすすめ）。
+     *
+     * @return array<string, mixed>
+     */
+    protected function buildKeepPaneData(): array
+    {
+        $isCastPortal = request()->is('cast/*');
+        $keeps = app(\App\Services\KeepListService::class);
+        $recommendation = app(\App\Services\RecommendationService::class);
+
+        if ($isCastPortal) {
+            $castId = Auth::guard('member')->check() ? (string) Auth::guard('member')->id() : '';
+            return [
+                'keepItems' => $castId !== '' ? $keeps->keptShopsForCast($castId) : [],
+                'keepProfileRoute' => 'cast.shopprofile.show',
+                'recommendItems' => $castId !== '' ? $recommendation->recommendShopsForCast($castId, 6) : [],
+                'recommendType' => 'shop',
+                'recommendLogic' => \App\Services\RecommendationService::castRecommendLogicLines(),
+                'recommendDetailRoute' => 'cast.shopprofile.show',
+            ];
+        }
+
+        $shopId = Auth::guard('shop')->check() ? (string) (Auth::guard('shop')->user()->shop_id ?? '') : '';
+        return [
+            'keepItems' => $shopId !== '' ? $keeps->keptCastsForShop($shopId) : [],
+            'keepProfileRoute' => 'shop.castprofileview.show',
+            'recommendItems' => $shopId !== '' ? $recommendation->recommendCastsForShop($shopId, 6) : [],
+            'recommendType' => 'cast',
+            'recommendLogic' => \App\Services\RecommendationService::shopRecommendLogicLines(),
+            'recommendDetailRoute' => 'shop.castprofileview.show',
+        ];
+    }
+
+    /**
      * 検索結果アイテム配列に is_keeping を付与する。
      *
      * @param  array<int, array<string, mixed>>  $items

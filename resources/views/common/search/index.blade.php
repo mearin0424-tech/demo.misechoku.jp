@@ -4,7 +4,7 @@
 @section('body-class', request()->is('cast/*') && ($activeTab ?? null) === 'pane-ai' ? 'page-search page-search-ai' : 'page-search')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/search.css') }}?v=20260712-like-unify">
+<link rel="stylesheet" href="{{ asset('assets/css/search.css') }}?v=20260719-location-pill">
 <link rel="stylesheet" href="{{ asset('assets/css/sub-header.css') }}">
 @endpush
 
@@ -17,12 +17,18 @@
     $activeTab = $activeTab ?? 'pane-list';
     $searchTab = $searchTab ?? 'list';
 
-    // タブ：cast は「検索／AIレコメンド」の 2 タブ、shop はタブなし。
-    $tabsForHeader = [];
+    // タブ：cast は「検索／AIコンシェルジュ／キープ」、shop は「検索／キープ」。
+    // キープリストは旧 KEEPS（フッターメニュー）から SEARCH 内へ移設。
     if ($showAiTab) {
         $tabsForHeader = [
             ['id' => 'pane-list', 'label' => '検索', 'url' => route('cast.search.index', ['tab' => 'list']), 'active' => $activeTab === 'pane-list'],
             ['id' => 'pane-ai', 'label' => 'AIコンシェルジュ', 'url' => route('cast.search.index', ['tab' => 'ai']), 'active' => $activeTab === 'pane-ai'],
+            ['id' => 'pane-keep', 'label' => 'キープ', 'url' => route('cast.search.index', ['tab' => 'keep']), 'active' => $activeTab === 'pane-keep'],
+        ];
+    } else {
+        $tabsForHeader = [
+            ['id' => 'pane-list', 'label' => '検索', 'url' => route('shop.search.index'), 'active' => $activeTab === 'pane-list'],
+            ['id' => 'pane-keep', 'label' => 'キープ', 'url' => route('shop.search.index', ['tab' => 'keep']), 'active' => $activeTab === 'pane-keep'],
         ];
     }
 
@@ -41,6 +47,9 @@
 <div class="{{ !empty($tabsForHeader) ? 'tab-page-body' : 'search-page-body' }}">
     {{-- 検索パネル：タイムライン＋一覧を統合した画面 --}}
     <div id="pane-list" class="tab-pane {{ $activeTab === 'pane-list' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-list' ? 'display:none' : '' }}">
+        {{-- 探索拠点の状態表示：設定済み/未設定が一目で分かるピル（タップで設定モーダル） --}}
+        @include('layouts.parts.location-pill')
+
         <div class="search-filter-box">
             {{-- 役割に応じたフィルター（検索窓・並び替え）／詳細検索は FAB --}}
             @include($partsView . '.filter')
@@ -113,6 +122,13 @@
             </section>
         </div>
     @endif
+
+    {{-- パネル：キープリスト（メッセージを送る前の保存リスト + おすすめ） --}}
+    <div id="pane-keep" class="tab-pane {{ $activeTab === 'pane-keep' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-keep' ? 'display:none' : '' }}">
+        @if($activeTab === 'pane-keep')
+            @include('common.search.keep-pane')
+        @endif
+    </div>
 </div>
 @endsection
 

@@ -30,7 +30,7 @@ class SearchController extends BaseSearchController
         if ($tab === 'search') {
             $tab = 'list';
         }
-        $tab = in_array($tab, ['list', 'ai'], true) ? $tab : 'list';
+        $tab = in_array($tab, ['list', 'ai', 'keep'], true) ? $tab : 'list';
         $activeTab = 'pane-' . $tab;
 
         $sort = (string) $request->query('sort', 'hitokoto');
@@ -41,7 +41,7 @@ class SearchController extends BaseSearchController
         $items = $this->buildSearchItems($request, $sort);
         $personalityType = $this->currentCastPersonalityType();
 
-        return $this->renderIndex([
+        $data = [
             'items'                  => $items,
             'personalityType'        => $personalityType,
             'activeTab'              => $activeTab,
@@ -51,7 +51,13 @@ class SearchController extends BaseSearchController
             'detailSearchOptions'    => $this->buildDetailSearchOptions(),
             'savedPreferences'       => app(\App\Services\CastSearchPreferenceService::class)->loadAll(),
             'searchLocationSettings' => app(UserLocationService::class)->loadProfileSettings(),
-        ]);
+        ];
+
+        if ($tab === 'keep') {
+            $data += $this->buildKeepPaneData();
+        }
+
+        return $this->renderIndex($data);
     }
 
     /**
