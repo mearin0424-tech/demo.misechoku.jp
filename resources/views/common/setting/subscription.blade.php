@@ -4,13 +4,7 @@
 
 @section('content')
 <div class="setting-page plan-page">
-    <div class="setting-header">
-        {{-- タイトルはヘッダー中央に表示（統一方針）。ページ内はリード文のみ --}}
-        <p class="page-lead">
-            Premiumプランのお申し込み・お支払い状況をここで確認できます。<br>
-            お支払いは銀行振込です。運営が入金を確認すると自動でPremium機能が有効になります。
-        </p>
-    </div>
+    {{-- タイトルはヘッダー中央、説明はオコジョガイド（character_guide_settings）に集約 --}}
 
     @if(session('message'))
         <div class="plan-flash">{{ session('message') }}</div>

@@ -17,8 +17,7 @@
     $docNotSubmitted = $docTotal - $docApproved - $docPending - $docRejected;
 @endphp
 <div class="license-page">
-    {{-- タイトルはヘッダー中央に表示（統一方針）。ページ内はリード文のみ --}}
-    <p class="page-lead">掲載に必要な書類の提出状況です。すべて承認されると求人票を公開できます。</p>
+    {{-- タイトルはヘッダー中央、説明はオコジョガイド（character_guide_settings）に集約 --}}
 
     {{-- 提出状況サマリー：提出できているか・何を提出したかを一目で --}}
     <section class="license-summary" aria-label="提出状況サマリー">

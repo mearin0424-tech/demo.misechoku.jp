@@ -4,13 +4,7 @@
 
 @section('content')
 <div class="support-form-page">
-    <div class="support-form-header">
-        {{-- タイトルはヘッダー中央に表示（統一方針）。ページ内はリード文のみ --}}
-        <p class="page-lead">
-            ミセチョクに関するご質問・ご要望・不具合のご連絡などはこちらからお送りください。<br>
-            内容を確認のうえ、ご記入いただいたメールアドレス宛に運営よりご返信いたします。
-        </p>
-    </div>
+    {{-- タイトルはヘッダー中央、説明はオコジョガイド（character_guide_settings）に集約 --}}
 
     @if(session('support_inquiry_success'))
         <div class="support-form-success" role="status">

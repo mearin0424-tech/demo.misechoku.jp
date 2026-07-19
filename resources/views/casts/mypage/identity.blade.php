@@ -350,8 +350,7 @@
 <div class="content-wrapper animate-fadeIn">
     <div class="cast-mypage-sub-page">
         <section class="mypage-area">
-            {{-- タイトルはヘッダー中央に表示（統一方針）。ページ内はリード文のみ --}}
-            <p class="page-lead">安心してご利用いただくため、本人確認書類の提出をお願いしています。運営の承認が完了すると、すべての機能が利用できます。</p>
+            {{-- タイトルはヘッダー中央、説明はオコジョガイド（character_guide_settings）に集約 --}}
 
             <div class="mypage-detail-box">
                 <div class="mypage-section">

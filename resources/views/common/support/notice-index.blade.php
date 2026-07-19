@@ -8,15 +8,7 @@
 
 @section('content')
 <div class="support-column-page support-notice-page">
-    <div class="support-column-header">
-        {{-- タイトルはヘッダー中央に表示（統一方針）。ページ内はリード文のみ --}}
-        <p class="page-lead">
-            運営からのお知らせです。
-            @if($isGuest)
-                <br>ログインすると、キャスト・店舗向けの内容をそれぞれのアプリ内からも閲覧できます。
-            @endif
-        </p>
-    </div>
+    {{-- タイトルはヘッダー中央、説明はオコジョガイド（character_guide_settings）に集約 --}}
 
     <div class="support-column-list">
         @forelse($notices as $notice)

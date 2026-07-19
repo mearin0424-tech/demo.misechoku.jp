@@ -344,8 +344,7 @@
 <div class="content-wrapper animate-fadeIn">
     <div class="cast-mypage-sub-page">
         <section class="mypage-area">
-            {{-- タイトルはヘッダー中央に表示（統一方針）。ページ内はリード文のみ --}}
-            <p class="page-lead">採用が決まったお店のボーナス申請から、振込完了までの進み具合をここで確認・操作できます。</p>
+            {{-- タイトルはヘッダー中央、説明はオコジョガイド（character_guide_settings）に集約 --}}
 
             @php
                 $hiredCases = $hiredCases ?? [];

@@ -133,12 +133,10 @@
         </div>
 
         <div class="table-wrapper">
-            <table class="admin-table inquiry-table">
+            <table class="admin-table admin-table--stack inquiry-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>区分</th>
-                        <th>名前</th>
+                        <th>送信者（区分 / ID）</th>
                         <th>件名</th>
                         <th>ステータス</th>
                         <th>受付日時</th>
@@ -163,17 +161,15 @@
                             data-href="{{ $detailUrl }}"
                             data-keyword="{{ strtolower($inquiry['from_name'] . ' ' . $inquiry['subject'] . ' ' . $inquiry['from_type']) }}"
                             class="inquiry-row inquiry-row--{{ $ageBucket }}">
-                            <td>#{{ $inquiry['id'] }}</td>
                             <td>
                                 @if (!empty($inquiry['from_type']))
                                     <span class="admin-status-badge">{{ $inquiry['from_type'] }}</span>
-                                @else
-                                    <span class="text-muted">—</span>
                                 @endif
+                                {{ $inquiry['from_name'] ?: '—' }}
+                                <span class="text-muted text-sm">#{{ $inquiry['id'] }}</span>
                             </td>
-                            <td>{{ $inquiry['from_name'] ?: '—' }}</td>
-                            <td>{{ $inquiry['subject'] ?: '（件名なし）' }}</td>
-                            <td>
+                            <td data-label="件名">{{ $inquiry['subject'] ?: '（件名なし）' }}</td>
+                            <td data-label="ステータス">
                                 <span class="actor-pill {{ $inqActor['cls'] }}">
                                     <i class="fas {{ $inqActor['icon'] }}"></i> {{ $inqActor['label'] }}
                                 </span>
@@ -183,8 +179,8 @@
                                     </span>
                                 </div>
                             </td>
-                            <td class="text-muted text-sm">{{ $inquiry['created_at']->format('Y-m-d H:i') }}</td>
-                            <td class="inquiry-age inquiry-age--{{ $ageBucket }}">
+                            <td data-label="受付日時" class="text-muted text-sm">{{ $inquiry['created_at']->format('Y-m-d H:i') }}</td>
+                            <td data-label="経過" class="inquiry-age inquiry-age--{{ $ageBucket }}">
                                 @if($isOpen)
                                     <i class="fas {{ $ageBucket === 'critical' ? 'fa-fire' : ($ageBucket === 'warning' ? 'fa-clock' : 'fa-hourglass-half') }}"></i>
                                     {{ $ageLabel }}
@@ -192,7 +188,7 @@
                                     <span class="text-muted">—</span>
                                 @endif
                             </td>
-                            <td class="text-right">
+                            <td class="text-right stack-actions">
                                 <a href="{{ $detailUrl }}" class="btn-action btn-action-secondary">
                                     詳細 <i class="fas fa-arrow-right"></i>
                                 </a>
@@ -200,11 +196,11 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted">問い合わせはありません。</td>
+                            <td colspan="6" class="text-center text-muted">問い合わせはありません。</td>
                         </tr>
                     @endforelse
                     <tr id="inquiry-empty-row" hidden>
-                        <td colspan="8" class="text-center text-muted">条件に一致する問合せはありません。</td>
+                        <td colspan="6" class="text-center text-muted">条件に一致する問合せはありません。</td>
                     </tr>
                 </tbody>
             </table>

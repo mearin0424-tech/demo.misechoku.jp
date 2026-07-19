@@ -134,8 +134,7 @@
 <div class="content-wrapper animate-fadeIn">
     <section class="mypage-area">
         <div class="staff-form-shell">
-            {{-- タイトルはヘッダー中央に表示（統一方針）。ページ内はリード文のみ --}}
-            <p class="page-lead">新しい店舗ログインアカウントを発行します。メールアドレスとパスワードを、追加するスタッフ本人に共有してください。</p>
+            {{-- タイトルはヘッダー中央、説明はオコジョガイド（character_guide_settings）に集約 --}}
 
             @if ($errors->has('shop') || $errors->has('manager_limit'))
                 <div class="staff-form-flash--error">

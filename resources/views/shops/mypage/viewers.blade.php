@@ -69,8 +69,7 @@
 @section('content')
 <div class="viewers-shell animate-fadeIn">
     <span class="viewers-premium-chip"><i class="fas fa-crown"></i> PREMIUM機能</span>
-    {{-- タイトルはヘッダー中央に表示（統一方針）。ページ内はリード文のみ --}}
-    <p class="page-lead">あなたのお店（プロフィール・求人）を閲覧したキャストの一覧です。気になるキャストにはスカウトを送ってみましょう。</p>
+    {{-- タイトルはヘッダー中央、説明はオコジョガイド（character_guide_settings）に集約 --}}
 
     @if($isPremium)
         @if(empty($viewers))

@@ -4,10 +4,7 @@
 
 @section('content')
 <div class="setting-page">
-    <div class="setting-header">
-        {{-- タイトルはヘッダー中央に表示（統一方針）。ページ内はリード文のみ --}}
-        <p class="page-lead">ミセチョクからのリマインダー通知の受け取り方法を設定します。</p>
-    </div>
+    {{-- タイトルはヘッダー中央、説明はオコジョガイド（character_guide_settings）に集約 --}}
 
     @if (session('message'))
         <div class="setting-alert setting-alert-success">{{ session('message') }}</div>

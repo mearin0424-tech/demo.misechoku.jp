@@ -4,10 +4,7 @@
 
 @section('content')
 <div class="setting-page">
-    <div class="setting-header">
-        {{-- タイトルはヘッダー中央に表示（統一方針）。ページ内はリード文のみ --}}
-        <p class="page-lead">メールアドレス変更・パスワード変更・LINE連携{{ request()->is('shop*') ? '・スタッフ管理' : '' }}・退会手続きをここで行います。</p>
-    </div>
+    {{-- タイトルはヘッダー中央、説明はオコジョガイド（character_guide_settings）に集約 --}}
 
     {{-- スタッフ・アカウント管理（店舗のみ）：サイドメニューから本ページ内に集約 --}}
     @if(request()->is('shop*'))

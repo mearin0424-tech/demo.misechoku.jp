@@ -59,12 +59,11 @@
     </section>
 
     <div class="table-wrapper" style="margin-top: 16px;">
-        <table class="admin-table">
+        <table class="admin-table admin-table--stack">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>送信者（ID）</th>
                     <th>受付日時</th>
-                    <th>送信者</th>
                     <th>カテゴリ</th>
                     <th>本文（抜粋）</th>
                     <th>ステータス</th>
@@ -87,20 +86,19 @@
                         };
                     @endphp
                     <tr>
-                        <td>{{ $inquiry->id }}</td>
-                        <td>{{ optional($inquiry->created_at)->format('Y-m-d H:i') }}</td>
                         <td>
-                            <div>{{ $senderBadge }}</div>
+                            <div>{{ $senderBadge }} <span class="admin-table-sub">#{{ $inquiry->id }}</span></div>
                             @if($inquiry->sender_id)
                                 <div class="admin-table-sub">{{ $inquiry->sender_id }}</div>
                             @endif
                         </td>
-                        <td>{{ $inquiry->categoryLabel() }}</td>
-                        <td class="admin-table-cell-clip">{{ \Illuminate\Support\Str::limit($inquiry->body, 60) }}</td>
-                        <td>
+                        <td data-label="受付日時">{{ optional($inquiry->created_at)->format('Y-m-d H:i') }}</td>
+                        <td data-label="カテゴリ">{{ $inquiry->categoryLabel() }}</td>
+                        <td data-label="本文（抜粋）" class="admin-table-cell-clip">{{ \Illuminate\Support\Str::limit($inquiry->body, 60) }}</td>
+                        <td data-label="ステータス">
                             <span class="badge {{ $statusBadge }}">{{ $inquiry->statusLabel() }}</span>
                         </td>
-                        <td>
+                        <td class="stack-actions">
                             <a href="{{ route('admin.support-inquiries.show', $inquiry->id) }}" class="btn-action">
                                 <i class="fas fa-eye"></i> 詳細
                             </a>
@@ -108,7 +106,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="admin-table-empty">
+                        <td colspan="6" class="admin-table-empty">
                             <i class="fas fa-inbox"></i> 該当する問い合わせはありません。
                         </td>
                     </tr>

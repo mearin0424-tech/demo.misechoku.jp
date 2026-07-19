@@ -29,6 +29,10 @@ class CharacterGuideService
         'cast.interaction.index'          => ['label' => 'キャスト：つながり（LIKES）',      'group' => 'cast',   'default_enabled' => false],
         'cast.talk.index'                 => ['label' => 'キャスト：トーク一覧',             'group' => 'cast',   'default_enabled' => false],
         'cast.register'                   => ['label' => 'キャスト：新規登録',               'group' => 'cast',   'default_enabled' => false],
+        'cast.mypage.identity'            => ['label' => 'キャスト：本人確認',               'group' => 'cast',   'default_enabled' => false],
+        'cast.mypage.reviews'             => ['label' => 'キャスト：レビュー一覧',           'group' => 'cast',   'default_enabled' => false],
+        'cast.htu'                        => ['label' => 'キャスト：ご利用ガイド',           'group' => 'cast',   'default_enabled' => false],
+        'cast.column.index'               => ['label' => 'キャスト：お役立ちコラム',         'group' => 'cast',   'default_enabled' => false],
 
         // 店舗向け
         'shop.home'                       => ['label' => '店舗：ホーム',                     'group' => 'shop',   'default_enabled' => false],
@@ -40,6 +44,21 @@ class CharacterGuideService
         'shop.interaction.index'          => ['label' => '店舗：つながり（LIKES）',          'group' => 'shop',   'default_enabled' => false],
         'shop.talk.index'                 => ['label' => '店舗：トーク一覧',                 'group' => 'shop',   'default_enabled' => false],
         'shop.register'                   => ['label' => '店舗：新規登録',                   'group' => 'shop',   'default_enabled' => false],
+        'shop.mypage.documents.index'     => ['label' => '店舗：許可証の提出・管理',         'group' => 'shop',   'default_enabled' => false],
+        'shop.mypage.viewers.index'       => ['label' => '店舗：閲覧キャスト一覧',           'group' => 'shop',   'default_enabled' => false],
+        'shop.mypage.staff.index'         => ['label' => '店舗：スタッフ管理',               'group' => 'shop',   'default_enabled' => false],
+        'shop.mypage.staff.create'        => ['label' => '店舗：スタッフを追加',             'group' => 'shop',   'default_enabled' => false],
+        'shop.mypage.review.index'        => ['label' => '店舗：レビュー一覧',               'group' => 'shop',   'default_enabled' => false],
+        'shop.htu'                        => ['label' => '店舗：ご利用ガイド',               'group' => 'shop',   'default_enabled' => false],
+        'shop.column.index'               => ['label' => '店舗：お役立ちコラム',             'group' => 'shop',   'default_enabled' => false],
+
+        // 共通（設定・サポート）
+        'setting.account'                 => ['label' => '共通：アカウント管理',             'group' => 'common', 'default_enabled' => false],
+        'setting.notification'            => ['label' => '共通：通知設定',                   'group' => 'common', 'default_enabled' => false],
+        'subscription'                    => ['label' => '共通：プラン設定（店舗）',         'group' => 'common', 'default_enabled' => false],
+        'support.form'                    => ['label' => '共通：問い合わせ窓口',             'group' => 'common', 'default_enabled' => false],
+        'support.column'                  => ['label' => '共通：お役立ちコラム（未ログイン）', 'group' => 'common', 'default_enabled' => false],
+        'support.notices'                 => ['label' => '共通：お知らせ',                   'group' => 'common', 'default_enabled' => false],
     ];
 
     /**
@@ -155,6 +174,7 @@ class CharacterGuideService
         return [
             'cast' => 'キャスト向け画面',
             'shop' => '店舗向け画面',
+            'common' => '共通画面（設定・サポート）',
         ];
     }
 }

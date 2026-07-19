@@ -64,7 +64,8 @@
       "Bash(php -l app/Services/UserTaskService.php)",
       "Bash(php -l app/Http/Controllers/Admin/PlanSubscriptionController.php)",
       "Bash(php -l app/Http/Controllers/Casts/SearchController.php)",
-      "Bash(php -l app/Http/Controllers/Shops/ViewerController.php)"
+      "Bash(php -l app/Http/Controllers/Shops/ViewerController.php)",
+      "Bash(php -l app/Services/CharacterGuideService.php)"
     ]
   }
 }

@@ -1,0 +1,212 @@
+/* ==========================================================================
+   admin-mobile.css — 運営管理画面のモバイル最適化 (2026-07-19)
+   admin.css の後に読み込み、スマホ（~640px）での使いにくさを一括で底上げする。
+   §1 横漏れ防止 / §2 テーブルのカード化 (.admin-table--stack + td[data-label])
+   §3 横スクロールテーブルの視認性 / §4 フィルタチップの1行スクロール化
+   §5 ヘッダーポップオーバーの全幅シート化 / §6 KPI・入金確認画面の微調整
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   §1 横漏れ防止：ページ全体の水平スクロールを禁止し、スクロールは
+      .table-wrapper 等の意図した内側コンテナだけに限定する
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+    .admin-main,
+    .admin-page {
+        overflow-x: clip;
+        min-width: 0;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   §2 テーブルのカード化
+   使い方: <table class="admin-table admin-table--stack"> + 各 <td data-label="見出し">
+   ・640px 以下で thead を隠し、1行 = 1カードの縦積みに変換
+   ・data-label が無い td は左寄せ（主見出しセル向け）
+   ・td.stack-actions はボタンを全幅縦積みにする操作セル
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+    .table-wrapper:has(> .admin-table--stack) {
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+        overflow: visible;
+        border-radius: 0;
+    }
+    .admin-table--stack {
+        min-width: 0;
+        display: block;
+        width: 100%;
+        font-size: 0.84rem;
+    }
+    .admin-table--stack thead { display: none; }
+    .admin-table--stack tbody { display: block; width: 100%; }
+    .admin-table--stack tr {
+        display: block;
+        background: var(--admin-surface, #fff);
+        border: 1px solid var(--admin-line, #e5e7eb);
+        border-radius: 12px;
+        padding: 4px 14px;
+        margin-bottom: 10px;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+    }
+    .admin-table--stack td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 9px 0;
+        border: 0;
+        border-bottom: 1px dashed var(--admin-line, #e5e7eb);
+        text-align: right;
+        min-width: 0;
+    }
+    .admin-table--stack td:last-child { border-bottom: 0; }
+    .admin-table--stack td::before {
+        content: attr(data-label);
+        flex: 0 0 auto;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--admin-muted, #6b7280);
+        text-align: left;
+    }
+    .admin-table--stack td:not([data-label]),
+    .admin-table--stack td[data-label=""] {
+        justify-content: flex-start;
+        text-align: left;
+    }
+    .admin-table--stack td:not([data-label])::before,
+    .admin-table--stack td[data-label=""]::before { content: none; }
+
+    /* 操作セル：ボタンを全幅・縦積みで最下部に */
+    .admin-table--stack td.stack-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        text-align: left;
+        padding-top: 12px;
+    }
+    .admin-table--stack td.stack-actions::before { content: none; }
+    .admin-table--stack td.stack-actions .btn-action,
+    .admin-table--stack td.stack-actions form,
+    .admin-table--stack td.stack-actions button {
+        width: 100%;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+    .admin-table--stack td.stack-actions form .btn-action { width: 100%; }
+
+    /* 空状態行はカード枠のままセンタリング */
+    .admin-table--stack td[colspan] {
+        display: block;
+        text-align: center;
+        border-bottom: 0;
+    }
+    .admin-table--stack td[colspan]::before { content: none; }
+}
+
+/* --------------------------------------------------------------------------
+   §3 横スクロールを残すテーブル：右端に「続きがある」フェードを出す
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+    .table-wrapper { position: relative; }
+    .table-wrapper:not(:has(> .admin-table--stack))::after {
+        content: '';
+        position: absolute;
+        top: 0; right: 0; bottom: 0;
+        width: 28px;
+        pointer-events: none;
+        border-radius: 0 12px 12px 0;
+        background: linear-gradient(to left, rgba(15, 23, 42, 0.10), transparent);
+    }
+}
+
+/* --------------------------------------------------------------------------
+   §4 フィルタチップ・ツールバー：折り返さず1行の横スクロールに
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+    .admin-page-toolbar-filters {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        gap: 8px;
+        padding-bottom: 4px;
+        margin-right: -12px;   /* ページ余白まで使って端まで流す */
+        padding-right: 12px;
+    }
+    .admin-page-toolbar-filters::-webkit-scrollbar { display: none; }
+    .admin-page-toolbar-filters .admin-filter-chip,
+    .admin-page-toolbar-filters .task-filter-chip {
+        flex: 0 0 auto;
+        white-space: nowrap;
+    }
+    /* dashboard のタスクチップ行も同様 */
+    .task-summary-row {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        gap: 8px;
+    }
+    .task-summary-row::-webkit-scrollbar { display: none; }
+    .task-summary-row > * { flex: 0 0 auto; }
+}
+
+/* --------------------------------------------------------------------------
+   §5 ヘッダーの未済タスク／お知らせポップオーバー：小画面では全幅シート
+   -------------------------------------------------------------------------- */
+@media (max-width: 520px) {
+    .admin-task-popover {
+        position: fixed;
+        top: 64px;
+        left: 8px;
+        right: 8px;
+        width: auto;
+        max-height: min(70vh, 480px);
+        overflow-y: auto;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   §6 画面別の微調整
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+    /* KPI：数値・パディングをやや圧縮（2列グリッドは admin.css のまま） */
+    .dashboard-kpi-card { padding: 10px; }
+    .dashboard-kpi-value { font-size: clamp(1.1rem, 6vw, 1.5rem); }
+    .dashboard-kpi-title { font-size: 0.68rem; }
+
+    /* 入金確認・振込（/admin/deposits）
+       ステップ表示：ラベルは現在ステップのみ表示し、他は点だけに */
+    .deposit-step-indicator { gap: 4px; }
+    .deposit-step-label { display: none; }
+    .deposit-step.is-current .deposit-step-label {
+        display: block;
+        white-space: nowrap;
+    }
+    /* 展開/折りたたみトグル：アイコンのみ（テキストは隠す） */
+    .deposit-bulk-toggle__btn .u-vh-mobile { display: none; }
+    /* 展開内の操作ボタンは全幅で押しやすく */
+    [data-deposit-row] .btn-action {
+        width: 100%;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+    [data-deposit-row] .btn-copy { flex: 0 0 auto; width: auto; }
+
+    /* 書類審査（/admin/verification）：書類プレビューのはみ出し防止 */
+    .admin-page img { max-width: 100%; height: auto; }
+
+    /* 問合せ・サポート問合せ：本文抜粋を2行でクランプ */
+    .admin-table-cell-clip {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        max-width: 100%;
+    }
+}
