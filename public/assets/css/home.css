@@ -4642,3 +4642,187 @@ body.page-home .rc-wage-card__row strong {
     color: #ffffff;
     font-variant-numeric: tabular-nums;
 }
+
+/* ============================================================================
+   SWIPE ガイド調整 (2026-07-19c)
+   ・左右スワイプ（写真）のバー：全幅セグメント → 中央寄せの極小バーへ縮小
+   ・上下スワイプ：上向きに流れるシェブロン + ラベルの明確なガイドを新設
+   ============================================================================ */
+
+/* 写真ページネーション：中央寄せのミニバー（控えめ） */
+body.page-home .photo-pagination.swiper-pagination-bullets {
+    top: 12px !important;
+    left: 50% !important;
+    right: auto !important;
+    width: auto !important;
+    transform: translateX(-50%) !important;
+    display: flex !important;
+    justify-content: center !important;
+    gap: 4px !important;
+}
+body.page-home .photo-pagination .swiper-pagination-bullet {
+    flex: 0 0 auto !important;
+    width: 14px !important;
+    height: 2px !important;
+    margin: 0 !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.22) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+    transform: none !important;
+}
+body.page-home .photo-pagination .swiper-pagination-bullet-active {
+    width: 20px !important;
+    background: rgba(255, 255, 255, 0.78) !important;
+}
+
+/* カード上端の "interactivity hint" バーも控えめに（サイズ・明度を落とす） */
+body.page-home .main-swiper .swiper-slide-active .cast-card:not(.cast-card--recruit)::after,
+body.page-home .main-swiper .swiper-slide-active .cast-card--recruit::after {
+    width: 22px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+/* --- 上下スワイプガイド --- */
+body.page-home .swipe-updown-guide {
+    position: absolute;
+    right: 14px;
+    top: 34%;
+    z-index: 45;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 10px;
+    border-radius: 999px;
+    background: rgba(10, 10, 10, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    pointer-events: none;
+    /* 表示から数秒はしっかり見せ、その後は薄く残す */
+    animation: guideSettle 6s ease forwards;
+}
+body.page-home .swipe-updown-guide.is-dismissed {
+    opacity: 0 !important;
+    transition: opacity 0.4s ease;
+}
+@keyframes guideSettle {
+    0%   { opacity: 0; }
+    8%   { opacity: 1; }
+    70%  { opacity: 1; }
+    100% { opacity: 0.38; }
+}
+body.page-home .swipe-updown-guide__chevs {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 0.7;
+    color: #ffffff;
+}
+body.page-home .swipe-updown-guide__chevs i {
+    font-size: 0.85rem;
+    animation: chevFloatUp 1.6s ease-in-out infinite;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+}
+body.page-home .swipe-updown-guide__chevs i:nth-child(2) {
+    animation-delay: 0.25s;
+    opacity: 0.6;
+}
+@keyframes chevFloatUp {
+    0%   { transform: translateY(4px); opacity: 0.25; }
+    40%  { transform: translateY(0);   opacity: 1; }
+    100% { transform: translateY(-5px); opacity: 0; }
+}
+body.page-home .swipe-updown-guide__label {
+    writing-mode: vertical-rl;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    color: rgba(255, 255, 255, 0.85);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+@media (prefers-reduced-motion: reduce) {
+    body.page-home .swipe-updown-guide { animation: none; opacity: 0.5; }
+    body.page-home .swipe-updown-guide__chevs i { animation: none; opacity: 1; }
+}
+
+/* ============================================================================
+   SWIPE アクション再配置 (2026-07-19d)
+   ・KEEP = 写真右上の小さなブックマーク
+   ・トーク = 下部の全幅CTA（採用フローの起点として最強調）
+   ・右側の縦アクション列は廃止 → 下部スタックの右パディングを標準に戻す
+   ============================================================================ */
+
+/* 旧アクション列ぶんの右パディングを解除（全幅を情報とCTAに使う） */
+body.page-home .cast-card--recruit .rc-bottom-bar {
+    padding-right: var(--content-padding-x, 16px) !important;
+}
+body.page-home .cast-card:not(.cast-card--recruit) .card-bottom-info {
+    padding-right: var(--content-padding-x, 16px) !important;
+}
+
+/* --- KEEP：写真右上のブックマーク --- */
+body.page-home .swipe-keep-corner {
+    position: absolute;
+    top: calc(var(--header-height, 60px) + 12px);
+    right: 12px;
+    z-index: 40;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 10, 10, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.40);
+    transition: transform 0.12s ease, background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+body.page-home .swipe-keep-corner:active { transform: scale(0.92); }
+/* アクティブ（キープ済み）＝ゴールドベタ */
+body.page-home .swipe-keep-corner.is-active,
+body.page-home .swipe-keep-corner[aria-pressed="true"] {
+    background: linear-gradient(135deg, #f6d36a, #e3b94a);
+    border-color: rgba(246, 211, 106, 0.9);
+    color: #1a0f00;
+    box-shadow: 0 0 12px rgba(246, 211, 106, 0.45);
+}
+
+/* --- トーク：全幅CTA --- */
+body.page-home .swipe-talk-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 50px;
+    margin-top: 10px;
+    padding: 13px 16px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--accent-grad-from, #a78bfa), var(--accent-grad-to, #7c3aed));
+    color: var(--on-accent-strong, #ffffff);
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.45),
+        0 0 0 4px rgba(var(--accent-rgb, 139, 92, 246), 0.20),
+        0 0 18px rgba(var(--accent-rgb, 139, 92, 246), 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.28),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.22);
+    transition: transform 0.12s ease, filter 0.15s ease;
+}
+body.page-home .swipe-talk-cta:active { transform: scale(0.98); }
+body.page-home .swipe-talk-cta i { font-size: 1.05rem; }
+
+/* 上下スワイプガイドが KEEP ブックマークと近づきすぎないよう少し下げる */
+body.page-home .swipe-updown-guide { top: 38%; }

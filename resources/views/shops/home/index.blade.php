@@ -4,7 +4,7 @@
 @section('body-class', 'no-scroll page-home')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260719-card-gold">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260719-actions-v2">
 @endpush
 
 @php
@@ -75,38 +75,19 @@
                 </div>
 
 
-                {{-- 2. アクションボタン（右側）。KEEP は favorite-quick.js（data-fav-toggle）に一本化 --}}
-                <div class="card-actions-overlay rc-actions stop-propagation">
-                    <div class="rc-action-item stop-propagation">
-                        <button
-                            type="button"
-                            class="action-circle-btn keep stop-propagation {{ !empty($item['is_kept']) ? 'is-active' : '' }}"
-                            data-fav-toggle
-                            data-item-id="{{ $item['id'] }}"
-                            data-item-type="shop"
-                            data-action="keep"
-                            aria-label="キープ"
-                            aria-pressed="{{ !empty($item['is_kept']) ? 'true' : 'false' }}"
-                        >
-                            <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M6 4a2 2 0 0 0-2 2v15.382a.6.6 0 0 0 .89.527L12 17.5l7.11 4.41A.6.6 0 0 0 20 21.382V6a2 2 0 0 0-2-2H6Z"/>
-                            </svg>
-                        </button>
-                        <span class="rc-action-label">キープ</span>
-                    </div>
-                    <div class="rc-action-item stop-propagation">
-                        <a
-                            href="{{ route($talkRoute, ['id' => $item['id'], 'talk_topic' => 'other', 'initiate' => 1]) }}"
-                            class="action-circle-btn message stop-propagation"
-                            aria-label="トークを開始する"
-                        >
-                            <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/>
-                            </svg>
-                        </a>
-                        <span class="rc-action-label">トーク</span>
-                    </div>
-                </div>
+                {{-- 2. KEEP：写真右上の小さなブックマーク（favorite-quick.js に一本化） --}}
+                <button
+                    type="button"
+                    class="swipe-keep-corner stop-propagation {{ !empty($item['is_kept']) ? 'is-active' : '' }}"
+                    data-fav-toggle
+                    data-item-id="{{ $item['id'] }}"
+                    data-item-type="shop"
+                    data-action="keep"
+                    aria-label="キープ"
+                    aria-pressed="{{ !empty($item['is_kept']) ? 'true' : 'false' }}"
+                >
+                    <i class="fas fa-bookmark" aria-hidden="true"></i>
+                </button>
 
                 {{-- 3. 下部スタック（4行構成）
                      1行目: 店名 / 2行目: 業種・レビュー・閲覧数 /
@@ -178,6 +159,13 @@
                                 </span>
                             </div>
                         </div>
+
+                        {{-- 5行目：トーク全幅CTA（採用フローの起点として最強調） --}}
+                        <a href="{{ route($talkRoute, ['id' => $item['id'], 'talk_topic' => 'other', 'initiate' => 1]) }}"
+                           class="swipe-talk-cta stop-propagation"
+                           aria-label="トークを開始する">
+                            <i class="fas fa-comment-dots" aria-hidden="true"></i> トークする
+                        </a>
                     </div>
                 </div>
 
@@ -212,38 +200,19 @@
                     </div>
                 </div>
 
-                {{-- アクションボタン（求人カードと同じラベル付き構造。favorite-quick.js に一本化） --}}
-                <div class="card-actions-overlay rc-actions stop-propagation">
-                    <div class="rc-action-item stop-propagation">
-                        <button
-                            type="button"
-                            class="action-circle-btn keep stop-propagation {{ !empty($item['is_kept']) ? 'is-active' : '' }}"
-                            data-fav-toggle
-                            data-item-id="{{ $item['id'] }}"
-                            data-item-type="{{ $itemType === 'recruit' ? 'shop' : 'cast' }}"
-                            data-action="keep"
-                            aria-label="キープ"
-                            aria-pressed="{{ !empty($item['is_kept']) ? 'true' : 'false' }}"
-                        >
-                            <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M6 4a2 2 0 0 0-2 2v15.382a.6.6 0 0 0 .89.527L12 17.5l7.11 4.41A.6.6 0 0 0 20 21.382V6a2 2 0 0 0-2-2H6Z"/>
-                            </svg>
-                        </button>
-                        <span class="rc-action-label">キープ</span>
-                    </div>
-                    <div class="rc-action-item stop-propagation">
-                        <a href="{{ route($talkRoute, ['id' => $item['id'], 'talk_topic' => 'other', 'initiate' => 1]) }}"
-                           class="action-circle-btn message stop-propagation" aria-label="トークを開始する">
-                            <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/>
-                            </svg>
-                        </a>
-                        <span class="rc-action-label">トーク</span>
-                    </div>
-                    @if($isShop)
-                    <a href="{{ route('cast.shopprofile.show', $item['id']) }}" class="card-recruit-btn stop-propagation">求人</a>
-                    @endif
-                </div>
+                {{-- KEEP：写真右上の小さなブックマーク（favorite-quick.js に一本化） --}}
+                <button
+                    type="button"
+                    class="swipe-keep-corner stop-propagation {{ !empty($item['is_kept']) ? 'is-active' : '' }}"
+                    data-fav-toggle
+                    data-item-id="{{ $item['id'] }}"
+                    data-item-type="{{ $itemType === 'recruit' ? 'shop' : 'cast' }}"
+                    data-action="keep"
+                    aria-label="キープ"
+                    aria-pressed="{{ !empty($item['is_kept']) ? 'true' : 'false' }}"
+                >
+                    <i class="fas fa-bookmark" aria-hidden="true"></i>
+                </button>
 
                 {{-- プロフィール情報（4行構成）
                      1行目: 名前(年齢) / 2行目: 希望業種・経験有無 /
@@ -282,6 +251,13 @@
                             <span class="tag-pill">#{{ $tag }}</span>
                         @endforeach
                     </div>
+
+                    {{-- 5行目：トーク全幅CTA --}}
+                    <a href="{{ route($talkRoute, ['id' => $item['id'], 'talk_topic' => 'other', 'initiate' => 1]) }}"
+                       class="swipe-talk-cta stop-propagation"
+                       aria-label="トークを開始する">
+                        <i class="fas fa-comment-dots" aria-hidden="true"></i> トークする
+                    </a>
                 </div>
                 <div class="discovery-swipe-guide" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -294,6 +270,44 @@
             @endforeach
         </div>
     </div>
+
+    {{-- 上下スワイプガイド：上向きに流れるシェブロン + ラベル。
+         表示から数秒はしっかり見せ、その後は薄く残る（スワイプ操作で非表示） --}}
+    <div class="swipe-updown-guide" id="swipe-updown-guide" aria-hidden="true">
+        <span class="swipe-updown-guide__chevs">
+            <i class="fas fa-chevron-up"></i>
+            <i class="fas fa-chevron-up"></i>
+        </span>
+        <span class="swipe-updown-guide__label">上にスワイプで次へ</span>
+    </div>
+
+    @push('scripts')
+    <script>
+    {{-- 上下スワイプガイド：一度でも縦スワイプしたら消す（学習済みユーザーへのノイズ防止） --}}
+    (function () {
+        var guide = document.getElementById('swipe-updown-guide');
+        var screen = document.getElementById('home-screen');
+        if (!guide || !screen) return;
+        var startY = null;
+        function dismiss() {
+            guide.classList.add('is-dismissed');
+            screen.removeEventListener('touchstart', onStart);
+            screen.removeEventListener('touchmove', onMove);
+            screen.removeEventListener('wheel', dismiss);
+        }
+        function onStart(e) {
+            startY = e.touches && e.touches[0] ? e.touches[0].clientY : null;
+        }
+        function onMove(e) {
+            if (startY === null || !e.touches || !e.touches[0]) return;
+            if (Math.abs(e.touches[0].clientY - startY) > 40) dismiss();
+        }
+        screen.addEventListener('touchstart', onStart, { passive: true });
+        screen.addEventListener('touchmove', onMove, { passive: true });
+        screen.addEventListener('wheel', dismiss, { passive: true });
+    })();
+    </script>
+    @endpush
 
     {{-- スワイプ操作オンボーディング（初回・久しぶりのみ表示） --}}
     <div class="home-onboarding-overlay" id="home-swipe-onboarding" aria-hidden="true">

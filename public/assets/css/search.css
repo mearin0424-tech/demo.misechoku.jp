@@ -3150,3 +3150,11 @@ body.page-search #pane-keep.tab-pane.active {
     -webkit-overflow-scrolling: touch;
     padding-bottom: 24px;
 }
+
+/* 検索条件エリアを開いても行の高さは常に一定に保つ：
+   .connection-list--search は flex column コンテナのため、リスト領域が縮むと
+   行（flex子）が既定の flex-shrink:1 で圧縮されてしまう。
+   圧縮を禁止し、収まらない分は下方向（スクロール）へ送る */
+body.page-search .connection-list--search > * {
+    flex: 0 0 auto;
+}
