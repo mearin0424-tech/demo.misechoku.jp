@@ -4,7 +4,7 @@
 @section('body-class', request()->is('cast/*') && ($activeTab ?? null) === 'pane-ai' ? 'page-search page-search-ai' : 'page-search')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/search.css') }}?v=20260719-location-pill">
+<link rel="stylesheet" href="{{ asset('assets/css/search.css') }}?v=20260719-search-topbar">
 <link rel="stylesheet" href="{{ asset('assets/css/sub-header.css') }}">
 @endpush
 
@@ -47,18 +47,14 @@
 <div class="{{ !empty($tabsForHeader) ? 'tab-page-body' : 'search-page-body' }}">
     {{-- 検索パネル：タイムライン＋一覧を統合した画面 --}}
     <div id="pane-list" class="tab-pane {{ $activeTab === 'pane-list' ? 'active' : '' }}" style="{{ $activeTab !== 'pane-list' ? 'display:none' : '' }}">
-        {{-- 探索拠点の状態表示：設定済み/未設定が一目で分かるピル（タップで設定モーダル） --}}
-        @include('layouts.parts.location-pill')
-
-        <div class="search-filter-box">
-            {{-- 役割に応じたフィルター（検索窓・並び替え）／詳細検索は FAB --}}
-            @include($partsView . '.filter')
+        {{-- 上部検索バー：スクロールしても固定（sticky）。
+             探索拠点・詳細フィルター・指定中条件は開閉エリアに集約し、
+             閉じると検索窓1行だけになり結果一覧が広がる --}}
+        <div class="search-topbar" id="search-topbar">
+            <div class="search-filter-box">
+                @include($partsView . '.filter')
+            </div>
         </div>
-
-        <button type="button" id="open-detail-search" class="search-detail-fab" aria-controls="detail-search-modal" aria-expanded="false" aria-label="詳細検索">
-            <i class="fas fa-sliders-h" aria-hidden="true"></i>
-            <span id="detail-search-badge" class="search-detail-fab__badge" style="display: none;" aria-hidden="true">0</span>
-        </button>
 
         <ul class="connection-list connection-list--search">
             @forelse($items as $item)
@@ -136,6 +132,32 @@
 <script src="{{ asset('assets/js/sub-header.js') }}"></script>
 <script src="{{ asset('assets/js/search-detail.js') }}?v=20260712-form-unify"></script>
 <script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260719-keep-only"></script>
+<script>
+{{-- 上部検索バーの開閉（状態は localStorage に保持） --}}
+(function () {
+    var bar = document.getElementById('search-topbar');
+    var extra = document.getElementById('search-topbar-extra');
+    var btn = document.getElementById('search-topbar-toggle');
+    if (!bar || !extra || !btn) return;
+
+    var KEY = 'search-topbar-collapsed';
+
+    function apply(collapsed) {
+        bar.classList.toggle('is-collapsed', collapsed);
+        btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    }
+
+    var saved = false;
+    try { saved = localStorage.getItem(KEY) === '1'; } catch (e) {}
+    apply(saved);
+
+    btn.addEventListener('click', function () {
+        var collapsed = !bar.classList.contains('is-collapsed');
+        apply(collapsed);
+        try { localStorage.setItem(KEY, collapsed ? '1' : '0'); } catch (e) {}
+    });
+})();
+</script>
 @if($showAiTab)
 <script src="{{ asset('assets/js/ai-chat.js') }}?v=20260712-ai"></script>
 @endif

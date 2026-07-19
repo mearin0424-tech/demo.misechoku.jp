@@ -5679,3 +5679,124 @@ section[id^="sec-"] {
     color: #422006;
     border-color: #b45309;
 }
+
+/* ============================================================
+   ライトモード化 (2026-07-19)
+   コンテンツ領域は薄ラベンダー基調のライトモード。
+   サイドバー / トップヘッダーは front と同じ「紫ダークのクローム」を維持。
+   admin.css は全面的に --admin-* トークン参照のため、
+   末尾でトークンを再定義するだけで全画面に効く。
+   ============================================================ */
+:root {
+    /* 表面・背景 */
+    --admin-bg: #f5f2fb;
+    --admin-bg-gradient: linear-gradient(180deg, #f7f5fc 0%, #f1edf9 100%);
+    --admin-surface: #ffffff;
+    --admin-surface-alt: rgba(124, 58, 237, 0.05);
+    --admin-surface-soft: rgba(124, 58, 237, 0.07);
+    --admin-card: #ffffff;
+    --admin-card-hover: rgba(124, 58, 237, 0.05);
+    /* --admin-sidebar / --admin-header はダークのまま（クローム） */
+
+    /* 罫線 */
+    --admin-line: rgba(124, 58, 237, 0.16);
+    --admin-line-soft: rgba(124, 58, 237, 0.09);
+    --admin-line-strong: rgba(124, 58, 237, 0.34);
+
+    /* 影：黒ではなくラベンダー系に */
+    --admin-shadow: 0 2px 6px rgba(76, 29, 149, 0.08), 0 1px 2px rgba(76, 29, 149, 0.06);
+    --admin-shadow-lg: 0 8px 24px rgba(76, 29, 149, 0.14), 0 4px 8px rgba(76, 29, 149, 0.08);
+    --admin-shadow-popover: 0 12px 40px rgba(76, 29, 149, 0.20), 0 0 0 1px rgba(124, 58, 237, 0.18);
+
+    /* テキスト：明背景で十分なコントラスト */
+    --admin-text: #241f33;
+    --admin-sub: #5f5876;
+    --admin-muted: #8b84a1;
+    --admin-disabled: #b6b0c8;
+    --admin-accent: #241f33;
+    --admin-ink: #ffffff;   /* アメジスト面（濃紫）上の文字は白へ */
+
+    /* アクセント：明背景で読める濃紫へ */
+    --admin-primary: #7c3aed;
+    --admin-primary-hover: #6d28d9;
+    --admin-primary-active: #5b21b6;
+    --admin-primary-soft: rgba(124, 58, 237, 0.10);
+    --admin-primary-soft-hover: rgba(124, 58, 237, 0.18);
+    --admin-primary-border: rgba(124, 58, 237, 0.35);
+
+    /* レガシー名（明背景向けに濃色へ） */
+    --admin-blue: #7c3aed;
+    --admin-purple: #7c3aed;
+    --admin-green: #059669;
+    --admin-yellow: #b45309;
+    --admin-red: #dc2626;
+
+    /* front 共通コンポーネント（form-controls.css 等）が参照する変数の解決先。
+       admin では tailwind.css を読まないため、ここで明示的にライト値を与える */
+    --color-text-main: #241f33;
+    --color-text-sub: #5f5876;
+    --accent: #7c3aed;
+    --accent-text: #7c3aed;
+    --accent-rgb: 124, 58, 237;
+
+    /* ステータス（明背景向けコントラスト） */
+    --status-success-bg: rgba(22, 163, 74, 0.10);
+    --status-success-fg: #15803d;
+    --status-success-bd: rgba(22, 163, 74, 0.35);
+    --status-warning-bg: rgba(217, 119, 6, 0.10);
+    --status-warning-fg: #b45309;
+    --status-warning-bd: rgba(217, 119, 6, 0.40);
+    --status-danger-bg: rgba(185, 28, 28, 0.08);
+    --status-danger-fg: #b91c1c;
+    --status-danger-bd: rgba(185, 28, 28, 0.40);
+    --status-info-bg: rgba(124, 58, 237, 0.10);
+    --status-info-fg: #6d28d9;
+    --status-info-bd: rgba(124, 58, 237, 0.35);
+    --status-neutral-bg: rgba(36, 31, 51, 0.05);
+    --status-neutral-fg: #6d6685;
+    --status-neutral-bd: rgba(36, 31, 51, 0.14);
+}
+
+/* クローム（サイドバー / トップヘッダー / その配下のポップオーバー起点ボタン）は
+   紫ダーク維持のため、テキスト・罫線系トークンをダーク値に戻す */
+.admin-sidebar,
+.admin-header {
+    --admin-text: #f5f5f5;
+    --admin-sub: #a0a0a0;
+    --admin-muted: #8a8a8a;
+    --admin-disabled: #525252;
+    --admin-accent: #f5f5f5;
+    --admin-ink: #0a0a0a;
+    --admin-line: rgba(168, 85, 247, 0.20);
+    --admin-line-soft: rgba(168, 85, 247, 0.10);
+    --admin-line-strong: rgba(168, 85, 247, 0.40);
+    --admin-surface: #141414;
+    --admin-surface-alt: rgba(255, 255, 255, 0.04);
+    --admin-surface-soft: rgba(168, 85, 247, 0.08);
+    --admin-card: #1a1a1a;
+    --admin-card-hover: rgba(168, 85, 247, 0.06);
+    --admin-primary: #a78bfa;
+    --admin-primary-hover: #c4b5fd;
+    --admin-primary-active: #7c3aed;
+    --admin-primary-soft: rgba(168, 85, 247, 0.12);
+    --admin-primary-soft-hover: rgba(168, 85, 247, 0.22);
+    --admin-primary-border: rgba(168, 85, 247, 0.40);
+}
+
+/* ヘッダーから開く通知ポップオーバーはコンテンツ扱い＝ライト面
+   （.admin-header 内にDOMがある場合に備えてライト値へ戻す） */
+.admin-header .admin-task-popover,
+.admin-task-popover {
+    --admin-text: #241f33;
+    --admin-sub: #5f5876;
+    --admin-muted: #8b84a1;
+    --admin-line: rgba(124, 58, 237, 0.16);
+    --admin-surface: #ffffff;
+    --admin-card: #ffffff;
+    --admin-primary: #7c3aed;
+    --admin-primary-soft: rgba(124, 58, 237, 0.10);
+}
+
+/* スクロールバーも明背景向けへ */
+::-webkit-scrollbar-thumb { background: rgba(76, 29, 149, 0.22); background-clip: padding-box; border: 2px solid transparent; }
+::-webkit-scrollbar-thumb:hover { background: rgba(76, 29, 149, 0.38); background-clip: padding-box; border: 2px solid transparent; }

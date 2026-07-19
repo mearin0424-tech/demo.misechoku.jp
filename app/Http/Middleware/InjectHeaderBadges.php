@@ -32,8 +32,6 @@ class InjectHeaderBadges
         'talk.interview_offer'       => ['icon' => 'fa-calendar-check',   'color' => 'accent',  'label' => '面談'],
         'talk.hired'                 => ['icon' => 'fa-check-double',     'color' => 'success', 'label' => '採用'],
         'talk.rejected'              => ['icon' => 'fa-circle-xmark',     'color' => 'muted',   'label' => '選考結果'],
-        'favorite.like_received'     => ['icon' => 'fa-heart',            'color' => 'pink',    'label' => 'いいね'],
-        'favorite.keep_received'     => ['icon' => 'fa-bookmark',         'color' => 'gold',    'label' => 'キープ'],
         'review.posted'              => ['icon' => 'fa-star',             'color' => 'gold',    'label' => 'レビュー'],
         'document.approved'          => ['icon' => 'fa-id-card',          'color' => 'success', 'label' => '書類審査'],
         'document.rejected'          => ['icon' => 'fa-id-card',          'color' => 'muted',   'label' => '書類審査'],

@@ -41,7 +41,8 @@
       "PowerShell(php -l app/Services/DocumentReviewService.php; php -l app/Http/Controllers/Admin/VerificationController.php)",
       "PowerShell(Out-Null *)",
       "Bash(npm run *)",
-      "Bash(npx tailwindcss *)"
+      "Bash(npx tailwindcss *)",
+      "Bash(python -)"
     ]
   }
 }

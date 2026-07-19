@@ -1,0 +1,449 @@
+/* ==========================================================================
+   light-theme.css — ライトモード（薄ラベンダー基調）
+   対象: body.theme-light が付くページ（SWIPE / MyPage / 認証系を除く全画面）
+   方針:
+   - 真っ白ではなく「限りなく薄いラベンダー」をベースに、テーマ紫と調和させる
+   - グローバルヘッダー / サブヘッダー / ボトムナビ / サイドメニュー / モーダル類は
+     従来の紫ダークのまま（クロームは全画面共通）
+   - 実装はデザイントークン（CSS変数）の反転を主軸に、
+     ハードコードされた暗色コンポーネントだけ個別に上書きする
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. トークン反転（Tailwind @theme 変数 + 旧レイアウト系変数）
+   -------------------------------------------------------------------------- */
+body.theme-light {
+    /* --- Tailwind トークン --- */
+    --color-base:         #f5f2fb;   /* ベース：極薄ラベンダー */
+    --color-surface-from: #ffffff;   /* カード面 */
+    --color-text-main:    #241f33;   /* 濃紫グレー */
+    --color-text-sub:     #5f5876;
+    --color-text-mute:    #8b84a1;
+    --color-line:         #e6e0f3;
+    /* --color-line-accent(#a855f7) は据え置き：紫の縁取りはそのまま調和する */
+
+    --color-success:      #059669;
+    --color-success-bg:   rgba(5, 150, 105, 0.10);
+    --color-success-line: rgba(5, 150, 105, 0.35);
+    --color-warn:         #b45309;
+    --color-warn-bg:      rgba(180, 83, 9, 0.10);
+    --color-warn-line:    rgba(180, 83, 9, 0.35);
+    --color-danger:       #dc2626;
+    --color-danger-bg:    rgba(220, 38, 38, 0.08);
+    --color-danger-line:  rgba(220, 38, 38, 0.35);
+
+    /* 影：ダーク用の強い黒影を淡いラベンダー影に */
+    --shadow-card-3d:   0 6px 18px rgba(76, 29, 149, 0.10), 0 1px 3px rgba(76, 29, 149, 0.08);
+    --shadow-btn-3d:    0 6px 14px rgba(76, 29, 149, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    --shadow-badge-3d:  0 3px 8px rgba(76, 29, 149, 0.15);
+    --shadow-fab-3d:    0 10px 24px rgba(76, 29, 149, 0.22);
+    --shadow-nav-pill:  0 3px 8px rgba(76, 29, 149, 0.15);
+    --shadow-input-dark: inset 0 1px 3px rgba(76, 29, 149, 0.08);
+
+    /* --- アクセント（明るい紫文字は白背景で読めないため濃紫へ） --- */
+    --accent-text: #7c3aed;
+
+    /* --- 旧レイアウト系変数（search.css / talk.css 等の legacy CSS が参照） --- */
+    --color-text-header:   #241f33;
+    --color-text:          #2d2742;
+    --color-text-muted:    #6d6685;
+    --color-border:        rgba(124, 58, 237, 0.16);
+    --color-border-strong: rgba(124, 58, 237, 0.34);
+    --color-card:          #ffffff;
+    --color-card-strong:   #ffffff;
+    --color-sub:           #ede8f8;
+    --color-main:          #f1edf9;
+    --dark-bg:             #ffffff;   /* 入力欄などの面として参照される */
+    --surface:             #ffffff;
+
+    /* 旧ゴールド系トークン（実体は紫）：明背景向けに濃く */
+    --gold:       #7c3aed;
+    --gold-light: #8b5cf6;
+    --gold-deep:  #6d28d9;
+
+    background-color: var(--color-base);
+    color: var(--color-text-main);
+}
+
+/* --------------------------------------------------------------------------
+   2. クローム（ヘッダー / サブヘッダー / フッター / サイドメニュー / トースト）は
+      紫ダークを維持 → 変数をダーク値に戻す
+      ※ モーダル・ポップオーバーは「画面テーマに追従」（ライト画面ではライト）
+   -------------------------------------------------------------------------- */
+body.theme-light #global-header,
+body.theme-light .sub-header-wrapper,
+body.theme-light nav[data-bottom-nav],
+body.theme-light #bottom-nav,
+body.theme-light #side-menu,
+body.theme-light .app-toast {
+    --color-text-header:   #f5f5f5;
+    --color-text:          #f5f5f5;
+    --color-text-main:     #f5f5f5;
+    --color-text-sub:      #b8b8b8;
+    --color-text-muted:    #a0a0a0;
+    --color-border:        rgba(168, 85, 247, 0.20);
+    --color-border-strong: rgba(168, 85, 247, 0.45);
+    --color-card:          #1a1a1a;
+    --color-card-strong:   #1a1a1a;
+    --color-sub:           #1a1a1a;
+    --color-main:          #14000d;
+    --dark-bg:             #050505;
+    --surface:             #141414;
+    --gold:       #a78bfa;
+    --gold-light: #c4b5fd;
+    --gold-deep:  #7c3aed;
+    --accent-text: #a78bfa;
+    --color-surface-from: #1a1a1a;
+    --color-base: #050505;
+}
+
+/* --------------------------------------------------------------------------
+   3. 汎用補正（ハードコード暗色の代表パターン）
+   -------------------------------------------------------------------------- */
+
+/* 入力系：クローム外はライト面に（form-controls.css の暗色指定を上書き） */
+body.theme-light main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+body.theme-light main select,
+body.theme-light main textarea {
+    background: #ffffff !important;
+    color: var(--color-text-main) !important;
+    border-color: rgba(124, 58, 237, 0.28) !important;
+    box-shadow: inset 0 1px 3px rgba(76, 29, 149, 0.08) !important;
+}
+body.theme-light main ::placeholder {
+    color: rgba(95, 88, 118, 0.55) !important;
+}
+
+/* 白文字ハードコードの受け皿：main 配下の見出し・本文が読めるように */
+body.theme-light main {
+    color: var(--color-text-main);
+}
+
+/* 罫線・区切り */
+body.theme-light main hr { border-color: var(--color-line); }
+
+/* --------------------------------------------------------------------------
+   4. SEARCH 画面
+   -------------------------------------------------------------------------- */
+body.theme-light .search-filter-box {
+    background: linear-gradient(180deg, #ffffff, #f7f4fc);
+    border-bottom: 1px solid var(--color-line);
+}
+body.theme-light .search-filter-minimal__input {
+    background: #ffffff;
+    color: var(--color-text-main);
+    border: 1px solid rgba(124, 58, 237, 0.24);
+}
+body.theme-light .search-filter-icon-btn {
+    background: #ffffff;
+    color: #7c3aed;
+    border: 1px solid rgba(124, 58, 237, 0.28);
+}
+body.theme-light .search-filter-icon-btn--gold {
+    background: linear-gradient(135deg, var(--accent-grad-from, #a78bfa), var(--accent-grad-to, #7c3aed));
+    color: #ffffff;
+    border: 0;
+}
+body.theme-light .search-filter-summary {
+    color: var(--color-text-sub);
+}
+
+/* タイムライン行（検索結果・キープ一覧） */
+body.theme-light .connection-item,
+body.theme-light .tl-row {
+    background: #ffffff;
+}
+body.theme-light .tl-row + .tl-row {
+    border-top: 1px solid rgba(124, 58, 237, 0.10);
+}
+body.theme-light .tl-row__name { color: var(--color-text-main); }
+body.theme-light .tl-row__meta,
+body.theme-light .tl-row__loc,
+body.theme-light .tl-row__time,
+body.theme-light .tl-row__msg { color: var(--color-text-sub); }
+body.theme-light .tl-row__thumb { background: #ece7f7; }
+body.theme-light .no-data-wrapper,
+body.theme-light .no-data-msg { color: var(--color-text-sub); }
+
+/* おすすめセクション（キープタブ） */
+body.theme-light .recommend-section {
+    background: linear-gradient(180deg, rgba(124, 58, 237, 0.05), #ffffff);
+    border-color: var(--color-line);
+}
+body.theme-light .recommend-item__link {
+    background: #ffffff;
+    border-color: var(--color-line);
+}
+body.theme-light .recommend-item__link:hover {
+    background: rgba(124, 58, 237, 0.05);
+}
+
+/* 探索拠点ピル：ライト面用に調整（設定済み＝白カード、未設定＝淡アンバー） */
+body.theme-light .location-pill {
+    background: #ffffff;
+    color: var(--color-text-main);
+    border: 1px solid rgba(124, 58, 237, 0.30);
+    box-shadow: 0 3px 10px rgba(76, 29, 149, 0.10);
+}
+body.theme-light .location-pill.is-unset {
+    background: #fdf6e7;
+    border: 1px dashed rgba(180, 83, 9, 0.45);
+    color: #6b5a2a;
+}
+body.theme-light .location-pill__icon--set { color: #059669; }
+body.theme-light .location-pill__icon--unset { color: #b45309; }
+body.theme-light .location-pill__mode {
+    background: rgba(5, 150, 105, 0.10);
+    border-color: rgba(5, 150, 105, 0.35);
+    color: #059669;
+}
+body.theme-light .location-pill__radius {
+    background: rgba(124, 58, 237, 0.08);
+    border-color: rgba(124, 58, 237, 0.28);
+    color: #7c3aed;
+}
+body.theme-light .location-pill__cta {
+    background: rgba(124, 58, 237, 0.08);
+    border-color: rgba(124, 58, 237, 0.24);
+    color: #7c3aed;
+}
+body.theme-light .location-pill__cta--unset {
+    background: #b45309;
+    border-color: #b45309;
+    color: #ffffff;
+}
+body.theme-light .location-pill__chev { color: rgba(36, 31, 51, 0.35); }
+
+/* 上部検索バー（sticky）と詳細フィルターボタン */
+body.theme-light .search-topbar .search-filter-box {
+    box-shadow: 0 8px 18px rgba(76, 29, 149, 0.12);
+}
+body.theme-light .search-detail-inline {
+    background: rgba(124, 58, 237, 0.06);
+    border-color: rgba(124, 58, 237, 0.30);
+    color: var(--color-text-main);
+}
+body.theme-light .search-detail-inline i:first-child { color: #7c3aed; }
+body.theme-light .search-detail-inline__badge {
+    background: #7c3aed;
+    color: #ffffff;
+}
+body.theme-light .search-detail-inline__chev { color: rgba(36, 31, 51, 0.35); }
+
+/* --------------------------------------------------------------------------
+   5. TALK（一覧・ルーム）
+   -------------------------------------------------------------------------- */
+/* 一覧の行は .connection-item（上記）でライト化される */
+
+/* トークルーム：背景を薄ラベンダーに（app-v2 inline の暗グラデを上書き） */
+body.theme-light #talk-room-container {
+    background:
+        radial-gradient(circle at top, rgba(168, 85, 247, 0.08), transparent 40%),
+        linear-gradient(180deg, #ffffff 0%, #f5f2fb 100%) !important;
+}
+
+/* 相手の吹き出し：ダークグレー → 薄ラベンダーグレー */
+body.theme-light .msg-left .message-bubble,
+body.theme-light #talk-room-container .msg-left .message-bubble {
+    background: #ece7f7 !important;
+    color: #241f33 !important;
+}
+/* 自分の吹き出しはアクセント色ベタのまま（そのまま調和する） */
+
+/* 時刻・既読 */
+body.theme-light .msg-time,
+body.theme-light #talk-room-container .msg-time {
+    color: rgba(36, 31, 51, 0.45) !important;
+}
+body.theme-light #talk-room-container .msg-right .msg-time {
+    color: rgba(36, 31, 51, 0.55) !important;
+}
+
+/* 入力エリア：暗グラデ → 白面 */
+body.theme-light #talk-room-container .chat-input-area {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), #ffffff);
+    border-top: 1px solid var(--color-line);
+    box-shadow: 0 -6px 18px rgba(76, 29, 149, 0.08);
+}
+body.theme-light .chat-input-wrapper {
+    background: #f5f2fb;
+    border: 1px solid rgba(124, 58, 237, 0.22);
+    box-shadow: inset 0 1px 3px rgba(76, 29, 149, 0.08);
+}
+body.theme-light .chat-input-wrapper textarea {
+    color: #241f33;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 0 !important;
+}
+body.theme-light .chat-input-wrapper textarea::placeholder {
+    color: rgba(95, 88, 118, 0.55);
+}
+body.theme-light .btn-chat-action {
+    background: #ffffff;
+    border: 1px solid rgba(124, 58, 237, 0.28);
+    color: #7c3aed;
+}
+
+/* --------------------------------------------------------------------------
+   6. Tailwind ユーティリティ直書きページ（プロフィール詳細・設定など）の補正
+   面・ボーダー・文字はトークン反転（--color-base / --color-surface-from /
+   --color-text-*）で追従する。
+   ※ .text-white / .bg-black 系は写真上のオーバーレイ文字に使われるため反転しない
+   -------------------------------------------------------------------------- */
+
+/* ダーク前提の半透明白カード（rgba(255,255,255,0.03) 系）はライトでは消えるため面を付ける */
+body.theme-light main .glass-card {
+    background: #ffffff;
+    border-color: var(--color-line);
+}
+
+/* --------------------------------------------------------------------------
+   7. モーダル・ポップアップ（画面テーマ追従：ライト画面では白パネル）
+   変数ベースのモーダル（詳細検索・レビュー等）はトークン反転で自動追従。
+   ここではハードコード暗色と modal-readability.css の !important を上書きする。
+   ※ 暗転オーバーレイ（背面の黒幕）とライトボックス（写真ビューア）はダークのまま
+   -------------------------------------------------------------------------- */
+
+/* ヘッダーの通知 / やることポップオーバー（app-v2 inline の !important を上書き） */
+body.theme-light #header-task-popup,
+body.theme-light #header-notification-popup {
+    background: #ffffff !important;
+    border: 1px solid rgba(124, 58, 237, 0.30) !important;
+    box-shadow: 0 12px 32px rgba(76, 29, 149, 0.18) !important;
+}
+body.theme-light .task-popup-header {
+    background: rgba(124, 58, 237, 0.08) !important;
+    border-bottom: 1px solid rgba(124, 58, 237, 0.20) !important;
+}
+body.theme-light .task-popup-header h4 { color: #7c3aed !important; }
+body.theme-light .notif-popup-section-label {
+    background: rgba(124, 58, 237, 0.06) !important;
+    color: #7c3aed !important;
+    border-bottom-color: rgba(124, 58, 237, 0.14) !important;
+}
+body.theme-light .notif-popup-item {
+    color: #241f33 !important;
+    border-bottom-color: rgba(124, 58, 237, 0.12) !important;
+}
+body.theme-light a.notif-popup-item:hover { background: rgba(124, 58, 237, 0.06) !important; }
+body.theme-light .notif-popup-empty { color: #6d6685 !important; }
+
+/* 探索拠点モーダル */
+body.theme-light .location-modal {
+    background: linear-gradient(180deg, #ffffff, #f5f2fb);
+    border-color: rgba(124, 58, 237, 0.30);
+    color: #241f33;
+    box-shadow: 0 24px 64px rgba(76, 29, 149, 0.25);
+}
+body.theme-light .location-modal__title { color: #241f33; }
+body.theme-light .location-modal__lead,
+body.theme-light .location-modal__hint,
+body.theme-light .location-modal__divider { color: #6d6685; }
+body.theme-light .location-modal__close {
+    background: rgba(124, 58, 237, 0.08);
+    color: #6d6685;
+}
+body.theme-light .location-modal__btn-primary { color: #ffffff; }
+body.theme-light .location-modal__btn-secondary {
+    border-color: rgba(124, 58, 237, 0.34);
+    color: #241f33;
+}
+body.theme-light .location-modal__btn-ghost {
+    border-color: rgba(36, 31, 51, 0.25);
+    color: #6d6685;
+}
+body.theme-light .location-modal__input {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.28);
+    color: #241f33;
+}
+body.theme-light .location-modal__current {
+    background: rgba(124, 58, 237, 0.06);
+    border-color: rgba(124, 58, 237, 0.18);
+}
+body.theme-light .location-modal__current-label { color: #241f33; }
+
+/* おすすめ表示ロジック説明モーダル（modal-readability.css の !important に勝つ） */
+body.theme-light .recommend-info-modal__panel {
+    background: #ffffff !important;
+    border-color: rgba(124, 58, 237, 0.30) !important;
+}
+body.theme-light .recommend-info-modal__title { color: #241f33 !important; }
+body.theme-light .recommend-info-modal__close { color: #6d6685 !important; }
+body.theme-light .recommend-info-modal__list li {
+    color: #2d2742 !important;
+    background: rgba(124, 58, 237, 0.05) !important;
+    border-color: rgba(124, 58, 237, 0.16) !important;
+}
+
+/* 詳細検索モーダル：面はトークン反転で追従。ハードコード分のみ補正 */
+body.theme-light .detail-search-modal__window {
+    background: #ffffff;
+    box-shadow: 0 -4px 24px rgba(76, 29, 149, 0.20);
+}
+body.theme-light .detail-search-modal__footer { background: rgba(124, 58, 237, 0.05); }
+body.theme-light .detail-search-modal__close { color: #6d6685; }
+
+/* 並び替えパネル */
+body.theme-light .search-sort-panel {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.30);
+    box-shadow: 0 10px 28px rgba(76, 29, 149, 0.18);
+}
+body.theme-light .search-sort-panel__item { color: #2d2742; }
+body.theme-light .search-sort-panel__item:hover { background: rgba(124, 58, 237, 0.06); }
+
+/* レビュー投稿モーダル：面は変数追従。ヘッダー帯と白文字 !important のみ補正 */
+body.theme-light .review-modal-header {
+    background: rgba(255, 255, 255, 0.94);
+    border-bottom-color: var(--color-line);
+}
+body.theme-light .review-modal-title { color: #7c3aed !important; }
+body.theme-light .review-modal-intro { color: #2d2742 !important; }
+body.theme-light .review-modal-body label,
+body.theme-light .review-modal-body .review-item-label { color: #241f33 !important; }
+
+/* --------------------------------------------------------------------------
+   8. OFFICIAL（/about /terms /privacy）・サポート系（お知らせ / コラム / HTU / 問合せ）
+   -------------------------------------------------------------------------- */
+
+/* 規約・ポリシー：policy-page.css の読み物用トークンをライト値へ */
+body.theme-light.is-policy-document,
+body.theme-light .policy-doc-shell {
+    --policy-text: #2d2742;
+    --policy-text-muted: #6d6685;
+    --policy-rule: rgba(76, 29, 149, 0.14);
+    --policy-accent: #7c3aed;
+}
+body.theme-light .policy-doc-lead {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.22);
+}
+
+/* サポート系ページ：ページコンテナの白文字ハードコードを反転 */
+body.theme-light .support-column-page,
+body.theme-light .support-column-page.support-column-detail,
+body.theme-light .support-notice-page,
+body.theme-light .support-notice-detail,
+body.theme-light .support-form-page {
+    color: var(--color-text-main);
+}
+body.theme-light .support-form-page .support-form-group label,
+body.theme-light .support-form-faq-title {
+    color: var(--color-text-main);
+}
+
+/* ダークカード（rgba(20,7,15) / rgba(8,4,6) 系）→ 白面 */
+body.theme-light .support-column-page .support-column-card,
+body.theme-light .support-form-card,
+body.theme-light .support-form-faq {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.20);
+}
+body.theme-light .support-faq-item {
+    background: #f7f4fc;
+    border-color: rgba(124, 58, 237, 0.16);
+}
+/* 汎用受け皿：サポート系ページ内の暗背景カードで個別クラスが漏れても
+   入力欄は §3 の汎用ルール（main input 白面化）で読める状態を担保する */

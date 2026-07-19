@@ -8,7 +8,7 @@
         $metaDescription = trim($__env->yieldContent('meta_description')) ?: 'ミセチョクのデモサイトです。';
         $metaImage = trim($__env->yieldContent('meta_image')) ?: asset('assets/images/pwa/icon-512.png');
         $canonicalUrl = trim($__env->yieldContent('canonical')) ?: url()->current();
-        $assetVersion = '20260712-motion-all';
+        $assetVersion = '20260719-light-all';
         $resolvedTitle = $metaTitle !== ''
             ? $metaTitle
             : ($pageTitle !== '' ? $pageTitle . ' | ' . config('app.name', 'ミセチョク') : config('app.name', 'ミセチョク'));
@@ -56,6 +56,15 @@
         } else {
             $displayTitle = $headerTitleCustom !== '' ? $headerTitleCustom : $pageTitle;
         }
+
+        // ===== ライトモード判定 =====
+        // SWIPE（home）と MyPage、認証系フルスクリーン以外はライトモード（薄ラベンダー基調）。
+        // ヘッダー／フッター等のクロームは light-theme.css 側で除外して紫ダークを維持する。
+        $bodyClassAttr = trim($__env->yieldContent('body-class'));
+        $isLightTheme = !request()->is('*/home*')
+            && !request()->is('*/mypage*')
+            && !str_contains($bodyClassAttr, 'page-demo-login')
+            && !str_contains($bodyClassAttr, 'page-auth-login');
 
         // ===== ボトムナビ：アクティブ判定（旧 layouts.parts.footer と同一ロジック） =====
         $navPrefix       = request()->is('cast/*') ? 'cast' : 'shop';
@@ -335,15 +344,6 @@
             }
         }
 
-        /* --- 詳細検索 FAB：画面（ビューポート）右下に固定。
-              旧 search.css は 430px センターのコンテンツ右端基準で left 計算していたため、
-              デスクトップだと中央寄りに出てしまう。ここで右端基準に上書き。 */
-        .search-detail-fab {
-            left: auto !important;
-            right: calc(16px + env(safe-area-inset-right, 0px)) !important;
-            bottom: calc(var(--footer-height, 75px) + 16px + env(safe-area-inset-bottom, 0px)) !important;
-        }
-
         /* --- TALK ROOM 専用：ボトムナビを隠し、メッセージ入力欄をルームコンテナ最下部に固定。
               さらに main / body のスクロールを抑止して二重スクロールバーを解消する。
               chat-input-area は position: fixed ではなく、position: relative の #talk-room-container を
@@ -601,8 +601,12 @@
     {{-- モーション基盤（タブ/モーダル/画像/リビールのなめらか化。Step1） --}}
     <link rel="stylesheet" href="{{ asset('assets/css/motion.css') }}?v={{ $assetVersion }}">
     <script src="{{ asset('assets/js/motion.js') }}?v={{ $assetVersion }}" defer></script>
+    @if($isLightTheme)
+    {{-- ライトモード（薄ラベンダー基調）。全CSSの最後に読み込んで上書きする --}}
+    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260719-light-4">
+    @endif
 </head>
-<body class="@yield('body-class') bg-base text-text-main"
+<body class="@yield('body-class') {{ $isLightTheme ? 'theme-light' : '' }} bg-base text-text-main"
       data-notification-badge="{{ isset($unreadNewsCount) ? (int) $unreadNewsCount : 0 }}">
 
     {{-- サイドメニュー開閉用オーバーレイ（app.js が #menu-overlay を操作） --}}

@@ -2991,3 +2991,92 @@ li.connection-item.tl-row a.tl-row__link {
     border-color: rgba(74, 222, 128, 0.4);
     color: #4ade80;
 }
+
+/* ==========================================================================
+   上部検索バーの固定 + 開閉（2026-07-19）
+   - .search-topbar を sticky でヘッダー+サブヘッダー直下に固定
+   - 開閉エリア（探索拠点 / 詳細フィルター / 指定中条件）を畳むと
+     検索窓1行だけになり、結果一覧の表示領域が広がる
+   - 旧 右下FAB（.search-detail-fab）は廃止し「詳細フィルター」ボタンに一本化
+   ========================================================================== */
+
+/* content-wrapper の overflow-x: hidden はスクロールコンテナ化して sticky を
+   無効にするため、検索ページのみ clip（スクロールコンテナを作らない）へ */
+body.page-search .content-wrapper { overflow-x: clip; }
+
+.search-topbar {
+    position: sticky;
+    top: calc(var(--header-height, 60px) + var(--sub-header-height, 46px));
+    z-index: 80;
+}
+.search-topbar .search-filter-box {
+    border-radius: 0 0 14px 14px;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+}
+
+/* 開閉トグル（シェブロン回転） */
+.search-topbar-toggle i { transition: transform 0.2s ease; }
+.search-topbar.is-collapsed .search-topbar-toggle i { transform: rotate(180deg); }
+
+/* 開閉エリア */
+.search-topbar-extra {
+    overflow: hidden;
+    max-height: 260px;
+    opacity: 1;
+    transition: max-height 0.24s ease, opacity 0.18s ease, margin 0.24s ease;
+}
+.search-topbar.is-collapsed .search-topbar-extra {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    pointer-events: none;
+}
+
+/* 詳細フィルター：スリムな全幅バー（旧FABの置き換え。ID は search-detail.js 互換） */
+.search-detail-inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 8px;
+    padding: 9px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--color-border-strong, rgba(168, 85, 247, 0.40));
+    background: rgba(168, 85, 247, 0.10);
+    color: var(--color-text-header, #f5f5f5);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: left;
+    box-sizing: border-box;
+    min-height: 40px;
+}
+.search-detail-inline i:first-child {
+    color: var(--gold, #a78bfa);
+    font-size: 0.85rem;
+    flex: 0 0 auto;
+}
+.search-detail-inline__label { flex: 1; min-width: 0; }
+.search-detail-inline__badge {
+    flex: 0 0 auto;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--accent, #8b5cf6);
+    color: var(--on-accent, #fff);
+    font-size: 0.7rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+.search-detail-inline__chev {
+    flex: 0 0 auto;
+    font-size: 0.7rem;
+    color: var(--color-text-muted, #a0a0a0);
+}
+
+/* 開閉エリア内の探索拠点ピルの余白を詰める（バー内に収める） */
+.search-topbar-extra .location-pill-wrap { padding: 8px 0 0; }
