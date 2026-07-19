@@ -73,9 +73,10 @@
             || request()->is('*/shopprofiles/*')
             || request()->is('share/*');
         // ===== プレミアムホワイト（試験導入 2026-07-19）=====
-        // SWIPE (home) と MyPage を「白基調 + 高級感」プロトタイプで表示するためのフラグ。
+        // MyPage を「白基調 + 高級感」プロトタイプで表示するためのフラグ。
         // premium-white.css がここでのみ発動し、既存のダークスタイルを上書きする。
-        $isPremiumWhite = request()->routeIs('cast.home', 'shop.home', 'cast.mypage.index', 'shop.mypage.index');
+        // ※ SWIPE (home) は白基調で崩れたため対象から除外（元のダーク表示を維持）
+        $isPremiumWhite = request()->routeIs('cast.mypage.index', 'shop.mypage.index');
 
         $isLightTheme = !$isDarkPage
             && !str_contains($bodyClassAttr, 'page-demo-login')
