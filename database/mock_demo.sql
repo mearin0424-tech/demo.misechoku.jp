@@ -544,15 +544,10 @@ CREATE TABLE `favorites` (
 --
 
 INSERT INTO `favorites` (`id`, `cast_id`, `shop_id`, `action_type`, `sender_type`, `created_at`) VALUES
-(1, 'c00000001', 's00000001', 'LIKE', 'shop', '2026-03-20 08:17:46'),
 (4, 'c00000001', 's00000001', 'KEEP', 'shop', '2026-05-05 08:20:19'),
-(8, 'c00000001', 's00000002', 'LIKE', 'shop', '2026-05-05 10:56:19'),
-(9, 'c00000002', 's00000002', 'LIKE', 'shop', '2026-05-05 10:56:28'),
 (10, 'c00000002', 's00000002', 'KEEP', 'shop', '2026-05-05 10:56:30'),
 (11, 'c00000001', 's00000002', 'KEEP', 'shop', '2026-05-05 11:07:09'),
-(12, 'c00000002', 's00000001', 'LIKE', 'shop', '2026-05-05 11:07:33'),
-(14, 'c00000003', 's00000001', 'KEEP', 'shop', '2026-05-05 13:50:13'),
-(15, 'c00000003', 's00000001', 'LIKE', 'shop', '2026-05-06 10:30:53');
+(14, 'c00000003', 's00000001', 'KEEP', 'shop', '2026-05-05 13:50:13');
 
 -- --------------------------------------------------------
 
@@ -564,6 +559,21 @@ CREATE TABLE `footprints` (
   `id` bigint UNSIGNED NOT NULL,
   `cast_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `shop_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `profile_views`（プロフィール閲覧ログ）
+--
+
+CREATE TABLE `profile_views` (
+  `id` bigint UNSIGNED NOT NULL,
+  `viewer_type` varchar(8) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '閲覧者ロール cast|shop',
+  `viewer_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '閲覧者ID',
+  `target_type` varchar(8) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '閲覧されたロール cast|shop',
+  `target_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '閲覧されたID',
   `created_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -1913,6 +1923,13 @@ ALTER TABLE `footprints`
   ADD KEY `footprints_shop_id_foreign` (`shop_id`);
 
 --
+-- テーブルのインデックス `profile_views`
+--
+ALTER TABLE `profile_views`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `profile_views_target` (`target_type`,`target_id`);
+
+--
 -- テーブルのインデックス `industries`
 --
 ALTER TABLE `industries`
@@ -2283,6 +2300,12 @@ ALTER TABLE `favorites`
 -- テーブルの AUTO_INCREMENT `footprints`
 --
 ALTER TABLE `footprints`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- テーブルの AUTO_INCREMENT `profile_views`
+--
+ALTER TABLE `profile_views`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --

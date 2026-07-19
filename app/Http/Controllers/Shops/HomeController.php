@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Shops;
 
 use App\Http\Controllers\Controller;
 use App\Models\Favorite;
+use App\Models\ProfileView;
+use App\Services\ProfileViewService;
 use App\Services\UserLocationService;
 use App\Support\RecruitCatchOverlay;
 use Carbon\Carbon;
@@ -16,6 +18,7 @@ class HomeController extends Controller
 
     public function __construct(
         private readonly UserLocationService $userLocation,
+        private readonly ProfileViewService $profileViews,
     ) {
     }
 
@@ -84,40 +87,11 @@ class HomeController extends Controller
 
         $origin = $this->userLocation->getActiveLocation();
 
-        // LIKE数は favorites テーブルから集計（存在しない環境でも動くようにガード）
-        $likeCounts = [];
-        $likedTodayCastIds = [];
-        if (Schema::hasTable('favorites')) {
-            // 各キャストが店舗から受け取った LIKE 数（LIKE は店舗発信のみ）
-            $likeRows = DB::table('favorites')
-                ->select('cast_id', DB::raw('COUNT(*) as cnt'))
-                ->whereNotNull('cast_id')
-                ->where('action_type', Favorite::ACTION_LIKE)
-                ->where('sender_type', Favorite::SENDER_SHOP)
-                ->groupBy('cast_id')
-                ->get();
-            foreach ($likeRows as $lr) {
-                if ($lr->cast_id !== null) {
-                    $likeCounts[$lr->cast_id] = (int) $lr->cnt;
-                }
-            }
-
-            if (auth()->guard('shop')->check()) {
-                $shopId = (string) (auth()->guard('shop')->user()->shop_id ?? '');
-                if ($shopId !== '') {
-                    // LIKE は純粋なトグル（行が存在する = アクティブ）。
-                    // 旧仕様の「当日分のみ」判定は SEARCH 等との表示ズレの原因だったため撤去。
-                    $likedTodayCastIds = DB::table('favorites')
-                        ->where('shop_id', $shopId)
-                        ->whereNotNull('cast_id')
-                        ->where('action_type', Favorite::ACTION_LIKE)
-                        ->where('sender_type', Favorite::SENDER_SHOP)
-                        ->pluck('cast_id')
-                        ->all();
-                }
-            }
-        }
-        $likedTodayCastMap = array_fill_keys($likedTodayCastIds, true);
+        // プロフィール閲覧数（profile_views テーブルから集計）
+        $viewCounts = $this->profileViews->countForMany(
+            ProfileView::TYPE_CAST,
+            $rows->pluck('id')->all()
+        );
 
         $keptCastIds = [];
         if (Schema::hasTable('favorites') && auth()->guard('shop')->check()) {
@@ -153,8 +127,7 @@ class HomeController extends Controller
                 'name' => $row->nickname ?: ($row->name ?: 'ゲスト'),
                 'age' => $birthday ? $birthday->age : null,
                 'tags' => $this->buildCastTags($row, $tagNamesByCast[(string) $row->id] ?? []),
-                'like_count' => $likeCounts[$row->id] ?? 0,
-                'is_liked' => isset($likedTodayCastMap[$row->id]),
+                'view_count' => $viewCounts[$row->id] ?? 0,
                 'images' => $images,
                 'is_kept' => isset($keptCastMap[$row->id]),
                 'distance_km' => $distanceKm,
@@ -307,25 +280,13 @@ class HomeController extends Controller
                 ->keyBy('shop_id');
         }
 
-        // 店舗宛の LIKE 数（cast 発信の LIKE 件数）
-        $likeCounts = [];
-        if (Schema::hasTable('favorites')) {
-            $likeRows = DB::table('favorites')
-                ->select('shop_id', DB::raw('COUNT(*) as cnt'))
-                ->whereNotNull('shop_id')
-                ->where('action_type', Favorite::ACTION_LIKE)
-                ->where('sender_type', Favorite::SENDER_CAST)
-                ->groupBy('shop_id')
-                ->get();
-            foreach ($likeRows as $lr) {
-                if ($lr->shop_id !== null) {
-                    $likeCounts[$lr->shop_id] = (int) $lr->cnt;
-                }
-            }
-        }
+        // 店舗プロフィールの閲覧数（profile_views テーブルから集計）
+        $viewCounts = $this->profileViews->countForMany(
+            ProfileView::TYPE_SHOP,
+            $rows->pluck('id')->all()
+        );
 
         $keptShopIds = [];
-        $likedShopIds = [];
         if (Schema::hasTable('favorites') && auth()->guard('member')->check()) {
             $castId = (string) auth()->guard('member')->id();
             if ($castId !== '') {
@@ -336,19 +297,9 @@ class HomeController extends Controller
                     ->whereNotNull('shop_id')
                     ->pluck('shop_id')
                     ->all();
-
-                // LIKE は純粋なトグル（行が存在する = アクティブ）。当日限定判定は撤去。
-                $likedShopIds = DB::table('favorites')
-                    ->where('cast_id', $castId)
-                    ->where('action_type', Favorite::ACTION_LIKE)
-                    ->where('sender_type', Favorite::SENDER_CAST)
-                    ->whereNotNull('shop_id')
-                    ->pluck('shop_id')
-                    ->all();
             }
         }
         $keptShopMap = array_fill_keys($keptShopIds, true);
-        $likedShopMap = array_fill_keys($likedShopIds, true);
 
         $items = [];
         foreach ($rows as $row) {
@@ -444,13 +395,12 @@ class HomeController extends Controller
                 'pref' => $row->pref ?? '',
                 'city' => $row->city ?? '',
                 'nearest_station' => '',
-                'like_count' => $likeCounts[$row->id] ?? 0,
+                'view_count' => $viewCounts[$row->id] ?? 0,
                 'industry_name' => $industryByShop[$row->id] ?? null,
                 'rating' => $hasReviews ? (float) ($row->avg_rating ?? 0) : 0.0,
                 'review_count' => $hasReviews ? (int) ($row->review_count ?? 0) : 0,
                 'is_premium' => isset($premiumShopIds[$row->id]),
                 'is_kept' => isset($keptShopMap[$row->id]),
-                'is_liked' => isset($likedShopMap[$row->id]),
                 'recruit_bonus_lines' => $bonusLines,
                 'signup_bonus_range' => $this->discoverySignupBonusRange($bonusLines),
                 'trial_hourly_range' => $this->discoveryHourlyPair($trialHourly, $meta, 'trial'),
@@ -781,7 +731,7 @@ class HomeController extends Controller
                 'name' => $row->shop_name ?: '店舗',
                 'age' => null,
                 'tags' => $this->buildShopTags($row),
-                'like_count' => 0,
+                'view_count' => 0,
                 'rating' => 0,
                 'images' => $images,
             ];

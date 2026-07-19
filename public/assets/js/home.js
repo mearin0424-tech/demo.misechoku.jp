@@ -292,7 +292,7 @@ function initActionButtons() {
             if (this.classList.contains('message')) {
                 return;
             }
-            // LIKE / KEEP は favorite-quick.js（data-fav-toggle）に一本化。
+            // KEEP は favorite-quick.js（data-fav-toggle）に一本化。
             // ここでは何もしない（document への委譲ハンドラが処理する）。
             if (this.hasAttribute('data-fav-toggle')) {
                 return;
@@ -333,13 +333,6 @@ function initActionButtons() {
 
                     if (typeof data.is_active !== 'undefined') {
                         this.classList.toggle('is-active', !!data.is_active);
-                    }
-
-                    if (data.action === 'like' && typeof data.like_count === 'number') {
-                        const countEl = this.querySelector('.action-btn-count');
-                        if (countEl) {
-                            countEl.textContent = data.like_count;
-                        }
                     }
 
                     this.style.transform = 'scale(1.2)';

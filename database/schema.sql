@@ -538,6 +538,20 @@ CREATE TABLE IF NOT EXISTS `footprints` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -----------------------------------------------------------------------------
+-- profile_views（プロフィール閲覧ログ。閲覧回数の表示に使用）
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `profile_views` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `viewer_type` varchar(8) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '閲覧者ロール cast|shop',
+  `viewer_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '閲覧者ID',
+  `target_type` varchar(8) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '閲覧されたロール cast|shop',
+  `target_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '閲覧されたID',
+  `created_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `profile_views_target` (`target_type`,`target_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------------------------
 -- messages
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `messages` (

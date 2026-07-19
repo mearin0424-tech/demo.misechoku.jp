@@ -4237,3 +4237,28 @@ body.page-home .rc-rating-inline .rc-review-cnt {
     color: rgba(251, 211, 141, 0.8);
 }
 
+/* ============================================================================
+   縦長スマホ対応 (2026-07-19)
+   main の高さが 100vh（URL バー込み）基準で確定するため、モバイルブラウザでは
+   #home-screen が可視領域より下に伸び、カード下部の情報・アクションが
+   ボトムナビの裏〜画面外に落ちていた。
+   可視領域に追従する dvh で main〜#home-screen の高さを確定させる。
+   （app-v2 レイアウトは app.css を読まないため .no-scroll が効いておらず、
+    body が微妙にスクロールできてしまう問題もここで止める）
+   ============================================================================ */
+body.page-home {
+    overflow: hidden;
+    height: 100vh;
+    height: 100dvh;
+}
+body.page-home main#main-content {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0 !important;
+    overflow: hidden;
+}
+body.page-home #home-screen {
+    height: 100%;
+    height: 100dvh;
+}
+

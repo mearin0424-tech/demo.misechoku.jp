@@ -3,7 +3,9 @@ namespace App\Http\Controllers\Casts;
 
 use App\Consts\CommonConsts;
 use App\Http\Controllers\Controller;
+use App\Models\ProfileView;
 use App\Services\AdminMasterService;
+use App\Services\ProfileViewService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -11,8 +13,10 @@ use Illuminate\Support\Facades\Schema;
 
 class ProfileController extends Controller
 {
-    public function __construct(private readonly AdminMasterService $adminMasterService)
-    {
+    public function __construct(
+        private readonly AdminMasterService $adminMasterService,
+        private readonly ProfileViewService $profileViews,
+    ) {
     }
 
     /**
@@ -306,6 +310,14 @@ class ProfileController extends Controller
         if (request()->is('cast/*')) {
             // キャスト側 → お店の情報を表示
             $shop = $this->buildShopDetailData((string) $id);
+            if (auth()->guard('member')->check()) {
+                $this->profileViews->record(
+                    ProfileView::TYPE_CAST,
+                    (string) auth()->guard('member')->id(),
+                    ProfileView::TYPE_SHOP,
+                    (string) $id
+                );
+            }
             return view('shops.profile.show', [
                 'pageId' => 'shop_info',
                 'shop'   => $shop,
@@ -313,7 +325,15 @@ class ProfileController extends Controller
             ]);
         }
 
-        // お店側 → キャストの情報を表示
+        // お店側 → キャストの情報を表示（閲覧を記録）
+        if (auth()->guard('shop')->check()) {
+            $this->profileViews->record(
+                ProfileView::TYPE_SHOP,
+                (string) (auth()->guard('shop')->user()->shop_id ?? ''),
+                ProfileView::TYPE_CAST,
+                (string) $id
+            );
+        }
         return view('casts.profile.show', $this->buildCastProfileViewData((string) $id, false));
     }
 
@@ -365,8 +385,8 @@ class ProfileController extends Controller
             'nearest_stations' => [],
             'tag_groups' => [],
             'sub_images' => $subImages,
-            // LIKE 数：キャスト（sender_type=cast）からこのお店宛のLIKE件数
-            'like_cnt' => $this->countLikesForShop($shopId),
+            // 閲覧数：このお店のプロフィールが閲覧された回数
+            'view_cnt' => $this->profileViews->countFor(ProfileView::TYPE_SHOP, $shopId),
         ] + [
             'industry' => '',
             'zip' => '',
@@ -376,7 +396,7 @@ class ProfileController extends Controller
             'nearest_stations' => [],
             'tag_groups' => [],
             'sub_images' => [],
-            'like_cnt' => 0,
+            'view_cnt' => 0,
         ];
     }
 
@@ -494,20 +514,16 @@ class ProfileController extends Controller
             $word = trim((string) (DB::table('cast_posts')->where('cast_id', $castId)->value('body') ?? ''));
         }
 
-        // 閲覧中の店舗が実際に KEEP / LIKE 済みか（行が存在 = アクティブ）。
-        // 旧実装は is_kept を true 固定・is_liked 未提供で、他画面との表示ズレの原因だった。
+        // 閲覧中の店舗が実際に KEEP 済みか（行が存在 = アクティブ）。
         $isKeptByViewer = false;
-        $isLikedByViewer = false;
         $viewerShopId = (string) (auth()->guard('shop')->user()->shop_id ?? '');
         if ($viewerShopId !== '' && Schema::hasTable('favorites')) {
-            $favRows = DB::table('favorites')
+            $isKeptByViewer = DB::table('favorites')
                 ->where('shop_id', $viewerShopId)
                 ->where('cast_id', $castId)
                 ->where('sender_type', 'shop')
-                ->pluck('action_type')
-                ->all();
-            $isKeptByViewer  = in_array('KEEP', $favRows, true);
-            $isLikedByViewer = in_array('LIKE', $favRows, true);
+                ->where('action_type', 'KEEP')
+                ->exists();
         }
 
         return [
@@ -522,9 +538,8 @@ class ProfileController extends Controller
             'img' => $images[0] ?? asset('assets/images/common/no-image.png'),
             'is_applied' => true,
             'is_kept' => $isKeptByViewer,
-            'is_liked' => $isLikedByViewer,
-            // LIKE 数：店舗（sender_type=shop）からこのキャスト宛のLIKE件数
-            'like_cnt' => $this->countLikesForCast($castId),
+            // 閲覧数：このキャストのプロフィールが閲覧された回数
+            'view_cnt' => $this->profileViews->countFor(ProfileView::TYPE_CAST, $castId),
             'pref' => $row->pref ?? '',
             'city' => $row->city ?? '',
             'height' => $row->height,
@@ -608,8 +623,7 @@ class ProfileController extends Controller
             'img' => $images[0],
             'is_applied' => false,
             'is_kept' => false,
-            'is_liked' => false,
-            'like_cnt' => 0,
+            'view_cnt' => 0,
             'pref' => '',
             'city' => '',
             'height' => null,
@@ -640,37 +654,6 @@ class ProfileController extends Controller
         return DB::table('casts')
             ->where('id', $castId)
             ->exists();
-    }
-
-    /**
-     * このキャスト宛の LIKE 件数（店舗→キャスト方向）。
-     * favorites テーブル: action_type=LIKE, sender_type=SHOP, cast_id=$castId
-     */
-    private function countLikesForCast(string $castId): int
-    {
-        if (!Schema::hasTable('favorites')) {
-            return 0;
-        }
-        return (int) DB::table('favorites')
-            ->where('action_type', \App\Models\Favorite::ACTION_LIKE)
-            ->where('sender_type', \App\Models\Favorite::SENDER_SHOP)
-            ->where('cast_id', $castId)
-            ->count();
-    }
-
-    /**
-     * この店舗宛の LIKE 件数（キャスト→店舗方向）。
-     */
-    private function countLikesForShop(string $shopId): int
-    {
-        if (!Schema::hasTable('favorites')) {
-            return 0;
-        }
-        return (int) DB::table('favorites')
-            ->where('action_type', \App\Models\Favorite::ACTION_LIKE)
-            ->where('sender_type', \App\Models\Favorite::SENDER_CAST)
-            ->where('shop_id', $shopId)
-            ->count();
     }
 
     private function assetPathForStored(?string $path): string

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Casts;
 
 use App\Http\Controllers\Controller;
+use App\Models\ProfileView;
+use App\Services\ProfileViewService;
 use App\Support\RecruitCatchOverlay;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +28,16 @@ class RecruitmentController extends Controller
         $numericId = $this->normalizeRouteIdToNumeric($id);
         $data = $this->getRecruitDataFromDatabase($numericId, false);
         abort_if(empty($data['shop']), 404);
+
+        // キャストによる店舗プロフィール閲覧を記録
+        if (auth()->guard('member')->check()) {
+            app(ProfileViewService::class)->record(
+                ProfileView::TYPE_CAST,
+                (string) auth()->guard('member')->id(),
+                ProfileView::TYPE_SHOP,
+                's' . str_pad((string) $numericId, 8, '0', STR_PAD_LEFT)
+            );
+        }
 
         $initialJobPanel = $request->query('job', '');
         $initialJobPanel = in_array($initialJobPanel, ['fulltime', 'help'], true) ? $initialJobPanel : '';
@@ -409,18 +421,11 @@ class RecruitmentController extends Controller
     {
         $shopName = $data['shop']['name'] ?? $data['recruit']['store_name'] ?? '店舗';
 
-        // プロフィール画面に表示する受信 LIKE 数（キャスト → この店舗）
+        // プロフィール画面に表示する閲覧数（この店舗のプロフィールが閲覧された回数）
         $likeShopId = 's' . str_pad((string) $id, 8, '0', STR_PAD_LEFT);
-        if (is_array($data['shop'] ?? null) && !isset($data['shop']['like_cnt'])) {
-            try {
-                $data['shop']['like_cnt'] = (int) DB::table('favorites')
-                    ->where('shop_id', $likeShopId)
-                    ->where('action_type', 'LIKE')
-                    ->where('sender_type', 'cast')
-                    ->count();
-            } catch (\Throwable) {
-                $data['shop']['like_cnt'] = 0;
-            }
+        if (is_array($data['shop'] ?? null) && !isset($data['shop']['view_cnt'])) {
+            $data['shop']['view_cnt'] = app(ProfileViewService::class)
+                ->countFor(ProfileView::TYPE_SHOP, $likeShopId);
         }
         // 優良店バッヂ（過去3ヶ月の請求をすべて期日内に入金した店舗）— キャストにも見せる
         if (is_array($data['shop'] ?? null) && !isset($data['shop']['is_premium'])) {
@@ -461,22 +466,6 @@ class RecruitmentController extends Controller
             }
         }
 
-        // 現在のキャストがこの店舗を LIKE 済みか（プロフィールの LIKE ボタン用。行が存在 = アクティブ）
-        if (is_array($data['shop'] ?? null) && !isset($data['shop']['is_liked'])) {
-            $data['shop']['is_liked'] = false;
-            if ($forCast && auth()->guard('member')->check()) {
-                try {
-                    $data['shop']['is_liked'] = DB::table('favorites')
-                        ->where('shop_id', $likeShopId)
-                        ->where('cast_id', (string) auth()->guard('member')->id())
-                        ->where('action_type', 'LIKE')
-                        ->where('sender_type', 'cast')
-                        ->exists();
-                } catch (\Throwable) {
-                    $data['shop']['is_liked'] = false;
-                }
-            }
-        }
         $shareUrl = route('share.recruit.show', ['id' => $id]);
         $shareText = trim((string) ($data['recruit']['catch_copy'] ?? ''));
         if ($shareText === '') {

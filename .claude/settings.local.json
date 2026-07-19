@@ -39,7 +39,9 @@
       "PowerShell(php artisan view:clear 2>&1 | Select-Object -Last 2; php artisan route:clear 2>&1 | Select-Object -Last 2; php artisan cache:clear 2>&1 | Select-Object -Last 2)",
       "PowerShell(Get-Content *)",
       "PowerShell(php -l app/Services/DocumentReviewService.php; php -l app/Http/Controllers/Admin/VerificationController.php)",
-      "PowerShell(Out-Null *)"
+      "PowerShell(Out-Null *)",
+      "Bash(npm run *)",
+      "Bash(npx tailwindcss *)"
     ]
   }
 }

@@ -146,6 +146,8 @@ class MypageController extends Controller
 
         $shopData = [
             'shop_name'    => $row->shop_name ?? 'ショップ',
+            'view_cnt'     => app(\App\Services\ProfileViewService::class)
+                ->countFor(\App\Models\ProfileView::TYPE_SHOP, $shopId),
             'word'         => $hitokotoBody !== '' ? $hitokotoBody : '最高級の空間で、最高の出会いを。',
             'review_avg'   => $row && $row->avg_eva ? round((float)$row->avg_eva, 1) : 0.0,
             'review_count' => $row ? (int)$row->review_count : 0,

@@ -942,12 +942,9 @@ class MypageController extends Controller
         $industryNames = $this->resolveDesiredJobByIndustries($castId, $castRow->industry_id ?? null);
         $looksSummary = $looksTags !== [] ? implode(' / ', $looksTags) : '';
         $personalitySummary = $personalityTags !== [] ? implode(' / ', $personalityTags) : '';
-        // 自分が店舗から受け取った LIKE 数（LIKE は店舗発信のみ）
-        $likeCount = DB::table('favorites')
-            ->where('cast_id', $castId)
-            ->where('action_type', Favorite::ACTION_LIKE)
-            ->where('sender_type', Favorite::SENDER_SHOP)
-            ->count();
+        // 自分のプロフィールが閲覧された回数
+        $viewCount = app(\App\Services\ProfileViewService::class)
+            ->countFor(\App\Models\ProfileView::TYPE_CAST, $castId);
 
         $matchCount = 0;
         if (Schema::hasTable('shop_job_applications')) {
@@ -1033,7 +1030,7 @@ class MypageController extends Controller
             'img'              => $images[0]['url'] ?? null,
             'is_applied'       => true,
             'is_kept'          => true,
-            'like_cnt'         => $likeCount,
+            'view_cnt'         => $viewCount,
             'match_cnt'        => $matchCount,
             'bonus_total'      => $bonusTotal,
             'zip'              => $castRow->zip ?? '',
@@ -1115,7 +1112,7 @@ class MypageController extends Controller
             'img'              => $images[0]['url'] ?? null,
             'is_applied'       => false,
             'is_kept'          => false,
-            'like_cnt'         => 0,
+            'view_cnt'         => 0,
             'match_cnt'        => 0,
             'bonus_total'      => 0,
             'zip'              => '',

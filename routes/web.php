@@ -478,7 +478,6 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
     Route::prefix('interaction')->name('interaction.')->group(function () {
         Route::get('/', [ShopInteraction::class, 'index'])->name('index');
         Route::get('/keep', [ShopInteraction::class, 'keep'])->name('keep');
-        Route::get('/like', [ShopInteraction::class, 'like'])->name('like');
     });
 
     // 繧ｭ繝｣繧ｹ繝医・繝励Ο繝輔ぅ繝ｼ繝ｫ髢ｲ隕ｧ・亥ｺ苓・縺九ｉ隕九ｋ・・
@@ -557,7 +556,6 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
 
     Route::get('/interaction', [ShopInteraction::class, 'index'])->name('interaction.index');
     Route::get('/interaction/keep', [ShopInteraction::class, 'keep'])->name('interaction.keep');
-    Route::get('/interaction/like', [ShopInteraction::class, 'like'])->name('interaction.like');
     Route::get('/mypage', [CastMypage::class, 'index'])->name('mypage.index');
     Route::post('/mypage/word', [CastMypage::class, 'updateWord'])->name('mypage.word');
     Route::post('/mypage/search-location', [CastMypage::class, 'updateSearchLocation'])->name('mypage.search-location.update');

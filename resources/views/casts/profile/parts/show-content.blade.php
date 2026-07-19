@@ -11,7 +11,7 @@
     $age = $cast['age'] ?? null;
     $intro = trim((string) ($cast['intro'] ?? $cast['pr'] ?? ''));
     $introTrunc = mb_substr($intro, 0, 80) . (mb_strlen($intro) > 80 ? '…' : '');
-    $likeCount = (int) ($cast['like_cnt'] ?? 0);
+    $viewCount = (int) ($cast['view_cnt'] ?? 0);
     $location = trim(implode(' / ', array_filter([$cast['pref'] ?? null, $cast['city'] ?? null])));
     $bwh = trim(implode(' / ', [
         ($cast['bust'] ?? $cast['b'] ?? '') ?: '--',
@@ -49,15 +49,16 @@
             </div>
         </div>
 
-        {{-- ===== 名前/年齢 + ライク数 + 場所 ===== --}}
+        {{-- ===== 名前/年齢 + 閲覧数 + 場所 ===== --}}
         <div class="mb-4 flex flex-col gap-1.5">
             <div class="flex items-center justify-between gap-2">
                 <h1 class="app-title text-[22px] text-text-main leading-tight truncate min-w-0">
                     {{ $castDisplayName }}@if($age)<span class="text-[16px] text-text-sub ml-1">({{ $age }})</span>@endif
                 </h1>
-                <div class="flex items-center gap-1 shrink-0" title="受け取ったいいね">
-                    <i class="fas fa-heart text-[15px] text-discovery-pink"></i>
-                    <span class="font-bold text-[13px] text-text-main" data-fav-count-target="cast:{{ $favCastId ?? ($cast['id'] ?? '') }}">{{ number_format($likeCount) }}</span>
+                <div class="flex items-center gap-1 shrink-0" title="プロフィールが閲覧された回数">
+                    <i class="fas fa-eye text-[15px] text-accent-text"></i>
+                    <span class="font-bold text-[13px] text-text-main">{{ number_format($viewCount) }}</span>
+                    <span class="text-[10px] text-text-sub">閲覧</span>
                 </div>
             </div>
             @if($location !== '' || !empty($distanceLabel ?? null))
@@ -82,7 +83,7 @@
             </a>
         @elseif($showInteractionActions)
             @php $favCastId = (string) ($cast['id'] ?? $cast['cast_id'] ?? ''); @endphp
-            {{-- トーク / LIKE / KEEP / 共有 の横一列。トークが flex-1 で最も目立つ Primary --}}
+            {{-- トーク / KEEP / 共有 の横一列。トークが flex-1 で最も目立つ Primary --}}
             <div class="fav-actions-row">
                 @if($favCastId !== '' && Route::has('shop.talk.room'))
                     <a href="{{ route('shop.talk.room', ['id' => $favCastId, 'talk_topic' => 'other', 'initiate' => 1]) }}"
@@ -90,13 +91,6 @@
                         <i class="fas fa-comment-dots"></i> トークする
                     </a>
                 @endif
-                <button type="button" id="btn-profile-like"
-                        class="fav-circle fav-circle--like"
-                        data-fav-toggle data-action="like" data-item-type="cast" data-item-id="{{ $favCastId }}"
-                        aria-label="いいね" aria-pressed="{{ ($cast['is_liked'] ?? false) ? 'true' : 'false' }}">
-                    <i class="fas fa-heart" aria-hidden="true"></i>
-                    <span class="fav-circle__cap">LIKE</span>
-                </button>
                 <button type="button" id="btn-profile-keep"
                         class="fav-circle fav-circle--keep"
                         data-fav-toggle data-action="keep" data-item-type="cast" data-item-id="{{ $favCastId }}"

@@ -4,7 +4,7 @@
 @section('body-class', 'no-scroll page-home')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260713-meta-plain">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260719-viewport-fix">
 @endpush
 
 @php
@@ -74,26 +74,8 @@
                     <div class="rc-img-gradient" aria-hidden="true"></div>
                 </div>
 
-                {{-- 2. アクションボタン（右側）。LIKE/KEEP は favorite-quick.js（data-fav-toggle）に一本化 --}}
+                {{-- 2. アクションボタン（右側）。KEEP は favorite-quick.js（data-fav-toggle）に一本化 --}}
                 <div class="card-actions-overlay rc-actions stop-propagation">
-                    <div class="rc-action-item stop-propagation">
-                        <button
-                            type="button"
-                            class="action-circle-btn like stop-propagation {{ !empty($item['is_liked']) ? 'is-active' : '' }}"
-                            data-fav-toggle
-                            data-item-id="{{ $item['id'] }}"
-                            data-item-type="shop"
-                            data-action="like"
-                            aria-label="いいね"
-                            aria-pressed="{{ !empty($item['is_liked']) ? 'true' : 'false' }}"
-                        >
-                            <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/>
-                            </svg>
-                            <span class="action-btn-count" data-fav-count>{{ $item['like_count'] ?? 0 }}</span>
-                        </button>
-                        <span class="rc-action-label">いいね</span>
-                    </div>
                     <div class="rc-action-item stop-propagation">
                         <button
                             type="button"
@@ -168,6 +150,9 @@
                                     @if(!empty($item['distance_label']))
                                         <span class="meta-chip__dist"><i class="fas fa-route" aria-hidden="true"></i>{{ $item['distance_label'] }}</span>
                                     @endif
+                                </span>
+                                <span class="meta-chip meta-chip--views" title="プロフィールが閲覧された回数">
+                                    <i class="fas fa-eye" aria-hidden="true"></i>{{ number_format((int) ($item['view_count'] ?? 0)) }}回閲覧
                                 </span>
                             </div>
                         </div>
@@ -253,24 +238,6 @@
                     <div class="rc-action-item stop-propagation">
                         <button
                             type="button"
-                            class="action-circle-btn like stop-propagation {{ !empty($item['is_liked']) ? 'is-active' : '' }}"
-                            data-fav-toggle
-                            data-item-id="{{ $item['id'] }}"
-                            data-item-type="{{ $itemType === 'recruit' ? 'shop' : 'cast' }}"
-                            data-action="like"
-                            aria-label="いいね"
-                            aria-pressed="{{ !empty($item['is_liked']) ? 'true' : 'false' }}"
-                        >
-                            <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/>
-                            </svg>
-                            <span class="action-btn-count" data-fav-count>{{ $item['like_count'] ?? 0 }}</span>
-                        </button>
-                        <span class="rc-action-label">いいね</span>
-                    </div>
-                    <div class="rc-action-item stop-propagation">
-                        <button
-                            type="button"
                             class="action-circle-btn keep stop-propagation {{ !empty($item['is_kept']) ? 'is-active' : '' }}"
                             data-fav-toggle
                             data-item-id="{{ $item['id'] }}"
@@ -318,6 +285,9 @@
                             @if(!empty($item['distance_label']))
                                 <span class="meta-chip__dist"><i class="fas fa-route" aria-hidden="true"></i>{{ $item['distance_label'] }}</span>
                             @endif
+                        </span>
+                        <span class="meta-chip meta-chip--views" title="プロフィールが閲覧された回数">
+                            <i class="fas fa-eye" aria-hidden="true"></i>{{ number_format((int) ($item['view_count'] ?? 0)) }}回閲覧
                         </span>
                     </div>
                     @if($isShop && isset($item['rating']))
@@ -381,5 +351,5 @@
 @push('scripts')
 <script src="{{ asset('assets/js/home.js') }}?v=20260712-motion"></script>
 {{-- LIKE / KEEP の共通トグル（全画面この1本に統一） --}}
-<script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260712-optimistic"></script>
+<script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260719-keep-only"></script>
 @endpush

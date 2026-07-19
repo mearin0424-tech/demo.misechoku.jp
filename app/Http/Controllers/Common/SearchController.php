@@ -24,7 +24,7 @@ abstract class SearchController extends Controller
     }
 
     /**
-     * 検索結果アイテム配列に is_keeping / is_liked を付与する。
+     * 検索結果アイテム配列に is_keeping を付与する。
      *
      * @param  array<int, array<string, mixed>>  $items
      * @param  string  $itemType  'shop' or 'cast'
@@ -49,7 +49,6 @@ abstract class SearchController extends Controller
             // 未ログインは全部 false で返す
             foreach ($items as &$it) {
                 $it['is_keeping'] = false;
-                $it['is_liked'] = false;
             }
             unset($it);
             return $items;
@@ -59,7 +58,6 @@ abstract class SearchController extends Controller
         if ($ids === []) {
             foreach ($items as &$it) {
                 $it['is_keeping'] = false;
-                $it['is_liked'] = false;
             }
             unset($it);
             return $items;
@@ -67,52 +65,24 @@ abstract class SearchController extends Controller
 
         $favoriteColumn = $itemType === 'shop' ? 'shop_id' : 'cast_id';
 
-        // 自分のアクションの取得（個別 is_keeping / is_liked 用）
+        // 自分の KEEP の取得（個別 is_keeping 用）
         $rows = DB::table('favorites')
-            ->select('action_type', $favoriteColumn . ' as target_id')
+            ->select($favoriteColumn . ' as target_id')
             ->where('sender_type', $senderType)
-            ->whereIn('action_type', [Favorite::ACTION_KEEP, Favorite::ACTION_LIKE])
+            ->where('action_type', Favorite::ACTION_KEEP)
             ->when($senderType === Favorite::SENDER_CAST && $myCastId !== '', fn ($q) => $q->where('cast_id', $myCastId))
             ->when($senderType === Favorite::SENDER_SHOP && $myShopId !== '', fn ($q) => $q->where('shop_id', $myShopId))
             ->whereIn($favoriteColumn, $ids)
             ->get();
 
         $keepSet = [];
-        $likeSet = [];
         foreach ($rows as $r) {
-            $targetId = (string) $r->target_id;
-            if ($r->action_type === Favorite::ACTION_KEEP) {
-                $keepSet[$targetId] = true;
-            } elseif ($r->action_type === Favorite::ACTION_LIKE) {
-                $likeSet[$targetId] = true;
-            }
-        }
-
-        // 受け手側の合計 LIKE 数（スワイプ / プロフィール画面で表示する）。
-        // KEEP 数はプライベートな保存リストのため、本人以外に一切出さない
-        // （表示だけでなくペイロードにも含めない）。
-        $oppositeSender = $itemType === 'cast' ? Favorite::SENDER_SHOP : Favorite::SENDER_CAST;
-        $countRows = DB::table('favorites')
-            ->select($favoriteColumn . ' as target_id', DB::raw('COUNT(*) as cnt'))
-            ->where('action_type', Favorite::ACTION_LIKE)
-            ->where('sender_type', $oppositeSender)
-            ->whereIn($favoriteColumn, $ids)
-            ->groupBy('target_id')
-            ->get();
-
-        $likeCounts = [];
-        foreach ($countRows as $r) {
-            $likeCounts[(string) $r->target_id] = (int) $r->cnt;
+            $keepSet[(string) $r->target_id] = true;
         }
 
         foreach ($items as &$it) {
             $id = (string) ($it['id'] ?? '');
             $it['is_keeping'] = isset($keepSet[$id]);
-            $it['is_liked'] = isset($likeSet[$id]);
-            // 既存の like_count を上書きしない（home.js 側で別ソース提供しているケースに配慮）
-            if (!isset($it['like_count'])) {
-                $it['like_count'] = $likeCounts[$id] ?? 0;
-            }
         }
         unset($it);
 

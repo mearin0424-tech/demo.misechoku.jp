@@ -56,7 +56,14 @@
              旧: 優良店/レビューの大型2カラムカード → 目立ちすぎのため
              店舗名の下の小型チップに格下げ（情報は維持、占有面積を1/4に） --}}
         <div class="mb-4">
-            <h1 class="app-title text-[24px] text-text-main leading-tight mb-1.5">{{ $displayName }}</h1>
+            <div class="flex items-center justify-between gap-3 mb-1.5">
+                <h1 class="app-title text-[24px] text-text-main leading-tight truncate min-w-0">{{ $displayName }}</h1>
+                <div class="flex items-center gap-1.5 shrink-0" title="プロフィールが閲覧された回数">
+                    <i class="fas fa-eye text-[16px] text-accent-text" aria-hidden="true"></i>
+                    <span class="font-bold text-[14px] text-text-main">{{ number_format((int) ($shopData['view_cnt'] ?? 0)) }}</span>
+                    <span class="text-[10px] text-text-sub">閲覧</span>
+                </div>
+            </div>
             <div class="flex flex-wrap items-center gap-2">
                 <a href="{{ route('shop.mypage.review.index') }}"
                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border border-line text-[11px] font-bold text-text-main hover:border-line-accent/60 transition-colors">

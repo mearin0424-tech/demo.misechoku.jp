@@ -47,7 +47,6 @@ final class SmokeRouteMatrix
             'shop search' => ['shop.search.index', [], 200],
             'shop interaction index' => ['shop.interaction.index', [], 200],
             'shop interaction keep' => ['shop.interaction.keep', [], 200],
-            'shop interaction like' => ['shop.interaction.like', [], 200],
             'shop profile edit' => ['shop.profile.edit', [], 200],
             'shop recruits edit' => ['shop.recruits.edit', [], 200],
             'shop mypage index' => ['shop.mypage.index', [], 200],

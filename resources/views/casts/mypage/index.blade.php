@@ -17,7 +17,7 @@
     $zipText     = !empty($cast['zip']) ? ('〒' . $cast['zip']) : '';
     $iconImage   = ($cast['img'] ?? null) ?: ($subImages[0]['url'] ?? asset('assets/images/common/no-image.png'));
     $bonusTotal  = number_format((int) ($cast['bonus_total'] ?? 0));
-    $likeCount   = number_format((int) ($cast['like_cnt'] ?? 0));
+    $viewCount   = number_format((int) ($cast['view_cnt'] ?? 0));
     $photoCount  = count($subImages);
     $word        = trim((string) ($cast['word'] ?? ''));
     $wordPlaceholder = '今、何してる？（タイムラインに公開されます）';
@@ -62,12 +62,13 @@
             </div>
         </div>
 
-        {{-- ===== Name + Likes（横並び。ライクのラベル無し） ===== --}}
+        {{-- ===== Name + プロフィール閲覧数（横並び） ===== --}}
         <div class="flex items-center justify-between gap-3 mb-4">
             <h1 class="app-title text-[24px] text-text-main leading-tight truncate min-w-0">{{ $displayName }}</h1>
-            <div class="flex items-center gap-1.5 shrink-0" title="受け取ったいいね">
-                <x-ui.icon name="like" class="text-[18px] text-discovery-pink" />
-                <span class="font-bold text-[14px] text-text-main">{{ $likeCount }}</span>
+            <div class="flex items-center gap-1.5 shrink-0" title="プロフィールが閲覧された回数">
+                <i class="fas fa-eye text-[16px] text-accent-text" aria-hidden="true"></i>
+                <span class="font-bold text-[14px] text-text-main">{{ $viewCount }}</span>
+                <span class="text-[10px] text-text-sub">閲覧</span>
             </div>
         </div>
 

@@ -1,4 +1,4 @@
-/* タイムライン行のクイックアクション（KEEP / LIKE）トグル
+/* タイムライン行・スワイプ・プロフィールのクイックアクション（KEEP）トグル
  * - <a> の中ではなく外側に配置し、stopPropagation で行リンクへの伝播を防ぐ
  * - 結果は API レスポンスで is_active を受けて aria-pressed をトグル
  */
@@ -14,19 +14,16 @@
      * スワイプ → プロフィール詳細 → 「戻る」(bfcache) のように画面を行き来すると、
      * サーバーレンダリング時点の古い状態が表示されて挙動がズレて見える。
      * 直近のトグル結果を sessionStorage に保存し、ページ表示時に同じ対象の
-     * ボタン / カウンタへ適用することで、全画面で LIKE / KEEP の状態を一致させる。 */
+     * ボタンへ適用することで、全画面で KEEP の状態を一致させる。 */
     const SYNC_KEY = 'fav-sync-v1';
 
     function readSyncStates() {
         try { return JSON.parse(sessionStorage.getItem(SYNC_KEY) || '{}'); } catch (e) { return {}; }
     }
-    function writeSyncState(action, itemType, itemId, isActive, likeCount) {
+    function writeSyncState(action, itemType, itemId, isActive) {
         try {
             const s = readSyncStates();
-            s[action + ':' + itemType + ':' + itemId] = {
-                a: isActive ? 1 : 0,
-                c: (typeof likeCount === 'number') ? likeCount : null,
-            };
+            s[action + ':' + itemType + ':' + itemId] = { a: isActive ? 1 : 0 };
             sessionStorage.setItem(SYNC_KEY, JSON.stringify(s));
         } catch (e) { /* private mode 等では同期なしで続行 */ }
     }
@@ -47,51 +44,22 @@
             ).forEach(function (btn) {
                 btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
                 btn.classList.toggle('is-active', isActive);
-                if (action === 'like' && typeof st.c === 'number') {
-                    const cntEl = btn.querySelector('[data-fav-count]');
-                    if (cntEl) cntEl.textContent = st.c.toLocaleString();
-                }
             });
-            if (action === 'like' && typeof st.c === 'number') {
-                document.querySelectorAll('[data-fav-count-target="' + itemType + ':' + itemId + '"]')
-                    .forEach(function (el) { el.textContent = st.c.toLocaleString(); });
-            }
         });
     }
     document.addEventListener('DOMContentLoaded', applySyncStates);
     // bfcache から復元されたときも最新のローカル状態を反映
     window.addEventListener('pageshow', function (e) { if (e.persisted) applySyncStates(); });
 
-    function getCookieValue(name) {
-        const m = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/[\-.+*]/g, '\\$&') + '=([^;]*)'));
-        return m ? decodeURIComponent(m[1]) : null;
-    }
-
     /* ---------------- 状態適用ヘルパ ----------------
-       対象（action × item）に紐づくページ内の全ボタン・全カウンタへ一括反映する。
-       likeCount が null のときはカウントは触らない。 */
-    function applyStateToDom(action, itemType, itemId, isActive, likeCount) {
+       対象（action × item）に紐づくページ内の全ボタンへ一括反映する。 */
+    function applyStateToDom(action, itemType, itemId, isActive) {
         document.querySelectorAll(
             '[data-fav-toggle][data-action="' + action + '"][data-item-type="' + itemType + '"][data-item-id="' + itemId + '"]'
         ).forEach(function (el) {
             el.setAttribute('aria-pressed', isActive ? 'true' : 'false');
             el.classList.toggle('is-active', isActive);
-            if (action === 'like' && typeof likeCount === 'number') {
-                const cntEl = el.querySelector('[data-fav-count]');
-                if (cntEl) cntEl.textContent = likeCount.toLocaleString();
-            }
         });
-        if (action === 'like' && typeof likeCount === 'number') {
-            document.querySelectorAll('[data-fav-count-target="' + itemType + ':' + itemId + '"]')
-                .forEach(function (el) { el.textContent = likeCount.toLocaleString(); });
-        }
-    }
-
-    function readDisplayedCount(btn) {
-        const cntEl = btn.querySelector('[data-fav-count]');
-        if (!cntEl) return null;
-        const n = parseInt(String(cntEl.textContent).replace(/[^\d]/g, ''), 10);
-        return Number.isFinite(n) ? n : null;
     }
 
     async function toggleFavorite(btn) {
@@ -104,19 +72,15 @@
             item_id: btn.dataset.itemId,
         };
 
-        /* ---- 楽観的更新：押した瞬間に UI を反転（Tinder 的な即応性）----
+        /* ---- 楽観的更新：押した瞬間に UI を反転 ----
            失敗時は prev の状態にロールバックする。 */
         const prevActive = btn.getAttribute('aria-pressed') === 'true';
-        const prevCount = readDisplayedCount(btn);
         const nextActive = !prevActive;
-        const nextCount = (payload.action === 'like' && prevCount !== null)
-            ? Math.max(0, prevCount + (nextActive ? 1 : -1))
-            : null;
-        applyStateToDom(payload.action, payload.item_type, payload.item_id, nextActive, nextCount);
+        applyStateToDom(payload.action, payload.item_type, payload.item_id, nextActive);
         if (navigator.vibrate) { try { navigator.vibrate(10); } catch (e) {} }
 
         function rollback() {
-            applyStateToDom(payload.action, payload.item_type, payload.item_id, prevActive, prevCount);
+            applyStateToDom(payload.action, payload.item_type, payload.item_id, prevActive);
         }
 
         try {
@@ -160,16 +124,9 @@
             // サーバーの正の値で最終確定（楽観値とズレていればここで補正される）
             const data = await res.json();
             const isActive = !!data.is_active;
-            const likeCount = (typeof data.like_count === 'number') ? data.like_count : null;
-            applyStateToDom(payload.action, payload.item_type, payload.item_id, isActive, likeCount);
+            applyStateToDom(payload.action, payload.item_type, payload.item_id, isActive);
             // 他画面（bfcache で戻った時など）との状態同期用に保存
-            writeSyncState(payload.action, payload.item_type, payload.item_id, isActive, likeCount);
-
-            // カウントバッジは検索リストでは表示しない方針
-            //（KEEP 数は本人以外に非公開・LIKE 数はスワイプ/プロフィール画面のみ）。
-            // 既存のバッジ要素が残っていれば掃除だけする。
-            const staleCount = btn.querySelector('.tl-row__action-count');
-            if (staleCount) staleCount.remove();
+            writeSyncState(payload.action, payload.item_type, payload.item_id, isActive);
 
             // interaction 一覧では「解除した」=「行が消える」UX に寄せる
             if (!isActive) {
@@ -180,26 +137,13 @@
                 }
             }
 
-            // item_type に応じて「相手＝お店 / キャスト」を切替
-            const partnerLabel = payload.item_type === 'shop' ? 'お店' : 'キャスト';
-
-            if (payload.action === 'like') {
-                // ✨ LIKE = 相手に通知が届く（公開アクション）
-                showToast(
-                    isActive
-                        ? `💜 ${partnerLabel}に「いいね」を届けました`
-                        : `${partnerLabel}への「いいね」を取り消しました`,
-                    isActive ? 'like' : null
-                );
-            } else {
-                // 🔖 KEEP = 自分だけのリスト（プライベート）
-                showToast(
-                    isActive
-                        ? '🔖 あなたのキープリストに保存しました'
-                        : 'キープを解除しました',
-                    isActive ? 'keep' : null
-                );
-            }
+            // 🔖 KEEP = 自分だけのリスト（プライベート）
+            showToast(
+                isActive
+                    ? '🔖 あなたのキープリストに保存しました'
+                    : 'キープを解除しました',
+                isActive ? 'keep' : null
+            );
         } catch (e) {
             rollback();
             showToast('通信エラーが発生しました');
@@ -222,10 +166,9 @@
         if (!msg) return;
         const el = ensureToast();
         el.textContent = msg;
-        // variant: 'like' (mauve pink) / 'keep' (gold) / null (default)
+        // variant: 'keep' (gold) / null (default)
         el.classList.remove('is-like', 'is-keep');
-        if (variant === 'like') el.classList.add('is-like');
-        else if (variant === 'keep') el.classList.add('is-keep');
+        if (variant === 'keep') el.classList.add('is-keep');
         el.classList.add('is-visible');
         clearTimeout(toastTimer);
         toastTimer = setTimeout(function () { el.classList.remove('is-visible'); }, 1900);

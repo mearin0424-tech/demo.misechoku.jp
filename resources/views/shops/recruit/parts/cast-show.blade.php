@@ -4,7 +4,7 @@
     $iconImage    = $shop['main_img'] ?? ($galleryImages[0] ?? asset('assets/images/common/no-image.png'));
     $catchCopy    = trim((string) ($recruit['catch_copy'] ?? ''));
     $totalSlots   = max(9, count($galleryImages));
-    $likeCount    = (int) ($recruit['like_cnt'] ?? $shop['like_cnt'] ?? 0);
+    $viewCount    = (int) ($recruit['view_cnt'] ?? $shop['view_cnt'] ?? 0);
     $ctaShopId    = $shop['id'] ?? $shop['shop_id'] ?? $recruit['id'] ?? $recruit['shop_id'] ?? null;
     $ctaHasHelp   = $usesJobTypes
         ? !empty($recruit_help['help_hourly_wage']) || !empty($recruit_help['hourly_wage'])
@@ -96,9 +96,10 @@
                         </span>
                     @endif
                 </div>
-                <div class="flex items-center gap-1 shrink-0">
-                    <i class="fas fa-heart text-[15px] text-discovery-pink"></i>
-                    <span class="font-bold text-[13px] text-text-main" data-fav-count-target="shop:{{ $ctaShopId }}">{{ number_format($likeCount) }}</span>
+                <div class="flex items-center gap-1 shrink-0" title="プロフィールが閲覧された回数">
+                    <i class="fas fa-eye text-[15px] text-accent-text"></i>
+                    <span class="font-bold text-[13px] text-text-main">{{ number_format($viewCount) }}</span>
+                    <span class="text-[10px] text-text-sub">閲覧</span>
                 </div>
             </div>
             <div class="flex items-center gap-1.5 text-text-sub text-[12px] flex-wrap">
@@ -160,25 +161,13 @@
         @if(!empty($ctaShopId))
             <div class="flex flex-col gap-2 mb-2">
                 {{-- 最重要：TALK 遷移（求人未登録でも常に表示） --}}
-                {{-- トーク / LIKE / KEEP / 共有 の横一列。トークが flex-1 で最も目立つ Primary --}}
+                {{-- トーク / KEEP / 共有 の横一列。トークが flex-1 で最も目立つ Primary --}}
                 <div class="fav-actions-row" style="margin-bottom: 20px;">
                     <a href="{{ $mkTalkHref(['id' => $ctaShopId, 'talk_topic' => 'other', 'initiate' => 1]) }}"
                        @if($isShopPreview) aria-disabled="true" title="プレビュー：求職者はここからトークに遷移します" onclick="return false;" @endif
                        class="fav-actions-row__primary inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-full font-bold bg-accent text-on-accent shadow-[0_4px_12px_rgba(0,0,0,0.4)] active:scale-[0.98] transition-transform duration-150 {{ $isShopPreview ? 'cursor-default' : '' }}">
                         <i class="fas fa-comment-dots"></i> トークする
                     </a>
-                    <button type="button"
-                            @if($isShopPreview) disabled title="プレビュー：求職者はここでいいねできます" @endif
-                            class="fav-circle fav-circle--like {{ $isShopPreview ? 'opacity-70' : '' }}"
-                            aria-label="いいね"
-                            aria-pressed="{{ !empty($shop['is_liked']) ? 'true' : 'false' }}"
-                            @unless($isShopPreview) data-fav-toggle @endunless
-                            data-item-id="{{ $shop['id'] ?? '' }}"
-                            data-item-type="shop"
-                            data-action="like">
-                        <i class="fas fa-heart" aria-hidden="true"></i>
-                        <span class="fav-circle__cap">LIKE</span>
-                    </button>
                     <button type="button"
                             @if($isShopPreview) disabled title="プレビュー：求職者はここでキープできます" @endif
                             class="fav-circle fav-circle--keep {{ $isShopPreview ? 'opacity-70' : '' }}"

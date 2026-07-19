@@ -119,7 +119,7 @@
 @push('scripts')
 <script src="{{ asset('assets/js/sub-header.js') }}"></script>
 <script src="{{ asset('assets/js/search-detail.js') }}?v=20260712-form-unify"></script>
-<script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260712-optimistic"></script>
+<script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260719-keep-only"></script>
 @if($showAiTab)
 <script src="{{ asset('assets/js/ai-chat.js') }}?v=20260712-ai"></script>
 @endif

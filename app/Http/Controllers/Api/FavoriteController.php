@@ -4,30 +4,24 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Favorite;
-use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class FavoriteController extends Controller
 {
-    public function __construct(private readonly NotificationService $notifications)
-    {
-    }
-
     /**
-     * スワイプ画面からの「いいね」「キープ」をトグルする簡易API
+     * スワイプ画面などからの「キープ」をトグルする簡易API
      *
-     * action: like / keep
+     * action: keep
      * item_type: cast / shop
      * item_id: 対象のID（キャストID or 店舗ID）
      */
     public function toggle(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'action' => 'required|string|in:like,keep',
+            'action' => 'required|string|in:keep',
             'item_type' => 'required|string|in:cast,shop',
             'item_id' => 'required|string|max:20',
         ]);
@@ -65,28 +59,15 @@ class FavoriteController extends Controller
             return response()->json(['error' => 'Invalid target combination'], 422);
         }
 
-        // 対称設計：cast → shop も shop → cast も LIKE 可能。
-        // 連打抑制（1日1回）は下の処理で双方向に共通適用される。
-
-        $actionType = match ($action) {
-            'keep' => Favorite::ACTION_KEEP,
-            default => Favorite::ACTION_LIKE,
-        };
-
         // 自分が同じ向きで打った既存レコード
         $existing = DB::table('favorites')
-            ->where('action_type', $actionType)
+            ->where('action_type', Favorite::ACTION_KEEP)
             ->where('sender_type', $senderType)
             ->when(!empty($castId), fn ($q) => $q->where('cast_id', $castId))
             ->when(!empty($shopId), fn ($q) => $q->where('shop_id', $shopId))
             ->first();
 
-        $now = now();
-        $isActive = false;
-
-        // LIKE / KEEP とも純粋なトグル。
-        //   既存行あり → 削除（取り消し）
-        //   既存行なし → 追加（LIKE は通知付き。ただし同ペアへの通知は 1 日 1 回まで）
+        // 純粋なトグル：既存行あり → 削除（取り消し）／ 既存行なし → 追加
         if ($existing) {
             DB::table('favorites')->where('id', $existing->id)->delete();
             $isActive = false;
@@ -94,31 +75,11 @@ class FavoriteController extends Controller
             DB::table('favorites')->insert([
                 'cast_id' => $castId,
                 'shop_id' => $shopId,
-                'action_type' => $actionType,
+                'action_type' => Favorite::ACTION_KEEP,
                 'sender_type' => $senderType,
-                'created_at' => $now,
+                'created_at' => now(),
             ]);
             $isActive = true;
-
-            if ($action === 'like' && !$this->hasNotifiedLikeToday((string) ($castId ?? ''), (string) ($shopId ?? ''))) {
-                $this->notifyLikeReceived($senderType, (string) ($castId ?? ''), (string) ($shopId ?? ''));
-            }
-        }
-
-        // 表示用の最新いいね数。
-        // - キャスト宛 = sender_type=shop からの LIKE 件数
-        // - 店舗宛   = sender_type=cast からの LIKE 件数
-        $likeCount = null;
-        if ($action === 'like') {
-            $likeCount = (int) DB::table('favorites')
-                ->where('action_type', Favorite::ACTION_LIKE)
-                ->when($itemType === 'cast', function ($q) use ($itemId) {
-                    $q->where('cast_id', $itemId)->where('sender_type', Favorite::SENDER_SHOP);
-                })
-                ->when($itemType === 'shop', function ($q) use ($itemId) {
-                    $q->where('shop_id', $itemId)->where('sender_type', Favorite::SENDER_CAST);
-                })
-                ->count();
         }
 
         return response()->json([
@@ -127,68 +88,6 @@ class FavoriteController extends Controller
             'item_type' => $itemType,
             'item_id' => $itemId,
             'is_active' => $isActive,
-            'like_count' => $likeCount,
         ]);
-    }
-
-    /**
-     * 同ペア（cast × shop）への LIKE 通知を本日すでに送っているか。
-     * トグル連打による通知スパムを防ぐ（favorites 行は消えるため notifications 側で判定）。
-     */
-    private function hasNotifiedLikeToday(string $castId, string $shopId): bool
-    {
-        if ($castId === '' || $shopId === '') {
-            return false;
-        }
-        try {
-            return DB::table('notifications')
-                ->where('type', 'favorite.like_received')
-                ->whereDate('created_at', now()->toDateString())
-                ->where('payload->cast_id', $castId)
-                ->where('payload->shop_id', $shopId)
-                ->exists();
-        } catch (\Throwable $e) {
-            // notifications 未整備環境では常に未通知扱い
-            return false;
-        }
-    }
-
-    /**
-     * LIKE を受け取った側にお知らせ通知（インボックス＋許可時は Push）。
-     * - cast → shop: 店舗マネージャー全員に通知
-     * - shop → cast: 対象キャストに通知
-     */
-    private function notifyLikeReceived(string $senderType, string $castId, string $shopId): void
-    {
-        try {
-            if ($senderType === Favorite::SENDER_CAST && $shopId !== '') {
-                $castName = (string) (DB::table('cast_profiles')->where('cast_id', $castId)->value('nickname') ?? '');
-                $displayName = $castName !== '' ? $castName : 'キャスト';
-                $this->notifications->createForShop(
-                    $shopId,
-                    'favorite.like_received',
-                    'いいねが届きました',
-                    "{$displayName}さんからいいねが届きました。",
-                    url('/shop/interaction'),
-                    ['cast_id' => $castId, 'shop_id' => $shopId]
-                );
-                return;
-            }
-
-            if ($senderType === Favorite::SENDER_SHOP && $castId !== '') {
-                $shopName = (string) (DB::table('shop_profiles')->where('shop_id', $shopId)->value('shop_name') ?? '');
-                $displayName = $shopName !== '' ? $shopName : '店舗';
-                $this->notifications->createForCast(
-                    $castId,
-                    'favorite.like_received',
-                    'いいねが届きました',
-                    "{$displayName}からいいねが届きました。",
-                    url('/cast/interaction'),
-                    ['cast_id' => $castId, 'shop_id' => $shopId]
-                );
-            }
-        } catch (\Throwable $e) {
-            Log::warning('Favorite notify failed: ' . $e->getMessage());
-        }
     }
 }

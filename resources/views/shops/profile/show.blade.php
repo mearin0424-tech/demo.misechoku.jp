@@ -25,10 +25,10 @@
         <div class="shop-word-bubble">
             <p>{{ $shop['word'] ?? '' }}</p>
         </div>
-        @php $shopLikeCount = (int) ($shop['like_cnt'] ?? 0); @endphp
-        <div class="shop-like-badge" title="キャストから受け取ったLIKE">
-            <i class="fas fa-heart"></i>
-            <span>{{ number_format($shopLikeCount) }}</span>
+        @php $shopViewCount = (int) ($shop['view_cnt'] ?? 0); @endphp
+        <div class="shop-like-badge" title="プロフィールが閲覧された回数">
+            <i class="fas fa-eye"></i>
+            <span>{{ number_format($shopViewCount) }}回閲覧</span>
         </div>
     </div>
 

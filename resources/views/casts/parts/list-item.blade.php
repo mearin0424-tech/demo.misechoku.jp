@@ -8,7 +8,7 @@
         : trim((string) (($item['pref'] ?? '') . ' ' . ($item['city'] ?? '')));
     $locationIcon = $nearestStation !== '' ? 'fa-train' : 'fa-map-marker-alt';
 @endphp
-<li class="connection-item connection-item--clickable connection-item--shop-rich tl-row tl-row--shop tl-row--has-actions">
+<li class="connection-item connection-item--clickable connection-item--shop-rich tl-row tl-row--shop">
     <a href="{{ $recruitUrl }}" class="connection-item__link tl-row__link">
         {{-- 丸型アイコン --}}
         <div class="tl-row__thumb-wrap">
@@ -66,16 +66,4 @@
             @endif
         </div>
     </a>
-    @php
-        $isLiked = (bool) ($item['is_liked'] ?? false);
-        $likeCnt = $item['like_count'] ?? null;
-    @endphp
-    {{-- 一覧の LIKE は状態表示のみ（操作はスワイプ / プロフィール詳細に集約） --}}
-    <div class="tl-row__actions">
-        <span class="tl-row__like-indicator {{ $isLiked ? 'is-on' : '' }}"
-              aria-label="いいね{{ $isLiked ? '済み' : '' }}{{ $likeCnt !== null ? '・' . number_format((int) $likeCnt) . '件' : '' }}">
-            <i class="fas fa-heart" aria-hidden="true"></i>
-            @if($likeCnt !== null)<span class="tl-row__like-count">{{ number_format((int) $likeCnt) }}</span>@endif
-        </span>
-    </div>
 </li>

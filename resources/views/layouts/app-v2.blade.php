@@ -353,13 +353,17 @@
         body.page-talk-room { overflow: hidden; }
         body.page-talk-room nav[data-bottom-nav] { display: none !important; }
         body.page-talk-room main#main-content {
+            /* 100vh はモバイルブラウザだと URL バー込みの高さになり、下端の入力欄が画面外へ落ちる。
+               可視領域に追従する dvh を優先し、非対応ブラウザのみ vh フォールバック。 */
             height: 100vh !important;
+            height: 100dvh !important;
             min-height: 0 !important;
             padding-bottom: 0 !important;      /* ボトムナビが無いので確保不要 */
             overflow: hidden !important;
         }
         body.page-talk-room #talk-room-container {
             height: calc(100vh - var(--header-height, 60px)) !important;
+            height: calc(100dvh - var(--header-height, 60px)) !important;
             min-height: 0 !important;
             position: relative !important;     /* chat-input-area の absolute 基準 */
         }
