@@ -59,6 +59,7 @@ class HomeController extends Controller
                 'cast_profiles.pr',
                 'cast_profiles.exp',
                 'cast_profiles.profession',
+                'cast_profiles.industry_id',
                 'cast_profiles.latitude',
                 'cast_profiles.longitude',
                 DB::raw("(SELECT ci.image_path FROM cast_images ci WHERE ci.cast_id = casts.id ORDER BY ci.is_main DESC, ci.main_order IS NULL, ci.main_order, ci.id LIMIT 1) as main_image_path")
@@ -110,6 +111,11 @@ class HomeController extends Controller
 
         $maxDistanceKm = (int) ($this->userLocation->getEffectiveMaxDistanceKm() ?? 0);
 
+        // 希望業種（industry_id → 業種名）
+        $industryNames = Schema::hasTable('industries')
+            ? DB::table('industries')->pluck('name', 'id')
+            : collect();
+
         $items = [];
         foreach ($rows as $row) {
             $birthday = $row->birthday ? Carbon::parse($row->birthday) : null;
@@ -130,6 +136,10 @@ class HomeController extends Controller
                 'view_count' => $viewCounts[$row->id] ?? 0,
                 'images' => $images,
                 'is_kept' => isset($keptCastMap[$row->id]),
+                'pref' => $row->pref ?? '',
+                'city' => $row->city ?? '',
+                'industry_name' => $row->industry_id !== null ? (string) ($industryNames[$row->industry_id] ?? '') : '',
+                'night_work_label' => ((int) ($row->exp ?? 0) === 1) ? '経験あり' : '未経験',
                 'distance_km' => $distanceKm,
                 'distance_label' => $distanceKm !== null ? $this->userLocation->formatDistance($distanceKm) : null,
             ];

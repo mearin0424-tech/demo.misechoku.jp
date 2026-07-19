@@ -30,14 +30,14 @@
     </div>
 
     @if($currentDoc && !empty($currentDoc['ng_reason']))
-        <div class="management-summary-note" style="margin-bottom:10px; color:#ffb4b4;">
+        <div class="management-summary-note" style="margin-bottom:10px; color:#b91c1c;">
             差し戻し理由：{{ $currentDoc['ng_reason'] }}
         </div>
     @endif
 
     @if($currentDoc)
-        <div class="text-xs" style="margin-bottom:10px; color:#C9B8B8;">
-            提出済み：<strong style="color:#e6dffc;">{{ $currentDoc['type_label'] ?? '' }}</strong>
+        <div class="text-xs" style="margin-bottom:10px; color:#6d6685;">
+            提出済み：<strong style="color:#2d2742;">{{ $currentDoc['type_label'] ?? '' }}</strong>
             @if(!empty($currentDoc['updated_at_label']))
                 <span style="margin-left:8px;">更新: {{ $currentDoc['updated_at_label'] }}</span>
             @endif

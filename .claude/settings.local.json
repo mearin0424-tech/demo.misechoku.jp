@@ -42,7 +42,18 @@
       "PowerShell(Out-Null *)",
       "Bash(npm run *)",
       "Bash(npx tailwindcss *)",
-      "Bash(python -)"
+      "Bash(python -)",
+      "Bash(sed -n '217,260p' public/assets/css/talk.css)",
+      "Bash(sed -n '2333,2400p' public/assets/css/talk.css)",
+      "Bash(awk '/color: #\\(f5f5f5|fff|ffffff|ececec|e8e|f0[a-f0-9]{4}|c4b5fd|a78bfa\\)/ {print NR\": \"prev\" => \"$0} {prev=$0}' public/assets/css/talk.css)",
+      "Bash(sed -n '155,180p' public/assets/css/talk.css)",
+      "Bash(sed -n '1158,1215p' public/assets/css/talk.css)",
+      "Bash(sed -n '2100,2145p' public/assets/css/talk.css)",
+      "Bash(sed -n '36,41p;88,93p;188,215p;228,236p' resources/views/shops/mypage/management.blade.php)",
+      "Bash(sed -n '30,35p;84,90p;195,200p' resources/views/casts/mypage/employment.blade.php)",
+      "Bash(sed -n '222,231p' resources/views/shops/mypage/management.blade.php)",
+      "Bash(sed -n '137,152p' resources/views/casts/mypage/employment.blade.php)",
+      "Bash(php -l app/Http/Controllers/Common/TalkController.php)"
     ]
   }
 }

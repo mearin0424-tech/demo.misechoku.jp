@@ -251,3 +251,220 @@ input[type="file"]::file-selector-button:hover {
     color: #fff !important;
     box-shadow: 0 0 12px rgba(214, 112, 162, 0.4) !important;
 }
+
+/* =====================================================================
+   優良店バッヂ（全画面共通・2026-07-19）
+   メタリックゴールドの「バッヂらしい」統一デザイン。
+   明背景・暗背景どちらでも成立する自己完結スタイル。
+   使用: <x-ui.premium-badge /> （resources/views/components/ui/premium-badge）
+   ===================================================================== */
+.premium-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px 3px 8px;
+    border-radius: 999px;
+    background: linear-gradient(160deg, #f9e08e 0%, #f6d36a 32%, #d4af37 68%, #b8860b 100%);
+    border: 1px solid rgba(133, 94, 6, 0.55);
+    color: #4a3305;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    line-height: 1.2;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        inset 0 -1px 1px rgba(133, 94, 6, 0.35),
+        0 2px 6px rgba(0, 0, 0, 0.25);
+    white-space: nowrap;
+    vertical-align: middle;
+}
+.premium-badge .fa-crown {
+    font-size: 0.82em;
+    color: #6b4d04;
+    filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.4));
+}
+.premium-badge--sm {
+    padding: 2px 7px 2px 6px;
+    font-size: 9.5px;
+    gap: 3px;
+}
+/* 未取得状態（店舗マイページの自店舗表示用）：グレーメタル */
+.premium-badge--off {
+    background: linear-gradient(160deg, #e7e4ee 0%, #cfcada 45%, #a9a3b8 100%);
+    border-color: rgba(95, 88, 118, 0.45);
+    color: #55506a;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.6),
+        inset 0 -1px 1px rgba(95, 88, 118, 0.25),
+        0 2px 5px rgba(0, 0, 0, 0.15);
+}
+.premium-badge--off .fa-crown { color: #6d6685; }
+/* ボタンとして使う場合のリセットラッパー（マイページの条件モーダル起動用） */
+.premium-badge-btn {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* =====================================================================
+   共有メニュー（丸ボタン＋ポップアップ）
+   旧 app.css（app-v2 では未読込）から移植。プロフィール詳細・公開共有ページで使用。
+   share-menu.js（グローバル読込済み）が data-share-menu を操作する。
+   ===================================================================== */
+.share-menu {
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 auto;
+}
+.share-menu__trigger {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.22), rgba(20, 20, 20, 0.7));
+    border: 1px solid var(--color-border-strong, rgba(168, 85, 247, 0.45));
+    color: var(--gold-light, #c4b5fd);
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    transition: transform 0.12s ease, background 0.15s ease;
+}
+.share-menu__trigger:hover {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.42), rgba(20, 20, 20, 0.8));
+    transform: scale(1.05);
+}
+.share-menu__trigger[aria-expanded="true"] {
+    background: linear-gradient(135deg, var(--gold-light, #c4b5fd), var(--gold, #a78bfa));
+    color: #1a1206;
+}
+.share-menu__panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 1200;
+    min-width: 200px;
+    background: linear-gradient(180deg, var(--color-sub, #1a1a1a), var(--dark-bg, #050505));
+    border: 1px solid var(--color-border-strong, rgba(168, 85, 247, 0.45));
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.55);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.share-menu__panel[hidden] { display: none; }
+.share-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: transparent;
+    border: 0;
+    color: var(--color-text-header, #f5f5f5);
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.12s ease;
+    white-space: nowrap;
+    min-height: 44px;
+}
+.share-menu__item:hover {
+    background: rgba(168, 85, 247, 0.1);
+    color: var(--gold-light, #c4b5fd);
+}
+.share-menu__item i,
+.share-menu__icon-x {
+    width: 18px;
+    text-align: center;
+    color: var(--gold, #a78bfa);
+}
+.share-menu__icon-x {
+    font-weight: 900;
+    font-size: 1rem;
+}
+.share-menu__copied-toast {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: var(--color-success-bg, rgba(110, 231, 183, 0.14));
+    color: var(--color-success, #6ee7b7);
+    border: 1px solid rgba(74, 222, 128, 0.45);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    z-index: 1300;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 0.4s ease;
+}
+
+/* =====================================================================
+   プロフィール閲覧数 + メダル（全画面共通・2026-07-19）
+   1,000以上=銅 / 5,000以上=銀 / 10,000以上=金。単位は M（=千）。
+   使用: <x-ui.view-count :count="$n" />
+   ===================================================================== */
+.view-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+.view-count__eye {
+    font-size: 0.95em;
+    color: var(--accent-text, #a78bfa);
+}
+.view-count__num {
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: inherit;
+}
+.view-count__unit {
+    font-size: 0.72em;
+    color: inherit;
+    opacity: 0.72;
+}
+/* メダル：小さな金属ディスク + メダルアイコン（明背景・暗背景どちらでも成立） */
+.view-medal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border-radius: 50%;
+    font-size: 11px;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        inset 0 -1px 1px rgba(0, 0, 0, 0.25),
+        0 1px 3px rgba(0, 0, 0, 0.3);
+    flex: 0 0 auto;
+}
+.view-medal--gold {
+    background: linear-gradient(160deg, #f9e08e 0%, #d4af37 60%, #b8860b 100%);
+    border: 1px solid rgba(133, 94, 6, 0.5);
+    color: #5b4304;
+}
+.view-medal--silver {
+    background: linear-gradient(160deg, #f5f6f8 0%, #c0c6cf 60%, #8f98a3 100%);
+    border: 1px solid rgba(75, 85, 99, 0.45);
+    color: #4b5563;
+}
+.view-medal--bronze {
+    background: linear-gradient(160deg, #e8b27d 0%, #cd7f32 60%, #8c5a1e 100%);
+    border: 1px solid rgba(90, 50, 16, 0.5);
+    color: #5a3210;
+}

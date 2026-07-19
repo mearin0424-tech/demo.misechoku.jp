@@ -4262,3 +4262,247 @@ body.page-home #home-screen {
     height: 100dvh;
 }
 
+
+/* ============================================================================
+   SWIPE 画像レイアウト調整 (2026-07-19)
+   ・画像は「画面横幅フィット + 上寄せ」（object-fit: contain / top）
+   ・縦の不足分はカード下部のブラック面＋グラデーションで埋める
+   　→ 下部情報（名前・位置・タグ・時給）が画像に潰されず読みやすくなる
+   ============================================================================ */
+body.page-home .cast-card,
+body.page-home .cast-card.glass-card,
+body.page-home .cast-card--recruit {
+    background: #050505 !important;
+}
+body.page-home .home-photo,
+body.page-home .photo-swiper .swiper-slide img {
+    object-fit: contain !important;
+    object-position: top center !important;
+}
+
+/* 画像下端 → ブラックの継ぎ目をなめらかに（下側 60% に黒グラデを重ねる）。
+   既存の ::after グラデ（--discovery-base 基調）をブラック基調で上書き */
+body.page-home .home-photo-wrap::after,
+body.page-home .rc-img-wrap::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    height: 60%;
+    pointer-events: none;
+    z-index: 2;
+    background: linear-gradient(180deg,
+        rgba(5, 5, 5, 0) 0%,
+        rgba(5, 5, 5, 0.35) 40%,
+        rgba(5, 5, 5, 0.82) 72%,
+        #050505 100%);
+}
+/* cast カード側の旧・小型グラデ指定（height 10% 等）も同じ見た目に統一 */
+body.page-home .cast-card:not(.cast-card--recruit) .home-photo-wrap::after {
+    height: 60%;
+    background: linear-gradient(180deg,
+        rgba(5, 5, 5, 0) 0%,
+        rgba(5, 5, 5, 0.35) 40%,
+        rgba(5, 5, 5, 0.82) 72%,
+        #050505 100%);
+}
+
+/* ============================================================================
+   トーク遷移ボタンの強調 (2026-07-19)
+   最重要 CTA として：サイズアップ + アクセントのグローリング + ごく弱いパルス
+   ============================================================================ */
+body.page-home .action-btn-message,
+body.page-home .action-circle-btn.message {
+    width: 68px !important;
+    height: 68px !important;
+    min-width: 68px !important;
+    min-height: 68px !important;
+    box-shadow:
+        0 10px 24px rgba(0, 0, 0, 0.50),
+        0 0 0 5px rgba(var(--accent-rgb, 139, 92, 246), 0.22),
+        0 0 22px rgba(var(--accent-rgb, 139, 92, 246), 0.55),
+        inset 0 2px 3px rgba(255, 255, 255, 0.35),
+        inset 0 -3px 5px rgba(0, 0, 0, 0.30) !important;
+    animation: talkBtnPulse 2.4s ease-in-out infinite;
+}
+body.page-home .action-btn-message .action-icon,
+body.page-home .action-circle-btn.message .action-icon {
+    width: 30px !important;
+    height: 30px !important;
+}
+/* 「トーク」ラベルもアクセント色で強調 */
+body.page-home .rc-action-item:has(.action-circle-btn.message) .rc-action-label,
+body.page-home .rc-action-item:has(.action-btn-message) .rc-action-label {
+    color: var(--accent-text, #a78bfa);
+    font-size: 0.66rem;
+}
+@keyframes talkBtnPulse {
+    0%, 100% {
+        box-shadow:
+            0 10px 24px rgba(0, 0, 0, 0.50),
+            0 0 0 4px rgba(var(--accent-rgb, 139, 92, 246), 0.18),
+            0 0 16px rgba(var(--accent-rgb, 139, 92, 246), 0.40),
+            inset 0 2px 3px rgba(255, 255, 255, 0.35),
+            inset 0 -3px 5px rgba(0, 0, 0, 0.30);
+    }
+    50% {
+        box-shadow:
+            0 10px 24px rgba(0, 0, 0, 0.50),
+            0 0 0 7px rgba(var(--accent-rgb, 139, 92, 246), 0.30),
+            0 0 28px rgba(var(--accent-rgb, 139, 92, 246), 0.68),
+            inset 0 2px 3px rgba(255, 255, 255, 0.35),
+            inset 0 -3px 5px rgba(0, 0, 0, 0.30);
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    body.page-home .action-btn-message,
+    body.page-home .action-circle-btn.message {
+        animation: none !important;
+    }
+}
+
+/* ============================================================================
+   SWIPE カード下部 4行構成 (2026-07-19)
+   店舗カード: 店名 / 業種・レビュー・閲覧数 / 駅・距離 / ボーナス金(大)+時給
+   キャストカード: 名前(年齢) / 希望業種・経験 / エリア・距離 / タグ
+   優良店バッヂはカード左上（ヘッダー直下）に固定
+   ============================================================================ */
+
+/* 優良店バッヂ：カード左上（固定ヘッダーに隠れない位置） */
+body.page-home .rc-premium-topleft {
+    position: absolute;
+    top: calc(var(--header-height, 60px) + 12px);
+    left: 12px;
+    z-index: 30;
+    pointer-events: none;
+}
+
+/* 行の共通レイアウト */
+body.page-home .rc-line,
+body.page-home .cc-line {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    width: 100%;
+    min-width: 0;
+    margin-top: 6px;
+}
+
+/* 2行目：業種・レビュー・閲覧数 */
+body.page-home .rc-genre,
+body.page-home .cc-genre {
+    color: var(--accent-text, #a78bfa);
+    font-weight: 800;
+    font-size: 0.82rem;
+    letter-spacing: 0.02em;
+}
+body.page-home .rc-line--meta .rc-rating-inline { font-size: 0.82rem; }
+body.page-home .rc-line--meta .rc-review-cnt { margin-left: 2px; }
+body.page-home .rc-views {
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 0.78rem;
+}
+
+/* 経験有無チップ（キャストカード2行目） */
+body.page-home .cc-exp {
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    white-space: nowrap;
+}
+body.page-home .cc-exp.is-exp {
+    background: rgba(110, 231, 183, 0.14);
+    color: #6ee7b7;
+    border-color: rgba(110, 231, 183, 0.40);
+}
+
+/* 3行目：駅・距離 */
+body.page-home .rc-loc,
+body.page-home .rc-dist {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+body.page-home .rc-loc i { color: rgba(255, 255, 255, 0.55); font-size: 0.72em; }
+body.page-home .rc-dist { color: var(--accent-text, #a78bfa); }
+body.page-home .rc-dist i { font-size: 0.72em; }
+
+/* 4行目：左=ボーナス金（大） / 右=時給 */
+body.page-home .rc-line--money {
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 12px;
+    margin-top: 10px;
+}
+body.page-home .rc-bonus-big {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+body.page-home .rc-bonus-big__label {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    color: #f6d36a;
+    text-transform: uppercase;
+}
+body.page-home .rc-bonus-big__amount {
+    font-size: clamp(1.5rem, 6.6vw, 1.95rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    background: linear-gradient(180deg, #f9e08e 0%, #f6d36a 45%, #d4af37 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+body.page-home .rc-wage-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 0 0 auto;
+}
+body.page-home .rc-wage-compact__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 8px;
+    font-size: 0.64rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.62);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+body.page-home .rc-wage-compact__row strong {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #ffffff;
+    font-variant-numeric: tabular-nums;
+}
+
+/* 1行目：名前の年齢かっこ表記 */
+body.page-home .cast-name .age {
+    margin-left: 4px;
+    font-size: 0.72em !important;
+    font-weight: 500 !important;
+    opacity: 0.85;
+}

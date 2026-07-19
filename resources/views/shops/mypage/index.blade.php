@@ -58,11 +58,7 @@
         <div class="mb-4">
             <div class="flex items-center justify-between gap-3 mb-1.5">
                 <h1 class="app-title text-[24px] text-text-main leading-tight truncate min-w-0">{{ $displayName }}</h1>
-                <div class="flex items-center gap-1.5 shrink-0" title="プロフィールが閲覧された回数">
-                    <i class="fas fa-eye text-[16px] text-accent-text" aria-hidden="true"></i>
-                    <span class="font-bold text-[14px] text-text-main">{{ number_format((int) ($shopData['view_cnt'] ?? 0)) }}</span>
-                    <span class="text-[10px] text-text-sub">閲覧</span>
-                </div>
+                <x-ui.view-count :count="(int) ($shopData['view_cnt'] ?? 0)" class="shrink-0 text-[14px] text-text-main" />
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 <a href="{{ route('shop.mypage.review.index') }}"
@@ -74,9 +70,9 @@
                 <button type="button" id="open-good-payer-badge-modal"
                         aria-haspopup="dialog" aria-controls="modal-good-payer-badge"
                         aria-label="優良店バッヂの説明を開く"
-                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[11px] font-bold transition-colors {{ $hasGoodPayerBadge ? 'border-amber-400/50 text-amber-300' : 'border-line text-text-sub hover:border-line-accent/40' }}">
-                    <i class="fas fa-crown text-[10px] {{ $hasGoodPayerBadge ? 'text-amber-400' : 'text-text-sub/70' }}"></i>
-                    優良店{{ $hasGoodPayerBadge ? '' : '（未取得）' }}
+                        class="premium-badge-btn">
+                    <x-ui.premium-badge :off="!$hasGoodPayerBadge"
+                                        :label="'優良店' . ($hasGoodPayerBadge ? '' : '（未取得）')" />
                 </button>
             </div>
         </div>
@@ -102,7 +98,7 @@
                     </p>
                 </span>
                 @if(!$licenseApproved)
-                    <a href="#license-section" class="mypage-alert__btn">許可証を登録する</a>
+                    <a href="{{ route('shop.mypage.documents.index') }}" class="mypage-alert__btn">許可証を登録する</a>
                 @else
                     <a href="{{ route('shop.recruits.show') }}" class="mypage-alert__btn">公開設定へ</a>
                 @endif
@@ -216,7 +212,7 @@
                         <p class="mt-2.5 pt-2.5 border-t border-line text-[11px] leading-relaxed text-text-sub">
                             @if(!$licenseApproved)
                                 <i class="fas fa-file-shield text-danger text-[10px] mr-1"></i>掲載には営業許可証の承認が必要です。
-                                <a href="#license-section" class="font-bold text-accent-text underline">許可証を登録する</a>
+                                <a href="{{ route('shop.mypage.documents.index') }}" class="font-bold text-accent-text underline">許可証を登録する</a>
                             @else
                                 <i class="fas fa-circle-info text-[10px] mr-1"></i>公開すると検索・スワイプに表示されます。上の「ステータス管理」から公開できます。
                             @endif
@@ -443,9 +439,31 @@
                         </div>
                     @endif
 
-                    {{-- Licenses（同じデザインで色違い：amber/champagne 系。partial の構造は触らず外側だけ薄く違う色味の枠で包む） --}}
-                    <div id="license-section" class="mt-5 pt-5 border-t border-amber-400/30 shop-mypage-license-wrap" style="scroll-margin-top: 120px;">
-                        @include('shops.mypage.partials.shop-license-documents', ['documents' => $documents ?? []])
+                    {{-- Licenses：提出・管理は専用ページ（ライトモード）へ。ここは状況サマリーのみ --}}
+                    @php
+                        $docList = collect($documents ?? []);
+                        $docTotal = $docList->count();
+                        $docApproved = $docList->where('status', 'approved')->count();
+                        $docPending = $docList->where('status', 'pending')->count();
+                        $docRejected = $docList->where('status', 'rejected')->count();
+                    @endphp
+                    <div id="license-section" class="mt-5 pt-5 border-t border-amber-400/30" style="scroll-margin-top: 120px;">
+                        <div class="flex items-center justify-between gap-3 flex-wrap">
+                            <div class="min-w-0">
+                                <h3 class="app-title text-[13px] tracking-widest text-amber-300 mb-1">
+                                    <i class="fas fa-file-shield mr-1" aria-hidden="true"></i>許可証の登録
+                                </h3>
+                                <p class="text-[12px] text-text-sub">
+                                    承認 {{ $docApproved }}/{{ $docTotal }}件
+                                    @if($docPending > 0)・審査中 {{ $docPending }}件@endif
+                                    @if($docRejected > 0)・<span style="color: var(--color-danger);">差戻し {{ $docRejected }}件</span>@endif
+                                </p>
+                            </div>
+                            <a href="{{ route('shop.mypage.documents.index') }}"
+                               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full font-bold bg-accent text-on-accent shadow-[0_4px_12px_rgba(0,0,0,0.4)] active:scale-[0.98] transition-transform duration-150 text-[13px]">
+                                <i class="fas fa-file-arrow-up" aria-hidden="true"></i> 提出・管理する
+                            </a>
+                        </div>
                     </div>
                 </x-ui.card>
 

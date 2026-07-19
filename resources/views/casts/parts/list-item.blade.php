@@ -13,16 +13,11 @@
         {{-- 丸型アイコン --}}
         <div class="tl-row__thumb-wrap">
             <img loading="lazy" decoding="async" src="{{ $item['main_img'] ?? asset('assets/images/common/no-image.png') }}" alt="" class="tl-row__thumb">
-            @if(!empty($item['is_excellent']))
-                <span class="tl-row__crown" role="img" aria-label="優良店" title="優良店">
-                    <i class="fas fa-crown" aria-hidden="true"></i>
-                </span>
-            @endif
         </div>
 
         <div class="tl-row__body">
-            {{-- 1行目：アイコンの隣に来る「名前」のみで強くフォーカス --}}
-            <h3 class="tl-row__name">{{ $item['shop_name'] }}</h3>
+            {{-- 1行目：名前 + 優良店バッヂ（全画面共通コンポーネント） --}}
+            <h3 class="tl-row__name">{{ $item['shop_name'] }}@if(!empty($item['is_excellent'])) <x-ui.premium-badge size="sm" />@endif</h3>
 
             {{-- 2行目：業種・位置・評価・距離（メタ情報を分離） --}}
             <div class="tl-row__meta">

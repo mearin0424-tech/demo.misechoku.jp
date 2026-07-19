@@ -50,6 +50,10 @@ class AppServiceProvider extends ServiceProvider
             $notify = $svc->getNotificationsForLayout(30);
             $view->with('adminNotifications', $notify['items']);
             $view->with('adminNotificationCount', $notify['total_count']);
+
+            $inbox = $svc->getInboxForLayout(20);
+            $view->with('adminInboxItems', $inbox['items']);
+            $view->with('adminInboxUnread', $inbox['unread']);
         });
 
     }

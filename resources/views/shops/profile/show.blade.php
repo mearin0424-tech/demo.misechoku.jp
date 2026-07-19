@@ -25,10 +25,8 @@
         <div class="shop-word-bubble">
             <p>{{ $shop['word'] ?? '' }}</p>
         </div>
-        @php $shopViewCount = (int) ($shop['view_cnt'] ?? 0); @endphp
-        <div class="shop-like-badge" title="プロフィールが閲覧された回数">
-            <i class="fas fa-eye"></i>
-            <span>{{ number_format($shopViewCount) }}回閲覧</span>
+        <div class="shop-like-badge">
+            <x-ui.view-count :count="(int) ($shop['view_cnt'] ?? 0)" />
         </div>
     </div>
 

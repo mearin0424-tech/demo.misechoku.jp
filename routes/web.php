@@ -509,6 +509,7 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
         Route::post('/search-location', [ShopMypage::class, 'updateSearchLocation'])->name('search-location.update');
         Route::get('/management', [ShopRecruit::class, 'management'])->name('management');
         Route::get('/reviews', [ShopReview::class, 'index'])->name('review.index');
+        Route::get('/documents', [ShopMypage::class, 'documents'])->name('documents.index');
         Route::get('/documents/{type}', [ShopMypage::class, 'viewLicenseDocument'])->name('documents.show')->whereIn('type', ['business', 'entertainment']);
         Route::post('/documents/upload', [ShopMypage::class, 'uploadDocument'])->name('documents.upload');
         Route::post('/documents/request-review', [ShopMypage::class, 'requestDocumentReview'])->name('documents.request-review');

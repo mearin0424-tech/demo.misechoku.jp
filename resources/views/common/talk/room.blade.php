@@ -67,6 +67,71 @@
     .hired-wage-field-wrap.is-visible {
         display: block;
     }
+    /* ===== クイック定型文パネル（入力欄の下・横スクロールチップ） ===== */
+    .quick-reply-panel {
+        padding: 8px 0 2px;
+        max-height: 150px;
+        opacity: 1;
+        overflow: hidden;
+        transition: max-height 0.2s ease, opacity 0.15s ease, padding 0.2s ease;
+    }
+    .quick-reply-panel.is-hidden {
+        max-height: 0;
+        opacity: 0;
+        padding: 0;
+        pointer-events: none;
+    }
+    .quick-reply-panel__label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 6px;
+        font-size: 0.68rem;
+        font-weight: 800;
+        color: #6d28d9;
+        letter-spacing: 0.03em;
+    }
+    .quick-reply-panel__status {
+        padding: 1px 8px;
+        border-radius: 999px;
+        background: rgba(124, 58, 237, 0.10);
+        border: 1px solid rgba(124, 58, 237, 0.30);
+        font-size: 0.64rem;
+        font-weight: 800;
+        color: #6d28d9;
+        white-space: nowrap;
+    }
+    .quick-reply-panel__scroll {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 6px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .quick-reply-panel__scroll::-webkit-scrollbar { display: none; }
+    .quick-reply-chip {
+        flex: 0 0 auto;
+        padding: 8px 14px;
+        min-height: 40px;
+        border-radius: 999px;
+        border: 1px solid rgba(124, 58, 237, 0.28);
+        background: #ffffff;
+        color: #241f33;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background 0.12s ease, transform 0.1s ease;
+    }
+    .quick-reply-chip--suggest {
+        background: rgba(124, 58, 237, 0.08);
+        border-color: rgba(124, 58, 237, 0.45);
+        color: #4c2889;
+        font-weight: 700;
+    }
+    .quick-reply-chip:active { transform: scale(0.96); }
+
     .hired-wage-field-wrap label {
         display: block;
         font-size: 0.80rem;
@@ -423,6 +488,26 @@
                     <span class="talk-ng-warn-text">使用できない表現が含まれています。</span>
                 </div>
             </form>
+
+            {{-- クイック定型文パネル：デフォルト表示。入力欄フォーカスで隠れてキーボード優先。
+                 進行状況（応募〜面談〜採用）に応じた候補を先頭に、マイ定型文（4スロット）を後ろに並べる --}}
+            <div id="quick-reply-panel" class="quick-reply-panel" aria-label="定型文パネル">
+                <div class="quick-reply-panel__label">
+                    <i class="fas fa-bolt" aria-hidden="true"></i>
+                    <span>{{ !empty($currentStatusLabel) ? 'いまの状況におすすめの定型文' : '定型文' }}</span>
+                    @if(!empty($currentStatusLabel))
+                        <span class="quick-reply-panel__status">{{ $currentStatusLabel }}</span>
+                    @endif
+                </div>
+                <div class="quick-reply-panel__scroll" id="quick-reply-scroll">
+                    @foreach(($quickReplySuggestions ?? []) as $qr)
+                        <button type="button" class="quick-reply-chip quick-reply-chip--suggest"
+                                data-quick-reply="{{ $qr }}"
+                                title="{{ $qr }}">{{ \Illuminate\Support\Str::limit($qr, 22) }}</button>
+                    @endforeach
+                    {{-- マイ定型文（4スロット）は JS が window.talkQuickTemplates から追加 --}}
+                </div>
+            </div>
         </div>
     @endif
 </div>
@@ -671,6 +756,63 @@
     </div>
 </div>
 @endif
+
+@push('scripts')
+<script>
+{{-- クイック定型文パネル：チップ挿入 / 入力フォーカスで非表示（キーボード優先）/ マイ定型文の合流 --}}
+(function () {
+    'use strict';
+    var panel = document.getElementById('quick-reply-panel');
+    var form = document.getElementById('chat-form');
+    if (!panel || !form) return;
+    var textarea = form.querySelector('textarea[name="message"]');
+    var scroll = document.getElementById('quick-reply-scroll');
+
+    // マイ定型文（4スロット・設定で編集可能）を候補の後ろに追加
+    (window.talkQuickTemplates || []).forEach(function (slot) {
+        var body = ((slot && (slot.body || slot.default_body)) || '').trim();
+        if (!body || !scroll) return;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'quick-reply-chip quick-reply-chip--slot';
+        btn.setAttribute('data-quick-reply', body);
+        btn.title = body;
+        btn.textContent = body.length > 22 ? body.slice(0, 22) + '…' : body;
+        scroll.appendChild(btn);
+    });
+
+    // チップ → 入力欄へ挿入。フォーカスは奪わない（パネルを保ったまま送信ボタンで即送信できる）
+    panel.addEventListener('click', function (e) {
+        var chip = e.target.closest('[data-quick-reply]');
+        if (!chip || !textarea) return;
+        textarea.value = chip.getAttribute('data-quick-reply');
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
+    // 入力欄タッチ（フォーカス）→ パネルを隠してキーボード表示を優先。解除で再表示
+    if (textarea) {
+        textarea.addEventListener('focus', function () {
+            panel.classList.add('is-hidden');
+        });
+        textarea.addEventListener('blur', function () {
+            setTimeout(function () { panel.classList.remove('is-hidden'); }, 180);
+        });
+    }
+
+    // 入力エリア（パネル込み）の実高さをメッセージ一覧の余白へ反映（cast/shop 両ロール共通）
+    var inputArea = document.querySelector('#talk-room-container .chat-input-area');
+    var messages = document.querySelector('#talk-room-container .chat-messages');
+    if (inputArea && messages && !window.__talkComposerHBound) {
+        window.__talkComposerHBound = true;
+        var apply = function () {
+            messages.style.setProperty('--talk-composer-h', inputArea.offsetHeight + 'px');
+        };
+        apply();
+        if ('ResizeObserver' in window) new ResizeObserver(apply).observe(inputArea);
+    }
+})();
+</script>
+@endpush
 
 @if($isCast)
 @push('scripts')

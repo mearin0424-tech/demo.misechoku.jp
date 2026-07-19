@@ -25,6 +25,21 @@ class MypageController extends Controller
     {
     }
 
+    /**
+     * 許可証の提出・管理（専用ページ／ライトモード）
+     */
+    public function documents()
+    {
+        $shopId = $this->currentShopId();
+        $documentData = $this->documentReviewService->getShopLicensePageData($shopId);
+
+        return view('shops.mypage.documents', [
+            'pageId' => 'mypage',
+            'documents' => $documentData['documents'],
+            'allDocumentsApproved' => $documentData['all_approved'],
+        ]);
+    }
+
     public function index()
     {
         $shopId = $this->currentShopId();

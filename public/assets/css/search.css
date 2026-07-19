@@ -3080,3 +3080,22 @@ body.page-search .content-wrapper { overflow-x: clip; }
 
 /* 開閉エリア内の探索拠点ピルの余白を詰める（バー内に収める） */
 .search-topbar-extra .location-pill-wrap { padding: 8px 0 0; }
+
+/* 検索ページ：サブヘッダーと検索バーの間の空間を詰めてぴったり接続 */
+body.page-search .tab-page-body { padding-top: 0; }
+body.page-search .search-topbar .search-filter-box { border-radius: 0 0 14px 14px; }
+
+/* 検索結果一覧・キープ一覧を画面横幅いっぱいに（行は内側 padding を持つため full-bleed 化）。
+   おすすめ欄・AI チャットなどカード型の中身には左右ガターを個別に戻す */
+body.page-search .content-wrapper {
+    padding-left: 0;
+    padding-right: 0;
+}
+body.page-search .interaction-recommend-wrap {
+    padding-left: var(--content-padding-x, 16px);
+    padding-right: var(--content-padding-x, 16px);
+}
+body.page-search .no-data-wrapper {
+    padding-left: var(--content-padding-x, 16px);
+    padding-right: var(--content-padding-x, 16px);
+}

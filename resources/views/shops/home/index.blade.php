@@ -4,7 +4,7 @@
 @section('body-class', 'no-scroll page-home')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260719-viewport-fix">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260719-card-lines">
 @endpush
 
 @php
@@ -74,6 +74,13 @@
                     <div class="rc-img-gradient" aria-hidden="true"></div>
                 </div>
 
+                {{-- 優良店バッヂ：カード左上（ヘッダー直下）に固定表示 --}}
+                @if(!empty($item['is_premium']))
+                <div class="rc-premium-topleft">
+                    <x-ui.premium-badge />
+                </div>
+                @endif
+
                 {{-- 2. アクションボタン（右側）。KEEP は favorite-quick.js（data-fav-toggle）に一本化 --}}
                 <div class="card-actions-overlay rc-actions stop-propagation">
                     <div class="rc-action-item stop-propagation">
@@ -107,95 +114,66 @@
                     </div>
                 </div>
 
-                {{-- 3. 下部スタック：店名等 → 入店祝い金 → 時給（店名はバッジ直上） --}}
-                <div class="rc-bottom-bar" aria-label="給与・ボーナス">
+                {{-- 3. 下部スタック（4行構成）
+                     1行目: 店名 / 2行目: 業種・レビュー・閲覧数 /
+                     3行目: 最寄り駅・距離 / 4行目: 左=ボーナス金（大） 右=時給 --}}
+                <div class="rc-bottom-bar" aria-label="店舗情報">
                     <div class="rc-bottom-bar__stack">
                         @php
                             $trialR = $item['trial_hourly_range'] ?? null;
                             $helpR  = $item['help_hourly_range'] ?? null;
                             $bonusRg = $item['signup_bonus_range'] ?? null;
                             $hasRating = !empty($item['rating']) && $item['rating'] > 0;
-                            $hasPremium = !empty($item['is_premium']);
+                            $stationLine = trim((string) ($item['nearest_station'] ?? ''));
+                            $areaLine = trim(($item['pref'] ?? '') . ' ' . ($item['city'] ?? ''));
                         @endphp
 
-                        <div class="rc-info" aria-label="店舗情報">
-                            @if($hasRating)
-                            <div class="rc-badges">
-                                <div class="rc-rating-inline">
-                                    <span class="rc-star" aria-hidden="true">★</span>
-                                    <span class="rc-rating-val numeric-font">{{ number_format((float)$item['rating'], 1) }}</span>
-                                    @if(isset($item['review_count']) && (int)$item['review_count'] > 0)
-                                    <span class="rc-review-cnt">レビュー{{ (int)$item['review_count'] }}件</span>
-                                    @endif
-                                </div>
-                            </div>
+                        {{-- 1行目：店名（大きめ） --}}
+                        <h2 class="rc-shop-name serif-font">{{ $item['name'] }}</h2>
+
+                        {{-- 2行目：業種・レビュー（★値 + 件数はかっこ）・閲覧数 --}}
+                        <div class="rc-line rc-line--meta">
+                            @if(!empty($item['industry_name']))
+                                <span class="rc-genre">{{ $item['industry_name'] }}</span>
                             @endif
-
-                            {{-- 優良店バッヂは店名の横に（ゴールドベタで目立たせる） --}}
-                            <h2 class="rc-shop-name serif-font">{{ $item['name'] }}@if($hasPremium)<span class="rc-premium-inline"><i class="fas fa-crown" aria-hidden="true"></i>優良店</span>@endif</h2>
-
-                            @php
-                                $stationLine = trim((string) ($item['nearest_station'] ?? ''));
-                                $areaLine = trim(($item['pref'] ?? '') . ' ' . ($item['city'] ?? ''));
-                                $locLine = $stationLine !== '' ? $stationLine : ($areaLine !== '' ? $areaLine : '六本木');
-                                $locIcon = $stationLine !== '' ? 'fa-train' : 'fa-map-marker-alt';
-                            @endphp
-                            {{-- 業種チップと位置チップを分離表示 --}}
-                            <div class="rc-meta meta-chips">
-                                @if(!empty($item['industry_name']))
-                                <span class="meta-chip meta-chip--genre">{{ $item['industry_name'] }}</span>
-                                @endif
-                                <span class="meta-chip meta-chip--loc">
-                                    <i class="fas {{ $locIcon }}" aria-hidden="true"></i>{{ $locLine }}
-                                    @if(!empty($item['distance_label']))
-                                        <span class="meta-chip__dist"><i class="fas fa-route" aria-hidden="true"></i>{{ $item['distance_label'] }}</span>
-                                    @endif
+                            @if($hasRating)
+                                <span class="rc-rating-inline">
+                                    <span class="rc-star" aria-hidden="true">★</span>{{ number_format((float)$item['rating'], 1) }}@if((int)($item['review_count'] ?? 0) > 0)<span class="rc-review-cnt">({{ (int)$item['review_count'] }}件)</span>@endif
                                 </span>
-                                <span class="meta-chip meta-chip--views" title="プロフィールが閲覧された回数">
-                                    <i class="fas fa-eye" aria-hidden="true"></i>{{ number_format((int) ($item['view_count'] ?? 0)) }}回閲覧
-                                </span>
-                            </div>
+                            @endif
+                            <x-ui.view-count :count="(int) ($item['view_count'] ?? 0)" class="rc-views" />
                         </div>
 
-                        @if(!empty($bonusRg))
-                        <div class="rc-signup-bonus-pill">
-                            <span class="rc-signup-bonus-pill__label">入店祝い金</span>
-                            <span class="rc-signup-bonus-pill__nums numeric-font">
-                                @if((int)$bonusRg['hi'] > (int)$bonusRg['lo'])
-                                ¥{{ number_format((int)$bonusRg['lo']) }}〜¥{{ number_format((int)$bonusRg['hi']) }}円
-                                @else
-                                ¥{{ number_format((int)$bonusRg['lo']) }}円
-                                @endif
+                        {{-- 3行目：最寄り駅・自分からの距離 --}}
+                        <div class="rc-line rc-line--loc">
+                            <span class="rc-loc">
+                                <i class="fas {{ $stationLine !== '' ? 'fa-train' : 'fa-map-marker-alt' }}" aria-hidden="true"></i>{{ $stationLine !== '' ? $stationLine : ($areaLine !== '' ? $areaLine : 'エリア未設定') }}
                             </span>
+                            @if(!empty($item['distance_label']))
+                                <span class="rc-dist"><i class="fas fa-route" aria-hidden="true"></i>自分から {{ $item['distance_label'] }}</span>
+                            @endif
                         </div>
-                        @endif
-                        <div class="rc-wage-panel">
-                            <div class="rc-wage-panel__trial">
-                                <span class="rc-wage-panel__trial-label">体入時給</span>
-                                <div class="rc-wage-panel__trial-amount numeric-font">
-                                    @if(!empty($trialR))
-                                        @if((int)$trialR['hi'] > (int)$trialR['lo'])
-                                        ¥{{ number_format((int)$trialR['lo']) }}~¥{{ number_format((int)$trialR['hi']) }}
-                                        @else
-                                        ¥{{ number_format((int)$trialR['lo']) }}〜
-                                        @endif
+
+                        {{-- 4行目：左=入店祝い金（大きめ） / 右=時給 --}}
+                        <div class="rc-line rc-line--money">
+                            <div class="rc-bonus-big">
+                                <span class="rc-bonus-big__label">入店祝い金</span>
+                                <span class="rc-bonus-big__amount numeric-font">
+                                    @if(!empty($bonusRg))
+                                        ¥{{ number_format((int)$bonusRg['lo']) }}@if((int)$bonusRg['hi'] > (int)$bonusRg['lo'])〜@endif
                                     @else
-                                        <span class="rc-wage-panel__dash">—</span>
+                                        —
                                     @endif
-                                </div>
+                                </span>
                             </div>
-                            <div class="rc-wage-panel__help">
-                                <span class="rc-wage-panel__help-label">ヘルプ時給</span>
-                                <span class="rc-wage-panel__help-amount numeric-font">
-                                    @if(!empty($helpR))
-                                        @if((int)$helpR['hi'] > (int)$helpR['lo'])
-                                        ¥{{ number_format((int)$helpR['lo']) }}~¥{{ number_format((int)$helpR['hi']) }}
-                                        @else
-                                        ¥{{ number_format((int)$helpR['lo']) }}〜
-                                        @endif
-                                    @else
-                                        <span class="rc-wage-panel__dash">—</span>
-                                    @endif
+                            <div class="rc-wage-compact">
+                                <span class="rc-wage-compact__row">
+                                    <span>体入時給</span>
+                                    <strong class="numeric-font">@if(!empty($trialR))¥{{ number_format((int)$trialR['lo']) }}〜@else —@endif</strong>
+                                </span>
+                                <span class="rc-wage-compact__row">
+                                    <span>ヘルプ時給</span>
+                                    <strong class="numeric-font">@if(!empty($helpR))¥{{ number_format((int)$helpR['lo']) }}〜@else —@endif</strong>
                                 </span>
                             </div>
                         </div>
@@ -266,40 +244,38 @@
                     @endif
                 </div>
 
-                {{-- プロフィール情報 --}}
+                {{-- プロフィール情報（4行構成）
+                     1行目: 名前(年齢) / 2行目: 希望業種・経験有無 /
+                     3行目: エリア・距離 / 4行目: タグ --}}
                 <div class="card-bottom-info">
-                    <h2 class="cast-name serif-font">{{ $item['name'] }}@if(!$isShop && isset($item['age'])) <span class="age">{{ $item['age'] }}</span>@endif</h2>
+                    {{-- 1行目：名前（年齢はかっこ） --}}
+                    <h2 class="cast-name serif-font">{{ $item['name'] }}@if(!$isShop && isset($item['age']))<span class="age">({{ $item['age'] }})</span>@endif</h2>
+
+                    {{-- 2行目：希望業種・経験有無 --}}
+                    <div class="cc-line cc-line--job">
+                        @if(!empty($item['industry_name']))
+                            <span class="cc-genre">{{ $item['industry_name'] }}</span>
+                        @endif
+                        @if(!$isShop && !empty($item['night_work_label']))
+                            <span class="cc-exp {{ $item['night_work_label'] === '経験あり' ? 'is-exp' : '' }}">{{ $item['night_work_label'] }}</span>
+                        @endif
+                    </div>
+
+                    {{-- 3行目：エリア・自分からの距離 --}}
                     @php
                         $bottomStation = trim((string) ($item['nearest_station'] ?? ''));
                         $bottomArea = trim(($item['pref'] ?? '') . ' ' . ($item['city'] ?? ''));
-                        $bottomLoc = $bottomStation !== '' ? $bottomStation : ($bottomArea !== '' ? $bottomArea : '六本木');
-                        $bottomIcon = $bottomStation !== '' ? 'fa-train' : 'fa-map-marker-alt';
                     @endphp
-                    {{-- 業種チップと位置チップを分離表示（求人カードと同デザイン） --}}
-                    <div class="card-location meta-chips">
-                        @if(!empty($item['industry_name']))
-                        <span class="meta-chip meta-chip--genre">{{ $item['industry_name'] }}</span>
+                    <div class="cc-line cc-line--loc">
+                        <span class="rc-loc">
+                            <i class="fas {{ $bottomStation !== '' ? 'fa-train' : 'fa-map-marker-alt' }}" aria-hidden="true"></i>{{ $bottomStation !== '' ? $bottomStation : ($bottomArea !== '' ? $bottomArea : 'エリア未設定') }}
+                        </span>
+                        @if(!empty($item['distance_label']))
+                            <span class="rc-dist"><i class="fas fa-route" aria-hidden="true"></i>自分から {{ $item['distance_label'] }}</span>
                         @endif
-                        <span class="meta-chip meta-chip--loc">
-                            <i class="fas {{ $bottomIcon }}" aria-hidden="true"></i>{{ $bottomLoc }}
-                            @if(!empty($item['distance_label']))
-                                <span class="meta-chip__dist"><i class="fas fa-route" aria-hidden="true"></i>{{ $item['distance_label'] }}</span>
-                            @endif
-                        </span>
-                        <span class="meta-chip meta-chip--views" title="プロフィールが閲覧された回数">
-                            <i class="fas fa-eye" aria-hidden="true"></i>{{ number_format((int) ($item['view_count'] ?? 0)) }}回閲覧
-                        </span>
                     </div>
-                    @if($isShop && isset($item['rating']))
-                    <div class="card-rating">
-                        <span class="card-rating-stars" aria-label="評価 {{ $item['rating'] }}">
-                            @for($i = 1; $i <= 5; $i++)
-                                <span class="star {{ $i <= floor($item['rating']) ? 'filled' : 'empty' }}">{{ $i <= floor($item['rating']) ? '★' : '☆' }}</span>
-                            @endfor
-                        </span>
-                        <span class="card-rating-num">{{ number_format($item['rating'], 1) }}</span>
-                    </div>
-                    @endif
+
+                    {{-- 4行目：タグ --}}
                     <div class="card-tags-row">
                         @foreach($item['tags'] ?? [] as $tag)
                             <span class="tag-pill">#{{ $tag }}</span>

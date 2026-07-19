@@ -447,3 +447,229 @@ body.theme-light .support-faq-item {
 }
 /* 汎用受け皿：サポート系ページ内の暗背景カードで個別クラスが漏れても
    入力欄は §3 の汎用ルール（main input 白面化）で読める状態を担保する */
+
+/* --------------------------------------------------------------------------
+   9. TALK（一覧・ルーム）のダーク残渣を一括補正
+   配色ルール: 本文 = 濃グレー(#241f33/#2d2742)、アクセント・操作 = バイオレット(#6d28d9/#7c3aed)
+   -------------------------------------------------------------------------- */
+
+/* 一覧タブ */
+body.theme-light .talk-tabs {
+    background: #ffffff;
+    border-bottom-color: var(--color-line);
+}
+body.theme-light .talk-tabs .tab-item { color: #6d6685; }
+body.theme-light .talk-tabs .tab-item.active { color: #6d28d9; }
+
+/* 一覧行（IG リファインの白文字 !important を上書き） */
+body.theme-light .talk-list-container .talk-name { color: #241f33 !important; }
+body.theme-light .talk-list-container .talk-time { color: rgba(36, 31, 51, 0.45) !important; }
+body.theme-light .talk-list-container .talk-last-msg { color: rgba(36, 31, 51, 0.60) !important; }
+body.theme-light .talk-list-container .talk-item:has(.unread-badge) .talk-name { color: #14101f !important; }
+body.theme-light .talk-list-container .talk-item:has(.unread-badge) .talk-last-msg { color: rgba(36, 31, 51, 0.85) !important; }
+
+/* ルームヘッダー（相手情報バー）：白バー + 濃グレー文字 */
+body.theme-light .talk-room-header,
+body.theme-light #talk-room-container .talk-room-header {
+    background: #ffffff !important;
+    border-bottom: 1px solid var(--color-line) !important;
+    box-shadow: 0 4px 12px rgba(76, 29, 149, 0.08) !important;
+    color: #241f33;
+}
+body.theme-light .talk-job-kind-badge,
+body.theme-light #talk-room-container .talk-job-kind-badge {
+    background: rgba(124, 58, 237, 0.08) !important;
+    border: 1px solid rgba(124, 58, 237, 0.28) !important;
+    color: #6d28d9 !important;
+}
+body.theme-light .talk-block-icon-btn {
+    background: rgba(220, 38, 38, 0.06);
+    border-color: rgba(220, 38, 38, 0.40);
+    color: #dc2626;
+}
+
+/* 採用結果パネル・アクショングリッド */
+body.theme-light .talk-result-panel,
+body.theme-light #talk-room-container .talk-result-panel {
+    background: #ffffff !important;
+    border: 1px solid var(--color-line) !important;
+}
+body.theme-light .talk-action-item {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.22);
+    color: #2d2742;
+}
+body.theme-light .talk-action-icon {
+    background: rgba(124, 58, 237, 0.08);
+    color: #6d28d9;
+}
+body.theme-light .talk-action-item-primary { color: #a16207; }
+body.theme-light .talk-job-kind-save-status { color: #6d28d9; }
+body.theme-light .talk-job-kind-lock-note { color: #6d6685; }
+
+/* 面談候補日 UI：淡バイオレット面 + 濃色文字（クリーム/薄紫の白抜き文字を全て置換） */
+body.theme-light .interview-option-btn,
+body.theme-light #talk-room-container .interview-option-btn {
+    background: #ffffff !important;
+    border-color: rgba(124, 58, 237, 0.35) !important;
+    color: #241f33 !important;
+}
+body.theme-light .interview-option-btn .interview-option-date,
+body.theme-light #talk-room-container .interview-option-btn .interview-option-date { color: #6d28d9 !important; }
+body.theme-light .interview-option-btn .interview-option-action,
+body.theme-light .interview-option-btn.is-selected .interview-option-action { color: #241f33 !important; }
+body.theme-light .interview-option-btn.is-selected,
+body.theme-light #talk-room-container .interview-option-btn.is-selected {
+    background: rgba(124, 58, 237, 0.10) !important;
+    border-color: rgba(124, 58, 237, 0.60) !important;
+}
+body.theme-light .message-bubble-auto .interview-title,
+body.theme-light #talk-room-container .message-bubble-auto .interview-title { color: #6d28d9 !important; }
+body.theme-light .message-bubble-auto .interview-title i { color: #7c3aed !important; }
+body.theme-light .interview-confirmed-date,
+body.theme-light #talk-room-container .interview-confirmed-date { color: #6d28d9 !important; }
+body.theme-light .interview-change-schedule-btn,
+body.theme-light .msg-left .interview-change-schedule-btn,
+body.theme-light #talk-room-container .interview-change-schedule-btn {
+    color: #6d28d9 !important;
+    border-color: rgba(124, 58, 237, 0.45) !important;
+    background: rgba(124, 58, 237, 0.06) !important;
+}
+body.theme-light .message-bubble-auto a,
+body.theme-light #talk-room-container .message-bubble-auto a { color: #6d28d9 !important; }
+
+/* 自動送信カード内の本文（--color-text-main 参照）はトークン反転で濃グレーに追従する */
+
+/* コンポーザーの textarea：ID 詳細度に負けていた文字色を確実に濃グレー化 */
+body.theme-light #talk-room-container .chat-input-wrapper textarea { color: #241f33 !important; }
+
+/* 結果テンプレ（room.blade の @push インラインスタイルを上書き） */
+body.theme-light .result-template-button {
+    background: rgba(124, 58, 237, 0.06);
+    border-color: rgba(124, 58, 237, 0.40);
+    color: #6d28d9;
+}
+body.theme-light .result-template-button:hover {
+    background: rgba(124, 58, 237, 0.12);
+    border-color: rgba(124, 58, 237, 0.60);
+}
+body.theme-light .result-message-textarea {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.30);
+    color: #241f33;
+    box-shadow: inset 0 1px 3px rgba(76, 29, 149, 0.08);
+}
+body.theme-light .hired-wage-field-wrap label { color: #6d28d9; }
+
+/* --------------------------------------------------------------------------
+   10. プロフィール詳細の KEEP 円形ボタン（fav-actions.css のダークガラスを白面へ）
+       アクティブ（ゴールド/ピンクのベタ + 濃色文字）はそのまま活きる
+   -------------------------------------------------------------------------- */
+body.theme-light .fav-circle {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.30);
+    color: #6d28d9;
+    box-shadow: 0 2px 8px rgba(76, 29, 149, 0.12);
+}
+body.theme-light .fav-circle:hover {
+    background: rgba(124, 58, 237, 0.08);
+    color: #6d28d9;
+    border-color: rgba(124, 58, 237, 0.50);
+}
+body.theme-light .fav-circle__cap { color: rgba(76, 29, 149, 0.55); }
+
+/* --------------------------------------------------------------------------
+   11. トークルームの面談・結果モーダル（.interview-modal 系）を白パネル化
+   -------------------------------------------------------------------------- */
+body.theme-light .interview-modal {
+    background: #ffffff;
+    border: 1px solid rgba(124, 58, 237, 0.32);
+    box-shadow: 0 16px 50px rgba(76, 29, 149, 0.25);
+    color: #241f33;
+}
+body.theme-light .interview-modal-close { color: #6d6685; }
+body.theme-light .interview-modal-desc { color: #5f5876; opacity: 1; }
+body.theme-light .interview-menu-sheet {
+    background: #ffffff;
+    color: #241f33;
+}
+body.theme-light .result-employment-kind-select {
+    background: #ffffff;
+    color: #241f33;
+    border-color: rgba(124, 58, 237, 0.30);
+}
+
+/* --------------------------------------------------------------------------
+   12. 採用・入金管理（cast: /cast/mypage/management, shop: /shop/mypage/management）
+   MyPage 系で唯一ライトモードにする業務ページ。ビュー内インラインの
+   「ダーク前提の半透明白カード」を白面 + ラベンダー罫線に置き換える
+   -------------------------------------------------------------------------- */
+body.theme-light .shop-management-shell .mypage-page-title { color: #241f33; }
+body.theme-light .case-summary-card,
+body.theme-light .case-card,
+body.theme-light .deposit-precheck-card,
+body.theme-light .payment-bank-accordion,
+body.theme-light .mypage-mini-row {
+    background: #ffffff !important;
+    border-color: rgba(124, 58, 237, 0.20) !important;
+}
+body.theme-light .case-summary-card.is-action .case-summary-card__value { color: #6d28d9; }
+body.theme-light .mypage-mini-row:hover {
+    background: rgba(124, 58, 237, 0.05) !important;
+    border-color: rgba(124, 58, 237, 0.35) !important;
+}
+body.theme-light .mypage-mini-row__name { color: #241f33; }
+body.theme-light .mypage-mini-row__sub { color: #6d6685; }
+body.theme-light .mypage-mini-row__status { background: rgba(124, 58, 237, 0.10); color: #6d28d9; }
+body.theme-light .mypage-mini-row__status.is-rejected,
+body.theme-light .mypage-mini-row__status.is-overdue { background: rgba(220, 38, 38, 0.08); color: #b91c1c; }
+body.theme-light .mypage-mini-row__chev { color: rgba(76, 29, 149, 0.40); }
+body.theme-light .shop-management-empty {
+    color: #6d6685;
+    border-color: rgba(124, 58, 237, 0.25);
+    background: #ffffff;
+}
+body.theme-light .payment-bank-section { border-top-color: var(--color-line); }
+body.theme-light .payment-bank-accordion__summary-text { color: #241f33; }
+body.theme-light .payment-bank-data-row { border-bottom-color: rgba(124, 58, 237, 0.12); }
+
+/* 下部固定 CTA バー：ダークガラス → 白バー */
+body.theme-light .deposit-cta-bar {
+    background: rgba(255, 255, 255, 0.97);
+    border-top: 1px solid var(--color-line);
+    box-shadow: 0 -8px 24px rgba(76, 29, 149, 0.15);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+/* 承認・入金報告モーダル（shop-action-modal）：画面テーマ追従で白パネル化。
+   modal-readability.css / ビュー内インラインの !important を上書き */
+body.theme-light .shop-action-modal { background: rgba(0, 0, 0, 0.55) !important; }
+body.theme-light .shop-action-modal-panel {
+    background: #ffffff !important;
+    border-color: rgba(124, 58, 237, 0.30) !important;
+    box-shadow: 0 25px 60px -12px rgba(76, 29, 149, 0.35) !important;
+}
+body.theme-light .shop-action-modal-header {
+    background: #f7f4fc !important;
+    border-bottom-color: rgba(124, 58, 237, 0.20) !important;
+}
+body.theme-light .shop-action-modal-title { color: #241f33 !important; }
+body.theme-light .shop-action-modal-note {
+    color: #5f5876 !important;
+    background: #f7f4fc !important;
+    border-color: rgba(124, 58, 237, 0.16) !important;
+}
+body.theme-light .shop-action-modal-check { color: #241f33 !important; }
+body.theme-light .shop-action-modal-label { color: #5f5876 !important; }
+body.theme-light .shop-action-modal-input {
+    background: #ffffff !important;
+    color: #241f33 !important;
+    border-color: rgba(124, 58, 237, 0.30) !important;
+}
+body.theme-light .shop-action-modal-input::placeholder { color: rgba(95, 88, 118, 0.55) !important; }
+body.theme-light .shop-action-modal-footer {
+    background: #f7f4fc !important;
+    border-top-color: rgba(124, 58, 237, 0.20) !important;
+}
+body.theme-light .shop-action-modal-close { color: #6d6685 !important; }

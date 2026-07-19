@@ -55,11 +55,7 @@
                 <h1 class="app-title text-[22px] text-text-main leading-tight truncate min-w-0">
                     {{ $castDisplayName }}@if($age)<span class="text-[16px] text-text-sub ml-1">({{ $age }})</span>@endif
                 </h1>
-                <div class="flex items-center gap-1 shrink-0" title="プロフィールが閲覧された回数">
-                    <i class="fas fa-eye text-[15px] text-accent-text"></i>
-                    <span class="font-bold text-[13px] text-text-main">{{ number_format($viewCount) }}</span>
-                    <span class="text-[10px] text-text-sub">閲覧</span>
-                </div>
+                <x-ui.view-count :count="$viewCount" class="shrink-0 text-[13px] text-text-main" />
             </div>
             @if($location !== '' || !empty($distanceLabel ?? null))
                 <div class="flex flex-wrap items-center gap-1.5 text-[12px] text-text-sub">

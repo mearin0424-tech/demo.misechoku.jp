@@ -3,6 +3,7 @@
 @php
     $map = [
         'home'     => 'ph-fill ph-house',
+        'swipe'    => 'ph-fill ph-cards',
         'search'   => 'ph-bold ph-magnifying-glass',
         'likes'    => 'ph-fill ph-heart',
         'talk'     => 'ph-fill ph-chat-teardrop-text',

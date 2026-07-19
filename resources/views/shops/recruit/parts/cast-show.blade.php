@@ -89,18 +89,11 @@
                 <div class="flex items-center gap-2 min-w-0">
                     <h1 class="app-title text-[22px] text-text-main leading-tight truncate min-w-0">{{ $shopName }}</h1>
                     @if($isPremiumShop)
-                        {{-- 優良店バッヂ：金銭・実績の意味色（ゴールドベタ・フラット） --}}
-                        <span class="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-gold-from to-gold-to text-[11px] font-extrabold text-[#1a1206] tracking-wide"
-                              title="過去3ヶ月の採用ボーナスをすべて期日内に入金した店舗です">
-                            <i class="fas fa-crown text-[10px]"></i>優良店
-                        </span>
+                        {{-- 優良店バッヂ（全画面共通コンポーネント） --}}
+                        <x-ui.premium-badge class="shrink-0" />
                     @endif
                 </div>
-                <div class="flex items-center gap-1 shrink-0" title="プロフィールが閲覧された回数">
-                    <i class="fas fa-eye text-[15px] text-accent-text"></i>
-                    <span class="font-bold text-[13px] text-text-main">{{ number_format($viewCount) }}</span>
-                    <span class="text-[10px] text-text-sub">閲覧</span>
-                </div>
+                <x-ui.view-count :count="$viewCount" class="shrink-0 text-[13px] text-text-main" />
             </div>
             <div class="flex items-center gap-1.5 text-text-sub text-[12px] flex-wrap">
                 @if($reviewCount > 0)

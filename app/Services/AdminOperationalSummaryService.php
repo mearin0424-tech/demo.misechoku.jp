@@ -129,6 +129,46 @@ class AdminOperationalSummaryService
     }
 
     /**
+     * ヘッダー「お知らせ」用：ログイン中 admin 宛の個人通知（notifications テーブル）。
+     *
+     * @return array{items: array<int, array<string, mixed>>, unread: int}
+     */
+    public function getInboxForLayout(int $limit = 20): array
+    {
+        $adminId = (string) (auth()->guard('admin')->id() ?? '');
+        if ($adminId === '' || ! Schema::hasTable('notifications')) {
+            return ['items' => [], 'unread' => 0];
+        }
+
+        $rows = DB::table('notifications')
+            ->where('user_type', 'admin')
+            ->where('user_id', $adminId)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->limit($limit)
+            ->get(['id', 'title', 'url', 'read_at', 'created_at']);
+
+        $unread = (int) DB::table('notifications')
+            ->where('user_type', 'admin')
+            ->where('user_id', $adminId)
+            ->whereNull('read_at')
+            ->count();
+
+        $items = [];
+        foreach ($rows as $row) {
+            $items[] = [
+                'id' => (int) $row->id,
+                'title' => (string) $row->title,
+                'url' => $row->url ?: route('admin.dashboard'),
+                'is_unread' => $row->read_at === null,
+                'time_label' => $row->created_at ? Carbon::parse($row->created_at)->format('m/d H:i') : '',
+            ];
+        }
+
+        return ['items' => $items, 'unread' => $unread];
+    }
+
+    /**
      * @return array<int, array{title: string, time_label: string, icon: string, class: string, url: string, sort: int}>
      */
     private function buildNotifications(int $maxBillingTasks): array

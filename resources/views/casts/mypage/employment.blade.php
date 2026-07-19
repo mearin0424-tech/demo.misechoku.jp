@@ -134,16 +134,18 @@
     .case-card__waiting i { color: var(--gold); }
     .case-card__waiting--done { color: var(--color-success); }
     .case-card__waiting--done i { color: var(--color-success); }
+    /* 主要アクション：ひと回り大きく・グラデ＋アクセントグローで最優先の操作として目立たせる */
     .case-card__action-btn {
-        display: inline-flex; align-items: center; gap: 6px;
-        padding: 8px 14px; border-radius: 999px;
-        background: var(--accent, #d670a2);
-        color: var(--on-accent, #1a0814); border: 0; font-weight: 800; font-size: 0.82rem; cursor: pointer;
-        box-shadow: 0 6px 14px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.20), inset 0 -1px 0 rgba(0,0,0,.18);
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        padding: 12px 20px; border-radius: 999px; min-height: 46px;
+        background: linear-gradient(135deg, var(--accent-grad-from, #a78bfa), var(--accent-grad-to, #7c3aed));
+        color: var(--on-accent-strong, #ffffff); border: 0; font-weight: 800; font-size: 0.92rem; cursor: pointer;
+        box-shadow: 0 8px 20px rgba(var(--accent-rgb, 139, 92, 246), 0.38), inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1px 0 rgba(0,0,0,.15);
         margin-left: auto;
+        transition: filter .15s, transform .12s, box-shadow .15s;
     }
-    .case-card__action-btn:hover { filter: brightness(1.06); }
-    .case-card__action-btn:active { transform: scale(.97); box-shadow: 0 2px 4px rgba(0,0,0,.4), inset 0 2px 4px rgba(0,0,0,.2); }
+    .case-card__action-btn:hover { filter: brightness(1.07); box-shadow: 0 10px 26px rgba(var(--accent-rgb, 139, 92, 246), 0.50), inset 0 1px 0 rgba(255,255,255,.28); }
+    .case-card__action-btn:active { transform: scale(.97); box-shadow: 0 3px 8px rgba(var(--accent-rgb, 139, 92, 246), .35), inset 0 2px 4px rgba(0,0,0,.2); }
     .case-card__view-talk {
         display: inline-flex; align-items: center; gap: 4px;
         font-size: 0.74rem; color: var(--color-text-muted); text-decoration: none;

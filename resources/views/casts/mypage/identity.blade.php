@@ -10,7 +10,7 @@
     display: flex;
     gap: 6px;
     padding: 6px;
-    background: rgba(255,255,255,.05);
+    background: #ece7f7;
     border-radius: 12px;
     margin: 12px 0 16px;
 }
@@ -20,7 +20,7 @@
     border-radius: 8px;
     background: transparent;
     border: 0;
-    color: #C9B8B8;
+    color: #6d6685;
     font-weight: 700;
     font-size: 0.86rem;
     cursor: pointer;
@@ -31,10 +31,10 @@
     color: var(--on-accent, #1a0814);
     box-shadow: 0 4px 12px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .20), inset 0 -1px 0 rgba(0, 0, 0, .18);
 }
-.identity-pattern-tab:not(.is-active):hover { background: rgba(255,255,255,.06); color: #e6dffc; }
+.identity-pattern-tab:not(.is-active):hover { background: rgba(124,58,237,.08); color: #241f33; }
 .identity-pattern-help {
     font-size: 0.78rem;
-    color: #C9B8B8;
+    color: #5f5876;
     line-height: 1.7;
     margin: 0 0 12px;
     padding: 10px 12px;
@@ -47,7 +47,7 @@
     border-radius: 12px;
     padding: 14px 16px;
     margin-bottom: 14px;
-    background: rgba(255,255,255,.02);
+    background: #ffffff;
 }
 .identity-form-section__head {
     display: flex;
@@ -59,19 +59,19 @@
 .identity-form-section__title {
     font-size: 0.92rem;
     font-weight: 800;
-    color: #c4b5fd;
+    color: #6d28d9;
 }
 .identity-form-section__pill {
     font-size: 0.7rem;
     padding: 3px 8px;
     border-radius: 999px;
-    background: rgba(255,255,255,.06);
-    color: #C9B8B8;
+    background: #f5f2fb;
+    color: #6d6685;
     font-weight: 700;
 }
-.identity-form-section__pill.is-approved { background: rgba(16,185,129,.18); color: #6ee7b7; }
-.identity-form-section__pill.is-pending  { background: rgba(234,179,8,.16);  color: #fde047; }
-.identity-form-section__pill.is-rejected { background: rgba(220,38,38,.16);  color: #fca5a5; }
+.identity-form-section__pill.is-approved { background: rgba(5,150,105,.10); color: #047857; }
+.identity-form-section__pill.is-pending  { background: rgba(180,83,9,.10);  color: #b45309; }
+.identity-form-section__pill.is-rejected { background: rgba(220,38,38,.08);  color: #dc2626; }
 /* フラッシュメッセージ */
 .identity-flash {
     margin: 0 0 14px;
@@ -164,16 +164,16 @@
 .identity-status-overall i {
     flex-shrink: 0;
     font-size: 2.1rem;
-    color: #c4b5fd;
+    color: #7c3aed;
     filter: drop-shadow(0 2px 8px rgba(168, 85, 247, 0.35));
 }
 .identity-status-overall.is-verified i {
-    color: #6ee7b7;
+    color: #059669;
     filter: drop-shadow(0 2px 8px rgba(16, 185, 129, 0.45));
 }
 /* メインテキスト：大きく */
 .identity-status-overall__text {
-    color: #ffffff;
+    color: #241f33;
     font-weight: 800;
     font-size: 1.05rem;
     line-height: 1.25;
@@ -181,7 +181,7 @@
 }
 .identity-status-overall__text small {
     display: block;
-    color: rgba(255, 255, 255, 0.62);
+    color: #5f5876;
     font-weight: 500;
     font-size: 0.76rem;
     margin-top: 4px;
@@ -201,7 +201,7 @@
 .identity-form-section .bank-form-row .bank-label {
     flex-basis: 100%;
     font-size: 0.78rem;
-    color: rgba(255, 255, 255, 0.78);
+    color: #5f5876;
     margin-bottom: 2px;
 }
 /* ファイル選択ボタン：mauve outline、選択済みは緑 */
@@ -213,9 +213,9 @@
     font-size: 0.82rem;
     font-weight: 600;
     border-radius: 999px;
-    border: 1px solid rgba(168, 85, 247, 0.40);
-    color: rgba(255, 255, 255, 0.88);
-    background: rgba(168, 85, 247, 0.06);
+    border: 1px solid rgba(124, 58, 237, 0.40);
+    color: #2d2742;
+    background: rgba(124, 58, 237, 0.05);
     cursor: pointer;
     transition: background 0.15s ease, border-color 0.15s ease;
 }
@@ -224,7 +224,7 @@
     border-color: rgba(168, 85, 247, 0.65);
 }
 .identity-form-section .file-upload-btn.is-selected {
-    color: #6ee7b7;
+    color: #047857;
     border-color: rgba(110, 231, 183, 0.55);
     background: rgba(16, 185, 129, 0.10);
 }
@@ -235,11 +235,11 @@
     flex: 1 1 auto;
     min-width: 0;
     font-size: 0.78rem;
-    color: rgba(255, 255, 255, 0.55);
+    color: #8b84a1;
     word-break: break-all;
 }
 .identity-form-section .file-name-display.is-set {
-    color: #d4d4d4;
+    color: #2d2742;
 }
 /* インラインエラー（alert の置き換え）*/
 .cast-identity-error {
@@ -247,8 +247,8 @@
     padding: 10px 12px;
     border-radius: 12px;
     border: 1px solid rgba(248, 113, 113, 0.45);
-    background: rgba(220, 38, 38, 0.08);
-    color: #fecaca;
+    background: rgba(220, 38, 38, 0.06);
+    color: #b91c1c;
     font-size: 0.82rem;
     line-height: 1.5;
     display: flex;
@@ -267,12 +267,71 @@
     padding: 10px 12px;
     border-radius: 12px;
     border: 1px solid rgba(110, 231, 183, 0.45);
-    background: rgba(16, 185, 129, 0.08);
-    color: #a7f3d0;
+    background: rgba(5, 150, 105, 0.08);
+    color: #047857;
     font-size: 0.82rem;
     line-height: 1.5;
 }
 .cast-identity-success[hidden] { display: none; }
+
+/* === 提出状況サマリー（何を提出したかを一覧で明示） === */
+.identity-doc-summary {
+    background: #ffffff;
+    border: 1px solid rgba(124, 58, 237, 0.20);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin: 0 0 18px;
+    box-shadow: 0 6px 18px rgba(76, 29, 149, 0.08);
+}
+.identity-doc-summary__title {
+    margin: 0 0 8px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #6d28d9;
+}
+.identity-doc-summary__title i { margin-right: 4px; }
+.identity-doc-summary__list { list-style: none; margin: 0; padding: 0; }
+.identity-doc-summary__row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 2px;
+}
+.identity-doc-summary__row + .identity-doc-summary__row { border-top: 1px solid rgba(124, 58, 237, 0.10); }
+.identity-doc-summary__icon {
+    flex: 0 0 auto;
+    width: 28px; height: 28px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.85rem;
+    background: #f5f2fb; color: #8b84a1;
+}
+.identity-doc-summary__row.is-approved .identity-doc-summary__icon { background: rgba(5,150,105,0.10); color: #059669; }
+.identity-doc-summary__row.is-pending  .identity-doc-summary__icon { background: rgba(180,83,9,0.10); color: #b45309; }
+.identity-doc-summary__row.is-rejected .identity-doc-summary__icon { background: rgba(220,38,38,0.08); color: #dc2626; }
+.identity-doc-summary__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.identity-doc-summary__label { font-size: 0.84rem; font-weight: 800; color: #241f33; }
+.identity-doc-summary__label small {
+    margin-left: 6px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    color: #8b84a1;
+}
+.identity-doc-summary__detail { font-size: 0.72rem; color: #6d6685; overflow-wrap: anywhere; }
+.identity-doc-summary__detail strong { color: #2d2742; }
+.identity-doc-summary__status { flex: 0 0 auto; font-size: 0.72rem; font-weight: 800; color: #8b84a1; white-space: nowrap; }
+.identity-doc-summary__row.is-approved .identity-doc-summary__status { color: #059669; }
+.identity-doc-summary__row.is-pending  .identity-doc-summary__status { color: #b45309; }
+.identity-doc-summary__row.is-rejected .identity-doc-summary__status { color: #dc2626; }
+
+/* === ライトモード：mypage.css のダーク面を上書き === */
+.cast-mypage-sub-page .mypage-detail-box {
+    background: #ffffff !important;
+    border: 1px solid rgba(124, 58, 237, 0.18) !important;
+    box-shadow: 0 6px 18px rgba(76, 29, 149, 0.08) !important;
+}
+.cast-mypage-sub-page .mypage-page-head__title { color: #241f33 !important; }
+.cast-mypage-sub-page .mypage-page-head__title i { color: #7c3aed !important; }
+.cast-mypage-sub-page .mypage-page-head__desc { color: #5f5876 !important; }
 </style>
 @endpush
 
@@ -321,6 +380,44 @@
                                 <small>下記のいずれかのパターンで書類を提出してください。</small>
                             @endif
                         </div>
+                    </div>
+
+                    {{-- 提出状況サマリー：どの書類を提出済みか（種類・提出日・状態）を一覧で明示 --}}
+                    @php
+                        $summaryRows = [
+                            ['label' => '顔写真付き身分証', 'pattern' => 'A', 'doc' => $categoryDocs['photo_id'] ?? null],
+                            ['label' => '顔写真なし身分証', 'pattern' => 'B', 'doc' => $categoryDocs['non_photo_id'] ?? null],
+                            ['label' => '住所確認書類', 'pattern' => 'B', 'doc' => $categoryDocs['address_proof'] ?? null],
+                        ];
+                    @endphp
+                    <div class="identity-doc-summary" aria-label="提出状況">
+                        <p class="identity-doc-summary__title"><i class="fas fa-list-check" aria-hidden="true"></i>提出状況</p>
+                        <ul class="identity-doc-summary__list">
+                            @foreach($summaryRows as $r)
+                                @php
+                                    $d = $r['doc'];
+                                    $sk = $d['status_key'] ?? null;
+                                    $rowState = $d ? ($sk ?? 'pending') : 'none';
+                                @endphp
+                                <li class="identity-doc-summary__row is-{{ $rowState }}">
+                                    <span class="identity-doc-summary__icon" aria-hidden="true">
+                                        <i class="fas {{ $d ? ($sk === 'approved' ? 'fa-circle-check' : ($sk === 'rejected' ? 'fa-circle-exclamation' : 'fa-hourglass-half')) : 'fa-minus' }}"></i>
+                                    </span>
+                                    <span class="identity-doc-summary__body">
+                                        <span class="identity-doc-summary__label">{{ $r['label'] }}<small>パターン{{ $r['pattern'] }}</small></span>
+                                        <span class="identity-doc-summary__detail">
+                                            @if($d)
+                                                提出書類: <strong>{{ $d['type_label'] ?? '書類' }}</strong>
+                                                @if(!empty($d['updated_at_label']))（{{ $d['updated_at_label'] }} 提出）@endif
+                                            @else
+                                                まだ提出されていません
+                                            @endif
+                                        </span>
+                                    </span>
+                                    <span class="identity-doc-summary__status">{{ $d ? ($d['status_label'] ?? '審査中') : '未提出' }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
                     </div>
 
                     {{-- 審査中：運営へ承認を催促できる（24時間に1回まで） --}}

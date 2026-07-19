@@ -5696,7 +5696,11 @@ section[id^="sec-"] {
     --admin-surface-soft: rgba(124, 58, 237, 0.07);
     --admin-card: #ffffff;
     --admin-card-hover: rgba(124, 58, 237, 0.05);
-    /* --admin-sidebar / --admin-header はダークのまま（クローム） */
+
+    /* クローム：front のヘッダー/フッターと同じディープパープル（Discord/Teams 風） */
+    --admin-header: #4527a0;
+    --admin-sidebar: #3a2088;
+    --admin-sidebar-shine: linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent 60%);
 
     /* 罫線 */
     --admin-line: rgba(124, 58, 237, 0.16);
@@ -5800,3 +5804,23 @@ section[id^="sec-"] {
 /* スクロールバーも明背景向けへ */
 ::-webkit-scrollbar-thumb { background: rgba(76, 29, 149, 0.22); background-clip: padding-box; border: 2px solid transparent; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(76, 29, 149, 0.38); background-clip: padding-box; border: 2px solid transparent; }
+
+/* ヘッダー「お知らせ」ポップオーバー：未読アイテムの強調 */
+.admin-inbox-item .admin-task-item-icon { background: var(--admin-primary-soft); color: var(--admin-primary); }
+.admin-inbox-item.is-unread .admin-task-item-title { font-weight: 800; }
+.admin-inbox-item.is-unread {
+    position: relative;
+    background: var(--admin-primary-soft);
+    border-radius: 10px;
+}
+.admin-inbox-item.is-unread::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--admin-primary);
+}

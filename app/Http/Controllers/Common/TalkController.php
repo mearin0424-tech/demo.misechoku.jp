@@ -144,6 +144,8 @@ class TalkController extends Controller
             'blockUrl' => $isCastPortal ? route('cast.talk.block') : route('shop.talk.block'),
             'blockState' => $blockState,
             'canSend' => !$blockState['is_blocked'],
+            // 入力欄下のクイック定型文パネル：やりとりの進行状況に応じた候補を優先表示
+            'quickReplySuggestions' => $this->buildQuickReplySuggestions($isCastPortal, $currentApplicationStatus),
             'currentStatusCode' => $this->applicationStatusCode($currentApplicationStatus),
             'currentStatusLabel' => $this->statusLabel(
                 $this->applicationStatusCode($currentApplicationStatus),
@@ -1076,6 +1078,83 @@ class TalkController extends Controller
     private function toNumericShopId(string $shopId): int
     {
         return (int) ltrim(str_starts_with($shopId, 's') ? substr($shopId, 1) : $shopId, '0');
+    }
+
+    /**
+     * クイック定型文パネル用：やりとりの進行状況（application status）に応じた
+     * 定型文候補を返す。先頭ほど優先度が高い。
+     *
+     * @return array<int, string>
+     */
+    private function buildQuickReplySuggestions(bool $isCastPortal, int $status): array
+    {
+        if ($isCastPortal) {
+            // キャスト → 店舗
+            return match ($status) {
+                self::APPLICATION_STATUS_INTERVIEW_PENDING => [
+                    '面談候補日ありがとうございます。確認して回答しますね！',
+                    '別の日程でも調整可能でしょうか？',
+                    '面談は何分くらいかかりますか？',
+                ],
+                self::APPLICATION_STATUS_INTERVIEW_FIXED => [
+                    '面談当日はよろしくお願いします！',
+                    '当日の持ち物や服装の指定はありますか？',
+                    '場所の詳細を教えていただけますか？',
+                    '当日どなたをお訪ねすればよいですか？',
+                ],
+                self::APPLICATION_STATUS_HIRED,
+                self::APPLICATION_STATUS_HIRED_FULLTIME => [
+                    '採用ありがとうございます！よろしくお願いします。',
+                    '初出勤日の詳細を教えてください。',
+                    '勤務にあたって準備するものはありますか？',
+                    '出勤時間の何分前に伺えばよいですか？',
+                ],
+                self::APPLICATION_STATUS_REJECTED,
+                self::APPLICATION_STATUS_REJECTED_TRIAL => [
+                    'ご連絡ありがとうございました。',
+                    'また機会がありましたらよろしくお願いします。',
+                ],
+                default => [
+                    'はじめまして！求人を見てご連絡しました。',
+                    '体入を希望しています。空いている日程はありますか？',
+                    'お店の雰囲気について教えてください。',
+                    '時給・待遇について詳しく知りたいです。',
+                    '未経験でも大丈夫ですか？',
+                ],
+            };
+        }
+
+        // 店舗 → キャスト
+        return match ($status) {
+            self::APPLICATION_STATUS_INTERVIEW_PENDING => [
+                '面談の候補日をお送りしました。ご確認ください。',
+                'ご都合の良い日程があれば教えてください。',
+                '日程が合わない場合はお気軽にご相談ください。',
+            ],
+            self::APPLICATION_STATUS_INTERVIEW_FIXED => [
+                '面談当日、お待ちしております！',
+                'お気をつけてお越しください。',
+                '当日は私服でお越しいただいて大丈夫です。',
+                '到着されたらこのトークでお知らせください。',
+            ],
+            self::APPLICATION_STATUS_HIRED,
+            self::APPLICATION_STATUS_HIRED_FULLTIME => [
+                'この度は採用となりました！おめでとうございます。',
+                '初出勤日についてご案内します。',
+                '不明点があればいつでもご連絡ください。',
+            ],
+            self::APPLICATION_STATUS_REJECTED,
+            self::APPLICATION_STATUS_REJECTED_TRIAL => [
+                'この度はご応募ありがとうございました。',
+                'またのご縁がありましたらよろしくお願いいたします。',
+            ],
+            default => [
+                'はじめまして！ご興味をお持ちいただきありがとうございます。',
+                'ぜひ一度お店の雰囲気を見にいらしてください。',
+                'ご質問があればお気軽にどうぞ！',
+                '面談のご都合はいかがでしょうか？',
+            ],
+        };
     }
 
     private function getCurrentApplicationStatus(string $castId, string $shopId): int

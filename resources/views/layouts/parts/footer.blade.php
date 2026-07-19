@@ -12,9 +12,9 @@
 
 {{-- ボトムナビゲーション --}}
 <nav id="bottom-nav" class="fixed-ui bottom-0 bg-base border-t border-line h-[var(--footer-height)] z-[1000] flex items-center justify-around px-2">
-    {{-- ホーム（おすすめのスワイプ表示） --}}
+    {{-- スワイプ（おすすめのカードデッキ） --}}
     <a href="{{ route($prefix . '.home') }}" class="nav-item {{ $isHome ? 'active' : '' }}">
-        <i class="fas fa-home"></i>
+        <i class="fas fa-layer-group"></i>
         <span>SWIPE</span>
     </a>
 

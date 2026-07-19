@@ -8,7 +8,7 @@
         $metaDescription = trim($__env->yieldContent('meta_description')) ?: 'ミセチョクのデモサイトです。';
         $metaImage = trim($__env->yieldContent('meta_image')) ?: asset('assets/images/pwa/icon-512.png');
         $canonicalUrl = trim($__env->yieldContent('canonical')) ?: url()->current();
-        $assetVersion = '20260719-light-all';
+        $assetVersion = '20260719-view-medal';
         $resolvedTitle = $metaTitle !== ''
             ? $metaTitle
             : ($pageTitle !== '' ? $pageTitle . ' | ' . config('app.name', 'ミセチョク') : config('app.name', 'ミセチョク'));
@@ -59,10 +59,19 @@
 
         // ===== ライトモード判定 =====
         // SWIPE（home）と MyPage、認証系フルスクリーン以外はライトモード（薄ラベンダー基調）。
+        // ただし採用・入金管理（*/mypage/management*）は業務ページのためライトにする。
         // ヘッダー／フッター等のクロームは light-theme.css 側で除外して紫ダークを維持する。
         $bodyClassAttr = trim($__env->yieldContent('body-class'));
-        $isLightTheme = !request()->is('*/home*')
-            && !request()->is('*/mypage*')
+        $isDarkPage = request()->is('*/home*')
+            || (request()->is('*/mypage*')
+                && !request()->is('*/mypage/management*')
+                && !request()->is('*/mypage/identity*')
+                && !request()->is('*/mypage/documents*'))
+            // プロフィール詳細（キャスト/店舗）と公開共有ページは MyPage と同じダークテーマ
+            || request()->is('*/castprofileview/*')
+            || request()->is('*/shopprofiles/*')
+            || request()->is('share/*');
+        $isLightTheme = !$isDarkPage
             && !str_contains($bodyClassAttr, 'page-demo-login')
             && !str_contains($bodyClassAttr, 'page-auth-login');
 
@@ -351,6 +360,13 @@
               による「fixed が absolute 化する」問題を避け、スクロール中もブレずに最下部に貼り付く。 --- */
         body.page-talk-room { overflow: hidden; }
         body.page-talk-room nav[data-bottom-nav] { display: none !important; }
+        /* TALK（一覧・ルーム）は行・吹き出しが内側余白を持つため、
+           content-wrapper の左右ガターを外して画面横幅いっぱいを使う */
+        body.page-talk .content-wrapper {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            max-width: 100% !important;
+        }
         body.page-talk-room main#main-content {
             /* 100vh はモバイルブラウザだと URL バー込みの高さになり、下端の入力欄が画面外へ落ちる。
                可視領域に追従する dvh を優先し、非対応ブラウザのみ vh フォールバック。 */
@@ -390,20 +406,32 @@
             padding-left:  max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             padding-right: max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             z-index: 1600 !important;
-            /* ヘッダーと完全に同じ背景（同 rgba + 同 blur）にして継ぎ目を消す */
-            background: rgba(10, 10, 10, 0.92) !important;
-            backdrop-filter: blur(18px) !important;
-            -webkit-backdrop-filter: blur(18px) !important;
+            /* ヘッダーと完全に同じディープパープル（ソリッド）にして継ぎ目を消す */
+            background: #4527a0 !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
             margin-top: 0 !important;
             border-top: 0 !important;
-            /* 下端にゴールドの極細ライン + 軽い影でコンテンツとの境界を明示。
+            /* 下端に白の極細ライン + 軽い影でコンテンツとの境界を明示。
                コンテンツに被って暗く落ちないよう影は控えめに。 */
             box-shadow:
-                inset 0 -1px 0 rgba(168, 85, 247, 0.22),
-                0 2px 6px rgba(0, 0, 0, 0.20) !important;
+                inset 0 -1px 0 rgba(255, 255, 255, 0.14),
+                0 2px 6px rgba(0, 0, 0, 0.18) !important;
         }
         .sub-header-tabs {
             background-color: transparent !important;
+        }
+
+        /* --- ボトムナビ：ヘッダーと同一のディープパープル（Discord/Teams 風・全画面共通）。
+              半透明ガラス（bg-deep-purple/30 + blur）をやめ、ソリッドで統一する --- */
+        nav[data-bottom-nav] {
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 55%),
+                #4527a0 !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+            box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.30) !important;
         }
 
         /* --- TALK ROOM：他画面と同じ --max-content-width に揃えつつ、内側コンテナはフル幅で背景を敷く --- */
@@ -429,15 +457,17 @@
             /* 左右パディングは sub-header と同じ計算式で完全一致させる（モバイルでは 16px ガター） */
             padding-left:  max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             padding-right: max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
+            /* Discord / Teams 系のディープパープル（アイコンの紫 #8b5cf6 と同色相）。
+               上端にごく薄い白シーンだけ乗せ、下端 = サブヘッダーと完全同色でフラットに繋ぐ */
             background:
-                /* 上端だけに紫グローを残し、ヘッダー下端 = サブヘッダー上端でぴったり同色にする */
-                linear-gradient(180deg, rgba(168, 85, 247, 0.22) 0%, rgba(168, 85, 247, 0) 100%),
-                rgba(10, 10, 10, 0.92) !important;
+                linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 60%),
+                #4527a0 !important;
             /* 下端 1px のアクセント線は消す（サブヘッダーがある場合に隙間に見える） */
             border-bottom: 0 !important;
-            /* 下方向の重い影は出さない。サブヘッダーがあるページではこの影が継ぎ目に見えるため。
-               紫の周辺グローだけ薄く残してヘッダーの存在感を維持する */
-            box-shadow: 0 0 18px rgba(168, 85, 247, 0.18) !important;
+            /* 下方向の重い影は出さない。サブヘッダーがあるページではこの影が継ぎ目に見えるため */
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
         }
         .header-icon-btn:hover,
         .header-icon-btn:focus-visible {
@@ -476,7 +506,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/layout-sidebar.css') }}">
 
     {{-- ヘッダーのポップアップ（通知 / タスク）専用CSS：app.js が #btn-header-* で togglePopup する --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/layout-header.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/layout-header.css') }}?v=20260719-deep-purple">
 
     {{-- 通知 / やることリスト ポップアップを mypage のカード調に上書き（不透明 + アクセント枠 + 3Dシャドウ） --}}
     <style>
@@ -603,7 +633,7 @@
     <script src="{{ asset('assets/js/motion.js') }}?v={{ $assetVersion }}" defer></script>
     @if($isLightTheme)
     {{-- ライトモード（薄ラベンダー基調）。全CSSの最後に読み込んで上書きする --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260719-light-4">
+    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260719-light-7">
     @endif
 </head>
 <body class="@yield('body-class') {{ $isLightTheme ? 'theme-light' : '' }} bg-base text-text-main"
@@ -643,7 +673,7 @@
                 <a href="{{ route($navPrefix . '.home') }}"
                    class="nav-item flex flex-col items-center justify-center transition-all duration-300 {{ $navIsHome ? 'is-active' : '' }}">
                     <span class="nav-icon-wrap flex items-center justify-center mb-1 transition-all">
-                        <x-ui.icon name="home" class="nav-icon text-[22px] transition-all" />
+                        <x-ui.icon name="swipe" class="nav-icon text-[22px] transition-all" />
                     </span>
                     <span class="app-title text-[10px] font-bold tracking-wider">SWIPE</span>
                 </a>

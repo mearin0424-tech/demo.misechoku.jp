@@ -123,7 +123,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     {{-- メインアプリと同じ Noto Sans JP + Montserrat（DESIGN.md §3 と統一） --}}
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700;800;900&family=Montserrat:wght@400;600;700;800&display=swap">
-    <link rel="stylesheet" href="{{ asset('assets/css/admin.css') }}?v=20260719-admin-light">
+    <link rel="stylesheet" href="{{ asset('assets/css/admin.css') }}?v=20260719-admin-header">
     @stack('admin-styles')
     {{-- 入力コンポーネントの全画面統一（文字列/文章/数値/日付/選択） --}}
     <link rel="stylesheet" href="{{ asset('assets/css/form-controls.css') }}?v=20260719-light-all">
@@ -227,24 +227,21 @@
                         <i class="fas fa-magnifying-glass"></i>
                         <input type="text" class="admin-search-input" placeholder="検索...">
                     </div>
+                    {{-- 未済タスク（請求・書類審査・問合せなどの要対応一覧） --}}
                     <div style="position: relative;">
                         @php
-                            $nAdminNotify = (int) ($adminNotificationCount ?? 0);
+                            $nAdminTasks = (int) ($adminNotificationCount ?? 0);
                         @endphp
-                        <button type="button" class="admin-header-icon" id="admin-notification-toggle" aria-label="通知">
-                            <i class="fas fa-bell"></i>
-                            @if ($nAdminNotify > 0)
-                                @if ($nAdminNotify > 99)
-                                    <span class="admin-header-notification-count" aria-hidden="true">99+</span>
-                                @else
-                                    <span class="admin-header-notification-count" aria-hidden="true">{{ $nAdminNotify }}</span>
-                                @endif
+                        <button type="button" class="admin-header-icon" id="admin-task-toggle" aria-label="未済タスク" data-popover-target="admin-task-popover-el">
+                            <i class="fas fa-list-check"></i>
+                            @if ($nAdminTasks > 0)
+                                <span class="admin-header-notification-count" aria-hidden="true">{{ $nAdminTasks > 99 ? '99+' : $nAdminTasks }}</span>
                             @endif
                         </button>
-                        <div id="admin-notification-popover" class="admin-task-popover" aria-hidden="true">
+                        <div id="admin-task-popover-el" class="admin-task-popover" aria-hidden="true">
                             <div class="admin-task-popover-head">
-                                <div class="admin-task-popover-title">通知</div>
-                                <div class="admin-task-popover-badge">{{ $nAdminNotify }}件</div>
+                                <div class="admin-task-popover-title">未済タスク</div>
+                                <div class="admin-task-popover-badge">{{ $nAdminTasks }}件</div>
                             </div>
                             <div class="admin-task-popover-list">
                                 @forelse ($adminNotifications ?? [] as $item)
@@ -258,11 +255,48 @@
                                         </span>
                                     </a>
                                 @empty
-                                    <div class="admin-task-popover-empty">現在、表示する通知はありません。</div>
+                                    <div class="admin-task-popover-empty">未済のタスクはありません。</div>
                                 @endforelse
                             </div>
                             <div class="admin-task-popover-foot">
                                 <a href="{{ route('admin.dashboard') }}" class="admin-task-popover-link">ダッシュボードで全体を確認</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- お知らせ（admin 宛の個人通知：notifications テーブル） --}}
+                    <div style="position: relative;">
+                        @php
+                            $nAdminInbox = (int) ($adminInboxUnread ?? 0);
+                        @endphp
+                        <button type="button" class="admin-header-icon" id="admin-notification-toggle" aria-label="お知らせ" data-popover-target="admin-notification-popover">
+                            <i class="fas fa-bell"></i>
+                            @if ($nAdminInbox > 0)
+                                <span class="admin-header-notification-count" aria-hidden="true">{{ $nAdminInbox > 99 ? '99+' : $nAdminInbox }}</span>
+                            @endif
+                        </button>
+                        <div id="admin-notification-popover" class="admin-task-popover" aria-hidden="true">
+                            <div class="admin-task-popover-head">
+                                <div class="admin-task-popover-title">お知らせ</div>
+                                <div class="admin-task-popover-badge">未読 {{ $nAdminInbox }}件</div>
+                            </div>
+                            <div class="admin-task-popover-list">
+                                @forelse ($adminInboxItems ?? [] as $item)
+                                    <a href="{{ $item['url'] }}" class="admin-task-item admin-inbox-item {{ !empty($item['is_unread']) ? 'is-unread' : '' }}">
+                                        <span class="admin-task-item-icon">
+                                            <i class="fas fa-bell"></i>
+                                        </span>
+                                        <span>
+                                            <span class="admin-task-item-title">{{ $item['title'] }}</span>
+                                            <span class="admin-task-item-time">{{ $item['time_label'] }}</span>
+                                        </span>
+                                    </a>
+                                @empty
+                                    <div class="admin-task-popover-empty">お知らせはありません。</div>
+                                @endforelse
+                            </div>
+                            <div class="admin-task-popover-foot">
+                                <button type="button" id="admin-inbox-read-all" class="admin-task-popover-link" style="background:transparent;border:0;cursor:pointer;">すべて既読にする</button>
                             </div>
                         </div>
                     </div>
@@ -287,8 +321,6 @@
             var overlay = document.getElementById('admin-mobile-overlay');
             var openBtn = document.getElementById('admin-menu-toggle');
             var closeBtn = document.getElementById('admin-sidebar-close');
-            var taskToggle = document.getElementById('admin-notification-toggle');
-            var taskPopover = document.getElementById('admin-notification-popover');
 
             function openSidebar() {
                 if (!sidebar || !overlay) return;
@@ -302,33 +334,62 @@
                 overlay.classList.remove('is-open');
             }
 
-            function closeTaskPopover() {
-                if (!taskPopover) return;
-                taskPopover.classList.remove('is-open');
-                taskPopover.setAttribute('aria-hidden', 'true');
+            // ヘッダーポップオーバー（未済タスク / お知らせ）：どちらか一方だけ開く
+            var popoverPairs = [];
+            document.querySelectorAll('[data-popover-target]').forEach(function (btn) {
+                var pop = document.getElementById(btn.getAttribute('data-popover-target'));
+                if (pop) popoverPairs.push({ btn: btn, pop: pop });
+            });
+
+            function closeAllPopovers(except) {
+                popoverPairs.forEach(function (pair) {
+                    if (pair.pop === except) return;
+                    pair.pop.classList.remove('is-open');
+                    pair.pop.setAttribute('aria-hidden', 'true');
+                });
             }
 
-            function toggleTaskPopover(event) {
-                if (!taskPopover) return;
-                if (event) event.stopPropagation();
-                var isOpen = taskPopover.classList.toggle('is-open');
-                taskPopover.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
-            }
+            popoverPairs.forEach(function (pair) {
+                pair.btn.addEventListener('click', function (event) {
+                    event.stopPropagation();
+                    var isOpen = pair.pop.classList.toggle('is-open');
+                    pair.pop.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+                    if (isOpen) closeAllPopovers(pair.pop);
+                });
+            });
 
             if (openBtn) openBtn.addEventListener('click', openSidebar);
             if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
             if (overlay) {
                 overlay.addEventListener('click', function () {
                     closeSidebar();
-                    closeTaskPopover();
+                    closeAllPopovers(null);
                 });
             }
-            if (taskToggle) taskToggle.addEventListener('click', toggleTaskPopover);
             document.addEventListener('click', function (event) {
-                if (!taskPopover || !taskToggle) return;
-                if (taskPopover.contains(event.target) || taskToggle.contains(event.target)) return;
-                closeTaskPopover();
+                var inside = popoverPairs.some(function (pair) {
+                    return pair.pop.contains(event.target) || pair.btn.contains(event.target);
+                });
+                if (!inside) closeAllPopovers(null);
             });
+
+            // お知らせ：すべて既読にする（cast/shop/admin 共通の既読APIを使用）
+            var readAllBtn = document.getElementById('admin-inbox-read-all');
+            if (readAllBtn) {
+                readAllBtn.addEventListener('click', function () {
+                    readAllBtn.disabled = true;
+                    var meta = document.querySelector('meta[name="csrf-token"]');
+                    fetch('{{ route('notifications.read-all') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': meta ? meta.getAttribute('content') : '',
+                        },
+                        credentials: 'same-origin',
+                    }).then(function () { window.location.reload(); })
+                      .catch(function () { readAllBtn.disabled = false; });
+                });
+            }
         })();
 
         // インフォボタン（ページタイトル横の (i)）のポップオーバー開閉
