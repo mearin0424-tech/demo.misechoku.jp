@@ -3099,3 +3099,54 @@ body.page-search .no-data-wrapper {
     padding-left: var(--content-padding-x, 16px);
     padding-right: var(--content-padding-x, 16px);
 }
+
+/* ==========================================================================
+   SEARCH 画面内スクロール化（2026-07-19）
+   sticky はブラウザ・祖先overflow条件で位置ズレの原因になるため廃止し、
+   TALK ルームと同じ「バー固定 + リストのみスクロール」のレイアウトへ。
+   検索バーはサブヘッダー下端（margin-top: --sub-header-height）にぴったり接続される
+   ========================================================================== */
+body.page-search main#main-content {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0 !important;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+body.page-search .content-wrapper {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+body.page-search .tab-page-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    margin-top: var(--sub-header-height, 46px);
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    overflow: hidden;
+}
+
+/* 検索バー：sticky を解除（フレックス配置でサブヘッダー直下に物理固定される） */
+body.page-search .search-topbar {
+    position: static;
+    flex: 0 0 auto;
+}
+
+/* 検索タブ：#pane-list（flex/overflow hidden は既存指定）内で結果リストのみスクロール */
+body.page-search .connection-list--search {
+    padding-bottom: 24px;
+}
+
+/* キープタブ：タブ全体をスクロール */
+body.page-search #pane-keep.tab-pane.active {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 24px;
+}

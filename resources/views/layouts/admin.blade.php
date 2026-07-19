@@ -123,7 +123,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     {{-- メインアプリと同じ Noto Sans JP + Montserrat（DESIGN.md §3 と統一） --}}
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700;800;900&family=Montserrat:wght@400;600;700;800&display=swap">
-    <link rel="stylesheet" href="{{ asset('assets/css/admin.css') }}?v=20260719-admin-header">
+    <link rel="stylesheet" href="{{ asset('assets/css/admin.css') }}?v=20260719-purple-back">
     @stack('admin-styles')
     {{-- 入力コンポーネントの全画面統一（文字列/文章/数値/日付/選択） --}}
     <link rel="stylesheet" href="{{ asset('assets/css/form-controls.css') }}?v=20260719-light-all">

@@ -259,30 +259,66 @@ body.theme-light #talk-room-container .msg-right .msg-time {
     color: rgba(36, 31, 51, 0.55) !important;
 }
 
-/* 入力エリア：暗グラデ → 白面 */
-body.theme-light #talk-room-container .chat-input-area {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), #ffffff);
-    border-top: 1px solid var(--color-line);
-    box-shadow: 0 -6px 18px rgba(76, 29, 149, 0.08);
+/* 入力エリア：暗グラデ → 白面
+   ※ talk.css の IG リファイン節が !important のダーク指定
+     （rgba(10,10,10,.94) / #1c1c1c）を持つため、同等以上の詳細度 + !important で上書きする */
+body.theme-light #talk-room-container .chat-input-area,
+body.theme-light.page-talk-room #talk-room-container .chat-input-area {
+    background: rgba(255, 255, 255, 0.97) !important;
+    border-top: 1px solid var(--color-line, #e6e0f3) !important;
+    box-shadow: 0 -6px 18px rgba(76, 29, 149, 0.08) !important;
 }
-body.theme-light .chat-input-wrapper {
-    background: #f5f2fb;
-    border: 1px solid rgba(124, 58, 237, 0.22);
-    box-shadow: inset 0 1px 3px rgba(76, 29, 149, 0.08);
+body.theme-light .chat-input-wrapper,
+body.theme-light #talk-room-container .chat-input-wrapper {
+    background: #f5f2fb !important;
+    border: 1px solid rgba(124, 58, 237, 0.24) !important;
+    box-shadow: inset 0 1px 3px rgba(76, 29, 149, 0.06) !important;
 }
-body.theme-light .chat-input-wrapper textarea {
-    color: #241f33;
+body.theme-light .chat-input-wrapper:focus-within,
+body.theme-light #talk-room-container .chat-input-wrapper:focus-within {
+    border-color: rgba(124, 58, 237, 0.55) !important;
+    box-shadow: inset 0 1px 3px rgba(76, 29, 149, 0.06), 0 0 0 3px rgba(124, 58, 237, 0.10) !important;
+}
+body.theme-light .chat-input-wrapper textarea,
+body.theme-light #talk-room-container .chat-input-wrapper textarea {
+    color: #241f33 !important;
     background: transparent !important;
     box-shadow: none !important;
     border: 0 !important;
 }
-body.theme-light .chat-input-wrapper textarea::placeholder {
-    color: rgba(95, 88, 118, 0.55);
+body.theme-light .chat-input-wrapper textarea::placeholder,
+body.theme-light #talk-room-container .chat-input-wrapper textarea::placeholder {
+    color: rgba(95, 88, 118, 0.55) !important;
 }
-body.theme-light .btn-chat-action {
+body.theme-light .btn-chat-action,
+body.theme-light #talk-room-container .btn-chat-action {
+    background: #ffffff !important;
+    border: 1px solid rgba(124, 58, 237, 0.30) !important;
+    color: #7c3aed !important;
+}
+body.theme-light .btn-chat-action:hover,
+body.theme-light #talk-room-container .btn-chat-action:hover {
+    background: rgba(124, 58, 237, 0.08) !important;
+}
+/* NGワード警告：ライト面用の赤 */
+body.theme-light .talk-ng-warn {
+    background: rgba(220, 38, 38, 0.06);
+    border-color: rgba(220, 38, 38, 0.40);
+    color: #b91c1c;
+}
+
+/* クイック定型文パネル（room.blade 内スタイルの色を確実にライト基準へ） */
+body.theme-light .quick-reply-panel__label,
+body.theme-light .quick-reply-panel__status { color: #6d28d9; }
+body.theme-light .quick-reply-chip {
     background: #ffffff;
-    border: 1px solid rgba(124, 58, 237, 0.28);
-    color: #7c3aed;
+    border-color: rgba(124, 58, 237, 0.28);
+    color: #241f33;
+}
+body.theme-light .quick-reply-chip--suggest {
+    background: rgba(124, 58, 237, 0.08);
+    border-color: rgba(124, 58, 237, 0.45);
+    color: #4c2889;
 }
 
 /* --------------------------------------------------------------------------

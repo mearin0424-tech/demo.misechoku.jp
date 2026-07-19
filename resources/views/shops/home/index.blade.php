@@ -4,7 +4,7 @@
 @section('body-class', 'no-scroll page-home')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260719-card-lines">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260719-card-gold">
 @endpush
 
 @php
@@ -74,12 +74,6 @@
                     <div class="rc-img-gradient" aria-hidden="true"></div>
                 </div>
 
-                {{-- 優良店バッヂ：カード左上（ヘッダー直下）に固定表示 --}}
-                @if(!empty($item['is_premium']))
-                <div class="rc-premium-topleft">
-                    <x-ui.premium-badge />
-                </div>
-                @endif
 
                 {{-- 2. アクションボタン（右側）。KEEP は favorite-quick.js（data-fav-toggle）に一本化 --}}
                 <div class="card-actions-overlay rc-actions stop-propagation">
@@ -128,6 +122,11 @@
                             $areaLine = trim(($item['pref'] ?? '') . ' ' . ($item['city'] ?? ''));
                         @endphp
 
+                        {{-- 優良店バッヂ：店名の真上 --}}
+                        @if(!empty($item['is_premium']))
+                            <div class="rc-premium-row"><x-ui.premium-badge /></div>
+                        @endif
+
                         {{-- 1行目：店名（大きめ） --}}
                         <h2 class="rc-shop-name serif-font">{{ $item['name'] }}</h2>
 
@@ -154,11 +153,13 @@
                             @endif
                         </div>
 
-                        {{-- 4行目：左=入店祝い金（大きめ） / 右=時給 --}}
+                        {{-- 4行目：左=ボーナス金（ゴールドカード） / 右=時給（グラスカード）
+                             ※ 右のアクション列（トーク等）と被らないよう、この行は
+                                rc-bottom-bar の右パディング内に収まるカード2枚構成 --}}
                         <div class="rc-line rc-line--money">
-                            <div class="rc-bonus-big">
-                                <span class="rc-bonus-big__label">入店祝い金</span>
-                                <span class="rc-bonus-big__amount numeric-font">
+                            <div class="rc-bonus-card">
+                                <span class="rc-bonus-card__label"><i class="fas fa-gem" aria-hidden="true"></i>ボーナス金</span>
+                                <span class="rc-bonus-card__amount numeric-font">
                                     @if(!empty($bonusRg))
                                         ¥{{ number_format((int)$bonusRg['lo']) }}@if((int)$bonusRg['hi'] > (int)$bonusRg['lo'])〜@endif
                                     @else
@@ -166,12 +167,12 @@
                                     @endif
                                 </span>
                             </div>
-                            <div class="rc-wage-compact">
-                                <span class="rc-wage-compact__row">
+                            <div class="rc-wage-card">
+                                <span class="rc-wage-card__row">
                                     <span>体入時給</span>
                                     <strong class="numeric-font">@if(!empty($trialR))¥{{ number_format((int)$trialR['lo']) }}〜@else —@endif</strong>
                                 </span>
-                                <span class="rc-wage-compact__row">
+                                <span class="rc-wage-card__row">
                                     <span>ヘルプ時給</span>
                                     <strong class="numeric-font">@if(!empty($helpR))¥{{ number_format((int)$helpR['lo']) }}〜@else —@endif</strong>
                                 </span>

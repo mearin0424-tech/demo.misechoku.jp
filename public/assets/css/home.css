@@ -4506,3 +4506,139 @@ body.page-home .cast-name .age {
     font-weight: 500 !important;
     opacity: 0.85;
 }
+
+/* ============================================================================
+   SWIPE 求人カード：マネー行のカード化 + 優良店バッヂ位置修正 (2026-07-19b)
+   ・優良店バッヂ = 店名の真上
+   ・ボーナス金 = 輝くゴールドカード（シマー付き）／時給 = ダークグラスカード
+   ・右のアクション列（トーク 68px + グロー）と被らないよう右パディングを拡張
+   ============================================================================ */
+
+/* 優良店バッヂ：店名の真上に配置（左上オーバーレイは廃止） */
+body.page-home .rc-premium-topleft { display: none !important; }
+body.page-home .rc-premium-row {
+    margin-bottom: 4px;
+    line-height: 1;
+}
+
+/* アクション列との干渉回避：下部スタックの右余白を拡張
+   （トーク 68px + 右 14px + グロー 7px ≒ 89px → 余裕を見て 100px 確保） */
+body.page-home .cast-card--recruit .rc-bottom-bar {
+    padding-right: 100px !important;
+}
+body.page-home .cast-card:not(.cast-card--recruit) .card-bottom-info {
+    padding-right: 100px !important;
+}
+/* マネー行はカード2枚を縦積み許容（幅が足りない端末では折り返す） */
+body.page-home .rc-line--money {
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 8px;
+}
+
+/* --- ボーナス金：輝くゴールドカード --- */
+body.page-home .rc-bonus-card {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background:
+        radial-gradient(120% 90% at 20% 0%, rgba(249, 224, 142, 0.20), transparent 55%),
+        linear-gradient(150deg, rgba(63, 47, 6, 0.92), rgba(31, 22, 3, 0.94));
+    border: 1px solid rgba(246, 211, 106, 0.65);
+    box-shadow:
+        0 0 14px rgba(246, 211, 106, 0.28),
+        inset 0 1px 0 rgba(255, 240, 180, 0.35),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+}
+/* シマー（金面を斜めに走る光沢） */
+body.page-home .rc-bonus-card::after {
+    content: '';
+    position: absolute;
+    top: -60%;
+    left: -80%;
+    width: 60%;
+    height: 220%;
+    background: linear-gradient(100deg,
+        transparent 0%,
+        rgba(255, 244, 200, 0.16) 45%,
+        rgba(255, 250, 225, 0.34) 50%,
+        rgba(255, 244, 200, 0.16) 55%,
+        transparent 100%);
+    transform: rotate(8deg);
+    animation: bonusShimmer 3.2s ease-in-out infinite;
+    pointer-events: none;
+}
+@keyframes bonusShimmer {
+    0%   { left: -80%; }
+    55%  { left: 130%; }
+    100% { left: 130%; }
+}
+@media (prefers-reduced-motion: reduce) {
+    body.page-home .rc-bonus-card::after { animation: none; display: none; }
+}
+body.page-home .rc-bonus-card__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    color: #f6d36a;
+    text-transform: uppercase;
+    text-shadow: 0 0 8px rgba(246, 211, 106, 0.45);
+}
+body.page-home .rc-bonus-card__label i { font-size: 0.7rem; }
+body.page-home .rc-bonus-card__amount {
+    font-size: clamp(1.45rem, 6.2vw, 1.85rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    background: linear-gradient(180deg, #fff3c4 0%, #f9e08e 30%, #f6d36a 55%, #d4af37 80%, #b8860b 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 1px 6px rgba(246, 211, 106, 0.40));
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- 時給：ダークグラスカード --- */
+body.page-home .rc-wage-card {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    padding: 9px 12px;
+    border-radius: 14px;
+    background: rgba(10, 10, 10, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 3px 10px rgba(0, 0, 0, 0.35);
+}
+body.page-home .rc-wage-card__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.62);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+body.page-home .rc-wage-card__row strong {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: #ffffff;
+    font-variant-numeric: tabular-nums;
+}

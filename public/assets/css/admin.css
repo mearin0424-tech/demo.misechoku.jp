@@ -5697,10 +5697,9 @@ section[id^="sec-"] {
     --admin-card: #ffffff;
     --admin-card-hover: rgba(124, 58, 237, 0.05);
 
-    /* クローム：front のヘッダー/フッターと同じディープパープル（Discord/Teams 風） */
-    --admin-header: #4527a0;
-    --admin-sidebar: #3a2088;
-    --admin-sidebar-shine: linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent 60%);
+    /* クローム：front と同じ「ダークガラス + アメジストグロー」に戻す
+       （--admin-header / --admin-sidebar は先頭 :root の元値をそのまま使う） */
+    --admin-sidebar-shine: linear-gradient(180deg, rgba(168, 85, 247, 0.22), transparent 60%);
 
     /* 罫線 */
     --admin-line: rgba(124, 58, 237, 0.16);

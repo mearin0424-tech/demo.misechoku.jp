@@ -406,32 +406,35 @@
             padding-left:  max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             padding-right: max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             z-index: 1600 !important;
-            /* ヘッダーと完全に同じディープパープル（ソリッド）にして継ぎ目を消す */
-            background: #4527a0 !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
+            /* 元のデザイン：ヘッダーと同じ地色（同 rgba + 同 blur）にして継ぎ目を消す */
+            background: rgba(10, 10, 10, 0.92) !important;
+            backdrop-filter: blur(18px) !important;
+            -webkit-backdrop-filter: blur(18px) !important;
             margin-top: 0 !important;
             border-top: 0 !important;
-            /* 下端に白の極細ライン + 軽い影でコンテンツとの境界を明示。
+            /* 下端にアメジストの極細ライン + 軽い影でコンテンツとの境界を明示。
                コンテンツに被って暗く落ちないよう影は控えめに。 */
             box-shadow:
-                inset 0 -1px 0 rgba(255, 255, 255, 0.14),
-                0 2px 6px rgba(0, 0, 0, 0.18) !important;
+                inset 0 -1px 0 rgba(168, 85, 247, 0.22),
+                0 2px 6px rgba(0, 0, 0, 0.20) !important;
         }
         .sub-header-tabs {
             background-color: transparent !important;
         }
 
-        /* --- ボトムナビ：ヘッダーと同一のディープパープル（Discord/Teams 風・全画面共通）。
-              半透明ガラス（bg-deep-purple/30 + blur）をやめ、ソリッドで統一する --- */
+        /* --- ボトムナビ：元の紫ガラスに戻しつつ、下端に向けて深くなる
+              アメジストグラデーションで高級感を出す（ヘッダーと上下対称の表現） --- */
         nav[data-bottom-nav] {
             background:
-                linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 55%),
-                #4527a0 !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-            border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
-            box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.30) !important;
+                linear-gradient(0deg,
+                    rgba(168, 85, 247, 0.28) 0%,
+                    rgba(139, 60, 220, 0.13) 45%,
+                    rgba(168, 85, 247, 0.03) 100%),
+                rgba(10, 10, 10, 0.90) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            border-top: 1px solid rgba(168, 85, 247, 0.35) !important;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.55) !important;
         }
 
         /* --- TALK ROOM：他画面と同じ --max-content-width に揃えつつ、内側コンテナはフル幅で背景を敷く --- */
@@ -457,17 +460,22 @@
             /* 左右パディングは sub-header と同じ計算式で完全一致させる（モバイルでは 16px ガター） */
             padding-left:  max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             padding-right: max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
-            /* Discord / Teams 系のディープパープル（アイコンの紫 #8b5cf6 と同色相）。
-               上端にごく薄い白シーンだけ乗せ、下端 = サブヘッダーと完全同色でフラットに繋ぐ */
+            /* 元の紫（ダークガラス + アメジストグロー）。
+               上端から下端へ多段でフェードするグラデーションで高級感を出しつつ、
+               下端 = サブヘッダーの地色（rgba(10,10,10,0.92)）とぴったり同色に繋ぐ */
             background:
-                linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 60%),
-                #4527a0 !important;
+                linear-gradient(180deg,
+                    rgba(168, 85, 247, 0.30) 0%,
+                    rgba(139, 60, 220, 0.14) 45%,
+                    rgba(168, 85, 247, 0.04) 75%,
+                    rgba(168, 85, 247, 0) 100%),
+                rgba(10, 10, 10, 0.92) !important;
+            backdrop-filter: blur(18px) !important;
+            -webkit-backdrop-filter: blur(18px) !important;
             /* 下端 1px のアクセント線は消す（サブヘッダーがある場合に隙間に見える） */
             border-bottom: 0 !important;
-            /* 下方向の重い影は出さない。サブヘッダーがあるページではこの影が継ぎ目に見えるため */
-            box-shadow: none !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
+            /* 下方向の重い影は出さず、紫の周辺グローだけ薄く残す */
+            box-shadow: 0 0 18px rgba(168, 85, 247, 0.18) !important;
         }
         .header-icon-btn:hover,
         .header-icon-btn:focus-visible {
@@ -506,7 +514,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/layout-sidebar.css') }}">
 
     {{-- ヘッダーのポップアップ（通知 / タスク）専用CSS：app.js が #btn-header-* で togglePopup する --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/layout-header.css') }}?v=20260719-deep-purple">
+    <link rel="stylesheet" href="{{ asset('assets/css/layout-header.css') }}?v=20260719-purple-back">
 
     {{-- 通知 / やることリスト ポップアップを mypage のカード調に上書き（不透明 + アクセント枠 + 3Dシャドウ） --}}
     <style>
@@ -633,7 +641,7 @@
     <script src="{{ asset('assets/js/motion.js') }}?v={{ $assetVersion }}" defer></script>
     @if($isLightTheme)
     {{-- ライトモード（薄ラベンダー基調）。全CSSの最後に読み込んで上書きする --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260719-light-7">
+    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260719-light-8">
     @endif
 </head>
 <body class="@yield('body-class') {{ $isLightTheme ? 'theme-light' : '' }} bg-base text-text-main"
