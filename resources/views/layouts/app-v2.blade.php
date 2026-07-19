@@ -654,7 +654,7 @@
     {{-- プレミアムホワイト（試験導入）: SWIPE / MyPage の白基調プロトタイプ。
          セリフ体見出しのため Noto Serif JP も追加読み込み。ダークテーマ CSS の後に来て上書きする --}}
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('assets/css/premium-white.css') }}?v=20260719-pwhite-01">
+    <link rel="stylesheet" href="{{ asset('assets/css/premium-white.css') }}?v=20260720-pwhite-02">
     @endif
 </head>
 <body class="@yield('body-class') {{ $isLightTheme ? 'theme-light' : '' }} {{ $isPremiumWhite ? 'theme-premium-white' : '' }} bg-base text-text-main"
