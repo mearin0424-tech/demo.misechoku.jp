@@ -50,18 +50,24 @@ document.addEventListener('DOMContentLoaded', function() {
         // DISCOVERY 仕様：シームレスな無限ループ（末尾→先頭、先頭→末尾）
         loop: slideCount >= 2,
         rewind: false,
-        speed: 460, /* 少し長め + motion.css の ease-out で "ぬるっと" 止まる */
+        // 340ms + CSS 側で cubic-bezier(0.22, 0.8, 0.34, 1) の easing
+        speed: 340,
         mousewheel: {
             enabled: true,
-            sensitivity: 0.8,
-            thresholdDelta: 20
+            sensitivity: 0.5,
+            thresholdDelta: 24
         },
         touchRatio: 1,
-        // ある程度斜めのジェスチャーも縦として拾う
-        touchAngle: 35,
-        threshold: 10,
+        // タップ〜微動での誤反応対策：明確に引っ張った時のみスライド
+        touchAngle: 26,
+        threshold: 22,
+        shortSwipes: false,
+        longSwipes: true,
+        longSwipesRatio: 0.25,
+        longSwipesMs: 260,
+        followFinger: true,
         resistance: true,
-        resistanceRatio: 0.7,
+        resistanceRatio: 0.5,
         touchStartPreventDefault: false,
         grabCursor: true,
         preventClicks: true,
@@ -70,23 +76,20 @@ document.addEventListener('DOMContentLoaded', function() {
             enabled: true,
             onlyInViewport: true
         },
-        observer: true,
-        observeParents: true,
+        passiveListeners: true,
+        observer: false,
+        observeParents: false,
         on: {
             init: function () {
                 var self = this;
-                setTimeout(function () {
+                requestAnimationFrame(function () {
                     self.update();
                     // 初回表示でも文字がフワッと立ち上がるように
                     refreshActiveCard(self, 'card');
-                }, 100);
+                });
             },
-            slideChangeTransitionStart: function () {
-                // 上下スワイプの切替時：本文を一旦消してから新カードで再生
-                refreshActiveCard(this, 'card');
-            },
+            // A) transitionStart は削除、End の1回だけに集約
             slideChangeTransitionEnd: function () {
-                // 完全到達後にもう一度ピン留めし、stagger を確実に再生
                 refreshActiveCard(this, 'card');
             }
         }
@@ -99,6 +102,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // タップでその写真へジャンプ。
     // ========================================================================
     function buildPhotoSegBar(paginationEl, swiper, count) {
+        // 旧 bullet 系のクラスが残っていると Swiper CDN CSS / home.css 内の
+        // .swiper-pagination-bullets 系ルールに hit してセグメントが太くなる。
+        // 完全に切り離すため一括で剥がす。
+        paginationEl.classList.remove('swiper-pagination', 'swiper-pagination-bullets', 'swiper-pagination-horizontal');
         paginationEl.classList.add('photo-seg-bar');
         paginationEl.innerHTML = '';
 
@@ -153,39 +160,29 @@ document.addEventListener('DOMContentLoaded', function() {
             touchStartPreventDefault: false,
             touchReleaseOnEdges: true,
             // より水平に近いジェスチャーのみ横スワイプ扱いにし、斜め〜縦は親（上下スワイプ）へ譲る
-            touchAngle: 18,
-            threshold: 12,
-            speed: 420,
-            // モダンなパララックス演出：前の写真は奥でゆっくり退き（減光+微縮小）、
-            // 次の写真が上のレイヤーで滑り込んで覆う
-            effect: 'creative',
-            creativeEffect: {
-                limitProgress: 2,
-                prev: {
-                    translate: ['-22%', 0, -1],
-                    opacity: 0.4,
-                    scale: 0.96,
-                },
-                next: {
-                    translate: ['100%', 0, 0],
-                },
-            },
+            // 水平ジェスチャーだけを厳しく判定して縦を親に返す
+            touchAngle: 12,
+            threshold: 14,
+            speed: 300,
+            // creative は撤回：標準 slide + spaceBetween + CSS filter で軽量に奥行き感を出す
+            effect: 'slide',
+            spaceBetween: 8,
             resistance: true,
-            resistanceRatio: 0.6,
+            resistanceRatio: 0.5,
             longSwipes: true,
-            longSwipesRatio: 0.15,
-            longSwipesMs: 150,
-            shortSwipes: true,
+            longSwipesRatio: 0.20,
+            longSwipesMs: 200,
+            shortSwipes: false,
             followFinger: true,
             watchOverflow: false,
             preventClicks: true,
             preventClicksPropagation: true,
-            // 縦方向の動きは親のメインSwiperに伝搬させる
             touchMoveStopPropagation: false,
             slideToClickedSlide: false,
             centeredSlides: false,
-            observer: true,
-            observeParents: true,
+            passiveListeners: true,
+            observer: false,
+            observeParents: false,
             on: {
                 touchStart: function () {
                     isPhotoSwiping = false;

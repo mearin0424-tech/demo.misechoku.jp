@@ -91,7 +91,13 @@
       "Bash(sed -n '158,172p' public/assets/css/light-theme.css)",
       "Bash(node --check public/personality-test/script.js)",
       "Bash(node --check public/assets/js/register-shop-profile-crop.js)",
-      "Bash(python3 -)"
+      "Bash(python3 -)",
+      "Bash(python3 tmp/editor_patch.py)",
+      "Bash(node --check public/assets/js/image-editor.js)",
+      "Bash(bash *)",
+      "Bash(python3 -c \"import io; open\\('a'\\).read\\(\\)\")",
+      "Bash(python3 -c \"print\\('hi'\\)\")",
+      "Bash(python3 -c \"print\\('hi'\\); import sys; sys.exit\\(0\\)\")"
     ]
   }
 }

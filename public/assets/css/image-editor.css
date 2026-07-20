@@ -416,3 +416,107 @@
     .imge__title { font-size: 0.86rem; letter-spacing: 0.06em; }
     .imge__chip { padding: 6px 10px; font-size: 0.76rem; }
 }
+
+/* ============================================================
+   装飾文字パネル + プレビューオーバーレイ (2026-07-20)
+   ============================================================ */
+.imge__text-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 4px 2px;
+}
+.imge__text-input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    background: rgba(0, 0, 0, 0.35);
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+}
+.imge__text-input::placeholder { color: rgba(255, 255, 255, 0.45); }
+.imge__text-input:focus {
+    outline: none;
+    border-color: #c4b5fd;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.20);
+}
+.imge__text-colors { display: flex; gap: 10px; align-items: center; }
+.imge__text-color {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.12s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.imge__text-color:hover { transform: scale(1.05); }
+.imge__text-color.is-active {
+    border-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.28), 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+.imge__text-size {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+.imge__text-size input[type="range"] { flex: 1; accent-color: #a78bfa; }
+.imge__text-pos { display: inline-flex; gap: 6px; }
+.imge__text-pos-btn {
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    background: transparent;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.imge__text-pos-btn.is-active {
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    border-color: transparent;
+    color: #ffffff;
+}
+.imge__text-bg-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.imge__text-bg-toggle input[type="checkbox"] {
+    width: 18px; height: 18px;
+    accent-color: #a78bfa;
+}
+
+/* プレビューオーバーレイ：Cropper の .cropper-view-box 内に絶対配置 */
+.imge__text-overlay {
+    position: absolute;
+    left: 0; right: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    z-index: 5;
+}
+.imge__text-overlay[data-pos="top"]    { top: 8%;    bottom: auto; }
+.imge__text-overlay[data-pos="middle"] { top: 50%;   transform: translateY(-50%); bottom: auto; }
+.imge__text-overlay[data-pos="bottom"] { bottom: 8%; top: auto; }
+.imge__text-overlay__inner {
+    display: inline-block;
+    font-family: "Noto Sans JP", "Hiragino Sans", sans-serif;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    max-width: 92%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

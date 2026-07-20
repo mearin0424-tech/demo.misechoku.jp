@@ -5233,19 +5233,39 @@ body.page-home .photo-pagination.photo-seg-bar {
     background: transparent;
     z-index: 20;
 }
-/* さらに控えめ：全体で 10% 程度の存在感（各セグメント 6px × 2px） */
+/* さらに控えめ：全体で 10% 程度の存在感（各セグメント 6px × 2px）
+   ※ Swiper CDN CSS / 旧 bullet ルールが hit しないよう詳細度勝ち + !important で強制 */
+body.page-home .photo-pagination.photo-seg-bar .photo-seg,
 body.page-home .photo-seg {
-    position: relative;
-    flex: 0 0 auto;
-    width: 6px;
-    height: 2px;
-    border: 0;
-    padding: 0;
-    margin: 0;
-    border-radius: 999px;
+    position: relative !important;
+    flex: 0 0 auto !important;
+    width: 6px !important;
+    max-width: 6px !important;
+    min-width: 6px !important;
+    height: 2px !important;
+    min-height: 2px !important;
+    max-height: 2px !important;
+    border: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 999px !important;
     background: rgba(210, 196, 255, 0.22);
     cursor: pointer;
     transition: background 0.2s ease;
+    box-shadow: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    display: inline-block !important;
+    line-height: 0 !important;
+}
+/* コンテナ自身のサイズ暴走も止める（旧 bullet の height 指定に負けないように） */
+body.page-home .photo-pagination.photo-seg-bar {
+    height: auto !important;
+    line-height: 0 !important;
+    text-align: center !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
 }
 /* タップ領域の拡大（見た目2.5pxのまま上下10pxで押せる） */
 body.page-home .photo-seg::before {

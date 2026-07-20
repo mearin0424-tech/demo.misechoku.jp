@@ -146,6 +146,13 @@
                 saturate:   100,
                 warmth:     0,     // -50..50
             },
+            text: {
+                content: '',
+                color: '#ffffff',
+                size: 42,
+                pos: 'bottom',
+                bg: false,
+            },
         };
 
         this.cropper = null;
@@ -233,6 +240,7 @@
         if (this.opts.enableFilters) {
             tabs.push({ key: 'adjust', icon: 'fa-sliders', label: '調整' });
             tabs.push({ key: 'filter', icon: 'fa-wand-magic-sparkles', label: 'フィルタ' });
+            tabs.push({ key: 'text',   icon: 'fa-font',                   label: '文字' });
         }
 
         var tabBar = h('div', { className: 'imge__tabbar', role: 'tablist' });
@@ -263,6 +271,7 @@
             if (t.key === 'transform')  self._buildTransformPanel(panel);
             if (t.key === 'adjust')     self._buildAdjustPanel(panel);
             if (t.key === 'filter')     self._buildFilterPanel(panel);
+            if (t.key === 'text')       self._buildTextPanel(panel);
             panelWrap.appendChild(panel);
         });
 
@@ -481,13 +490,16 @@
     };
 
     ImageEditor.prototype._applyLiveFilter = function () {
-        var css = this._buildFilterCss();
-        // Cropper のキャンバスコンテナ側に filter をあてる（プレビュー全体に反映）
-        if (this.rootEl) {
-            var cc = this.rootEl.querySelector('.cropper-canvas img');
-            if (cc) cc.style.filter = css;
-            // ハンドラ側は透過にして視認性維持
-        }
+        var css = this._buildFilterCss() || 'none';
+        if (!this.rootEl) return;
+        // バグ修正：Cropper は「外周プレビュー(.cropper-canvas img)」と
+        // 「切り抜き枠内の複製(.cropper-view-box img)」を別のノードで持つ。
+        // 両方に filter を当てないと「暗くしても枠内は明るいまま」の食い違いになる。
+        var nodes = this.rootEl.querySelectorAll('.cropper-canvas img, .cropper-view-box img');
+        nodes.forEach(function (img) {
+            img.style.filter = css;
+            img.style.webkitFilter = css;
+        });
     };
 
     ImageEditor.prototype._rotateBy = function (deg) {
@@ -520,6 +532,8 @@
             background: false,
             toggleDragModeOnDblclick: false,
             ready: function () { self._applyLiveFilter(); },
+            crop: function () { self._applyLiveFilter(); },
+            cropmove: function () { self._applyLiveFilter(); },
             zoom: function (ev) {
                 self.state.zoom = ev.detail.ratio || self.state.zoom;
                 if (self._zoomInput) self._zoomInput.value = self.state.zoom.toFixed(2);
@@ -586,7 +600,7 @@
                 this._toast('画像のトリミングに失敗しました', 'error');
                 return;
             }
-            // フィルタ効果を canvas に焼き付ける（Canvas.filter API が使える環境で有効化）
+            // フィルタ効果を canvas に焼き付ける
             var css = this._buildFilterCss();
             if (css) {
                 var bake = document.createElement('canvas');
@@ -596,9 +610,58 @@
                 if (typeof ctx.filter === 'string') {
                     ctx.filter = css;
                     ctx.drawImage(canvas, 0, 0);
+                    ctx.filter = 'none';
                     canvas = bake;
                 }
-                // Canvas.filter 未対応環境は crop のみで妥協（CSS filter は preview 上だけ）
+            }
+            // 装飾文字を焼き付け
+            if (this.state.text && this.state.text.content) {
+                var tctx = canvas.getContext('2d');
+                var t = this.state.text;
+                var fontPx = Math.round(canvas.height * (t.size / 500) * 2.2);
+                tctx.textAlign = 'center';
+                tctx.textBaseline = 'middle';
+                tctx.font = '800 ' + fontPx + 'px "Noto Sans JP", "Hiragino Sans", sans-serif';
+                var cx = canvas.width / 2;
+                var cy = t.pos === 'top'
+                    ? Math.round(canvas.height * 0.12)
+                    : (t.pos === 'middle' ? Math.round(canvas.height * 0.5) : Math.round(canvas.height * 0.88));
+                var metrics = tctx.measureText(t.content);
+                if (t.bg) {
+                    var padX = Math.round(fontPx * 0.6);
+                    var padY = Math.round(fontPx * 0.35);
+                    var bw = Math.round(metrics.width) + padX * 2;
+                    var bh = Math.round(fontPx * 1.1) + padY * 2;
+                    tctx.fillStyle = 'rgba(0,0,0,0.50)';
+                    var br = bh / 2;
+                    var bx = cx - bw / 2, by = cy - bh / 2;
+                    tctx.beginPath();
+                    tctx.moveTo(bx + br, by);
+                    tctx.lineTo(bx + bw - br, by);
+                    tctx.quadraticCurveTo(bx + bw, by, bx + bw, by + br);
+                    tctx.lineTo(bx + bw, by + bh - br);
+                    tctx.quadraticCurveTo(bx + bw, by + bh, bx + bw - br, by + bh);
+                    tctx.lineTo(bx + br, by + bh);
+                    tctx.quadraticCurveTo(bx, by + bh, bx, by + bh - br);
+                    tctx.lineTo(bx, by + br);
+                    tctx.quadraticCurveTo(bx, by, bx + br, by);
+                    tctx.closePath();
+                    tctx.fill();
+                }
+                tctx.shadowColor = 'rgba(0,0,0,0.55)';
+                tctx.shadowBlur = Math.max(4, fontPx * 0.08);
+                tctx.shadowOffsetY = Math.max(1, fontPx * 0.03);
+                if (t.color === '#f6d36a') {
+                    var g = tctx.createLinearGradient(0, cy - fontPx / 2, 0, cy + fontPx / 2);
+                    g.addColorStop(0, '#fff3c4');
+                    g.addColorStop(0.5, '#f6d36a');
+                    g.addColorStop(1, '#d4af37');
+                    tctx.fillStyle = g;
+                } else {
+                    tctx.fillStyle = t.color;
+                }
+                tctx.fillText(t.content, cx, cy);
+                tctx.shadowColor = 'transparent';
             }
             canvas.toBlob(function (blob) {
                 if (!blob) {
@@ -628,6 +691,133 @@
     ImageEditor.prototype._toast = function (msg, variant) {
         if (window.appToast) window.appToast(msg, variant);
         else window.alert(msg);
+    };
+
+    ImageEditor.prototype._buildTextPanel = function (panel) {
+        var self = this;
+        var wrap = h('div', { className: 'imge__text-panel' });
+
+        var input = h('input', {
+            type: 'text', className: 'imge__text-input',
+            placeholder: '写真に載せる文字（20字以内）',
+            maxlength: '20',
+            value: self.state.text.content,
+        });
+        input.addEventListener('input', function () {
+            self.state.text.content = input.value;
+            self._syncTextPreview();
+        });
+
+        var colorRow = h('div', { className: 'imge__text-colors' });
+        [
+            { key: '#ffffff', label: '白', style: 'background:#ffffff' },
+            { key: '#111111', label: '黒', style: 'background:#111111' },
+            { key: '#f6d36a', label: '金', style: 'background:linear-gradient(135deg,#fff3c4,#d4af37)' },
+            { key: '#d670a2', label: '桃', style: 'background:#d670a2' },
+        ].forEach(function (c) {
+            var b = h('button', {
+                type: 'button',
+                className: 'imge__text-color' + (self.state.text.color === c.key ? ' is-active' : ''),
+                'data-color': c.key,
+                'aria-label': c.label,
+                style: c.style,
+                onClick: function () {
+                    self.state.text.color = c.key;
+                    wrap.querySelectorAll('.imge__text-color').forEach(function (x) {
+                        x.classList.toggle('is-active', x.getAttribute('data-color') === c.key);
+                    });
+                    self._syncTextPreview();
+                },
+            });
+            colorRow.appendChild(b);
+        });
+
+        var sizeRow = h('label', { className: 'imge__text-size' }, [
+            h('span', { text: 'サイズ' }),
+            (function () {
+                var r = h('input', { type: 'range', min: '18', max: '96', step: '2', value: String(self.state.text.size), 'aria-label': '文字サイズ' });
+                r.addEventListener('input', function () {
+                    self.state.text.size = parseInt(r.value, 10) || 42;
+                    self._syncTextPreview();
+                });
+                return r;
+            })(),
+        ]);
+
+        var posRow = h('div', { className: 'imge__text-pos' });
+        [
+            { key: 'top',    label: '上' },
+            { key: 'middle', label: '中央' },
+            { key: 'bottom', label: '下' },
+        ].forEach(function (p) {
+            var b = h('button', {
+                type: 'button',
+                className: 'imge__text-pos-btn' + (self.state.text.pos === p.key ? ' is-active' : ''),
+                'data-pos': p.key,
+                onClick: function () {
+                    self.state.text.pos = p.key;
+                    posRow.querySelectorAll('.imge__text-pos-btn').forEach(function (x) {
+                        x.classList.toggle('is-active', x.getAttribute('data-pos') === p.key);
+                    });
+                    self._syncTextPreview();
+                },
+                text: p.label,
+            });
+            posRow.appendChild(b);
+        });
+
+        var bgToggle = h('label', { className: 'imge__text-bg-toggle' }, [
+            (function () {
+                var c = h('input', { type: 'checkbox' });
+                c.checked = !!self.state.text.bg;
+                c.addEventListener('change', function () { self.state.text.bg = c.checked; self._syncTextPreview(); });
+                return c;
+            })(),
+            h('span', { text: '半透明の帯を敷く（読みやすさUP）' }),
+        ]);
+
+        wrap.appendChild(input);
+        wrap.appendChild(colorRow);
+        wrap.appendChild(sizeRow);
+        wrap.appendChild(posRow);
+        wrap.appendChild(bgToggle);
+        panel.appendChild(wrap);
+    };
+
+    ImageEditor.prototype._syncTextPreview = function () {
+        if (!this.rootEl) return;
+        var view = this.rootEl.querySelector('.cropper-view-box');
+        if (!view) return;
+        var overlay = view.querySelector('.imge__text-overlay');
+        if (!overlay) {
+            overlay = h('div', { className: 'imge__text-overlay' });
+            var span = h('span', { className: 'imge__text-overlay__inner' });
+            overlay.appendChild(span);
+            view.appendChild(overlay);
+        }
+        var t = this.state.text;
+        var innerSpan = overlay.querySelector('.imge__text-overlay__inner');
+        innerSpan.textContent = t.content || '';
+        if (t.color === '#f6d36a') {
+            innerSpan.style.backgroundImage = 'linear-gradient(180deg,#fff3c4,#f6d36a 50%,#d4af37)';
+            innerSpan.style.webkitBackgroundClip = 'text';
+            innerSpan.style.backgroundClip = 'text';
+            innerSpan.style.color = 'transparent';
+            innerSpan.style.webkitTextFillColor = 'transparent';
+        } else {
+            innerSpan.style.backgroundImage = 'none';
+            innerSpan.style.color = t.color;
+            innerSpan.style.webkitTextFillColor = t.color;
+        }
+        var basis = view.clientHeight || 400;
+        var fontPx = Math.round(basis * (t.size / 500));
+        innerSpan.style.fontSize = fontPx + 'px';
+        innerSpan.style.padding = t.bg ? (Math.round(fontPx * 0.28) + 'px ' + Math.round(fontPx * 0.6) + 'px') : '0';
+        innerSpan.style.background = t.bg ? 'rgba(0,0,0,0.45)' : 'transparent';
+        innerSpan.style.borderRadius = t.bg ? '999px' : '0';
+        innerSpan.style.textShadow = t.color === '#111111' ? '0 1px 3px rgba(255,255,255,0.35)' : '0 1px 3px rgba(0,0,0,0.55), 0 0 12px rgba(0,0,0,0.25)';
+        overlay.style.display = t.content ? 'flex' : 'none';
+        overlay.dataset.pos = t.pos;
     };
 
     window.MisechokuImageEditor = {
