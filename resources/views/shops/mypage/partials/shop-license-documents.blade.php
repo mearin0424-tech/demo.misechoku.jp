@@ -192,6 +192,8 @@
                                         ファイルを選択
                                     </button>
                                     <p class="license-accordion__file-selected" data-license-file-name hidden></p>
+                                    {{-- 選択した画像のプレビュー（PDF はファイル名表示のみ） --}}
+                                    <img class="license-accordion__preview" data-license-preview alt="選択ファイルのプレビュー" hidden>
                                 </div>
                             </div>
 
@@ -716,11 +718,29 @@
             feedback.className = 'license-accordion__submit-feedback is-' + state;
             feedback.textContent = message || '';
         }
+        var previewEl = form.querySelector('[data-license-preview]');
         function updateFileName() {
-            if (!fileNameEl) return;
             var f = fileInput && fileInput.files && fileInput.files[0];
-            if (f) { fileNameEl.hidden = false; fileNameEl.textContent = '選択中: ' + f.name; }
-            else { fileNameEl.hidden = true; fileNameEl.textContent = ''; }
+            if (fileNameEl) {
+                if (f) { fileNameEl.hidden = false; fileNameEl.textContent = '選択中: ' + f.name; }
+                else { fileNameEl.hidden = true; fileNameEl.textContent = ''; }
+            }
+            // 画像ならその場でプレビュー表示（PDF はファイル名のみ）
+            if (previewEl) {
+                if (previewEl.dataset.blobUrl) {
+                    URL.revokeObjectURL(previewEl.dataset.blobUrl);
+                    delete previewEl.dataset.blobUrl;
+                }
+                if (f && /^image\//.test(f.type)) {
+                    var blobUrl = URL.createObjectURL(f);
+                    previewEl.src = blobUrl;
+                    previewEl.dataset.blobUrl = blobUrl;
+                    previewEl.hidden = false;
+                } else {
+                    previewEl.hidden = true;
+                    previewEl.removeAttribute('src');
+                }
+            }
         }
         function isValid() {
             var hasFile = fileInput && fileInput.files && fileInput.files.length > 0;

@@ -8,7 +8,7 @@
         $metaDescription = trim($__env->yieldContent('meta_description')) ?: 'ミセチョクのデモサイトです。';
         $metaImage = trim($__env->yieldContent('meta_image')) ?: asset('assets/images/pwa/icon-512.png');
         $canonicalUrl = trim($__env->yieldContent('canonical')) ?: url()->current();
-        $assetVersion = '20260720-ink-policy';
+        $assetVersion = '20260720-fullwidth';
         $resolvedTitle = $metaTitle !== ''
             ? $metaTitle
             : ($pageTitle !== '' ? $pageTitle . ' | ' . config('app.name', 'ミセチョク') : config('app.name', 'ミセチョク'));
@@ -112,10 +112,9 @@
         );
 
         // premium-white 対象ページは theme-light と競合しないよう除外（premium-white が優先）
+        // ログイン画面（demo/auth）もライトモード対象（2026-07-20。トークン反転で追従）
         $naturalLightTheme = !$isDarkPage
-            && !$naturalPremiumWhite
-            && !str_contains($bodyClassAttr, 'page-demo-login')
-            && !str_contains($bodyClassAttr, 'page-auth-login');
+            && !$naturalPremiumWhite;
 
         // ===== テーマ切替（ヘッダーのライト/ダークトグル 2026-07-20）=====
         // Cookie: theme_mode = 'dark' → 全画面を SWIPE/プロフィール同様のダークベースへ強制。
@@ -582,6 +581,18 @@
             text-shadow: none !important;
         }
         /* ライトテーマ：ヘッダーと上下対称の艶ガラス（下端ハイライト + 上方向の浮遊影） */
+        /* さがす・トーク一覧：main の下余白を外し、リストがフッターの
+           すりガラス越しに透けて見えるようにする（最下部の到達余白はリスト側で確保） */
+        body.page-search main#main-content,
+        body.page-talk.page-talk-list main#main-content {
+            padding-bottom: 0 !important;
+        }
+        body.page-search .tab-page-body,
+        body.page-search .search-page-body,
+        body.page-talk.page-talk-list .talk-list-container {
+            padding-bottom: calc(var(--footer-height, 75px) + env(safe-area-inset-bottom, 0px) + 24px) !important;
+        }
+
         body.theme-light nav[data-bottom-nav],
         body.theme-premium-white nav[data-bottom-nav] {
             background: linear-gradient(0deg,
@@ -861,7 +872,7 @@
     <script src="{{ asset('assets/js/motion.js') }}?v={{ $assetVersion }}" defer></script>
     {{-- ライトモード（薄ラベンダー基調）。全ルールが body.theme-light スコープのため常時読み込みで安全。
          テーマトグル（ライト/ダーク）のライブ切替を可能にするため @if を外して常時ロードする --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260720-light-29">
+    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260720-light-31">
     {{-- プレミアムホワイト（MyPage）: 全ルールが body.theme-premium-white スコープ。同上で常時ロード --}}
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600;700;900&family=Cinzel:wght@600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/css/premium-white.css') }}?v=20260720-pwhite-09">

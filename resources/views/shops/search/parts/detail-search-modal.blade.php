@@ -316,13 +316,10 @@
 
         <div class="detail-search-modal__footer detail-search-modal__footer--search">
             <button type="button" class="detail-search-modal__btn detail-search-modal__btn--reset" data-detail-search-reset>クリア</button>
-            <button type="button" class="detail-search-modal__btn detail-search-modal__btn--save" data-detail-search-save
-                    data-save-url="{{ route('shop.search-preferences.save') }}">
-                保存
-            </button>
-            <button type="button" class="detail-search-modal__btn detail-search-modal__btn--submit" data-detail-search-submit>検索</button>
+            {{-- 保存ボタンは廃止：検索実行時に条件を自動保存する --}}
+            <button type="button" class="detail-search-modal__btn detail-search-modal__btn--submit" data-detail-search-submit
+                    data-save-url="{{ route('shop.search-preferences.save') }}">検索</button>
         </div>
-        <p class="detail-search-modal__save-feedback" data-detail-search-save-feedback hidden></p>
     </div>
 </div>
 
@@ -559,9 +556,9 @@
     }
 
     // ===== 既存：条件保存 =====
-    var saveBtn = form.closest('.detail-search-modal__window')?.querySelector('[data-detail-search-save]');
-    var feedback = form.closest('.detail-search-modal__window')?.querySelector('[data-detail-search-save-feedback]');
-    if (!saveBtn) return;
+    // ===== 検索実行時に条件を自動保存（保存ボタンは廃止） =====
+    var saveBtn = form.closest('.detail-search-modal__window')?.querySelector('[data-detail-search-submit]');
+    if (!saveBtn || !saveBtn.dataset.saveUrl) return;
 
     function readCheckedValues(name) {
         return Array.from(form.querySelectorAll('input[name="' + name + '"]:checked'))
@@ -577,12 +574,8 @@
         return el ? String(el.value || '').trim() : '';
     }
 
-    saveBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-        if (saveBtn.dataset.busy === '1') return;
-        saveBtn.dataset.busy = '1';
-        if (feedback) { feedback.hidden = true; feedback.className = 'detail-search-modal__save-feedback'; }
-
+    saveBtn.addEventListener('click', function () {
+        // 検索遷移と並行して条件を保存（keepalive でナビゲーション後も送信継続）
         var payload = new FormData();
         payload.append('_token', (document.querySelector('meta[name="csrf-token"]') || {}).content || '');
 
@@ -605,28 +598,15 @@
         var exp = readRadioValue('night_work_exp');
         if (exp !== '') payload.append('night_work_exp', exp);
 
-        fetch(saveBtn.dataset.saveUrl, {
-            method: 'POST',
-            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-            body: payload,
-            credentials: 'same-origin'
-        })
-        .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
-        .then(function () {
-            if (feedback) {
-                feedback.hidden = false;
-                feedback.className = 'detail-search-modal__save-feedback is-success';
-                feedback.textContent = '検索条件を保存しました。次回もこの条件で開きます。';
-            }
-        })
-        .catch(function () {
-            if (feedback) {
-                feedback.hidden = false;
-                feedback.className = 'detail-search-modal__save-feedback is-error';
-                feedback.textContent = '保存に失敗しました。時間をおいて再度お試しください。';
-            }
-        })
-        .finally(function () { saveBtn.dataset.busy = '0'; });
+        try {
+            fetch(saveBtn.dataset.saveUrl, {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: payload,
+                credentials: 'same-origin',
+                keepalive: true
+            });
+        } catch (e) { /* 保存失敗は検索を妨げない */ }
     });
 })();
 </script>

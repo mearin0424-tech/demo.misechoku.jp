@@ -265,6 +265,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Swiper 標準の bullet はやめ、ゴム風粘性のカスタムページャーを敷く
         if (paginationEl) {
             buildElasticPager(paginationEl, swiper, photoSlideCount);
+            // 配置は「トークする」ボタンの直下（カスタムページャーなので swiper 外でも動作する）
+            var cardEl = el.closest('.cast-card');
+            var talkCta = cardEl && cardEl.querySelector('.swipe-talk-cta');
+            if (talkCta) {
+                talkCta.insertAdjacentElement('afterend', paginationEl);
+            }
         }
     });
 

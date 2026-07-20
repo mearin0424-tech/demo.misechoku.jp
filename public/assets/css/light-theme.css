@@ -1190,14 +1190,12 @@ body.theme-light .detail-search-chip--search:hover {
     background: rgba(124, 58, 237, 0.05);
     border-color: rgba(124, 58, 237, 0.28);
 }
-body.theme-light .detail-search-chip--search:has(input:checked),
-body.theme-light .detail-search-chip.is-pinned {
-    background: rgba(124, 58, 237, 0.10);
-    border-color: rgba(124, 58, 237, 0.38);
-    color: #6d28d9;
+body.theme-light .detail-search-chip--search:has(input:checked) {
+    background: #6d28d9;
+    border-color: #6d28d9;
+    color: #ffffff;
     box-shadow: none;
 }
-body.theme-light .detail-search-chip.is-pinned::before { color: #7c3aed; }
 
 /* サブセクション見出し・フッターボタン */
 body.theme-light .detail-search-subsection__label { color: #6d28d9; }
@@ -1523,11 +1521,10 @@ body.theme-light .detail-search-chip--search:hover {
     background: rgba(168, 85, 247, 0.12);
     border-color: rgba(124, 58, 237, 0.45);
 }
-body.theme-light .detail-search-chip--search:has(input:checked),
-body.theme-light .detail-search-chip--search.is-pinned {
-    background: rgba(124, 58, 237, 0.16);
-    border-color: rgba(124, 58, 237, 0.55);
-    color: #5b21b6;
+body.theme-light .detail-search-chip--search:has(input:checked) {
+    background: #6d28d9;
+    border-color: #6d28d9;
+    color: #ffffff;
     box-shadow: none;
 }
 
@@ -1670,4 +1667,34 @@ body.theme-light h2,
 body.theme-light h3,
 body.theme-light .app-title {
     color: #5b21b6;
+}
+
+
+/* §26 さがす一覧のひとこと吹き出し（ライト配色） */
+body.theme-light .tl-row__msg {
+    background: rgba(124, 58, 237, 0.06);
+    border-color: rgba(124, 58, 237, 0.20);
+    color: #4b465c !important;
+}
+body.theme-light .tl-row__msg::before {
+    border-left-color: rgba(124, 58, 237, 0.20);
+    border-bottom-color: rgba(124, 58, 237, 0.20);
+}
+
+
+/* §27 スカウト残数バー（ライト配色） */
+body.theme-light .talk-scout-quota {
+    background: rgba(124, 58, 237, 0.07);
+    border-color: rgba(124, 58, 237, 0.26);
+    color: #5b21b6;
+}
+body.theme-light .talk-scout-quota i { color: #7c3aed; }
+body.theme-light .talk-scout-quota__plan--free {
+    background: rgba(124, 58, 237, 0.10);
+    color: #5b21b6;
+}
+body.theme-light .talk-scout-quota.is-empty {
+    background: rgba(220, 38, 38, 0.07);
+    border-color: rgba(220, 38, 38, 0.35);
+    color: #b91c1c;
 }

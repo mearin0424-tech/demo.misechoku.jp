@@ -601,6 +601,8 @@
 @endsection
 
 @push('scripts')
+{{-- 金融機関・支店サジェスト（/api/bank-lookup）: include 消失によるデグレを復元 --}}
+@include('partials.bank-autocomplete-scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var csrfToken = (document.querySelector('meta[name="csrf-token"]') && document.querySelector('meta[name="csrf-token"]').getAttribute('content')) || '';
@@ -646,6 +648,34 @@ document.addEventListener('DOMContentLoaded', function () {
         bankModal.addEventListener('click', function (e) { if (e.target === bankModal) closeBankModal(); });
         bankForm.addEventListener('submit', function (e) {
             e.preventDefault();
+
+            // ---- クライアント側バリデーション（サーバ検証と同等の主要チェック） ----
+            var bankCode = (bankForm.querySelector('[data-bank-code-input]') || {}).value || '';
+            var branchCode = (bankForm.querySelector('[data-branch-code-input]') || {}).value || '';
+            var accountNumber = ((bankForm.querySelector('[name="account_number"]') || {}).value || '').trim();
+            var accountName = ((bankForm.querySelector('[name="account_name"]') || {}).value || '').trim();
+            function warn(msg, sel) {
+                (window.appToast || window.alert)(msg, 'error');
+                var el = sel ? bankForm.querySelector(sel) : null;
+                if (el && el.focus) el.focus();
+            }
+            if (!/^\d{4}$/.test(bankCode)) {
+                warn('金融機関を候補から選択してください（実在する金融機関のみ登録できます）。', '[data-bank-name-input]');
+                return;
+            }
+            if (!/^\d{3}$/.test(branchCode)) {
+                warn('支店を候補から選択してください。', '[data-branch-name-input]');
+                return;
+            }
+            if (!/^\d{7,8}$/.test(accountNumber)) {
+                warn('口座番号は7桁または8桁の数字で入力してください。', '[name="account_number"]');
+                return;
+            }
+            if (accountName === '') {
+                warn('口座名義（カナ）を入力してください。', '[name="account_name"]');
+                return;
+            }
+
             var fd = new FormData(bankForm);
             var btn = document.getElementById('cast-bank-modal-submit');
             if (btn) btn.disabled = true;

@@ -1544,22 +1544,6 @@ body.page-search .connection-list--search {
     min-height: 30px;
 }
 
-/* 選択済みチップ：位置は元の並びのまま、面色＋チェックマークで控えめに強調 */
-.detail-search-chip.is-pinned {
-    background: rgba(168, 85, 247, 0.20);
-    border-color: rgba(167, 139, 250, 0.40);
-    color: #fff;
-    position: relative;
-}
-.detail-search-chip.is-pinned::before {
-    content: '\f00c';
-    font-family: 'Font Awesome 6 Free', 'Font Awesome 5 Free';
-    font-weight: 900;
-    margin-right: 5px;
-    color: var(--gold-light, #c4b5fd);
-    font-size: 0.72rem;
-}
-
 .detail-search-chips--search {
     gap: 6px;
 }
@@ -1582,9 +1566,10 @@ body.page-search .connection-list--search {
     border-color: rgba(168, 85, 247, 0.50);
 }
 
+/* 選択状態：色反転（バイオレットのベタ塗り + 白文字。チェックマークなし） */
 .detail-search-chip--search:has(input:checked) {
-    background: rgba(168, 85, 247, 0.30);
-    border-color: rgba(196, 181, 253, 0.70);
+    background: #7c3aed;
+    border-color: #7c3aed;
     color: #ffffff;
 }
 
@@ -3194,3 +3179,31 @@ body.page-search .connection-list--search > * {
     background: rgba(168, 85, 247, 0.16);
 }
 .detail-search-chips__more[hidden] { display: none; }
+
+
+/* ============================================================================
+   さがす一覧：ひとことを吹き出しで表現 (2026-07-20)
+   ============================================================================ */
+.tl-row__msg {
+    position: relative;
+    margin-top: 6px !important;
+    padding: 8px 12px;
+    border-radius: 12px;
+    border-top-left-radius: 4px;
+    background: rgba(168, 85, 247, 0.10);
+    border: 1px solid rgba(168, 85, 247, 0.22);
+}
+/* 旧デザインの引用符（C）は廃止し、アバター側を向く吹き出しのしっぽに */
+.tl-row__msg::before {
+    content: '' !important;
+    position: absolute;
+    top: 12px;
+    left: -5px;
+    width: 8px;
+    height: 8px;
+    margin: 0;
+    background: inherit;
+    border-left: 1px solid rgba(168, 85, 247, 0.22);
+    border-bottom: 1px solid rgba(168, 85, 247, 0.22);
+    transform: rotate(45deg);
+}

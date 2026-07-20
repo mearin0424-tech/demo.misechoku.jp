@@ -75,3 +75,8 @@
         </div>
     </div>
 @endsection
+
+@push('admin-scripts')
+{{-- 金融機関・支店サジェスト（/api/bank-lookup） --}}
+@include('partials.bank-autocomplete-scripts')
+@endpush

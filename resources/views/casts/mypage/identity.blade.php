@@ -231,6 +231,99 @@
 .identity-form-section .file-upload-btn.is-selected i::before {
     content: "\f00c";  /* fa-check */
 }
+/* 提出状況サマリー：許可証ページ（license-summary）と同一UI（2026-07-20） */
+.license-summary {
+    background: #ffffff;
+    border: 1px solid rgba(124, 58, 237, 0.20);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 16px;
+    box-shadow: 0 6px 18px rgba(76, 29, 149, 0.08);
+}
+.license-summary__counts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.license-summary__count {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 999px;
+    font-size: 0.74rem; font-weight: 800;
+    background: #f5f2fb; color: #6d6685; border: 1px solid rgba(95, 88, 118, 0.20);
+}
+.license-summary__count.is-approved { background: rgba(5,150,105,0.08); color: #059669; border-color: rgba(5,150,105,0.30); }
+.license-summary__count.is-pending  { background: rgba(180,83,9,0.08); color: #b45309; border-color: rgba(180,83,9,0.30); }
+.license-summary__count.is-rejected { background: rgba(220,38,38,0.06); color: #dc2626; border-color: rgba(220,38,38,0.30); }
+.license-summary__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.license-summary__row { display: flex; align-items: center; gap: 10px; padding: 10px 4px; }
+.license-summary__row + .license-summary__row { border-top: 1px solid rgba(124, 58, 237, 0.10); }
+.license-summary__row-icon {
+    flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; background: #f5f2fb; color: #8b84a1;
+}
+.license-summary__row.is-approved .license-summary__row-icon { background: rgba(5,150,105,0.10); color: #059669; }
+.license-summary__row.is-pending  .license-summary__row-icon { background: rgba(180,83,9,0.10); color: #b45309; }
+.license-summary__row.is-rejected .license-summary__row-icon { background: rgba(220,38,38,0.08); color: #dc2626; }
+.license-summary__row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.license-summary__row-name { font-size: 0.88rem; font-weight: 800; color: #4b465c; }
+.license-summary__row-detail { font-size: 0.74rem; color: #6d6685; overflow-wrap: anywhere; }
+.license-summary__row-detail strong { color: #2d2742; }
+.license-summary__row-status { flex: 0 0 auto; font-size: 0.74rem; font-weight: 800; color: #6d6685; white-space: nowrap; }
+.license-summary__row.is-approved .license-summary__row-status { color: #059669; }
+.license-summary__row.is-pending  .license-summary__row-status { color: #b45309; }
+.license-summary__row.is-rejected .license-summary__row-status { color: #dc2626; }
+
+/* アップロードUI（2026-07-20 改善）：全幅ドロップ風ボタン + 画像プレビュー */
+.identity-form-section .file-upload-btn--drop {
+    display: flex !important;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 14px !important;
+    border-radius: 12px !important;
+    border-style: dashed !important;
+    text-align: left;
+}
+.identity-form-section .file-upload-btn--drop i { font-size: 1.2rem; }
+.identity-form-section .file-upload-btn--drop span { display: flex; flex-direction: column; line-height: 1.4; }
+.identity-form-section .file-upload-btn--drop small {
+    font-weight: 600;
+    font-size: 0.68rem;
+    color: #857ca0;
+}
+.identity-form-section .file-upload-btn--drop.is-selected {
+    border-style: solid !important;
+    background: rgba(124, 58, 237, 0.10) !important;
+}
+.identity-form-section .upload-preview-thumb {
+    display: block;
+    margin-top: 8px;
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 12px;
+    border: 1px solid rgba(124, 58, 237, 0.28);
+    box-shadow: 0 3px 12px rgba(76, 29, 149, 0.10);
+    object-fit: contain;
+    background: #ffffff;
+}
+.identity-form-section .upload-preview-thumb[hidden] { display: none; }
+.identity-form-section .upload-preview-pdf {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(220, 38, 38, 0.06);
+    border: 1px solid rgba(220, 38, 38, 0.30);
+    color: #b91c1c;
+    font-size: 0.8rem;
+    font-weight: 700;
+    max-width: 100%;
+    overflow: hidden;
+}
+.identity-form-section .upload-preview-pdf[hidden] { display: none; }
+.identity-form-section .upload-preview-pdf span {
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 .identity-form-section .file-name-display {
     flex: 1 1 auto;
     min-width: 0;
@@ -390,22 +483,40 @@
                             ['label' => '住所確認書類', 'pattern' => 'B', 'doc' => $categoryDocs['address_proof'] ?? null],
                         ];
                     @endphp
-                    <div class="identity-doc-summary" aria-label="提出状況">
-                        <p class="identity-doc-summary__title"><i class="fas fa-list-check" aria-hidden="true"></i>提出状況</p>
-                        <ul class="identity-doc-summary__list">
+                    {{-- 提出状況サマリー：許可証ページ（license-summary）と同一UI --}}
+                    @php
+                        $idApproved = 0; $idPending = 0; $idRejected = 0; $idNone = 0;
+                        foreach ($summaryRows as $r) {
+                            $sk = $r['doc']['status_key'] ?? null;
+                            if (!$r['doc']) $idNone++;
+                            elseif ($sk === 'approved') $idApproved++;
+                            elseif ($sk === 'rejected') $idRejected++;
+                            else $idPending++;
+                        }
+                    @endphp
+                    <section class="license-summary" aria-label="提出状況サマリー">
+                        <div class="license-summary__counts">
+                            <span class="license-summary__count is-approved"><i class="fas fa-circle-check"></i>承認 {{ $idApproved }}</span>
+                            <span class="license-summary__count is-pending"><i class="fas fa-hourglass-half"></i>審査中 {{ $idPending }}</span>
+                            @if($idRejected > 0)
+                                <span class="license-summary__count is-rejected"><i class="fas fa-circle-exclamation"></i>差戻し {{ $idRejected }}</span>
+                            @endif
+                            <span class="license-summary__count is-none"><i class="fas fa-minus"></i>未提出 {{ $idNone }}</span>
+                        </div>
+                        <ul class="license-summary__list">
                             @foreach($summaryRows as $r)
                                 @php
                                     $d = $r['doc'];
                                     $sk = $d['status_key'] ?? null;
-                                    $rowState = $d ? ($sk ?? 'pending') : 'none';
+                                    $rowState = $d ? ($sk ?? 'pending') : 'not-submitted';
                                 @endphp
-                                <li class="identity-doc-summary__row is-{{ $rowState }}">
-                                    <span class="identity-doc-summary__icon" aria-hidden="true">
+                                <li class="license-summary__row is-{{ $rowState }}">
+                                    <span class="license-summary__row-icon" aria-hidden="true">
                                         <i class="fas {{ $d ? ($sk === 'approved' ? 'fa-circle-check' : ($sk === 'rejected' ? 'fa-circle-exclamation' : 'fa-hourglass-half')) : 'fa-minus' }}"></i>
                                     </span>
-                                    <span class="identity-doc-summary__body">
-                                        <span class="identity-doc-summary__label">{{ $r['label'] }}<small>パターン{{ $r['pattern'] }}</small></span>
-                                        <span class="identity-doc-summary__detail">
+                                    <span class="license-summary__row-body">
+                                        <span class="license-summary__row-name">{{ $r['label'] }}（パターン{{ $r['pattern'] }}）</span>
+                                        <span class="license-summary__row-detail">
                                             @if($d)
                                                 提出書類: <strong>{{ $d['type_label'] ?? '書類' }}</strong>
                                                 @if(!empty($d['updated_at_label']))（{{ $d['updated_at_label'] }} 提出）@endif
@@ -414,11 +525,11 @@
                                             @endif
                                         </span>
                                     </span>
-                                    <span class="identity-doc-summary__status">{{ $d ? ($d['status_label'] ?? '審査中') : '未提出' }}</span>
+                                    <span class="license-summary__row-status">{{ $d ? ($d['status_label'] ?? '審査中') : '未提出' }}</span>
                                 </li>
                             @endforeach
                         </ul>
-                    </div>
+                    </section>
 
                     {{-- 審査中：運営へ承認を催促できる（24時間に1回まで） --}}
                     @if($isPendingReview)
@@ -565,15 +676,41 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    /* ファイル選択：ファイル名 + 選択済みチェック + 画像サムネ */
+    /* ファイル選択：ファイル名 + 選択済みチェック + 画像プレビュー / PDF チップ */
     document.querySelectorAll('input[type="file"].bank-input').forEach(function (input) {
         input.addEventListener('change', function () {
             var nameDisplay = document.getElementById(input.id + '_name');
+            var previewEl = document.getElementById(input.id + '_preview');
+            var pdfChip = document.getElementById(input.id + '_pdf');
             var uploadBtn = input.previousElementSibling;
             while (uploadBtn && !uploadBtn.classList.contains('file-upload-btn')) {
                 uploadBtn = uploadBtn.previousElementSibling;
             }
             var file = input.files && input.files[0];
+
+            // プレビュー更新（画像はサムネ表示 / PDF はファイルチップ表示）
+            if (previewEl) {
+                if (previewEl.dataset.blobUrl) {
+                    URL.revokeObjectURL(previewEl.dataset.blobUrl);
+                    delete previewEl.dataset.blobUrl;
+                }
+                if (file && /^image\//.test(file.type)) {
+                    var blobUrl = URL.createObjectURL(file);
+                    previewEl.src = blobUrl;
+                    previewEl.dataset.blobUrl = blobUrl;
+                    previewEl.hidden = false;
+                } else {
+                    previewEl.hidden = true;
+                    previewEl.removeAttribute('src');
+                }
+            }
+            if (pdfChip) {
+                var isPdf = file && (file.type === 'application/pdf' || /\.pdf$/i.test(file.name));
+                pdfChip.hidden = !isPdf;
+                var nameSpan = pdfChip.querySelector('span');
+                if (nameSpan) nameSpan.textContent = isPdf ? file.name : '';
+            }
+
             if (file) {
                 if (nameDisplay) {
                     nameDisplay.textContent = file.name;

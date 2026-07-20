@@ -5217,18 +5217,20 @@ body.page-home .swipe-keep-corner {
    ・切替時: 先端が先に伸び（Phase A）、後端が弾けて追いつく（Phase B）
      イージング cubic-bezier(0.6, -0.28, 0.01, 1.35) は JS 側で付与
    ============================================================================ */
+/* 配置：JS がカード内「トークする」ボタン直下へ移設するため、静的フローで中央寄せ */
 body.page-home .photo-pagination.elastic-pager {
-    position: absolute !important;
-    top: 12px !important;
-    left: 50% !important;
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
     right: auto !important;
     bottom: auto !important;
     width: auto !important;
-    transform: translateX(-50%) !important;
+    transform: none !important;
     z-index: 20;
     display: flex !important;
     justify-content: center !important;
-    padding: 6px 10px;             /* タップ余白 + ピル端の逃げ */
+    padding: 10px 10px 0;          /* CTA との間隔 + タップ余白 */
+    margin: 0;
     pointer-events: auto;
     background: transparent;
 }
@@ -5292,4 +5294,23 @@ body.page-home .cast-card--recruit .rc-bottom-bar {
 }
 body.page-home .cast-card--recruit .rc-bottom-bar__stack {
     pointer-events: auto !important;
+}
+
+
+/* ============================================================================
+   求人カード：下部の縦スワイプ透過ゾーン (2026-07-20)
+   画像ラップがカード全面（inset:0）のため、下部での上下スワイプが
+   横スワイプ判定（nested photo-swiper）に吸われて操作性が悪かった。
+   photo-swiper の外側に透明レイヤーを重ね、下部のドラッグを
+   メイン（縦）スワイパーへ直接届かせてキャストカードと同じ操作感にする。
+   ============================================================================ */
+body.page-home .cast-card--recruit .rc-vswipe-zone {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 44%;
+    z-index: 7;              /* 画像(≦6)より上、下部バー(30)より下 */
+    background: transparent;
+    touch-action: pan-y;     /* 縦パンをブラウザ/メインSwiperに委ねる */
 }

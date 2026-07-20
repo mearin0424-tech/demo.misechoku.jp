@@ -670,7 +670,7 @@ body.theme-premium-white:not(.mode-dark) .pslate .pslate__amount { filter: drop-
     padding: 13px 16px;
     border-radius: 999px;
     background: linear-gradient(180deg, var(--accent-grad-from, #a78bfa) 0%, var(--accent-grad-to, #7c3aed) 100%);
-    color: var(--on-accent-strong, #ffffff);
+    color: #ffffff !important;  /* SWIPE カードと同じく文字は常に白 */
     font-size: 0.95rem;
     font-weight: 800;
     text-decoration: none;
@@ -742,4 +742,56 @@ body:has(.profile-talk-bar) main#main-content {
     background: #ef4444;
     border: 0;
     color: #ffffff;
+}
+
+
+/* ==================================================================
+   名前行のインラインアクション（共有/KEEP を小型アイコンで）: 全画面共通
+   ================================================================== */
+.profile-inline-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.profile-inline-actions .fav-circle,
+.profile-inline-actions .share-menu__trigger {
+    width: 36px;
+    height: 36px;
+    font-size: 0.92rem;
+}
+.profile-inline-actions .fav-circle__cap { display: none; }
+
+
+/* ==================================================================
+   業務系フォーム画面のフル幅化（2026-07-20）
+   採用・入金管理 / 本人確認 / 許可証 / 口座モーダル 等で
+   content-wrapper（16px）+ 内側ラッパーの二重ガターにより
+   実効幅が痩せていたのを解消。外側の16pxガターのみ使用する。
+   ================================================================== */
+.content-wrapper .mypage-area {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+.content-wrapper .shop-management-shell {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* 口座登録 / 承認・入金モーダル：パネルを画面幅いっぱいに近づけ、
+   内側余白もスリム化して入力欄の実効幅を確保 */
+.payment-bank-modal-panel,
+.shop-action-modal-panel {
+    max-width: min(30rem, calc(100vw - 1rem)) !important;
+}
+.payment-bank-modal-body,
+.shop-action-modal-body {
+    padding: 1.2rem 1rem !important;
+}
+.payment-bank-modal-header,
+.shop-action-modal-header {
+    padding: 0.9rem 1rem !important;
+}
+.payment-bank-modal-footer,
+.shop-action-modal-footer {
+    padding: 0.9rem 1rem !important;
 }

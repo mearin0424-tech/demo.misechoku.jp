@@ -4,7 +4,7 @@
 @section('body-class', 'page-talk page-talk-list')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260720-composer">
+<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260720-scout-quota">
 <link rel="stylesheet" href="{{ asset('assets/css/sub-header.css') }}">
 @endpush
 
@@ -26,6 +26,20 @@
 </div>
 
 <div class="talk-list-container tab-page-body">
+        {{-- 店舗側：本日のスカウト（新規トーク開始）残数。既存のやり取りは無制限 --}}
+        @if(!empty($scoutQuota))
+            @php $scoutRemaining = max(0, (int) $scoutQuota['limit'] - (int) $scoutQuota['used']); @endphp
+            <div class="talk-scout-quota {{ $scoutRemaining === 0 ? 'is-empty' : '' }}" role="status">
+                <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                <span>本日の新規スカウト：残り <strong>{{ $scoutRemaining }}</strong> / {{ $scoutQuota['limit'] }} 件</span>
+                @if(!empty($scoutQuota['is_premium']))
+                    <span class="talk-scout-quota__plan">Premium</span>
+                @else
+                    <span class="talk-scout-quota__plan talk-scout-quota__plan--free">無料プラン</span>
+                @endif
+            </div>
+        @endif
+
         {{-- パネル1：やり取り中 --}}
         <div id="pane-ongoing" class="tab-pane active">
             @forelse($ongoingTalks as $index => $talk)

@@ -18,9 +18,7 @@
         <div class="task-popup__head-title">
             <i class="fas fa-list-check task-popup__head-icon" aria-hidden="true"></i>
             <span class="task-popup__head-label">やることリスト</span>
-            @if($total > 0)
-                <span class="task-popup__head-count">{{ $total }}</span>
-            @endif
+            {{-- タイトル横のカウントは廃止（ヘッダーアイコン上のバッジで十分） --}}
         </div>
         <button type="button"
                 class="task-popup__close"

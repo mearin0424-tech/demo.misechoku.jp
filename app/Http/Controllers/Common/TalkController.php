@@ -80,7 +80,18 @@ class TalkController extends Controller
                 ->all();
         }
 
-        return view('common.talk.index', compact('ongoingTalks', 'requestTalks', 'profileRoute'));
+        // 店舗側：本日のスカウト（新規トーク開始）残り送信可能数を上部に表示する
+        $scoutQuota = null;
+        if (!$isCastPortal) {
+            try {
+                $scoutQuota = app(\App\Services\PlanSubscriptionService::class)
+                    ->checkScoutQuota((string) $this->currentShopId());
+            } catch (\Throwable $e) {
+                $scoutQuota = null;
+            }
+        }
+
+        return view('common.talk.index', compact('ongoingTalks', 'requestTalks', 'profileRoute', 'scoutQuota'));
     }
 
     /**

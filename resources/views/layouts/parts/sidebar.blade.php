@@ -42,9 +42,15 @@
                             @if($identityPendingBadge)<span class="sidebar-badge-pending">未済</span>@endif
                         </a>
                     </li>
+                @else
+                    {{-- 店舗：許可証の提出・管理（本人確認と同格の導線） --}}
+                    <li>
+                        <a href="{{ route('shop.mypage.documents.index') }}">
+                            <i class="fas fa-file-shield"></i> 許可証の提出・管理
+                            @if($licensePendingBadge)<span class="sidebar-badge-pending">未済</span>@endif
+                        </a>
+                    </li>
                 @endif
-                {{-- 許可証管理はサイドメニューから撤去（MyPage PROFILE タブ内・非公開アラート・
-                     やることリストからの導線で十分なため） --}}
             </ul>
         </div>
 

@@ -16,7 +16,7 @@
             <h3 class="tl-row__name">
                 {{ $c['name'] ?? '' }}
                 @if(!empty($c['age']))
-                    <span class="tl-row__age">{{ $c['age'] }}歳</span>
+                    <span class="tl-row__age">({{ $c['age'] }})</span>
                 @endif
             </h3>
             <div class="tl-row__meta">

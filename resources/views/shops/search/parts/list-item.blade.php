@@ -18,7 +18,7 @@
             {{-- 2行目：年齢・位置・距離（メタ情報を分離） --}}
             <div class="tl-row__meta">
                 @if(!empty($item['age']))
-                    <span class="tl-row__age">{{ $item['age'] }}歳</span>
+                    <span class="tl-row__age">({{ $item['age'] }})</span>
                 @endif
                 @if($area !== '')
                     <span class="tl-row__loc">

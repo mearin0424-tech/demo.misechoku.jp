@@ -58,21 +58,32 @@
                 @endforeach
             </select>
         </div>
+        @php
+            // カテゴリごとに ID を一意化（複数フォーム併存時の label/for・プレビュー連動のため）
+            $frontId = $category . '_front_file';
+            $backId  = $category . '_back_file';
+        @endphp
         <div class="bank-form-row">
             <label class="bank-label">表面（画像 or PDF）</label>
-            <label for="front_file" class="file-upload-btn">
-                <i class="fas fa-upload"></i> ファイルを選択
+            <label for="{{ $frontId }}" class="file-upload-btn file-upload-btn--drop">
+                <i class="fas fa-cloud-arrow-up"></i>
+                <span>タップしてファイルを選択<small>画像 / PDF・8MBまで</small></span>
             </label>
-            <span class="file-name-display" id="front_file_name">選択されていません</span>
-            <input type="file" id="front_file" name="front_file" class="bank-input visually-hidden" accept=".pdf,image/*" required>
+            <span class="file-name-display" id="{{ $frontId }}_name">選択されていません</span>
+            <img class="upload-preview-thumb" id="{{ $frontId }}_preview" alt="表面プレビュー" hidden>
+            <span class="upload-preview-pdf" id="{{ $frontId }}_pdf" hidden><i class="fas fa-file-pdf"></i><span></span></span>
+            <input type="file" id="{{ $frontId }}" name="front_file" class="bank-input visually-hidden" accept=".pdf,image/*" required>
         </div>
         <div class="bank-form-row">
             <label class="bank-label">裏面（{{ $requireBack ? '必須' : '任意' }}）</label>
-            <label for="back_file" class="file-upload-btn">
-                <i class="fas fa-upload"></i> ファイルを選択
+            <label for="{{ $backId }}" class="file-upload-btn file-upload-btn--drop">
+                <i class="fas fa-cloud-arrow-up"></i>
+                <span>タップしてファイルを選択<small>画像 / PDF・8MBまで</small></span>
             </label>
-            <span class="file-name-display" id="back_file_name">選択されていません</span>
-            <input type="file" id="back_file" name="back_file" class="bank-input visually-hidden" accept=".pdf,image/*" @if($requireBack) required @endif>
+            <span class="file-name-display" id="{{ $backId }}_name">選択されていません</span>
+            <img class="upload-preview-thumb" id="{{ $backId }}_preview" alt="裏面プレビュー" hidden>
+            <span class="upload-preview-pdf" id="{{ $backId }}_pdf" hidden><i class="fas fa-file-pdf"></i><span></span></span>
+            <input type="file" id="{{ $backId }}" name="back_file" class="bank-input visually-hidden" accept=".pdf,image/*" @if($requireBack) required @endif>
         </div>
         @if($showExpiry)
             <div class="bank-form-row">

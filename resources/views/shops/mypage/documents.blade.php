@@ -83,6 +83,30 @@
 .license-page__back { margin: 18px 0 0; font-size: 0.82rem; }
 .license-page__back a { color: #6d28d9; text-decoration: none; font-weight: 700; }
 
+/* 選択画像のプレビュー（2026-07-20 アップロードUI改善） */
+.license-accordion__preview {
+    display: block;
+    margin: 10px auto 0;
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 12px;
+    border: 1px solid rgba(124, 58, 237, 0.28);
+    box-shadow: 0 3px 12px rgba(76, 29, 149, 0.10);
+    object-fit: contain;
+    background: #ffffff;
+}
+.license-accordion__preview[hidden] { display: none; }
+
+/* アップロード領域：暗いグレーになっていたのを明るいラベンダー面に（2026-07-20） */
+.license-accordion__dropzone {
+    background: #faf8fe !important;
+    border-color: rgba(124, 58, 237, 0.35) !important;
+}
+.license-accordion__dropzone.is-dragover { background: rgba(124, 58, 237, 0.08) !important; }
+.license-accordion__dropzone-icon { color: #a78bfa !important; }
+.license-accordion__dropzone-text { color: #6d6685 !important; }
+.license-accordion__file-selected { color: #5b21b6 !important; }
+
 /* 提出状況サマリー */
 .license-summary {
     background: #ffffff;

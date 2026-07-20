@@ -49,56 +49,51 @@
             </div>
         </div>
 
-        {{-- ===== 名前/年齢 + 閲覧数 + 場所 ===== --}}
+        {{-- ===== 名前/年齢（右端: 共有・KEEP のアイコンのみ）+ 場所/閲覧数 ===== --}}
+        @php $favCastId = (string) ($cast['id'] ?? $cast['cast_id'] ?? ''); @endphp
         <div class="mb-4 flex flex-col gap-1.5">
             <div class="flex items-center justify-between gap-2">
                 <h1 class="app-title text-[22px] text-text-main leading-tight truncate min-w-0">
                     {{ $castDisplayName }}@if($age)<span class="text-[16px] text-text-sub ml-1">({{ $age }})</span>@endif
                 </h1>
-                <x-ui.view-count :count="$viewCount" class="shrink-0 text-[13px] text-text-main" />
+                @if(!$isOwn && $showInteractionActions)
+                    <div class="profile-inline-actions shrink-0" id="profile-inline-actions">
+                        @if(!empty($shareUrl))
+                            @include('partials.share-menu', [
+                                'shareUrl' => $shareUrl,
+                                'shareTitle' => $shareTitle ?? ($castDisplayName . 'のプロフィール'),
+                                'shareText' => $shareText ?? $intro,
+                                'menuId' => 'cast-share-menu',
+                            ])
+                        @endif
+                        <button type="button" id="btn-profile-keep"
+                                class="fav-circle fav-circle--keep"
+                                data-fav-toggle data-action="keep" data-item-type="cast" data-item-id="{{ $favCastId }}"
+                                aria-label="キープ" aria-pressed="{{ ($cast['is_kept'] ?? false) ? 'true' : 'false' }}">
+                            <i class="fas fa-bookmark" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                @endif
             </div>
-            @if($location !== '' || !empty($distanceLabel ?? null))
-                <div class="flex flex-wrap items-center gap-1.5 text-[12px] text-text-sub">
-                    <span class="inline-flex items-center gap-1">
-                        <i class="fas fa-map-marker-alt text-[10px]"></i>{{ $location !== '' ? $location : '位置情報未設定' }}
+            <div class="flex flex-wrap items-center gap-1.5 text-[12px] text-text-sub">
+                <span class="inline-flex items-center gap-1">
+                    <i class="fas fa-map-marker-alt text-[10px]"></i>{{ $location !== '' ? $location : '位置情報未設定' }}
+                </span>
+                @if(!empty($distanceLabel ?? null))
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/10 border border-line-accent/30 text-accent-text text-[10.5px] font-bold">
+                        <i class="fas fa-route text-[9px]"></i> {{ $distanceLabel }}
                     </span>
-                    @if(!empty($distanceLabel ?? null))
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/10 border border-line-accent/30 text-accent-text text-[10.5px] font-bold">
-                            <i class="fas fa-route text-[9px]"></i> {{ $distanceLabel }}
-                        </span>
-                    @endif
-                </div>
-            @endif
+                @endif
+                {{-- 閲覧数：位置情報の隣に表示 --}}
+                <x-ui.view-count :count="$viewCount" class="text-[12px] text-text-sub" />
+            </div>
         </div>
 
-        {{-- ===== アクション（店舗プロフィールと同じ構成：シンプルな単色 Primary + 中央寄せアイコン列） ===== --}}
         @if($isOwn)
             <a href="{{ route('cast.profile.edit') }}"
                class="flex w-full items-center justify-center gap-2 px-6 py-3 rounded-full font-bold bg-accent text-on-accent shadow-[0_4px_12px_rgba(0,0,0,0.4)] active:scale-[0.98] transition-transform duration-150 mb-5">
                 <i class="fas fa-pen"></i> プロフィール編集
             </a>
-        @elseif($showInteractionActions)
-            @php $favCastId = (string) ($cast['id'] ?? $cast['cast_id'] ?? ''); @endphp
-            {{-- KEEP / 共有 の横一列。トークするは画面下部固定バー（.profile-talk-bar）に一本化 --}}
-            <div class="fav-actions-row">
-                <button type="button" id="btn-profile-keep"
-                        class="fav-circle fav-circle--keep"
-                        data-fav-toggle data-action="keep" data-item-type="cast" data-item-id="{{ $favCastId }}"
-                        aria-label="キープ" aria-pressed="{{ ($cast['is_kept'] ?? false) ? 'true' : 'false' }}">
-                    <i class="fas fa-bookmark" aria-hidden="true"></i>
-                    <span class="fav-circle__cap">KEEP</span>
-                </button>
-                @if(!empty($shareUrl))
-                    <div class="shrink-0 flex flex-col items-center">
-                        @include('partials.share-menu', [
-                            'shareUrl' => $shareUrl,
-                            'shareTitle' => $shareTitle ?? ($castDisplayName . 'のプロフィール'),
-                            'shareText' => $shareText ?? $intro,
-                            'menuId' => 'cast-share-menu',
-                        ])
-                    </div>
-                @endif
-            </div>
         @endif
     </div>
 

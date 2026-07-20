@@ -60,7 +60,20 @@
         <div class="mb-4">
             <div class="flex items-center justify-between gap-3 mb-1.5">
                 <h1 class="app-title text-[24px] text-text-main leading-tight truncate min-w-0">{{ $displayName }}</h1>
-                <x-ui.view-count :count="(int) ($shopData['view_cnt'] ?? 0)" class="shrink-0 text-[14px] text-text-main" />
+                <div class="shrink-0 flex items-center gap-2">
+                    <x-ui.view-count :count="(int) ($shopData['view_cnt'] ?? 0)" class="text-[14px] text-text-main" />
+                    @php $myShopShareId = (int) (auth()->guard('shop')->user()->shop_id ?? 0); @endphp
+                    @if($myShopShareId > 0)
+                        <div class="profile-inline-actions">
+                            @include('partials.share-menu', [
+                                'shareUrl' => route('share.recruit.show', ['id' => $myShopShareId]),
+                                'shareTitle' => $displayName . 'の求人情報',
+                                'shareText' => $word !== '' ? $word : ($displayName . 'の求人情報です。'),
+                                'menuId' => 'my-shop-share-menu',
+                            ])
+                        </div>
+                    @endif
+                </div>
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 <a href="{{ route('shop.mypage.review.index') }}"

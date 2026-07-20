@@ -71,3 +71,20 @@
     margin-bottom: 26px; /* キャプションぶん */
 }
 .fav-actions-row__primary { flex: 1 1 auto; min-width: 0; }
+
+
+/* ==================================================================
+   名前行右端のインラインアクション（共有 / KEEP をアイコンのみで控えめに）
+   ================================================================== */
+.profile-inline-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.profile-inline-actions .fav-circle,
+.profile-inline-actions .share-menu__trigger {
+    width: 36px;
+    height: 36px;
+    font-size: 0.92rem;
+}
+.profile-inline-actions .fav-circle__cap { display: none; }

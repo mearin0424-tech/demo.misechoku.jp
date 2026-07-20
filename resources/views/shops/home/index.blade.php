@@ -4,7 +4,7 @@
 @section('body-class', 'no-scroll page-home')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260720-pointer-fix">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260720-swipe-brushup">
 @endpush
 
 @php
@@ -73,6 +73,10 @@
                     {{-- 画像下端を黒に溶け込ませるグラデーション --}}
                     <div class="rc-img-gradient" aria-hidden="true"></div>
                 </div>
+
+                {{-- 下部の縦スワイプ透過ゾーン：photo-swiper の外に置き、
+                     下半分のドラッグをメイン（縦）スワイパーへ直接届かせる --}}
+                <div class="rc-vswipe-zone" aria-hidden="true"></div>
 
 
                 {{-- 2. 下部スタック（4行構成）
@@ -374,7 +378,7 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/home.js') }}?v=20260720-elastic-v2"></script>
+<script src="{{ asset('assets/js/home.js') }}?v=20260720-swipe-brushup"></script>
 {{-- LIKE / KEEP の共通トグル（全画面この1本に統一） --}}
 <script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260720-keep-confirm"></script>
 @endpush

@@ -63,10 +63,20 @@
             </div>
         </div>
 
-        {{-- ===== Name + プロフィール閲覧数（横並び） ===== --}}
+        {{-- ===== Name + 閲覧数 + 共有（自分のプロフィールを SNS 共有） ===== --}}
         <div class="flex items-center justify-between gap-3 mb-4">
             <h1 class="app-title text-[24px] text-text-main leading-tight truncate min-w-0">{{ $displayName }}</h1>
-            <x-ui.view-count :count="(int) ($cast['view_cnt'] ?? 0)" class="shrink-0 text-[14px] text-text-main" />
+            <div class="shrink-0 flex items-center gap-2">
+                <x-ui.view-count :count="(int) ($cast['view_cnt'] ?? 0)" class="text-[14px] text-text-main" />
+                <div class="profile-inline-actions">
+                    @include('partials.share-menu', [
+                        'shareUrl' => route('share.cast.show', ['id' => auth()->guard('member')->id()]),
+                        'shareTitle' => $displayName . 'のプロフィール',
+                        'shareText' => $word !== '' ? $word : ($displayName . 'のプロフィールです。'),
+                        'menuId' => 'my-profile-share-menu',
+                    ])
+                </div>
+            </div>
         </div>
 
         {{-- ===== 管理メニュー =====

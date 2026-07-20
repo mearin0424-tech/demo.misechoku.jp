@@ -127,9 +127,6 @@
     // ---------------------------------------------------------------------
     // 手順: accordion / chip filter の共通ヘルパ
     // ---------------------------------------------------------------------
-    var CHIP_FILTER_THRESHOLD = 10; // これ以上のチップ数なら検索 UI を挿入
-    var CHIP_INITIAL_VISIBLE = 8;    // 未選択チップの初期表示件数
-
     function injectAccordionCountChip(block) {
         var head = block.querySelector('[data-accordion-trigger]');
         if (!head) return null;
@@ -214,59 +211,6 @@
         }
     }
 
-    // タグが多いセクションは折りたたみのみ（キーワード検索UIは廃止 2026-07-20）
-    function setupChipFilter(chipsContainer) {
-        if (!chipsContainer || chipsContainer.dataset.chipFilterInit === '1') return;
-        var chips = chipsContainer.querySelectorAll('.detail-search-chip');
-        if (chips.length < CHIP_FILTER_THRESHOLD) return;
-
-        chipsContainer.dataset.chipFilterInit = '1';
-        chipsContainer.classList.add('detail-search-chips--filterable');
-
-        var moreBtn = document.createElement('button');
-        moreBtn.type = 'button';
-        moreBtn.className = 'detail-search-chips__more';
-        chipsContainer.parentNode.insertBefore(moreBtn, chipsContainer.nextSibling);
-
-        var isExpanded = false;
-
-        function chipChecked(chip) {
-            var input = chip.querySelector('input[type="checkbox"], input[type="radio"]');
-            return input ? input.checked : false;
-        }
-
-        function refresh() {
-            var shownUnselected = 0;
-            var hiddenUnselected = 0;
-            chips.forEach(function (chip) {
-                var checked = chipChecked(chip);
-                // 選択済み: 常に表示（位置は元の並びのまま維持する）
-                chip.classList.toggle('is-pinned', checked);
-                if (checked) {
-                    chip.style.display = '';
-                    return;
-                }
-                if (isExpanded || shownUnselected < CHIP_INITIAL_VISIBLE) {
-                    chip.style.display = '';
-                    shownUnselected++;
-                } else {
-                    chip.style.display = 'none';
-                    hiddenUnselected++;
-                }
-            });
-            moreBtn.textContent = isExpanded ? '閉じる' : ('すべて表示 +' + hiddenUnselected);
-            moreBtn.hidden = hiddenUnselected === 0 && isExpanded === false;
-        }
-
-        moreBtn.addEventListener('click', function () {
-            isExpanded = !isExpanded;
-            refresh();
-        });
-
-        chipsContainer.addEventListener('change', refresh);
-        refresh();
-    }
-
     if (modal) {
         modal.querySelectorAll('[data-accordion]').forEach(function (block) {
             var head = block.querySelector('[data-accordion-trigger]');
@@ -304,9 +248,7 @@
         });
 
         // チップ数が多いコンテナに検索フィルタ UI を挿入
-        modal.querySelectorAll('.detail-search-chips').forEach(function (container) {
-            setupChipFilter(container);
-        });
+        // タグは常に全件表示（折りたたみ・並び替え・ピン留めは行わない 2026-07-20）
     }
 
     function countConditions() {

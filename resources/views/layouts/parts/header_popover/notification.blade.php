@@ -25,9 +25,7 @@
         <div class="notif-popup__head-title">
             <i class="fas fa-bell notif-popup__head-icon" aria-hidden="true"></i>
             <span class="notif-popup__head-label">お知らせ</span>
-            @if($unreadCount > 0)
-                <span class="notif-popup__head-count" data-notif-unread-badge>{{ $unreadCount }}</span>
-            @endif
+            {{-- タイトル横のカウントは廃止（ヘッダーアイコン上のバッジで十分） --}}
         </div>
         <div class="notif-popup__head-actions">
             @if(Route::has('setting.notification'))
