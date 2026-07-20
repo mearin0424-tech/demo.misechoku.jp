@@ -192,7 +192,7 @@
                                 </div>
                             @endforeach
                         </div>
-                        <div class="photo-pagination swiper-pagination"></div>
+                        <div class="photo-pagination swiper-pagination stop-propagation"></div>
                     </div>
                 </div>
 
@@ -374,7 +374,7 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/home.js') }}?v=20260720-elastic-pager"></script>
+<script src="{{ asset('assets/js/home.js') }}?v=20260720-elastic-v2"></script>
 {{-- LIKE / KEEP の共通トグル（全画面この1本に統一） --}}
 <script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260719-keep-only"></script>
 @endpush

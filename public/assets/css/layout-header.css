@@ -917,54 +917,26 @@ a.task-popup__item:hover { background: rgba(168, 85, 247, 0.07); text-decoration
     pointer-events: none;
 }
 
-/* 新：ヘッダーアイコン用バッジ（大きめ・視認性強化） */
+/* 新：ヘッダーアイコン用バッジ
+   シンプル仕様（2026-07-20）: グラデ・グロー・pulseリングを廃止し、
+   フラットな赤丸 + 白文字のみ。種別（通知/タスク/緊急）で色を変えない。 */
 .header-badge {
     position: absolute;
     top: 0px;
     right: 0px;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 5px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
     border-radius: 999px;
-    background: linear-gradient(145deg, var(--gold-light, #f2d371), var(--gold-deep, #b98a2f));
-    color: #1a0f00;
-    font-size: 0.64rem;
-    font-weight: 900;
-    line-height: 18px;
+    background: #ef4444;
+    color: #ffffff;
+    font-size: 0.62rem;
+    font-weight: 700;
+    line-height: 16px;
     letter-spacing: 0;
     text-align: center;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.55), 0 0 0 2px rgba(10, 10, 10, 0.9);
     pointer-events: none;
     font-variant-numeric: tabular-nums;
-}
-/* 未読通知バッジ：ピンク系（accent 追従） */
-.header-badge.is-accent {
-    background: linear-gradient(145deg, #ff8fbf, var(--accent, #d670a2));
-    color: #29081a;
-}
-/* 緊急タスクバッジ：暖色 */
-.header-badge.is-urgent {
-    background: linear-gradient(145deg, #fca5a5, #e15c5c);
-    color: #2a0808;
-}
-/* アイコンに未読があるあいだ、バッジに小さな pulse リング */
-.header-icon-btn.has-badge .header-badge::after {
-    content: '';
-    position: absolute;
-    inset: -3px;
-    border-radius: inherit;
-    border: 1px solid currentColor;
-    opacity: 0;
-    animation: header-badge-pulse 2s ease-out infinite;
-    pointer-events: none;
-}
-@keyframes header-badge-pulse {
-    0%   { opacity: 0.55; transform: scale(0.85); }
-    75%  { opacity: 0;    transform: scale(1.6); }
-    100% { opacity: 0;    transform: scale(1.6); }
-}
-@media (prefers-reduced-motion: reduce) {
-    .header-icon-btn.has-badge .header-badge::after { animation: none; }
 }
 
 /* ==========================================================================

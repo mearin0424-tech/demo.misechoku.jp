@@ -1316,19 +1316,7 @@ body.theme-light .detail-search-location-suggest-empty { color: #857ca0; }
    §18 ヘッダーバッジ / 通知・やることポップオーバー（BEM版）
    ライトモード時の可読性補正（layout-header.css はダークネイティブ）
    ============================================================ */
-/* --- ヘッダー右上の通知/タスク バッジ：白文字＋濃色グラデで視認性を確保 --- */
-body.theme-light .header-badge {
-    background: linear-gradient(145deg, #8b5cf6, #6d28d9);
-    color: #ffffff;
-}
-body.theme-light .header-badge.is-accent {
-    background: linear-gradient(145deg, #ec4899, #be185d);
-    color: #ffffff;
-}
-body.theme-light .header-badge.is-urgent {
-    background: linear-gradient(145deg, #ef4444, #b91c1c);
-    color: #ffffff;
-}
+/* ヘッダーバッジはフラット赤丸+白文字（layout-header.css）で両モード共通 */
 
 /* --- ポップオーバー内テキスト（ハードコード白・薄紫を濃色へ） --- */
 body.theme-light .notif-popup__head-icon,
@@ -1375,3 +1363,90 @@ body.theme-light .notif-popup__empty-title,
 body.theme-light .task-popup__empty-title { color: #241f33; }
 body.theme-light .notif-popup__empty-desc,
 body.theme-light .task-popup__empty-desc { color: #857ca0; }
+
+
+/* ============================================================
+   §19 AIコンシェルジュ（ai-chat）：ライトモード対応
+   search.css のダークネイティブ配色を白×薄紫の面に反転
+   ============================================================ */
+body.theme-light .ai-chat {
+    background:
+        linear-gradient(135deg, rgba(167, 139, 250, 0.08), rgba(124, 58, 237, 0.05)),
+        #ffffff;
+    border-color: rgba(124, 58, 237, 0.22);
+    box-shadow:
+        0 8px 24px rgba(76, 29, 149, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+body.theme-light .ai-chat__header {
+    background: rgba(124, 58, 237, 0.05);
+    border-bottom-color: rgba(124, 58, 237, 0.16);
+}
+body.theme-light .ai-chat__header-title { color: #241f33; }
+body.theme-light .ai-chat__header-sub { color: #6d6685; }
+
+body.theme-light .ai-chat__notice {
+    background: rgba(124, 58, 237, 0.05);
+    border-bottom-color: rgba(124, 58, 237, 0.14);
+}
+body.theme-light .ai-chat__notice-label { color: #574d6f; }
+body.theme-light .ai-chat__notice-label strong { color: #241f33; }
+body.theme-light .ai-chat__notice-link {
+    background: rgba(124, 58, 237, 0.08);
+    border-color: rgba(124, 58, 237, 0.30);
+    color: #6d28d9;
+}
+body.theme-light .ai-chat__notice-link:hover { background: rgba(124, 58, 237, 0.16); }
+
+body.theme-light .ai-chat__reset {
+    border-color: rgba(124, 58, 237, 0.25);
+    color: #857ca0;
+}
+body.theme-light .ai-chat__reset:hover {
+    background: rgba(124, 58, 237, 0.08);
+    color: #241f33;
+}
+body.theme-light .ai-chat__source { color: #6d28d9; }
+
+/* メッセージバブル */
+body.theme-light .ai-chat__bubble--ai {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.20);
+    color: #241f33;
+    box-shadow: 0 2px 8px rgba(76, 29, 149, 0.06);
+}
+/* ユーザーバブル（紫グラデ×白文字）はライトでもそのまま */
+
+/* レコメンドカード */
+body.theme-light .ai-chat__card {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.20);
+    box-shadow: 0 3px 10px rgba(76, 29, 149, 0.07);
+}
+body.theme-light .ai-chat__card:hover { border-color: rgba(124, 58, 237, 0.45); }
+body.theme-light .ai-chat__card-thumb { background: #ede7f8; }
+body.theme-light .ai-chat__card-title { color: #241f33; }
+body.theme-light .ai-chat__card-meta { color: #6d6685; }
+body.theme-light .ai-chat__card-reason { color: #6d28d9; }
+body.theme-light .ai-chat__card-cta { color: #7c3aed; }
+
+/* コンポーザー（クイックリプライ + 入力欄） */
+body.theme-light .ai-chat__composer {
+    background: rgba(124, 58, 237, 0.04);
+    border-top-color: rgba(124, 58, 237, 0.14);
+}
+body.theme-light .ai-chat__quick {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.24);
+    color: #6d28d9;
+}
+body.theme-light .ai-chat__quick:hover {
+    background: rgba(124, 58, 237, 0.08);
+    border-color: rgba(124, 58, 237, 0.45);
+}
+body.theme-light .ai-chat__input {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.24);
+    color: #241f33;
+}
+body.theme-light .ai-chat__input::placeholder { color: rgba(36, 31, 51, 0.35); }

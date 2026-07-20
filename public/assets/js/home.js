@@ -100,14 +100,16 @@ document.addEventListener('DOMContentLoaded', function() {
     //   Phase B (50〜100%): トレイリングエッジがパチンと追いつき 16px に収縮
     // ========================================================================
     const ELASTIC = {
-        DOT: 4,          // ドット直径
-        GAP: 8,          // ドット間隔
-        PITCH: 12,       // DOT + GAP
-        PILL_W: 16,      // 通常時のピル幅
-        STRETCH_MS: 170, // Phase A
-        SNAP_MS: 230,    // Phase B
-        EASE_STRETCH: 'cubic-bezier(0.4, 0, 0.2, 1)',
-        EASE_SNAP: 'cubic-bezier(0.6, -0.28, 0.01, 1.35)' // 有機的な粘性（オーバーシュート付き）
+        DOT: 4,           // ドット直径
+        GAP: 8,           // ドット間隔
+        PITCH: 12,        // DOT + GAP
+        PILL_W: 16,       // 通常時のピル幅
+        MAX_STRETCH: 24,  // 伸び切り時の最大幅（ゴムの引き伸ばし上限）
+        STRETCH_MS: 180,  // Phase A（遷移度 0〜50%）
+        SNAP_MS: 220,     // Phase B（遷移度 50〜100%）
+        // 有機的な粘性（前縮み→オーバーシュート）を両フェーズに適用
+        EASE_STRETCH: 'cubic-bezier(0.6, -0.28, 0.01, 1.35)',
+        EASE_SNAP: 'cubic-bezier(0.6, -0.28, 0.01, 1.35)'
     };
 
     function buildElasticPager(paginationEl, swiper, count) {
@@ -157,18 +159,22 @@ document.addEventListener('DOMContentLoaded', function() {
             const toLeft = leftFor(to);
             const forward = to > from;
 
-            // --- Phase A: 伸び（進行方向の先端が先に動き、後端は残る） ---
+            // --- Phase A: 伸び（進行方向の先端が先に動き出し、後端は遅れて残る。最大約24px） ---
+            const stretchW = Math.min(
+                Math.abs(toLeft - fromLeft) + ELASTIC.PILL_W,
+                ELASTIC.MAX_STRETCH
+            );
             pill.style.transition =
                 'left ' + ELASTIC.STRETCH_MS + 'ms ' + ELASTIC.EASE_STRETCH + ', ' +
                 'width ' + ELASTIC.STRETCH_MS + 'ms ' + ELASTIC.EASE_STRETCH;
             if (forward) {
-                // 左端（後端）固定・右端（先端）が目的地まで伸びる
+                // 後端（左端）固定・先端（右端）が前方へ引き伸ばされる
                 pill.style.left = fromLeft + 'px';
-                pill.style.width = (toLeft - fromLeft + ELASTIC.PILL_W) + 'px';
+                pill.style.width = stretchW + 'px';
             } else {
-                // 右端（後端）固定・左端（先端）が目的地まで伸びる
-                pill.style.left = toLeft + 'px';
-                pill.style.width = (fromLeft - toLeft + ELASTIC.PILL_W) + 'px';
+                // 後端（右端）固定・先端（左端）が前方（左）へ引き伸ばされる
+                pill.style.left = (fromLeft + ELASTIC.PILL_W - stretchW) + 'px';
+                pill.style.width = stretchW + 'px';
             }
 
             // --- Phase B: 縮みと結合（後端がパチンと弾けて追いつく） ---

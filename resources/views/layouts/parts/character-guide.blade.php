@@ -20,10 +20,10 @@
     }
 
     // ===== AIコンシェルジュ入口（2026-07-20）=====
-    // サブヘッダーの AI タブを廃止し、キャスト領域ではオコジョのタップで AI コンシェルジュへ遷移。
-    // SWIPE（home）はオコジョ非表示ポリシー、AI 画面自身では自己リンクになるため除外。
+    // サブヘッダーの AI タブを廃止し、SEARCH（さがす）画面内のみオコジョのタップで
+    // AI コンシェルジュへ遷移させる。AI 画面自身では自己リンクになるため除外。
     $onAiPage = request()->routeIs('cast.search.index') && request('tab') === 'ai';
-    $aiEntryUrl = (request()->is('cast/*') && !$onAiPage && !request()->is('*/home*'))
+    $aiEntryUrl = (request()->is('cast/search*') && !$onAiPage)
         ? route('cast.search.index', ['tab' => 'ai'])
         : null;
 @endphp
