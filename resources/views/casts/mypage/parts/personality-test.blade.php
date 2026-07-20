@@ -1,6 +1,6 @@
 <div id="mypage-personality-test-panel" class="mypage-personality-test" style="display: none;">
     <div id="shindan-app" data-base-path="/personality-test/">
-        <button class="btn-back-to-top" type="button">トップに戻る</button>
+        <button class="btn-back-to-top" type="button">マイページへ戻る</button>
 
         <div id="start-screen">
             <h1 class="title"><span>接客タイプ診断</span></h1>

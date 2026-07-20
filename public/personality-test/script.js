@@ -247,7 +247,12 @@ document.addEventListener('DOMContentLoaded', () => {
         appRoot.scrollIntoView({ behavior: 'smooth' });
     });
 
-    backToTopBtns.forEach((btn) => btn.addEventListener('click', resetToStart));
+    // 「戻る」ボタン：診断トップへのリセットではなく、マイページへ戻す
+    // （return_to があればそちらを優先。無ければキャストのマイページへ）
+    backToTopBtns.forEach((btn) => btn.addEventListener('click', (event) => {
+        event.preventDefault();
+        window.location.href = returnUrl || '/cast/mypage';
+    }));
 
     setTimeout(() => {
         const title = appRoot.querySelector('.title');

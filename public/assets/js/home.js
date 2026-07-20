@@ -155,7 +155,21 @@ document.addEventListener('DOMContentLoaded', function() {
             // より水平に近いジェスチャーのみ横スワイプ扱いにし、斜め〜縦は親（上下スワイプ）へ譲る
             touchAngle: 18,
             threshold: 12,
-            speed: 300,
+            speed: 420,
+            // モダンなパララックス演出：前の写真は奥でゆっくり退き（減光+微縮小）、
+            // 次の写真が上のレイヤーで滑り込んで覆う
+            effect: 'creative',
+            creativeEffect: {
+                limitProgress: 2,
+                prev: {
+                    translate: ['-22%', 0, -1],
+                    opacity: 0.4,
+                    scale: 0.96,
+                },
+                next: {
+                    translate: ['100%', 0, 0],
+                },
+            },
             resistance: true,
             resistanceRatio: 0.6,
             longSwipes: true,
