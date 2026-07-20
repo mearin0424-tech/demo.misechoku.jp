@@ -2315,7 +2315,7 @@ li.connection-item.tl-row a.tl-row__link {
     color: var(--gold, #a78bfa);
 }
 .tl-row__rating { color: #e6dffc; }
-.tl-row__dist { color: #c4b5fd; }
+/* 距離は最寄り駅（__loc）と同じ文字色（薄紫の別色扱いを廃止） */
 
 /* === メッセージ（ひとこと） === */
 .tl-row__msg {
@@ -3206,4 +3206,147 @@ body.page-search .connection-list--search > * {
     border-left: 1px solid rgba(168, 85, 247, 0.22);
     border-bottom: 1px solid rgba(168, 85, 247, 0.22);
     transform: rotate(45deg);
+}
+
+
+/* ============================================================================
+   詳細検索 タグ再リファイン (2026-07-20)
+   囲いを完全リセットして「一重の四角い枠のみ」に。サイズもひと回り整える
+   ============================================================================ */
+.detail-search-chip.detail-search-chip--search {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0 !important;
+    padding: 7px 12px !important;
+    margin: 0 !important;
+    border: 1px solid rgba(168, 85, 247, 0.35) !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    box-shadow: none !important;
+    outline: none !important;
+    color: var(--color-text, #f5f5f5);
+    font-size: 12.5px !important;
+    font-weight: 600;
+    line-height: 1.4;
+    cursor: pointer;
+}
+.detail-search-chip.detail-search-chip--search span {
+    border: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    min-height: 0 !important;
+    font-size: inherit !important;
+    color: inherit !important;
+}
+.detail-search-chip.detail-search-chip--search:hover {
+    border-color: rgba(168, 85, 247, 0.60) !important;
+}
+.detail-search-chip.detail-search-chip--search:has(input:checked) {
+    background: #7c3aed !important;
+    border-color: #7c3aed !important;
+    color: #ffffff !important;
+}
+
+/* エリアのミニ検索ボックス */
+.detail-search-area-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 10px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(168, 85, 247, 0.30);
+    background: rgba(255, 255, 255, 0.04);
+}
+.detail-search-area-filter i { color: #a78bfa; font-size: 0.78rem; }
+.detail-search-area-filter input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--color-text, #f5f5f5);
+    font-size: 0.84rem;
+}
+.detail-search-area-filter input::placeholder { color: rgba(196, 181, 253, 0.45); }
+
+/* 給与・採用報酬のレンジスライダー */
+.detail-search-range { padding: 4px 2px 2px; }
+.detail-search-range__input {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 22px;
+    background: transparent;
+    cursor: pointer;
+    --range-progress: 0%;
+}
+.detail-search-range__input::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(90deg,
+        #7c3aed 0%, #a78bfa var(--range-progress),
+        rgba(168, 85, 247, 0.18) var(--range-progress), rgba(168, 85, 247, 0.18) 100%);
+}
+.detail-search-range__input::-moz-range-track {
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(168, 85, 247, 0.18);
+}
+.detail-search-range__input::-moz-range-progress {
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #7c3aed, #a78bfa);
+}
+.detail-search-range__input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    margin-top: -8px;
+    border-radius: 50%;
+    background: #7c3aed;
+    border: 3px solid #ffffff;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.45);
+}
+.detail-search-range__input::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #7c3aed;
+    border: 3px solid #ffffff;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.45);
+}
+.detail-search-range__value {
+    margin-top: 8px;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #c4b5fd;
+    font-variant-numeric: tabular-nums;
+}
+.detail-search-range__input.is-unset + .detail-search-range__value { color: rgba(196, 181, 253, 0.55); font-weight: 700; }
+
+
+/* 検索バー右端の「詳細フィルター」アイコン + 条件数バッジ */
+.search-filter-icon-btn--filter { position: relative; }
+.search-filter-icon-btn__badge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: #ef4444;
+    color: #ffffff;
+    font-size: 0.6rem;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
 }

@@ -86,7 +86,9 @@
       "Bash(sed -n '1688,1720p' public/assets/css/talk.css)",
       "Bash(sed -n '2420,2440p' public/assets/css/talk.css)",
       "Bash(node --check public/assets/js/talk-room.js)",
-      "Bash(node --check public/assets/js/register-wizard.js)"
+      "Bash(node --check public/assets/js/register-wizard.js)",
+      "Bash(sed -n '2298,2320p' public/assets/css/search.css)",
+      "Bash(sed -n '158,172p' public/assets/css/light-theme.css)"
     ]
   }
 }

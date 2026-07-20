@@ -159,6 +159,7 @@ body.theme-light .tl-row + .tl-row {
 body.theme-light .tl-row__name { color: var(--color-text-main); }
 body.theme-light .tl-row__meta,
 body.theme-light .tl-row__loc,
+body.theme-light .tl-row__dist,
 body.theme-light .tl-row__time,
 body.theme-light .tl-row__msg { color: var(--color-text-sub); }
 body.theme-light .tl-row__thumb { background: #ece7f7; }
@@ -1697,4 +1698,40 @@ body.theme-light .talk-scout-quota.is-empty {
     background: rgba(220, 38, 38, 0.07);
     border-color: rgba(220, 38, 38, 0.35);
     color: #b91c1c;
+}
+
+
+/* §28 詳細検索 タグ再リファイン + エリア検索 + レンジ（ライト配色） */
+body.theme-light .detail-search-chip.detail-search-chip--search {
+    background: #ffffff !important;
+    border-color: rgba(124, 58, 237, 0.35) !important;
+    color: #4b465c;
+}
+body.theme-light .detail-search-chip.detail-search-chip--search:hover {
+    border-color: rgba(124, 58, 237, 0.60) !important;
+}
+body.theme-light .detail-search-chip.detail-search-chip--search:has(input:checked) {
+    background: #6d28d9 !important;
+    border-color: #6d28d9 !important;
+    color: #ffffff !important;
+}
+body.theme-light .detail-search-area-filter {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.28);
+}
+body.theme-light .detail-search-area-filter input { color: #4b465c; }
+body.theme-light .detail-search-area-filter input::placeholder { color: rgba(75, 70, 92, 0.40); }
+body.theme-light .detail-search-range__value { color: #6d28d9; }
+body.theme-light .detail-search-range__input.is-unset + .detail-search-range__value { color: #857ca0; }
+
+
+/* §29 ログイン画面：ボタンの過剰な立体感を他画面の Primary CTA と同等に */
+body.page-demo-login .shadow-btn-3d,
+body.page-auth-login .shadow-btn-3d {
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+}
+body.page-demo-login .active\:translate-y-1:active,
+body.page-auth-login .active\:translate-y-1:active {
+    transform: scale(0.97) !important;
+    box-shadow: 0 3px 8px rgba(124, 58, 237, 0.25) !important;
 }

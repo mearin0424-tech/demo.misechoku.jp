@@ -760,6 +760,24 @@ body:has(.profile-talk-bar) main#main-content {
     font-size: 0.92rem;
 }
 .profile-inline-actions .fav-circle__cap { display: none; }
+/* 共有：丸囲い・面・影を撤去してアイコンのみのシンプル表示 */
+.profile-inline-actions .share-menu__trigger {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    border-radius: 10px !important;
+    color: #8b5cf6 !important;
+    font-size: 1.05rem;
+}
+.profile-inline-actions .share-menu__trigger:hover {
+    background: rgba(139, 92, 246, 0.10) !important;
+    transform: none;
+    color: #6d28d9 !important;
+}
+.profile-inline-actions .share-menu__trigger[aria-expanded="true"] {
+    background: rgba(139, 92, 246, 0.14) !important;
+    color: #6d28d9 !important;
+}
 
 
 /* ==================================================================

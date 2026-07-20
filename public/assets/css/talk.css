@@ -3055,3 +3055,47 @@ body.page-talk-room .talk-room-header,
     color: #fca5a5;
 }
 .talk-scout-quota.is-empty i { color: #f87171; }
+
+
+/* ============================================================
+   トーク一覧 行レイアウト修正 (2026-07-20)
+   ・ピン：名前と同じ行の右上に絶対配置（薄紫アイコンのみ）
+   ・最終更新時刻：メッセージ末尾の右下へ
+   ============================================================ */
+body.page-talk-list .talk-item,
+.talk-list-container .talk-item { position: relative; }
+
+body.page-talk-list .talk-pin-btn,
+.talk-list-container .talk-pin-btn {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    margin: 0;
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    min-height: 30px;
+    background: transparent !important;
+    border: 0 !important;
+    color: #b9a8ef !important;   /* 薄紫：背景と同化しない */
+}
+body.page-talk-list .talk-pin-btn:hover,
+.talk-list-container .talk-pin-btn:hover {
+    color: #8b5cf6 !important;
+    background: rgba(139, 92, 246, 0.10) !important;
+}
+body.page-talk-list .talk-pin-btn[aria-pressed="true"],
+.talk-list-container .talk-pin-btn[aria-pressed="true"] {
+    background: linear-gradient(135deg, #a78bfa, #7c3aed) !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.35);
+}
+/* 名前がピンに被らないよう右に余白 */
+body.page-talk-list .talk-header,
+.talk-list-container .talk-header { padding-right: 34px; }
+
+.talk-time--bottom {
+    font-size: 0.68rem;
+    color: #9a91b5;
+    white-space: nowrap;
+}

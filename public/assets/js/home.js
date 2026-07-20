@@ -94,102 +94,38 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 各カード内の左右スワイプ（同一アカウントの複数写真）
     // ========================================================================
-    // ゴム風粘性（Elastic Stretch）ページインジケーター
-    // 静的ドット列 + 絶対配置の伸縮ピル。インデックス切替時に
-    //   Phase A (0〜50%): リーディングエッジが先行してゴムのように伸びる
-    //   Phase B (50〜100%): トレイリングエッジがパチンと追いつき 16px に収縮
+    // 写真セグメントバー（ストーリー型）
+    // ドット式は廃止：写真枚数ぶんの等分バーで「今どこ/全何枚」が一目でわかる。
+    // タップでその写真へジャンプ。
     // ========================================================================
-    const ELASTIC = {
-        DOT: 4,           // ドット直径
-        GAP: 8,           // ドット間隔
-        PITCH: 12,        // DOT + GAP
-        PILL_W: 16,       // 通常時のピル幅
-        MAX_STRETCH: 24,  // 伸び切り時の最大幅（ゴムの引き伸ばし上限）
-        STRETCH_MS: 180,  // Phase A（遷移度 0〜50%）
-        SNAP_MS: 220,     // Phase B（遷移度 50〜100%）
-        // 有機的な粘性（前縮み→オーバーシュート）を両フェーズに適用
-        EASE_STRETCH: 'cubic-bezier(0.6, -0.28, 0.01, 1.35)',
-        EASE_SNAP: 'cubic-bezier(0.6, -0.28, 0.01, 1.35)'
-    };
-
-    function buildElasticPager(paginationEl, swiper, count) {
-        paginationEl.classList.add('elastic-pager');
+    function buildPhotoSegBar(paginationEl, swiper, count) {
+        paginationEl.classList.add('photo-seg-bar');
         paginationEl.innerHTML = '';
 
-        const track = document.createElement('div');
-        track.className = 'elastic-pager__track';
-
+        const segs = [];
         for (let i = 0; i < count; i++) {
-            const dot = document.createElement('button');
-            dot.type = 'button';
-            dot.className = 'elastic-pager__dot stop-propagation';
-            dot.setAttribute('aria-label', (i + 1) + '枚目の写真へ');
-            dot.addEventListener('click', function (ev) {
+            const seg = document.createElement('button');
+            seg.type = 'button';
+            seg.className = 'photo-seg stop-propagation';
+            seg.setAttribute('aria-label', (i + 1) + '枚目の写真へ');
+            seg.addEventListener('click', function (ev) {
                 ev.preventDefault();
                 ev.stopPropagation();
                 swiper.slideTo(i);
             });
-            track.appendChild(dot);
+            paginationEl.appendChild(seg);
+            segs.push(seg);
         }
 
-        const pill = document.createElement('span');
-        pill.className = 'elastic-pager__pill';
-        pill.setAttribute('aria-hidden', 'true');
-        track.appendChild(pill);
-        paginationEl.appendChild(track);
-
-        // ピル中心をドット中心に合わせた left 座標
-        const leftFor = (idx) => idx * ELASTIC.PITCH + (ELASTIC.DOT / 2) - (ELASTIC.PILL_W / 2);
-
-        let current = swiper.activeIndex || 0;
-        let phaseTimer = null;
-
-        // 初期配置（アニメーションなし）
-        pill.style.transition = 'none';
-        pill.style.left = leftFor(current) + 'px';
-        pill.style.width = ELASTIC.PILL_W + 'px';
-
-        function go(to) {
-            if (to === current) return;
-            const from = current;
-            current = to;
-            clearTimeout(phaseTimer);
-
-            const fromLeft = leftFor(from);
-            const toLeft = leftFor(to);
-            const forward = to > from;
-
-            // --- Phase A: 伸び（進行方向の先端が先に動き出し、後端は遅れて残る。最大約24px） ---
-            const stretchW = Math.min(
-                Math.abs(toLeft - fromLeft) + ELASTIC.PILL_W,
-                ELASTIC.MAX_STRETCH
-            );
-            pill.style.transition =
-                'left ' + ELASTIC.STRETCH_MS + 'ms ' + ELASTIC.EASE_STRETCH + ', ' +
-                'width ' + ELASTIC.STRETCH_MS + 'ms ' + ELASTIC.EASE_STRETCH;
-            if (forward) {
-                // 後端（左端）固定・先端（右端）が前方へ引き伸ばされる
-                pill.style.left = fromLeft + 'px';
-                pill.style.width = stretchW + 'px';
-            } else {
-                // 後端（右端）固定・先端（左端）が前方（左）へ引き伸ばされる
-                pill.style.left = (fromLeft + ELASTIC.PILL_W - stretchW) + 'px';
-                pill.style.width = stretchW + 'px';
-            }
-
-            // --- Phase B: 縮みと結合（後端がパチンと弾けて追いつく） ---
-            phaseTimer = setTimeout(function () {
-                pill.style.transition =
-                    'left ' + ELASTIC.SNAP_MS + 'ms ' + ELASTIC.EASE_SNAP + ', ' +
-                    'width ' + ELASTIC.SNAP_MS + 'ms ' + ELASTIC.EASE_SNAP;
-                pill.style.left = toLeft + 'px';
-                pill.style.width = ELASTIC.PILL_W + 'px';
-            }, ELASTIC.STRETCH_MS);
+        function sync() {
+            const active = swiper.activeIndex || 0;
+            segs.forEach(function (seg, idx) {
+                seg.classList.toggle('is-active', idx === active);
+                seg.classList.toggle('is-passed', idx < active);
+            });
         }
-
-        swiper.on('slideChange', function () {
-            go(swiper.activeIndex);
-        });
+        swiper.on('slideChange', sync);
+        sync();
     }
 
     const photoSwipers = [];
@@ -264,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Swiper 標準の bullet はやめ、ゴム風粘性のカスタムページャーを敷く
         if (paginationEl) {
-            buildElasticPager(paginationEl, swiper, photoSlideCount);
+            buildPhotoSegBar(paginationEl, swiper, photoSlideCount);
             // 配置は「トークする」ボタンの直下（カスタムページャーなので swiper 外でも動作する）
             var cardEl = el.closest('.cast-card');
             var talkCta = cardEl && cardEl.querySelector('.swipe-talk-cta');

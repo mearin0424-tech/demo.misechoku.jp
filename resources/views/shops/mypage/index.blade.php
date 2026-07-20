@@ -137,7 +137,18 @@
                     <span class="mypage-tile__badge mypage-tile__badge--urgent" aria-label="要対応 {{ $mgmtActionCount }}件">{{ $mgmtActionCount }}</span>
                 @endif
             </a>
+            <button type="button" class="mypage-tile" id="open-location-setting"
+                    onclick="var t=document.getElementById('location-pill-trigger'); if (t) t.click();">
+                <i class="fas fa-location-dot mypage-tile__icon"></i>
+                <span class="mypage-tile__label">探索拠点の設定<span class="mypage-tile__sub">LOCATION</span></span>
+            </button>
         </div>
+        {{-- 探索拠点モーダル（location-pill 同梱。ピル表示は隠してタイルから開く） --}}
+        <div class="mypage-location-include" style="display: contents;">
+            @include('layouts.parts.location-pill')
+        </div>
+        <style>.mypage-location-include .location-pill-wrap { display: none; }</style>
+
     </div>
 
     {{-- ===== Tabs：GALLERY / JOB / PROFILE の3タブ構成（キャスト MyPage とデザイン・名称を統一） ===== --}}

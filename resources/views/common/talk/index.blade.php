@@ -4,7 +4,7 @@
 @section('body-class', 'page-talk page-talk-list')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260720-scout-quota">
+<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260720-row-layout">
 <link rel="stylesheet" href="{{ asset('assets/css/sub-header.css') }}">
 @endpush
 
@@ -49,7 +49,6 @@
                         <div class="talk-info">
                             <div class="talk-header">
                                 <span class="talk-name">{{ $talk['name'] }}</span>
-                                <span class="talk-time">{{ $talk['last_time'] }}</span>
                             </div>
                             <div class="talk-last-msg-row">
                                 <p class="talk-last-msg">{{ $talk['last_message'] }}</p>
@@ -59,9 +58,13 @@
                             </div>
                             <div class="flex justify-between items-center mt-1">
                                 <span class="talk-status">{{ $talk['status_label'] ?? 'やり取り中' }}</span>
-                                @if(!empty($talk['has_fulltime_request_badge']))
-                                    <span class="unread-badge" style="background:linear-gradient(135deg,#c4b5fd,#a78bfa 45%,#7c3aed);color:#1a0814;">本入店希望</span>
-                                @endif
+                                <span class="flex items-center gap-2">
+                                    @if(!empty($talk['has_fulltime_request_badge']))
+                                        <span class="unread-badge" style="background:linear-gradient(135deg,#c4b5fd,#a78bfa 45%,#7c3aed);color:#1a0814;">本入店希望</span>
+                                    @endif
+                                    {{-- 最終更新はメッセージ末尾の右下に --}}
+                                    <span class="talk-time talk-time--bottom">{{ $talk['last_time'] }}</span>
+                                </span>
                             </div>
                         </div>
                     </a>
@@ -119,7 +122,6 @@
                             <div class="talk-info">
                                 <div class="talk-header">
                                     <span class="talk-name">{{ $talk['name'] }}</span>
-                                    <span class="talk-time">{{ $talk['last_time'] }}</span>
                                 </div>
                                 <div class="talk-last-msg-row">
                                     <p class="talk-last-msg">{{ $talk['last_message'] }}</p>
@@ -129,9 +131,12 @@
                                 </div>
                                 <div class="flex justify-between items-center mt-1">
                                     <span class="talk-status">{{ $talk['status_label'] ?? $requestTabText }}</span>
-                                    @if(!empty($talk['has_fulltime_request_badge']))
-                                        <span class="unread-badge" style="background:linear-gradient(135deg,#c4b5fd,#a78bfa 45%,#7c3aed);color:#1a0814;">本入店希望</span>
-                                    @endif
+                                    <span class="flex items-center gap-2">
+                                        @if(!empty($talk['has_fulltime_request_badge']))
+                                            <span class="unread-badge" style="background:linear-gradient(135deg,#c4b5fd,#a78bfa 45%,#7c3aed);color:#1a0814;">本入店希望</span>
+                                        @endif
+                                        <span class="talk-time talk-time--bottom">{{ $talk['last_time'] }}</span>
+                                    </span>
                                 </div>
                             </div>
                         </a>

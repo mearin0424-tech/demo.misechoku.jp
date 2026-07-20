@@ -5211,70 +5211,53 @@ body.page-home .swipe-keep-corner {
 
 
 /* ============================================================================
-   ゴム風粘性（Elastic Stretch）ページインジケーター (2026-07-20)
-   ・非アクティブ: 4px 正円 / 薄ラベンダー #D2C4FF @ 40%
-   ・アクティブ: 高さ4px・幅16px のバイオレット #9156FA ピル
-   ・切替時: 先端が先に伸び（Phase A）、後端が弾けて追いつく（Phase B）
-     イージング cubic-bezier(0.6, -0.28, 0.01, 1.35) は JS 側で付与
+   写真セグメントバー（ストーリー型 2026-07-20）
+   ・ドット式は廃止。写真枚数ぶんの等分バーで現在位置と枚数が一目でわかる
+   ・配置は JS が「トークする」ボタン直下へ移設（静的フロー）
    ============================================================================ */
-/* 配置：JS がカード内「トークする」ボタン直下へ移設するため、静的フローで中央寄せ */
-body.page-home .photo-pagination.elastic-pager {
+body.page-home .photo-pagination.photo-seg-bar {
     position: static !important;
     top: auto !important;
     left: auto !important;
     right: auto !important;
     bottom: auto !important;
-    width: auto !important;
     transform: none !important;
-    z-index: 20;
+    width: 100% !important;
     display: flex !important;
-    justify-content: center !important;
-    padding: 10px 10px 0;          /* CTA との間隔 + タップ余白 */
+    gap: 5px;
+    padding: 10px 22px 0;
     margin: 0;
+    box-sizing: border-box;
     pointer-events: auto;
     background: transparent;
+    z-index: 20;
 }
-body.page-home .elastic-pager__track {
+body.page-home .photo-seg {
     position: relative;
-    display: flex;
-    align-items: center;
-    gap: 8px;                       /* 要素間の余白 8px */
+    flex: 1 1 0;
+    min-width: 0;
     height: 4px;
-}
-body.page-home .elastic-pager__dot {
-    flex: 0 0 auto;
-    width: 4px;                     /* 直径 4px の完全な正円 */
-    height: 4px;
-    border-radius: 50%;
-    background: #D2C4FF;
-    opacity: 0.4;                   /* ごく薄い半透明ラベンダー */
     border: 0;
     padding: 0;
     margin: 0;
+    border-radius: 999px;
+    background: rgba(210, 196, 255, 0.30);
     cursor: pointer;
-    position: relative;
-    transition: opacity 0.2s ease;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
 }
-body.page-home .elastic-pager__dot:hover { opacity: 0.7; }
-/* タップ領域の拡大（見た目は 4px のまま 20px 四方で押せる） */
-body.page-home .elastic-pager__dot::before {
+/* タップ領域の拡大（見た目4pxのまま上下12pxで押せる） */
+body.page-home .photo-seg::before {
     content: '';
     position: absolute;
-    inset: -8px;
+    inset: -12px 0;
 }
-body.page-home .elastic-pager__pill {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 4px;                    /* 極細 */
-    width: 16px;                    /* 通常時 */
-    border-radius: 999px;
-    background: #9156FA;            /* 鮮やかなバイオレット */
-    box-shadow: 0 0 6px rgba(145, 86, 250, 0.55);  /* 写真上でも視認できる微グロー */
-    pointer-events: none;
-    will-change: left, width;
+body.page-home .photo-seg.is-passed {
+    background: rgba(167, 139, 250, 0.55);
 }
-
+body.page-home .photo-seg.is-active {
+    background: linear-gradient(90deg, #a78bfa, #7c3aed);
+    box-shadow: 0 0 8px rgba(145, 86, 250, 0.55);
+}
 
 /* ============================================================================
    SWIPE ライトモード対応は撤回（2026-07-20）: SWIPE は常にダーク表示

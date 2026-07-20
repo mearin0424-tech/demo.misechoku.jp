@@ -4,7 +4,7 @@
 @section('body-class', request()->is('cast/*') && ($activeTab ?? null) === 'pane-ai' ? 'page-search page-search-ai' : 'page-search')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/search.css') }}?v=20260720-chips-invert">
+<link rel="stylesheet" href="{{ asset('assets/css/search.css') }}?v=20260720-filter-icon">
 <link rel="stylesheet" href="{{ asset('assets/css/sub-header.css') }}">
 @endpush
 
@@ -131,7 +131,7 @@
 
 @push('scripts')
 <script src="{{ asset('assets/js/sub-header.js') }}"></script>
-<script src="{{ asset('assets/js/search-detail.js') }}?v=20260720-autosave"></script>
+<script src="{{ asset('assets/js/search-detail.js') }}?v=20260720-tags-v3"></script>
 <script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260720-keep-confirm"></script>
 <script>
 {{-- 上部検索バーの開閉：デフォルトは閉じ（HTML初期状態）→ タップで開閉するだけ。

@@ -211,6 +211,62 @@
         }
     }
 
+    // =====================================================================
+    // レンジスライダー（給与/採用報酬）: hidden の <select> と双方向同期
+    // =====================================================================
+    if (modal) {
+        modal.querySelectorAll('[data-range-for]').forEach(function (range) {
+            var select = document.getElementById(range.getAttribute('data-range-for'));
+            if (!select) return;
+            var valueEl = range.parentElement ? range.parentElement.querySelector('[data-range-value]') : null;
+            range.max = String(Math.max(0, select.options.length - 1));
+
+            function paint() {
+                var idx = parseInt(range.value, 10) || 0;
+                var opt = select.options[idx];
+                if (valueEl) valueEl.textContent = opt ? opt.textContent : '指定なし';
+                var max = parseInt(range.max, 10) || 1;
+                range.style.setProperty('--range-progress', ((idx / Math.max(1, max)) * 100) + '%');
+                range.classList.toggle('is-unset', idx === 0);
+            }
+            function fromSelect() {
+                range.value = String(Math.max(0, select.selectedIndex));
+                paint();
+            }
+            range.addEventListener('input', function () {
+                select.selectedIndex = parseInt(range.value, 10) || 0;
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+                paint();
+            });
+            // クリア等で select 側が変わった時に追従
+            select.addEventListener('change', fromSelect);
+            fromSelect();
+        });
+
+        // =================================================================
+        // エリア：テキストで絞り込めるミニ検索（並びは維持・非一致のみ非表示）
+        // =================================================================
+        modal.querySelectorAll('.detail-search-section--area').forEach(function (section) {
+            var chipsWrap = section.querySelector('.detail-search-chips');
+            if (!chipsWrap || section.querySelector('[data-area-filter]')) return;
+            var box = document.createElement('div');
+            box.className = 'detail-search-area-filter';
+            box.innerHTML = '<i class="fas fa-magnifying-glass" aria-hidden="true"></i>'
+                + '<input type="text" data-area-filter placeholder="エリア名で検索（例: 新宿）" aria-label="エリアを検索">';
+            chipsWrap.parentNode.insertBefore(box, chipsWrap);
+            var input = box.querySelector('input');
+            input.addEventListener('input', function () {
+                var q = (input.value || '').trim();
+                chipsWrap.querySelectorAll('.detail-search-chip').forEach(function (chip) {
+                    var label = chip.textContent || '';
+                    var checked = !!chip.querySelector('input:checked');
+                    // 選択済みは常に表示。未選択は部分一致のみ表示（並びは不変）
+                    chip.style.display = (checked || q === '' || label.indexOf(q) !== -1) ? '' : 'none';
+                });
+            });
+        });
+    }
+
     if (modal) {
         modal.querySelectorAll('[data-accordion]').forEach(function (block) {
             var head = block.querySelector('[data-accordion-trigger]');

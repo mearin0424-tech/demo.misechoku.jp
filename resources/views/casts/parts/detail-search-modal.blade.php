@@ -22,6 +22,10 @@
     if (!in_array($detailLocationMode, $allowedLocationModes, true)) {
         $detailLocationMode = '';
     }
+    // 登録住所（profile）モードは廃止 → 現在地扱いにフォールバック
+    if ($detailLocationMode === 'profile') {
+        $detailLocationMode = 'current';
+    }
     $detailPassportAddress = (string) (request('passport_address', $loc['passport_address'] ?? ''));
     $detailPassportLat = request('passport_lat', $loc['passport_latitude'] ?? '');
     $detailPassportLng = request('passport_lng', $loc['passport_longitude'] ?? '');
@@ -180,26 +184,7 @@
                     <fieldset class="detail-search-location-modes">
                         <legend class="sr-only">基準となる拠点</legend>
 
-                        {{-- 登録住所 --}}
-                        <label class="detail-search-location-card {{ $detailLocationMode === 'profile' ? 'is-selected' : '' }} {{ $hasProfileAddress ? '' : 'is-disabled-soft' }}" data-mode-card="profile">
-                            <input type="radio" name="location_mode" value="profile" @checked($detailLocationMode === 'profile')>
-                            <span class="detail-search-location-card__row">
-                                <i class="fas fa-home detail-search-location-card__icon"></i>
-                                <span class="detail-search-location-card__main">
-                                    <span class="detail-search-location-card__title">登録住所</span>
-                                    <span class="detail-search-location-card__sub {{ $hasProfileAddress ? '' : 'is-warn' }}">
-                                        @if($hasProfileLocation)
-                                            {{ $profileAddressText !== '' ? $profileAddressText : 'プロフィールの住所を基準にします' }}
-                                        @elseif($hasProfileAddress)
-                                            {{ $profileAddressText }}
-                                        @else
-                                            プロフィールに住所が登録されていません
-                                        @endif
-                                    </span>
-                                </span>
-                            </span>
-                        </label>
-
+                        {{-- 登録住所（プロフィール住所）は廃止：拠点はマイページの「探索拠点の設定」で管理 --}}
                         {{-- 指定地 --}}
                         <label class="detail-search-location-card {{ $detailLocationMode === 'passport' ? 'is-selected' : '' }}" data-mode-card="passport">
                             <input type="radio" name="location_mode" value="passport" @checked($detailLocationMode === 'passport')>
@@ -299,29 +284,41 @@
                     </div>
                 </div>
 
+                {{-- 給与(時給)：スライドバーで調整（選択値は hidden の select が submit を担う） --}}
                 <div class="detail-search-section detail-search-section--panel" data-summary-group="給与(時給)">
-                    <label class="detail-search-label detail-search-label--panel" for="detail-search-hourly-wage"><i class="fas fa-yen-sign" aria-hidden="true"></i>給与(時給)</label>
-                    <div class="detail-search-select-wrap">
-                        <select id="detail-search-hourly-wage" name="hourly_wage" class="detail-search-select">
-                            <option value="">選択する</option>
-                            @foreach($hourlyWages as $value)
-                                <option value="{{ $value }}" {{ $selectedHourlyWage === (string) $value ? 'selected' : '' }}>{{ number_format((int) $value) }}円以上</option>
-                            @endforeach
-                        </select>
-                        <span class="detail-search-select-wrap__icon" aria-hidden="true"><i class="fas fa-chevron-down"></i></span>
+                    <label class="detail-search-label detail-search-label--panel" for="detail-search-hourly-wage-range"><i class="fas fa-yen-sign" aria-hidden="true"></i>給与(時給)</label>
+                    <select id="detail-search-hourly-wage" name="hourly_wage" class="detail-search-select" hidden aria-hidden="true" tabindex="-1">
+                        <option value="">指定なし</option>
+                        @foreach($hourlyWages as $value)
+                            <option value="{{ $value }}" {{ $selectedHourlyWage === (string) $value ? 'selected' : '' }}>時給 {{ number_format((int) $value) }}円以上</option>
+                        @endforeach
+                    </select>
+                    <div class="detail-search-range">
+                        <input type="range" id="detail-search-hourly-wage-range"
+                               class="detail-search-range__input"
+                               min="0" step="1" value="0"
+                               data-range-for="detail-search-hourly-wage"
+                               aria-label="希望時給">
+                        <div class="detail-search-range__value" data-range-value>指定なし</div>
                     </div>
                 </div>
 
+                {{-- 採用報酬（ボーナス金）：スライドバーで調整 --}}
                 <div class="detail-search-section detail-search-section--panel" data-summary-group="採用報酬">
-                    <label class="detail-search-label detail-search-label--panel" for="detail-search-reward"><i class="fas fa-gift" aria-hidden="true"></i>採用報酬</label>
-                    <div class="detail-search-select-wrap">
-                        <select id="detail-search-reward" name="reward" class="detail-search-select">
-                            <option value="">選択する</option>
-                            @foreach($rewards as $value)
-                                <option value="{{ $value }}" {{ $selectedReward === (string) $value ? 'selected' : '' }}>{{ number_format((int) $value) }}円以上</option>
-                            @endforeach
-                        </select>
-                        <span class="detail-search-select-wrap__icon" aria-hidden="true"><i class="fas fa-chevron-down"></i></span>
+                    <label class="detail-search-label detail-search-label--panel" for="detail-search-reward-range"><i class="fas fa-gift" aria-hidden="true"></i>採用報酬（ボーナス金）</label>
+                    <select id="detail-search-reward" name="reward" class="detail-search-select" hidden aria-hidden="true" tabindex="-1">
+                        <option value="">指定なし</option>
+                        @foreach($rewards as $value)
+                            <option value="{{ $value }}" {{ $selectedReward === (string) $value ? 'selected' : '' }}>{{ number_format((int) $value) }}円以上</option>
+                        @endforeach
+                    </select>
+                    <div class="detail-search-range">
+                        <input type="range" id="detail-search-reward-range"
+                               class="detail-search-range__input"
+                               min="0" step="1" value="0"
+                               data-range-for="detail-search-reward"
+                               aria-label="採用報酬">
+                        <div class="detail-search-range__value" data-range-value>指定なし</div>
                     </div>
                 </div>
 
