@@ -56,6 +56,16 @@
                 @if(!$isCast)
                     <li><a href="{{ url('/subscription') }}"><i class="fas fa-crown"></i> プラン選択</a></li>
                 @endif
+                @php $isThemeForcedDark = request()->cookie('theme_mode') === 'dark'; @endphp
+                <li>
+                    <button type="button" id="btn-theme-toggle"
+                            class="sidebar-theme-toggle"
+                            data-theme-mode="{{ $isThemeForcedDark ? 'dark' : 'light' }}"
+                            aria-label="{{ $isThemeForcedDark ? 'ライトモードに切り替え' : 'ダークモードに切り替え' }}">
+                        <i class="fas {{ $isThemeForcedDark ? 'fa-sun' : 'fa-moon' }}" aria-hidden="true"></i>
+                        <span id="theme-toggle-label">{{ $isThemeForcedDark ? 'ライトモードに切り替え' : 'ダークモードに切り替え' }}</span>
+                    </button>
+                </li>
             </ul>
         </div>
 
@@ -179,6 +189,25 @@
 }
 
 .sidebar-footer { padding: 20px; padding-bottom: max(20px, env(safe-area-inset-bottom, 0px)); border-top: 1px solid rgba(168, 85, 247, 0.16); }
+/* テーマ切替（サイドメニュー内）：メニューリンクと同じトーンのボタン */
+.sidebar-theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 12px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.92rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.sidebar-theme-toggle:hover { background: rgba(168, 85, 247, 0.14); }
+.sidebar-theme-toggle i { width: 1.2em; text-align: center; color: #f6d36a; }
 .btn-logout {
     width: 100%; padding: 12px; background: rgba(32, 7, 10, 0.9);
     border: 1px solid rgba(248, 113, 113, 0.7); color: #fecaca;

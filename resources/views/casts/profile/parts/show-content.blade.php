@@ -246,3 +246,14 @@
         <i class="fas fa-times"></i>
     </button>
 </div>
+
+{{-- 画面下部固定の「トークする」バー（店舗→キャスト） --}}
+@php $fixedTalkCastId = (string) ($cast['id'] ?? $cast['cast_id'] ?? ''); @endphp
+@if($fixedTalkCastId !== '' && Route::has('shop.talk.room'))
+    <div class="profile-talk-bar" role="complementary" aria-label="トークを開始">
+        <a href="{{ route('shop.talk.room', ['id' => $fixedTalkCastId, 'talk_topic' => 'other', 'initiate' => 1]) }}"
+           class="profile-talk-bar__btn">
+            <i class="fas fa-comment-dots" aria-hidden="true"></i> トークする
+        </a>
+    </div>
+@endif

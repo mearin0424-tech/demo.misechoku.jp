@@ -116,29 +116,34 @@
             </div>
         </div>
 
-        {{-- 3. ボーナス金 / 時給：枠なしのタイポグラフィ主体（採用・入金管理の合計表示と同系統） --}}
-        @if($showBonusMain || $primaryWageDisp)
-            <div class="mb-4 pb-3 flex items-stretch gap-4"
-                 style="border-bottom: 1px solid transparent; border-image: linear-gradient(to right, rgba(246, 211, 106, 0.4), rgba(246, 211, 106, 0.06) 70%, transparent) 1;">
-                @if($showBonusMain)
-                    <div class="flex-1 min-w-0 flex flex-col gap-1">
-                        <span class="text-[10px] font-extrabold tracking-[0.16em] text-amber-300/90 uppercase">入店ボーナス</span>
-                        <span class="text-[26px] font-black leading-none tracking-tight bg-gradient-to-br from-amber-200 via-amber-300 to-amber-500 bg-clip-text text-transparent"
-                              style="font-variant-numeric: tabular-nums;">¥{{ number_format($noruma) }}</span>
-                        @if($bonusConditionsText !== '')
-                            <span class="text-[10px] text-text-sub leading-snug line-clamp-1">{{ $bonusConditionsText }}</span>
-                        @endif
-                    </div>
-                @endif
-                @if($showBonusMain && $primaryWageDisp)
-                    <div class="w-px bg-line self-stretch"></div>
-                @endif
-                @if($primaryWageDisp)
-                    <div class="flex-1 min-w-0 flex flex-col gap-1">
-                        <span class="text-[10px] font-extrabold tracking-[0.16em] text-accent-text uppercase">{{ $primaryWageLabel }}</span>
-                        <span class="text-[22px] font-extrabold leading-none tracking-tight text-text-main" style="font-variant-numeric: tabular-nums;">{{ $primaryWageDisp }}</span>
-                    </div>
-                @endif
+        {{-- 3. ボーナス金 / 時給：SWIPE カードと同一デザイン（ゴールドカード + ダークグラス時給カード）。
+             体入時給・ヘルプ時給の両方を表示する --}}
+        @if($showBonusMain || $trialWageDisp || $helpWageDisp || $regularWageDisp)
+            @php
+                // 1行目：体入時給を優先。無ければ本入り時給を表示
+                $wageRow1Label = $trialWageDisp ? '体入時給' : '本入り時給';
+                $wageRow1Disp  = $trialWageDisp ?: $regularWageDisp;
+            @endphp
+            <div class="rc-line--money mb-4">
+                <div class="rc-bonus-card">
+                    <span class="rc-bonus-card__label"><i class="fas fa-gem" aria-hidden="true"></i>ボーナス金</span>
+                    <span class="rc-bonus-card__amount numeric-font">
+                        @if($showBonusMain)¥{{ number_format($noruma) }}@else —@endif
+                    </span>
+                    @if($showBonusMain && $bonusConditionsText !== '')
+                        <span class="rc-bonus-card__cond">{{ $bonusConditionsText }}</span>
+                    @endif
+                </div>
+                <div class="rc-wage-card">
+                    <span class="rc-wage-card__row">
+                        <span>{{ $wageRow1Label }}</span>
+                        <strong class="numeric-font">{{ $wageRow1Disp ?: '—' }}</strong>
+                    </span>
+                    <span class="rc-wage-card__row">
+                        <span>ヘルプ時給</span>
+                        <strong class="numeric-font">{{ $helpWageDisp ?: '—' }}</strong>
+                    </span>
+                </div>
             </div>
         @endif
 
@@ -573,3 +578,13 @@
     });
 })();
 </script>
+
+{{-- 画面下部固定の「トークする」バー（キャスト閲覧時のみ。店舗プレビューでは非表示） --}}
+@if(!($isShopPreview ?? empty($forCast)) && !empty($ctaShopId))
+    <div class="profile-talk-bar" role="complementary" aria-label="トークを開始">
+        <a href="{{ route('cast.talk.room', ['id' => $ctaShopId, 'talk_topic' => 'other', 'initiate' => 1]) }}"
+           class="profile-talk-bar__btn">
+            <i class="fas fa-comment-dots" aria-hidden="true"></i> トークする
+        </a>
+    </div>
+@endif

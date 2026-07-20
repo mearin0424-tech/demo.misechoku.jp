@@ -129,23 +129,10 @@ body.theme-premium-white .shop-name {
 }
 
 /* --------------------------------------------------------------------------
-   §2 ヘッダー / サブヘッダー：グローバル（app-v2）の
-   「深紫 → 下部透明グラデーション」をそのまま採用（上書きしない）。
-   ボトムナビのみ白グラスを維持する。
+   §2 ヘッダー / サブヘッダー / ボトムナビ：グローバル（app-v2）の
+   「アメジストグラデ → 透明フェード」をそのまま採用（上書きしない）。
+   これで MyPage と他画面のクロームが完全に一致する。
    -------------------------------------------------------------------------- */
-body.theme-premium-white nav[data-bottom-nav] {
-    background:
-        linear-gradient(0deg,
-            rgba(255, 255, 255, 0.72) 0%,
-            rgba(247, 243, 252, 0.68) 60%,
-            rgba(237, 231, 248, 0.58) 100%) !important;
-    backdrop-filter: blur(22px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(22px) saturate(180%) !important;
-    border-top: 1px solid rgba(124, 58, 237, 0.16) !important;
-    box-shadow:
-        0 -1px 0 rgba(255, 255, 255, 0.55) inset,
-        0 -8px 24px rgba(76, 29, 149, 0.10) !important;
-}
 
 /* ヘッダー内アイコン・タイトル：紫グラデ上なので白（グローバルと同じ） */
 body.theme-premium-white #global-header .header-title-main,
@@ -171,21 +158,7 @@ body.theme-premium-white #global-header .header-badge {
     border: 1.5px solid rgba(255, 255, 255, 0.6) !important;
 }
 
-/* ボトムナビのアイテム */
-body.theme-premium-white nav[data-bottom-nav] .nav-item {
-    color: var(--pw-text-sub) !important;
-}
-body.theme-premium-white nav[data-bottom-nav] .nav-item.is-active {
-    color: var(--pw-violet-deep) !important;
-}
-body.theme-premium-white nav[data-bottom-nav] .nav-item .nav-icon {
-    color: currentColor !important;
-}
-body.theme-premium-white nav[data-bottom-nav] .nav-item.is-active .nav-icon-wrap {
-    background: linear-gradient(135deg, var(--pw-violet-2), var(--pw-violet)) !important;
-    color: #ffffff !important;
-    box-shadow: var(--shadow-nav-pill) !important;
-}
+/* ボトムナビのアイテム色はグローバル（白 + 紫グラデ上）に統一するため上書きしない */
 
 /* サブヘッダー内タブ（GALLERY / PROFILE 等） */
 body.theme-premium-white .sub-header-wrapper [data-tab],
@@ -562,4 +535,44 @@ body.theme-premium-white .view-count {
 body.theme-premium-white main .from-surface-from.to-base,
 body.theme-premium-white main [class*="from-surface-from"][class*="to-base"] {
     background: linear-gradient(180deg, var(--pw-white), var(--pw-surface)) !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   §5 プロフィール詳細ページ（castprofileview / shopprofile / recruits.show）
+   非 Tailwind のハードコード色を白面向けに補正 (2026-07-20)
+   -------------------------------------------------------------------------- */
+body.theme-premium-white .info-header .name,
+body.theme-premium-white .info-name {
+    color: var(--pw-text) !important;
+}
+body.theme-premium-white .info-sub,
+body.theme-premium-white .info-specs {
+    color: var(--pw-text-sub) !important;
+}
+/* KEEP 円形ボタン（fav-actions.css のダークガラス → 白面） */
+body.theme-premium-white .fav-circle {
+    background: var(--pw-white) !important;
+    border-color: var(--pw-violet-line-strong) !important;
+    color: var(--pw-violet-deep) !important;
+    box-shadow: var(--pw-shadow-sm) !important;
+}
+body.theme-premium-white .fav-circle:hover {
+    background: var(--pw-violet-soft) !important;
+}
+body.theme-premium-white .fav-circle__cap {
+    color: var(--pw-text-sub) !important;
+}
+/* インライン style の白・薄グレー文字も受け止める */
+body.theme-premium-white main [style*="color:#fff"],
+body.theme-premium-white main [style*="color: #fff"],
+body.theme-premium-white main [style*="color:#ffffff"],
+body.theme-premium-white main [style*="color: #ffffff"] {
+    color: var(--pw-text) !important;
+}
+body.theme-premium-white main [style*="color:#c0c0c0"],
+body.theme-premium-white main [style*="color: #c0c0c0"],
+body.theme-premium-white main [style*="color:#e6dffc"],
+body.theme-premium-white main [style*="color: #e6dffc"] {
+    color: var(--pw-text-sub) !important;
 }

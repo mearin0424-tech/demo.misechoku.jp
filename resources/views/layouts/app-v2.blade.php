@@ -73,10 +73,17 @@
             || request()->is('*/shopprofiles/*')
             || request()->is('share/*');
         // ===== プレミアムホワイト（試験導入 2026-07-19）=====
-        // MyPage を「白基調 + 高級感」プロトタイプで表示するためのフラグ。
+        // MyPage / プロフィール詳細を「白基調 + 高級感」テーマで表示するためのフラグ。
         // premium-white.css がここでのみ発動し、既存のダークスタイルを上書きする。
+        // これらは Tailwind トークンベースの画面のため、トークン反転で一括ライト化できる。
         // ※ SWIPE (home) は白基調で崩れたため対象から除外（元のダーク表示を維持）
-        $naturalPremiumWhite = request()->routeIs('cast.mypage.index', 'shop.mypage.index');
+        $naturalPremiumWhite = request()->routeIs(
+            'cast.mypage.index',
+            'shop.mypage.index',
+            'cast.shopprofile.show',      // キャスト → 店舗プロフィール
+            'shop.castprofileview.show',  // 店舗 → キャストプロフィール
+            'shop.recruits.show'          // 店舗 → 自求人プレビュー（実質プロフィール画面）
+        );
 
         $naturalLightTheme = !$isDarkPage
             && !str_contains($bodyClassAttr, 'page-demo-login')
@@ -422,13 +429,13 @@
             padding-left:  max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             padding-right: max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             z-index: 1600 !important;
-            /* ヘッダー下端（rgba(124,58,237,0.62)）から色を引き継ぎ、
+            /* ヘッダー下端（rgba(139,92,246,0.66)）から色を引き継ぎ、
                下端に向けて透明にフェードする連続グラデーション */
             background:
                 linear-gradient(180deg,
-                    rgba(124, 58, 237, 0.62) 0%,
-                    rgba(124, 58, 237, 0.34) 55%,
-                    rgba(124, 58, 237, 0) 100%) !important;
+                    rgba(139, 92, 246, 0.66) 0%,
+                    rgba(167, 139, 250, 0.36) 55%,
+                    rgba(167, 139, 250, 0) 100%) !important;
             backdrop-filter: none !important;
             -webkit-backdrop-filter: none !important;
             margin-top: 0 !important;
@@ -445,19 +452,28 @@
             background-color: transparent !important;
         }
 
-        /* --- ボトムナビ：元の紫ガラスに戻しつつ、下端に向けて深くなる
-              アメジストグラデーションで高級感を出す（ヘッダーと上下対称の表現） --- */
+        /* --- ボトムナビ：ヘッダーと上下対称。
+              「トークする」/ログインボタンと同じアメジストグラデ（下端=濃 → 上端=透明）。
+              ライト/ダークどちらのテーマでも共通（MyPage 含め全画面で統一） --- */
         nav[data-bottom-nav] {
             background:
                 linear-gradient(0deg,
-                    rgba(168, 85, 247, 0.28) 0%,
-                    rgba(139, 60, 220, 0.13) 45%,
-                    rgba(168, 85, 247, 0.03) 100%),
-                rgba(10, 10, 10, 0.90) !important;
-            backdrop-filter: blur(16px) !important;
-            -webkit-backdrop-filter: blur(16px) !important;
-            border-top: 1px solid rgba(168, 85, 247, 0.35) !important;
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.55) !important;
+                    rgba(124, 58, 237, 0.96) 0%,
+                    rgba(139, 92, 246, 0.85) 55%,
+                    rgba(167, 139, 250, 0.45) 82%,
+                    rgba(167, 139, 250, 0) 100%) !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            border-top: 0 !important;
+            box-shadow: none !important;
+        }
+        /* ナビの文字・アイコン：紫グラデ上なので白で統一 + フェード部の可読性用の影 */
+        nav[data-bottom-nav] .nav-item {
+            color: rgba(255, 255, 255, 0.82) !important;
+            text-shadow: 0 1px 3px rgba(46, 16, 101, 0.45);
+        }
+        nav[data-bottom-nav] .nav-item.is-active {
+            color: #ffffff !important;
         }
 
         /* --- TALK ROOM：他画面と同じ --max-content-width に揃えつつ、内側コンテナはフル幅で背景を敷く --- */
@@ -483,15 +499,15 @@
             /* 左右パディングは sub-header と同じ計算式で完全一致させる（モバイルでは 16px ガター） */
             padding-left:  max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             padding-right: max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
-            /* 深い紫（アイコン等のアクセントと同系 #5b21b6→#7c3aed）から
+            /* 「トークする」/ログインボタンと同じアメジストグラデ（#7c3aed→#8b5cf6→#a78bfa）から
                下端に向けて透明にフェードするグラデーション。
-               コンテンツがヘッダーの下に "溶けて" スクロールしていく表現 */
+               上端=濃（白文字が読める）→ 下端=明るいラベンダー → 透明 */
             background:
                 linear-gradient(180deg,
-                    rgba(91, 33, 182, 0.95) 0%,
-                    rgba(109, 40, 217, 0.88) 50%,
-                    rgba(124, 58, 237, 0.55) 80%,
-                    rgba(124, 58, 237, 0) 100%) !important;
+                    rgba(124, 58, 237, 0.96) 0%,
+                    rgba(139, 92, 246, 0.85) 55%,
+                    rgba(167, 139, 250, 0.45) 82%,
+                    rgba(167, 139, 250, 0) 100%) !important;
             backdrop-filter: none !important;
             -webkit-backdrop-filter: none !important;
             border-bottom: 0 !important;
@@ -502,9 +518,9 @@
         body:has(.sub-header-wrapper) #global-header {
             background:
                 linear-gradient(180deg,
-                    rgba(91, 33, 182, 0.95) 0%,
-                    rgba(109, 40, 217, 0.88) 60%,
-                    rgba(124, 58, 237, 0.62) 100%) !important;
+                    rgba(124, 58, 237, 0.96) 0%,
+                    rgba(139, 92, 246, 0.85) 60%,
+                    rgba(139, 92, 246, 0.66) 100%) !important;
         }
         /* ヘッダー上の文字・アイコンは白のまま、フェード部でも読めるよう影を付与 */
         #global-header .header-title-main,
@@ -679,7 +695,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260720-light-14">
     {{-- プレミアムホワイト（MyPage）: 全ルールが body.theme-premium-white スコープ。同上で常時ロード --}}
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('assets/css/premium-white.css') }}?v=20260720-pwhite-03">
+    <link rel="stylesheet" href="{{ asset('assets/css/premium-white.css') }}?v=20260720-pwhite-05">
 </head>
 <body class="@yield('body-class') {{ $isLightTheme ? 'theme-light' : '' }} {{ $isPremiumWhite ? 'theme-premium-white' : '' }} bg-base text-text-main"
       data-natural-light="{{ $naturalLightTheme ? '1' : '0' }}"
@@ -826,6 +842,8 @@
                 icon.classList.toggle('fa-sun', mode === 'dark');
                 icon.classList.toggle('fa-moon', mode !== 'dark');
             }
+            var labelEl = document.getElementById('theme-toggle-label');
+            if (labelEl) labelEl.textContent = label;
         }
 
         btn.addEventListener('click', function () {

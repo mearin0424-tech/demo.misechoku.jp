@@ -481,3 +481,144 @@ input[type="file"]::file-selector-button:hover {
     margin: 14px 0 18px;
 }
 body.theme-light .page-lead { color: #5f5876; }
+
+
+/* ============================================================
+   ボーナス金 / 時給カード（SWIPE・プロフィール共通デザイン）
+   home.css の body.page-home スコープ版と同一ビジュアル。
+   プロフィール詳細（cast-show）でも同じ見た目で使えるよう非スコープで定義。
+   ============================================================ */
+.rc-line--money {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+    margin-top: 6px;
+}
+.rc-bonus-card {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background:
+        radial-gradient(120% 90% at 20% 0%, rgba(249, 224, 142, 0.20), transparent 55%),
+        linear-gradient(150deg, rgba(63, 47, 6, 0.92), rgba(31, 22, 3, 0.94));
+    border: 1px solid rgba(246, 211, 106, 0.65);
+    box-shadow:
+        0 0 14px rgba(246, 211, 106, 0.28),
+        inset 0 1px 0 rgba(255, 240, 180, 0.35),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+}
+.rc-bonus-card__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    color: #f6d36a;
+    text-transform: uppercase;
+    text-shadow: 0 0 8px rgba(246, 211, 106, 0.45);
+}
+.rc-bonus-card__label i { font-size: 0.7rem; }
+.rc-bonus-card__amount {
+    font-size: clamp(1.45rem, 6.2vw, 1.85rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    background: linear-gradient(180deg, #fff3c4 0%, #f9e08e 30%, #f6d36a 55%, #d4af37 80%, #b8860b 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 1px 6px rgba(246, 211, 106, 0.40));
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.rc-bonus-card__cond {
+    font-size: 0.62rem;
+    color: rgba(255, 240, 180, 0.75);
+    line-height: 1.4;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+.rc-wage-card {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    padding: 9px 12px;
+    border-radius: 14px;
+    /* ライト背景の上でも読めるよう、SWIPE 版よりわずかに不透明を上げた濃面 */
+    background: rgba(16, 12, 26, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 3px 10px rgba(0, 0, 0, 0.25);
+}
+.rc-wage-card__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.62);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+.rc-wage-card__row strong {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: #ffffff;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   プロフィール下部固定の「トークする」バー
+   （SWIPE のトークCTAと同じアメジストグラデ。フッターの上に浮かせる）
+   ============================================================ */
+.profile-talk-bar {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(var(--footer-height, 75px) + 12px);
+    z-index: 90;
+    width: min(calc(100vw - 32px), calc(var(--max-content-width, 430px) - 32px));
+}
+.profile-talk-bar__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 50px;
+    padding: 13px 16px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, var(--accent-grad-from, #a78bfa) 0%, var(--accent-grad-to, #7c3aed) 100%);
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow:
+        0 8px 18px rgba(46, 16, 101, 0.35),
+        0 2px 4px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.45),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.28);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    transition: transform 0.12s ease, filter 0.15s ease;
+}
+.profile-talk-bar__btn:active { transform: scale(0.97); }
+/* 固定バーの高さぶん、本文下部に余白を確保 */
+body:has(.profile-talk-bar) main#main-content {
+    padding-bottom: calc(var(--footer-height, 75px) + 84px + env(safe-area-inset-bottom, 0px)) !important;
+}
