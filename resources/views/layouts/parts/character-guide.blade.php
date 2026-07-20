@@ -18,6 +18,14 @@
             // DB 未準備時などは静かにスキップ
         }
     }
+
+    // ===== AIコンシェルジュ入口（2026-07-20）=====
+    // サブヘッダーの AI タブを廃止し、キャスト領域ではオコジョのタップで AI コンシェルジュへ遷移。
+    // SWIPE（home）はオコジョ非表示ポリシー、AI 画面自身では自己リンクになるため除外。
+    $onAiPage = request()->routeIs('cast.search.index') && request('tab') === 'ai';
+    $aiEntryUrl = (request()->is('cast/*') && !$onAiPage && !request()->is('*/home*'))
+        ? route('cast.search.index', ['tab' => 'ai'])
+        : null;
 @endphp
 
 {{-- オコジョガイド：右下浮遊デザイン。閉じるボタンはキャラクター右下に配置（吹き出し外）
@@ -25,15 +33,20 @@
      オンボーディング等の外部から updateCharacterMessage を呼んでも、無効化された画面では
      表示させないためのゲート。 --}}
 <div id="character-guide"
-     class="discovery-guide {{ $shouldShow ? '' : 'is-hidden' }}"
-     data-server-enabled="{{ $shouldShow ? '1' : '0' }}">
+     class="discovery-guide {{ $shouldShow ? '' : 'is-hidden' }} {{ $aiEntryUrl ? 'guide--ai-entry' : '' }}"
+     data-server-enabled="{{ $shouldShow ? '1' : '0' }}"
+     @if($aiEntryUrl) data-ai-url="{{ $aiEntryUrl }}" @endif>
     {{-- 左側の吹き出し --}}
     <div class="guide-speech-bubble">
         <p id="character-message-content">{!! nl2br(e($resolvedGuideMessage)) !!}</p>
     </div>
     {{-- 右側のキャラクター（×ボタンはキャラ右下に絶対配置） --}}
-    <div class="guide-character-wrap">
+    <div class="guide-character-wrap"
+         @if($aiEntryUrl) role="link" tabindex="0" aria-label="AIコンシェルジュを開く" @endif>
         <img src="{{ asset('assets/images/guide/guide-character.png') }}" alt="ガイド">
+        @if($aiEntryUrl)
+            <span class="guide-ai-badge" aria-hidden="true">AI</span>
+        @endif
         <button type="button" class="guide-close-btn" id="character-guide-close" aria-label="ガイドを閉じる">
             <i class="fas fa-times" aria-hidden="true"></i>
         </button>

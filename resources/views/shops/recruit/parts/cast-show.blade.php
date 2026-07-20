@@ -116,33 +116,34 @@
             </div>
         </div>
 
-        {{-- 3. ボーナス金 / 時給：SWIPE カードと同一デザイン（ゴールドカード + ダークグラス時給カード）。
+        {{-- 3. ボーナス金 / 時給：SWIPE カードと同一の Premium Slate（横型一体スレート）。
              体入時給・ヘルプ時給の両方を表示する --}}
         @if($showBonusMain || $trialWageDisp || $helpWageDisp || $regularWageDisp)
             @php
-                // 1行目：体入時給を優先。無ければ本入り時給を表示
+                // 1列目：体入時給を優先。無ければ本入り時給を表示
                 $wageRow1Label = $trialWageDisp ? '体入時給' : '本入り時給';
                 $wageRow1Disp  = $trialWageDisp ?: $regularWageDisp;
             @endphp
-            <div class="rc-line--money mb-4">
-                <div class="rc-bonus-card">
-                    <span class="rc-bonus-card__label"><i class="fas fa-gem" aria-hidden="true"></i>ボーナス金</span>
-                    <span class="rc-bonus-card__amount numeric-font">
-                        @if($showBonusMain)¥{{ number_format($noruma) }}@else —@endif
+            <div class="pslate mb-4">
+                <div class="pslate__bonus">
+                    <span class="pslate__label">ボーナス金</span>
+                    <span class="pslate__amount">
+                        @if($showBonusMain)<span class="pslate__yen">¥</span>{{ number_format($noruma) }}@else —@endif
                     </span>
                     @if($showBonusMain && $bonusConditionsText !== '')
-                        <span class="rc-bonus-card__cond">{{ $bonusConditionsText }}</span>
+                        <span class="pslate__cond">{{ $bonusConditionsText }}</span>
                     @endif
                 </div>
-                <div class="rc-wage-card">
-                    <span class="rc-wage-card__row">
-                        <span>{{ $wageRow1Label }}</span>
-                        <strong class="numeric-font">{{ $wageRow1Disp ?: '—' }}</strong>
-                    </span>
-                    <span class="rc-wage-card__row">
-                        <span>ヘルプ時給</span>
-                        <strong class="numeric-font">{{ $helpWageDisp ?: '—' }}</strong>
-                    </span>
+                <span class="pslate__divider" aria-hidden="true"></span>
+                <div class="pslate__wages">
+                    <div class="pslate__wage">
+                        <span class="pslate__label">{{ $wageRow1Label }}</span>
+                        <span class="pslate__wage-amount">{{ $wageRow1Disp ?: '—' }}</span>
+                    </div>
+                    <div class="pslate__wage">
+                        <span class="pslate__label">ヘルプ時給</span>
+                        <span class="pslate__wage-amount">{{ $helpWageDisp ?: '—' }}</span>
+                    </div>
                 </div>
             </div>
         @endif

@@ -232,7 +232,7 @@
                 var label = chipLabel(chip);
                 var checked = chipChecked(chip);
                 var matches = q === '' || label.indexOf(q) !== -1;
-                // 選択済み: 常に表示（先頭に集約）
+                // 選択済み: 常に表示（位置は元の並びのまま維持する）
                 chip.classList.toggle('is-pinned', checked);
                 if (checked) {
                     chip.style.display = matches ? '' : 'none';
@@ -261,15 +261,6 @@
             });
             moreBtn.textContent = isExpanded ? '折りたたむ' : ('もっと見る（残り ' + hiddenUnselected + ' 件）');
             moreBtn.hidden = hiddenUnselected === 0 && isExpanded === false;
-            // pinnedを CSS の :nth-child order で並び替えたく、簡易対応で checked → 先頭に DOM 移動
-            var frag = document.createDocumentFragment();
-            var later = document.createDocumentFragment();
-            chips.forEach(function (chip) {
-                if (chipChecked(chip)) frag.appendChild(chip);
-                else later.appendChild(chip);
-            });
-            chipsContainer.appendChild(frag);
-            chipsContainer.appendChild(later);
             if (selectedCount) selectedCount.textContent = String(selectedTotal);
             if (clearBtn) clearBtn.hidden = currentQuery === '';
         }
@@ -289,7 +280,7 @@
             refresh();
         });
 
-        // change 時にも再描画（選択したチップは先頭に固定）
+        // change 時にも再描画（選択状態の強調・カウンタ更新のみ。並び順は維持）
         chipsContainer.addEventListener('change', refresh);
         refresh();
     }

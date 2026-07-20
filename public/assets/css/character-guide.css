@@ -112,3 +112,40 @@
     margin: 0;
     line-height: 1.4;
 }
+
+
+/* ============================================================
+   AIコンシェルジュ入口モード（キャスト領域）
+   ガイド無効・×で閉じた後もキャラクターは AI 入口として残す
+   ============================================================ */
+.discovery-guide.guide--ai-entry.is-hidden,
+.discovery-guide.guide--ai-entry.is-dismissed {
+    display: flex;
+}
+.discovery-guide.guide--ai-entry.is-hidden .guide-speech-bubble,
+.discovery-guide.guide--ai-entry.is-dismissed .guide-speech-bubble,
+.discovery-guide.guide--ai-entry.is-hidden .guide-close-btn,
+.discovery-guide.guide--ai-entry.is-dismissed .guide-close-btn {
+    display: none;
+}
+.discovery-guide.guide--ai-entry.is-hidden .guide-character-wrap,
+.discovery-guide.guide--ai-entry.is-dismissed .guide-character-wrap {
+    opacity: 0.92;
+}
+
+/* AI バッジ（キャラクター左上の小ピル） */
+.guide-ai-badge {
+    position: absolute;
+    top: -4px;
+    left: -14px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    color: #ffffff;
+    font-size: 0.60rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    box-shadow: 0 3px 10px rgba(124, 58, 237, 0.45);
+    pointer-events: none;
+}

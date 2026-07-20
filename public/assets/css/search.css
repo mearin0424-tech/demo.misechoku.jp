@@ -1611,12 +1611,11 @@ body.page-search .connection-list--search {
     min-height: 30px;
 }
 
-/* 選択済みチップ：先頭に配置＋強調枠 */
+/* 選択済みチップ：位置は元の並びのまま、面色＋チェックマークで控えめに強調 */
 .detail-search-chip.is-pinned {
-    background: rgba(168, 85, 247, 0.22);
-    border-color: var(--gold-light, #c4b5fd);
+    background: rgba(168, 85, 247, 0.20);
+    border-color: rgba(167, 139, 250, 0.40);
     color: #fff;
-    box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.2) inset;
     position: relative;
 }
 .detail-search-chip.is-pinned::before {
@@ -1637,22 +1636,21 @@ body.page-search .connection-list--search {
     padding: 9px 14px;
     border-radius: 10px;
     background: var(--color-card-strong);
-    border-color: rgba(168, 85, 247, 0.22);
+    border-color: rgba(255, 255, 255, 0.07);
     color: var(--color-text-muted);
     font-size: 0.82rem;
     font-weight: 600;
 }
 
 .detail-search-chip--search:hover {
-    border-color: var(--color-border-strong);
+    border-color: rgba(168, 85, 247, 0.30);
     background: rgba(255, 255, 255, 0.04);
 }
 
 .detail-search-chip--search:has(input:checked) {
     background: rgba(168, 85, 247, 0.18);
-    border-color: var(--gold);
+    border-color: rgba(167, 139, 250, 0.45);
     color: var(--gold);
-    box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.12) inset;
 }
 
 .detail-search-location-segment {

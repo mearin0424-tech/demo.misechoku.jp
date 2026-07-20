@@ -1175,3 +1175,203 @@ body:not(.theme-light) .viewers-shell { color: #f5f5f5; }
 
 /* 汎用リード文（.page-lead は var 参照だが、念のためダーク値を保証） */
 body:not(.theme-light) .page-lead { color: #b8b8b8; }
+
+
+/* ============================================================
+   §17 詳細検索モーダル：ライトモード時のハードコード色補正
+   （チップ / ツールバー / 位置情報カード / スライダー / サジェスト）
+   ============================================================ */
+body.theme-light .detail-search-chip--search {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.12);
+    color: #574d6f;
+}
+body.theme-light .detail-search-chip--search:hover {
+    background: rgba(124, 58, 237, 0.05);
+    border-color: rgba(124, 58, 237, 0.28);
+}
+body.theme-light .detail-search-chip--search:has(input:checked),
+body.theme-light .detail-search-chip.is-pinned {
+    background: rgba(124, 58, 237, 0.10);
+    border-color: rgba(124, 58, 237, 0.38);
+    color: #6d28d9;
+    box-shadow: none;
+}
+body.theme-light .detail-search-chip.is-pinned::before { color: #7c3aed; }
+
+/* チップ検索ツールバー */
+body.theme-light .detail-search-chips__searchbox {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.20);
+    color: #574d6f;
+}
+body.theme-light .detail-search-chips__searchbox:focus-within {
+    background: #ffffff;
+    border-color: #7c3aed;
+    color: #241f33;
+}
+body.theme-light .detail-search-chips__searchbox > i { color: #a78bfa; }
+body.theme-light .detail-search-chips__meta {
+    background: rgba(124, 58, 237, 0.08);
+    border-color: rgba(124, 58, 237, 0.22);
+    color: #574d6f;
+}
+body.theme-light .detail-search-chips__meta-selected { color: #6d28d9; }
+body.theme-light .detail-search-chips__more {
+    color: #6d28d9;
+    border-color: rgba(124, 58, 237, 0.35);
+}
+body.theme-light .detail-search-chips__more:hover { background: rgba(124, 58, 237, 0.06); }
+
+/* サブセクション見出し・フッターボタン */
+body.theme-light .detail-search-subsection__label { color: #6d28d9; }
+body.theme-light .detail-search-modal__btn--save {
+    background: rgba(124, 58, 237, 0.08);
+    border-color: rgba(124, 58, 237, 0.24);
+    color: #6d28d9;
+}
+body.theme-light .detail-search-modal__btn--save:hover { background: rgba(124, 58, 237, 0.14); }
+
+/* 位置情報カード（blade インラインの白文字を補正） */
+body.theme-light .detail-search-location-card {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.16);
+}
+body.theme-light .detail-search-location-card:hover { border-color: rgba(124, 58, 237, 0.35); }
+body.theme-light .detail-search-location-card.is-selected {
+    background: rgba(124, 58, 237, 0.07);
+    border-color: #7c3aed;
+}
+body.theme-light .detail-search-location-card__title { color: #241f33; }
+body.theme-light .detail-search-location-card.is-selected .detail-search-location-card__title { color: #241f33; }
+body.theme-light .detail-search-location-card__sub { color: #6d6685; }
+body.theme-light .detail-search-location-card__icon { color: #a78bfa; }
+body.theme-light .detail-search-location-card.is-selected .detail-search-location-card__icon { color: #7c3aed; }
+body.theme-light .detail-search-location-input {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.24);
+    color: #241f33;
+}
+body.theme-light .detail-search-location-input::placeholder { color: rgba(36, 31, 51, 0.35); }
+body.theme-light .detail-search-location-input:focus {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+body.theme-light .detail-search-location-input-wrap > i { color: #a78bfa; }
+body.theme-light .detail-search-location-current-btn {
+    background: rgba(124, 58, 237, 0.08);
+    color: #2d2742;
+}
+body.theme-light .detail-search-location-current-btn:hover { background: rgba(124, 58, 237, 0.14); }
+body.theme-light .detail-search-location-current-btn i { color: #7c3aed; }
+body.theme-light .detail-search-location-passport-status { color: #6d6685; }
+body.theme-light .detail-search-location-passport-status i { color: #7c3aed; }
+body.theme-light .detail-search-location-passport-status[data-state="resolved"] { color: #047857; }
+body.theme-light .detail-search-location-passport-status[data-state="resolved"] i { color: #059669; }
+body.theme-light .detail-search-location-passport-status[data-state="resolved"] strong { color: #065f46; }
+body.theme-light .detail-search-location-hint { color: #6d6685; }
+body.theme-light .detail-search-location-hint i { color: #7c3aed; }
+
+/* 半径スライダー */
+body.theme-light .detail-search-location-radius { border-top-color: rgba(124, 58, 237, 0.14); }
+body.theme-light .detail-search-location-slider__marks { color: #857ca0; }
+body.theme-light .detail-search-location-slider__mark.is-active { color: #6d28d9; }
+body.theme-light .detail-search-location-range::-webkit-slider-runnable-track {
+    background: rgba(124, 58, 237, 0.10);
+    border-color: rgba(124, 58, 237, 0.25);
+}
+body.theme-light .detail-search-location-range::-moz-range-track {
+    background: rgba(124, 58, 237, 0.10);
+    border-color: rgba(124, 58, 237, 0.25);
+}
+body.theme-light .detail-search-location-range::-webkit-slider-thumb {
+    background: #7c3aed;
+    border-color: #ffffff;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.40);
+}
+body.theme-light .detail-search-location-range::-moz-range-thumb {
+    background: #7c3aed;
+    border-color: #ffffff;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.40);
+}
+body.theme-light .detail-search-location-slider__value { color: #6d28d9; }
+
+/* 住所サジェスト */
+body.theme-light .detail-search-location-suggest-list {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.28);
+    box-shadow: 0 12px 28px rgba(76, 29, 149, 0.18);
+}
+body.theme-light .detail-search-location-suggest-item { color: #2d2742; }
+body.theme-light .detail-search-location-suggest-item:hover,
+body.theme-light .detail-search-location-suggest-item.is-active {
+    background: rgba(124, 58, 237, 0.08);
+    color: #6d28d9;
+}
+body.theme-light .detail-search-location-suggest-item i { color: #7c3aed; }
+body.theme-light .detail-search-location-suggest-empty { color: #857ca0; }
+
+
+/* ============================================================
+   §18 ヘッダーバッジ / 通知・やることポップオーバー（BEM版）
+   ライトモード時の可読性補正（layout-header.css はダークネイティブ）
+   ============================================================ */
+/* --- ヘッダー右上の通知/タスク バッジ：白文字＋濃色グラデで視認性を確保 --- */
+body.theme-light .header-badge {
+    background: linear-gradient(145deg, #8b5cf6, #6d28d9);
+    color: #ffffff;
+}
+body.theme-light .header-badge.is-accent {
+    background: linear-gradient(145deg, #ec4899, #be185d);
+    color: #ffffff;
+}
+body.theme-light .header-badge.is-urgent {
+    background: linear-gradient(145deg, #ef4444, #b91c1c);
+    color: #ffffff;
+}
+
+/* --- ポップオーバー内テキスト（ハードコード白・薄紫を濃色へ） --- */
+body.theme-light .notif-popup__head-icon,
+body.theme-light .task-popup__head-icon { color: #7c3aed; }
+body.theme-light .notif-popup__mark-all { color: #6d28d9; }
+body.theme-light .notif-popup__mark-all:hover { color: #241f33; }
+body.theme-light .notif-popup__close,
+body.theme-light .task-popup__close,
+body.theme-light .notif-popup__gear { color: #857ca0; }
+body.theme-light .notif-popup__close:hover,
+body.theme-light .task-popup__close:hover,
+body.theme-light .notif-popup__gear:hover { color: #241f33; }
+body.theme-light .notif-popup__tab { color: #574d6f; }
+body.theme-light .notif-popup__tab:hover { color: #241f33; }
+body.theme-light .notif-popup__tab.is-active { color: #6d28d9; }
+body.theme-light .notif-popup__section-label,
+body.theme-light .task-popup__section-label { color: #6d28d9; }
+body.theme-light .task-popup__section--high .task-popup__section-label i { color: #dc2626; }
+body.theme-light .notif-popup__official-title { color: #241f33; }
+body.theme-light .notif-popup__official-date { color: #857ca0; }
+body.theme-light .notif-popup__official-chev { color: #a78bfa; }
+body.theme-light .notif-popup__item-cat,
+body.theme-light .task-popup__item-cat { color: #6d28d9; }
+body.theme-light .notif-popup__item--pink .notif-popup__item-cat { color: #be185d; }
+body.theme-light .notif-popup__item--gold .notif-popup__item-cat { color: #a16207; }
+body.theme-light .notif-popup__item--success .notif-popup__item-cat { color: #047857; }
+body.theme-light .task-popup__item--high .task-popup__item-cat { color: #dc2626; }
+body.theme-light .notif-popup__item-time,
+body.theme-light .task-popup__item-time { color: #857ca0; }
+body.theme-light .notif-popup__item-title,
+body.theme-light .task-popup__item-title { color: #241f33; }
+body.theme-light .notif-popup__item-desc,
+body.theme-light .task-popup__item-desc { color: #5f5876; }
+body.theme-light .notif-popup__empty,
+body.theme-light .task-popup__empty { color: #857ca0; }
+
+/* アイコンチップ：淡色文字を濃色へ（面色はそのまま薄く） */
+body.theme-light .notif-popup__item--accent  .notif-popup__item-icon { color: #7c3aed; }
+body.theme-light .notif-popup__item--pink    .notif-popup__item-icon { color: #be185d; }
+body.theme-light .notif-popup__item--gold    .notif-popup__item-icon { color: #a16207; }
+body.theme-light .notif-popup__item--success .notif-popup__item-icon { color: #047857; }
+body.theme-light .notif-popup__item--muted   .notif-popup__item-icon { color: #6b7280; }
+body.theme-light .notif-popup__empty-title,
+body.theme-light .task-popup__empty-title { color: #241f33; }
+body.theme-light .notif-popup__empty-desc,
+body.theme-light .task-popup__empty-desc { color: #857ca0; }

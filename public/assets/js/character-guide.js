@@ -53,7 +53,25 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (characterWrap && characterGuide) {
-        characterWrap.addEventListener('click', toggleBubble);
+        // AIコンシェルジュ入口モード（キャスト領域）：タップで AI 画面へ遷移。
+        // それ以外は従来どおり吹き出しの表示/非表示をトグルする。
+        var aiUrl = characterGuide.getAttribute('data-ai-url');
+        characterWrap.addEventListener('click', function (e) {
+            if (aiUrl) {
+                e.stopPropagation();
+                window.location.href = aiUrl;
+                return;
+            }
+            toggleBubble(e);
+        });
+        if (aiUrl) {
+            characterWrap.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    window.location.href = aiUrl;
+                }
+            });
+        }
     }
 
     if (closeBtn && characterGuide) {

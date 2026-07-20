@@ -484,104 +484,171 @@ body.theme-light .page-lead { color: #5f5876; }
 
 
 /* ============================================================
-   ボーナス金 / 時給カード（SWIPE・プロフィール共通デザイン）
-   home.css の body.page-home スコープ版と同一ビジュアル。
-   プロフィール詳細（cast-show）でも同じ見た目で使えるよう非スコープで定義。
+   Premium Slate — 給料・ボーナス横型一体スレート
+   （SWIPE・プロフィール共通。左=ボーナス金 / 右=体入・ヘルプ時給）
+   ダーク既定、theme-light / theme-premium-white でライト表面に反転。
    ============================================================ */
-.rc-line--money {
+.pslate {
+    --pslate-gold: linear-gradient(120deg, #b2882a 10%, #f6da7a 35%, #fff6d1 50%, #f6da7a 65%, #b2882a 90%);
+    position: relative;
     display: flex;
     align-items: stretch;
-    gap: 8px;
     width: 100%;
     min-width: 0;
-    margin-top: 6px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    overflow: hidden;
+    isolation: isolate;
+    background:
+        radial-gradient(130% 100% at 12% 0%, rgba(167, 139, 250, 0.10), transparent 55%),
+        linear-gradient(150deg, rgba(28, 21, 44, 0.94), rgba(15, 11, 25, 0.92));
+    /* 枠は極薄に抑え、バイオレットの Aura Shadow で浮遊感を出す */
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow:
+        0 10px 26px rgba(76, 29, 149, 0.35),
+        0 2px 8px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
-.rc-bonus-card {
-    position: relative;
-    flex: 1 1 0;
+/* Glossy Sweep: 5秒周期で斜めの細い光の束が横切る */
+.pslate::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    background-image: linear-gradient(105deg,
+        transparent 42%,
+        rgba(255, 255, 255, 0.05) 47%,
+        rgba(255, 255, 255, 0.20) 50%,
+        rgba(255, 255, 255, 0.05) 53%,
+        transparent 58%);
+    background-size: 260% 100%;
+    background-repeat: no-repeat;
+    animation: pslateSweep 5s ease-in-out infinite;
+}
+.pslate__bonus {
+    flex: 1 1 44%;
     min-width: 0;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 3px;
-    padding: 10px 14px;
-    border-radius: 14px;
-    background:
-        radial-gradient(120% 90% at 20% 0%, rgba(249, 224, 142, 0.20), transparent 55%),
-        linear-gradient(150deg, rgba(63, 47, 6, 0.92), rgba(31, 22, 3, 0.94));
-    border: 1px solid rgba(246, 211, 106, 0.65);
-    box-shadow:
-        0 0 14px rgba(246, 211, 106, 0.28),
-        inset 0 1px 0 rgba(255, 240, 180, 0.35),
-        inset 0 -1px 2px rgba(0, 0, 0, 0.45);
-    overflow: hidden;
+    padding-right: 12px;
 }
-.rc-bonus-card__label {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 0.64rem;
-    font-weight: 800;
-    letter-spacing: 0.18em;
-    color: #f6d36a;
-    text-transform: uppercase;
-    text-shadow: 0 0 8px rgba(246, 211, 106, 0.45);
+.pslate__label {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    color: rgba(255, 255, 255, 0.52);
+    white-space: nowrap;
 }
-.rc-bonus-card__label i { font-size: 0.7rem; }
-.rc-bonus-card__amount {
-    font-size: clamp(1.45rem, 6.2vw, 1.85rem);
-    font-weight: 900;
-    line-height: 1.05;
-    letter-spacing: -0.01em;
-    background: linear-gradient(180deg, #fff3c4 0%, #f9e08e 30%, #f6d36a 55%, #d4af37 80%, #b8860b 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    filter: drop-shadow(0 1px 6px rgba(246, 211, 106, 0.40));
-    font-variant-numeric: tabular-nums;
+.pslate__amount {
+    font-family: 'Cinzel', 'Playfair Display', 'Noto Serif JP', serif;
+    font-size: clamp(1.25rem, 5.4vw, 1.55rem);
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: 0.01em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-variant-numeric: tabular-nums;
+    background-image: var(--pslate-gold);
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: pslateShimmer 4.2s linear infinite;
+    filter: drop-shadow(0 1px 4px rgba(246, 218, 122, 0.18));
 }
-.rc-bonus-card__cond {
-    font-size: 0.62rem;
-    color: rgba(255, 240, 180, 0.75);
+.pslate__yen { font-size: 0.72em; margin-right: 1px; }
+.pslate__cond {
+    font-size: 0.6rem;
     line-height: 1.4;
+    color: rgba(255, 255, 255, 0.45);
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
 }
-.rc-wage-card {
-    flex: 1 1 0;
+.pslate__divider {
+    flex: 0 0 1px;
+    width: 1px;
+    align-self: stretch;
+    background: rgba(255, 255, 255, 0.10);
+}
+.pslate__wages {
+    flex: 1 1 56%;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-left: 12px;
+}
+.pslate__wage {
+    flex: 1 1 50%;
     min-width: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 5px;
-    padding: 9px 12px;
-    border-radius: 14px;
-    /* ライト背景の上でも読めるよう、SWIPE 版よりわずかに不透明を上げた濃面 */
-    background: rgba(16, 12, 26, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 3px 10px rgba(0, 0, 0, 0.25);
+    gap: 3px;
 }
-.rc-wage-card__row {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 10px;
-    font-size: 0.62rem;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.62);
-    letter-spacing: 0.05em;
+.pslate__wage-amount {
+    font-family: 'Cinzel', 'Playfair Display', 'Noto Serif JP', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.15;
+    color: #f3eefc;
     white-space: nowrap;
-}
-.rc-wage-card__row strong {
-    font-size: 0.92rem;
-    font-weight: 800;
-    color: #ffffff;
+    overflow: hidden;
+    text-overflow: ellipsis;
     font-variant-numeric: tabular-nums;
 }
+@keyframes pslateShimmer {
+    0%   { background-position: 0% 0; }
+    100% { background-position: -250% 0; }
+}
+@keyframes pslateSweep {
+    0%, 54%   { background-position: 130% 0; }
+    88%, 100% { background-position: -130% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .pslate::after { animation: none; display: none; }
+    .pslate__amount { animation: none; }
+}
+
+/* --- ライトテーマ（強制ダーク mode-dark 時は除外） --- */
+body.theme-light:not(.mode-dark) .pslate,
+body.theme-premium-white:not(.mode-dark) .pslate {
+    --pslate-gold: linear-gradient(120deg, #8a5a00 10%, #c59b27 35%, #fcf3cf 50%, #c59b27 65%, #8a5a00 90%);
+    background:
+        radial-gradient(130% 100% at 12% 0%, rgba(167, 139, 250, 0.14), transparent 55%),
+        linear-gradient(150deg, #ffffff, #f4f0fc);
+    border-color: rgba(124, 58, 237, 0.14);
+    box-shadow:
+        0 10px 26px rgba(124, 58, 237, 0.16),
+        0 2px 8px rgba(76, 29, 149, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+body.theme-light:not(.mode-dark) .pslate::after,
+body.theme-premium-white:not(.mode-dark) .pslate::after {
+    background-image: linear-gradient(105deg,
+        transparent 42%,
+        rgba(255, 255, 255, 0.20) 47%,
+        rgba(255, 255, 255, 0.65) 50%,
+        rgba(255, 255, 255, 0.20) 53%,
+        transparent 58%);
+}
+body.theme-light:not(.mode-dark) .pslate .pslate__label,
+body.theme-premium-white:not(.mode-dark) .pslate .pslate__label { color: #857ca0; }
+body.theme-light:not(.mode-dark) .pslate .pslate__cond,
+body.theme-premium-white:not(.mode-dark) .pslate .pslate__cond { color: #9a91b5; }
+body.theme-light:not(.mode-dark) .pslate .pslate__divider,
+body.theme-premium-white:not(.mode-dark) .pslate .pslate__divider { background: rgba(30, 26, 46, 0.10); }
+body.theme-light:not(.mode-dark) .pslate .pslate__wage-amount,
+body.theme-premium-white:not(.mode-dark) .pslate .pslate__wage-amount { color: #2a2440; }
+body.theme-light:not(.mode-dark) .pslate .pslate__amount,
+body.theme-premium-white:not(.mode-dark) .pslate .pslate__amount { filter: drop-shadow(0 1px 3px rgba(138, 90, 0, 0.14)); }
 
 /* ============================================================
    プロフィール下部固定の「トークする」バー

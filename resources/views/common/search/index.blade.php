@@ -4,7 +4,7 @@
 @section('body-class', request()->is('cast/*') && ($activeTab ?? null) === 'pane-ai' ? 'page-search page-search-ai' : 'page-search')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/search.css') }}?v=20260719-row-fixed">
+<link rel="stylesheet" href="{{ asset('assets/css/search.css') }}?v=20260720-chip-subtle">
 <link rel="stylesheet" href="{{ asset('assets/css/sub-header.css') }}">
 @endpush
 
@@ -17,12 +17,12 @@
     $activeTab = $activeTab ?? 'pane-list';
     $searchTab = $searchTab ?? 'list';
 
-    // タブ：cast は「検索／AIコンシェルジュ／キープ」、shop は「検索／キープ」。
+    // タブ：cast / shop とも「検索／キープ」。
+    // AIコンシェルジュはサブヘッダーから外し、右下のオコジョ（character-guide）から遷移する。
     // キープリストは旧 KEEPS（フッターメニュー）から SEARCH 内へ移設。
     if ($showAiTab) {
         $tabsForHeader = [
             ['id' => 'pane-list', 'label' => '検索', 'url' => route('cast.search.index', ['tab' => 'list']), 'active' => $activeTab === 'pane-list'],
-            ['id' => 'pane-ai', 'label' => 'AIコンシェルジュ', 'url' => route('cast.search.index', ['tab' => 'ai']), 'active' => $activeTab === 'pane-ai'],
             ['id' => 'pane-keep', 'label' => 'キープ', 'url' => route('cast.search.index', ['tab' => 'keep']), 'active' => $activeTab === 'pane-keep'],
         ];
     } else {
@@ -131,7 +131,7 @@
 
 @push('scripts')
 <script src="{{ asset('assets/js/sub-header.js') }}"></script>
-<script src="{{ asset('assets/js/search-detail.js') }}?v=20260712-form-unify"></script>
+<script src="{{ asset('assets/js/search-detail.js') }}?v=20260720-no-reorder"></script>
 <script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260719-keep-only"></script>
 <script>
 {{-- 上部検索バーの開閉：デフォルトは閉じ（HTML初期状態）→ タップで開閉するだけ。

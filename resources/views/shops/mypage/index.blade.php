@@ -18,36 +18,38 @@
 
     <div class="px-5 pt-4 pb-6">
 
-        {{-- ===== アイコン + ひとこと吹き出し ===== --}}
-        <div class="flex items-start gap-3 mb-5">
+        {{-- ===== アイコン + ひとこと吹き出し（キャスト MyPage と同一のコンパクト構成） ===== --}}
+        <div class="flex items-center gap-3 mb-5">
             <div class="w-[84px] h-[84px] rounded-full overflow-hidden border-2 border-line-accent/40 shadow-card-3d bg-surface-from shrink-0">
                 <img src="{{ $iconImage }}" alt="" class="w-full h-full object-cover" id="main-icon-display">
             </div>
 
             <div class="flex-1 min-w-0">
-                {{-- 枠の高さはアイコン（84px）に揃える。区切り線なしのコンパクト構成 --}}
-                <div class="relative min-h-[84px] flex flex-col bg-gradient-to-br from-surface-from to-base border border-line-accent/40 rounded-2xl shadow-card-3d px-3 py-2.5">
-                    {{-- 吹き出しのしっぽ --}}
-                    <span class="absolute top-5 -left-[8px] w-0 h-0 border-y-[8px] border-y-transparent border-r-[10px] border-r-line-accent/40"></span>
-                    <span class="absolute top-5 -left-[6px] w-0 h-0 border-y-[7px] border-y-transparent border-r-[9px] border-r-surface-from"></span>
+                {{-- コンパクト構成：ひとこと(1行目) + 最終更新(2行目) を左に、編集ボタンは右で2行にまたがる --}}
+                <div class="relative flex items-stretch gap-2 bg-gradient-to-br from-surface-from to-base border border-line-accent/40 rounded-2xl shadow-card-3d px-3 py-2">
+                    {{-- 吹き出しのしっぽ（アイコン側に向く） --}}
+                    <span class="absolute top-1/2 -translate-y-1/2 -left-[8px] w-0 h-0 border-y-[8px] border-y-transparent border-r-[10px] border-r-line-accent/40"></span>
+                    <span class="absolute top-1/2 -translate-y-1/2 -left-[6px] w-0 h-0 border-y-[7px] border-y-transparent border-r-[9px] border-r-surface-from"></span>
 
-                    <p id="display-word"
-                       data-placeholder="{{ $wordPlaceholder }}"
-                       class="flex-1 text-[13px] leading-relaxed {{ $word === '' ? 'text-text-sub' : 'text-text-main' }}">
-                        {{ $word !== '' ? $word : $wordPlaceholder }}
-                    </p>
-
-                    {{-- 最終更新 + 編集：区切り線なしの1行フッター --}}
-                    <div class="mt-1 flex items-center justify-between gap-2 leading-none">
+                    {{-- 左：ひとこと + 最終更新 --}}
+                    <div class="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
+                        <p id="display-word"
+                           data-placeholder="{{ $wordPlaceholder }}"
+                           class="text-[13px] leading-snug {{ $word === '' ? 'text-text-sub' : 'text-text-main' }}">
+                            {{ $word !== '' ? $word : $wordPlaceholder }}
+                        </p>
                         <span id="display-word-updated" class="text-[10px] text-text-sub leading-none">
                             最終更新 {{ $shopData['appeal_updated_at'] ?? '未設定' }}
                         </span>
-                        <button type="button" id="open-word-edit-btn"
-                                aria-label="ひとことを編集"
-                                class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] leading-none text-text-sub hover:text-accent-text hover:bg-accent/10 active:scale-95 transition-all">
-                            <x-ui.icon name="edit" class="text-[10px]" />編集
-                        </button>
                     </div>
+
+                    {{-- 右：編集ボタン（2行にまたがって縦中央配置） --}}
+                    <button type="button" id="open-word-edit-btn"
+                            aria-label="ひとことを編集"
+                            class="shrink-0 self-stretch inline-flex flex-col items-center justify-center gap-0.5 px-2.5 rounded-lg text-[11px] font-medium text-text-sub hover:text-accent-text hover:bg-accent/10 active:scale-95 transition-all">
+                        <x-ui.icon name="edit" class="text-[13px]" />
+                        <span class="leading-none">編集</span>
+                    </button>
                 </div>
             </div>
         </div>

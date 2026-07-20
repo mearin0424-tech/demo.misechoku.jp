@@ -402,12 +402,12 @@
         </div>
 
         <div class="detail-search-modal__footer detail-search-modal__footer--search">
-            <button type="button" class="detail-search-modal__btn detail-search-modal__btn--reset" data-detail-search-reset>条件をクリア</button>
+            <button type="button" class="detail-search-modal__btn detail-search-modal__btn--reset" data-detail-search-reset>クリア</button>
             <button type="button" class="detail-search-modal__btn detail-search-modal__btn--save" data-detail-search-save
                     data-save-url="{{ route('cast.search-preferences.save') }}">
-                条件を保存
+                保存
             </button>
-            <button type="button" class="detail-search-modal__btn detail-search-modal__btn--submit" data-detail-search-submit>この条件で検索</button>
+            <button type="button" class="detail-search-modal__btn detail-search-modal__btn--submit" data-detail-search-submit>検索</button>
         </div>
         <p class="detail-search-modal__save-feedback" data-detail-search-save-feedback hidden></p>
     </div>

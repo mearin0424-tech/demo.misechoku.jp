@@ -133,29 +133,26 @@
                             @endif
                         </div>
 
-                        {{-- 4行目：左=ボーナス金（ゴールドカード） / 右=時給（グラスカード）
-                             ※ 右のアクション列（トーク等）と被らないよう、この行は
-                                rc-bottom-bar の右パディング内に収まるカード2枚構成 --}}
-                        <div class="rc-line rc-line--money">
-                            <div class="rc-bonus-card">
-                                <span class="rc-bonus-card__label"><i class="fas fa-gem" aria-hidden="true"></i>ボーナス金</span>
-                                <span class="rc-bonus-card__amount numeric-font">
-                                    @if(!empty($bonusRg))
-                                        ¥{{ number_format((int)$bonusRg['lo']) }}@if((int)$bonusRg['hi'] > (int)$bonusRg['lo'])〜@endif
-                                    @else
-                                        —
+                        {{-- 4行目：Premium Slate（左=ボーナス金 / 右=体入・ヘルプ時給の横型一体スレート） --}}
+                        <div class="pslate">
+                            <div class="pslate__bonus">
+                                <span class="pslate__label">ボーナス金</span>
+                                <span class="pslate__amount">
+                                    @if(!empty($bonusRg))<span class="pslate__yen">¥</span>{{ number_format((int)$bonusRg['lo']) }}@if((int)$bonusRg['hi'] > (int)$bonusRg['lo'])〜@endif
+                                    @else —
                                     @endif
                                 </span>
                             </div>
-                            <div class="rc-wage-card">
-                                <span class="rc-wage-card__row">
-                                    <span>体入時給</span>
-                                    <strong class="numeric-font">@if(!empty($trialR))¥{{ number_format((int)$trialR['lo']) }}〜@else —@endif</strong>
-                                </span>
-                                <span class="rc-wage-card__row">
-                                    <span>ヘルプ時給</span>
-                                    <strong class="numeric-font">@if(!empty($helpR))¥{{ number_format((int)$helpR['lo']) }}〜@else —@endif</strong>
-                                </span>
+                            <span class="pslate__divider" aria-hidden="true"></span>
+                            <div class="pslate__wages">
+                                <div class="pslate__wage">
+                                    <span class="pslate__label">体入時給</span>
+                                    <span class="pslate__wage-amount">@if(!empty($trialR))¥{{ number_format((int)$trialR['lo']) }}〜@else —@endif</span>
+                                </div>
+                                <div class="pslate__wage">
+                                    <span class="pslate__label">ヘルプ時給</span>
+                                    <span class="pslate__wage-amount">@if(!empty($helpR))¥{{ number_format((int)$helpR['lo']) }}〜@else —@endif</span>
+                                </div>
                             </div>
                         </div>
 
