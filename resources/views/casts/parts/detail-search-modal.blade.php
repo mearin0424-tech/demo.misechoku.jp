@@ -106,7 +106,7 @@
             <form id="detail-search-form" class="detail-search-form detail-search-form--search">
                 <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="業種" data-open="true">
                     <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="true">
-                        <span>希望業種</span>
+                        <span><i class="fas fa-briefcase" aria-hidden="true"></i>希望業種</span>
                         <span class="detail-search-accordion__icon">−</span>
                     </button>
                     <div class="detail-search-accordion__body">
@@ -128,7 +128,7 @@
 
                 <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="出勤頻度・時間帯">
                     <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="false">
-                        <span>希望の出勤頻度・時間帯</span>
+                        <span><i class="fas fa-clock" aria-hidden="true"></i>希望の出勤頻度・時間帯</span>
                         <span class="detail-search-accordion__icon">+</span>
                     </button>
                     <div class="detail-search-accordion__body" hidden>
@@ -157,7 +157,7 @@
 
                 <div class="detail-search-section detail-search-section--panel detail-search-section--area" data-summary-group="エリア">
                     <div class="detail-search-section__head">
-                        <span class="detail-search-section__title">エリア</span>
+                        <span class="detail-search-section__title"><i class="fas fa-location-dot" aria-hidden="true"></i>エリア</span>
                         <span class="detail-search-selection-badge" data-selection-count data-empty-label="" {{ count($selectedAreas) > 0 ? '' : 'hidden' }}>
                             {{ count($selectedAreas) }}件選択中
                         </span>
@@ -174,7 +174,7 @@
 
                 <div class="detail-search-section detail-search-section--panel">
                     <div class="detail-search-section__head">
-                        <span class="detail-search-section__title">位置情報から探す</span>
+                        <span class="detail-search-section__title"><i class="fas fa-location-crosshairs" aria-hidden="true"></i>位置情報から探す</span>
                     </div>
 
                     <fieldset class="detail-search-location-modes">
@@ -300,7 +300,7 @@
                 </div>
 
                 <div class="detail-search-section detail-search-section--panel" data-summary-group="給与(時給)">
-                    <label class="detail-search-label detail-search-label--panel" for="detail-search-hourly-wage">給与(時給)</label>
+                    <label class="detail-search-label detail-search-label--panel" for="detail-search-hourly-wage"><i class="fas fa-yen-sign" aria-hidden="true"></i>給与(時給)</label>
                     <div class="detail-search-select-wrap">
                         <select id="detail-search-hourly-wage" name="hourly_wage" class="detail-search-select">
                             <option value="">選択する</option>
@@ -313,7 +313,7 @@
                 </div>
 
                 <div class="detail-search-section detail-search-section--panel" data-summary-group="採用報酬">
-                    <label class="detail-search-label detail-search-label--panel" for="detail-search-reward">採用報酬</label>
+                    <label class="detail-search-label detail-search-label--panel" for="detail-search-reward"><i class="fas fa-gift" aria-hidden="true"></i>採用報酬</label>
                     <div class="detail-search-select-wrap">
                         <select id="detail-search-reward" name="reward" class="detail-search-select">
                             <option value="">選択する</option>
@@ -327,7 +327,7 @@
 
                 <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="働き方・給与">
                     <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="false">
-                        <span>働き方・給与</span>
+                        <span><i class="fas fa-user-clock" aria-hidden="true"></i>働き方・給与</span>
                         <span class="detail-search-accordion__icon">+</span>
                     </button>
                     <div class="detail-search-accordion__body" hidden>
@@ -344,7 +344,7 @@
 
                 <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="歓迎条件">
                     <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="false">
-                        <span>歓迎条件</span>
+                        <span><i class="fas fa-heart" aria-hidden="true"></i>歓迎条件</span>
                         <span class="detail-search-accordion__icon">+</span>
                     </button>
                     <div class="detail-search-accordion__body" hidden>
@@ -361,7 +361,7 @@
 
                 <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="待遇・サポート">
                     <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="false">
-                        <span>待遇・サポート</span>
+                        <span><i class="fas fa-hand-holding-heart" aria-hidden="true"></i>待遇・サポート</span>
                         <span class="detail-search-accordion__icon">+</span>
                     </button>
                     <div class="detail-search-accordion__body" hidden>
@@ -378,7 +378,7 @@
 
                 <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="店舗の雰囲気・設備" data-open="true">
                     <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="true">
-                        <span>店舗の雰囲気・設備</span>
+                        <span><i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>店舗の雰囲気・設備</span>
                         <span class="detail-search-accordion__icon">−</span>
                     </button>
                     <div class="detail-search-accordion__body">

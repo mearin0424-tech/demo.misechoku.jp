@@ -16,7 +16,7 @@ body.theme-light {
     /* --- Tailwind トークン --- */
     --color-base:         #f5f2fb;   /* ベース：極薄ラベンダー */
     --color-surface-from: #ffffff;   /* カード面 */
-    --color-text-main:    #241f33;   /* 濃紫グレー */
+    --color-text-main:    #4b465c;   /* 濃紫グレー */
     --color-text-sub:     #5f5876;
     --color-text-mute:    #8b84a1;
     --color-line:         #e6e0f3;
@@ -44,7 +44,7 @@ body.theme-light {
     --accent-text: #7c3aed;
 
     /* --- 旧レイアウト系変数（search.css / talk.css 等の legacy CSS が参照） --- */
-    --color-text-header:   #241f33;
+    --color-text-header:   #4b465c;
     --color-text:          #2d2742;
     --color-text-muted:    #6d6685;
     --color-border:        rgba(124, 58, 237, 0.16);
@@ -246,7 +246,7 @@ body.theme-light #talk-room-container {
 body.theme-light .msg-left .message-bubble,
 body.theme-light #talk-room-container .msg-left .message-bubble {
     background: #ece7f7 !important;
-    color: #241f33 !important;
+    color: #4b465c !important;
 }
 /* 自分の吹き出しはアクセント色ベタのまま（そのまま調和する） */
 
@@ -281,7 +281,7 @@ body.theme-light #talk-room-container .chat-input-wrapper:focus-within {
 }
 body.theme-light .chat-input-wrapper textarea,
 body.theme-light #talk-room-container .chat-input-wrapper textarea {
-    color: #241f33 !important;
+    color: #4b465c !important;
     background: transparent !important;
     box-shadow: none !important;
     border: 0 !important;
@@ -314,7 +314,7 @@ body.theme-light .quick-reply-panel__edit { color: #6d28d9; }
 body.theme-light .quick-reply-card {
     background: #ffffff;
     border-color: rgba(124, 58, 237, 0.28);
-    color: #241f33;
+    color: #4b465c;
 }
 body.theme-light .quick-reply-card--suggest {
     background: rgba(124, 58, 237, 0.08);
@@ -360,7 +360,7 @@ body.theme-light .notif-popup-section-label {
     border-bottom-color: rgba(124, 58, 237, 0.14) !important;
 }
 body.theme-light .notif-popup-item {
-    color: #241f33 !important;
+    color: #4b465c !important;
     border-bottom-color: rgba(124, 58, 237, 0.12) !important;
 }
 body.theme-light a.notif-popup-item:hover { background: rgba(124, 58, 237, 0.06) !important; }
@@ -370,10 +370,10 @@ body.theme-light .notif-popup-empty { color: #6d6685 !important; }
 body.theme-light .location-modal {
     background: linear-gradient(180deg, #ffffff, #f5f2fb);
     border-color: rgba(124, 58, 237, 0.30);
-    color: #241f33;
+    color: #4b465c;
     box-shadow: 0 24px 64px rgba(76, 29, 149, 0.25);
 }
-body.theme-light .location-modal__title { color: #241f33; }
+body.theme-light .location-modal__title { color: #4b465c; }
 body.theme-light .location-modal__lead,
 body.theme-light .location-modal__hint,
 body.theme-light .location-modal__divider { color: #6d6685; }
@@ -384,7 +384,7 @@ body.theme-light .location-modal__close {
 body.theme-light .location-modal__btn-primary { color: #ffffff; }
 body.theme-light .location-modal__btn-secondary {
     border-color: rgba(124, 58, 237, 0.34);
-    color: #241f33;
+    color: #4b465c;
 }
 body.theme-light .location-modal__btn-ghost {
     border-color: rgba(36, 31, 51, 0.25);
@@ -393,20 +393,20 @@ body.theme-light .location-modal__btn-ghost {
 body.theme-light .location-modal__input {
     background: #ffffff;
     border-color: rgba(124, 58, 237, 0.28);
-    color: #241f33;
+    color: #4b465c;
 }
 body.theme-light .location-modal__current {
     background: rgba(124, 58, 237, 0.06);
     border-color: rgba(124, 58, 237, 0.18);
 }
-body.theme-light .location-modal__current-label { color: #241f33; }
+body.theme-light .location-modal__current-label { color: #4b465c; }
 
 /* おすすめ表示ロジック説明モーダル（modal-readability.css の !important に勝つ） */
 body.theme-light .recommend-info-modal__panel {
     background: #ffffff !important;
     border-color: rgba(124, 58, 237, 0.30) !important;
 }
-body.theme-light .recommend-info-modal__title { color: #241f33 !important; }
+body.theme-light .recommend-info-modal__title { color: #4b465c !important; }
 body.theme-light .recommend-info-modal__close { color: #6d6685 !important; }
 body.theme-light .recommend-info-modal__list li {
     color: #2d2742 !important;
@@ -439,7 +439,7 @@ body.theme-light .review-modal-header {
 body.theme-light .review-modal-title { color: #7c3aed !important; }
 body.theme-light .review-modal-intro { color: #2d2742 !important; }
 body.theme-light .review-modal-body label,
-body.theme-light .review-modal-body .review-item-label { color: #241f33 !important; }
+body.theme-light .review-modal-body .review-item-label { color: #4b465c !important; }
 
 /* --------------------------------------------------------------------------
    8. OFFICIAL（/about /terms /privacy）・サポート系（お知らせ / コラム / HTU / 問合せ）
@@ -487,7 +487,7 @@ body.theme-light .support-faq-item {
 
 /* --------------------------------------------------------------------------
    9. TALK（一覧・ルーム）のダーク残渣を一括補正
-   配色ルール: 本文 = 濃グレー(#241f33/#2d2742)、アクセント・操作 = バイオレット(#6d28d9/#7c3aed)
+   配色ルール: 本文 = 濃グレー(#4b465c/#2d2742)、アクセント・操作 = バイオレット(#6d28d9/#7c3aed)
    -------------------------------------------------------------------------- */
 
 /* 一覧タブ */
@@ -499,7 +499,7 @@ body.theme-light .talk-tabs .tab-item { color: #6d6685; }
 body.theme-light .talk-tabs .tab-item.active { color: #6d28d9; }
 
 /* 一覧行（IG リファインの白文字 !important を上書き） */
-body.theme-light .talk-list-container .talk-name { color: #241f33 !important; }
+body.theme-light .talk-list-container .talk-name { color: #4b465c !important; }
 body.theme-light .talk-list-container .talk-time { color: rgba(36, 31, 51, 0.45) !important; }
 body.theme-light .talk-list-container .talk-last-msg { color: rgba(36, 31, 51, 0.60) !important; }
 body.theme-light .talk-list-container .talk-item:has(.unread-badge) .talk-name { color: #14101f !important; }
@@ -511,7 +511,7 @@ body.theme-light #talk-room-container .talk-room-header {
     background: #ffffff !important;
     border-bottom: 1px solid var(--color-line) !important;
     box-shadow: 0 4px 12px rgba(76, 29, 149, 0.08) !important;
-    color: #241f33;
+    color: #4b465c;
 }
 body.theme-light .talk-job-kind-badge,
 body.theme-light #talk-room-container .talk-job-kind-badge {
@@ -549,12 +549,12 @@ body.theme-light .interview-option-btn,
 body.theme-light #talk-room-container .interview-option-btn {
     background: #ffffff !important;
     border-color: rgba(124, 58, 237, 0.35) !important;
-    color: #241f33 !important;
+    color: #4b465c !important;
 }
 body.theme-light .interview-option-btn .interview-option-date,
 body.theme-light #talk-room-container .interview-option-btn .interview-option-date { color: #6d28d9 !important; }
 body.theme-light .interview-option-btn .interview-option-action,
-body.theme-light .interview-option-btn.is-selected .interview-option-action { color: #241f33 !important; }
+body.theme-light .interview-option-btn.is-selected .interview-option-action { color: #4b465c !important; }
 body.theme-light .interview-option-btn.is-selected,
 body.theme-light #talk-room-container .interview-option-btn.is-selected {
     background: rgba(124, 58, 237, 0.10) !important;
@@ -578,7 +578,7 @@ body.theme-light #talk-room-container .message-bubble-auto a { color: #6d28d9 !i
 /* 自動送信カード内の本文（--color-text-main 参照）はトークン反転で濃グレーに追従する */
 
 /* コンポーザーの textarea：ID 詳細度に負けていた文字色を確実に濃グレー化 */
-body.theme-light #talk-room-container .chat-input-wrapper textarea { color: #241f33 !important; }
+body.theme-light #talk-room-container .chat-input-wrapper textarea { color: #4b465c !important; }
 
 /* 結果テンプレ（room.blade の @push インラインスタイルを上書き） */
 body.theme-light .result-template-button {
@@ -593,7 +593,7 @@ body.theme-light .result-template-button:hover {
 body.theme-light .result-message-textarea {
     background: #ffffff;
     border-color: rgba(124, 58, 237, 0.30);
-    color: #241f33;
+    color: #4b465c;
     box-shadow: inset 0 1px 3px rgba(76, 29, 149, 0.08);
 }
 body.theme-light .hired-wage-field-wrap label { color: #6d28d9; }
@@ -622,17 +622,17 @@ body.theme-light .interview-modal {
     background: #ffffff;
     border: 1px solid rgba(124, 58, 237, 0.32);
     box-shadow: 0 16px 50px rgba(76, 29, 149, 0.25);
-    color: #241f33;
+    color: #4b465c;
 }
 body.theme-light .interview-modal-close { color: #6d6685; }
 body.theme-light .interview-modal-desc { color: #5f5876; opacity: 1; }
 body.theme-light .interview-menu-sheet {
     background: #ffffff;
-    color: #241f33;
+    color: #4b465c;
 }
 body.theme-light .result-employment-kind-select {
     background: #ffffff;
-    color: #241f33;
+    color: #4b465c;
     border-color: rgba(124, 58, 237, 0.30);
 }
 
@@ -651,7 +651,7 @@ body.theme-light .mypage-mini-row:hover {
     background: rgba(124, 58, 237, 0.05) !important;
     border-color: rgba(124, 58, 237, 0.35) !important;
 }
-body.theme-light .mypage-mini-row__name { color: #241f33; }
+body.theme-light .mypage-mini-row__name { color: #4b465c; }
 body.theme-light .mypage-mini-row__sub { color: #6d6685; }
 body.theme-light .mypage-mini-row__status { background: rgba(124, 58, 237, 0.10); color: #6d28d9; }
 body.theme-light .mypage-mini-row__status.is-rejected,
@@ -663,7 +663,7 @@ body.theme-light .shop-management-empty {
     background: #ffffff;
 }
 body.theme-light .payment-bank-section { border-top-color: var(--color-line); }
-body.theme-light .payment-bank-accordion__summary-text { color: #241f33; }
+body.theme-light .payment-bank-accordion__summary-text { color: #4b465c; }
 body.theme-light .payment-bank-data-row { border-bottom-color: rgba(124, 58, 237, 0.12); }
 
 /* 下部固定 CTA バー：ダークガラス → 白バー */
@@ -687,17 +687,17 @@ body.theme-light .shop-action-modal-header {
     background: #f7f4fc !important;
     border-bottom-color: rgba(124, 58, 237, 0.20) !important;
 }
-body.theme-light .shop-action-modal-title { color: #241f33 !important; }
+body.theme-light .shop-action-modal-title { color: #4b465c !important; }
 body.theme-light .shop-action-modal-note {
     color: #5f5876 !important;
     background: #f7f4fc !important;
     border-color: rgba(124, 58, 237, 0.16) !important;
 }
-body.theme-light .shop-action-modal-check { color: #241f33 !important; }
+body.theme-light .shop-action-modal-check { color: #4b465c !important; }
 body.theme-light .shop-action-modal-label { color: #5f5876 !important; }
 body.theme-light .shop-action-modal-input {
     background: #ffffff !important;
-    color: #241f33 !important;
+    color: #4b465c !important;
     border-color: rgba(124, 58, 237, 0.30) !important;
 }
 body.theme-light .shop-action-modal-input::placeholder { color: rgba(95, 88, 118, 0.55) !important; }
@@ -711,11 +711,11 @@ body.theme-light .shop-action-modal-close { color: #6d6685 !important; }
    13. サイドメニュー配下ページのライト徹底化 (2026-07-19)
    対象: /setting/* /support/* /about /terms /privacy 等
    各 blade の @push で直書きされたダーク色をライトへ強制上書きする
-   配色: 面=白、本文=#241f33、補助=#5f5876、アクセント=#6d28d9
+   配色: 面=白、本文=#4b465c、補助=#5f5876、アクセント=#6d28d9
    -------------------------------------------------------------------------- */
 
 /* ===== 設定ページ（account / notification / subscription 共通 .setting-*） ===== */
-body.theme-light .setting-page { color: #241f33 !important; }
+body.theme-light .setting-page { color: #4b465c !important; }
 body.theme-light .setting-title { color: #6d28d9 !important; }
 body.theme-light .setting-lead,
 body.theme-light .setting-guide,
@@ -729,14 +729,14 @@ body.theme-light .setting-section--danger {
     border-color: rgba(220, 38, 38, 0.35) !important;
     background: #fff7f7 !important;
 }
-body.theme-light .setting-section-title { color: #241f33 !important; }
+body.theme-light .setting-section-title { color: #4b465c !important; }
 body.theme-light .setting-section-title i { color: #6d28d9 !important; }
 body.theme-light .setting-section--danger .setting-section-title i { color: #b91c1c !important; }
-body.theme-light .setting-form-group label { color: #241f33 !important; font-weight: 700; }
+body.theme-light .setting-form-group label { color: #4b465c !important; font-weight: 700; }
 body.theme-light .setting-form-group input,
 body.theme-light .setting-form-group textarea {
     background: #ffffff !important;
-    color: #241f33 !important;
+    color: #4b465c !important;
     border-color: rgba(124, 58, 237, 0.30) !important;
     box-shadow: inset 0 1px 3px rgba(76, 29, 149, 0.06) !important;
 }
@@ -753,9 +753,9 @@ body.theme-light .setting-error { color: #b91c1c !important; }
 
 /* 行タイプ */
 body.theme-light .setting-row + .setting-row { border-top-color: rgba(124, 58, 237, 0.10) !important; }
-body.theme-light .setting-row-label { color: #241f33 !important; font-weight: 700; }
+body.theme-light .setting-row-label { color: #4b465c !important; font-weight: 700; }
 body.theme-light .setting-row-desc { color: #5f5876 !important; }
-body.theme-light .setting-check { color: #241f33 !important; }
+body.theme-light .setting-check { color: #4b465c !important; }
 body.theme-light .setting-linked { color: #059669 !important; }
 
 /* フラッシュ・アラート */
@@ -785,7 +785,7 @@ body.theme-light .setting-btn-unlink,
 body.theme-light .setting-btn-push {
     background: #ffffff !important;
     border-color: rgba(124, 58, 237, 0.30) !important;
-    color: #241f33 !important;
+    color: #4b465c !important;
 }
 body.theme-light .setting-btn-unlink:hover { background: rgba(124, 58, 237, 0.06) !important; }
 body.theme-light .setting-btn-test {
@@ -801,7 +801,7 @@ body.theme-light .withdraw-warning {
     color: #b91c1c !important;
 }
 body.theme-light .withdraw-warning i { color: #dc2626 !important; }
-body.theme-light .withdraw-check { color: #241f33 !important; }
+body.theme-light .withdraw-check { color: #4b465c !important; }
 
 /* ===== サブスクリプション（.plan-*） ===== */
 body.theme-light .plan-current,
@@ -818,7 +818,7 @@ body.theme-light .plan-current-label,
 body.theme-light .plan-badge { color: #6d28d9 !important; }
 body.theme-light .plan-current-name,
 body.theme-light .plan-name,
-body.theme-light .plan-price { color: #241f33 !important; }
+body.theme-light .plan-price { color: #4b465c !important; }
 
 /* ===== サポート系（column / notice / htu / form）追加補正 ===== */
 body.theme-light .support-column-title,
@@ -826,7 +826,7 @@ body.theme-light .support-column-item-title,
 body.theme-light .support-notice-title,
 body.theme-light .support-notice-item-title,
 body.theme-light .support-form-title,
-body.theme-light .support-form-faq-title { color: #241f33 !important; }
+body.theme-light .support-form-faq-title { color: #4b465c !important; }
 body.theme-light .support-column-lead,
 body.theme-light .support-column-item-meta,
 body.theme-light .support-notice-lead,
@@ -849,7 +849,7 @@ body.theme-light .support-notice-breadcrumb a { color: #6d28d9 !important; }
 body.theme-light .support-column-pagination .pagination li span,
 body.theme-light .support-column-pagination .pagination li a {
     background: #ffffff !important;
-    color: #241f33 !important;
+    color: #4b465c !important;
     border-color: rgba(124, 58, 237, 0.24) !important;
 }
 body.theme-light .support-column-pagination .pagination li.active span {
@@ -865,23 +865,23 @@ body.theme-light .htu-section,
 body.theme-light .htu-block,
 body.theme-light .htu-card {
     background: #ffffff !important;
-    color: #241f33 !important;
+    color: #4b465c !important;
     border-color: rgba(124, 58, 237, 0.20) !important;
 }
 body.theme-light .htu-title,
 body.theme-light .htu-heading,
-body.theme-light .htu-block-title { color: #241f33 !important; }
+body.theme-light .htu-block-title { color: #4b465c !important; }
 body.theme-light .htu-lead,
 body.theme-light .htu-text,
 body.theme-light .htu-note { color: #5f5876 !important; }
 
 /* 問い合わせフォーム */
-body.theme-light .support-form-group label { color: #241f33 !important; }
+body.theme-light .support-form-group label { color: #4b465c !important; }
 body.theme-light .support-form-group input,
 body.theme-light .support-form-group select,
 body.theme-light .support-form-group textarea {
     background: #ffffff !important;
-    color: #241f33 !important;
+    color: #4b465c !important;
     border-color: rgba(124, 58, 237, 0.30) !important;
 }
 body.theme-light .support-form-card,
@@ -889,19 +889,19 @@ body.theme-light .support-form-faq,
 body.theme-light .support-faq-item {
     background: #ffffff !important;
     border-color: rgba(124, 58, 237, 0.16) !important;
-    color: #241f33 !important;
+    color: #4b465c !important;
 }
 
 /* ===== 規約・ポリシー本文の追加補正 ===== */
-body.theme-light .policy-doc-shell { color: #241f33 !important; }
+body.theme-light .policy-doc-shell { color: #4b465c !important; }
 body.theme-light .policy-doc-shell h1,
 body.theme-light .policy-doc-shell h2,
-body.theme-light .policy-doc-shell h3 { color: #241f33 !important; }
+body.theme-light .policy-doc-shell h3 { color: #4b465c !important; }
 body.theme-light .policy-doc-shell a { color: #6d28d9 !important; }
 body.theme-light .policy-doc-toc a {
     background: #ffffff !important;
     border-color: rgba(124, 58, 237, 0.24) !important;
-    color: #241f33 !important;
+    color: #4b465c !important;
 }
 body.theme-light .policy-doc-toc a:hover { background: rgba(124, 58, 237, 0.06) !important; }
 
@@ -910,7 +910,7 @@ body.theme-light .policy-doc-toc a:hover { background: rgba(124, 58, 237, 0.06) 
    §14 ハードコード白/薄グレー文字の一括補正 (2026-07-19)
    各 blade の @push('styles') やレガシー talk.css/search.css に残る
    「白 (#fff / #f5f5f5)」「淡グレー (#c0c0c0 / #a0a0a0 / #d4d4d4)」
-   を、白背景のライト画面で読める色 (#241f33 / #5f5876) に強制上書きする。
+   を、白背景のライト画面で読める色 (#4b465c / #5f5876) に強制上書きする。
    ダークページ (body.theme-light が付かない画面) には影響しない。
    ========================================================================== */
 
@@ -922,7 +922,7 @@ body.theme-light .setting-current-value,
 body.theme-light .setting-form-help,
 body.theme-light .setting-modal-title,
 body.theme-light .withdraw-check {
-    color: #241f33 !important;
+    color: #4b465c !important;
 }
 body.theme-light .setting-lead,
 body.theme-light .setting-guide,
@@ -940,7 +940,7 @@ body.theme-light .staff-form-shell,
 body.theme-light .staff-list-item-name,
 body.theme-light .staff-form-title,
 body.theme-light .staff-form-label {
-    color: #241f33 !important;
+    color: #4b465c !important;
 }
 body.theme-light .staff-list-item-meta,
 body.theme-light .staff-form-help,
@@ -948,7 +948,7 @@ body.theme-light .staff-form-cancel {
     color: #5f5876 !important;
 }
 body.theme-light .staff-form-cancel:hover {
-    color: #241f33 !important;
+    color: #4b465c !important;
     border-color: rgba(124, 58, 237, 0.35) !important;
 }
 
@@ -960,7 +960,7 @@ body.theme-light .support-form-label,
 body.theme-light .support-form-input,
 body.theme-light .support-form-textarea,
 body.theme-light .support-form-select {
-    color: #241f33 !important;
+    color: #4b465c !important;
 }
 body.theme-light .support-form-lead,
 body.theme-light .support-form-help,
@@ -980,7 +980,7 @@ body.theme-light .support-column-title,
 body.theme-light .support-column-item-title,
 body.theme-light .support-column-body,
 body.theme-light .support-notice-page {
-    color: #241f33 !important;
+    color: #4b465c !important;
 }
 body.theme-light .support-column-lead,
 body.theme-light .support-column-item-meta,
@@ -995,7 +995,7 @@ body.theme-light .support-column-back {
    ダークテーマ (body に theme-light が付かない画面) では従来どおり。 */
 body.theme-light.page-talk-list .talk-name,
 body.theme-light .talk-list-container .talk-name {
-    color: #241f33 !important;
+    color: #4b465c !important;
 }
 body.theme-light.page-talk-list .talk-time,
 body.theme-light .talk-list-container .talk-time {
@@ -1043,7 +1043,7 @@ body.theme-light .talk-template-menu,
 body.theme-light .talk-template-menu-panel,
 body.theme-light .interview-menu-sheet,
 body.theme-light .talk-action-menu-sheet {
-    color: #241f33 !important;
+    color: #4b465c !important;
 }
 body.theme-light .talk-template-menu-title,
 body.theme-light .interview-menu-title,
@@ -1053,7 +1053,7 @@ body.theme-light .talk-template-slot-body,
 body.theme-light .result-template-title,
 body.theme-light .result-template-body,
 body.theme-light .hired-wage-field-wrap label {
-    color: #241f33 !important;
+    color: #4b465c !important;
 }
 body.theme-light .talk-template-menu-desc,
 body.theme-light .talk-template-slot-hint,
@@ -1066,7 +1066,7 @@ body.theme-light .hired-wage-field-wrap input,
 body.theme-light .result-message-textarea,
 body.theme-light .talk-template-slot-textarea,
 body.theme-light .talk-action-menu-input {
-    color: #241f33 !important;
+    color: #4b465c !important;
 }
 body.theme-light .hired-wage-field-wrap input::placeholder,
 body.theme-light .result-message-textarea::placeholder,
@@ -1090,7 +1090,7 @@ body.theme-light .talk-action-menu-input::placeholder {
     font-weight: 700;
     line-height: 1.4;
     color: #ffffff;
-    background: #241f33;
+    background: #4b465c;
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
     max-width: calc(100vw - 32px);
@@ -1113,7 +1113,7 @@ body.theme-light .review-modal-title,
 body.theme-light .review-rating-question,
 body.theme-light .review-comment-label,
 body.theme-light .review-comment-textarea {
-    color: #241f33 !important;
+    color: #4b465c !important;
 }
 body.theme-light .review-modal-intro,
 body.theme-light .review-modal-loading,
@@ -1218,15 +1218,15 @@ body.theme-light .detail-search-location-card.is-selected {
     background: rgba(124, 58, 237, 0.07);
     border-color: #7c3aed;
 }
-body.theme-light .detail-search-location-card__title { color: #241f33; }
-body.theme-light .detail-search-location-card.is-selected .detail-search-location-card__title { color: #241f33; }
+body.theme-light .detail-search-location-card__title { color: #4b465c; }
+body.theme-light .detail-search-location-card.is-selected .detail-search-location-card__title { color: #4b465c; }
 body.theme-light .detail-search-location-card__sub { color: #6d6685; }
 body.theme-light .detail-search-location-card__icon { color: #a78bfa; }
 body.theme-light .detail-search-location-card.is-selected .detail-search-location-card__icon { color: #7c3aed; }
 body.theme-light .detail-search-location-input {
     background: #ffffff;
     border-color: rgba(124, 58, 237, 0.24);
-    color: #241f33;
+    color: #4b465c;
 }
 body.theme-light .detail-search-location-input::placeholder { color: rgba(36, 31, 51, 0.35); }
 body.theme-light .detail-search-location-input:focus {
@@ -1302,14 +1302,14 @@ body.theme-light .task-popup__close,
 body.theme-light .notif-popup__gear { color: #857ca0; }
 body.theme-light .notif-popup__close:hover,
 body.theme-light .task-popup__close:hover,
-body.theme-light .notif-popup__gear:hover { color: #241f33; }
+body.theme-light .notif-popup__gear:hover { color: #4b465c; }
 body.theme-light .notif-popup__tab { color: #574d6f; }
-body.theme-light .notif-popup__tab:hover { color: #241f33; }
+body.theme-light .notif-popup__tab:hover { color: #4b465c; }
 body.theme-light .notif-popup__tab.is-active { color: #6d28d9; }
 body.theme-light .notif-popup__section-label,
 body.theme-light .task-popup__section-label { color: #6d28d9; }
 body.theme-light .task-popup__section--high .task-popup__section-label i { color: #dc2626; }
-body.theme-light .notif-popup__official-title { color: #241f33; }
+body.theme-light .notif-popup__official-title { color: #4b465c; }
 body.theme-light .notif-popup__official-date { color: #857ca0; }
 body.theme-light .notif-popup__official-chev { color: #a78bfa; }
 body.theme-light .notif-popup__item-cat,
@@ -1321,7 +1321,7 @@ body.theme-light .task-popup__item--high .task-popup__item-cat { color: #dc2626;
 body.theme-light .notif-popup__item-time,
 body.theme-light .task-popup__item-time { color: #857ca0; }
 body.theme-light .notif-popup__item-title,
-body.theme-light .task-popup__item-title { color: #241f33; }
+body.theme-light .task-popup__item-title { color: #4b465c; }
 body.theme-light .notif-popup__item-desc,
 body.theme-light .task-popup__item-desc { color: #5f5876; }
 body.theme-light .notif-popup__empty,
@@ -1334,7 +1334,7 @@ body.theme-light .notif-popup__item--gold    .notif-popup__item-icon { color: #a
 body.theme-light .notif-popup__item--success .notif-popup__item-icon { color: #047857; }
 body.theme-light .notif-popup__item--muted   .notif-popup__item-icon { color: #6b7280; }
 body.theme-light .notif-popup__empty-title,
-body.theme-light .task-popup__empty-title { color: #241f33; }
+body.theme-light .task-popup__empty-title { color: #4b465c; }
 body.theme-light .notif-popup__empty-desc,
 body.theme-light .task-popup__empty-desc { color: #857ca0; }
 
@@ -1356,7 +1356,7 @@ body.theme-light .ai-chat__header {
     background: rgba(124, 58, 237, 0.05);
     border-bottom-color: rgba(124, 58, 237, 0.16);
 }
-body.theme-light .ai-chat__header-title { color: #241f33; }
+body.theme-light .ai-chat__header-title { color: #4b465c; }
 body.theme-light .ai-chat__header-sub { color: #6d6685; }
 
 body.theme-light .ai-chat__notice {
@@ -1364,7 +1364,7 @@ body.theme-light .ai-chat__notice {
     border-bottom-color: rgba(124, 58, 237, 0.14);
 }
 body.theme-light .ai-chat__notice-label { color: #574d6f; }
-body.theme-light .ai-chat__notice-label strong { color: #241f33; }
+body.theme-light .ai-chat__notice-label strong { color: #4b465c; }
 body.theme-light .ai-chat__notice-link {
     background: rgba(124, 58, 237, 0.08);
     border-color: rgba(124, 58, 237, 0.30);
@@ -1378,7 +1378,7 @@ body.theme-light .ai-chat__reset {
 }
 body.theme-light .ai-chat__reset:hover {
     background: rgba(124, 58, 237, 0.08);
-    color: #241f33;
+    color: #4b465c;
 }
 body.theme-light .ai-chat__source { color: #6d28d9; }
 
@@ -1386,7 +1386,7 @@ body.theme-light .ai-chat__source { color: #6d28d9; }
 body.theme-light .ai-chat__bubble--ai {
     background: #ffffff;
     border-color: rgba(124, 58, 237, 0.20);
-    color: #241f33;
+    color: #4b465c;
     box-shadow: 0 2px 8px rgba(76, 29, 149, 0.06);
 }
 /* ユーザーバブル（紫グラデ×白文字）はライトでもそのまま */
@@ -1399,7 +1399,7 @@ body.theme-light .ai-chat__card {
 }
 body.theme-light .ai-chat__card:hover { border-color: rgba(124, 58, 237, 0.45); }
 body.theme-light .ai-chat__card-thumb { background: #ede7f8; }
-body.theme-light .ai-chat__card-title { color: #241f33; }
+body.theme-light .ai-chat__card-title { color: #4b465c; }
 body.theme-light .ai-chat__card-meta { color: #6d6685; }
 body.theme-light .ai-chat__card-reason { color: #6d28d9; }
 body.theme-light .ai-chat__card-cta { color: #7c3aed; }
@@ -1421,7 +1421,7 @@ body.theme-light .ai-chat__quick:hover {
 body.theme-light .ai-chat__input {
     background: #ffffff;
     border-color: rgba(124, 58, 237, 0.24);
-    color: #241f33;
+    color: #4b465c;
 }
 body.theme-light .ai-chat__input::placeholder { color: rgba(36, 31, 51, 0.35); }
 
@@ -1432,25 +1432,25 @@ body.theme-light .ai-chat__input::placeholder { color: rgba(36, 31, 51, 0.35); }
    ポップアップ内テキストを一段濃いインクカラーへ引き上げる
    ============================================================ */
 body.theme-light .notif-popup__head-label,
-body.theme-light .task-popup__head-label { color: #1a1526 !important; }
+body.theme-light .task-popup__head-label { color: #5b21b6 !important; }
 body.theme-light .notif-popup__tab { color: #3f3956; }
 body.theme-light .notif-popup__tab.is-active { color: #5b21b6; }
 body.theme-light .notif-popup__section-label,
 body.theme-light .task-popup__section-label { color: #5b21b6; }
-body.theme-light .notif-popup__official-title { color: #1a1526; }
+body.theme-light .notif-popup__official-title { color: #5b21b6; }
 body.theme-light .notif-popup__official-date { color: #6d6685; }
 body.theme-light .notif-popup__item-cat,
 body.theme-light .task-popup__item-cat { color: #5b21b6; }
 body.theme-light .notif-popup__item-time,
 body.theme-light .task-popup__item-time { color: #6d6685; }
 body.theme-light .notif-popup__item-title,
-body.theme-light .task-popup__item-title { color: #1a1526 !important; }
+body.theme-light .task-popup__item-title { color: #5b21b6 !important; }
 body.theme-light .notif-popup__item-desc,
 body.theme-light .task-popup__item-desc { color: #453f5c; }
 body.theme-light .notif-popup__empty,
 body.theme-light .task-popup__empty { color: #6d6685; }
 body.theme-light .notif-popup__empty-title,
-body.theme-light .task-popup__empty-title { color: #1a1526; }
+body.theme-light .task-popup__empty-title { color: #5b21b6; }
 body.theme-light .notif-popup__empty-desc,
 body.theme-light .task-popup__empty-desc { color: #6d6685; }
 
@@ -1467,13 +1467,13 @@ body.theme-light .detail-search-accordion--panel {
     box-shadow: 0 2px 10px rgba(76, 29, 149, 0.05);
 }
 /* アコーディオン見出し */
-body.theme-light .detail-search-accordion__head { color: #241f33; }
+body.theme-light .detail-search-accordion__head { color: #4b465c; }
 body.theme-light .detail-search-accordion__head:hover { color: #6d28d9; }
 body.theme-light .detail-search-accordion__icon { color: #7c3aed; }
 /* セクション見出し・ラベル */
 body.theme-light .detail-search-section__title,
 body.theme-light .detail-search-label--panel,
-body.theme-light .detail-search-label { color: #241f33; }
+body.theme-light .detail-search-label { color: #4b465c; }
 /* 選択件数バッジ */
 body.theme-light .detail-search-selection-badge {
     background: rgba(124, 58, 237, 0.08);
@@ -1484,7 +1484,7 @@ body.theme-light .detail-search-selection-badge {
 body.theme-light .detail-search-select {
     background: #ffffff;
     border-color: rgba(124, 58, 237, 0.24);
-    color: #241f33;
+    color: #4b465c;
 }
 body.theme-light .detail-search-select:focus {
     border-color: #7c3aed;
@@ -1504,7 +1504,7 @@ body.theme-light .detail-search-modal__btn--reset {
 }
 body.theme-light .detail-search-modal__btn--reset:hover {
     background: rgba(124, 58, 237, 0.05);
-    color: #241f33;
+    color: #4b465c;
 }
 /* 検索ボタン：黒影を淡いラベンダー影へ */
 body.theme-light .detail-search-modal__btn--submit {
@@ -1517,7 +1517,7 @@ body.theme-light .detail-search-modal__btn--submit {
 body.theme-light .detail-search-chip--search {
     background: rgba(168, 85, 247, 0.08);
     border-color: rgba(168, 85, 247, 0.30);
-    color: #241f33;
+    color: #4b465c;
 }
 body.theme-light .detail-search-chip--search:hover {
     background: rgba(168, 85, 247, 0.12);
@@ -1569,11 +1569,11 @@ body.theme-light .msg-right .message-bubble-auto,
 body.theme-light #talk-room-container .message-bubble-auto {
     background: linear-gradient(180deg, #f3edfd 0%, #e9e0fa 100%) !important;
     border: 1px solid rgba(124, 58, 237, 0.45) !important;
-    color: #241f33 !important;
+    color: #4b465c !important;
     box-shadow: 0 2px 10px rgba(76, 29, 149, 0.10) !important;
 }
 body.theme-light .message-bubble-auto p,
-body.theme-light #talk-room-container .message-bubble-auto p { color: #241f33 !important; }
+body.theme-light #talk-room-container .message-bubble-auto p { color: #4b465c !important; }
 body.theme-light .message-bubble-auto .interview-body-copy,
 body.theme-light #talk-room-container .message-bubble-auto .interview-body-copy { color: #3a3352 !important; }
 body.theme-light .msg-avatar-auto {
@@ -1597,5 +1597,77 @@ body.theme-light .talk-template-tab {
 body.theme-light .talk-template-tab.is-active {
     background: rgba(124, 58, 237, 0.12);
     border-color: rgba(124, 58, 237, 0.45);
+    color: #5b21b6;
+}
+
+
+/* §22 トークルーム サブヘッダー薄型化のライト配色 */
+body.theme-light .talk-status-value { color: #6d28d9; }
+body.theme-light .talk-status-dot { background: #7c3aed; }
+body.theme-light .talk-job-kind-switch__caption,
+body.theme-light .talk-job-kind-chip__caption { color: #857ca0; }
+body.theme-light .talk-job-kind-switch__segment { color: #857ca0 !important; }
+body.theme-light .talk-job-kind-switch__segment.is-active {
+    color: #5b21b6 !important;
+    border-bottom-color: #7c3aed !important;
+}
+body.theme-light .talk-job-kind-chip__value { color: #6d28d9; }
+body.theme-light .talk-job-kind-chip .fa-lock { color: #857ca0; }
+
+
+/* §23 コンポーザー刷新のライト配色 */
+body.theme-light .quick-reply-card--action {
+    background: rgba(124, 58, 237, 0.10) !important;
+    border-color: rgba(124, 58, 237, 0.45) !important;
+    color: #5b21b6 !important;
+}
+
+
+/* ============================================================
+   §17-e 詳細検索：タイトルバーのライト化 + プロファイル基準の見出し
+   （タイトル部に残っていたダーク面 rgba(10,10,10,0.96) を白へ）
+   ============================================================ */
+body.theme-light .detail-search-modal__header--search {
+    background: #ffffff !important;
+    border-bottom-color: rgba(124, 58, 237, 0.16) !important;
+}
+body.theme-light .detail-search-modal__title {
+    color: #6d28d9 !important;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+}
+body.theme-light .detail-search-modal__header-line { background: rgba(124, 58, 237, 0.30) !important; }
+body.theme-light .detail-search-section__title i,
+body.theme-light .detail-search-label--panel i,
+body.theme-light .detail-search-label i,
+body.theme-light .detail-search-accordion__head span i { color: #7c3aed; }
+
+/* ============================================================
+   §24 入力画面の見出しをプロファイル画面基準に統一
+   （プロフィール編集 / 求人票編集のセクションタイトル）
+   ============================================================ */
+body.theme-light .shop-profile-edit__section-title,
+body.theme-light .job-edit-v2__sec-title {
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.14em !important;
+    color: #6d28d9 !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+body.theme-light .shop-profile-edit__section-title i,
+body.theme-light .job-edit-v2__sec-title i { color: #7c3aed; font-size: 12px; }
+
+
+/* ============================================================
+   §25 タイポグラフィ・ポリシー（2026-07-20）
+   真っ黒文字を廃止：見出し・名前 = 濃い紫 / 平文 = グレー
+   ============================================================ */
+body.theme-light h1,
+body.theme-light h2,
+body.theme-light h3,
+body.theme-light .app-title {
     color: #5b21b6;
 }

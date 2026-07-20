@@ -142,7 +142,8 @@
     {{-- 左側：戻るボタン または トーク相手アイコン --}}
     <div class="header-left">
         @if($showBackButton)
-            <a href="javascript:history.back()" class="btn-back">
+            {{-- 履歴バックではなく、階層上の親画面へ戻す導線（app-v2 で $backUrl を算出） --}}
+            <a href="{{ $backUrl ?? 'javascript:history.back()' }}" class="btn-back" aria-label="前の画面へ戻る">
                 <i class="fas fa-chevron-left"></i>
             </a>
         @endif

@@ -156,7 +156,7 @@
                     '  <div class="ai-chat__card-body">' +
                     '    <p class="ai-chat__card-title">' + escapeHtml(r.name) + '</p>' +
                     '    <p class="ai-chat__card-meta">' + escapeHtml(meta) + '</p>' +
-                    '    <p class="ai-chat__card-reason"><i class="fas fa-sparkles"></i> ' + escapeHtml(r.reason || '') + '</p>' +
+                    '    <p class="ai-chat__card-reason"><i class="fas fa-wand-magic-sparkles"></i> ' + escapeHtml(r.reason || '') + '</p>' +
                     '  </div>' +
                     '  <span class="ai-chat__card-cta">求人を見る →</span>' +
                     '</a>'

@@ -874,7 +874,7 @@
         {{-- ファーストビュー CTA：スクロールさせずに登録導線を完結 --}}
         <div class="lp-hero__cta">
             <a href="{{ route('cast.register') }}" class="lp-hero__cta-primary">
-                <i class="fas fa-sparkles"></i> 無料でお店を探してみる
+                <i class="fas fa-wand-magic-sparkles"></i> 無料でお店を探してみる
             </a>
             <span class="lp-hero__cta-micro">
                 <span><i class="fas fa-stopwatch"></i>登録は30秒</span>
@@ -1015,7 +1015,7 @@
         </h2>
         <p class="lp-cta-band__sub">最大10万円のお祝い金。登録も利用もずっと無料です。</p>
         <a href="{{ route('cast.register') }}" class="lp-hero__cta-primary">
-            <i class="fas fa-sparkles"></i> 30秒で無料登録する
+            <i class="fas fa-wand-magic-sparkles"></i> 30秒で無料登録する
         </a>
         <span class="lp-cta-band__micro">しつこい連絡は一切ありません。匿名のままお店を探せます。</span>
     </div>
@@ -1148,7 +1148,7 @@
             <span>登録30秒・ずっと無料</span>
         </div>
         <a href="{{ route('cast.register') }}" class="lp-fixed-cta__btn">
-            <i class="fas fa-sparkles"></i> 無料ではじめる
+            <i class="fas fa-wand-magic-sparkles"></i> 無料ではじめる
         </a>
     </div>
     <p class="lp-fixed-cta__shop">

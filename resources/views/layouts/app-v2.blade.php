@@ -8,7 +8,7 @@
         $metaDescription = trim($__env->yieldContent('meta_description')) ?: 'ミセチョクのデモサイトです。';
         $metaImage = trim($__env->yieldContent('meta_image')) ?: asset('assets/images/pwa/icon-512.png');
         $canonicalUrl = trim($__env->yieldContent('canonical')) ?: url()->current();
-        $assetVersion = '20260720-simple-chrome';
+        $assetVersion = '20260720-ink-policy';
         $resolvedTitle = $metaTitle !== ''
             ? $metaTitle
             : ($pageTitle !== '' ? $pageTitle . ' | ' . config('app.name', 'ミセチョク') : config('app.name', 'ミセチョク'));
@@ -26,6 +26,38 @@
         $isLoginPage = request()->routeIs('login.demo');
         $showBackButton = !$isMainPage && !$isLoginPage;
         $isTalkRoomPage = request()->routeIs('cast.talk.room', 'shop.talk.room');
+
+        // ===== 戻る導線（2026-07-20）=====
+        // ブラウザ履歴（history.back）ではなく、画面階層上の「親画面」へ確実に戻す。
+        $backRoleTop = auth()->guard('member')->check() ? 'cast' : 'shop';
+        $backUrl = null;
+        if ($showBackButton) {
+            if ($isTalkRoomPage) {
+                $backUrl = route($backRoleTop . '.talk.index');
+            } elseif (request()->is('cast/shopprofiles/*')) {
+                $backUrl = route('cast.search.index', ['tab' => 'list']);
+            } elseif (request()->is('shop/castprofileview/*')) {
+                $backUrl = route('shop.search.index');
+            } elseif (request()->is('shop/recruits/*') && !request()->is('shop/recruits/status')) {
+                $backUrl = url('/shop/recruits/status');
+            } elseif (request()->is('shop/recruits/status')) {
+                $backUrl = route('shop.mypage.index');
+            } elseif (request()->is('cast/mypage/*')) {
+                $backUrl = route('cast.mypage.index');
+            } elseif (request()->is('shop/mypage/*')) {
+                $backUrl = route('shop.mypage.index');
+            } elseif (request()->is('setting/*') || request()->is('subscription*')) {
+                $backUrl = route($backRoleTop . '.mypage.index');
+            } else {
+                // 汎用：URL を1階層上へ（例: /cast/column/xxx → /cast/column）。
+                // 1階層しかない場合はロールのホームへ。
+                $pathSegs = explode('/', trim(request()->path(), '/'));
+                array_pop($pathSegs);
+                $backUrl = count($pathSegs) > 0
+                    ? url(implode('/', $pathSegs))
+                    : route($backRoleTop . '.home');
+            }
+        }
 
         $segments = explode('.', $routeName ?: '');
         $lastSegment = end($segments) ?: '';
@@ -530,11 +562,15 @@
               色味（アメジストグラデ）は撤去し、blur + 彩度ブーストのフロスト面のみ。
               ダーク面 = 白文字 / ライトテーマ = 濃色文字 で可読性を確保する --- */
         nav[data-bottom-nav] {
-            background: rgba(18, 15, 26, 0.55) !important;
-            backdrop-filter: blur(20px) saturate(150%) !important;
-            -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
-            border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
-            box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.25) !important;
+            background: linear-gradient(0deg,
+                rgba(24, 20, 34, 0.48) 0%,
+                rgba(18, 15, 26, 0.36) 100%) !important;
+            backdrop-filter: blur(28px) saturate(190%) !important;
+            -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.18) !important;
+            box-shadow:
+                inset 0 -1px 0 rgba(255, 255, 255, 0.14),
+                0 -8px 28px rgba(0, 0, 0, 0.28) !important;
         }
         /* ナビの文字・アイコン：フラットな紫（影・ネオンなしのシンプル表示） */
         nav[data-bottom-nav] .nav-item {
@@ -549,15 +585,15 @@
         body.theme-light nav[data-bottom-nav],
         body.theme-premium-white nav[data-bottom-nav] {
             background: linear-gradient(0deg,
-                rgba(255, 255, 255, 0.80) 0%,
-                rgba(255, 255, 255, 0.55) 100%) !important;
-            backdrop-filter: blur(22px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(22px) saturate(180%) !important;
-            border-top: 1px solid rgba(255, 255, 255, 0.85) !important;
+                rgba(255, 255, 255, 0.58) 0%,
+                rgba(255, 255, 255, 0.32) 100%) !important;
+            backdrop-filter: blur(30px) saturate(200%) !important;
+            -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.80) !important;
             box-shadow:
                 inset 0 -1px 0 rgba(255, 255, 255, 0.95),
                 inset 0 1px 0 rgba(124, 58, 237, 0.10),
-                0 -10px 28px rgba(30, 20, 60, 0.14) !important;
+                0 -10px 30px rgba(30, 20, 60, 0.16) !important;
         }
 
         /* --- TALK ROOM：他画面と同じ --max-content-width に揃えつつ、内側コンテナはフル幅で背景を敷く --- */
@@ -583,12 +619,16 @@
             /* 左右パディングは sub-header と同じ計算式で完全一致させる（モバイルでは 16px ガター） */
             padding-left:  max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             padding-right: max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
-            /* ニュートラルなすりガラス（色なしグラスモーフィズム 2026-07-20） */
-            background: rgba(18, 15, 26, 0.55) !important;
-            backdrop-filter: blur(20px) saturate(150%) !important;
-            -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
+            /* ニュートラルなすりガラス：透過を強め blur を深めた本格グラスモーフィズム */
+            background: linear-gradient(180deg,
+                rgba(24, 20, 34, 0.48) 0%,
+                rgba(18, 15, 26, 0.36) 100%) !important;
+            backdrop-filter: blur(28px) saturate(190%) !important;
+            -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.18) !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.14),
+                0 8px 28px rgba(0, 0, 0, 0.28) !important;
         }
         /* タイトル・アイコン：全画面共通のフラットな紫（影・ネオンなしのシンプル表示） */
         #global-header .header-title-main,
@@ -627,15 +667,15 @@
         body.theme-light #global-header,
         body.theme-premium-white #global-header {
             background: linear-gradient(180deg,
-                rgba(255, 255, 255, 0.80) 0%,
-                rgba(255, 255, 255, 0.55) 100%) !important;
-            backdrop-filter: blur(22px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(22px) saturate(180%) !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.85) !important;
+                rgba(255, 255, 255, 0.58) 0%,
+                rgba(255, 255, 255, 0.32) 100%) !important;
+            backdrop-filter: blur(30px) saturate(200%) !important;
+            -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.80) !important;
             box-shadow:
                 inset 0 1px 0 rgba(255, 255, 255, 0.95),
                 inset 0 -1px 0 rgba(124, 58, 237, 0.10),
-                0 10px 28px rgba(30, 20, 60, 0.14) !important;
+                0 10px 30px rgba(30, 20, 60, 0.16) !important;
         }
 
         /* --- サイドメニュー本体：明るい薄ラベンダー（全モード共通 2026-07-20）。
@@ -661,7 +701,7 @@
         #side-menu .menu-summary,
         #side-menu .sidebar-theme-toggle,
         #side-menu .btn-sidebar-close {
-            color: #241f33 !important;
+            color: #4b465c !important;
             text-shadow: none;
         }
         #side-menu .sidebar-sub-menu a i,
@@ -693,15 +733,16 @@
     <link rel="stylesheet" href="{{ asset('assets/css/layout-sidebar.css') }}?v=20260720-full-height">
 
     {{-- ヘッダーのポップアップ（通知 / タスク）専用CSS：app.js が #btn-header-* で togglePopup する --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/layout-header.css') }}?v=20260720-popup-simple">
+    <link rel="stylesheet" href="{{ asset('assets/css/layout-header.css') }}?v=20260720-ink-policy">
 
-    {{-- 通知 / やることリスト ポップアップを mypage のカード調に上書き（不透明 + アクセント枠 + 3Dシャドウ） --}}
+    {{-- 通知 / やることリスト ポップアップ：SWIPE 等のダーク画面でも
+         常にライトデザイン（白パネル）で統一（2026-07-20） --}}
     <style>
         #header-task-popup,
         #header-notification-popup {
-            background: linear-gradient(to bottom right, var(--color-surface-from), var(--color-base)) !important;
-            border: 1px solid rgba(168, 85, 247, 0.4) !important;
-            box-shadow: var(--shadow-card-3d) !important;
+            background: #ffffff !important;
+            border: 1px solid rgba(124, 58, 237, 0.30) !important;
+            box-shadow: 0 12px 32px rgba(76, 29, 149, 0.18) !important;
             border-radius: var(--radius-card) !important;
             opacity: 1 !important;
         }
@@ -820,10 +861,10 @@
     <script src="{{ asset('assets/js/motion.js') }}?v={{ $assetVersion }}" defer></script>
     {{-- ライトモード（薄ラベンダー基調）。全ルールが body.theme-light スコープのため常時読み込みで安全。
          テーマトグル（ライト/ダーク）のライブ切替を可能にするため @if を外して常時ロードする --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260720-light-25">
+    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260720-light-29">
     {{-- プレミアムホワイト（MyPage）: 全ルールが body.theme-premium-white スコープ。同上で常時ロード --}}
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600;700;900&family=Cinzel:wght@600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('assets/css/premium-white.css') }}?v=20260720-pwhite-07">
+    <link rel="stylesheet" href="{{ asset('assets/css/premium-white.css') }}?v=20260720-pwhite-09">
 </head>
 <body class="@yield('body-class') {{ $isLightTheme ? 'theme-light' : '' }} {{ $isPremiumWhite ? 'theme-premium-white' : '' }} {{ $isForcedDark ? 'mode-dark' : 'mode-light' }} bg-base text-text-main"
       data-natural-light="{{ $naturalLightTheme ? '1' : '0' }}"

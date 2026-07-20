@@ -10,7 +10,7 @@ body.is-policy-document {
     --policy-rule: rgba(255, 255, 255, 0.10);
 }
 body.theme-light.is-policy-document {
-    --policy-text: #241f33;
+    --policy-text: #4b465c;
     --policy-text-muted: #6d6685;
     --policy-rule: rgba(36, 31, 51, 0.14);
 }

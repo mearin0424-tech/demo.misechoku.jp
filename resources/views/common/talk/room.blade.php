@@ -10,7 +10,7 @@
 @section('body-class', 'page-talk page-talk-room')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260720-tpl-slide">
+<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260720-composer">
 @if($isCast)
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/review-modal.css') }}">
@@ -148,7 +148,7 @@
         border-radius: 12px;
         border: 1px solid rgba(124, 58, 237, 0.28);
         background: #ffffff;
-        color: #241f33;
+        color: #4b465c;
         text-align: left;
         cursor: pointer;
         min-height: 56px;
@@ -191,7 +191,7 @@
         background: linear-gradient(180deg, rgba(246, 211, 106, 0.10), rgba(246, 211, 106, 0.04));
         border-color: rgba(180, 83, 9, 0.30);
     }
-    .quick-reply-card--slot .quick-reply-card__body { color: #241f33; }
+    .quick-reply-card--slot .quick-reply-card__body { color: #4b465c; }
 
     .hired-wage-field-wrap label {
         display: block;
@@ -457,10 +457,11 @@
                                 </p>
                                 <button
                                     type="button"
-                                    class="interview-change-schedule-btn js-work-complete-trigger"
+                                    class="talk-bonus-cta js-work-complete-trigger"
                                     data-application-id="{{ $reviewApplicationId }}"
                                 >
-                                    {{ $currentTalkJobKindValue === 'fulltime' ? 'ボーナス達成報告' : '勤務完了報告' }}
+                                    <i class="fas fa-yen-sign" aria-hidden="true"></i>
+                                    {{ $currentTalkJobKindValue === 'fulltime' ? 'ボーナス達成報告をする' : '勤務完了報告をする' }}
                                 </button>
                             @endif
                             @if($isMineForLayout)
@@ -558,9 +559,8 @@
                         <input type="hidden" name="talk_topic" value="{{ $initialTalkTopic ?? '' }}">
                         <input type="hidden" name="talk_job_kind" value="{{ $initialTalkJobKind ?? '' }}">
                     @endif
-                    <button type="button" id="open-talk-action-menu" class="btn-chat-action" aria-label="メニューを開く">
-                        <i class="fas fa-plus"></i>
-                    </button>
+                    {{-- ＋メニューは廃止（2026-07-20）。定型文は下部パネル、ボーナス報告は
+                         採用確定の自動送信カード内CTA、面談候補日は定型文パネル先頭の導線から。 --}}
                     <div class="chat-input-wrapper">
                         <textarea name="message" rows="1" placeholder="メッセージを入力..." class="focus:outline-none"></textarea>
                     </div>
@@ -589,6 +589,12 @@
                     </button>
                 </div>
                 <div class="quick-reply-panel__grid" id="quick-reply-scroll">
+                    @if(!$isCast && !$isInterviewOfferLocked)
+                        {{-- ＋メニュー廃止に伴い、面談候補日の送信導線をここに常設 --}}
+                        <button type="button" class="quick-reply-card quick-reply-card--action" id="open-interview-modal-inline">
+                            <span class="quick-reply-card__body"><i class="far fa-calendar-alt" aria-hidden="true"></i> 面談候補日を送信</span>
+                        </button>
+                    @endif
                     @foreach(($quickReplySuggestions ?? []) as $qr)
                         <button type="button" class="quick-reply-card quick-reply-card--suggest"
                                 data-quick-reply="{{ $qr }}"
@@ -879,17 +885,21 @@
         scroll.appendChild(btn);
     });
 
-    // 「編集」ボタン → 既存の＋メニュー内「定型文を使う」（talkQuickTemplates 編集モーダル）を開く
+    // 「編集」ボタン → 定型文モーダルを直接開く（＋メニューは廃止済み）
     var editBtn = document.getElementById('quick-reply-open-editor');
     if (editBtn) {
         editBtn.addEventListener('click', function () {
             var templateSendBtn = document.getElementById('open-template-send-menu');
-            var actionMenuBtn = document.getElementById('open-talk-action-menu');
-            // ＋メニューを開き、その後で定型文モーダルを開くための順次発火
-            if (actionMenuBtn) actionMenuBtn.click();
-            setTimeout(function () {
-                if (templateSendBtn) templateSendBtn.click();
-            }, 40);
+            if (templateSendBtn) templateSendBtn.click();
+        });
+    }
+
+    // 面談候補日の送信（定型文パネル先頭の常設導線 → 既存モーダルを開く）
+    var interviewInline = document.getElementById('open-interview-modal-inline');
+    if (interviewInline) {
+        interviewInline.addEventListener('click', function () {
+            var trigger = document.getElementById('open-interview-modal');
+            if (trigger) trigger.click();
         });
     }
 

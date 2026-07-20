@@ -9,7 +9,7 @@
 @section('body-class', 'is-policy-document')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('assets/css/policy-page.css') }}?v=20260720-mincho-plain">
+    <link rel="stylesheet" href="{{ asset('assets/css/policy-page.css') }}?v=20260720-ink-policy">
 @endpush
 
 @section('content')

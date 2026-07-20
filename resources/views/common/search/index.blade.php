@@ -4,7 +4,7 @@
 @section('body-class', request()->is('cast/*') && ($activeTab ?? null) === 'pane-ai' ? 'page-search page-search-ai' : 'page-search')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/search.css') }}?v=20260720-refine">
+<link rel="stylesheet" href="{{ asset('assets/css/search.css') }}?v=20260720-profile-align">
 <link rel="stylesheet" href="{{ asset('assets/css/sub-header.css') }}">
 @endpush
 
@@ -78,7 +78,7 @@
                 data-personality-type="{{ $personalityType ?? '' }}"
             >
                 <header class="ai-chat__header">
-                    <div class="ai-chat__header-icon"><i class="fas fa-sparkles"></i></div>
+                    <div class="ai-chat__header-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
                     <div class="ai-chat__header-text">
                         <p class="ai-chat__header-title">AI コンシェルジュ <span class="ai-chat__badge">BETA</span></p>
                         <p class="ai-chat__header-sub">いくつかの質問に答えるだけで、あなたに合うお店をAIが提案するよ。</p>

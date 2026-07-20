@@ -251,7 +251,7 @@
      class="fixed inset-0 z-[1100] hidden items-center justify-center bg-black/60 backdrop-blur-sm p-5">
     <div class="w-full max-w-md bg-gradient-to-br from-surface-from to-base border border-line-accent/40 rounded-card shadow-card-3d p-5">
         <h3 class="app-title text-[13px] text-accent-text tracking-widest mb-3">ひとことを編集</h3>
-        <textarea id="word-input" rows="3"
+        <textarea id="word-input" rows="3" maxlength="50"
                   placeholder="{{ $wordPlaceholder }}"
                   class="w-full px-3 py-2 rounded-panel bg-accent/10 border border-line-accent/40 text-text-main placeholder-gray-400 shadow-input-dark outline-none resize-none"></textarea>
         <p class="text-[10px] text-text-sub mt-2 mb-4">※更新するとタイムラインに反映されます</p>

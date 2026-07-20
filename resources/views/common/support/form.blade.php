@@ -244,7 +244,7 @@
     background: #ffffff;
     border: 1px solid rgba(124, 58, 237, 0.24);
     box-shadow: 0 3px 12px rgba(76, 29, 149, 0.08);
-    color: #241f33;
+    color: #4b465c;
     text-decoration: none;
 }
 .support-faq-guide-link__icon {
@@ -257,7 +257,7 @@
     font-size: 1rem;
 }
 .support-faq-guide-link__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.support-faq-guide-link__body strong { font-size: 0.9rem; color: #241f33; }
+.support-faq-guide-link__body strong { font-size: 0.9rem; color: #4b465c; }
 .support-faq-guide-link__body small { font-size: 0.72rem; color: #574d6f; line-height: 1.5; }
 .support-faq-guide-link__chev { color: rgba(124, 58, 237, 0.45); font-size: 0.8rem; }
 </style>

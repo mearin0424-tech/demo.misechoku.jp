@@ -3150,10 +3150,18 @@ body.page-search .connection-list--search > * {
 .detail-search-section__title,
 .detail-search-label--panel,
 .detail-search-label {
-    font-size: 0.8rem;
+    font-size: 13px;
     font-weight: 700;
     color: #c4b5fd;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
+}
+.detail-search-section__title i,
+.detail-search-label--panel i,
+.detail-search-label i,
+.detail-search-accordion__head span i {
+    margin-right: 7px;
+    font-size: 12px;
+    color: #a78bfa;
 }
 .detail-search-section__title,
 .detail-search-label--panel {
@@ -3161,9 +3169,9 @@ body.page-search .connection-list--search > * {
 }
 .detail-search-accordion--panel .detail-search-accordion__head {
     color: #c4b5fd;
-    font-size: 0.84rem;
+    font-size: 13px;
     font-weight: 700;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.12em;
 }
 .detail-search-accordion--panel .detail-search-accordion__head:hover {
     color: #ddd0ff;

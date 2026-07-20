@@ -496,7 +496,7 @@
                 @if(!empty($shopTagGroups))
                     <x-ui.card class="p-5">
                         <h3 class="app-title text-[13px] tracking-widest text-accent-text mb-4 flex items-center gap-2">
-                            <i class="fas fa-sparkles"></i> AMBIENCE
+                            <i class="fas fa-wand-magic-sparkles"></i> AMBIENCE
                         </h3>
                         <div class="flex flex-col gap-3">
                             @foreach($shopTagGroups as $group)

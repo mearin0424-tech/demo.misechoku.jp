@@ -967,3 +967,65 @@ body.page-talk.page-talk-room .header-left {
 /* ============================================================
    （旧単一ハイフン系のセレクタは新 BEM に完全移行済）
    ============================================================ */
+
+
+/* ==========================================================================
+   ポップオーバー（お知らせ / やることリスト）：全画面ライトデザイン統一 (2026-07-20)
+   SWIPE 等のダーク画面・強制ダーク時でも、パネルは常に白 + 濃色文字で表示する。
+   （light-theme.css §18 と同じ配色をテーマ非依存で適用）
+   ========================================================================== */
+.notif-popup__head,
+.task-popup__head {
+    background: linear-gradient(180deg, rgba(124, 58, 237, 0.08), rgba(124, 58, 237, 0.02));
+    border-bottom-color: rgba(124, 58, 237, 0.18);
+}
+.notif-popup__head-icon,
+.task-popup__head-icon { color: #7c3aed; }
+.notif-popup__head-label,
+.task-popup__head-label { color: #5b21b6 !important; }
+.notif-popup__close,
+.task-popup__close,
+.notif-popup__gear { color: #857ca0; }
+.notif-popup__close:hover,
+.task-popup__close:hover,
+.notif-popup__gear:hover { background: rgba(124, 58, 237, 0.08); color: #4b465c; }
+.notif-popup__tabs { background: rgba(124, 58, 237, 0.03); border-bottom-color: rgba(124, 58, 237, 0.14); }
+.notif-popup__tab { color: #3f3956; }
+.notif-popup__tab:hover { background: rgba(124, 58, 237, 0.06); color: #4b465c; }
+.notif-popup__tab.is-active {
+    background: rgba(124, 58, 237, 0.12);
+    border-color: rgba(124, 58, 237, 0.40);
+    color: #5b21b6;
+}
+.notif-popup__tab-num { background: rgba(124, 58, 237, 0.10); color: #5b21b6; }
+.notif-popup__section-label,
+.task-popup__section-label { color: #5b21b6; }
+.task-popup__section--high .task-popup__section-label i { color: #dc2626; }
+.notif-popup__official-title { color: #5b21b6; }
+.notif-popup__official-date { color: #6d6685; }
+.notif-popup__official-chev { color: #a78bfa; }
+.notif-popup__item-cat,
+.task-popup__item-cat { color: #5b21b6; }
+.notif-popup__item--pink .notif-popup__item-cat { color: #be185d; }
+.notif-popup__item--gold .notif-popup__item-cat { color: #a16207; }
+.notif-popup__item--success .notif-popup__item-cat { color: #047857; }
+.task-popup__item--high .task-popup__item-cat { color: #dc2626; }
+.notif-popup__item-time,
+.task-popup__item-time { color: #6d6685; }
+.notif-popup__item-title,
+.task-popup__item-title { color: #5b21b6 !important; }
+.notif-popup__item-desc,
+.task-popup__item-desc { color: #453f5c; }
+.notif-popup__empty,
+.task-popup__empty { color: #6d6685; }
+.notif-popup__empty-title,
+.task-popup__empty-title { color: #5b21b6; }
+.notif-popup__empty-desc,
+.task-popup__empty-desc { color: #6d6685; }
+.notif-popup__item--accent  .notif-popup__item-icon { color: #7c3aed; }
+.notif-popup__item--pink    .notif-popup__item-icon { color: #be185d; }
+.notif-popup__item--gold    .notif-popup__item-icon { color: #a16207; }
+.notif-popup__item--success .notif-popup__item-icon { color: #047857; }
+.notif-popup__item--muted   .notif-popup__item-icon { color: #6b7280; }
+.notif-popup__thread::-webkit-scrollbar-thumb,
+.notif-popup__body::-webkit-scrollbar-thumb { background: rgba(124, 58, 237, 0.30); }

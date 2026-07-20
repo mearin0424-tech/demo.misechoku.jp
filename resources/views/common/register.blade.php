@@ -1168,7 +1168,7 @@
         body.theme-light .register-chip span {
             border: 1px solid rgba(124, 58, 237, 0.24);
             background: #ffffff;
-            color: #241f33;
+            color: #4b465c;
         }
         body.theme-light .register-chip input:checked + span {
             border-color: rgba(124, 58, 237, 0.55);
@@ -1179,7 +1179,7 @@
         body.theme-light .register-field,
         body.theme-light .register-field span,
         body.theme-light .register-check {
-            color: #241f33;
+            color: #4b465c;
         }
         body.theme-light .register-field em { color: #6d28d9; }
         body.theme-light .register-field-hint { color: #6d6685; }
@@ -1188,7 +1188,7 @@
         body.theme-light .register-field textarea {
             border: 1px solid rgba(124, 58, 237, 0.24);
             background: #ffffff;
-            color: #241f33;
+            color: #4b465c;
         }
         body.theme-light .register-field input::placeholder,
         body.theme-light .register-field textarea::placeholder {
@@ -1219,5 +1219,90 @@
             box-shadow: 0 6px 14px rgba(76, 29, 149, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.30);
         }
         body.theme-light .register-logo { filter: drop-shadow(0 6px 16px rgba(76, 29, 149, 0.18)); }
+
+        /* ============================================================
+           質問形式ウィザード + 必須だけクイック登録（register-wizard.js）
+           ============================================================ */
+        .register-mode-intro { display: flex; flex-direction: column; gap: 12px; padding: 24px 22px; }
+        .register-mode-title { margin: 0 0 4px; font-size: 1.02rem; color: var(--accent-text, #f0a6c4); }
+        .register-mode-btn {
+            text-align: left; display: flex; flex-direction: column; gap: 4px;
+            padding: 16px; border-radius: 18px;
+            border: 1px solid rgba(168, 85, 247, 0.30);
+            background: rgba(255, 255, 255, 0.04);
+            color: #f5f5f5; cursor: pointer; font-family: inherit;
+            transition: border-color .15s ease, background .15s ease;
+        }
+        .register-mode-btn strong { font-size: 0.98rem; display: flex; gap: 8px; align-items: center; }
+        .register-mode-btn strong i { color: #a78bfa; }
+        .register-mode-btn small { color: #a0a0a0; font-size: 0.76rem; line-height: 1.5; }
+        .register-mode-btn--wizard { border-color: rgba(168, 85, 247, 0.60); background: rgba(168, 85, 247, 0.12); }
+        .register-mode-btn:hover { border-color: rgba(168, 85, 247, 0.75); }
+
+        .register-wizard-progress { margin: 0 0 2px; }
+        .register-wizard-progress__bar { height: 6px; border-radius: 999px; background: rgba(168, 85, 247, 0.15); overflow: hidden; }
+        .register-wizard-progress__bar span {
+            display: block; height: 100%; width: 0; border-radius: 999px;
+            background: linear-gradient(90deg, #a78bfa, #7c3aed);
+            transition: width .25s ease;
+        }
+        .register-wizard-progress__label { margin: 8px 0 0; font-size: 0.78rem; font-weight: 700; color: #c4b5fd; }
+
+        .register-wizard-nav { display: flex; flex-direction: column; gap: 10px; }
+        .register-wizard-nav__row { display: flex; gap: 10px; }
+        .register-wizard-back,
+        .register-wizard-next {
+            flex: 1; min-height: 50px; border-radius: 999px;
+            font-weight: 800; font-size: 0.92rem; cursor: pointer; font-family: inherit;
+        }
+        .register-wizard-back { background: transparent; border: 1px solid rgba(168, 85, 247, 0.30); color: #c4b5fd; }
+        .register-wizard-back:disabled { opacity: 0.4; cursor: default; }
+        .register-wizard-next {
+            border: 0;
+            background: linear-gradient(135deg, var(--accent-grad-from, #a78bfa), var(--accent-grad-to, #7c3aed));
+            color: #ffffff;
+            box-shadow: 0 6px 16px rgba(124, 58, 237, 0.35);
+        }
+        .register-wizard-next[hidden] { display: none; }
+        .register-wizard-error { margin: 0; font-size: 0.8rem; font-weight: 700; color: #f87171; }
+        .register-wizard-switch,
+        .register-quick-full {
+            background: none; border: 0; color: #a78bfa;
+            font-size: 0.78rem; font-weight: 700; font-family: inherit;
+            text-decoration: underline; text-underline-offset: 3px;
+            cursor: pointer; align-self: center;
+        }
+        .register-quick-note {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 14px; border-radius: 12px;
+            background: rgba(168, 85, 247, 0.12);
+            border: 1px solid rgba(168, 85, 247, 0.35);
+            color: #c4b5fd; font-size: 0.8rem; font-weight: 700;
+        }
+        .register-quick-note .register-quick-full { margin-left: auto; align-self: auto; }
+        .register-field.is-quick-hidden { display: none !important; }
+        .register-field.is-missing input,
+        .register-field.is-missing select,
+        .register-field.is-missing textarea {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
+        }
+
+        body.theme-light .register-mode-title { color: #6d28d9; }
+        body.theme-light .register-mode-btn { background: #ffffff; border-color: rgba(124, 58, 237, 0.24); color: #4b465c; }
+        body.theme-light .register-mode-btn small { color: #6d6685; }
+        body.theme-light .register-mode-btn--wizard { background: rgba(124, 58, 237, 0.08); border-color: rgba(124, 58, 237, 0.50); }
+        body.theme-light .register-wizard-progress__label { color: #6d28d9; }
+        body.theme-light .register-wizard-back { background: #ffffff; border-color: rgba(124, 58, 237, 0.30); color: #6d28d9; }
+        body.theme-light .register-wizard-switch,
+        body.theme-light .register-quick-full { color: #6d28d9; }
+        body.theme-light .register-quick-note {
+            background: rgba(124, 58, 237, 0.08);
+            border-color: rgba(124, 58, 237, 0.30);
+            color: #5b21b6;
+        }
+        body.theme-light .register-wizard-error { color: #dc2626; }
     </style>
+
+    <script src="{{ asset('assets/js/register-wizard.js') }}?v=20260720-wizard"></script>
 @endsection

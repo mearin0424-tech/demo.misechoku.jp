@@ -84,7 +84,7 @@
                 {{-- 位置情報 --}}
                 <div class="detail-search-section detail-search-section--panel">
                     <div class="detail-search-section__head">
-                        <span class="detail-search-section__title">位置情報から探す</span>
+                        <span class="detail-search-section__title"><i class="fas fa-location-crosshairs" aria-hidden="true"></i>位置情報から探す</span>
                     </div>
 
                     <fieldset class="detail-search-location-modes">
@@ -207,7 +207,7 @@
                 {{-- 年齢範囲 --}}
                 <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="年齢" data-open="true">
                     <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="true">
-                        <span>年齢</span>
+                        <span><i class="fas fa-cake-candles" aria-hidden="true"></i>年齢</span>
                         <span class="detail-search-accordion__icon">−</span>
                     </button>
                     <div class="detail-search-accordion__body">
@@ -230,7 +230,7 @@
                 {{-- 出勤頻度・時間帯（短いのでデフォルト開く） --}}
                 <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="出勤頻度・時間帯" data-open="true">
                     <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="true">
-                        <span>希望の出勤頻度・時間帯</span>
+                        <span><i class="fas fa-clock" aria-hidden="true"></i>希望の出勤頻度・時間帯</span>
                         <span class="detail-search-accordion__icon">−</span>
                     </button>
                     <div class="detail-search-accordion__body">
@@ -260,7 +260,7 @@
                 {{-- 経験（短いのでデフォルト開く） --}}
                 <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="ナイトワーク経験" data-open="true">
                     <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="true">
-                        <span>ナイトワーク経験</span>
+                        <span><i class="fas fa-star" aria-hidden="true"></i>ナイトワーク経験</span>
                         <span class="detail-search-accordion__icon">−</span>
                     </button>
                     <div class="detail-search-accordion__body">
@@ -279,7 +279,7 @@
                 {{-- ルックス --}}
                 <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="ルックス">
                     <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="false">
-                        <span>ルックス</span>
+                        <span><i class="fas fa-face-smile" aria-hidden="true"></i>ルックス</span>
                         <span class="detail-search-accordion__icon">+</span>
                     </button>
                     <div class="detail-search-accordion__body" hidden>
@@ -297,7 +297,7 @@
                 {{-- 性格・内面 --}}
                 <div class="detail-search-accordion detail-search-accordion--panel" data-accordion data-summary-group="性格・内面">
                     <button type="button" class="detail-search-accordion__head" data-accordion-trigger aria-expanded="false">
-                        <span>性格・内面</span>
+                        <span><i class="fas fa-heart" aria-hidden="true"></i>性格・内面</span>
                         <span class="detail-search-accordion__icon">+</span>
                     </button>
                     <div class="detail-search-accordion__body" hidden>

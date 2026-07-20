@@ -104,7 +104,7 @@
    ============================================================ */
 .col-list-page {
     padding: 14px 16px 32px;
-    color: #241f33;
+    color: #4b465c;
 }
 @media (min-width: 768px) {
     .col-list-page { padding: 20px 24px 40px; }
@@ -246,7 +246,7 @@
     font-size: 0.95rem;
     font-weight: 800;
     line-height: 1.45;
-    color: #241f33;
+    color: #4b465c;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;

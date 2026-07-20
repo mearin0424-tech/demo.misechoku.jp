@@ -20,7 +20,7 @@ body.theme-premium-white {
     --pw-base:        #ede7f8;  /* ページ背景（薄紫がかったオフホワイト） */
     --pw-surface:     #f7f3fc;  /* パネル / セクションの面 */
     --pw-white:       #ffffff;  /* カード / モーダル / 吹き出しの面（純白でなく極薄ラベンダーと組む） */
-    --pw-text:        #1e1a2e;  /* 本文 */
+    --pw-text:        #4b465c;  /* 平文はグレー（真っ黒禁止） */  /* 本文 */
     --pw-text-sub:    #574d6f;  /* 補助 */
     --pw-text-mute:   #857ca0;  /* さらに弱い（キャプション） */
     --pw-violet:      #7c3aed;  /* SEARCH の虫眼鏡ボタンと同系のバイオレット */
@@ -126,7 +126,7 @@ body.theme-premium-white .cast-name,
 body.theme-premium-white .shop-name {
     font-family: var(--pw-font-serif) !important;
     font-weight: 700 !important;
-    color: var(--pw-text) !important;
+    color: var(--pw-violet-deep) !important;  /* 見出し・名前は濃い紫 */
 }
 
 /* --------------------------------------------------------------------------
@@ -508,4 +508,11 @@ body.theme-premium-white main [style*="color: #c0c0c0"],
 body.theme-premium-white main [style*="color:#e6dffc"],
 body.theme-premium-white main [style*="color: #e6dffc"] {
     color: var(--pw-text-sub) !important;
+}
+
+
+/* ひとこと編集モーダルの保存ボタン：影が単独で強すぎたため他ボタンと同程度に抑制 */
+body.theme-premium-white #modal-word #word-edit-save-btn,
+body.theme-light #modal-word #word-edit-save-btn {
+    box-shadow: 0 3px 10px rgba(124, 58, 237, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
 }

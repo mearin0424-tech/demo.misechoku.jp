@@ -85,7 +85,8 @@
       "Bash(node --check public/assets/js/favorite-quick.js)",
       "Bash(sed -n '1688,1720p' public/assets/css/talk.css)",
       "Bash(sed -n '2420,2440p' public/assets/css/talk.css)",
-      "Bash(node --check public/assets/js/talk-room.js)"
+      "Bash(node --check public/assets/js/talk-room.js)",
+      "Bash(node --check public/assets/js/register-wizard.js)"
     ]
   }
 }

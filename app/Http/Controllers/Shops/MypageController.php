@@ -316,7 +316,7 @@ class MypageController extends Controller
     public function updateWord(Request $request)
     {
         $request->validate([
-            'word' => 'nullable|string|max:500',
+            'word' => 'nullable|string|max:50',
         ]);
 
         $shopId = $this->currentShopId();
