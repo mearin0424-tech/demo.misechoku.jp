@@ -542,7 +542,7 @@
                     <label class="register-field">
                         <span>メイン画像 <em>必須</em></span>
                         <input type="file" id="shop-register-profile-image" name="shop_profile_image" accept="image/jpeg,image/png,image/gif,image/webp" required>
-                        <small class="register-field-hint">店舗の雰囲気が伝わる画像を1枚選び、次の画面で<strong>横長（16:9）</strong>の範囲を調整してから登録してください。（JPEG / PNG / GIF / WebP、最大2MB）</small>
+                        <small class="register-field-hint">店舗の雰囲気が伝わる画像を1枚選び、次の画面で<strong>縦長（4:5）</strong>の範囲を調整してから登録してください。（JPEG / PNG / GIF / WebP、最大2MB）</small>
                     </label>
                 </section>
             @endif
@@ -626,7 +626,7 @@
         <div class="register-shop-crop-inner">
             <div>
                 <h3 id="register-shop-crop-title">店舗メイン画像の調整</h3>
-                <p class="register-shop-crop-guide">表示枠は横長（16:9）です。ズームや位置を調整し、「この画像で続ける」を押すと登録フォームに反映されます。</p>
+                <p class="register-shop-crop-guide">表示枠は縦長（4:5）です。ズームや位置を調整し、「この画像で続ける」を押すと登録フォームに反映されます。</p>
             </div>
             <div class="register-shop-crop-frame">
                 <img id="register-shop-crop-preview" src="" alt="">
@@ -1215,6 +1215,436 @@
         }
         body.theme-light .register-logo { filter: drop-shadow(0 6px 16px rgba(76, 29, 149, 0.18)); }
 
+        /* ============================================================
+           ★ 新規登録 UI 大幅リニューアル (2026-07-20)
+           ステップ式ウィザード + 洗練されたフォーム体験
+           ============================================================ */
+        body.page-auth-register {
+            background: linear-gradient(160deg, #f8f5ff 0%, #eee6fb 100%) !important;
+            min-height: 100dvh;
+        }
+        body.page-auth-register main#main-content { padding: 0 !important; }
+
+        .register-page {
+            width: 100%;
+            max-width: 560px;
+            margin: 0 auto;
+            padding: 24px 16px 140px;  /* 下部固定ナビ分の余白 */
+        }
+        /* ヒーロー：ロゴ控えめ、タイトル大きく */
+        .register-hero {
+            text-align: center;
+            padding: 8px 0 20px !important;
+            background: transparent !important;
+            border: 0 !important;
+            box-shadow: none !important;
+        }
+        .register-hero .register-logo {
+            width: 140px !important;
+            max-width: 60% !important;
+            margin: 0 auto 10px !important;
+            filter: drop-shadow(0 3px 10px rgba(124, 58, 237, 0.18)) !important;
+        }
+        .register-hero .register-title {
+            margin: 0 !important;
+            font-size: 1.35rem !important;
+            font-weight: 800;
+            color: #4c1d95 !important;
+            letter-spacing: 0.02em;
+        }
+
+        /* ウィザード：進捗バー + STEP n/N + タイトル */
+        .rw-header {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            padding: 12px 4px 14px;
+            background: linear-gradient(180deg, rgba(248, 245, 255, 0.98) 60%, rgba(248, 245, 255, 0.4) 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            margin-bottom: 10px;
+        }
+        .rw-progress {
+            height: 5px;
+            border-radius: 999px;
+            background: rgba(124, 58, 237, 0.14);
+            overflow: hidden;
+        }
+        .rw-progress__bar {
+            display: block;
+            width: 0;
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #a78bfa, #7c3aed);
+            box-shadow: 0 0 12px rgba(124, 58, 237, 0.35);
+            transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .rw-progress__meta {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-top: 10px;
+            padding: 0 4px;
+        }
+        .rw-step-num {
+            font-family: 'Cinzel', 'Playfair Display', serif;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            color: #7c3aed;
+        }
+        .rw-step-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #4c1d95;
+            letter-spacing: 0.01em;
+        }
+
+        /* カード：白面+紫影+丸め */
+        body.page-auth-register .register-card {
+            border-radius: 20px !important;
+            border: 1px solid rgba(124, 58, 237, 0.14) !important;
+            background: #ffffff !important;
+            box-shadow: 0 12px 32px rgba(76, 29, 149, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+            padding: 22px 20px !important;
+            margin-bottom: 14px;
+        }
+        body.page-auth-register .register-card-head { margin-bottom: 16px; }
+        body.page-auth-register .register-card-head h2 {
+            font-size: 0.72rem !important;
+            font-weight: 800;
+            letter-spacing: 0.20em;
+            text-transform: uppercase;
+            color: #7c3aed !important;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(124, 58, 237, 0.10);
+        }
+
+        /* フィールド */
+        body.page-auth-register .register-field { gap: 6px; margin-bottom: 4px; }
+        body.page-auth-register .register-field > span {
+            font-size: 0.82rem !important;
+            font-weight: 700 !important;
+            color: #4c1d95 !important;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        body.page-auth-register .register-field > span em {
+            font-style: normal;
+            font-size: 0.62rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #ffffff !important;
+            margin-left: 4px !important;
+            letter-spacing: 0.06em;
+        }
+        body.page-auth-register .register-field input[type="text"],
+        body.page-auth-register .register-field input[type="email"],
+        body.page-auth-register .register-field input[type="tel"],
+        body.page-auth-register .register-field input[type="password"],
+        body.page-auth-register .register-field input[type="date"],
+        body.page-auth-register .register-field input[type="number"],
+        body.page-auth-register .register-field select,
+        body.page-auth-register .register-field textarea {
+            width: 100%;
+            padding: 14px 16px !important;
+            border-radius: 12px !important;
+            border: 1.5px solid rgba(124, 58, 237, 0.22) !important;
+            background: #faf7ff !important;
+            color: #1e1a2e !important;
+            font-size: 16px !important;
+            font-weight: 500;
+            min-height: 52px;
+            line-height: 1.5;
+            transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        body.page-auth-register .register-field input:focus,
+        body.page-auth-register .register-field select:focus,
+        body.page-auth-register .register-field textarea:focus {
+            outline: none !important;
+            border-color: #7c3aed !important;
+            background: #ffffff !important;
+            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12), 0 4px 12px rgba(124, 58, 237, 0.08) !important;
+            transform: translateY(-1px);
+        }
+        body.page-auth-register .register-field input::placeholder,
+        body.page-auth-register .register-field textarea::placeholder {
+            color: rgba(76, 29, 149, 0.30) !important;
+            font-weight: 400;
+        }
+        body.page-auth-register .register-field-hint {
+            font-size: 0.72rem !important;
+            color: #6d6685 !important;
+            line-height: 1.6;
+            margin-top: 2px;
+        }
+        /* 必須未入力の強調 */
+        body.page-auth-register .register-field.is-missing input,
+        body.page-auth-register .register-field.is-missing select,
+        body.page-auth-register .register-field.is-missing textarea {
+            border-color: #ef4444 !important;
+            background: rgba(239, 68, 68, 0.04) !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.10) !important;
+        }
+        body.page-auth-register .register-card.is-missing {
+            border-color: rgba(239, 68, 68, 0.35) !important;
+        }
+
+        /* ファイル入力 */
+        body.page-auth-register .register-field input[type="file"] {
+            padding: 12px 14px !important;
+            background: #faf7ff !important;
+            border: 1.5px dashed rgba(124, 58, 237, 0.35) !important;
+            border-radius: 12px !important;
+            font-size: 0.85rem !important;
+            cursor: pointer;
+            min-height: 56px;
+        }
+        body.page-auth-register .register-field input[type="file"]:hover {
+            background: rgba(124, 58, 237, 0.06) !important;
+            border-color: #7c3aed !important;
+        }
+
+        /* チップグリッド */
+        body.page-auth-register .register-chip-grid { gap: 8px; }
+        body.page-auth-register .register-chip span {
+            padding: 10px 16px !important;
+            font-size: 0.86rem !important;
+            font-weight: 600;
+            border-radius: 12px !important;
+            border: 1.5px solid rgba(124, 58, 237, 0.22) !important;
+            background: #faf7ff !important;
+            color: #4c1d95 !important;
+            transition: all 0.15s;
+        }
+        body.page-auth-register .register-chip input:checked + span {
+            background: linear-gradient(135deg, #a78bfa, #7c3aed) !important;
+            border-color: transparent !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.30);
+            transform: translateY(-1px);
+        }
+
+        /* スキップトグル */
+        body.page-auth-register .register-skip-toggle {
+            border: 1px solid rgba(124, 58, 237, 0.18) !important;
+            background: rgba(124, 58, 237, 0.04) !important;
+            color: #4c1d95 !important;
+            border-radius: 12px !important;
+            padding: 12px 14px !important;
+        }
+
+        /* 3サイズ・身長体重 */
+        body.page-auth-register .metric-field-label,
+        body.page-auth-register .bwh-group > span {
+            font-size: 0.82rem !important;
+            font-weight: 700 !important;
+            color: #4c1d95 !important;
+        }
+        body.page-auth-register .metric-input-wrap input,
+        body.page-auth-register .bwh-field input {
+            padding: 12px 14px !important;
+            border-radius: 12px !important;
+            border: 1.5px solid rgba(124, 58, 237, 0.22) !important;
+            background: #faf7ff !important;
+            color: #1e1a2e !important;
+            font-size: 16px !important;
+        }
+        body.page-auth-register .bwh-letter { color: #7c3aed !important; font-weight: 800; }
+        body.page-auth-register .metric-unit { color: #857ca0 !important; }
+
+        /* アラート */
+        body.page-auth-register .register-alert {
+            border-radius: 14px !important;
+            border-width: 1.5px !important;
+            padding: 14px 18px !important;
+            font-weight: 600;
+        }
+        body.page-auth-register .register-alert-error {
+            background: rgba(239, 68, 68, 0.06) !important;
+            border-color: rgba(239, 68, 68, 0.40) !important;
+            color: #b91c1c !important;
+        }
+        body.page-auth-register .register-alert-success {
+            background: rgba(5, 150, 105, 0.06) !important;
+            border-color: rgba(5, 150, 105, 0.40) !important;
+            color: #047857 !important;
+        }
+
+        /* 同意チェック */
+        body.page-auth-register .register-check {
+            font-size: 0.88rem;
+            color: #4c1d95;
+            line-height: 1.65;
+        }
+        body.page-auth-register .register-check a { color: #7c3aed; text-decoration: underline; font-weight: 700; }
+        body.page-auth-register .register-check input {
+            width: 22px !important; height: 22px !important;
+            accent-color: #7c3aed;
+        }
+
+        /* ---------- ウィザード：下部固定ナビ ---------- */
+        .register-actions--wizard-hidden { display: none !important; }
+        .rw-nav {
+            position: fixed;
+            left: 0; right: 0; bottom: 0;
+            z-index: 50;
+            padding: 12px max(16px, env(safe-area-inset-left)) calc(12px + env(safe-area-inset-bottom));
+            background: linear-gradient(0deg, rgba(255, 255, 255, 0.98) 60%, rgba(255, 255, 255, 0));
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(124, 58, 237, 0.10);
+        }
+        .rw-nav__buttons {
+            display: flex;
+            gap: 10px;
+            max-width: 560px;
+            margin: 0 auto;
+        }
+        .rw-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 54px;
+            padding: 0 20px;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .rw-btn--back {
+            flex: 0 0 auto;
+            min-width: 90px;
+            background: #ffffff;
+            border: 1.5px solid rgba(124, 58, 237, 0.30);
+            color: #6d28d9;
+        }
+        .rw-btn--back:hover { background: rgba(124, 58, 237, 0.06); border-color: #7c3aed; }
+        .rw-btn--back:disabled { opacity: 0.35; cursor: not-allowed; }
+        .rw-btn--next,
+        .rw-btn--submit {
+            flex: 1 1 auto;
+            background: linear-gradient(135deg, #a78bfa, #7c3aed);
+            color: #ffffff;
+            border: 0;
+            box-shadow: 0 8px 22px rgba(124, 58, 237, 0.32);
+        }
+        .rw-btn--next:hover,
+        .rw-btn--submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 26px rgba(124, 58, 237, 0.40);
+        }
+        .rw-btn--next:active,
+        .rw-btn--submit:active { transform: scale(0.97); }
+        .rw-btn[hidden] { display: none !important; }
+        .rw-error {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 0 auto 10px;
+            padding: 8px 14px;
+            max-width: 560px;
+            border-radius: 10px;
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.28);
+            color: #b91c1c;
+            font-size: 0.82rem;
+            font-weight: 700;
+        }
+        .rw-error[hidden] { display: none; }
+        .rw-error i { font-size: 0.9rem; }
+
+
+
+        /* ★ モダン入力UI強化（2026-07-20 追加） */
+        /* 自動保存ヒント */
+        .rw-draft-hint {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin: 8px 4px 0;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(124, 58, 237, 0.06);
+            border: 1px solid rgba(124, 58, 237, 0.14);
+            color: #6d28d9;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        .rw-draft-hint i { font-size: 0.72rem; color: #7c3aed; }
+        /* パスワード表示切替 */
+        .rw-pass-wrap {
+            position: relative;
+            display: block;
+            width: 100%;
+        }
+        .rw-pass-wrap > input { padding-right: 48px !important; }
+        .rw-pass-toggle {
+            position: absolute;
+            top: 50%;
+            right: 8px;
+            transform: translateY(-50%);
+            width: 36px; height: 36px;
+            border: 0;
+            background: transparent;
+            border-radius: 10px;
+            color: #7c3aed;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.12s ease;
+        }
+        .rw-pass-toggle:hover { background: rgba(124, 58, 237, 0.10); }
+        /* 入力欄のフォーカスマイクロインタラクション拡張 */
+        body.page-auth-register .register-field select {
+            background-image: linear-gradient(45deg, transparent 50%, #7c3aed 50%),
+                              linear-gradient(135deg, #7c3aed 50%, transparent 50%);
+            background-position: calc(100% - 20px) calc(50% - 3px), calc(100% - 14px) calc(50% - 3px);
+            background-size: 6px 6px, 6px 6px;
+            background-repeat: no-repeat;
+            padding-right: 40px !important;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        /* テキストエリア：最低高さ + リサイズ縦のみ */
+        body.page-auth-register .register-field textarea {
+            min-height: 96px !important;
+            resize: vertical;
+        }
+        /* 日付入力：カレンダーアイコンを紫に */
+        body.page-auth-register .register-field input[type="date"] {
+            color-scheme: light;
+        }
+        body.page-auth-register .register-field input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(30%) sepia(90%) saturate(1500%) hue-rotate(255deg);
+            cursor: pointer;
+        }
+        /* 郵便番号：数字らしい tabular-nums */
+        body.page-auth-register .register-field input[name="zip"],
+        body.page-auth-register .register-field input[name="phone"],
+        body.page-auth-register .register-field input[type="number"] {
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.02em;
+        }
+        /* Grid の gap を統一 */
+        body.page-auth-register .register-grid { gap: 14px !important; }
+
+        @media (max-width: 480px) {
+            .register-hero .register-title { font-size: 1.2rem !important; }
+            body.page-auth-register .register-card { padding: 18px 16px !important; }
+            .rw-nav { padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); }
+            .rw-btn { min-height: 50px; font-size: 0.9rem; }
+        }
     </style>
+
+    <script src="{{ asset('assets/js/register-wizard.js') }}?v=20260720-wizard3"></script>
 
 @endsection

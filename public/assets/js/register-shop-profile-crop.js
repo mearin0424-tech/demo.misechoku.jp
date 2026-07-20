@@ -21,11 +21,11 @@
 
                 window.MisechokuImageEditor.open(file, {
                     title: '店舗メイン画像を編集',
-                    // 店舗は 16:9 (横長) を既定にしつつ、他のアスペクトも選べる
-                    aspectRatio: 16 / 9,
+                    // 店舗マイページの画像と同じ 4:5（縦長）で保存
+                    aspectRatio: 4 / 5,
                     aspectPresets: null,
-                    outputWidth: 1600,
-                    outputHeight: 900,
+                    outputWidth: 1200,
+                    outputHeight: 1500,
                     outputFormat: 'image/jpeg',
                     outputQuality: 0.9,
                     enableFilters: true,
@@ -73,7 +73,7 @@
                 img.src = e.target.result;
                 destroyCropper();
                 cropper = new Cropper(img, {
-                    aspectRatio: 16 / 9, viewMode: 1, dragMode: 'move', autoCropArea: 1,
+                    aspectRatio: 4 / 5, viewMode: 1, dragMode: 'move', autoCropArea: 1,
                     zoomable: true, movable: true, scalable: false, rotatable: false,
                     responsive: true, background: false, toggleDragModeOnDblclick: false,
                 });
@@ -88,7 +88,7 @@
             if (!cropper || !pendingFile) return;
             if (btnConfirm.disabled) return;
             btnConfirm.disabled = true;
-            var canvas = cropper.getCroppedCanvas({ width: 1600, height: 900, imageSmoothingQuality: 'high' });
+            var canvas = cropper.getCroppedCanvas({ width: 1200, height: 1500, imageSmoothingQuality: 'high' });
             if (!canvas) { (window.appToast || window.alert)('画像のトリミングに失敗しました', 'error'); btnConfirm.disabled = false; return; }
             canvas.toBlob(function (blob) {
                 btnConfirm.disabled = false;

@@ -220,11 +220,19 @@
         body.page-auth-login #side-menu,
         body.page-auth-login #menu-overlay,
         body.page-auth-login #header-task-popup,
-        body.page-auth-login #header-notification-popup {
+        body.page-auth-login #header-notification-popup,
+        body.page-auth-register #global-header,
+        body.page-auth-register nav[data-bottom-nav],
+        body.page-auth-register #character-guide,
+        body.page-auth-register #side-menu,
+        body.page-auth-register #menu-overlay,
+        body.page-auth-register #header-task-popup,
+        body.page-auth-register #header-notification-popup {
             display: none !important;
         }
         body.page-demo-login main#main-content,
-        body.page-auth-login main#main-content {
+        body.page-auth-login main#main-content,
+        body.page-auth-register main#main-content {
             padding-top: 0 !important;
             padding-bottom: 0 !important;
             min-height: 100vh !important;

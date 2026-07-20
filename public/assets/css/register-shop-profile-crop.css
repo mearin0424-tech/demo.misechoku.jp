@@ -1,4 +1,4 @@
-/* 店舗新規登録：メイン画像の横長（16:9）トリミングモーダル */
+/* 店舗新規登録：メイン画像の縦長（4:5・マイページ同）トリミングモーダル */
 #register-shop-crop-modal.register-shop-crop-overlay {
     display: none;
     position: fixed;
@@ -41,7 +41,7 @@
     width: 100%;
     max-width: 640px;
     margin: 0 auto;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 4 / 5;
     border-radius: 14px;
     overflow: hidden;
     background: #000;

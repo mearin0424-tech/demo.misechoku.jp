@@ -171,10 +171,7 @@
                        class="inline-flex items-center justify-center min-h-[52px] rounded-panel border border-line-accent/30 bg-base text-text-main text-[14px] font-bold tracking-wider shadow-input-dark hover:border-line-accent/60 hover:text-accent-text transition-all">
                         <i class="ph-fill ph-storefront mr-2 text-accent-text"></i> 店舗登録
                     </a>
-                    <a href="{{ route('login.demo') }}"
-                       class="inline-flex items-center justify-center min-h-[52px] rounded-panel border border-line-accent/30 bg-base text-text-main text-[14px] font-bold tracking-wider shadow-input-dark hover:border-line-accent/60 hover:text-accent-text transition-all">
-                        <i class="ph-fill ph-shield-star mr-2 text-accent-text"></i> 運営ログイン
-                    </a>
+                    {{-- 運営は新規登録の対象外（ログインタブから認証） --}}
                 </div>
             </div>
         </div>
