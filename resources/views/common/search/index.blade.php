@@ -4,7 +4,7 @@
 @section('body-class', request()->is('cast/*') && ($activeTab ?? null) === 'pane-ai' ? 'page-search page-search-ai' : 'page-search')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/search.css') }}?v=20260720-filter-brushup">
+<link rel="stylesheet" href="{{ asset('assets/css/search.css') }}?v=20260720-refine">
 <link rel="stylesheet" href="{{ asset('assets/css/sub-header.css') }}">
 @endpush
 
@@ -81,7 +81,7 @@
                     <div class="ai-chat__header-icon"><i class="fas fa-sparkles"></i></div>
                     <div class="ai-chat__header-text">
                         <p class="ai-chat__header-title">AI コンシェルジュ <span class="ai-chat__badge">BETA</span></p>
-                        <p class="ai-chat__header-sub">条件・気分・悩み、なんでも話しかけてOK。あなたに合うお店を一緒に探すよ。</p>
+                        <p class="ai-chat__header-sub">いくつかの質問に答えるだけで、あなたに合うお店をAIが提案するよ。</p>
                     </div>
                 </header>
 
@@ -108,10 +108,10 @@
                     <form class="ai-chat__form" data-ai-form autocomplete="off">
                         <input
                             type="text" class="ai-chat__input" data-ai-input
-                            name="message" maxlength="500" required
-                            placeholder="例: 六本木で未経験OK、時給4500円以上"
+                            name="message" maxlength="500" disabled
+                            placeholder="フリーテキスト入力は実装中です（選択肢から選んでね）"
                         >
-                        <button type="submit" class="ai-chat__send" data-ai-send aria-label="送信">
+                        <button type="submit" class="ai-chat__send" data-ai-send aria-label="送信" disabled>
                             <i class="fas fa-paper-plane"></i>
                         </button>
                     </form>
@@ -131,8 +131,8 @@
 
 @push('scripts')
 <script src="{{ asset('assets/js/sub-header.js') }}"></script>
-<script src="{{ asset('assets/js/search-detail.js') }}?v=20260720-filter-brushup"></script>
-<script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260719-keep-only"></script>
+<script src="{{ asset('assets/js/search-detail.js') }}?v=20260720-refine"></script>
+<script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260720-keep-confirm"></script>
 <script>
 {{-- 上部検索バーの開閉：デフォルトは閉じ（HTML初期状態）→ タップで開閉するだけ。
      localStorage 保存はやめて、SEARCH を開くたびに常に閉じた状態からスタートさせる --}}
@@ -149,6 +149,6 @@
 })();
 </script>
 @if($showAiTab)
-<script src="{{ asset('assets/js/ai-chat.js') }}?v=20260712-ai"></script>
+<script src="{{ asset('assets/js/ai-chat.js') }}?v=20260720-qa-flow"></script>
 @endif
 @endpush

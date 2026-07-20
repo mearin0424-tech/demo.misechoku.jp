@@ -9,16 +9,18 @@
     // ---- 今誰のボールか（キャスト視点）----
     //   0: あなた（ボーナス申請）   1: 店舗（承認）   2: 運営（請求書）
     //   3: 店舗（入金）             4: 運営（振込）   5: あなた（受領確認） 6: 完了
+    // ラベルは「要対応 / 待ち（誰） / 完了」の3状態で明確に表記する
     $actor = match (true) {
         $isCompleted          => ['cls' => 'case-actor--done',  'icon' => 'fa-circle-check',    'label' => '完了'],
-        $progressIndex === 0  => ['cls' => 'case-actor--you',   'icon' => 'fa-hand-point-right', 'label' => 'あなたの番'],
-        $progressIndex === 1  => ['cls' => 'case-actor--shop',  'icon' => 'fa-store',           'label' => '店舗の対応待ち'],
-        $progressIndex === 2  => ['cls' => 'case-actor--admin', 'icon' => 'fa-headset',         'label' => '運営の対応待ち'],
-        $progressIndex === 3  => ['cls' => 'case-actor--shop',  'icon' => 'fa-store',           'label' => '店舗の入金待ち'],
-        $progressIndex === 4  => ['cls' => 'case-actor--admin', 'icon' => 'fa-headset',         'label' => '運営の振込待ち'],
-        $progressIndex === 5  => ['cls' => 'case-actor--you',   'icon' => 'fa-hand-point-right', 'label' => 'あなたの番'],
-        default               => ['cls' => 'case-actor--admin', 'icon' => 'fa-circle-question',  'label' => '確認中'],
+        $progressIndex === 0  => ['cls' => 'case-actor--you',   'icon' => 'fa-bolt',            'label' => '要対応'],
+        $progressIndex === 1  => ['cls' => 'case-actor--shop',  'icon' => 'fa-hourglass-half',  'label' => '待ち（店舗）'],
+        $progressIndex === 2  => ['cls' => 'case-actor--admin', 'icon' => 'fa-hourglass-half',  'label' => '待ち（運営）'],
+        $progressIndex === 3  => ['cls' => 'case-actor--shop',  'icon' => 'fa-hourglass-half',  'label' => '待ち（店舗）'],
+        $progressIndex === 4  => ['cls' => 'case-actor--admin', 'icon' => 'fa-hourglass-half',  'label' => '待ち（運営）'],
+        $progressIndex === 5  => ['cls' => 'case-actor--you',   'icon' => 'fa-bolt',            'label' => '要対応'],
+        default               => ['cls' => 'case-actor--admin', 'icon' => 'fa-circle-question', 'label' => '確認中'],
     };
+    $caseState = $isCompleted ? 'done' : ($isActionable ? 'action' : 'waiting');
 
     // ---- 現在ステージの説明 + 次に起こること ----
     $currentStage = $stages[$progressIndex] ?? null;
@@ -43,7 +45,8 @@
         } catch (\Throwable $e) { /* パース不可なら非表示 */ }
     }
 @endphp
-<article class="case-card {{ $isActionable ? 'is-actionable' : '' }} {{ $isCompleted ? 'is-completed' : '' }}">
+<article class="case-card {{ $isActionable ? 'is-actionable' : '' }} {{ $isCompleted ? 'is-completed' : '' }}"
+         data-case-state="{{ $caseState }}">
     <span class="case-actor {{ $actor['cls'] }}">
         <i class="fas {{ $actor['icon'] }}" aria-hidden="true"></i>{{ $actor['label'] }}
         @if($stallDays !== null)

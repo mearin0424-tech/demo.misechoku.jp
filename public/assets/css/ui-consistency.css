@@ -691,3 +691,55 @@ body.theme-premium-white:not(.mode-dark) .pslate .pslate__amount { filter: drop-
 body:has(.profile-talk-bar) main#main-content {
     padding-bottom: calc(var(--footer-height, 75px) + 84px + env(safe-area-inset-bottom, 0px)) !important;
 }
+
+
+/* ==================================================================
+   キープ解除の確認ポップアップ（fav-confirm）
+   グローバルトースト同様、ライト/ダーク共通の濃色パネル
+   ================================================================== */
+.fav-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.55);
+    padding: 24px;
+}
+.fav-confirm-overlay.is-visible { display: flex; }
+.fav-confirm-panel {
+    width: 100%;
+    max-width: 320px;
+    background: #1d1830;
+    border: 1px solid rgba(168, 85, 247, 0.40);
+    border-radius: 16px;
+    padding: 20px 18px 16px;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.50);
+}
+.fav-confirm-text {
+    margin: 0 0 16px;
+    color: #f5f5f5;
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-align: center;
+}
+.fav-confirm-actions { display: flex; gap: 10px; }
+.fav-confirm-btn {
+    flex: 1;
+    padding: 10px 0;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+.fav-confirm-btn--cancel {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #f5f5f5;
+}
+.fav-confirm-btn--ok {
+    background: #ef4444;
+    border: 0;
+    color: #ffffff;
+}

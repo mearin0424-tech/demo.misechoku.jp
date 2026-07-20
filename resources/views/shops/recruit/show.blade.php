@@ -1103,7 +1103,7 @@
 
 @push('scripts')
 {{-- KEEP アイコンボタン（data-fav-toggle）のトグル + トースト --}}
-<script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260719-keep-only"></script>
+<script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260720-keep-confirm"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var usesJobTypes = @json($usesJobTypes ?? false);

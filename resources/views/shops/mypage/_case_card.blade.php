@@ -15,16 +15,18 @@
     // ---- 今誰のボールか（店舗視点）----
     //   0: キャスト（申請待ち）   1: あなた（承認）   2: 運営（請求書）
     //   3: あなた（入金）         4: 運営（照合・振込） 5: キャスト（受領確認） 6: 完了
+    // ラベルは「要対応 / 待ち（誰） / 完了」の3状態で明確に表記する
     $actor = match (true) {
-        $isCompleted          => ['cls' => 'case-actor--done',  'icon' => 'fa-circle-check',     'label' => '完了'],
-        $progressIndex === 0  => ['cls' => 'case-actor--cast',  'icon' => 'fa-user',             'label' => 'キャストの申請待ち'],
-        $progressIndex === 1  => ['cls' => 'case-actor--you',   'icon' => 'fa-hand-point-right', 'label' => 'あなたの番'],
-        $progressIndex === 2  => ['cls' => 'case-actor--admin', 'icon' => 'fa-headset',          'label' => '運営の対応待ち'],
-        $progressIndex === 3  => ['cls' => 'case-actor--you',   'icon' => 'fa-hand-point-right', 'label' => 'あなたの番'],
-        $progressIndex === 4  => ['cls' => 'case-actor--admin', 'icon' => 'fa-headset',          'label' => '運営の対応待ち'],
-        $progressIndex === 5  => ['cls' => 'case-actor--cast',  'icon' => 'fa-user',             'label' => 'キャストの確認待ち'],
-        default               => ['cls' => 'case-actor--admin', 'icon' => 'fa-circle-question',  'label' => '確認中'],
+        $isCompleted          => ['cls' => 'case-actor--done',  'icon' => 'fa-circle-check',    'label' => '完了'],
+        $progressIndex === 0  => ['cls' => 'case-actor--cast',  'icon' => 'fa-hourglass-half',  'label' => '待ち（キャスト）'],
+        $progressIndex === 1  => ['cls' => 'case-actor--you',   'icon' => 'fa-bolt',            'label' => '要対応'],
+        $progressIndex === 2  => ['cls' => 'case-actor--admin', 'icon' => 'fa-hourglass-half',  'label' => '待ち（運営）'],
+        $progressIndex === 3  => ['cls' => 'case-actor--you',   'icon' => 'fa-bolt',            'label' => '要対応'],
+        $progressIndex === 4  => ['cls' => 'case-actor--admin', 'icon' => 'fa-hourglass-half',  'label' => '待ち（運営）'],
+        $progressIndex === 5  => ['cls' => 'case-actor--cast',  'icon' => 'fa-hourglass-half',  'label' => '待ち（キャスト）'],
+        default               => ['cls' => 'case-actor--admin', 'icon' => 'fa-circle-question', 'label' => '確認中'],
     };
+    $caseState = $isCompleted ? 'done' : ($isActionable ? 'action' : 'waiting');
 
     // ---- 現在ステージの説明（店舗視点）----
     $currentStage = $stages[$progressIndex] ?? null;
@@ -49,7 +51,8 @@
         } catch (\Throwable $e) { /* パース不可なら非表示 */ }
     }
 @endphp
-<article class="case-card {{ $isActionable ? 'is-actionable' : '' }} {{ $isCompleted ? 'is-completed' : '' }}">
+<article class="case-card {{ $isActionable ? 'is-actionable' : '' }} {{ $isCompleted ? 'is-completed' : '' }}"
+         data-case-state="{{ $caseState }}">
     <span class="case-actor {{ $actor['cls'] }}">
         <i class="fas {{ $actor['icon'] }}" aria-hidden="true"></i>{{ $actor['label'] }}
         @if($stallDays !== null)

@@ -6,41 +6,32 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/review-modal.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/css/case-flow.css') }}?v=20260719-case-light">
+<link rel="stylesheet" href="{{ asset('assets/css/case-flow.css') }}?v=20260720-case-filter">
 <style>
     /* ========================================================
        採用・入金 統合タイムライン
        ======================================================== */
-    .case-summary {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 8px;
-        margin-bottom: 16px;
+    /* 絞り込みチップ（ダッシュボード数値カードは廃止） */
+    .case-filter { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .case-filter__chip {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 8px 16px; border-radius: 999px;
+        font-size: 0.84rem; font-weight: 700; font-family: inherit;
+        background: #ffffff; border: 1px solid rgba(124, 58, 237, 0.22);
+        color: #574d6f; cursor: pointer;
+        transition: background .15s, color .15s, border-color .15s;
     }
-    .case-summary-card {
-        background: #ffffff;
-        border: 1px solid rgba(124, 58, 237, 0.20);
-        border-radius: 12px;
-        padding: 10px 12px;
-        text-align: center;
-        position: relative;
-        cursor: default;
-        font: inherit;
-        width: 100%;
+    .case-filter__chip.is-active {
+        background: rgba(124, 58, 237, 0.12);
+        border-color: rgba(124, 58, 237, 0.45);
+        color: #5b21b6;
     }
-    button.case-summary-card[data-scroll-target] { cursor: pointer; transition: transform .12s, box-shadow .15s; }
-    button.case-summary-card[data-scroll-target]:active { transform: scale(.96); }
-    .case-summary-card__label { display: block; font-size: 0.66rem; color: #6d6685; letter-spacing: 0.06em; font-weight: 700; margin-bottom: 4px; }
-    .case-summary-card__value { display: block; font-size: 1.4rem; font-weight: 800; color: #6d28d9; font-variant-numeric: tabular-nums; line-height: 1.1; }
-    /* 要対応 > 0 は暖色で最優先の注意喚起 */
-    .case-summary-card.is-action { border-color: rgba(217, 119, 6, 0.55); background: rgba(217, 119, 6, 0.07); }
-    .case-summary-card.is-action .case-summary-card__label { color: #b45309; }
-    .case-summary-card.is-action .case-summary-card__value { color: #b45309; }
-    .case-summary-card__hint {
-        display: block; font-size: 0.58rem; color: rgba(109, 102, 133, 0.75);
-        margin-top: 3px; font-weight: 600;
+    .case-filter__num {
+        min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px;
+        background: #ef4444; color: #ffffff;
+        font-size: 0.68rem; font-weight: 700; line-height: 18px; text-align: center;
+        font-variant-numeric: tabular-nums;
     }
-    .case-summary-card.is-action .case-summary-card__hint { color: rgba(180, 83, 9, 0.8); }
 
     .case-card {
         background: #ffffff;
@@ -76,13 +67,19 @@
        - 済み = accent ベタ + ✓ / 現在 = accent リング + ソフトハロー / 未来 = ニュートラル
        - コネクタはドットの左右に "すき間" を作って、洗練された点線的リズムに */
     .case-pipeline {
-        list-style: none; margin: 0 0 12px; padding: 4px 0 2px;
-        display: grid; grid-template-columns: repeat(7, 1fr); position: relative;
+        list-style: none; margin: 0 0 12px; padding: 4px 0 8px;
+        display: flex; gap: 0; position: relative;
+        overflow-x: auto; -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
     }
-    .case-pipeline__step { position: relative; text-align: center; padding-top: 27px; font-size: 0.6rem; }
+    .case-pipeline::-webkit-scrollbar { display: none; }
+    .case-pipeline__step {
+        position: relative; flex: 0 0 auto; min-width: 86px;
+        text-align: center; padding-top: 32px; font-size: 0.74rem;
+    }
     .case-pipeline__step::after {
-        content: ''; position: absolute; top: 9px;
-        left: calc(50% + 13px); right: calc(-50% + 13px);
+        content: ''; position: absolute; top: 11px;
+        left: calc(50% + 15px); right: calc(-50% + 15px);
         height: 2px; border-radius: 2px;
         background: rgba(124, 58, 237, 0.14); z-index: 0;
     }
@@ -94,9 +91,9 @@
 
     .case-pipeline__bullet {
         position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-        width: 20px; height: 20px; border-radius: 50%;
+        width: 24px; height: 24px; border-radius: 50%;
         display: inline-flex; align-items: center; justify-content: center;
-        font-size: 0.58rem; font-weight: 800;
+        font-size: 0.72rem; font-weight: 800;
         background: #ffffff;
         border: 1.5px solid rgba(124, 58, 237, 0.28);
         color: var(--color-text-muted); z-index: 1;
@@ -104,7 +101,7 @@
     }
     .case-pipeline__step.is-done .case-pipeline__bullet {
         background: var(--accent, #d670a2); color: var(--on-accent, #ffffff); border-color: var(--accent, #d670a2);
-        font-size: 0.52rem;
+        font-size: 0.64rem;
     }
     .case-pipeline__step.is-current .case-pipeline__bullet {
         background: #ffffff;
@@ -117,7 +114,7 @@
         0%, 100% { box-shadow: 0 0 0 4px rgba(var(--accent-rgb, 214, 112, 162), 0.14); }
         50%      { box-shadow: 0 0 0 7px rgba(var(--accent-rgb, 214, 112, 162), 0.05); }
     }
-    .case-pipeline__label { display: block; font-size: 0.6rem; color: var(--color-text-muted); line-height: 1.25; }
+    .case-pipeline__label { display: block; font-size: 0.74rem; color: var(--color-text-muted); line-height: 1.3; padding: 0 4px; }
     .case-pipeline__step.is-done .case-pipeline__label { color: var(--color-text-sub, #5f5876); }
     .case-pipeline__step.is-current .case-pipeline__label { color: var(--accent-text, #7c3aed); font-weight: 800; }
 
@@ -366,26 +363,14 @@
             </div>
 
             <div class="mypage-detail-box">
-                {{-- サマリー（タップで該当セクションへ移動） --}}
-                <div class="case-summary">
-                    <button type="button" class="case-summary-card {{ $actionableCount > 0 ? 'is-action' : '' }}"
-                            @if($actionableCount > 0) data-scroll-target=".case-card.is-actionable" @endif>
-                        <span class="case-summary-card__label">要対応</span>
-                        <span class="case-summary-card__value">{{ $actionableCount }}</span>
-                        @if($actionableCount > 0)
-                            <span class="case-summary-card__hint">タップで移動</span>
-                        @endif
+                {{-- 絞り込みチップ（要対応/待ち/完了） --}}
+                <div class="case-filter" role="group" aria-label="案件の絞り込み">
+                    <button type="button" class="case-filter__chip is-active" data-case-filter="all">すべて</button>
+                    <button type="button" class="case-filter__chip" data-case-filter="action">
+                        要対応@if($actionableCount > 0)<span class="case-filter__num">{{ $actionableCount }}</span>@endif
                     </button>
-                    <button type="button" class="case-summary-card"
-                            @if($activeCases->isNotEmpty()) data-scroll-target="#section-active-cases" @endif>
-                        <span class="case-summary-card__label">進行中</span>
-                        <span class="case-summary-card__value">{{ max($activeCases->count() - $actionableCount, 0) }}</span>
-                    </button>
-                    <button type="button" class="case-summary-card"
-                            @if($completedCases->isNotEmpty()) data-scroll-target="#section-completed-cases" @endif>
-                        <span class="case-summary-card__label">完了</span>
-                        <span class="case-summary-card__value">{{ $completedCases->count() }}</span>
-                    </button>
+                    <button type="button" class="case-filter__chip" data-case-filter="waiting">待ち</button>
+                    <button type="button" class="case-filter__chip" data-case-filter="done">完了</button>
                 </div>
 
                 @if(session('status'))
@@ -396,17 +381,21 @@
                 @endif
 
                 @if($activeCases->isNotEmpty())
-                    <h2 class="mypage-stage-heading" id="section-active-cases"><i class="fas fa-fire"></i> 進行中の案件</h2>
-                    @foreach($activeCases as $case)
-                        @include('casts.mypage._case_card', ['case' => $case])
-                    @endforeach
+                    <section data-case-section>
+                        <h2 class="mypage-stage-heading" id="section-active-cases"><i class="fas fa-fire"></i> 進行中の案件</h2>
+                        @foreach($activeCases as $case)
+                            @include('casts.mypage._case_card', ['case' => $case])
+                        @endforeach
+                    </section>
                 @endif
 
                 @if($completedCases->isNotEmpty())
-                    <h2 class="mypage-stage-heading" id="section-completed-cases"><i class="fas fa-check-circle"></i> 完了した案件</h2>
-                    @foreach($completedCases as $case)
-                        @include('casts.mypage._case_card', ['case' => $case])
-                    @endforeach
+                    <section data-case-section>
+                        <h2 class="mypage-stage-heading" id="section-completed-cases"><i class="fas fa-check-circle"></i> 完了した案件</h2>
+                        @foreach($completedCases as $case)
+                            @include('casts.mypage._case_card', ['case' => $case])
+                        @endforeach
+                    </section>
                 @endif
 
                 @if(!empty($ongoingApplications))
@@ -617,12 +606,34 @@
 document.addEventListener('DOMContentLoaded', function () {
     var csrfToken = (document.querySelector('meta[name="csrf-token"]') && document.querySelector('meta[name="csrf-token"]').getAttribute('content')) || '';
 
-    // サマリーカード → 該当セクションへスクロール
-    document.querySelectorAll('.case-summary-card[data-scroll-target]').forEach(function (card) {
-        card.addEventListener('click', function () {
-            var target = document.querySelector(card.getAttribute('data-scroll-target'));
-            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // 絞り込みチップ：要対応 / 待ち / 完了 でケースカードをフィルタ
+    document.querySelectorAll('[data-case-filter]').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+            var mode = chip.getAttribute('data-case-filter');
+            document.querySelectorAll('[data-case-filter]').forEach(function (c) {
+                c.classList.toggle('is-active', c === chip);
+            });
+            document.querySelectorAll('.case-card[data-case-state]').forEach(function (card) {
+                var st = card.getAttribute('data-case-state');
+                card.style.display = (mode === 'all' || st === mode) ? '' : 'none';
+            });
+            // 表示中カードが1枚もないセクションは見出しごと隠す
+            document.querySelectorAll('[data-case-section]').forEach(function (sec) {
+                var visible = Array.prototype.some.call(
+                    sec.querySelectorAll('.case-card[data-case-state]'),
+                    function (c) { return c.style.display !== 'none'; }
+                );
+                sec.style.display = visible ? '' : 'none';
+            });
         });
+    });
+
+    // 進行ステータスバー：現在ステップが中央に来るよう初期スクロール
+    document.querySelectorAll('.case-pipeline').forEach(function (p) {
+        var cur = p.querySelector('.is-current') || p.querySelector('.case-pipeline__step.is-done:last-of-type');
+        if (cur) {
+            p.scrollLeft = Math.max(0, cur.offsetLeft - (p.clientWidth / 2) + (cur.clientWidth / 2));
+        }
     });
 
     // 口座モーダル

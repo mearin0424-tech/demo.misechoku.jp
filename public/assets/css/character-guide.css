@@ -133,19 +133,28 @@
     opacity: 0.92;
 }
 
-/* AI バッジ（キャラクター左上の小ピル） */
+/* AI バッジ（キャラクターの真上に「AIコンシェルジュ」ラベル） */
 .guide-ai-badge {
     position: absolute;
-    top: -4px;
-    left: -14px;
-    padding: 3px 8px;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 10px;
     border-radius: 999px;
     background: linear-gradient(135deg, #a78bfa, #7c3aed);
     color: #ffffff;
     font-size: 0.60rem;
     font-weight: 800;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     line-height: 1;
+    white-space: nowrap;
     box-shadow: 0 3px 10px rgba(124, 58, 237, 0.45);
     pointer-events: none;
+}
+
+
+/* 詳細検索・位置情報モーダル表示中はオコジョ（AI入口含む）を背面に隠す */
+body:has(.detail-search-modal.is-open) #character-guide,
+body:has(.location-modal-overlay[aria-hidden="false"]) #character-guide {
+    display: none !important;
 }

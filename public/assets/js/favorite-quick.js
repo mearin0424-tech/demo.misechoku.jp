@@ -179,11 +179,50 @@
        stopPropagation するとハンドラまで届かず「押しても反応しない」事故が起きる。
        キャプチャ段階（document → target の下り）で捕捉することで、
        どの画面のどんな入れ子構造でも確実に1回だけ処理する。 */
+    /* ---------------- キープ一覧での解除確認 ----------------
+       一覧では解除すると行が即座に消えて戻せないため、
+       「キープから削除しますか？」の確認ポップアップを挟む。 */
+    function showKeepConfirm(onOk) {
+        let ov = document.getElementById('fav-keep-confirm');
+        if (!ov) {
+            ov = document.createElement('div');
+            ov.id = 'fav-keep-confirm';
+            ov.className = 'fav-confirm-overlay';
+            ov.innerHTML =
+                '<div class="fav-confirm-panel" role="alertdialog" aria-modal="true" aria-label="キープから削除の確認">' +
+                '  <p class="fav-confirm-text">キープから削除しますか？</p>' +
+                '  <div class="fav-confirm-actions">' +
+                '    <button type="button" class="fav-confirm-btn fav-confirm-btn--cancel" data-confirm-cancel>やめる</button>' +
+                '    <button type="button" class="fav-confirm-btn fav-confirm-btn--ok" data-confirm-ok>削除する</button>' +
+                '  </div>' +
+                '</div>';
+            document.body.appendChild(ov);
+        }
+        ov.classList.add('is-visible');
+        const okBtn = ov.querySelector('[data-confirm-ok]');
+        const cancelBtn = ov.querySelector('[data-confirm-cancel]');
+        function close() {
+            ov.classList.remove('is-visible');
+            okBtn.onclick = cancelBtn.onclick = ov.onclick = null;
+        }
+        okBtn.onclick = function () { close(); onOk(); };
+        cancelBtn.onclick = close;
+        ov.onclick = function (e) { if (e.target === ov) close(); };
+    }
+
     document.addEventListener('click', function (e) {
         const btn = e.target.closest('[data-fav-toggle]');
         if (!btn || btn.disabled) return;
         e.preventDefault();
         e.stopPropagation();
+
+        // キープ一覧（解除で行が消える画面）で ON→OFF にする時だけ確認を挟む
+        const isDeactivating = btn.getAttribute('aria-pressed') === 'true';
+        const inRemovableList = !!btn.closest('[data-fav-remove-on-deactivate]');
+        if (isDeactivating && inRemovableList) {
+            showKeepConfirm(function () { toggleFavorite(btn); });
+            return;
+        }
         toggleFavorite(btn);
     }, true);
 })();

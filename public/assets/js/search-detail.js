@@ -214,6 +214,7 @@
         }
     }
 
+    // タグが多いセクションは折りたたみのみ（キーワード検索UIは廃止 2026-07-20）
     function setupChipFilter(chipsContainer) {
         if (!chipsContainer || chipsContainer.dataset.chipFilterInit === '1') return;
         var chips = chipsContainer.querySelectorAll('.detail-search-chip');
@@ -222,39 +223,12 @@
         chipsContainer.dataset.chipFilterInit = '1';
         chipsContainer.classList.add('detail-search-chips--filterable');
 
-        // 検索入力 + カウンタバー
-        var toolbar = document.createElement('div');
-        toolbar.className = 'detail-search-chips__toolbar';
-        toolbar.innerHTML = ''
-            + '<label class="detail-search-chips__searchbox">'
-            +   '<i class="fas fa-search" aria-hidden="true"></i>'
-            +   '<input type="text" class="detail-search-chips__search" placeholder="キーワードで絞り込み..." aria-label="タグを検索">'
-            +   '<button type="button" class="detail-search-chips__clear" hidden aria-label="検索をクリア"><i class="fas fa-times"></i></button>'
-            + '</label>'
-            + '<span class="detail-search-chips__meta">'
-            +   '<span class="detail-search-chips__meta-selected" data-chip-selected-count>0</span>'
-            +   '<span class="detail-search-chips__meta-sep">/</span>'
-            +   '<span>' + chips.length + '</span>'
-            + '</span>';
-        chipsContainer.parentNode.insertBefore(toolbar, chipsContainer);
-
-        // 「もっと見る」ボタン
         var moreBtn = document.createElement('button');
         moreBtn.type = 'button';
         moreBtn.className = 'detail-search-chips__more';
-        moreBtn.textContent = 'もっと見る（残り ' + Math.max(0, chips.length - CHIP_INITIAL_VISIBLE) + ' 件）';
         chipsContainer.parentNode.insertBefore(moreBtn, chipsContainer.nextSibling);
 
-        var searchInput = toolbar.querySelector('.detail-search-chips__search');
-        var clearBtn = toolbar.querySelector('.detail-search-chips__clear');
-        var selectedCount = toolbar.querySelector('[data-chip-selected-count]');
         var isExpanded = false;
-        var currentQuery = '';
-
-        function chipLabel(chip) {
-            var span = chip.querySelector('span');
-            return span ? span.textContent.trim().toLowerCase() : '';
-        }
 
         function chipChecked(chip) {
             var input = chip.querySelector('input[type="checkbox"], input[type="radio"]');
@@ -262,23 +236,14 @@
         }
 
         function refresh() {
-            var q = currentQuery;
             var shownUnselected = 0;
-            var selectedTotal = 0;
+            var hiddenUnselected = 0;
             chips.forEach(function (chip) {
-                var label = chipLabel(chip);
                 var checked = chipChecked(chip);
-                var matches = q === '' || label.indexOf(q) !== -1;
                 // 選択済み: 常に表示（位置は元の並びのまま維持する）
                 chip.classList.toggle('is-pinned', checked);
                 if (checked) {
-                    chip.style.display = matches ? '' : 'none';
-                    selectedTotal++;
-                    return;
-                }
-                // 未選択
-                if (!matches) {
-                    chip.style.display = 'none';
+                    chip.style.display = '';
                     return;
                 }
                 if (isExpanded || shownUnselected < CHIP_INITIAL_VISIBLE) {
@@ -286,38 +251,18 @@
                     shownUnselected++;
                 } else {
                     chip.style.display = 'none';
+                    hiddenUnselected++;
                 }
             });
-            var hiddenUnselected = 0;
-            chips.forEach(function (chip) {
-                if (!chipChecked(chip)) {
-                    var label = chipLabel(chip);
-                    var matches = q === '' || label.indexOf(q) !== -1;
-                    if (matches && chip.style.display === 'none') hiddenUnselected++;
-                }
-            });
-            moreBtn.textContent = isExpanded ? '折りたたむ' : ('もっと見る（残り ' + hiddenUnselected + ' 件）');
+            moreBtn.textContent = isExpanded ? '閉じる' : ('すべて表示 +' + hiddenUnselected);
             moreBtn.hidden = hiddenUnselected === 0 && isExpanded === false;
-            if (selectedCount) selectedCount.textContent = String(selectedTotal);
-            if (clearBtn) clearBtn.hidden = currentQuery === '';
         }
 
-        searchInput.addEventListener('input', function () {
-            currentQuery = searchInput.value.trim().toLowerCase();
-            refresh();
-        });
-        clearBtn.addEventListener('click', function () {
-            searchInput.value = '';
-            currentQuery = '';
-            searchInput.focus();
-            refresh();
-        });
         moreBtn.addEventListener('click', function () {
             isExpanded = !isExpanded;
             refresh();
         });
 
-        // change 時にも再描画（選択状態の強調・カウンタ更新のみ。並び順は維持）
         chipsContainer.addEventListener('change', refresh);
         refresh();
     }

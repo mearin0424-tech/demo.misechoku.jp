@@ -8,7 +8,7 @@
         $metaDescription = trim($__env->yieldContent('meta_description')) ?: 'ミセチョクのデモサイトです。';
         $metaImage = trim($__env->yieldContent('meta_image')) ?: asset('assets/images/pwa/icon-512.png');
         $canonicalUrl = trim($__env->yieldContent('canonical')) ?: url()->current();
-        $assetVersion = '20260720-badge-unify';
+        $assetVersion = '20260720-okojo-hide';
         $resolvedTitle = $metaTitle !== ''
             ? $metaTitle
             : ($pageTitle !== '' ? $pageTitle . ' | ' . config('app.name', 'ミセチョク') : config('app.name', 'ミセチョク'));
@@ -438,9 +438,15 @@
         }
         body.theme-light .sub-header-wrapper,
         body.theme-premium-white .sub-header-wrapper {
-            background: rgba(255, 255, 255, 0.62) !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.70) !important;
-            box-shadow: 0 4px 14px rgba(30, 20, 60, 0.08) !important;
+            background: linear-gradient(180deg,
+                rgba(255, 255, 255, 0.74) 0%,
+                rgba(255, 255, 255, 0.55) 100%) !important;
+            backdrop-filter: blur(20px) saturate(170%) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(170%) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.80) !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.90),
+                0 6px 18px rgba(30, 20, 60, 0.10) !important;
         }
         /* ============================================================
            サブヘッダーのタブ切替：お知らせポップアップの
@@ -530,26 +536,29 @@
             border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
             box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.25) !important;
         }
+        /* ナビの文字・アイコン：ヘッダーと同じ「紫 + 立体影」で全画面統一 */
         nav[data-bottom-nav] .nav-item {
-            color: rgba(255, 255, 255, 0.78) !important;
-            text-shadow: none;
+            color: rgba(139, 92, 246, 0.62) !important;
+            text-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.30),
+                0 2px 4px rgba(76, 29, 149, 0.35);
         }
         nav[data-bottom-nav] .nav-item.is-active {
-            color: #ffffff !important;
+            color: #7c3aed !important;
         }
+        /* ライトテーマ：ヘッダーと上下対称の艶ガラス（下端ハイライト + 上方向の浮遊影） */
         body.theme-light nav[data-bottom-nav],
         body.theme-premium-white nav[data-bottom-nav] {
-            background: rgba(255, 255, 255, 0.62) !important;
-            border-top: 1px solid rgba(255, 255, 255, 0.70) !important;
-            box-shadow: 0 -8px 24px rgba(30, 20, 60, 0.10) !important;
-        }
-        body.theme-light nav[data-bottom-nav] .nav-item,
-        body.theme-premium-white nav[data-bottom-nav] .nav-item {
-            color: rgba(36, 31, 51, 0.60) !important;
-        }
-        body.theme-light nav[data-bottom-nav] .nav-item.is-active,
-        body.theme-premium-white nav[data-bottom-nav] .nav-item.is-active {
-            color: #6d28d9 !important;
+            background: linear-gradient(0deg,
+                rgba(255, 255, 255, 0.80) 0%,
+                rgba(255, 255, 255, 0.55) 100%) !important;
+            backdrop-filter: blur(22px) saturate(180%) !important;
+            -webkit-backdrop-filter: blur(22px) saturate(180%) !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.85) !important;
+            box-shadow:
+                inset 0 -1px 0 rgba(255, 255, 255, 0.95),
+                inset 0 1px 0 rgba(124, 58, 237, 0.10),
+                0 -10px 28px rgba(30, 20, 60, 0.14) !important;
         }
 
         /* --- TALK ROOM：他画面と同じ --max-content-width に揃えつつ、内側コンテナはフル幅で背景を敷く --- */
@@ -582,44 +591,54 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
         }
+        /* タイトル・アイコン：全画面共通で「紫 + 立体影」（MyPage 含めテーマ差なし） */
         #global-header .header-title-main,
         #global-header .header-icon-btn,
-        #global-header .btn-back {
-            text-shadow: none;
+        #global-header .btn-back,
+        #global-header .header-talk-name {
+            color: #8b5cf6 !important;
+            text-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.35),
+                0 2px 5px rgba(76, 29, 149, 0.40) !important;
         }
         .header-icon-btn:hover,
         .header-icon-btn:focus-visible {
-            background-color: rgba(255, 255, 255, 0.10) !important;
+            background-color: rgba(139, 92, 246, 0.12) !important;
         }
         .header-icon-btn:active {
-            background-color: rgba(255, 255, 255, 0.16) !important;
+            background-color: rgba(139, 92, 246, 0.20) !important;
         }
-        /* ライトテーマ：白フロスト面 + 濃色文字（可読性優先） */
+        /* タイトル：中央絶対配置を廃止して左寄せ（戻るボタンの隣から始まる） */
+        #global-header .header-center-title {
+            position: static !important;
+            left: auto !important;
+            top: auto !important;
+            transform: none !important;
+            flex: 1 1 auto !important;
+            justify-content: flex-start !important;
+            text-align: left !important;
+            min-width: 0 !important;
+            max-width: none !important;
+            margin: 0 8px 0 2px !important;
+        }
+        /* アイコン群：右詰め。ただし誤タップ防止に 8px の間隔を確保 */
+        #global-header .header-right {
+            gap: 8px !important;
+            margin-right: -6px !important;
+        }
+        /* ライトテーマ：立体＋艶のある白ガラス（上端ハイライト + 下方向の浮遊影） */
         body.theme-light #global-header,
         body.theme-premium-white #global-header {
-            background: rgba(255, 255, 255, 0.62) !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.70) !important;
-            box-shadow: 0 8px 24px rgba(30, 20, 60, 0.10) !important;
-        }
-        body.theme-light #global-header .header-title-main,
-        body.theme-light #global-header .header-icon-btn,
-        body.theme-light #global-header .btn-back,
-        body.theme-light #global-header .header-talk-name,
-        body.theme-premium-white #global-header .header-title-main,
-        body.theme-premium-white #global-header .header-icon-btn,
-        body.theme-premium-white #global-header .btn-back,
-        body.theme-premium-white #global-header .header-talk-name {
-            color: #241f33 !important;
-        }
-        body.theme-light .header-icon-btn:hover,
-        body.theme-light .header-icon-btn:focus-visible,
-        body.theme-premium-white .header-icon-btn:hover,
-        body.theme-premium-white .header-icon-btn:focus-visible {
-            background-color: rgba(36, 31, 51, 0.06) !important;
-        }
-        body.theme-light .header-icon-btn:active,
-        body.theme-premium-white .header-icon-btn:active {
-            background-color: rgba(36, 31, 51, 0.10) !important;
+            background: linear-gradient(180deg,
+                rgba(255, 255, 255, 0.80) 0%,
+                rgba(255, 255, 255, 0.55) 100%) !important;
+            backdrop-filter: blur(22px) saturate(180%) !important;
+            -webkit-backdrop-filter: blur(22px) saturate(180%) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.85) !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.95),
+                inset 0 -1px 0 rgba(124, 58, 237, 0.10),
+                0 10px 28px rgba(30, 20, 60, 0.14) !important;
         }
 
         /* --- サイドメニュー本体：ニュートラルなすりガラス（色なしグラスモーフィズム 2026-07-20）。
@@ -676,9 +695,16 @@
         /* ライトテーマ：白フロスト + 濃色文字 */
         body.theme-light #side-menu,
         body.theme-premium-white #side-menu {
-            background: rgba(255, 255, 255, 0.72) !important;
-            border-left: 1px solid rgba(255, 255, 255, 0.70) !important;
-            box-shadow: -12px 0 36px rgba(30, 20, 60, 0.18) !important;
+            background: linear-gradient(160deg,
+                rgba(255, 255, 255, 0.86) 0%,
+                rgba(246, 242, 255, 0.72) 100%) !important;
+            backdrop-filter: blur(26px) saturate(170%) !important;
+            -webkit-backdrop-filter: blur(26px) saturate(170%) !important;
+            border-left: 1px solid rgba(255, 255, 255, 0.90) !important;
+            box-shadow:
+                inset 1px 0 0 rgba(255, 255, 255, 0.90),
+                inset 0 1px 0 rgba(255, 255, 255, 0.80),
+                -16px 0 40px rgba(30, 20, 60, 0.20) !important;
         }
         body.theme-light .sidebar-header,
         body.theme-premium-white .sidebar-header {
@@ -859,7 +885,7 @@
     <script src="{{ asset('assets/js/motion.js') }}?v={{ $assetVersion }}" defer></script>
     {{-- ライトモード（薄ラベンダー基調）。全ルールが body.theme-light スコープのため常時読み込みで安全。
          テーマトグル（ライト/ダーク）のライブ切替を可能にするため @if を外して常時ロードする --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260720-light-22">
+    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260720-light-23">
     {{-- プレミアムホワイト（MyPage）: 全ルールが body.theme-premium-white スコープ。同上で常時ロード --}}
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600;700;900&family=Cinzel:wght@600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/css/premium-white.css') }}?v=20260720-pwhite-07">

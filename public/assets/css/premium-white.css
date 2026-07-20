@@ -35,7 +35,8 @@ body.theme-premium-white {
     --pw-shadow-sm:   0 1px 2px rgba(76, 29, 149, 0.06);
     --pw-shadow-md:   0 6px 18px rgba(76, 29, 149, 0.10), 0 1px 3px rgba(76, 29, 149, 0.06);
     --pw-shadow-lift: 0 14px 36px rgba(76, 29, 149, 0.14), 0 3px 8px rgba(76, 29, 149, 0.06);
-    --pw-font-serif:  "Noto Serif JP", "Hiragino Mincho ProN", serif;
+    /* 金額（.pslate）以外はセリフ体を使わない方針（2026-07-20）: 見出しも Noto Sans */
+    --pw-font-serif:  "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif;
 
     /* ==== Tailwind @theme トークンを反転（body[data-theme] より優先） ==== */
     --color-base:              var(--pw-base);
@@ -134,23 +135,7 @@ body.theme-premium-white .shop-name {
    これで MyPage と他画面のクロームが完全に一致する。
    -------------------------------------------------------------------------- */
 
-/* ヘッダー内アイコン・タイトル：紫グラデ上なので白（グローバルと同じ） */
-body.theme-premium-white #global-header .header-title-main,
-body.theme-premium-white #global-header .header-title-main.header-title-serif {
-    color: #ffffff !important;
-    text-shadow: 0 1px 3px rgba(46, 16, 101, 0.45) !important;
-}
-body.theme-premium-white #global-header .header-icon-btn,
-body.theme-premium-white #global-header .btn-back {
-    color: #ffffff !important;
-}
-body.theme-premium-white #global-header .header-icon-btn:hover,
-body.theme-premium-white #global-header .header-icon-btn:focus-visible {
-    background-color: rgba(255, 255, 255, 0.14) !important;
-}
-body.theme-premium-white #global-header .header-icon-btn:active {
-    background-color: rgba(255, 255, 255, 0.22) !important;
-}
+/* ヘッダー内アイコン・タイトル：全画面共通（紫 + 立体影 / app-v2 inline）に統一するため上書きしない */
 /* バッジ：全画面共通のフラット赤丸（ui-consistency.css）に統一するため上書きしない */
 
 /* ボトムナビのアイテム色はグローバル（白 + 紫グラデ上）に統一するため上書きしない */

@@ -1,122 +1,75 @@
 /**
  * 規約・ポリシー公開ページ（/about /terms /privacy）
- * 旧: オフホワイト×ブラウンの紙風テーマ → アプリ全体（ダーク×アメジスト）と
- * 乖離して見づらかったため、ダークテーマ + 読み物向けタイポグラフィに刷新。
+ * 方針（2026-07-20）: 明朝体の文章だけを端的に載せるプレーンな文書スタイル。
+ * カード・目次・番号チップ等の装飾は使わない。ライト/ダーク両テーマ対応。
  */
 
 body.is-policy-document {
     --policy-text: #e8e6ea;
     --policy-text-muted: #9d9aa4;
-    --policy-rule: rgba(255, 255, 255, 0.08);
-    --policy-accent: var(--accent-text, #a78bfa);
+    --policy-rule: rgba(255, 255, 255, 0.10);
+}
+body.theme-light.is-policy-document {
+    --policy-text: #241f33;
+    --policy-text-muted: #6d6685;
+    --policy-rule: rgba(36, 31, 51, 0.14);
 }
 
 .policy-doc-shell {
     max-width: 42rem;
     margin: 0 auto;
-    padding: 1.5rem 0 3rem;
+    padding: 1.75rem var(--content-padding-x, 16px) 3rem;
     color: var(--policy-text);
-    font-family: var(--font-sans, 'Noto Sans JP', system-ui, sans-serif);
+    font-family: 'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
     font-size: 0.9375rem;
-    line-height: 1.95;
-    letter-spacing: 0.02em;
+    line-height: 2.0;
+    letter-spacing: 0.03em;
 }
 
-/* リード（冒頭のあいさつ・前文）：カードで少し格上げ */
+/* 前文：装飾なしのプレーンな導入 */
 .policy-doc-lead {
-    padding: 18px 18px 16px;
-    margin-bottom: 1.75rem;
-    border-radius: 16px;
-    border: 1px solid rgba(168, 85, 247, 0.25);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012));
+    margin-bottom: 2rem;
 }
 .policy-doc-lead-title {
     margin: 0 0 0.75rem;
-    font-size: 0.7rem;
-    font-weight: 800;
-    letter-spacing: 0.18em;
-    color: var(--policy-accent);
-    text-transform: uppercase;
-}
-
-/* 目次（章が多い規約向け。blade 側で章数 >= 4 のとき表示） */
-.policy-doc-toc {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin: 0 0 1.75rem;
-}
-.policy-doc-toc a {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 6px 12px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.03);
-    color: var(--policy-text-muted);
-    font-size: 0.72rem;
+    font-size: 1.02rem;
     font-weight: 700;
-    text-decoration: none;
-    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
-}
-.policy-doc-toc a:hover {
-    border-color: rgba(var(--accent-rgb, 139, 92, 246), 0.55);
-    color: var(--policy-accent);
-    background: rgba(var(--accent-rgb, 139, 92, 246), 0.08);
+    color: var(--policy-text);
 }
 
-/* 章：番号つき見出し + 細いヘアラインで区切る読み物レイアウト */
+/* 章：見出し + 本文のみ。細いヘアラインで区切る */
 .policy-doc-chapter {
     padding-bottom: 1.75rem;
     margin-bottom: 1.75rem;
     border-bottom: 1px solid var(--policy-rule);
-    scroll-margin-top: calc(var(--header-height, 60px) + 16px);
 }
 .policy-doc-shell > *:last-child {
     border-bottom: none;
     margin-bottom: 0;
     padding-bottom: 0.25rem;
 }
-
 .policy-doc-chapter-title {
     margin: 0 0 0.9rem;
-    font-size: 1.06rem;
-    font-weight: 800;
+    font-size: 1.02rem;
+    font-weight: 700;
     color: var(--policy-text);
-    line-height: 1.5;
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-}
-.policy-doc-chapter-num {
-    flex-shrink: 0;
-    font-size: 0.7rem;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    color: var(--policy-accent);
-    font-variant-numeric: tabular-nums;
+    line-height: 1.6;
 }
 
-/* 会社概要（/about）のメタ表：定義リスト風カード */
+/* 会社概要（/about）のメタ表：ラベル + 値のみのプレーン表記 */
 .policy-doc-meta {
-    margin-bottom: 1.75rem;
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.02);
-    padding: 4px 18px;
+    margin-bottom: 2rem;
 }
 .policy-doc-meta-row {
-    padding: 0.9rem 0;
+    padding: 0.8rem 0;
     border-bottom: 1px solid var(--policy-rule);
 }
 .policy-doc-meta-row:last-child { border-bottom: none; }
 .policy-doc-meta-label {
-    font-size: 0.7rem;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    color: var(--policy-accent);
-    margin-bottom: 0.3rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--policy-text-muted);
+    margin-bottom: 0.25rem;
 }
 
 /* ---------------- Markdown 本文 ---------------- */
@@ -130,49 +83,35 @@ body.is-policy-document {
 .policy-md h3,
 .policy-md h4 {
     margin: 1.4em 0 0.6em;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--policy-text);
-    line-height: 1.45;
+    line-height: 1.6;
 }
-.policy-md h1 { font-size: 1.15rem; }
-.policy-md h2 { font-size: 1.06rem; }
-.policy-md h3 { font-size: 0.98rem; color: var(--policy-accent); }
+.policy-md h1 { font-size: 1.08rem; }
+.policy-md h2 { font-size: 1.02rem; }
+.policy-md h3 { font-size: 0.96rem; }
 
 .policy-md ul,
 .policy-md ol {
     margin: 0 0 1em;
-    padding-left: 1.4em;
+    padding-left: 1.5em;
 }
-.policy-md li { margin: 0.4em 0; }
-.policy-md li::marker { color: var(--policy-accent); }
+.policy-md li { margin: 0.35em 0; }
+.policy-md li::marker { color: var(--policy-text-muted); }
 
 .policy-md a {
-    color: var(--policy-accent);
+    color: inherit;
     text-decoration: underline;
     text-underline-offset: 3px;
     text-decoration-thickness: 1px;
 }
-.policy-md strong { font-weight: 800; color: #fff; }
+.policy-md strong { font-weight: 700; color: var(--policy-text); }
 
 .policy-md blockquote {
     margin: 1em 0;
-    padding: 0.6em 0 0.6em 1em;
-    border-left: 3px solid rgba(var(--accent-rgb, 139, 92, 246), 0.5);
+    padding: 0 0 0 1em;
+    border-left: 2px solid var(--policy-rule);
     color: var(--policy-text-muted);
-}
-
-.policy-md pre,
-.policy-md code {
-    font-family: ui-monospace, 'Cascadia Code', 'Consolas', monospace;
-    font-size: 0.86em;
-}
-.policy-md pre {
-    overflow-x: auto;
-    padding: 0.85rem 1rem;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--policy-rule);
-    border-radius: 10px;
-    margin: 1em 0;
 }
 
 .policy-md hr {

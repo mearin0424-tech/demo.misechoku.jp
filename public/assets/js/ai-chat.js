@@ -1,15 +1,12 @@
 /**
- * ミセチョク — AI コンシェルジュ 自由入力チャット
+ * ミセチョク — AI コンシェルジュ（QA 診断方式）
  *
- * data-ai-chat-root をルートとして、自由入力 → タイピング演出 → AI 返答 → 店舗カード を描画する。
- * サーバ側 /cast/search/ai-chat は OSS モデル（Groq / Ollama など OpenAI 互換 API）で
- * 返答を生成する。連携が無効／失敗時は AiChatTemplateService のテンプレ返答に自動フォールバック。
+ * いくつかの質問に選択肢で答えると、回答をまとめて /cast/search/ai-chat に送信し、
+ * 自分に合う店舗のレコメンドカードを表示する。
+ * フリーテキスト入力は「実装中」表示で無効化（選択肢のみで完結させる）。
  */
 (function () {
     'use strict';
-
-    var STORAGE_KEY = 'ai-chat-transcript-v1';
-    var STORAGE_TTL_MS = 1000 * 60 * 60 * 2; // 2 時間: 古すぎる履歴は破棄
 
     function escapeHtml(s) {
         return String(s == null ? '' : s)
@@ -42,37 +39,20 @@
         var sendBtn = root.querySelector('[data-ai-send]');
         var quickReplyArea = root.querySelector('[data-ai-quick-replies]');
 
-        /** @type {{role:string, content:string, cards?:any[], source?:string, ts?:number}[]} */
-        var transcript = [];
         var isBusy = false;
 
         // ------------------------------------------------------------
-        // 永続化：sessionStorage に短期保存（同じタブでリロードしても続きから）
+        // QA 診断フロー定義
         // ------------------------------------------------------------
-        function saveTranscript() {
-            try {
-                var payload = { ts: Date.now(), items: transcript };
-                sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-            } catch (_) {}
-        }
-        function restoreTranscript() {
-            try {
-                var raw = sessionStorage.getItem(STORAGE_KEY);
-                if (!raw) return null;
-                var payload = JSON.parse(raw);
-                if (!payload || !Array.isArray(payload.items)) return null;
-                if (typeof payload.ts !== 'number' || Date.now() - payload.ts > STORAGE_TTL_MS) {
-                    sessionStorage.removeItem(STORAGE_KEY);
-                    return null;
-                }
-                return payload.items;
-            } catch (_) {
-                return null;
-            }
-        }
-        function clearTranscript() {
-            try { sessionStorage.removeItem(STORAGE_KEY); } catch (_) {}
-        }
+        var QA_FLOW = [
+            { q: 'まずはエリア！どのあたりで働きたい？', opts: ['六本木', '新宿・歌舞伎町', '渋谷', '銀座', 'エリアは問わない'] },
+            { q: '気になる業種はある？', opts: ['キャバクラ', 'ラウンジ', 'ガールズバー', 'スナック', 'こだわらない'] },
+            { q: '希望の時給はどれくらい？', opts: ['時給3,000円以上', '時給4,000円以上', '時給5,000円以上', 'こだわらない'] },
+            { q: 'ナイトワークの経験は？', opts: ['未経験', '少しだけ経験あり', '経験豊富'] },
+            { q: '最後に、いちばん重視したいポイントは？', opts: ['高収入', 'ノルマなし', '自由出勤', '未経験サポート'] }
+        ];
+        var qaIndex = -1;
+        var qaAnswers = [];
 
         // ------------------------------------------------------------
         // 描画ヘルパ
@@ -87,16 +67,12 @@
             }, 30);
         }
 
-        function appendUser(text, opts) {
+        function appendUser(text) {
             var div = document.createElement('div');
             div.className = 'ai-chat__msg ai-chat__msg--user';
             div.innerHTML = '<div class="ai-chat__bubble ai-chat__bubble--user">' + escapeHtml(text) + '</div>';
             thread.appendChild(div);
             scrollToBottom();
-            if (!opts || !opts.silent) {
-                transcript.push({ role: 'user', content: text, ts: Date.now() });
-                saveTranscript();
-            }
         }
 
         function appendTyping() {
@@ -135,7 +111,6 @@
                 '</div>';
             thread.appendChild(div);
 
-            // 文字ごとにフェードイン風に見せる（体感の "生成中" 感）
             var target = div.querySelector('[data-ai-body]');
             if (opts && opts.instant) {
                 target.innerHTML = formatReply(text);
@@ -143,33 +118,26 @@
             } else {
                 revealTextGradually(target, text);
             }
-
-            if (!opts || !opts.silent) {
-                transcript.push({ role: 'ai', content: text, source: source || null, ts: Date.now() });
-                saveTranscript();
-            }
         }
 
         function revealTextGradually(el, text) {
             var chars = String(text || '').split('');
             var i = 0;
-            var chunk = Math.max(1, Math.floor(chars.length / 40)); // 40 ステップ弱で終わる
-            var frame;
+            var chunk = Math.max(1, Math.floor(chars.length / 40));
             (function step() {
                 var slice = chars.slice(0, Math.min(i + chunk, chars.length)).join('');
                 el.innerHTML = formatReply(slice);
                 if (i < chars.length) {
                     i += chunk;
                     scrollToBottom();
-                    frame = window.setTimeout(step, 18);
+                    window.setTimeout(step, 18);
                 } else {
                     scrollToBottom(true);
                 }
             })();
-            return function cancel() { if (frame) window.clearTimeout(frame); };
         }
 
-        function appendCards(recs, opts) {
+        function appendCards(recs) {
             if (!recs || !recs.length) return;
             var wrap = document.createElement('div');
             wrap.className = 'ai-chat__cards';
@@ -180,7 +148,6 @@
                 var reward = r.reward ? '採用報酬 ' + r.reward.toLocaleString() + '円' : '';
                 var meta = [area, wage, reward].filter(Boolean).join(' / ');
 
-                // 同一タブで遷移（戻るとsessionStorageから会話が復元される）
                 wrap.insertAdjacentHTML('beforeend',
                     '<a href="' + escapeHtml(r.url) + '" class="ai-chat__card">' +
                     '  <div class="ai-chat__card-thumb">' +
@@ -198,59 +165,75 @@
 
             thread.appendChild(wrap);
             scrollToBottom();
-
-            if (!opts || !opts.silent) {
-                // 直近の ai 発話にカードを付与
-                for (var i = transcript.length - 1; i >= 0; i--) {
-                    if (transcript[i].role === 'ai') {
-                        transcript[i].cards = recs;
-                        break;
-                    }
-                }
-                saveTranscript();
-            }
         }
 
-        function renderQuickReplies(replies) {
+        // 選択肢ボタン：[{label, onClick}] または文字列（文字列は無視せずそのままラベル+ハンドラ必須のため非推奨）
+        function renderChoices(items) {
             if (!quickReplyArea) return;
             quickReplyArea.innerHTML = '';
-            if (!replies || !replies.length) return;
-            replies.forEach(function (text) {
+            if (!items || !items.length) return;
+            items.forEach(function (item) {
                 var btn = document.createElement('button');
                 btn.type = 'button';
                 btn.className = 'ai-chat__quick';
-                btn.textContent = text;
+                btn.textContent = item.label;
                 btn.addEventListener('click', function () {
                     if (isBusy) return;
-                    submitMessage(text);
+                    item.onClick(item.label);
                 });
                 quickReplyArea.appendChild(btn);
             });
         }
 
         // ------------------------------------------------------------
-        // 送信
+        // QA フロー進行
         // ------------------------------------------------------------
-        function submitMessage(text) {
-            var msg = (text || '').trim();
-            if (!msg || isBusy) return;
-            isBusy = true;
-            if (sendBtn) sendBtn.disabled = true;
-            if (input) input.disabled = true;
+        function askNext() {
+            qaIndex++;
+            if (qaIndex >= QA_FLOW.length) {
+                finishQa();
+                return;
+            }
+            var step = QA_FLOW[qaIndex];
+            appendAi('Q' + (qaIndex + 1) + '/' + QA_FLOW.length + '　' + step.q, { instant: qaIndex > 0 });
+            renderChoices(step.opts.map(function (opt) {
+                return { label: opt, onClick: handleAnswer };
+            }));
+        }
 
-            appendUser(msg);
-            if (input) input.value = '';
-            renderQuickReplies([]); // 送信中はクイックリプライ非表示
+        function handleAnswer(label) {
+            appendUser(label);
+            qaAnswers.push(label);
+            window.setTimeout(askNext, 250);
+        }
+
+        function restartQa() {
+            qaIndex = -1;
+            qaAnswers = [];
+            appendAi('もう一度診断するね！✨', { instant: true });
+            window.setTimeout(askNext, 250);
+        }
+
+        function finishQa() {
+            var parts = qaAnswers.filter(function (t) {
+                return !/こだわらない|問わない/.test(t);
+            });
+            if (personalityType) parts.push('接客タイプ' + personalityType);
+            var msg = (parts.length ? parts.join(' ') : 'おすすめ') + ' に合うお店を探して';
+
+            appendAi('ありがとう✨ 回答に合わせてピッタリのお店を探すね！', { instant: true });
+            fetchRecommendation(msg);
+        }
+
+        // ------------------------------------------------------------
+        // サーバへ送信（QA 回答のまとめのみ。フリーテキストは実装中）
+        // ------------------------------------------------------------
+        function fetchRecommendation(msg) {
+            if (isBusy) return;
+            isBusy = true;
+            renderChoices([]);
 
             var typingEl = appendTyping();
-
-            // LLM に送る履歴（過去 12 ターン程度）
-            var histForServer = transcript
-                .filter(function (t) { return t.role === 'user' || t.role === 'ai'; })
-                .slice(-24)
-                .map(function (t) { return { role: t.role === 'ai' ? 'assistant' : 'user', content: t.content }; });
-
-            // タイピング演出用の最低表示時間
             var minWait = 700 + Math.floor(Math.random() * 400);
             var startedAt = Date.now();
 
@@ -263,7 +246,7 @@
                     'X-CSRF-TOKEN': getCsrf(),
                 },
                 credentials: 'same-origin',
-                body: JSON.stringify({ message: msg, history: histForServer }),
+                body: JSON.stringify({ message: msg, history: [] }),
             })
                 .then(function (res) {
                     if (!res.ok) throw new Error('AI chat failed: ' + res.status);
@@ -275,34 +258,22 @@
                         if (typingEl && typingEl.parentNode) typingEl.parentNode.removeChild(typingEl);
                         appendAi(data.reply || '', { source: data.source || '' });
                         appendCards(data.recommendations || []);
-                        renderQuickReplies(data.quick_replies || []);
-                        finishTurn();
+                        renderChoices([{ label: 'もう一度診断する', onClick: restartQa }]);
+                        isBusy = false;
                     }, wait);
                 })
                 .catch(function () {
                     window.setTimeout(function () {
                         if (typingEl && typingEl.parentNode) typingEl.parentNode.removeChild(typingEl);
-                        appendAi(
-                            'ごめん、いま少し繋がりにくいみたい💦 もう一度送ってもらえる？\n(通信環境が悪い時にもこの表示が出るよ)',
-                            { instant: true }
-                        );
-                        renderQuickReplies(['再試行', '別のお店を提案して', '未経験OKに絞って']);
-                        finishTurn();
+                        appendAi('ごめん、いま少し繋がりにくいみたい💦 もう一度試してみてね。', { instant: true });
+                        renderChoices([{ label: 'もう一度診断する', onClick: restartQa }]);
+                        isBusy = false;
                     }, 500);
                 });
         }
 
-        function finishTurn() {
-            isBusy = false;
-            if (sendBtn) sendBtn.disabled = false;
-            if (input) {
-                input.disabled = false;
-                input.focus();
-            }
-        }
-
         // ------------------------------------------------------------
-        // 「会話をリセット」ボタン（動的注入）
+        // リセットボタン（ヘッダー右）
         // ------------------------------------------------------------
         function injectResetButton() {
             if (root.querySelector('[data-ai-reset]')) return;
@@ -312,61 +283,43 @@
             btn.type = 'button';
             btn.className = 'ai-chat__reset';
             btn.setAttribute('data-ai-reset', '');
-            btn.setAttribute('aria-label', '会話をリセット');
+            btn.setAttribute('aria-label', '診断をやり直す');
             btn.innerHTML = '<i class="fas fa-arrow-rotate-left"></i>';
-            btn.title = '会話をリセット';
+            btn.title = '診断をやり直す';
             btn.addEventListener('click', function () {
                 if (isBusy) return;
-                transcript = [];
-                clearTranscript();
                 thread.innerHTML = '';
+                qaIndex = -1;
+                qaAnswers = [];
                 initialGreeting();
             });
             head.appendChild(btn);
         }
 
         // ------------------------------------------------------------
-        // 起動時
+        // 起動時：あいさつ → Q1
         // ------------------------------------------------------------
         function initialGreeting() {
             var greet = personalityType
-                ? 'こんにちは✨ あなたにピッタリのお店、AIが一緒に探すよ！\n接客タイプ診断（' + personalityType + '）も登録済みだから、タイプに合わせた提案もできるよ💎\n「六本木で時給高いお店」「私のタイプに合うお店」みたいに気軽に聞いてね！'
-                : 'こんにちは✨ あなたにピッタリのお店、AIが一緒に探すよ！\n例えば「六本木で時給高いお店」「未経験OKでノルマ緩いところ」みたいに教えてくれると見つけやすいよ💎';
-            appendAi(greet, { instant: true, silent: true });
-            transcript.push({ role: 'ai', content: greet, ts: Date.now() });
-            saveTranscript();
-            var quick = [
-                '六本木で時給高いお店',
-                '未経験OKのお店',
-                'ノルマ無しで働きたい',
-                '銀座のクラブを見る',
-            ];
-            if (personalityType) quick.unshift('私の接客タイプに合うお店');
-            renderQuickReplies(quick);
+                ? 'こんにちは✨ いくつかの質問に答えるだけで、あなたにピッタリのお店をAIが探すよ！\n接客タイプ診断（' + personalityType + '）も加味して提案するね💎'
+                : 'こんにちは✨ いくつかの質問に答えるだけで、あなたにピッタリのお店をAIが探すよ！';
+            appendAi(greet, { instant: true });
+            window.setTimeout(askNext, 300);
+        }
+
+        // フリーテキストは実装中：入力欄・送信ボタンを無効化
+        if (input) {
+            input.value = '';
+            input.disabled = true;
+            input.required = false;
+            input.placeholder = 'フリーテキスト入力は実装中です（選択肢から選んでね）';
+        }
+        if (sendBtn) sendBtn.disabled = true;
+        if (form) {
+            form.addEventListener('submit', function (e) { e.preventDefault(); });
         }
 
         injectResetButton();
-
-        var saved = restoreTranscript();
-        if (saved && saved.length) {
-            transcript = saved;
-            saved.forEach(function (item) {
-                if (item.role === 'user') {
-                    appendUser(item.content, { silent: true });
-                } else if (item.role === 'ai') {
-                    appendAi(item.content, { instant: true, silent: true, source: item.source || '' });
-                    if (Array.isArray(item.cards)) appendCards(item.cards, { silent: true });
-                }
-            });
-        } else {
-            initialGreeting();
-        }
-
-        if (form) {
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-                submitMessage(input ? input.value : '');
-            });
-        }
+        initialGreeting();
     });
 })();

@@ -4,8 +4,8 @@
     $isCast = request()->is('cast/*');
 @endphp
 
-@section('title', ($partnerName ?? 'トーク') . ' 様')
-@section('header_title', $partnerName . ' 様')
+@section('title', $partnerName ?? 'トーク')
+@section('header_title', $partnerName)
 @section('header_avatar', $partnerAvatar ?? asset('assets/images/common/no-image.png'))
 @section('body-class', 'page-talk page-talk-room')
 
