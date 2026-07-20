@@ -5308,13 +5308,10 @@ body.page-home .cast-card--recruit .rc-bottom-bar__stack {
    photo-swiper の外側に透明レイヤーを重ね、下部のドラッグを
    メイン（縦）スワイパーへ直接届かせてキャストカードと同じ操作感にする。
    ============================================================================ */
+/* 撤回（2026-07-20）：この透明ゾーンは touch-action:pan-y と組み合わせて
+   ブラウザに縦パンを強制していたため、指を置いた瞬間に切り替わってしまう問題を
+   引き起こしていた。Swiper のネスト機構（写真=横 / メイン=縦）に一本化するため
+   要素自体を無効化する（マークアップは互換のため残す）。 */
 body.page-home .cast-card--recruit .rc-vswipe-zone {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 44%;
-    z-index: 7;              /* 画像(≦6)より上、下部バー(30)より下 */
-    background: transparent;
-    touch-action: pan-y;     /* 縦パンをブラウザ/メインSwiperに委ねる */
+    display: none !important;
 }

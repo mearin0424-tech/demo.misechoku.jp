@@ -160,9 +160,9 @@ document.addEventListener('DOMContentLoaded', function() {
             touchStartPreventDefault: false,
             touchReleaseOnEdges: true,
             // より水平に近いジェスチャーのみ横スワイプ扱いにし、斜め〜縦は親（上下スワイプ）へ譲る
-            // 水平ジェスチャーだけを厳しく判定して縦を親に返す
-            touchAngle: 12,
-            threshold: 14,
+            // 水平ジェスチャー判定：厳しすぎると横スワイプに気付かない
+            touchAngle: 20,
+            threshold: 10,
             speed: 300,
             // creative は撤回：標準 slide + spaceBetween + CSS filter で軽量に奥行き感を出す
             effect: 'slide',

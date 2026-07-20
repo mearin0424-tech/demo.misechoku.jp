@@ -332,13 +332,17 @@
             h('span', { className: 'imge__label-val', 'data-imge-zoom-val': '', text: '1.0×' }),
         ]);
         var zoomInput = h('input', {
-            type: 'range', min: 0.5, max: 3, step: 0.05, value: 1,
+            type: 'range', min: 0.5, max: 4, step: 0.02, value: 1,
             className: 'imge__slider',
             'aria-label': 'ズーム',
         });
         zoomInput.addEventListener('input', function () {
-            var v = parseFloat(zoomInput.value);
-            if (self.cropper) self.cropper.zoomTo(v);
+            var v = parseFloat(zoomInput.value) || 1;
+            if (self.cropper) {
+                // 相対倍率：初期スケール(_zoomBase) × スライダー値
+                var base = self._zoomBase || 1;
+                try { self.cropper.zoomTo(base * v); } catch (e) {}
+            }
             self.state.zoom = v;
             var el = panel.querySelector('[data-imge-zoom-val]');
             if (el) el.textContent = v.toFixed(2) + '×';
@@ -519,9 +523,15 @@
         } else {
             ratio = NaN;
         }
+        // 出力サイズが指定されていれば、それに合った縦横比を最優先で使う
+        // （aspectRatio が渡っていない/一致しない時の保険）
+        var expectedRatio = ratio;
+        if ((!expectedRatio || isNaN(expectedRatio)) && this.opts.outputWidth && this.opts.outputHeight) {
+            expectedRatio = this.opts.outputWidth / this.opts.outputHeight;
+        }
         this.cropper = new Cropper(this.imgEl, {
-            aspectRatio: ratio,
-            viewMode: 1,
+            aspectRatio: expectedRatio || ratio,
+            viewMode: 2,          // canvas が container を覆う。縦長 crop box が確実に維持される
             dragMode: 'move',
             autoCropArea: 1,
             zoomable: true,
@@ -529,16 +539,41 @@
             scalable: true,
             rotatable: true,
             responsive: true,
+            checkOrientation: true, // EXIF 回転を尊重（横長化バグの根本原因のひとつ）
             background: false,
             toggleDragModeOnDblclick: false,
-            ready: function () { self._applyLiveFilter(); },
+            ready: function () {
+                // アスペクト比の再確定（一部ブラウザで初期の autoCropArea が横長になるケースの保険）
+                if (expectedRatio && expectedRatio > 0) {
+                    try { self.cropper.setAspectRatio(expectedRatio); } catch (e) {}
+                }
+                // ズームスライダーを Cropper の実スケールに同期
+                self._syncZoomFromCropper();
+                self._applyLiveFilter();
+            },
             crop: function () { self._applyLiveFilter(); },
             cropmove: function () { self._applyLiveFilter(); },
             zoom: function (ev) {
                 self.state.zoom = ev.detail.ratio || self.state.zoom;
-                if (self._zoomInput) self._zoomInput.value = self.state.zoom.toFixed(2);
+                self._syncZoomFromCropper();
             },
         });
+    };
+
+    // Cropper の実スケールをスライダーへ反映（相対ズームで表示）
+    ImageEditor.prototype._syncZoomFromCropper = function () {
+        if (!this.cropper || !this._zoomInput) return;
+        try {
+            var cd = this.cropper.getCanvasData();
+            var id = this.cropper.getImageData();
+            if (!cd || !id || !id.naturalWidth) return;
+            // 初期スケール（container fit）を 1.0 として、現在の倍率を計算
+            if (!this._zoomBase) this._zoomBase = id.width / id.naturalWidth || 1;
+            var current = (cd.width / id.naturalWidth) / this._zoomBase;
+            this._zoomInput.value = String(current.toFixed(2));
+            var valEl = this.rootEl && this.rootEl.querySelector('[data-imge-zoom-val]');
+            if (valEl) valEl.textContent = current.toFixed(2) + '×';
+        } catch (e) {}
     };
 
     ImageEditor.prototype._resetAll = function () {

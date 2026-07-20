@@ -212,35 +212,60 @@
     }
 
     // =====================================================================
-    // レンジスライダー（給与/採用報酬）: hidden の <select> と双方向同期
+    // レンジスライダー（給与/採用報酬）：data-range-values の配列を段階として
+    // hidden input（#detail-search-hourly-wage / #detail-search-reward）へ書き込む。
+    // 旧「hidden <select>」方式は「マスタが空 → option が生成されずスライダーが動かない」
+    // 問題があったため撤廃し、Blade 側でフォールバック候補を必ず持たせる方式に変更。
     // =====================================================================
     if (modal) {
-        modal.querySelectorAll('[data-range-for]').forEach(function (range) {
-            var select = document.getElementById(range.getAttribute('data-range-for'));
-            if (!select) return;
-            var valueEl = range.parentElement ? range.parentElement.querySelector('[data-range-value]') : null;
-            range.max = String(Math.max(0, select.options.length - 1));
+        modal.querySelectorAll('.detail-search-range[data-range-target]').forEach(function (wrap) {
+            var range = wrap.querySelector('input[type="range"]');
+            var valueEl = wrap.querySelector('[data-range-value]');
+            var hidden = document.getElementById(wrap.getAttribute('data-range-target'));
+            if (!range || !hidden) return;
+            var values;
+            try { values = JSON.parse(wrap.getAttribute('data-range-values') || '[]'); }
+            catch (e) { values = []; }
+            // 「指定なし」を先頭に必ず入れる
+            values = [0].concat((values || []).filter(function (v) { return v > 0; }));
+            var labeler = wrap.getAttribute('data-range-labeler') || 'wage';
+            range.max = String(Math.max(1, values.length - 1));
+
+            function fmt(n) { return '¥' + n.toLocaleString('en-US') + '以上'; }
+            function labelFor(n) {
+                if (!n) return '指定なし';
+                return (labeler === 'wage' ? '時給 ' : '') + fmt(n);
+            }
 
             function paint() {
                 var idx = parseInt(range.value, 10) || 0;
-                var opt = select.options[idx];
-                if (valueEl) valueEl.textContent = opt ? opt.textContent : '指定なし';
+                var v = values[idx] || 0;
+                hidden.value = v > 0 ? String(v) : '';
+                if (valueEl) valueEl.textContent = labelFor(v);
                 var max = parseInt(range.max, 10) || 1;
                 range.style.setProperty('--range-progress', ((idx / Math.max(1, max)) * 100) + '%');
                 range.classList.toggle('is-unset', idx === 0);
             }
-            function fromSelect() {
-                range.value = String(Math.max(0, select.selectedIndex));
+            // 初期値：hidden の value（サーバ/クエリ復元）→ もっとも近い段階へスナップ
+            (function initFromValue() {
+                var initial = parseInt(wrap.getAttribute('data-range-initial') || hidden.value || '0', 10) || 0;
+                var idx = 0;
+                if (initial > 0) {
+                    var best = Infinity;
+                    values.forEach(function (v, i) {
+                        var d = Math.abs(v - initial);
+                        if (d < best) { best = d; idx = i; }
+                    });
+                }
+                range.value = String(idx);
                 paint();
-            }
-            range.addEventListener('input', function () {
-                select.selectedIndex = parseInt(range.value, 10) || 0;
-                select.dispatchEvent(new Event('change', { bubbles: true }));
-                paint();
+            })();
+
+            range.addEventListener('input', paint);
+            // クリア（外部からの hidden.value = '' 変化）でも追従
+            hidden.addEventListener('change', function () {
+                if (!hidden.value) { range.value = '0'; paint(); }
             });
-            // クリア等で select 側が変わった時に追従
-            select.addEventListener('change', fromSelect);
-            fromSelect();
         });
 
         // =================================================================

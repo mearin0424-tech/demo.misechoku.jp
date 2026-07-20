@@ -131,7 +131,7 @@
 
 @push('scripts')
 <script src="{{ asset('assets/js/sub-header.js') }}"></script>
-<script src="{{ asset('assets/js/search-detail.js') }}?v=20260720-tags-v3"></script>
+<script src="{{ asset('assets/js/search-detail.js') }}?v=20260720-range-fix"></script>
 <script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260720-keep-confirm"></script>
 <script>
 {{-- 上部検索バーの開閉：デフォルトは閉じ（HTML初期状態）→ タップで開閉するだけ。

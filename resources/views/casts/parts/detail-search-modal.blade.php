@@ -284,39 +284,43 @@
                     </div>
                 </div>
 
-                {{-- 給与(時給)：スライドバーで調整（選択値は hidden の select が submit を担う） --}}
+                @php
+                    // マスタが空でもスライダーが機能するようフォールバック候補を用意
+                    $wageOptions = $hourlyWages instanceof \Illuminate\Support\Collection ? $hourlyWages->all() : (array) $hourlyWages;
+                    if (empty($wageOptions)) $wageOptions = [3000, 4000, 5000, 6000, 8000, 10000];
+                    $rewardOptions = $rewards instanceof \Illuminate\Support\Collection ? $rewards->all() : (array) $rewards;
+                    if (empty($rewardOptions)) $rewardOptions = [10000, 30000, 50000, 100000, 200000, 300000];
+                @endphp
+
+                {{-- 給与(時給)：スライドバー（hidden input に値を直接書き込む方式） --}}
                 <div class="detail-search-section detail-search-section--panel" data-summary-group="給与(時給)">
                     <label class="detail-search-label detail-search-label--panel" for="detail-search-hourly-wage-range"><i class="fas fa-yen-sign" aria-hidden="true"></i>給与(時給)</label>
-                    <select id="detail-search-hourly-wage" name="hourly_wage" class="detail-search-select" hidden aria-hidden="true" tabindex="-1">
-                        <option value="">指定なし</option>
-                        @foreach($hourlyWages as $value)
-                            <option value="{{ $value }}" {{ $selectedHourlyWage === (string) $value ? 'selected' : '' }}>時給 {{ number_format((int) $value) }}円以上</option>
-                        @endforeach
-                    </select>
-                    <div class="detail-search-range">
+                    <input type="hidden" name="hourly_wage" id="detail-search-hourly-wage" value="{{ $selectedHourlyWage }}">
+                    <div class="detail-search-range"
+                         data-range-target="detail-search-hourly-wage"
+                         data-range-values='@json(array_map("intval", $wageOptions))'
+                         data-range-labeler="wage"
+                         data-range-initial="{{ $selectedHourlyWage }}">
                         <input type="range" id="detail-search-hourly-wage-range"
                                class="detail-search-range__input"
                                min="0" step="1" value="0"
-                               data-range-for="detail-search-hourly-wage"
                                aria-label="希望時給">
                         <div class="detail-search-range__value" data-range-value>指定なし</div>
                     </div>
                 </div>
 
-                {{-- 採用報酬（ボーナス金）：スライドバーで調整 --}}
+                {{-- 採用報酬（ボーナス金）：スライドバー --}}
                 <div class="detail-search-section detail-search-section--panel" data-summary-group="採用報酬">
                     <label class="detail-search-label detail-search-label--panel" for="detail-search-reward-range"><i class="fas fa-gift" aria-hidden="true"></i>採用報酬（ボーナス金）</label>
-                    <select id="detail-search-reward" name="reward" class="detail-search-select" hidden aria-hidden="true" tabindex="-1">
-                        <option value="">指定なし</option>
-                        @foreach($rewards as $value)
-                            <option value="{{ $value }}" {{ $selectedReward === (string) $value ? 'selected' : '' }}>{{ number_format((int) $value) }}円以上</option>
-                        @endforeach
-                    </select>
-                    <div class="detail-search-range">
+                    <input type="hidden" name="reward" id="detail-search-reward" value="{{ $selectedReward }}">
+                    <div class="detail-search-range"
+                         data-range-target="detail-search-reward"
+                         data-range-values='@json(array_map("intval", $rewardOptions))'
+                         data-range-labeler="reward"
+                         data-range-initial="{{ $selectedReward }}">
                         <input type="range" id="detail-search-reward-range"
                                class="detail-search-range__input"
                                min="0" step="1" value="0"
-                               data-range-for="detail-search-reward"
                                aria-label="採用報酬">
                         <div class="detail-search-range__value" data-range-value>指定なし</div>
                     </div>
