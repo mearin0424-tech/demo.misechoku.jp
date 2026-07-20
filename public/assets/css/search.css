@@ -3249,6 +3249,29 @@ body.page-search .connection-list--search > * {
     border-color: #7c3aed !important;
     color: #ffffff !important;
 }
+/* チップ内の <input type="checkbox"> は完全非表示に（〇の枠を消す） */
+.detail-search-chip.detail-search-chip--search input[type="checkbox"],
+.detail-search-chip.detail-search-chip--search input[type="radio"] {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+/* 選択時：span 内の子要素を含めて文字色を白に反転（is-pinned も同扱い） */
+.detail-search-chip.detail-search-chip--search:has(input:checked) span,
+.detail-search-chip.detail-search-chip--search:has(input:checked) *,
+.detail-search-chip.detail-search-chip--search.is-pinned span,
+.detail-search-chip.detail-search-chip--search.is-pinned * {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+}
 
 /* エリアのミニ検索ボックス */
 .detail-search-area-filter {

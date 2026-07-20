@@ -16,22 +16,25 @@
         </div>
 
         <div class="tl-row__body">
-            {{-- 1行目：名前 + 優良店バッヂ --}}
-            <h3 class="tl-row__name">{{ $item['shop_name'] }}@if(!empty($item['is_excellent'])) <x-ui.premium-badge size="sm" />@endif</h3>
-
-            {{-- 2行目：業種・位置・評価・距離 --}}
-            <div class="tl-row__meta">
+            {{-- 1行目：店舗名 +（業種を小文字で右に）+ 優良店バッヂ --}}
+            <h3 class="tl-row__name">
+                <span class="tl-row__name-text">{{ $item['shop_name'] }}</span>
                 @if(!empty($item['industry_label']))
-                    <span class="tl-row__industry">{{ $item['industry_label'] }}</span>
+                    <span class="tl-row__industry-inline">{{ $item['industry_label'] }}</span>
+                @endif
+                @if(!empty($item['is_excellent'])) <x-ui.premium-badge size="sm" />@endif
+            </h3>
+
+            {{-- 2行目：評価レビュー → 最寄り駅 → 距離 --}}
+            <div class="tl-row__meta">
+                @if(!empty($item['rating_display']))
+                    <span class="tl-row__rating">
+                        <i class="fas fa-star" aria-hidden="true"></i><span class="tl-row__rating-val">{{ $item['rating_display'] }}</span>
+                    </span>
                 @endif
                 @if($locationLine !== '')
                     <span class="tl-row__loc">
                         <i class="fas {{ $locationIcon }}" aria-hidden="true"></i>{{ $locationLine }}
-                    </span>
-                @endif
-                @if(!empty($item['rating_display']))
-                    <span class="tl-row__rating">
-                        <i class="fas fa-star" aria-hidden="true"></i>{{ $item['rating_display'] }}
                     </span>
                 @endif
                 @if(!empty($item['distance_label']))
@@ -41,26 +44,24 @@
                 @endif
             </div>
 
-            {{-- 3行目：ボーナス金 + 時給（給与情報チップ） --}}
+            {{-- 3行目：ボーナス金 + 時給（洗練された給与カード） --}}
             @php
                 $hourly = (int) ($item['hourly_wage'] ?? 0);
                 $reward = (int) ($item['reward'] ?? 0);
             @endphp
             @if($hourly > 0 || $reward > 0)
-                <div class="tl-row__pay">
+                <div class="tl-pay">
                     @if($reward > 0)
-                        <span class="tl-pay-chip tl-pay-chip--bonus">
-                            <i class="fas fa-gift" aria-hidden="true"></i>
-                            <span class="tl-pay-chip__label">ボーナス</span>
-                            <strong>¥{{ number_format($reward) }}</strong>
-                        </span>
+                        <div class="tl-pay__cell tl-pay__cell--bonus">
+                            <span class="tl-pay__label">ボーナス</span>
+                            <span class="tl-pay__amount"><span class="tl-pay__yen">¥</span>{{ number_format($reward) }}</span>
+                        </div>
                     @endif
                     @if($hourly > 0)
-                        <span class="tl-pay-chip tl-pay-chip--wage">
-                            <i class="fas fa-yen-sign" aria-hidden="true"></i>
-                            <span class="tl-pay-chip__label">時給</span>
-                            <strong>¥{{ number_format($hourly) }}〜</strong>
-                        </span>
+                        <div class="tl-pay__cell tl-pay__cell--wage">
+                            <span class="tl-pay__label">時給</span>
+                            <span class="tl-pay__amount"><span class="tl-pay__yen">¥</span>{{ number_format($hourly) }}<span class="tl-pay__unit">〜</span></span>
+                        </div>
                     @endif
                 </div>
             @endif
