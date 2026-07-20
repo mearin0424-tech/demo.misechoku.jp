@@ -59,13 +59,15 @@
             <div class="menu-label-header">SETTING</div>
             <ul class="sidebar-sub-menu">
                 <li><a href="{{ url('/setting/notification') }}"><i class="fas fa-bell"></i> 通知設定</a></li>
-                <li>
-                    {{-- 探索拠点：検索・スワイプ共通の距離基準。サイドメニューを閉じてからモーダルを開く --}}
-                    <button type="button" class="sidebar-theme-toggle" id="sidebar-location-setting"
-                            onclick="document.getElementById('side-menu').classList.remove('open'); document.getElementById('menu-overlay').classList.remove('show'); document.body.style.overflow=''; var t=document.getElementById('location-pill-trigger'); if (t) t.click();">
-                        <i class="fas fa-location-dot"></i> <span>探索拠点の設定</span>
-                    </button>
-                </li>
+                @if($isCast)
+                    <li>
+                        {{-- 探索拠点：検索・スワイプ共通の距離基準（キャストのみ。店舗は店舗住所固定） --}}
+                        <button type="button" class="sidebar-theme-toggle" id="sidebar-location-setting"
+                                onclick="document.getElementById('side-menu').classList.remove('open'); document.getElementById('menu-overlay').classList.remove('show'); document.body.style.overflow=''; var t=document.getElementById('location-pill-trigger'); if (t) t.click();">
+                            <i class="fas fa-location-dot"></i> <span>探索拠点の設定</span>
+                        </button>
+                    </li>
+                @endif
                 @if(!$isCast)
                     <li><a href="{{ url('/subscription') }}"><i class="fas fa-crown"></i> プラン選択</a></li>
                 @endif
@@ -122,9 +124,11 @@
 
 {{-- 探索拠点モーダル（全画面共通）：#side-menu の transform の影響を受けないよう aside の外に配置。
      ピル表示は不要なので隠し、サイドメニューの「探索拠点の設定」から #location-pill-trigger を発火して開く --}}
+@if($isCast)
 <div class="sidebar-location-include" style="display: contents;">
     @include('layouts.parts.location-pill')
 </div>
+@endif
 <style>.sidebar-location-include .location-pill-wrap { display: none; }</style>
 
 <style>

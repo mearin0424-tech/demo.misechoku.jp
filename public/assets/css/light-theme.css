@@ -1735,3 +1735,14 @@ body.page-auth-login .active\:translate-y-1:active {
     transform: scale(0.97) !important;
     box-shadow: 0 3px 8px rgba(124, 58, 237, 0.25) !important;
 }
+
+
+/* §30 店舗詳細検索：拠点固定カード（ライト配色） */
+body.theme-light .detail-search-location-fixed {
+    background: rgba(124, 58, 237, 0.05);
+    border-color: rgba(124, 58, 237, 0.22);
+}
+body.theme-light .detail-search-location-fixed__icon { color: #7c3aed; }
+body.theme-light .detail-search-location-fixed__title { color: #4b465c; }
+body.theme-light .detail-search-location-fixed__sub { color: #6d6685; }
+body.theme-light .detail-search-location-fixed__sub.is-warn { color: #dc2626; }

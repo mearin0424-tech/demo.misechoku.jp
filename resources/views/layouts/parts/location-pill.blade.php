@@ -119,3 +119,187 @@
         <p id="location-modal-message" class="location-modal__message" hidden></p>
     </div>
 </div>
+
+
+{{-- モーダルのスタイル同梱（2026-07-20）：
+     従来は旧 app.css / search.css に定義があり、検索ページ以外（サイドメニュー経由）で
+     開くと未スタイルで崩れていた。コンポーネントに CSS を同梱して全画面で成立させる。
+     ライトモード補正は light-theme.css（body.theme-light .location-modal*）が上書きする。 --}}
+<style id="location-modal-css-bundled">
+.location-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease;
+}
+.location-modal-overlay[aria-hidden="false"] {
+    opacity: 1;
+    pointer-events: auto;
+}
+.location-modal {
+    position: relative;
+    width: min(420px, 100%);
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    background: linear-gradient(180deg, var(--color-sub), var(--dark-bg));
+    border: 1px solid var(--color-border-strong);
+    border-radius: 18px;
+    padding: 22px 22px 18px;
+    color: var(--color-text-header);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7);
+}
+.location-modal__close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--color-text-muted);
+    cursor: pointer;
+}
+.location-modal__close:hover { background: rgba(255, 255, 255, 0.16); color: var(--color-text-header); }
+.location-modal__title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--color-text-header);
+    margin: 0 0 8px;
+    font-family: var(--font-serif);
+    letter-spacing: 0.04em;
+}
+.location-modal__lead {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+    margin: 0 0 16px;
+}
+.location-modal__section { margin-bottom: 14px; }
+.location-modal__section-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin: 0 0 8px;
+    letter-spacing: 0.04em;
+}
+.location-modal__btn-primary,
+.location-modal__btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.92rem;
+    cursor: pointer;
+    border: 0;
+}
+.location-modal__btn-primary {
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    color: #1a1206;
+}
+.location-modal__btn-primary:hover { filter: brightness(1.05); }
+.location-modal__btn-secondary {
+    background: transparent;
+    border: 1px solid var(--color-border-strong);
+    color: var(--color-text-header);
+}
+.location-modal__btn-secondary:hover { background: rgba(168, 85, 247, 0.08); }
+.location-modal__btn-ghost {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    padding: 5px 10px;
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+    cursor: pointer;
+    margin-left: auto;
+}
+.location-modal__btn-ghost:hover { color: var(--color-text-header); border-color: rgba(255, 255, 255, 0.35); }
+.location-modal__hint {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    margin: 6px 0 0;
+}
+.location-modal__divider {
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 0.74rem;
+    margin: 12px 0;
+    position: relative;
+}
+.location-modal__divider::before,
+.location-modal__divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 38%;
+    height: 1px;
+    background: var(--color-border);
+}
+.location-modal__divider::before { left: 0; }
+.location-modal__divider::after { right: 0; }
+.location-modal__form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+}
+.location-modal__input {
+    height: 42px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid var(--color-border-strong);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-text-header);
+    font-size: 0.92rem;
+}
+.location-modal__input:focus {
+    outline: 2px solid rgba(168, 85, 247, 0.45);
+    outline-offset: 1px;
+    background: rgba(255, 255, 255, 0.1);
+}
+.location-modal__current {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(168, 85, 247, 0.06);
+    border: 1px solid var(--color-border);
+    font-size: 0.82rem;
+}
+.location-modal__current-label { color: var(--color-text-header); font-weight: 700; }
+.location-modal__message {
+    margin-top: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    background: var(--color-danger-bg);
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    color: var(--color-danger);
+}
+.location-modal__message.is-success {
+    background: var(--color-success-bg);
+    border-color: rgba(74, 222, 128, 0.4);
+    color: var(--color-success);
+}
+
+/* ==========================================================================
+   共有メニュー（丸ボタン＋ポップアップ）
+   ========================================================================== */
+</style>

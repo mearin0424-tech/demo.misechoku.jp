@@ -87,103 +87,21 @@
                         <span class="detail-search-section__title"><i class="fas fa-location-crosshairs" aria-hidden="true"></i>位置情報から探す</span>
                     </div>
 
-                    <fieldset class="detail-search-location-modes">
-                        <legend class="sr-only">基準となる拠点</legend>
-
-                        <label class="detail-search-location-card {{ $detailLocationMode === 'profile' ? 'is-selected' : '' }} {{ $hasProfileAddress ? '' : 'is-disabled-soft' }}" data-mode-card="profile">
-                            <input type="radio" name="location_mode" value="profile" @checked($detailLocationMode === 'profile')>
-                            <span class="detail-search-location-card__row">
-                                <i class="fas fa-home detail-search-location-card__icon"></i>
-                                <span class="detail-search-location-card__main">
-                                    <span class="detail-search-location-card__title">登録住所</span>
-                                    <span class="detail-search-location-card__sub {{ $hasProfileAddress ? '' : 'is-warn' }}">
-                                        @if($hasProfileLocation)
-                                            {{ $profileAddressText !== '' ? $profileAddressText : '店舗の登録住所を基準にします' }}
-                                        @elseif($hasProfileAddress)
-                                            {{ $profileAddressText }}
-                                        @else
-                                            店舗の住所が登録されていません
-                                        @endif
-                                    </span>
-                                </span>
+                    {{-- 店舗は常に「店舗の登録住所」を基準に距離検索する（拠点選択なし・仕様） --}}
+                    <input type="hidden" name="location_mode" value="profile">
+                    <div class="detail-search-location-fixed">
+                        <i class="fas fa-store detail-search-location-fixed__icon" aria-hidden="true"></i>
+                        <span class="detail-search-location-fixed__body">
+                            <span class="detail-search-location-fixed__title">店舗の住所を基準に検索します</span>
+                            <span class="detail-search-location-fixed__sub {{ $hasProfileAddress ? '' : 'is-warn' }}">
+                                @if($hasProfileAddress)
+                                    {{ $profileAddressText !== '' ? $profileAddressText : '登録済みの店舗住所からの距離で表示されます' }}
+                                @else
+                                    店舗の住所が未登録です。PROFILE から住所を登録してください
+                                @endif
                             </span>
-                        </label>
-
-                        <label class="detail-search-location-card {{ $detailLocationMode === 'passport' ? 'is-selected' : '' }}" data-mode-card="passport">
-                            <input type="radio" name="location_mode" value="passport" @checked($detailLocationMode === 'passport')>
-                            <span class="detail-search-location-card__row">
-                                <i class="fas fa-map detail-search-location-card__icon"></i>
-                                <span class="detail-search-location-card__main">
-                                    <span class="detail-search-location-card__title">
-                                        指定地
-                                        <span class="detail-search-location-card__badge">PASSPORT</span>
-                                    </span>
-                                    <span class="detail-search-location-card__sub">住所や駅名で任意の場所を指定できます</span>
-                                </span>
-                            </span>
-                            <span class="detail-search-location-card__expand" data-mode-section="passport">
-                                <span class="detail-search-location-passport-row">
-                                    <span class="detail-search-location-input-wrap detail-search-location-suggest-wrap" id="detail-search-location-suggest-wrap">
-                                        <i class="fas fa-search"></i>
-                                        <input id="detail-search-location-passport-address"
-                                               type="text"
-                                               name="passport_address"
-                                               class="detail-search-location-input"
-                                               maxlength="255"
-                                               placeholder="例: 渋谷駅, 新宿区..."
-                                               value="{{ $detailPassportAddress }}"
-                                               autocomplete="off"
-                                               role="combobox"
-                                               aria-autocomplete="list"
-                                               aria-controls="detail-search-location-suggest-list"
-                                               aria-expanded="false">
-                                        <ul class="detail-search-location-suggest-list" id="detail-search-location-suggest-list" role="listbox" hidden></ul>
-                                    </span>
-                                    <button type="button" class="detail-search-location-lookup-btn" id="detail-search-location-lookup-btn">
-                                        <i class="fas fa-magnifying-glass-location" data-lookup-icon></i>
-                                        <span data-lookup-label>検索</span>
-                                    </button>
-                                </span>
-                                <input type="hidden" name="passport_lat" id="detail-search-location-passport-lat" value="{{ $detailPassportLat }}">
-                                <input type="hidden" name="passport_lng" id="detail-search-location-passport-lng" value="{{ $detailPassportLng }}">
-                                <p class="detail-search-location-passport-status" id="detail-search-location-passport-status"
-                                   data-default-message="住所・駅名を入れて『検索』を押してください"
-                                   data-state="{{ ($detailLocationMode === 'passport' && is_numeric($detailPassportLat) && is_numeric($detailPassportLng)) ? 'resolved' : 'idle' }}">
-                                    @if($detailLocationMode === 'passport' && is_numeric($detailPassportLat) && is_numeric($detailPassportLng))
-                                        <i class="fas fa-circle-check"></i>
-                                        <span>解決済み: <strong>{{ $detailPassportLabel !== '' ? $detailPassportLabel : $detailPassportAddress }}</strong>（{{ number_format((float) $detailPassportLat, 4) }}, {{ number_format((float) $detailPassportLng, 4) }}）</span>
-                                    @else
-                                        <i class="fas fa-info-circle"></i>
-                                        <span>住所・駅名を入れて『検索』を押してください</span>
-                                    @endif
-                                </p>
-                            </span>
-                        </label>
-
-                        <label class="detail-search-location-card {{ $detailLocationMode === 'current' ? 'is-selected' : '' }}" data-mode-card="current">
-                            <input type="radio" name="location_mode" value="current" @checked($detailLocationMode === 'current')>
-                            <span class="detail-search-location-card__row">
-                                <i class="fas fa-location-crosshairs detail-search-location-card__icon"></i>
-                                <span class="detail-search-location-card__main">
-                                    <span class="detail-search-location-card__title">現在地</span>
-                                    <span class="detail-search-location-card__sub">端末の位置情報を使用します</span>
-                                </span>
-                                <i class="fas fa-circle-check detail-search-location-card__check" data-current-check {{ ($detailCurrentLat !== '' && $detailCurrentLng !== '') ? '' : 'hidden' }}></i>
-                            </span>
-                            <span class="detail-search-location-card__expand" data-mode-section="current">
-                                <button type="button" class="detail-search-location-current-btn" id="detail-search-location-current-btn">
-                                    <i class="fas fa-location-crosshairs" aria-hidden="true"></i>
-                                    <span data-current-btn-label>最新の現在地を取得する</span>
-                                </button>
-                                <p class="detail-search-location-hint" id="detail-search-location-current-label" {{ ($detailCurrentLat !== '' && $detailCurrentLng !== '') ? '' : 'hidden' }}>
-                                    <i class="fas fa-info-circle"></i>
-                                    <span>最新の位置情報が反映されています</span>
-                                </p>
-                                <input type="hidden" name="current_lat" id="detail-search-location-current-lat" value="{{ $detailCurrentLat }}">
-                                <input type="hidden" name="current_lng" id="detail-search-location-current-lng" value="{{ $detailCurrentLng }}">
-                            </span>
-                        </label>
-                    </fieldset>
+                        </span>
+                    </div>
 
                     <div class="detail-search-location-radius">
                         <div class="detail-search-location-slider">
