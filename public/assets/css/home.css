@@ -5191,3 +5191,19 @@ body.page-home .cast-name-row .cast-name {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+
+/* ============================================================================
+   下部情報エリアの操作要素をオーバーレイより確実に手前へ (2026-07-20)
+   合成クリックが装飾レイヤーに落ちて誤遷移するのを構造的に防ぐ
+   ============================================================================ */
+body.page-home .rc-bottom-bar,
+body.page-home .card-bottom-info {
+    position: relative;
+    z-index: 30;
+}
+body.page-home .swipe-talk-cta,
+body.page-home .swipe-keep-corner {
+    position: relative;
+    z-index: 31;
+}

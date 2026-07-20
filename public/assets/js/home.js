@@ -183,24 +183,42 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // 求人カード（全体）：クリックで詳細遷移。
-    // ただし下部情報エリア（.rc-bottom-bar）内のタップは KEEP／トークCTA／
-    // ボーナス・時給カード等の操作要素が集約されているため、遷移対象外とする。
-    // 画像エリア（.rc-img-wrap）のタップだけがプロフィール遷移のトリガー。
-    document.querySelectorAll('.cast-card--recruit[data-detail-url]').forEach(function (card) {
+    // ============================================================
+    // トークCTA：capture 段階で最優先に処理する。
+    // Swiper の preventClicks が <a> の既定遷移を殺す／合成クリックが
+    // 親カードに落ちる等、どのレイヤーで拾われても確実にトークへ遷移させる。
+    // （Swiper の loop 複製スライドにも効くよう document 委譲）
+    // ============================================================
+    document.addEventListener('click', function (e) {
+        var cta = e.target.closest('.swipe-talk-cta');
+        if (!cta) return;
+        e.preventDefault();
+        e.stopPropagation();
+        var href = cta.getAttribute('href');
+        if (href) window.location.href = href;
+    }, true);
+
+    // ============================================================
+    // 求人カード（全体）：クリックで詳細遷移（document 委譲版）。
+    // ・Swiper loop の複製スライドにも自動で効く
+    // ・下部情報エリア（.rc-bottom-bar / .card-bottom-info）は
+    //   KEEP／トークCTA／時給カード等の操作要素が集約されているため遷移対象外。
+    //   → 画像エリアのタップだけがプロフィール遷移のトリガー
+    // ============================================================
+    document.addEventListener('click', function (e) {
+        var card = e.target.closest('.cast-card--recruit[data-detail-url]');
+        if (!card) return;
+        // 下部情報エリアは遷移させない（ボタン類の明示的な除外領域）
+        if (e.target.closest('.rc-bottom-bar')) return;
+        if (e.target.closest('.card-bottom-info')) return;
+        // <a href> / <button> / .stop-propagation / ページネーションはそれぞれの動作を優先
+        if (e.target.closest('a[href]')) return;
+        if (e.target.closest('button')) return;
+        if (e.target.closest('.stop-propagation')) return;
+        if (e.target.closest('.photo-pagination')) return;
+        if (isPhotoSwiping) return;
         var recruitUrl = card.getAttribute('data-detail-url');
-        if (!recruitUrl) return;
-        card.addEventListener('click', function (e) {
-            // 下部情報エリアはボタン・CTAの集合なので、遷移させない（明示的な除外領域）
-            if (e.target.closest('.rc-bottom-bar')) return;
-            // <a href> / <button> / .stop-propagation / ページネーションはそれぞれの動作を優先
-            if (e.target.closest('a[href]')) return;
-            if (e.target.closest('button')) return;
-            if (e.target.closest('.stop-propagation')) return;
-            if (e.target.closest('.photo-pagination')) return;
-            if (isPhotoSwiping) return;
-            window.location.href = recruitUrl;
-        });
+        if (recruitUrl) window.location.href = recruitUrl;
     });
 
     // リサイズ・ビューポート変化時に Swiper を更新（モバイルのアドレスバー表示切替など）

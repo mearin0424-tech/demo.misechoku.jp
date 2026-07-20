@@ -178,7 +178,7 @@
     opacity: 0.5;
 }
 
-.sidebar-footer { padding: 20px; border-top: 1px solid rgba(168, 85, 247, 0.16); }
+.sidebar-footer { padding: 20px; padding-bottom: max(20px, env(safe-area-inset-bottom, 0px)); border-top: 1px solid rgba(168, 85, 247, 0.16); }
 .btn-logout {
     width: 100%; padding: 12px; background: rgba(32, 7, 10, 0.9);
     border: 1px solid rgba(248, 113, 113, 0.7); color: #fecaca;

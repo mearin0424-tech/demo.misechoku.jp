@@ -1146,3 +1146,32 @@ body.theme-light .cast-mypage-sub-page .mypage-detail-box {
     border: 0 !important;
     box-shadow: none !important;
 }
+
+
+/* ==========================================================================
+   §16 強制ダークモード時の可読性補正 (2026-07-20)
+   ヘッダーのテーマトグルで dark を選ぶと body.theme-light が外れる。
+   ライトファーストで実装したページ（許可証・プラン・採用管理等）の
+   「白カードの外にある濃色テキスト」をダーク背景でも読める色に戻す。
+   ※ 白カード内部（#fff面 + 濃色文字）はそのままで可読なので触らない
+   ========================================================================== */
+
+/* 許可証の提出・管理 */
+body:not(.theme-light) .license-page__title { color: #f5f5f5 !important; }
+body:not(.theme-light) .license-page__title i { color: #a78bfa !important; }
+body:not(.theme-light) .license-page__desc { color: #b8b8b8 !important; }
+body:not(.theme-light) .license-page__back a { color: #a78bfa !important; }
+
+/* プラン設定 */
+body:not(.theme-light) .plan-page { color: #f5f5f5 !important; }
+body:not(.theme-light) .plan-guest-note { color: #b8b8b8 !important; }
+
+/* 採用・入金管理（キャスト）: 獲得ボーナス見出し */
+body:not(.theme-light) .employment-bonus-hero__label { color: #f6d36a !important; }
+body:not(.theme-light) .employment-bonus-hero__meta { color: #b8b8b8 !important; }
+
+/* 閲覧キャスト一覧（Premium） */
+body:not(.theme-light) .viewers-shell { color: #f5f5f5; }
+
+/* 汎用リード文（.page-lead は var 参照だが、念のためダーク値を保証） */
+body:not(.theme-light) .page-lead { color: #b8b8b8; }

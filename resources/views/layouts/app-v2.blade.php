@@ -76,11 +76,20 @@
         // MyPage を「白基調 + 高級感」プロトタイプで表示するためのフラグ。
         // premium-white.css がここでのみ発動し、既存のダークスタイルを上書きする。
         // ※ SWIPE (home) は白基調で崩れたため対象から除外（元のダーク表示を維持）
-        $isPremiumWhite = request()->routeIs('cast.mypage.index', 'shop.mypage.index');
+        $naturalPremiumWhite = request()->routeIs('cast.mypage.index', 'shop.mypage.index');
 
-        $isLightTheme = !$isDarkPage
+        $naturalLightTheme = !$isDarkPage
             && !str_contains($bodyClassAttr, 'page-demo-login')
             && !str_contains($bodyClassAttr, 'page-auth-login');
+
+        // ===== テーマ切替（ヘッダーのライト/ダークトグル 2026-07-20）=====
+        // Cookie: theme_mode = 'dark' → 全画面を SWIPE/プロフィール同様のダークベースへ強制。
+        // 'light'/未設定 → 通常のページ別テーマ（ライトベース）。
+        // 全 CSS はダークネイティブ + body.theme-light で上書きする構造のため、
+        // ダーク強制は body クラスを外すだけで成立する（リロード無しのライブ切替可）。
+        $isForcedDark = request()->cookie('theme_mode') === 'dark';
+        $isPremiumWhite = $naturalPremiumWhite && !$isForcedDark;
+        $isLightTheme = $naturalLightTheme && !$isForcedDark;
 
         // ===== ボトムナビ：アクティブ判定（旧 layouts.parts.footer と同一ロジック） =====
         $navPrefix       = request()->is('cast/*') ? 'cast' : 'shop';
@@ -537,7 +546,7 @@
     </style>
 
     {{-- サイドバー partial の位置決めCSS（右端からスライド） --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/layout-sidebar.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/layout-sidebar.css') }}?v=20260720-full-height">
 
     {{-- ヘッダーのポップアップ（通知 / タスク）専用CSS：app.js が #btn-header-* で togglePopup する --}}
     <link rel="stylesheet" href="{{ asset('assets/css/layout-header.css') }}?v=20260719-center-title">
@@ -665,18 +674,16 @@
     {{-- モーション基盤（タブ/モーダル/画像/リビールのなめらか化。Step1） --}}
     <link rel="stylesheet" href="{{ asset('assets/css/motion.css') }}?v={{ $assetVersion }}">
     <script src="{{ asset('assets/js/motion.js') }}?v={{ $assetVersion }}" defer></script>
-    @if($isLightTheme)
-    {{-- ライトモード（薄ラベンダー基調）。全CSSの最後に読み込んで上書きする --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260720-light-13">
-    @endif
-    @if($isPremiumWhite)
-    {{-- プレミアムホワイト（試験導入）: SWIPE / MyPage の白基調プロトタイプ。
-         セリフ体見出しのため Noto Serif JP も追加読み込み。ダークテーマ CSS の後に来て上書きする --}}
+    {{-- ライトモード（薄ラベンダー基調）。全ルールが body.theme-light スコープのため常時読み込みで安全。
+         テーマトグル（ライト/ダーク）のライブ切替を可能にするため @if を外して常時ロードする --}}
+    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260720-light-14">
+    {{-- プレミアムホワイト（MyPage）: 全ルールが body.theme-premium-white スコープ。同上で常時ロード --}}
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/css/premium-white.css') }}?v=20260720-pwhite-03">
-    @endif
 </head>
 <body class="@yield('body-class') {{ $isLightTheme ? 'theme-light' : '' }} {{ $isPremiumWhite ? 'theme-premium-white' : '' }} bg-base text-text-main"
+      data-natural-light="{{ $naturalLightTheme ? '1' : '0' }}"
+      data-natural-pwhite="{{ $naturalPremiumWhite ? '1' : '0' }}"
       data-notification-badge="{{ isset($unreadNewsCount) ? (int) $unreadNewsCount : 0 }}">
 
     {{-- サイドメニュー開閉用オーバーレイ（app.js が #menu-overlay を操作） --}}
@@ -789,6 +796,43 @@
                     window.openImageLightbox(el.currentSrc || el.src);
                 });
             });
+        });
+    })();
+    </script>
+
+    {{-- テーマ切替（ライト/ダーク）: ヘッダーのトグルボタン。
+         Cookie theme_mode を切り替え、body クラスをその場で付け替える（リロード不要）。
+         'dark'  → theme-light / theme-premium-white を外して全画面ダークベース
+         'light' → data-natural-* に基づきページ本来のテーマへ戻す --}}
+    <script>
+    (function () {
+        var btn = document.getElementById('btn-theme-toggle');
+        if (!btn) return;
+        var icon = btn.querySelector('i');
+
+        function applyMode(mode) {
+            var b = document.body;
+            if (mode === 'dark') {
+                b.classList.remove('theme-light', 'theme-premium-white');
+            } else {
+                if (b.getAttribute('data-natural-light') === '1') b.classList.add('theme-light');
+                if (b.getAttribute('data-natural-pwhite') === '1') b.classList.add('theme-premium-white');
+            }
+            btn.setAttribute('data-theme-mode', mode);
+            var label = mode === 'dark' ? 'ライトモードに切り替え' : 'ダークモードに切り替え';
+            btn.setAttribute('aria-label', label);
+            btn.setAttribute('title', label);
+            if (icon) {
+                icon.classList.toggle('fa-sun', mode === 'dark');
+                icon.classList.toggle('fa-moon', mode !== 'dark');
+            }
+        }
+
+        btn.addEventListener('click', function () {
+            var next = btn.getAttribute('data-theme-mode') === 'dark' ? 'light' : 'dark';
+            // 1年間保持・全パス
+            document.cookie = 'theme_mode=' + next + '; path=/; max-age=31536000; SameSite=Lax';
+            applyMode(next);
         });
     })();
     </script>

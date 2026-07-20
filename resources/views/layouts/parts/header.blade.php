@@ -163,13 +163,22 @@
         @endif
     </div>
 
-    {{-- 右側：タスク / 通知 / ハンバーガーメニュー --}}
+    {{-- 右側：テーマ切替 / タスク / 通知 / ハンバーガーメニュー --}}
     <div class="header-right">
         @php
             $taskTotal = isset($todoList) ? count($todoList) : 0;
             $taskHigh  = isset($taskHighCount) ? (int) $taskHighCount : 0;
             $bellCount = isset($unreadNewsCount) ? (int) $unreadNewsCount : 0;
+            $isThemeForcedDark = request()->cookie('theme_mode') === 'dark';
         @endphp
+
+        <button id="btn-theme-toggle"
+                class="header-icon-btn"
+                aria-label="{{ $isThemeForcedDark ? 'ライトモードに切り替え' : 'ダークモードに切り替え' }}"
+                title="{{ $isThemeForcedDark ? 'ライトモードに切り替え' : 'ダークモードに切り替え' }}"
+                data-theme-mode="{{ $isThemeForcedDark ? 'dark' : 'light' }}">
+            <i class="fas {{ $isThemeForcedDark ? 'fa-sun' : 'fa-moon' }} header-icon-btn__ico" aria-hidden="true"></i>
+        </button>
         <button id="btn-header-task"
                 class="header-icon-btn {{ $taskHigh > 0 ? 'is-urgent' : '' }} {{ $taskTotal > 0 ? 'has-badge' : '' }}"
                 aria-label="やることリスト（{{ $taskTotal }}件）"

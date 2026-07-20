@@ -1,13 +1,14 @@
 /* サイドバーの基本設定（右からのグラスモーフィック・ドロワー）
  * #app と幅を揃えるため、ビューポートではなく #app の右端を基準にする。
- * 高さはフッターより上で止め、ログアウトボタンが常に押せるようにする。 */
+ * 高さはグローバルフッターを気にせず画面最下部まで広げる（z-index はフッターより上）。 */
 #side-menu {
     position: fixed;
     top: 0;
     /* #app の右端 = ビューポート中央 + max-content-width/2。
      * モバイル（#app 全幅 = 100vw）では max() が 0 を選び、従来挙動と一致。 */
     right: max(0px, calc(50vw - var(--max-content-width) / 2));
-    bottom: var(--footer-height, 75px);
+    bottom: 0;
+    height: 100dvh;
     width: min(280px, calc(100vw - 40px));
     max-width: 100vw;
     background:

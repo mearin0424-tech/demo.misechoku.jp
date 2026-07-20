@@ -12,6 +12,7 @@ class EncryptCookies extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        //
+        // テーマ切替（ライト/ダーク）は JS からも読み書きするため平文
+        'theme_mode',
     ];
 }
