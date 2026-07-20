@@ -1120,5 +1120,104 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* ============================================================
+           ライトモード（標準）：新規登録画面を薄ラベンダー基調に反転
+           ============================================================ */
+        body.theme-light.page-auth-register.page-auth-register-cast,
+        body.theme-light.page-auth-register.page-auth-register-shop {
+            background:
+                radial-gradient(circle at top left, rgba(167, 139, 250, 0.16), transparent 32%),
+                linear-gradient(180deg, #f5f2fb 0%, #f5f2fb 100%);
+        }
+        body.theme-light.page-auth-register #bg-layer {
+            background:
+                radial-gradient(circle at 15% 10%, rgba(167, 139, 250, 0.12), transparent 22%),
+                radial-gradient(circle at 82% 16%, rgba(124, 58, 237, 0.06), transparent 18%);
+        }
+        body.theme-light .register-hero,
+        body.theme-light .register-card {
+            border: 1px solid rgba(124, 58, 237, 0.18);
+            background: #ffffff;
+            box-shadow:
+                0 12px 36px rgba(76, 29, 149, 0.10),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+        body.theme-light .register-role {
+            border: 1px solid rgba(124, 58, 237, 0.20);
+            background: #ffffff;
+            color: #574d6f;
+        }
+        body.theme-light .register-role.is-active {
+            border-color: rgba(124, 58, 237, 0.50);
+            background: rgba(124, 58, 237, 0.10);
+            color: #5b21b6;
+        }
+        body.theme-light .register-title { color: #6d28d9; }
+        body.theme-light .register-card-head h2 { color: #6d28d9; }
+        body.theme-light .register-alert-success {
+            border-color: rgba(5, 150, 105, 0.35);
+            background: rgba(5, 150, 105, 0.08);
+            color: #047857;
+        }
+        body.theme-light .register-alert-error {
+            border-color: rgba(220, 38, 38, 0.35);
+            background: rgba(220, 38, 38, 0.07);
+            color: #b91c1c;
+        }
+        body.theme-light .register-chip span {
+            border: 1px solid rgba(124, 58, 237, 0.24);
+            background: #ffffff;
+            color: #241f33;
+        }
+        body.theme-light .register-chip input:checked + span {
+            border-color: rgba(124, 58, 237, 0.55);
+            background: rgba(124, 58, 237, 0.12);
+            color: #5b21b6;
+        }
+        body.theme-light .register-radio,
+        body.theme-light .register-field,
+        body.theme-light .register-field span,
+        body.theme-light .register-check {
+            color: #241f33;
+        }
+        body.theme-light .register-field em { color: #6d28d9; }
+        body.theme-light .register-field-hint { color: #6d6685; }
+        body.theme-light .register-field input,
+        body.theme-light .register-field select,
+        body.theme-light .register-field textarea {
+            border: 1px solid rgba(124, 58, 237, 0.24);
+            background: #ffffff;
+            color: #241f33;
+        }
+        body.theme-light .register-field input::placeholder,
+        body.theme-light .register-field textarea::placeholder {
+            color: rgba(36, 31, 51, 0.38);
+        }
+        body.theme-light .register-field input[type="date"] { color-scheme: light; }
+        body.theme-light .register-field input[type="date"]::-webkit-calendar-picker-indicator { filter: none; }
+        body.theme-light .register-field input:focus,
+        body.theme-light .register-field select:focus,
+        body.theme-light .register-field textarea:focus {
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+        }
+        body.theme-light .register-plan-option {
+            border: 1px solid rgba(124, 58, 237, 0.20);
+            background: #ffffff;
+        }
+        body.theme-light .register-plan-option strong { color: #6d28d9; }
+        body.theme-light .register-plan-coming { color: #857ca0; }
+        body.theme-light .register-check a,
+        body.theme-light .register-login-link { color: #6d28d9; }
+        body.theme-light .register-secondary {
+            border: 1px solid rgba(124, 58, 237, 0.30);
+            background: #ffffff;
+            color: #6d28d9;
+        }
+        body.theme-light .register-submit {
+            box-shadow: 0 6px 14px rgba(76, 29, 149, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.30);
+        }
+        body.theme-light .register-logo { filter: drop-shadow(0 6px 16px rgba(76, 29, 149, 0.18)); }
     </style>
 @endsection

@@ -137,3 +137,35 @@
     .case-card__head { padding-right: 96px; }
     .case-now { font-size: 0.7rem; }
 }
+
+
+/* ============================================================
+   ケースカード：トーク導線（全幅の明確なボタン 2026-07-20）
+   旧「トークを見る」小テキストリンクの置き換え
+   ============================================================ */
+.case-card__talk-open {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 11px 14px;
+    border-radius: 12px;
+    background: rgba(124, 58, 237, 0.08);
+    border: 1px solid rgba(124, 58, 237, 0.35);
+    color: #6d28d9;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+.case-card__talk-open:hover {
+    background: rgba(124, 58, 237, 0.14);
+    border-color: rgba(124, 58, 237, 0.55);
+}
+.case-card__talk-open:active { transform: scale(0.98); }
+.case-card__talk-open-chev {
+    margin-left: auto;
+    font-size: 0.72rem;
+    color: rgba(124, 58, 237, 0.55);
+}

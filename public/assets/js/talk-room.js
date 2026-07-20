@@ -638,19 +638,8 @@ document.addEventListener('DOMContentLoaded', function() {
         return section;
     };
 
-    const renderTemplateSlots = () => {
-        if (!templateMenuList) return;
-        templateMenuList.innerHTML = '';
-
-        // ① 状況（ステータス）ごとの定型文をすべて表示（現在ステータスに関係なく全部）
-        const allGroups = Array.isArray(window.talkAllQuickReplies) ? window.talkAllQuickReplies : [];
-        allGroups.forEach(function (group) {
-            if (group && Array.isArray(group.items) && group.items.length > 0) {
-                templateMenuList.appendChild(buildStatusSection(group));
-            }
-        });
-
-        // ② マイ定型文（4スロット・編集可能）
+    // マイ定型文（4スロット・編集可能）のセクションを作る
+    const buildMineSection = () => {
         const mySection = document.createElement('section');
         mySection.className = 'talk-template-status-section talk-template-status-section--mine';
 
@@ -672,7 +661,83 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             mySection.appendChild(slotWrap);
         }
-        templateMenuList.appendChild(mySection);
+        return mySection;
+    };
+
+    // 定型文メニュー：ステータス別パネルを左右スライド（タブ + スワイプ）で切り替える。
+    // 初期表示は現在のトークステータスに合わせる。
+    const renderTemplateSlots = () => {
+        if (!templateMenuList) return;
+        templateMenuList.innerHTML = '';
+
+        const allGroups = (Array.isArray(window.talkAllQuickReplies) ? window.talkAllQuickReplies : [])
+            .filter(function (g) { return g && Array.isArray(g.items) && g.items.length > 0; });
+
+        const panels = allGroups.map(function (group) {
+            return {
+                key: String(group.status_key || group.status_code || ''),
+                label: group.status_label || '',
+                build: function () { return buildStatusSection(group); }
+            };
+        });
+        panels.push({ key: 'mine', label: 'マイ定型文', build: buildMineSection });
+
+        const tabs = document.createElement('div');
+        tabs.className = 'talk-template-tabs';
+        tabs.setAttribute('role', 'tablist');
+        tabs.setAttribute('aria-label', '状況で定型文を切り替え');
+
+        const track = document.createElement('div');
+        track.className = 'talk-template-track';
+
+        panels.forEach(function (p, i) {
+            const tab = document.createElement('button');
+            tab.type = 'button';
+            tab.className = 'talk-template-tab';
+            tab.setAttribute('role', 'tab');
+            tab.textContent = p.label;
+            tab.addEventListener('click', function () { scrollToPanel(i, true); });
+            tabs.appendChild(tab);
+
+            const panel = document.createElement('div');
+            panel.className = 'talk-template-panel';
+            panel.appendChild(p.build());
+            track.appendChild(panel);
+        });
+
+        templateMenuList.appendChild(tabs);
+        templateMenuList.appendChild(track);
+
+        function setActiveTab(i) {
+            Array.prototype.forEach.call(tabs.children, function (t, idx) {
+                t.classList.toggle('is-active', idx === i);
+                t.setAttribute('aria-selected', idx === i ? 'true' : 'false');
+            });
+            if (tabs.children[i] && tabs.children[i].scrollIntoView) {
+                tabs.children[i].scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+            }
+        }
+        function scrollToPanel(i, smooth) {
+            const panel = track.children[i];
+            if (!panel) return;
+            track.scrollTo({ left: panel.offsetLeft, behavior: smooth ? 'smooth' : 'auto' });
+            setActiveTab(i);
+        }
+        // スワイプでスライドした時もタブのアクティブを追従
+        let scrollSyncTimer = null;
+        track.addEventListener('scroll', function () {
+            clearTimeout(scrollSyncTimer);
+            scrollSyncTimer = setTimeout(function () {
+                const i = Math.round(track.scrollLeft / Math.max(1, track.clientWidth));
+                setActiveTab(Math.max(0, Math.min(panels.length - 1, i)));
+            }, 60);
+        }, { passive: true });
+
+        // 初期表示 = 現在のトークステータス（該当なしなら先頭）
+        const currentKey = String(window.currentTalkStatusCode || '');
+        let initial = panels.findIndex(function (p) { return p.key === currentKey; });
+        if (initial < 0) initial = 0;
+        requestAnimationFrame(function () { scrollToPanel(initial, false); });
     };
 
     const openTemplateMenu = () => {

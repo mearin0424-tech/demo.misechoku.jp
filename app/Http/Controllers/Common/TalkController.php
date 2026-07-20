@@ -1131,6 +1131,8 @@ class TalkController extends Controller
             }
             return [
                 'status_code' => $g['code'],
+                // フロントの currentTalkStatusCode（文字列キー）と突き合わせて初期表示を決める
+                'status_key' => $this->applicationStatusCode($g['code']),
                 'status_label' => $g['label'],
                 'items' => $items,
             ];

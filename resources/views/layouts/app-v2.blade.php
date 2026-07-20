@@ -8,7 +8,7 @@
         $metaDescription = trim($__env->yieldContent('meta_description')) ?: 'ミセチョクのデモサイトです。';
         $metaImage = trim($__env->yieldContent('meta_image')) ?: asset('assets/images/pwa/icon-512.png');
         $canonicalUrl = trim($__env->yieldContent('canonical')) ?: url()->current();
-        $assetVersion = '20260720-okojo-hide';
+        $assetVersion = '20260720-simple-chrome';
         $resolvedTitle = $metaTitle !== ''
             ? $metaTitle
             : ($pageTitle !== '' ? $pageTitle . ' | ' . config('app.name', 'ミセチョク') : config('app.name', 'ミセチョク'));
@@ -536,15 +536,14 @@
             border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
             box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.25) !important;
         }
-        /* ナビの文字・アイコン：ヘッダーと同じ「紫 + 立体影」で全画面統一 */
+        /* ナビの文字・アイコン：フラットな紫（影・ネオンなしのシンプル表示） */
         nav[data-bottom-nav] .nav-item {
             color: rgba(139, 92, 246, 0.62) !important;
-            text-shadow:
-                0 1px 0 rgba(255, 255, 255, 0.30),
-                0 2px 4px rgba(76, 29, 149, 0.35);
+            text-shadow: none !important;
         }
         nav[data-bottom-nav] .nav-item.is-active {
             color: #7c3aed !important;
+            text-shadow: none !important;
         }
         /* ライトテーマ：ヘッダーと上下対称の艶ガラス（下端ハイライト + 上方向の浮遊影） */
         body.theme-light nav[data-bottom-nav],
@@ -591,15 +590,13 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
         }
-        /* タイトル・アイコン：全画面共通で「紫 + 立体影」（MyPage 含めテーマ差なし） */
+        /* タイトル・アイコン：全画面共通のフラットな紫（影・ネオンなしのシンプル表示） */
         #global-header .header-title-main,
         #global-header .header-icon-btn,
         #global-header .btn-back,
         #global-header .header-talk-name {
             color: #8b5cf6 !important;
-            text-shadow:
-                0 1px 0 rgba(255, 255, 255, 0.35),
-                0 2px 5px rgba(76, 29, 149, 0.40) !important;
+            text-shadow: none !important;
         }
         .header-icon-btn:hover,
         .header-icon-btn:focus-visible {
@@ -641,116 +638,54 @@
                 0 10px 28px rgba(30, 20, 60, 0.14) !important;
         }
 
-        /* --- サイドメニュー本体：ニュートラルなすりガラス（色なしグラスモーフィズム 2026-07-20）。
-              ダーク面 = 濃色フロスト + 白文字 / ライトテーマ = 白フロスト + 濃色文字 --- */
+        /* --- サイドメニュー本体：明るい薄ラベンダー（全モード共通 2026-07-20）。
+              半透明だと背後の暗い画面が透けて暗く見えるため、ほぼ不透明の明色面にする --- */
         #side-menu {
             right: 0 !important;
-            background: rgba(18, 15, 26, 0.72) !important;
-            backdrop-filter: blur(24px) saturate(150%) !important;
-            -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
-            border-left: 1px solid rgba(255, 255, 255, 0.14) !important;
-            box-shadow: -12px 0 36px rgba(0, 0, 0, 0.35) !important;
+            background: linear-gradient(160deg, #faf8ff 0%, #efe9fa 100%) !important;
+            backdrop-filter: blur(20px) saturate(160%) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+            border-left: 1px solid rgba(255, 255, 255, 0.90) !important;
+            box-shadow:
+                inset 1px 0 0 rgba(255, 255, 255, 0.90),
+                -16px 0 40px rgba(30, 20, 60, 0.25) !important;
         }
         .sidebar-header {
-            border-bottom-color: rgba(255, 255, 255, 0.16) !important;
+            border-bottom-color: rgba(36, 31, 51, 0.10) !important;
         }
         .sidebar-footer {
-            border-top-color: rgba(255, 255, 255, 0.16) !important;
+            border-top-color: rgba(36, 31, 51, 0.10) !important;
         }
         #side-menu,
         #side-menu .sidebar-sub-menu a,
         #side-menu .menu-summary,
-        #side-menu .sidebar-theme-toggle {
-            color: #ffffff !important;
+        #side-menu .sidebar-theme-toggle,
+        #side-menu .btn-sidebar-close {
+            color: #241f33 !important;
             text-shadow: none;
         }
         #side-menu .sidebar-sub-menu a i,
         #side-menu .menu-summary i:first-child,
         #side-menu .sidebar-theme-toggle i {
-            color: rgba(255, 255, 255, 0.80) !important;
+            color: #6d28d9 !important;
         }
         #side-menu .menu-label-header {
-            color: rgba(255, 255, 255, 0.55) !important;
+            color: #857ca0 !important;
             text-shadow: none;
         }
-        #side-menu .btn-sidebar-close {
-            color: #ffffff !important;
-        }
         .sidebar-sub-menu a:hover,
-        #side-menu .sidebar-theme-toggle:hover {
-            background: rgba(255, 255, 255, 0.10) !important;
+        #side-menu .sidebar-theme-toggle:hover,
+        .btn-sidebar-close:hover {
+            background: rgba(124, 58, 237, 0.07) !important;
         }
         #side-menu .btn-logout {
-            background: rgba(255, 255, 255, 0.10) !important;
-            color: #ffffff !important;
-            border: 1px solid rgba(255, 255, 255, 0.30) !important;
+            background: rgba(220, 38, 38, 0.06) !important;
+            color: #dc2626 !important;
+            border: 1px solid rgba(220, 38, 38, 0.35) !important;
         }
         #side-menu .sidebar-badge-pending {
             background: #dc2626 !important;
             color: #ffffff !important;
-        }
-        .btn-sidebar-close:hover {
-            background: rgba(255, 255, 255, 0.12) !important;
-        }
-        /* ライトテーマ：白フロスト + 濃色文字 */
-        body.theme-light #side-menu,
-        body.theme-premium-white #side-menu {
-            background: linear-gradient(160deg,
-                rgba(255, 255, 255, 0.86) 0%,
-                rgba(246, 242, 255, 0.72) 100%) !important;
-            backdrop-filter: blur(26px) saturate(170%) !important;
-            -webkit-backdrop-filter: blur(26px) saturate(170%) !important;
-            border-left: 1px solid rgba(255, 255, 255, 0.90) !important;
-            box-shadow:
-                inset 1px 0 0 rgba(255, 255, 255, 0.90),
-                inset 0 1px 0 rgba(255, 255, 255, 0.80),
-                -16px 0 40px rgba(30, 20, 60, 0.20) !important;
-        }
-        body.theme-light .sidebar-header,
-        body.theme-premium-white .sidebar-header {
-            border-bottom-color: rgba(36, 31, 51, 0.10) !important;
-        }
-        body.theme-light .sidebar-footer,
-        body.theme-premium-white .sidebar-footer {
-            border-top-color: rgba(36, 31, 51, 0.10) !important;
-        }
-        body.theme-light #side-menu,
-        body.theme-light #side-menu .sidebar-sub-menu a,
-        body.theme-light #side-menu .menu-summary,
-        body.theme-light #side-menu .sidebar-theme-toggle,
-        body.theme-light #side-menu .btn-sidebar-close,
-        body.theme-premium-white #side-menu,
-        body.theme-premium-white #side-menu .sidebar-sub-menu a,
-        body.theme-premium-white #side-menu .menu-summary,
-        body.theme-premium-white #side-menu .sidebar-theme-toggle,
-        body.theme-premium-white #side-menu .btn-sidebar-close {
-            color: #241f33 !important;
-        }
-        body.theme-light #side-menu .sidebar-sub-menu a i,
-        body.theme-light #side-menu .menu-summary i:first-child,
-        body.theme-light #side-menu .sidebar-theme-toggle i,
-        body.theme-premium-white #side-menu .sidebar-sub-menu a i,
-        body.theme-premium-white #side-menu .menu-summary i:first-child,
-        body.theme-premium-white #side-menu .sidebar-theme-toggle i {
-            color: #6d28d9 !important;
-        }
-        body.theme-light #side-menu .menu-label-header,
-        body.theme-premium-white #side-menu .menu-label-header {
-            color: #857ca0 !important;
-        }
-        body.theme-light .sidebar-sub-menu a:hover,
-        body.theme-light #side-menu .sidebar-theme-toggle:hover,
-        body.theme-light .btn-sidebar-close:hover,
-        body.theme-premium-white .sidebar-sub-menu a:hover,
-        body.theme-premium-white #side-menu .sidebar-theme-toggle:hover,
-        body.theme-premium-white .btn-sidebar-close:hover {
-            background: rgba(36, 31, 51, 0.06) !important;
-        }
-        body.theme-light #side-menu .btn-logout,
-        body.theme-premium-white #side-menu .btn-logout {
-            background: rgba(220, 38, 38, 0.06) !important;
-            color: #dc2626 !important;
-            border: 1px solid rgba(220, 38, 38, 0.35) !important;
         }
     </style>
 
@@ -885,7 +820,7 @@
     <script src="{{ asset('assets/js/motion.js') }}?v={{ $assetVersion }}" defer></script>
     {{-- ライトモード（薄ラベンダー基調）。全ルールが body.theme-light スコープのため常時読み込みで安全。
          テーマトグル（ライト/ダーク）のライブ切替を可能にするため @if を外して常時ロードする --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260720-light-23">
+    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260720-light-25">
     {{-- プレミアムホワイト（MyPage）: 全ルールが body.theme-premium-white スコープ。同上で常時ロード --}}
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600;700;900&family=Cinzel:wght@600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/css/premium-white.css') }}?v=20260720-pwhite-07">
@@ -923,7 +858,7 @@
              新ボトムナビ（behaviors.js が data-bottom-nav を見る）
              active 判定は URL 階層から（旧 footer と同等）。href は実ルート。
              ============================================================ --}}
-        <nav data-bottom-nav data-nav-style="neon"
+        <nav data-bottom-nav data-nav-style="flat"
              class="fixed bottom-0 left-0 w-full z-50 h-[75px] pb-[env(safe-area-inset-bottom)] box-border bg-deep-purple/30 backdrop-blur-md border-t border-line-accent/40 shadow-footer">
             <div class="flex justify-around items-center h-full px-2 max-w-[var(--max-content-width)] mx-auto">
                 <a href="{{ route($navPrefix . '.home') }}"

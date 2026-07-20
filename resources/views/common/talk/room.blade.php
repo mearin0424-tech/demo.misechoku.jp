@@ -10,7 +10,7 @@
 @section('body-class', 'page-talk page-talk-room')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260720-pin-color">
+<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260720-tpl-slide">
 @if($isCast)
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/review-modal.css') }}">
@@ -233,7 +233,7 @@
     window.talkAllQuickReplies = @json($allQuickReplySuggestions ?? []);
     window.talkNgPayload = @json($ngWordPayload ?? ['patterns' => [], 'words' => []]);
 </script>
-<script src="{{ asset('assets/js/talk-room.js') }}?v=20260720-subheader-switch"></script>
+<script src="{{ asset('assets/js/talk-room.js') }}?v=20260720-tpl-slide"></script>
 @endpush
 
 @section('content')

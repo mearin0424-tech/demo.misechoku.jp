@@ -6,7 +6,7 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/review-modal.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/css/case-flow.css') }}?v=20260720-case-filter">
+<link rel="stylesheet" href="{{ asset('assets/css/case-flow.css') }}?v=20260720-talk-open">
 <style>
     /* ========================================================
        採用・入金 統合タイムライン
@@ -369,8 +369,7 @@
                     <button type="button" class="case-filter__chip" data-case-filter="action">
                         要対応@if($actionableCount > 0)<span class="case-filter__num">{{ $actionableCount }}</span>@endif
                     </button>
-                    <button type="button" class="case-filter__chip" data-case-filter="waiting">待ち</button>
-                    <button type="button" class="case-filter__chip" data-case-filter="done">完了</button>
+
                 </div>
 
                 @if(session('status'))

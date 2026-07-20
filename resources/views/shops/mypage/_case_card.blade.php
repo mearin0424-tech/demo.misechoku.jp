@@ -175,14 +175,9 @@
         </div>
     @endif
 
-    {{-- アクション行 --}}
-    <div class="case-card__action-row">
-        @if(!empty($case['talk_link']))
-            <a href="{{ $case['talk_link'] }}" class="case-card__view-talk">
-                <i class="fas fa-comment-dots"></i> トークを見る
-            </a>
-        @endif
-        @if($isActionable)
+    {{-- アクション行：要対応時の主ボタンのみ（待ち/完了テキストは右上バッジに集約済み） --}}
+    @if($isActionable)
+        <div class="case-card__action-row">
             <button type="button" class="case-card__action-btn"
                     data-case-action="{{ $case['actionable'] }}"
                     data-application-id="{{ $case['application_id'] }}"
@@ -190,14 +185,14 @@
                 <i class="fas {{ $actionIcon }}"></i>
                 {{ $case['actionable_label'] }}
             </button>
-        @elseif(!empty($case['waiting_on']))
-            <span class="case-card__waiting">
-                <i class="fas fa-hourglass-half"></i> {{ $case['waiting_on'] }}
-            </span>
-        @elseif($isCompleted)
-            <span class="case-card__waiting case-card__waiting--done">
-                <i class="fas fa-check-double"></i> 振込完了
-            </span>
-        @endif
-    </div>
+        </div>
+    @endif
+
+    {{-- トーク導線：全幅の明確なボタン --}}
+    @if(!empty($case['talk_link']))
+        <a href="{{ $case['talk_link'] }}" class="case-card__talk-open">
+            <i class="fas fa-comment-dots"></i> トークを開く
+            <i class="fas fa-chevron-right case-card__talk-open-chev" aria-hidden="true"></i>
+        </a>
+    @endif
 </article>
