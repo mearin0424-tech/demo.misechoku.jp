@@ -133,28 +133,25 @@
 .pwa-install-btn:hover { color: var(--accent-text) !important; }
 
 /* ==================================================================
-   5. バッジの統一（2026-07-12 フラット化）
+   5. バッジの統一（2026-07-20 シンプル化・全画面共通）
    ルール:
-     - 通常のカウント/お知らせ = accent ベタ（テーマ追従）
-     - 未済・緊急・要対応     = danger ベタ（赤）
-     - グラデーション・内側ハイライト・ドロップ影は使わない。
-       暗背景から切り抜くリング（0 0 0 2px）だけ許可。
+     - 未済タスク・お知らせともフラットな赤丸（#ef4444）+ 白文字のみ。
+     - グラデーション・リング・枠線・ドロップ影は一切使わない。
+     - 画面/テーマ別の上書きは行わない（premium-white 等でも共通）。
    ================================================================== */
 .header-badge,
 .header-badge.is-accent,
+.header-badge.is-urgent,
 .badge-notify {
-    background: var(--accent) !important;
-    color: var(--on-accent) !important;
-    box-shadow: 0 0 0 2px rgba(10, 10, 10, 0.9) !important;
-}
-.header-badge.is-urgent {
-    background: #e15c5c !important;
-    color: #fff !important;
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    border: 0 !important;
+    box-shadow: none !important;
 }
 .mypage-tile__badge {
-    background: var(--accent) !important;
-    color: var(--on-accent) !important;
-    box-shadow: 0 0 0 2px rgba(10, 10, 10, 0.9) !important;
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
 }
 .mypage-tile__badge--urgent {
     background: #e15c5c !important;

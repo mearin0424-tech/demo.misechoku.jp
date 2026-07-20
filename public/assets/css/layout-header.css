@@ -332,11 +332,11 @@ body.is-image-editing #global-header {
 }
 
 /* ポップオーバーの強制固定位置
-   - 右上を起点に、モバイルでは画面幅ほぼいっぱいまで広げる
-   - ヘッダー直下から生えるように見せる
+   - ページのスクロール量に関係なく常にビューポート右上（ヘッダー直下）に表示する
+   - モバイルでは画面幅ほぼいっぱいまで広げる
 */
 .header-popup {
-    position: absolute !important;
+    position: fixed !important;
     top: calc(var(--header-height, 60px) + 4px) !important;
     left: auto !important;
     right: 8px !important;
@@ -450,32 +450,8 @@ body.is-image-editing #global-header {
     flex-shrink: 0;
 }
 
-/* ヘッダー内アクションボタン */
-.notif-popup__mark-all,
-.notif-popup__close,
-.task-popup__close {
-    background: transparent;
-    border: 1px solid rgba(168, 85, 247, 0.30);
-    color: var(--gold-light, #c4b5fd);
-    padding: 5px 10px;
-    border-radius: 999px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-    letter-spacing: 0.02em;
-    line-height: 1;
-}
-.notif-popup__mark-all:hover {
-    background: rgba(168, 85, 247, 0.15);
-    border-color: var(--gold-light, #c4b5fd);
-    color: #f5f5f5;
-}
-.notif-popup__mark-all i { font-size: 0.72rem; }
-
+/* ヘッダー内アクション（設定 / 閉じる）：
+   枠囲みをやめたシンプルなアイコンボタン。両方とも同サイズ（30px）。 */
 .notif-popup__close,
 .task-popup__close,
 .notif-popup__gear {
@@ -484,22 +460,20 @@ body.is-image-editing #global-header {
     padding: 0;
     justify-content: center;
     color: rgba(196, 181, 253, 0.65);
-    border-color: rgba(168, 85, 247, 0.18);
     background: transparent;
-    border: 1px solid rgba(168, 85, 247, 0.18);
+    border: 0;
     border-radius: 999px;
     display: inline-flex;
     align-items: center;
     cursor: pointer;
     text-decoration: none;
-    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    transition: background 0.15s ease, color 0.15s ease;
 }
 .notif-popup__close:hover,
 .task-popup__close:hover,
 .notif-popup__gear:hover {
-    background: rgba(168, 85, 247, 0.15);
+    background: rgba(168, 85, 247, 0.12);
     color: #f5f5f5;
-    border-color: var(--gold-light, #c4b5fd);
     text-decoration: none;
 }
 .notif-popup__close i,

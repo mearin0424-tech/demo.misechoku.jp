@@ -1321,8 +1321,6 @@ body.theme-light .detail-search-location-suggest-empty { color: #857ca0; }
 /* --- ポップオーバー内テキスト（ハードコード白・薄紫を濃色へ） --- */
 body.theme-light .notif-popup__head-icon,
 body.theme-light .task-popup__head-icon { color: #7c3aed; }
-body.theme-light .notif-popup__mark-all { color: #6d28d9; }
-body.theme-light .notif-popup__mark-all:hover { color: #241f33; }
 body.theme-light .notif-popup__close,
 body.theme-light .task-popup__close,
 body.theme-light .notif-popup__gear { color: #857ca0; }
@@ -1450,3 +1448,124 @@ body.theme-light .ai-chat__input {
     color: #241f33;
 }
 body.theme-light .ai-chat__input::placeholder { color: rgba(36, 31, 51, 0.35); }
+
+
+/* ============================================================
+   §18-b ポップオーバー文字色の強化（2026-07-20）
+   「まだ見にくい」フィードバックを受け、ライトモード時の
+   ポップアップ内テキストを一段濃いインクカラーへ引き上げる
+   ============================================================ */
+body.theme-light .notif-popup__head-label,
+body.theme-light .task-popup__head-label { color: #1a1526 !important; }
+body.theme-light .notif-popup__tab { color: #3f3956; }
+body.theme-light .notif-popup__tab.is-active { color: #5b21b6; }
+body.theme-light .notif-popup__section-label,
+body.theme-light .task-popup__section-label { color: #5b21b6; }
+body.theme-light .notif-popup__official-title { color: #1a1526; }
+body.theme-light .notif-popup__official-date { color: #6d6685; }
+body.theme-light .notif-popup__item-cat,
+body.theme-light .task-popup__item-cat { color: #5b21b6; }
+body.theme-light .notif-popup__item-time,
+body.theme-light .task-popup__item-time { color: #6d6685; }
+body.theme-light .notif-popup__item-title,
+body.theme-light .task-popup__item-title { color: #1a1526 !important; }
+body.theme-light .notif-popup__item-desc,
+body.theme-light .task-popup__item-desc { color: #453f5c; }
+body.theme-light .notif-popup__empty,
+body.theme-light .task-popup__empty { color: #6d6685; }
+body.theme-light .notif-popup__empty-title,
+body.theme-light .task-popup__empty-title { color: #1a1526; }
+body.theme-light .notif-popup__empty-desc,
+body.theme-light .task-popup__empty-desc { color: #6d6685; }
+
+
+/* ============================================================
+   §17-b 詳細検索モーダル：残っていたダーク面の全面ライト化 +
+         タグ（チップ）を MyPage/プロフィールと同配色のスリム型に統一
+   ============================================================ */
+/* パネル面（黒面 rgba(10,10,10,0.92) → 白カード） */
+body.theme-light .detail-search-section--panel,
+body.theme-light .detail-search-accordion--panel {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.16);
+    box-shadow: 0 2px 10px rgba(76, 29, 149, 0.05);
+}
+/* アコーディオン見出し */
+body.theme-light .detail-search-accordion__head { color: #241f33; }
+body.theme-light .detail-search-accordion__head:hover { color: #6d28d9; }
+body.theme-light .detail-search-accordion__icon { color: #7c3aed; }
+/* セクション見出し・ラベル */
+body.theme-light .detail-search-section__title,
+body.theme-light .detail-search-label--panel,
+body.theme-light .detail-search-label { color: #241f33; }
+/* 選択件数バッジ */
+body.theme-light .detail-search-selection-badge {
+    background: rgba(124, 58, 237, 0.08);
+    border-color: rgba(124, 58, 237, 0.24);
+    color: #6d28d9;
+}
+/* セレクト */
+body.theme-light .detail-search-select {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.24);
+    color: #241f33;
+}
+body.theme-light .detail-search-select:focus {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+body.theme-light .detail-search-select-wrap__icon { color: #857ca0; }
+/* フッター（sticky 黒面 → 白フロスト） */
+body.theme-light .detail-search-modal__footer--search {
+    background: rgba(255, 255, 255, 0.96);
+    border-top-color: rgba(124, 58, 237, 0.16);
+    box-shadow: 0 -10px 20px rgba(76, 29, 149, 0.08);
+}
+/* クリアボタン */
+body.theme-light .detail-search-modal__btn--reset {
+    border-color: rgba(124, 58, 237, 0.24);
+    color: #574d6f;
+}
+body.theme-light .detail-search-modal__btn--reset:hover {
+    background: rgba(124, 58, 237, 0.05);
+    color: #241f33;
+}
+/* 検索ボタン：黒影を淡いラベンダー影へ */
+body.theme-light .detail-search-modal__btn--submit {
+    box-shadow:
+        0 6px 14px rgba(76, 29, 149, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.30);
+}
+
+/* タグ（スリム型）：プロフィールのタグと同じ薄紫ウォッシュ + 濃色文字 */
+body.theme-light .detail-search-chip--search {
+    background: rgba(168, 85, 247, 0.08);
+    border-color: rgba(168, 85, 247, 0.30);
+    color: #241f33;
+}
+body.theme-light .detail-search-chip--search:hover {
+    background: rgba(168, 85, 247, 0.12);
+    border-color: rgba(124, 58, 237, 0.45);
+}
+body.theme-light .detail-search-chip--search:has(input:checked),
+body.theme-light .detail-search-chip--search.is-pinned {
+    background: rgba(124, 58, 237, 0.16);
+    border-color: rgba(124, 58, 237, 0.55);
+    color: #5b21b6;
+    box-shadow: none;
+}
+
+
+/* §17-c 詳細フィルター ブラッシュアップのライト配色 */
+body.theme-light .detail-search-accordion__preview { color: #6d28d9; }
+body.theme-light .detail-search-submit-count { background: rgba(255, 255, 255, 0.30); }
+body.theme-light .detail-search-accordion__count {
+    background: rgba(124, 58, 237, 0.10);
+    border-color: rgba(124, 58, 237, 0.35);
+    color: #6d28d9;
+}
+body.theme-light .detail-search-accordion--panel.has-selection,
+body.theme-light .detail-search-section--panel.has-selection {
+    border-color: rgba(124, 58, 237, 0.45);
+    box-shadow: inset 3px 0 0 rgba(124, 58, 237, 0.75), 0 2px 10px rgba(76, 29, 149, 0.05);
+}

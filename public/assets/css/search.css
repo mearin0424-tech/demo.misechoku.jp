@@ -977,7 +977,8 @@ body.page-search .connection-list--search {
     right: 0;
     bottom: var(--footer-height);
     left: 0;
-    z-index: 1100;
+    /* オコジョ（#character-guide z-index:2000）より前面に出す */
+    z-index: 2100;
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -1628,29 +1629,31 @@ body.page-search .connection-list--search {
 }
 
 .detail-search-chips--search {
-    gap: 10px;
+    gap: 6px;
 }
 
+/* MyPage / プロフィールのタグ（px-2 py-1 rounded bg-accent/10 border-line-accent/30 text-[11px]）
+   と同じサイズ・デザインのスリムなタグ型に統一 */
 .detail-search-chip--search {
-    min-height: 40px;
-    padding: 9px 14px;
-    border-radius: 10px;
-    background: var(--color-card-strong);
-    border-color: rgba(255, 255, 255, 0.07);
-    color: var(--color-text-muted);
-    font-size: 0.82rem;
+    min-height: 0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: rgba(168, 85, 247, 0.10);
+    border-color: rgba(168, 85, 247, 0.30);
+    color: var(--color-text, #f5f5f5);
+    font-size: 11px;
     font-weight: 600;
+    line-height: 1.5;
 }
 
 .detail-search-chip--search:hover {
-    border-color: rgba(168, 85, 247, 0.30);
-    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(168, 85, 247, 0.50);
 }
 
 .detail-search-chip--search:has(input:checked) {
-    background: rgba(168, 85, 247, 0.18);
-    border-color: rgba(167, 139, 250, 0.45);
-    color: var(--gold);
+    background: rgba(168, 85, 247, 0.30);
+    border-color: rgba(196, 181, 253, 0.70);
+    color: #ffffff;
 }
 
 .detail-search-location-segment {
@@ -3155,4 +3158,47 @@ body.page-search #pane-keep.tab-pane.active {
    圧縮を禁止し、収まらない分は下方向（スクロール）へ送る */
 body.page-search .connection-list--search > * {
     flex: 0 0 auto;
+}
+
+
+/* ============================================================================
+   詳細フィルター ブラッシュアップ (2026-07-20)
+   ・閉じたアコーディオンに選択内容の1行プレビュー
+   ・検索ボタンの条件数チップ
+   ・選択ありパネルの左アクセントライン
+   ============================================================================ */
+.detail-search-accordion__preview {
+    padding: 0 16px 12px;
+    margin-top: -4px;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--gold-light, #c4b5fd);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+.detail-search-accordion__preview[hidden] { display: none; }
+
+.detail-search-submit-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    margin-left: 8px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.22);
+    color: currentColor;
+    font-size: 0.72rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+.detail-search-submit-count[hidden] { display: none; }
+
+.detail-search-accordion--panel.has-selection,
+.detail-search-section--panel.has-selection {
+    border-color: rgba(168, 85, 247, 0.55);
+    box-shadow: inset 3px 0 0 rgba(139, 92, 246, 0.9);
 }

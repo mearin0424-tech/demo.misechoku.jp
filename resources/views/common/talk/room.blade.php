@@ -10,7 +10,7 @@
 @section('body-class', 'page-talk page-talk-room')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260720-subheader-switch">
+<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260720-pin-color">
 @if($isCast)
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/review-modal.css') }}">

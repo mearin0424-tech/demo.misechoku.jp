@@ -177,6 +177,43 @@
         }
     }
 
+    // 閉じたアコーディオンに「選択中の内容」を1行プレビュー表示する
+    function updateAccordionPreview(block) {
+        var body = block.querySelector('.detail-search-accordion__body');
+        var head = block.querySelector('[data-accordion-trigger]');
+        if (!body || !head) return;
+        var preview = block.querySelector('[data-accordion-preview]');
+        if (!preview) {
+            preview = document.createElement('div');
+            preview.className = 'detail-search-accordion__preview';
+            preview.setAttribute('data-accordion-preview', '');
+            preview.hidden = true;
+            head.insertAdjacentElement('afterend', preview);
+        }
+        var labels = [];
+        block.querySelectorAll('input[type="checkbox"]:checked').forEach(function (input) {
+            var label = input.closest('label');
+            var span = label ? label.querySelector('span:last-child') : null;
+            var t = span ? span.textContent.trim() : '';
+            if (t) labels.push(t);
+        });
+        block.querySelectorAll('select').forEach(function (sel) {
+            if (!sel.value) return;
+            var opt = sel.options[sel.selectedIndex];
+            if (opt && opt.textContent) labels.push(opt.textContent.trim());
+        });
+        var isOpen = !body.hidden;
+        if (isOpen || labels.length === 0) {
+            preview.hidden = true;
+            preview.textContent = '';
+        } else {
+            var shown = labels.slice(0, 3).join('・');
+            if (labels.length > 3) shown += ' 他' + (labels.length - 3) + '件';
+            preview.hidden = false;
+            preview.textContent = shown;
+        }
+    }
+
     function setupChipFilter(chipsContainer) {
         if (!chipsContainer || chipsContainer.dataset.chipFilterInit === '1') return;
         var chips = chipsContainer.querySelectorAll('.detail-search-chip');
@@ -301,6 +338,7 @@
                 block.setAttribute('data-open', isOpen ? 'true' : 'false');
                 head.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
                 if (icon) icon.textContent = isOpen ? '−' : '+';
+                updateAccordionPreview(block);
             }
 
             // タグ大量セクションはデフォルトで閉じる（data-open の値をリスペクトしつつ、選択がある場合は開く）
@@ -313,8 +351,11 @@
                 syncAccordion(body.hidden);
             });
 
-            // change 時にヘッドのカウントを更新
-            block.addEventListener('change', function () { updateAccordionCount(block); });
+            // change 時にヘッドのカウント・プレビューを更新
+            block.addEventListener('change', function () {
+                updateAccordionCount(block);
+                updateAccordionPreview(block);
+            });
         });
 
         // チップ数が多いコンテナに検索フィルタ UI を挿入
@@ -387,6 +428,19 @@
             badgeEl.textContent = count;
             badgeEl.style.display = count > 0 ? 'inline-flex' : 'none';
         }
+        // フッターの「検索」ボタンに選択中の条件数をライブ表示
+        var submitBtnEl = modal ? modal.querySelector('[data-detail-search-submit]') : null;
+        if (submitBtnEl) {
+            var submitChip = submitBtnEl.querySelector('[data-submit-count]');
+            if (!submitChip) {
+                submitChip = document.createElement('span');
+                submitChip.className = 'detail-search-submit-count';
+                submitChip.setAttribute('data-submit-count', '');
+                submitBtnEl.appendChild(submitChip);
+            }
+            submitChip.textContent = String(count);
+            submitChip.hidden = count === 0;
+        }
         if (summaryTextEl && summaryEl) {
             var lines = getSummaryLines();
             if (lines.length) {
@@ -429,6 +483,14 @@
                 if (firstLocation) firstLocation.closest('.detail-search-location-option').classList.add('is-selected');
                 if (keywordInput) keywordInput.value = '';
                 updateBadgeAndSummary();
+                // アコーディオンの件数チップ・プレビュー・タグ絞り込みUIも即時リフレッシュ
+                modal.querySelectorAll('[data-accordion]').forEach(function (block) {
+                    updateAccordionCount(block);
+                    updateAccordionPreview(block);
+                });
+                modal.querySelectorAll('.detail-search-chips').forEach(function (c) {
+                    c.dispatchEvent(new Event('change'));
+                });
             });
         }
     }

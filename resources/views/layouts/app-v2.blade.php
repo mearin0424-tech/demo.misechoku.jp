@@ -8,7 +8,7 @@
         $metaDescription = trim($__env->yieldContent('meta_description')) ?: 'ミセチョクのデモサイトです。';
         $metaImage = trim($__env->yieldContent('meta_image')) ?: asset('assets/images/pwa/icon-512.png');
         $canonicalUrl = trim($__env->yieldContent('canonical')) ?: url()->current();
-        $assetVersion = '20260720-ai-okojo';
+        $assetVersion = '20260720-badge-unify';
         $resolvedTitle = $metaTitle !== ''
             ? $metaTitle
             : ($pageTitle !== '' ? $pageTitle . ' | ' . config('app.name', 'ミセチョク') : config('app.name', 'ミセチョク'));
@@ -425,142 +425,131 @@
             padding-left:  max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             padding-right: max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             z-index: 1600 !important;
-            /* 立体グラスパネル：ヘッダーより一段明るいアメジスト半透明 + blur。
-               上端ハイライトの艶と下方向の影で "ヘッダーの下に重なるガラス板" を表現 */
-            background:
-                linear-gradient(180deg,
-                    rgba(139, 92, 246, 0.62) 0%,
-                    rgba(167, 139, 250, 0.50) 100%) !important;
-            backdrop-filter: blur(18px) saturate(160%) !important;
-            -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
+            /* ヘッダーと同じニュートラルなすりガラス面（色なし） */
+            background: rgba(18, 15, 26, 0.55) !important;
+            backdrop-filter: blur(20px) saturate(150%) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
             margin-top: 0 !important;
             border-top: 0 !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.22) !important;
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.30),
-                0 4px 14px rgba(46, 16, 101, 0.25) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.20) !important;
             padding-top: 6px !important;
             padding-bottom: 6px !important;
         }
+        body.theme-light .sub-header-wrapper,
+        body.theme-premium-white .sub-header-wrapper {
+            background: rgba(255, 255, 255, 0.62) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.70) !important;
+            box-shadow: 0 4px 14px rgba(30, 20, 60, 0.08) !important;
+        }
         /* ============================================================
-           サブヘッダー：ネオ・グラスモーフィズム（Neo-Glassmorphism）
-           ・アクリルガラスのコンテナ（極薄白 + blur12 + 極細ボーダー）
-           ・擬似ボーダーライト（上部から光が当たる極細ハイライト）
-           ・オーラ（背後のネオンパープルのぼかしグロー）
+           サブヘッダーのタブ切替：お知らせポップアップの
+           「すべて / 未読」タブ（.notif-popup__tab）と同一デザイン
+           ・透明タブ + 角丸8px / アクティブ = 薄紫フィル + 紫枠 + 強調文字
            ============================================================ */
-
-        /* ① 全体コンテナ（タブ群を囲む擦りガラスの外枠） */
         .sub-header-wrapper .sub-header-tabs {
             position: relative;
             display: flex !important;
             width: 100%;
-            gap: 0 !important;
-            padding: 4px !important;
-            border-radius: 12px !important;
-            background: rgba(255, 255, 255, 0.03) !important;
-            backdrop-filter: blur(12px) !important;
-            -webkit-backdrop-filter: blur(12px) !important;
-            border: 1px solid rgba(255, 255, 255, 0.08) !important;
-            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.10) !important;
-            isolation: isolate; /* オーラ(z-index:-1)をコンテナ背面に留める */
+            gap: 4px !important;
+            padding: 0 !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            border: 0 !important;
+            box-shadow: none !important;
         }
-        /* 擬似ボーダーライト：上部から光が当たっている極細ハイライトライン */
-        .sub-header-wrapper .sub-header-tabs::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 10%;
-            right: 10%;
-            height: 1px;
-            border-radius: 999px;
-            background: linear-gradient(90deg,
-                transparent,
-                rgba(255, 255, 255, 0.55) 50%,
-                transparent);
-            pointer-events: none;
-        }
-        /* オーラ（バックグロウ）：背後に極薄のネオンパープルのぼかし */
+        .sub-header-wrapper .sub-header-tabs::before,
         .sub-header-wrapper .sub-header-tabs::after {
-            content: '';
-            position: absolute;
-            inset: -10px -6px;
-            z-index: -1;
-            border-radius: 18px;
-            background: radial-gradient(60% 90% at 50% 50%,
-                rgba(168, 85, 247, 0.38),
-                rgba(168, 85, 247, 0.10) 60%,
-                transparent 80%);
-            filter: blur(14px);
-            pointer-events: none;
+            display: none !important;
         }
-
-        /* ③ 非アクティブタブ（既定）：完全透過 + 薄いグレー・パープル文字 */
         .sub-header-wrapper .sub-header-tabs .tab-item {
             flex: 1 1 0 !important;
             min-width: 0;
-            text-align: center !important;
+            display: inline-flex;
+            align-items: center;
             justify-content: center;
-            border-radius: 9px !important;
-            padding: 8px 6px !important;
+            text-align: center !important;
+            padding: 6px 10px !important;
+            border-radius: 8px !important;
             background: transparent !important;
-            border: 0 !important;
+            border: 1px solid transparent !important;
             box-shadow: none !important;
-            color: rgba(255, 255, 255, 0.4) !important;
-            font-weight: 600 !important;
+            color: rgba(196, 181, 253, 0.7) !important;
+            font-size: 0.76rem !important;
+            font-weight: 700 !important;
             text-shadow: none !important;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+            transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
         }
         .sub-header-wrapper .sub-header-tabs .tab-item:hover {
-            color: rgba(255, 255, 255, 0.75) !important;
+            background: rgba(168, 85, 247, 0.08) !important;
+            color: #f5f5f5 !important;
         }
-        /* ④ ミクロアニメーション：押し込みフィードバック */
         .sub-header-wrapper .sub-header-tabs .tab-item:active {
             transform: scale(0.97);
         }
-        /* ② アクティブタブ：少し濃い磨きガラス + 白い光 + 完全ホワイト太字 */
         .sub-header-wrapper .sub-header-tabs .tab-item.active {
-            background: rgba(255, 255, 255, 0.08) !important;
+            background: rgba(168, 85, 247, 0.18) !important;
+            border-color: rgba(168, 85, 247, 0.45) !important;
             color: #ffffff !important;
-            font-weight: 700 !important;
-            box-shadow:
-                0 4px 12px rgba(255, 255, 255, 0.05),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
         }
-        /* 旧デザインの下線インジケータは撤去 */
         .sub-header-wrapper .sub-header-tabs .tab-item.active::after {
             display: none !important;
+        }
+        /* ライトテーマ：お知らせタブの §18 ライト配色と同一トーン */
+        body.theme-light .sub-header-wrapper .sub-header-tabs .tab-item,
+        body.theme-premium-white .sub-header-wrapper .sub-header-tabs .tab-item {
+            color: #574d6f !important;
+        }
+        body.theme-light .sub-header-wrapper .sub-header-tabs .tab-item:hover,
+        body.theme-premium-white .sub-header-wrapper .sub-header-tabs .tab-item:hover {
+            background: rgba(124, 58, 237, 0.06) !important;
+            color: #241f33 !important;
+        }
+        body.theme-light .sub-header-wrapper .sub-header-tabs .tab-item.active,
+        body.theme-premium-white .sub-header-wrapper .sub-header-tabs .tab-item.active {
+            background: rgba(124, 58, 237, 0.12) !important;
+            border-color: rgba(124, 58, 237, 0.40) !important;
+            color: #5b21b6 !important;
         }
         .sub-header-tabs {
             background-color: transparent !important;
         }
 
-        /* --- ボトムナビ：ヘッダーと上下対称の立体グラスモーフィズム。
-              アメジスト半透明グラデ + blur、下端ハイライト（艶）+ 上方向の影（浮遊感）。
-              ライト/ダークどちらのテーマでも共通（MyPage 含め全画面で統一） --- */
+        /* --- ボトムナビ：ニュートラルなすりガラス（グラスモーフィズム 2026-07-20）。
+              色味（アメジストグラデ）は撤去し、blur + 彩度ブーストのフロスト面のみ。
+              ダーク面 = 白文字 / ライトテーマ = 濃色文字 で可読性を確保する --- */
         nav[data-bottom-nav] {
-            background:
-                linear-gradient(0deg,
-                    rgba(124, 58, 237, 0.88) 0%,
-                    rgba(139, 92, 246, 0.74) 60%,
-                    rgba(167, 139, 250, 0.58) 100%) !important;
-            backdrop-filter: blur(18px) saturate(160%) !important;
-            -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
-            border-top: 1px solid rgba(255, 255, 255, 0.25) !important;
-            box-shadow:
-                inset 0 -1px 0 rgba(255, 255, 255, 0.45),
-                inset 0 1px 0 rgba(255, 255, 255, 0.12),
-                0 -6px 20px rgba(46, 16, 101, 0.35) !important;
+            background: rgba(18, 15, 26, 0.55) !important;
+            backdrop-filter: blur(20px) saturate(150%) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
+            box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.25) !important;
         }
-        /* ナビの文字・アイコン：紫グラデ上なので白で統一 + フェード部の可読性用の影 */
         nav[data-bottom-nav] .nav-item {
-            color: rgba(255, 255, 255, 0.82) !important;
-            text-shadow: 0 1px 3px rgba(46, 16, 101, 0.45);
+            color: rgba(255, 255, 255, 0.78) !important;
+            text-shadow: none;
         }
         nav[data-bottom-nav] .nav-item.is-active {
             color: #ffffff !important;
+        }
+        body.theme-light nav[data-bottom-nav],
+        body.theme-premium-white nav[data-bottom-nav] {
+            background: rgba(255, 255, 255, 0.62) !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.70) !important;
+            box-shadow: 0 -8px 24px rgba(30, 20, 60, 0.10) !important;
+        }
+        body.theme-light nav[data-bottom-nav] .nav-item,
+        body.theme-premium-white nav[data-bottom-nav] .nav-item {
+            color: rgba(36, 31, 51, 0.60) !important;
+        }
+        body.theme-light nav[data-bottom-nav] .nav-item.is-active,
+        body.theme-premium-white nav[data-bottom-nav] .nav-item.is-active {
+            color: #6d28d9 !important;
         }
 
         /* --- TALK ROOM：他画面と同じ --max-content-width に揃えつつ、内側コンテナはフル幅で背景を敷く --- */
@@ -586,74 +575,83 @@
             /* 左右パディングは sub-header と同じ計算式で完全一致させる（モバイルでは 16px ガター） */
             padding-left:  max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             padding-right: max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
-            /* 立体グラスモーフィズム：
-               「トークする」ボタンと同系のアメジスト半透明グラデ + blur、
-               上端の白ハイライト（艶）+ 下方向のドロップシャドウ（浮遊感） */
-            background:
-                linear-gradient(180deg,
-                    rgba(124, 58, 237, 0.88) 0%,
-                    rgba(139, 92, 246, 0.74) 60%,
-                    rgba(167, 139, 250, 0.58) 100%) !important;
-            backdrop-filter: blur(18px) saturate(160%) !important;
-            -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.25) !important;
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.45),
-                inset 0 -1px 0 rgba(255, 255, 255, 0.12),
-                0 6px 20px rgba(46, 16, 101, 0.35) !important;
+            /* ニュートラルなすりガラス（色なしグラスモーフィズム 2026-07-20） */
+            background: rgba(18, 15, 26, 0.55) !important;
+            backdrop-filter: blur(20px) saturate(150%) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
         }
-        /* ヘッダー上の文字・アイコンは白のまま、フェード部でも読めるよう影を付与 */
         #global-header .header-title-main,
         #global-header .header-icon-btn,
         #global-header .btn-back {
-            text-shadow: 0 1px 3px rgba(46, 16, 101, 0.45);
+            text-shadow: none;
         }
         .header-icon-btn:hover,
         .header-icon-btn:focus-visible {
-            background-color: rgba(168, 85, 247, 0.10) !important;
+            background-color: rgba(255, 255, 255, 0.10) !important;
         }
         .header-icon-btn:active {
-            background-color: rgba(168, 85, 247, 0.18) !important;
+            background-color: rgba(255, 255, 255, 0.16) !important;
+        }
+        /* ライトテーマ：白フロスト面 + 濃色文字（可読性優先） */
+        body.theme-light #global-header,
+        body.theme-premium-white #global-header {
+            background: rgba(255, 255, 255, 0.62) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.70) !important;
+            box-shadow: 0 8px 24px rgba(30, 20, 60, 0.10) !important;
+        }
+        body.theme-light #global-header .header-title-main,
+        body.theme-light #global-header .header-icon-btn,
+        body.theme-light #global-header .btn-back,
+        body.theme-light #global-header .header-talk-name,
+        body.theme-premium-white #global-header .header-title-main,
+        body.theme-premium-white #global-header .header-icon-btn,
+        body.theme-premium-white #global-header .btn-back,
+        body.theme-premium-white #global-header .header-talk-name {
+            color: #241f33 !important;
+        }
+        body.theme-light .header-icon-btn:hover,
+        body.theme-light .header-icon-btn:focus-visible,
+        body.theme-premium-white .header-icon-btn:hover,
+        body.theme-premium-white .header-icon-btn:focus-visible {
+            background-color: rgba(36, 31, 51, 0.06) !important;
+        }
+        body.theme-light .header-icon-btn:active,
+        body.theme-premium-white .header-icon-btn:active {
+            background-color: rgba(36, 31, 51, 0.10) !important;
         }
 
-        /* --- サイドメニュー本体：ヘッダー・フッターと同じアメジストグラデーション ---
-              上端=濃 #7c3aed → 下端=明るいラベンダー #a78bfa（ドロワーは読み物なので透明化はしない）。
-              文字・アイコンは白系で統一（ヘッダーと同じトーン） --- */
+        /* --- サイドメニュー本体：ニュートラルなすりガラス（色なしグラスモーフィズム 2026-07-20）。
+              ダーク面 = 濃色フロスト + 白文字 / ライトテーマ = 白フロスト + 濃色文字 --- */
         #side-menu {
             right: 0 !important;
-            background:
-                linear-gradient(180deg,
-                    rgba(124, 58, 237, 0.97) 0%,
-                    rgba(139, 92, 246, 0.95) 55%,
-                    rgba(167, 139, 250, 0.94) 100%) !important;
-            box-shadow:
-                -12px 0 36px rgba(46, 16, 101, 0.45),
-                -2px 0 18px rgba(124, 58, 237, 0.30) !important;
-            border-left: 1px solid rgba(255, 255, 255, 0.22) !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
+            background: rgba(18, 15, 26, 0.72) !important;
+            backdrop-filter: blur(24px) saturate(150%) !important;
+            -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
+            border-left: 1px solid rgba(255, 255, 255, 0.14) !important;
+            box-shadow: -12px 0 36px rgba(0, 0, 0, 0.35) !important;
         }
         .sidebar-header {
-            border-bottom-color: rgba(255, 255, 255, 0.22) !important;
+            border-bottom-color: rgba(255, 255, 255, 0.16) !important;
         }
         .sidebar-footer {
-            border-top-color: rgba(255, 255, 255, 0.22) !important;
+            border-top-color: rgba(255, 255, 255, 0.16) !important;
         }
-        /* メニュー文字・アイコン：紫グラデ上で読める白系に統一 */
         #side-menu,
         #side-menu .sidebar-sub-menu a,
         #side-menu .menu-summary,
         #side-menu .sidebar-theme-toggle {
             color: #ffffff !important;
-            text-shadow: 0 1px 3px rgba(46, 16, 101, 0.40);
+            text-shadow: none;
         }
         #side-menu .sidebar-sub-menu a i,
         #side-menu .menu-summary i:first-child,
         #side-menu .sidebar-theme-toggle i {
-            color: rgba(255, 255, 255, 0.85) !important;
+            color: rgba(255, 255, 255, 0.80) !important;
         }
         #side-menu .menu-label-header {
-            color: rgba(255, 255, 255, 0.65) !important;
+            color: rgba(255, 255, 255, 0.55) !important;
             text-shadow: none;
         }
         #side-menu .btn-sidebar-close {
@@ -661,20 +659,72 @@
         }
         .sidebar-sub-menu a:hover,
         #side-menu .sidebar-theme-toggle:hover {
-            background: rgba(255, 255, 255, 0.14) !important;
+            background: rgba(255, 255, 255, 0.10) !important;
         }
-        /* ログアウト：紫面上でも見える白縁の警告ボタン */
         #side-menu .btn-logout {
-            background: rgba(255, 255, 255, 0.12) !important;
+            background: rgba(255, 255, 255, 0.10) !important;
             color: #ffffff !important;
-            border: 1px solid rgba(255, 255, 255, 0.35) !important;
+            border: 1px solid rgba(255, 255, 255, 0.30) !important;
         }
         #side-menu .sidebar-badge-pending {
             background: #dc2626 !important;
             color: #ffffff !important;
         }
         .btn-sidebar-close:hover {
-            background: rgba(168, 85, 247, 0.18) !important;
+            background: rgba(255, 255, 255, 0.12) !important;
+        }
+        /* ライトテーマ：白フロスト + 濃色文字 */
+        body.theme-light #side-menu,
+        body.theme-premium-white #side-menu {
+            background: rgba(255, 255, 255, 0.72) !important;
+            border-left: 1px solid rgba(255, 255, 255, 0.70) !important;
+            box-shadow: -12px 0 36px rgba(30, 20, 60, 0.18) !important;
+        }
+        body.theme-light .sidebar-header,
+        body.theme-premium-white .sidebar-header {
+            border-bottom-color: rgba(36, 31, 51, 0.10) !important;
+        }
+        body.theme-light .sidebar-footer,
+        body.theme-premium-white .sidebar-footer {
+            border-top-color: rgba(36, 31, 51, 0.10) !important;
+        }
+        body.theme-light #side-menu,
+        body.theme-light #side-menu .sidebar-sub-menu a,
+        body.theme-light #side-menu .menu-summary,
+        body.theme-light #side-menu .sidebar-theme-toggle,
+        body.theme-light #side-menu .btn-sidebar-close,
+        body.theme-premium-white #side-menu,
+        body.theme-premium-white #side-menu .sidebar-sub-menu a,
+        body.theme-premium-white #side-menu .menu-summary,
+        body.theme-premium-white #side-menu .sidebar-theme-toggle,
+        body.theme-premium-white #side-menu .btn-sidebar-close {
+            color: #241f33 !important;
+        }
+        body.theme-light #side-menu .sidebar-sub-menu a i,
+        body.theme-light #side-menu .menu-summary i:first-child,
+        body.theme-light #side-menu .sidebar-theme-toggle i,
+        body.theme-premium-white #side-menu .sidebar-sub-menu a i,
+        body.theme-premium-white #side-menu .menu-summary i:first-child,
+        body.theme-premium-white #side-menu .sidebar-theme-toggle i {
+            color: #6d28d9 !important;
+        }
+        body.theme-light #side-menu .menu-label-header,
+        body.theme-premium-white #side-menu .menu-label-header {
+            color: #857ca0 !important;
+        }
+        body.theme-light .sidebar-sub-menu a:hover,
+        body.theme-light #side-menu .sidebar-theme-toggle:hover,
+        body.theme-light .btn-sidebar-close:hover,
+        body.theme-premium-white .sidebar-sub-menu a:hover,
+        body.theme-premium-white #side-menu .sidebar-theme-toggle:hover,
+        body.theme-premium-white .btn-sidebar-close:hover {
+            background: rgba(36, 31, 51, 0.06) !important;
+        }
+        body.theme-light #side-menu .btn-logout,
+        body.theme-premium-white #side-menu .btn-logout {
+            background: rgba(220, 38, 38, 0.06) !important;
+            color: #dc2626 !important;
+            border: 1px solid rgba(220, 38, 38, 0.35) !important;
         }
     </style>
 
@@ -682,7 +732,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/layout-sidebar.css') }}?v=20260720-full-height">
 
     {{-- ヘッダーのポップアップ（通知 / タスク）専用CSS：app.js が #btn-header-* で togglePopup する --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/layout-header.css') }}?v=20260720-simple-badge">
+    <link rel="stylesheet" href="{{ asset('assets/css/layout-header.css') }}?v=20260720-popup-simple">
 
     {{-- 通知 / やることリスト ポップアップを mypage のカード調に上書き（不透明 + アクセント枠 + 3Dシャドウ） --}}
     <style>
@@ -809,10 +859,10 @@
     <script src="{{ asset('assets/js/motion.js') }}?v={{ $assetVersion }}" defer></script>
     {{-- ライトモード（薄ラベンダー基調）。全ルールが body.theme-light スコープのため常時読み込みで安全。
          テーマトグル（ライト/ダーク）のライブ切替を可能にするため @if を外して常時ロードする --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260720-light-18">
+    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260720-light-22">
     {{-- プレミアムホワイト（MyPage）: 全ルールが body.theme-premium-white スコープ。同上で常時ロード --}}
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600;700;900&family=Cinzel:wght@600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('assets/css/premium-white.css') }}?v=20260720-pwhite-06">
+    <link rel="stylesheet" href="{{ asset('assets/css/premium-white.css') }}?v=20260720-pwhite-07">
 </head>
 <body class="@yield('body-class') {{ $isLightTheme ? 'theme-light' : '' }} {{ $isPremiumWhite ? 'theme-premium-white' : '' }} {{ $isForcedDark ? 'mode-dark' : 'mode-light' }} bg-base text-text-main"
       data-natural-light="{{ $naturalLightTheme ? '1' : '0' }}"

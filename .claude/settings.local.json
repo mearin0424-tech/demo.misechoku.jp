@@ -79,7 +79,8 @@
       "Bash(sed -n '2212,2235p' public/assets/css/home.css)",
       "Bash(sed -n '410,430p' public/assets/css/light-theme.css)",
       "Bash(sed -n '1610,1635p' public/assets/css/search.css)",
-      "Bash(node --check public/assets/js/character-guide.js)"
+      "Bash(node --check public/assets/js/character-guide.js)",
+      "Bash(node --check public/assets/js/search-detail.js)"
     ]
   }
 }

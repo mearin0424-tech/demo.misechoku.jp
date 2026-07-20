@@ -1523,7 +1523,7 @@ button.interview-option-btn:hover {
     border-color: rgba(226, 188, 79, 0.5);
 }
 
-/* --- ピン留めボタン --- */
+/* --- ピン留めボタン（アメジスト配色。白一色をやめて視認性と質感を出す） --- */
 .talk-pin-btn {
     width: 32px;
     height: 32px;
@@ -1532,8 +1532,8 @@ button.interview-option-btn:hover {
     margin-left: 8px;
     border-radius: 50%;
     border: none;
-    background: rgba(0, 0, 0, 0.35);
-    color: rgba(255, 255, 255, 0.7);
+    background: rgba(168, 85, 247, 0.12);
+    color: #a78bfa;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1547,17 +1547,33 @@ button.interview-option-btn:hover {
 }
 
 .talk-pin-btn:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
+    background: rgba(168, 85, 247, 0.22);
+    color: #c4b5fd;
 }
 
+/* ピン留め中：アメジストグラデ塗り + 白ピン（斜め） */
 .talk-pin-btn[aria-pressed="true"] {
-    background: rgba(168, 85, 247, 0.18);
-    color: #fcd34d;
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.35);
 }
 
 .talk-pin-btn[aria-pressed="true"] i {
     transform: rotate(-25deg);
+}
+
+/* ライトモード：薄紫面 + 濃紫ピン（ピン留め中は共通のグラデ塗り） */
+body.theme-light .talk-pin-btn {
+    background: rgba(124, 58, 237, 0.08);
+    color: #7c3aed;
+}
+body.theme-light .talk-pin-btn:hover {
+    background: rgba(124, 58, 237, 0.16);
+    color: #6d28d9;
+}
+body.theme-light .talk-pin-btn[aria-pressed="true"] {
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    color: #ffffff;
 }
 
 /* ==========================================================================
