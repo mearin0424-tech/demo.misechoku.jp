@@ -142,7 +142,8 @@
 
                     <div class="register-field">
                         <span>生年月日 <em>必須</em></span>
-                        <input type="date" name="birth_date" value="{{ old('birth_date') }}">
+                        <input type="date" name="birth_date" value="{{ old('birth_date') }}" data-rw-birth>
+                        <span class="rw-age-badge" data-rw-age-badge hidden></span>
                     </div>
 
                     <label class="register-field">
@@ -213,7 +214,7 @@
                     <div class="register-skip-target" @if(old('profile_skip')) hidden @endif>
                     <label class="register-field">
                         <span>自己紹介</span>
-                        <textarea name="intro" rows="4" placeholder="自己紹介">{{ old('intro') }}</textarea>
+                        <textarea name="intro" rows="4" placeholder="自己紹介" data-rw-suggest="intro">{{ old('intro') }}</textarea>
                     </label>
 
                     @if(!empty($masters['industries']) && $masters['industries']->isNotEmpty())
@@ -315,7 +316,7 @@
                     </div>
                     <label class="register-field">
                         <span>メイン画像 <em>必須</em></span>
-                        <input type="file" id="cast-register-profile-image" name="profile_image" accept="image/jpeg,image/png,image/gif,image/webp" required>
+                        <input type="file" id="cast-register-profile-image" name="profile_image" accept="image/jpeg,image/png,image/gif,image/webp" capture="user" required>
                         <small class="register-field-hint">顔が分かる画像を1枚選び、次の画面で<strong>縦長（3:4）</strong>の範囲を調整してから登録してください。（JPEG / PNG / GIF / WebP、最大2MB）</small>
                     </label>
                 </section>
@@ -360,11 +361,11 @@
                             <div class="register-grid register-grid-two">
                                 <label class="register-field">
                                     <span>表面（画像 / PDF）</span>
-                                    <input type="file" name="identity_front_file" accept=".pdf,image/*">
+                                    <input type="file" name="identity_front_file" accept=".pdf,image/*" capture="environment">
                                 </label>
                                 <label class="register-field">
                                     <span>裏面（任意）</span>
-                                    <input type="file" name="identity_back_file" accept=".pdf,image/*">
+                                    <input type="file" name="identity_back_file" accept=".pdf,image/*" capture="environment">
                                 </label>
                             </div>
 
@@ -390,11 +391,11 @@
                             <div class="register-grid register-grid-two">
                                 <label class="register-field">
                                     <span>① 表面（画像 / PDF）</span>
-                                    <input type="file" name="identity_front_file" accept=".pdf,image/*">
+                                    <input type="file" name="identity_front_file" accept=".pdf,image/*" capture="environment">
                                 </label>
                                 <label class="register-field">
                                     <span>① 裏面（任意）</span>
-                                    <input type="file" name="identity_back_file" accept=".pdf,image/*">
+                                    <input type="file" name="identity_back_file" accept=".pdf,image/*" capture="environment">
                                 </label>
                             </div>
 
@@ -408,7 +409,7 @@
 
                             <label class="register-field">
                                 <span>② 表面（画像 / PDF）</span>
-                                <input type="file" name="identity_address_front_file" accept=".pdf,image/*">
+                                <input type="file" name="identity_address_front_file" accept=".pdf,image/*" capture="environment">
                             </label>
                         </div>
                     </div>
@@ -503,12 +504,12 @@
 
                     <label class="register-field">
                         <span>キャッチコピー（ひとこと）</span>
-                        <input type="text" name="word" value="{{ old('word') }}" placeholder="例：最高級の夜を、あなたに。">
+                        <input type="text" name="word" value="{{ old('word') }}" placeholder="例：最高級の夜を、あなたに。" data-rw-suggest="catch">
                         <small class="register-field-hint">一覧やプロフィールに表示される短い紹介文です。</small>
                     </label>
                     <label class="register-field">
                         <span>お店の紹介文</span>
-                        <textarea name="overview" rows="5" placeholder="お店のコンセプト、雰囲気、客層などを入力">{{ old('overview') }}</textarea>
+                        <textarea name="overview" rows="5" placeholder="お店のコンセプト、雰囲気、客層などを入力" data-rw-suggest="overview">{{ old('overview') }}</textarea>
                     </label>
                     @if(!empty($masters['industries']) && $masters['industries']->isNotEmpty())
                     <div class="register-field">
@@ -1562,7 +1563,176 @@
 
 
 
-        /* ★ モダン入力UI強化（2026-07-20 追加） */
+        /* ★★ 先進的な機能スタイル（2026-07-20 追加） */
+        /* 入力欄の右端に置く ✓/× マーク */
+        .rw-input-wrap { position: relative; display: block; width: 100%; }
+        .rw-input-wrap > input { padding-right: 40px !important; }
+        .rw-inline-mark {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.72rem;
+            color: #ffffff;
+            pointer-events: none;
+        }
+        .rw-inline-mark.is-ok { display: inline-flex; background: #059669; }
+        .rw-inline-mark.is-ng { display: inline-flex; background: #ef4444; }
+        .rw-inline-hint {
+            display: block;
+            margin-top: 4px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #b91c1c;
+        }
+        /* パスワード強度メーター */
+        .rw-strength {
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .rw-strength__bars {
+            display: flex;
+            gap: 4px;
+            flex: 1;
+        }
+        .rw-strength__bars > span {
+            flex: 1;
+            height: 4px;
+            border-radius: 999px;
+            background: rgba(124, 58, 237, 0.14);
+        }
+        .rw-strength--1 .rw-strength__bars > span:nth-child(-n+1) { background: #ef4444; }
+        .rw-strength--2 .rw-strength__bars > span:nth-child(-n+2) { background: #f59e0b; }
+        .rw-strength--3 .rw-strength__bars > span:nth-child(-n+3) { background: #7c3aed; }
+        .rw-strength--4 .rw-strength__bars > span { background: #059669; }
+        .rw-strength__label {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: #6d6685;
+            min-width: 68px;
+            text-align: right;
+        }
+        .rw-strength--1 .rw-strength__label { color: #ef4444; }
+        .rw-strength--2 .rw-strength__label { color: #b45309; }
+        .rw-strength--3 .rw-strength__label { color: #7c3aed; }
+        .rw-strength--4 .rw-strength__label { color: #059669; }
+
+        /* 年齢バッジ */
+        .rw-age-badge {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 3px 12px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #a78bfa, #7c3aed);
+            color: #ffffff;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+        }
+        .rw-age-badge.is-under {
+            background: linear-gradient(135deg, #f87171, #dc2626);
+        }
+
+        /* 候補プリセット（AI補完） */
+        .rw-suggest {
+            margin-top: 8px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.08), rgba(124, 58, 237, 0.04));
+            border: 1px dashed rgba(124, 58, 237, 0.28);
+        }
+        .rw-suggest__head {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: #6d28d9;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .rw-suggest__head i { color: #a78bfa; }
+        .rw-suggest__list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .rw-suggest__item {
+            font-family: inherit;
+            font-size: 0.76rem;
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: #ffffff;
+            border: 1px solid rgba(124, 58, 237, 0.30);
+            color: #4c1d95;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: left;
+            line-height: 1.4;
+            max-width: 100%;
+        }
+        .rw-suggest__item:hover {
+            background: rgba(124, 58, 237, 0.08);
+            border-color: #7c3aed;
+            transform: translateY(-1px);
+        }
+
+        /* ドラフト復元トースト */
+        .rw-toast {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translate(-50%, -20px);
+            z-index: 200;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px 10px 16px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #a78bfa, #7c3aed);
+            color: #ffffff;
+            font-size: 0.82rem;
+            font-weight: 700;
+            box-shadow: 0 10px 24px rgba(124, 58, 237, 0.35);
+            opacity: 0;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+        }
+        .rw-toast.is-visible { transform: translate(-50%, 0); opacity: 1; }
+        .rw-toast__x {
+            border: 0;
+            background: rgba(255, 255, 255, 0.20);
+            color: #ffffff;
+            width: 26px; height: 26px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.7rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .rw-toast__x:hover { background: rgba(255, 255, 255, 0.32); }
+
+        /* ステップ入力充足率チップ */
+        .rw-fill-pct {
+            margin-left: auto;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: rgba(124, 58, 237, 0.10);
+            border: 1px solid rgba(124, 58, 237, 0.28);
+            color: #6d28d9;
+            font-size: 0.7rem;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+        }
+
+                /* ★ モダン入力UI強化（2026-07-20 追加） */
         /* 自動保存ヒント */
         .rw-draft-hint {
             display: inline-flex;
@@ -1645,6 +1815,6 @@
         }
     </style>
 
-    <script src="{{ asset('assets/js/register-wizard.js') }}?v=20260720-wizard3"></script>
+    <script src="{{ asset('assets/js/register-wizard.js') }}?v=20260720-wizard4"></script>
 
 @endsection

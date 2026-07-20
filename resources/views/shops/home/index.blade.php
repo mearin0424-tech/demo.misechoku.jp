@@ -4,7 +4,7 @@
 @section('body-class', 'no-scroll page-home')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260720-seg-mini">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260720-seg-tiny">
 @endpush
 
 @php
