@@ -158,14 +158,8 @@
         @endphp
         @if(!empty($ctaShopId))
             <div class="flex flex-col gap-2 mb-2">
-                {{-- 最重要：TALK 遷移（求人未登録でも常に表示） --}}
-                {{-- トーク / KEEP / 共有 の横一列。トークが flex-1 で最も目立つ Primary --}}
+                {{-- KEEP / 共有 の横一列。トークするは画面下部固定バー（.profile-talk-bar）に一本化 --}}
                 <div class="fav-actions-row" style="margin-bottom: 20px;">
-                    <a href="{{ $mkTalkHref(['id' => $ctaShopId, 'talk_topic' => 'other', 'initiate' => 1]) }}"
-                       @if($isShopPreview) aria-disabled="true" title="プレビュー：求職者はここからトークに遷移します" onclick="return false;" @endif
-                       class="fav-actions-row__primary inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-full font-bold bg-accent text-on-accent shadow-[0_4px_12px_rgba(0,0,0,0.4)] active:scale-[0.98] transition-transform duration-150 {{ $isShopPreview ? 'cursor-default' : '' }}">
-                        <i class="fas fa-comment-dots"></i> トークする
-                    </a>
                     <button type="button"
                             @if($isShopPreview) disabled title="プレビュー：求職者はここでキープできます" @endif
                             class="fav-circle fav-circle--keep {{ $isShopPreview ? 'opacity-70' : '' }}"
@@ -579,11 +573,14 @@
 })();
 </script>
 
-{{-- 画面下部固定の「トークする」バー（キャスト閲覧時のみ。店舗プレビューでは非表示） --}}
-@if(!($isShopPreview ?? empty($forCast)) && !empty($ctaShopId))
+{{-- 画面下部固定の「トークする」バー（SWIPEカードのCTAと同一デザイン）。
+     店舗プレビュー時は見た目そのまま・無効状態で表示（求職者に見える形の確認用） --}}
+@if(!empty($ctaShopId))
+    @php $talkBarPreview = $isShopPreview ?? empty($forCast); @endphp
     <div class="profile-talk-bar" role="complementary" aria-label="トークを開始">
-        <a href="{{ route('cast.talk.room', ['id' => $ctaShopId, 'talk_topic' => 'other', 'initiate' => 1]) }}"
-           class="profile-talk-bar__btn">
+        <a href="{{ $talkBarPreview ? '#' : route('cast.talk.room', ['id' => $ctaShopId, 'talk_topic' => 'other', 'initiate' => 1]) }}"
+           class="profile-talk-bar__btn"
+           @if($talkBarPreview) aria-disabled="true" onclick="return false;" title="プレビュー：求職者はここからトークに遷移します" @endif>
             <i class="fas fa-comment-dots" aria-hidden="true"></i> トークする
         </a>
     </div>

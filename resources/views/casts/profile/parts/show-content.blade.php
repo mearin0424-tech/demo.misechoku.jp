@@ -79,14 +79,8 @@
             </a>
         @elseif($showInteractionActions)
             @php $favCastId = (string) ($cast['id'] ?? $cast['cast_id'] ?? ''); @endphp
-            {{-- トーク / KEEP / 共有 の横一列。トークが flex-1 で最も目立つ Primary --}}
+            {{-- KEEP / 共有 の横一列。トークするは画面下部固定バー（.profile-talk-bar）に一本化 --}}
             <div class="fav-actions-row">
-                @if($favCastId !== '' && Route::has('shop.talk.room'))
-                    <a href="{{ route('shop.talk.room', ['id' => $favCastId, 'talk_topic' => 'other', 'initiate' => 1]) }}"
-                       class="fav-actions-row__primary inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-full font-bold bg-accent text-on-accent shadow-[0_4px_12px_rgba(0,0,0,0.4)] active:scale-[0.98] transition-transform duration-150">
-                        <i class="fas fa-comment-dots"></i> トークする
-                    </a>
-                @endif
                 <button type="button" id="btn-profile-keep"
                         class="fav-circle fav-circle--keep"
                         data-fav-toggle data-action="keep" data-item-type="cast" data-item-id="{{ $favCastId }}"

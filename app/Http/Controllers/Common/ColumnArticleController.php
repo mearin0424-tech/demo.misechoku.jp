@@ -29,6 +29,25 @@ class ColumnArticleController extends Controller
             $query->forShop();
         }
 
+        // タグ絞り込みチップ用：現在の閲覧対象で公開中の記事に付いている全タグ
+        $availableTags = (clone $query)
+            ->pluck('tags')
+            ->filter(fn ($tags) => is_array($tags))
+            ->flatten()
+            ->map(fn ($t) => trim((string) $t))
+            ->filter(fn ($t) => $t !== '')
+            ->unique()
+            ->values()
+            ->all();
+
+        // ?tag= で絞り込み
+        $activeTag = trim((string) $request->query('tag', ''));
+        if ($activeTag !== '' && in_array($activeTag, $availableTags, true)) {
+            $query->whereJsonContains('tags', $activeTag);
+        } else {
+            $activeTag = '';
+        }
+
         $articles = $query->paginate(12)->withQueryString();
 
         return view('common.support.column-index', [
@@ -36,6 +55,8 @@ class ColumnArticleController extends Controller
             'isCast' => $isCast,
             'isShop' => $isShop,
             'isGuest' => $isGuest,
+            'availableTags' => $availableTags,
+            'activeTag' => $activeTag,
         ]);
     }
 

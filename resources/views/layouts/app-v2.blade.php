@@ -8,7 +8,7 @@
         $metaDescription = trim($__env->yieldContent('meta_description')) ?: 'ミセチョクのデモサイトです。';
         $metaImage = trim($__env->yieldContent('meta_image')) ?: asset('assets/images/pwa/icon-512.png');
         $canonicalUrl = trim($__env->yieldContent('canonical')) ?: url()->current();
-        $assetVersion = '20260719-deep-pages';
+        $assetVersion = '20260720-talk-bar-unified';
         $resolvedTitle = $metaTitle !== ''
             ? $metaTitle
             : ($pageTitle !== '' ? $pageTitle . ' | ' . config('app.name', 'ミセチョク') : config('app.name', 'ミセチョク'));
@@ -429,43 +429,81 @@
             padding-left:  max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             padding-right: max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             z-index: 1600 !important;
-            /* ヘッダー下端（rgba(139,92,246,0.66)）から色を引き継ぎ、
-               下端に向けて透明にフェードする連続グラデーション */
+            /* 立体グラスパネル：ヘッダーより一段明るいアメジスト半透明 + blur。
+               上端ハイライトの艶と下方向の影で "ヘッダーの下に重なるガラス板" を表現 */
             background:
                 linear-gradient(180deg,
-                    rgba(139, 92, 246, 0.66) 0%,
-                    rgba(167, 139, 250, 0.36) 55%,
-                    rgba(167, 139, 250, 0) 100%) !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
+                    rgba(139, 92, 246, 0.62) 0%,
+                    rgba(167, 139, 250, 0.50) 100%) !important;
+            backdrop-filter: blur(18px) saturate(160%) !important;
+            -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
             margin-top: 0 !important;
             border-top: 0 !important;
-            box-shadow: none !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.22) !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.30),
+                0 4px 14px rgba(46, 16, 101, 0.25) !important;
+            padding-top: 6px !important;
+            padding-bottom: 6px !important;
         }
-        /* サブヘッダー内のタブ・ラベル：フェード部でも読めるよう白 + 濃紫の影 */
-        .sub-header-wrapper,
-        .sub-header-wrapper .sub-header-tabs a,
-        .sub-header-wrapper .sub-header-tabs button {
-            text-shadow: 0 1px 3px rgba(46, 16, 101, 0.5);
+        /* サブヘッダーのタブ：立体的なガラスのピル型ボタンに。
+           非アクティブ = 半透明ガラス + 白文字 / アクティブ = 白面 + 濃紫文字（押されて光る） */
+        .sub-header-wrapper .sub-header-tabs .tab-item {
+            border-radius: 999px !important;
+            padding: 7px 16px !important;
+            background: rgba(255, 255, 255, 0.12) !important;
+            border: 1px solid rgba(255, 255, 255, 0.28) !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.35),
+                inset 0 -1px 2px rgba(46, 16, 101, 0.20),
+                0 2px 6px rgba(46, 16, 101, 0.22) !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            text-shadow: 0 1px 2px rgba(46, 16, 101, 0.45);
+            transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease !important;
+        }
+        .sub-header-wrapper .sub-header-tabs .tab-item:hover {
+            background: rgba(255, 255, 255, 0.20) !important;
+        }
+        .sub-header-wrapper .sub-header-tabs .tab-item:active {
+            transform: scale(0.96);
+        }
+        .sub-header-wrapper .sub-header-tabs .tab-item.active {
+            background: linear-gradient(180deg, #ffffff, #f1ecfb) !important;
+            color: #6d28d9 !important;
+            text-shadow: none !important;
+            border-color: rgba(255, 255, 255, 0.9) !important;
+            box-shadow:
+                inset 0 1px 0 #ffffff,
+                0 3px 10px rgba(46, 16, 101, 0.35) !important;
+        }
+        /* 旧デザインの下線インジケータは撤去（ピル型に置換） */
+        .sub-header-wrapper .sub-header-tabs .tab-item.active::after {
+            display: none !important;
+        }
+        .sub-header-wrapper .sub-header-tabs {
+            gap: 8px !important;
         }
         .sub-header-tabs {
             background-color: transparent !important;
         }
 
-        /* --- ボトムナビ：ヘッダーと上下対称。
-              「トークする」/ログインボタンと同じアメジストグラデ（下端=濃 → 上端=透明）。
+        /* --- ボトムナビ：ヘッダーと上下対称の立体グラスモーフィズム。
+              アメジスト半透明グラデ + blur、下端ハイライト（艶）+ 上方向の影（浮遊感）。
               ライト/ダークどちらのテーマでも共通（MyPage 含め全画面で統一） --- */
         nav[data-bottom-nav] {
             background:
                 linear-gradient(0deg,
-                    rgba(124, 58, 237, 0.96) 0%,
-                    rgba(139, 92, 246, 0.85) 55%,
-                    rgba(167, 139, 250, 0.45) 82%,
-                    rgba(167, 139, 250, 0) 100%) !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-            border-top: 0 !important;
-            box-shadow: none !important;
+                    rgba(124, 58, 237, 0.88) 0%,
+                    rgba(139, 92, 246, 0.74) 60%,
+                    rgba(167, 139, 250, 0.58) 100%) !important;
+            backdrop-filter: blur(18px) saturate(160%) !important;
+            -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.25) !important;
+            box-shadow:
+                inset 0 -1px 0 rgba(255, 255, 255, 0.45),
+                inset 0 1px 0 rgba(255, 255, 255, 0.12),
+                0 -6px 20px rgba(46, 16, 101, 0.35) !important;
         }
         /* ナビの文字・アイコン：紫グラデ上なので白で統一 + フェード部の可読性用の影 */
         nav[data-bottom-nav] .nav-item {
@@ -499,28 +537,21 @@
             /* 左右パディングは sub-header と同じ計算式で完全一致させる（モバイルでは 16px ガター） */
             padding-left:  max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             padding-right: max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
-            /* 「トークする」/ログインボタンと同じアメジストグラデ（#7c3aed→#8b5cf6→#a78bfa）から
-               下端に向けて透明にフェードするグラデーション。
-               上端=濃（白文字が読める）→ 下端=明るいラベンダー → 透明 */
+            /* 立体グラスモーフィズム：
+               「トークする」ボタンと同系のアメジスト半透明グラデ + blur、
+               上端の白ハイライト（艶）+ 下方向のドロップシャドウ（浮遊感） */
             background:
                 linear-gradient(180deg,
-                    rgba(124, 58, 237, 0.96) 0%,
-                    rgba(139, 92, 246, 0.85) 55%,
-                    rgba(167, 139, 250, 0.45) 82%,
-                    rgba(167, 139, 250, 0) 100%) !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-            border-bottom: 0 !important;
-            box-shadow: none !important;
-        }
-        /* サブヘッダーがあるページ：ヘッダー下端は透明にせず、
-           サブヘッダーのグラデーションへ色を引き継いで連続フェードにする */
-        body:has(.sub-header-wrapper) #global-header {
-            background:
-                linear-gradient(180deg,
-                    rgba(124, 58, 237, 0.96) 0%,
-                    rgba(139, 92, 246, 0.85) 60%,
-                    rgba(139, 92, 246, 0.66) 100%) !important;
+                    rgba(124, 58, 237, 0.88) 0%,
+                    rgba(139, 92, 246, 0.74) 60%,
+                    rgba(167, 139, 250, 0.58) 100%) !important;
+            backdrop-filter: blur(18px) saturate(160%) !important;
+            -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.25) !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.45),
+                inset 0 -1px 0 rgba(255, 255, 255, 0.12),
+                0 6px 20px rgba(46, 16, 101, 0.35) !important;
         }
         /* ヘッダー上の文字・アイコンは白のまま、フェード部でも読めるよう影を付与 */
         #global-header .header-title-main,
@@ -536,25 +567,62 @@
             background-color: rgba(168, 85, 247, 0.18) !important;
         }
 
-        /* --- サイドメニュー本体：背景グラデ・シャドウを紫トーンへ + 右端はビューポート右端固定 --- */
+        /* --- サイドメニュー本体：ヘッダー・フッターと同じアメジストグラデーション ---
+              上端=濃 #7c3aed → 下端=明るいラベンダー #a78bfa（ドロワーは読み物なので透明化はしない）。
+              文字・アイコンは白系で統一（ヘッダーと同じトーン） --- */
         #side-menu {
             right: 0 !important;
             background:
-                radial-gradient(circle at 0% 0%, rgba(168, 85, 247, 0.20), transparent 55%),
-                linear-gradient(180deg, rgba(20, 20, 20, 0.96), rgba(10, 10, 10, 0.98)) !important;
+                linear-gradient(180deg,
+                    rgba(124, 58, 237, 0.97) 0%,
+                    rgba(139, 92, 246, 0.95) 55%,
+                    rgba(167, 139, 250, 0.94) 100%) !important;
             box-shadow:
-                -12px 0 36px rgba(0,0,0,0.65),
-                -2px 0 18px rgba(168, 85, 247, 0.28) !important;
-            border-left: 1px solid rgba(168, 85, 247, 0.35) !important;
+                -12px 0 36px rgba(46, 16, 101, 0.45),
+                -2px 0 18px rgba(124, 58, 237, 0.30) !important;
+            border-left: 1px solid rgba(255, 255, 255, 0.22) !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
         }
         .sidebar-header {
-            border-bottom-color: rgba(168, 85, 247, 0.25) !important;
+            border-bottom-color: rgba(255, 255, 255, 0.22) !important;
         }
         .sidebar-footer {
-            border-top-color: rgba(168, 85, 247, 0.25) !important;
+            border-top-color: rgba(255, 255, 255, 0.22) !important;
         }
-        .sidebar-sub-menu a:hover {
-            background: rgba(168, 85, 247, 0.14) !important;
+        /* メニュー文字・アイコン：紫グラデ上で読める白系に統一 */
+        #side-menu,
+        #side-menu .sidebar-sub-menu a,
+        #side-menu .menu-summary,
+        #side-menu .sidebar-theme-toggle {
+            color: #ffffff !important;
+            text-shadow: 0 1px 3px rgba(46, 16, 101, 0.40);
+        }
+        #side-menu .sidebar-sub-menu a i,
+        #side-menu .menu-summary i:first-child,
+        #side-menu .sidebar-theme-toggle i {
+            color: rgba(255, 255, 255, 0.85) !important;
+        }
+        #side-menu .menu-label-header {
+            color: rgba(255, 255, 255, 0.65) !important;
+            text-shadow: none;
+        }
+        #side-menu .btn-sidebar-close {
+            color: #ffffff !important;
+        }
+        .sidebar-sub-menu a:hover,
+        #side-menu .sidebar-theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.14) !important;
+        }
+        /* ログアウト：紫面上でも見える白縁の警告ボタン */
+        #side-menu .btn-logout {
+            background: rgba(255, 255, 255, 0.12) !important;
+            color: #ffffff !important;
+            border: 1px solid rgba(255, 255, 255, 0.35) !important;
+        }
+        #side-menu .sidebar-badge-pending {
+            background: #dc2626 !important;
+            color: #ffffff !important;
         }
         .btn-sidebar-close:hover {
             background: rgba(168, 85, 247, 0.18) !important;
@@ -695,9 +763,9 @@
     <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260720-light-14">
     {{-- プレミアムホワイト（MyPage）: 全ルールが body.theme-premium-white スコープ。同上で常時ロード --}}
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('assets/css/premium-white.css') }}?v=20260720-pwhite-05">
+    <link rel="stylesheet" href="{{ asset('assets/css/premium-white.css') }}?v=20260720-pwhite-06">
 </head>
-<body class="@yield('body-class') {{ $isLightTheme ? 'theme-light' : '' }} {{ $isPremiumWhite ? 'theme-premium-white' : '' }} bg-base text-text-main"
+<body class="@yield('body-class') {{ $isLightTheme ? 'theme-light' : '' }} {{ $isPremiumWhite ? 'theme-premium-white' : '' }} {{ $isForcedDark ? 'mode-dark' : 'mode-light' }} bg-base text-text-main"
       data-natural-light="{{ $naturalLightTheme ? '1' : '0' }}"
       data-natural-pwhite="{{ $naturalPremiumWhite ? '1' : '0' }}"
       data-notification-badge="{{ isset($unreadNewsCount) ? (int) $unreadNewsCount : 0 }}">
@@ -834,6 +902,9 @@
                 if (b.getAttribute('data-natural-light') === '1') b.classList.add('theme-light');
                 if (b.getAttribute('data-natural-pwhite') === '1') b.classList.add('theme-premium-white');
             }
+            // SWIPE 等の "テーマクラス非対象" 画面用のモードクラス（下部グラデ・キャッチコピー配色に使用）
+            b.classList.toggle('mode-dark', mode === 'dark');
+            b.classList.toggle('mode-light', mode !== 'dark');
             btn.setAttribute('data-theme-mode', mode);
             var label = mode === 'dark' ? 'ライトモードに切り替え' : 'ダークモードに切り替え';
             btn.setAttribute('aria-label', label);

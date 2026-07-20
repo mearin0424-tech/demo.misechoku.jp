@@ -58,47 +58,18 @@
         </form>
     </div>
 
-    <div class="support-form-faq">
-        <h2 class="support-form-faq-title">よくある質問</h2>
-        <div class="support-faq-list">
-            <details class="support-faq-item">
-                <summary class="support-faq-question">
-                    <span>ログインできない場合はどうすれば良いですか？</span>
-                    <i class="fas fa-chevron-down"></i>
-                </summary>
-                <div class="support-faq-answer">
-                    メールアドレス・パスワードに誤りがないかをご確認ください。それでも解決しない場合は、上記フォームより「アカウント・ログインについて」を選択しお問い合わせください。
-                </div>
-            </details>
-            <details class="support-faq-item">
-                <summary class="support-faq-question">
-                    <span>{{ $isCast ? 'お店からのオファーはどこで確認できますか？' : 'キャストからの応募やメッセージはどこで確認できますか？' }}</span>
-                    <i class="fas fa-chevron-down"></i>
-                </summary>
-                <div class="support-faq-answer">
-                    つながり（KEEPS）タブとトーク画面から、やりとり中の相手を一覧で確認できます。
-                </div>
-            </details>
-            <details class="support-faq-item">
-                <summary class="support-faq-question">
-                    <span>通知のオン／オフはどこで変更できますか？</span>
-                    <i class="fas fa-chevron-down"></i>
-                </summary>
-                <div class="support-faq-answer">
-                    サイドメニュー内の「SETTING &gt; 通知設定」から、リマインダー通知の受け取り設定を変更できます。
-                </div>
-            </details>
-            <details class="support-faq-item">
-                <summary class="support-faq-question">
-                    <span>退会やアカウント削除はできますか？</span>
-                    <i class="fas fa-chevron-down"></i>
-                </summary>
-                <div class="support-faq-answer">
-                    サイドメニュー内の「SETTING &gt; アカウント設定」から退会手続きへ進めます。
-                </div>
-            </details>
-        </div>
-    </div>
+    {{-- よくある質問はご利用ガイドに集約（重複掲載を解消） --}}
+    @php $faqIsLoggedInArea = request()->is('cast/*') || request()->is('shop/*'); @endphp
+    @if($faqIsLoggedInArea)
+        <a href="{{ $isCast ? route('cast.htu') : route('shop.htu') }}" class="support-faq-guide-link">
+            <span class="support-faq-guide-link__icon"><i class="fas fa-circle-question"></i></span>
+            <span class="support-faq-guide-link__body">
+                <strong>よくある質問はご利用ガイドへ</strong>
+                <small>お問い合わせの前に、ご利用ガイドの「よくある質問」もご確認ください。</small>
+            </span>
+            <i class="fas fa-chevron-right support-faq-guide-link__chev"></i>
+        </a>
+    @endif
 </div>
 @endsection
 
@@ -261,5 +232,33 @@
 }
 .support-form-submit:hover { filter: brightness(1.06); }
 .support-form-submit:active { transform: scale(.97); box-shadow: 0 2px 5px rgba(0,0,0,.45), inset 0 2px 4px rgba(0,0,0,.2); }
+
+/* ご利用ガイド（よくある質問）への誘導リンクカード */
+.support-faq-guide-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: #ffffff;
+    border: 1px solid rgba(124, 58, 237, 0.24);
+    box-shadow: 0 3px 12px rgba(76, 29, 149, 0.08);
+    color: #241f33;
+    text-decoration: none;
+}
+.support-faq-guide-link__icon {
+    flex: 0 0 auto;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(124, 58, 237, 0.10);
+    color: #7c3aed;
+    font-size: 1rem;
+}
+.support-faq-guide-link__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.support-faq-guide-link__body strong { font-size: 0.9rem; color: #241f33; }
+.support-faq-guide-link__body small { font-size: 0.72rem; color: #574d6f; line-height: 1.5; }
+.support-faq-guide-link__chev { color: rgba(124, 58, 237, 0.45); font-size: 0.8rem; }
 </style>
 @endpush

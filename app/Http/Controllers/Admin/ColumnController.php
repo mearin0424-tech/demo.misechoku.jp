@@ -94,6 +94,18 @@ class ColumnController extends Controller
         $data['visible_to_shop'] = $request->boolean('visible_to_shop');
         $data['visible_to_guest'] = $request->boolean('visible_to_guest');
 
+        // タグ：カンマ / 読点区切りの文字列 → 正規化した配列（最大10個・各20文字）
+        $rawTags = (string) $request->input('tags', '');
+        $tags = collect(preg_split('/[,、]/u', $rawTags))
+            ->map(fn ($t) => trim((string) $t))
+            ->filter(fn ($t) => $t !== '')
+            ->map(fn ($t) => mb_substr($t, 0, 20))
+            ->unique()
+            ->take(10)
+            ->values()
+            ->all();
+        $data['tags'] = $tags;
+
         if (! $data['is_published']) {
             $data['published_at'] = null;
         } elseif (empty($data['published_at'])) {

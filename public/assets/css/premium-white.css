@@ -416,54 +416,7 @@ body.theme-premium-white .notif-popup-empty {
     border-bottom-color: var(--pw-violet-line) !important;
 }
 
-/* ===== サイドメニュー（右からスライド）：白ラベンダーグラス ===== */
-body.theme-premium-white #side-menu {
-    background:
-        radial-gradient(circle at 0% 0%, rgba(124, 58, 237, 0.12), transparent 55%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(247, 243, 252, 0.94)) !important;
-    border-left: 1px solid var(--pw-violet-line-strong) !important;
-    box-shadow:
-        -12px 0 36px rgba(76, 29, 149, 0.12),
-        -2px 0 18px rgba(124, 58, 237, 0.10) !important;
-    color: var(--pw-text) !important;
-}
-body.theme-premium-white .sidebar-header {
-    border-bottom-color: var(--pw-violet-line) !important;
-}
-body.theme-premium-white .sidebar-footer {
-    border-top-color: var(--pw-violet-line) !important;
-}
-body.theme-premium-white .sidebar-sub-menu a,
-body.theme-premium-white .menu-summary {
-    color: var(--pw-text) !important;
-}
-body.theme-premium-white .sidebar-sub-menu a:hover {
-    background: var(--pw-violet-soft) !important;
-    color: var(--pw-violet-deep) !important;
-}
-body.theme-premium-white .sidebar-sub-menu a i,
-body.theme-premium-white .menu-summary i:first-child {
-    color: var(--pw-violet) !important;
-}
-body.theme-premium-white .menu-label-header {
-    color: var(--pw-violet-deep) !important;
-    opacity: 0.7 !important;
-}
-body.theme-premium-white .btn-sidebar-close {
-    color: var(--pw-violet-deep) !important;
-}
-body.theme-premium-white .btn-sidebar-close:hover {
-    background: var(--pw-violet-soft) !important;
-}
-body.theme-premium-white .btn-logout {
-    background: rgba(220, 38, 38, 0.08) !important;
-    color: #b91c1c !important;
-    border: 1px solid rgba(220, 38, 38, 0.30) !important;
-}
-body.theme-premium-white .sidebar-badge-pending {
-    background: #dc2626 !important;
-    color: #ffffff !important;
-}
+/* ===== サイドメニュー：グローバル（app-v2）のアメジストグラデに統一するため上書きしない ===== */
 
 /* ===== オコジョガイド吹き出し ===== */
 body.theme-premium-white #character-guide .guide-speech-bubble {

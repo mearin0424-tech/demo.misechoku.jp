@@ -15,6 +15,7 @@ class ColumnArticle extends Model
         'slug',
         'column_category_id',
         'body',
+        'tags',
         'is_published',
         'published_at',
         'visible_to_cast',
@@ -28,6 +29,7 @@ class ColumnArticle extends Model
         'visible_to_shop' => 'boolean',
         'visible_to_guest' => 'boolean',
         'published_at' => 'datetime',
+        'tags' => 'array',
     ];
 
     public function scopePublished(Builder $query): Builder

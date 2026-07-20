@@ -31,6 +31,7 @@ class StoreColumnArticleRequest extends FormRequest
                 }),
             ],
             'body' => ['required', 'string'],
+            'tags' => ['nullable', 'string', 'max:300'],
             'is_published' => ['sometimes', 'boolean'],
             'published_at' => ['nullable', 'date'],
             'visible_to_cast' => ['sometimes', 'boolean'],
@@ -45,6 +46,7 @@ class StoreColumnArticleRequest extends FormRequest
             'title' => 'タイトル',
             'column_category_id' => 'カテゴリ',
             'body' => '本文',
+            'tags' => 'タグ',
             'published_at' => '公開日時',
         ];
     }

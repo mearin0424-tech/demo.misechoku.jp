@@ -4839,10 +4839,11 @@ body.page-home .swipe-updown-guide { top: 38%; }
 
 /* --- キャッチコピー：文字サイズ縮小 + 透けた黒背景 + KEEPと同じ高さ --- */
 body.page-home .cast-card--recruit .rc-manager-msg {
-    /* KEEP バッジ (top: header+12, size:44) と縦位置を揃える */
     top: calc(var(--header-height, 60px) + 12px) !important;
-    padding: 0 68px 0 12px !important; /* 右側は KEEP ボタン領域 (56px) を確保 */
+    /* KEEP は名前行へ移設済みのため左右対称パディングで真ん中寄せ */
+    padding: 0 16px !important;
     align-items: center !important;
+    justify-content: center !important;
     z-index: 20 !important;
 }
 body.page-home .cast-card--recruit .rc-manager-msg__backdrop {
@@ -5207,3 +5208,162 @@ body.page-home .swipe-keep-corner {
     position: relative;
     z-index: 31;
 }
+
+
+/* ============================================================================
+   ゴム風粘性（Elastic Stretch）ページインジケーター (2026-07-20)
+   ・非アクティブ: 4px 正円 / 薄ラベンダー #D2C4FF @ 40%
+   ・アクティブ: 高さ4px・幅16px のバイオレット #9156FA ピル
+   ・切替時: 先端が先に伸び（Phase A）、後端が弾けて追いつく（Phase B）
+     イージング cubic-bezier(0.6, -0.28, 0.01, 1.35) は JS 側で付与
+   ============================================================================ */
+body.page-home .photo-pagination.elastic-pager {
+    position: absolute !important;
+    top: 12px !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: auto !important;
+    transform: translateX(-50%) !important;
+    z-index: 20;
+    display: flex !important;
+    justify-content: center !important;
+    padding: 6px 10px;             /* タップ余白 + ピル端の逃げ */
+    pointer-events: auto;
+    background: transparent;
+}
+body.page-home .elastic-pager__track {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;                       /* 要素間の余白 8px */
+    height: 4px;
+}
+body.page-home .elastic-pager__dot {
+    flex: 0 0 auto;
+    width: 4px;                     /* 直径 4px の完全な正円 */
+    height: 4px;
+    border-radius: 50%;
+    background: #D2C4FF;
+    opacity: 0.4;                   /* ごく薄い半透明ラベンダー */
+    border: 0;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    position: relative;
+    transition: opacity 0.2s ease;
+}
+body.page-home .elastic-pager__dot:hover { opacity: 0.7; }
+/* タップ領域の拡大（見た目は 4px のまま 20px 四方で押せる） */
+body.page-home .elastic-pager__dot::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+}
+body.page-home .elastic-pager__pill {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 4px;                    /* 極細 */
+    width: 16px;                    /* 通常時 */
+    border-radius: 999px;
+    background: #9156FA;            /* 鮮やかなバイオレット */
+    box-shadow: 0 0 6px rgba(145, 86, 250, 0.55);  /* 写真上でも視認できる微グロー */
+    pointer-events: none;
+    will-change: left, width;
+}
+
+
+/* ============================================================================
+   SWIPE ライトモード (2026-07-20)
+   ライト時（body.mode-light）は下部グラデーションとキャッチコピー背景を
+   白（薄ラベンダー #f5f2fb）にして、ライトモードを表現する。
+   ダーク時（body.mode-dark）は従来の黒基調のまま。
+   ============================================================================ */
+
+/* カード面：黒 → 薄ラベンダー */
+body.page-home.mode-light .cast-card,
+body.page-home.mode-light .cast-card.glass-card,
+body.page-home.mode-light .cast-card--recruit {
+    background: #f5f2fb !important;
+}
+
+/* 画像下端のグラデーション：黒フェード → 薄ラベンダーフェード */
+body.page-home.mode-light .home-photo-wrap::after,
+body.page-home.mode-light .rc-img-wrap::after,
+body.page-home.mode-light .cast-card:not(.cast-card--recruit) .home-photo-wrap::after {
+    background: linear-gradient(180deg,
+        rgba(245, 242, 251, 0) 0%,
+        rgba(245, 242, 251, 0.35) 40%,
+        rgba(245, 242, 251, 0.88) 72%,
+        #f5f2fb 100%) !important;
+}
+
+/* キャッチコピー：白（薄ラベンダー）の半透明パネル + 濃色文字 */
+body.page-home.mode-light .cast-card--recruit .rc-manager-msg__backdrop {
+    background: linear-gradient(180deg,
+        rgba(255, 255, 255, 0.92) 0%,
+        rgba(245, 242, 251, 0.85) 100%) !important;
+    border: 1px solid rgba(124, 58, 237, 0.18);
+    box-shadow: 0 2px 12px rgba(76, 29, 149, 0.14) !important;
+}
+body.page-home.mode-light .cast-card--recruit .rc-manager-msg__line1,
+body.page-home.mode-light .cast-card--recruit .rc-manager-msg__line2 {
+    color: #241f33 !important;
+    text-shadow: none !important;
+}
+body.page-home.mode-light .cast-card--recruit .rc-msg-em {
+    color: #6d28d9 !important;
+}
+
+/* 下部テキスト（薄ラベンダー面の上）：濃色へ */
+body.page-home.mode-light .rc-shop-name,
+body.page-home.mode-light .cast-name {
+    color: #1e1a2e !important;
+    text-shadow: none !important;
+}
+body.page-home.mode-light .cast-name .age {
+    color: #574d6f !important;
+}
+body.page-home.mode-light .rc-loc,
+body.page-home.mode-light .rc-dist,
+body.page-home.mode-light .rc-views {
+    color: #574d6f !important;
+}
+body.page-home.mode-light .rc-loc i,
+body.page-home.mode-light .rc-dist i {
+    color: #857ca0 !important;
+}
+body.page-home.mode-light .rc-rating-inline {
+    color: #241f33 !important;
+}
+body.page-home.mode-light .rc-rating-inline .rc-review-cnt {
+    color: #574d6f !important;
+}
+body.page-home.mode-light .tag-pill {
+    background: #ffffff !important;
+    border: 1px solid rgba(124, 58, 237, 0.20) !important;
+    color: #574d6f !important;
+}
+
+/* KEEP（名前行内）：白面 + バイオレット */
+body.page-home.mode-light .swipe-keep-corner--inline {
+    background: #ffffff !important;
+    border-color: rgba(124, 58, 237, 0.35) !important;
+    color: #6d28d9 !important;
+    box-shadow: 0 1px 4px rgba(76, 29, 149, 0.15) !important;
+}
+body.page-home.mode-light .swipe-keep-corner--inline.is-active,
+body.page-home.mode-light .swipe-keep-corner--inline[aria-pressed="true"] {
+    background: linear-gradient(135deg, #f6d36a, #e3b94a) !important;
+    color: #1a0f00 !important;
+    border-color: rgba(246, 211, 106, 0.9) !important;
+}
+
+/* 上下スワイプガイドのキャレット：薄ラベンダー面で見える濃色に */
+body.page-home.mode-light .discovery-swipe-guide {
+    color: rgba(46, 16, 101, 0.40) !important;
+    filter: drop-shadow(0 1px 3px rgba(255, 255, 255, 0.8)) !important;
+}
+
+/* 時給カード・ボーナスカードは自己完結の濃面デザインなのでそのまま（両モード共通） */

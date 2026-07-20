@@ -93,6 +93,99 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // 各カード内の左右スワイプ（同一アカウントの複数写真）
+    // ========================================================================
+    // ゴム風粘性（Elastic Stretch）ページインジケーター
+    // 静的ドット列 + 絶対配置の伸縮ピル。インデックス切替時に
+    //   Phase A (0〜50%): リーディングエッジが先行してゴムのように伸びる
+    //   Phase B (50〜100%): トレイリングエッジがパチンと追いつき 16px に収縮
+    // ========================================================================
+    const ELASTIC = {
+        DOT: 4,          // ドット直径
+        GAP: 8,          // ドット間隔
+        PITCH: 12,       // DOT + GAP
+        PILL_W: 16,      // 通常時のピル幅
+        STRETCH_MS: 170, // Phase A
+        SNAP_MS: 230,    // Phase B
+        EASE_STRETCH: 'cubic-bezier(0.4, 0, 0.2, 1)',
+        EASE_SNAP: 'cubic-bezier(0.6, -0.28, 0.01, 1.35)' // 有機的な粘性（オーバーシュート付き）
+    };
+
+    function buildElasticPager(paginationEl, swiper, count) {
+        paginationEl.classList.add('elastic-pager');
+        paginationEl.innerHTML = '';
+
+        const track = document.createElement('div');
+        track.className = 'elastic-pager__track';
+
+        for (let i = 0; i < count; i++) {
+            const dot = document.createElement('button');
+            dot.type = 'button';
+            dot.className = 'elastic-pager__dot stop-propagation';
+            dot.setAttribute('aria-label', (i + 1) + '枚目の写真へ');
+            dot.addEventListener('click', function (ev) {
+                ev.preventDefault();
+                ev.stopPropagation();
+                swiper.slideTo(i);
+            });
+            track.appendChild(dot);
+        }
+
+        const pill = document.createElement('span');
+        pill.className = 'elastic-pager__pill';
+        pill.setAttribute('aria-hidden', 'true');
+        track.appendChild(pill);
+        paginationEl.appendChild(track);
+
+        // ピル中心をドット中心に合わせた left 座標
+        const leftFor = (idx) => idx * ELASTIC.PITCH + (ELASTIC.DOT / 2) - (ELASTIC.PILL_W / 2);
+
+        let current = swiper.activeIndex || 0;
+        let phaseTimer = null;
+
+        // 初期配置（アニメーションなし）
+        pill.style.transition = 'none';
+        pill.style.left = leftFor(current) + 'px';
+        pill.style.width = ELASTIC.PILL_W + 'px';
+
+        function go(to) {
+            if (to === current) return;
+            const from = current;
+            current = to;
+            clearTimeout(phaseTimer);
+
+            const fromLeft = leftFor(from);
+            const toLeft = leftFor(to);
+            const forward = to > from;
+
+            // --- Phase A: 伸び（進行方向の先端が先に動き、後端は残る） ---
+            pill.style.transition =
+                'left ' + ELASTIC.STRETCH_MS + 'ms ' + ELASTIC.EASE_STRETCH + ', ' +
+                'width ' + ELASTIC.STRETCH_MS + 'ms ' + ELASTIC.EASE_STRETCH;
+            if (forward) {
+                // 左端（後端）固定・右端（先端）が目的地まで伸びる
+                pill.style.left = fromLeft + 'px';
+                pill.style.width = (toLeft - fromLeft + ELASTIC.PILL_W) + 'px';
+            } else {
+                // 右端（後端）固定・左端（先端）が目的地まで伸びる
+                pill.style.left = toLeft + 'px';
+                pill.style.width = (fromLeft - toLeft + ELASTIC.PILL_W) + 'px';
+            }
+
+            // --- Phase B: 縮みと結合（後端がパチンと弾けて追いつく） ---
+            phaseTimer = setTimeout(function () {
+                pill.style.transition =
+                    'left ' + ELASTIC.SNAP_MS + 'ms ' + ELASTIC.EASE_SNAP + ', ' +
+                    'width ' + ELASTIC.SNAP_MS + 'ms ' + ELASTIC.EASE_SNAP;
+                pill.style.left = toLeft + 'px';
+                pill.style.width = ELASTIC.PILL_W + 'px';
+            }, ELASTIC.STRETCH_MS);
+        }
+
+        swiper.on('slideChange', function () {
+            go(swiper.activeIndex);
+        });
+    }
+
     const photoSwipers = [];
     document.querySelectorAll('.photo-swiper').forEach((el) => {
         const paginationEl = el.querySelector('.photo-pagination');
@@ -160,34 +253,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         };
-        if (paginationEl) {
-            options.pagination = {
-                el: paginationEl,
-                clickable: true
-            };
-        }
         const swiper = new Swiper(el, options);
         photoSwipers.push(swiper);
-    });
 
-    // 写真エリアは「Swiperでスワイプ / clickで詳細遷移」（求人スワイプカードはカード全体で求人へ）
-    document.querySelectorAll('.home-photo-wrap').forEach((wrap) => {
-        const detailUrl = wrap.getAttribute('data-detail-url');
-        if (!detailUrl) return;
-        if (wrap.closest('.cast-card--recruit')) return;
-        wrap.addEventListener('click', function (e) {
-            // <a href> / <button> は常に本来の動作を優先（トーク遷移・KEEPトグル等）
-            if (e && e.target && (e.target.closest('a[href]') || e.target.closest('button'))) return;
-            if (isPhotoSwiping) return;
-            window.location.href = detailUrl;
-        });
+        // Swiper 標準の bullet はやめ、ゴム風粘性のカスタムページャーを敷く
+        if (paginationEl) {
+            buildElasticPager(paginationEl, swiper, photoSlideCount);
+        }
     });
 
     // ============================================================
-    // トークCTA：capture 段階で最優先に処理する。
-    // Swiper の preventClicks が <a> の既定遷移を殺す／合成クリックが
-    // 親カードに落ちる等、どのレイヤーで拾われても確実にトークへ遷移させる。
-    // （Swiper の loop 複製スライドにも効くよう document 委譲）
+    // トークCTA：capture 段階で最優先に処理する（保険）。
+    // Swiper の preventClicks が <a> の既定遷移を殺すケースでも
+    // 確実にトークルームへ遷移させる（loop 複製スライドにも効く document 委譲）
     // ============================================================
     document.addEventListener('click', function (e) {
         var cta = e.target.closest('.swipe-talk-cta');
@@ -199,26 +277,25 @@ document.addEventListener('DOMContentLoaded', function() {
     }, true);
 
     // ============================================================
-    // 求人カード（全体）：クリックで詳細遷移（document 委譲版）。
-    // ・Swiper loop の複製スライドにも自動で効く
-    // ・下部情報エリア（.rc-bottom-bar / .card-bottom-info）は
-    //   KEEP／トークCTA／時給カード等の操作要素が集約されているため遷移対象外。
-    //   → 画像エリアのタップだけがプロフィール遷移のトリガー
+    // プロフィール遷移：キャストカード・求人カード共通で
+    // 「画像エリア（.home-photo-wrap）のタップのみ」をトリガーにする。
+    // ・カード全体ハンドラは廃止（下部のボタン類が誤遷移する根本原因だった）
+    // ・document 委譲なので Swiper loop の複製スライドにも自動で効く
+    // ・URL はキャストカード = wrap の data-detail-url / 求人カード = カードの data-detail-url
     // ============================================================
     document.addEventListener('click', function (e) {
-        var card = e.target.closest('.cast-card--recruit[data-detail-url]');
-        if (!card) return;
-        // 下部情報エリアは遷移させない（ボタン類の明示的な除外領域）
-        if (e.target.closest('.rc-bottom-bar')) return;
-        if (e.target.closest('.card-bottom-info')) return;
-        // <a href> / <button> / .stop-propagation / ページネーションはそれぞれの動作を優先
+        // ボタン・リンク・ページネーションはそれぞれの本来動作を優先
         if (e.target.closest('a[href]')) return;
         if (e.target.closest('button')) return;
         if (e.target.closest('.stop-propagation')) return;
         if (e.target.closest('.photo-pagination')) return;
+        var wrap = e.target.closest('.home-photo-wrap');
+        if (!wrap) return;
         if (isPhotoSwiping) return;
-        var recruitUrl = card.getAttribute('data-detail-url');
-        if (recruitUrl) window.location.href = recruitUrl;
+        var recruitCard = wrap.closest('.cast-card--recruit');
+        var url = wrap.getAttribute('data-detail-url')
+            || (recruitCard ? recruitCard.getAttribute('data-detail-url') : null);
+        if (url) window.location.href = url;
     });
 
     // リサイズ・ビューポート変化時に Swiper を更新（モバイルのアドレスバー表示切替など）

@@ -50,6 +50,14 @@
         </div>
 
         <div class="admin-form-row">
+            <label class="admin-label">タグ（任意）</label>
+            <input type="text" name="tags" class="admin-input" maxlength="300"
+                   value="{{ old('tags', is_array(optional($column)->tags) ? implode(', ', $column->tags) : '') }}"
+                   placeholder="例: 初心者向け, 面接対策, 給与">
+            <small class="admin-note u-block u-mt-8">カンマ区切りで最大10個（各20文字まで）。コラム一覧のタグ絞り込みに使われます。</small>
+        </div>
+
+        <div class="admin-form-row">
             <label class="admin-label">公開する</label>
             <label class="admin-check-row">
                 <input type="checkbox" name="is_published" value="1" {{ old('is_published', optional($column)->is_published) ? 'checked' : '' }}>

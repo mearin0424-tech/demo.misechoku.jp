@@ -596,6 +596,7 @@ body.theme-light .page-lead { color: #5f5876; }
     width: min(calc(100vw - 32px), calc(var(--max-content-width, 430px) - 32px));
 }
 .profile-talk-bar__btn {
+    /* SWIPE カードの .swipe-talk-cta と同一デザイン（グラデ・立体シャドウ・文字） */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -605,19 +606,23 @@ body.theme-light .page-lead { color: #5f5876; }
     padding: 13px 16px;
     border-radius: 999px;
     background: linear-gradient(180deg, var(--accent-grad-from, #a78bfa) 0%, var(--accent-grad-to, #7c3aed) 100%);
-    color: #ffffff;
+    color: var(--on-accent-strong, #ffffff);
     font-size: 0.95rem;
     font-weight: 800;
     text-decoration: none;
     box-shadow:
-        0 8px 18px rgba(46, 16, 101, 0.35),
-        0 2px 4px rgba(0, 0, 0, 0.25),
+        0 8px 18px rgba(0, 0, 0, 0.45),
+        0 2px 4px rgba(0, 0, 0, 0.35),
         inset 0 1px 0 rgba(255, 255, 255, 0.45),
         inset 0 -2px 4px rgba(0, 0, 0, 0.28);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
     transition: transform 0.12s ease, filter 0.15s ease;
 }
 .profile-talk-bar__btn:active { transform: scale(0.97); }
+.profile-talk-bar__btn[aria-disabled="true"] {
+    opacity: 0.65;
+    cursor: default;
+}
 /* 固定バーの高さぶん、本文下部に余白を確保 */
 body:has(.profile-talk-bar) main#main-content {
     padding-bottom: calc(var(--footer-height, 75px) + 84px + env(safe-area-inset-bottom, 0px)) !important;
