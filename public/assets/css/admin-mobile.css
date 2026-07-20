@@ -210,3 +210,310 @@
         max-width: 100%;
     }
 }
+
+
+/* ==========================================================================
+   admin-mobile.css v2 追記 (2026-07-20)
+   §7 請求書ツールバー / 発行待ちカードの縦積み化
+   §8 詳細画面（2カラム）のスマホ1カラム化
+   §9 admin-page-toolbar-row のスマホ縦積み
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   §7 invoice-toolbar / invoice-pending-card：スマホでは縦積み
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+    .invoice-toolbar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+    }
+    .invoice-toolbar__search,
+    .invoice-toolbar__sort,
+    .invoice-toolbar__hits {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    .invoice-toolbar__sort {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        justify-content: space-between !important;
+    }
+    .invoice-toolbar__sort select {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    .invoice-pending-card {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        padding: 12px !important;
+    }
+    .invoice-pending-card-info,
+    .invoice-pending-card-amount,
+    .invoice-pending-card-actions {
+        width: 100% !important;
+        text-align: left !important;
+    }
+    .invoice-pending-card-amount {
+        font-size: 1.05rem !important;
+        border-top: 1px dashed rgba(124, 58, 237, 0.16);
+        padding-top: 8px;
+    }
+    .invoice-pending-card-actions {
+        display: flex !important;
+        justify-content: stretch !important;
+    }
+    .invoice-pending-card-actions .btn-action {
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+    .invoice-pending-card-meta {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 4px 8px !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   §8 詳細画面のスマホ1カラム化（casts/show, shops/show, inquiry/show）
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+    /* 2カラムグリッド系を1カラムに */
+    .admin-detail-grid,
+    .admin-two-column,
+    .admin-page-columns,
+    .billing-detail-row {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+    .billing-detail-row > * {
+        width: 100% !important;
+    }
+    /* dl 定義リストのラベル/値を縦積みではなく2列に */
+    .admin-detail-list dt,
+    .admin-detail-list dd {
+        display: block;
+    }
+    /* show 画面の顔写真＋メタ情報のヘッダーを縦積み */
+    .admin-show-hero {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 10px !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   §9 admin-page-toolbar-row のスマホ縦積み（検索 + ソートが横並びのケース）
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+    .admin-page-toolbar-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+    }
+    .admin-page-toolbar-search {
+        width: 100% !important;
+    }
+    .admin-page-toolbar-row .invoice-toolbar__sort,
+    .admin-page-toolbar-row label {
+        width: 100% !important;
+    }
+    .admin-page-toolbar-row .invoice-toolbar__hits {
+        text-align: right !important;
+        font-size: 0.72rem !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   §10 dashboard-kpi-card の中身をよりコンパクトに（複数KPIの視認性）
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+    .dashboard-kpi-head {
+        gap: 4px;
+    }
+    .dashboard-kpi-title {
+        font-size: 0.66rem;
+        letter-spacing: 0.02em;
+    }
+    .dashboard-kpi-main {
+        gap: 3px;
+        align-items: baseline;
+    }
+    .dashboard-kpi-unit {
+        font-size: 0.7rem;
+    }
+    .dashboard-kpi-trend {
+        font-size: 0.62rem;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   §11 書類審査（verification）：カード内画像プレビューのはみ出し防止
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+    .verification-card,
+    .verify-card,
+    .id-card-item {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    .verification-card img,
+    .verify-card img,
+    .id-card-item img,
+    .doc-preview img {
+        max-width: 100% !important;
+        height: auto !important;
+        object-fit: contain;
+    }
+    /* verify 画面の左右2カラムを縦積み */
+    .verification-grid,
+    .verify-grid,
+    .verify-columns {
+        grid-template-columns: 1fr !important;
+        display: grid !important;
+        gap: 12px !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   §12 マスタ系画面：インライン編集フォームの幅・ボタン
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+    .master-form-row,
+    .ngword-form-row,
+    .notification-spec-form-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+    }
+    .master-form-row input,
+    .master-form-row select,
+    .master-form-row textarea,
+    .ngword-form-row input,
+    .notification-spec-form-row input,
+    .notification-spec-form-row textarea {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+    /* コード管理画面のマスタメンテナンス */
+    .master-index-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   §13 お知らせ・コラム フォーム（tinymce/textarea）：スマホで幅可変
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+    .notice-form,
+    .column-form,
+    .admin-form {
+        min-width: 0 !important;
+    }
+    .notice-form input,
+    .notice-form textarea,
+    .notice-form select,
+    .column-form input,
+    .column-form textarea,
+    .column-form select,
+    .admin-form input,
+    .admin-form textarea,
+    .admin-form select {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    .admin-form-actions,
+    .notice-form-actions,
+    .column-form-actions {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+    .admin-form-actions .btn-action,
+    .notice-form-actions .btn-action,
+    .column-form-actions .btn-action {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   §14 売上（sales）：グラフとランキングテーブル
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+    .sales-chart-wrap,
+    .sales-chart,
+    .dashboard-chart-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .sales-chart svg,
+    .dashboard-chart svg {
+        min-width: 100%;
+        height: auto;
+    }
+    .sales-ranking-grid,
+    .sales-two-column {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+}
+
+
+/* ==========================================================================
+   admin-mobile.css v3 追記 (2026-07-20)
+   §15 詳細画面（shops/show, casts/show）のヒーロー領域の情報密度整理
+   §16 admin-summary-grid のスマホ2列
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   §15 admin-detail-hero__meta：3列→スマホでは2列（狭幅では1列）
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+    .admin-detail-hero__meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+        padding: 12px !important;
+    }
+    .admin-detail-hero__meta-value {
+        font-size: 0.86rem !important;
+    }
+    .admin-detail-hero__title-row {
+        gap: 6px !important;
+    }
+}
+@media (max-width: 380px) {
+    .admin-detail-hero__meta {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   §16 admin-summary-grid（本入店/体験/ヘルプ等）：狭幅は2列を維持しつつ
+       セル内フォントを微調整
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+    .admin-summary-grid {
+        gap: 8px !important;
+    }
+    .admin-summary-grid > * {
+        padding: 8px !important;
+        font-size: 0.82rem !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   §17 non-stack テーブル（詳細画面内の一部）のフォント縮小
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+    .admin-table:not(.admin-table--stack) {
+        font-size: 0.78rem !important;
+    }
+    .admin-table:not(.admin-table--stack) th,
+    .admin-table:not(.admin-table--stack) td {
+        padding: 8px 10px !important;
+    }
+}

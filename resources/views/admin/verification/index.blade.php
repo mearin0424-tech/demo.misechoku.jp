@@ -250,7 +250,7 @@
             </div>
 
             <div class="table-wrapper u-mt-12">
-                <table class="admin-table admin-table--sticky-actions">
+                <table class="admin-table admin-table--sticky-actions admin-table--stack">
                     <thead>
                         <tr>
                             <th>キャスト</th>
@@ -274,7 +274,7 @@
                                         <div class="text-xs text-muted">{{ $document['email'] }}</div>
                                     @endif
                                 </td>
-                                <td>
+                                <td data-label="登録情報">
                                     <div class="verification-profile">
                                         @if(!empty($document['real_name']))
                                             <div><span class="verification-profile-label">氏名</span>{{ $document['real_name'] }}</div>
@@ -301,7 +301,7 @@
                                     $isDocExpired = !empty($document['expired_at'])
                                         && \Illuminate\Support\Carbon::parse((string) $document['expired_at'])->isPast();
                                 @endphp
-                                <td>
+                                <td data-label="書類種別">
                                     @if(!empty($document['category_label']) && $document['category_label'] !== '—')
                                         <div class="text-xs text-muted">{{ $document['category_label'] }}</div>
                                     @endif
@@ -312,7 +312,7 @@
                                         </div>
                                     @endif
                                 </td>
-                                <td>
+                                <td data-label="ステータス">
                                     <span class="actor-pill {{ $castActor['cls'] }}">
                                         <i class="fas {{ $castActor['icon'] }}"></i> {{ $castActor['label'] }}
                                     </span>
@@ -323,7 +323,7 @@
                                         <div class="text-xs text-muted u-mt-4">承認日時: {{ $document['approved_at_label'] }}</div>
                                     @endif
                                 </td>
-                                <td>
+                                <td data-label="提出物">
                                     @php
                                         $profileFields = [];
                                         if (!empty($document['real_name'])) $profileFields[] = '氏名: ' . $document['real_name'];
@@ -372,15 +372,15 @@
                                         @endif
                                     </div>
                                 </td>
-                                <td>
+                                <td data-label="理由">
                                     @if(!empty($document['ng_reason']))
                                         <div class="verification-comment">{{ $document['ng_reason'] }}</div>
                                     @else
                                         <span class="text-xs text-muted">—</span>
                                     @endif
                                 </td>
-                                <td class="text-sm text-muted">{{ $document['updated_at_label'] ?: '-' }}</td>
-                                <td style="min-width:200px;">
+                                <td data-label="更新日時" class="text-sm text-muted">{{ $document['updated_at_label'] ?: '-' }}</td>
+                                <td class="stack-actions" style="min-width:200px;">
                                     @if($document['status_code'] !== 2)
                                         <form method="POST" action="{{ route('admin.verification.cast.approve', ['document' => $document['id']]) }}"
                                               style="display:inline-block; margin-bottom:6px;"
@@ -473,7 +473,7 @@
             </div>
 
             <div class="table-wrapper u-mt-12">
-                <table class="admin-table admin-table--sticky-actions">
+                <table class="admin-table admin-table--sticky-actions admin-table--stack">
                     <thead>
                         <tr>
                             <th>店舗</th>
@@ -497,7 +497,7 @@
                                         <div class="text-xs text-muted">{{ $document['email'] }}</div>
                                     @endif
                                 </td>
-                                <td>
+                                <td data-label="登録情報">
                                     <div class="verification-profile">
                                         @if(!empty($document['shop_name']))
                                             <div><span class="verification-profile-label">店舗名</span>{{ $document['shop_name'] }}</div>
@@ -517,7 +517,7 @@
                                         @endif
                                     </div>
                                 </td>
-                                <td>
+                                <td data-label="書類">
                                     {{ $document['type_label'] }}
                                     @if(!empty($document['expired_at_label']))
                                         <div class="text-xs {{ ($document['expiry_filter_key'] ?? '') === 'expired' ? '' : 'text-muted' }}">
@@ -528,7 +528,7 @@
                                         </div>
                                     @endif
                                 </td>
-                                <td>
+                                <td data-label="ステータス">
                                     <span class="actor-pill {{ $shopActor['cls'] }}">
                                         <i class="fas {{ $shopActor['icon'] }}"></i> {{ $shopActor['label'] }}
                                     </span>
@@ -539,7 +539,7 @@
                                         <div class="text-xs text-muted u-mt-4">承認日時: {{ $document['approved_at_label'] }}</div>
                                     @endif
                                 </td>
-                                <td>
+                                <td data-label="提出物">
                                     @php
                                         $shopProfileFields = [];
                                         if (!empty($document['shop_name'])) $shopProfileFields[] = '店舗名: ' . $document['shop_name'];
@@ -570,15 +570,15 @@
                                         -
                                     @endif
                                 </td>
-                                <td>
+                                <td data-label="理由">
                                     @if(!empty($document['ng_reason']))
                                         <div class="verification-comment">{{ $document['ng_reason'] }}</div>
                                     @else
                                         <span class="text-xs text-muted">—</span>
                                     @endif
                                 </td>
-                                <td class="text-sm text-muted">{{ $document['updated_at_label'] ?: '-' }}</td>
-                                <td style="min-width:200px;">
+                                <td data-label="更新日時" class="text-sm text-muted">{{ $document['updated_at_label'] ?: '-' }}</td>
+                                <td class="stack-actions" style="min-width:200px;">
                                     @if($document['status_code'] !== 2)
                                         @php $isShopDocExpired = ($document['expiry_filter_key'] ?? '') === 'expired'; @endphp
                                         <form method="POST" action="{{ route('admin.verification.shopdoc.approve', ['document' => $document['id']]) }}"

@@ -10,7 +10,7 @@
 @section('body-class', 'page-talk page-talk-room')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260713-talk-auto-msg">
+<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260720-subheader-switch">
 @if($isCast)
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/review-modal.css') }}">
@@ -230,9 +230,10 @@
     window.canSelectTalkJobKind = @json($canSelectTalkJobKind ?? false);
     window.currentTalkStatusCode = @json($currentStatusCode ?? 'chatting');
     window.talkQuickTemplates = @json($quickTemplates ?? []);
+    window.talkAllQuickReplies = @json($allQuickReplySuggestions ?? []);
     window.talkNgPayload = @json($ngWordPayload ?? ['patterns' => [], 'words' => []]);
 </script>
-<script src="{{ asset('assets/js/talk-room.js') }}?v=20260719-scout-limit"></script>
+<script src="{{ asset('assets/js/talk-room.js') }}?v=20260720-subheader-switch"></script>
 @endpush
 
 @section('content')
@@ -247,6 +248,9 @@
     $currentTalkJobKindValue = $selectedTalkJobKind ?? $initialTalkJobKind ?? null;
     $currentTalkJobKindLabel = $talkJobKindLabelMap[$currentTalkJobKindValue] ?? '未選択';
     $isInterviewOfferLocked = in_array(($currentStatusCode ?? ''), ['hired', 'rejected'], true);
+    // 種別スイッチ表示判定：本入店（fulltime）確定済みはロック表示、
+    // それ以外（未選択 / trial / help）は 新規入店 ⇔ ヘルプ の2択スイッチ
+    $isJobKindFulltimeLocked = $currentTalkJobKindValue === 'fulltime';
 @endphp
 
 <div id="talk-room-container" class="flex flex-col h-full bg-base">
@@ -257,18 +261,36 @@
                     <span class="talk-status-caption">状況:</span>
                     <span class="talk-status-value">{{ $currentStatusLabel ?? 'やり取り中' }}</span>
                 </span>
-                @if(!$isCast)
-                    <button type="button" id="open-job-kind-modal" class="talk-job-kind-badge" @if(empty($canSelectTalkJobKind)) disabled @endif>
-                        <span class="talk-job-kind-caption">種別:</span>
-                        <span id="talk-job-kind-current" class="talk-job-kind-value">{{ $currentTalkJobKindLabel }}</span>
-                        @if(!empty($canSelectTalkJobKind))
-                            <i class="fas fa-chevron-down" aria-hidden="true"></i>
-                        @endif
-                    </button>
+                @if(!$isCast && !$isJobKindFulltimeLocked)
+                    {{-- 店舗側かつ本入店未確定：新規入店 / ヘルプ の2択スイッチ（インライン） --}}
+                    @php $canSwitchJobKind = !empty($canSelectTalkJobKind); @endphp
+                    <div class="talk-job-kind-switch {{ $canSwitchJobKind ? '' : 'is-disabled' }}"
+                         role="radiogroup" aria-label="種別"
+                         data-current="{{ $currentTalkJobKindValue ?? '' }}"
+                         data-action-url="{{ $actionUrl }}"
+                         data-partner-id="{{ $partnerId }}">
+                        <span class="talk-job-kind-switch__caption">種別</span>
+                        <div class="talk-job-kind-switch__track">
+                            <span class="talk-job-kind-switch__thumb" aria-hidden="true"></span>
+                            <button type="button" class="talk-job-kind-switch__segment {{ $currentTalkJobKindValue === 'trial' ? 'is-active' : '' }}"
+                                    data-job-kind="trial"
+                                    role="radio" aria-checked="{{ $currentTalkJobKindValue === 'trial' ? 'true' : 'false' }}"
+                                    @if(!$canSwitchJobKind) disabled @endif>新規入店</button>
+                            <button type="button" class="talk-job-kind-switch__segment {{ $currentTalkJobKindValue === 'help' ? 'is-active' : '' }}"
+                                    data-job-kind="help"
+                                    role="radio" aria-checked="{{ $currentTalkJobKindValue === 'help' ? 'true' : 'false' }}"
+                                    @if(!$canSwitchJobKind) disabled @endif>ヘルプ</button>
+                        </div>
+                        <span id="talk-job-kind-current" data-job-kind-current="{{ $currentTalkJobKindValue ?? '' }}" hidden></span>
+                    </div>
                 @else
-                    <span class="talk-job-kind-badge talk-job-kind-badge-static">
-                        <span class="talk-job-kind-caption">種別:</span>
-                        <span id="talk-job-kind-current" class="talk-job-kind-value">{{ $currentTalkJobKindLabel }}</span>
+                    {{-- キャスト側 or 本入店ロック済み：読み取り専用チップ --}}
+                    <span class="talk-job-kind-chip {{ $isJobKindFulltimeLocked ? 'talk-job-kind-chip--locked' : '' }}">
+                        <span class="talk-job-kind-chip__caption">種別</span>
+                        <span id="talk-job-kind-current" class="talk-job-kind-chip__value" data-job-kind-current="{{ $currentTalkJobKindValue ?? '' }}">{{ $currentTalkJobKindLabel }}</span>
+                        @if($isJobKindFulltimeLocked)
+                            <i class="fas fa-lock" aria-hidden="true"></i>
+                        @endif
                     </span>
                 @endif
                 @if(empty($blockState['blocked_by_other']))
@@ -277,7 +299,7 @@
                         <input type="hidden" name="partner_id" value="{{ $partnerId }}">
                         <button
                             type="submit"
-                            class="talk-block-icon-btn"
+                            class="talk-block-icon-btn talk-block-icon-btn--plain {{ !empty($blockState['blocked_by_me']) ? 'is-active' : '' }}"
                             title="{{ !empty($blockState['blocked_by_me']) ? 'ブロック解除' : 'ブロック' }}"
                             aria-label="{{ !empty($blockState['blocked_by_me']) ? 'ブロック解除' : 'ブロック' }}"
                         >
@@ -625,7 +647,7 @@
             <h2>定型文を選択</h2>
             <button type="button" class="interview-modal-close js-talk-template-close" aria-label="閉じる">&times;</button>
         </div>
-        <p class="talk-template-menu-hint">タップで本文を挿入。鉛筆ボタンから内容を編集できます（4スロットまで）。</p>
+        <p class="talk-template-menu-hint">状況ごとの定型文をタップで挿入できます。マイ定型文（下段）は鉛筆ボタンから編集できます。</p>
         <div id="talk-template-menu-list" class="talk-template-list"></div>
     </div>
 </div>

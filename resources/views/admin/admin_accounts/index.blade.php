@@ -85,11 +85,10 @@
                 </span>
             </h2>
             <div class="table-wrapper">
-                <table class="admin-table">
+                <table class="admin-table admin-table--stack">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>氏名</th>
+                            <th>氏名（ID）</th>
                             <th>メールアドレス</th>
                             <th>ロール</th>
                             <th>有効</th>
@@ -99,30 +98,32 @@
                     <tbody>
                         @forelse($admins as $admin)
                             <tr>
-                                <td>{{ $admin->id }}</td>
-                                <td>{{ $admin->name ?: '—' }}</td>
                                 <td>
+                                    {{ $admin->name ?: '—' }}
+                                    <div class="admin-table-sub"><code>{{ $admin->id }}</code></div>
+                                </td>
+                                <td data-label="メール">
                                     @if(!empty($admin->email))
                                         <a href="mailto:{{ $admin->email }}">{{ $admin->email }}</a>
                                     @else — @endif
                                 </td>
-                                <td>
+                                <td data-label="ロール">
                                     <span class="admin-status-badge {{ $admin->role === 'admin' ? 'is-success' : 'is-warning' }}">
                                         {{ $admin->role === 'admin' ? 'スーパー管理者' : 'オペレーター' }}
                                     </span>
                                 </td>
-                                <td>
+                                <td data-label="有効">
                                     @if((int) $admin->is_active === 1)
                                         <span class="admin-status-badge is-active">有効</span>
                                     @else
                                         <span class="admin-status-badge is-inactive">無効</span>
                                     @endif
                                 </td>
-                                <td>{{ $admin->created_at ? \Illuminate\Support\Carbon::parse($admin->created_at)->format('Y-m-d') : '—' }}</td>
+                                <td data-label="登録日">{{ $admin->created_at ? \Illuminate\Support\Carbon::parse($admin->created_at)->format('Y-m-d') : '—' }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center">運営アカウントが登録されていません。</td>
+                                <td colspan="5" class="text-center">運営アカウントが登録されていません。</td>
                             </tr>
                         @endforelse
                     </tbody>

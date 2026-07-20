@@ -2493,3 +2493,313 @@ body.page-talk-room .message-bubble-auto,
     font-weight: 800;
     color: #fca5a5;
 }
+
+
+/* ==========================================================================
+   定型文編集モーダル：状況（ステータス）ごとのセクション表示 (2026-07-20)
+   モーダル全体はライト画面に追従（body.theme-light 下では白面）。
+   ダーク画面（page-talk-room）でも読める色にしつつ、
+   ライト画面での上書きは light-theme.css §14 のパターンに従う。
+   ========================================================================== */
+.talk-template-list {
+    gap: 14px !important;
+}
+.talk-template-status-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.talk-template-status-section + .talk-template-status-section {
+    padding-top: 12px;
+    border-top: 1px dashed rgba(124, 58, 237, 0.20);
+}
+.talk-template-status-heading {
+    margin: 0 0 4px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--gold-light, #c4b5fd);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.talk-template-status-heading::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 12px;
+    border-radius: 2px;
+    background: var(--gold-light, #c4b5fd);
+}
+.talk-template-status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.talk-template-status-list--slots {
+    gap: 8px;
+}
+.talk-template-status-item {
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+    color: #efe2e2;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+.talk-template-status-item:hover {
+    background: rgba(168, 85, 247, 0.10);
+    border-color: rgba(168, 85, 247, 0.35);
+}
+.talk-template-status-item:active {
+    transform: scale(0.98);
+}
+
+/* ==========================================================================
+   ライトテーマ画面での上書き（トークルームは常にライト運用）
+   ========================================================================== */
+body.theme-light .talk-template-status-section + .talk-template-status-section {
+    border-top-color: rgba(124, 58, 237, 0.16);
+}
+body.theme-light .talk-template-status-heading {
+    color: #6d28d9 !important;
+}
+body.theme-light .talk-template-status-heading::before {
+    background: #7c3aed;
+}
+body.theme-light .talk-template-status-item {
+    background: #ffffff !important;
+    border-color: rgba(124, 58, 237, 0.20) !important;
+    color: #241f33 !important;
+}
+body.theme-light .talk-template-status-item:hover {
+    background: rgba(124, 58, 237, 0.06) !important;
+    border-color: rgba(124, 58, 237, 0.36) !important;
+}
+
+
+/* ==========================================================================
+   トークルーム サブヘッダー刷新 (2026-07-20)
+   ・縦幅を圧縮 (padding 10px→6px)
+   ・ブロックボタンは丸の囲いを外して素のアイコンに
+   ・種別は「新規入店」「ヘルプ」の2択セグメントスイッチに
+   ========================================================================== */
+
+/* サブヘッダー本体：縦パディングを圧縮 */
+body.page-talk-room .talk-room-header,
+#talk-room-container .talk-room-header {
+    padding: 6px 12px !important;
+    padding-top: max(6px, env(safe-area-inset-top)) !important;
+    min-height: 36px !important;
+}
+body.page-talk-room .talk-room-shop-badges,
+#talk-room-container .talk-room-shop-badges {
+    gap: 8px !important;
+}
+
+/* --------------------------------------------------------------------------
+   ブロックボタン：丸の囲いを完全に外し、素のアイコンだけに
+   -------------------------------------------------------------------------- */
+.talk-block-icon-btn.talk-block-icon-btn--plain {
+    width: auto !important;
+    height: auto !important;
+    padding: 4px 6px !important;
+    border: 0 !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    color: rgba(255, 255, 255, 0.55) !important;
+    font-size: 0.95rem !important;
+    line-height: 1 !important;
+    box-shadow: none !important;
+}
+.talk-block-icon-btn.talk-block-icon-btn--plain:hover {
+    background: transparent !important;
+    color: #ef4444 !important;
+}
+.talk-block-icon-btn.talk-block-icon-btn--plain:active {
+    transform: scale(0.90);
+}
+.talk-block-icon-btn.talk-block-icon-btn--plain.is-active {
+    color: #ef4444 !important;
+}
+
+/* ライトテーマ用（トークルームは light-theme 適用対象） */
+body.theme-light .talk-block-icon-btn.talk-block-icon-btn--plain {
+    color: rgba(109, 102, 133, 0.7) !important;
+}
+body.theme-light .talk-block-icon-btn.talk-block-icon-btn--plain:hover,
+body.theme-light .talk-block-icon-btn.talk-block-icon-btn--plain.is-active {
+    color: #dc2626 !important;
+}
+
+/* --------------------------------------------------------------------------
+   種別スイッチ（新規入店 / ヘルプ の2択セグメントコントロール）
+   -------------------------------------------------------------------------- */
+.talk-job-kind-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.78);
+}
+.talk-job-kind-switch__caption {
+    color: rgba(212, 196, 164, 0.85);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+.talk-job-kind-switch__track {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    padding: 2px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(168, 85, 247, 0.40);
+    min-height: 24px;
+}
+.talk-job-kind-switch__thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    bottom: 2px;
+    width: calc(50% - 2px);
+    border-radius: 999px;
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.35);
+    transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 0;
+}
+.talk-job-kind-switch__segment {
+    position: relative;
+    z-index: 1;
+    flex: 0 0 auto;
+    min-width: 56px;
+    padding: 3px 12px;
+    border: 0;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 999px;
+    white-space: nowrap;
+    transition: color 0.15s ease;
+}
+.talk-job-kind-switch__segment.is-active {
+    color: #ffffff;
+}
+/* 「新規入店」がアクティブ → サム左（デフォルト位置） */
+/* 「ヘルプ」がアクティブ → サム右へスライド */
+.talk-job-kind-switch__segment[data-job-kind="help"].is-active ~ .talk-job-kind-switch__thumb,
+.talk-job-kind-switch[data-current="help"] .talk-job-kind-switch__thumb {
+    transform: translateX(100%);
+}
+/* 未選択（どちらも is-active でない）: サムを隠す */
+.talk-job-kind-switch[data-current=""] .talk-job-kind-switch__thumb,
+.talk-job-kind-switch:not([data-current="trial"]):not([data-current="help"]) .talk-job-kind-switch__thumb {
+    opacity: 0;
+}
+.talk-job-kind-switch[data-current=""] .talk-job-kind-switch__segment,
+.talk-job-kind-switch:not([data-current="trial"]):not([data-current="help"]) .talk-job-kind-switch__segment {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.talk-job-kind-switch.is-disabled .talk-job-kind-switch__segment {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+.talk-job-kind-switch.is-disabled .talk-job-kind-switch__track {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* --------------------------------------------------------------------------
+   種別チップ（読み取り専用：キャスト側 / 本入店ロック）
+   -------------------------------------------------------------------------- */
+.talk-job-kind-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(168, 85, 247, 0.30);
+    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.75);
+    min-height: 24px;
+}
+.talk-job-kind-chip__caption {
+    color: rgba(212, 196, 164, 0.85);
+    font-weight: 700;
+}
+.talk-job-kind-chip__value {
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.92);
+}
+.talk-job-kind-chip--locked {
+    background: rgba(212, 160, 23, 0.10);
+    border-color: rgba(212, 160, 23, 0.40);
+}
+.talk-job-kind-chip--locked .talk-job-kind-chip__value {
+    color: #f4d087;
+}
+.talk-job-kind-chip--locked i {
+    font-size: 0.62rem;
+    color: rgba(244, 208, 135, 0.75);
+}
+
+/* --------------------------------------------------------------------------
+   ライトテーマ用の上書き
+   -------------------------------------------------------------------------- */
+body.theme-light .talk-job-kind-switch {
+    color: #241f33 !important;
+}
+body.theme-light .talk-job-kind-switch__caption {
+    color: #6d28d9 !important;
+}
+body.theme-light .talk-job-kind-switch__track {
+    background: #ffffff !important;
+    border-color: rgba(124, 58, 237, 0.30) !important;
+    box-shadow: inset 0 1px 2px rgba(76, 29, 149, 0.06) !important;
+}
+body.theme-light .talk-job-kind-switch__segment {
+    color: #5f5876 !important;
+}
+body.theme-light .talk-job-kind-switch__segment.is-active {
+    color: #ffffff !important;
+}
+body.theme-light .talk-job-kind-switch__thumb {
+    background: linear-gradient(135deg, #a78bfa, #7c3aed) !important;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.30) !important;
+}
+body.theme-light .talk-job-kind-chip {
+    background: #ffffff !important;
+    border-color: rgba(124, 58, 237, 0.24) !important;
+    color: #241f33 !important;
+}
+body.theme-light .talk-job-kind-chip__caption {
+    color: #6d28d9 !important;
+}
+body.theme-light .talk-job-kind-chip__value {
+    color: #241f33 !important;
+}
+body.theme-light .talk-job-kind-chip--locked {
+    background: rgba(212, 160, 23, 0.10) !important;
+    border-color: rgba(212, 160, 23, 0.45) !important;
+}
+body.theme-light .talk-job-kind-chip--locked .talk-job-kind-chip__value {
+    color: #92650a !important;
+}
+
+/* status ラベル：サブヘッダー縦幅圧縮に合わせて微調整 */
+body.page-talk-room .talk-status-label,
+#talk-room-container .talk-status-label {
+    font-size: 0.68rem;
+    min-height: 24px;
+}

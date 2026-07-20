@@ -99,11 +99,10 @@
         </div>
 
         <div class="table-wrapper">
-            <table class="admin-table">
+            <table class="admin-table admin-table--stack">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>タイトル</th>
+                        <th>タイトル（ID）</th>
                         <th>カテゴリ</th>
                         <th>公開状態</th>
                         <th>閲覧対象</th>
@@ -134,13 +133,15 @@
                             $search = mb_strtolower(($column->title ?? '') . ' ' . $catName);
                         @endphp
                         <tr data-column-row data-status="{{ $statusKey }}" data-search="{{ $search }}">
-                            <td>{{ $column->id }}</td>
-                            <td>{{ $column->title }}</td>
-                            <td>{{ $catName ?: '-' }}</td>
                             <td>
+                                {{ $column->title }}
+                                <div class="admin-table-sub"><code>#{{ $column->id }}</code></div>
+                            </td>
+                            <td data-label="カテゴリ">{{ $catName ?: '-' }}</td>
+                            <td data-label="公開状態">
                                 <span class="admin-status-badge {{ $statusBadge }}"><i class="fas {{ $statusIcon }}"></i> {{ $statusText }}</span>
                             </td>
-                            <td>
+                            <td data-label="閲覧対象">
                                 <div class="audience-chips">
                                     @if($column->visible_to_cast)<span class="audience-chip audience-chip--cast"><i class="fas fa-user"></i> キャスト</span>@endif
                                     @if($column->visible_to_shop)<span class="audience-chip audience-chip--shop"><i class="fas fa-store"></i> 店舗</span>@endif
@@ -150,14 +151,14 @@
                                     @endif
                                 </div>
                             </td>
-                            <td>
+                            <td data-label="公開日時">
                                 @if($column->published_at)
                                     {{ $column->published_at->format('Y-m-d H:i') }}
                                 @else
                                     -
                                 @endif
                             </td>
-                            <td class="text-right">
+                            <td class="text-right stack-actions">
                                 <a href="{{ route('admin.columns.edit', $column) }}" class="row-action-link">編集</a>
                                 <form action="{{ route('admin.columns.destroy', $column) }}" method="post" onsubmit="return confirm('削除しますか？');" style="display:inline;">
                                     @csrf
@@ -168,11 +169,11 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center">コラム記事がありません。</td>
+                            <td colspan="6" class="text-center">コラム記事がありません。</td>
                         </tr>
                     @endforelse
                     <tr id="column-empty-row" hidden>
-                        <td colspan="7" class="text-center text-muted">条件に一致するコラムはありません。</td>
+                        <td colspan="6" class="text-center text-muted">条件に一致するコラムはありません。</td>
                     </tr>
                 </tbody>
             </table>

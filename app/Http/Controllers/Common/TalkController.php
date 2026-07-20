@@ -146,6 +146,7 @@ class TalkController extends Controller
             'canSend' => !$blockState['is_blocked'],
             // 入力欄下のクイック定型文パネル：やりとりの進行状況に応じた候補を優先表示
             'quickReplySuggestions' => $this->buildQuickReplySuggestions($isCastPortal, $currentApplicationStatus),
+            'allQuickReplySuggestions' => $this->buildAllQuickReplySuggestionsByStatus($isCastPortal),
             'currentStatusCode' => $this->applicationStatusCode($currentApplicationStatus),
             'currentStatusLabel' => $this->statusLabel(
                 $this->applicationStatusCode($currentApplicationStatus),
@@ -1106,6 +1107,36 @@ class TalkController extends Controller
      *
      * @return array<int, string>
      */
+    /**
+     * 定型文編集画面で表示する「ステータスごとの全定型文」。
+     * 現在ステータスに関係なく、すべての状況の候補文をセクションで返す。
+     *
+     * @return array<int, array{status_code:int, status_label:string, items: array<int,string>}>
+     */
+    private function buildAllQuickReplySuggestionsByStatus(bool $isCastPortal): array
+    {
+        // 表示する代表ステータス（採用/不採用は fulltime/trial とまとめて 1 セクション）
+        $groups = [
+            ['code' => self::APPLICATION_STATUS_CHATTING,          'label' => 'やり取り中（初回・雑談）'],
+            ['code' => self::APPLICATION_STATUS_INTERVIEW_PENDING, 'label' => '面談日調整中'],
+            ['code' => self::APPLICATION_STATUS_INTERVIEW_FIXED,   'label' => '面談日確定済み'],
+            ['code' => self::APPLICATION_STATUS_HIRED,             'label' => '採用'],
+            ['code' => self::APPLICATION_STATUS_REJECTED,          'label' => '不採用・お断り'],
+        ];
+
+        return array_values(array_filter(array_map(function (array $g) use ($isCastPortal) {
+            $items = $this->buildQuickReplySuggestions($isCastPortal, $g['code']);
+            if (empty($items)) {
+                return null;
+            }
+            return [
+                'status_code' => $g['code'],
+                'status_label' => $g['label'],
+                'items' => $items,
+            ];
+        }, $groups)));
+    }
+
     private function buildQuickReplySuggestions(bool $isCastPortal, int $status): array
     {
         if ($isCastPortal) {

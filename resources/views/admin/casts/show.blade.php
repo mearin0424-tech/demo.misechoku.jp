@@ -169,7 +169,7 @@
             <p class="admin-note u-mb-0">応募履歴はありません。</p>
         @else
             <div class="table-wrapper">
-                <table class="admin-table">
+                <table class="admin-table admin-table--stack">
                     <thead>
                         <tr>
                             <th>応募日</th>
@@ -202,15 +202,15 @@
                             @endphp
                             <tr>
                                 <td>{{ $app->created_at ? \Illuminate\Support\Carbon::parse($app->created_at)->format('Y-m-d') : '—' }}</td>
-                                <td>
+                                <td data-label="店舗">
                                     @if(!empty($app->shop_id))
                                         <a href="{{ route('admin.shops.show', $app->shop_id) }}">{{ $app->shop_name ?: $app->shop_id }}</a>
                                     @else
                                         {{ $app->shop_name ?: '—' }}
                                     @endif
                                 </td>
-                                <td><span class="admin-status-badge {{ $appStatusBadge }}">{{ $appStatusLabel }}</span></td>
-                                <td>{{ $app->result_date ? \Illuminate\Support\Carbon::parse($app->result_date)->format('Y-m-d') : '—' }}</td>
+                                <td data-label="ステータス"><span class="admin-status-badge {{ $appStatusBadge }}">{{ $appStatusLabel }}</span></td>
+                                <td data-label="結果日">{{ $app->result_date ? \Illuminate\Support\Carbon::parse($app->result_date)->format('Y-m-d') : '—' }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -226,7 +226,7 @@
             <p class="admin-note u-mb-0">入金・振込履歴はありません。</p>
         @else
             <div class="table-wrapper">
-                <table class="admin-table">
+                <table class="admin-table admin-table--stack">
                     <thead>
                         <tr>
                             <th>請求番号</th>
@@ -242,12 +242,12 @@
                         @foreach($depositRows as $row)
                             <tr>
                                 <td>{{ $row->invoice_number ?: '—' }}</td>
-                                <td>{{ $row->shop_name ?: '—' }}</td>
-                                <td>{{ $row->bonus_amount !== null ? number_format($row->bonus_amount) . ' 円' : '—' }}</td>
-                                <td>{{ $row->cast_transfer_amount !== null ? number_format($row->cast_transfer_amount) . ' 円' : '—' }}</td>
-                                <td>{{ $row->invoice_issued_at ? \Illuminate\Support\Carbon::parse($row->invoice_issued_at)->format('Y-m-d') : '—' }}</td>
-                                <td>{{ $row->cast_transferred_at ? \Illuminate\Support\Carbon::parse($row->cast_transferred_at)->format('Y-m-d') : '—' }}</td>
-                                <td>{{ $row->completed_at ? \Illuminate\Support\Carbon::parse($row->completed_at)->format('Y-m-d') : '—' }}</td>
+                                <td data-label="店舗">{{ $row->shop_name ?: '—' }}</td>
+                                <td data-label="採用ボーナス">{{ $row->bonus_amount !== null ? number_format($row->bonus_amount) . ' 円' : '—' }}</td>
+                                <td data-label="振込額">{{ $row->cast_transfer_amount !== null ? number_format($row->cast_transfer_amount) . ' 円' : '—' }}</td>
+                                <td data-label="請求日">{{ $row->invoice_issued_at ? \Illuminate\Support\Carbon::parse($row->invoice_issued_at)->format('Y-m-d') : '—' }}</td>
+                                <td data-label="振込日">{{ $row->cast_transferred_at ? \Illuminate\Support\Carbon::parse($row->cast_transferred_at)->format('Y-m-d') : '—' }}</td>
+                                <td data-label="完了日">{{ $row->completed_at ? \Illuminate\Support\Carbon::parse($row->completed_at)->format('Y-m-d') : '—' }}</td>
                             </tr>
                         @endforeach
                     </tbody>

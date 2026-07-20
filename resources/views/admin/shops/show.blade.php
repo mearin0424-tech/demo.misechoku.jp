@@ -157,7 +157,7 @@
             <p class="admin-note u-mb-0">請求・入金履歴はありません。</p>
         @else
             <div class="table-wrapper">
-                <table class="admin-table">
+                <table class="admin-table admin-table--stack">
                     <thead>
                         <tr>
                             <th>請求番号</th>
@@ -196,17 +196,17 @@
                             @endphp
                             <tr>
                                 <td>{{ $d->invoice_number ?: '—' }}</td>
-                                <td>
+                                <td data-label="キャスト">
                                     @if(!empty($d->cast_id))
                                         <a href="{{ route('admin.casts.show', $d->cast_id) }}">{{ $d->cast_nickname ?: $d->cast_id }}</a>
                                     @else — @endif
                                 </td>
-                                <td class="u-text-num">{{ $d->invoice_amount !== null ? number_format($d->invoice_amount) . ' 円' : '—' }}</td>
-                                <td class="u-text-num">{{ $d->bonus_amount !== null ? number_format($d->bonus_amount) . ' 円' : '—' }}</td>
-                                <td>{{ $d->invoice_issued_at ? \Illuminate\Support\Carbon::parse($d->invoice_issued_at)->format('Y-m-d') : '—' }}</td>
-                                <td>{{ $d->shop_payment_confirmed_at ? \Illuminate\Support\Carbon::parse($d->shop_payment_confirmed_at)->format('Y-m-d') : '—' }}</td>
-                                <td>{{ $d->completed_at ? \Illuminate\Support\Carbon::parse($d->completed_at)->format('Y-m-d') : '—' }}</td>
-                                <td><span class="admin-status-badge {{ $statusClass }}">{{ $statusLabel }}</span></td>
+                                <td data-label="請求額" class="u-text-num">{{ $d->invoice_amount !== null ? number_format($d->invoice_amount) . ' 円' : '—' }}</td>
+                                <td data-label="ボーナス" class="u-text-num">{{ $d->bonus_amount !== null ? number_format($d->bonus_amount) . ' 円' : '—' }}</td>
+                                <td data-label="請求日">{{ $d->invoice_issued_at ? \Illuminate\Support\Carbon::parse($d->invoice_issued_at)->format('Y-m-d') : '—' }}</td>
+                                <td data-label="入金確認">{{ $d->shop_payment_confirmed_at ? \Illuminate\Support\Carbon::parse($d->shop_payment_confirmed_at)->format('Y-m-d') : '—' }}</td>
+                                <td data-label="完了日">{{ $d->completed_at ? \Illuminate\Support\Carbon::parse($d->completed_at)->format('Y-m-d') : '—' }}</td>
+                                <td data-label="ステータス"><span class="admin-status-badge {{ $statusClass }}">{{ $statusLabel }}</span></td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -266,7 +266,7 @@
                 <p class="admin-note u-mb-0">管理者アカウントは未登録です。</p>
             @else
                 <div class="table-wrapper">
-                    <table class="admin-table">
+                    <table class="admin-table admin-table--stack">
                         <thead>
                             <tr>
                                 <th>名前</th>
@@ -285,23 +285,23 @@
                                 @endphp
                                 <tr>
                                     <td>{{ $m->name ?: '—' }}</td>
-                                    <td>
+                                    <td data-label="メール">
                                         @if(!empty($m->email))
                                             <a href="mailto:{{ $m->email }}">{{ $m->email }}</a>
                                         @else — @endif
                                     </td>
-                                    <td>
+                                    <td data-label="権限">
                                         @if($isOwner)
                                             <span class="manager-role-badge manager-role-badge--owner"><i class="fas fa-crown"></i> オーナー</span>
                                         @else
                                             <span class="manager-role-badge manager-role-badge--staff">スタッフ</span>
                                         @endif
                                     </td>
-                                    <td>
+                                    <td data-label="状態">
                                         <span class="admin-status-badge {{ $isMgrActive ? 'is-success' : 'is-inactive' }}">{{ $isMgrActive ? '有効' : '無効' }}</span>
                                     </td>
-                                    <td>{{ $m->last_login_at ? \Illuminate\Support\Carbon::parse($m->last_login_at)->format('Y-m-d H:i') : '—' }}</td>
-                                    <td>{{ $m->created_at ? \Illuminate\Support\Carbon::parse($m->created_at)->format('Y-m-d') : '—' }}</td>
+                                    <td data-label="最終ログイン">{{ $m->last_login_at ? \Illuminate\Support\Carbon::parse($m->last_login_at)->format('Y-m-d H:i') : '—' }}</td>
+                                    <td data-label="登録日">{{ $m->created_at ? \Illuminate\Support\Carbon::parse($m->created_at)->format('Y-m-d') : '—' }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

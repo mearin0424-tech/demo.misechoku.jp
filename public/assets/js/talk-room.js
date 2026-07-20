@@ -367,6 +367,67 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ========================================================================
+    // 種別スイッチ（サブヘッダー内・インライン 2択）
+    // 新規入店 (trial) / ヘルプ (help) をタップで即時保存。
+    // 面談日確定後や本入店ロック時は disabled 属性で無効化される。
+    // ========================================================================
+    const talkJobKindSwitch = document.querySelector('.talk-job-kind-switch');
+    if (talkJobKindSwitch) {
+        const switchActionUrl = talkJobKindSwitch.getAttribute('data-action-url');
+        const switchPartnerId = talkJobKindSwitch.getAttribute('data-partner-id');
+        const switchCsrfToken = (document.querySelector('meta[name="csrf-token"]')
+            && document.querySelector('meta[name="csrf-token"]').getAttribute('content')) || '';
+        const isSwitchDisabled = talkJobKindSwitch.classList.contains('is-disabled');
+        const segments = talkJobKindSwitch.querySelectorAll('.talk-job-kind-switch__segment');
+
+        const setSwitchActive = (kind) => {
+            talkJobKindSwitch.setAttribute('data-current', kind || '');
+            segments.forEach(function (seg) {
+                const on = seg.getAttribute('data-job-kind') === kind;
+                seg.classList.toggle('is-active', on);
+                seg.setAttribute('aria-checked', on ? 'true' : 'false');
+            });
+            const currentEl = document.getElementById('talk-job-kind-current');
+            if (currentEl) currentEl.setAttribute('data-job-kind-current', kind || '');
+        };
+
+        segments.forEach(function (seg) {
+            seg.addEventListener('click', async function () {
+                if (isSwitchDisabled || seg.disabled) return;
+                const selected = seg.getAttribute('data-job-kind');
+                if (!selected || selected === currentSavedTalkJobKind) return;
+
+                const prev = currentSavedTalkJobKind;
+                // Optimistic UI: 先に見た目を切り替える
+                setSwitchActive(selected);
+                segments.forEach(function (s) { s.disabled = true; });
+                try {
+                    await postJson(switchActionUrl, switchCsrfToken, {
+                        partner_id: switchPartnerId,
+                        action_type: 'set_job_kind',
+                        job_kind: selected,
+                    });
+                    currentSavedTalkJobKind = selected;
+                    if (typeof renderTalkKindGuidance === 'function') {
+                        renderTalkKindGuidance(currentSavedTalkJobKind);
+                    }
+                    // 既存の select（互換用モーダル内）にも反映
+                    if (talkRoomJobKindSelect) talkRoomJobKindSelect.value = selected;
+                } catch (error) {
+                    // 失敗したら元に戻す
+                    setSwitchActive(prev);
+                    (window.appToast || window.alert)(
+                        (error && error.message) || '種別の保存に失敗しました。',
+                        'error'
+                    );
+                } finally {
+                    segments.forEach(function (s) { s.disabled = false; });
+                }
+            });
+        });
+    }
+
+    // ========================================================================
     // クイック定型文（4 スロット）— モーダル内で挿入／編集／デフォルト復帰
     // 共有: shop / cast 両ブランチから openTemplateMenu / closeTemplateMenu を呼ぶ。
     // ========================================================================
@@ -547,19 +608,71 @@ document.addEventListener('DOMContentLoaded', function() {
         card.appendChild(form);
     };
 
+    // ステータスごとの定型文セクションを1つ作る
+    const buildStatusSection = (group) => {
+        const section = document.createElement('section');
+        section.className = 'talk-template-status-section';
+
+        const heading = document.createElement('h3');
+        heading.className = 'talk-template-status-heading';
+        heading.textContent = group.status_label || '';
+        section.appendChild(heading);
+
+        const list = document.createElement('div');
+        list.className = 'talk-template-status-list';
+        (group.items || []).forEach(function (text) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'talk-template-status-item';
+            btn.textContent = text;
+            btn.addEventListener('click', function () {
+                if (!messageInput) return;
+                closeTemplateMenu();
+                messageInput.value = text;
+                messageInput.dispatchEvent(new Event('input', { bubbles: true }));
+                messageInput.focus();
+            });
+            list.appendChild(btn);
+        });
+        section.appendChild(list);
+        return section;
+    };
+
     const renderTemplateSlots = () => {
         if (!templateMenuList) return;
         templateMenuList.innerHTML = '';
+
+        // ① 状況（ステータス）ごとの定型文をすべて表示（現在ステータスに関係なく全部）
+        const allGroups = Array.isArray(window.talkAllQuickReplies) ? window.talkAllQuickReplies : [];
+        allGroups.forEach(function (group) {
+            if (group && Array.isArray(group.items) && group.items.length > 0) {
+                templateMenuList.appendChild(buildStatusSection(group));
+            }
+        });
+
+        // ② マイ定型文（4スロット・編集可能）
+        const mySection = document.createElement('section');
+        mySection.className = 'talk-template-status-section talk-template-status-section--mine';
+
+        const myHeading = document.createElement('h3');
+        myHeading.className = 'talk-template-status-heading';
+        myHeading.textContent = 'マイ定型文（編集可能・4スロット）';
+        mySection.appendChild(myHeading);
+
         if (!cachedQuickTemplateSlots.length) {
             const empty = document.createElement('p');
             empty.className = 'talk-template-empty';
-            empty.textContent = '定型文が利用できません。';
-            templateMenuList.appendChild(empty);
-            return;
+            empty.textContent = 'マイ定型文が利用できません。';
+            mySection.appendChild(empty);
+        } else {
+            const slotWrap = document.createElement('div');
+            slotWrap.className = 'talk-template-status-list talk-template-status-list--slots';
+            cachedQuickTemplateSlots.forEach(function (slot) {
+                slotWrap.appendChild(buildSlotCard(slot));
+            });
+            mySection.appendChild(slotWrap);
         }
-        cachedQuickTemplateSlots.forEach(function (slot) {
-            templateMenuList.appendChild(buildSlotCard(slot));
-        });
+        templateMenuList.appendChild(mySection);
     };
 
     const openTemplateMenu = () => {

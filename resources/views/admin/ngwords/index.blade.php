@@ -108,11 +108,10 @@
             </div>
 
             <div class="table-wrapper">
-                <table class="admin-table">
+                <table class="admin-table admin-table--stack">
                     <thead>
                         <tr>
-                            <th class="u-w-60">ID</th>
-                            <th>NGワード</th>
+                            <th>NGワード（ID）</th>
                             <th class="u-w-100">状態</th>
                             <th>登録日</th>
                             <th class="u-w-140">操作</th>
@@ -125,20 +124,22 @@
                                 data-ngword-row
                                 data-status="{{ $isActive ? 'active' : 'inactive' }}"
                                 data-search="{{ mb_strtolower((string) $word->word) }}">
-                                <td><code>{{ $word->id }}</code></td>
-                                <td>{{ $word->word }}</td>
                                 <td>
+                                    {{ $word->word }}
+                                    <div class="admin-table-sub"><code>#{{ $word->id }}</code></div>
+                                </td>
+                                <td data-label="状態">
                                     <span class="admin-status-badge {{ $isActive ? 'is-success' : 'is-inactive' }}">
                                         {{ $isActive ? '有効' : '無効' }}
                                     </span>
                                 </td>
-                                <td>{{ $word->created_at ? \Illuminate\Support\Carbon::parse($word->created_at)->format('Y-m-d') : '-' }}</td>
-                                <td>
+                                <td data-label="登録日">{{ $word->created_at ? \Illuminate\Support\Carbon::parse($word->created_at)->format('Y-m-d') : '-' }}</td>
+                                <td class="stack-actions">
                                     <div class="u-flex u-gap-6">
                                         <a href="{{ route('admin.ngwords.index', ['edit' => $word->id]) }}"
                                            class="admin-row-icon-btn {{ ($editingWord->id ?? null) === $word->id ? 'is-active' : '' }}"
                                            title="編集">
-                                            <i class="fas fa-pen"></i>
+                                            <i class="fas fa-pen"></i> 編集
                                         </a>
                                         @if($isActive)
                                             <form method="POST" action="{{ route('admin.ngwords.destroy', $word->id) }}"
@@ -146,7 +147,7 @@
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="admin-row-icon-btn admin-row-icon-delete" title="削除">
-                                                    <i class="fas fa-times"></i>
+                                                    <i class="fas fa-times"></i> 削除
                                                 </button>
                                             </form>
                                         @endif
@@ -155,11 +156,11 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center">登録されているNGワードはありません。</td>
+                                <td colspan="4" class="text-center">登録されているNGワードはありません。</td>
                             </tr>
                         @endforelse
                         <tr id="ngword-empty-row" hidden>
-                            <td colspan="5" class="text-center text-muted">条件に一致するNGワードはありません。</td>
+                            <td colspan="4" class="text-center text-muted">条件に一致するNGワードはありません。</td>
                         </tr>
                     </tbody>
                 </table>

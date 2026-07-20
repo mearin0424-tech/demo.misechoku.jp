@@ -133,11 +133,10 @@
         </div>
 
         <div class="table-wrapper">
-            <table class="admin-table admin-table-clickable">
+            <table class="admin-table admin-table-clickable admin-table--stack">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>キャスト名</th>
+                        <th>キャスト（ID）</th>
                         <th>登録日</th>
                         <th>最終ログイン</th>
                         <th>本人確認</th>
@@ -177,12 +176,12 @@
                             tabindex="0"
                             role="link"
                             aria-label="キャスト詳細：{{ $cast['name'] }}">
-                            <td><code>{{ $cast['id'] }}</code></td>
                             <td>
                                 <a href="{{ $detailUrl }}" class="admin-row-clickable__link">{{ $cast['name'] }}</a>
+                                <div class="admin-table-sub"><code>{{ $cast['id'] }}</code></div>
                             </td>
-                            <td class="text-sm">{{ $regAt ? $regAt->format('Y-m-d') : '—' }}</td>
-                            <td class="shop-login shop-login--{{ $loginTone }}">
+                            <td data-label="登録日" class="text-sm">{{ $regAt ? $regAt->format('Y-m-d') : '—' }}</td>
+                            <td data-label="最終ログイン" class="shop-login shop-login--{{ $loginTone }}">
                                 @if($loginAt)
                                     <span class="shop-login__date">{{ $loginAt->format('Y-m-d H:i') }}</span>
                                     <span class="shop-login__age">
@@ -193,14 +192,14 @@
                                     <span class="shop-login__none"><i class="fas fa-circle-question"></i> ログイン履歴なし</span>
                                 @endif
                             </td>
-                            <td>
+                            <td data-label="本人確認">
                                 @if($isIdVerified)
                                     <span class="admin-status-badge is-success"><i class="fas fa-circle-check"></i> 確認済み</span>
                                 @else
                                     <span class="admin-status-badge is-warning"><i class="fas fa-id-card"></i> 未確認</span>
                                 @endif
                             </td>
-                            <td>
+                            <td data-label="状態">
                                 @if($isSuspended)
                                     <span class="admin-status-badge is-danger"><i class="fas fa-ban"></i> 停止中</span>
                                 @elseif($isActive)
@@ -212,11 +211,11 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center">キャストアカウントがありません。</td>
+                            <td colspan="5" class="text-center">キャストアカウントがありません。</td>
                         </tr>
                     @endforelse
                     <tr id="cast-empty-row" hidden>
-                        <td colspan="6" class="text-center text-muted">条件に一致するキャストはいません。</td>
+                        <td colspan="5" class="text-center text-muted">条件に一致するキャストはいません。</td>
                     </tr>
                 </tbody>
             </table>

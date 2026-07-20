@@ -413,17 +413,24 @@
             padding-left:  max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             padding-right: max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             z-index: 1600 !important;
-            /* 元のデザイン：ヘッダーと同じ地色（同 rgba + 同 blur）にして継ぎ目を消す */
-            background: rgba(10, 10, 10, 0.92) !important;
-            backdrop-filter: blur(18px) !important;
-            -webkit-backdrop-filter: blur(18px) !important;
+            /* ヘッダー下端（rgba(124,58,237,0.62)）から色を引き継ぎ、
+               下端に向けて透明にフェードする連続グラデーション */
+            background:
+                linear-gradient(180deg,
+                    rgba(124, 58, 237, 0.62) 0%,
+                    rgba(124, 58, 237, 0.34) 55%,
+                    rgba(124, 58, 237, 0) 100%) !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
             margin-top: 0 !important;
             border-top: 0 !important;
-            /* 下端にアメジストの極細ライン + 軽い影でコンテンツとの境界を明示。
-               コンテンツに被って暗く落ちないよう影は控えめに。 */
-            box-shadow:
-                inset 0 -1px 0 rgba(168, 85, 247, 0.22),
-                0 2px 6px rgba(0, 0, 0, 0.20) !important;
+            box-shadow: none !important;
+        }
+        /* サブヘッダー内のタブ・ラベル：フェード部でも読めるよう白 + 濃紫の影 */
+        .sub-header-wrapper,
+        .sub-header-wrapper .sub-header-tabs a,
+        .sub-header-wrapper .sub-header-tabs button {
+            text-shadow: 0 1px 3px rgba(46, 16, 101, 0.5);
         }
         .sub-header-tabs {
             background-color: transparent !important;
@@ -467,22 +474,34 @@
             /* 左右パディングは sub-header と同じ計算式で完全一致させる（モバイルでは 16px ガター） */
             padding-left:  max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
             padding-right: max(var(--content-padding-x, 16px), calc(50vw - var(--max-content-width, 430px) / 2)) !important;
-            /* 元の紫（ダークガラス + アメジストグロー）。
-               上端から下端へ多段でフェードするグラデーションで高級感を出しつつ、
-               下端 = サブヘッダーの地色（rgba(10,10,10,0.92)）とぴったり同色に繋ぐ */
+            /* 深い紫（アイコン等のアクセントと同系 #5b21b6→#7c3aed）から
+               下端に向けて透明にフェードするグラデーション。
+               コンテンツがヘッダーの下に "溶けて" スクロールしていく表現 */
             background:
                 linear-gradient(180deg,
-                    rgba(168, 85, 247, 0.30) 0%,
-                    rgba(139, 60, 220, 0.14) 45%,
-                    rgba(168, 85, 247, 0.04) 75%,
-                    rgba(168, 85, 247, 0) 100%),
-                rgba(10, 10, 10, 0.92) !important;
-            backdrop-filter: blur(18px) !important;
-            -webkit-backdrop-filter: blur(18px) !important;
-            /* 下端 1px のアクセント線は消す（サブヘッダーがある場合に隙間に見える） */
+                    rgba(91, 33, 182, 0.95) 0%,
+                    rgba(109, 40, 217, 0.88) 50%,
+                    rgba(124, 58, 237, 0.55) 80%,
+                    rgba(124, 58, 237, 0) 100%) !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
             border-bottom: 0 !important;
-            /* 下方向の重い影は出さず、紫の周辺グローだけ薄く残す */
-            box-shadow: 0 0 18px rgba(168, 85, 247, 0.18) !important;
+            box-shadow: none !important;
+        }
+        /* サブヘッダーがあるページ：ヘッダー下端は透明にせず、
+           サブヘッダーのグラデーションへ色を引き継いで連続フェードにする */
+        body:has(.sub-header-wrapper) #global-header {
+            background:
+                linear-gradient(180deg,
+                    rgba(91, 33, 182, 0.95) 0%,
+                    rgba(109, 40, 217, 0.88) 60%,
+                    rgba(124, 58, 237, 0.62) 100%) !important;
+        }
+        /* ヘッダー上の文字・アイコンは白のまま、フェード部でも読めるよう影を付与 */
+        #global-header .header-title-main,
+        #global-header .header-icon-btn,
+        #global-header .btn-back {
+            text-shadow: 0 1px 3px rgba(46, 16, 101, 0.45);
         }
         .header-icon-btn:hover,
         .header-icon-btn:focus-visible {
@@ -648,13 +667,13 @@
     <script src="{{ asset('assets/js/motion.js') }}?v={{ $assetVersion }}" defer></script>
     @if($isLightTheme)
     {{-- ライトモード（薄ラベンダー基調）。全CSSの最後に読み込んで上書きする --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260719-light-12">
+    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260720-light-13">
     @endif
     @if($isPremiumWhite)
     {{-- プレミアムホワイト（試験導入）: SWIPE / MyPage の白基調プロトタイプ。
          セリフ体見出しのため Noto Serif JP も追加読み込み。ダークテーマ CSS の後に来て上書きする --}}
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('assets/css/premium-white.css') }}?v=20260720-pwhite-02">
+    <link rel="stylesheet" href="{{ asset('assets/css/premium-white.css') }}?v=20260720-pwhite-03">
     @endif
 </head>
 <body class="@yield('body-class') {{ $isLightTheme ? 'theme-light' : '' }} {{ $isPremiumWhite ? 'theme-premium-white' : '' }} bg-base text-text-main"

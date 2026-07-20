@@ -94,11 +94,10 @@
         </div>
 
         <div class="table-wrapper">
-            <table class="admin-table">
+            <table class="admin-table admin-table--stack">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>タイトル</th>
+                        <th>タイトル（ID）</th>
                         <th>公開状態</th>
                         <th>閲覧対象</th>
                         <th>公開日時</th>
@@ -127,12 +126,14 @@
                             $search = mb_strtolower(($notice->title ?? '') . ' ' . substr(strip_tags((string) ($notice->body ?? '')), 0, 200));
                         @endphp
                         <tr data-notice-row data-status="{{ $statusKey }}" data-search="{{ $search }}">
-                            <td>{{ $notice->id }}</td>
-                            <td>{{ $notice->title }}</td>
                             <td>
+                                {{ $notice->title }}
+                                <div class="admin-table-sub"><code>#{{ $notice->id }}</code></div>
+                            </td>
+                            <td data-label="公開状態">
                                 <span class="admin-status-badge {{ $statusBadge }}"><i class="fas {{ $statusIcon }}"></i> {{ $statusText }}</span>
                             </td>
-                            <td>
+                            <td data-label="閲覧対象">
                                 <div class="audience-chips">
                                     @if($notice->visible_to_cast)<span class="audience-chip audience-chip--cast"><i class="fas fa-user"></i> キャスト</span>@endif
                                     @if($notice->visible_to_shop)<span class="audience-chip audience-chip--shop"><i class="fas fa-store"></i> 店舗</span>@endif
@@ -142,14 +143,14 @@
                                     @endif
                                 </div>
                             </td>
-                            <td>
+                            <td data-label="公開日時">
                                 @if($notice->published_at)
                                     {{ $notice->published_at->format('Y-m-d H:i') }}
                                 @else
                                     -
                                 @endif
                             </td>
-                            <td class="text-right">
+                            <td class="text-right stack-actions">
                                 <a href="{{ route('admin.notices.edit', $notice) }}" class="row-action-link">編集</a>
                                 <form action="{{ route('admin.notices.destroy', $notice) }}" method="post" onsubmit="return confirm('削除しますか？');" style="display:inline;">
                                     @csrf
@@ -160,11 +161,11 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center">お知らせが登録されていません。</td>
+                            <td colspan="5" class="text-center">お知らせが登録されていません。</td>
                         </tr>
                     @endforelse
                     <tr id="notice-empty-row" hidden>
-                        <td colspan="6" class="text-center text-muted">条件に一致するお知らせはありません。</td>
+                        <td colspan="5" class="text-center text-muted">条件に一致するお知らせはありません。</td>
                     </tr>
                 </tbody>
             </table>

@@ -183,16 +183,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // 求人カード（全体）：クリックで詳細遷移。
+    // ただし下部情報エリア（.rc-bottom-bar）内のタップは KEEP／トークCTA／
+    // ボーナス・時給カード等の操作要素が集約されているため、遷移対象外とする。
+    // 画像エリア（.rc-img-wrap）のタップだけがプロフィール遷移のトリガー。
     document.querySelectorAll('.cast-card--recruit[data-detail-url]').forEach(function (card) {
         var recruitUrl = card.getAttribute('data-detail-url');
         if (!recruitUrl) return;
         card.addEventListener('click', function (e) {
-            // <a href>（トーク遷移CTA・求人ボタン等）は常にリンク先を優先。
-            // iOS Safari では .stop-propagation の touchstart 停止で
-            // <a> の click が合成イベントとして親へ来ることがあり、
-            // .stop-propagation 判定だけでは防ぎきれないため明示的に除外する
+            // 下部情報エリアはボタン・CTAの集合なので、遷移させない（明示的な除外領域）
+            if (e.target.closest('.rc-bottom-bar')) return;
+            // <a href> / <button> / .stop-propagation / ページネーションはそれぞれの動作を優先
             if (e.target.closest('a[href]')) return;
-            // 同様に <button>（優良店バッヂ・?km ヘルプ等）もカード遷移させない
             if (e.target.closest('button')) return;
             if (e.target.closest('.stop-propagation')) return;
             if (e.target.closest('.photo-pagination')) return;

@@ -1124,3 +1124,25 @@ body.theme-light .review-rating-value {
 body.theme-light .review-comment-textarea::placeholder {
     color: rgba(95, 88, 118, 0.55) !important;
 }
+
+
+/* ==========================================================================
+   §15 ライト画面のラッパー面：白ハードコードを一括で透明に (2026-07-20)
+   ・body 背景は薄ラベンダー（#f5f2fb）
+   ・カード面（.identity-form-section 等の内部要素）だけが白で "浮く"
+   ・その間の外側ラッパーが白だとカードと同化するため、透明に統一
+   ========================================================================== */
+body.theme-light .mypage-detail-box,
+body.theme-light .cast-mypage-sub-page,
+body.theme-light .cast-mypage-shell,
+body.theme-light .shop-mypage-shell,
+body.theme-light .mypage-area,
+body.theme-light .license-page,
+body.theme-light .shop-management-shell,
+body.theme-light .staff-shell,
+body.theme-light .staff-form-shell,
+body.theme-light .cast-mypage-sub-page .mypage-detail-box {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}

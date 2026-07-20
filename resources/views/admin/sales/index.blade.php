@@ -145,7 +145,7 @@
         <details class="sales-monthly-detail">
             <summary>月別の数値を表で確認</summary>
             <div class="table-wrapper u-mt-12">
-                <table class="admin-table">
+                <table class="admin-table admin-table--stack">
                     <thead>
                         <tr>
                             <th>月</th>
@@ -158,9 +158,9 @@
                         @foreach($months as $row)
                             <tr>
                                 <td>{{ $row['year_month'] }}</td>
-                                <td>{{ number_format((int) $row['commission']) }} 円</td>
-                                <td>{{ number_format((int) $row['gmv']) }} 円</td>
-                                <td>{{ number_format((int) $row['count']) }} 件</td>
+                                <td data-label="仲介料収益">{{ number_format((int) $row['commission']) }} 円</td>
+                                <td data-label="GMV">{{ number_format((int) $row['gmv']) }} 円</td>
+                                <td data-label="件数">{{ number_format((int) $row['count']) }} 件</td>
                             </tr>
                         @endforeach
                     </tbody>

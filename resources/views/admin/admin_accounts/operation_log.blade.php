@@ -47,7 +47,7 @@
             <p class="admin-note u-mb-0">該当するログはありません。</p>
         @else
             <div class="table-wrapper">
-                <table class="admin-table">
+                <table class="admin-table admin-table--stack">
                     <thead>
                         <tr>
                             <th class="u-w-140">日時</th>
@@ -62,26 +62,26 @@
                         @foreach($logs as $log)
                             <tr>
                                 <td>{{ $log->created_at ? \Illuminate\Support\Carbon::parse($log->created_at)->format('Y-m-d H:i') : '—' }}</td>
-                                <td>
+                                <td data-label="運営者">
                                     <div>{{ $log->operator_email ?: '—' }}</div>
                                     @if(!empty($log->operator_role))
                                         <div class="u-fs-xs u-text-muted">{{ $log->operator_role }}</div>
                                     @endif
                                 </td>
-                                <td>
+                                <td data-label="アクション">
                                     <span class="admin-status-badge {{ str_contains((string) $log->action, 'reject') || str_contains((string) $log->action, 'suspend') ? 'is-danger' : (str_contains((string) $log->action, 'approve') || str_contains((string) $log->action, 'unsuspend') ? 'is-success' : 'is-warning') }}">
                                         {{ $actionLabel($log->action) }}
                                     </span>
                                     <div class="u-fs-xs u-text-muted u-mt-4"><code>{{ $log->action }}</code></div>
                                 </td>
-                                <td>
+                                <td data-label="対象">
                                     <div>{{ $log->target_type ?: '—' }}</div>
                                     @if(!empty($log->target_id))
                                         <code class="u-fs-xs">{{ $log->target_id }}</code>
                                     @endif
                                 </td>
-                                <td class="u-text-pre">{{ $log->summary ?: '—' }}</td>
-                                <td class="u-fs-xs u-text-muted">{{ $log->ip_address ?: '—' }}</td>
+                                <td data-label="概要" class="u-text-pre">{{ $log->summary ?: '—' }}</td>
+                                <td data-label="IP" class="u-fs-xs u-text-muted">{{ $log->ip_address ?: '—' }}</td>
                             </tr>
                         @endforeach
                     </tbody>

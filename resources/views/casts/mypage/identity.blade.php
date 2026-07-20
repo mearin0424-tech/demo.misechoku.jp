@@ -323,11 +323,14 @@
 .identity-doc-summary__row.is-pending  .identity-doc-summary__status { color: #b45309; }
 .identity-doc-summary__row.is-rejected .identity-doc-summary__status { color: #dc2626; }
 
-/* === ライトモード：mypage.css のダーク面を上書き === */
+/* === ライトモード：mypage.css のダーク面を上書き ===
+   外側ラッパーは透明にして、body の薄紫（#f5f2fb）を通す。
+   → 中の白カード（.identity-form-section 等）が薄紫背景に浮き上がる */
 .cast-mypage-sub-page .mypage-detail-box {
-    background: #ffffff !important;
-    border: 1px solid rgba(124, 58, 237, 0.18) !important;
-    box-shadow: 0 6px 18px rgba(76, 29, 149, 0.08) !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
 }
 .cast-mypage-sub-page .mypage-page-head__title { color: #241f33 !important; }
 .cast-mypage-sub-page .mypage-page-head__title i { color: #7c3aed !important; }

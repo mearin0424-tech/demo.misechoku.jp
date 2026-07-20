@@ -377,7 +377,7 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/home.js') }}?v=20260719-cta-fix"></script>
+<script src="{{ asset('assets/js/home.js') }}?v=20260720-bottom-bar-guard"></script>
 {{-- LIKE / KEEP の共通トグル（全画面この1本に統一） --}}
 <script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260719-keep-only"></script>
 @endpush
