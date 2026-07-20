@@ -5275,95 +5275,21 @@ body.page-home .elastic-pager__pill {
 
 
 /* ============================================================================
-   SWIPE ライトモード (2026-07-20)
-   ライト時（body.mode-light）は下部グラデーションとキャッチコピー背景を
-   白（薄ラベンダー #f5f2fb）にして、ライトモードを表現する。
-   ダーク時（body.mode-dark）は従来の黒基調のまま。
+   SWIPE ライトモード対応は撤回（2026-07-20）: SWIPE は常にダーク表示
    ============================================================================ */
 
-/* カード面：黒 → 薄ラベンダー */
-body.page-home.mode-light .cast-card,
-body.page-home.mode-light .cast-card.glass-card,
-body.page-home.mode-light .cast-card--recruit {
-    background: #f5f2fb !important;
-}
 
-/* 画像下端のグラデーション：黒フェード → 薄ラベンダーフェード */
-body.page-home.mode-light .home-photo-wrap::after,
-body.page-home.mode-light .rc-img-wrap::after,
-body.page-home.mode-light .cast-card:not(.cast-card--recruit) .home-photo-wrap::after {
-    background: linear-gradient(180deg,
-        rgba(245, 242, 251, 0) 0%,
-        rgba(245, 242, 251, 0.35) 40%,
-        rgba(245, 242, 251, 0.88) 72%,
-        #f5f2fb 100%) !important;
+/* ============================================================================
+   【根本修正】求人カード下部バーのタップ透過問題 (2026-07-20)
+   旧デザインの `.rc-bottom-bar { pointer-events: none }` が残っており、
+   中のトークCTA / KEEP へのタップが素通りして下の画像エリア
+   （inset:0 の .rc-img-wrap）に着地 → プロフィール誤遷移していた。
+   コンテナは透過のまま（バー外周の余白部で縦スワイプを妨げない）、
+   スタック（中身一式）だけ操作可能に戻す。
+   ============================================================================ */
+body.page-home .cast-card--recruit .rc-bottom-bar {
+    pointer-events: none !important;
 }
-
-/* キャッチコピー：白（薄ラベンダー）の半透明パネル + 濃色文字 */
-body.page-home.mode-light .cast-card--recruit .rc-manager-msg__backdrop {
-    background: linear-gradient(180deg,
-        rgba(255, 255, 255, 0.92) 0%,
-        rgba(245, 242, 251, 0.85) 100%) !important;
-    border: 1px solid rgba(124, 58, 237, 0.18);
-    box-shadow: 0 2px 12px rgba(76, 29, 149, 0.14) !important;
+body.page-home .cast-card--recruit .rc-bottom-bar__stack {
+    pointer-events: auto !important;
 }
-body.page-home.mode-light .cast-card--recruit .rc-manager-msg__line1,
-body.page-home.mode-light .cast-card--recruit .rc-manager-msg__line2 {
-    color: #241f33 !important;
-    text-shadow: none !important;
-}
-body.page-home.mode-light .cast-card--recruit .rc-msg-em {
-    color: #6d28d9 !important;
-}
-
-/* 下部テキスト（薄ラベンダー面の上）：濃色へ */
-body.page-home.mode-light .rc-shop-name,
-body.page-home.mode-light .cast-name {
-    color: #1e1a2e !important;
-    text-shadow: none !important;
-}
-body.page-home.mode-light .cast-name .age {
-    color: #574d6f !important;
-}
-body.page-home.mode-light .rc-loc,
-body.page-home.mode-light .rc-dist,
-body.page-home.mode-light .rc-views {
-    color: #574d6f !important;
-}
-body.page-home.mode-light .rc-loc i,
-body.page-home.mode-light .rc-dist i {
-    color: #857ca0 !important;
-}
-body.page-home.mode-light .rc-rating-inline {
-    color: #241f33 !important;
-}
-body.page-home.mode-light .rc-rating-inline .rc-review-cnt {
-    color: #574d6f !important;
-}
-body.page-home.mode-light .tag-pill {
-    background: #ffffff !important;
-    border: 1px solid rgba(124, 58, 237, 0.20) !important;
-    color: #574d6f !important;
-}
-
-/* KEEP（名前行内）：白面 + バイオレット */
-body.page-home.mode-light .swipe-keep-corner--inline {
-    background: #ffffff !important;
-    border-color: rgba(124, 58, 237, 0.35) !important;
-    color: #6d28d9 !important;
-    box-shadow: 0 1px 4px rgba(76, 29, 149, 0.15) !important;
-}
-body.page-home.mode-light .swipe-keep-corner--inline.is-active,
-body.page-home.mode-light .swipe-keep-corner--inline[aria-pressed="true"] {
-    background: linear-gradient(135deg, #f6d36a, #e3b94a) !important;
-    color: #1a0f00 !important;
-    border-color: rgba(246, 211, 106, 0.9) !important;
-}
-
-/* 上下スワイプガイドのキャレット：薄ラベンダー面で見える濃色に */
-body.page-home.mode-light .discovery-swipe-guide {
-    color: rgba(46, 16, 101, 0.40) !important;
-    filter: drop-shadow(0 1px 3px rgba(255, 255, 255, 0.8)) !important;
-}
-
-/* 時給カード・ボーナスカードは自己完結の濃面デザインなのでそのまま（両モード共通） */

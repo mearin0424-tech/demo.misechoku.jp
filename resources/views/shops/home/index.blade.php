@@ -4,7 +4,7 @@
 @section('body-class', 'no-scroll page-home')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260720-swipe-light">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260720-pointer-fix">
 @endpush
 
 @php

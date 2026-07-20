@@ -69,7 +69,14 @@
       "Bash(php -l app/Http/Middleware/EncryptCookies.php)",
       "Bash(php -l app/Http/Controllers/Common/ColumnArticleController.php)",
       "Bash(php -l app/Http/Controllers/Admin/ColumnController.php)",
-      "Bash(php -l app/Models/ColumnArticle.php)"
+      "Bash(php -l app/Models/ColumnArticle.php)",
+      "Bash(sed -n '1059,1100p' public/assets/css/home.css)",
+      "Bash(sed -n '2181,2210p' public/assets/css/home.css)",
+      "Bash(node --check public/assets/js/home.js)",
+      "Bash(node -e \"new Function\\(require\\('fs'\\).readFileSync\\('public/assets/js/home.js','utf8'\\)\\); console.log\\('JS OK'\\)\")",
+      "Bash(sed -n '1195,1210p' public/assets/css/home.css)",
+      "Bash(sed -n '2000,2010p' public/assets/css/home.css)",
+      "Bash(sed -n '2212,2235p' public/assets/css/home.css)"
     ]
   }
 }

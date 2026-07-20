@@ -446,43 +446,96 @@
             padding-top: 6px !important;
             padding-bottom: 6px !important;
         }
-        /* サブヘッダーのタブ：立体的なガラスのピル型ボタンに。
-           非アクティブ = 半透明ガラス + 白文字 / アクティブ = 白面 + 濃紫文字（押されて光る） */
+        /* ============================================================
+           サブヘッダー：ネオ・グラスモーフィズム（Neo-Glassmorphism）
+           ・アクリルガラスのコンテナ（極薄白 + blur12 + 極細ボーダー）
+           ・擬似ボーダーライト（上部から光が当たる極細ハイライト）
+           ・オーラ（背後のネオンパープルのぼかしグロー）
+           ============================================================ */
+
+        /* ① 全体コンテナ（タブ群を囲む擦りガラスの外枠） */
+        .sub-header-wrapper .sub-header-tabs {
+            position: relative;
+            display: flex !important;
+            width: 100%;
+            gap: 0 !important;
+            padding: 4px !important;
+            border-radius: 12px !important;
+            background: rgba(255, 255, 255, 0.03) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.10) !important;
+            isolation: isolate; /* オーラ(z-index:-1)をコンテナ背面に留める */
+        }
+        /* 擬似ボーダーライト：上部から光が当たっている極細ハイライトライン */
+        .sub-header-wrapper .sub-header-tabs::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 10%;
+            right: 10%;
+            height: 1px;
+            border-radius: 999px;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(255, 255, 255, 0.55) 50%,
+                transparent);
+            pointer-events: none;
+        }
+        /* オーラ（バックグロウ）：背後に極薄のネオンパープルのぼかし */
+        .sub-header-wrapper .sub-header-tabs::after {
+            content: '';
+            position: absolute;
+            inset: -10px -6px;
+            z-index: -1;
+            border-radius: 18px;
+            background: radial-gradient(60% 90% at 50% 50%,
+                rgba(168, 85, 247, 0.38),
+                rgba(168, 85, 247, 0.10) 60%,
+                transparent 80%);
+            filter: blur(14px);
+            pointer-events: none;
+        }
+
+        /* ③ 非アクティブタブ（既定）：完全透過 + 薄いグレー・パープル文字 */
         .sub-header-wrapper .sub-header-tabs .tab-item {
-            border-radius: 999px !important;
-            padding: 7px 16px !important;
-            background: rgba(255, 255, 255, 0.12) !important;
-            border: 1px solid rgba(255, 255, 255, 0.28) !important;
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.35),
-                inset 0 -1px 2px rgba(46, 16, 101, 0.20),
-                0 2px 6px rgba(46, 16, 101, 0.22) !important;
-            color: #ffffff !important;
-            font-weight: 700 !important;
-            text-shadow: 0 1px 2px rgba(46, 16, 101, 0.45);
-            transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease !important;
+            flex: 1 1 0 !important;
+            min-width: 0;
+            text-align: center !important;
+            justify-content: center;
+            border-radius: 9px !important;
+            padding: 8px 6px !important;
+            background: transparent !important;
+            border: 0 !important;
+            box-shadow: none !important;
+            color: rgba(255, 255, 255, 0.4) !important;
+            font-weight: 600 !important;
+            text-shadow: none !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
         }
         .sub-header-wrapper .sub-header-tabs .tab-item:hover {
-            background: rgba(255, 255, 255, 0.20) !important;
+            color: rgba(255, 255, 255, 0.75) !important;
         }
+        /* ④ ミクロアニメーション：押し込みフィードバック */
         .sub-header-wrapper .sub-header-tabs .tab-item:active {
-            transform: scale(0.96);
+            transform: scale(0.97);
         }
+        /* ② アクティブタブ：少し濃い磨きガラス + 白い光 + 完全ホワイト太字 */
         .sub-header-wrapper .sub-header-tabs .tab-item.active {
-            background: linear-gradient(180deg, #ffffff, #f1ecfb) !important;
-            color: #6d28d9 !important;
-            text-shadow: none !important;
-            border-color: rgba(255, 255, 255, 0.9) !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
             box-shadow:
-                inset 0 1px 0 #ffffff,
-                0 3px 10px rgba(46, 16, 101, 0.35) !important;
+                0 4px 12px rgba(255, 255, 255, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
         }
-        /* 旧デザインの下線インジケータは撤去（ピル型に置換） */
+        /* 旧デザインの下線インジケータは撤去 */
         .sub-header-wrapper .sub-header-tabs .tab-item.active::after {
             display: none !important;
-        }
-        .sub-header-wrapper .sub-header-tabs {
-            gap: 8px !important;
         }
         .sub-header-tabs {
             background-color: transparent !important;
