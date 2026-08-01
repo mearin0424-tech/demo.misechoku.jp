@@ -21,7 +21,16 @@
 @endphp
 <section class="doc-card">
     <header class="doc-card__head">
-        <h3 class="doc-card__title">{{ $sectionTitle }}</h3>
+        <div class="doc-card__head-body">
+            <h3 class="doc-card__title">{{ $sectionTitle }}</h3>
+            <p class="doc-card__meta">
+                @if($currentDoc)
+                    <strong>{{ $currentDoc['type_label'] ?? '書類' }}</strong>@if(!empty($currentDoc['updated_at_label']))・{{ $currentDoc['updated_at_label'] }}更新@endif
+                @else
+                    まだ提出されていません
+                @endif
+            </p>
+        </div>
         <span class="doc-card__pill {{ $statusPillClass }}">
             {{ $currentDoc ? ($currentDoc['status_label'] ?? '提出済み') : '未提出' }}
         </span>
@@ -29,16 +38,6 @@
 
     @if($currentDoc && !empty($currentDoc['ng_reason']))
         <p class="doc-card__ng"><i class="fas fa-circle-exclamation"></i> 差し戻し理由：{{ $currentDoc['ng_reason'] }}</p>
-    @endif
-
-    @if($currentDoc)
-        <p class="doc-card__current">
-            <span class="doc-card__current-label">提出済み</span>
-            <strong>{{ $currentDoc['type_label'] ?? '' }}</strong>
-            @if(!empty($currentDoc['updated_at_label']))
-                <span class="doc-card__current-meta">{{ $currentDoc['updated_at_label'] }}更新</span>
-            @endif
-        </p>
     @endif
 
     <form class="doc-form cast-identity-form" enctype="multipart/form-data">

@@ -186,47 +186,97 @@
 .cast-edit-page { padding: 12px 0 0; }
 .cast-edit-form { position: relative; padding: 0 0 108px; }
 /* セクションカード：他画面のカード（surface + アンビエント紫枠）と同じトーンに統一 */
-.cast-edit-section { margin: 0 0 14px; padding: 14px; border-radius: 14px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012)); border: 1px solid rgba(168, 85, 247, 0.25); }
-.cast-edit-section h3 { margin: 0 0 12px; font-size: 14px; color: var(--accent-text, #f0a6c4); font-weight: 700; display: flex; gap: 8px; align-items: center; }
-.field { margin-bottom: 12px; }
+/* セクションカード：docs / identity ページと同じデザイントークンに統一
+   （--doc-* を上書きせず、そのまま白面 + 薄紫枠 + soft shadow） */
+.cast-edit-section {
+    margin: 0 0 16px;
+    padding: 16px;
+    border-radius: 16px;
+    background: #ffffff;
+    border: 1px solid rgba(124, 58, 237, 0.18);
+    box-shadow: 0 4px 14px rgba(76, 29, 149, 0.08);
+}
+/* セクション見出し：許可証・本人確認と同じ「小さめ・muted・UPPER」パターン */
+.cast-edit-section h3 {
+    margin: 0 0 14px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #8b84a1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+.cast-edit-section h3 i { color: #7c3aed; font-size: 0.85rem; }
+.field { margin-bottom: 14px; }
 .field:last-child { margin-bottom: 0; }
-.field > label { display: block; margin-bottom: 6px; font-size: 0.78rem; font-weight: 700; color: var(--color-text-sub, #b8b8b8); letter-spacing: 0.04em; }
-.required { color: #f87171; margin-left: 4px; }
+.field > label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.80rem;
+    font-weight: 700;
+    color: #1e1a30;
+    letter-spacing: 0.02em;
+}
+.required {
+    display: inline-block;
+    padding: 1px 7px;
+    margin-left: 6px;
+    border-radius: 999px;
+    background: rgba(220, 38, 38, 0.10);
+    color: #dc2626;
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
 .cast-input, .cast-select {
     width: 100%;
-    background: #050505;
-    border: 1px solid #2a2a2a;
+    background: #ffffff;
+    border: 1px solid rgba(124, 58, 237, 0.30);
     border-radius: 10px;
-    padding: 12px 14px;
-    color: #fff;
+    padding: 10px 12px;
+    color: #1e1a30;
     font-size: 16px; /* iOSズーム回避 */
     line-height: 1.4;
     min-height: 44px;
     outline: none;
+    color-scheme: light;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
-.cast-input[type="date"] { min-height: 44px; color-scheme: dark; font-variant-numeric: tabular-nums; }
-.cast-input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) opacity(.75); cursor: pointer; }
+.cast-input[type="date"] { min-height: 44px; font-variant-numeric: tabular-nums; }
 .cast-textarea { resize: vertical; line-height: 1.6; }
 .min-h100 { min-height: 110px; }
-.cast-input:focus, .cast-select:focus { border-color: var(--accent, #d670a2); box-shadow: 0 0 0 3px rgba(var(--accent-rgb, 214, 112, 162), 0.22); }
-.cast-input::placeholder { color: rgba(255, 255, 255, 0.28); font-weight: 500; }
+.cast-input:focus, .cast-select:focus {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+}
+.cast-input::placeholder { color: #8b84a1; font-weight: 500; }
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.tag-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.tag-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
 .tag-chip { position: relative; display: inline-flex; }
 .tag-chip input { position: absolute; opacity: 0; pointer-events: none; }
-.tag-chip span { padding: 7px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; border: 1px solid rgba(255, 255, 255, .05); background: rgba(10, 10, 10, 0.8); color: #a0a0a0; }
-/* ルックス / 内面の選択チップ：意図的にカラー区分（ルックス=mauve、内面=cool blue）。
-   ただし旧 warm wine (#5a1c2c) / 旧 gold (#c8a951) を撤去して新テーマに整合させる。 */
+.tag-chip span {
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border: 1px solid rgba(124, 58, 237, 0.25);
+    background: #faf7ff;
+    color: #4a4560;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+.tag-chip:hover span { background: rgba(124, 58, 237, 0.06); border-color: rgba(124, 58, 237, 0.45); }
+/* ルックス / 内面の選択チップ：カテゴリ別カラー（ルックス=アメジスト、内面=ブルー） */
 .tag-looks input:checked + span {
-    background: rgba(var(--accent-rgb, 214, 112, 162), 0.18);
-    border-color: rgba(var(--accent-rgb, 214, 112, 162), 0.45);
-    color: var(--accent-text, #f0a6c4);
+    background: rgba(124, 58, 237, 0.14);
+    border-color: rgba(124, 58, 237, 0.55);
+    color: #6d28d9;
 }
 .tag-personality input:checked + span {
-    background: rgba(56, 132, 220, 0.16);
-    border-color: rgba(56, 132, 220, 0.45);
-    color: #93c5fd;
+    background: rgba(37, 99, 235, 0.10);
+    border-color: rgba(37, 99, 235, 0.45);
+    color: #2563eb;
 }
 .radio-like-row { display: flex; gap: 18px; flex-wrap: wrap; }
 .radio-like { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
@@ -236,7 +286,12 @@
 .radio-like input:checked + .dot::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent, #d670a2); position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
 .radio-like span:last-child { color: #a0a0a0; font-size: 12px; font-weight: 600; }
 .radio-like input:checked + .dot + span { color: #fff; }
-.save-bar { position: absolute; left: 0; right: 0; bottom: 0; padding: 24px 16px 16px; background: linear-gradient(to top, #050505 35%, rgba(5, 5, 5, 0.92) 65%, rgba(5, 5, 5, 0)); }
+.save-bar {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 24px 16px 16px;
+    background: linear-gradient(to top, #f5f2fb 35%, rgba(245, 242, 251, 0.92) 65%, rgba(245, 242, 251, 0));
+}
 /* 保存 = Primary CTA（DESIGN.md §10：アクセントグラデ + 立体） */
 .save-btn {
     width: 100%;

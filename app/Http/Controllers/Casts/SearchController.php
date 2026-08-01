@@ -121,6 +121,13 @@ class SearchController extends BaseSearchController
         if (Schema::hasColumn('shop_jobs', 'noruma_cond')) {
             $jobSelect[] = 'shop_jobs.noruma_cond';
         }
+        // ひとこと（shop_posts）が無いとき、キャッチコピー / 店長メッセージを代替表示するために select
+        if (Schema::hasColumn('shop_jobs', 'catch_copy')) {
+            $jobSelect[] = 'shop_jobs.catch_copy';
+        }
+        if (Schema::hasColumn('shop_jobs', 'pr')) {
+            $jobSelect[] = 'shop_jobs.pr as shop_job_pr';
+        }
 
         $rows = $rows->select(array_merge(
             [
@@ -203,6 +210,20 @@ class SearchController extends BaseSearchController
 
                 $sc = $scoring->scoreShopRow($row, $scoringContext);
 
+                // 「ひとこと」は shop_posts の最新投稿が第一。
+                // 未投稿の店舗は shop_jobs.catch_copy → shop_jobs.pr を代替表示することで
+                // 一覧のスキマ（何も出ない行）を無くす。
+                $hitokotoBody = (string) ($row->shop_post_body ?? '');
+                if ($hitokotoBody === '') {
+                    $fallback = trim((string) ($row->catch_copy ?? '')) ?: trim((string) ($row->shop_job_pr ?? ''));
+                    if ($fallback !== '') {
+                        $fallbackOneLine = preg_replace('/\s+/u', ' ', $fallback) ?? $fallback;
+                        $hitokotoBody = mb_strlen($fallbackOneLine) > 80
+                            ? mb_substr($fallbackOneLine, 0, 80) . '…'
+                            : $fallbackOneLine;
+                    }
+                }
+
                 return [
                     'id'                  => $row->id,
                     'shop_name'           => (string) ($row->shop_name ?: 'ショップ'),
@@ -211,7 +232,7 @@ class SearchController extends BaseSearchController
                     'catch'               => (string) ($row->shop_post_body ?? ''),
                     'overview'            => '',
                     'main_img'            => $this->getShopImages((string) $row->id)[0] ?? asset('assets/images/common/no-image.png'),
-                    'hitokoto'            => (string) ($row->shop_post_body ?? ''),
+                    'hitokoto'            => $hitokotoBody,
                     'hitokoto_updated_at' => $hitokotoUpdatedAt?->locale('ja')->diffForHumans(),
                     'hitokoto_ts'         => $hitokotoUpdatedAt?->getTimestamp(),
                     'hourly_wage'         => $this->searchRowHourlyWage($row),

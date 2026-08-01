@@ -100,7 +100,9 @@ body.no-scroll main#main-content .content-wrapper {
         height: 100% !important;
         max-height: 100% !important;
         min-height: 0 !important;
-        aspect-ratio: 3 / 4;
+        /* 登録時 Cropper.js が 4:5 で切り抜くため、カードも 4:5 に揃える
+           → object-fit: cover と一致し、画面サイズによらず切り取りが発生しない */
+        aspect-ratio: 4 / 5;
     }
 }
 
@@ -109,11 +111,11 @@ body.no-scroll main#main-content .content-wrapper {
     .home-photo-wrap {
         min-height: 180px;
     }
-    /* 非常に狭い画面では極端なトリミングを避けつつ中央寄せで表示 */
+    /* 4:5 保証（登録時 crop）＋カード 4:5 で完全一致するため letterbox は不要。
+       ただし旧アップロード等の非 4:5 保険として、極端に狭い画面では顔優先 (top寄せ) を維持 */
     .photo-swiper .swiper-slide img,
     .home-photo {
-        object-fit: contain;
-        object-position: center center;
+        object-position: 50% 20%;
     }
 }
 
@@ -154,7 +156,9 @@ body.no-scroll main#main-content .content-wrapper {
     position: relative;
     width: min(380px, 88vw) !important;
     max-width: 88vw !important;
-    aspect-ratio: 3 / 4;
+    /* 登録時 4:5 crop に合わせてカードも 4:5 に固定
+       → object-fit: cover で切り取りが起きない = 画面サイズによる見え方の差異が消える */
+    aspect-ratio: 4 / 5;
     max-height: min(82vh, 88dvh) !important;
     height: auto !important;
     min-height: 280px;
@@ -277,7 +281,9 @@ body.no-scroll main#main-content .content-wrapper {
     max-width: none;
     max-height: none;
     object-fit: cover;
-    object-position: center top;
+    /* カード 4:5 と写真 4:5 が一致するので通常は cropping 発生せず。
+       非 4:5 の旧アップロードのみ、顔ゾーン (上から 20%) を優先して残す */
+    object-position: 50% 20%;
     border-radius: var(--home-card-radius) var(--home-card-radius) 0 0;
     background-color: var(--color-main);
 }

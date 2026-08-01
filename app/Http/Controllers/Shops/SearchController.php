@@ -235,7 +235,20 @@ class SearchController extends BaseSearchController
                     $hitokotoTs = Carbon::parse($row->profile_updated_at);
                 }
 
+                // 「ひとこと」は cast_posts の最新投稿が第一。
+                // 投稿がまだ無いキャストは自己紹介 (cast_profiles.pr) の冒頭を代替表示することで
+                // 一覧のスキマ（何も表示されない行）を無くす。
                 $hitokotoBody = (string) ($row->hitokoto_body ?? '');
+                if ($hitokotoBody === '') {
+                    $pr = trim((string) ($row->pr ?? ''));
+                    if ($pr !== '') {
+                        // 1行に整えて、長すぎたら省略（吹き出しに収まるサイズ）
+                        $prOneLine = preg_replace('/\s+/u', ' ', $pr) ?? $pr;
+                        $hitokotoBody = mb_strlen($prOneLine) > 80
+                            ? mb_substr($prOneLine, 0, 80) . '…'
+                            : $prOneLine;
+                    }
+                }
 
                 $distanceKm = $origin
                     ? $userLocation->distanceKm(

@@ -100,88 +100,25 @@
 }
 
 /* ============================================================
-   2. 提出状況サマリー
+   2. 件数サマリー（KPI チップのみ・詳細は各書類カードに統合）
    ============================================================ */
-.doc-summary {
-    background: var(--doc-surface);
-    border: 1px solid var(--doc-line);
-    border-radius: var(--doc-radius);
-    padding: 16px;
-    margin-bottom: 20px;
-    box-shadow: var(--doc-shadow);
-}
-.doc-summary__title {
-    margin: 0 0 12px;
-    font-size: 0.78rem;
-    font-weight: 800;
-    color: var(--doc-muted);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-}
-.doc-summary__counts {
+.doc-counts {
     display: flex; flex-wrap: wrap; gap: 6px;
-    margin-bottom: 14px;
+    margin-bottom: 16px;
 }
-.doc-summary__count {
+.doc-counts__chip {
     display: inline-flex; align-items: center; gap: 5px;
-    padding: 4px 10px;
+    padding: 5px 12px;
     border-radius: 999px;
-    font-size: 0.74rem; font-weight: 700;
+    font-size: 0.75rem; font-weight: 700;
     background: #f4f0fb;
     color: var(--doc-body);
     border: 1px solid var(--doc-line);
 }
-.doc-summary__count i { font-size: 0.7rem; }
-.doc-summary__count.is-approved { background: rgba(5, 150, 105, 0.08); color: #059669; border-color: rgba(5, 150, 105, 0.28); }
-.doc-summary__count.is-pending  { background: rgba(180, 83, 9, 0.08); color: #b45309; border-color: rgba(180, 83, 9, 0.28); }
-.doc-summary__count.is-rejected { background: rgba(220, 38, 38, 0.06); color: #dc2626; border-color: rgba(220, 38, 38, 0.30); }
-
-.doc-summary__list {
-    list-style: none; margin: 0; padding: 0;
-    display: flex; flex-direction: column;
-}
-.doc-summary__row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 0;
-}
-.doc-summary__row + .doc-summary__row { border-top: 1px solid var(--doc-line); }
-.doc-summary__row-icon {
-    flex: 0 0 auto;
-    width: 28px; height: 28px; border-radius: 50%;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 0.82rem;
-    background: #f4f0fb; color: var(--doc-muted);
-}
-.doc-summary__row.is-approved .doc-summary__row-icon { background: rgba(5, 150, 105, 0.10); color: #059669; }
-.doc-summary__row.is-pending  .doc-summary__row-icon { background: rgba(180, 83, 9, 0.10); color: #b45309; }
-.doc-summary__row.is-rejected .doc-summary__row-icon { background: rgba(220, 38, 38, 0.08); color: #dc2626; }
-.doc-summary__row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.doc-summary__row-name {
-    font-size: 0.90rem; font-weight: 700; color: var(--doc-ink);
-    letter-spacing: -0.005em;
-}
-.doc-summary__row-name .doc-summary__pattern {
-    margin-left: 6px;
-    font-size: 0.66rem; font-weight: 700;
-    color: var(--doc-muted);
-    letter-spacing: 0.06em;
-}
-.doc-summary__row-detail {
-    font-size: 0.76rem;
-    color: var(--doc-body);
-    line-height: 1.5;
-    overflow-wrap: anywhere;
-}
-.doc-summary__row-detail strong { color: var(--doc-ink); font-weight: 700; }
-.doc-summary__row-status {
-    flex: 0 0 auto;
-    font-size: 0.74rem; font-weight: 700;
-    color: var(--doc-muted);
-    white-space: nowrap;
-}
-.doc-summary__row.is-approved .doc-summary__row-status { color: #059669; }
-.doc-summary__row.is-pending  .doc-summary__row-status { color: #b45309; }
-.doc-summary__row.is-rejected .doc-summary__row-status { color: #dc2626; }
+.doc-counts__chip i { font-size: 0.7rem; }
+.doc-counts__chip.is-approved { background: rgba(5, 150, 105, 0.08); color: #059669; border-color: rgba(5, 150, 105, 0.28); }
+.doc-counts__chip.is-pending  { background: rgba(180, 83, 9, 0.08); color: #b45309; border-color: rgba(180, 83, 9, 0.28); }
+.doc-counts__chip.is-rejected { background: rgba(220, 38, 38, 0.06); color: #dc2626; border-color: rgba(220, 38, 38, 0.30); }
 
 /* ============================================================
    3. 承認催促
@@ -271,15 +208,30 @@
     box-shadow: var(--doc-shadow);
 }
 .doc-card__head {
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
     margin-bottom: 14px;
 }
+.doc-card__head-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .doc-card__title {
     margin: 0;
     font-size: 1rem; font-weight: 800;
     color: var(--doc-ink);
     letter-spacing: -0.005em;
+    line-height: 1.35;
 }
+/* 統合後：ヘッダーに「提出書類・更新日」を1行で集約（旧 doc-card__current を廃止） */
+.doc-card__meta {
+    margin: 0;
+    font-size: 0.76rem;
+    color: var(--doc-muted);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.doc-card__meta strong { color: var(--doc-body); font-weight: 700; }
 .doc-card__pill {
     flex: 0 0 auto;
     padding: 4px 10px;
@@ -288,6 +240,8 @@
     background: #f4f0fb;
     color: var(--doc-muted);
     border: 1px solid var(--doc-line);
+    margin-top: 1px;
+    white-space: nowrap;
 }
 .doc-card__pill.is-approved { background: rgba(5, 150, 105, 0.10); color: #059669; border-color: rgba(5, 150, 105, 0.30); }
 .doc-card__pill.is-pending  { background: rgba(180, 83, 9, 0.10); color: #b45309; border-color: rgba(180, 83, 9, 0.30); }
@@ -305,28 +259,6 @@
     display: flex; align-items: flex-start; gap: 6px;
 }
 .doc-card__ng i { margin-top: 2px; }
-
-.doc-card__current {
-    margin: 0 0 14px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    background: #faf7ff;
-    border: 1px dashed var(--doc-line-2);
-    font-size: 0.82rem;
-    color: var(--doc-body);
-    display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px;
-}
-.doc-card__current-label {
-    font-size: 0.68rem; font-weight: 800; letter-spacing: 0.06em;
-    color: var(--doc-muted);
-    text-transform: uppercase;
-    margin-right: 2px;
-}
-.doc-card__current strong { color: var(--doc-ink); font-weight: 700; }
-.doc-card__current-meta {
-    margin-left: auto;
-    font-size: 0.72rem; color: var(--doc-muted);
-}
 
 /* ---------- フォーム内部（縦積み・統一） ---------- */
 .doc-form { display: flex; flex-direction: column; gap: 14px; }
@@ -559,46 +491,15 @@
                         </div>
                     </div>
 
-                    {{-- 2. 提出状況サマリー --}}
-                    <section class="doc-summary" aria-label="提出状況サマリー">
-                        <p class="doc-summary__title">提出状況</p>
-                        <div class="doc-summary__counts">
-                            <span class="doc-summary__count is-approved"><i class="fas fa-circle-check"></i>承認 {{ $idApproved }}</span>
-                            <span class="doc-summary__count is-pending"><i class="fas fa-hourglass-half"></i>審査中 {{ $idPending }}</span>
-                            @if($idRejected > 0)
-                                <span class="doc-summary__count is-rejected"><i class="fas fa-circle-exclamation"></i>差戻し {{ $idRejected }}</span>
-                            @endif
-                            <span class="doc-summary__count"><i class="fas fa-minus"></i>未提出 {{ $idNone }}</span>
-                        </div>
-                        <ul class="doc-summary__list">
-                            @foreach($summaryRows as $r)
-                                @php
-                                    $d = $r['doc'];
-                                    $sk = $d['status_key'] ?? null;
-                                    $rowState = $d ? ($sk ?? 'pending') : 'not-submitted';
-                                @endphp
-                                <li class="doc-summary__row is-{{ $rowState }}">
-                                    <span class="doc-summary__row-icon" aria-hidden="true">
-                                        <i class="fas {{ $d ? ($sk === 'approved' ? 'fa-circle-check' : ($sk === 'rejected' ? 'fa-circle-exclamation' : 'fa-hourglass-half')) : 'fa-minus' }}"></i>
-                                    </span>
-                                    <span class="doc-summary__row-body">
-                                        <span class="doc-summary__row-name">
-                                            {{ $r['label'] }}<span class="doc-summary__pattern">パターン{{ $r['pattern'] }}</span>
-                                        </span>
-                                        <span class="doc-summary__row-detail">
-                                            @if($d)
-                                                <strong>{{ $d['type_label'] ?? '書類' }}</strong>
-                                                @if(!empty($d['updated_at_label']))・{{ $d['updated_at_label'] }}提出@endif
-                                            @else
-                                                まだ提出されていません
-                                            @endif
-                                        </span>
-                                    </span>
-                                    <span class="doc-summary__row-status">{{ $d ? ($d['status_label'] ?? '審査中') : '未提出' }}</span>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </section>
+                    {{-- 2. 件数サマリー（KPI チップのみ。詳細は下の各書類カードに集約） --}}
+                    <div class="doc-counts" aria-label="提出状況">
+                        <span class="doc-counts__chip is-approved"><i class="fas fa-circle-check"></i>承認 {{ $idApproved }}</span>
+                        <span class="doc-counts__chip is-pending"><i class="fas fa-hourglass-half"></i>審査中 {{ $idPending }}</span>
+                        @if($idRejected > 0)
+                            <span class="doc-counts__chip is-rejected"><i class="fas fa-circle-exclamation"></i>差戻し {{ $idRejected }}</span>
+                        @endif
+                        <span class="doc-counts__chip"><i class="fas fa-minus"></i>未提出 {{ $idNone }}</span>
+                    </div>
 
                     {{-- 3. 審査催促 --}}
                     @if($isPendingReview)

@@ -131,23 +131,24 @@
         gap: 40px;
     }
 
+    /* セクション見出し：許可証・本人確認・キャスト編集と同じ「小さめ・muted・UPPER」パターン */
     .shop-profile-edit__section-title {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         margin: 0 0 20px;
         padding-bottom: 8px;
         border-bottom: 1px solid #1f1a14;
-        font-size: 0.875rem;
-        font-style: italic;
+        font-size: 0.78rem;
         font-family: var(--font-sans);
-        font-weight: 600;
-        color: rgba(161, 161, 170, 0.95);
-        letter-spacing: 0.08em;
+        font-weight: 800;
+        color: rgba(196, 181, 253, 0.85);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
     }
     .shop-profile-edit__section-title i {
-        font-size: 0.9rem;
-        color: #52525b;
+        font-size: 0.85rem;
+        color: var(--spe-gold, #a78bfa);
         font-style: normal;
     }
 

@@ -4,7 +4,7 @@
 @section('body-class', 'page-shop-documents')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/shop-license-documents.css') }}?v=20260801-simplify">
+<link rel="stylesheet" href="{{ asset('assets/css/shop-license-documents.css') }}?v=20260801-merge">
 @endpush
 
 @section('content')
@@ -39,49 +39,17 @@
         </div>
     </div>
 
-    {{-- 2. 提出状況サマリー --}}
-    <section class="doc-summary" aria-label="提出状況サマリー">
-        <p class="doc-summary__title">提出状況</p>
-        <div class="doc-summary__counts">
-            <span class="doc-summary__count is-approved"><i class="fas fa-circle-check"></i>承認 {{ $docApproved }}</span>
-            <span class="doc-summary__count is-pending"><i class="fas fa-hourglass-half"></i>審査中 {{ $docPending }}</span>
-            @if($docRejected > 0)
-                <span class="doc-summary__count is-rejected"><i class="fas fa-circle-exclamation"></i>差戻し {{ $docRejected }}</span>
-            @endif
-            <span class="doc-summary__count"><i class="fas fa-minus"></i>未提出 {{ $docNotSubmitted }}</span>
-        </div>
-        <ul class="doc-summary__list">
-            @foreach($docList as $doc)
-                @php
-                    $st = $doc['status'] ?? 'not_submitted';
-                    $rec = $doc['record'] ?? [];
-                    $fileName = $rec['file_name'] ?? '';
-                    $updated = $rec['updated_at_label'] ?? '';
-                    $rowState = str_replace('_', '-', $st);
-                @endphp
-                <li class="doc-summary__row is-{{ $rowState }}">
-                    <span class="doc-summary__row-icon" aria-hidden="true">
-                        <i class="fas {{ $st === 'approved' ? 'fa-circle-check' : ($st === 'pending' ? 'fa-hourglass-half' : ($st === 'rejected' ? 'fa-circle-exclamation' : 'fa-minus')) }}"></i>
-                    </span>
-                    <span class="doc-summary__row-body">
-                        <span class="doc-summary__row-name">{{ $doc['display_name'] ?? ($doc['name'] ?? '許可証') }}</span>
-                        <span class="doc-summary__row-detail">
-                            @if($fileName !== '')
-                                <strong>{{ $fileName }}</strong>@if($updated !== '')・{{ $updated }}@endif
-                            @elseif($st === 'not_submitted')
-                                まだ提出されていません
-                            @else
-                                アップロード済み
-                            @endif
-                        </span>
-                    </span>
-                    <span class="doc-summary__row-status">{{ $doc['status_label'] ?? '未提出' }}</span>
-                </li>
-            @endforeach
-        </ul>
-    </section>
+    {{-- 2. 件数サマリー（KPI チップのみ。詳細は下の各書類カードに集約） --}}
+    <div class="doc-counts" aria-label="提出状況">
+        <span class="doc-counts__chip is-approved"><i class="fas fa-circle-check"></i>承認 {{ $docApproved }}</span>
+        <span class="doc-counts__chip is-pending"><i class="fas fa-hourglass-half"></i>審査中 {{ $docPending }}</span>
+        @if($docRejected > 0)
+            <span class="doc-counts__chip is-rejected"><i class="fas fa-circle-exclamation"></i>差戻し {{ $docRejected }}</span>
+        @endif
+        <span class="doc-counts__chip"><i class="fas fa-minus"></i>未提出 {{ $docNotSubmitted }}</span>
+    </div>
 
-    {{-- 3. 各書類の提出・差し替え（アコーディオン部品） --}}
+    {{-- 3. 各書類：提出状況と操作を1カードに統合（アコーディオン部品） --}}
     @include('shops.mypage.partials.shop-license-documents', ['documents' => $documents ?? []])
 
     <p class="license-page__back">
@@ -155,74 +123,24 @@
     line-height: 1.65;
 }
 
-/* 提出状況サマリー */
-.doc-summary {
-    background: var(--doc-surface);
-    border: 1px solid var(--doc-line);
-    border-radius: var(--doc-radius);
-    padding: 16px;
-    margin-bottom: 20px;
-    box-shadow: var(--doc-shadow);
-}
-.doc-summary__title {
-    margin: 0 0 12px;
-    font-size: 0.78rem; font-weight: 800;
-    color: var(--doc-muted);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-}
-.doc-summary__counts {
+/* 件数サマリー（KPI チップ行のみ・詳細は各書類カードに統合） */
+.doc-counts {
     display: flex; flex-wrap: wrap; gap: 6px;
-    margin-bottom: 14px;
+    margin-bottom: 16px;
 }
-.doc-summary__count {
+.doc-counts__chip {
     display: inline-flex; align-items: center; gap: 5px;
-    padding: 4px 10px;
+    padding: 5px 12px;
     border-radius: 999px;
-    font-size: 0.74rem; font-weight: 700;
+    font-size: 0.75rem; font-weight: 700;
     background: #f4f0fb;
     color: var(--doc-body);
     border: 1px solid var(--doc-line);
 }
-.doc-summary__count i { font-size: 0.7rem; }
-.doc-summary__count.is-approved { background: rgba(5, 150, 105, 0.08); color: #059669; border-color: rgba(5, 150, 105, 0.28); }
-.doc-summary__count.is-pending  { background: rgba(180, 83, 9, 0.08); color: #b45309; border-color: rgba(180, 83, 9, 0.28); }
-.doc-summary__count.is-rejected { background: rgba(220, 38, 38, 0.06); color: #dc2626; border-color: rgba(220, 38, 38, 0.30); }
-
-.doc-summary__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
-.doc-summary__row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 0;
-}
-.doc-summary__row + .doc-summary__row { border-top: 1px solid var(--doc-line); }
-.doc-summary__row-icon {
-    flex: 0 0 auto;
-    width: 28px; height: 28px; border-radius: 50%;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 0.82rem;
-    background: #f4f0fb; color: var(--doc-muted);
-}
-.doc-summary__row.is-approved .doc-summary__row-icon { background: rgba(5, 150, 105, 0.10); color: #059669; }
-.doc-summary__row.is-pending  .doc-summary__row-icon { background: rgba(180, 83, 9, 0.10); color: #b45309; }
-.doc-summary__row.is-rejected .doc-summary__row-icon { background: rgba(220, 38, 38, 0.08); color: #dc2626; }
-.doc-summary__row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.doc-summary__row-name { font-size: 0.90rem; font-weight: 700; color: var(--doc-ink); letter-spacing: -0.005em; }
-.doc-summary__row-detail {
-    font-size: 0.76rem;
-    color: var(--doc-body);
-    line-height: 1.5;
-    overflow-wrap: anywhere;
-}
-.doc-summary__row-detail strong { color: var(--doc-ink); font-weight: 700; }
-.doc-summary__row-status {
-    flex: 0 0 auto;
-    font-size: 0.74rem; font-weight: 700;
-    color: var(--doc-muted);
-    white-space: nowrap;
-}
-.doc-summary__row.is-approved .doc-summary__row-status { color: #059669; }
-.doc-summary__row.is-pending  .doc-summary__row-status { color: #b45309; }
-.doc-summary__row.is-rejected .doc-summary__row-status { color: #dc2626; }
+.doc-counts__chip i { font-size: 0.7rem; }
+.doc-counts__chip.is-approved { background: rgba(5, 150, 105, 0.08); color: #059669; border-color: rgba(5, 150, 105, 0.28); }
+.doc-counts__chip.is-pending  { background: rgba(180, 83, 9, 0.08); color: #b45309; border-color: rgba(180, 83, 9, 0.28); }
+.doc-counts__chip.is-rejected { background: rgba(220, 38, 38, 0.06); color: #dc2626; border-color: rgba(220, 38, 38, 0.30); }
 
 /* ============================================================
    アコーディオン（partial の shop-license-documents.blade.php）を
@@ -260,7 +178,7 @@
 .license-accordion.is-rejected { border-color: rgba(220, 38, 38, 0.32) !important; }
 
 .license-accordion__head {
-    display: flex; align-items: center; gap: 10px;
+    display: flex; align-items: flex-start; gap: 12px;
     width: 100%;
     padding: 14px 16px !important;
     background: transparent;
@@ -270,7 +188,7 @@
     transition: background 0.15s ease;
 }
 .license-accordion__head:hover { background: rgba(124, 58, 237, 0.04) !important; }
-.license-accordion__title-block { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.license-accordion__title-block { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .license-accordion__title {
     font-size: 0.95rem !important;
     font-weight: 800 !important;
@@ -283,6 +201,27 @@
     color: var(--doc-muted) !important;
     font-weight: 600 !important;
     letter-spacing: 0.02em;
+}
+/* 統合後：ヘッダー内に「発行元・ファイル名・更新日」を1行に集約
+   （旧 doc-summary__list の情報をここに移設） */
+.license-accordion__meta {
+    font-size: 0.74rem;
+    color: var(--doc-muted);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.license-accordion__meta strong {
+    color: var(--doc-body);
+    font-weight: 700;
+}
+.license-accordion__status-col {
+    flex: 0 0 auto;
+    display: inline-flex; flex-direction: column; align-items: flex-end; gap: 4px;
+    padding-top: 1px;
 }
 
 .license-accordion__status {

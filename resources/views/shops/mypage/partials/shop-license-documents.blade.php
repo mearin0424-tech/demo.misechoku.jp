@@ -72,16 +72,25 @@
                         data-license-accordion-toggle>
                     <span class="license-accordion__title-block">
                         <span class="license-accordion__title">{{ $displayName }}</span>
-                        @if($issuer !== '')
-                            <span class="license-accordion__issuer">{{ $issuer }}</span>
+                        @php
+                            $headerMeta = [];
+                            if ($issuer !== '') { $headerMeta[] = e($issuer); }
+                            if ($serverFileName !== '') { $headerMeta[] = '<strong>' . e($serverFileName) . '</strong>'; }
+                            elseif ($status === 'not_submitted') { $headerMeta[] = 'まだ提出されていません'; }
+                            if ($updatedLabel !== '') { $headerMeta[] = $updatedLabel . '更新'; }
+                        @endphp
+                        @if($headerMeta)
+                            <span class="license-accordion__meta">{!! implode('・', $headerMeta) !!}</span>
                         @endif
                     </span>
-                    <span class="license-accordion__status license-accordion__status--{{ str_replace('_','-',$status) }}">
-                        {{ $statusLabel }}
+                    <span class="license-accordion__status-col">
+                        <span class="license-accordion__status license-accordion__status--{{ str_replace('_','-',$status) }}">
+                            {{ $statusLabel }}
+                        </span>
+                        @if($expiringSoon)
+                            <span class="license-accordion__chip">{{ $expirationNoticeLabel }}</span>
+                        @endif
                     </span>
-                    @if($expiringSoon)
-                        <span class="license-accordion__chip">{{ $expirationNoticeLabel }}</span>
-                    @endif
                     <span class="license-accordion__chevron" aria-hidden="true">
                         <i class="fas fa-chevron-down"></i>
                     </span>
