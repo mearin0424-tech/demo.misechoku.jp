@@ -448,15 +448,15 @@
 
         .role-login-submit {
             border: 0;
-            background: var(--accent, #d670a2);
-            color: var(--on-accent, #1a0814);
+            background: linear-gradient(135deg, var(--accent-grad-from, #e88bb2), var(--accent-grad-to, #a83d70));
+            color: var(--on-accent-strong, #ffffff);
             cursor: pointer;
             box-shadow:
                 0 6px 14px rgba(0, 0, 0, 0.45),
                 inset 0 1px 0 rgba(255, 255, 255, 0.20),
                 inset 0 -1px 0 rgba(0, 0, 0, 0.18);
         }
-        .role-login-submit:hover { filter: brightness(1.06); }
+        .role-login-submit:hover { filter: none; }
         .role-login-submit:active {
             transform: scale(0.97);
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.45), inset 0 2px 4px rgba(0, 0, 0, 0.2);

@@ -163,16 +163,23 @@ document.addEventListener('DOMContentLoaded', function() {
             // 水平ジェスチャー判定：厳しすぎると横スワイプに気付かない
             touchAngle: 20,
             threshold: 10,
-            speed: 300,
+            // ぬるぬる感：スナップは長めに、途中で切替させない
+            speed: 380,
             // creative は撤回：標準 slide + spaceBetween + CSS filter で軽量に奥行き感を出す
             effect: 'slide',
             spaceBetween: 8,
             resistance: true,
-            resistanceRatio: 0.5,
+            // 端の抵抗を強めてゴム感を出す（半分より少し重い）
+            resistanceRatio: 0.72,
             longSwipes: true,
-            longSwipesRatio: 0.20,
-            longSwipesMs: 200,
+            // 「最後までスワイプしないと切り替わらない」ぬるぬる感：
+            //   0.20 → 0.55（半分より少し先まで指を運ばないと commit しない）
+            longSwipesRatio: 0.55,
+            // 早すぎるフリックで即座に切り替わらないよう猶予を延ばす
+            longSwipesMs: 400,
+            // shortSwipes（速度ベースの即時切替）は完全に無効化
             shortSwipes: false,
+            // フォロー中の指離しで、指位置に対して滑らかに戻る／進む
             followFinger: true,
             watchOverflow: false,
             preventClicks: true,
