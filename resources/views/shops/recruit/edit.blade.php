@@ -581,7 +581,7 @@
         </header>
 
         @if(session('message'))
-            <div class="job-edit-v2__notice job-edit-v2__notice--success">
+            <div class="job-edit-v2__notice job-edit-v2__notice--success" data-flash-toast="success">
                 <i class="fas fa-check-circle"></i>
                 <span>{{ session('message') }}</span>
             </div>
@@ -1160,7 +1160,7 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/form-enhance.js') }}"></script>
+<script src="{{ asset('assets/js/form-enhance.js') }}?v=20260802-phase3"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var form = document.getElementById('recruit-form');

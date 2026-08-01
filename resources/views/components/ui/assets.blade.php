@@ -4,5 +4,5 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 @endpush
 @push('foot-scripts')
-    <script src="{{ asset('assets/js/behaviors.js') }}" defer></script>
+    <script src="{{ asset('assets/js/behaviors.js') }}?v=20260802-phase3" defer></script>
 @endpush

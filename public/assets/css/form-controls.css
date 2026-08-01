@@ -262,6 +262,235 @@ input[type="radio"] {
     background: #ffffff !important;
     color: #5f5876 !important;
 }
+
+/* =====================================================================
+   必須 / 任意 バッジ（.req-required / .req-optional）
+   ラベル横に添える小さい pill。全画面共通スタイル。
+   ===================================================================== */
+.req-required,
+.req-optional {
+    display: inline-block;
+    padding: 1px 7px;
+    margin-left: 6px;
+    border-radius: 999px;
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    vertical-align: 1px;
+}
+.req-required {
+    background: rgba(220, 38, 38, 0.10);
+    color: #dc2626;
+}
+.req-optional {
+    background: #f4f0fb;
+    color: #8b84a1;
+}
+
+/* =====================================================================
+   数値入力コンポーネント（.metric-* / .bwh-*）
+   2026-08-01 統合: 登録・編集・全てのプロフィール系で共通
+   - HTML マークアップは register.blade.php / cast profile edit で一致
+   - behaviors.js が data-stepper 属性で ± ボタンを注入
+   ===================================================================== */
+
+/* ネイティブスピナーの除去 */
+.metric-input-wrap input[type="number"],
+.bwh-field input[type="number"] {
+    -webkit-appearance: none !important;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+.metric-input-wrap input[type="number"]::-webkit-outer-spin-button,
+.metric-input-wrap input[type="number"]::-webkit-inner-spin-button,
+.bwh-field input[type="number"]::-webkit-outer-spin-button,
+.bwh-field input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* 身長・体重ペア */
+.metric-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+.metric-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+}
+.metric-field-label {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 0.80rem !important;
+    font-weight: 700 !important;
+    color: #1e1a30 !important;
+    letter-spacing: 0.02em;
+}
+.metric-field-label small,
+.metric-field-hint {
+    font-size: 0.70rem;
+    font-weight: 600;
+    color: #8b84a1;
+    letter-spacing: 0.04em;
+}
+
+/* 入力エリア（input + 単位サフィックス） */
+.metric-input-wrap {
+    display: flex !important;
+    align-items: stretch !important;
+    background: #ffffff !important;
+    border: 1.5px solid rgba(124, 58, 237, 0.30) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 6px rgba(76, 29, 149, 0.06);
+    overflow: hidden;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.metric-input-wrap:focus-within {
+    border-color: #7c3aed !important;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15) !important;
+}
+/* form-controls.css §1 の input 汎用スタイルを上書きして「wrapper が枠を持ち、input は透明」に */
+.metric-input-wrap input,
+.metric-input-wrap input[type="number"] {
+    flex: 1 !important;
+    min-width: 0 !important;
+    width: auto !important;
+    padding: 12px 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #1e1a30 !important;
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    outline: none !important;
+    min-height: 52px !important;
+    font-variant-numeric: tabular-nums;
+    text-align: center !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+}
+.metric-input-wrap input::placeholder {
+    color: #b9b3c7 !important;
+    font-weight: 500;
+}
+.metric-unit {
+    padding: 0 14px;
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #7c3aed;
+    letter-spacing: 0.02em;
+    pointer-events: none;
+    user-select: none;
+    background: rgba(124, 58, 237, 0.06);
+    border-left: 1px solid rgba(124, 58, 237, 0.15);
+}
+
+/* ± ステッパー（behaviors.js が挿入） */
+.metric-step {
+    flex: 0 0 44px;
+    width: 44px;
+    border: 0;
+    background: rgba(124, 58, 237, 0.06);
+    color: #7c3aed;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.12s ease, color 0.12s ease, transform 0.10s ease;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+.metric-step--minus { border-right: 1px solid rgba(124, 58, 237, 0.15); }
+.metric-step--plus  { border-left:  1px solid rgba(124, 58, 237, 0.15); }
+.metric-step:hover {
+    background: rgba(124, 58, 237, 0.14);
+    color: #6d28d9;
+}
+.metric-step:active {
+    transform: scale(0.94);
+    background: rgba(124, 58, 237, 0.20);
+}
+.metric-step:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    background: transparent;
+}
+.metric-input-wrap[data-stepper] .metric-unit {
+    border-left: 0;
+    padding: 0 6px 0 4px;
+    background: transparent;
+}
+
+/* BWHグループ */
+.bwh-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0 0 8px;
+}
+.bwh-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+.bwh-field {
+    position: relative;
+    display: flex !important;
+    align-items: stretch;
+    background: #ffffff !important;
+    border: 1.5px solid rgba(124, 58, 237, 0.30) !important;
+    border-radius: 12px !important;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(76, 29, 149, 0.06);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    margin: 0;
+}
+.bwh-field:focus-within {
+    border-color: #7c3aed !important;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15) !important;
+}
+.bwh-letter {
+    flex-shrink: 0;
+    width: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.90rem;
+    font-weight: 800;
+    color: #ffffff;
+    background: linear-gradient(145deg, #a78bfa, #7c3aed);
+    letter-spacing: 0.02em;
+}
+.bwh-field input,
+.bwh-field input[type="number"] {
+    flex: 1 !important;
+    min-width: 0 !important;
+    width: auto !important;
+    padding: 10px 6px !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: #1e1a30 !important;
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    outline: none !important;
+    min-height: 52px !important;
+    text-align: center !important;
+    font-variant-numeric: tabular-nums;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+}
+.bwh-field input::placeholder {
+    color: #b9b3c7 !important;
+    font-weight: 500;
+}
 :is(body.theme-light, .admin-layout) .fc-tag input:checked + span,
 :is(body.theme-light, .admin-layout) .tag-chip input:checked + span,
 :is(body.theme-light, .admin-layout) .detail-search-chip input:checked + span,

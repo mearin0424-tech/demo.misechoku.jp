@@ -127,6 +127,90 @@
     initSwipeDecks();
     initFab();
     initMessageForms();
+    initNumberSteppers();
+  }
+
+  /**
+   * 数値入力の ± ステッパー
+   *   <div class="metric-input-wrap" data-stepper data-step="1">
+   *     <input type="number" min="130" max="200" ...>
+   *     <span class="metric-unit">cm</span>
+   *   </div>
+   * → JS が - と + ボタンを注入し、input の min/max を尊重して増減。
+   * data-step が無ければ 1、data-step="100" のように任意単位も可。
+   * オートリピート（長押しで加速）対応。
+   */
+  function initNumberSteppers() {
+    var wraps = document.querySelectorAll('.metric-input-wrap[data-stepper]');
+    Array.prototype.forEach.call(wraps, function (wrap) {
+      if (wrap.__stepperBound) return;
+      wrap.__stepperBound = true;
+
+      var input = wrap.querySelector('input');
+      if (!input) return;
+
+      var step = parseFloat(wrap.getAttribute('data-step') || input.getAttribute('step') || '1');
+      if (!isFinite(step) || step <= 0) step = 1;
+      var min  = input.hasAttribute('min') ? parseFloat(input.getAttribute('min')) : null;
+      var max  = input.hasAttribute('max') ? parseFloat(input.getAttribute('max')) : null;
+
+      var mkBtn = function (dir) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'metric-step metric-step--' + (dir < 0 ? 'minus' : 'plus');
+        b.setAttribute('aria-label', dir < 0 ? '減らす' : '増やす');
+        b.textContent = dir < 0 ? '−' : '＋';
+        return b;
+      };
+
+      var apply = function (delta) {
+        var curRaw = (input.value || '').toString().replace(/[^\d.-]/g, '');
+        var cur = parseFloat(curRaw);
+        if (!isFinite(cur)) {
+          cur = (min !== null && isFinite(min)) ? min : 0;
+        }
+        var next = cur + delta;
+        if (min !== null && next < min) next = min;
+        if (max !== null && next > max) next = max;
+        // 整数ステップなら整数に丸める
+        if (Number.isInteger(step)) next = Math.round(next);
+        input.value = String(next);
+        input.dispatchEvent(new Event('input',  { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      };
+
+      var minusBtn = mkBtn(-1);
+      var plusBtn  = mkBtn(1);
+
+      // オートリピート（120ms 間隔、300ms 後に加速）
+      function attachHold(btn, dir) {
+        var timer = null;
+        var accel = null;
+        var start = function (e) {
+          e.preventDefault();
+          apply(dir * step);
+          accel = setTimeout(function () {
+            timer = setInterval(function () { apply(dir * step); }, 90);
+          }, 320);
+        };
+        var stop = function () {
+          if (accel)  { clearTimeout(accel);  accel = null; }
+          if (timer)  { clearInterval(timer); timer = null; }
+        };
+        btn.addEventListener('pointerdown', start);
+        btn.addEventListener('pointerup',   stop);
+        btn.addEventListener('pointerleave',stop);
+        btn.addEventListener('pointercancel',stop);
+      }
+      attachHold(minusBtn, -1);
+      attachHold(plusBtn,   1);
+
+      // input の左に - 、右に + を挿入（.metric-unit があればその手前）
+      wrap.insertBefore(minusBtn, input);
+      var unit = wrap.querySelector('.metric-unit');
+      if (unit) wrap.insertBefore(plusBtn, unit.nextSibling);
+      else wrap.appendChild(plusBtn);
+    });
   }
 
   if (document.readyState !== 'loading') initBehaviors();

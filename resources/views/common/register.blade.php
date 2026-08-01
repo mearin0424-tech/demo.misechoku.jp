@@ -212,36 +212,24 @@
                     </label>
 
                     <div class="register-skip-target" @if(old('profile_skip')) hidden @endif>
+                    {{-- === 自己PR === （編集画面と同順） --}}
                     <label class="register-field">
-                        <span>自己紹介</span>
+                        <span>自己PR</span>
                         <textarea name="intro" rows="4" placeholder="自己紹介" data-rw-suggest="intro">{{ old('intro') }}</textarea>
                     </label>
 
-                    @if(!empty($masters['industries']) && $masters['industries']->isNotEmpty())
-                    <div class="register-field">
-                        <span>希望業種</span>
-                        <div class="register-chip-grid">
-                            @foreach($masters['industries'] as $industry)
-                                <label class="register-chip">
-                                    <input type="checkbox" name="industry_ids[]" value="{{ $industry->id }}" @checked(in_array((int)$industry->id, old('industry_ids', []), true))>
-                                    <span>{{ $industry->name }}</span>
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
-                    @endif
-
+                    {{-- === 体型・ルックス情報 === （編集画面と同順：身長→体重→BWH→ルックス→性格・内面） --}}
                     <div class="metric-pair">
                         <div class="metric-field">
                             <label class="metric-field-label" for="reg-height">身長 <small>cm</small></label>
-                            <div class="metric-input-wrap">
+                            <div class="metric-input-wrap" data-stepper data-step="1">
                                 <input type="number" id="reg-height" name="height" value="{{ old('height') }}" inputmode="numeric" pattern="[0-9]*" min="130" max="200" placeholder="160">
                                 <span class="metric-unit">cm</span>
                             </div>
                         </div>
                         <div class="metric-field">
                             <label class="metric-field-label" for="reg-weight">体重 <small>kg</small></label>
-                            <div class="metric-input-wrap">
+                            <div class="metric-input-wrap" data-stepper data-step="1">
                                 <input type="number" id="reg-weight" name="weight" value="{{ old('weight') }}" inputmode="numeric" pattern="[0-9]*" min="30" max="150" placeholder="48">
                                 <span class="metric-unit">kg</span>
                             </div>
@@ -287,6 +275,21 @@
                                 <label class="register-chip">
                                     <input type="checkbox" name="personality_tag_ids[]" value="{{ $personality->id }}" @checked(in_array((int)$personality->id, old('personality_tag_ids', []), true))>
                                     <span>{{ $personality->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
+                    {{-- === 希望の働き方 === （編集画面と同順：希望職種→現職業→ナイトワーク経験） --}}
+                    @if(!empty($masters['industries']) && $masters['industries']->isNotEmpty())
+                    <div class="register-field">
+                        <span>希望職種</span>
+                        <div class="register-chip-grid">
+                            @foreach($masters['industries'] as $industry)
+                                <label class="register-chip">
+                                    <input type="checkbox" name="industry_ids[]" value="{{ $industry->id }}" @checked(in_array((int)$industry->id, old('industry_ids', []), true))>
+                                    <span>{{ $industry->name }}</span>
                                 </label>
                             @endforeach
                         </div>
@@ -1436,24 +1439,12 @@
             padding: 12px 14px !important;
         }
 
-        /* 3サイズ・身長体重 */
+        /* 3サイズ・身長体重の共通スタイルは form-controls.css の §数値入力コンポーネント
+           に統一済み（2026-08-01）。ここではラベル色だけ register 用に上書き。 */
         body.page-auth-register .metric-field-label,
         body.page-auth-register .bwh-group > span {
-            font-size: 0.82rem !important;
-            font-weight: 700 !important;
             color: #4c1d95 !important;
         }
-        body.page-auth-register .metric-input-wrap input,
-        body.page-auth-register .bwh-field input {
-            padding: 12px 14px !important;
-            border-radius: 12px !important;
-            border: 1.5px solid rgba(124, 58, 237, 0.22) !important;
-            background: #faf7ff !important;
-            color: #1e1a2e !important;
-            font-size: 16px !important;
-        }
-        body.page-auth-register .bwh-letter { color: #7c3aed !important; font-weight: 800; }
-        body.page-auth-register .metric-unit { color: #857ca0 !important; }
 
         /* アラート */
         body.page-auth-register .register-alert {

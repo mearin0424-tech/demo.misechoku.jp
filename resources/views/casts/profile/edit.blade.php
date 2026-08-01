@@ -18,13 +18,13 @@
 
 @push('scripts')
 <script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
-<script src="{{ asset('assets/js/form-enhance.js') }}"></script>
+<script src="{{ asset('assets/js/form-enhance.js') }}?v=20260802-phase3"></script>
 @endpush
 
 @section('content')
 <div class="cast-edit-page">
     @if(session('message'))
-        <p class="profile-edit-flash">{{ session('message') }}</p>
+        <p class="profile-edit-flash" data-flash-toast="success">{{ session('message') }}</p>
     @endif
 
     @php
@@ -91,14 +91,14 @@
             <div class="metric-pair">
                 <div class="metric-field">
                     <label class="metric-field-label" for="edit-height">身長 <small>cm</small></label>
-                    <div class="metric-input-wrap">
+                    <div class="metric-input-wrap" data-stepper data-step="1">
                         <input type="number" id="edit-height" name="height" value="{{ old('height', $profile['height']) }}" inputmode="numeric" pattern="[0-9]*" min="130" max="200" placeholder="160">
                         <span class="metric-unit">cm</span>
                     </div>
                 </div>
                 <div class="metric-field">
                     <label class="metric-field-label" for="edit-weight">体重 <small>kg</small></label>
-                    <div class="metric-input-wrap">
+                    <div class="metric-input-wrap" data-stepper data-step="1">
                         <input type="number" id="edit-weight" name="weight" value="{{ old('weight', $profile['weight']) }}" inputmode="numeric" pattern="[0-9]*" min="30" max="150" placeholder="48">
                         <span class="metric-unit">kg</span>
                     </div>

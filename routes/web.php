@@ -485,6 +485,9 @@ Route::prefix('shop')->name('shop.')->group(function () {
 */
 Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function () {
 
+    // 新規登録直後のチュートリアル
+    Route::get('/tutorial', [\App\Http\Controllers\Common\TutorialController::class, 'shopShow'])->name('tutorial');
+
     Route::get('/home', [ShopHome::class, 'index'])->name('home');
     Route::get('/search', [ShopSearch::class, 'index'])->name('search.index');
     Route::get('/search/{tab}', fn ($tab) => redirect()->route('shop.search.index', $tab === 'keep' ? ['tab' => 'keep'] : []))->where('tab', 'timeline|list|keep');
@@ -570,6 +573,9 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
 |--------------------------------------------------------------------------
 */
 Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function () {
+    // 新規登録直後のチュートリアル
+    Route::get('/tutorial', [\App\Http\Controllers\Common\TutorialController::class, 'castShow'])->name('tutorial');
+
     Route::get('/home', [ShopHome::class, 'index'])->name('home');
     Route::get('/profile/edit', [CastProfile::class, 'edit'])->name('profile.edit');
     Route::post('/profile/update', [CastProfile::class, 'update'])->name('profile.update');

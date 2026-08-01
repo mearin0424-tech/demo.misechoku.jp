@@ -519,12 +519,21 @@ a:hover {
     margin: 0;
 }
 
+/* ============================================================
+   数字入力コンポーネント（2026-08-01 リニューアル）
+   - 登録画面／編集画面で共通利用（HTMLマークアップ一致 + このCSS1箇所）
+   - ライトテーマ基調（白面 + 薄紫枠 + soft shadow）
+   - タップ領域 52px、値は 20px tabular-nums で読みやすく
+   - .metric-input-wrap に data-stepper 属性が付いていれば
+     JS (behaviors.js) が ± ボタンを自動注入する
+   ============================================================ */
+
 /* 身長・体重ペア */
 .metric-pair {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 12px;
+    gap: 12px;
+    margin-bottom: 14px;
 }
 .metric-field {
     display: flex;
@@ -536,101 +545,141 @@ a:hover {
     display: flex;
     align-items: baseline;
     gap: 6px;
-    font-size: 0.78rem;
+    font-size: 0.80rem;
     font-weight: 700;
-    color: rgba(232, 213, 163, 0.78);
-    letter-spacing: 0.04em;
+    color: #1e1a30;
+    letter-spacing: 0.02em;
 }
 .metric-field-label small,
 .metric-field-hint {
-    font-size: 0.66rem;
+    font-size: 0.70rem;
     font-weight: 600;
-    color: rgba(232, 213, 163, 0.5);
-    letter-spacing: 0.06em;
+    color: #8b84a1;
+    letter-spacing: 0.04em;
 }
 
-/* 入力エリア（input + 単位サフィックス） */
+/* 入力エリア（input + 単位サフィックス。data-stepper で ± ボタン付き） */
 .metric-input-wrap {
     display: flex;
-    align-items: center;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(168, 85, 247, 0.28);
-    border-radius: 10px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    align-items: stretch;
+    background: #ffffff;
+    border: 1.5px solid rgba(124, 58, 237, 0.30);
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(76, 29, 149, 0.06);
+    overflow: hidden;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 .metric-input-wrap:focus-within {
-    border-color: rgba(168, 85, 247, 0.6);
-    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.16);
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
 }
 .metric-input-wrap input {
     flex: 1;
     min-width: 0;
-    padding: 10px 0 10px 14px;
+    padding: 12px 0;
     border: 0;
     background: transparent;
-    color: #fff;
-    font-size: 17px; /* iOSズーム回避 */
-    font-weight: 700;
+    color: #1e1a30;
+    font-size: 20px;   /* iOSズーム回避 & 大きく読みやすく */
+    font-weight: 800;
     outline: none;
-    min-height: 44px;
+    min-height: 52px;
     font-variant-numeric: tabular-nums;
-    text-align: right;
+    text-align: center;
     box-shadow: none;
 }
 .metric-input-wrap input::placeholder {
-    color: rgba(255, 255, 255, 0.28);
+    color: #b9b3c7;
     font-weight: 500;
 }
 .metric-unit {
-    padding: 0 14px 0 6px;
-    font-size: 0.82rem;
+    padding: 0 14px;
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.85rem;
     font-weight: 700;
-    color: rgba(168, 85, 247, 0.85);
-    letter-spacing: 0.04em;
+    color: #7c3aed;
+    letter-spacing: 0.02em;
     pointer-events: none;
     user-select: none;
+    background: rgba(124, 58, 237, 0.06);
+    border-left: 1px solid rgba(124, 58, 237, 0.15);
 }
+
+/* ± ステッパーボタン（behaviors.js が data-stepper 属性で注入） */
+.metric-step {
+    flex: 0 0 44px;
+    width: 44px;
+    border: 0;
+    background: rgba(124, 58, 237, 0.06);
+    color: #7c3aed;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.12s ease, color 0.12s ease, transform 0.10s ease;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+.metric-step--minus { border-right: 1px solid rgba(124, 58, 237, 0.15); }
+.metric-step--plus  { border-left:  1px solid rgba(124, 58, 237, 0.15); }
+.metric-step:hover {
+    background: rgba(124, 58, 237, 0.14);
+    color: #6d28d9;
+}
+.metric-step:active {
+    transform: scale(0.94);
+    background: rgba(124, 58, 237, 0.20);
+}
+.metric-step:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    background: transparent;
+}
+/* ステッパーが付いた時は、右側の単位は「input と +ボタン」の間に来る */
+.metric-input-wrap[data-stepper] .metric-unit { border-left: 0; padding: 0 6px 0 4px; background: transparent; }
 
 /* BWHグループ */
 .bwh-group {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
     margin: 0 0 8px;
 }
 .bwh-row {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px;
+    gap: 10px;
 }
 .bwh-field {
     position: relative;
     display: flex;
     align-items: stretch;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(168, 85, 247, 0.28);
-    border-radius: 10px;
+    background: #ffffff;
+    border: 1.5px solid rgba(124, 58, 237, 0.30);
+    border-radius: 12px;
     overflow: hidden;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    box-shadow: 0 2px 6px rgba(76, 29, 149, 0.06);
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
     margin: 0;
 }
 .bwh-field:focus-within {
-    border-color: rgba(168, 85, 247, 0.6);
-    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.16);
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
 }
 .bwh-letter {
     flex-shrink: 0;
-    width: 30px;
+    width: 36px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.84rem;
+    font-size: 0.90rem;
     font-weight: 800;
-    color: #1a0814;
+    color: #ffffff;
     background: linear-gradient(145deg, #a78bfa, #7c3aed);
-    letter-spacing: 0.04em;
+    letter-spacing: 0.02em;
 }
 .bwh-field input {
     flex: 1;
@@ -638,17 +687,17 @@ a:hover {
     padding: 10px 6px;
     border: 0;
     background: transparent;
-    color: #fff;
-    font-size: 17px;
-    font-weight: 700;
+    color: #1e1a30;
+    font-size: 20px;
+    font-weight: 800;
     outline: none;
-    min-height: 44px;
+    min-height: 52px;
     text-align: center;
     font-variant-numeric: tabular-nums;
     box-shadow: none;
 }
 .bwh-field input::placeholder {
-    color: rgba(255, 255, 255, 0.22);
+    color: #b9b3c7;
     font-weight: 500;
 }
 

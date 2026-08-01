@@ -6,17 +6,20 @@
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/form-enhance.css') }}">
 <style>
-    /* Shop Information / 求人票系と揃えた店舗プロフィール編集 */
+    /* 店舗プロフィール編集：ライトテーマ（許可証・本人確認・キャスト編集と同じ doc トークン）
+       2026-08-01 Phase 2 リニューアル */
     .shop-profile-edit {
-        --spe-bg: #050505;
-        --spe-panel: #0a0a0a;
-        --spe-field: #110f0d;
-        --spe-border: #2a2015;
-        --spe-border-focus: rgba(168, 85, 247, 0.5);
-        --spe-gold: #a78bfa;
-        --spe-muted: #71717a;
-        --spe-hint: #52525b;
-        --spe-subheader-h: 56px;
+        --spe-bg:            #f5f2fb;
+        --spe-panel:         transparent;
+        --spe-field:         #ffffff;
+        --spe-border:        rgba(124, 58, 237, 0.30);
+        --spe-border-focus:  #7c3aed;
+        --spe-gold:          #7c3aed;
+        --spe-muted:         #4a4560;
+        --spe-hint:          #8b84a1;
+        --spe-ink:           #1e1a30;
+        --spe-line:          rgba(124, 58, 237, 0.18);
+        --spe-subheader-h:   56px;
         background: var(--spe-bg);
         min-height: 100%;
         margin: 0 calc(-1 * var(--content-padding-x, 16px));
@@ -28,13 +31,10 @@
         margin: 0 auto;
         min-height: 100%;
         background: var(--spe-panel);
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        /* fixed 化したサブヘッダーの高さぶんコンテンツを下げる */
+        box-shadow: none;
         padding-top: var(--spe-subheader-h, 56px);
     }
 
-    /* サブヘッダー：祖先の overflow-x hidden により sticky が効かずズレて
-       コンテンツが隠れていたため、EDIT JOB と同じ fixed 方式に統一 */
     .shop-profile-edit__top {
         position: fixed;
         top: var(--header-height, 60px);
@@ -44,24 +44,23 @@
         max-width: var(--max-content-width);
         height: var(--spe-subheader-h, 56px);
         box-sizing: border-box;
-        z-index: 1400; /* グローバルヘッダー(1500)より下、コンテンツより上 */
+        z-index: 1400;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 12px;
         padding: 0 16px;
-        background: rgba(10, 10, 10, 0.95);
+        background: rgba(245, 242, 251, 0.92);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        border-bottom: 1px solid var(--color-line, #2a2a2a);
+        border-bottom: 1px solid var(--spe-line);
     }
-    /* アンカースクロール時、fixed ヘッダー2段ぶんのマージンを確保 */
     .shop-profile-edit__form section {
         scroll-margin-top: calc(var(--header-height, 60px) + var(--spe-subheader-h, 56px) + 12px);
     }
 
     .shop-profile-edit__back {
-        color: #a1a1aa;
+        color: var(--spe-muted);
         padding: 4px;
         margin-left: -4px;
         text-decoration: none;
@@ -69,9 +68,7 @@
         line-height: 1;
         transition: color 0.15s ease;
     }
-    .shop-profile-edit__back:hover {
-        color: var(--spe-gold);
-    }
+    .shop-profile-edit__back:hover { color: var(--spe-gold); }
 
     .shop-profile-edit__title-block {
         text-align: center;
@@ -82,7 +79,7 @@
         margin: 0;
         font-size: 0.875rem;
         font-weight: 800;
-        color: #fff;
+        color: var(--spe-ink);
         letter-spacing: 0.2em;
         font-family: var(--font-sans);
     }
@@ -124,11 +121,59 @@
         padding: 0;
     }
 
+    /* セクションアンカーナビ：横スクロール chip 行 */
+    .shop-profile-edit__anchor-nav {
+        display: flex;
+        gap: 8px;
+        padding: 8px 16px 4px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        background: rgba(245, 242, 251, 0.85);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        border-bottom: 1px solid var(--spe-line);
+        position: sticky;
+        top: calc(var(--header-height, 60px) + var(--spe-subheader-h, 56px));
+        z-index: 100;
+    }
+    .shop-profile-edit__anchor-nav::-webkit-scrollbar { display: none; }
+    .shop-profile-edit__anchor-nav a {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 14px;
+        border-radius: 999px;
+        background: #ffffff;
+        border: 1px solid var(--spe-border);
+        color: var(--spe-muted);
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+    }
+    .shop-profile-edit__anchor-nav a:hover {
+        background: rgba(124, 58, 237, 0.06);
+        border-color: var(--spe-gold);
+        color: var(--spe-gold);
+    }
+    .shop-profile-edit__anchor-nav a i { font-size: 0.72rem; color: var(--spe-gold); }
+
     .shop-profile-edit__form {
-        padding: 20px 20px 8px;
+        padding: 16px;
         display: flex;
         flex-direction: column;
-        gap: 40px;
+        gap: 16px;
+    }
+    /* 各セクションをカード化（許可証・本人確認・キャスト編集と同じ doc-card 仕様） */
+    .shop-profile-edit__form > section {
+        background: #ffffff;
+        border: 1px solid var(--spe-line);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 4px 14px rgba(76, 29, 149, 0.08);
     }
 
     /* セクション見出し：許可証・本人確認・キャスト編集と同じ「小さめ・muted・UPPER」パターン */
@@ -136,19 +181,19 @@
         display: flex;
         align-items: center;
         gap: 6px;
-        margin: 0 0 20px;
+        margin: 0 0 14px;
         padding-bottom: 8px;
-        border-bottom: 1px solid #1f1a14;
+        border-bottom: 1px solid var(--spe-line);
         font-size: 0.78rem;
         font-family: var(--font-sans);
         font-weight: 800;
-        color: rgba(196, 181, 253, 0.85);
+        color: var(--spe-hint);
         letter-spacing: 0.12em;
         text-transform: uppercase;
     }
     .shop-profile-edit__section-title i {
         font-size: 0.85rem;
-        color: var(--spe-gold, #a78bfa);
+        color: var(--spe-gold);
         font-style: normal;
     }
 
@@ -161,10 +206,10 @@
 
     .shop-profile-edit__label {
         display: block;
-        font-size: 10px;
-        font-weight: 800;
-        color: var(--spe-gold);
-        margin: 0 0 6px 4px;
+        font-size: 0.80rem;
+        font-weight: 700;
+        color: var(--spe-ink);
+        margin: 0 0 6px 2px;
         letter-spacing: 0.02em;
     }
 
@@ -175,26 +220,28 @@
         box-sizing: border-box;
         background: var(--spe-field);
         border: 1px solid var(--spe-border);
-        border-radius: 8px;
-        padding: 12px 16px;
-        font-size: 0.875rem;
-        color: #fafafa;
-        transition: border-color 0.15s ease, background 0.15s ease;
+        border-radius: 10px;
+        padding: 10px 12px;
+        min-height: 44px;
+        font-size: 16px;   /* iOS ズーム回避 */
+        color: var(--spe-ink);
+        color-scheme: light;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
     .shop-profile-edit__input::placeholder,
     .shop-profile-edit__textarea::placeholder {
-        color: #52525b;
+        color: #b9b3c7;
     }
     .shop-profile-edit__input:focus,
     .shop-profile-edit__textarea:focus,
     .shop-profile-edit__select:focus {
         outline: none;
         border-color: var(--spe-border-focus);
-        background: #161311;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
     }
     .shop-profile-edit__textarea {
         resize: vertical;
-        min-height: 140px;
+        min-height: 120px;
         line-height: 1.6;
     }
 
@@ -203,8 +250,8 @@
     }
 
     .shop-profile-edit__hint {
-        margin: 6px 0 0 4px;
-        font-size: 10px;
+        margin: 6px 0 0 2px;
+        font-size: 0.72rem;
         line-height: 1.5;
         color: var(--spe-hint);
     }
@@ -229,8 +276,8 @@
         align-items: center;
         gap: 8px;
         margin-top: 10px;
-        font-size: 0.75rem;
-        color: #a1a1aa;
+        font-size: 0.82rem;
+        color: var(--spe-muted);
         cursor: pointer;
     }
     .shop-profile-edit__check-line input { width: auto; accent-color: var(--spe-gold); }
@@ -239,44 +286,44 @@
         display: flex;
         align-items: stretch;
         gap: 8px;
-        padding: 8px;
-        border: 1px solid var(--color-border, rgba(168, 85, 247, 0.22));
-        border-radius: 10px;
-        background: rgba(255,255,255,0.02);
+        padding: 10px;
+        border: 1px solid var(--spe-line);
+        border-radius: 12px;
+        background: #faf7ff;
         transition: border-color 0.15s ease, background 0.15s ease;
     }
     .shop-profile-edit__station-row:first-child {
-        border-color: var(--gold, #a78bfa);
-        background: rgba(168, 85, 247, 0.06);
+        border-color: rgba(124, 58, 237, 0.55);
+        background: rgba(124, 58, 237, 0.06);
     }
     .shop-profile-edit__station-row.is-dragging { opacity: 0.55; }
-    .shop-profile-edit__station-row.is-ghost { background: rgba(168, 85, 247, 0.18); }
+    .shop-profile-edit__station-row.is-ghost { background: rgba(124, 58, 237, 0.14); }
     .shop-profile-edit__station-drag {
         flex: 0 0 auto;
-        width: 32px;
+        width: 36px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         background: transparent;
         border: 0;
-        color: var(--color-text-muted, rgba(216,201,168,0.65));
+        color: var(--spe-hint);
         cursor: grab;
         touch-action: none;
-        border-radius: 6px;
+        border-radius: 8px;
     }
-    .shop-profile-edit__station-drag:hover { color: var(--gold, #a78bfa); background: rgba(168, 85, 247, 0.10); }
+    .shop-profile-edit__station-drag:hover { color: var(--spe-gold); background: rgba(124, 58, 237, 0.10); }
     .shop-profile-edit__station-drag:active { cursor: grabbing; }
     .shop-profile-edit__station-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
     .shop-profile-edit__station-badge {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        font-size: 0.68rem;
+        font-size: 0.70rem;
         font-weight: 700;
-        color: var(--color-text-muted, rgba(216,201,168,0.65));
+        color: var(--spe-hint);
         letter-spacing: 0.04em;
     }
-    .shop-profile-edit__station-row:first-child .shop-profile-edit__station-badge { color: var(--gold, #a78bfa); }
+    .shop-profile-edit__station-row:first-child .shop-profile-edit__station-badge { color: var(--spe-gold); }
     .shop-profile-edit__station-badge .is-main-pill {
         display: inline-flex;
         align-items: center;
@@ -284,8 +331,8 @@
         border-radius: 999px;
         font-size: 0.62rem;
         font-weight: 800;
-        background: var(--accent, #d670a2);
-        color: var(--on-accent, #1a0814);
+        background: var(--spe-gold);
+        color: #ffffff;
     }
     .shop-profile-edit__station-row:not(:first-child) .is-main-pill { display: none; }
     .shop-profile-edit__station-set-main {
@@ -294,27 +341,26 @@
         align-items: center;
         gap: 6px;
         margin-top: 6px;
-        padding: 5px 10px;
-        font-size: 0.7rem;
+        padding: 6px 12px;
+        font-size: 0.75rem;
         font-weight: 700;
-        background: transparent;
-        border: 1px solid var(--color-border, rgba(168, 85, 247, 0.22));
+        background: #ffffff;
+        border: 1px solid var(--spe-border);
         border-radius: 999px;
-        color: var(--color-text-muted, rgba(216,201,168,0.65));
+        color: var(--spe-muted);
         cursor: pointer;
         transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     }
     .shop-profile-edit__station-set-main:hover {
-        background: rgba(168, 85, 247, 0.10);
-        color: var(--gold-light, #c4b5fd);
-        border-color: var(--color-border-strong, rgba(168, 85, 247, 0.4));
+        background: rgba(124, 58, 237, 0.06);
+        color: var(--spe-gold);
+        border-color: var(--spe-gold);
     }
     .shop-profile-edit__station-set-main i { font-size: 0.66rem; }
-    /* メイン（先頭）の行は「設定済み」状態にして無効化 */
     .shop-profile-edit__station-row:first-child .shop-profile-edit__station-set-main {
-        background: var(--accent, #d670a2);
-        border-color: var(--accent, #d670a2);
-        color: var(--on-accent, #1a0814);
+        background: var(--spe-gold);
+        border-color: var(--spe-gold);
+        color: #ffffff;
         cursor: default;
         pointer-events: none;
     }
@@ -326,40 +372,41 @@
     }
     .shop-profile-edit__station-remove {
         flex: 0 0 auto;
-        width: 32px;
+        width: 36px;
         background: transparent;
         border: 0;
-        color: var(--color-text-muted, rgba(216,201,168,0.65));
+        color: var(--spe-hint);
         cursor: pointer;
-        border-radius: 6px;
+        border-radius: 8px;
     }
-    .shop-profile-edit__station-remove:hover { color: var(--color-danger, #fca5a5); background: rgba(248,113,113,0.10); }
+    .shop-profile-edit__station-remove:hover { color: #dc2626; background: rgba(220, 38, 38, 0.08); }
     .shop-profile-edit__station-info {
         display: flex;
         align-items: flex-start;
         gap: 6px;
         margin: 6px 0 10px;
-        padding: 8px 10px;
-        border-radius: 8px;
-        background: rgba(168, 85, 247, 0.06);
-        border: 1px solid rgba(168, 85, 247, 0.22);
-        font-size: 0.72rem;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: rgba(124, 58, 237, 0.06);
+        border: 1px solid var(--spe-line);
+        font-size: 0.76rem;
         line-height: 1.55;
-        color: var(--color-text, #d8c9a8);
+        color: var(--spe-muted);
     }
-    .shop-profile-edit__station-info i { color: var(--gold, #a78bfa); margin-top: 2px; }
+    .shop-profile-edit__station-info i { color: var(--spe-gold); margin-top: 2px; }
     .shop-profile-edit__station-add {
         align-self: flex-start;
         margin-top: 4px;
-        padding: 8px 12px;
-        font-size: 0.72rem;
+        padding: 8px 14px;
+        font-size: 0.76rem;
         font-weight: 700;
         color: var(--spe-gold);
-        background: transparent;
-        border: 1px dashed rgba(168, 85, 247, 0.35);
-        border-radius: 8px;
+        background: #ffffff;
+        border: 1px dashed var(--spe-border);
+        border-radius: 999px;
         cursor: pointer;
     }
+    .shop-profile-edit__station-add:hover { background: rgba(124, 58, 237, 0.06); border-color: var(--spe-gold); }
     .shop-profile-edit__station-actions {
         display: flex;
         gap: 8px;
@@ -415,27 +462,27 @@
     .shop-profile-edit__chip span {
         display: inline-flex;
         align-items: center;
-        min-height: 34px;
-        padding: 6px 12px;
+        min-height: 36px;
+        padding: 7px 14px;
         border-radius: 999px;
         border: 1px solid var(--spe-border);
-        background: #141210;
-        color: #a1a1aa;
-        font-size: 0.75rem;
-        font-weight: 600;
-        transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+        background: #faf7ff;
+        color: var(--spe-muted);
+        font-size: 0.78rem;
+        font-weight: 700;
+        transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
     }
     .shop-profile-edit__chip:hover span {
-        border-color: #3a2a18;
+        background: rgba(124, 58, 237, 0.06);
+        border-color: var(--spe-gold);
     }
     .shop-profile-edit__chip input:checked + span {
         border-color: var(--spe-gold);
-        background: #2a2210;
+        background: rgba(124, 58, 237, 0.12);
         color: var(--spe-gold);
-        box-shadow: 0 0 10px rgba(168, 85, 247, 0.1);
     }
     .shop-profile-edit__chip input:focus-visible + span {
-        outline: 2px solid rgba(168, 85, 247, 0.45);
+        outline: 2px solid var(--spe-gold);
         outline-offset: 2px;
     }
 
@@ -451,10 +498,8 @@
         padding-left: max(16px, env(safe-area-inset-left, 0px));
         padding-right: max(16px, env(safe-area-inset-right, 0px));
         padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-        background: rgba(10, 10, 10, 0.95);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-top: 1px solid #1f1a14;
+        background: linear-gradient(to top, rgba(245, 242, 251, 0.98) 55%, rgba(245, 242, 251, 0.90) 85%, rgba(245, 242, 251, 0));
+        border-top: 1px solid var(--spe-line);
         box-sizing: border-box;
     }
     .shop-profile-edit__actions-inner {
@@ -471,51 +516,53 @@
         align-items: center;
         justify-content: center;
         padding: 12px 18px;
-        border-radius: 8px;
-        font-size: 0.875rem;
+        border-radius: 10px;
+        font-size: 0.88rem;
         font-weight: 700;
-        color: #a1a1aa;
+        color: var(--spe-muted);
         text-decoration: none;
-        border: none;
-        background: transparent;
+        border: 1px solid var(--spe-line);
+        background: #ffffff;
         cursor: pointer;
-        transition: color 0.15s ease, background 0.15s ease;
+        transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
     }
     .shop-profile-edit__cancel:hover {
-        color: #fff;
-        background: #18181b;
+        color: var(--spe-ink);
+        border-color: var(--spe-gold);
     }
 
+    /* Primary CTA レシピ準拠（DESIGN.md §10） */
     .shop-profile-edit__submit {
         flex: 1;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
+        min-height: 50px;
         padding: 12px 16px;
-        border: none;
-        border-radius: 8px;
-        font-size: 0.875rem;
+        border: 0;
+        border-radius: 12px;
+        font-size: 0.95rem;
         font-weight: 800;
         cursor: pointer;
-        color: var(--on-accent, #1a0814);
-        background: var(--accent, #d670a2);
-        box-shadow: 0 6px 14px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.20), inset 0 -1px 0 rgba(0,0,0,.18);
-        transition: filter 0.15s ease, transform 0.15s ease;
-    }
-    .shop-profile-edit__submit:hover {
-        filter: brightness(1.06);
+        color: var(--on-accent-strong, #ffffff);
+        background: linear-gradient(135deg, var(--accent-grad-from, #a78bfa), var(--accent-grad-to, #7c3aed));
+        box-shadow:
+            0 6px 14px rgba(0, 0, 0, 0.45),
+            inset 0 1px 0 rgba(255, 255, 255, 0.20),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.18);
+        transition: transform 0.12s ease;
     }
     .shop-profile-edit__submit:active {
         transform: scale(0.97);
-        box-shadow: 0 2px 5px rgba(0,0,0,.45), inset 0 2px 4px rgba(0,0,0,.2);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.45), inset 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 </style>
 @endpush
 
 @push('scripts')
 <script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
-<script src="{{ asset('assets/js/form-enhance.js') }}"></script>
+<script src="{{ asset('assets/js/form-enhance.js') }}?v=20260802-phase3"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var lastCb = document.querySelector('.js-biz-close-last');
@@ -695,7 +742,7 @@ document.addEventListener('DOMContentLoaded', function () {
         </header>
 
         @if(session('message'))
-            <p class="shop-profile-edit__flash" role="status">{{ session('message') }}</p>
+            <p class="shop-profile-edit__flash" role="status" data-flash-toast="success">{{ session('message') }}</p>
         @endif
 
         @if($errors->any())
@@ -708,6 +755,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 </ul>
             </div>
         @endif
+
+        {{-- セクションアンカーナビ（2026-08-01 Phase 3）：各セクションへ即ジャンプ --}}
+        <nav class="shop-profile-edit__anchor-nav" aria-label="セクション">
+            <a href="#spe-sec-basic" data-form-guard-bypass><i class="fas fa-info-circle"></i>基本</a>
+            <a href="#spe-sec-loc"   data-form-guard-bypass><i class="fas fa-map-marker-alt"></i>位置</a>
+            <a href="#spe-sec-hours" data-form-guard-bypass><i class="far fa-clock"></i>営業時間</a>
+            <a href="#spe-sec-st"    data-form-guard-bypass><i class="fas fa-train"></i>最寄り駅</a>
+            <a href="#spe-sec-tags"  data-form-guard-bypass><i class="fas fa-tags"></i>タグ</a>
+        </nav>
 
         <form id="shop-profile-edit-form" action="{{ route('shop.profile.update') }}" method="POST" class="h-adr shop-profile-edit__form"
               data-form-guard data-completion-meter>

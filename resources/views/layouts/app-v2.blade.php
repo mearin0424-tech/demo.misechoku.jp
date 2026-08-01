@@ -8,7 +8,7 @@
         $metaDescription = trim($__env->yieldContent('meta_description')) ?: 'ミセチョクのデモサイトです。';
         $metaImage = trim($__env->yieldContent('meta_image')) ?: asset('assets/images/pwa/icon-512.png');
         $canonicalUrl = trim($__env->yieldContent('canonical')) ?: url()->current();
-        $assetVersion = '20260801-btn-rules';
+        $assetVersion = '20260802-phase3';
         $resolvedTitle = $metaTitle !== ''
             ? $metaTitle
             : ($pageTitle !== '' ? $pageTitle . ' | ' . config('app.name', 'ミセチョク') : config('app.name', 'ミセチョク'));
@@ -279,22 +279,8 @@
            タブなし（shop）はサブヘッダーが無く、main の padding-top で global-header を回避済み。
            → 二重余白を防ぐため、ここでの padding-top 強制は撤去 */
 
-        /* Fix 3: /cast/profile/edit の身長・体重・3サイズフィールド
-           input と単位（cm/kg）を横並びに */
-        .metric-input-wrap {
-            display: flex !important;
-            align-items: center !important;
-            gap: 8px !important;
-        }
-        .metric-input-wrap input[type="number"] {
-            width: 80px !important;
-            flex-shrink: 0 !important;
-        }
-        .metric-unit {
-            flex-shrink: 0 !important;
-            font-size: 0.875rem !important;
-            color: inherit !important;
-        }
+        /* .metric-input-wrap / .bwh-field は app.css §数字入力コンポーネント
+           に統一済み（2026-08-01 リニューアル）。旧 layout hack はここで撤去。 */
 
         /* Fix 5: /cast/talk の店舗名が 2 行に折り返すのを 1 行省略へ */
         .talk-name {

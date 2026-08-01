@@ -140,11 +140,29 @@
     }
 
     // ================================================================
+    // 3. 保存フラッシュ → グローバルトースト（統一）
+    //    session('message') / session('status') / session('success') を
+    //    Blade で <p class="*-flash" data-flash-toast="success">...</p> と書けば、
+    //    ページ表示時に window.appToast() で通知して、インラインの p は非表示にする。
+    // ================================================================
+    function promoteFlashToToast() {
+        if (typeof window.appToast !== 'function') return;
+        document.querySelectorAll('[data-flash-toast]').forEach(function (el) {
+            var msg = (el.textContent || '').trim();
+            if (!msg) return;
+            var variant = el.getAttribute('data-flash-toast') || 'success';
+            window.appToast(msg, variant);
+            el.hidden = true;
+        });
+    }
+
+    // ================================================================
     // 起動
     // ================================================================
     function boot() {
         document.querySelectorAll('form[data-form-guard]').forEach(initFormGuard);
         document.querySelectorAll('form[data-completion-meter]').forEach(initCompletionMeter);
+        promoteFlashToToast();
     }
 
     if (document.readyState === 'loading') {

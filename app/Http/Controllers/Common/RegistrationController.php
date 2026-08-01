@@ -189,7 +189,7 @@ class RegistrationController extends Controller
         $request->session()->regenerate();
 
         return redirect()
-            ->route('cast.home')
+            ->route('cast.tutorial')
             ->with('message', 'キャストアカウントを登録しました。');
     }
 
@@ -349,7 +349,7 @@ class RegistrationController extends Controller
         }
 
         return redirect()
-            ->route('shop.mypage.index')
+            ->route('shop.tutorial')
             ->with('message', '店舗アカウントを登録しました。許可証の提出はマイページからお願いします。');
     }
 
