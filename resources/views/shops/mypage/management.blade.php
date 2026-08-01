@@ -3,7 +3,7 @@
 @section('title', '採用・入金管理')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/recruitment.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/recruitment.css') }}?v=20260801-btn-rules">
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/management.css') }}?v=20260508">
 <link rel="stylesheet" href="{{ asset('assets/css/case-flow.css') }}?v=20260720-talk-open">

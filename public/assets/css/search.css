@@ -52,12 +52,23 @@ body.page-search .contents.search-page-body {
     margin-top: 0;
 }
 
-body.page-search #pane-list.tab-pane.active {
+body.page-search #pane-list.tab-pane.active,
+body.page-search #pane-ai.tab-pane.active {
     flex: 1 1 auto;
     min-height: 0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+}
+
+/* AI コンシェルジュ：スレッドは flex で伸縮、コンポーザー（クイックリプライ + 入力欄）は
+   常に画面内の下部に固定表示。ボトムナビの直上に浮かせて選択肢を隠さない。 */
+body.page-search #pane-ai.tab-pane.active .ai-chat {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    margin: 12px 12px 0;
 }
 
 body.page-search .connection-list--search {
@@ -1929,11 +1940,19 @@ body.page-search .connection-list--search {
 
 .ai-chat__thread {
     padding: 14px 14px 8px;
+    /* デフォルト（フォールバック）は上限あり。flex 親の中では下記オーバーライドで
+       画面高さいっぱいに伸縮する。 */
     max-height: 480px;
     overflow-y: auto;
     display: flex; flex-direction: column; gap: 10px;
     scrollbar-width: thin;
     scrollbar-color: rgba(168, 85, 247, 0.45) transparent;
+}
+/* AI パネル内では max-height 制限を外し、flex-grow で余白を全部使う */
+body.page-search #pane-ai.tab-pane.active .ai-chat__thread {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
 }
 .ai-chat__thread::-webkit-scrollbar { width: 6px; }
 .ai-chat__thread::-webkit-scrollbar-thumb {
@@ -2060,38 +2079,52 @@ body.page-search .connection-list--search {
 /* コンポーザー：クイックリプライ + 入力フォーム（スレッド下に固定） */
 .ai-chat__composer {
     flex: 0 0 auto;
-    background: rgba(0, 0, 0, 0.35);
-    border-top: 1px solid rgba(168, 85, 247, 0.3);
+    background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.55), rgba(10, 6, 20, 0.85));
+    border-top: 1px solid rgba(168, 85, 247, 0.45);
+    box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.35);
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
 }
 
-/* クイックリプライ（chip）：横スクロール1行でコンポーザーの高さを圧縮 */
+/* 回答選択欄（chip）：折り返して全選択肢を一望できる形に。
+   タップ領域も 44px 目安で確保（Human Interface Guidelines 準拠）。 */
 .ai-chat__quick-replies {
-    display: flex; flex-wrap: nowrap; gap: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
     padding: 0 14px;
     min-height: 0;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
 }
-.ai-chat__quick-replies::-webkit-scrollbar { display: none; }
-.ai-chat__quick-replies:not(:empty) { padding-top: 10px; }
+.ai-chat__quick-replies:not(:empty) {
+    padding-top: 12px;
+    padding-bottom: 4px;
+}
 .ai-chat__quick {
-    flex: 0 0 auto;
-    padding: 7px 14px;
+    flex: 0 1 auto;
+    min-height: 40px;
+    padding: 9px 16px;
     border-radius: 999px;
-    background: rgba(168, 85, 247, 0.10);
-    border: 1px solid rgba(168, 85, 247, 0.45);
-    color: #e6dffc;
-    font-size: 0.78rem; font-weight: 700;
+    background: linear-gradient(180deg, rgba(168, 85, 247, 0.22), rgba(124, 58, 237, 0.15));
+    border: 1px solid rgba(168, 85, 247, 0.60);
+    color: #f3ecff;
+    font-size: 0.86rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
     cursor: pointer;
-    transition: background .15s ease;
+    transition: background .15s ease, border-color .15s ease, transform .12s ease;
     font-family: inherit;
     white-space: nowrap;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        0 2px 6px rgba(124, 58, 237, 0.25);
 }
 .ai-chat__quick:hover {
-    background: rgba(168, 85, 247, 0.22);
-    border-color: rgba(168, 85, 247, 0.75);
+    background: linear-gradient(180deg, rgba(168, 85, 247, 0.36), rgba(124, 58, 237, 0.24));
+    border-color: rgba(196, 181, 253, 0.80);
 }
+.ai-chat__quick:active { transform: scale(0.97); }
 
 /* 入力フォーム */
 .ai-chat__form {

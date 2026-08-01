@@ -15,7 +15,7 @@ class MemberAuth
     {
         if (!auth()->guard('member')->check()) {
             return redirect()
-                ->route('login.demo')
+                ->route('cast.login')
                 ->with('message', 'ログインの有効期限が切れました。もう一度ログインしてください。');
         }
 

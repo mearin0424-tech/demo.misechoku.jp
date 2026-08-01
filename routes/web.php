@@ -13,6 +13,7 @@ use App\Http\Controllers\Common\DemoLoginController;
 use App\Http\Controllers\Common\BankLookupController;
 use App\Http\Controllers\Common\RegistrationController;
 use App\Http\Controllers\Auth\Cast\LoginController as CastLogin;
+use App\Http\Controllers\Auth\Shop\LoginController as ShopLogin;
 use App\Http\Controllers\Auth\LineLoginController as LineLogin;
 use App\Http\Controllers\LineWebhookController;
 use App\Http\Controllers\Common\TalkController as TalkController;
@@ -72,7 +73,7 @@ Route::get('/favicon.ico', function () {
 */
 Route::get('/manifest.json', function () {
     // 未ログインでも 200 で開ける URL にする（Chrome のインストール判定が通りやすい）
-    $startUrl = '/login?utm_source=pwa';
+    $startUrl = '/login/demo?utm_source=pwa';
     $manifest = [
         'name' => 'ミセチョク',
         'short_name' => 'ミセチョク',
@@ -128,7 +129,9 @@ Route::get('/bk/{path}', function ($path) {
 Route::prefix('admin')->name('admin.')->group(function () {
 
     // 繝ｭ繧ｰ繧､繝ｳ縺ｯ蜈ｱ騾・/login 縺ｫ邨ｱ荳・医Μ繝繧､繝ｬ繧ｯ繝医・縺ｿ・・
-    Route::get('/login', fn () => redirect('/login'))->name('login');
+    // 運営（管理者）ログイン：本番用の独立URL
+    Route::get('/login', [AdminAuth::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AdminAuth::class, 'login'])->name('login.post');
     Route::post('/logout', [AdminAuth::class, 'logout'])->name('logout');
 
     // 邂｡逅・判髱｢譛ｬ菴・
@@ -344,8 +347,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 |--------------------------------------------------------------------------
 */
 // 繝・Δ逕ｨ蜈ｱ騾壹Ο繧ｰ繧､繝ｳ
-Route::get('/login', [DemoLoginController::class, 'show'])->name('login.demo');
-Route::post('/login', [DemoLoginController::class, 'login'])->name('login.demo.post');
+// デモ用ログイン：/login/demo（本番用は cast.login / shop.login / admin.login）
+Route::get('/login/demo', [DemoLoginController::class, 'show'])->name('login.demo');
+Route::post('/login/demo', [DemoLoginController::class, 'login'])->name('login.demo.post');
+// 旧URL（/login）からの後方互換リダイレクト
+Route::get('/login', fn () => redirect()->route('login.demo'));
 
 // LINE繝ｭ繧ｰ繧､繝ｳ
 Route::get('/login/line', [LineLogin::class, 'redirect'])->name('login.line.redirect');
@@ -454,13 +460,20 @@ Route::get('/api/geocoding/suggest', [\App\Http\Controllers\Common\LocationContr
     ->name('api.geocoding.suggest');
 
 Route::prefix('cast')->name('cast.')->group(function () {
-    Route::get('/login', fn () => redirect('/login'))->name('login');
+    // キャスト：本番用ログイン
+    Route::get('/login', [CastLogin::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [CastLogin::class, 'login'])->name('login.post');
+    Route::post('/logout', [CastLogin::class, 'logout'])->name('logout');
+    // キャスト：新規登録
     Route::get('/register', [RegistrationController::class, 'showCast'])->name('register');
     Route::post('/register', [RegistrationController::class, 'storeCast'])->name('register.store');
 });
 
 Route::prefix('shop')->name('shop.')->group(function () {
-    Route::get('/login', fn () => redirect('/login'))->name('login');
+    // 店舗：本番用ログイン
+    Route::get('/login', [ShopLogin::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [ShopLogin::class, 'login'])->name('login.post');
+    // 店舗：新規登録
     Route::get('/register', [RegistrationController::class, 'showShop'])->name('register');
     Route::post('/register', [RegistrationController::class, 'storeShop'])->name('register.store');
 });

@@ -10,7 +10,7 @@
 @section('body-class', 'page-talk page-talk-room')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260720-row-layout">
+<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260801-quick-reply">
 @if($isCast)
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/review-modal.css') }}">
@@ -67,66 +67,111 @@
     .hired-wage-field-wrap.is-visible {
         display: block;
     }
-    /* ===== クイック定型文パネル：カードグリッド版 ===== */
+    /* ============================================================
+       クイック定型文パネル（2026-08-01 リニューアル）
+       - キーボード表示中もパネルは隠さず、コンパクト（横1列スクロール）に変形
+       - パネル頭の折りたたみハンドルで手動で完全に閉じられる
+       - is-hidden は撤廃（意図せぬ非表示の原因だったため）
+       ============================================================ */
     .quick-reply-panel {
-        padding: 8px 0 2px;
-        max-height: 240px;
+        padding: 6px 0 0;
         opacity: 1;
         overflow: hidden;
-        transition: max-height 0.2s ease, opacity 0.15s ease, padding 0.2s ease;
+        transition: max-height 0.22s ease, padding 0.22s ease;
+        max-height: 240px;
     }
-    .quick-reply-panel.is-hidden {
-        max-height: 0;
-        opacity: 0;
-        padding: 0;
-        pointer-events: none;
+    /* コンパクト：入力欄フォーカス中 = キーボード表示中の想定。chip 1行だけ残す */
+    .quick-reply-panel.is-compact {
+        max-height: 60px;
+        padding-top: 4px;
     }
+    /* コンパクト時は head を隠して chip 領域を最大化 */
+    .quick-reply-panel.is-compact .quick-reply-panel__head { display: none; }
+    /* 手動折りたたみ：ハンドルだけ残す（chip なし） */
+    .quick-reply-panel.is-collapsed {
+        max-height: 30px;
+        padding-top: 0;
+    }
+
     .quick-reply-panel__head {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 8px;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
+        padding: 0 2px;
     }
+    .quick-reply-panel.is-compact .quick-reply-panel__head,
+    .quick-reply-panel.is-collapsed .quick-reply-panel__head { margin-bottom: 4px; }
+
     .quick-reply-panel__label {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
-        font-size: 0.68rem;
+        gap: 6px;
+        font-size: 0.72rem;
         font-weight: 800;
         color: #6d28d9;
-        letter-spacing: 0.03em;
+        letter-spacing: 0.02em;
         min-width: 0;
         overflow: hidden;
     }
+    .quick-reply-panel.is-compact .quick-reply-panel__label > span:not(.quick-reply-panel__status) { display: none; }
+    .quick-reply-panel.is-collapsed .quick-reply-panel__label { color: #857ca0; }
+
     .quick-reply-panel__status {
-        padding: 1px 8px;
+        padding: 2px 8px;
         border-radius: 999px;
         background: rgba(124, 58, 237, 0.10);
         border: 1px solid rgba(124, 58, 237, 0.30);
-        font-size: 0.64rem;
+        font-size: 0.66rem;
         font-weight: 800;
         color: #6d28d9;
         white-space: nowrap;
     }
+
+    /* ハンドル群（右側）：折りたたみトグル + 編集 */
+    .quick-reply-panel__tools {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .quick-reply-panel__toggle,
     .quick-reply-panel__edit {
         flex: 0 0 auto;
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 4px;
         padding: 4px 10px;
         border-radius: 999px;
         border: 1px solid rgba(124, 58, 237, 0.35);
         background: #ffffff;
         color: #6d28d9;
-        font-size: 0.7rem;
+        font-size: 0.72rem;
         font-weight: 800;
         cursor: pointer;
-        min-height: 28px;
+        min-height: 30px;
+        transition: background 0.12s ease, border-color 0.12s ease, transform 0.1s ease;
     }
+    .quick-reply-panel__toggle {
+        min-width: 34px;
+        padding: 4px 8px;
+    }
+    .quick-reply-panel__toggle:hover,
+    .quick-reply-panel__edit:hover {
+        background: rgba(124, 58, 237, 0.06);
+        border-color: rgba(124, 58, 237, 0.60);
+    }
+    .quick-reply-panel__toggle:active,
     .quick-reply-panel__edit:active { transform: scale(0.96); }
+    .quick-reply-panel__toggle i {
+        transition: transform 0.2s ease;
+        font-size: 0.72rem;
+    }
+    .quick-reply-panel.is-collapsed .quick-reply-panel__toggle i { transform: rotate(180deg); }
 
-    /* カードグリッド：2列固定、パネル内スクロール */
+    /* カードグリッド：デフォルトは 2 列。コンパクト時は横スクロールの chip 1 列 */
     .quick-reply-panel__grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -138,6 +183,18 @@
         scrollbar-width: none;
     }
     .quick-reply-panel__grid::-webkit-scrollbar { display: none; }
+    /* コンパクト時：flex 横スクロール */
+    .quick-reply-panel.is-compact .quick-reply-panel__grid {
+        display: flex;
+        grid-template-columns: none;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        max-height: 48px;
+        gap: 6px;
+        padding: 2px 2px 6px;
+    }
+    .quick-reply-panel.is-collapsed .quick-reply-panel__grid { display: none; }
 
     .quick-reply-card {
         position: relative;
@@ -177,6 +234,25 @@
         color: #a16207;
         margin-bottom: 1px;
     }
+    /* コンパクト時のカードは 1 行の pill */
+    .quick-reply-panel.is-compact .quick-reply-card {
+        flex: 0 0 auto;
+        flex-direction: row;
+        align-items: center;
+        min-height: 38px;
+        max-width: 240px;
+        padding: 7px 14px;
+        border-radius: 999px;
+        gap: 6px;
+    }
+    .quick-reply-panel.is-compact .quick-reply-card__slot-no { display: none; }
+    .quick-reply-panel.is-compact .quick-reply-card__body {
+        -webkit-line-clamp: 1;
+        font-size: 0.76rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
     /* おすすめ（進行状況ベース）：淡バイオレット面 */
     .quick-reply-card--suggest {
         background: rgba(124, 58, 237, 0.08);
@@ -192,6 +268,24 @@
         border-color: rgba(180, 83, 9, 0.30);
     }
     .quick-reply-card--slot .quick-reply-card__body { color: #4b465c; }
+    /* カテゴリ chip（カード先頭のミニラベル：質問／感謝 等） */
+    .quick-reply-card__cat {
+        display: inline-block;
+        padding: 1px 7px;
+        border-radius: 999px;
+        font-size: 0.58rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        color: #7c3aed;
+        background: rgba(124, 58, 237, 0.10);
+        border: 1px solid rgba(124, 58, 237, 0.22);
+    }
+    .quick-reply-card__cat--thanks   { color: #b45309; background: rgba(217, 119, 6, 0.10); border-color: rgba(217, 119, 6, 0.22); }
+    .quick-reply-card__cat--schedule { color: #0f766e; background: rgba(20, 184, 166, 0.10); border-color: rgba(20, 184, 166, 0.28); }
+    .quick-reply-card__cat--intro    { color: #6d28d9; background: rgba(124, 58, 237, 0.10); border-color: rgba(124, 58, 237, 0.28); }
+    .quick-reply-card__cat--question { color: #2563eb; background: rgba(37, 99, 235, 0.10); border-color: rgba(37, 99, 235, 0.28); }
+    .quick-reply-card__cat--status   { color: #6d28d9; background: rgba(124, 58, 237, 0.10); border-color: rgba(124, 58, 237, 0.28); }
+    .quick-reply-panel.is-compact .quick-reply-card__cat { display: none; }
 
     .hired-wage-field-wrap label {
         display: block;
@@ -233,7 +327,7 @@
     window.talkAllQuickReplies = @json($allQuickReplySuggestions ?? []);
     window.talkNgPayload = @json($ngWordPayload ?? ['patterns' => [], 'words' => []]);
 </script>
-<script src="{{ asset('assets/js/talk-room.js') }}?v=20260720-tpl-slide"></script>
+<script src="{{ asset('assets/js/talk-room.js') }}?v=20260801-tpl-category"></script>
 @endpush
 
 @section('content')
@@ -572,34 +666,63 @@
                 </div>
             </form>
 
-            {{-- クイック定型文パネル：デフォルト表示。入力欄フォーカスで隠れてキーボード優先。
-                 進行状況（応募〜面談〜採用）に応じた候補を先頭に、マイ定型文（4スロット）を後ろに並べる --}}
+            {{-- クイック定型文パネル（2026-08-01 リニューアル）:
+                 - キーボード表示中もパネルを隠さず、コンパクト（横1列 chip）に自動変形
+                 - 右上のハンドルで手動折りたたみ可能（設定は sessionStorage に保存）
+                 - suggestion に category chip を付けて視認性向上 --}}
             <div id="quick-reply-panel" class="quick-reply-panel" aria-label="定型文パネル">
                 <div class="quick-reply-panel__head">
                     <span class="quick-reply-panel__label">
                         <i class="fas fa-bolt" aria-hidden="true"></i>
-                        <span>{{ !empty($currentStatusLabel) ? 'いまの状況におすすめの定型文' : '定型文' }}</span>
+                        <span>定型文</span>
                         @if(!empty($currentStatusLabel))
                             <span class="quick-reply-panel__status">{{ $currentStatusLabel }}</span>
                         @endif
                     </span>
-                    {{-- マイ定型文の編集導線：既存の＋メニュー内「定型文を使う」を開く --}}
-                    <button type="button" class="quick-reply-panel__edit" id="quick-reply-open-editor" aria-label="マイ定型文を編集">
-                        <i class="fas fa-pen-to-square" aria-hidden="true"></i>編集
-                    </button>
+                    <span class="quick-reply-panel__tools">
+                        <button type="button" class="quick-reply-panel__edit" id="quick-reply-open-editor" aria-label="定型文を編集・全て見る">
+                            <i class="fas fa-list" aria-hidden="true"></i>すべて
+                        </button>
+                        <button type="button" class="quick-reply-panel__toggle" id="quick-reply-toggle" aria-label="定型文パネルを開閉" aria-expanded="true">
+                            <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                        </button>
+                    </span>
                 </div>
                 <div class="quick-reply-panel__grid" id="quick-reply-scroll">
                     @if(!$isCast && !$isInterviewOfferLocked)
                         {{-- ＋メニュー廃止に伴い、面談候補日の送信導線をここに常設 --}}
                         <button type="button" class="quick-reply-card quick-reply-card--action" id="open-interview-modal-inline">
+                            <span class="quick-reply-card__cat quick-reply-card__cat--schedule">日程</span>
                             <span class="quick-reply-card__body"><i class="far fa-calendar-alt" aria-hidden="true"></i> 面談候補日を送信</span>
                         </button>
                     @endif
                     @foreach(($quickReplySuggestions ?? []) as $qr)
+                        @php
+                            // カテゴリ検出（TalkController の suggest は string または {category, body} を許容）
+                            $cat = null;
+                            $body = null;
+                            if (is_array($qr)) {
+                                $cat = $qr['category'] ?? null;
+                                $body = $qr['body'] ?? '';
+                            } else {
+                                $body = (string) $qr;
+                            }
+                            $catLabelMap = [
+                                'intro'    => ['自己紹介', 'intro'],
+                                'question' => ['質問',     'question'],
+                                'schedule' => ['日程',     'schedule'],
+                                'thanks'   => ['感謝',     'thanks'],
+                                'status'   => ['状況',     'status'],
+                            ];
+                            $catInfo = $cat && isset($catLabelMap[$cat]) ? $catLabelMap[$cat] : null;
+                        @endphp
                         <button type="button" class="quick-reply-card quick-reply-card--suggest"
-                                data-quick-reply="{{ $qr }}"
-                                title="{{ $qr }}">
-                            <span class="quick-reply-card__body">{{ $qr }}</span>
+                                data-quick-reply="{{ $body }}"
+                                title="{{ $body }}">
+                            @if($catInfo)
+                                <span class="quick-reply-card__cat quick-reply-card__cat--{{ $catInfo[1] }}">{{ $catInfo[0] }}</span>
+                            @endif
+                            <span class="quick-reply-card__body">{{ $body }}</span>
                         </button>
                     @endforeach
                     {{-- マイ定型文（4スロット）は JS が window.talkQuickTemplates から追加 --}}
@@ -885,7 +1008,7 @@
         scroll.appendChild(btn);
     });
 
-    // 「編集」ボタン → 定型文モーダルを直接開く（＋メニューは廃止済み）
+    // 「すべて」ボタン → 定型文モーダルを直接開く（＋メニューは廃止済み）
     var editBtn = document.getElementById('quick-reply-open-editor');
     if (editBtn) {
         editBtn.addEventListener('click', function () {
@@ -905,19 +1028,47 @@
 
     // チップ → 入力欄へ挿入。フォーカスは奪わない（パネルを保ったまま送信ボタンで即送信できる）
     panel.addEventListener('click', function (e) {
+        // トグル系のクリックは chip 選択から除外
+        if (e.target.closest('.quick-reply-panel__toggle, .quick-reply-panel__edit')) return;
         var chip = e.target.closest('[data-quick-reply]');
         if (!chip || !textarea) return;
         textarea.value = chip.getAttribute('data-quick-reply');
         textarea.dispatchEvent(new Event('input', { bubbles: true }));
     });
 
-    // 入力欄タッチ（フォーカス）→ パネルを隠してキーボード表示を優先。解除で再表示
+    // ------------------------------------------------------------------
+    // パネルの状態切替：
+    //   - 入力欄フォーカス中：is-compact（横1列 chip、常時可視）
+    //   - フォーカス外：通常グリッド
+    //   - ユーザー手動折りたたみ（is-collapsed）は sessionStorage に保存
+    // ------------------------------------------------------------------
+    var COLLAPSE_KEY = 'talkQuickReplyCollapsed';
+    var isManuallyCollapsed = sessionStorage.getItem(COLLAPSE_KEY) === '1';
+
+    function applyCollapsed() {
+        panel.classList.toggle('is-collapsed', isManuallyCollapsed);
+        var toggle = document.getElementById('quick-reply-toggle');
+        if (toggle) toggle.setAttribute('aria-expanded', isManuallyCollapsed ? 'false' : 'true');
+    }
+    applyCollapsed();
+
+    var toggleBtn = document.getElementById('quick-reply-toggle');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function () {
+            isManuallyCollapsed = !isManuallyCollapsed;
+            sessionStorage.setItem(COLLAPSE_KEY, isManuallyCollapsed ? '1' : '0');
+            applyCollapsed();
+        });
+    }
+
+    // 入力欄フォーカス/ブラー：完全非表示にせず、コンパクト表示に切替（キーボード表示中も chip が見える）
     if (textarea) {
         textarea.addEventListener('focus', function () {
-            panel.classList.add('is-hidden');
+            if (!isManuallyCollapsed) panel.classList.add('is-compact');
         });
         textarea.addEventListener('blur', function () {
-            setTimeout(function () { panel.classList.remove('is-hidden'); }, 180);
+            // 180ms 待って chip タップとの競合を避ける
+            setTimeout(function () { panel.classList.remove('is-compact'); }, 180);
         });
     }
 
@@ -931,6 +1082,34 @@
         };
         apply();
         if ('ResizeObserver' in window) new ResizeObserver(apply).observe(inputArea);
+    }
+
+    // ------------------------------------------------------------------
+    // キーボード対応：
+    //   - #talk-room-container は 100dvh でキーボード表示中は自動で縮む（レイアウト側）
+    //   - JS では visualViewport の状態変化を .is-kbd-open クラスで反映し、
+    //     padding など補助的な調整だけ行う（overlap を防ぐ）
+    // ------------------------------------------------------------------
+    if (inputArea && 'visualViewport' in window) {
+        var vv = window.visualViewport;
+        var applyKbd = function () {
+            var kbdH = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+            // 40px 以下はアドレスバー変動等のノイズとして無視
+            inputArea.classList.toggle('is-kbd-open', kbdH > 40);
+            // メッセージエリアの余白を再計算（コンポーザ高さの変化を即反映）
+            if (messages && inputArea) {
+                messages.style.setProperty('--talk-composer-h', inputArea.offsetHeight + 'px');
+            }
+            // キーボード表示中は最下部までスクロールして「入力欄すぐ上」を維持
+            if (kbdH > 40 && messages) {
+                requestAnimationFrame(function () {
+                    messages.scrollTop = messages.scrollHeight;
+                });
+            }
+        };
+        vv.addEventListener('resize', applyKbd);
+        vv.addEventListener('scroll', applyKbd);
+        applyKbd();
     }
 })();
 </script>

@@ -21,7 +21,7 @@ class AdminPermission
     {
         $user = auth()->guard('admin')->user();
         if (!$user) {
-            return redirect()->route('login.demo')->with('message', 'ログインが必要です。');
+            return redirect()->route('admin.login')->with('message', 'ログインが必要です。');
         }
 
         if (method_exists($user, 'hasPermission') && $user->hasPermission($permissionKey)) {

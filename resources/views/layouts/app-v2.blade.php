@@ -8,7 +8,7 @@
         $metaDescription = trim($__env->yieldContent('meta_description')) ?: 'ミセチョクのデモサイトです。';
         $metaImage = trim($__env->yieldContent('meta_image')) ?: asset('assets/images/pwa/icon-512.png');
         $canonicalUrl = trim($__env->yieldContent('canonical')) ?: url()->current();
-        $assetVersion = '20260720-share-plain';
+        $assetVersion = '20260801-btn-rules';
         $resolvedTitle = $metaTitle !== ''
             ? $metaTitle
             : ($pageTitle !== '' ? $pageTitle . ' | ' . config('app.name', 'ミセチョク') : config('app.name', 'ミセチョク'));
@@ -23,7 +23,7 @@
             'cast.mypage.index', 'shop.mypage.index',
         ];
         $isMainPage = in_array($routeName, $mainRouteNames, true);
-        $isLoginPage = request()->routeIs('login.demo');
+        $isLoginPage = request()->routeIs('login.demo', 'cast.login', 'shop.login', 'admin.login');
         $showBackButton = !$isMainPage && !$isLoginPage;
         $isTalkRoomPage = request()->routeIs('cast.talk.room', 'shop.talk.room');
 

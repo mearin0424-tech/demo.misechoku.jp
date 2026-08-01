@@ -197,6 +197,28 @@ keyframes はコンパイル済み CSS にのみ存在する。**画面側に `<
 レガシー CSS のブレは `public/assets/css/ui-consistency.css`（全ページ CSS の後に
 読み込む上書き専用ファイル）で吸収する。新規画面はこの表に従って直接組む。
 
+### ★ 正解レシピ（`ui-consistency.css §8c` で定義済み・そのまま class に付けて使う）
+
+新規ボタンは**まずこの 4 クラスの利用を検討する**こと。既存のレガシークラス
+（`.btn-gold-submit` `.recruit-cta-btn` 等）は `ui-consistency.css` の overrides で
+これと同じ見た目に揃えているため、既存画面の作り直しは不要。
+
+| クラス | 役割 | 修飾子 |
+|---|---|---|
+| `.btn-primary-cta` | 保存・送信・応募・トーク送信など画面の主要アクション | `--full`（幅100%）/ `--pill`（角丸999px）/ `--sm`（min-h 40px） |
+| `.btn-secondary-cta` | 補助導線・キャンセル・戻る | `--full` / `--pill` |
+| `.btn-ghost-cta` | 「編集」「閉じる」等の小さなユーティリティ | — |
+| `.btn-destructive-cta` | 削除・ログアウト（アウトライン）/ `--solid`（確定操作のベタ赤） | `--solid` |
+
+**このクラスを付けるだけで**：
+- 立体感（Primary は 3D、Secondary/Ghost/Destructive はフラット）
+- アクセントトークン追従（テーマスイッチ対応）
+- hover の明暗変化なし・active の沈み込みあり（§8b 準拠）
+- 適切なタップ領域（min-height 44px 以上、Primary は 48px）
+
+**それでも独自スタイルが必要なとき**は、必ず下の役割表と「深度の原則」に従うこと。
+
+
 | 役割 | 色 | 深度 | レシピ |
 |---|---|---|---|
 | **Primary CTA**（保存・送信・応募・TALK。1画面に原則1つ） | アクセントグラデ `from-accent-grad-from to-accent-grad-to` + `text-on-accent(-strong)` | **立体**（inset ハイライト + ドロップ影） | `.btn-gold-submit` / `x-ui.button` が正 |

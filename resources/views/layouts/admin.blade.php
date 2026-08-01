@@ -203,7 +203,7 @@
                             <div class="admin-user-role">{{ $authedRoleLabel }}</div>
                         </div>
                     </div>
-                    <button type="button" class="admin-logout-btn" onclick="if(confirm('ログアウトしますか？')) location.href='{{ route('login.demo') }}'">
+                    <button type="button" class="admin-logout-btn" onclick="if(confirm('ログアウトしますか？')) location.href='{{ route('admin.login') }}'">
                         <i class="fas fa-sign-out-alt"></i>
                         <span>ログアウト</span>
                     </button>

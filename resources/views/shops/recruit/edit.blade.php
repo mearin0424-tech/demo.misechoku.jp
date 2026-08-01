@@ -4,7 +4,7 @@
 @section('body-class', 'page-recruit-edit')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/recruitment.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/recruitment.css') }}?v=20260801-btn-rules">
 <link rel="stylesheet" href="{{ asset('assets/css/form-enhance.css') }}">
 <style>
     .job-edit-v2 {

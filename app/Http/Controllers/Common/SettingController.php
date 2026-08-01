@@ -245,7 +245,8 @@ class SettingController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login.demo')->with('message', '退会手続きが完了しました。ご利用ありがとうございました。');
+        $loginRoute = $actorType === 'cast' ? 'cast.login' : 'shop.login';
+        return redirect()->route($loginRoute)->with('message', '退会手続きが完了しました。ご利用ありがとうございました。');
     }
 
     /* ============================================================

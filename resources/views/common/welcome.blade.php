@@ -846,7 +846,7 @@
 <div class="lp-topbar">
     <div class="lp-topbar__inner">
         <h1 class="lp-topbar__logo">MISECHOKU</h1>
-        <a href="{{ route('login.demo') }}" class="lp-topbar__login">
+        <a href="{{ route('cast.login') }}" class="lp-topbar__login">
             <i class="fas fa-right-to-bracket"></i> ログイン
         </a>
     </div>

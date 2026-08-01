@@ -1152,38 +1152,47 @@ class TalkController extends Controller
 
     private function buildQuickReplySuggestions(bool $isCastPortal, int $status): array
     {
+        // 各要素は文字列 or ['category' => intro|question|schedule|thanks|status, 'body' => '...']
+        // Blade / JS 側は string / array 両方を受け取れる（2026-08-01 リニューアル）
         if ($isCastPortal) {
             // キャスト → 店舗
             return match ($status) {
                 self::APPLICATION_STATUS_INTERVIEW_PENDING => [
-                    '面談候補日ありがとうございます。確認して回答しますね！',
-                    '別の日程でも調整可能でしょうか？',
-                    '面談は何分くらいかかりますか？',
+                    ['category' => 'thanks',   'body' => '面談候補日ありがとうございます！確認して回答しますね。'],
+                    ['category' => 'schedule', 'body' => '第一希望の日程で調整をお願いします。'],
+                    ['category' => 'schedule', 'body' => 'すみません、その日程は難しいので別日を提案いただけますか？'],
+                    ['category' => 'question', 'body' => '面談はどれくらい時間がかかりますか？'],
+                    ['category' => 'question', 'body' => 'オンラインでの面談も可能でしょうか？'],
                 ],
                 self::APPLICATION_STATUS_INTERVIEW_FIXED => [
-                    '面談当日はよろしくお願いします！',
-                    '当日の持ち物や服装の指定はありますか？',
-                    '場所の詳細を教えていただけますか？',
-                    '当日どなたをお訪ねすればよいですか？',
+                    ['category' => 'thanks',   'body' => '面談当日はよろしくお願いします！'],
+                    ['category' => 'question', 'body' => '当日の持ち物や服装の指定はありますか？'],
+                    ['category' => 'question', 'body' => '場所の詳しいアクセスを教えていただけますか？'],
+                    ['category' => 'question', 'body' => '当日はどなたをお訪ねすればよいですか？'],
+                    ['category' => 'status',   'body' => 'すみません、少し遅れそうです。到着次第ご連絡します。'],
+                    ['category' => 'status',   'body' => '到着しました。入口はどちらでしょうか？'],
                 ],
                 self::APPLICATION_STATUS_HIRED,
                 self::APPLICATION_STATUS_HIRED_FULLTIME => [
-                    '採用ありがとうございます！よろしくお願いします。',
-                    '初出勤日の詳細を教えてください。',
-                    '勤務にあたって準備するものはありますか？',
-                    '出勤時間の何分前に伺えばよいですか？',
+                    ['category' => 'thanks',   'body' => '採用ありがとうございます！精一杯頑張ります。'],
+                    ['category' => 'schedule', 'body' => '初出勤日はいつを予定していますか？'],
+                    ['category' => 'question', 'body' => '当日の持ち物・服装を教えてください。'],
+                    ['category' => 'question', 'body' => '出勤時間の何分前に伺えばよいですか？'],
+                    ['category' => 'question', 'body' => '入店時の手続きで必要な書類はありますか？'],
                 ],
                 self::APPLICATION_STATUS_REJECTED,
                 self::APPLICATION_STATUS_REJECTED_TRIAL => [
-                    'ご連絡ありがとうございました。',
-                    'また機会がありましたらよろしくお願いします。',
+                    ['category' => 'thanks', 'body' => 'ご連絡ありがとうございました。'],
+                    ['category' => 'thanks', 'body' => 'またご縁がありましたらぜひよろしくお願いします。'],
                 ],
                 default => [
-                    'はじめまして！求人を見てご連絡しました。',
-                    '体入を希望しています。空いている日程はありますか？',
-                    'お店の雰囲気について教えてください。',
-                    '時給・待遇について詳しく知りたいです。',
-                    '未経験でも大丈夫ですか？',
+                    // やり取り中（応募直後・雑談期）
+                    ['category' => 'intro',    'body' => 'はじめまして！求人を拝見してご連絡しました。'],
+                    ['category' => 'intro',    'body' => 'プロフィールをご覧いただきありがとうございます。ぜひお話しできればと思います。'],
+                    ['category' => 'schedule', 'body' => '体入を希望しています。空いている日程はありますか？'],
+                    ['category' => 'question', 'body' => 'お店の雰囲気について教えてください。'],
+                    ['category' => 'question', 'body' => '時給や採用条件について詳しく知りたいです。'],
+                    ['category' => 'question', 'body' => '未経験でも安心して働けますか？'],
                 ],
             };
         }
@@ -1191,32 +1200,37 @@ class TalkController extends Controller
         // 店舗 → キャスト
         return match ($status) {
             self::APPLICATION_STATUS_INTERVIEW_PENDING => [
-                '面談の候補日をお送りしました。ご確認ください。',
-                'ご都合の良い日程があれば教えてください。',
-                '日程が合わない場合はお気軽にご相談ください。',
+                ['category' => 'schedule', 'body' => '面談の候補日をお送りしました。ご都合はいかがでしょうか？'],
+                ['category' => 'schedule', 'body' => 'ご都合の良い日程があればお気軽に教えてください。'],
+                ['category' => 'schedule', 'body' => '日程が合わない場合は別日を提案いたします。'],
+                ['category' => 'question', 'body' => '面談は対面／オンラインどちらをご希望ですか？'],
             ],
             self::APPLICATION_STATUS_INTERVIEW_FIXED => [
-                '面談当日、お待ちしております！',
-                'お気をつけてお越しください。',
-                '当日は私服でお越しいただいて大丈夫です。',
-                '到着されたらこのトークでお知らせください。',
+                ['category' => 'status',   'body' => '面談当日、お待ちしております！'],
+                ['category' => 'status',   'body' => 'お気をつけてお越しください。'],
+                ['category' => 'status',   'body' => '当日は私服でお越しいただいて大丈夫です。'],
+                ['category' => 'status',   'body' => '到着されましたらこのトークでお知らせください。'],
+                ['category' => 'question', 'body' => '当日は身分証と印鑑をお持ちください。'],
             ],
             self::APPLICATION_STATUS_HIRED,
             self::APPLICATION_STATUS_HIRED_FULLTIME => [
-                'この度は採用となりました！おめでとうございます。',
-                '初出勤日についてご案内します。',
-                '不明点があればいつでもご連絡ください。',
+                ['category' => 'thanks',   'body' => 'この度は採用となりました！おめでとうございます。'],
+                ['category' => 'schedule', 'body' => '初出勤日について改めてご案内します。'],
+                ['category' => 'question', 'body' => '当日の集合時間・持ち物のご案内です。'],
+                ['category' => 'status',   'body' => '不明点があればいつでもご連絡ください。'],
             ],
             self::APPLICATION_STATUS_REJECTED,
             self::APPLICATION_STATUS_REJECTED_TRIAL => [
-                'この度はご応募ありがとうございました。',
-                'またのご縁がありましたらよろしくお願いいたします。',
+                ['category' => 'thanks', 'body' => 'この度はご応募ありがとうございました。'],
+                ['category' => 'thanks', 'body' => 'またのご縁がありましたらよろしくお願いいたします。'],
             ],
             default => [
-                'はじめまして！ご興味をお持ちいただきありがとうございます。',
-                'ぜひ一度お店の雰囲気を見にいらしてください。',
-                'ご質問があればお気軽にどうぞ！',
-                '面談のご都合はいかがでしょうか？',
+                ['category' => 'intro',    'body' => 'はじめまして！ご興味をお持ちいただきありがとうございます。'],
+                ['category' => 'intro',    'body' => 'プロフィール拝見しました。ぜひ一度お話しできれば嬉しいです。'],
+                ['category' => 'schedule', 'body' => '一度お店の雰囲気を見にいらしてください。'],
+                ['category' => 'schedule', 'body' => '面談のご都合はいかがでしょうか？'],
+                ['category' => 'question', 'body' => 'ご質問があればお気軽にどうぞ！'],
+                ['category' => 'question', 'body' => '希望の勤務日数や時間帯があれば教えてください。'],
             ],
         };
     }

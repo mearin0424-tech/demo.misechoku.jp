@@ -4,7 +4,7 @@
 @section('body-class', 'page-shop-documents')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/shop-license-documents.css') }}?v=20260719-light">
+<link rel="stylesheet" href="{{ asset('assets/css/shop-license-documents.css') }}?v=20260801-simplify">
 @endpush
 
 @section('content')
@@ -15,51 +15,73 @@
     $docPending = $docList->where('status', 'pending')->count();
     $docRejected = $docList->where('status', 'rejected')->count();
     $docNotSubmitted = $docTotal - $docApproved - $docPending - $docRejected;
+
+    $overallVerified = $docTotal > 0 && $docApproved === $docTotal;
+    $overallPending = !$overallVerified && $docPending > 0;
 @endphp
 <div class="license-page">
-    {{-- タイトルはヘッダー中央、説明はオコジョガイド（character_guide_settings）に集約 --}}
-
-    {{-- 提出状況サマリー：提出できているか・何を提出したかを一目で --}}
-    <section class="license-summary" aria-label="提出状況サマリー">
-        <div class="license-summary__counts">
-            <span class="license-summary__count is-approved"><i class="fas fa-circle-check"></i>承認 {{ $docApproved }}</span>
-            <span class="license-summary__count is-pending"><i class="fas fa-hourglass-half"></i>審査中 {{ $docPending }}</span>
-            @if($docRejected > 0)
-                <span class="license-summary__count is-rejected"><i class="fas fa-circle-exclamation"></i>差戻し {{ $docRejected }}</span>
+    {{-- 1. ヒーロー：全体ステータス --}}
+    <div class="license-hero {{ $overallVerified ? 'is-verified' : ($overallPending ? 'is-pending' : '') }}">
+        <span class="license-hero__icon" aria-hidden="true">
+            <i class="fas {{ $overallVerified ? 'fa-circle-check' : ($overallPending ? 'fa-hourglass-half' : 'fa-file-shield') }}"></i>
+        </span>
+        <div class="license-hero__body">
+            @if($overallVerified)
+                <p class="license-hero__title">許可証すべて承認済み</p>
+                <p class="license-hero__desc">求人票の公開に必要な書類はすべて揃っています。</p>
+            @elseif($overallPending)
+                <p class="license-hero__title">審査中の書類があります</p>
+                <p class="license-hero__desc">運営が内容を確認しています（通常 1〜2 営業日）。承認まで一部機能が制限されます。</p>
+            @else
+                <p class="license-hero__title">許可証の提出が必要です</p>
+                <p class="license-hero__desc">すべて承認されると求人票を公開できます。</p>
             @endif
-            <span class="license-summary__count is-none"><i class="fas fa-minus"></i>未提出 {{ $docNotSubmitted }}</span>
         </div>
-        <ul class="license-summary__list">
+    </div>
+
+    {{-- 2. 提出状況サマリー --}}
+    <section class="doc-summary" aria-label="提出状況サマリー">
+        <p class="doc-summary__title">提出状況</p>
+        <div class="doc-summary__counts">
+            <span class="doc-summary__count is-approved"><i class="fas fa-circle-check"></i>承認 {{ $docApproved }}</span>
+            <span class="doc-summary__count is-pending"><i class="fas fa-hourglass-half"></i>審査中 {{ $docPending }}</span>
+            @if($docRejected > 0)
+                <span class="doc-summary__count is-rejected"><i class="fas fa-circle-exclamation"></i>差戻し {{ $docRejected }}</span>
+            @endif
+            <span class="doc-summary__count"><i class="fas fa-minus"></i>未提出 {{ $docNotSubmitted }}</span>
+        </div>
+        <ul class="doc-summary__list">
             @foreach($docList as $doc)
                 @php
                     $st = $doc['status'] ?? 'not_submitted';
                     $rec = $doc['record'] ?? [];
                     $fileName = $rec['file_name'] ?? '';
                     $updated = $rec['updated_at_label'] ?? '';
+                    $rowState = str_replace('_', '-', $st);
                 @endphp
-                <li class="license-summary__row is-{{ str_replace('_', '-', $st) }}">
-                    <span class="license-summary__row-icon" aria-hidden="true">
+                <li class="doc-summary__row is-{{ $rowState }}">
+                    <span class="doc-summary__row-icon" aria-hidden="true">
                         <i class="fas {{ $st === 'approved' ? 'fa-circle-check' : ($st === 'pending' ? 'fa-hourglass-half' : ($st === 'rejected' ? 'fa-circle-exclamation' : 'fa-minus')) }}"></i>
                     </span>
-                    <span class="license-summary__row-body">
-                        <span class="license-summary__row-name">{{ $doc['display_name'] ?? ($doc['name'] ?? '許可証') }}</span>
-                        <span class="license-summary__row-detail">
+                    <span class="doc-summary__row-body">
+                        <span class="doc-summary__row-name">{{ $doc['display_name'] ?? ($doc['name'] ?? '許可証') }}</span>
+                        <span class="doc-summary__row-detail">
                             @if($fileName !== '')
-                                提出ファイル: <strong>{{ $fileName }}</strong>@if($updated !== '')（{{ $updated }}）@endif
+                                <strong>{{ $fileName }}</strong>@if($updated !== '')・{{ $updated }}@endif
                             @elseif($st === 'not_submitted')
                                 まだ提出されていません
                             @else
-                                アップロード済みファイル
+                                アップロード済み
                             @endif
                         </span>
                     </span>
-                    <span class="license-summary__row-status">{{ $doc['status_label'] ?? '未提出' }}</span>
+                    <span class="doc-summary__row-status">{{ $doc['status_label'] ?? '未提出' }}</span>
                 </li>
             @endforeach
         </ul>
     </section>
 
-    {{-- 各書類の提出・差し替え（既存アコーディオン部品を流用） --}}
+    {{-- 3. 各書類の提出・差し替え（アコーディオン部品） --}}
     @include('shops.mypage.partials.shop-license-documents', ['documents' => $documents ?? []])
 
     <p class="license-page__back">
@@ -70,100 +92,533 @@
 
 @push('styles')
 <style>
-/* ===== 許可証ページ（ライトモード）レイアウト ===== */
-.license-page { padding: 16px 0 32px; }
-.license-page__head { margin-bottom: 14px; }
-.license-page__title {
+/* ============================================================
+   許可証ページ（ライトモード）— 本人確認ページと同一デザイントークン
+   ============================================================ */
+:root {
+    --doc-ink:      #1e1a30;
+    --doc-body:     #4a4560;
+    --doc-muted:    #8b84a1;
+    --doc-accent:   #7c3aed;
+    --doc-accent-2: #a78bfa;
+    --doc-line:     rgba(124, 58, 237, 0.18);
+    --doc-line-2:   rgba(124, 58, 237, 0.30);
+    --doc-surface:  #ffffff;
+    --doc-shadow:   0 4px 14px rgba(76, 29, 149, 0.08);
+    --doc-radius:   16px;
+}
+
+.license-page { padding: 12px 0 32px; color: var(--doc-body); }
+.license-page__back { margin: 22px 0 0; text-align: center; font-size: 0.84rem; }
+.license-page__back a { color: var(--doc-accent); text-decoration: none; font-weight: 700; }
+
+/* ヒーロー */
+.license-hero {
+    display: flex; align-items: center; gap: 14px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+    border-radius: var(--doc-radius);
+    background: linear-gradient(180deg, rgba(168, 85, 247, 0.09), rgba(168, 85, 247, 0.02));
+    border: 1px solid var(--doc-line-2);
+    box-shadow: var(--doc-shadow);
+}
+.license-hero.is-verified {
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.10), rgba(16, 185, 129, 0.02));
+    border-color: rgba(16, 185, 129, 0.35);
+}
+.license-hero.is-pending {
+    background: linear-gradient(180deg, rgba(217, 119, 6, 0.09), rgba(217, 119, 6, 0.02));
+    border-color: rgba(217, 119, 6, 0.35);
+}
+.license-hero__icon {
+    flex: 0 0 auto;
+    width: 44px; height: 44px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(124, 58, 237, 0.12);
+    color: var(--doc-accent);
+    font-size: 1.35rem;
+}
+.license-hero.is-verified .license-hero__icon { background: rgba(16, 185, 129, 0.12); color: #059669; }
+.license-hero.is-pending  .license-hero__icon { background: rgba(217, 119, 6, 0.12); color: #b45309; }
+.license-hero__body { flex: 1; min-width: 0; }
+.license-hero__title {
+    margin: 0 0 4px;
+    font-size: 1.05rem; font-weight: 800;
+    color: var(--doc-ink);
+    letter-spacing: -0.005em;
+    line-height: 1.3;
+}
+.license-hero__desc {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--doc-body);
+    line-height: 1.65;
+}
+
+/* 提出状況サマリー */
+.doc-summary {
+    background: var(--doc-surface);
+    border: 1px solid var(--doc-line);
+    border-radius: var(--doc-radius);
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: var(--doc-shadow);
+}
+.doc-summary__title {
+    margin: 0 0 12px;
+    font-size: 0.78rem; font-weight: 800;
+    color: var(--doc-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+.doc-summary__counts {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-bottom: 14px;
+}
+.doc-summary__count {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.74rem; font-weight: 700;
+    background: #f4f0fb;
+    color: var(--doc-body);
+    border: 1px solid var(--doc-line);
+}
+.doc-summary__count i { font-size: 0.7rem; }
+.doc-summary__count.is-approved { background: rgba(5, 150, 105, 0.08); color: #059669; border-color: rgba(5, 150, 105, 0.28); }
+.doc-summary__count.is-pending  { background: rgba(180, 83, 9, 0.08); color: #b45309; border-color: rgba(180, 83, 9, 0.28); }
+.doc-summary__count.is-rejected { background: rgba(220, 38, 38, 0.06); color: #dc2626; border-color: rgba(220, 38, 38, 0.30); }
+
+.doc-summary__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.doc-summary__row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 0;
+}
+.doc-summary__row + .doc-summary__row { border-top: 1px solid var(--doc-line); }
+.doc-summary__row-icon {
+    flex: 0 0 auto;
+    width: 28px; height: 28px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.82rem;
+    background: #f4f0fb; color: var(--doc-muted);
+}
+.doc-summary__row.is-approved .doc-summary__row-icon { background: rgba(5, 150, 105, 0.10); color: #059669; }
+.doc-summary__row.is-pending  .doc-summary__row-icon { background: rgba(180, 83, 9, 0.10); color: #b45309; }
+.doc-summary__row.is-rejected .doc-summary__row-icon { background: rgba(220, 38, 38, 0.08); color: #dc2626; }
+.doc-summary__row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.doc-summary__row-name { font-size: 0.90rem; font-weight: 700; color: var(--doc-ink); letter-spacing: -0.005em; }
+.doc-summary__row-detail {
+    font-size: 0.76rem;
+    color: var(--doc-body);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+.doc-summary__row-detail strong { color: var(--doc-ink); font-weight: 700; }
+.doc-summary__row-status {
+    flex: 0 0 auto;
+    font-size: 0.74rem; font-weight: 700;
+    color: var(--doc-muted);
+    white-space: nowrap;
+}
+.doc-summary__row.is-approved .doc-summary__row-status { color: #059669; }
+.doc-summary__row.is-pending  .doc-summary__row-status { color: #b45309; }
+.doc-summary__row.is-rejected .doc-summary__row-status { color: #dc2626; }
+
+/* ============================================================
+   アコーディオン（partial の shop-license-documents.blade.php）を
+   同じライトトークンに揃える上書き
+   ============================================================ */
+.license-section { margin: 0; }
+.license-section__head { margin-bottom: 14px; }
+.license-section__title {
     display: flex; align-items: center; gap: 8px;
     margin: 0 0 6px;
-    font-size: 1.15rem; font-weight: 800; color: #241f33;
+    font-size: 0.78rem; font-weight: 800;
+    color: var(--doc-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
 }
-.license-page__title i { color: #7c3aed; }
-.license-page__desc { margin: 0; font-size: 0.82rem; line-height: 1.7; color: #5f5876; }
-.license-page__back { margin: 18px 0 0; font-size: 0.82rem; }
-.license-page__back a { color: #6d28d9; text-decoration: none; font-weight: 700; }
+.license-section__title i { color: var(--doc-accent); }
+.license-section__title-en { display: none; }
+.license-section__lead {
+    margin: 0;
+    font-size: 0.80rem;
+    line-height: 1.65;
+    color: var(--doc-body);
+}
+.license-accordion-list { display: flex; flex-direction: column; gap: 12px; }
 
-/* 選択画像のプレビュー（2026-07-20 アップロードUI改善） */
+.license-accordion {
+    background: var(--doc-surface) !important;
+    border: 1px solid var(--doc-line) !important;
+    border-radius: var(--doc-radius) !important;
+    box-shadow: var(--doc-shadow);
+    overflow: hidden;
+}
+.license-accordion.is-approved { border-color: rgba(5, 150, 105, 0.32) !important; }
+.license-accordion.is-pending  { border-color: rgba(180, 83, 9, 0.32) !important; }
+.license-accordion.is-rejected { border-color: rgba(220, 38, 38, 0.32) !important; }
+
+.license-accordion__head {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%;
+    padding: 14px 16px !important;
+    background: transparent;
+    border: 0; cursor: pointer;
+    text-align: left;
+    color: var(--doc-ink) !important;
+    transition: background 0.15s ease;
+}
+.license-accordion__head:hover { background: rgba(124, 58, 237, 0.04) !important; }
+.license-accordion__title-block { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.license-accordion__title {
+    font-size: 0.95rem !important;
+    font-weight: 800 !important;
+    color: var(--doc-ink) !important;
+    line-height: 1.35;
+    word-break: break-word;
+}
+.license-accordion__issuer {
+    font-size: 0.72rem !important;
+    color: var(--doc-muted) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em;
+}
+
+.license-accordion__status {
+    display: inline-flex; align-items: center;
+    padding: 4px 10px !important;
+    border-radius: 999px !important;
+    font-size: 0.70rem !important; font-weight: 700 !important;
+    letter-spacing: 0.02em;
+    border: 1px solid transparent;
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+.license-accordion__status--not-submitted {
+    background: #f4f0fb !important;
+    color: var(--doc-muted) !important;
+    border-color: var(--doc-line) !important;
+}
+.license-accordion__status--pending,
+.license-accordion__status--draft {
+    background: rgba(180, 83, 9, 0.10) !important;
+    color: #b45309 !important;
+    border-color: rgba(180, 83, 9, 0.30) !important;
+}
+.license-accordion__status--approved {
+    background: rgba(5, 150, 105, 0.10) !important;
+    color: #059669 !important;
+    border-color: rgba(5, 150, 105, 0.30) !important;
+}
+.license-accordion__status--rejected {
+    background: rgba(220, 38, 38, 0.08) !important;
+    color: #dc2626 !important;
+    border-color: rgba(220, 38, 38, 0.32) !important;
+}
+.license-accordion__chip {
+    font-size: 0.66rem !important;
+    padding: 2px 8px !important;
+    border-radius: 999px !important;
+    background: rgba(220, 38, 38, 0.10) !important;
+    color: #dc2626 !important;
+    border: 1px solid rgba(220, 38, 38, 0.30) !important;
+    flex: 0 0 auto;
+}
+.license-accordion__chevron { flex: 0 0 auto; color: var(--doc-accent) !important; font-size: 0.82rem; }
+
+.license-accordion__body {
+    padding: 0 16px 16px !important;
+    border-top: 1px solid var(--doc-line) !important;
+    background: #faf7ff !important;
+}
+
+/* 折りたたみヒント */
+.license-accordion__hint {
+    margin: 12px 0 4px;
+    border: 1px solid var(--doc-line);
+    border-radius: 10px;
+    background: #ffffff;
+}
+.license-accordion__hint summary {
+    padding: 10px 12px;
+    font-size: 0.80rem; font-weight: 700; color: var(--doc-accent);
+    cursor: pointer;
+    list-style: none;
+    display: flex; align-items: center; gap: 6px;
+}
+.license-accordion__hint summary::-webkit-details-marker { display: none; }
+.license-accordion__hint-body { padding: 0 12px 12px; font-size: 0.80rem; color: var(--doc-body); line-height: 1.7; }
+.license-accordion__hint-body p { margin: 0 0 6px; }
+
+/* 差し戻し理由 */
+.license-accordion__ng {
+    margin: 12px 0 0 !important;
+    padding: 10px 12px !important;
+    border-radius: 10px !important;
+    background: rgba(220, 38, 38, 0.06) !important;
+    border: 1px solid rgba(220, 38, 38, 0.30) !important;
+    color: #b91c1c !important;
+    font-size: 0.82rem !important;
+    line-height: 1.55 !important;
+}
+
+/* パネル */
+.license-accordion__panel {
+    display: flex; flex-direction: column; gap: 12px;
+    padding-top: 14px;
+}
+
+/* 既存ファイル表示 */
+.license-accordion__file-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px !important;
+    background: #ffffff !important;
+    border: 1px solid var(--doc-line) !important;
+    border-radius: 10px !important;
+}
+.license-accordion__file-icon {
+    flex: 0 0 auto; width: 32px; height: 32px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    background: rgba(124, 58, 237, 0.10) !important;
+    color: var(--doc-accent) !important;
+    font-size: 0.95rem;
+}
+.license-accordion__file-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.license-accordion__file-link {
+    color: var(--doc-accent) !important;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    font-size: 0.86rem; font-weight: 700;
+    word-break: break-all;
+}
+.license-accordion__file-meta { font-size: 0.72rem !important; color: var(--doc-muted) !important; }
+
+/* ラベル・入力 */
+.license-accordion__field { display: flex; flex-direction: column; gap: 6px; }
+.license-accordion__label {
+    font-size: 0.80rem !important;
+    font-weight: 700 !important;
+    color: var(--doc-ink) !important;
+    letter-spacing: 0.02em;
+    display: inline-flex; align-items: center; gap: 6px;
+}
+.license-accordion__required {
+    margin-left: 6px !important;
+    padding: 1px 7px !important;
+    border-radius: 999px !important;
+    background: rgba(220, 38, 38, 0.10) !important;
+    color: #dc2626 !important;
+    font-size: 0.64rem !important; font-weight: 800 !important;
+    letter-spacing: 0.04em;
+}
+.license-accordion__optional {
+    margin-left: 6px !important;
+    padding: 1px 7px !important;
+    border-radius: 999px !important;
+    background: #f4f0fb !important;
+    color: var(--doc-muted) !important;
+    font-size: 0.64rem !important; font-weight: 800 !important;
+    letter-spacing: 0.04em;
+}
+.license-accordion__input {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px !important;
+    border-radius: 10px !important;
+    border: 1px solid var(--doc-line-2) !important;
+    background: #ffffff !important;
+    color: var(--doc-ink) !important;
+    font-size: 0.90rem !important;
+    font-family: inherit;
+    box-sizing: border-box;
+    color-scheme: light;
+}
+.license-accordion__input:focus {
+    outline: none;
+    border-color: var(--doc-accent) !important;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15) !important;
+}
+.license-accordion__field-note {
+    margin: 0;
+    font-size: 0.72rem; color: var(--doc-muted); line-height: 1.5;
+}
+
+/* アップロードエリア */
+.license-accordion__dropzone {
+    background: #ffffff !important;
+    border: 1.5px dashed var(--doc-line-2) !important;
+    border-radius: 12px !important;
+    padding: 14px !important;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+.license-accordion__dropzone.is-dragover {
+    background: rgba(124, 58, 237, 0.06) !important;
+    border-color: var(--doc-accent) !important;
+}
+.license-accordion__dropzone-inner {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    padding: 8px 0;
+    text-align: center;
+}
+.license-accordion__dropzone-icon {
+    font-size: 1.6rem !important;
+    color: var(--doc-accent) !important;
+}
+.license-accordion__dropzone-text {
+    margin: 0 !important;
+    font-size: 0.82rem !important;
+    line-height: 1.55;
+    color: var(--doc-body) !important;
+}
+.license-accordion__file-selected {
+    margin: 4px 0 0 !important;
+    font-size: 0.80rem !important;
+    font-weight: 700 !important;
+    color: #047857 !important;
+    word-break: break-all;
+}
 .license-accordion__preview {
     display: block;
     margin: 10px auto 0;
     max-width: 100%;
     max-height: 200px;
-    border-radius: 12px;
-    border: 1px solid rgba(124, 58, 237, 0.28);
-    box-shadow: 0 3px 12px rgba(76, 29, 149, 0.10);
+    border-radius: 10px;
+    border: 1px solid var(--doc-line);
+    box-shadow: 0 2px 8px rgba(76, 29, 149, 0.08);
     object-fit: contain;
     background: #ffffff;
 }
 .license-accordion__preview[hidden] { display: none; }
 
-/* アップロード領域：暗いグレーになっていたのを明るいラベンダー面に（2026-07-20） */
-.license-accordion__dropzone {
-    background: #faf8fe !important;
-    border-color: rgba(124, 58, 237, 0.35) !important;
+/* ボタン群 */
+.license-accordion__btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 44px;
+    padding: 10px 18px !important;
+    border-radius: 10px !important;
+    font-size: 0.88rem !important; font-weight: 700 !important;
+    font-family: inherit;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.12s ease, border-color 0.12s ease, transform 0.12s ease;
 }
-.license-accordion__dropzone.is-dragover { background: rgba(124, 58, 237, 0.08) !important; }
-.license-accordion__dropzone-icon { color: #a78bfa !important; }
-.license-accordion__dropzone-text { color: #6d6685 !important; }
-.license-accordion__file-selected { color: #5b21b6 !important; }
+.license-accordion__btn:active { transform: scale(0.98); }
+.license-accordion__btn--secondary {
+    background: #ffffff !important;
+    border-color: var(--doc-line-2) !important;
+    color: var(--doc-accent) !important;
+}
+.license-accordion__btn--secondary:hover {
+    background: rgba(124, 58, 237, 0.06) !important;
+    border-color: var(--doc-accent) !important;
+}
+.license-accordion__btn--primary,
+.license-accordion__btn--full {
+    background: linear-gradient(135deg, var(--doc-accent-2), var(--doc-accent)) !important;
+    color: #ffffff !important;
+    border: 0 !important;
+    box-shadow:
+        0 6px 14px rgba(124, 58, 237, 0.30),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    width: 100%;
+    min-height: 50px;
+    font-size: 0.95rem !important;
+    font-weight: 800 !important;
+}
+.license-accordion__btn--ghost {
+    background: transparent !important;
+    color: var(--doc-body) !important;
+    border-color: var(--doc-line) !important;
+}
+.license-accordion__btn--danger {
+    background: #dc2626 !important;
+    color: #ffffff !important;
+    border: 0 !important;
+    box-shadow: 0 6px 14px rgba(220, 38, 38, 0.30);
+}
 
-/* 提出状況サマリー */
-.license-summary {
-    background: #ffffff;
-    border: 1px solid rgba(124, 58, 237, 0.20);
-    border-radius: 14px;
-    padding: 14px;
-    margin-bottom: 16px;
-    box-shadow: 0 6px 18px rgba(76, 29, 149, 0.08);
+/* 取り下げゾーン */
+.license-accordion__withdraw-zone {
+    display: flex; flex-direction: column; gap: 10px;
+    padding: 12px !important;
+    border-radius: 10px !important;
+    background: #faf7ff !important;
+    border: 1px dashed var(--doc-line-2) !important;
 }
-.license-summary__counts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.license-summary__count {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 4px 10px; border-radius: 999px;
-    font-size: 0.74rem; font-weight: 800;
-    background: #f5f2fb; color: #6d6685; border: 1px solid rgba(95, 88, 118, 0.20);
+.license-accordion__withdraw-warning {
+    margin: 0 !important;
+    font-size: 0.80rem !important;
+    color: var(--doc-body) !important;
+    line-height: 1.6;
+    display: flex; align-items: flex-start; gap: 6px;
 }
-.license-summary__count.is-approved { background: rgba(5,150,105,0.08); color: #059669; border-color: rgba(5,150,105,0.30); }
-.license-summary__count.is-pending  { background: rgba(180,83,9,0.08); color: #b45309; border-color: rgba(180,83,9,0.30); }
-.license-summary__count.is-rejected { background: rgba(220,38,38,0.06); color: #dc2626; border-color: rgba(220,38,38,0.30); }
-.license-summary__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
-.license-summary__row {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 4px;
-}
-.license-summary__row + .license-summary__row { border-top: 1px solid rgba(124, 58, 237, 0.10); }
-.license-summary__row-icon {
-    flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 0.9rem;
-    background: #f5f2fb; color: #8b84a1;
-}
-.license-summary__row.is-approved .license-summary__row-icon { background: rgba(5,150,105,0.10); color: #059669; }
-.license-summary__row.is-pending  .license-summary__row-icon { background: rgba(180,83,9,0.10); color: #b45309; }
-.license-summary__row.is-rejected .license-summary__row-icon { background: rgba(220,38,38,0.08); color: #dc2626; }
-.license-summary__row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.license-summary__row-name { font-size: 0.88rem; font-weight: 800; color: #241f33; }
-.license-summary__row-detail { font-size: 0.74rem; color: #6d6685; overflow-wrap: anywhere; }
-.license-summary__row-detail strong { color: #2d2742; }
-.license-summary__row-status { flex: 0 0 auto; font-size: 0.74rem; font-weight: 800; color: #6d6685; white-space: nowrap; }
-.license-summary__row.is-approved .license-summary__row-status { color: #059669; }
-.license-summary__row.is-pending  .license-summary__row-status { color: #b45309; }
-.license-summary__row.is-rejected .license-summary__row-status { color: #dc2626; }
+.license-accordion__withdraw-warning i { color: var(--doc-accent); margin-top: 2px; }
 
-/* ===== アコーディオン部品のダーク面をライトへ上書き（partial の後読みで勝つ） ===== */
-.license-accordion { background: #ffffff; }
-.license-accordion__body { background: #faf8fd; }
-.license-accordion__file-row,
-.license-accordion__dropzone { background: #ffffff; }
-.license-accordion__withdraw-zone { background: #f5f2fb; }
-.license-accordion__status--not-submitted {
-    background: #f5f2fb;
-    color: #6d6685;
+/* 送信フィードバック */
+.license-accordion__submit-feedback {
+    margin: 0 !important;
+    padding: 10px 12px !important;
+    border-radius: 10px !important;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: #047857;
+    font-size: 0.82rem;
+    line-height: 1.5;
 }
-.license-accordion__optional { background: rgba(95, 88, 118, 0.10); }
-.license-accordion__btn--secondary { background: #ffffff; }
-.license-accordion__btn--secondary:hover { background: rgba(124, 58, 237, 0.06); }
-.license-accordion__input { color-scheme: light; }
-.license-withdraw-modal__panel { background: #ffffff; }
+
+/* サポート窓口 */
+.license-accordion__support {
+    padding: 12px !important;
+    border-radius: 10px !important;
+    background: #faf7ff !important;
+    border: 1px solid var(--doc-line) !important;
+    display: flex; flex-direction: column; gap: 6px;
+}
+.license-accordion__support-text {
+    margin: 0 !important;
+    font-size: 0.78rem !important;
+    color: var(--doc-body) !important;
+    line-height: 1.6;
+}
+.license-accordion__support-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--doc-accent) !important;
+    text-decoration: none;
+    font-size: 0.82rem; font-weight: 700;
+}
+.license-accordion__support-link:hover { text-decoration: underline; }
+
+/* 取り下げモーダル */
+.license-withdraw-modal__panel {
+    background: #ffffff !important;
+    border: 1px solid var(--doc-line-2) !important;
+    box-shadow: 0 20px 40px rgba(76, 29, 149, 0.25);
+}
+
+/* エラー・成功 */
+.license-section__flash {
+    margin: 0 0 12px !important;
+    padding: 11px 14px !important;
+    border-radius: 12px !important;
+    background: rgba(16, 185, 129, 0.08) !important;
+    color: #047857 !important;
+    border: 1px solid rgba(16, 185, 129, 0.35) !important;
+    font-size: 0.84rem !important;
+    line-height: 1.6;
+}
+.license-section__errors {
+    margin: 0 0 12px !important;
+    padding: 11px 14px !important;
+    border-radius: 12px !important;
+    background: rgba(220, 38, 38, 0.06) !important;
+    color: #b91c1c !important;
+    border: 1px solid rgba(220, 38, 38, 0.32) !important;
+    font-size: 0.84rem !important;
+    line-height: 1.6;
+}
+.license-section__errors p { margin: 0; }
 </style>
 @endpush

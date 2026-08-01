@@ -97,9 +97,13 @@
             });
 
             if (res.status === 401) {
-                // 未ログイン → ログイン画面へ（route('login.demo') = /login）
+                // 未ログイン → 現在の URL からロールを判定して該当ログイン画面へ
                 rollback();
-                window.location.href = '/login';
+                const path = window.location.pathname || '';
+                const loginUrl = path.startsWith('/cast')
+                    ? '/cast/login'
+                    : (path.startsWith('/shop') ? '/shop/login' : '/login/demo');
+                window.location.href = loginUrl;
                 return;
             }
             if (res.status === 419) {

@@ -39,12 +39,12 @@
 
                 <div class="role-login-card-body">
                     <div class="role-login-role-switch">
-                        <a href="{{ route('login.demo') }}" class="role-login-role {{ $role === 'cast' ? 'is-active' : '' }}">
+                        <a href="{{ route('cast.login') }}" class="role-login-role {{ $role === 'cast' ? 'is-active' : '' }}">
                             <i class="fas fa-user role-login-role__icon" aria-hidden="true"></i>
                             <span class="role-login-role__label">キャスト</span>
                             <span class="role-login-role__sub">お仕事を探す</span>
                         </a>
-                        <a href="{{ route('login.demo') }}" class="role-login-role {{ $role === 'shop' ? 'is-active' : '' }}">
+                        <a href="{{ route('shop.login') }}" class="role-login-role {{ $role === 'shop' ? 'is-active' : '' }}">
                             <i class="fas fa-store role-login-role__icon" aria-hidden="true"></i>
                             <span class="role-login-role__label">店舗</span>
                             <span class="role-login-role__sub">キャストを探す</span>

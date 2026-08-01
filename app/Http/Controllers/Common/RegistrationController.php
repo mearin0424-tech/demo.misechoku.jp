@@ -370,7 +370,7 @@ class RegistrationController extends Controller
             'submitLabel' => '登録する',
             'alternateUrl' => $isCast ? route('shop.register') : route('cast.register'),
             'alternateLabel' => $isCast ? '店舗' : 'キャスト',
-            'loginUrl' => route('login.demo'),
+            'loginUrl' => $isCast ? route('cast.login') : route('shop.login'),
             'prefOptions' => CommonConsts::PREFS,
         ];
     }

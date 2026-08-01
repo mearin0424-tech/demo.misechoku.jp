@@ -184,13 +184,13 @@ class LineLoginController extends Controller
             ->first();
 
         if (!$provider) {
-            return redirect()->route('login.demo')
+            return redirect()->route('cast.login')
                 ->withErrors(['line' => 'このLINEアカウントはまだ連携されていません。ログイン後、設定＞通知設定から「LINEと連携」してください。']);
         }
 
         $cast = Cast::query()->where('status', 1)->find($provider->cast_id);
         if (!$cast) {
-            return redirect()->route('login.demo')
+            return redirect()->route('cast.login')
                 ->withErrors(['line' => 'このアカウントは利用できません。']);
         }
 
@@ -211,7 +211,7 @@ class LineLoginController extends Controller
             ->first();
 
         if (!$manager) {
-            return redirect()->route('login.demo')
+            return redirect()->route('shop.login')
                 ->withErrors(['line' => 'このLINEアカウントはまだ連携されていません。ログイン後、設定＞通知設定から「LINEと連携」してください。']);
         }
 

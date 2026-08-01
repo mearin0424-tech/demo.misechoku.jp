@@ -59,7 +59,7 @@ class LoginController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()
-            ->route('login.demo')
+            ->route('cast.login')
             ->with('message', 'ログアウトしました。');
     }
 }

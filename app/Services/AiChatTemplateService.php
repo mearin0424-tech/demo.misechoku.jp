@@ -62,13 +62,12 @@ class AiChatTemplateService
 
         $grounded = $this->buildGroundedContext($userMessage);
 
+        // 完全一致でも段階的緩和でも 1 件も無い場合（DB がほぼ空、等）は
+        // 素の「おすすめ」で必ずカードを出す。空カード状態は基本的に発生させない方針。
         if ($grounded['recommendations'] === []) {
             return [
-                'reply' => $this->randomPick([
-                    'うーん、その条件にピッタリのお店が見つからなかった💦 もう少し条件を緩めて聞いてみてくれる？',
-                    'ごめんね〜、今日はちょうどいいお店が見当たらないみたい！別の表現で教えてもらえる？',
-                    '近い候補が出てこなかったよ…🥺 「未経験OK」とか「銀座エリア」とか、もっと絞ってみる？',
-                ]),
+                'reply' => 'ちょうどピッタリのお店はまだ見つからなかったから、'
+                    . 'いま人気で近そうなお店を先におすすめするね✨',
                 'recommendations' => [],
                 'quick_replies'   => [
                     '未経験OKのお店を探す',
@@ -80,7 +79,11 @@ class AiChatTemplateService
         }
 
         return [
-            'reply'           => $this->pickReplyTemplate($grounded['intent'], count($grounded['recommendations'])),
+            'reply'           => $this->pickReplyTemplate(
+                $grounded['intent'],
+                count($grounded['recommendations']),
+                $grounded['relaxed'] ?? [],
+            ),
             'recommendations' => $grounded['recommendations'],
             'quick_replies'   => $this->pickQuickReplies($grounded['intent']),
         ];
@@ -89,35 +92,84 @@ class AiChatTemplateService
     /**
      * ユーザー発話から intent と候補店舗を作り、外部（LLM 連携等）から利用できるように返す。
      *
+     * 「条件どんぴしゃ」で 0 件のときは段階的に条件を緩めて、最終的に必ず 1〜N 件
+     * を返す（DB がほぼ空でない限り）。どの条件を緩めたかは `relaxed` で報告し、
+     * 返答テキストが「近いお店を出したよ」ニュアンスを添えられるようにする。
+     *
      * @return array{
      *   intent: array<string,mixed>,
-     *   recommendations: array<int, array<string,mixed>>
+     *   recommendations: array<int, array<string,mixed>>,
+     *   relaxed: array<int, string>
      * }
      */
     public function buildGroundedContext(string $userMessage, int $limit = 3): array
     {
         $userMessage = trim($userMessage);
         if ($userMessage === '') {
-            return ['intent' => $this->extractIntent(''), 'recommendations' => []];
+            return ['intent' => $this->extractIntent(''), 'recommendations' => [], 'relaxed' => []];
         }
         $intent = $this->extractIntent($userMessage);
-        $shops  = $this->pickShops($intent, $limit);
+
+        // 1) まずは完全条件で試す
+        $shops = $this->pickShops($intent, $limit);
+        $relaxed = [];
+
+        // 2) 0 件なら段階的に条件を落として再検索
+        //    重視度の低い順に外していく（雰囲気 → 報酬下限 → 時給下限/高時給 → 業種 → エリア）
+        if ($shops === []) {
+            $relaxSteps = [
+                'atmosphere'  => ['atmosphere' => null],
+                'reward_min'  => ['reward_min' => 0],
+                'wage'        => ['wage_min' => 0, 'high_wage' => false],
+                'industry'    => ['industry' => null],
+                'area'        => ['area' => null],
+            ];
+            $working = $intent;
+            foreach ($relaxSteps as $label => $override) {
+                // その条件が実際に指定されていなければスキップ（相対的に緩和とは呼ばない）
+                $wasActive = $this->isFilterActive($working, $label);
+                $working = array_merge($working, $override);
+                if (!$wasActive) {
+                    continue;
+                }
+                $relaxed[] = $label;
+                $shops = $this->pickShops($working, $limit);
+                if ($shops !== []) {
+                    break;
+                }
+            }
+        }
+
+        // 3) それでも 0 件なら「新着 or 人気」で無条件に候補を出す（最終保険）
+        if ($shops === []) {
+            $shops = $this->pickFallbackShops($limit);
+            if ($shops !== []) {
+                $relaxed[] = 'all_filters';
+            }
+        }
 
         return [
             'intent'          => $intent,
             'recommendations' => array_map(fn ($s) => $this->toRecommendation($s, $intent), $shops),
+            'relaxed'         => $relaxed,
         ];
     }
 
     /**
-     * intent + 件数からテンプレのオープニング/クロージング文を生成（LLM 失敗時の fallback）。
-     *
-     * @param array<string,mixed> $intent
+     * intent の特定フィルタが「実際に指定されているか」を判定。
      */
-    public function buildTemplateReply(array $intent, int $count): string
+    private function isFilterActive(array $intent, string $label): bool
     {
-        return $this->pickReplyTemplate($intent, $count);
+        return match ($label) {
+            'atmosphere' => !empty($intent['atmosphere']),
+            'reward_min' => (int) ($intent['reward_min'] ?? 0) > 0,
+            'wage'       => ((int) ($intent['wage_min'] ?? 0) > 0) || !empty($intent['high_wage']),
+            'industry'   => !empty($intent['industry']),
+            'area'       => !empty($intent['area']),
+            default      => false,
+        };
     }
+
 
     /**
      * intent からクイックリプライ候補を返す（外部からも利用できるように公開）。
@@ -216,6 +268,60 @@ class AiChatTemplateService
     // =================================================================
     // 候補店舗の選定
     // =================================================================
+
+    /**
+     * 全条件で 0 件だったときの最終保険。全店舗から新着順に返す。
+     *
+     * @return array<int, object>
+     */
+    private function pickFallbackShops(int $limit): array
+    {
+        return $this->pickShops([
+            'area'          => null,
+            'industry'      => null,
+            'wage_min'      => 0,
+            'reward_min'    => 0,
+            'no_experience' => false,
+            'no_norma'      => false,
+            'high_wage'     => false,
+            'near_station'  => false,
+            'atmosphere'    => null,
+        ], $limit);
+    }
+
+    /**
+     * 条件を緩めて拾ったときの前置き文。緩めたラベルに応じてトーンを変える。
+     *
+     * @param array<int, string> $relaxed
+     */
+    private function buildRelaxedOpener(array $relaxed): string
+    {
+        // 全部外した（fallback）→ もっと控えめに謝る
+        if (in_array('all_filters', $relaxed, true)) {
+            return $this->randomPick([
+                'うーん、その条件どんぴしゃのお店はまだないみたい🥺 いま登録があるお店から、近そうなのを先に紹介するね✨',
+                'ちょうどぴったりが見つからなかったから、いま人気で近そうなお店を並べてみたよ💎',
+                '条件フルマッチのお店はまだなんだけど、雰囲気が近そうなところをおすすめするね☕',
+            ]);
+        }
+
+        // どの条件を緩めたかで一言添える
+        $labelMap = [
+            'area'       => 'エリア',
+            'industry'   => '業種',
+            'wage'       => '時給の条件',
+            'reward_min' => '採用報酬の条件',
+            'atmosphere' => '雰囲気の条件',
+        ];
+        $labels = array_values(array_filter(array_map(fn ($k) => $labelMap[$k] ?? null, $relaxed)));
+        $labelText = $labels === [] ? '条件' : implode('・', $labels);
+
+        return $this->randomPick([
+            'その条件どんぴしゃのお店はまだ無かったから、' . $labelText . 'を少し広げて近い候補をピックアップしたよ✨',
+            'ぴったりのお店は見つからなかったんだけど、' . $labelText . 'を緩めたら近いお店があったよ💎',
+            '完全一致のお店はまだ登録がないみたい🥺 ' . $labelText . 'を少しだけ広げて近そうなのを出すね✨',
+        ]);
+    }
 
     /**
      * @param array<string,mixed> $intent
@@ -393,16 +499,21 @@ class AiChatTemplateService
 
     /**
      * @param array<string,mixed> $intent
+     * @param array<int, string>  $relaxed  緩和した条件ラベル（'area','industry','wage','reward_min','atmosphere','all_filters'）
      */
-    private function pickReplyTemplate(array $intent, int $count): string
+    private function pickReplyTemplate(array $intent, int $count, array $relaxed = []): string
     {
-        // 優先度: 業種＋エリア > 時給/報酬 > 未経験/ノルマ > 雰囲気 > 汎用
-        $opener = $this->randomPick([
-            'ちょっと考えるね…',
-            'なるほど〜！',
-            'うんうん、わかった！',
-            'いい感じの希望だね✨',
-        ]);
+        // 条件を緩めて拾ったときは、冒頭で「ちょうどのお店はまだない」と正直に伝える
+        if ($relaxed !== []) {
+            $opener = $this->buildRelaxedOpener($relaxed);
+        } else {
+            $opener = $this->randomPick([
+                'ちょっと考えるね…',
+                'なるほど〜！',
+                'うんうん、わかった！',
+                'いい感じの希望だね✨',
+            ]);
+        }
         $closing = $this->randomPick([
             'どれか気になるところある？',
             '気になるお店があったら「詳しく」って言ってね💎',

@@ -644,20 +644,25 @@
    トークルーム：入力エリアを最下部に固定（スクロールしても動かない）
    ========================================================================== */
 #talk-room-container .chat-input-area {
+    /* layouts/app-v2 で position:absolute; bottom:0 に上書きされる（100dvh 内での貼り付け）。
+       fixed 指定はレガシー環境向けフォールバック。 */
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
     bottom: var(--footer-height);
-    z-index: 100;
+    z-index: 1000;  /* bottom-nav (500) より前面に。定型文パネルが被らないよう明示 */
     width: min(100vw, var(--max-content-width));
     max-width: var(--max-content-width);
     box-sizing: border-box;
     padding: 10px var(--content-padding-x) 12px;
     padding-bottom: calc(12px + env(safe-area-inset-bottom, 0));
-    /* アプリ全体のボルドー基調と統一 */
     background: linear-gradient(180deg, rgba(10, 10, 10, 0.92), rgba(20, 20, 20, 0.96));
     border-top: 1px solid rgba(168, 85, 247, 0.22);
     box-shadow: 0 -8px 22px rgba(0, 0, 0, 0.22);
+}
+/* キーボード表示中：safe-area 分の下パディングは不要（100dvh がキーボード分を除いた領域なので） */
+#talk-room-container .chat-input-area.is-kbd-open {
+    padding-bottom: 8px;
 }
 
 /* LINE風：入力欄と送信ボタンを横並び（ボタンは入力欄の外） */
@@ -2572,6 +2577,10 @@ body.page-talk-room .message-bubble-auto,
     line-height: 1.55;
     cursor: pointer;
     transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
 }
 .talk-template-status-item:hover {
     background: rgba(168, 85, 247, 0.10);
@@ -2580,6 +2589,23 @@ body.page-talk-room .message-bubble-auto,
 .talk-template-status-item:active {
     transform: scale(0.98);
 }
+.talk-template-status-item__cat {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #7c3aed;
+    background: rgba(124, 58, 237, 0.10);
+    border: 1px solid rgba(124, 58, 237, 0.28);
+}
+.talk-template-status-item__cat--thanks   { color: #b45309; background: rgba(217, 119, 6, 0.10); border-color: rgba(217, 119, 6, 0.28); }
+.talk-template-status-item__cat--schedule { color: #0f766e; background: rgba(20, 184, 166, 0.10); border-color: rgba(20, 184, 166, 0.30); }
+.talk-template-status-item__cat--question { color: #2563eb; background: rgba(37, 99, 235, 0.10); border-color: rgba(37, 99, 235, 0.30); }
+.talk-template-status-item__cat--intro    { color: #6d28d9; background: rgba(124, 58, 237, 0.10); border-color: rgba(124, 58, 237, 0.30); }
+.talk-template-status-item__cat--status   { color: #6d28d9; background: rgba(124, 58, 237, 0.10); border-color: rgba(124, 58, 237, 0.30); }
+.talk-template-status-item__body { display: block; }
 
 /* ==========================================================================
    ライトテーマ画面での上書き（トークルームは常にライト運用）

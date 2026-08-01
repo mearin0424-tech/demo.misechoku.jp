@@ -226,15 +226,164 @@ input[type="file"]::file-selector-button:hover {
 .case-card__action-btn:hover,
 .ai-chat__send:hover,
 .mypage-alert__btn:hover,
-.search-filter-icon-btn--gold:hover {
+.search-filter-icon-btn--gold:hover,
+/* 追加（2026-08-01 audit で検出）: TALK / HOME / SEARCH / RECRUITMENT / PROFILE / MYPAGE / APP */
+.btn-send:hover,
+.card-recruit-btn:hover,
+.search-detail-fab:hover,
+.recruit-cta-btn:hover,
+.recruit-btn-preview:hover,
+.action-btn.like:hover,
+.app-btn:hover {
     filter: none !important;
     opacity: 1 !important;
+}
+/* hover の translate/scale 移動も廃止（:active でのみ沈み込ませる）*/
+.card-recruit-btn:hover,
+.action-circle-btn.keep:hover,
+.action-circle-btn.like:hover,
+.app-btn:hover,
+.register-submit:hover,
+.register-secondary:hover {
+    transform: none !important;
 }
 /* Tailwind ユーティリティ由来（x-ui.button / fab の hover:brightness-110） */
 .hover\:brightness-110:hover {
     --tw-brightness: brightness(1) !important;
     filter: none !important;
 }
+
+/* ------------------------------------------------------------------
+   8c. Primary CTA 正解レシピ（.btn-primary-cta）
+   新規画面はこのクラス1つで Primary CTA を組める。既存の役割ボタンは
+   §1 の .btn-gold 等のオーバーライドで同じ見た目に揃える。
+   ------------------------------------------------------------------ */
+.btn-primary-cta {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    min-height: 48px !important;
+    padding: 12px 20px !important;
+    border: 0 !important;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, var(--accent-grad-from, #a78bfa), var(--accent-grad-to, #7c3aed)) !important;
+    color: var(--on-accent-strong, #ffffff) !important;
+    font-weight: 800 !important;
+    font-size: 0.95rem !important;
+    letter-spacing: 0.02em !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    box-shadow:
+        0 6px 14px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.20),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18) !important;
+    transition: transform 0.12s ease !important;
+}
+.btn-primary-cta:hover { filter: none !important; opacity: 1 !important; transform: none !important; }
+.btn-primary-cta:active {
+    transform: scale(0.97) !important;
+    box-shadow:
+        0 2px 5px rgba(0, 0, 0, 0.45),
+        inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+.btn-primary-cta:disabled,
+.btn-primary-cta[aria-disabled="true"] {
+    opacity: 0.65 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+}
+.btn-primary-cta--full { width: 100% !important; }
+.btn-primary-cta--pill { border-radius: 999px !important; }
+.btn-primary-cta--sm { min-height: 40px !important; padding: 8px 14px !important; font-size: 0.86rem !important; }
+
+/* Secondary CTA 正解レシピ（.btn-secondary-cta）：フラット + accent 枠 */
+.btn-secondary-cta {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    min-height: 44px !important;
+    padding: 10px 18px !important;
+    border: 1px solid rgba(var(--accent-rgb, 168, 85, 247), 0.40) !important;
+    border-radius: 12px !important;
+    background: rgba(var(--accent-rgb, 168, 85, 247), 0.10) !important;
+    color: var(--accent-text, #a78bfa) !important;
+    font-weight: 700 !important;
+    font-size: 0.90rem !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+    transition: background 0.12s ease, border-color 0.12s ease, transform 0.12s ease !important;
+}
+.btn-secondary-cta:hover {
+    background: rgba(var(--accent-rgb, 168, 85, 247), 0.18) !important;
+    border-color: rgba(var(--accent-rgb, 168, 85, 247), 0.60) !important;
+    filter: none !important;
+    transform: none !important;
+}
+.btn-secondary-cta:active { transform: scale(0.97) !important; }
+.btn-secondary-cta--full { width: 100% !important; }
+.btn-secondary-cta--pill { border-radius: 999px !important; }
+
+/* Ghost CTA 正解レシピ（.btn-ghost-cta）：枠なし・text ボタン */
+.btn-ghost-cta {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    min-height: 36px !important;
+    padding: 6px 12px !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: transparent !important;
+    color: var(--color-text-sub, #a0a0a0) !important;
+    font-weight: 700 !important;
+    font-size: 0.86rem !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+    transition: background 0.12s ease, color 0.12s ease !important;
+}
+.btn-ghost-cta:hover {
+    background: rgba(var(--accent-rgb, 168, 85, 247), 0.08) !important;
+    color: var(--accent-text, #a78bfa) !important;
+}
+
+/* Destructive CTA 正解レシピ（.btn-destructive-cta）：赤アウトライン */
+.btn-destructive-cta {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    min-height: 44px !important;
+    padding: 10px 18px !important;
+    border: 1px solid rgba(220, 38, 38, 0.45) !important;
+    border-radius: 12px !important;
+    background: rgba(220, 38, 38, 0.06) !important;
+    color: #dc2626 !important;
+    font-weight: 700 !important;
+    font-size: 0.90rem !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+    transition: background 0.12s ease, transform 0.12s ease !important;
+}
+.btn-destructive-cta:hover {
+    background: rgba(220, 38, 38, 0.12) !important;
+    filter: none !important;
+    transform: none !important;
+}
+.btn-destructive-cta:active { transform: scale(0.97) !important; }
+.btn-destructive-cta--solid {
+    background: #dc2626 !important;
+    color: #ffffff !important;
+    border: 0 !important;
+    box-shadow:
+        0 6px 14px rgba(220, 38, 38, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.20) !important;
+}
+.btn-destructive-cta--solid:hover { background: #dc2626 !important; }
 
 /* KEEP / LIKE のアクティブ状態：グラデ → ベタ（グローは状態FBなので残す）
    LIKE は「感情アクション＝ピンク」の意味色なので、テーマ（紫）に追従させず固定 */

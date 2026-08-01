@@ -608,7 +608,17 @@ document.addEventListener('DOMContentLoaded', function() {
         card.appendChild(form);
     };
 
+    // カテゴリラベル (backend の 'intro'/'question'/'schedule'/'thanks'/'status' に対応)
+    const templateCategoryMap = {
+        intro:    { label: '自己紹介', className: 'intro' },
+        question: { label: '質問',     className: 'question' },
+        schedule: { label: '日程',     className: 'schedule' },
+        thanks:   { label: '感謝',     className: 'thanks' },
+        status:   { label: '状況',     className: 'status' },
+    };
+
     // ステータスごとの定型文セクションを1つ作る
+    // item は { category, body } または旧形式の string を許容
     const buildStatusSection = (group) => {
         const section = document.createElement('section');
         section.className = 'talk-template-status-section';
@@ -620,15 +630,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const list = document.createElement('div');
         list.className = 'talk-template-status-list';
-        (group.items || []).forEach(function (text) {
+        (group.items || []).forEach(function (item) {
+            const body = (item && typeof item === 'object') ? String(item.body || '') : String(item || '');
+            const category = (item && typeof item === 'object') ? (item.category || '') : '';
+            if (!body) return;
+
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'talk-template-status-item';
-            btn.textContent = text;
+
+            if (category && templateCategoryMap[category]) {
+                const cat = document.createElement('span');
+                cat.className = 'talk-template-status-item__cat talk-template-status-item__cat--' + templateCategoryMap[category].className;
+                cat.textContent = templateCategoryMap[category].label;
+                btn.appendChild(cat);
+            }
+            const bodyEl = document.createElement('span');
+            bodyEl.className = 'talk-template-status-item__body';
+            bodyEl.textContent = body;
+            btn.appendChild(bodyEl);
+
             btn.addEventListener('click', function () {
                 if (!messageInput) return;
                 closeTemplateMenu();
-                messageInput.value = text;
+                messageInput.value = body;
                 messageInput.dispatchEvent(new Event('input', { bubbles: true }));
                 messageInput.focus();
             });

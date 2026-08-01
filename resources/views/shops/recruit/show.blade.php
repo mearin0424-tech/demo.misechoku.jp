@@ -6,7 +6,7 @@
 @section('canonical', $shareUrl ?? url()->current())
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/recruitment.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/recruitment.css') }}?v=20260801-btn-rules">
 <link rel="stylesheet" href="{{ asset('assets/css/fav-actions.css') }}">
 <style>
     /* アプリの max-content-width に追従させ、追加の幅制限・余分なネストを掛けない */

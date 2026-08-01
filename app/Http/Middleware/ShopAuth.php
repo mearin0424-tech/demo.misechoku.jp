@@ -15,7 +15,7 @@ class ShopAuth
     {
         if (!auth()->guard('shop')->check()) {
             return redirect()
-                ->route('login.demo')
+                ->route('shop.login')
                 ->with('message', 'ログインの有効期限が切れました。もう一度ログインしてください。');
         }
 

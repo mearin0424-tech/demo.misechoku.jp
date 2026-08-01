@@ -43,19 +43,37 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // メインの上下スワイプ（モダン・操作性重視）
+    // ------------------------------------------------------------------
+    // 2枚以上とばない設計（2026-08-01 修正）:
+    //   1. slidesPerGroup: 1 を明示（Swiper 既定は 1 だが安全策として固定）
+    //   2. preventInteractionOnTransition: true（アニメ中の新規タッチを無効化）
+    //   3. mousewheel.thresholdTime: 500ms でトラックパッド慣性を抑制
+    //   4. transitionStart で allowTouchMove を false に、End で true に戻す
+    //      （preventInteractionOnTransition が効かない環境向けの二重ガード）
+    //   5. longSwipesRatio を 0.25→0.35 / longSwipesMs 260→400 に緩和して
+    //      「振り抜くまで確定しない」感を与える
+    // ------------------------------------------------------------------
     const mainSwiper = new Swiper('.main-swiper', {
         direction: 'vertical',
         slidesPerView: 1,
+        slidesPerGroup: 1,  // 1回のジェスチャで必ず 1 スライドだけ移動
         centeredSlides: true,
         // DISCOVERY 仕様：シームレスな無限ループ（末尾→先頭、先頭→末尾）
         loop: slideCount >= 2,
         rewind: false,
         // 340ms + CSS 側で cubic-bezier(0.22, 0.8, 0.34, 1) の easing
         speed: 340,
+        // トランジション中は新しい touch/click を弾く（Swiper 8+）
+        preventInteractionOnTransition: true,
         mousewheel: {
             enabled: true,
             sensitivity: 0.5,
-            thresholdDelta: 24
+            // 24 → 40：トラックパッドの細かい delta を1つずつ拾わない
+            thresholdDelta: 40,
+            // 500ms 間は同方向の追加 wheel イベントを無視（Swiper の慣性ガード）
+            thresholdTime: 500,
+            forceToAxis: true,
+            releaseOnEdges: true,
         },
         touchRatio: 1,
         // タップ〜微動での誤反応対策：明確に引っ張った時のみスライド
@@ -63,11 +81,14 @@ document.addEventListener('DOMContentLoaded', function() {
         threshold: 22,
         shortSwipes: false,
         longSwipes: true,
-        longSwipesRatio: 0.25,
-        longSwipesMs: 260,
+        // 0.25 → 0.35：3割以上ドラッグしないと確定させない（誤操作抑制）
+        longSwipesRatio: 0.35,
+        // 260 → 400：フリックのタイムウィンドウを広げてワンアクション感を出す
+        longSwipesMs: 400,
         followFinger: true,
         resistance: true,
-        resistanceRatio: 0.5,
+        // 0.5 → 0.72：端でのゴム感を強化（Photo swiper と統一）
+        resistanceRatio: 0.72,
         touchStartPreventDefault: false,
         grabCursor: true,
         preventClicks: true,
@@ -88,9 +109,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     refreshActiveCard(self, 'card');
                 });
             },
-            // A) transitionStart は削除、End の1回だけに集約
+            // トランジション開始でタッチを封鎖、終了で解禁（二重ガード）
+            slideChangeTransitionStart: function () {
+                this.allowTouchMove = false;
+            },
             slideChangeTransitionEnd: function () {
                 refreshActiveCard(this, 'card');
+                // 完了後にわずかな余韻を置いてから解禁（連続フリックの防止）
+                var self = this;
+                setTimeout(function () { self.allowTouchMove = true; }, 60);
             }
         }
     });

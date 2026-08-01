@@ -1,433 +1,505 @@
 @extends('layouts.app-v2')
 
 @section('title', '本人確認')
-@section('body-class', 'page-cast-mypage')
+@section('body-class', 'page-cast-mypage page-cast-identity')
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <style>
-.identity-pattern-tabs {
-    display: flex;
-    gap: 6px;
-    padding: 6px;
-    background: #ece7f7;
-    border-radius: 12px;
-    margin: 12px 0 16px;
-}
-.identity-pattern-tab {
-    flex: 1;
-    padding: 10px 12px;
-    border-radius: 8px;
-    background: transparent;
-    border: 0;
-    color: #6d6685;
-    font-weight: 700;
-    font-size: 0.86rem;
-    cursor: pointer;
-    text-align: center;
-}
-.identity-pattern-tab.is-active {
-    background: var(--accent, #d670a2);
-    color: var(--on-accent, #1a0814);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .20), inset 0 -1px 0 rgba(0, 0, 0, .18);
-}
-.identity-pattern-tab:not(.is-active):hover { background: rgba(124,58,237,.08); color: #241f33; }
-.identity-pattern-help {
-    font-size: 0.78rem;
-    color: #5f5876;
-    line-height: 1.7;
-    margin: 0 0 12px;
-    padding: 10px 12px;
-    border-left: 2px solid rgba(168, 85, 247, .55);
-    background: rgba(168, 85, 247, .04);
-    border-radius: 0 6px 6px 0;
-}
-.identity-form-section {
-    border: 1px solid rgba(168, 85, 247, .18);
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 14px;
-    background: #ffffff;
-}
-.identity-form-section__head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 10px;
-}
-.identity-form-section__title {
-    font-size: 0.92rem;
-    font-weight: 800;
-    color: #6d28d9;
-}
-.identity-form-section__pill {
-    font-size: 0.7rem;
-    padding: 3px 8px;
-    border-radius: 999px;
-    background: #f5f2fb;
-    color: #6d6685;
-    font-weight: 700;
-}
-.identity-form-section__pill.is-approved { background: rgba(5,150,105,.10); color: #047857; }
-.identity-form-section__pill.is-pending  { background: rgba(180,83,9,.10);  color: #b45309; }
-.identity-form-section__pill.is-rejected { background: rgba(220,38,38,.08);  color: #dc2626; }
-/* フラッシュメッセージ */
-.identity-flash {
-    margin: 0 0 14px;
-    padding: 11px 14px;
-    border-radius: 12px;
-    background: rgba(var(--accent-rgb, 139, 92, 246), 0.12);
-    border: 1px solid rgba(var(--accent-rgb, 139, 92, 246), 0.4);
-    color: var(--color-text-main, #f5f5f5);
-    font-size: 0.84rem;
-    line-height: 1.6;
+/* ============================================================
+   本人確認ページ（ライトモード）
+   共通デザイントークン（フォント2段階・色3段階に揃える）
+   - ヘッダー文字   : #1e1a30 / 800
+   - 本文           : #4a4560 / 500
+   - 補助（灰紫）   : #8b84a1 / 500
+   - アクセント     : #7c3aed
+   - 面（カード）   : #ffffff / rgba紫 border / soft shadow
+   ============================================================ */
+:root {
+    --doc-ink:      #1e1a30;
+    --doc-body:     #4a4560;
+    --doc-muted:    #8b84a1;
+    --doc-accent:   #7c3aed;
+    --doc-accent-2: #a78bfa;
+    --doc-line:     rgba(124, 58, 237, 0.18);
+    --doc-line-2:   rgba(124, 58, 237, 0.30);
+    --doc-surface:  #ffffff;
+    --doc-shadow:   0 4px 14px rgba(76, 29, 149, 0.08);
+    --doc-radius:   16px;
 }
 
-/* 審査中バリアント（warn トーン） */
-.identity-status-overall.is-pending-review {
-    background: linear-gradient(180deg, rgba(252, 211, 77, 0.10), rgba(252, 211, 77, 0.02));
-    border-color: rgba(252, 211, 77, 0.45);
-}
-.identity-status-overall.is-pending-review i {
-    color: var(--color-warn, #fcd34d);
-    filter: drop-shadow(0 2px 8px rgba(252, 211, 77, 0.3));
-}
-
-/* 承認催促 */
-.identity-remind {
-    margin: -8px 0 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-.identity-remind__btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    padding: 12px 16px;
-    border-radius: 999px;
-    border: 1px solid rgba(var(--accent-rgb, 139, 92, 246), 0.5);
-    background: rgba(var(--accent-rgb, 139, 92, 246), 0.12);
-    color: var(--accent-text, #a78bfa);
-    font-size: 0.88rem;
-    font-weight: 800;
-    cursor: pointer;
-    transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
-}
-.identity-remind__btn:active { transform: scale(0.98); }
-.identity-remind__note {
-    margin: 0;
-    font-size: 0.72rem;
-    color: var(--color-text-sub, #b8b8b8);
-    text-align: center;
-}
-.identity-remind__done {
-    margin: 0;
-    padding: 11px 14px;
-    border-radius: 12px;
-    border: 1px dashed rgba(var(--accent-rgb, 139, 92, 246), 0.4);
-    color: var(--color-text-sub, #b8b8b8);
-    font-size: 0.8rem;
-    text-align: center;
-}
-.identity-remind__done i { color: var(--accent-text, #a78bfa); margin-right: 4px; }
-
-/* === 本人確認ステータス：ページのヒーローカード === */
-.identity-status-overall {
-    padding: 18px 20px 20px;
-    border-radius: 18px;
-    border: 1px solid rgba(168, 85, 247, .35);
-    margin-bottom: 22px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    background:
-        linear-gradient(180deg, rgba(168, 85, 247, 0.12), rgba(168, 85, 247, 0.03));
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    box-shadow:
-        0 4px 16px rgba(0, 0, 0, 0.25),
-        inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-.identity-status-overall.is-verified {
-    background:
-        linear-gradient(180deg, rgba(16, 185, 129, 0.14), rgba(16, 185, 129, 0.03));
-    border-color: rgba(16, 185, 129, .50);
-    box-shadow:
-        0 4px 16px rgba(16, 185, 129, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-/* アイコン：丸枠なしのフラット、サイズ大きく */
-.identity-status-overall i {
-    flex-shrink: 0;
-    font-size: 2.1rem;
-    color: #7c3aed;
-    filter: drop-shadow(0 2px 8px rgba(168, 85, 247, 0.35));
-}
-.identity-status-overall.is-verified i {
-    color: #059669;
-    filter: drop-shadow(0 2px 8px rgba(16, 185, 129, 0.45));
-}
-/* メインテキスト：大きく */
-.identity-status-overall__text {
-    color: #241f33;
-    font-weight: 800;
-    font-size: 1.05rem;
-    line-height: 1.25;
-    letter-spacing: -0.01em;
-}
-.identity-status-overall__text small {
-    display: block;
-    color: #5f5876;
-    font-weight: 500;
-    font-size: 0.76rem;
-    margin-top: 4px;
-    letter-spacing: 0;
-    line-height: 1.5;
-}
-
-/* === C-1: 本人確認 UX polish === */
-/* ファイル選択ボタン：ファイル名が長くても崩れない flex row */
-.identity-form-section .bank-form-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px 10px;
-    margin-bottom: 12px;
-}
-.identity-form-section .bank-form-row .bank-label {
-    flex-basis: 100%;
-    font-size: 0.78rem;
-    color: #5f5876;
-    margin-bottom: 2px;
-}
-/* ファイル選択ボタン：mauve outline、選択済みは緑 */
-.identity-form-section .file-upload-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    font-size: 0.82rem;
-    font-weight: 600;
-    border-radius: 999px;
-    border: 1px solid rgba(124, 58, 237, 0.40);
-    color: #2d2742;
-    background: rgba(124, 58, 237, 0.05);
-    cursor: pointer;
-    transition: background 0.15s ease, border-color 0.15s ease;
-}
-.identity-form-section .file-upload-btn:hover {
-    background: rgba(168, 85, 247, 0.14);
-    border-color: rgba(168, 85, 247, 0.65);
-}
-.identity-form-section .file-upload-btn.is-selected {
-    color: #047857;
-    border-color: rgba(110, 231, 183, 0.55);
-    background: rgba(16, 185, 129, 0.10);
-}
-.identity-form-section .file-upload-btn.is-selected i::before {
-    content: "\f00c";  /* fa-check */
-}
-/* 提出状況サマリー：許可証ページ（license-summary）と同一UI（2026-07-20） */
-.license-summary {
-    background: #ffffff;
-    border: 1px solid rgba(124, 58, 237, 0.20);
-    border-radius: 14px;
-    padding: 14px;
-    margin-bottom: 16px;
-    box-shadow: 0 6px 18px rgba(76, 29, 149, 0.08);
-}
-.license-summary__counts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.license-summary__count {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 4px 10px; border-radius: 999px;
-    font-size: 0.74rem; font-weight: 800;
-    background: #f5f2fb; color: #6d6685; border: 1px solid rgba(95, 88, 118, 0.20);
-}
-.license-summary__count.is-approved { background: rgba(5,150,105,0.08); color: #059669; border-color: rgba(5,150,105,0.30); }
-.license-summary__count.is-pending  { background: rgba(180,83,9,0.08); color: #b45309; border-color: rgba(180,83,9,0.30); }
-.license-summary__count.is-rejected { background: rgba(220,38,38,0.06); color: #dc2626; border-color: rgba(220,38,38,0.30); }
-.license-summary__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
-.license-summary__row { display: flex; align-items: center; gap: 10px; padding: 10px 4px; }
-.license-summary__row + .license-summary__row { border-top: 1px solid rgba(124, 58, 237, 0.10); }
-.license-summary__row-icon {
-    flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 0.9rem; background: #f5f2fb; color: #8b84a1;
-}
-.license-summary__row.is-approved .license-summary__row-icon { background: rgba(5,150,105,0.10); color: #059669; }
-.license-summary__row.is-pending  .license-summary__row-icon { background: rgba(180,83,9,0.10); color: #b45309; }
-.license-summary__row.is-rejected .license-summary__row-icon { background: rgba(220,38,38,0.08); color: #dc2626; }
-.license-summary__row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.license-summary__row-name { font-size: 0.88rem; font-weight: 800; color: #4b465c; }
-.license-summary__row-detail { font-size: 0.74rem; color: #6d6685; overflow-wrap: anywhere; }
-.license-summary__row-detail strong { color: #2d2742; }
-.license-summary__row-status { flex: 0 0 auto; font-size: 0.74rem; font-weight: 800; color: #6d6685; white-space: nowrap; }
-.license-summary__row.is-approved .license-summary__row-status { color: #059669; }
-.license-summary__row.is-pending  .license-summary__row-status { color: #b45309; }
-.license-summary__row.is-rejected .license-summary__row-status { color: #dc2626; }
-
-/* アップロードUI（2026-07-20 改善）：全幅ドロップ風ボタン + 画像プレビュー */
-.identity-form-section .file-upload-btn--drop {
-    display: flex !important;
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 16px 14px !important;
-    border-radius: 12px !important;
-    border-style: dashed !important;
-    text-align: left;
-}
-.identity-form-section .file-upload-btn--drop i { font-size: 1.2rem; }
-.identity-form-section .file-upload-btn--drop span { display: flex; flex-direction: column; line-height: 1.4; }
-.identity-form-section .file-upload-btn--drop small {
-    font-weight: 600;
-    font-size: 0.68rem;
-    color: #857ca0;
-}
-.identity-form-section .file-upload-btn--drop.is-selected {
-    border-style: solid !important;
-    background: rgba(124, 58, 237, 0.10) !important;
-}
-.identity-form-section .upload-preview-thumb {
-    display: block;
-    margin-top: 8px;
-    max-width: 100%;
-    max-height: 200px;
-    border-radius: 12px;
-    border: 1px solid rgba(124, 58, 237, 0.28);
-    box-shadow: 0 3px 12px rgba(76, 29, 149, 0.10);
-    object-fit: contain;
-    background: #ffffff;
-}
-.identity-form-section .upload-preview-thumb[hidden] { display: none; }
-.identity-form-section .upload-preview-pdf {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 8px;
-    padding: 8px 12px;
-    border-radius: 10px;
-    background: rgba(220, 38, 38, 0.06);
-    border: 1px solid rgba(220, 38, 38, 0.30);
-    color: #b91c1c;
-    font-size: 0.8rem;
-    font-weight: 700;
-    max-width: 100%;
-    overflow: hidden;
-}
-.identity-form-section .upload-preview-pdf[hidden] { display: none; }
-.identity-form-section .upload-preview-pdf span {
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.identity-form-section .file-name-display {
-    flex: 1 1 auto;
-    min-width: 0;
-    font-size: 0.78rem;
-    color: #8b84a1;
-    word-break: break-all;
-}
-.identity-form-section .file-name-display.is-set {
-    color: #2d2742;
-}
-/* インラインエラー（alert の置き換え）*/
-.cast-identity-error {
-    margin: 10px 0 0;
-    padding: 10px 12px;
-    border-radius: 12px;
-    border: 1px solid rgba(248, 113, 113, 0.45);
-    background: rgba(220, 38, 38, 0.06);
-    color: #b91c1c;
-    font-size: 0.82rem;
-    line-height: 1.5;
-    display: flex;
-    align-items: flex-start;
-    gap: 6px;
-}
-.cast-identity-error::before {
-    content: "⚠";
-    flex-shrink: 0;
-    color: #fca5a5;
-}
-.cast-identity-error[hidden] { display: none; }
-/* 成功メッセージ */
-.cast-identity-success {
-    margin: 10px 0 0;
-    padding: 10px 12px;
-    border-radius: 12px;
-    border: 1px solid rgba(110, 231, 183, 0.45);
-    background: rgba(5, 150, 105, 0.08);
-    color: #047857;
-    font-size: 0.82rem;
-    line-height: 1.5;
-}
-.cast-identity-success[hidden] { display: none; }
-
-/* === 提出状況サマリー（何を提出したかを一覧で明示） === */
-.identity-doc-summary {
-    background: #ffffff;
-    border: 1px solid rgba(124, 58, 237, 0.20);
-    border-radius: 14px;
-    padding: 12px 14px;
-    margin: 0 0 18px;
-    box-shadow: 0 6px 18px rgba(76, 29, 149, 0.08);
-}
-.identity-doc-summary__title {
-    margin: 0 0 8px;
-    font-size: 0.82rem;
-    font-weight: 800;
-    color: #6d28d9;
-}
-.identity-doc-summary__title i { margin-right: 4px; }
-.identity-doc-summary__list { list-style: none; margin: 0; padding: 0; }
-.identity-doc-summary__row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 9px 2px;
-}
-.identity-doc-summary__row + .identity-doc-summary__row { border-top: 1px solid rgba(124, 58, 237, 0.10); }
-.identity-doc-summary__icon {
-    flex: 0 0 auto;
-    width: 28px; height: 28px; border-radius: 50%;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 0.85rem;
-    background: #f5f2fb; color: #8b84a1;
-}
-.identity-doc-summary__row.is-approved .identity-doc-summary__icon { background: rgba(5,150,105,0.10); color: #059669; }
-.identity-doc-summary__row.is-pending  .identity-doc-summary__icon { background: rgba(180,83,9,0.10); color: #b45309; }
-.identity-doc-summary__row.is-rejected .identity-doc-summary__icon { background: rgba(220,38,38,0.08); color: #dc2626; }
-.identity-doc-summary__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
-.identity-doc-summary__label { font-size: 0.84rem; font-weight: 800; color: #241f33; }
-.identity-doc-summary__label small {
-    margin-left: 6px;
-    font-size: 0.66rem;
-    font-weight: 700;
-    color: #8b84a1;
-}
-.identity-doc-summary__detail { font-size: 0.72rem; color: #6d6685; overflow-wrap: anywhere; }
-.identity-doc-summary__detail strong { color: #2d2742; }
-.identity-doc-summary__status { flex: 0 0 auto; font-size: 0.72rem; font-weight: 800; color: #8b84a1; white-space: nowrap; }
-.identity-doc-summary__row.is-approved .identity-doc-summary__status { color: #059669; }
-.identity-doc-summary__row.is-pending  .identity-doc-summary__status { color: #b45309; }
-.identity-doc-summary__row.is-rejected .identity-doc-summary__status { color: #dc2626; }
-
-/* === ライトモード：mypage.css のダーク面を上書き ===
-   外側ラッパーは透明にして、body の薄紫（#f5f2fb）を通す。
-   → 中の白カード（.identity-form-section 等）が薄紫背景に浮き上がる */
-.cast-mypage-sub-page .mypage-detail-box {
+/* 外側ラッパー：mypage.css のダーク面を打ち消して薄紫背景を通す */
+.cast-mypage-sub-page .mypage-detail-box,
+.cast-mypage-sub-page .mypage-section {
     background: transparent !important;
     border: 0 !important;
     box-shadow: none !important;
     padding: 0 !important;
 }
-.cast-mypage-sub-page .mypage-page-head__title { color: #241f33 !important; }
-.cast-mypage-sub-page .mypage-page-head__title i { color: #7c3aed !important; }
-.cast-mypage-sub-page .mypage-page-head__desc { color: #5f5876 !important; }
+.cast-mypage-sub-page { color: var(--doc-body); }
+
+/* ============================================================
+   1. ヒーロー：全体ステータス
+   ============================================================ */
+.identity-hero {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+    border-radius: var(--doc-radius);
+    background: linear-gradient(180deg, rgba(168, 85, 247, 0.09), rgba(168, 85, 247, 0.02));
+    border: 1px solid var(--doc-line-2);
+    box-shadow: var(--doc-shadow);
+}
+.identity-hero__icon {
+    flex: 0 0 auto;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(124, 58, 237, 0.12);
+    color: var(--doc-accent);
+    font-size: 1.35rem;
+}
+.identity-hero__body { flex: 1; min-width: 0; }
+.identity-hero__title {
+    margin: 0 0 4px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--doc-ink);
+    letter-spacing: -0.005em;
+    line-height: 1.3;
+}
+.identity-hero__desc {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--doc-body);
+    line-height: 1.65;
+}
+.identity-hero.is-verified {
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.10), rgba(16, 185, 129, 0.02));
+    border-color: rgba(16, 185, 129, 0.35);
+}
+.identity-hero.is-verified .identity-hero__icon { background: rgba(16, 185, 129, 0.12); color: #059669; }
+.identity-hero.is-pending {
+    background: linear-gradient(180deg, rgba(217, 119, 6, 0.09), rgba(217, 119, 6, 0.02));
+    border-color: rgba(217, 119, 6, 0.35);
+}
+.identity-hero.is-pending .identity-hero__icon { background: rgba(217, 119, 6, 0.12); color: #b45309; }
+
+/* フラッシュ */
+.identity-flash {
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(124, 58, 237, 0.08);
+    border: 1px solid var(--doc-line-2);
+    color: var(--doc-ink);
+    font-size: 0.86rem;
+    line-height: 1.6;
+}
+
+/* ============================================================
+   2. 提出状況サマリー
+   ============================================================ */
+.doc-summary {
+    background: var(--doc-surface);
+    border: 1px solid var(--doc-line);
+    border-radius: var(--doc-radius);
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: var(--doc-shadow);
+}
+.doc-summary__title {
+    margin: 0 0 12px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--doc-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+.doc-summary__counts {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-bottom: 14px;
+}
+.doc-summary__count {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.74rem; font-weight: 700;
+    background: #f4f0fb;
+    color: var(--doc-body);
+    border: 1px solid var(--doc-line);
+}
+.doc-summary__count i { font-size: 0.7rem; }
+.doc-summary__count.is-approved { background: rgba(5, 150, 105, 0.08); color: #059669; border-color: rgba(5, 150, 105, 0.28); }
+.doc-summary__count.is-pending  { background: rgba(180, 83, 9, 0.08); color: #b45309; border-color: rgba(180, 83, 9, 0.28); }
+.doc-summary__count.is-rejected { background: rgba(220, 38, 38, 0.06); color: #dc2626; border-color: rgba(220, 38, 38, 0.30); }
+
+.doc-summary__list {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-direction: column;
+}
+.doc-summary__row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 0;
+}
+.doc-summary__row + .doc-summary__row { border-top: 1px solid var(--doc-line); }
+.doc-summary__row-icon {
+    flex: 0 0 auto;
+    width: 28px; height: 28px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.82rem;
+    background: #f4f0fb; color: var(--doc-muted);
+}
+.doc-summary__row.is-approved .doc-summary__row-icon { background: rgba(5, 150, 105, 0.10); color: #059669; }
+.doc-summary__row.is-pending  .doc-summary__row-icon { background: rgba(180, 83, 9, 0.10); color: #b45309; }
+.doc-summary__row.is-rejected .doc-summary__row-icon { background: rgba(220, 38, 38, 0.08); color: #dc2626; }
+.doc-summary__row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.doc-summary__row-name {
+    font-size: 0.90rem; font-weight: 700; color: var(--doc-ink);
+    letter-spacing: -0.005em;
+}
+.doc-summary__row-name .doc-summary__pattern {
+    margin-left: 6px;
+    font-size: 0.66rem; font-weight: 700;
+    color: var(--doc-muted);
+    letter-spacing: 0.06em;
+}
+.doc-summary__row-detail {
+    font-size: 0.76rem;
+    color: var(--doc-body);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+.doc-summary__row-detail strong { color: var(--doc-ink); font-weight: 700; }
+.doc-summary__row-status {
+    flex: 0 0 auto;
+    font-size: 0.74rem; font-weight: 700;
+    color: var(--doc-muted);
+    white-space: nowrap;
+}
+.doc-summary__row.is-approved .doc-summary__row-status { color: #059669; }
+.doc-summary__row.is-pending  .doc-summary__row-status { color: #b45309; }
+.doc-summary__row.is-rejected .doc-summary__row-status { color: #dc2626; }
+
+/* ============================================================
+   3. 承認催促
+   ============================================================ */
+.identity-remind {
+    margin: 0 0 20px;
+    display: flex; flex-direction: column; gap: 8px;
+}
+.identity-remind__btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--doc-line-2);
+    background: rgba(124, 58, 237, 0.06);
+    color: var(--doc-accent);
+    font-size: 0.90rem; font-weight: 800;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+}
+.identity-remind__btn:active { transform: scale(0.98); }
+.identity-remind__note {
+    margin: 0; text-align: center;
+    font-size: 0.74rem; color: var(--doc-muted);
+}
+.identity-remind__done {
+    margin: 0; padding: 12px 14px; text-align: center;
+    border-radius: 12px;
+    border: 1px dashed var(--doc-line-2);
+    color: var(--doc-body);
+    font-size: 0.82rem;
+}
+.identity-remind__done i { color: var(--doc-accent); margin-right: 4px; }
+
+/* ============================================================
+   4. パターン切替タブ
+   ============================================================ */
+.identity-pattern-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: #ece7f7;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+.identity-pattern-tab {
+    flex: 1;
+    padding: 12px 10px;
+    border-radius: 9px;
+    background: transparent; border: 0;
+    color: var(--doc-body);
+    font-size: 0.82rem; font-weight: 700;
+    line-height: 1.35;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.identity-pattern-tab.is-active {
+    background: var(--doc-accent);
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(124, 58, 237, 0.30);
+}
+.identity-pattern-tab:not(.is-active):hover { background: rgba(124, 58, 237, 0.08); color: var(--doc-ink); }
+
+.identity-pattern-help {
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: var(--doc-body);
+    background: rgba(124, 58, 237, 0.05);
+    border-left: 3px solid var(--doc-accent-2);
+    border-radius: 0 10px 10px 0;
+}
+.identity-pattern-help strong { color: var(--doc-ink); font-weight: 700; }
+
+/* ============================================================
+   5. 書類カード（doc-card / doc-form）— 各書類の入力領域
+   ============================================================ */
+.doc-card {
+    background: var(--doc-surface);
+    border: 1px solid var(--doc-line);
+    border-radius: var(--doc-radius);
+    padding: 18px;
+    margin-bottom: 14px;
+    box-shadow: var(--doc-shadow);
+}
+.doc-card__head {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    margin-bottom: 14px;
+}
+.doc-card__title {
+    margin: 0;
+    font-size: 1rem; font-weight: 800;
+    color: var(--doc-ink);
+    letter-spacing: -0.005em;
+}
+.doc-card__pill {
+    flex: 0 0 auto;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.02em;
+    background: #f4f0fb;
+    color: var(--doc-muted);
+    border: 1px solid var(--doc-line);
+}
+.doc-card__pill.is-approved { background: rgba(5, 150, 105, 0.10); color: #059669; border-color: rgba(5, 150, 105, 0.30); }
+.doc-card__pill.is-pending  { background: rgba(180, 83, 9, 0.10); color: #b45309; border-color: rgba(180, 83, 9, 0.30); }
+.doc-card__pill.is-rejected { background: rgba(220, 38, 38, 0.08); color: #dc2626; border-color: rgba(220, 38, 38, 0.32); }
+
+.doc-card__ng {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(220, 38, 38, 0.06);
+    border: 1px solid rgba(220, 38, 38, 0.30);
+    color: #b91c1c;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    display: flex; align-items: flex-start; gap: 6px;
+}
+.doc-card__ng i { margin-top: 2px; }
+
+.doc-card__current {
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #faf7ff;
+    border: 1px dashed var(--doc-line-2);
+    font-size: 0.82rem;
+    color: var(--doc-body);
+    display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px;
+}
+.doc-card__current-label {
+    font-size: 0.68rem; font-weight: 800; letter-spacing: 0.06em;
+    color: var(--doc-muted);
+    text-transform: uppercase;
+    margin-right: 2px;
+}
+.doc-card__current strong { color: var(--doc-ink); font-weight: 700; }
+.doc-card__current-meta {
+    margin-left: auto;
+    font-size: 0.72rem; color: var(--doc-muted);
+}
+
+/* ---------- フォーム内部（縦積み・統一） ---------- */
+.doc-form { display: flex; flex-direction: column; gap: 14px; }
+.doc-form__field { display: flex; flex-direction: column; gap: 6px; }
+.doc-form__label {
+    font-size: 0.80rem; font-weight: 700; color: var(--doc-ink);
+    letter-spacing: 0.02em;
+    display: inline-flex; align-items: center; gap: 6px;
+}
+.doc-form__req {
+    display: inline-flex; align-items: center;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: rgba(220, 38, 38, 0.10);
+    color: #dc2626;
+    font-size: 0.64rem; font-weight: 800;
+    letter-spacing: 0.04em;
+}
+.doc-form__req.is-optional {
+    background: #f4f0fb;
+    color: var(--doc-muted);
+}
+
+.doc-form__select,
+.doc-form__input {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--doc-line-2);
+    background: #ffffff;
+    color: var(--doc-ink);
+    font-size: 0.90rem;
+    font-family: inherit;
+    box-sizing: border-box;
+    color-scheme: light;
+}
+.doc-form__select:focus,
+.doc-form__input:focus {
+    outline: none;
+    border-color: var(--doc-accent);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+}
+
+/* ドロップボタン：全幅・大きく・選択時は色替え */
+.doc-form__drop {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px 16px;
+    border: 1.5px dashed var(--doc-line-2);
+    border-radius: 12px;
+    background: #faf7ff;
+    color: var(--doc-body);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+.doc-form__drop:hover {
+    background: rgba(124, 58, 237, 0.06);
+    border-color: var(--doc-accent-2);
+}
+.doc-form__drop-icon {
+    flex: 0 0 auto;
+    width: 40px; height: 40px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    background: rgba(124, 58, 237, 0.10);
+    color: var(--doc-accent);
+    font-size: 1.05rem;
+}
+.doc-form__drop-text {
+    flex: 1; min-width: 0;
+    display: flex; flex-direction: column; gap: 2px;
+    text-align: left;
+    line-height: 1.4;
+    overflow: hidden;
+}
+.doc-form__drop-name {
+    font-size: 0.88rem; font-weight: 700;
+    color: var(--doc-ink);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.doc-form__drop-text small {
+    font-size: 0.70rem; font-weight: 500; color: var(--doc-muted);
+}
+/* 選択済み状態 */
+.doc-form__drop.is-selected {
+    border-style: solid;
+    border-color: rgba(16, 185, 129, 0.45);
+    background: rgba(16, 185, 129, 0.06);
+}
+.doc-form__drop.is-selected .doc-form__drop-icon {
+    background: rgba(16, 185, 129, 0.14);
+    color: #059669;
+}
+.doc-form__drop.is-selected .doc-form__drop-name { color: #065f46; }
+
+.doc-form__preview {
+    display: block;
+    max-width: 100%;
+    max-height: 200px;
+    margin-top: 6px;
+    border-radius: 10px;
+    border: 1px solid var(--doc-line);
+    background: #ffffff;
+    object-fit: contain;
+    box-shadow: 0 2px 8px rgba(76, 29, 149, 0.08);
+}
+.doc-form__preview[hidden] { display: none; }
+.doc-form__pdf-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 10px;
+    margin-top: 4px;
+    border-radius: 8px;
+    background: rgba(220, 38, 38, 0.06);
+    border: 1px solid rgba(220, 38, 38, 0.30);
+    color: #b91c1c;
+    font-size: 0.76rem; font-weight: 700;
+    max-width: 100%; overflow: hidden;
+}
+.doc-form__pdf-chip[hidden] { display: none; }
+.doc-form__pdf-chip span {
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* 送信ボタン（本ページ内の Primary CTA レシピ） */
+.doc-form__submit {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%;
+    min-height: 50px;
+    margin-top: 4px;
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--doc-accent-2), var(--doc-accent));
+    color: #ffffff;
+    font-size: 0.95rem; font-weight: 800;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    box-shadow:
+        0 6px 14px rgba(124, 58, 237, 0.30),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    transition: transform 0.12s ease;
+}
+.doc-form__submit:active { transform: scale(0.98); }
+.doc-form__submit:disabled { opacity: 0.65; cursor: progress; }
+
+/* インラインメッセージ */
+.cast-identity-error {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(220, 38, 38, 0.35);
+    background: rgba(220, 38, 38, 0.05);
+    color: #b91c1c;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    display: flex; align-items: flex-start; gap: 6px;
+}
+.cast-identity-error::before { content: "⚠"; flex-shrink: 0; }
+.cast-identity-error[hidden] { display: none; }
+.cast-identity-success {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    background: rgba(16, 185, 129, 0.06);
+    color: #047857;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+.cast-identity-success[hidden] { display: none; }
 </style>
 @endpush
 
@@ -442,101 +514,98 @@
     $categoryDocs = $categoryDocuments ?? ['photo_id' => null, 'non_photo_id' => null, 'address_proof' => null];
     $detectedPattern = $detectedPattern ?? 'photo';
     $isVerified = $isVerified ?? false;
+    $isPendingReview = !$isVerified && ($identityStatus ?? '') === 'pending';
+
+    $summaryRows = [
+        ['label' => '顔写真付き身分証', 'pattern' => 'A', 'doc' => $categoryDocs['photo_id'] ?? null],
+        ['label' => '顔写真なし身分証', 'pattern' => 'B', 'doc' => $categoryDocs['non_photo_id'] ?? null],
+        ['label' => '住所確認書類',       'pattern' => 'B', 'doc' => $categoryDocs['address_proof'] ?? null],
+    ];
+    $idApproved = 0; $idPending = 0; $idRejected = 0; $idNone = 0;
+    foreach ($summaryRows as $r) {
+        $sk = $r['doc']['status_key'] ?? null;
+        if (!$r['doc']) { $idNone++; }
+        elseif ($sk === 'approved') { $idApproved++; }
+        elseif ($sk === 'rejected') { $idRejected++; }
+        else { $idPending++; }
+    }
 @endphp
 <div class="content-wrapper animate-fadeIn">
     <div class="cast-mypage-sub-page">
         <section class="mypage-area">
-            {{-- タイトルはヘッダー中央、説明はオコジョガイド（character_guide_settings）に集約 --}}
-
             <div class="mypage-detail-box">
                 <div class="mypage-section">
-                    {{-- h2 "本人確認の状況" は eyebrow と status hero と triple-redundant なので撤去 --}}
 
                     @if(session('status'))
                         <p class="identity-flash" role="status">{{ session('status') }}</p>
                     @endif
 
-                    {{-- 全体ステータス（このカードがページの "hero" として機能する）
-                         完了 / 審査中 / 未提出・差戻し の3状態を明確に分ける --}}
-                    @php $isPendingReview = !$isVerified && ($identityStatus ?? '') === 'pending'; @endphp
-                    <div class="identity-status-overall {{ $isVerified ? 'is-verified' : '' }} {{ $isPendingReview ? 'is-pending-review' : '' }}">
-                        <i class="fas {{ $isVerified ? 'fa-circle-check' : ($isPendingReview ? 'fa-hourglass-half' : 'fa-clock') }}"></i>
-                        <div class="identity-status-overall__text">
+                    {{-- 1. ヒーロー：全体状況 --}}
+                    <div class="identity-hero {{ $isVerified ? 'is-verified' : ($isPendingReview ? 'is-pending' : '') }}">
+                        <span class="identity-hero__icon" aria-hidden="true">
+                            <i class="fas {{ $isVerified ? 'fa-circle-check' : ($isPendingReview ? 'fa-hourglass-half' : 'fa-clock') }}"></i>
+                        </span>
+                        <div class="identity-hero__body">
                             @if($isVerified)
-                                本人確認 完了
-                                <small>すべての書類が承認されています。</small>
+                                <p class="identity-hero__title">本人確認 完了</p>
+                                <p class="identity-hero__desc">すべての書類が承認されています。</p>
                             @elseif($isPendingReview)
-                                審査中です
-                                <small>書類は提出済みです。運営が内容を確認しています（通常1〜2営業日）。承認されるまで一部機能が制限されます。</small>
+                                <p class="identity-hero__title">審査中です</p>
+                                <p class="identity-hero__desc">運営が内容を確認しています（通常 1〜2 営業日）。承認まで一部機能が制限されます。</p>
                             @else
-                                本人確認 未完了
-                                <small>下記のいずれかのパターンで書類を提出してください。</small>
+                                <p class="identity-hero__title">本人確認 未完了</p>
+                                <p class="identity-hero__desc">下記のいずれかのパターンで書類を提出してください。</p>
                             @endif
                         </div>
                     </div>
 
-                    {{-- 提出状況サマリー：どの書類を提出済みか（種類・提出日・状態）を一覧で明示 --}}
-                    @php
-                        $summaryRows = [
-                            ['label' => '顔写真付き身分証', 'pattern' => 'A', 'doc' => $categoryDocs['photo_id'] ?? null],
-                            ['label' => '顔写真なし身分証', 'pattern' => 'B', 'doc' => $categoryDocs['non_photo_id'] ?? null],
-                            ['label' => '住所確認書類', 'pattern' => 'B', 'doc' => $categoryDocs['address_proof'] ?? null],
-                        ];
-                    @endphp
-                    {{-- 提出状況サマリー：許可証ページ（license-summary）と同一UI --}}
-                    @php
-                        $idApproved = 0; $idPending = 0; $idRejected = 0; $idNone = 0;
-                        foreach ($summaryRows as $r) {
-                            $sk = $r['doc']['status_key'] ?? null;
-                            if (!$r['doc']) $idNone++;
-                            elseif ($sk === 'approved') $idApproved++;
-                            elseif ($sk === 'rejected') $idRejected++;
-                            else $idPending++;
-                        }
-                    @endphp
-                    <section class="license-summary" aria-label="提出状況サマリー">
-                        <div class="license-summary__counts">
-                            <span class="license-summary__count is-approved"><i class="fas fa-circle-check"></i>承認 {{ $idApproved }}</span>
-                            <span class="license-summary__count is-pending"><i class="fas fa-hourglass-half"></i>審査中 {{ $idPending }}</span>
+                    {{-- 2. 提出状況サマリー --}}
+                    <section class="doc-summary" aria-label="提出状況サマリー">
+                        <p class="doc-summary__title">提出状況</p>
+                        <div class="doc-summary__counts">
+                            <span class="doc-summary__count is-approved"><i class="fas fa-circle-check"></i>承認 {{ $idApproved }}</span>
+                            <span class="doc-summary__count is-pending"><i class="fas fa-hourglass-half"></i>審査中 {{ $idPending }}</span>
                             @if($idRejected > 0)
-                                <span class="license-summary__count is-rejected"><i class="fas fa-circle-exclamation"></i>差戻し {{ $idRejected }}</span>
+                                <span class="doc-summary__count is-rejected"><i class="fas fa-circle-exclamation"></i>差戻し {{ $idRejected }}</span>
                             @endif
-                            <span class="license-summary__count is-none"><i class="fas fa-minus"></i>未提出 {{ $idNone }}</span>
+                            <span class="doc-summary__count"><i class="fas fa-minus"></i>未提出 {{ $idNone }}</span>
                         </div>
-                        <ul class="license-summary__list">
+                        <ul class="doc-summary__list">
                             @foreach($summaryRows as $r)
                                 @php
                                     $d = $r['doc'];
                                     $sk = $d['status_key'] ?? null;
                                     $rowState = $d ? ($sk ?? 'pending') : 'not-submitted';
                                 @endphp
-                                <li class="license-summary__row is-{{ $rowState }}">
-                                    <span class="license-summary__row-icon" aria-hidden="true">
+                                <li class="doc-summary__row is-{{ $rowState }}">
+                                    <span class="doc-summary__row-icon" aria-hidden="true">
                                         <i class="fas {{ $d ? ($sk === 'approved' ? 'fa-circle-check' : ($sk === 'rejected' ? 'fa-circle-exclamation' : 'fa-hourglass-half')) : 'fa-minus' }}"></i>
                                     </span>
-                                    <span class="license-summary__row-body">
-                                        <span class="license-summary__row-name">{{ $r['label'] }}（パターン{{ $r['pattern'] }}）</span>
-                                        <span class="license-summary__row-detail">
+                                    <span class="doc-summary__row-body">
+                                        <span class="doc-summary__row-name">
+                                            {{ $r['label'] }}<span class="doc-summary__pattern">パターン{{ $r['pattern'] }}</span>
+                                        </span>
+                                        <span class="doc-summary__row-detail">
                                             @if($d)
-                                                提出書類: <strong>{{ $d['type_label'] ?? '書類' }}</strong>
-                                                @if(!empty($d['updated_at_label']))（{{ $d['updated_at_label'] }} 提出）@endif
+                                                <strong>{{ $d['type_label'] ?? '書類' }}</strong>
+                                                @if(!empty($d['updated_at_label']))・{{ $d['updated_at_label'] }}提出@endif
                                             @else
                                                 まだ提出されていません
                                             @endif
                                         </span>
                                     </span>
-                                    <span class="license-summary__row-status">{{ $d ? ($d['status_label'] ?? '審査中') : '未提出' }}</span>
+                                    <span class="doc-summary__row-status">{{ $d ? ($d['status_label'] ?? '審査中') : '未提出' }}</span>
                                 </li>
                             @endforeach
                         </ul>
                     </section>
 
-                    {{-- 審査中：運営へ承認を催促できる（24時間に1回まで） --}}
+                    {{-- 3. 審査催促 --}}
                     @if($isPendingReview)
                         <div class="identity-remind">
                             @if(!empty($identityRemindSentRecently))
                                 <p class="identity-remind__done">
-                                    <i class="fas fa-paper-plane"></i> 承認の催促を送信済みです（24時間に1回まで送信できます）
+                                    <i class="fas fa-paper-plane"></i> 承認の催促を送信済みです（24時間に1回まで）
                                 </p>
                             @else
                                 <form method="POST" action="{{ route('cast.mypage.identity.remind') }}"
@@ -551,20 +620,20 @@
                         </div>
                     @endif
 
-                    {{-- パターン切替タブ --}}
+                    {{-- 4. パターン切替タブ --}}
                     <div class="identity-pattern-tabs" role="tablist">
                         <button type="button" class="identity-pattern-tab {{ $detectedPattern === 'photo' ? 'is-active' : '' }}" data-pattern="photo">
-                            パターンA：顔写真付き身分証 1枚
+                            パターンA<br>顔写真付き身分証 1枚
                         </button>
                         <button type="button" class="identity-pattern-tab {{ $detectedPattern === 'non_photo' ? 'is-active' : '' }}" data-pattern="non_photo">
-                            パターンB：顔写真なし身分証 ＋ 住所確認書類
+                            パターンB<br>顔写真なし＋住所確認
                         </button>
                     </div>
 
-                    {{-- パターンA --}}
+                    {{-- 5. パターンA --}}
                     <div class="identity-pattern-pane" data-pattern-pane="photo" @if($detectedPattern !== 'photo') hidden @endif>
                         <p class="identity-pattern-help">
-                            <strong>運転免許証 / パスポート / マイナンバーカード / 在留カード</strong> のいずれか1点をアップロードしてください。両面記載のあるものは表面・裏面の両方を提出してください。
+                            <strong>運転免許証 / パスポート / マイナンバーカード / 在留カード</strong> のいずれか 1 点をアップロードしてください。両面ある書類は表・裏の両方を提出してください。
                         </p>
 
                         @include('casts.mypage._identity_form', [
@@ -578,10 +647,10 @@
                         ])
                     </div>
 
-                    {{-- パターンB --}}
+                    {{-- 6. パターンB --}}
                     <div class="identity-pattern-pane" data-pattern-pane="non_photo" @if($detectedPattern !== 'non_photo') hidden @endif>
                         <p class="identity-pattern-help">
-                            <strong>顔写真なし身分証（健康保険証 など）</strong>と<strong>住所確認書類（住民票・公共料金領収書 など）</strong>の<strong>両方</strong>をアップロードしてください。両方が承認されてはじめて本人確認が完了します。
+                            <strong>顔写真なし身分証（健康保険証 など）</strong>と<strong>住所確認書類（住民票・公共料金領収書 など）</strong>の <strong>両方</strong> をアップロードしてください。両方が承認されて本人確認完了となります。
                         </p>
 
                         @include('casts.mypage._identity_form', [
@@ -605,7 +674,7 @@
                         ])
                     </div>
 
-                    <p id="cast-identity-message" class="management-summary-note" style="display:none; margin-top:8px;"></p>
+                    <p id="cast-identity-message" style="display:none; margin-top:8px;"></p>
                 </div>
             </div>
         </section>
@@ -676,32 +745,30 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    /* ファイル選択：ファイル名 + 選択済みチェック + 画像プレビュー / PDF チップ */
+    /* ファイル選択：ドロップボタンにファイル名を反映 + プレビュー / PDF チップ */
     document.querySelectorAll('input[type="file"].bank-input').forEach(function (input) {
         input.addEventListener('change', function () {
-            var nameDisplay = document.getElementById(input.id + '_name');
-            var previewEl = document.getElementById(input.id + '_preview');
+            var nameEl  = document.getElementById(input.id + '_name');
+            var preview = document.getElementById(input.id + '_preview');
             var pdfChip = document.getElementById(input.id + '_pdf');
-            var uploadBtn = input.previousElementSibling;
-            while (uploadBtn && !uploadBtn.classList.contains('file-upload-btn')) {
-                uploadBtn = uploadBtn.previousElementSibling;
-            }
+            // ドロップボタン（input の直前の label）
+            var drop = document.querySelector('label[for="' + input.id + '"]');
             var file = input.files && input.files[0];
 
-            // プレビュー更新（画像はサムネ表示 / PDF はファイルチップ表示）
-            if (previewEl) {
-                if (previewEl.dataset.blobUrl) {
-                    URL.revokeObjectURL(previewEl.dataset.blobUrl);
-                    delete previewEl.dataset.blobUrl;
+            // プレビュー
+            if (preview) {
+                if (preview.dataset.blobUrl) {
+                    URL.revokeObjectURL(preview.dataset.blobUrl);
+                    delete preview.dataset.blobUrl;
                 }
                 if (file && /^image\//.test(file.type)) {
                     var blobUrl = URL.createObjectURL(file);
-                    previewEl.src = blobUrl;
-                    previewEl.dataset.blobUrl = blobUrl;
-                    previewEl.hidden = false;
+                    preview.src = blobUrl;
+                    preview.dataset.blobUrl = blobUrl;
+                    preview.hidden = false;
                 } else {
-                    previewEl.hidden = true;
-                    previewEl.removeAttribute('src');
+                    preview.hidden = true;
+                    preview.removeAttribute('src');
                 }
             }
             if (pdfChip) {
@@ -712,17 +779,11 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             if (file) {
-                if (nameDisplay) {
-                    nameDisplay.textContent = file.name;
-                    nameDisplay.classList.add('is-set');
-                }
-                if (uploadBtn) uploadBtn.classList.add('is-selected');
+                if (nameEl) nameEl.textContent = file.name;
+                if (drop) drop.classList.add('is-selected');
             } else {
-                if (nameDisplay) {
-                    nameDisplay.textContent = '選択されていません';
-                    nameDisplay.classList.remove('is-set');
-                }
-                if (uploadBtn) uploadBtn.classList.remove('is-selected');
+                if (nameEl) nameEl.textContent = 'タップしてファイルを選択';
+                if (drop) drop.classList.remove('is-selected');
             }
         });
     });

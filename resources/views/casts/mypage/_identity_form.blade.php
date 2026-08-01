@@ -16,41 +16,38 @@
         'pending'  => 'is-pending',
         default    => '',
     };
+    $frontId = $category . '_front_file';
+    $backId  = $category . '_back_file';
 @endphp
-<div class="identity-form-section">
-    <div class="identity-form-section__head">
-        <span class="identity-form-section__title">{{ $sectionTitle }}</span>
-        @if($currentDoc)
-            <span class="identity-form-section__pill {{ $statusPillClass }}">
-                {{ $currentDoc['status_label'] ?? '提出済み' }}
-            </span>
-        @else
-            <span class="identity-form-section__pill">未提出</span>
-        @endif
-    </div>
+<section class="doc-card">
+    <header class="doc-card__head">
+        <h3 class="doc-card__title">{{ $sectionTitle }}</h3>
+        <span class="doc-card__pill {{ $statusPillClass }}">
+            {{ $currentDoc ? ($currentDoc['status_label'] ?? '提出済み') : '未提出' }}
+        </span>
+    </header>
 
     @if($currentDoc && !empty($currentDoc['ng_reason']))
-        <div class="management-summary-note" style="margin-bottom:10px; color:#b91c1c;">
-            差し戻し理由：{{ $currentDoc['ng_reason'] }}
-        </div>
+        <p class="doc-card__ng"><i class="fas fa-circle-exclamation"></i> 差し戻し理由：{{ $currentDoc['ng_reason'] }}</p>
     @endif
 
     @if($currentDoc)
-        <div class="text-xs" style="margin-bottom:10px; color:#6d6685;">
-            提出済み：<strong style="color:#2d2742;">{{ $currentDoc['type_label'] ?? '' }}</strong>
+        <p class="doc-card__current">
+            <span class="doc-card__current-label">提出済み</span>
+            <strong>{{ $currentDoc['type_label'] ?? '' }}</strong>
             @if(!empty($currentDoc['updated_at_label']))
-                <span style="margin-left:8px;">更新: {{ $currentDoc['updated_at_label'] }}</span>
+                <span class="doc-card__current-meta">{{ $currentDoc['updated_at_label'] }}更新</span>
             @endif
-        </div>
+        </p>
     @endif
 
-    <form class="management-bank-form cast-identity-form" enctype="multipart/form-data">
+    <form class="doc-form cast-identity-form" enctype="multipart/form-data">
         @csrf
         <input type="hidden" name="category" value="{{ $category }}">
 
-        <div class="bank-form-row">
-            <label class="bank-label">書類種別</label>
-            <select name="type" class="bank-input" required>
+        <div class="doc-form__field">
+            <label class="doc-form__label" for="{{ $category }}_type">書類種別</label>
+            <select id="{{ $category }}_type" name="type" class="doc-form__select bank-input" required>
                 @foreach($allowedTypes as $t)
                     <option value="{{ $t }}" @selected(($currentDoc['type'] ?? null) === $t)>
                         {{ $typeLabels[$t] ?? $t }}
@@ -58,46 +55,48 @@
                 @endforeach
             </select>
         </div>
-        @php
-            // カテゴリごとに ID を一意化（複数フォーム併存時の label/for・プレビュー連動のため）
-            $frontId = $category . '_front_file';
-            $backId  = $category . '_back_file';
-        @endphp
-        <div class="bank-form-row">
-            <label class="bank-label">表面（画像 or PDF）</label>
-            <label for="{{ $frontId }}" class="file-upload-btn file-upload-btn--drop">
-                <i class="fas fa-cloud-arrow-up"></i>
-                <span>タップしてファイルを選択<small>画像 / PDF・8MBまで</small></span>
+
+        <div class="doc-form__field">
+            <label class="doc-form__label">表面 <span class="doc-form__req">必須</span></label>
+            <label for="{{ $frontId }}" class="doc-form__drop">
+                <span class="doc-form__drop-icon"><i class="fas fa-cloud-arrow-up"></i></span>
+                <span class="doc-form__drop-text">
+                    <span class="doc-form__drop-name" id="{{ $frontId }}_name">タップしてファイルを選択</span>
+                    <small>画像 / PDF・最大 8MB</small>
+                </span>
             </label>
-            <span class="file-name-display" id="{{ $frontId }}_name">選択されていません</span>
-            <img class="upload-preview-thumb" id="{{ $frontId }}_preview" alt="表面プレビュー" hidden>
-            <span class="upload-preview-pdf" id="{{ $frontId }}_pdf" hidden><i class="fas fa-file-pdf"></i><span></span></span>
+            <img class="doc-form__preview" id="{{ $frontId }}_preview" alt="表面プレビュー" hidden>
+            <span class="doc-form__pdf-chip" id="{{ $frontId }}_pdf" hidden><i class="fas fa-file-pdf"></i><span></span></span>
             <input type="file" id="{{ $frontId }}" name="front_file" class="bank-input visually-hidden" accept=".pdf,image/*" required>
         </div>
-        <div class="bank-form-row">
-            <label class="bank-label">裏面（{{ $requireBack ? '必須' : '任意' }}）</label>
-            <label for="{{ $backId }}" class="file-upload-btn file-upload-btn--drop">
-                <i class="fas fa-cloud-arrow-up"></i>
-                <span>タップしてファイルを選択<small>画像 / PDF・8MBまで</small></span>
+
+        <div class="doc-form__field">
+            <label class="doc-form__label">裏面 <span class="doc-form__req {{ $requireBack ? '' : 'is-optional' }}">{{ $requireBack ? '必須' : '任意' }}</span></label>
+            <label for="{{ $backId }}" class="doc-form__drop">
+                <span class="doc-form__drop-icon"><i class="fas fa-cloud-arrow-up"></i></span>
+                <span class="doc-form__drop-text">
+                    <span class="doc-form__drop-name" id="{{ $backId }}_name">タップしてファイルを選択</span>
+                    <small>裏面がある書類のみ</small>
+                </span>
             </label>
-            <span class="file-name-display" id="{{ $backId }}_name">選択されていません</span>
-            <img class="upload-preview-thumb" id="{{ $backId }}_preview" alt="裏面プレビュー" hidden>
-            <span class="upload-preview-pdf" id="{{ $backId }}_pdf" hidden><i class="fas fa-file-pdf"></i><span></span></span>
+            <img class="doc-form__preview" id="{{ $backId }}_preview" alt="裏面プレビュー" hidden>
+            <span class="doc-form__pdf-chip" id="{{ $backId }}_pdf" hidden><i class="fas fa-file-pdf"></i><span></span></span>
             <input type="file" id="{{ $backId }}" name="back_file" class="bank-input visually-hidden" accept=".pdf,image/*" @if($requireBack) required @endif>
         </div>
+
         @if($showExpiry)
-            <div class="bank-form-row">
-                <label class="bank-label">有効期限（任意）</label>
-                <input type="date" name="expired_at" class="bank-input">
+            <div class="doc-form__field">
+                <label class="doc-form__label" for="{{ $category }}_exp">有効期限 <span class="doc-form__req is-optional">任意</span></label>
+                <input type="date" id="{{ $category }}_exp" name="expired_at" class="doc-form__input bank-input">
             </div>
         @endif
+
         <p class="cast-identity-error" role="alert" hidden></p>
         <p class="cast-identity-success" role="status" hidden></p>
-        <div class="text-right" style="margin-top:10px;">
-            <button type="submit" class="btn-action manage">
-                <i class="fas fa-upload"></i>
-                {{ $currentDoc ? '差し替えてアップロード' : 'アップロード' }}
-            </button>
-        </div>
+
+        <button type="submit" class="doc-form__submit">
+            <i class="fas fa-upload"></i>
+            {{ $currentDoc ? '差し替えて提出する' : 'この内容で提出する' }}
+        </button>
     </form>
-</div>
+</section>

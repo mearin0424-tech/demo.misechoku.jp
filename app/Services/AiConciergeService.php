@@ -35,7 +35,10 @@ class AiConciergeService
   読み取り、それに合う候補店舗を提示する。
 - 候補店舗のリストは開発者から「### 候補店舗（この中からのみ紹介できる）」として
   与えられる。それ以外のお店の名前を出してはいけない。
-- 候補が 0 件のときは、条件を緩める提案をする（「エリアを変える？」等）。
+- 開発者からの補足に「条件を緩めて出した」旨が明記されているときは、
+  必ず冒頭で「ちょうどぴったりのお店はまだ無かったから、○○を広げて近いところを出したよ」
+  という正直で前向きなトーンを添えること（強要）。
+- 候補が本当に 0 件のときは、条件を緩める提案をする（「エリアを変える？」等）。
 - 会話履歴を踏まえて、繰り返しの挨拶にならないよう自然に続ける。
 
 # 出力
@@ -91,13 +94,14 @@ PROMPT;
         $grounded = $this->template->buildGroundedContext($userMessage, 3);
         $intent = $grounded['intent'];
         $recs   = $grounded['recommendations'];
+        $relaxed = $grounded['relaxed'] ?? [];
 
         // 2) LLM を試す（失敗時は null）
         $llmReply = null;
         if ($this->llm->isEnabled()) {
             $llmReply = $this->llm->chat(
                 self::SYSTEM_PROMPT,
-                $this->buildMessages($userMessage, $history, $intent, $recs, $personalityType),
+                $this->buildMessages($userMessage, $history, $intent, $recs, $personalityType, $relaxed),
             );
         }
 
@@ -125,7 +129,7 @@ PROMPT;
      * @param  array<int, array<string,mixed>> $recs
      * @return array<int, array{role:string, content:string}>
      */
-    private function buildMessages(string $userMessage, array $history, array $intent, array $recs, ?string $personalityType = null): array
+    private function buildMessages(string $userMessage, array $history, array $intent, array $recs, ?string $personalityType = null, array $relaxed = []): array
     {
         $out = [];
 
@@ -152,7 +156,7 @@ PROMPT;
 
         // 候補店舗を "developer / system 補足" として最後の user メッセージに
         // インジェクション形式で添える（履歴に残さない）
-        $context = $this->formatShopsContext($intent, $recs, $personalityType);
+        $context = $this->formatShopsContext($intent, $recs, $personalityType, $relaxed);
         if ($context !== '') {
             // 末尾の user メッセージにコンテキストを追加
             $lastIdx = count($out) - 1;
@@ -167,7 +171,7 @@ PROMPT;
      * @param  array<string,mixed> $intent
      * @param  array<int, array<string,mixed>> $recs
      */
-    private function formatShopsContext(array $intent, array $recs, ?string $personalityType = null): string
+    private function formatShopsContext(array $intent, array $recs, ?string $personalityType = null, array $relaxed = []): string
     {
         $lines = [];
         $lines[] = '（開発者からの補足。ユーザには見えない）';
@@ -181,9 +185,33 @@ PROMPT;
                 . '（' . implode(' / ', $axes) . '）'
                 . '。「私のタイプに合うお店」等と聞かれたらこの特性を踏まえて候補の魅力を語ること。';
         }
+
+        // 段階緩和が入ったときは「どんぴしゃは無かった／近い候補を出している」旨を LLM に伝える
+        if ($relaxed !== []) {
+            if (in_array('all_filters', $relaxed, true)) {
+                $lines[] = '重要: 条件どんぴしゃのお店は登録がなかったため、'
+                    . '全条件を外して人気順・新着順で近いお店を出しています。'
+                    . '返答の冒頭で「ちょうどぴったりのお店はまだないから、いま近そうなお店を先に紹介するね」等の'
+                    . '正直で前向きなトーンを必ず入れてください。';
+            } else {
+                $labelMap = [
+                    'area'       => 'エリア',
+                    'industry'   => '業種',
+                    'wage'       => '時給の条件',
+                    'reward_min' => '採用報酬の条件',
+                    'atmosphere' => '雰囲気の条件',
+                ];
+                $labels = array_values(array_filter(array_map(fn ($k) => $labelMap[$k] ?? null, $relaxed)));
+                $labelText = $labels === [] ? '条件' : implode('・', $labels);
+                $lines[] = '重要: 条件どんぴしゃのお店が無かったため、【' . $labelText . '】を少し緩めて近い候補を出しています。'
+                    . '返答の冒頭で「ぴったりのお店はまだないから、' . $labelText . 'を少し広げて近いところを出したよ」等、'
+                    . '正直に伝える一言を必ず入れてください。';
+            }
+        }
+
         if (empty($recs)) {
             $lines[] = '### 候補店舗（この中からのみ紹介できる）';
-            $lines[] = '（該当なし。条件を緩める提案をしてください）';
+            $lines[] = '（該当なし。「まだピッタリが無いから、また条件を教えてね」と前向きに促してください）';
         } else {
             $lines[] = '### 候補店舗（この中からのみ紹介できる）';
             foreach ($recs as $i => $r) {
@@ -201,8 +229,7 @@ PROMPT;
             }
         }
         $lines[] = '';
-        $lines[] = '上記の候補（もしくはそれが 0 件なら「条件を緩める提案」）を踏まえて、';
-        $lines[] = '自然な口調で 100〜200 字の返答を1つだけ生成してください。';
+        $lines[] = '上記の候補を踏まえて、自然な口調で 100〜200 字の返答を1つだけ生成してください。';
         return implode("\n", $lines);
     }
 

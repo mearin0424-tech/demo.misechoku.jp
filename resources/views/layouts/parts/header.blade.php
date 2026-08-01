@@ -13,7 +13,7 @@
         'cast.mypage.index', 'shop.mypage.index',
     ];
     $isMainPage = in_array($routeName, $mainRouteNames, true);
-    $isLoginPage = request()->routeIs('login.demo');
+    $isLoginPage = request()->routeIs('login.demo', 'cast.login', 'shop.login', 'admin.login');
     $showBackButton = !$isMainPage && !$isLoginPage;
     $isTalkRoomPage = request()->routeIs('cast.talk.room', 'shop.talk.room');
 
