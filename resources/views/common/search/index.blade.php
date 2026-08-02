@@ -4,7 +4,8 @@
 @section('body-class', request()->is('cast/*') && ($activeTab ?? null) === 'pane-ai' ? 'page-search page-search-ai' : 'page-search')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/search.css') }}?v=20260801-ai-quick-visible">
+<link rel="stylesheet" href="{{ asset('assets/css/search.css') }}?v=20260802-split">
+<link rel="stylesheet" href="{{ asset('assets/css/search-location-bar.css') }}?v=20260802-split">
 <link rel="stylesheet" href="{{ asset('assets/css/sub-header.css') }}">
 @endpush
 

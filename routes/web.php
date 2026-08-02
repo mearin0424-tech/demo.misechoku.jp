@@ -666,11 +666,11 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
     Route::get('/mypage/management', [CastMypage::class, 'employment'])->name('mypage.management');
     Route::get('/mypage/reviews', [CastMypage::class, 'reviews'])->name('mypage.reviews');
     Route::post('/mypage/payment/bank', [CastMypage::class, 'updateBank'])->name('mypage.payment.bank.update');
-    Route::get('/mypage/identity', [CastMypage::class, 'identity'])->name('mypage.identity');
-    Route::post('/mypage/identity/remind', [CastMypage::class, 'identityRemind'])->name('mypage.identity.remind');
-    Route::post('/mypage/identity/upload', [CastMypage::class, 'uploadIdentity'])->name('mypage.identity.upload');
-    // 明示的な「運営に提出する」アクション（DRAFT→PENDING）
-    Route::post('/mypage/identity/submit', [CastMypage::class, 'submitIdentityForReview'])->name('mypage.identity.submit');
+    // Identity verification: extracted to dedicated Casts\IdentityController (2026-08-02)
+    Route::get('/mypage/identity', [\App\Http\Controllers\Casts\IdentityController::class, 'identity'])->name('mypage.identity');
+    Route::post('/mypage/identity/remind', [\App\Http\Controllers\Casts\IdentityController::class, 'identityRemind'])->name('mypage.identity.remind');
+    Route::post('/mypage/identity/upload', [\App\Http\Controllers\Casts\IdentityController::class, 'upload'])->name('mypage.identity.upload');
+    Route::post('/mypage/identity/submit', [\App\Http\Controllers\Casts\IdentityController::class, 'submitForReview'])->name('mypage.identity.submit');
     Route::post('/mypage/images/upload', [CastMypage::class, 'uploadImage'])->name('mypage.images.upload');
     Route::post('/mypage/images/order', [CastMypage::class, 'updateImageOrder'])->name('mypage.images.order');
     Route::delete('/mypage/images/{id}', [CastMypage::class, 'deleteImage'])->name('mypage.images.delete');

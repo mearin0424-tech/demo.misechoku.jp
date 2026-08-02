@@ -43,6 +43,7 @@ class TalkController extends Controller
         private readonly ShopJobApplicationJobSnapshotService $shopJobApplicationJobSnapshotService,
         private readonly \App\Services\NotificationService $notificationService,
         private readonly TalkQuickReplyCatalog $quickReplyCatalog,
+        private readonly \App\Services\NgWordDetector $ngWordDetector,
     ) {
     }
 
@@ -1143,51 +1144,11 @@ class TalkController extends Controller
      * NGワード検出。最初にヒットした語を返す。なければ null。
      * 連絡先誘導（電話・メール・URL・SNSハンドル）と、ng_words テーブルの双方を検査。
      */
+    // Delegate to the injected service (extracted 2026-08-02).
+    // Kept as a thin wrapper so existing callers ($this->detectNgWord(...)) don't need to change.
     private function detectNgWord(string $text): ?string
     {
-        if ($text === '') {
-            return null;
-        }
-        $normalized = mb_convert_kana($text, 'asKV');
-
-        // 1) 正規表現での連絡先誘導検出
-        $patterns = [
-            '/\b\d{2,4}-\d{2,4}-\d{4}\b/u'                       => '電話番号',
-            '/(?:080|090|070|050)\d{8}/u'                        => '携帯番号',
-            '/[\w.+-]+@[\w-]+\.[\w.-]+/u'                        => 'メールアドレス',
-            '/https?:\/\/\S+/iu'                                 => 'URL',
-            '/(?:line|ﾗｲﾝ|ライン)\s*(?:id|ID|アイディー)?[:：]?\s*[A-Za-z0-9._-]{3,}/iu' => 'LINE ID',
-            '/@[A-Za-z0-9_.]{3,}/u'                              => 'SNSアカウント',
-        ];
-        foreach ($patterns as $regex => $label) {
-            if (preg_match($regex, $normalized)) {
-                return $label;
-            }
-        }
-
-        // 2) ng_words テーブル
-        try {
-            $words = \Illuminate\Support\Facades\Cache::remember(
-                'talk:ng_words',
-                300,
-                fn () => DB::table('ng_words')
-                    ->where('is_active', 1)
-                    ->pluck('word')
-                    ->filter()
-                    ->map(fn ($w) => (string) $w)
-                    ->all()
-            );
-        } catch (\Throwable $e) {
-            $words = [];
-        }
-        $needle = mb_strtolower($normalized);
-        foreach ($words as $word) {
-            $w = mb_strtolower(trim((string) $word));
-            if ($w !== '' && mb_strpos($needle, $w) !== false) {
-                return $word;
-            }
-        }
-        return null;
+        return $this->ngWordDetector->detect($text);
     }
 
     /**

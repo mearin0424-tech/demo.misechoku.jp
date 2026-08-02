@@ -198,6 +198,11 @@ php artisan test --group=premium
 | `tests/Feature/Cast/AvailabilityDeclarationTest.php` | 「今すぐ入れる」宣言（2h/4h/8h・不正値拒否・取り消し） |
 | `tests/Feature/Shop/HelpBroadcastTest.php` | 緊急ヘルプ一斉送信・6h クールダウン・バリデーション |
 | `tests/Feature/Setting/WithdrawFlowTest.php` | 退会時の PII 匿名化・最後のオーナー保護・パスワード誤り拒否 |
+| `tests/Feature/Shop/ReviewReplyTest.php` | 店舗返信投稿・削除・他店舗のレビューへの返信拒否 |
+| `tests/Feature/Shop/StaffManagementTest.php` | 1店舗1オーナー制約、staff からの owner-only 操作 403、enum bridge |
+| `tests/Feature/Shop/LicenseSubmit2StepTest.php` | 書類 2 段階提出フロー（upload → request-review → withdraw）+ staff 403 |
+| `tests/Feature/Discovery/TierRankingTest.php` | DISCOVERY の Tier A/B/C 並び替え（DiscoveryController::getHomeCasts） |
+| `tests/Feature/Support/NgWordDetectorTest.php` | NG 語検出（電話番号・LINE ID・URL・NG語テーブル・非アクティブ除外）|
 
 **実行方法**:
 ```bash
@@ -206,10 +211,3 @@ php artisan test --testsuite=Feature
 php artisan test --filter=PasswordResetTest
 php artisan test --filter=HelpBroadcastTest
 ```
-
-### 今後追加したいテスト（優先順）
-1. `ReviewReplyTest` — 店舗返信投稿・削除、他店舗のレビューへの返信拒否
-2. `TierRankingTest` — DISCOVERY の Tier A/B/C 並び替えロジック（DiscoveryController::getHomeCasts）
-3. `LicenseSubmit2StepTest` — 書類 2 段階提出フロー（upload → request-review → withdraw）
-4. `StaffManagementTest` — 1店舗1オーナー制約、staff からの owner-only 操作 403
-5. `NgWordDetectionTest` — トーク送信時の NG 語検出（連絡先誘導・URL・LINE ID パターン）
