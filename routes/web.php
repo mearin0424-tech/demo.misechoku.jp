@@ -15,6 +15,8 @@ use App\Http\Controllers\Common\RegistrationController;
 use App\Http\Controllers\Auth\Cast\LoginController as CastLogin;
 use App\Http\Controllers\Auth\Shop\LoginController as ShopLogin;
 use App\Http\Controllers\Auth\LineLoginController as LineLogin;
+use App\Http\Controllers\Auth\PasswordResetController as PasswordReset;
+use App\Http\Controllers\Auth\EmailVerificationController as EmailVerify;
 use App\Http\Controllers\LineWebhookController;
 use App\Http\Controllers\Common\TalkController as TalkController;
 use App\Http\Controllers\Common\NotificationController as CommonNotification;
@@ -270,6 +272,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/support-inquiries/{inquiry}/note', [\App\Http\Controllers\Admin\SupportInquiryController::class, 'updateNote'])->name('support-inquiries.note');
         });
 
+        // ユーザー通報管理
+        Route::middleware('admin.permission:content.notices')->group(function () {
+            Route::get('/user-reports', [\App\Http\Controllers\Admin\UserReportController::class, 'index'])->name('user_reports.index');
+            Route::post('/user-reports/{id}/status', [\App\Http\Controllers\Admin\UserReportController::class, 'updateStatus'])->name('user_reports.status')->whereNumber('id');
+        });
+
         // 隲区ｱゅ・謖ｯ霎ｼ繧ｿ繧ｹ繧ｯ邂｡逅・
         Route::get('/tasks', [AdminTask::class, 'index'])
             ->middleware('admin.permission:dashboard.view')
@@ -346,10 +354,29 @@ Route::prefix('admin')->name('admin.')->group(function () {
 | 1. Public & Guest Routes (LP繝ｻ隱崎ｨｼ)
 |--------------------------------------------------------------------------
 */
-// 繝・Δ逕ｨ蜈ｱ騾壹Ο繧ｰ繧､繝ｳ
-// デモ用ログイン：/login/demo（本番用は cast.login / shop.login / admin.login）
+// ★★★ テスト用（本番デプロイ時に無効化推奨）★★★
+// デモ用ログイン：/login/demo（1画面から cast/shop/admin にワンクリックログイン）
+// 本番用は cast.login / shop.login / admin.login。詳細は CLAUDE.md「テスト用機能」参照。
 Route::get('/login/demo', [DemoLoginController::class, 'show'])->name('login.demo');
 Route::post('/login/demo', [DemoLoginController::class, 'login'])->name('login.demo.post');
+
+// パスワードリセット（キャスト・店舗共通）
+Route::prefix('password')->name('password.')->group(function () {
+    Route::get('/forgot', [PasswordReset::class, 'showForgotForm'])->name('forgot.show');
+    Route::post('/forgot', [PasswordReset::class, 'sendResetLink'])->name('forgot.post');
+    Route::get('/reset', [PasswordReset::class, 'showResetForm'])->name('reset.show');
+    Route::post('/reset', [PasswordReset::class, 'resetPassword'])->name('reset.post');
+});
+
+// メール認証（署名付き URL でリンクを踏むと email_verified_at が入る）
+Route::prefix('auth/email')->name('auth.email.')->group(function () {
+    Route::get('/verify/{type}/{id}', [EmailVerify::class, 'verify'])
+        ->where(['type' => 'cast|shop', 'id' => '[cm][0-9]+'])
+        ->name('verify');
+    Route::post('/send', [EmailVerify::class, 'send'])
+        ->middleware('throttle:6,60')  // 60 分 6 回まで（連投対策）
+        ->name('send');
+});
 // 旧URL（/login）からの後方互換リダイレクト
 Route::get('/login', fn () => redirect()->route('login.demo'));
 
@@ -372,6 +399,11 @@ Route::name('pages.')->group(function () {
     Route::post('/support/form', [\App\Http\Controllers\Common\SupportInquiryController::class, 'store'])
         ->middleware('throttle:5,60')  // 1 ユーザー 60 分 5 件まで（連投スパム対策）
         ->name('support.form.submit');
+
+    // ユーザー通報（キャスト・店舗共通）— トークルーム／プロフィール画面から呼ばれる
+    Route::post('/user-report', [\App\Http\Controllers\Common\UserReportController::class, 'store'])
+        ->middleware('throttle:20,60')  // 60 分 20 件まで（スパム抑止）
+        ->name('user-report.store');
 });
 
 // 停止中アカウント向けランディング
@@ -513,7 +545,8 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
     Route::get('/castprofileview/{id}', [CastProfile::class, 'show'])->name('castprofileview.show');
 
     // 繝励Ο繝輔ぅ繝ｼ繝ｫ・医く繝｣繧ｹ繝育畑邱ｨ髮・ｼ捏hop/profile/edit縲∝ｺ苓・逕ｨ縺ｯ store 繧ｵ繝悶ヱ繧ｹ・・
-    Route::prefix('profile')->name('profile.')->group(function () {
+    // 店舗プロフィールの編集はオーナー専用（住所・電話・営業時間は店舗のアイデンティティ）
+    Route::prefix('profile')->name('profile.')->middleware('shop.owner')->group(function () {
         Route::get('/edit', [ShopProfile::class, 'edit'])->name('edit');
         Route::post('/update', [ShopProfile::class, 'update'])->name('update');
         Route::post('/suggest-stations', [ShopProfile::class, 'suggestStations'])->name('suggest-stations');
@@ -523,12 +556,17 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
     });
 
     // 笘・豎ゆｺｺ逾ｨ (Recruits)
+    // 【権限分離】
+    //   - hired-wage 更新／show 閲覧：スタッフも OK（面談後の日常業務）
+    //   - edit / update / toggle-status：オーナー専用（給与・ボーナス・公開設定は経営判断）
     Route::prefix('recruits')->name('recruits.')->group(function () {
         Route::post('/application/hired-wage', [ShopRecruit::class, 'updateApplicationHiredWage'])->name('application-hired-wage');
-        Route::get('/edit', [ShopRecruit::class, 'edit'])->name('edit');
         Route::get('/show/{id?}', [ShopRecruit::class, 'show'])->name('show');
-        Route::put('/update', [ShopRecruit::class, 'update'])->name('update');
-        Route::post('/toggle-status', [ShopRecruit::class, 'toggleStatus'])->name('toggle-status');
+        Route::middleware('shop.owner')->group(function () {
+            Route::get('/edit', [ShopRecruit::class, 'edit'])->name('edit');
+            Route::put('/update', [ShopRecruit::class, 'update'])->name('update');
+            Route::post('/toggle-status', [ShopRecruit::class, 'toggleStatus'])->name('toggle-status');
+        });
     });
 
     // 繝槭う繝壹・繧ｸ
@@ -539,26 +577,37 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
         Route::get('/management', [ShopRecruit::class, 'management'])->name('management');
         Route::get('/viewers', [\App\Http\Controllers\Shops\ViewerController::class, 'index'])->name('viewers.index');
         Route::get('/reviews', [ShopReview::class, 'index'])->name('review.index');
+        // 許可証：閲覧はスタッフも OK（提出状況の把握）／アップロード・提出はオーナー専用
         Route::get('/documents', [ShopMypage::class, 'documents'])->name('documents.index');
         Route::get('/documents/{type}', [ShopMypage::class, 'viewLicenseDocument'])->name('documents.show')->whereIn('type', ['business', 'entertainment']);
-        Route::post('/documents/upload', [ShopMypage::class, 'uploadDocument'])->name('documents.upload');
-        Route::post('/documents/request-review', [ShopMypage::class, 'requestDocumentReview'])->name('documents.request-review');
-        Route::post('/documents/withdraw-review', [ShopMypage::class, 'withdrawDocumentReview'])->name('documents.withdraw-review');
-        Route::post('/payment/bank', [ShopMypage::class, 'updateBank'])->name('payment.bank.update');
-        Route::post('/deposit/approve', [ShopMypage::class, 'approveDeposit'])->name('deposit.approve');
-        Route::post('/deposit/pay', [ShopMypage::class, 'payToPlatform'])->name('deposit.pay');
+        Route::middleware('shop.owner')->group(function () {
+            Route::post('/documents/upload', [ShopMypage::class, 'uploadDocument'])->name('documents.upload');
+            Route::post('/documents/request-review', [ShopMypage::class, 'requestDocumentReview'])->name('documents.request-review');
+            Route::post('/documents/withdraw-review', [ShopMypage::class, 'withdrawDocumentReview'])->name('documents.withdraw-review');
+            // 銀行口座・入金確認・振込操作は経営判断／お金の操作 → オーナー専用
+            Route::post('/payment/bank', [ShopMypage::class, 'updateBank'])->name('payment.bank.update');
+            Route::post('/deposit/approve', [ShopMypage::class, 'approveDeposit'])->name('deposit.approve');
+            Route::post('/deposit/pay', [ShopMypage::class, 'payToPlatform'])->name('deposit.pay');
+        });
 
         // スタッフ管理（1店舗に複数の店舗ログインアカウントを持たせる）
+        // 閲覧のみスタッフも OK（自分の権限を把握できる）／追加・削除はオーナー専用
+        // 個別の add/delete 権限は StaffController::authorizeOwner() で内部強制済み。
+        // ここでは middleware で二重防御はせず、閲覧のみ許可する形にする。
         Route::prefix('staff')->name('staff.')->group(function () {
             Route::get('/', [ShopStaff::class, 'index'])->name('index');
-            Route::get('/create', [ShopStaff::class, 'create'])->name('create');
-            Route::post('/', [ShopStaff::class, 'store'])->name('store');
-            Route::delete('/{id}', [ShopStaff::class, 'destroy'])->name('destroy')->where('id', 'm[0-9]+');
+            Route::middleware('shop.owner')->group(function () {
+                Route::get('/create', [ShopStaff::class, 'create'])->name('create');
+                Route::post('/', [ShopStaff::class, 'store'])->name('store');
+                Route::delete('/{id}', [ShopStaff::class, 'destroy'])->name('destroy')->where('id', 'm[0-9]+');
+            });
         });
     });
 
-    // 繝ｬ繝薙Η繝ｼ蜈ｬ髢九・髱櫁｡ｨ遉ｺ縺ｮ蛻・ｊ譖ｿ縺茨ｼ・eviews 逕ｻ髱｢縺ｮ JS 縺九ｉ菴ｿ逕ｨ・・
+    // レビュー公開・非表示の切り替え（reviews 画面の JS から使用）
     Route::post('/mypage/review/update', [ShopReview::class, 'updateStatus'])->name('review.update');
+    // レビューへの店舗からの返信投稿・更新・削除
+    Route::post('/mypage/review/reply', [ShopReview::class, 'reply'])->name('review.reply');
 
     // SUPPORT 繝壹・繧ｸ・亥ｺ苓・蜷代￠・・
     Route::get('/htu', [PageController::class, 'htu'])->name('htu');

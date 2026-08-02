@@ -86,6 +86,25 @@ public/assets/
 ### テスト
 - テスト方針・実装ルールは `AUTO-TEST.md` を参照（未整備の場合はスキップ）
 
+### テスト用機能（本番デプロイ時に除外すべきもの）
+本番運用では意図しない動作/情報漏洩を招く可能性があるため、以下は「**テスト用**」と明記して開発・
+デモ用途に限定する。新規追加時も同じルールで**用途と本番での扱い**をコメント/ドキュメントに残すこと。
+
+- **デモ用ログイン画面** — `/login/demo`（`App\Http\Controllers\Common\DemoLoginController`、view `resources/views/common/demo-login.blade.php`）。
+  1画面から複数ロール（cast / shop / admin）へワンクリックログインできる利便性優先の画面で、
+  正式なログイン画面（`cast.login` / `shop.login` / `admin.login`）とは別扱い。**本番デプロイ時は
+  ルート除外 or `.env` フラグでガード**すること。
+- **テスト用データセット** — `database/test_reset.sql`。全ユーザースケールのテーブルを TRUNCATE
+  してから、`cast01@test.jp` … `shop01@test.jp` … などのテスト用パーソナを投入。
+  **本番 DB には絶対に流さない**。
+- **`@test.jp` ドメインのメールアドレス** — テスト用アカウントで使用中。本番の実ユーザー登録時に
+  意図せず同ドメインが混入しないよう、必要に応じて登録バリデーションで拒否できるよう検討。
+- **外部プレースホルダー画像 URL**（`randomuser.me` / `loremflickr.com` / `picsum.photos`）—
+  テストデータの `cast_images.image_path` / `shop_images.image_path` に格納されている URL は
+  検証用のフリー素材。本番運用ではキャスト・店舗が自身でアップロードした画像パスに置き換わる。
+- 新しくテスト用機能・エンドポイント・シード等を追加する場合は、**ファイル冒頭のコメントに「テスト用」と明記**し、
+  本セクションにも追記すること。
+
 ### エージェント運用
 - Claude Code のサブエージェント（Explore/Plan/general-purpose）の使い分けは `Agent.md` を参照
 
@@ -102,7 +121,11 @@ public/assets/
 - スキーマ変更（CREATE TABLE / ALTER TABLE / DROP 等）を行った場合、`database/schema.sql` と `database/mock_demo.sql` を **両方** 最新化する。
 - 生クエリは避け、Eloquent ORM を使用する。DDL変更は新規マイグレーションで対応。
 - **最新のテーブル構造は `database/mock_demo.sql` を参照**。コード・ロジック・テストを書く際は必ずこのファイルのスキーマと照合し、カラム名・型・制約の不整合があれば指摘または修正すること。
-- 開発者向けの追加 SQL は `database/*.sql` として置く（例: `database/character_guide_deep_pages.sql`）。UNIQUE キーが利用できる場合は `ON DUPLICATE KEY UPDATE` で再実行安全に。
+- **`database/` に置く SQL は 3 種類のみ**：
+  1. `schema.sql` — スキーマ定義（初期構築時）
+  2. `mock_demo.sql` — スキーマ + 参照テーブル + 最小データ（初期構築時。schema.sql の代わりにこちらを流せば全部入る）
+  3. `test_reset.sql` — テストデータ投入（`mock_demo.sql` を流した後で使用）
+- 追加のマイグレーション用 SQL（ALTER TABLE 等）は**上記 3 ファイルに直接反映**する。単発 SQL ファイルを新設して残さない（`schema.sql` / `mock_demo.sql` の CREATE 定義を書き換え、既に本番デプロイ済みなら開発者に手動 ALTER コマンドを口頭/PR 説明で伝える運用）。
 
 ### デザイン
 - デザインは `DESIGN.md` の定義に従う。コード・ビュー生成時は必ず参照すること。

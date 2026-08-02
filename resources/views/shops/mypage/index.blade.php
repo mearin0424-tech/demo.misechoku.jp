@@ -193,7 +193,8 @@
             <div class="p-4 flex flex-col gap-4">
                 @php $js = $jobSummary ?? []; @endphp
 
-                {{-- 求人票を編集（タブの内容を編集する入口。キャスト MyPage と同パターン） --}}
+                {{-- 求人票を編集（タブの内容を編集する入口。オーナー専用） --}}
+                @shopowner
                 <a href="{{ route('shop.recruits.edit') }}"
                    class="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-line-accent/40 bg-gradient-to-br from-surface-from to-base shadow-card-3d hover:border-accent/60 active:scale-[0.99] transition-all">
                     <span class="flex items-center gap-2.5 min-w-0">
@@ -202,6 +203,7 @@
                     </span>
                     <i class="fas fa-chevron-right text-text-sub text-[11px] shrink-0"></i>
                 </a>
+                @endshopowner
 
                 {{-- 求人ステータス + 応募数の概要バー（公開設定・応募状況の管理へ） --}}
                 <x-ui.card class="p-4">
@@ -354,7 +356,8 @@
         {{-- ========== SHOP panel：店舗情報 + 許可証 ========== --}}
         <div data-tab-panel="shop">
             <div class="p-4 flex flex-col gap-4">
-                {{-- プロファイルを編集（タブの内容を編集する入口。キャスト MyPage と同パターン） --}}
+                {{-- プロファイルを編集（オーナー専用。スタッフには非表示） --}}
+                @shopowner
                 <a href="{{ route('shop.profile.edit') }}"
                    class="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-line-accent/40 bg-gradient-to-br from-surface-from to-base shadow-card-3d hover:border-accent/60 active:scale-[0.99] transition-all">
                     <span class="flex items-center gap-2.5 min-w-0">
@@ -363,6 +366,7 @@
                     </span>
                     <i class="fas fa-chevron-right text-text-sub text-[11px] shrink-0"></i>
                 </a>
+                @endshopowner
 
                 {{-- Shop Information --}}
                 <x-ui.card class="p-5">

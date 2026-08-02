@@ -43,6 +43,44 @@ class ReviewController extends Controller
         ], $updated ? 200 : 422);
     }
 
+    /**
+     * 店舗からレビューへの返信投稿・更新・削除。
+     * 1 レビューに対して 1 件の返信のみ（reviews.reply_body / reply_at を直接更新）。
+     * 空文字が来たら削除扱い。
+     */
+    public function reply(Request $request)
+    {
+        $data = $request->validate([
+            'id'         => ['required', 'integer'],
+            'reply_body' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $reply = trim((string) ($data['reply_body'] ?? ''));
+
+        $affected = \Illuminate\Support\Facades\DB::table('reviews')
+            ->where('id', $data['id'])
+            ->where('shop_id', $this->currentShopId())
+            ->update([
+                'reply_body' => $reply !== '' ? $reply : null,
+                'reply_at'   => $reply !== '' ? now() : null,
+                'updated_at' => now(),
+            ]);
+
+        if ($affected === 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'このレビューへの返信権限がありません。',
+            ], 403);
+        }
+
+        return response()->json([
+            'success'   => true,
+            'message'   => $reply !== '' ? '返信を投稿しました。' : '返信を削除しました。',
+            'reply_body' => $reply !== '' ? $reply : null,
+            'reply_at'  => $reply !== '' ? now()->format('Y/m/d H:i') : null,
+        ]);
+    }
+
     private function currentShopId(): string
     {
         return (string) auth()->guard('shop')->user()->shop_id;

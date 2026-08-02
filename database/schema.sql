@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS `push_subscriptions` (
 CREATE TABLE IF NOT EXISTS `casts` (
   `id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '主キー (c00000001~)',
   `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email_verified_at` timestamp NULL DEFAULT NULL COMMENT 'メール認証完了日時（NULL=未認証）',
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `status` tinyint NOT NULL DEFAULT '0',
   `identity_status` tinyint NOT NULL DEFAULT '1' COMMENT '1:未提出, 2:未承認, 3:承認済',
@@ -262,6 +263,7 @@ CREATE TABLE IF NOT EXISTS `shop_managers` (
   `shop_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '所属する shops.id（1店舗で複数アカウント可）',
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ログイン用メールアドレス（全shop_managersでユニーク）',
+  `email_verified_at` timestamp NULL DEFAULT NULL COMMENT 'メール認証完了日時（NULL=未認証）',
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `role` tinyint NOT NULL DEFAULT '0' COMMENT '権限 (1:オーナー, 2:スタッフ)',
   `status` tinyint NOT NULL DEFAULT '0' COMMENT '稼働 (0:停止, 1:有効)',
@@ -598,6 +600,8 @@ CREATE TABLE IF NOT EXISTS `reviews` (
   `contents` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `eva` decimal(3,1) NOT NULL DEFAULT '0.0',
   `is_anonymous` tinyint(1) NOT NULL DEFAULT '1',
+  `reply_body` text COLLATE utf8mb4_unicode_ci COMMENT '店舗からの返信本文（1件のみ）',
+  `reply_at` timestamp NULL DEFAULT NULL COMMENT '返信投稿日時',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -972,6 +976,31 @@ CREATE TABLE IF NOT EXISTS `policy_revisions` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `policy_revisions_doc_created_index` (`policy_document_id`, `created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------------------------
+-- user_reports（ユーザー間の通報）
+-- reporter が target を通報。管理者が確認・対応する。
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `user_reports` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `reporter_type` varchar(8) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '通報者ロール cast|shop',
+  `reporter_id` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `target_type` varchar(8) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '通報対象ロール cast|shop',
+  `target_id` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `reason` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'harassment|contact_info|inappropriate|fake|other',
+  `detail` text COLLATE utf8mb4_unicode_ci COMMENT '通報者の自由記述（任意）',
+  `context_type` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '通報起点 talk|profile など',
+  `context_message_id` bigint UNSIGNED DEFAULT NULL COMMENT 'トーク発の場合の messages.id',
+  `status` tinyint NOT NULL DEFAULT 0 COMMENT '0:未対応 1:対応中 2:完了 3:却下',
+  `admin_note` text COLLATE utf8mb4_unicode_ci COMMENT '運営メモ',
+  `handled_by` bigint UNSIGNED DEFAULT NULL COMMENT '対応した system_accounts.id',
+  `handled_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_reports_target_idx` (`target_type`, `target_id`),
+  KEY `user_reports_status_idx` (`status`, `created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -----------------------------------------------------------------------------

@@ -866,7 +866,7 @@
     <script src="{{ asset('assets/js/motion.js') }}?v={{ $assetVersion }}" defer></script>
     {{-- ライトモード（薄ラベンダー基調）。全ルールが body.theme-light スコープのため常時読み込みで安全。
          テーマトグル（ライト/ダーク）のライブ切替を可能にするため @if を外して常時ロードする --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260720-light-35">
+    <link rel="stylesheet" href="{{ asset('assets/css/light-theme.css') }}?v=20260802-job-edit">
     {{-- プレミアムホワイト（MyPage）: 全ルールが body.theme-premium-white スコープ。同上で常時ロード --}}
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600;700;900&family=Cinzel:wght@600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/css/premium-white.css') }}?v=20260720-pwhite-09">
@@ -891,6 +891,11 @@
         {{-- メイン：--max-content-width に追従して中央寄せ（モバイル430 → タブレット600 → デスクトップ720）。
              旧 layouts.app と同じ条件で content-wrapper を被せ、移行画面のレイアウトを大きく崩さないようにする。 --}}
         <main id="main-content" class="max-w-[var(--max-content-width)] mx-auto">
+            {{-- メール未認証バナー（一度認証すれば消える） --}}
+            @include('layouts.parts.email-unverified-banner')
+            {{-- 面談リマインダー（24h 以内の面談確定案件があれば表示） --}}
+            @include('layouts.parts.interview-reminder-banner')
+
             @if(request()->routeIs('cast.shopprofile.show', 'shop.castprofileview.show', 'cast.mypage.index', 'shop.mypage.index', 'shop.recruits.show', 'share.cast.show', 'share.recruit.show'))
                 @yield('content')
             @else

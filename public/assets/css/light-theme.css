@@ -1746,3 +1746,167 @@ body.theme-light .detail-search-location-fixed__icon { color: #7c3aed; }
 body.theme-light .detail-search-location-fixed__title { color: #4b465c; }
 body.theme-light .detail-search-location-fixed__sub { color: #6d6685; }
 body.theme-light .detail-search-location-fixed__sub.is-warn { color: #dc2626; }
+
+
+/* ============================================================
+   §31 求人票の編集（job-edit-v2）— ライト配色化 (2026-08-02)
+
+   このページはインライン CSS がダーク前提（rgba白 5%背景 / 白文字）
+   で書かれており、ライトテーマではパネルが薄グレー・テキストがほぼ
+   同色で潰れて読めなくなっていた。ライト画面向けに配色トークンごと
+   上書きして視認性を確保する。
+
+   デザイントークン（本人確認・書類ページと同系）:
+     - ink   : #1e1a30  見出し・強調
+     - body  : #4a4560  本文
+     - muted : #8b84a1  ヒント
+     - accent: #7c3aed
+     - line  : rgba(124, 58, 237, 0.18)
+     - line-2: rgba(124, 58, 237, 0.30)
+   ============================================================ */
+
+/* --- ①：CSS 変数を上書き（パネル・フィールド・ボーダー・ゴールド） --- */
+body.theme-light .job-edit-v2 {
+    --je-bg: transparent;
+    --je-panel: #ffffff;
+    --je-field: #ffffff;
+    --je-border: rgba(124, 58, 237, 0.24);
+    --je-gold: #7c3aed;
+}
+
+/* --- ②：外枠パネル --- */
+body.theme-light .job-edit-v2__shell {
+    background: #ffffff !important;
+    border: 1px solid rgba(124, 58, 237, 0.14);
+    box-shadow: 0 4px 14px rgba(76, 29, 149, 0.08) !important;
+}
+
+/* --- ③：サブヘッダー --- */
+body.theme-light .job-edit-v2__top {
+    background: rgba(255, 255, 255, 0.96) !important;
+    border-bottom: 1px solid rgba(124, 58, 237, 0.18) !important;
+    box-shadow: 0 6px 14px -10px rgba(76, 29, 149, 0.20) !important;
+}
+body.theme-light .job-edit-v2__back { color: #6d6685 !important; }
+body.theme-light .job-edit-v2__back:hover { color: #7c3aed !important; }
+body.theme-light .job-edit-v2__title-en { color: rgba(124, 58, 237, 0.75) !important; }
+body.theme-light .job-edit-v2__title-sub { color: #1e1a30 !important; }
+
+/* --- ④：セクション番号バッジ --- */
+body.theme-light .job-edit-v2__sec-title::before {
+    background: rgba(124, 58, 237, 0.10) !important;
+    border-color: rgba(124, 58, 237, 0.35) !important;
+    color: #6d28d9 !important;
+}
+
+/* --- ⑤：ラベル・必須・任意 --- */
+body.theme-light .job-edit-v2__label { color: #1e1a30 !important; }
+body.theme-light .job-edit-v2__req {
+    background: rgba(124, 58, 237, 0.10) !important;
+    border-color: rgba(124, 58, 237, 0.35) !important;
+    color: #6d28d9 !important;
+}
+body.theme-light .job-edit-v2__opt {
+    background: rgba(139, 132, 161, 0.10) !important;
+    border-color: rgba(139, 132, 161, 0.35) !important;
+    color: #8b84a1 !important;
+}
+
+/* --- ⑥：入力欄・テキストエリア --- */
+body.theme-light .job-edit-v2__input,
+body.theme-light .job-edit-v2__textarea {
+    background: #ffffff !important;
+    border: 1px solid rgba(124, 58, 237, 0.24) !important;
+    color: #1e1a30 !important;
+    color-scheme: light;
+}
+body.theme-light .job-edit-v2__input::placeholder,
+body.theme-light .job-edit-v2__textarea::placeholder {
+    color: rgba(139, 132, 161, 0.60) !important;
+}
+body.theme-light .job-edit-v2__input:focus,
+body.theme-light .job-edit-v2__textarea:focus {
+    border-color: #7c3aed !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.14) !important;
+}
+body.theme-light .job-edit-v2__hint { color: #8b84a1 !important; }
+body.theme-light .job-edit-v2__unit-suffix { color: #8b84a1 !important; }
+
+/* --- ⑦：カード（グループ枠） --- */
+body.theme-light .job-edit-v2__card {
+    background: #faf7ff !important;
+    border-color: rgba(124, 58, 237, 0.18) !important;
+}
+body.theme-light .job-edit-v2__card--accent { border-color: rgba(124, 58, 237, 0.35) !important; }
+body.theme-light .job-edit-v2__card--accent::before { background: rgba(124, 58, 237, 0.55) !important; }
+
+/* --- ⑧：チップ（未選択 / 選択済） --- */
+body.theme-light .job-edit-v2__chip span {
+    background: #ffffff !important;
+    border-color: rgba(124, 58, 237, 0.24) !important;
+    color: #4a4560 !important;
+}
+body.theme-light .job-edit-v2__chip input:checked + span {
+    background: rgba(124, 58, 237, 0.10) !important;
+    border-color: #7c3aed !important;
+    color: #5b21b6 !important;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.10) !important;
+}
+body.theme-light .job-edit-v2__tag-cat { color: #6d28d9 !important; }
+
+/* --- ⑨：ショップ補足ノート（点線囲み） --- */
+body.theme-light .job-edit-v2__shop-note {
+    background: #faf7ff !important;
+    border-color: rgba(124, 58, 237, 0.30) !important;
+    color: #6d6685 !important;
+}
+
+/* --- ⑩：本入・体験・ヘルプ 開閉メニュー --- */
+body.theme-light .job-edit-v2__kind-details {
+    background: #ffffff !important;
+    border-color: rgba(124, 58, 237, 0.20) !important;
+}
+body.theme-light .job-edit-v2__kind-summary { color: #1e1a30 !important; }
+body.theme-light .job-edit-v2__kind-summary::after { color: #7c3aed !important; }
+body.theme-light .job-edit-v2__kind-body { border-top-color: rgba(124, 58, 237, 0.18) !important; }
+body.theme-light .job-edit-v2__kind-subtitle { color: #6d28d9 !important; }
+body.theme-light .job-edit-v2__shift-last { color: #6d6685 !important; }
+
+/* --- ⑪：ステータス行・トグルスイッチ --- */
+body.theme-light .job-edit-v2__status { border-bottom-color: rgba(124, 58, 237, 0.18) !important; }
+body.theme-light .job-edit-v2__status-label { color: #1e1a30 !important; }
+body.theme-light .job-edit-v2__status-hint { color: #8b84a1 !important; }
+body.theme-light .job-edit-v2__pub-label { color: #8b84a1 !important; }
+body.theme-light .job-edit-v2__pub-label.is-on { color: #6d28d9 !important; }
+body.theme-light .job-edit-v2__switch-track { background: #d4d0e0 !important; }
+body.theme-light .job-edit-v2__switch input:checked + .job-edit-v2__switch-track {
+    background: #7c3aed !important;
+}
+body.theme-light .job-edit-v2__switch-knob {
+    background: #ffffff !important;
+    box-shadow: 0 1px 4px rgba(76, 29, 149, 0.25) !important;
+}
+
+/* --- ⑫：プレビューリンク --- */
+body.theme-light .job-edit-v2__preview-link {
+    color: #7c3aed !important;
+    border-color: rgba(124, 58, 237, 0.40) !important;
+    background: rgba(124, 58, 237, 0.05) !important;
+}
+
+/* --- ⑬：注意メッセージ（公開に必要な書類が未提出等） --- */
+body.theme-light .job-edit-v2__notice {
+    background: rgba(180, 83, 9, 0.08) !important;
+    border-color: rgba(180, 83, 9, 0.30) !important;
+    color: #b45309 !important;
+}
+body.theme-light .job-edit-v2__notice a { color: #7c3aed !important; }
+
+/* --- ⑭：フォーカス時の select（ネイティブ）を光背景に合わせる --- */
+body.theme-light .job-edit-v2 select {
+    background: #ffffff !important;
+    color: #1e1a30 !important;
+    border-color: rgba(124, 58, 237, 0.24) !important;
+    color-scheme: light;
+}

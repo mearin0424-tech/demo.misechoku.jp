@@ -78,6 +78,14 @@
                             <i class="fas fa-right-to-bracket" aria-hidden="true"></i>
                             <span>ログイン</span>
                         </button>
+
+                        {{-- パスワードリセット導線（キャスト・店舗共通） --}}
+                        <div style="margin-top: 12px; text-align: center;">
+                            <a href="{{ route('password.forgot.show') }}"
+                               style="font-size: 0.82rem; color: rgba(255,255,255,0.7); text-decoration: underline;">
+                                パスワードをお忘れの方はこちら
+                            </a>
+                        </div>
                     </form>
                 </div>
             </div>

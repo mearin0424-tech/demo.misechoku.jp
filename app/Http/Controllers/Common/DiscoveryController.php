@@ -991,6 +991,10 @@ class DiscoveryController extends Controller
         if (empty($path)) {
             return asset('assets/images/common/no-image.png');
         }
+        // 外部プレースホルダー画像（i.pravatar.cc / ui-avatars.com / picsum.photos 等）は素通し
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
         if (str_starts_with($path, 'uploads/')) {
             return asset($path);
         }

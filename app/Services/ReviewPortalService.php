@@ -9,21 +9,28 @@ class ReviewPortalService
 {
     public function getShopReviewPageData(string $shopId): array
     {
+        $selectCols = [
+            'reviews.id',
+            'reviews.cast_id',
+            'reviews.contents',
+            'reviews.eva',
+            'reviews.created_at',
+            DB::raw($this->reviewReleaseExpression() . ' as `release`'),
+            DB::raw($this->reviewAnonymousExpression() . ' as `anonymous`'),
+            'cast_profiles.nickname',
+            'cast_profiles.name',
+        ];
+        // 店舗返信カラムがあれば SELECT に追加（2026-08-02 追加）
+        if (Schema::hasColumn('reviews', 'reply_body')) {
+            $selectCols[] = 'reviews.reply_body';
+            $selectCols[] = 'reviews.reply_at';
+        }
+
         $reviewRows = DB::table('reviews')
             ->leftJoin('cast_profiles', 'reviews.cast_id', '=', 'cast_profiles.cast_id')
             ->where('reviews.shop_id', $shopId)
             ->orderByDesc('reviews.id')
-            ->select(
-                'reviews.id',
-                'reviews.cast_id',
-                'reviews.contents',
-                'reviews.eva',
-                'reviews.created_at',
-                DB::raw($this->reviewReleaseExpression() . ' as `release`'),
-                DB::raw($this->reviewAnonymousExpression() . ' as `anonymous`'),
-                'cast_profiles.nickname',
-                'cast_profiles.name'
-            )
+            ->select($selectCols)
             ->get();
 
         $reviewIds = $reviewRows->pluck('id')->map(fn ($id) => (int) $id)->all();
@@ -43,6 +50,11 @@ class ReviewPortalService
                 'release' => (int) ($row->release ?? 1),
                 'details' => $detailMap[(int) $row->id] ?? [],
                 'created_at_label' => !empty($row->created_at) ? date('Y-m-d H:i', strtotime((string) $row->created_at)) : null,
+                // 店舗からの返信（reply_body / reply_at）— 未対応スキーマの場合は null
+                'reply_body' => property_exists($row, 'reply_body') ? (string) ($row->reply_body ?? '') : '',
+                'reply_at_label' => (property_exists($row, 'reply_at') && !empty($row->reply_at))
+                    ? date('Y-m-d H:i', strtotime((string) $row->reply_at))
+                    : null,
             ];
         })->all();
 

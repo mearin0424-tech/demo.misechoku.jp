@@ -1049,7 +1049,7 @@ body.no-scroll main#main-content .content-wrapper {
     left: 0;
     right: 0;
     top: min(52%, calc(65% - 88px));
-    bottom: 56px;
+    bottom: var(--home-cta-bottom, 85px);
     background: linear-gradient(
         to bottom,
         rgba(5, 5, 5, 0) 0%,
@@ -1197,14 +1197,16 @@ body.no-scroll main#main-content .content-wrapper {
     box-sizing: border-box;
 }
 
-/* 下部：入店祝い金ピル＋体入時給（大）／ヘルプ時給 */
+/* 下部：入店祝い金ピル＋体入時給（大）／ヘルプ時給
+   bottom は --home-cta-bottom（フッター高＋safe-area＋10px gap）を採用。
+   padding-bottom は 0：stack の最終要素（トークCTA）を bottom 値まで詰める */
 .cast-card--recruit .rc-bottom-bar {
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 56px;
+    bottom: var(--home-cta-bottom, 85px);
     z-index: 11;
-    padding: 0 14px 10px;
+    padding: 0 14px 0;
     box-sizing: border-box;
     pointer-events: none;
 }
@@ -5355,7 +5357,7 @@ body.page-home .cast-card--profile::before {
     left: 0;
     right: 0;
     top: min(52%, calc(65% - 88px));
-    bottom: 56px;
+    bottom: var(--home-cta-bottom, 85px);
     background: linear-gradient(
         to bottom,
         rgba(5, 5, 5, 0) 0%,
@@ -5394,15 +5396,15 @@ body.page-home .cast-card--profile .photo-swiper .swiper-slide img {
     background-color: var(--color-main);
 }
 
-/* 情報エリア：トークCTAの上・pointer-events は stack のみ有効
+/* 情報エリア：トークCTAをグローバルフッター直上に。
    （求人カード .rc-bottom-bar と同じレイアウト） */
 body.page-home .cast-card--profile .rc-bottom-bar {
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 56px;
+    bottom: var(--home-cta-bottom, 85px);
     z-index: 11;
-    padding: 0 14px 10px;
+    padding: 0 14px 0;
     box-sizing: border-box;
     pointer-events: none;
 }
@@ -5427,6 +5429,15 @@ body.page-home .cast-card--profile .card-tags-row {
     flex-wrap: wrap;
     gap: 6px;
     margin: 0;
+}
+
+/* ============================================================================
+   トークCTAをグローバルフッター直上に貼り付けるためのオフセット (2026-08-02)
+   従来 bottom: 56px 固定で、フッター(75px)に約 19px 潜り込んでいた。
+   フッター高 + safe-area + 10px の gap で「フッター真上」に配置する。
+   ============================================================================ */
+body.page-home {
+    --home-cta-bottom: calc(var(--footer-height, 75px) + env(safe-area-inset-bottom, 0px) + 10px);
 }
 
 

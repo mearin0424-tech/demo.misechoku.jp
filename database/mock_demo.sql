@@ -116,6 +116,7 @@ INSERT INTO `bank_accounts` (`id`, `holder_type`, `holder_id`, `bank_code`, `ban
 CREATE TABLE `casts` (
   `id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '主キー (c00000001~)',
   `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email_verified_at` timestamp NULL DEFAULT NULL COMMENT 'メール認証完了日時（NULL=未認証）',
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `status` tinyint NOT NULL DEFAULT '0',
   `identity_status` tinyint NOT NULL DEFAULT '1' COMMENT '1:未提出, 2:未承認, 3:承認済',
@@ -850,6 +851,30 @@ INSERT INTO `notification_preferences` (`id`, `user_type`, `user_id`, `push_enab
 -- --------------------------------------------------------
 
 --
+-- テーブルの構造 `user_reports`（ユーザー間の通報）
+--
+
+CREATE TABLE `user_reports` (
+  `id` bigint UNSIGNED NOT NULL,
+  `reporter_type` varchar(8) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '通報者ロール cast|shop',
+  `reporter_id` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `target_type` varchar(8) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '通報対象ロール cast|shop',
+  `target_id` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `reason` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'harassment|contact_info|inappropriate|fake|other',
+  `detail` text COLLATE utf8mb4_unicode_ci,
+  `context_type` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'talk|profile など',
+  `context_message_id` bigint UNSIGNED DEFAULT NULL,
+  `status` tinyint NOT NULL DEFAULT '0' COMMENT '0:未対応 1:対応中 2:完了 3:却下',
+  `admin_note` text COLLATE utf8mb4_unicode_ci,
+  `handled_by` bigint UNSIGNED DEFAULT NULL,
+  `handled_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- テーブルの構造 `password_reset_tokens`
 --
 
@@ -1035,6 +1060,8 @@ CREATE TABLE `reviews` (
   `contents` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `eva` decimal(3,1) NOT NULL DEFAULT '0.0',
   `is_anonymous` tinyint(1) NOT NULL DEFAULT '1',
+  `reply_body` text COLLATE utf8mb4_unicode_ci COMMENT '店舗からの返信本文（1件のみ）',
+  `reply_at` timestamp NULL DEFAULT NULL COMMENT '返信投稿日時',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1366,6 +1393,7 @@ CREATE TABLE `shop_managers` (
   `shop_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '所属する shops.id（1店舗で複数アカウント可）',
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'ログイン用メールアドレス（全shop_managersでユニーク）',
+  `email_verified_at` timestamp NULL DEFAULT NULL COMMENT 'メール認証完了日時（NULL=未認証）',
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `role` tinyint NOT NULL DEFAULT '0' COMMENT '権限 (1:オーナー, 2:スタッフ)',
   `status` tinyint NOT NULL DEFAULT '0' COMMENT '稼働 (0:停止, 1:有効)',
@@ -1998,6 +2026,16 @@ ALTER TABLE `notification_preferences`
 --
 ALTER TABLE `password_reset_tokens`
   ADD PRIMARY KEY (`email`);
+
+--
+-- テーブルのインデックス `user_reports`
+--
+ALTER TABLE `user_reports`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_reports_target_idx` (`target_type`, `target_id`),
+  ADD KEY `user_reports_status_idx` (`status`, `created_at`);
+ALTER TABLE `user_reports`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- テーブルのインデックス `payment_tasks`

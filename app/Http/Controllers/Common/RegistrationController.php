@@ -188,9 +188,14 @@ class RegistrationController extends Controller
         auth()->guard('member')->login($member);
         $request->session()->regenerate();
 
+        // メール認証リンクを送信（未認証状態でスタート）
+        \App\Http\Controllers\Auth\EmailVerificationController::dispatchVerifyMail(
+            'cast', (string) $member->id, (string) $member->email
+        );
+
         return redirect()
             ->route('cast.tutorial')
-            ->with('message', 'キャストアカウントを登録しました。');
+            ->with('message', 'キャストアカウントを登録しました。ご登録のメールアドレス宛に認証リンクをお送りしましたのでご確認ください。');
     }
 
     public function storeShop(Request $request): RedirectResponse
@@ -348,9 +353,14 @@ class RegistrationController extends Controller
             });
         }
 
+        // メール認証リンクを送信
+        \App\Http\Controllers\Auth\EmailVerificationController::dispatchVerifyMail(
+            'shop', (string) $manager->id, (string) $manager->email
+        );
+
         return redirect()
             ->route('shop.tutorial')
-            ->with('message', '店舗アカウントを登録しました。許可証の提出はマイページからお願いします。');
+            ->with('message', '店舗アカウントを登録しました。ご登録のメールアドレス宛に認証リンクをお送りしましたのでご確認ください。許可証の提出はマイページからどうぞ。');
     }
 
     private function buildViewData(string $role): array

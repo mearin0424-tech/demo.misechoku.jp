@@ -50,11 +50,12 @@ class StaffController extends Controller
     {
         $this->authorizeOwner();
 
+        // 1店舗につきオーナーは 1 人限定（既定運用）。
+        // 追加できるのはスタッフ (ROLE_STAFF) のみに固定する。
         $data = $request->validate([
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'email', 'max:255', Rule::unique('shop_managers', 'email')],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role'     => ['required', Rule::in([ShopManager::ROLE_OWNER, ShopManager::ROLE_STAFF])],
         ], [
             'email.unique' => 'このメールアドレスは既に登録されています。',
         ]);
@@ -68,7 +69,7 @@ class StaffController extends Controller
             'name'       => (string) $data['name'],
             'email'      => (string) $data['email'],
             'password'   => Hash::make($data['password']),
-            'role'       => (int) $data['role'],
+            'role'       => ShopManager::ROLE_STAFF,   // オーナーは 1 店舗 1 人限定のため固定
             'status'     => ShopManager::STATUS_ACTIVE,
             'created_at' => $now,
             'updated_at' => $now,

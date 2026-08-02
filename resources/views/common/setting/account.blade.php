@@ -143,12 +143,23 @@
         <div class="withdraw-warning" role="alert">
             <i class="fas fa-exclamation-triangle"></i>
             <div>
-                <p>退会すると、これまでのやりとり履歴・プロフィール情報・キープ／いいね情報は閲覧できなくなります。</p>
-                <p class="withdraw-warning-small">なお、利用規約・個人情報保護方針に基づき、一定期間データを保管する場合があります。</p>
+                <p><strong>退会すると、以下のデータが失われます:</strong></p>
+                <ul style="margin: 6px 0 8px 20px; padding: 0; font-size: 0.86rem; line-height: 1.75;">
+                    <li>プロフィール情報（写真・自己紹介・タグなど）</li>
+                    <li>キープ・いいね・閲覧履歴</li>
+                    <li>やりとり中のトーク／面談日程</li>
+                    <li>ログイン情報・LINE 連携</li>
+                </ul>
+                <p><strong>退会しても残るもの（法令・会計上の必要性）:</strong></p>
+                <ul style="margin: 6px 0 8px 20px; padding: 0; font-size: 0.86rem; line-height: 1.75;">
+                    <li>過去の採用・入金・請求書履歴（個人情報は匿名化）</li>
+                    <li>他ユーザーとのトーク履歴（相手側からは「退会したユーザー」として見えます）</li>
+                </ul>
+                <p class="withdraw-warning-small">この操作は取り消せません。利用規約・個人情報保護方針に基づき、一定期間データを保管する場合があります。</p>
             </div>
         </div>
         <form method="POST" action="{{ route('setting.account.withdraw') }}"
-              onsubmit="return confirm('本当に退会しますか？この操作は取り消せません。');"
+              id="withdraw-form"
               autocomplete="off">
             @csrf
             <div class="setting-form-group">
@@ -157,7 +168,7 @@
                           placeholder="サービス改善のため、差し支えなければお聞かせください。">{{ old('reason') }}</textarea>
             </div>
             <div class="setting-form-group">
-                <label for="withdraw-current-password">現在のパスワード（確認）</label>
+                <label for="withdraw-current-password">現在のパスワード（本人確認）</label>
                 <input id="withdraw-current-password"
                        type="password"
                        name="current_password"
@@ -167,13 +178,38 @@
             </div>
             <label class="withdraw-check">
                 <input type="checkbox" name="agreement" value="1" required>
-                <span>退会後はアカウントを元に戻せないことを理解しました。</span>
+                <span>退会後はアカウントを元に戻せないこと、個人情報は匿名化されることを理解しました。</span>
             </label>
-            <button type="submit" class="setting-submit setting-submit-danger">
+            <button type="submit" class="setting-submit setting-submit-danger" id="withdraw-submit">
                 <i class="fas fa-right-from-bracket"></i> 退会を申し込む
             </button>
+            <p style="margin-top: 8px; font-size: 0.72rem; text-align: center; color: #a0a0a0;">
+                誤操作防止のため、送信後に最終確認ダイアログが表示されます。
+            </p>
         </form>
     </section>
+
+    <script>
+        (function () {
+            var form = document.getElementById('withdraw-form');
+            var btn = document.getElementById('withdraw-submit');
+            if (!form || !btn) return;
+            form.addEventListener('submit', function (e) {
+                // 2 段階の確認：チェックボックスは form validation 済みなので、最後にダイアログ
+                var confirmMsg = '本当に退会しますか？\n\n'
+                    + '・すべてのデータが匿名化されます\n'
+                    + '・アカウントは元に戻せません\n'
+                    + '・過去の会計データ（採用・入金）は法令のため保管されます\n\n'
+                    + 'よろしければ「OK」を押してください。';
+                if (!confirm(confirmMsg)) {
+                    e.preventDefault();
+                    return false;
+                }
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 処理中...';
+            });
+        })();
+    </script>
 </div>
 @endsection
 

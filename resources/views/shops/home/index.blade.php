@@ -4,7 +4,7 @@
 @section('body-class', 'no-scroll page-home')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260802-cssmode">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260802-cta-above-footer">
 @endpush
 
 @php

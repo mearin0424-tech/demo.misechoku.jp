@@ -69,7 +69,14 @@
                     </li>
                 @endif
                 @if(!$isCast)
-                    <li><a href="{{ url('/subscription') }}"><i class="fas fa-crown"></i> プラン選択</a></li>
+                    {{-- Premium プラン選択はお金の操作 → オーナー専用リンク --}}
+                    @shopowner
+                        <li><a href="{{ url('/subscription') }}"><i class="fas fa-crown"></i> プラン選択</a></li>
+                    @endshopowner
+                    {{-- スタッフ管理：閲覧は全 shop_manager 可（自分の権限バッジが分かる）。
+                         追加・削除は StaffController::authorizeOwner() / shop.owner middleware で
+                         オーナーのみに制限。 --}}
+                    <li><a href="{{ route('shop.mypage.staff.index') }}"><i class="fas fa-id-badge"></i> スタッフ管理</a></li>
                 @endif
                 @php $isThemeForcedDark = request()->cookie('theme_mode') === 'dark'; @endphp
                 <li>

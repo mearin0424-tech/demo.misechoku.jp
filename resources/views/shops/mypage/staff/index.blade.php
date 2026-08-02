@@ -268,11 +268,11 @@
                 <p class="staff-notice__title"><i class="fas fa-shield-halved"></i> 権限について</p>
                 <div class="staff-notice__row">
                     <span class="staff-badge staff-badge--owner"><i class="fas fa-crown"></i> オーナー</span>
-                    <span>スタッフの追加・削除、店舗情報の変更を含む、すべての操作が可能</span>
+                    <span><strong>1 店舗につき 1 人のみ</strong>。スタッフ管理、店舗情報・求人票の編集、許可証提出、Premium 契約など全操作が可能</span>
                 </div>
                 <div class="staff-notice__row">
                     <span class="staff-badge staff-badge--staff">スタッフ</span>
-                    <span>応募者対応・メッセージ・求人ステータス変更など、日常業務のみ可能</span>
+                    <span>応募者対応・メッセージ・面談日程調整・採用可否など日常業務が可能。店舗情報や求人票の編集はオーナー専用</span>
                 </div>
             </div>
         </div>

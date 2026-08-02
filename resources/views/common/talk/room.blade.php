@@ -312,6 +312,99 @@
         border-color: rgba(168, 85, 247, 0.55);
         box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 0 3px rgba(168, 85, 247, 0.12);
     }
+
+    /* ===== 通報モーダル ===== */
+    .user-report-modal {
+        position: fixed; inset: 0; z-index: 3500;
+        display: none;
+        align-items: center; justify-content: center;
+        padding: 24px 16px;
+    }
+    .user-report-modal:not([hidden]) { display: flex; }
+    .user-report-modal__overlay {
+        position: absolute; inset: 0;
+        background: rgba(0,0,0,0.72);
+        backdrop-filter: blur(4px);
+    }
+    .user-report-modal__panel {
+        position: relative;
+        width: min(480px, 100%);
+        background: #fff;
+        border-radius: 16px;
+        padding: 22px 20px 20px;
+        box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+    }
+    .user-report-modal__close {
+        position: absolute; top: 12px; right: 12px;
+        background: transparent; border: 0;
+        font-size: 1.5rem; color: #8b84a1;
+        cursor: pointer; padding: 4px 8px;
+        line-height: 1;
+    }
+    .user-report-modal__title {
+        margin: 0 0 10px;
+        font-size: 1.05rem; font-weight: 800;
+        color: #1e1a30;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .user-report-modal__title i { color: #dc2626; }
+    .user-report-modal__lead {
+        margin: 0 0 18px;
+        font-size: 0.82rem; color: #4a4560;
+        line-height: 1.6;
+    }
+    .user-report-modal__label {
+        display: block;
+        font-size: 0.78rem; font-weight: 700; color: #1e1a30;
+        margin: 0 0 6px;
+    }
+    .user-report-modal__select,
+    .user-report-modal__textarea {
+        width: 100%; box-sizing: border-box;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(124,58,237,0.24);
+        background: #fff; color: #1e1a30;
+        font-size: 0.9rem; font-family: inherit;
+    }
+    .user-report-modal__select:focus,
+    .user-report-modal__textarea:focus {
+        outline: none;
+        border-color: #7c3aed;
+        box-shadow: 0 0 0 3px rgba(124,58,237,0.14);
+    }
+    .user-report-modal__textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+    .user-report-modal__feedback {
+        margin: 12px 0 0; padding: 10px 12px;
+        border-radius: 10px;
+        font-size: 0.82rem; line-height: 1.5;
+    }
+    .user-report-modal__feedback.is-error {
+        background: rgba(220,38,38,0.08); color: #b91c1c;
+        border: 1px solid rgba(220,38,38,0.32);
+    }
+    .user-report-modal__feedback.is-success {
+        background: rgba(16,185,129,0.08); color: #047857;
+        border: 1px solid rgba(16,185,129,0.32);
+    }
+    .user-report-modal__actions {
+        margin-top: 18px; display: flex; gap: 8px; justify-content: flex-end;
+    }
+    .user-report-modal__btn {
+        min-height: 44px; padding: 10px 18px;
+        border-radius: 10px; border: 1px solid transparent;
+        font-size: 0.88rem; font-weight: 700;
+        cursor: pointer;
+        display: inline-flex; align-items: center; gap: 6px;
+    }
+    .user-report-modal__btn--ghost {
+        background: #fff; border-color: rgba(124,58,237,0.24); color: #4a4560;
+    }
+    .user-report-modal__btn--primary {
+        background: linear-gradient(135deg, #a78bfa, #7c3aed);
+        color: #fff; border-color: rgba(124,58,237,0.35);
+    }
+    .user-report-modal__btn:disabled { opacity: 0.55; cursor: not-allowed; }
 </style>
 @endpush
 
@@ -390,6 +483,18 @@
                     </span>
                 @endif
                 @if(empty($blockState['blocked_by_other']))
+                    {{-- 通報ボタン（相手を運営に報告） --}}
+                    <button
+                        type="button"
+                        class="talk-block-icon-btn talk-block-icon-btn--plain"
+                        data-user-report-open
+                        data-target-type="{{ $isCast ? 'shop' : 'cast' }}"
+                        data-target-id="{{ $partnerId }}"
+                        title="この相手を通報"
+                        aria-label="この相手を通報"
+                    >
+                        <i class="fas fa-flag"></i>
+                    </button>
                     <form action="{{ $blockUrl }}" method="POST" class="talk-block-inline-form">
                         @csrf
                         <input type="hidden" name="partner_id" value="{{ $partnerId }}">
@@ -403,6 +508,51 @@
                         </button>
                     </form>
                 @endif
+        </div>
+    </div>
+
+    {{-- ===== 通報モーダル ===== --}}
+    <div class="user-report-modal" data-user-report-modal hidden role="dialog" aria-modal="true" aria-labelledby="user-report-title">
+        <div class="user-report-modal__overlay" data-user-report-close></div>
+        <div class="user-report-modal__panel">
+            <button type="button" class="user-report-modal__close" data-user-report-close aria-label="閉じる">×</button>
+            <h3 id="user-report-title" class="user-report-modal__title">
+                <i class="fas fa-flag"></i> この相手を通報する
+            </h3>
+            <p class="user-report-modal__lead">
+                悪質な行為・ルール違反があれば運営にお知らせください。<br>
+                内容は運営で確認します（通報したことは相手に通知されません）。
+            </p>
+            <form data-user-report-form data-endpoint="{{ route('user-report.store') }}">
+                @csrf
+                <input type="hidden" name="target_type" data-target-type>
+                <input type="hidden" name="target_id" data-target-id>
+                <input type="hidden" name="context_type" value="talk">
+
+                <label class="user-report-modal__label">通報理由</label>
+                <select name="reason" required class="user-report-modal__select">
+                    <option value="">選択してください</option>
+                    <option value="harassment">ハラスメント／脅迫</option>
+                    <option value="contact_info">連絡先誘導（LINE ID・電話番号等）</option>
+                    <option value="inappropriate">不適切な発言・画像</option>
+                    <option value="fake">なりすまし・虚偽情報</option>
+                    <option value="other">その他</option>
+                </select>
+
+                <label class="user-report-modal__label" style="margin-top:14px;">詳細（任意・1000文字まで）</label>
+                <textarea name="detail" rows="4" maxlength="1000"
+                          placeholder="具体的な状況を記入いただけると対応がスムーズです。"
+                          class="user-report-modal__textarea"></textarea>
+
+                <p class="user-report-modal__feedback" data-user-report-feedback hidden></p>
+
+                <div class="user-report-modal__actions">
+                    <button type="button" class="user-report-modal__btn user-report-modal__btn--ghost" data-user-report-close>キャンセル</button>
+                    <button type="submit" class="user-report-modal__btn user-report-modal__btn--primary" data-user-report-submit>
+                        <i class="fas fa-paper-plane"></i> 通報する
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -1481,6 +1631,92 @@
             if (btn) btn.disabled = false;
             errEl.textContent = '送信に失敗しました。';
             errEl.style.display = 'block';
+        });
+    });
+})();
+</script>
+
+{{-- ===== ユーザー通報モーダル ===== --}}
+<script>
+(function () {
+    var modal = document.querySelector('[data-user-report-modal]');
+    if (!modal) return;
+    var form = modal.querySelector('[data-user-report-form]');
+    var feedback = modal.querySelector('[data-user-report-feedback]');
+    var submitBtn = modal.querySelector('[data-user-report-submit]');
+    var targetTypeInput = modal.querySelector('[data-target-type]');
+    var targetIdInput = modal.querySelector('[data-target-id]');
+    var endpoint = form.getAttribute('data-endpoint');
+    var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+
+    function setFeedback(kind, text) {
+        if (!feedback) return;
+        if (!kind) { feedback.hidden = true; feedback.className = 'user-report-modal__feedback'; return; }
+        feedback.className = 'user-report-modal__feedback is-' + kind;
+        feedback.textContent = text;
+        feedback.hidden = false;
+    }
+    function openModal(targetType, targetId) {
+        targetTypeInput.value = targetType;
+        targetIdInput.value = targetId;
+        setFeedback(null);
+        form.reset();
+        targetTypeInput.value = targetType;
+        targetIdInput.value = targetId;
+        modal.hidden = false;
+        document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+        modal.hidden = true;
+        document.body.style.overflow = '';
+    }
+
+    // 開閉トリガー
+    document.querySelectorAll('[data-user-report-open]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            openModal(btn.getAttribute('data-target-type'), btn.getAttribute('data-target-id'));
+        });
+    });
+    modal.querySelectorAll('[data-user-report-close]').forEach(function (el) {
+        el.addEventListener('click', closeModal);
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !modal.hidden) closeModal();
+    });
+
+    // 送信
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        setFeedback(null);
+        submitBtn.disabled = true;
+
+        var fd = new FormData(form);
+        var payload = {};
+        fd.forEach(function (v, k) { payload[k] = v; });
+
+        fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify(payload),
+        })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
+        .then(function (res) {
+            if (res.ok && res.body && res.body.success) {
+                setFeedback('success', res.body.message || '通報を受け付けました。');
+                setTimeout(function () { closeModal(); }, 1800);
+            } else {
+                submitBtn.disabled = false;
+                setFeedback('error', (res.body && res.body.message) || '通報の送信に失敗しました。時間をおいて再度お試しください。');
+            }
+        })
+        .catch(function () {
+            submitBtn.disabled = false;
+            setFeedback('error', '通信エラーで通報を送信できませんでした。');
         });
     });
 })();

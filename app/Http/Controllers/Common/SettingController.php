@@ -229,12 +229,82 @@ class SettingController extends Controller
             return back()->withErrors(['退会処理が現在ご利用いただけません。お手数ですが運営までお問い合わせください。']);
         }
 
-        DB::table($table)
-            ->where($idColumn, $actorId)
-            ->update([
-                'deleted_at' => now(),
-                'updated_at' => now(),
-            ]);
+        // 店舗マネージャの場合、最後のオーナーは退会不可（先に別オーナーを立てる必要あり）
+        if ($actorType === 'shop') {
+            $me = \App\Models\ShopManager::find($actorId);
+            if ($me && (int) $me->role === \App\Models\ShopManager::ROLE_OWNER) {
+                $otherOwners = \App\Models\ShopManager::query()
+                    ->where('shop_id', $me->shop_id)
+                    ->where('id', '!=', $me->id)
+                    ->where('role', \App\Models\ShopManager::ROLE_OWNER)
+                    ->where('status', \App\Models\ShopManager::STATUS_ACTIVE)
+                    ->count();
+                if ($otherOwners === 0) {
+                    return back()->withErrors([
+                        'agreement' => 'あなたは店舗の最後のオーナーです。先に別のスタッフをオーナーに引き継いでからでないと退会できません。詳しくはサポートまでお問い合わせください。',
+                    ])->withInput();
+                }
+            }
+        }
+
+        // 匿名化 + ソフト削除。email はクリアして再登録可能に。
+        // 過去の応募・入金・トークとの参照整合性のため PK は残す。
+        $anonymizeUpdate = [
+            'deleted_at' => now(),
+            'updated_at' => now(),
+        ];
+        if (Schema::hasColumn($table, 'email')) {
+            // ユニーク制約のあるカラムは NULL 化（NULL は複数許容）
+            $anonymizeUpdate['email'] = null;
+        }
+        if (Schema::hasColumn($table, 'password')) {
+            $anonymizeUpdate['password'] = null;
+        }
+        if (Schema::hasColumn($table, 'remember_token')) {
+            $anonymizeUpdate['remember_token'] = null;
+        }
+        if (Schema::hasColumn($table, 'line_user_id')) {
+            $anonymizeUpdate['line_user_id'] = null;
+        }
+        if (Schema::hasColumn($table, 'name')) {
+            $anonymizeUpdate['name'] = null;
+        }
+
+        DB::transaction(function () use ($actorType, $actorId, $table, $idColumn, $anonymizeUpdate) {
+            DB::table($table)
+                ->where($idColumn, $actorId)
+                ->update($anonymizeUpdate);
+
+            // 付随プロフィールの PII を匿名化
+            if ($actorType === 'cast') {
+                if (Schema::hasTable('cast_profiles')) {
+                    DB::table('cast_profiles')
+                        ->where('cast_id', $actorId)
+                        ->update([
+                            'nickname'   => '退会したユーザー',
+                            'name'       => null,
+                            'name_kana'  => null,
+                            'tel'        => null,
+                            'zip'        => null,
+                            'addr'       => null,
+                            'building'   => null,
+                            'pr'         => null,
+                            'latitude'   => null,
+                            'longitude'  => null,
+                            'available_until' => null,
+                            'updated_at' => now(),
+                        ]);
+                }
+                // 本人確認書類はコンプライアンス上、明示削除ではなく参照不能化のみ
+                if (Schema::hasTable('cast_images')) {
+                    DB::table('cast_images')->where('cast_id', $actorId)->delete();
+                }
+                if (Schema::hasTable('cast_posts')) {
+                    DB::table('cast_posts')->where('cast_id', $actorId)->delete();
+                }
+            }
+            // shop_manager 単位の匿名化のみ（shop 全体の匿名化はここでは行わない）
+        });
 
         // ログアウト
         if ($actorType === 'cast') {
@@ -279,6 +349,8 @@ class SettingController extends Controller
         if ($shopId === null) {
             return redirect()->route('subscription')->withErrors(['店舗アカウントでログインしてください。']);
         }
+        // Premium 契約はお金の操作 → オーナー専用
+        $this->assertShopOwner();
 
         $data = $request->validate([
             'billing_cycle' => ['required', Rule::in([ShopPlanSubscription::CYCLE_MONTHLY, ShopPlanSubscription::CYCLE_YEARLY])],
@@ -317,6 +389,10 @@ class SettingController extends Controller
     public function cancelPlanContract(PlanSubscriptionService $planService): RedirectResponse
     {
         $shopId = $this->currentShopId();
+        if ($shopId !== null) {
+            // Premium キャンセルもお金の操作 → オーナー専用
+            $this->assertShopOwner();
+        }
         $pending = $shopId ? $planService->pendingFor($shopId) : null;
         if ($pending) {
             $planService->cancelPending($pending);
@@ -422,6 +498,18 @@ class SettingController extends Controller
     {
         $manager = auth()->guard('shop')->user();
         return ($manager && !empty($manager->shop_id)) ? (string) $manager->shop_id : null;
+    }
+
+    /**
+     * 店舗ログインアカウントがオーナー(role=1)であることを保証する。
+     * Premium 契約・解約等のお金操作で使用。
+     */
+    private function assertShopOwner(): void
+    {
+        $manager = auth()->guard('shop')->user();
+        if (!$manager || (int) $manager->role !== \App\Models\ShopManager::ROLE_OWNER) {
+            abort(403, 'この操作にはオーナー権限が必要です。');
+        }
     }
 
     private function resolveActor(): array

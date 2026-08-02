@@ -213,18 +213,15 @@
                     <p class="staff-form-field__error" id="staff-password-confirm-error" hidden></p>
                 </div>
 
+                {{-- 権限：1店舗につきオーナーは 1 人限定のため、追加できるのは
+                     「スタッフ」ロールに固定。フォームには表示せず案内文のみ。 --}}
                 <div class="staff-form-field">
-                    <label for="staff-role">権限<span class="req">必須</span></label>
-                    {{-- 1つ選択はプルダウンに統一（入力コンポーネント規約） --}}
-                    <select id="staff-role" name="role" required>
-                        <option value="{{ \App\Models\ShopManager::ROLE_STAFF }}" {{ old('role', \App\Models\ShopManager::ROLE_STAFF) == \App\Models\ShopManager::ROLE_STAFF ? 'selected' : '' }}>
-                            スタッフ — 応募者対応・メッセージなど日常業務のみ
-                        </option>
-                        <option value="{{ \App\Models\ShopManager::ROLE_OWNER }}" {{ old('role') == \App\Models\ShopManager::ROLE_OWNER ? 'selected' : '' }}>
-                            オーナー — スタッフ管理・店舗情報変更を含む全権限
-                        </option>
-                    </select>
-                    <p class="staff-form-field__hint">スタッフ管理・店舗情報変更を任せる人はオーナーを選択してください。</p>
+                    <label>権限</label>
+                    <p class="staff-form-field__hint" style="margin-top:6px;">
+                        追加するアカウントは<strong>スタッフ権限</strong>で作成されます（オーナーは 1 店舗につき 1 人のみ）。<br>
+                        スタッフは応募者対応・メッセージ・面談確定などの日常業務を扱えます。
+                        店舗情報の変更・求人票の編集・許可証提出・Premium 契約などはオーナー専用です。
+                    </p>
                 </div>
 
                 <div class="staff-form-actions">

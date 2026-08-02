@@ -19,6 +19,7 @@
                 ['label' => 'お知らせ管理', 'route' => 'admin.notices.index', 'icon' => 'fa-bell', 'badge' => null, 'badge_class' => '', 'permission' => 'content.notices'],
                 ['label' => 'コラム管理', 'route' => 'admin.columns.index', 'icon' => 'fa-pen-nib', 'badge' => null, 'badge_class' => '', 'permission' => 'content.columns'],
                 ['label' => 'サポート問合せ', 'route' => 'admin.support-inquiries.index', 'icon' => 'fa-envelope-open-text', 'badge' => null, 'badge_class' => '', 'permission' => 'content.notices'],
+                ['label' => 'ユーザー通報', 'route' => 'admin.user_reports.index', 'icon' => 'fa-flag', 'badge' => null, 'badge_class' => '', 'permission' => 'content.notices'],
             ],
         ],
         [

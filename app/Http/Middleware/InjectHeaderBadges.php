@@ -123,6 +123,13 @@ class InjectHeaderBadges
             $operationalNotices = [];
         }
 
+        // 面談リマインダー（in-app バナー用）：現在ログイン中の cast/shop に
+        // 24 時間以内の面談確定案件があれば返す。app-v2 レイアウトが banner を出す。
+        $upcomingInterviews = $this->loadUpcomingInterviews($userType, $userId);
+
+        // メール未認証の判定（casts / shop_managers.email_verified_at が NULL）
+        $emailUnverified = $this->isEmailUnverified($userType, $userId);
+
         View::share([
             'todoList'           => $todoList,
             'taskGroups'         => $taskGroups,
@@ -131,9 +138,80 @@ class InjectHeaderBadges
             'notificationGroups' => $notificationGroups,
             'operationalNotices' => $operationalNotices,
             'unreadNewsCount'    => $unreadPersonal,
+            'upcomingInterviews' => $upcomingInterviews,
+            'emailUnverified'    => $emailUnverified,
         ]);
 
         return $next($request);
+    }
+
+    /**
+     * メール未認証かどうか（未ログインなら false）。
+     * カラムが存在しない古いスキーマでは false を返す（バナーを出さない）。
+     */
+    private function isEmailUnverified(?string $userType, ?string $userId): bool
+    {
+        if (!$userType || !$userId) return false;
+        $table = $userType === 'cast' ? 'casts' : 'shop_managers';
+        if (!\Illuminate\Support\Facades\Schema::hasColumn($table, 'email_verified_at')) return false;
+
+        $verifiedAt = \Illuminate\Support\Facades\DB::table($table)->where('id', $userId)->value('email_verified_at');
+        return empty($verifiedAt);
+    }
+
+    /**
+     * 24 時間以内の面談確定案件を取得（cast/shop 共通）。
+     *
+     * @return array<int, array{application_id:int, hours_until:int, at_label:string, partner_name:string, partner_id:string, talk_url:string}>
+     */
+    private function loadUpcomingInterviews(?string $userType, ?string $userId): array
+    {
+        if (!$userType || !$userId) return [];
+        if (!\Illuminate\Support\Facades\Schema::hasTable('shop_job_applications')) return [];
+
+        // status = 3 (面談日決定), result_date が今から 24h 以内
+        $q = \Illuminate\Support\Facades\DB::table('shop_job_applications as a')
+            ->join('shop_jobs as j', 'a.shop_job_id', '=', 'j.id')
+            ->leftJoin('shop_profiles as sp', 'j.shop_id', '=', 'sp.shop_id')
+            ->leftJoin('cast_profiles as cp', 'a.cast_id', '=', 'cp.cast_id')
+            ->where('a.status', 3)
+            ->whereNotNull('a.result_date')
+            ->where('a.result_date', '>=', now())
+            ->where('a.result_date', '<=', now()->addHours(24));
+
+        if ($userType === 'cast') {
+            $q->where('a.cast_id', $userId);
+        } else {
+            $q->where('j.shop_id', $userId);
+        }
+
+        $rows = $q->select(
+            'a.id as application_id',
+            'a.result_date',
+            'a.cast_id',
+            'j.shop_id',
+            'sp.shop_name',
+            'cp.nickname',
+            'cp.name'
+        )->limit(3)->get();
+
+        $items = [];
+        foreach ($rows as $row) {
+            $when = \Carbon\Carbon::parse($row->result_date);
+            $items[] = [
+                'application_id' => (int) $row->application_id,
+                'hours_until'    => max(0, (int) now()->diffInHours($when, false)),
+                'at_label'       => $when->format('n月j日 H:i'),
+                'partner_name'   => $userType === 'cast'
+                    ? (string) ($row->shop_name ?? '（店舗）')
+                    : (string) ($row->nickname ?: $row->name ?: '（キャスト）'),
+                'partner_id'     => (string) ($userType === 'cast' ? $row->shop_id : $row->cast_id),
+                'talk_url'       => $userType === 'cast'
+                    ? url('/cast/talk/room/' . $row->shop_id)
+                    : url('/shop/talk/room/' . $row->cast_id),
+            ];
+        }
+        return $items;
     }
 
     /**
