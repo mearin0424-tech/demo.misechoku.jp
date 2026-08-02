@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shops;
 
+use App\Http\Concerns\ResolvesActor;
 use App\Http\Controllers\Controller;
 use App\Models\Favorite;
 use App\Services\AdminMasterService;
@@ -16,12 +17,15 @@ use Illuminate\Validation\ValidationException;
 
 class RecruitmentController extends Controller
 {
+    use ResolvesActor;
+
     private const MSG_LICENSE_REQUIRED_FOR_PUBLISH = '求人を公開するには、営業許可証と風営許可証の両方を提出し、運営の承認が必要です。';
 
     public function __construct(
         private readonly AdminMasterService $adminMasterService,
         private readonly DocumentReviewService $documentReviewService,
         private readonly BillingManagementService $billingManagementService,
+        private readonly \App\Services\RecruitPublicationService $recruitPublicationService,
     ) {
     }
 
@@ -668,38 +672,15 @@ class RecruitmentController extends Controller
     public function toggleStatus(Request $request)
     {
         $shopId = $this->currentShopId();
+
+        // Horizontal schema path: delegate to RecruitPublicationService.
         if ($this->shopJobsHorizontalSchema()) {
             $jt = (int) $request->input('job_type', 1);
             if (!in_array($jt, [1, 2, 3], true)) {
                 $jt = 1;
             }
-            $col = match ($jt) {
-                2 => 'trial_status',
-                3 => 'help_status',
-                default => 'regular_status',
-            };
-            if (!Schema::hasColumn('shop_jobs', $col)) {
-                return redirect()->back()->with('message', '求人設定を更新できません。');
-            }
-            $row = DB::table('shop_jobs')->where('shop_id', $shopId)->first();
-            if (!$row) {
-                return redirect()->back()->with('message', '求人情報が見つかりません。');
-            }
-            $cur = (int) ($row->{$col} ?? 0);
-            $next = $cur === 1 ? 0 : 1;
-            if ($next === 1 && !$this->documentReviewService->shopLicenseFullyApproved($shopId)) {
-                return redirect()
-                    ->back()
-                    ->with('message', self::MSG_LICENSE_REQUIRED_FOR_PUBLISH);
-            }
-            DB::table('shop_jobs')->where('shop_id', $shopId)->update([
-                $col => $next,
-                'updated_at' => now(),
-            ]);
-
-            return redirect()
-                ->back()
-                ->with('message', $next === 1 ? '求人を公開しました' : '求人を非公開にしました');
+            $result = $this->recruitPublicationService->toggleHorizontal($shopId, $jt);
+            return redirect()->back()->with('message', $result['message']);
         }
 
         $currentStatus = $this->getCurrentRecruitStatus($shopId);
@@ -1353,24 +1334,7 @@ class RecruitmentController extends Controller
         }
     }
 
-    private function assetPathForStored(?string $path): string
-    {
-        if (empty($path)) {
-            return asset('assets/images/common/no-image.png');
-        }
-        // 外部プレースホルダー画像（i.pravatar.cc / ui-avatars.com 等）は素通し
-        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
-            return $path;
-        }
-        if (str_starts_with($path, 'uploads/')) {
-            return asset($path);
-        }
-        if (str_starts_with($path, 'public/')) {
-            return asset('storage/' . substr($path, 7));
-        }
-
-        return asset(ltrim($path, '/'));
-    }
+    // assetPathForStored() is now provided by ResolvesActor trait.
 
     private function currentShopId(): string
     {

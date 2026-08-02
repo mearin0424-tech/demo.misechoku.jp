@@ -8,17 +8,22 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ShopManager extends Authenticatable
 {
-    /** 権限: オーナー（店舗運営の全権限） */
-    public const ROLE_OWNER = 1;
-
-    /** 権限: スタッフ（日常業務のみ。スタッフ管理・店舗削除は不可） */
-    public const ROLE_STAFF = 2;
-
-    /** 稼働ステータス: 有効 */
+    // Legacy int constants (kept for backwards compat).
+    // Prefer using the App\Enums\ShopManagerRole enum in new code:
+    //   ShopManagerRole::from($manager->role)->canManageStaff()
+    public const ROLE_OWNER    = 1;
+    public const ROLE_STAFF    = 2;
     public const STATUS_ACTIVE = 1;
-
-    /** 稼働ステータス: 無効 */
     public const STATUS_DISABLED = 0;
+
+    /**
+     * Convenience accessor returning the strongly-typed role enum
+     * (or null if the row has an unexpected value).
+     */
+    public function roleEnum(): ?\App\Enums\ShopManagerRole
+    {
+        return \App\Enums\ShopManagerRole::tryFrom((int) $this->role);
+    }
 
     protected $table = 'shop_managers';
 

@@ -4,16 +4,21 @@
 @section('body-class', 'page-talk page-talk-list')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260720-row-layout">
+<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260802-split">
+<link rel="stylesheet" href="{{ asset('assets/css/talk-light.css') }}?v=20260802-split">
 <link rel="stylesheet" href="{{ asset('assets/css/sub-header.css') }}">
 @endpush
 
 @section('content')
 @php
     $isCast = request()->is('cast/*');
-    $requestTabText = $isCast ? 'オファー' : '過去のやり取り';
+    $requestCount = count($requestTalks ?? []);
+    // Cast side: "スカウト受信 (N)" — shop-initiated, cast-unreplied conversations.
+    // Shop side: "過去のやり取り" — closed/completed applications.
+    $requestTabText = $isCast
+        ? ('スカウト受信' . ($requestCount > 0 ? " ($requestCount)" : ''))
+        : '過去のやり取り';
     $targetRoute = $isCast ? 'cast.talk.room' : 'shop.talk.room';
-    // $profileRoute はコントローラーから渡される（キャスト→お店詳細、お店→キャスト詳細）
 @endphp
 
 <div class="has-sub-header">
@@ -79,6 +84,29 @@
 
         {{-- パネル2：オファー / 過去のやり取り --}}
         <div id="pane-requests" class="tab-pane">
+            @if($isCast && $requestCount > 0)
+                <div class="talk-scout-banner">
+                    <i class="fas fa-bullhorn"></i>
+                    <div>
+                        <strong>{{ $requestCount }} 件のスカウトが届いています</strong>
+                        <small>店舗からのオファーです。返信すると自動的に「やり取り中」に移ります。</small>
+                    </div>
+                </div>
+                <style>
+                .talk-scout-banner {
+                    margin: 10px 12px 12px;
+                    padding: 12px 14px;
+                    background: linear-gradient(90deg, rgba(197,160,89,0.14), rgba(197,160,89,0.06));
+                    border: 1px solid rgba(197,160,89,0.35);
+                    border-radius: 12px;
+                    display: flex; gap: 10px; align-items: flex-start;
+                    color: #a16207;
+                }
+                .talk-scout-banner i { font-size: 1.05rem; margin-top: 2px; color: #b45309; }
+                .talk-scout-banner strong { display: block; font-size: 0.9rem; }
+                .talk-scout-banner small { display: block; font-size: 0.72rem; margin-top: 2px; opacity: 0.85; }
+                </style>
+            @endif
             @forelse($requestTalks as $talk)
                 @if($isCast)
                     <div class="request-card">
@@ -143,7 +171,14 @@
                     </div>
                 @endif
             @empty
-                <div class="no-messages text-center py-10 opacity-50">{{ $requestTabText }}はありません</div>
+                <div class="no-messages text-center py-10 opacity-50">
+                    @if($isCast)
+                        まだスカウトは届いていません。<br>
+                        <small style="font-size:0.78rem; opacity:0.75;">プロフィールを充実させると店舗の目に止まりやすくなります。</small>
+                    @else
+                        {{ $requestTabText }}はありません
+                    @endif
+                </div>
             @endforelse
         </div>
 </div>

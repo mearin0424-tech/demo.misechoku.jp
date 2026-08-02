@@ -9,11 +9,22 @@ use Illuminate\Database\Eloquent\Model;
  */
 class UserReport extends Model
 {
-    /** ステータス */
-    public const STATUS_PENDING   = 0;   // 未対応
-    public const STATUS_IN_REVIEW = 1;   // 対応中
-    public const STATUS_RESOLVED  = 2;   // 完了
-    public const STATUS_DISMISSED = 3;   // 却下
+    // Legacy int constants (backwards compat).
+    // Prefer App\Enums\UserReportStatus in new code:
+    //   UserReportStatus::from($report->status)->label()
+    public const STATUS_PENDING   = 0;
+    public const STATUS_IN_REVIEW = 1;
+    public const STATUS_RESOLVED  = 2;
+    public const STATUS_DISMISSED = 3;
+
+    /**
+     * Convenience accessor returning the strongly-typed status enum
+     * (or null if the row has an unexpected value).
+     */
+    public function statusEnum(): ?\App\Enums\UserReportStatus
+    {
+        return \App\Enums\UserReportStatus::tryFrom((int) $this->status);
+    }
 
     /** 通報理由コード（フロント側の enum に一致させる） */
     public const REASONS = [

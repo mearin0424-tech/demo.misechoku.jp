@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shops;
 
+use App\Http\Concerns\ResolvesActor;
 use App\Http\Controllers\Controller;
 use App\Services\PlanSubscriptionService;
 use Carbon\Carbon;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\DB;
  */
 class ViewerController extends Controller
 {
+    use ResolvesActor;
+
     public function __construct(private readonly PlanSubscriptionService $planService)
     {
     }
@@ -82,21 +85,5 @@ class ViewerController extends Controller
         ]);
     }
 
-    private function assetPathForStored(?string $path): string
-    {
-        if (empty($path)) {
-            return asset('assets/images/common/no-image.png');
-        }
-        // 外部プレースホルダー画像（i.pravatar.cc / ui-avatars.com 等）は素通し
-        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
-            return $path;
-        }
-        if (str_starts_with($path, 'uploads/')) {
-            return asset($path);
-        }
-        if (str_starts_with($path, 'public/')) {
-            return asset('storage/' . substr($path, 7));
-        }
-        return asset(ltrim($path, '/'));
-    }
+    // assetPathForStored() is now provided by ResolvesActor trait.
 }

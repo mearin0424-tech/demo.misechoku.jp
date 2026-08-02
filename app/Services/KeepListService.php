@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Concerns\ResolvesActor;
 use App\Models\Favorite;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\Schema;
  */
 class KeepListService
 {
+    use ResolvesActor;
+
     /**
      * キャストがキープしたお店の一覧。
      *
@@ -116,25 +119,5 @@ class KeepListService
         }
     }
 
-    private function assetPathForStored(?string $path): string
-    {
-        if (empty($path)) {
-            return asset('assets/images/common/no-image.png');
-        }
-
-        // 外部プレースホルダー画像（i.pravatar.cc / ui-avatars.com 等）は素通し
-        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
-            return $path;
-        }
-
-        if (str_starts_with($path, 'uploads/')) {
-            return asset($path);
-        }
-
-        if (str_starts_with($path, 'public/')) {
-            return asset('storage/' . substr($path, 7));
-        }
-
-        return asset(ltrim($path, '/'));
-    }
+    // assetPathForStored() is now provided by ResolvesActor trait.
 }

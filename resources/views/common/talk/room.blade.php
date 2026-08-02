@@ -10,7 +10,8 @@
 @section('body-class', 'page-talk page-talk-room')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260801-quick-reply">
+<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260802-split">
+<link rel="stylesheet" href="{{ asset('assets/css/talk-light.css') }}?v=20260802-split">
 @if($isCast)
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/review-modal.css') }}">

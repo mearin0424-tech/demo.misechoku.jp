@@ -13,11 +13,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 /**
- * ★★★ テスト用（本番デプロイ時に無効化推奨）★★★
- * デモ用ログイン画面：1画面から複数ロール（cast/shop/admin）にワンクリックログインできる
- * 検証・デモ用の便宜的な入口。正式なログイン画面（cast.login / shop.login / admin.login）とは別扱い。
+ * ### demo function and data for test ###
  *
- * 詳細: CLAUDE.md「テスト用機能」セクション参照。
+ * Demo login screen. Allows one-click login to any role (cast/shop/admin) from a single page
+ * for QA and demo purposes. Separate from the production login flows
+ * (cast.login / shop.login / admin.login).
+ *
+ * IMPORTANT: Disable this controller and its routes before production deploy.
+ * See CLAUDE.md "テスト用機能" section for the full inventory of demo/test artifacts.
  */
 class DemoLoginController extends Controller
 {

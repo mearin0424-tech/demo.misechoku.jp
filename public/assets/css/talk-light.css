@@ -1,0 +1,526 @@
+/* talk-light.css
+ * Extracted from talk.css (2026-08-02) — all body.theme-light overrides for the
+ * talk room / list. Keeping the dark base and light overrides in separate files
+ * makes future re-theming and A/B testing much easier.
+ *
+ * Load ORDER matters: this file must come AFTER talk.css in the layout.
+ */
+
+/* ==========================================================================
+   ライトテーマ画面での上書き（トークルームは常にライト運用）
+   ========================================================================== */
+body.theme-light .talk-template-status-section + .talk-template-status-section {
+    border-top-color: rgba(124, 58, 237, 0.16);
+}
+body.theme-light .talk-template-status-heading {
+    color: #6d28d9 !important;
+}
+body.theme-light .talk-template-status-heading::before {
+    background: #7c3aed;
+}
+body.theme-light .talk-template-status-item {
+    background: #ffffff !important;
+    border-color: rgba(124, 58, 237, 0.20) !important;
+    color: #241f33 !important;
+}
+body.theme-light .talk-template-status-item:hover {
+    background: rgba(124, 58, 237, 0.06) !important;
+    border-color: rgba(124, 58, 237, 0.36) !important;
+}
+
+
+/* ==========================================================================
+   トークルーム サブヘッダー刷新 (2026-07-20)
+   ・縦幅を圧縮 (padding 10px→6px)
+   ・ブロックボタンは丸の囲いを外して素のアイコンに
+   ・種別は「新規入店」「ヘルプ」の2択セグメントスイッチに
+   ========================================================================== */
+
+/* サブヘッダー本体：縦パディングを圧縮 */
+body.page-talk-room .talk-room-header,
+#talk-room-container .talk-room-header {
+    padding: 6px 12px !important;
+    padding-top: max(6px, env(safe-area-inset-top)) !important;
+    min-height: 36px !important;
+}
+body.page-talk-room .talk-room-shop-badges,
+#talk-room-container .talk-room-shop-badges {
+    gap: 8px !important;
+}
+
+/* --------------------------------------------------------------------------
+   ブロックボタン：丸の囲いを完全に外し、素のアイコンだけに
+   -------------------------------------------------------------------------- */
+.talk-block-icon-btn.talk-block-icon-btn--plain {
+    width: auto !important;
+    height: auto !important;
+    padding: 4px 6px !important;
+    border: 0 !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    color: rgba(255, 255, 255, 0.55) !important;
+    font-size: 0.95rem !important;
+    line-height: 1 !important;
+    box-shadow: none !important;
+}
+.talk-block-icon-btn.talk-block-icon-btn--plain:hover {
+    background: transparent !important;
+    color: #ef4444 !important;
+}
+.talk-block-icon-btn.talk-block-icon-btn--plain:active {
+    transform: scale(0.90);
+}
+.talk-block-icon-btn.talk-block-icon-btn--plain.is-active {
+    color: #ef4444 !important;
+}
+
+/* ライトテーマ用（トークルームは light-theme 適用対象） */
+body.theme-light .talk-block-icon-btn.talk-block-icon-btn--plain {
+    color: rgba(109, 102, 133, 0.7) !important;
+}
+body.theme-light .talk-block-icon-btn.talk-block-icon-btn--plain:hover,
+body.theme-light .talk-block-icon-btn.talk-block-icon-btn--plain.is-active {
+    color: #dc2626 !important;
+}
+
+/* --------------------------------------------------------------------------
+   種別スイッチ（新規入店 / ヘルプ の2択セグメントコントロール）
+   -------------------------------------------------------------------------- */
+.talk-job-kind-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.78);
+}
+.talk-job-kind-switch__caption {
+    color: rgba(212, 196, 164, 0.85);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+.talk-job-kind-switch__track {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    padding: 2px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(168, 85, 247, 0.28);
+    min-height: 20px;
+}
+.talk-job-kind-switch__thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    bottom: 2px;
+    width: calc(50% - 2px);
+    border-radius: 999px;
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    box-shadow: 0 1px 5px rgba(124, 58, 237, 0.30);
+    transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 0;
+}
+.talk-job-kind-switch__segment {
+    position: relative;
+    z-index: 1;
+    flex: 0 0 auto;
+    min-width: 48px;
+    padding: 2px 10px;
+    border: 0;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+    cursor: pointer;
+    border-radius: 999px;
+    white-space: nowrap;
+    transition: color 0.15s ease;
+}
+.talk-job-kind-switch__segment.is-active {
+    color: #ffffff;
+}
+/* 「新規入店」がアクティブ → サム左（デフォルト位置） */
+/* 「ヘルプ」がアクティブ → サム右へスライド */
+.talk-job-kind-switch__segment[data-job-kind="help"].is-active ~ .talk-job-kind-switch__thumb,
+.talk-job-kind-switch[data-current="help"] .talk-job-kind-switch__thumb {
+    transform: translateX(100%);
+}
+/* 未選択（どちらも is-active でない）: サムを隠す */
+.talk-job-kind-switch[data-current=""] .talk-job-kind-switch__thumb,
+.talk-job-kind-switch:not([data-current="trial"]):not([data-current="help"]) .talk-job-kind-switch__thumb {
+    opacity: 0;
+}
+.talk-job-kind-switch[data-current=""] .talk-job-kind-switch__segment,
+.talk-job-kind-switch:not([data-current="trial"]):not([data-current="help"]) .talk-job-kind-switch__segment {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.talk-job-kind-switch.is-disabled .talk-job-kind-switch__segment {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+.talk-job-kind-switch.is-disabled .talk-job-kind-switch__track {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* --------------------------------------------------------------------------
+   種別チップ（読み取り専用：キャスト側 / 本入店ロック）
+   -------------------------------------------------------------------------- */
+.talk-job-kind-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(168, 85, 247, 0.30);
+    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.75);
+    min-height: 24px;
+}
+.talk-job-kind-chip__caption {
+    color: rgba(212, 196, 164, 0.85);
+    font-weight: 700;
+}
+.talk-job-kind-chip__value {
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.92);
+}
+.talk-job-kind-chip--locked {
+    background: rgba(212, 160, 23, 0.10);
+    border-color: rgba(212, 160, 23, 0.40);
+}
+.talk-job-kind-chip--locked .talk-job-kind-chip__value {
+    color: #f4d087;
+}
+.talk-job-kind-chip--locked i {
+    font-size: 0.62rem;
+    color: rgba(244, 208, 135, 0.75);
+}
+
+/* --------------------------------------------------------------------------
+   ライトテーマ用の上書き
+   -------------------------------------------------------------------------- */
+body.theme-light .talk-job-kind-switch {
+    color: #241f33 !important;
+}
+body.theme-light .talk-job-kind-switch__caption {
+    color: #6d28d9 !important;
+}
+body.theme-light .talk-job-kind-switch__track {
+    background: #ffffff !important;
+    border-color: rgba(124, 58, 237, 0.30) !important;
+    box-shadow: inset 0 1px 2px rgba(76, 29, 149, 0.06) !important;
+}
+body.theme-light .talk-job-kind-switch__segment {
+    color: #5f5876 !important;
+}
+body.theme-light .talk-job-kind-switch__segment.is-active {
+    color: #ffffff !important;
+}
+body.theme-light .talk-job-kind-switch__thumb {
+    background: linear-gradient(135deg, #a78bfa, #7c3aed) !important;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.30) !important;
+}
+body.theme-light .talk-job-kind-chip {
+    background: #ffffff !important;
+    border-color: rgba(124, 58, 237, 0.24) !important;
+    color: #241f33 !important;
+}
+body.theme-light .talk-job-kind-chip__caption {
+    color: #6d28d9 !important;
+}
+body.theme-light .talk-job-kind-chip__value {
+    color: #241f33 !important;
+}
+body.theme-light .talk-job-kind-chip--locked {
+    background: rgba(212, 160, 23, 0.10) !important;
+    border-color: rgba(212, 160, 23, 0.45) !important;
+}
+body.theme-light .talk-job-kind-chip--locked .talk-job-kind-chip__value {
+    color: #92650a !important;
+}
+
+/* status ラベル：サブヘッダー縦幅圧縮に合わせて微調整 */
+body.page-talk-room .talk-status-label,
+#talk-room-container .talk-status-label {
+    font-size: 0.68rem;
+    min-height: 24px;
+}
+
+
+/* ============================================================
+   定型文メニュー：ステータス別タブ + 左右スライド (2026-07-20)
+   ============================================================ */
+.talk-template-tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 2px 2px 10px;
+}
+.talk-template-tabs::-webkit-scrollbar { display: none; }
+.talk-template-tab {
+    flex: 0 0 auto;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    background: transparent;
+    color: #c4b5fd;
+    font-size: 0.76rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.talk-template-tab.is-active {
+    background: rgba(168, 85, 247, 0.18);
+    border-color: rgba(168, 85, 247, 0.60);
+    color: #ffffff;
+}
+.talk-template-track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.talk-template-track::-webkit-scrollbar { display: none; }
+.talk-template-panel {
+    flex: 0 0 100%;
+    min-width: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    box-sizing: border-box;
+    padding: 0 2px;
+}
+
+
+/* ============================================================
+   トークルーム サブヘッダー：薄型・スタイリッシュ化 (2026-07-20)
+   ・バーの縦幅を圧縮し、状況はドット+値のみのコンパクト表示
+   ・種別はトラック/サム付きスイッチを廃止 → 下線付きテキスト2択
+   ============================================================ */
+body.page-talk-room .talk-room-header,
+#talk-room-container .talk-room-header {
+    padding: 6px 14px !important;
+}
+.talk-room-shop-badges { gap: 14px; }
+
+/* 状況：「状況:」キャプションは省略し、ドット + 値だけ */
+.talk-status-caption { display: none; }
+.talk-status-label { font-size: 0.76rem; gap: 6px; }
+.talk-status-dot {
+    width: 6px;
+    height: 6px;
+    background: #8b5cf6;
+    box-shadow: none;
+    animation: none;
+}
+.talk-status-value {
+    color: #c4b5fd;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+/* 種別：スイッチ意匠を全廃してテキスト2択（アクティブは下線 + 強調色） */
+.talk-job-kind-switch { gap: 8px; }
+.talk-job-kind-switch__caption {
+    color: rgba(255, 255, 255, 0.40);
+    font-weight: 600;
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+}
+.talk-job-kind-switch__track {
+    background: transparent !important;
+    border: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+    gap: 12px;
+}
+.talk-job-kind-switch__thumb { display: none !important; }
+.talk-job-kind-switch__segment {
+    min-width: 0 !important;
+    padding: 2px 0 3px !important;
+    border-radius: 0 !important;
+    border-bottom: 2px solid transparent !important;
+    color: rgba(255, 255, 255, 0.42) !important;
+    font-size: 0.76rem !important;
+    font-weight: 700 !important;
+}
+.talk-job-kind-switch__segment.is-active {
+    color: #c4b5fd !important;
+    border-bottom-color: #8b5cf6 !important;
+    background: transparent !important;
+}
+.talk-job-kind-switch.is-disabled .talk-job-kind-switch__segment { opacity: 0.5; }
+
+/* 読み取り専用チップ（キャスト側/ロック済み）も同じ薄型テキスト表示に */
+.talk-job-kind-chip {
+    background: transparent !important;
+    border: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+    gap: 8px;
+}
+.talk-job-kind-chip__caption {
+    color: rgba(255, 255, 255, 0.40);
+    font-weight: 600;
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+}
+.talk-job-kind-chip__value {
+    color: #c4b5fd;
+    font-weight: 700;
+    font-size: 0.76rem;
+}
+.talk-job-kind-chip .fa-lock { color: rgba(255, 255, 255, 0.35); font-size: 0.62rem; }
+
+
+/* ============================================================
+   コンポーザー刷新 (2026-07-20)
+   ・＋ボタン廃止に伴う送信ボタンのブラッシュアップ（大きく・明瞭に）
+   ・ボーナス報告CTA（採用確定の自動送信カード内）
+   ・面談候補日の常設導線（定型文パネル先頭）
+   ============================================================ */
+.btn-send {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    box-shadow:
+        0 6px 16px rgba(124, 58, 237, 0.40),
+        inset 0 1px 0 rgba(255, 255, 255, 0.30),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+}
+.btn-send i {
+    font-size: 1.1rem;
+    margin-left: 2px;
+}
+.btn-send:hover {
+    filter: brightness(1.07);
+    transform: translateY(-1px);
+}
+
+/* ボーナス達成/勤務完了 報告：カード内の最優先CTA */
+.talk-bonus-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px 16px;
+    border-radius: 999px;
+    border: 0 !important;
+    background: linear-gradient(135deg, #a78bfa, #7c3aed) !important;
+    color: #ffffff !important;
+    font-size: 0.92rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow:
+        0 6px 16px rgba(124, 58, 237, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    transition: filter 0.15s ease, transform 0.12s ease;
+}
+.talk-bonus-cta:hover { filter: brightness(1.07); }
+.talk-bonus-cta:active { transform: scale(0.97); }
+
+/* 面談候補日の常設導線（定型文パネル先頭のアクションカード） */
+.quick-reply-card--action {
+    background: rgba(168, 85, 247, 0.16) !important;
+    border: 1px solid rgba(168, 85, 247, 0.50) !important;
+    color: #c4b5fd !important;
+    font-weight: 800;
+}
+.quick-reply-card--action .quick-reply-card__body i { margin-right: 4px; }
+
+
+/* ============================================================
+   トーク一覧：スカウト残数バー（店舗側 2026-07-20）
+   ============================================================ */
+.talk-scout-quota {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 14px 4px;
+    padding: 9px 14px;
+    border-radius: 12px;
+    background: rgba(168, 85, 247, 0.10);
+    border: 1px solid rgba(168, 85, 247, 0.30);
+    color: #c4b5fd;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+.talk-scout-quota i { color: #a78bfa; font-size: 0.72rem; }
+.talk-scout-quota strong { font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+.talk-scout-quota__plan {
+    margin-left: auto;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    color: #ffffff;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+}
+.talk-scout-quota__plan--free {
+    background: rgba(255, 255, 255, 0.10);
+    color: inherit;
+}
+.talk-scout-quota.is-empty {
+    background: rgba(220, 38, 38, 0.10);
+    border-color: rgba(220, 38, 38, 0.35);
+    color: #fca5a5;
+}
+.talk-scout-quota.is-empty i { color: #f87171; }
+
+
+/* ============================================================
+   トーク一覧 行レイアウト修正 (2026-07-20)
+   ・ピン：名前と同じ行の右上に絶対配置（薄紫アイコンのみ）
+   ・最終更新時刻：メッセージ末尾の右下へ
+   ============================================================ */
+body.page-talk-list .talk-item,
+.talk-list-container .talk-item { position: relative; }
+
+body.page-talk-list .talk-pin-btn,
+.talk-list-container .talk-pin-btn {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    margin: 0;
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    min-height: 30px;
+    background: transparent !important;
+    border: 0 !important;
+    color: #b9a8ef !important;   /* 薄紫：背景と同化しない */
+}
+body.page-talk-list .talk-pin-btn:hover,
+.talk-list-container .talk-pin-btn:hover {
+    color: #8b5cf6 !important;
+    background: rgba(139, 92, 246, 0.10) !important;
+}
+body.page-talk-list .talk-pin-btn[aria-pressed="true"],
+.talk-list-container .talk-pin-btn[aria-pressed="true"] {
+    background: linear-gradient(135deg, #a78bfa, #7c3aed) !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.35);
+}
+/* 名前がピンに被らないよう右に余白 */
+body.page-talk-list .talk-header,
+.talk-list-container .talk-header { padding-right: 34px; }
+
+.talk-time--bottom {
+    font-size: 0.68rem;
+    color: #9a91b5;
+    white-space: nowrap;
+}

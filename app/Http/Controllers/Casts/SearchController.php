@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Casts;
 
+use App\Http\Concerns\ResolvesActor;
 use App\Http\Controllers\Common\SearchController as BaseSearchController;
 use App\Services\AdminMasterService;
 use App\Services\SearchScoringService;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Schema;
 
 class SearchController extends BaseSearchController
 {
+    use ResolvesActor;
+
     private const SORT_OPTIONS = [
         'hitokoto'  => 'ひとこと更新が新しい順',
         'distance'  => '距離が近い順',
@@ -766,27 +769,7 @@ class SearchController extends BaseSearchController
         return $images;
     }
 
-    private function assetPathForStored(?string $path): string
-    {
-        if (empty($path)) {
-            return asset('assets/images/common/no-image.png');
-        }
-
-        // 外部プレースホルダー画像（i.pravatar.cc / ui-avatars.com 等）は素通し
-        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
-            return $path;
-        }
-
-        if (str_starts_with($path, 'uploads/')) {
-            return asset($path);
-        }
-
-        if (str_starts_with($path, 'public/')) {
-            return asset('storage/' . substr($path, 7));
-        }
-
-        return asset(ltrim($path, '/'));
-    }
+    // assetPathForStored() is now provided by ResolvesActor trait.
 
     public function savePreferences(\Illuminate\Http\Request $request, \App\Services\CastSearchPreferenceService $prefs)
     {

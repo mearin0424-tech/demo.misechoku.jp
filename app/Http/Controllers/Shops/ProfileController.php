@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Shops;
 
 use App\Consts\CommonConsts;
+use App\Http\Concerns\ResolvesActor;
 use App\Http\Controllers\Controller;
 use App\Services\AdminMasterService;
 use App\Services\ShopProfileLocationSyncService;
@@ -15,6 +16,8 @@ use Illuminate\Support\Facades\Schema;
 
 class ProfileController extends Controller
 {
+    use ResolvesActor;
+
     public function __construct(
         private readonly AdminMasterService $adminMasterService,
         private readonly ShopProfileLocationSyncService $shopProfileLocationSyncService,
@@ -580,27 +583,7 @@ class ProfileController extends Controller
         return (string) auth()->guard('shop')->user()->shop_id;
     }
 
-    private function assetPathForStored(?string $path): string
-    {
-        if (empty($path)) {
-            return asset('assets/images/common/no-image.png');
-        }
-
-        // 外部プレースホルダー画像（i.pravatar.cc / ui-avatars.com 等）は素通し
-        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
-            return $path;
-        }
-
-        if (str_starts_with($path, 'uploads/')) {
-            return asset($path);
-        }
-
-        if (str_starts_with($path, 'public/')) {
-            return asset('storage/' . substr($path, 7));
-        }
-
-        return asset(ltrim($path, '/'));
-    }
+    // assetPathForStored() is now provided by ResolvesActor trait.
 
     private function normalizeZip(?string $zip): ?string
     {

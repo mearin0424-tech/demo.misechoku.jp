@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Casts;
 
+use App\Http\Concerns\ResolvesActor;
+use App\Http\Controllers\Controller;
 use App\Models\Favorite;
 use App\Rules\KouzaMeig;
 use App\Services\BillingManagementService;
@@ -9,16 +11,17 @@ use App\Services\DocumentReviewService;
 use App\Services\GeocodingService;
 use App\Services\UserLocationService;
 use App\Support\ShopJobApplicationView;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 
 class MypageController extends Controller
 {
+    use ResolvesActor;
+
     public function __construct(
         private readonly BillingManagementService $billingManagementService,
         private readonly DocumentReviewService $documentReviewService
@@ -1191,24 +1194,9 @@ class MypageController extends Controller
         return asset($path);
     }
 
-    /** 保存先パスを表示用URLに変換（uploads/ または public/ または / 始まり） */
-    private function assetPathForStored(?string $path): string
-    {
-        if (empty($path)) {
-            return asset('assets/images/common/no-image.png');
-        }
-        // 外部プレースホルダー画像（i.pravatar.cc / ui-avatars.com 等）は素通し
-        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
-            return $path;
-        }
-        if (str_starts_with($path, 'uploads/')) {
-            return asset($path);
-        }
-        if (str_starts_with($path, 'public/')) {
-            return asset('storage/' . substr($path, 7));
-        }
-        return $this->assetPath($path);
-    }
+    // assetPathForStored() is now provided by ResolvesActor trait.
+    // The old body ended with `return $this->assetPath($path)`, which is equivalent to
+    // the trait's `asset(ltrim($path, '/'))` fallback branch.
 
     private function buildEmptyCast(): array
     {
@@ -1267,10 +1255,8 @@ class MypageController extends Controller
         ];
     }
 
-    private function currentCastId(): string
-    {
-        return (string) auth()->guard('member')->id();
-    }
+    // currentCastId() is now provided by ResolvesActor trait (returns ?string).
+    // All callers here run behind member.auth middleware, so it is effectively non-null.
 
     private function syncCastImageOrder(string $castId, array $orderedIds): void
     {

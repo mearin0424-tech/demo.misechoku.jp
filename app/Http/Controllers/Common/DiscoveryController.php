@@ -11,6 +11,7 @@
 
 namespace App\Http\Controllers\Common;
 
+use App\Http\Concerns\ResolvesActor;
 use App\Http\Controllers\Controller;
 use App\Models\Favorite;
 use App\Models\ProfileView;
@@ -23,6 +24,8 @@ use Illuminate\Support\Facades\Schema;
 
 class DiscoveryController extends Controller
 {
+    use ResolvesActor;
+
     // ==============================================================
     // Tier ランキング設定（getHomeCasts の並び順に影響）
     //
@@ -986,23 +989,7 @@ class DiscoveryController extends Controller
         return !empty($tags) ? array_slice($tags, 0, 3) : ['店舗情報登録中'];
     }
 
-    private function assetPathForStored(?string $path): string
-    {
-        if (empty($path)) {
-            return asset('assets/images/common/no-image.png');
-        }
-        // 外部プレースホルダー画像（i.pravatar.cc / ui-avatars.com / picsum.photos 等）は素通し
-        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
-            return $path;
-        }
-        if (str_starts_with($path, 'uploads/')) {
-            return asset($path);
-        }
-        if (str_starts_with($path, 'public/')) {
-            return asset('storage/' . substr($path, 7));
-        }
-        return asset(ltrim($path, '/'));
-    }
+    // assetPathForStored() is now provided by the ResolvesActor trait.
 
     private function cleanupStaleImageReferences(): void
     {

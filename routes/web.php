@@ -133,7 +133,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // 繝ｭ繧ｰ繧､繝ｳ縺ｯ蜈ｱ騾・/login 縺ｫ邨ｱ荳・医Μ繝繧､繝ｬ繧ｯ繝医・縺ｿ・・
     // 運営（管理者）ログイン：本番用の独立URL
     Route::get('/login', [AdminAuth::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AdminAuth::class, 'login'])->name('login.post');
+    // Rate-limit: 5 attempts per 15 minutes per IP (brute-force protection)
+    Route::post('/login', [AdminAuth::class, 'login'])
+        ->middleware('throttle:5,15')
+        ->name('login.post');
     Route::post('/logout', [AdminAuth::class, 'logout'])->name('logout');
 
     // 邂｡逅・判髱｢譛ｬ菴・
@@ -354,9 +357,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 | 1. Public & Guest Routes (LP繝ｻ隱崎ｨｼ)
 |--------------------------------------------------------------------------
 */
-// ★★★ テスト用（本番デプロイ時に無効化推奨）★★★
-// デモ用ログイン：/login/demo（1画面から cast/shop/admin にワンクリックログイン）
-// 本番用は cast.login / shop.login / admin.login。詳細は CLAUDE.md「テスト用機能」参照。
+// ### demo function and data for test ###
+// Demo login: /login/demo (one-click login for cast/shop/admin roles).
+// Production login routes: cast.login / shop.login / admin.login.
+// Disable this block before production deploy. See CLAUDE.md.
 Route::get('/login/demo', [DemoLoginController::class, 'show'])->name('login.demo');
 Route::post('/login/demo', [DemoLoginController::class, 'login'])->name('login.demo.post');
 
@@ -492,20 +496,26 @@ Route::get('/api/geocoding/suggest', [\App\Http\Controllers\Common\LocationContr
     ->name('api.geocoding.suggest');
 
 Route::prefix('cast')->name('cast.')->group(function () {
-    // キャスト：本番用ログイン
+    // Cast: production login form
     Route::get('/login', [CastLogin::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [CastLogin::class, 'login'])->name('login.post');
+    // Rate-limit: 5 attempts per 15 minutes per IP (brute-force protection)
+    Route::post('/login', [CastLogin::class, 'login'])
+        ->middleware('throttle:5,15')
+        ->name('login.post');
     Route::post('/logout', [CastLogin::class, 'logout'])->name('logout');
-    // キャスト：新規登録
+    // Cast: registration
     Route::get('/register', [RegistrationController::class, 'showCast'])->name('register');
     Route::post('/register', [RegistrationController::class, 'storeCast'])->name('register.store');
 });
 
 Route::prefix('shop')->name('shop.')->group(function () {
-    // 店舗：本番用ログイン
+    // Shop: production login form
     Route::get('/login', [ShopLogin::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [ShopLogin::class, 'login'])->name('login.post');
-    // 店舗：新規登録
+    // Rate-limit: 5 attempts per 15 minutes per IP (brute-force protection)
+    Route::post('/login', [ShopLogin::class, 'login'])
+        ->middleware('throttle:5,15')
+        ->name('login.post');
+    // Shop: registration
     Route::get('/register', [RegistrationController::class, 'showShop'])->name('register');
     Route::post('/register', [RegistrationController::class, 'storeShop'])->name('register.store');
 });
@@ -522,6 +532,14 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
 
     Route::get('/home', [DiscoveryHome::class, 'index'])->name('home');
     Route::get('/search', [ShopSearch::class, 'index'])->name('search.index');
+
+    // Emergency broadcast (send "help wanted now" to multiple casts)
+    Route::prefix('help-broadcast')->name('help-broadcast.')->group(function () {
+        Route::get('/candidates', [\App\Http\Controllers\Shops\HelpBroadcastController::class, 'candidates'])->name('candidates');
+        Route::post('/send', [\App\Http\Controllers\Shops\HelpBroadcastController::class, 'send'])
+            ->middleware('throttle:10,60')
+            ->name('send');
+    });
     Route::get('/search/{tab}', fn ($tab) => redirect()->route('shop.search.index', $tab === 'keep' ? ['tab' => 'keep'] : []))->where('tab', 'timeline|list|keep');
     Route::post('/search-preferences', [ShopSearch::class, 'savePreferences'])->name('search-preferences.save');
 

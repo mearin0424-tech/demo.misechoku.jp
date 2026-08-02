@@ -5,6 +5,8 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260802-cta-above-footer">
+{{-- Perf / tier-chip / cssMode overrides live in a separate file; load AFTER home.css. --}}
+<link rel="stylesheet" href="{{ asset('assets/css/home-perf.css') }}?v=20260802-split">
 @endpush
 
 @php
@@ -187,6 +189,18 @@
             @endforeach
         </div>
     </div>
+
+    {{-- Emergency broadcast trigger (shop side only). Fixed FAB above bottom nav. --}}
+    @if(!$isRecruit && !$isShop)
+        {{-- Only render for shop viewing casts (=not cast portal, not shop-profile browsing) --}}
+        @auth('shop')
+        <button type="button" id="help-broadcast-fab" class="help-broadcast-fab" aria-label="緊急ヘルプ一斉送信">
+            <i class="fas fa-bullhorn" aria-hidden="true"></i>
+            <span>緊急招集</span>
+        </button>
+        @include('shops.home.partials._help-broadcast-modal')
+        @endauth
+    @endif
 
     {{-- 優良店バッヂの達成条件モーダル（スワイプカードのバッヂタップで開く） --}}
     <div id="modal-premium-info" class="premium-info-modal" hidden role="dialog" aria-modal="true" aria-labelledby="premium-info-title">

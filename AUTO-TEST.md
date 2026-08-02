@@ -184,3 +184,32 @@ php artisan test --group=premium
 - 金額・日付の境界値テストは必ず含める
 - Premium プランの `ends_at` 計算は `Carbon::addMonth()` / `addYear()` を使用するため、閏月・閏年の境界も確認する
 - dompdf 未導入環境では PDF ではなく HTML ビュー（`$printMode = true`）が返るため、テストは両パターン想定
+
+---
+
+## 実装済み Feature テスト（2026-08-02 追加）
+
+| ファイル | 対象機能 |
+|---|---|
+| `tests/Feature/Auth/PasswordResetTest.php` | パスワードリセット全フロー（enumeration 対策・トークン失効・成功パス） |
+| `tests/Feature/Auth/EmailVerificationTest.php` | メール認証（署名 URL・未署名 URL 拒否・未ログイン再送信拒否） |
+| `tests/Feature/UserReportTest.php` | ユーザー通報の送信・重複排除・自己通報禁止 |
+| `tests/Feature/Support/TalkActionRegistryTest.php` | トークアクションの権限マトリクス（cast_only / shop_only / both_side） |
+| `tests/Feature/Cast/AvailabilityDeclarationTest.php` | 「今すぐ入れる」宣言（2h/4h/8h・不正値拒否・取り消し） |
+| `tests/Feature/Shop/HelpBroadcastTest.php` | 緊急ヘルプ一斉送信・6h クールダウン・バリデーション |
+| `tests/Feature/Setting/WithdrawFlowTest.php` | 退会時の PII 匿名化・最後のオーナー保護・パスワード誤り拒否 |
+
+**実行方法**:
+```bash
+php artisan test --testsuite=Feature
+# 個別:
+php artisan test --filter=PasswordResetTest
+php artisan test --filter=HelpBroadcastTest
+```
+
+### 今後追加したいテスト（優先順）
+1. `ReviewReplyTest` — 店舗返信投稿・削除、他店舗のレビューへの返信拒否
+2. `TierRankingTest` — DISCOVERY の Tier A/B/C 並び替えロジック（DiscoveryController::getHomeCasts）
+3. `LicenseSubmit2StepTest` — 書類 2 段階提出フロー（upload → request-review → withdraw）
+4. `StaffManagementTest` — 1店舗1オーナー制約、staff からの owner-only 操作 403
+5. `NgWordDetectionTest` — トーク送信時の NG 語検出（連絡先誘導・URL・LINE ID パターン）

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Common;
 
+use App\Http\Concerns\ResolvesActor;
 use App\Http\Controllers\Controller;
 use App\Services\MessageTemplateService;
 use App\Services\NotificationPreferenceService;
@@ -18,6 +19,8 @@ use Illuminate\Support\Facades\Schema;
 
 class TalkController extends Controller
 {
+    use ResolvesActor;
+
     private const MESSAGE_TYPE_TEXT = 1;
     private const MESSAGE_TYPE_INTERVIEW_OFFER = 2;
     private const MESSAGE_TYPE_INTERVIEW_CONFIRMED = 3;
@@ -359,7 +362,7 @@ class TalkController extends Controller
         $isCastPortal = request()->is('cast/*');
         $request->validate([
             'partner_id' => ['required', 'string'],
-            'action_type' => ['required', 'string', 'in:interview_offer,interview_confirm,interview_cancel_request,interview_cancel_accept,hired,rejected,cancel_status,set_job_kind,fulltime_request,work_complete_report,bonus_achievement_report'],
+            'action_type' => ['required', 'string', \Illuminate\Validation\Rule::in(\App\Support\TalkActionRegistry::allTypes())],
             'options' => ['nullable', 'array'],
             'options.*' => ['nullable', 'string'],
             'offer_token' => ['nullable', 'string'],
@@ -375,8 +378,8 @@ class TalkController extends Controller
         $this->abortIfBlocked($partnerId, $isCastPortal);
 
         $actionType = $request->input('action_type');
-        abort_if($isCastPortal && !in_array($actionType, ['interview_confirm', 'interview_cancel_accept', 'set_job_kind', 'fulltime_request', 'work_complete_report', 'bonus_achievement_report'], true), 403);
-        abort_if(!$isCastPortal && in_array($actionType, ['interview_confirm', 'interview_cancel_accept'], true), 403);
+        // Delegate side-authorization to TalkActionRegistry (single source of truth).
+        abort_unless(\App\Support\TalkActionRegistry::isAllowed($actionType, $isCastPortal), 403);
         $castId = $isCastPortal ? $this->currentCastId() : $partnerId;
         $shopId = $isCastPortal ? $partnerId : $this->currentShopId();
         $currentApplicationStatus = $this->getCurrentApplicationStatus($castId, $shopId);
@@ -1079,27 +1082,7 @@ class TalkController extends Controller
         return $dateTime->format('Y/m/d');
     }
 
-    private function assetPathForStored(?string $path): string
-    {
-        if (empty($path)) {
-            return asset('assets/images/common/no-image.png');
-        }
-
-        // 外部プレースホルダー画像（i.pravatar.cc / ui-avatars.com 等）は素通し
-        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
-            return $path;
-        }
-
-        if (str_starts_with($path, 'uploads/')) {
-            return asset($path);
-        }
-
-        if (str_starts_with($path, 'public/')) {
-            return asset('storage/' . substr($path, 7));
-        }
-
-        return asset(ltrim($path, '/'));
-    }
+    // assetPathForStored() is now provided by the ResolvesActor trait.
 
     private function resolveShopAvatar(string $shopId, ?string $fallbackPath = null): string
     {
