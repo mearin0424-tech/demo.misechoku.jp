@@ -63,6 +63,59 @@
             </div>
         </div>
 
+        {{-- ===== 「今すぐ入れる」宣言（Tier A 判定用） =====
+             店舗側の DISCOVERY で最上位に表示される最重要導線。
+             宣言中は残り時間と取り消しボタンを表示、未宣言時は 2h/4h/8h の選択ボタンを表示 --}}
+        @php
+            $availActive     = !empty($cast['available_is_active']);
+            $availRemaining  = (string) ($cast['available_remaining_label'] ?? '');
+            $availDeclareUrl = route('cast.mypage.availability.declare');
+            $availClearUrl   = route('cast.mypage.availability.clear');
+        @endphp
+        <section id="availability-card"
+                 class="cast-avail {{ $availActive ? 'is-active' : '' }}"
+                 data-availability-declare-url="{{ $availDeclareUrl }}"
+                 data-availability-clear-url="{{ $availClearUrl }}"
+                 aria-labelledby="availability-card-title">
+            <div class="cast-avail__head">
+                <span class="cast-avail__icon" aria-hidden="true">
+                    <i class="fas {{ $availActive ? 'fa-bolt' : 'fa-clock' }}"></i>
+                </span>
+                <div class="cast-avail__title-block">
+                    <p id="availability-card-title" class="cast-avail__title">
+                        @if($availActive)
+                            今すぐ入れる：宣言中
+                        @else
+                            今から入れる時間を宣言する
+                        @endif
+                    </p>
+                    <p class="cast-avail__lead" data-availability-remaining>
+                        @if($availActive)
+                            {{ $availRemaining !== '' ? $availRemaining : '有効中' }}・店舗側で優先表示されます
+                        @else
+                            近くの店舗の DISCOVERY で最上位に表示されます
+                        @endif
+                    </p>
+                </div>
+            </div>
+
+            <div class="cast-avail__actions" data-availability-actions>
+                @if($availActive)
+                    <button type="button" class="cast-avail__btn cast-avail__btn--danger" data-availability-clear>
+                        <i class="fas fa-xmark"></i> 宣言を取り消す
+                    </button>
+                @else
+                    <button type="button" class="cast-avail__btn cast-avail__btn--primary" data-availability-hours="2">2 時間</button>
+                    <button type="button" class="cast-avail__btn cast-avail__btn--primary" data-availability-hours="4">4 時間</button>
+                    <button type="button" class="cast-avail__btn cast-avail__btn--primary" data-availability-hours="8">8 時間</button>
+                @endif
+            </div>
+            <p class="cast-avail__note">
+                <i class="fas fa-circle-info" aria-hidden="true"></i>
+                この宣言は期限が来ると自動で解除されます。位置情報が近い店舗にだけ配信されます。
+            </p>
+        </section>
+
         {{-- ===== Name + 閲覧数 + 共有（自分のプロフィールを SNS 共有） ===== --}}
         <div class="flex items-center justify-between gap-3 mb-4">
             <h1 class="app-title text-[24px] text-text-main leading-tight truncate min-w-0">{{ $displayName }}</h1>
@@ -387,8 +440,16 @@
         .catch(function () { (window.appToast || window.alert)('保存に失敗しました', 'error'); })
         .finally(function () { saveBtn.disabled = false; });
     });
+
+    // 「今すぐ入れる」宣言カードのロジックは mypage-availability.js に分離済み
 })();
 </script>
+
+{{-- 「今すぐ入れる」宣言カード：設定 + 外部 JS --}}
+<script>
+window.MYPAGE_AVAILABILITY_CONFIG = { csrfToken: @json(csrf_token()) };
+</script>
+<script src="{{ asset('assets/js/mypage-availability.js') }}?v=20260802-availability"></script>
 
 {{-- ===== ギャラリー機能：元のスクリプト群 ===== --}}
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
@@ -492,5 +553,8 @@ window.MYPAGE_GALLERY_CONFIG = {
         font-size: 1.3rem !important;
         color: var(--color-accent-text) !important;
     }
+
 </style>
+{{-- 「今すぐ入れる」宣言カードの外部 CSS --}}
+<link rel="stylesheet" href="{{ asset('assets/css/mypage-availability.css') }}?v=20260802-availability">
 @endpush

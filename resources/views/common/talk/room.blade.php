@@ -285,6 +285,8 @@
     .quick-reply-card__cat--intro    { color: #6d28d9; background: rgba(124, 58, 237, 0.10); border-color: rgba(124, 58, 237, 0.28); }
     .quick-reply-card__cat--question { color: #2563eb; background: rgba(37, 99, 235, 0.10); border-color: rgba(37, 99, 235, 0.28); }
     .quick-reply-card__cat--status   { color: #6d28d9; background: rgba(124, 58, 237, 0.10); border-color: rgba(124, 58, 237, 0.28); }
+    /* 「今すぐヘルプ入れませんか」等の緊急招集テンプレ：金色で最強調（店舗→キャスト用） */
+    .quick-reply-card__cat--help     { color: #7a4b00; background: linear-gradient(105deg, #f0e6a8, #e8d08e 60%, #c5a059); border-color: rgba(197, 160, 89, 0.55); text-shadow: 0 1px 0 rgba(255,255,255,0.28); }
     .quick-reply-panel.is-compact .quick-reply-card__cat { display: none; }
 
     .hired-wage-field-wrap label {
@@ -327,7 +329,7 @@
     window.talkAllQuickReplies = @json($allQuickReplySuggestions ?? []);
     window.talkNgPayload = @json($ngWordPayload ?? ['patterns' => [], 'words' => []]);
 </script>
-<script src="{{ asset('assets/js/talk-room.js') }}?v=20260801-tpl-category"></script>
+<script src="{{ asset('assets/js/talk-room.js') }}?v=20260802-tpl-help"></script>
 @endpush
 
 @section('content')
@@ -713,6 +715,7 @@
                                 'schedule' => ['日程',     'schedule'],
                                 'thanks'   => ['感謝',     'thanks'],
                                 'status'   => ['状況',     'status'],
+                                'help'     => ['緊急招集', 'help'],
                             ];
                             $catInfo = $cat && isset($catLabelMap[$cat]) ? $catLabelMap[$cat] : null;
                         @endphp

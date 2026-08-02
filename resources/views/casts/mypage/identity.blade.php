@@ -432,6 +432,105 @@
     line-height: 1.5;
 }
 .cast-identity-success[hidden] { display: none; }
+
+/* ===== アップロード完了バナー（2段階フロー） ===== */
+.cast-identity-upload-status {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(16, 185, 129, 0.10);
+    color: #047857;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    font-size: 0.82rem;
+    line-height: 1.55;
+    display: flex; align-items: flex-start; gap: 6px;
+}
+.cast-identity-upload-status[hidden] { display: none; }
+.cast-identity-upload-status i { margin-top: 2px; }
+.cast-identity-upload-status.is-uploading {
+    background: rgba(124, 58, 237, 0.08);
+    color: var(--doc-accent);
+    border-color: rgba(124, 58, 237, 0.32);
+}
+.cast-identity-upload-status.is-error {
+    background: rgba(220, 38, 38, 0.06);
+    color: #b91c1c;
+    border-color: rgba(220, 38, 38, 0.32);
+}
+
+.cast-identity-submit-hint {
+    margin: 6px 0 0;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: rgba(180, 83, 9, 0.06);
+    color: #b45309;
+    border: 1px solid rgba(180, 83, 9, 0.22);
+    font-size: 0.74rem;
+    line-height: 1.5;
+    display: flex; align-items: flex-start; gap: 6px;
+}
+.cast-identity-submit-hint[hidden] { display: none; }
+.cast-identity-submit-hint i { margin-top: 2px; color: #b45309; }
+
+/* ===== 提出完了モーダル ===== */
+.cast-identity-submitted-modal {
+    position: fixed; inset: 0; z-index: 2600;
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 24px 16px;
+}
+.cast-identity-submitted-modal:not([hidden]) { display: flex; }
+.cast-identity-submitted-modal__overlay {
+    position: absolute; inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+}
+.cast-identity-submitted-modal__panel {
+    position: relative;
+    width: min(420px, 100%);
+    background: linear-gradient(180deg, #ffffff, #faf7ff);
+    border: 1px solid var(--doc-line-2);
+    border-radius: 18px;
+    padding: 24px 20px 20px;
+    text-align: center;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+}
+.cast-identity-submitted-modal__icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 56px; height: 56px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.15);
+    color: #059669;
+    font-size: 1.5rem;
+}
+.cast-identity-submitted-modal__title {
+    margin: 0 0 10px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--doc-ink);
+    letter-spacing: -0.005em;
+}
+.cast-identity-submitted-modal__text {
+    margin: 0 0 18px;
+    font-size: 0.84rem;
+    color: var(--doc-body);
+    line-height: 1.65;
+}
+.cast-identity-submitted-modal__btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 0;
+    background: linear-gradient(135deg, var(--doc-accent-2), var(--doc-accent));
+    color: #ffffff;
+    font-size: 0.95rem; font-weight: 800;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    box-shadow: 0 6px 14px rgba(124, 58, 237, 0.30);
+}
 </style>
 @endpush
 
@@ -453,12 +552,13 @@
         ['label' => '顔写真なし身分証', 'pattern' => 'B', 'doc' => $categoryDocs['non_photo_id'] ?? null],
         ['label' => '住所確認書類',       'pattern' => 'B', 'doc' => $categoryDocs['address_proof'] ?? null],
     ];
-    $idApproved = 0; $idPending = 0; $idRejected = 0; $idNone = 0;
+    $idApproved = 0; $idPending = 0; $idRejected = 0; $idDraft = 0; $idNone = 0;
     foreach ($summaryRows as $r) {
         $sk = $r['doc']['status_key'] ?? null;
         if (!$r['doc']) { $idNone++; }
         elseif ($sk === 'approved') { $idApproved++; }
         elseif ($sk === 'rejected') { $idRejected++; }
+        elseif ($sk === 'draft')    { $idDraft++; }
         else { $idPending++; }
     }
 @endphp
@@ -495,6 +595,9 @@
                     <div class="doc-counts" aria-label="提出状況">
                         <span class="doc-counts__chip is-approved"><i class="fas fa-circle-check"></i>承認 {{ $idApproved }}</span>
                         <span class="doc-counts__chip is-pending"><i class="fas fa-hourglass-half"></i>審査中 {{ $idPending }}</span>
+                        @if($idDraft > 0)
+                            <span class="doc-counts__chip is-pending"><i class="fas fa-paper-plane"></i>提出待ち {{ $idDraft }}</span>
+                        @endif
                         @if($idRejected > 0)
                             <span class="doc-counts__chip is-rejected"><i class="fas fa-circle-exclamation"></i>差戻し {{ $idRejected }}</span>
                         @endif
@@ -576,6 +679,19 @@
                     </div>
 
                     <p id="cast-identity-message" style="display:none; margin-top:8px;"></p>
+
+                    {{-- 提出完了モーダル：DRAFT→PENDING に成功したときに表示 --}}
+                    <div class="cast-identity-submitted-modal" data-cast-submitted-modal hidden role="dialog" aria-modal="true" aria-labelledby="cast-submitted-title">
+                        <div class="cast-identity-submitted-modal__overlay" data-cast-submitted-close></div>
+                        <div class="cast-identity-submitted-modal__panel">
+                            <span class="cast-identity-submitted-modal__icon" aria-hidden="true"><i class="fas fa-paper-plane"></i></span>
+                            <h3 id="cast-submitted-title" class="cast-identity-submitted-modal__title">運営に提出しました</h3>
+                            <p class="cast-identity-submitted-modal__text">運営による承認をお待ちください（通常 1〜2 営業日）。承認まで一部機能が制限されます。</p>
+                            <button type="button" class="cast-identity-submitted-modal__btn" data-cast-submitted-close>
+                                <i class="fas fa-check"></i> OK
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -599,49 +715,146 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // 各カテゴリのフォーム送信（インラインエラー + 成功表示）
+    // ===== 提出完了モーダル =====
+    var submittedModal = document.querySelector('[data-cast-submitted-modal]');
+    function openSubmittedModal() {
+        if (!submittedModal) return;
+        submittedModal.hidden = false;
+        document.body.style.overflow = 'hidden';
+    }
+    function closeSubmittedModalAndReload() {
+        if (!submittedModal) return;
+        submittedModal.hidden = true;
+        document.body.style.overflow = '';
+        window.location.reload();
+    }
+    if (submittedModal) {
+        submittedModal.querySelectorAll('[data-cast-submitted-close]').forEach(function (el) {
+            el.addEventListener('click', closeSubmittedModalAndReload);
+        });
+    }
+
+    // ===== 各カテゴリのフォーム（2段階フロー: ファイル選択で即アップロード, 提出ボタンで審査依頼） =====
+    var csrfToken = '{{ csrf_token() }}';
+    var uploadUrl = '{{ route("cast.mypage.identity.upload") }}';
+    var submitUrl = '{{ route("cast.mypage.identity.submit") }}';
+
     document.querySelectorAll('form.cast-identity-form').forEach(function (form) {
         var errorEl = form.querySelector('.cast-identity-error');
-        var successEl = form.querySelector('.cast-identity-success');
-        var showError = function (text) {
+        var uploadStatus = form.querySelector('[data-cast-upload-status]');
+        var uploadStatusText = form.querySelector('[data-cast-upload-status-text]');
+        var submitBtn = form.querySelector('[data-cast-submit-btn]');
+        var submitHint = form.querySelector('[data-cast-submit-hint]');
+        var frontInput = form.querySelector('input[name="front_file"]');
+        var backInput = form.querySelector('input[name="back_file"]');
+        var typeSelect = form.querySelector('select[name="type"]');
+        var expiryInput = form.querySelector('input[name="expired_at"]');
+        var categoryInput = form.querySelector('input[name="category"]');
+        var category = categoryInput ? categoryInput.value : '';
+
+        // draft 済みか（初期表示時：submitBtn が disabled でないなら既に draft がある）
+        var isUploaded = submitBtn ? !submitBtn.disabled : false;
+
+        function showError(text) {
             if (!errorEl) return;
             errorEl.textContent = text;
             errorEl.hidden = false;
-            if (successEl) successEl.hidden = true;
-        };
-        var showSuccess = function (text) {
-            if (!successEl) return;
-            successEl.textContent = text;
-            successEl.hidden = false;
+        }
+        function clearError() {
             if (errorEl) errorEl.hidden = true;
-        };
-        var clearMessages = function () {
-            if (errorEl) errorEl.hidden = true;
-            if (successEl) successEl.hidden = true;
-        };
+        }
+        function setUploadStatus(state, message) {
+            if (!uploadStatus) return;
+            uploadStatus.classList.remove('is-uploading', 'is-error');
+            if (!state) { uploadStatus.hidden = true; return; }
+            uploadStatus.hidden = false;
+            if (state !== 'success') uploadStatus.classList.add('is-' + state);
+            if (uploadStatusText) uploadStatusText.textContent = message || '';
+            var icon = uploadStatus.querySelector('i');
+            if (icon) {
+                icon.className = state === 'uploading' ? 'fas fa-spinner fa-spin'
+                    : state === 'error' ? 'fas fa-triangle-exclamation'
+                    : 'fas fa-circle-check';
+            }
+        }
+        function syncSubmitBtn() {
+            if (!submitBtn) return;
+            submitBtn.disabled = !isUploaded;
+        }
+
+        // ---- 自動アップロード（表面 or 裏面選択時、両方揃ってから発火するとは限らないため常時実行） ----
+        function autoUpload() {
+            if (!frontInput || !frontInput.files || !frontInput.files.length) {
+                // 表面がまだない：submit は無効のまま
+                return;
+            }
+            clearError();
+            setUploadStatus('uploading', 'アップロードしています…');
+            if (submitBtn) submitBtn.disabled = true;
+
+            var fd = new FormData();
+            fd.append('_token', csrfToken);
+            fd.append('category', category);
+            if (typeSelect) fd.append('type', typeSelect.value);
+            fd.append('front_file', frontInput.files[0]);
+            if (backInput && backInput.files && backInput.files[0]) {
+                fd.append('back_file', backInput.files[0]);
+            }
+            if (expiryInput && expiryInput.value) fd.append('expired_at', expiryInput.value);
+
+            fetch(uploadUrl, {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+                body: fd
+            })
+            .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw j; return j; }); })
+            .then(function () {
+                isUploaded = true;
+                setUploadStatus('success', 'アップロード完了。下の「運営に提出する」ボタンで審査依頼できます。');
+                syncSubmitBtn();
+            })
+            .catch(function (err) {
+                isUploaded = false;
+                var messages = err && err.errors ? Object.values(err.errors).flat() : [];
+                setUploadStatus('error', messages[0] || (err && err.message) || 'アップロードに失敗しました。ファイルを選び直してください。');
+                syncSubmitBtn();
+            });
+        }
+        if (frontInput) frontInput.addEventListener('change', autoUpload);
+        if (backInput)  backInput.addEventListener('change', autoUpload);
+        // 書類種別・有効期限の変更でも draft を上書きしたいので再アップロード
+        if (typeSelect) typeSelect.addEventListener('change', function () { if (isUploaded) autoUpload(); });
+        if (expiryInput) expiryInput.addEventListener('change', function () { if (isUploaded) autoUpload(); });
+
+        // ---- 提出（DRAFT → PENDING の明示的アクション） ----
         form.addEventListener('submit', function (e) {
             e.preventDefault();
-            clearMessages();
-            var submitBtn = form.querySelector('button[type="submit"]');
+            if (!isUploaded) {
+                showError('まずファイルをアップロードしてください。');
+                return;
+            }
+            clearError();
             if (submitBtn) submitBtn.disabled = true;
-            var formData = new FormData(form);
-            fetch('{{ route("cast.mypage.identity.upload") }}', {
+
+            fetch(submitUrl, {
                 method: 'POST',
-                headers: { 'Accept': 'application/json' },
-                body: formData
-            }).then(function (r) {
-                return r.json().then(function (json) {
-                    if (!r.ok) throw json;
-                    return json;
-                });
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ category: category })
             })
-            .then(function (res) {
-                showSuccess(res && res.message ? res.message : 'アップロードしました。');
-                setTimeout(function () { window.location.reload(); }, 600);
-            }).catch(function (error) {
+            .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw j; return j; }); })
+            .then(function () {
+                if (submitHint) submitHint.hidden = true;
+                openSubmittedModal();
+            })
+            .catch(function (err) {
+                var messages = err && err.errors ? Object.values(err.errors).flat() : [];
+                showError(messages[0] || (err && err.message) || '提出に失敗しました。');
                 if (submitBtn) submitBtn.disabled = false;
-                var messages = error && error.errors ? Object.values(error.errors).flat() : [];
-                showError(messages[0] || (error && error.message) || 'アップロードに失敗しました。時間をおいて再度お試しください。');
             });
         });
     });

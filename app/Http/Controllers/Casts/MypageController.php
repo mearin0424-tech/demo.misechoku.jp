@@ -126,6 +126,54 @@ class MypageController extends Controller
     }
 
     /**
+     * 「今すぐ入れる」宣言（Tier A 判定用）
+     *   - hours: 2 / 4 / 8 のいずれか。available_until = NOW() + hours 時間
+     *   - available_declared_at = NOW()（宣言時刻・タイブレーク用）
+     * 呼び出し例: POST /cast/mypage/availability { hours: 2 }
+     */
+    public function declareAvailability(Request $request)
+    {
+        $data = $request->validate([
+            'hours' => ['required', 'integer', 'in:2,4,8'],
+        ]);
+
+        $castId = $this->currentCastId();
+        $now = Carbon::now();
+        $until = (clone $now)->addHours((int) $data['hours']);
+
+        DB::table('cast_profiles')
+            ->where('cast_id', $castId)
+            ->update([
+                'available_until'       => $until,
+                'available_declared_at' => $now,
+                'updated_at'            => $now,
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'available_until'       => $until->toIso8601String(),
+            'available_declared_at' => $now->toIso8601String(),
+            'remaining_label'       => $data['hours'] . '時間',
+        ]);
+    }
+
+    /**
+     * 「今すぐ入れる」宣言の取り消し
+     */
+    public function clearAvailability()
+    {
+        DB::table('cast_profiles')
+            ->where('cast_id', $this->currentCastId())
+            ->update([
+                'available_until'       => null,
+                'available_declared_at' => null,
+                'updated_at'            => Carbon::now(),
+            ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
      * 採用・入金管理（採用状況と請求・入金を1画面に統合）
      */
     public function employment()
@@ -493,7 +541,41 @@ class MypageController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => '本人確認書類をアップロードしました。運営による確認・承認をお待ちください。',
+            'message' => 'アップロードが完了しました。「運営に提出する」を押すと審査が始まります。',
+        ]);
+    }
+
+    /**
+     * 本人確認書類の審査依頼（DRAFT → PENDING）。
+     * uploadIdentity() でアップロード済みの書類を「運営に提出」する明示的なアクション。
+     */
+    public function submitIdentityForReview(Request $request)
+    {
+        $allowedCategories = [
+            \App\Models\CastIdentityDocument::CATEGORY_PHOTO_ID,
+            \App\Models\CastIdentityDocument::CATEGORY_NON_PHOTO_ID,
+            \App\Models\CastIdentityDocument::CATEGORY_ADDRESS_PROOF,
+        ];
+
+        $data = $request->validate([
+            'category' => ['required', 'string', \Illuminate\Validation\Rule::in($allowedCategories)],
+        ]);
+
+        try {
+            $this->documentReviewService->requestCastIdentityReview(
+                $this->currentCastId(),
+                $data['category']
+            );
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage() ?: '提出に失敗しました。',
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => '運営に提出しました。承認までお待ちください。',
         ]);
     }
 
@@ -925,6 +1007,12 @@ class MypageController extends Controller
                 Schema::hasColumn('cast_profiles', 'personality_type')
                     ? 'cast_profiles.personality_type'
                     : DB::raw('NULL as personality_type'),
+                Schema::hasColumn('cast_profiles', 'available_until')
+                    ? 'cast_profiles.available_until'
+                    : DB::raw('NULL as available_until'),
+                Schema::hasColumn('cast_profiles', 'available_declared_at')
+                    ? 'cast_profiles.available_declared_at'
+                    : DB::raw('NULL as available_declared_at'),
                 'cast_profiles.updated_at as profile_updated_at'
             )
             ->first();
@@ -1018,6 +1106,24 @@ class MypageController extends Controller
             }
         }
 
+        // 「今すぐ入れる」宣言の残り時間ラベル
+        $availableRemainingLabel = null;
+        $availableIsActive = false;
+        if (!empty($castRow->available_until)) {
+            $until = Carbon::parse($castRow->available_until);
+            if ($until->isFuture()) {
+                $availableIsActive = true;
+                $diffMinutes = (int) ceil(Carbon::now()->diffInSeconds($until, false) / 60);
+                if ($diffMinutes >= 60) {
+                    $hours = (int) floor($diffMinutes / 60);
+                    $mins  = $diffMinutes % 60;
+                    $availableRemainingLabel = $mins > 0 ? "残り{$hours}時間{$mins}分" : "残り{$hours}時間";
+                } else {
+                    $availableRemainingLabel = "残り{$diffMinutes}分";
+                }
+            }
+        }
+
         return [
             'id'               => $castRow->id,
             'nickname'         => $castRow->nickname ?? '',
@@ -1033,6 +1139,9 @@ class MypageController extends Controller
             'view_cnt'         => $viewCount,
             'match_cnt'        => $matchCount,
             'bonus_total'      => $bonusTotal,
+            'available_until'  => $castRow->available_until,
+            'available_is_active'     => $availableIsActive,
+            'available_remaining_label' => $availableRemainingLabel,
             'zip'              => $castRow->zip ?? '',
             'pref'             => $castRow->pref ?? '',
             'city'             => $castRow->city ?? '',

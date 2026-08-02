@@ -41,7 +41,7 @@ use App\Http\Controllers\Admin\NotificationSpecController as AdminNotificationSp
 use App\Http\Controllers\Admin\CharacterGuideController as AdminCharacterGuide;
 
 // 蠎苓・蛛ｴ
-use App\Http\Controllers\Shops\HomeController as ShopHome;
+use App\Http\Controllers\Common\DiscoveryController as DiscoveryHome;
 use App\Http\Controllers\Shops\SearchController as ShopSearch;
 use App\Http\Controllers\Shops\MypageController as ShopMypage;
 use App\Http\Controllers\Shops\ProfileController as ShopProfile;
@@ -488,7 +488,7 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
     // 新規登録直後のチュートリアル
     Route::get('/tutorial', [\App\Http\Controllers\Common\TutorialController::class, 'shopShow'])->name('tutorial');
 
-    Route::get('/home', [ShopHome::class, 'index'])->name('home');
+    Route::get('/home', [DiscoveryHome::class, 'index'])->name('home');
     Route::get('/search', [ShopSearch::class, 'index'])->name('search.index');
     Route::get('/search/{tab}', fn ($tab) => redirect()->route('shop.search.index', $tab === 'keep' ? ['tab' => 'keep'] : []))->where('tab', 'timeline|list|keep');
     Route::post('/search-preferences', [ShopSearch::class, 'savePreferences'])->name('search-preferences.save');
@@ -576,7 +576,7 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
     // 新規登録直後のチュートリアル
     Route::get('/tutorial', [\App\Http\Controllers\Common\TutorialController::class, 'castShow'])->name('tutorial');
 
-    Route::get('/home', [ShopHome::class, 'index'])->name('home');
+    Route::get('/home', [DiscoveryHome::class, 'index'])->name('home');
     Route::get('/profile/edit', [CastProfile::class, 'edit'])->name('profile.edit');
     Route::post('/profile/update', [CastProfile::class, 'update'])->name('profile.update');
     Route::post('/profile/personality-type', [CastProfile::class, 'updatePersonalityType'])->name('profile.personality-type');
@@ -593,12 +593,17 @@ Route::prefix('cast')->name('cast.')->middleware('member.auth')->group(function 
     Route::get('/mypage', [CastMypage::class, 'index'])->name('mypage.index');
     Route::post('/mypage/word', [CastMypage::class, 'updateWord'])->name('mypage.word');
     Route::post('/mypage/search-location', [CastMypage::class, 'updateSearchLocation'])->name('mypage.search-location.update');
+    // 「今すぐ入れる」宣言（店舗ホームの Tier A 判定に用いる）
+    Route::post('/mypage/availability', [CastMypage::class, 'declareAvailability'])->name('mypage.availability.declare');
+    Route::delete('/mypage/availability', [CastMypage::class, 'clearAvailability'])->name('mypage.availability.clear');
     Route::get('/mypage/management', [CastMypage::class, 'employment'])->name('mypage.management');
     Route::get('/mypage/reviews', [CastMypage::class, 'reviews'])->name('mypage.reviews');
     Route::post('/mypage/payment/bank', [CastMypage::class, 'updateBank'])->name('mypage.payment.bank.update');
     Route::get('/mypage/identity', [CastMypage::class, 'identity'])->name('mypage.identity');
     Route::post('/mypage/identity/remind', [CastMypage::class, 'identityRemind'])->name('mypage.identity.remind');
     Route::post('/mypage/identity/upload', [CastMypage::class, 'uploadIdentity'])->name('mypage.identity.upload');
+    // 明示的な「運営に提出する」アクション（DRAFT→PENDING）
+    Route::post('/mypage/identity/submit', [CastMypage::class, 'submitIdentityForReview'])->name('mypage.identity.submit');
     Route::post('/mypage/images/upload', [CastMypage::class, 'uploadImage'])->name('mypage.images.upload');
     Route::post('/mypage/images/order', [CastMypage::class, 'updateImageOrder'])->name('mypage.images.order');
     Route::delete('/mypage/images/{id}', [CastMypage::class, 'deleteImage'])->name('mypage.images.delete');

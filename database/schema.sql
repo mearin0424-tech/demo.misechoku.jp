@@ -73,11 +73,14 @@ CREATE TABLE IF NOT EXISTS `cast_profiles` (
   `personality_type` varchar(4) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `latitude` decimal(10,7) DEFAULT NULL,
   `longitude` decimal(10,7) DEFAULT NULL,
+  `available_until` timestamp NULL DEFAULT NULL COMMENT '「今すぐ入れる」宣言の有効期限。NULL または過去なら宣言なし',
+  `available_declared_at` timestamp NULL DEFAULT NULL COMMENT '直近の available_until を宣言した時刻（同時刻タイブレーク用）',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `cast_profiles_cast_id_foreign` (`cast_id`),
-  KEY `fk_cast_profiles_industry` (`industry_id`)
+  KEY `fk_cast_profiles_industry` (`industry_id`),
+  KEY `idx_cast_profiles_available_until` (`available_until`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -----------------------------------------------------------------------------
@@ -127,7 +130,7 @@ CREATE TABLE IF NOT EXISTS `cast_identity_documents` (
   `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'photo_id: driver_license/passport/mynumber_card/residence_card | non_photo_id: health_insurance/pension_book | address_proof: residence_certificate/utility_bill',
   `image_path_front` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `image_path_back` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `status` tinyint NOT NULL DEFAULT '1' COMMENT '1:未承認, 2:承認済, 3:不備・却下',
+  `status` tinyint NOT NULL DEFAULT '0' COMMENT '0:下書き(未提出), 1:未審査(提出済み), 2:承認済, 3:不備・却下',
   `ng_reason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `expired_at` date DEFAULT NULL COMMENT '有効期限',
   `approved_at` timestamp NULL DEFAULT NULL COMMENT '承認日時',

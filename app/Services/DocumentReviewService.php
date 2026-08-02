@@ -73,6 +73,11 @@ class DocumentReviewService
         ];
     }
 
+    /**
+     * 本人確認書類のアップロード。
+     * 2段階フローに変更（2026-08-02）: 保存時は STATUS_DRAFT。
+     * ユーザが明示的に「提出」ボタンを押すと requestCastIdentityReview() で PENDING に遷移する。
+     */
     public function uploadCastIdentityDocument(
         string $castId,
         string $type,
@@ -99,7 +104,7 @@ class DocumentReviewService
                 'type' => $type,
                 'image_path_front' => $frontPath,
                 'image_path_back' => $backPath,
-                'status' => CastIdentityDocument::STATUS_PENDING,
+                'status' => CastIdentityDocument::STATUS_DRAFT,
                 'ng_reason' => null,
                 'expired_at' => $expiredAt ?: null,
                 'approved_at' => null,
@@ -113,6 +118,39 @@ class DocumentReviewService
                 ->whereIn('category', [CastIdentityDocument::CATEGORY_NON_PHOTO_ID, CastIdentityDocument::CATEGORY_ADDRESS_PROOF])
                 ->delete();
         }
+
+        $this->syncCastLegacyStatus($castId);
+
+        return $document->fresh();
+    }
+
+    /**
+     * 本人確認書類の審査依頼（DRAFT → PENDING）。
+     * uploadCastIdentityDocument() で作成された draft を「運営に提出」する明示的なアクション。
+     */
+    public function requestCastIdentityReview(string $castId, string $category): CastIdentityDocument
+    {
+        $document = CastIdentityDocument::query()
+            ->where('cast_id', $castId)
+            ->where('category', $category)
+            ->firstOrFail();
+
+        if (empty($document->image_path_front)) {
+            throw new \RuntimeException('ファイルが未アップロードです。まずファイルを選択してください。');
+        }
+        $status = (int) $document->status;
+        if ($status === CastIdentityDocument::STATUS_APPROVED) {
+            throw new \RuntimeException('承認済みのため再審査依頼はできません。差し替え後に審査依頼してください。');
+        }
+        if ($status === CastIdentityDocument::STATUS_PENDING) {
+            throw new \RuntimeException('すでに審査依頼中です。');
+        }
+
+        $document->update([
+            'status'      => CastIdentityDocument::STATUS_PENDING,
+            'ng_reason'   => null,
+            'approved_at' => null,
+        ]);
 
         $this->syncCastLegacyStatus($castId);
 
@@ -883,6 +921,11 @@ class DocumentReviewService
             return 'rejected';
         }
 
+        // 全書類が draft のみ → 未提出扱い（ユーザが「提出」ボタンを押していない）
+        if ($documents->every(fn (CastIdentityDocument $d) => (int) $d->status === CastIdentityDocument::STATUS_DRAFT)) {
+            return 'not_submitted';
+        }
+
         // 全部承認済みだがパターン未充足（B のうち片方だけ承認）→ pending 扱い
         return 'pending';
     }
@@ -914,6 +957,7 @@ class DocumentReviewService
             'status_key' => match ((int) $document->status) {
                 CastIdentityDocument::STATUS_APPROVED => 'approved',
                 CastIdentityDocument::STATUS_REJECTED => 'rejected',
+                CastIdentityDocument::STATUS_DRAFT    => 'draft',
                 default => 'pending',
             },
             'status_label' => $this->statusLabel((int) $document->status),

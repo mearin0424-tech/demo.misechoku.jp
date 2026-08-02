@@ -1,7 +1,15 @@
 <?php
-// prj/app/Http/Controllers/Shops/HomeController.php
+// app/Http/Controllers/Common/DiscoveryController.php
+//
+// DISCOVERY（縦スワイプの発見画面）用コントローラ。
+// キャスト側は /cast/home（求人カード一覧）、店舗側は /shop/home（キャストカード一覧）で
+// 同じ view (shops.home.index) を使う。以前は Shops\HomeController に置いて
+// キャスト側からも呼んでいたが、namespace が実態と乖離していたため Common へ移設 (2026-08-02)。
+//
+// TODO: getHomeCasts() / getHomeRecruits() のクエリロジックは将来 DiscoveryService に切り出す。
+// 今はまず controller の置き場所だけ Common に揃える段階。
 
-namespace App\Http\Controllers\Shops;
+namespace App\Http\Controllers\Common;
 
 use App\Http\Controllers\Controller;
 use App\Models\Favorite;
@@ -13,8 +21,42 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-class HomeController extends Controller
+class DiscoveryController extends Controller
 {
+    // ==============================================================
+    // Tier ランキング設定（getHomeCasts の並び順に影響）
+    //
+    // Tier A: 「今すぐ入れる」宣言中 → 距離昇順 → 宣言時刻の新しい順
+    // Tier B: 直近ログイン & 位置あり → スコア = 距離*重み + 経過時間*重み
+    // Tier C: それ以外 → 元の ID 順の逆
+    //
+    // 将来 A/B テストや管理画面から調整したくなったら config/discovery.php
+    // に移設予定。今はまずマジックナンバーを排除するのが目的。
+    // ==============================================================
+
+    /** キャストが「オンライン中」と見なされるログイン後の分数（Tier B チップ判定） */
+    private const ONLINE_NOW_WINDOW_MINUTES = 30;
+
+    /** Tier B の対象となる「直近ログイン」の時間窓（時間単位） */
+    private const TIER_B_RECENCY_HOURS = 24;
+
+    /** Tier B スコアの距離側の重み（km あたり） */
+    private const TIER_B_DISTANCE_WEIGHT = 1.0;
+
+    /** Tier B スコアの経過時間側の重み（時間あたり） */
+    private const TIER_B_RECENCY_WEIGHT = 0.5;
+
+    /** Tier B スコア計算時、距離未算出キャストに用いる仮の距離（km） */
+    private const TIER_B_UNKNOWN_DISTANCE_KM = 30.0;
+
+    /** Tier A で距離不明キャストを末尾に沈めるためのソートキー値 */
+    private const DISTANCE_UNKNOWN_SORT_KEY = 99999.0;
+
+    /** DISCOVERY 画面に表示するカードの上限件数 */
+    private const MAX_HOME_ITEMS = 20;
+
+    /** Tier 分類前に取得するキャストの上限件数（並び替え後上位 MAX_HOME_ITEMS を返す） */
+    private const CANDIDATES_FETCH_LIMIT = 60;
 
     public function __construct(
         private readonly UserLocationService $userLocation,
@@ -47,25 +89,40 @@ class HomeController extends Controller
 
     private function getHomeCasts(): array
     {
+        $hasAvailUntil     = Schema::hasColumn('cast_profiles', 'available_until');
+        $hasAvailDeclared  = Schema::hasColumn('cast_profiles', 'available_declared_at');
+
+        $select = [
+            'casts.id',
+            'casts.last_login_at',
+            'cast_profiles.nickname',
+            'cast_profiles.name',
+            'cast_profiles.birthday',
+            'cast_profiles.pref',
+            'cast_profiles.city',
+            'cast_profiles.pr',
+            'cast_profiles.exp',
+            'cast_profiles.profession',
+            'cast_profiles.industry_id',
+            'cast_profiles.latitude',
+            'cast_profiles.longitude',
+            DB::raw("(SELECT ci.image_path FROM cast_images ci WHERE ci.cast_id = casts.id ORDER BY ci.is_main DESC, ci.main_order IS NULL, ci.main_order, ci.id LIMIT 1) as main_image_path"),
+        ];
+        $select[] = $hasAvailUntil
+            ? 'cast_profiles.available_until'
+            : DB::raw('NULL as available_until');
+        $select[] = $hasAvailDeclared
+            ? 'cast_profiles.available_declared_at'
+            : DB::raw('NULL as available_declared_at');
+
+        // WHERE で予めランクを付けておくとページング時に楽になるが、
+        // ここでは Tier 判定に必要な情報を全部拾って PHP 側で並び替える方針
+        // （20 件と少ないため）。将来 100+ になったら SQL 側で ORDER BY を組む
         $rows = DB::table('casts')
             ->leftJoin('cast_profiles', 'casts.id', '=', 'cast_profiles.cast_id')
-            ->select(
-                'casts.id',
-                'cast_profiles.nickname',
-                'cast_profiles.name',
-                'cast_profiles.birthday',
-                'cast_profiles.pref',
-                'cast_profiles.city',
-                'cast_profiles.pr',
-                'cast_profiles.exp',
-                'cast_profiles.profession',
-                'cast_profiles.industry_id',
-                'cast_profiles.latitude',
-                'cast_profiles.longitude',
-                DB::raw("(SELECT ci.image_path FROM cast_images ci WHERE ci.cast_id = casts.id ORDER BY ci.is_main DESC, ci.main_order IS NULL, ci.main_order, ci.id LIMIT 1) as main_image_path")
-            )
+            ->select($select)
             ->orderBy('casts.id')
-            ->limit(20)
+            ->limit(self::CANDIDATES_FETCH_LIMIT)   // Tier 分類後に上位 MAX_HOME_ITEMS を返すため広めに取得
             ->get();
 
         // プロフィールタグ（ルックス/内面）を一括取得。
@@ -132,12 +189,17 @@ class HomeController extends Controller
                 });
         }
 
+        // Tier 分類（各パラメータはクラス定数で管理。上部の定数ブロック参照）
+        $now = Carbon::now();
+
         $items = [];
         foreach ($rows as $row) {
             $birthday = $row->birthday ? Carbon::parse($row->birthday) : null;
             $images = $this->getCastImages($row->id, $row->main_image_path);
+            $lat = $row->latitude  !== null ? (float) $row->latitude  : null;
+            $lng = $row->longitude !== null ? (float) $row->longitude : null;
             $distanceKm = $origin
-                ? $this->userLocation->distanceKm($origin['lat'], $origin['lng'], $row->latitude !== null ? (float) $row->latitude : null, $row->longitude !== null ? (float) $row->longitude : null)
+                ? $this->userLocation->distanceKm($origin['lat'], $origin['lng'], $lat, $lng)
                 : null;
             // 距離フィルタ：拠点設定があり、かつ半径>0 の場合のみ適用。
             // 距離不明（lat/lng 未登録）は除外しない（情報不足を理由にスキップする方針もあるが、表示機会を残す）。
@@ -145,6 +207,50 @@ class HomeController extends Controller
                 continue;
             }
             $passportLabel = $passportLabelByCast[(string) $row->id] ?? null;
+
+            // --- Tier / チップ判定 ---
+            $availActive = false;
+            $availRemainingLabel = null;
+            $availDeclaredAt = $row->available_declared_at ? Carbon::parse($row->available_declared_at) : null;
+            if (!empty($row->available_until)) {
+                $until = Carbon::parse($row->available_until);
+                if ($until->isFuture()) {
+                    $availActive = true;
+                    $mins = (int) ceil($now->diffInSeconds($until, false) / 60);
+                    $availRemainingLabel = $mins >= 60
+                        ? '残り' . (int) floor($mins / 60) . '時間'
+                        : '残り' . $mins . '分';
+                }
+            }
+
+            $lastLogin = $row->last_login_at ? Carbon::parse($row->last_login_at) : null;
+            $minutesSinceLogin = $lastLogin ? (int) $lastLogin->diffInMinutes($now, false) : null;
+            $isOnlineNow = $minutesSinceLogin !== null
+                && $minutesSinceLogin >= 0
+                && $minutesSinceLogin <= self::ONLINE_NOW_WINDOW_MINUTES;
+
+            if ($availActive) {
+                $tier = 'A';
+                // 距離不明は末尾扱いにするため大きな値を割当
+                $sortKey1 = $distanceKm !== null ? (float) $distanceKm : self::DISTANCE_UNKNOWN_SORT_KEY;
+                $sortKey2 = $availDeclaredAt ? -$availDeclaredAt->getTimestamp() : 0;
+            } elseif ($lat !== null && $lng !== null
+                && $lastLogin !== null
+                && $lastLogin->diffInHours($now, false) <= self::TIER_B_RECENCY_HOURS
+                && $lastLogin->diffInHours($now, false) >= 0
+            ) {
+                $tier = 'B';
+                $hoursSinceLogin = max(0.0, (float) $lastLogin->diffInHours($now, false));
+                $distanceForScore = $distanceKm !== null ? (float) $distanceKm : self::TIER_B_UNKNOWN_DISTANCE_KM;
+                $sortKey1 = $distanceForScore * self::TIER_B_DISTANCE_WEIGHT
+                          + $hoursSinceLogin * self::TIER_B_RECENCY_WEIGHT;
+                $sortKey2 = $lastLogin ? -$lastLogin->getTimestamp() : 0;
+            } else {
+                $tier = 'C';
+                $sortKey1 = 0;
+                $sortKey2 = -((int) $row->id); // 元の ID 順の逆（新しい登録が上）
+            }
+
             $items[] = [
                 'id' => $row->id,
                 'name' => $row->nickname ?: ($row->name ?: 'ゲスト'),
@@ -162,10 +268,35 @@ class HomeController extends Controller
                 'location_mode' => $passportLabel ? 'passport' : 'profile',
                 'distance_km' => $distanceKm,
                 'distance_label' => $distanceKm !== null ? $this->userLocation->formatDistance($distanceKm) : null,
+                // ↓ Tier / チップ表示用（view で参照）
+                'tier' => $tier,
+                'availability_active' => $availActive,
+                'availability_remaining_label' => $availRemainingLabel,
+                'is_online_now' => $isOnlineNow,
+                '_sort_tier'  => ['A' => 0, 'B' => 1, 'C' => 2][$tier] ?? 2,
+                '_sort_key1'  => $sortKey1,
+                '_sort_key2'  => $sortKey2,
             ];
         }
 
-        return $items;
+        // Tier A → B → C の順で並べ、各 Tier 内は sortKey1(ASC) → sortKey2(ASC) で決定的に整列
+        usort($items, function ($a, $b) {
+            if ($a['_sort_tier'] !== $b['_sort_tier']) {
+                return $a['_sort_tier'] <=> $b['_sort_tier'];
+            }
+            if ($a['_sort_key1'] !== $b['_sort_key1']) {
+                return $a['_sort_key1'] <=> $b['_sort_key1'];
+            }
+            return $a['_sort_key2'] <=> $b['_sort_key2'];
+        });
+
+        // 内部ソートキーは view に不要
+        foreach ($items as &$it) {
+            unset($it['_sort_tier'], $it['_sort_key1'], $it['_sort_key2']);
+        }
+        unset($it);
+
+        return array_slice($items, 0, self::MAX_HOME_ITEMS);
     }
 
     /**

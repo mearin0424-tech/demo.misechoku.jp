@@ -12,9 +12,10 @@
     $docList = collect($documents ?? []);
     $docTotal = $docList->count();
     $docApproved = $docList->where('status', 'approved')->count();
-    $docPending = $docList->where('status', 'pending')->count();
+    $docPending  = $docList->where('status', 'pending')->count();
     $docRejected = $docList->where('status', 'rejected')->count();
-    $docNotSubmitted = $docTotal - $docApproved - $docPending - $docRejected;
+    $docDraft    = $docList->where('status', 'draft')->count();
+    $docNotSubmitted = $docTotal - $docApproved - $docPending - $docRejected - $docDraft;
 
     $overallVerified = $docTotal > 0 && $docApproved === $docTotal;
     $overallPending = !$overallVerified && $docPending > 0;
@@ -43,6 +44,9 @@
     <div class="doc-counts" aria-label="提出状況">
         <span class="doc-counts__chip is-approved"><i class="fas fa-circle-check"></i>承認 {{ $docApproved }}</span>
         <span class="doc-counts__chip is-pending"><i class="fas fa-hourglass-half"></i>審査中 {{ $docPending }}</span>
+        @if($docDraft > 0)
+            <span class="doc-counts__chip is-pending"><i class="fas fa-paper-plane"></i>提出待ち {{ $docDraft }}</span>
+        @endif
         @if($docRejected > 0)
             <span class="doc-counts__chip is-rejected"><i class="fas fa-circle-exclamation"></i>差戻し {{ $docRejected }}</span>
         @endif

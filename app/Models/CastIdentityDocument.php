@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CastIdentityDocument extends Model
 {
+    // アップロード直後は STATUS_DRAFT（未提出）。ユーザが明示的に「提出」ボタンを押すと STATUS_PENDING に遷移し
+    // 運営審査対象となる。DRAFT のままでは admin ダッシュボードには「審査待ち」として上がらない。
+    public const STATUS_DRAFT = 0;
     public const STATUS_PENDING = 1;
     public const STATUS_APPROVED = 2;
     public const STATUS_REJECTED = 3;

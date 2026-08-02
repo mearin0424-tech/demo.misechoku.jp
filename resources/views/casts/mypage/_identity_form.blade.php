@@ -16,6 +16,9 @@
         'pending'  => 'is-pending',
         default    => '',
     };
+    // draft: アップロード済みだが「提出」ボタン未押下（=審査待ち行列に入っていない）
+    $isDraft = $statusKey === 'draft';
+    $isPending = $statusKey === 'pending';
     $frontId = $category . '_front_file';
     $backId  = $category . '_back_file';
 @endphp
@@ -90,12 +93,25 @@
             </div>
         @endif
 
+        {{-- アップロード完了バナー：ファイル選択後、サーバに draft 保存が完了したら表示 --}}
+        <p class="cast-identity-upload-status" data-cast-upload-status hidden>
+            <i class="fas fa-cloud-check"></i>
+            <span data-cast-upload-status-text>アップロード完了。下の「運営に提出する」ボタンで審査依頼できます。</span>
+        </p>
+
         <p class="cast-identity-error" role="alert" hidden></p>
         <p class="cast-identity-success" role="status" hidden></p>
 
-        <button type="submit" class="doc-form__submit">
-            <i class="fas fa-upload"></i>
-            {{ $currentDoc ? '差し替えて提出する' : 'この内容で提出する' }}
+        {{-- 2 段階フロー：
+             1. 表面（+ 任意の裏面）を選択→自動アップロード（draft として保存）
+             2. 「運営に提出する」ボタン押下→ DRAFT→PENDING の明示的アクション --}}
+        <button type="submit" class="doc-form__submit" data-cast-submit-btn @if(!$isDraft) disabled @endif>
+            <i class="fas fa-paper-plane"></i>
+            運営に提出する
         </button>
+        <p class="cast-identity-submit-hint" data-cast-submit-hint>
+            <i class="fas fa-info-circle" aria-hidden="true"></i>
+            ファイル選択後、明示的に「運営に提出する」ボタンを押すまで審査は始まりません。
+        </p>
     </form>
 </section>

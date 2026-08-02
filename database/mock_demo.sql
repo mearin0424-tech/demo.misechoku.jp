@@ -150,7 +150,7 @@ CREATE TABLE `cast_identity_documents` (
   `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'photo_id: driver_license/passport/mynumber_card/residence_card | non_photo_id: health_insurance/pension_book | address_proof: residence_certificate/utility_bill',
   `image_path_front` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `image_path_back` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `status` tinyint NOT NULL DEFAULT '1' COMMENT '1:未承認, 2:承認済, 3:不備・却下',
+  `status` tinyint NOT NULL DEFAULT '0' COMMENT '0:下書き(未提出), 1:未審査(提出済み), 2:承認済, 3:不備・却下',
   `ng_reason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `expired_at` date DEFAULT NULL COMMENT '有効期限',
   `approved_at` timestamp NULL DEFAULT NULL COMMENT '承認日時',
@@ -255,20 +255,23 @@ CREATE TABLE `cast_profiles` (
   `personality_type` varchar(4) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `latitude` decimal(10,7) DEFAULT NULL,
   `longitude` decimal(10,7) DEFAULT NULL,
+  `available_until` timestamp NULL DEFAULT NULL COMMENT '「今すぐ入れる」宣言の有効期限。NULL または過去なら宣言なし',
+  `available_declared_at` timestamp NULL DEFAULT NULL COMMENT '直近の available_until を宣言した時刻（同時刻タイブレーク用）',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- テーブルのデータのダンプ `cast_profiles`
+-- （動作確認用: id=1 は 2h 宣言中／id=5 は 4h 宣言中）
 --
 
-INSERT INTO `cast_profiles` (`id`, `industry_id`, `cast_id`, `nickname`, `name`, `name_kana`, `birthday`, `zip`, `pref`, `city`, `addr`, `building`, `tel`, `height`, `weight`, `bust`, `waist`, `hip`, `profession`, `exp`, `pr`, `personality_type`, `latitude`, `longitude`, `created_at`, `updated_at`) VALUES
-(1, 1, 'c00000001', 'みさき', '桜井美咲', NULL, '2001-05-15', '103-0016', '東京都', '中央区', '日本橋小網町', NULL, NULL, 156, 55, 50, 60, 70, '学生', 1, '自己紹介文です！', 'LCOH', 35.6826780, 139.7807160, '2026-05-06 13:57:04', '2026-05-16 15:13:12'),
-(2, NULL, 'c00000002', 'Yui', '田中結衣', NULL, '1994-04-24', '103-0016', '東京都', '中央区', '日本橋小網町', NULL, '07099999999', NULL, NULL, 55, 40, 50, NULL, 0, '自己PR文', NULL, NULL, NULL, '2026-03-15 06:24:25', '2026-05-04 08:42:53'),
-(3, 1, 'c00000003', 'マリ', '田端麻里奈', NULL, '1999-10-15', '134-0088', '東京都', '江戸川区', '西葛西', NULL, '07099999999', 160, 50, 50, 50, 50, '学生', 1, '自己PRテスト文章\r\n自己PRテスト文章\r\n自己PRテスト文章', NULL, NULL, NULL, '2026-05-06 15:32:47', '2026-05-06 15:32:47'),
-(4, 1, 'c00000004', '政子', '田所政子', NULL, '2005-05-10', '140-0014', '東京都', '品川区', '大井', NULL, '0356743525', 160, 48, 55, 55, 60, '学生', 0, 'こんにちは。', NULL, NULL, NULL, '2026-05-10 13:38:39', '2026-05-10 13:38:59'),
-(5, NULL, 'c00000005', 'のりりん', '間瀬紀子', NULL, '1998-05-10', '106-0045', '東京都', '港区', '麻布十番', NULL, '05033333333', 170, 55, 70, 80, 60, '学生', 1, 'はじめまして！お願いします！', NULL, NULL, NULL, '2026-05-10 13:47:29', '2026-05-10 13:47:29');
+INSERT INTO `cast_profiles` (`id`, `industry_id`, `cast_id`, `nickname`, `name`, `name_kana`, `birthday`, `zip`, `pref`, `city`, `addr`, `building`, `tel`, `height`, `weight`, `bust`, `waist`, `hip`, `profession`, `exp`, `pr`, `personality_type`, `latitude`, `longitude`, `available_until`, `available_declared_at`, `created_at`, `updated_at`) VALUES
+(1, 1, 'c00000001', 'みさき', '桜井美咲', NULL, '2001-05-15', '103-0016', '東京都', '中央区', '日本橋小網町', NULL, NULL, 156, 55, 50, 60, 70, '学生', 1, '自己紹介文です！', 'LCOH', 35.6826780, 139.7807160, DATE_ADD(NOW(), INTERVAL 2 HOUR), NOW(), '2026-05-06 13:57:04', '2026-05-16 15:13:12'),
+(2, NULL, 'c00000002', 'Yui', '田中結衣', NULL, '1994-04-24', '103-0016', '東京都', '中央区', '日本橋小網町', NULL, '07099999999', NULL, NULL, 55, 40, 50, NULL, 0, '自己PR文', NULL, NULL, NULL, NULL, NULL, '2026-03-15 06:24:25', '2026-05-04 08:42:53'),
+(3, 1, 'c00000003', 'マリ', '田端麻里奈', NULL, '1999-10-15', '134-0088', '東京都', '江戸川区', '西葛西', NULL, '07099999999', 160, 50, 50, 50, 50, '学生', 1, '自己PRテスト文章\r\n自己PRテスト文章\r\n自己PRテスト文章', NULL, NULL, NULL, NULL, NULL, '2026-05-06 15:32:47', '2026-05-06 15:32:47'),
+(4, 1, 'c00000004', '政子', '田所政子', NULL, '2005-05-10', '140-0014', '東京都', '品川区', '大井', NULL, '0356743525', 160, 48, 55, 55, 60, '学生', 0, 'こんにちは。', NULL, NULL, NULL, NULL, NULL, '2026-05-10 13:38:39', '2026-05-10 13:38:59'),
+(5, NULL, 'c00000005', 'のりりん', '間瀬紀子', NULL, '1998-05-10', '106-0045', '東京都', '港区', '麻布十番', NULL, '05033333333', 170, 55, 70, 80, 60, '学生', 1, 'はじめまして！お願いします！', NULL, NULL, NULL, DATE_ADD(NOW(), INTERVAL 4 HOUR), NOW(), '2026-05-10 13:47:29', '2026-05-10 13:47:29');
 
 -- --------------------------------------------------------
 

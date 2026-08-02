@@ -608,13 +608,14 @@ document.addEventListener('DOMContentLoaded', function() {
         card.appendChild(form);
     };
 
-    // カテゴリラベル (backend の 'intro'/'question'/'schedule'/'thanks'/'status' に対応)
+    // カテゴリラベル (backend の 'intro'/'question'/'schedule'/'thanks'/'status'/'help' に対応)
     const templateCategoryMap = {
         intro:    { label: '自己紹介', className: 'intro' },
         question: { label: '質問',     className: 'question' },
         schedule: { label: '日程',     className: 'schedule' },
         thanks:   { label: '感謝',     className: 'thanks' },
         status:   { label: '状況',     className: 'status' },
+        help:     { label: '緊急招集', className: 'help' },
     };
 
     // ステータスごとの定型文セクションを1つ作る

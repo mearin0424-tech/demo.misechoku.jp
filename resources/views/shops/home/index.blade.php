@@ -4,15 +4,19 @@
 @section('body-class', 'no-scroll page-home')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260801-card-45">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260802-cssmode">
 @endpush
 
 @php
     $itemType = $itemType ?? 'cast';
     $isShop = ($itemType === 'shop');
     $isRecruit = ($itemType === 'recruit');
+    // 詳細ページ・トークルート・KEEP対象は「見ている側」で分岐。
+    //   - 求人カード(cast側)：見ている店舗=詳細先、KEEP対象=shop
+    //   - キャストカード(shop側)：見ているキャスト=詳細先、KEEP対象=cast
     $detailRoute = $isRecruit ? 'cast.shopprofile.show' : ($isShop ? 'cast.shopprofile.show' : 'shop.castprofileview.show');
-    $talkRoute = ($isRecruit || $isShop) ? 'cast.talk.room' : 'shop.talk.room';
+    $talkRoute   = ($isRecruit || $isShop) ? 'cast.talk.room' : 'shop.talk.room';
+    $keepItemType = $isRecruit ? 'shop' : ($isShop ? 'shop' : 'cast');
 @endphp
 @section('content')
 <div id="home-screen" data-discovery-mode="{{ $itemType }}">
@@ -20,81 +24,56 @@
     <div class="main-swiper swiper">
         <div class="swiper-wrapper">
             @foreach($items as $item)
-            <div
-                class="swiper-slide cast-card glass-card {{ $isRecruit ? 'cast-card--recruit' : '' }}"
-                @if($isRecruit)
-                data-detail-url="{{ route('cast.shopprofile.show', $item['id']) }}"
-                @endif
-            >
-                @php
-                    $images = $item['images'] ?? [];
-                    if (empty($images)) {
-                        $images = [asset('assets/images/common/no-image.png')];
-                    }
-                    $imageCount = count($images);
-                @endphp
+            {{-- ================================================================
+                 カード共通スケルトン（画像=上65% / 情報=下35%・両カード同じ構造）
+                 - スワイプ操作性を店舗ホームとキャストホームで揃えるため、
+                   写真スワイパーは常に上部65%に限定し、下部35%は縦スワイプ専用ゾーンに。
+                 - 表示項目・ボタンだけが役割によって切り替わる（$isRecruit / $isShop）
+                 ================================================================ --}}
+            @php
+                $locationLabel = trim((string) ($item['location_label'] ?? ''));
+                $isPassport    = ($item['location_mode'] ?? '') === 'passport';
+                $stationLine   = trim((string) ($item['nearest_station'] ?? ''));
+                $areaLine      = trim(($item['pref'] ?? '') . ' ' . ($item['city'] ?? ''));
+                $hasRating     = !empty($item['rating']) && $item['rating'] > 0;
+                $trialR        = $item['trial_hourly_range']  ?? null;
+                $helpR         = $item['help_hourly_range']   ?? null;
+                $bonusRg       = $item['signup_bonus_range']  ?? null;
+                $mo            = $item['manager_overlay']     ?? ['show' => false];
+            @endphp
+            <div class="swiper-slide cast-card glass-card {{ $isRecruit ? 'cast-card--recruit' : 'cast-card--profile' }}">
 
-                @if($isRecruit)
-                {{-- ============================================================ --}}
-                {{-- 求人カード（上部65%画像 / コンパクト情報 / タグなし） --}}
-                {{-- ============================================================ --}}
+                {{-- 1. 画像エリア（両カード共通・上部65%） --}}
+                <div class="rc-img-wrap home-photo-wrap" data-detail-url="{{ route($detailRoute, $item['id']) }}">
+                    @include('shops.home.partials._photo-swiper', [
+                        'images'    => $item['images'] ?? [],
+                        'altName'   => $item['name'],
+                        'isRecruit' => $isRecruit,
+                    ])
 
-                {{-- 1. 画像エリア（上部 65%） --}}
-                <div class="rc-img-wrap home-photo-wrap">
-                    <div class="photo-swiper swiper {{ $imageCount <= 1 ? 'photo-swiper--single' : '' }}">
-                        <div class="swiper-wrapper">
-                            @foreach($images as $index => $imgPath)
-                            <div class="swiper-slide">
-                                <img
-                                    src="{{ $imgPath }}"
-                                    alt="{{ $item['name'] }}"
-                                    class="home-photo"
-                                    loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
-                                >
-                            </div>
-                            @endforeach
-                        </div>
-                        @if($imageCount > 1)
-                        <div class="photo-pagination swiper-pagination stop-propagation"></div>
-                        @endif
-                    </div>
-                    @php $mo = $item['manager_overlay'] ?? ['show' => false]; @endphp
-                    @if(!empty($mo['show']))
-                    <div class="rc-manager-msg" aria-label="キャッチコピー">
-                        <div class="rc-manager-msg__backdrop">
-                            <div class="rc-manager-msg__inner">
-                                @if(!empty($mo['line1_html']))
-                                <p class="rc-manager-msg__line1">{!! $mo['line1_html'] !!}</p>
-                                @endif
+                    {{-- 求人カードのみ：店長からのメッセージ（画像上部オーバーレイ） --}}
+                    @if($isRecruit && !empty($mo['show']))
+                        <div class="rc-manager-msg" aria-label="キャッチコピー">
+                            <div class="rc-manager-msg__backdrop">
+                                <div class="rc-manager-msg__inner">
+                                    @if(!empty($mo['line1_html']))
+                                        <p class="rc-manager-msg__line1">{!! $mo['line1_html'] !!}</p>
+                                    @endif
+                                </div>
                             </div>
                         </div>
-                    </div>
                     @endif
-                    {{-- 画像下端を黒に溶け込ませるグラデーション --}}
+
+                    {{-- 画像下端を黒に溶かすグラデーション（両カード共通） --}}
                     <div class="rc-img-gradient" aria-hidden="true"></div>
                 </div>
 
-                {{-- 下部の縦スワイプ透過ゾーン：photo-swiper の外に置き、
-                     下半分のドラッグをメイン（縦）スワイパーへ直接届かせる --}}
-                <div class="rc-vswipe-zone" aria-hidden="true"></div>
-
-
-                {{-- 2. 下部スタック（4行構成）
-                     1行目: 店名 + KEEP（右端） / 2行目: 業種・最寄り駅・距離・評価 /
-                     3行目: 左=ボーナス金（大） 右=時給 / 4行目: トークCTA --}}
-                <div class="rc-bottom-bar" aria-label="店舗情報">
+                {{-- 2. 情報エリア（両カード共通・下部35%） --}}
+                <div class="rc-bottom-bar" aria-label="{{ $isRecruit ? '店舗情報' : 'プロフィール' }}">
                     <div class="rc-bottom-bar__stack">
-                        @php
-                            $trialR = $item['trial_hourly_range'] ?? null;
-                            $helpR  = $item['help_hourly_range'] ?? null;
-                            $bonusRg = $item['signup_bonus_range'] ?? null;
-                            $hasRating = !empty($item['rating']) && $item['rating'] > 0;
-                            $stationLine = trim((string) ($item['nearest_station'] ?? ''));
-                            $areaLine = trim(($item['pref'] ?? '') . ' ' . ($item['city'] ?? ''));
-                        @endphp
 
-                        {{-- 優良店バッヂ：店名の真上（タップで達成条件モーダル） --}}
-                        @if(!empty($item['is_premium']))
+                        {{-- 求人カードのみ：優良店バッヂ --}}
+                        @if($isRecruit && !empty($item['is_premium']))
                             <div class="rc-premium-row">
                                 <button type="button" class="premium-badge-btn stop-propagation" data-open-premium-info aria-haspopup="dialog" aria-controls="modal-premium-info" aria-label="優良店バッヂの達成条件">
                                     <x-ui.premium-badge />
@@ -102,173 +81,108 @@
                             </div>
                         @endif
 
-                        {{-- 1行目：店名 + KEEP（右端） --}}
+                        {{-- キャストカードのみ：Tier チップ（今すぐ入れる / オンライン中） --}}
+                        @if(!$isRecruit && !$isShop)
+                            @include('shops.home.partials._tier-chip', ['tierChipItem' => $item])
+                        @endif
+
+                        {{-- 1行目：名前 + KEEP（両カード共通） --}}
                         <div class="rc-name-row">
-                            <h2 class="rc-shop-name serif-font">{{ $item['name'] }}</h2>
-                            <button
-                                type="button"
-                                class="swipe-keep-corner swipe-keep-corner--inline stop-propagation {{ !empty($item['is_kept']) ? 'is-active' : '' }}"
-                                data-fav-toggle
-                                data-item-id="{{ $item['id'] }}"
-                                data-item-type="shop"
-                                data-action="keep"
-                                aria-label="キープ"
-                                aria-pressed="{{ !empty($item['is_kept']) ? 'true' : 'false' }}"
-                            >
-                                <i class="fas fa-bookmark" aria-hidden="true"></i>
-                            </button>
+                            <h2 class="rc-shop-name serif-font">{{ $item['name'] }}@if(!$isRecruit && !$isShop && isset($item['age']))<span class="age">({{ $item['age'] }})</span>@endif</h2>
+                            @include('shops.home.partials._keep-button', [
+                                'itemId'   => $item['id'],
+                                'itemType' => $keepItemType,
+                                'isKept'   => !empty($item['is_kept']),
+                            ])
                         </div>
 
-                        {{-- 2行目：業種 → 最寄り駅 → 距離 → 評価レビュー数（右端） --}}
+                        {{-- 2行目：メタ情報（表示内容だけ役割で分岐） --}}
                         <div class="rc-line rc-line--meta">
-                            @if(!empty($item['industry_name']))
-                                <span class="rc-genre">{{ $item['industry_name'] }}</span>
+                            @if($isRecruit)
+                                @if(!empty($item['industry_name']))
+                                    <span class="rc-genre">{{ $item['industry_name'] }}</span>
+                                @endif
+                                <span class="rc-loc">
+                                    <i class="fas {{ $stationLine !== '' ? 'fa-train' : 'fa-map-marker-alt' }}" aria-hidden="true"></i>{{ $stationLine !== '' ? $stationLine : ($areaLine !== '' ? $areaLine : 'エリア未設定') }}
+                                </span>
+                                @if(!empty($item['distance_label']))
+                                    <span class="rc-dist"><i class="fas fa-route" aria-hidden="true"></i>自分から {{ $item['distance_label'] }}</span>
+                                @endif
+                                @if($hasRating)
+                                    <span class="rc-rating-inline">
+                                        <span class="rc-star" aria-hidden="true">★</span>{{ number_format((float)$item['rating'], 1) }}@if((int)($item['review_count'] ?? 0) > 0)<span class="rc-review-cnt">({{ (int)$item['review_count'] }}件)</span>@endif
+                                    </span>
+                                @endif
+                            @else
+                                @if(!empty($item['industry_name']))
+                                    <span class="rc-genre">{{ $item['industry_name'] }}</span>
+                                @endif
+                                @if($locationLabel !== '')
+                                    <span class="rc-loc {{ $isPassport ? 'rc-loc--passport' : '' }}"
+                                          @if($isPassport) title="パスポートモード：本人が指定した位置" @endif>
+                                        <i class="fas {{ $isPassport ? 'fa-plane-departure' : 'fa-map-marker-alt' }}" aria-hidden="true"></i>{{ $locationLabel }}
+                                    </span>
+                                @endif
+                                @if(!$isShop && !empty($item['night_work_label']))
+                                    <span class="cc-exp {{ $item['night_work_label'] === '経験あり' ? 'is-exp' : '' }}">{{ $item['night_work_label'] }}</span>
+                                @endif
                             @endif
-                            <span class="rc-loc">
-                                <i class="fas {{ $stationLine !== '' ? 'fa-train' : 'fa-map-marker-alt' }}" aria-hidden="true"></i>{{ $stationLine !== '' ? $stationLine : ($areaLine !== '' ? $areaLine : 'エリア未設定') }}
-                            </span>
+                        </div>
+
+                        {{-- 3行目：役割別の補足情報 --}}
+                        @if($isRecruit)
+                            {{-- 求人カード：ボーナス金 + 体入・ヘルプ時給の一体スレート --}}
+                            <div class="pslate">
+                                <div class="pslate__bonus">
+                                    <span class="pslate__label">ボーナス金</span>
+                                    <span class="pslate__amount">
+                                        @if(!empty($bonusRg))<span class="pslate__yen">¥</span>{{ number_format((int)$bonusRg['lo']) }}@if((int)$bonusRg['hi'] > (int)$bonusRg['lo'])〜@endif
+                                        @else —
+                                        @endif
+                                    </span>
+                                </div>
+                                <span class="pslate__divider" aria-hidden="true"></span>
+                                <div class="pslate__wages">
+                                    <div class="pslate__wage">
+                                        <span class="pslate__label">体入時給</span>
+                                        <span class="pslate__wage-amount">@if(!empty($trialR))¥{{ number_format((int)$trialR['lo']) }}〜@else —@endif</span>
+                                    </div>
+                                    <div class="pslate__wage">
+                                        <span class="pslate__label">ヘルプ時給</span>
+                                        <span class="pslate__wage-amount">@if(!empty($helpR))¥{{ number_format((int)$helpR['lo']) }}〜@else —@endif</span>
+                                    </div>
+                                </div>
+                            </div>
+                        @else
+                            {{-- キャスト/店舗プロフィールカード：距離 + タグ --}}
                             @if(!empty($item['distance_label']))
-                                <span class="rc-dist"><i class="fas fa-route" aria-hidden="true"></i>自分から {{ $item['distance_label'] }}</span>
-                            @endif
-                            @if($hasRating)
-                                <span class="rc-rating-inline">
-                                    <span class="rc-star" aria-hidden="true">★</span>{{ number_format((float)$item['rating'], 1) }}@if((int)($item['review_count'] ?? 0) > 0)<span class="rc-review-cnt">({{ (int)$item['review_count'] }}件)</span>@endif
-                                </span>
-                            @endif
-                        </div>
-
-                        {{-- 4行目：Premium Slate（左=ボーナス金 / 右=体入・ヘルプ時給の横型一体スレート） --}}
-                        <div class="pslate">
-                            <div class="pslate__bonus">
-                                <span class="pslate__label">ボーナス金</span>
-                                <span class="pslate__amount">
-                                    @if(!empty($bonusRg))<span class="pslate__yen">¥</span>{{ number_format((int)$bonusRg['lo']) }}@if((int)$bonusRg['hi'] > (int)$bonusRg['lo'])〜@endif
-                                    @else —
-                                    @endif
-                                </span>
-                            </div>
-                            <span class="pslate__divider" aria-hidden="true"></span>
-                            <div class="pslate__wages">
-                                <div class="pslate__wage">
-                                    <span class="pslate__label">体入時給</span>
-                                    <span class="pslate__wage-amount">@if(!empty($trialR))¥{{ number_format((int)$trialR['lo']) }}〜@else —@endif</span>
+                                <div class="cc-line cc-line--dist">
+                                    <span class="rc-dist"><i class="fas fa-route" aria-hidden="true"></i>自分から {{ $item['distance_label'] }}</span>
                                 </div>
-                                <div class="pslate__wage">
-                                    <span class="pslate__label">ヘルプ時給</span>
-                                    <span class="pslate__wage-amount">@if(!empty($helpR))¥{{ number_format((int)$helpR['lo']) }}〜@else —@endif</span>
+                            @endif
+                            @if(!empty($item['tags']))
+                                <div class="card-tags-row">
+                                    @foreach($item['tags'] as $tag)
+                                        <span class="tag-pill">#{{ $tag }}</span>
+                                    @endforeach
                                 </div>
-                            </div>
-                        </div>
+                            @endif
+                        @endif
 
-                        {{-- 5行目：トーク全幅CTA（採用フローの起点として最強調） --}}
-                        <a href="{{ route($talkRoute, ['id' => $item['id'], 'talk_topic' => 'other', 'initiate' => 1]) }}"
-                           class="swipe-talk-cta stop-propagation"
-                           aria-label="トークを開始する">
-                            <i class="fas fa-comment-dots" aria-hidden="true"></i> トークする
-                        </a>
+                        {{-- 4行目：トークCTA（両カード共通・採用フローの起点として最強調） --}}
+                        @include('shops.home.partials._talk-cta', [
+                            'talkRoute' => $talkRoute,
+                            'itemId'    => $item['id'],
+                        ])
                     </div>
                 </div>
 
-                {{-- 4. スワイプ誘導ガイド（上向きキャレット・常時バウンス） --}}
+                {{-- 3. スワイプ誘導ガイド（両カード共通） --}}
                 <div class="discovery-swipe-guide" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="18 15 12 9 6 15"/>
                     </svg>
                 </div>
-
-                @else
-                {{-- ============================================================ --}}
-                {{-- キャスト・店舗カード（既存レイアウト）                         --}}
-                {{-- ============================================================ --}}
-
-                {{-- メイン写真 --}}
-                <div class="home-photo-wrap" data-detail-url="{{ route($detailRoute, $item['id']) }}">
-                    <div class="photo-swiper swiper">
-                        <div class="swiper-wrapper">
-                            @foreach($images as $index => $imgPath)
-                                <div class="swiper-slide">
-                                    <img
-                                        src="{{ $imgPath }}"
-                                        alt="{{ $item['name'] }}の写真{{ $imageCount > 1 ? '（' . ($index + 1) . '枚目）' : '' }}"
-                                        class="home-photo"
-                                        loading="lazy"
-                                    >
-                                </div>
-                            @endforeach
-                        </div>
-                        <div class="photo-pagination swiper-pagination stop-propagation"></div>
-                    </div>
-                </div>
-
-                {{-- プロフィール情報（3行構成）
-                     1行目: 名前(年齢) + KEEP（右端） / 2行目: 希望業種・位置情報・経験有無 /
-                     3行目: 距離（設定時のみ）+ タグ --}}
-                <div class="card-bottom-info">
-                    {{-- 1行目：名前（年齢はかっこ） + KEEP --}}
-                    <div class="cast-name-row">
-                        <h2 class="cast-name serif-font">{{ $item['name'] }}@if(!$isShop && isset($item['age']))<span class="age">({{ $item['age'] }})</span>@endif</h2>
-                        <button
-                            type="button"
-                            class="swipe-keep-corner swipe-keep-corner--inline stop-propagation {{ !empty($item['is_kept']) ? 'is-active' : '' }}"
-                            data-fav-toggle
-                            data-item-id="{{ $item['id'] }}"
-                            data-item-type="{{ $itemType === 'recruit' ? 'shop' : 'cast' }}"
-                            data-action="keep"
-                            aria-label="キープ"
-                            aria-pressed="{{ !empty($item['is_kept']) ? 'true' : 'false' }}"
-                        >
-                            <i class="fas fa-bookmark" aria-hidden="true"></i>
-                        </button>
-                    </div>
-
-                    {{-- 2行目：希望業種 → 位置情報（パスポート時は設定位置、通常は登録住所）→ 経験有無 --}}
-                    @php
-                        $locationLabel = trim((string) ($item['location_label'] ?? ''));
-                        $isPassport = ($item['location_mode'] ?? '') === 'passport';
-                    @endphp
-                    <div class="cc-line cc-line--job">
-                        @if(!empty($item['industry_name']))
-                            <span class="cc-genre">{{ $item['industry_name'] }}</span>
-                        @endif
-                        @if($locationLabel !== '')
-                            <span class="rc-loc {{ $isPassport ? 'rc-loc--passport' : '' }}"
-                                  @if($isPassport) title="パスポートモード：本人が指定した位置" @endif>
-                                <i class="fas {{ $isPassport ? 'fa-plane-departure' : 'fa-map-marker-alt' }}" aria-hidden="true"></i>{{ $locationLabel }}
-                            </span>
-                        @endif
-                        @if(!$isShop && !empty($item['night_work_label']))
-                            <span class="cc-exp {{ $item['night_work_label'] === '経験あり' ? 'is-exp' : '' }}">{{ $item['night_work_label'] }}</span>
-                        @endif
-                    </div>
-
-                    {{-- 3行目：距離（探索拠点が設定されているときのみ） --}}
-                    @if(!empty($item['distance_label']))
-                    <div class="cc-line cc-line--dist">
-                        <span class="rc-dist"><i class="fas fa-route" aria-hidden="true"></i>自分から {{ $item['distance_label'] }}</span>
-                    </div>
-                    @endif
-
-                    {{-- タグ --}}
-                    <div class="card-tags-row">
-                        @foreach($item['tags'] ?? [] as $tag)
-                            <span class="tag-pill">#{{ $tag }}</span>
-                        @endforeach
-                    </div>
-
-                    {{-- 5行目：トーク全幅CTA --}}
-                    <a href="{{ route($talkRoute, ['id' => $item['id'], 'talk_topic' => 'other', 'initiate' => 1]) }}"
-                       class="swipe-talk-cta stop-propagation"
-                       aria-label="トークを開始する">
-                        <i class="fas fa-comment-dots" aria-hidden="true"></i> トークする
-                    </a>
-                </div>
-                <div class="discovery-swipe-guide" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="18 15 12 9 6 15"/>
-                    </svg>
-                </div>
-
-                @endif
             </div>
             @endforeach
         </div>
@@ -378,7 +292,7 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/home.js') }}?v=20260801-swipe-no-skip"></script>
+<script src="{{ asset('assets/js/home.js') }}?v=20260802-cssmode"></script>
 {{-- LIKE / KEEP の共通トグル（全画面この1本に統一） --}}
 <script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260720-keep-confirm"></script>
 @endpush

@@ -42,57 +42,49 @@ document.addEventListener('DOMContentLoaded', function() {
         refreshCardContent(card, mode || 'card');
     }
 
-    // メインの上下スワイプ（モダン・操作性重視）
-    // ------------------------------------------------------------------
-    // 2枚以上とばない設計（2026-08-01 修正）:
-    //   1. slidesPerGroup: 1 を明示（Swiper 既定は 1 だが安全策として固定）
-    //   2. preventInteractionOnTransition: true（アニメ中の新規タッチを無効化）
-    //   3. mousewheel.thresholdTime: 500ms でトラックパッド慣性を抑制
-    //   4. transitionStart で allowTouchMove を false に、End で true に戻す
-    //      （preventInteractionOnTransition が効かない環境向けの二重ガード）
-    //   5. longSwipesRatio を 0.25→0.35 / longSwipesMs 260→400 に緩和して
-    //      「振り抜くまで確定しない」感を与える
-    // ------------------------------------------------------------------
+    // ================================================================
+    // メインの上下スワイプ：cssMode で iOS/Android のネイティブ慣性に乗せる
+    // (2026-08-02 rev.2 - 最大ぬるぬる化)
+    // ----------------------------------------------------------------
+    // 【今回の要】cssMode: true
+    //   Swiper 8+ が持つ「CSS Scroll Snap ベース」の動作モード。
+    //   .swiper-wrapper を native スクロール container にして、
+    //   スワイプ・慣性・スナップを全て browser 側に委譲する。
+    //   → JS の requestAnimationFrame ループ / touch handler / speed 補間が
+    //     全て bypass されるため、モバイル GPU が持つ 60fps 以上の native scroll に
+    //     直接乗る。iOS Safari では 120Hz ProMotion にも自動追従。
+    //
+    // cssMode で無効化される Swiper option（→ 影響なし）:
+    //   resistance / resistanceRatio / followFinger / longSwipes*/ shortSwipes /
+    //   touchAngle / threshold / touchRatio / speed（native scroll 速度が使われる）
+    //
+    // 引き続き使えるもの: loop / direction / slidesPerView / mousewheel / keyboard /
+    //   on.init / on.slideChange
+    //
+    // 【注意】cssMode + nested Swiper（写真の横スワイパー）は独立して動く。
+    //   ・写真スワイパーは JS のまま（cssMode は入れ子で不安定なため）
+    //   ・写真領域の touch-action: pan-x が縦スワイプを親に通すガードになる
+    // ================================================================
     const mainSwiper = new Swiper('.main-swiper', {
         direction: 'vertical',
         slidesPerView: 1,
-        slidesPerGroup: 1,  // 1回のジェスチャで必ず 1 スライドだけ移動
+        slidesPerGroup: 1,
         centeredSlides: true,
-        // DISCOVERY 仕様：シームレスな無限ループ（末尾→先頭、先頭→末尾）
         loop: slideCount >= 2,
         rewind: false,
-        // 340ms + CSS 側で cubic-bezier(0.22, 0.8, 0.34, 1) の easing
-        speed: 340,
-        // トランジション中は新しい touch/click を弾く（Swiper 8+）
-        preventInteractionOnTransition: true,
+
+        // ★★ 最強設定：ネイティブ CSS Scroll Snap へ委譲 ★★
+        cssMode: true,
+
         mousewheel: {
             enabled: true,
             sensitivity: 0.5,
-            // 24 → 40：トラックパッドの細かい delta を1つずつ拾わない
             thresholdDelta: 40,
-            // 500ms 間は同方向の追加 wheel イベントを無視（Swiper の慣性ガード）
             thresholdTime: 500,
             forceToAxis: true,
             releaseOnEdges: true,
         },
-        touchRatio: 1,
-        // タップ〜微動での誤反応対策：明確に引っ張った時のみスライド
-        touchAngle: 26,
-        threshold: 22,
-        shortSwipes: false,
-        longSwipes: true,
-        // 0.25 → 0.35：3割以上ドラッグしないと確定させない（誤操作抑制）
-        longSwipesRatio: 0.35,
-        // 260 → 400：フリックのタイムウィンドウを広げてワンアクション感を出す
-        longSwipesMs: 400,
-        followFinger: true,
-        resistance: true,
-        // 0.5 → 0.72：端でのゴム感を強化（Photo swiper と統一）
-        resistanceRatio: 0.72,
-        touchStartPreventDefault: false,
         grabCursor: true,
-        preventClicks: true,
-        preventClicksPropagation: true,
         keyboard: {
             enabled: true,
             onlyInViewport: true
@@ -105,19 +97,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 var self = this;
                 requestAnimationFrame(function () {
                     self.update();
-                    // 初回表示でも文字がフワッと立ち上がるように
+                    // 初回のみ本文フワッ演出（連続時は演出せず遷移だけに集中）
                     refreshActiveCard(self, 'card');
                 });
-            },
-            // トランジション開始でタッチを封鎖、終了で解禁（二重ガード）
-            slideChangeTransitionStart: function () {
-                this.allowTouchMove = false;
-            },
-            slideChangeTransitionEnd: function () {
-                refreshActiveCard(this, 'card');
-                // 完了後にわずかな余韻を置いてから解禁（連続フリックの防止）
-                var self = this;
-                setTimeout(function () { self.allowTouchMove = true; }, 60);
             }
         }
     });
@@ -176,6 +158,13 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // 写真スワイパー（横）：nested のため cssMode は使わず、JS モードで最軽量チューニング
+        // 主要チューニング (2026-08-02 rev.2):
+        //   - speed 260→220：さらに snap を詰めて即応
+        //   - threshold 6→4：指を置いた瞬間の追従感を最大化
+        //   - resistanceRatio 0.5→0.35：端でのゴム感を軽く（速い連続フリック時の詰まり回避）
+        //   - spaceBetween 8→0：スライド間の隙間を消し、native cover の transform 計算を単純化
+        //   - longSwipesRatio 0.20→0.15：少しの動きでも進めて写真切替を軽快に
         const options = {
             direction: 'horizontal',
             slidesPerView: 1,
@@ -186,27 +175,16 @@ document.addEventListener('DOMContentLoaded', function() {
             allowTouchMove: true,
             touchStartPreventDefault: false,
             touchReleaseOnEdges: true,
-            // より水平に近いジェスチャーのみ横スワイプ扱いにし、斜め〜縦は親（上下スワイプ）へ譲る
-            // 水平ジェスチャー判定：厳しすぎると横スワイプに気付かない
-            touchAngle: 20,
-            threshold: 10,
-            // ぬるぬる感：スナップは長めに、途中で切替させない
-            speed: 380,
-            // creative は撤回：標準 slide + spaceBetween + CSS filter で軽量に奥行き感を出す
+            touchAngle: 22,
+            threshold: 4,
+            speed: 220,
             effect: 'slide',
-            spaceBetween: 8,
             resistance: true,
-            // 端の抵抗を強めてゴム感を出す（半分より少し重い）
-            resistanceRatio: 0.72,
+            resistanceRatio: 0.35,
             longSwipes: true,
-            // 「最後までスワイプしないと切り替わらない」ぬるぬる感：
-            //   0.20 → 0.55（半分より少し先まで指を運ばないと commit しない）
-            longSwipesRatio: 0.55,
-            // 早すぎるフリックで即座に切り替わらないよう猶予を延ばす
-            longSwipesMs: 400,
-            // shortSwipes（速度ベースの即時切替）は完全に無効化
-            shortSwipes: false,
-            // フォロー中の指離しで、指位置に対して滑らかに戻る／進む
+            longSwipesRatio: 0.15,
+            longSwipesMs: 240,
+            shortSwipes: true,
             followFinger: true,
             watchOverflow: false,
             preventClicks: true,
@@ -224,19 +202,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 touchMove: function () {
                     isPhotoSwiping = true;
                 },
-                slideChange: function () {
-                    // 写真切替で本文をフワッと再表示
-                    var card = el.closest('.cast-card');
-                    refreshCardContent(card, 'photo');
-                },
-                transitionEnd: function () {
-                    setTimeout(releasePhotoSwipeLock, 80);
-                },
                 touchEnd: function () {
-                    setTimeout(releasePhotoSwipeLock, 80);
+                    releasePhotoSwipeLock();
                 },
                 touchCancel: function () {
-                    setTimeout(releasePhotoSwipeLock, 80);
+                    releasePhotoSwipeLock();
                 }
             }
         };

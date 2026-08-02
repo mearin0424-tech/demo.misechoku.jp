@@ -39,8 +39,8 @@
                 $isApproved    = $status === 'approved';
                 $isPending     = $status === 'pending';
                 $isRejected    = $status === 'rejected';
-                // 承認済み以外は初期展開
-                $defaultOpen   = !$isApproved;
+                // 全書類（営業許可証・風営許可証）を初期展開
+                $defaultOpen   = true;
                 $accordionId   = 'license-acc-' . $doc['key'];
 
                 // 承認済み or 審査中（取り下げ可能）→ withdraw UI
@@ -204,6 +204,11 @@
                                     {{-- 選択した画像のプレビュー（PDF はファイル名表示のみ） --}}
                                     <img class="license-accordion__preview" data-license-preview alt="選択ファイルのプレビュー" hidden>
                                 </div>
+                                {{-- ↓ アップロード完了バナー（ファイル選択→自動アップロード成功後に表示） --}}
+                                <p class="license-accordion__upload-status" data-license-upload-status hidden>
+                                    <i class="fas fa-cloud-check" aria-hidden="true"></i>
+                                    <span data-license-upload-status-text>アップロード完了。下の「運営に提出する」ボタンで審査依頼できます。</span>
+                                </p>
                             </div>
 
                             <div class="license-accordion__field">
@@ -227,11 +232,18 @@
                                 @endif
                             </div>
 
+                            {{-- 提出ボタン: アップロード完了 & 期限入力済み で押せる。
+                                 押下時は request-review のみ実行（アップロードはファイル選択時に完了済み） --}}
                             <button type="submit"
                                     class="license-accordion__btn license-accordion__btn--primary license-accordion__btn--full"
-                                    data-license-submit>
-                                <i class="fas fa-paper-plane"></i> この内容で提出する
+                                    data-license-submit
+                                    disabled>
+                                <i class="fas fa-paper-plane"></i> 運営に提出する
                             </button>
+                            <p class="license-accordion__submit-hint" data-license-submit-hint>
+                                <i class="fas fa-info-circle" aria-hidden="true"></i>
+                                ファイル選択後、明示的に「運営に提出する」ボタンを押すまで審査は始まりません。
+                            </p>
                             <p class="license-accordion__submit-feedback" data-license-submit-feedback hidden></p>
 
                             {{-- 例外ケースへの相談窓口（枠2のみ） --}}
@@ -248,6 +260,19 @@
                 </div>
             </article>
         @endforeach
+    </div>
+
+    {{-- 提出完了モーダル（両カード共通・提出成功時に表示） --}}
+    <div class="license-submitted-modal" data-license-submitted-modal hidden role="dialog" aria-modal="true" aria-labelledby="license-submitted-title">
+        <div class="license-submitted-modal__overlay" data-license-submitted-close></div>
+        <div class="license-submitted-modal__panel">
+            <span class="license-submitted-modal__icon" aria-hidden="true"><i class="fas fa-paper-plane"></i></span>
+            <h3 id="license-submitted-title" class="license-submitted-modal__title">運営に提出しました</h3>
+            <p class="license-submitted-modal__text">運営による承認をお待ちください（通常 1〜2 営業日）。承認完了後、求人票の公開などが可能になります。</p>
+            <button type="button" class="license-accordion__btn license-accordion__btn--primary license-accordion__btn--full" data-license-submitted-close>
+                <i class="fas fa-check"></i> OK
+            </button>
+        </div>
     </div>
 
     {{-- 取り下げ確認モーダル（共通） --}}
@@ -680,6 +705,92 @@
 .license-withdraw-modal__title i { color: var(--color-danger); }
 .license-withdraw-modal__text { margin: 0 0 14px; font-size: 0.84rem; line-height: 1.7; color: var(--color-text); }
 .license-withdraw-modal__actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* ===== アップロード完了バナー (2段階フロー) ===== */
+.license-accordion__upload-status {
+    margin: 10px 0 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(16, 185, 129, 0.10);
+    color: #047857;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    font-size: 0.82rem;
+    line-height: 1.55;
+    display: flex; align-items: flex-start; gap: 6px;
+}
+.license-accordion__upload-status[hidden] { display: none; }
+.license-accordion__upload-status i { margin-top: 2px; }
+.license-accordion__upload-status.is-uploading {
+    background: rgba(124, 58, 237, 0.08);
+    color: var(--doc-accent, #7c3aed);
+    border-color: rgba(124, 58, 237, 0.32);
+}
+.license-accordion__upload-status.is-error {
+    background: rgba(220, 38, 38, 0.06);
+    color: #b91c1c;
+    border-color: rgba(220, 38, 38, 0.32);
+}
+
+/* 提出ボタン下の説明ヒント */
+.license-accordion__submit-hint {
+    margin: 6px 0 0;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: rgba(180, 83, 9, 0.06);
+    color: #b45309;
+    border: 1px solid rgba(180, 83, 9, 0.22);
+    font-size: 0.74rem;
+    line-height: 1.5;
+    display: flex; align-items: flex-start; gap: 6px;
+}
+.license-accordion__submit-hint[hidden] { display: none; }
+.license-accordion__submit-hint i { margin-top: 2px; color: #b45309; }
+
+/* ===== 提出完了モーダル ===== */
+.license-submitted-modal {
+    position: fixed; inset: 0; z-index: 2600;
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 24px 16px;
+}
+.license-submitted-modal:not([hidden]) { display: flex; }
+.license-submitted-modal__overlay {
+    position: absolute; inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+}
+.license-submitted-modal__panel {
+    position: relative;
+    width: min(420px, 100%);
+    background: linear-gradient(180deg, #ffffff, #faf7ff);
+    border: 1px solid rgba(124, 58, 237, 0.28);
+    border-radius: 18px;
+    padding: 24px 20px 20px;
+    text-align: center;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+}
+.license-submitted-modal__icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 56px; height: 56px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.15);
+    color: #059669;
+    font-size: 1.5rem;
+}
+.license-submitted-modal__title {
+    margin: 0 0 10px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #1e1a30;
+    letter-spacing: -0.005em;
+}
+.license-submitted-modal__text {
+    margin: 0 0 18px;
+    font-size: 0.84rem;
+    color: #4a4560;
+    line-height: 1.65;
+}
 </style>
 @endpush
 
@@ -705,7 +816,26 @@
         });
     });
 
-    // ===== アップロードフォーム =====
+    // ===== 提出完了モーダル =====
+    var submittedModal = root.querySelector('[data-license-submitted-modal]');
+    function openSubmittedModal() {
+        if (!submittedModal) return;
+        submittedModal.hidden = false;
+        document.body.style.overflow = 'hidden';
+    }
+    function closeSubmittedModalAndReload() {
+        if (!submittedModal) return;
+        submittedModal.hidden = true;
+        document.body.style.overflow = '';
+        window.location.reload();
+    }
+    if (submittedModal) {
+        submittedModal.querySelectorAll('[data-license-submitted-close]').forEach(function (el) {
+            el.addEventListener('click', closeSubmittedModalAndReload);
+        });
+    }
+
+    // ===== アップロードフォーム（2段階フロー: ファイル選択で即アップロード, 提出ボタンで審査依頼） =====
     root.querySelectorAll('[data-license-upload-form]').forEach(function (form) {
         var dropzone = form.querySelector('[data-license-dropzone]');
         var fileInput = form.querySelector('[data-license-file-input]');
@@ -713,6 +843,9 @@
         var fileNameEl = form.querySelector('[data-license-file-name]');
         var submitBtn = form.querySelector('[data-license-submit]');
         var feedback = form.querySelector('[data-license-submit-feedback]');
+        var uploadStatus = form.querySelector('[data-license-upload-status]');
+        var uploadStatusText = form.querySelector('[data-license-upload-status-text]');
+        var submitHint = form.querySelector('[data-license-submit-hint]');
         var acc = form.closest('[data-license-accordion]');
         var expiryRequired = acc && acc.getAttribute('data-expiry-required') === '1';
         var expiryInput = form.querySelector('input[name="expired_at"]');
@@ -720,6 +853,24 @@
         var reviewUrl = form.getAttribute('data-review-url');
         var docKey = form.getAttribute('data-doc-key');
 
+        // 状態フラグ: サーバに draft として保存済みか
+        //   ページ読み込み時に既存 [data-license-current-file] があれば「前回 draft 済み」扱い
+        var isUploaded = !!form.querySelector('[data-license-current-file]');
+
+        function setUploadStatus(state, message) {
+            if (!uploadStatus) return;
+            uploadStatus.classList.remove('is-uploading', 'is-error');
+            if (!state) { uploadStatus.hidden = true; return; }
+            uploadStatus.hidden = false;
+            if (state !== 'success') uploadStatus.classList.add('is-' + state);
+            if (uploadStatusText) uploadStatusText.textContent = message || '';
+            var icon = uploadStatus.querySelector('i');
+            if (icon) {
+                icon.className = state === 'uploading' ? 'fas fa-spinner fa-spin'
+                    : state === 'error' ? 'fas fa-triangle-exclamation'
+                    : 'fas fa-circle-check';
+            }
+        }
         function setFeedback(state, message) {
             if (!feedback) return;
             if (!state) { feedback.hidden = true; feedback.className = 'license-accordion__submit-feedback'; feedback.textContent = ''; return; }
@@ -751,24 +902,52 @@
                 }
             }
         }
-        function isValid() {
-            var hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
-            // 前回アップロード済みファイルがある場合（form内に data-license-current-file がある）はファイル未選択でも再提出可能
-            var hasPrev = !!form.querySelector('[data-license-current-file]');
-            if (!hasFile && !hasPrev) return false;
-            if (expiryRequired) {
-                if (!expiryInput || !expiryInput.value) return false;
-            }
+        function isValidForReview() {
+            if (!isUploaded) return false;
+            if (expiryRequired && (!expiryInput || !expiryInput.value)) return false;
             return true;
         }
         function syncSubmitDisabled() {
             if (!submitBtn) return;
-            submitBtn.disabled = !isValid();
+            submitBtn.disabled = !isValidForReview();
+        }
+
+        // ---- 即時アップロード（ファイル選択 or ドロップ完了時） ----
+        function autoUploadIfNeeded() {
+            var file = fileInput && fileInput.files && fileInput.files[0];
+            if (!file) return;
+            setFeedback(null);
+            setUploadStatus('uploading', 'アップロードしています…');
+            if (submitBtn) submitBtn.disabled = true;
+
+            var fd = new FormData();
+            fd.append('_token', csrfToken);
+            fd.append('type', docKey);
+            fd.append('file', file);
+            if (expiryInput && expiryInput.value) fd.append('expired_at', expiryInput.value);
+
+            fetch(uploadUrl, {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+                body: fd,
+            })
+            .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw j; return j; }); })
+            .then(function () {
+                isUploaded = true;
+                setUploadStatus('success', 'アップロード完了。下の「運営に提出する」ボタンで審査依頼できます。');
+                syncSubmitDisabled();
+            })
+            .catch(function (err) {
+                isUploaded = false;
+                var msgs = err && err.errors ? Object.values(err.errors).flat() : [];
+                setUploadStatus('error', msgs[0] || (err && err.message) || 'アップロードに失敗しました。ファイルを選び直してください。');
+                syncSubmitDisabled();
+            });
         }
 
         if (pickBtn) pickBtn.addEventListener('click', function () { fileInput && fileInput.click(); });
         if (fileInput) {
-            fileInput.addEventListener('change', function () { updateFileName(); syncSubmitDisabled(); });
+            fileInput.addEventListener('change', function () { updateFileName(); autoUploadIfNeeded(); });
         }
         if (expiryInput) {
             expiryInput.addEventListener('input', syncSubmitDisabled);
@@ -787,64 +966,48 @@
                 if (!e.dataTransfer || !e.dataTransfer.files || !e.dataTransfer.files.length) return;
                 fileInput.files = e.dataTransfer.files;
                 updateFileName();
-                syncSubmitDisabled();
+                autoUploadIfNeeded();
             });
         }
+        // 初期状態：前回 draft があれば有効期限入力でボタン活性化、なければアップロード待ち
         syncSubmitDisabled();
+        if (isUploaded) {
+            setUploadStatus('success', '前回アップロード済み。ファイルを差し替える場合は選び直してください。');
+        }
 
-        // Submit: 1) upload (file as draft) 2) request-review (set pending)
+        // ---- 提出（request-review のみ実行） ----
         form.addEventListener('submit', function (e) {
             e.preventDefault();
-            if (!isValid()) {
-                setFeedback('error', expiryRequired && expiryInput && !expiryInput.value
-                    ? '有効期限を入力してください。'
-                    : 'ファイルを選択してください。');
+            if (!isValidForReview()) {
+                setFeedback('error', !isUploaded
+                    ? 'まずファイルをアップロードしてください。'
+                    : '有効期限を入力してください。');
                 return;
             }
             if (submitBtn) submitBtn.disabled = true;
             setFeedback(null);
 
-            var file = fileInput && fileInput.files && fileInput.files[0];
-            var expiredAt = expiryInput ? expiryInput.value : '';
-            var chain = Promise.resolve();
+            var body = { type: docKey };
+            if (expiryInput && expiryInput.value) body.expired_at = expiryInput.value;
 
-            if (file) {
-                var fd = new FormData();
-                fd.append('_token', csrfToken);
-                fd.append('type', docKey);
-                fd.append('file', file);
-                if (expiredAt) fd.append('expired_at', expiredAt);
-                chain = chain.then(function () {
-                    return fetch(uploadUrl, {
-                        method: 'POST',
-                        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
-                        body: fd,
-                    }).then(function (r) {
-                        return r.json().then(function (json) { if (!r.ok) throw json; return json; });
-                    });
-                });
-            }
-
-            chain.then(function () {
-                var body = { type: docKey };
-                if (expiredAt) body.expired_at = expiredAt;
-                return fetch(reviewUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                    body: JSON.stringify(body),
-                }).then(function (r) {
-                    return r.json().then(function (json) { if (!r.ok) throw json; return json; });
-                });
-            }).then(function () {
-                window.location.reload();
-            }).catch(function (err) {
+            fetch(reviewUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: JSON.stringify(body),
+            })
+            .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw j; return j; }); })
+            .then(function () {
+                if (submitHint) submitHint.hidden = true;
+                openSubmittedModal();
+            })
+            .catch(function (err) {
                 var msgs = err && err.errors ? Object.values(err.errors).flat() : [];
-                setFeedback('error', msgs[0] || (err && err.message) || '処理に失敗しました。');
+                setFeedback('error', msgs[0] || (err && err.message) || '提出に失敗しました。');
                 if (submitBtn) submitBtn.disabled = false;
             });
         });
