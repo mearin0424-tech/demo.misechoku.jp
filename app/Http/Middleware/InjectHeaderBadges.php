@@ -44,6 +44,8 @@ class InjectHeaderBadges
      * UserTaskService の task key に対応するアイコン/色マッピング。
      */
     private const TASK_CATEGORIES = [
+        'cast.email_unverified'          => ['icon' => 'fa-envelope',     'label' => 'メール認証'],
+        'shop.email_unverified'          => ['icon' => 'fa-envelope',     'label' => 'メール認証'],
         'cast.identity_unsubmitted'      => ['icon' => 'fa-id-card',      'label' => '本人確認'],
         'cast.identity_rejected'         => ['icon' => 'fa-id-card',      'label' => '本人確認'],
         'cast.identity_pending'          => ['icon' => 'fa-id-card',      'label' => '本人確認'],
@@ -127,9 +129,6 @@ class InjectHeaderBadges
         // 24 時間以内の面談確定案件があれば返す。app-v2 レイアウトが banner を出す。
         $upcomingInterviews = $this->loadUpcomingInterviews($userType, $userId);
 
-        // メール未認証の判定（casts / shop_managers.email_verified_at が NULL）
-        $emailUnverified = $this->isEmailUnverified($userType, $userId);
-
         View::share([
             'todoList'           => $todoList,
             'taskGroups'         => $taskGroups,
@@ -139,24 +138,9 @@ class InjectHeaderBadges
             'operationalNotices' => $operationalNotices,
             'unreadNewsCount'    => $unreadPersonal,
             'upcomingInterviews' => $upcomingInterviews,
-            'emailUnverified'    => $emailUnverified,
         ]);
 
         return $next($request);
-    }
-
-    /**
-     * メール未認証かどうか（未ログインなら false）。
-     * カラムが存在しない古いスキーマでは false を返す（バナーを出さない）。
-     */
-    private function isEmailUnverified(?string $userType, ?string $userId): bool
-    {
-        if (!$userType || !$userId) return false;
-        $table = $userType === 'cast' ? 'casts' : 'shop_managers';
-        if (!\Illuminate\Support\Facades\Schema::hasColumn($table, 'email_verified_at')) return false;
-
-        $verifiedAt = \Illuminate\Support\Facades\DB::table($table)->where('id', $userId)->value('email_verified_at');
-        return empty($verifiedAt);
     }
 
     /**

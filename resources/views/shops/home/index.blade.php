@@ -1,6 +1,6 @@
 @extends('layouts.app-v2')
 
-@section('title', 'DISCOVERY')
+@section('title', 'SWIPE')
 @section('body-class', 'no-scroll page-home')
 
 @push('styles')
@@ -279,7 +279,7 @@
     <div class="home-onboarding-overlay" id="home-swipe-onboarding" aria-hidden="true">
         <div class="home-onboarding-inner">
             <div class="home-onboarding-header">
-                <span class="home-onboarding-kicker">DISCOVERY GUIDE</span>
+                <span class="home-onboarding-kicker">SWIPE GUIDE</span>
                 <h2 class="home-onboarding-title">スワイプで直感的にチェック</h2>
                 <p class="home-onboarding-lead">まずはホームの操作だけ覚えればOKです。</p>
             </div>

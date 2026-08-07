@@ -243,7 +243,7 @@
            レイアウト崩れ修正バッチ
            ============================================================ */
 
-        /* Fix 4: 本人確認 _identity_form のカスタムファイル入力 */
+        /* Generic accessibility helper (still referenced across the app) */
         .visually-hidden {
             position: absolute !important;
             width: 1px !important;
@@ -252,35 +252,6 @@
             clip: rect(0,0,0,0) !important;
             white-space: nowrap !important;
         }
-        .file-upload-btn {
-            display: inline-flex !important;
-            align-items: center !important;
-            gap: 6px !important;
-            padding: 8px 16px !important;
-            background: linear-gradient(135deg, var(--color-accent-grad-from, #c4b5fd), var(--color-accent-grad-to, #7c3aed)) !important;
-            color: #fff !important;
-            border-radius: 999px !important;
-            cursor: pointer !important;
-            font-size: 0.875rem !important;
-            font-weight: 700 !important;
-            box-shadow: var(--shadow-btn-3d) !important;
-        }
-        .file-upload-btn:active { transform: translateY(1px); }
-        .file-name-display {
-            display: block !important;
-            font-size: 0.78rem !important;
-            color: var(--color-text-sub) !important;
-            margin-top: 6px !important;
-            word-break: break-all !important;
-        }
-
-        /* Fix 1 + 2: SEARCH 画面の上余白
-           タブあり（cast）は .tab-page-body の margin-top で sub-header を回避済み。
-           タブなし（shop）はサブヘッダーが無く、main の padding-top で global-header を回避済み。
-           → 二重余白を防ぐため、ここでの padding-top 強制は撤去 */
-
-        /* .metric-input-wrap / .bwh-field は app.css §数字入力コンポーネント
-           に統一済み（2026-08-01 リニューアル）。旧 layout hack はここで撤去。 */
 
         /* Fix 5: /cast/talk の店舗名が 2 行に折り返すのを 1 行省略へ */
         .talk-name {
@@ -315,86 +286,6 @@
             white-space: nowrap !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
-        }
-
-        /* --- SWIPE カード上のテキスト：ひとまわり小さく + もう少し画面下へ寄せる --- */
-        .card-bottom-info {
-            padding-bottom: 12px !important;   /* 旧 24px → 12px に縮めて画面下へ */
-            padding-top: 48px !important;      /* 上方のグラデ領域を少し短く */
-            min-height: 96px !important;       /* 旧 120px → 96px */
-        }
-        .cast-card:not(.cast-card--recruit) .card-bottom-info {
-            padding-top: 44px !important;
-            min-height: 90px !important;
-        }
-        .cast-name {
-            font-size: clamp(1.05rem, 4.4vw, 1.45rem) !important;
-            margin-bottom: 1px !important;
-        }
-        .cast-name .age { font-size: 0.92em !important; }
-        .card-shop-name-main {
-            font-size: clamp(0.92rem, 3.4vw, 1.2rem) !important;
-            margin: 0 0 3px !important;
-        }
-        .card-shop-name-sub {
-            font-size: clamp(0.68rem, 2.2vw, 0.78rem) !important;
-        }
-        .card-location {
-            font-size: clamp(0.74rem, 2.6vw, 0.85rem) !important;
-            margin-bottom: 6px !important;
-        }
-        .card-recruit-bonus-line {
-            font-size: clamp(0.82rem, 3vw, 0.98rem) !important;
-        }
-        .card-shop-meta { margin-bottom: 7px !important; }
-        .card-rating-cnt { font-size: clamp(0.54rem, 1.6vw, 0.62rem) !important; }
-        @media (max-width: 480px) {
-            .card-bottom-info {
-                padding-bottom: 8px !important;
-                padding-top: 40px !important;
-                min-height: 82px !important;
-            }
-        }
-
-        /* --- SWIPE カード右側のアクションボタン群を小さく
-              旧 home.css は 56px（PC）/ 52px（タブ）/ 48px（モバイル）。これを全体的に縮める --- */
-        .action-circle-btn,
-        .action-btn-message,
-        .card-recruit-btn {
-            width: 42px !important;
-            height: 42px !important;
-            min-width: 42px !important;
-            min-height: 42px !important;
-            font-size: 1.05rem !important;
-        }
-        .action-circle-btn.like {
-            height: auto !important;
-            min-height: 42px !important;
-            padding-top: 6px !important;
-            padding-bottom: 5px !important;
-        }
-        .action-circle-btn.like .action-btn-count {
-            font-size: 0.62rem !important;
-        }
-        .card-actions-overlay {
-            gap: 8px !important;
-        }
-        @media (max-width: 480px) {
-            .action-circle-btn,
-            .action-btn-message,
-            .card-recruit-btn {
-                width: 38px !important;
-                height: 38px !important;
-                min-width: 38px !important;
-                min-height: 38px !important;
-                font-size: 0.95rem !important;
-            }
-            .action-circle-btn.like {
-                min-height: 38px !important;
-            }
-            .card-actions-overlay {
-                gap: 7px !important;
-            }
         }
 
         /* --- TALK ROOM 専用：ボトムナビを隠し、メッセージ入力欄をルームコンテナ最下部に固定。
@@ -891,8 +782,8 @@
         {{-- メイン：--max-content-width に追従して中央寄せ（モバイル430 → タブレット600 → デスクトップ720）。
              旧 layouts.app と同じ条件で content-wrapper を被せ、移行画面のレイアウトを大きく崩さないようにする。 --}}
         <main id="main-content" class="max-w-[var(--max-content-width)] mx-auto">
-            {{-- メール未認証バナー（一度認証すれば消える） --}}
-            @include('layouts.parts.email-unverified-banner')
+            {{-- Email verification is now surfaced via the header task popup (UserTaskService),
+                 not as a full-width banner — the banner used to overlap the swipe-home layout. --}}
             {{-- 面談リマインダー（24h 以内の面談確定案件があれば表示） --}}
             @include('layouts.parts.interview-reminder-banner')
 

@@ -524,7 +524,7 @@
                 悪質な行為・ルール違反があれば運営にお知らせください。<br>
                 内容は運営で確認します（通報したことは相手に通知されません）。
             </p>
-            <form data-user-report-form data-endpoint="{{ route('user-report.store') }}">
+            <form data-user-report-form data-endpoint="{{ route('pages.user-report.store') }}">
                 @csrf
                 <input type="hidden" name="target_type" data-target-type>
                 <input type="hidden" name="target_id" data-target-id>

@@ -93,7 +93,7 @@
                         @if($availActive)
                             {{ $availRemaining !== '' ? $availRemaining : '有効中' }}・店舗側で優先表示されます
                         @else
-                            近くの店舗の DISCOVERY で最上位に表示されます
+                            近くの店舗の SWIPE で最上位に表示されます
                         @endif
                     </p>
                 </div>

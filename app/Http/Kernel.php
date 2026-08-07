@@ -57,7 +57,7 @@ class Kernel extends HttpKernel
      */
     protected $routeMiddleware = [
 
-        'auth' => \App\Http\Middleware\Authenticate::class,
+        'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
@@ -72,8 +72,6 @@ class Kernel extends HttpKernel
         'member.auth' => \App\Http\Middleware\MemberAuth::class,
         'admin.auth' => \App\Http\Middleware\AdminAuth::class,
         'admin.permission' => \App\Http\Middleware\AdminPermission::class,
-        //'check.redirect' => \App\Http\Middleware\CheckRedirectAfterLogin::class,
-        'device.redirect' => \App\Http\Middleware\DeviceRedirect::class,
 
         // ヘッダーのおしらせ・やることリストを全認証画面に注入
         'header.badges' => \App\Http\Middleware\InjectHeaderBadges::class,

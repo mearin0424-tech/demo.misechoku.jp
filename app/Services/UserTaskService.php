@@ -24,6 +24,16 @@ class UserTaskService
     {
         $tasks = [];
 
+        // (a0) メール未認証
+        if ($this->isEmailUnverified('casts', $castId)) {
+            $tasks[] = [
+                'key'     => 'cast.email_unverified',
+                'text'    => 'メールアドレスが未認証です（アカウント設定から再送信できます）',
+                'url'     => $this->safeRoute('setting.account'),
+                'urgency' => 'normal',
+            ];
+        }
+
         // (a) 本人確認書類：承認完了までは常に「未済」としてタスクに出し続ける
         $identityStatus = $this->getCastIdentityStatus($castId);
         if ($identityStatus === 'unsubmitted') {
@@ -94,6 +104,17 @@ class UserTaskService
     public function forShop(string $shopId): array
     {
         $tasks = [];
+
+        // (a0) メール未認証（店舗の場合はマネージャー本人単位で判定）
+        $managerId = $this->currentShopManagerId();
+        if ($managerId !== null && $this->isEmailUnverified('shop_managers', $managerId)) {
+            $tasks[] = [
+                'key'     => 'shop.email_unverified',
+                'text'    => 'メールアドレスが未認証です（アカウント設定から再送信できます）',
+                'url'     => $this->safeRoute('setting.account'),
+                'urgency' => 'normal',
+            ];
+        }
 
         // (a) 許可書類：全書類が承認されるまで常に「未済」としてタスクに出し続ける
         $licenseStatus = $this->getShopLicenseStatus($shopId);
@@ -299,6 +320,25 @@ class UserTaskService
             ->where('sj.shop_id', $shopId)
             ->whereIn('ad.status', [3, 4])
             ->count();
+    }
+
+    private function isEmailUnverified(string $table, string $userId): bool
+    {
+        if (!Schema::hasTable($table) || !Schema::hasColumn($table, 'email_verified_at')) {
+            return false;
+        }
+        $verifiedAt = DB::table($table)->where('id', $userId)->value('email_verified_at');
+        return empty($verifiedAt);
+    }
+
+    private function currentShopManagerId(): ?string
+    {
+        try {
+            $u = auth()->guard('shop')->user();
+            return $u ? (string) $u->getKey() : null;
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     private function safeRoute(string $name, array $params = []): ?string

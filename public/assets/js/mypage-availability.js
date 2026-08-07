@@ -41,7 +41,7 @@
             availCard.classList.remove('is-active');
             if (iconEl) iconEl.className = 'fas fa-clock';
             if (titleEl) titleEl.textContent = '今から入れる時間を宣言する';
-            if (leadEl) leadEl.textContent = '近くの店舗の DISCOVERY で最上位に表示されます';
+            if (leadEl) leadEl.textContent = '近くの店舗の SWIPE で最上位に表示されます';
             if (actionsEl) {
                 actionsEl.innerHTML = ''
                     + '<button type="button" class="cast-avail__btn cast-avail__btn--primary" data-availability-hours="2">2 時間</button>'
