@@ -222,6 +222,11 @@ body.page-home .main-swiper .swiper-wrapper {
 body.page-home .main-swiper > .swiper-wrapper > .swiper-slide {
     contain: layout paint style;
     /* content-visibility: auto は loop 複製と相性が悪いことがあるため見送り */
+    /* スワイプ中に画面をタッチしてもアカウントが「飛ばない」ようにする。
+       scroll-snap-stop: always は、fling / 慣性スクロールが 2 枚以上のスライドを
+       跨がず、必ず次のスライドで一旦止まるよう強制する仕様。
+       これで「スワイプ操作をしながらタッチ」で複数スライドをスキップする挙動を封じる。 */
+    scroll-snap-stop: always;
 }
 
 /* 4. cssMode 中は Swiper が transform を使わないので、

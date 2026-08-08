@@ -5,7 +5,7 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/search.css') }}?v=20260802-split">
-<link rel="stylesheet" href="{{ asset('assets/css/search-location-bar.css') }}?v=20260802-split">
+<link rel="stylesheet" href="{{ asset('assets/css/search-location-bar.css') }}?v=20260808-footer-clear">
 <link rel="stylesheet" href="{{ asset('assets/css/sub-header.css') }}">
 @endpush
 

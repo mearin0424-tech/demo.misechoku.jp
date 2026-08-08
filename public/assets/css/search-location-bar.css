@@ -405,18 +405,20 @@ body.page-search .search-topbar {
     flex: 0 0 auto;
 }
 
-/* 検索タブ：#pane-list（flex/overflow hidden は既存指定）内で結果リストのみスクロール */
+/* 検索タブ：#pane-list（flex/overflow hidden は既存指定）内で結果リストのみスクロール。
+   最後の行がグローバルフッター（75px + safe-area）に被らないよう、
+   フッター高 + safe-area + 24px の余白を確保する。 */
 body.page-search .connection-list--search {
-    padding-bottom: 24px;
+    padding-bottom: calc(var(--footer-height, 75px) + env(safe-area-inset-bottom, 0px) + 24px);
 }
 
-/* キープタブ：タブ全体をスクロール */
+/* キープタブ：タブ全体をスクロール。padding-bottom は上と同じ理由。 */
 body.page-search #pane-keep.tab-pane.active {
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding-bottom: 24px;
+    padding-bottom: calc(var(--footer-height, 75px) + env(safe-area-inset-bottom, 0px) + 24px);
 }
 
 /* 検索条件エリアを開いても行の高さは常に一定に保つ：

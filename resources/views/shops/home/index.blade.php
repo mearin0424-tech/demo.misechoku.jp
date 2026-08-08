@@ -6,7 +6,7 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260802-cta-above-footer">
 {{-- Perf / tier-chip / cssMode overrides live in a separate file; load AFTER home.css. --}}
-<link rel="stylesheet" href="{{ asset('assets/css/home-perf.css') }}?v=20260802-split">
+<link rel="stylesheet" href="{{ asset('assets/css/home-perf.css') }}?v=20260808-snap-stop">
 @endpush
 
 @php

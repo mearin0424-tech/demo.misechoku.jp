@@ -21,7 +21,9 @@
     box-sizing: border-box;
 }
 .talk-list-container.tab-page-body {
-    padding: 0 0 calc(var(--footer-height) + 16px);
+    /* 最後のトーク行がグローバルフッター（＋safe-area）に被らないよう、
+       フッター高 + safe-area + 24px の空きを取る。 */
+    padding: 0 0 calc(var(--footer-height, 75px) + env(safe-area-inset-bottom, 0px) + 24px);
     padding-left: 0;
     padding-right: 0;
 }
@@ -2393,6 +2395,15 @@ body.page-talk-room .talk-job-kind-badge,
 body.page-talk-room .chat-messages,
 #talk-room-container .chat-messages {
     padding-bottom: calc(var(--talk-composer-h, 110px) + 20px) !important;
+}
+
+/* LINE / Instagram DM 風：メッセージが少ないときも最新メッセージがコンポーザー
+   直上に来るよう、最初の子に margin-top: auto を効かせて全ての行をボトムへ寄せる。
+   これで送信直後に「メッセージが上の方へ飛ぶ・下が真っ白」現象を防ぐ。
+   メッセージが多くコンテナを越えたときは通常どおりスクロールする（auto は 0 になる）。 */
+body.page-talk-room .chat-messages > *:first-child,
+#talk-room-container .chat-messages > *:first-child {
+    margin-top: auto !important;
 }
 
 /* 入力欄フォーカス：旧ゴールドの太いリング → アクセント枠のみの控えめ表現 */
