@@ -107,7 +107,11 @@
       "Bash(powershell *)",
       "Bash(Select-String -Pattern \"INFO|Compiled|ERROR\")",
       "Bash(Select-Object -First 3)",
-      "Bash(curl -s -o /dev/null -w '%{http_code}' -I 'https://images.unsplash.com/photo-__TRACKED_VAR__?w=100' --max-time 5)"
+      "Bash(curl -s -o /dev/null -w '%{http_code}' -I 'https://images.unsplash.com/photo-__TRACKED_VAR__?w=100' --max-time 5)",
+      "Bash(php -l app/Http/Controllers/Auth/MockLineController.php)",
+      "Bash(php -l app/Http/Controllers/Auth/EmailVerificationController.php)",
+      "Bash(php -l app/Http/Controllers/Api/PushController.php)",
+      "Bash(php -l config/demo.php)"
     ]
   }
 }

@@ -245,13 +245,31 @@ keyframes はコンパイル済み CSS にのみ存在する。**画面側に `<
 
 ---
 
-## 11. ライトモード（light-theme.css）
+## 11. ライトモード（light-theme.css）／ プレミアムホワイト（premium-white.css）
 
-ライト画面は薄ラベンダー基調（#f5f2fb）で、SWIPE・MyPage・プロフィール詳細・認証以外の全画面に適用される。
+ライト画面は薄ラベンダー基調（#f5f2fb）で、**SWIPE（`*/home*`）と公開共有ページ（`share/*`）以外の全画面**に適用される。
+MyPage とプロフィール詳細（`cast.mypage.index` / `shop.mypage.index` / `cast.shopprofile.show` / `shop.castprofileview.show`）は
+「プレミアムホワイト」テーマ（`premium-white.css`）で白基調 + 高級感の見え方に切り替わる。
 
 ### 判定と適用
-`layouts/app-v2.blade.php` で `$isLightTheme` を評価し、body に `theme-light` クラスを付与。
-上書きは `public/assets/css/light-theme.css` のみで完結させる（画面ごとに `<style>` を書かない）。
+`layouts/app-v2.blade.php` の以下フラグ:
+
+```php
+$isDarkPage = request()->is('*/home*') || request()->is('share/*');
+$naturalPremiumWhite = request()->routeIs(
+    'cast.mypage.index', 'shop.mypage.index',
+    'cast.shopprofile.show', 'shop.castprofileview.show',
+);
+$naturalLightTheme = !$isDarkPage && !$naturalPremiumWhite;
+// ヘッダーのライト/ダークトグル（Cookie: theme_mode=dark）で全画面ダーク強制可
+$isForcedDark   = request()->cookie('theme_mode') === 'dark';
+$isPremiumWhite = $naturalPremiumWhite && !$isForcedDark;
+$isLightTheme   = $naturalLightTheme   && !$isForcedDark;
+```
+
+body に `theme-light` / `theme-premium-white` / `mode-dark|mode-light` クラスを付与。
+上書きは `public/assets/css/light-theme.css` および `public/assets/css/premium-white.css` のみで完結させる
+（画面ごとに `<style>` を書かない）。
 
 ### 章構成（`light-theme.css`）
 | 章 | 対象 |

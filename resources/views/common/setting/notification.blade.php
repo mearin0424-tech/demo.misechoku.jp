@@ -69,11 +69,70 @@
                 </div>
                 <button type="button" id="push-enable-btn" class="setting-btn setting-btn-push">通知を有効化</button>
             </div>
+            @if (config('demo.enabled') && config('demo.test_push'))
+                {{-- ### demo function and data for test ###
+                     DEMO_MODE 有効時のみ表示: 自分にテスト Push を送る --}}
+                <div class="setting-row">
+                    <div class="setting-row-main">
+                        <div class="setting-row-label">[デモ] テスト Push を送る</div>
+                        <div class="setting-row-desc">上の「通知を有効化」を実施した後、この端末にテスト通知が届くか確認できます。</div>
+                    </div>
+                    <button type="button" id="push-test-btn" class="setting-btn setting-btn-test">テスト送信</button>
+                </div>
+            @endif
             <div class="setting-row" style="justify-content:flex-end;">
                 <button type="submit" class="setting-btn setting-btn-test">設定を保存</button>
             </div>
         </form>
+
+        @if (config('demo.enabled') && config('demo.mock_line'))
+            {{-- ### demo function and data for test ###
+                 DEMO_MODE 有効時のみ表示: モック LINE 連携（本番 OAuth 不要） --}}
+            <div class="setting-row" style="margin-top:12px;border-top:1px dashed rgba(168,85,247,0.4);padding-top:14px;">
+                <div class="setting-row-main">
+                    <div class="setting-row-label">[デモ] モック LINE 連携</div>
+                    <div class="setting-row-desc">LINE OAuth をスキップし、任意の ID で連携します（未入力なら自動生成）。</div>
+                </div>
+                <form method="POST" action="{{ route('setting.line.mock.link') }}" style="display:flex;gap:6px;align-items:center;">
+                    @csrf
+                    <input type="text" name="user_id" placeholder="任意 (空欄で自動生成)" style="padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(168,85,247,0.4);color:#f5f5f5;font-size:12px;width:150px;">
+                    <button type="submit" class="setting-btn setting-btn-push">連携</button>
+                </form>
+            </div>
+        @endif
     </section>
+    @if (config('demo.enabled') && config('demo.test_push'))
+        <script>
+        (function(){
+            var btn = document.getElementById('push-test-btn');
+            if (!btn) return;
+            btn.addEventListener('click', function(){
+                fetch('{{ route('push.test') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }).then(function(r){ return r.json().then(function(j){ return {status:r.status,body:j}; }); })
+                .then(function(res){
+                    var toast = (window.appToast || function(m){ alert(m); });
+                    if (res.status === 200 && res.body.sent > 0) {
+                        toast('テスト Push を送信しました。端末の通知を確認してください。', 'success');
+                    } else if (res.body.error === 'subscription_not_found') {
+                        toast('先に「通知を有効化」で端末を登録してください。', 'error');
+                    } else if (res.body.error === 'vapid_not_configured') {
+                        toast('サーバ側で VAPID キーが未設定です。運営に連絡してください。', 'error');
+                    } else {
+                        toast('テスト Push 送信結果: ' + JSON.stringify(res.body), 'info');
+                    }
+                }).catch(function(){
+                    (window.appToast || function(m){ alert(m); })('通信エラー', 'error');
+                });
+            });
+        })();
+        </script>
+    @endif
     @else
     <p class="setting-guest-note">通知の設定はログイン後に利用できます。</p>
     @endif

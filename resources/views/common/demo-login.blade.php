@@ -144,6 +144,16 @@
                         </a>
                     @endif
 
+                    {{-- ### demo function and data for test ###
+                         DEMO_MODE 有効時のみ表示: モック LINE ログイン（本番 OAuth 不要） --}}
+                    @if (config('demo.enabled') && config('demo.mock_line') && in_array($selectedRole, ['cast', 'shop']))
+                        <a href="{{ route('login.line.mock', ['role' => $selectedRole]) }}"
+                           class="inline-flex items-center justify-center gap-2 w-full min-h-[44px] rounded-panel font-bold text-[12px] tracking-wider text-text-main bg-accent/10 border border-line-accent/40">
+                            <i class="fa-solid fa-flask-vial"></i>
+                            <span>[デモ] モック LINE でログイン</span>
+                        </a>
+                    @endif
+
                     {{-- OR divider --}}
                     <div class="flex items-center gap-3 my-1">
                         <span class="flex-1 h-px bg-line-accent/20"></span>

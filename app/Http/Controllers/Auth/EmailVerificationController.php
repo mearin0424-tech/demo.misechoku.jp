@@ -39,6 +39,20 @@ class EmailVerificationController extends Controller
             return back()->with('message', 'このメールアドレスは既に認証済みです。');
         }
 
+        // ### demo function and data for test ###
+        // DEMO_MODE + DEMO_AUTO_VERIFY_EMAIL: bypass SMTP and mark verified now.
+        // Production must have DEMO_MODE=false.
+        if (config('demo.enabled') && config('demo.auto_verify_email')) {
+            DB::table($table)
+                ->where($idCol, $id)
+                ->update([
+                    'email_verified_at' => now(),
+                    'updated_at'        => now(),
+                ]);
+
+            return back()->with('message', '[デモ環境] メール送信をスキップし、' . $email . ' を即時認証済みにしました。');
+        }
+
         $this->dispatchVerifyMail($type, $id, $email);
 
         return back()->with('message', $email . ' 宛に認証メールを送信しました。メール内のリンクを開いて認証を完了してください（有効期限 60 分）。');

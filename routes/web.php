@@ -388,6 +388,12 @@ Route::get('/login', fn () => redirect()->route('login.demo'));
 Route::get('/login/line', [LineLogin::class, 'redirect'])->name('login.line.redirect');
 Route::get('/login/line/callback', [LineLogin::class, 'callback'])->name('login.line.callback');
 
+// ### demo function and data for test ###
+// Mock LINE login/link routes. Only functional when DEMO_MODE=true.
+// Controllers themselves check config('demo.enabled') && config('demo.mock_line').
+Route::get('/login/line/mock', [\App\Http\Controllers\Auth\MockLineController::class, 'showLogin'])->name('login.line.mock');
+Route::post('/login/line/mock', [\App\Http\Controllers\Auth\MockLineController::class, 'login'])->name('login.line.mock.post');
+
 // Messaging API Webhook（LINE Login のコールバックとは別。検証は同一チャネルの Channel secret が .env と一致している必要あり）
 Route::post('/line/webhook', LineWebhookController::class)->name('line.webhook');
 
@@ -433,6 +439,9 @@ Route::prefix('setting')->name('setting.')->group(function () {
     Route::get('/notification', [SettingController::class, 'notification'])->name('notification');
     Route::post('/notification', [SettingController::class, 'updateNotification'])->name('notification.update');
     Route::get('/line/link', [LineLogin::class, 'redirectLink'])->name('line.link');
+    // ### demo function and data for test ###
+    // Mock LINE link (bypasses real OAuth). Handler gates on config('demo.enabled').
+    Route::post('/line/mock-link', [\App\Http\Controllers\Auth\MockLineController::class, 'link'])->name('line.mock.link');
     Route::get('/account', [SettingController::class, 'account'])->name('account');
     Route::post('/account/email', [SettingController::class, 'updateEmail'])->name('account.email.update');
     Route::post('/account/password', [SettingController::class, 'updatePassword'])->name('account.password.update');
@@ -478,6 +487,9 @@ Route::middleware('signed')->group(function () {
 Route::prefix('api/push')->name('push.')->group(function () {
     Route::get('vapid-public-key', [\App\Http\Controllers\Api\PushController::class, 'vapidPublicKey'])->name('vapid');
     Route::post('subscribe', [\App\Http\Controllers\Api\PushController::class, 'subscribe'])->name('subscribe');
+    // ### demo function and data for test ###
+    // Test push send to self. Gated by config('demo.enabled') && config('demo.test_push').
+    Route::post('test', [\App\Http\Controllers\Api\PushController::class, 'testSend'])->name('test');
 });
 
 Route::prefix('api/favorites')->name('api.favorites.')->group(function () {

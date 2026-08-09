@@ -3,10 +3,18 @@
 ## 基本方針
 
 - テストは `tests/Feature/` 配下に機能テストとして作成する
-- テストDBは `.env.testing` を参照、`RefreshDatabase` トレイトを使用
+- テスト DB は `.env.testing` を参照、`database/testing.sqlite` を使用（本番 MySQL には向けない）
+- 画面スモークテストは `tests/Feature/Smoke` に集約する
+- `RefreshDatabase` トレイトまたは `migrate:fresh --env=testing` でリセット
 - テストクラス名は対象コントローラ・サービス名に合わせる（例: `BillingManagementServiceTest`）
 - **スキーマは `database/mock_demo.sql` と照合**し、カラム名・型・制約を一致させること
-- 新規追加テーブル（`profile_views` / `shop_plan_subscriptions` / `character_guide_settings`）も同様に照合
+- 新規追加テーブル（`profile_views` / `shop_plan_subscriptions` / `character_guide_settings` /
+  `support_inquiries` / `user_reports` / `policy_documents` / `push_subscriptions` /
+  `ai_suggestion_templates` など）も同様に照合
+
+### 実行環境
+- CI（GitHub Actions）と Plesk のステージング環境の両方で同じ手順で回す
+- 必要な PHP 拡張: `openssl` / `mbstring` / `sqlite3` / `pdo_sqlite` / `dom` / `xml` / `xmlwriter`
 
 ---
 
@@ -55,18 +63,28 @@
 | **閲覧キャスト一覧** | |
 | `recentViewersFor()` 正常系 | `profile_views` から target_type=shop の閲覧者を集計、`view_count` 降順（実装は `last_viewed_at` 降順） |
 
-### 優先度 3 — トークアクション遷移（`TalkController@action`）
+### 優先度 3 — トークアクション遷移（`TalkController@action` + `TalkActionRegistry`）
 
-ステータス遷移のルールが複雑なため、境界値を重点的にテストする。
+権限マトリクスは `App\Support\TalkActionRegistry` に集約されている。境界値を重点的にテストする。
+
+| アクション | 実行可 |
+|---|---|
+| `interview_offer` / `interview_cancel_request` / `hired` / `rejected` / `cancel_status` | 店舗のみ |
+| `interview_confirm` / `interview_cancel_accept` / `fulltime_request` / `work_complete_report` / `bonus_achievement_report` | キャストのみ |
+| `set_job_kind` | 双方 |
 
 | テストケース | 確認内容 |
 |------------|---------|
 | `interview_offer`（正常系） | ステータスが「やり取り中」のときのみ実行可 |
 | `interview_offer`（options 空） | バリデーションエラーになること |
 | `interview_confirm`（正常系） | キャスト側のみ実行可、`offer_token` / `selected_option` 必須 |
-| `interview_confirm`（店舗側） | 403 または拒否されること |
+| `interview_confirm`（店舗側） | 403 で拒否 |
 | `hired` / `rejected` | 店舗側のみ実行可 |
-| `cancel_status` | 双方から実行可、ステータスがリセットされること |
+| `cancel_status` | 店舗側のみ実行可、ステータスがリセットされる |
+| `interview_cancel_request` → `interview_cancel_accept` | 店舗発の取消要求をキャストが受諾でクローズ |
+| `fulltime_request` / `work_complete_report` / `bonus_achievement_report` | キャストのみ、応募ステータス整合 |
+| `set_job_kind` | 双方から実行可 |
+| 未定義の action_type | Rule::in で 422 拒否 |
 | メッセージ削除（10分以内） | 削除できること |
 | メッセージ削除（10分超過） | 削除できないこと |
 | 他人のメッセージ削除 | 拒否されること |
@@ -162,12 +180,17 @@
 ## テストコマンド
 
 ```bash
-# 全テスト実行
-php artisan test
+# 画面スモークテスト（本番 MySQL を使わない・SQLite で最小起動）
+composer test:smoke
+# = testing.sqlite 作成 → migrate:fresh --env=testing --force → tests/Feature/Smoke 実行
+
+# 全 Feature テスト
+php artisan test --testsuite=Feature
 
 # クラス指定
 php artisan test --filter=BillingManagementServiceTest
 php artisan test --filter=PlanSubscriptionServiceTest
+php artisan test --filter=TierRankingTest
 
 # グループ指定（将来的に @group アノテーションを付与した場合）
 php artisan test --group=billing
@@ -187,25 +210,37 @@ php artisan test --group=premium
 
 ---
 
-## 実装済み Feature テスト（2026-08-02 追加）
+## 実装済みテスト
+
+### Smoke テスト（`tests/Feature/Smoke/`）
+本番 DB を使わず SQLite で最小起動 → 主要画面が 200 で返ることを確認する。
+
+| ファイル | 対象 |
+|---|---|
+| `PublicPagesTest.php` | 未ログイン公開ページ（`/welcome` / `/about` / `/terms` / `/privacy` / `/support/*` / `/login/demo` 等） |
+| `CastPagesTest.php` | キャストポータル主要画面 |
+| `ShopPagesTest.php` | 店舗ポータル主要画面 |
+| `AdminPagesTest.php` | 管理画面主要画面 |
+
+### Feature テスト（`tests/Feature/`）
 
 | ファイル | 対象機能 |
 |---|---|
-| `tests/Feature/Auth/PasswordResetTest.php` | パスワードリセット全フロー（enumeration 対策・トークン失効・成功パス） |
-| `tests/Feature/Auth/EmailVerificationTest.php` | メール認証（署名 URL・未署名 URL 拒否・未ログイン再送信拒否） |
-| `tests/Feature/UserReportTest.php` | ユーザー通報の送信・重複排除・自己通報禁止 |
-| `tests/Feature/Support/TalkActionRegistryTest.php` | トークアクションの権限マトリクス（cast_only / shop_only / both_side） |
-| `tests/Feature/Cast/AvailabilityDeclarationTest.php` | 「今すぐ入れる」宣言（2h/4h/8h・不正値拒否・取り消し） |
-| `tests/Feature/Setting/WithdrawFlowTest.php` | 退会時の PII 匿名化・最後のオーナー保護・パスワード誤り拒否 |
-| `tests/Feature/Shop/ReviewReplyTest.php` | 店舗返信投稿・削除・他店舗のレビューへの返信拒否 |
-| `tests/Feature/Shop/StaffManagementTest.php` | 1店舗1オーナー制約、staff からの owner-only 操作 403、enum bridge |
-| `tests/Feature/Shop/LicenseSubmit2StepTest.php` | 書類 2 段階提出フロー（upload → request-review → withdraw）+ staff 403 |
-| `tests/Feature/Discovery/TierRankingTest.php` | DISCOVERY の Tier A/B/C 並び替え（DiscoveryController::getHomeCasts） |
-| `tests/Feature/Support/NgWordDetectorTest.php` | NG 語検出（電話番号・LINE ID・URL・NG語テーブル・非アクティブ除外）|
+| `Auth/PasswordResetTest.php` | パスワードリセット全フロー（enumeration 対策・トークン失効・成功パス） |
+| `Auth/EmailVerificationTest.php` | メール認証（署名 URL・未署名 URL 拒否・未ログイン再送信拒否） |
+| `UserReportTest.php` | ユーザー通報の送信・重複排除・自己通報禁止 |
+| `Support/TalkActionRegistryTest.php` | トークアクションの権限マトリクス（cast_only / shop_only / both_side） |
+| `Support/NgWordDetectorTest.php` | NG 語検出（電話番号・LINE ID・URL・NG 語テーブル・非アクティブ除外）|
+| `Cast/AvailabilityDeclarationTest.php` | 「今すぐ入れる」宣言（2h/4h/8h・不正値拒否・取り消し） |
+| `Setting/WithdrawFlowTest.php` | 退会時の PII 匿名化・最後のオーナー保護・パスワード誤り拒否 |
+| `Shop/ReviewReplyTest.php` | 店舗返信投稿・削除・他店舗のレビューへの返信拒否 |
+| `Shop/StaffManagementTest.php` | 1 店舗 1 オーナー制約、staff からの owner-only 操作 403、enum bridge |
+| `Shop/LicenseSubmit2StepTest.php` | 書類 2 段階提出フロー（upload → request-review → withdraw）+ staff 403 |
+| `Discovery/TierRankingTest.php` | DISCOVERY の Tier A/B/C 並び替え（`DiscoveryController::getHomeCasts`） |
 
 **実行方法**:
 ```bash
-php artisan test --testsuite=Feature
-# 個別:
-php artisan test --filter=PasswordResetTest
+composer test:smoke                          # スモーク（最小）
+php artisan test --testsuite=Feature         # Feature 全体
+php artisan test --filter=PasswordResetTest  # 個別
 ```

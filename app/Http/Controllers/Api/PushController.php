@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Services\PushNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -10,6 +11,36 @@ use Illuminate\Support\Facades\Log;
 
 class PushController extends Controller
 {
+    /**
+     * ### demo function and data for test ###
+     * Send a canned Web Push notification to the currently logged-in user.
+     * Gated by config('demo.enabled') && config('demo.test_push').
+     * Requires the caller to have already granted browser permission and
+     * completed /api/push/subscribe (i.e. push_subscriptions row exists).
+     */
+    public function testSend(Request $request, PushNotificationService $push): JsonResponse
+    {
+        if (!config('demo.enabled') || !config('demo.test_push')) {
+            return response()->json(['error' => 'demo mode disabled'], 403);
+        }
+
+        [$type, $id] = $this->resolveActor();
+        if (!$type || !$id) {
+            return response()->json(['error' => 'login required'], 401);
+        }
+
+        $result = $push->sendToUser(
+            $type,
+            $id,
+            '[デモ] テスト通知',
+            'ミセチョクのテスト通知です（' . now()->format('H:i:s') . '）',
+            url('/'),
+        );
+
+        return response()->json($result, $result['success'] ? 200 : 202);
+    }
+
+
     public function vapidPublicKey(): JsonResponse
     {
         $key = config('services.push.vapid_public');
