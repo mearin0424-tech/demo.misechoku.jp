@@ -588,17 +588,20 @@
         color: #a1a1aa;
     }
 
-    /* ---- レコードカードリスト（テーブル廃止・スマホ横スクロールなし） ---- */
+    /* ---- レコードカードリスト（テーブル廃止・スマホ横スクロールなし） ----
+       admin テーマは暗色前提。透明に近い bg だと環境によって親色が透けず
+       白文字が見えなくなるので、明示的に不透明の面色を敷いてコントラストを担保する。 */
     .master-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
     .master-item {
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        border: 1px solid var(--admin-line, rgba(168, 85, 247, 0.20));
         border-radius: 12px;
-        background: rgba(255, 255, 255, 0.02);
+        background: var(--admin-card, #1a1a1a);
+        color: var(--admin-text, #f5f5f5);
         padding: 10px 12px;
     }
     .master-item.is-editing {
-        border-color: rgba(168, 85, 247, 0.55);
-        background: rgba(168, 85, 247, 0.06);
+        border-color: var(--admin-primary-border, rgba(168, 85, 247, 0.55));
+        background: var(--admin-primary-soft, rgba(168, 85, 247, 0.12));
     }
     .master-item.is-hidden { display: none; }
     .master-item__row {
@@ -606,11 +609,12 @@
         align-items: center;
         gap: 10px;
     }
-    .master-item__name { flex: 1; min-width: 0; }
+    .master-item__name { flex: 1; min-width: 0; color: var(--admin-text, #f5f5f5); }
+    .master-inline-name { color: var(--admin-text, #f5f5f5); }
     .master-item__name .master-inline-name__text {
         font-size: 0.95rem;
         font-weight: 700;
-        color: #f5f5f5;
+        color: var(--admin-text, #f5f5f5);
         word-break: break-all;
     }
     .master-item__actions {
@@ -626,13 +630,13 @@
     .master-item__meta {
         margin-top: 8px;
         padding-top: 8px;
-        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        border-top: 1px solid var(--admin-line-soft, rgba(168, 85, 247, 0.10));
         display: flex;
         align-items: center;
         flex-wrap: wrap;
         gap: 6px;
         font-size: 0.72rem;
-        color: #a1a1aa;
+        color: var(--admin-sub, #a0a0a0);
     }
     .master-item__chip {
         display: inline-flex;
@@ -640,20 +644,48 @@
         gap: 5px;
         padding: 3px 9px;
         border-radius: 999px;
-        border: 1px solid rgba(255, 255, 255, 0.10);
-        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--admin-line, rgba(168, 85, 247, 0.20));
+        background: var(--admin-surface-alt, rgba(255, 255, 255, 0.04));
+        color: var(--admin-sub, #d4d4d4);
         font-size: 0.7rem;
         white-space: nowrap;
     }
-    .master-item__chip--id { font-variant-numeric: tabular-nums; color: #c4b5fd; }
-    .master-item__chip i { font-size: 0.62rem; opacity: 0.7; }
+    .master-item__chip--id {
+        font-variant-numeric: tabular-nums;
+        color: var(--admin-primary-hover, #c4b5fd);
+        background: var(--admin-primary-soft, rgba(168, 85, 247, 0.12));
+        border-color: var(--admin-primary-border, rgba(168, 85, 247, 0.40));
+    }
+    .master-item__chip i { font-size: 0.62rem; opacity: 0.85; }
     .master-list__empty {
         padding: 28px 12px;
         text-align: center;
-        color: #a1a1aa;
+        color: var(--admin-sub, #a0a0a0);
         font-size: 0.85rem;
-        border: 1px dashed rgba(255, 255, 255, 0.12);
+        border: 1px dashed var(--admin-line, rgba(168, 85, 247, 0.20));
         border-radius: 12px;
+        background: var(--admin-surface-alt, rgba(255, 255, 255, 0.03));
+    }
+
+    /* 強制的なライトモード（OS の Force Dark 反転や、admin を将来ライト化した場合の保険）:
+       admin の面色が明るくなった時に白文字が沈まないよう、コントラストの高い暗い文字色に切り替える */
+    @media (prefers-color-scheme: light) {
+        .master-item {
+            background: #ffffff;
+            color: #241f33;
+            border-color: rgba(76, 29, 149, 0.18);
+        }
+        .master-item__name,
+        .master-inline-name,
+        .master-item__name .master-inline-name__text { color: #241f33; }
+        .master-item__meta { color: #5f5876; border-top-color: rgba(76, 29, 149, 0.10); }
+        .master-item__chip {
+            background: #f8f6fd;
+            color: #5f5876;
+            border-color: rgba(76, 29, 149, 0.18);
+        }
+        .master-item__chip--id { color: #6d28d9; background: #ede9fe; border-color: #ddd6fe; }
+        .master-list__empty { color: #5f5876; background: #faf9fd; border-color: rgba(76, 29, 149, 0.18); }
     }
 
     /* ---- ドラッグ＆ドロップ並び替え ---- */

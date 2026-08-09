@@ -6,7 +6,6 @@ use App\Models\Master\CastTag;
 use App\Models\Master\ColumnCategory;
 use App\Models\Master\Industry;
 use App\Models\Master\NgWord;
-use App\Models\Master\ReviewContent;
 use App\Models\Master\ShopTag;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
@@ -456,20 +455,6 @@ class AdminMasterService
                 ],
             ],
             [
-                'key' => 'review_contents',
-                'table' => 'review_contents',
-                'model' => ReviewContent::class,
-                'title' => 'レビュー設問マスタ',
-                'description' => '清潔感、スタッフ対応などの評価項目',
-                'group' => 'レビュー',
-                'fields' => [
-                    ['input' => 'content', 'column' => $this->reviewContentColumn(), 'label' => '設問内容', 'placeholder' => '例: スタッフの対応は親切ですか？'],
-                ],
-                'uses_del_flg' => $this->hasColumn('review_contents', 'del_flg'),
-                'uses_is_active' => $this->hasColumn('review_contents', 'is_active'),
-                'uses_sort_order' => $this->hasColumn('review_contents', 'sort_order'),
-            ],
-            [
                 'key' => 'column_categories',
                 'table' => 'column_categories',
                 'model' => ColumnCategory::class,
@@ -578,7 +563,7 @@ class AdminMasterService
         $modelClass = $catalog['model'];
         $query = $modelClass::query()
             ->active()
-            ->select('id', DB::raw($this->nameExpressionFor($catalog['key']) . ' as name'), 'created_at');
+            ->select('id', 'name', 'created_at');
 
         if (!empty($catalog['fixed_attributes'])) {
             foreach ($catalog['fixed_attributes'] as $col => $val) {
@@ -628,23 +613,5 @@ class AdminMasterService
             ->orderBy('word')
             ->orderByDesc('id')
             ->get(['id', 'word', 'is_active', 'created_at']);
-    }
-
-    private function reviewContentColumn(): string
-    {
-        return $this->hasColumn('review_contents', 'content') ? 'content' : 'name';
-    }
-
-    private function nameExpressionFor(string $catalogKey): string
-    {
-        return match ($catalogKey) {
-            'review_contents' => $this->reviewContentColumn(),
-            default => 'name',
-        };
-    }
-
-    private function hasColumn(string $table, string $column): bool
-    {
-        return Schema::hasTable($table) && Schema::hasColumn($table, $column);
     }
 }
