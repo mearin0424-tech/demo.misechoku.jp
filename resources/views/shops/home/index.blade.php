@@ -301,7 +301,7 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/home.js') }}?v=20260809-swipe-perf"></script>
+<script src="{{ asset('assets/js/home.js') }}?v=20260809-up-swipe-fix"></script>
 {{-- LIKE / KEEP の共通トグル（全画面この1本に統一） --}}
 <script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260720-keep-confirm"></script>
 @endpush

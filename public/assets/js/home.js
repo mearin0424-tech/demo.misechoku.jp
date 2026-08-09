@@ -160,17 +160,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const photoSwipers = [];
     document.querySelectorAll('.photo-swiper').forEach((el) => {
-        // 2026-08-09 rev: loop クローンスライド内では init を skip。
-        //   Swiper の loop:true は前後 1 枚ずつ複製 (.swiper-slide-duplicate) を
-        //   DOM に足す。クローンは遷移中の 220ms しか見えず、着地時に本物へ
-        //   silently swap される。ここに nested Swiper を張ると:
-        //     ・インスタンス数 2 倍（10 枚のフィードで +20〜30 の click listener）
-        //     ・切替時に本物 / クローン間で active photo index が同期されずズレる
-        //   静的な img としてだけ描画すれば十分。
-        const parentMainSlide = el.closest('.main-swiper > .swiper-wrapper > .swiper-slide');
-        if (parentMainSlide && parentMainSlide.classList.contains('swiper-slide-duplicate')) {
-            return;
-        }
+        // 2026-08-09 rev.2: Swiper 11 は loop:true でもクローンスライドを作らず
+        // 実スライドを DOM 内で並び替える方式に変わったため、旧 rev で入れた
+        // `.swiper-slide-duplicate` 検出は常に false で機能していなかった。
+        // クローンが存在しない = 追加の nested Swiper は元々出ないので skip 条件不要。
 
         const paginationEl = el.querySelector('.photo-pagination');
         const photoSlideCount = el.querySelectorAll(':scope > .swiper-wrapper > .swiper-slide').length;
@@ -316,10 +309,38 @@ document.addEventListener('DOMContentLoaded', function() {
         window.visualViewport.addEventListener('resize', scheduleSwiperUpdate);
     }
 
-    // 3. クリックイベントの伝播停止 (ボタン類)
+    // 2026-08-09 rev: bfcache 復元 / タブ再表示時のレイアウト崩れ対策。
+    //   別画面へ遷移 → 戻る（back button / gesture）で bfcache 復元されると
+    //   DOMContentLoaded は発火せず、Swiper はキャッシュした translate と
+    //   寸法のまま。iOS Safari のアドレスバー状態が違うと dvh 実測が変わり、
+    //   カード / 画像 62% / 情報帯の位置が全部ズレる。
+    //   → pageshow(persisted) と visibilitychange で強制再測定させる。
+    //   1 フレーム待ってから update() すると viewport 反映後の実測が入る。
+    function forceSwiperRelayout() {
+        requestAnimationFrame(function () {
+            if (mainSwiper) mainSwiper.update();
+            updateAllPhotoSwipers();
+        });
+    }
+    window.addEventListener('pageshow', function (e) {
+        if (e.persisted) forceSwiperRelayout();
+    });
+    document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'visible') forceSwiperRelayout();
+    });
+
+    // 3. クリック伝播停止（誤・プロフィール遷移防止）
+    //   ── 2026-08-09 rev ──
+    //   旧: touchstart / mousedown で e.stopPropagation() していた。
+    //   これが「下→上スワイプ」で親指が画面下部の Talk CTA (.stop-propagation) に
+    //   着地したときに Swiper へ touchstart が届かず、次カードへ進めない主原因だった。
+    //   Swiper 11 は preventClicks:true でドラッグ後の click を自動キャンセルするので
+    //   touchstart / mousedown レベルで人力ブロックする必要は無い。
+    //   click レベルの伝播だけ止めて、document 側の photo-wrap プロフィール遷移
+    //   ハンドラに拾われないようにする（そちらは元々 `.stop-propagation` を除外
+    //   しているので二重の保険）。
     document.querySelectorAll('.stop-propagation').forEach(el => {
-        el.addEventListener('touchstart', (e) => e.stopPropagation(), {passive: true});
-        el.addEventListener('mousedown', (e) => e.stopPropagation());
+        el.addEventListener('click', (e) => e.stopPropagation());
     });
 
     // 4. アクションボタンの簡易動作（Ajax連携）

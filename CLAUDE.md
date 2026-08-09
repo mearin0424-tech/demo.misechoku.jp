@@ -105,9 +105,11 @@ public/assets/
   **本番 DB には絶対に流さない**。
 - **`@test.jp` ドメインのメールアドレス** — テスト用アカウントで使用中。本番の実ユーザー登録時に
   意図せず同ドメインが混入しないよう、必要に応じて登録バリデーションで拒否できるよう検討。
-- **外部プレースホルダー画像 URL**（`randomuser.me` / `loremflickr.com` / `picsum.photos`）—
-  テストデータの `cast_images.image_path` / `shop_images.image_path` に格納されている URL は
-  検証用のフリー素材。本番運用ではキャスト・店舗が自身でアップロードした画像パスに置き換わる。
+- **外部プレースホルダー画像 URL**（`images.unsplash.com` — `database/test_reset_images.sql` で
+  キュレートされた Unsplash 写真 ID を 1200x1500 の 4:5 クロップで読み込む）— テストデータの
+  `cast_images.image_path` / `shop_images.image_path` に格納されている URL は検証用のフリー素材。
+  差し替えは同 SQL 内の `photo-xxxxx` 部分を別の有効な Unsplash 写真 ID に置換するだけで反映される。
+  本番運用ではキャスト・店舗が自身でアップロードした画像パスに置き換わる。
 - 新しくテスト用機能・エンドポイント・シード等を追加する場合は、**上記マーカーをファイル冒頭に必ず記述**し、
   本セクションにも追記すること。
 
