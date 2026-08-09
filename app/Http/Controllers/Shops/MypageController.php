@@ -272,9 +272,24 @@ class MypageController extends Controller
 
         $searchLocationSettings = app(UserLocationService::class)->loadProfileSettings();
 
+        // 「本日すぐ入れます」宣言状態（NULLもしくは過去なら未宣言）
+        $availableActive = false;
+        $availableUntilIso = null;
+        if ($profileRow && Schema::hasColumn('shop_profiles', 'available_until') && !empty($profileRow->available_until)) {
+            $until = Carbon::parse($profileRow->available_until);
+            if ($until->isFuture()) {
+                $availableActive = true;
+                $availableUntilIso = $until->toIso8601String();
+            }
+        }
+
         return view('shops.mypage.index', [
             'pageId'    => 'mypage',
             'shopData'  => $shopData,
+            'shopAvailable' => [
+                'active' => $availableActive,
+                'until_iso' => $availableUntilIso,
+            ],
             'subImages' => $subImages,
             'documents' => $documentData['documents'],
             'allDocumentsApproved' => $documentData['all_approved'],
@@ -341,6 +356,58 @@ class MypageController extends Controller
             'success' => true,
             'appeal_updated_at' => $now->format('Y/m/d H:i'),
         ]);
+    }
+
+    /**
+     * 「本日すぐ入れます」宣言
+     *   - available_until = NOW() + 24h（固定）
+     *   - available_declared_at = NOW()
+     * 呼び出し例: POST /shop/mypage/availability
+     */
+    public function declareAvailability(Request $request)
+    {
+        if (!Schema::hasColumn('shop_profiles', 'available_until')) {
+            return response()->json(['success' => false, 'message' => '未対応の環境です。'], 400);
+        }
+
+        $shopId = $this->currentShopId();
+        $now = Carbon::now();
+        $until = (clone $now)->addHours(24);
+
+        DB::table('shop_profiles')
+            ->where('shop_id', $shopId)
+            ->update([
+                'available_until'       => $until,
+                'available_declared_at' => $now,
+                'updated_at'            => $now,
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'available_until'       => $until->toIso8601String(),
+            'available_declared_at' => $now->toIso8601String(),
+            'remaining_label'       => '24時間',
+        ]);
+    }
+
+    /**
+     * 「本日すぐ入れます」宣言の取り消し
+     */
+    public function clearAvailability()
+    {
+        if (!Schema::hasColumn('shop_profiles', 'available_until')) {
+            return response()->json(['success' => true]);
+        }
+
+        DB::table('shop_profiles')
+            ->where('shop_id', $this->currentShopId())
+            ->update([
+                'available_until'       => null,
+                'available_declared_at' => null,
+                'updated_at'            => Carbon::now(),
+            ]);
+
+        return response()->json(['success' => true]);
     }
 
     /**

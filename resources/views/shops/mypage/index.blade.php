@@ -138,6 +138,43 @@
                 @endif
             </a>
         </div>
+
+        {{-- ===== 「本日すぐ入れます」宣言（キャストの Availability と対称） ===== --}}
+        @php
+            $shopAvail = $shopAvailable ?? ['active' => false, 'until_iso' => null];
+        @endphp
+        <div id="shop-availability-card"
+             class="shop-avail-card {{ $shopAvail['active'] ? 'is-on' : '' }} mb-3"
+             data-availability-declare-url="{{ route('shop.mypage.availability.declare') }}"
+             data-availability-clear-url="{{ route('shop.mypage.availability.clear') }}"
+             data-availability-until="{{ $shopAvail['until_iso'] ?? '' }}">
+            <div class="shop-avail-card__body">
+                <span class="shop-avail-card__badge" aria-hidden="true"><i class="fas fa-bolt"></i></span>
+                <div class="shop-avail-card__text">
+                    <p class="shop-avail-card__title" data-avail-title>
+                        {{ $shopAvail['active'] ? '本日すぐ入れます：宣言中' : '本日すぐ入れます' }}
+                    </p>
+                    <p class="shop-avail-card__lead" data-avail-lead>
+                        @if($shopAvail['active'])
+                            24時間以内、スワイプ・検索・プロフィールに「本日すぐ入れます」タグが表示されます。
+                        @else
+                            即日でキャストを受け入れたいときに ON にしてください。24時間後に自動でOFFに戻ります。
+                        @endif
+                    </p>
+                </div>
+            </div>
+            <div class="shop-avail-card__actions" data-avail-actions>
+                @if($shopAvail['active'])
+                    <button type="button" class="shop-avail-card__btn shop-avail-card__btn--danger" data-availability-clear>
+                        <i class="fas fa-xmark"></i> 宣言を取り消す
+                    </button>
+                @else
+                    <button type="button" class="shop-avail-card__btn shop-avail-card__btn--primary" data-availability-declare>
+                        <i class="fas fa-bolt"></i> 24時間 ONにする
+                    </button>
+                @endif
+            </div>
+        </div>
     </div>
 
     {{-- ===== Tabs：GALLERY / JOB / PROFILE の3タブ構成（キャスト MyPage とデザイン・名称を統一） ===== --}}
@@ -655,6 +692,96 @@
         font-size: 1.3rem !important;
         color: var(--color-accent-text) !important;
     }
+
+    /* 「本日すぐ入れます」宣言カード */
+    .shop-avail-card {
+        border-radius: 14px;
+        padding: 12px 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(168, 85, 247, 0.25);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .shop-avail-card.is-on {
+        background: linear-gradient(135deg, rgba(251, 191, 36, 0.14), rgba(251, 146, 60, 0.10));
+        border-color: rgba(251, 191, 36, 0.55);
+        box-shadow: 0 4px 14px rgba(251, 191, 36, 0.12);
+    }
+    .shop-avail-card__body { display: flex; align-items: center; gap: 12px; }
+    .shop-avail-card__badge {
+        flex: 0 0 auto;
+        width: 40px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: rgba(251, 191, 36, 0.16);
+        color: #fbbf24;
+        font-size: 1.1rem;
+    }
+    .shop-avail-card.is-on .shop-avail-card__badge {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: #1a1a1a;
+        box-shadow: 0 2px 6px rgba(251, 191, 36, 0.4);
+    }
+    .shop-avail-card__title {
+        margin: 0;
+        font-size: 0.86rem;
+        font-weight: 800;
+        color: var(--color-text-header, #f5f5f5);
+        letter-spacing: 0.02em;
+    }
+    .shop-avail-card__lead {
+        margin: 2px 0 0;
+        font-size: 0.72rem;
+        line-height: 1.5;
+        color: var(--color-text-sub, #a1a1aa);
+    }
+    .shop-avail-card__actions { display: flex; gap: 8px; }
+    .shop-avail-card__btn {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 40px;
+        padding: 8px 14px;
+        border-radius: 10px;
+        font-size: 0.82rem;
+        font-weight: 800;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: transform 0.12s ease, background 0.15s ease, box-shadow 0.15s ease;
+    }
+    .shop-avail-card__btn:active { transform: scale(0.97); }
+    .shop-avail-card__btn:disabled { opacity: 0.6; cursor: wait; }
+    .shop-avail-card__btn--primary {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: #1a1a1a;
+        box-shadow: 0 4px 12px rgba(251, 191, 36, 0.32);
+    }
+    .shop-avail-card__btn--primary:hover { box-shadow: 0 6px 16px rgba(251, 191, 36, 0.4); }
+    .shop-avail-card__btn--danger {
+        background: rgba(220, 38, 38, 0.14);
+        border-color: rgba(220, 38, 38, 0.45);
+        color: #fca5a5;
+    }
+    .shop-avail-card__btn--danger:hover { background: rgba(220, 38, 38, 0.20); }
+
+    /* ライトモードでの調整 */
+    body.theme-light .shop-avail-card {
+        background: #ffffff;
+        border-color: rgba(124, 58, 237, 0.25);
+    }
+    body.theme-light .shop-avail-card.is-on {
+        background: linear-gradient(135deg, rgba(251, 191, 36, 0.14), rgba(255, 251, 235, 0.9));
+        border-color: rgba(251, 191, 36, 0.55);
+    }
+    body.theme-light .shop-avail-card__title { color: #1e1a30; }
+    body.theme-light .shop-avail-card__lead { color: #5f5876; }
+    body.theme-light .shop-avail-card__btn--danger { color: #b91c1c; }
 </style>
 @endpush
 
@@ -801,6 +928,80 @@ window.MYPAGE_GALLERY_CONFIG = {
     }
     if (closeBadgeTop) closeBadgeTop.addEventListener('click', hideBadgeModal);
 
+})();
+</script>
+
+{{-- 「本日すぐ入れます」宣言（24時間） --}}
+<script>
+(function () {
+    var card = document.getElementById('shop-availability-card');
+    if (!card) return;
+    var declareUrl = card.getAttribute('data-availability-declare-url');
+    var clearUrl = card.getAttribute('data-availability-clear-url');
+    var csrfToken = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
+
+    function render(active) {
+        var actions = card.querySelector('[data-avail-actions]');
+        var title = card.querySelector('[data-avail-title]');
+        var lead = card.querySelector('[data-avail-lead]');
+        card.classList.toggle('is-on', !!active);
+        if (title) title.textContent = active ? '本日すぐ入れます：宣言中' : '本日すぐ入れます';
+        if (lead) lead.textContent = active
+            ? '24時間以内、スワイプ・検索・プロフィールに「本日すぐ入れます」タグが表示されます。'
+            : '即日でキャストを受け入れたいときに ON にしてください。24時間後に自動でOFFに戻ります。';
+        if (actions) {
+            actions.innerHTML = active
+                ? '<button type="button" class="shop-avail-card__btn shop-avail-card__btn--danger" data-availability-clear><i class="fas fa-xmark"></i> 宣言を取り消す</button>'
+                : '<button type="button" class="shop-avail-card__btn shop-avail-card__btn--primary" data-availability-declare><i class="fas fa-bolt"></i> 24時間 ONにする</button>';
+        }
+    }
+
+    card.addEventListener('click', function (e) {
+        var declareBtn = e.target.closest('[data-availability-declare]');
+        var clearBtn = e.target.closest('[data-availability-clear]');
+        if (declareBtn) {
+            declareBtn.disabled = true;
+            fetch(declareUrl, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                credentials: 'same-origin',
+                body: '{}'
+            })
+                .then(function (res) { return res.ok ? res.json() : Promise.reject(res); })
+                .then(function (json) {
+                    if (json && json.success) {
+                        render(true);
+                        if (window.appToast) window.appToast('「本日すぐ入れます」を24時間 ONにしました', 'success');
+                    }
+                })
+                .catch(function () {
+                    if (window.appToast) window.appToast('宣言に失敗しました', 'error');
+                    declareBtn.disabled = false;
+                });
+        } else if (clearBtn) {
+            clearBtn.disabled = true;
+            fetch(clearUrl, {
+                method: 'DELETE',
+                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                credentials: 'same-origin'
+            })
+                .then(function (res) { return res.ok ? res.json() : Promise.reject(res); })
+                .then(function (json) {
+                    if (json && json.success) {
+                        render(false);
+                        if (window.appToast) window.appToast('宣言を取り消しました', 'info');
+                    }
+                })
+                .catch(function () {
+                    if (window.appToast) window.appToast('取消に失敗しました', 'error');
+                    clearBtn.disabled = false;
+                });
+        }
+    });
 })();
 </script>
 @endpush

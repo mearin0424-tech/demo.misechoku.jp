@@ -367,6 +367,101 @@ body.theme-light .notif-popup-item {
 body.theme-light a.notif-popup-item:hover { background: rgba(124, 58, 237, 0.06) !important; }
 body.theme-light .notif-popup-empty { color: #6d6685 !important; }
 
+/* --------------------------------------------------------------------------
+   7-b. ヘッダーの「やること」「通知」ポップアップは常にライトモード配色
+   スワイプ等の暗色画面上でも文字が読みにくくならないよう、テーマに関係なく
+   白ベース＋濃色テキストで表示する（本ファイルは常時ロード済み）
+   -------------------------------------------------------------------------- */
+#header-task-popup,
+#header-notification-popup {
+    background: #ffffff !important;
+    border: 1px solid rgba(124, 58, 237, 0.30) !important;
+    box-shadow: 0 12px 32px rgba(76, 29, 149, 0.18) !important;
+    color: #1e1a30 !important;
+}
+#header-task-popup .notif-popup__head,
+#header-task-popup .task-popup__head,
+#header-notification-popup .notif-popup__head,
+#header-notification-popup .task-popup__head {
+    background: linear-gradient(180deg, rgba(124, 58, 237, 0.10), rgba(124, 58, 237, 0.02)) !important;
+    border-bottom: 1px solid rgba(124, 58, 237, 0.20) !important;
+}
+#header-task-popup .notif-popup__head-label,
+#header-task-popup .task-popup__head-label,
+#header-notification-popup .notif-popup__head-label,
+#header-notification-popup .task-popup__head-label { color: #5b21b6 !important; }
+#header-task-popup .notif-popup__head-icon,
+#header-task-popup .task-popup__head-icon,
+#header-notification-popup .notif-popup__head-icon,
+#header-notification-popup .task-popup__head-icon { color: #7c3aed !important; }
+#header-task-popup .notif-popup__close,
+#header-task-popup .task-popup__close,
+#header-task-popup .notif-popup__gear,
+#header-notification-popup .notif-popup__close,
+#header-notification-popup .task-popup__close,
+#header-notification-popup .notif-popup__gear { color: #857ca0 !important; }
+#header-task-popup .notif-popup__close:hover,
+#header-task-popup .task-popup__close:hover,
+#header-task-popup .notif-popup__gear:hover,
+#header-notification-popup .notif-popup__close:hover,
+#header-notification-popup .task-popup__close:hover,
+#header-notification-popup .notif-popup__gear:hover { color: #4b465c !important; background: rgba(124, 58, 237, 0.10) !important; }
+#header-notification-popup .notif-popup__tabs {
+    background: rgba(124, 58, 237, 0.04) !important;
+    border-bottom-color: rgba(124, 58, 237, 0.14) !important;
+}
+#header-notification-popup .notif-popup__tab { color: #574d6f !important; }
+#header-notification-popup .notif-popup__tab:hover { color: #4b465c !important; background: rgba(124, 58, 237, 0.08) !important; }
+#header-notification-popup .notif-popup__tab.is-active { color: #6d28d9 !important; background: rgba(124, 58, 237, 0.14) !important; border-color: rgba(124, 58, 237, 0.35) !important; }
+#header-task-popup .notif-popup__section-label,
+#header-task-popup .task-popup__section-label,
+#header-notification-popup .notif-popup__section-label,
+#header-notification-popup .task-popup__section-label { color: #6d28d9 !important; }
+#header-task-popup .task-popup__section--high .task-popup__section-label i { color: #dc2626 !important; }
+#header-notification-popup .notif-popup__official-item { color: #4b465c !important; }
+#header-notification-popup a.notif-popup__official-item:hover { background: rgba(124, 58, 237, 0.06) !important; }
+#header-notification-popup .notif-popup__official-title { color: #4b465c !important; }
+#header-notification-popup .notif-popup__official-date { color: #857ca0 !important; }
+#header-notification-popup .notif-popup__official-chev { color: #a78bfa !important; }
+#header-task-popup .task-popup__summary,
+#header-task-popup .task-popup__summary-badge { color: #4b465c !important; }
+#header-task-popup .task-popup__item,
+#header-notification-popup .notif-popup__item { color: #4b465c !important; }
+#header-task-popup a.task-popup__item:hover,
+#header-notification-popup a.notif-popup__item:hover { background: rgba(124, 58, 237, 0.06) !important; }
+#header-task-popup .task-popup__item-cat,
+#header-notification-popup .notif-popup__item-cat { color: #6d28d9 !important; }
+#header-task-popup .task-popup__item--high .task-popup__item-cat { color: #dc2626 !important; }
+#header-notification-popup .notif-popup__item--pink .notif-popup__item-cat { color: #be185d !important; }
+#header-notification-popup .notif-popup__item--gold .notif-popup__item-cat { color: #a16207 !important; }
+#header-notification-popup .notif-popup__item--success .notif-popup__item-cat { color: #047857 !important; }
+#header-task-popup .task-popup__item-text,
+#header-task-popup .task-popup__item-title,
+#header-notification-popup .notif-popup__item-title { color: #1e1a30 !important; }
+#header-task-popup .task-popup__item-desc,
+#header-notification-popup .notif-popup__item-desc { color: #5f5876 !important; }
+#header-task-popup .task-popup__item-time,
+#header-notification-popup .notif-popup__item-time { color: #857ca0 !important; }
+#header-task-popup .task-popup__item-chev,
+#header-notification-popup .notif-popup__item-chev { color: #a78bfa !important; }
+#header-task-popup .task-popup__empty,
+#header-notification-popup .notif-popup__empty { color: #857ca0 !important; }
+#header-task-popup .task-popup__empty-title,
+#header-notification-popup .notif-popup__empty-title { color: #4b465c !important; }
+#header-task-popup .task-popup__empty-desc,
+#header-notification-popup .notif-popup__empty-desc { color: #857ca0 !important; }
+#header-task-popup .task-popup__empty-illust,
+#header-notification-popup .notif-popup__empty-illust { color: #a78bfa !important; }
+#header-notification-popup .notif-popup__item--accent  .notif-popup__item-icon { color: #7c3aed !important; }
+#header-notification-popup .notif-popup__item--pink    .notif-popup__item-icon { color: #be185d !important; }
+#header-notification-popup .notif-popup__item--gold    .notif-popup__item-icon { color: #a16207 !important; }
+#header-notification-popup .notif-popup__item--success .notif-popup__item-icon { color: #047857 !important; }
+#header-notification-popup .notif-popup__item--muted   .notif-popup__item-icon { color: #6b7280 !important; }
+#header-task-popup .task-popup__body::-webkit-scrollbar-thumb,
+#header-notification-popup .notif-popup__body::-webkit-scrollbar-thumb {
+    background: rgba(124, 58, 237, 0.35) !important;
+}
+
 /* 探索拠点モーダル */
 body.theme-light .location-modal {
     background: linear-gradient(180deg, #ffffff, #f5f2fb);

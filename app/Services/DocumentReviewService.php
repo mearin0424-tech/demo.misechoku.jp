@@ -268,7 +268,7 @@ class DocumentReviewService
         foreach ($data['documents'] as $doc) {
             if (($doc['status'] ?? '') === 'not_submitted') {
                 $out[] = [
-                    'text' => ($doc['name'] ?? '許可証') . 'の提出が未完了です。マイページの Licenses からアップロードしてください。',
+                    'text' => ($doc['name'] ?? '許可証') . 'の提出が未完了です。許可証提出ページからアップロードしてください。',
                 ];
                 continue;
             }

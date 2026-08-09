@@ -266,10 +266,12 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 12px;
-        align-items: end;
+        align-items: start;
     }
-    @media (max-width: 360px) {
-        .shop-profile-edit__shift-grid { grid-template-columns: 1fr; }
+    .shop-profile-edit__shift-grid > .shop-profile-edit__field {
+        margin-bottom: 0;
+        display: flex;
+        flex-direction: column;
     }
     .shop-profile-edit__check-line {
         display: flex;

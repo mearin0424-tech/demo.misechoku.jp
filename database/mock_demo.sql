@@ -1482,6 +1482,8 @@ CREATE TABLE `shop_profiles` (
   `close_time` time DEFAULT NULL COMMENT '閉店時刻',
   `latitude` decimal(10,7) DEFAULT NULL,
   `longitude` decimal(10,7) DEFAULT NULL,
+  `available_until` timestamp NULL DEFAULT NULL COMMENT '「本日すぐ入れます」宣言の有効期限。NULL または過去なら宣言なし',
+  `available_declared_at` timestamp NULL DEFAULT NULL COMMENT '直近の available_until を宣言した時刻',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1490,11 +1492,11 @@ CREATE TABLE `shop_profiles` (
 -- テーブルのデータのダンプ `shop_profiles`
 --
 
-INSERT INTO `shop_profiles` (`id`, `industry_id`, `industry_label`, `shop_id`, `shop_name`, `zip`, `pref`, `city`, `addr`, `building`, `tel`, `open_time`, `close_is_last`, `close_time`, `latitude`, `longitude`, `created_at`, `updated_at`) VALUES
-(1, 1, NULL, 's00000001', 'Club Luminous (ルミナス)', '103-0016', '東京都', '中央区', '日本橋小網町', 'ヂューエ日本橋 101', '+817099999999', '12:00:00', 1, NULL, 35.6826780, 139.7807160, '2026-05-06 15:15:40', '2026-05-06 15:15:40'),
-(2, NULL, NULL, 's00000002', 'CUTE', '134-0088', '東京都', '江戸川区', '西葛西', NULL, '07012345678', NULL, 0, NULL, NULL, NULL, '2026-03-16 13:08:08', '2026-03-20 08:22:07'),
-(8, 1, NULL, 's00000003', 'スナック奈緒子', '140-0014', '東京都', '品川区', '大井', '２８－３ＤｕｏＣｏｕｒｔ大井１０１号　室', '0356743525', NULL, 0, NULL, 35.6058540, 139.7325590, '2026-05-10 14:14:14', '2026-05-10 14:14:23'),
-(9, 1, NULL, 's00000004', 'USA', '192-0046', '東京都', '八王子市', '明神町', NULL, '99999999', NULL, 0, NULL, 35.6583670, 139.3493350, '2026-05-10 14:18:59', '2026-05-10 14:19:06');
+INSERT INTO `shop_profiles` (`id`, `industry_id`, `industry_label`, `shop_id`, `shop_name`, `zip`, `pref`, `city`, `addr`, `building`, `tel`, `open_time`, `close_is_last`, `close_time`, `latitude`, `longitude`, `available_until`, `available_declared_at`, `created_at`, `updated_at`) VALUES
+(1, 1, NULL, 's00000001', 'Club Luminous (ルミナス)', '103-0016', '東京都', '中央区', '日本橋小網町', 'ヂューエ日本橋 101', '+817099999999', '12:00:00', 1, NULL, 35.6826780, 139.7807160, NULL, NULL, '2026-05-06 15:15:40', '2026-05-06 15:15:40'),
+(2, NULL, NULL, 's00000002', 'CUTE', '134-0088', '東京都', '江戸川区', '西葛西', NULL, '07012345678', NULL, 0, NULL, NULL, NULL, NULL, NULL, '2026-03-16 13:08:08', '2026-03-20 08:22:07'),
+(8, 1, NULL, 's00000003', 'スナック奈緒子', '140-0014', '東京都', '品川区', '大井', '２８－３ＤｕｏＣｏｕｒｔ大井１０１号　室', '0356743525', NULL, 0, NULL, 35.6058540, 139.7325590, NULL, NULL, '2026-05-10 14:14:14', '2026-05-10 14:14:23'),
+(9, 1, NULL, 's00000004', 'USA', '192-0046', '東京都', '八王子市', '明神町', NULL, '99999999', NULL, 0, NULL, 35.6583670, 139.3493350, NULL, NULL, '2026-05-10 14:18:59', '2026-05-10 14:19:06');
 
 -- --------------------------------------------------------
 
@@ -2777,6 +2779,38 @@ CREATE TABLE IF NOT EXISTS `shop_plan_subscriptions` (
   KEY `sps_shop_status_idx` (`shop_id`,`status`),
   KEY `sps_status_due_idx` (`status`,`payment_due_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- ai_suggestion_templates : shop recruit editor "ランダム" auto-fill pool
+--   category = 'catch_copy' | 'manager_message'
+--
+
+CREATE TABLE IF NOT EXISTS `ai_suggestion_templates` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `category` varchar(40) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'catch_copy / manager_message',
+  `body` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `is_enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ast_category_enabled_idx` (`category`,`is_enabled`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `ai_suggestion_templates` (`category`, `body`, `is_enabled`, `created_at`, `updated_at`) VALUES
+('catch_copy', '未経験でも安心！高時給5,000円スタート', 1, NOW(), NOW()),
+('catch_copy', '働きやすさ抜群！シフト自由・当日でもOK', 1, NOW(), NOW()),
+('catch_copy', '初心者歓迎♪ノルマなし・ペナルティなし', 1, NOW(), NOW()),
+('catch_copy', '駅チカ徒歩3分！終電までのラクラク勤務', 1, NOW(), NOW()),
+('catch_copy', '週1日〜OK！副業・Wワーク大歓迎', 1, NOW(), NOW()),
+('catch_copy', 'アットホームな雰囲気で楽しく働けるお店', 1, NOW(), NOW()),
+('catch_copy', '体入時給6,000円！日払い・全額バック', 1, NOW(), NOW()),
+('catch_copy', '20代〜40代活躍中！年齢不問の優良店', 1, NOW(), NOW()),
+('manager_message', '当店では未経験の方も安心して働けるよう、先輩キャストと店長が丁寧にサポートします。無理なノルマや厳しい罰金は一切ありません。まずは気軽に体験入店からどうぞ。', 1, NOW(), NOW()),
+('manager_message', '駅から徒歩3分の好立地、終電までの勤務OKで通勤しやすさが自慢のお店です。シフトの融通も利くので、学業や家庭との両立を目指す方にもおすすめです。', 1, NOW(), NOW()),
+('manager_message', 'アットホームな雰囲気で、キャスト同士の仲もとても良い当店。困ったときはすぐに相談できる環境なので、初めての夜職でも安心して長く働けます。', 1, NOW(), NOW()),
+('manager_message', '当店は接客マナー・シャンパンコールなどの研修体制を整えているため、水商売未経験の方でも短期間で自信を持って接客できるようになります。まずは面接でお話ししましょう。', 1, NOW(), NOW()),
+('manager_message', '週1日・4時間からのシフトOK。副業やWワークで働きたい方も大歓迎です。プライベート優先で無理なく続けられる働き方を一緒に考えます。', 1, NOW(), NOW()),
+('manager_message', '20代〜40代まで幅広く活躍中。年齢や経験を問わず、あなたの魅力を活かせるステージがあります。まずは体験入店で当店の雰囲気を感じてください。', 1, NOW(), NOW());
 
 --
 -- 追加ダンプ `character_guide_settings`（深い階層ページの説明文集約 2026-07-19）

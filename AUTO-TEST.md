@@ -196,7 +196,6 @@ php artisan test --group=premium
 | `tests/Feature/UserReportTest.php` | ユーザー通報の送信・重複排除・自己通報禁止 |
 | `tests/Feature/Support/TalkActionRegistryTest.php` | トークアクションの権限マトリクス（cast_only / shop_only / both_side） |
 | `tests/Feature/Cast/AvailabilityDeclarationTest.php` | 「今すぐ入れる」宣言（2h/4h/8h・不正値拒否・取り消し） |
-| `tests/Feature/Shop/HelpBroadcastTest.php` | 緊急ヘルプ一斉送信・6h クールダウン・バリデーション |
 | `tests/Feature/Setting/WithdrawFlowTest.php` | 退会時の PII 匿名化・最後のオーナー保護・パスワード誤り拒否 |
 | `tests/Feature/Shop/ReviewReplyTest.php` | 店舗返信投稿・削除・他店舗のレビューへの返信拒否 |
 | `tests/Feature/Shop/StaffManagementTest.php` | 1店舗1オーナー制約、staff からの owner-only 操作 403、enum bridge |
@@ -209,5 +208,4 @@ php artisan test --group=premium
 php artisan test --testsuite=Feature
 # 個別:
 php artisan test --filter=PasswordResetTest
-php artisan test --filter=HelpBroadcastTest
 ```

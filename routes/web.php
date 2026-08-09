@@ -533,13 +533,6 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
     Route::get('/home', [DiscoveryHome::class, 'index'])->name('home');
     Route::get('/search', [ShopSearch::class, 'index'])->name('search.index');
 
-    // Emergency broadcast (send "help wanted now" to multiple casts)
-    Route::prefix('help-broadcast')->name('help-broadcast.')->group(function () {
-        Route::get('/candidates', [\App\Http\Controllers\Shops\HelpBroadcastController::class, 'candidates'])->name('candidates');
-        Route::post('/send', [\App\Http\Controllers\Shops\HelpBroadcastController::class, 'send'])
-            ->middleware('throttle:10,60')
-            ->name('send');
-    });
     Route::get('/search/{tab}', fn ($tab) => redirect()->route('shop.search.index', $tab === 'keep' ? ['tab' => 'keep'] : []))->where('tab', 'timeline|list|keep');
     Route::post('/search-preferences', [ShopSearch::class, 'savePreferences'])->name('search-preferences.save');
 
@@ -584,6 +577,10 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
             Route::get('/edit', [ShopRecruit::class, 'edit'])->name('edit');
             Route::put('/update', [ShopRecruit::class, 'update'])->name('update');
             Route::post('/toggle-status', [ShopRecruit::class, 'toggleStatus'])->name('toggle-status');
+            // Random auto-fill suggestion for catch_copy / manager_message
+            Route::get('/suggest/{category}', [ShopRecruit::class, 'randomSuggestion'])
+                ->whereIn('category', ['catch_copy', 'manager_message'])
+                ->name('suggest');
         });
     });
 
@@ -591,6 +588,9 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
     Route::prefix('mypage')->name('mypage.')->group(function () {
         Route::get('/', [ShopMypage::class, 'index'])->name('index');
         Route::post('/word', [ShopMypage::class, 'updateWord'])->name('word');
+        // 「本日すぐ入れます」宣言（24時間で自動失効）
+        Route::post('/availability', [ShopMypage::class, 'declareAvailability'])->name('availability.declare');
+        Route::delete('/availability', [ShopMypage::class, 'clearAvailability'])->name('availability.clear');
         Route::post('/search-location', [ShopMypage::class, 'updateSearchLocation'])->name('search-location.update');
         Route::get('/management', [ShopRecruit::class, 'management'])->name('management');
         Route::get('/viewers', [\App\Http\Controllers\Shops\ViewerController::class, 'index'])->name('viewers.index');

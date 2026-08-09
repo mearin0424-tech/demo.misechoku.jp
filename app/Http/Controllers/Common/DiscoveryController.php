@@ -342,6 +342,9 @@ class DiscoveryController extends Controller
             'shop_profiles.longitude',
             DB::raw("(SELECT si.image_path FROM shop_images si WHERE si.shop_id = shops.id ORDER BY si.is_main DESC, si.main_order IS NULL, si.main_order, si.id LIMIT 1) as main_image_path"),
         ];
+        if (Schema::hasColumn('shop_profiles', 'available_until')) {
+            $selectFields[] = 'shop_profiles.available_until';
+        }
         if (Schema::hasColumn('shop_jobs', 'hourly_wage_regular')) {
             $selectFields[] = 'shop_jobs.hourly_wage_regular';
         }
@@ -565,6 +568,12 @@ class DiscoveryController extends Controller
                 'review_count' => $hasReviews ? (int) ($row->review_count ?? 0) : 0,
                 'is_premium' => isset($premiumShopIds[$row->id]),
                 'is_kept' => isset($keptShopMap[$row->id]),
+                'available_active' => (function () use ($row) {
+                    $val = $row->available_until ?? null;
+                    if (empty($val)) return false;
+                    try { return \Carbon\Carbon::parse($val)->isFuture(); }
+                    catch (\Throwable) { return false; }
+                })(),
                 'recruit_bonus_lines' => $bonusLines,
                 'signup_bonus_range' => $this->discoverySignupBonusRange($bonusLines),
                 'trial_hourly_range' => $this->discoveryHourlyPair($trialHourly, $meta, 'trial'),

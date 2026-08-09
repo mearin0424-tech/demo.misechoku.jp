@@ -360,7 +360,7 @@ class RegistrationController extends Controller
 
         return redirect()
             ->route('shop.tutorial')
-            ->with('message', '店舗アカウントを登録しました。ご登録のメールアドレス宛に認証リンクをお送りしましたのでご確認ください。許可証の提出はマイページからどうぞ。');
+            ->with('message', '店舗アカウントを登録しました。ご登録のメールアドレス宛に認証リンクをお送りしましたのでご確認ください。許可証の提出は「許可証提出ページ」からどうぞ。');
     }
 
     private function buildViewData(string $role): array

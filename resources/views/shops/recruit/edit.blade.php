@@ -169,6 +169,36 @@
         margin: 0 0 8px 2px;
         letter-spacing: 0.02em;
     }
+    .job-edit-v2__label-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin: 0 0 8px 0;
+    }
+    .job-edit-v2__label-row .job-edit-v2__label { margin: 0; }
+    .job-edit-v2__suggest-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(168, 85, 247, 0.45);
+        background: rgba(168, 85, 247, 0.10);
+        color: var(--je-gold, #a78bfa);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        cursor: pointer;
+        transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+    }
+    .job-edit-v2__suggest-btn:hover {
+        background: rgba(168, 85, 247, 0.18);
+        border-color: rgba(168, 85, 247, 0.75);
+    }
+    .job-edit-v2__suggest-btn:active { transform: scale(0.96); }
+    .job-edit-v2__suggest-btn:disabled { opacity: 0.6; cursor: wait; }
+    .job-edit-v2__suggest-btn i { font-size: 0.78rem; }
     .job-edit-v2__req {
         font-size: 8px;
         font-weight: 800;
@@ -593,7 +623,7 @@
                 <i class="fas fa-exclamation-triangle"></i>
                 <span>
                     求人を公開するには、営業許可証と風営許可証の両方を提出し、運営の承認が必要です。審査が完了するまで「公開」にできません。
-                    <a href="{{ route('shop.mypage.index') }}">マイページで許可証を提出する</a>
+                    <a href="{{ route('shop.mypage.documents.index') }}">許可証提出ページへ</a>
                 </span>
             </div>
         @endif
@@ -623,14 +653,24 @@
                 <section aria-labelledby="job-sec-basic">
                     <h2 id="job-sec-basic" class="job-edit-v2__sec-title"><i class="fas fa-file-alt"></i> 店舗からのメッセージ</h2>
                     <div class="job-edit-v2__field">
-                        <label class="job-edit-v2__label" for="catch_copy">キャッチコピー <span class="job-edit-v2__req">必須</span></label>
+                        <div class="job-edit-v2__label-row">
+                            <label class="job-edit-v2__label" for="catch_copy">キャッチコピー <span class="job-edit-v2__req">必須</span></label>
+                            <button type="button" class="job-edit-v2__suggest-btn" data-suggest-target="#catch_copy" data-suggest-category="catch_copy">
+                                <i class="fas fa-dice" aria-hidden="true"></i> ランダム
+                            </button>
+                        </div>
                         <input type="text" id="catch_copy" name="catch_copy" class="job-edit-v2__input recruit-input"
                                value="{{ old('catch_copy', $recruit['catch_copy']) }}"
                                placeholder="例: 未経験でも時給5000円スタート！" maxlength="100">
-                        <p class="job-edit-v2__hint">一覧・求人票の冒頭で目立つ短い一文です。</p>
+                        <p class="job-edit-v2__hint">一覧・求人票の冒頭で目立つ短い一文です。「ランダム」で候補を差し込めます。</p>
                     </div>
                     <div class="job-edit-v2__field">
-                        <label class="job-edit-v2__label" for="message">店長からのメッセージ <span class="job-edit-v2__req">必須</span></label>
+                        <div class="job-edit-v2__label-row">
+                            <label class="job-edit-v2__label" for="message">店長からのメッセージ <span class="job-edit-v2__req">必須</span></label>
+                            <button type="button" class="job-edit-v2__suggest-btn" data-suggest-target="#message" data-suggest-category="manager_message">
+                                <i class="fas fa-dice" aria-hidden="true"></i> ランダム
+                            </button>
+                        </div>
                         <textarea id="message" name="message" rows="5" class="job-edit-v2__textarea recruit-textarea"
                                   placeholder="未経験歓迎、サポート体制など">{{ old('message', $recruit['message']) }}</textarea>
                     </div>
@@ -647,13 +687,6 @@
                 <details class="job-edit-v2__kind-details" @if($errors->any()) open @endif open>
                     <summary class="job-edit-v2__kind-summary">本入店・新規入店・ヘルプの設定</summary>
                     <div class="job-edit-v2__kind-body" style="padding-top:12px;">
-
-                        <div class="job-edit-v2__preview-row" style="margin-top:0;">
-                            <a href="{{ route('shop.recruits.show') }}" class="job-edit-v2__preview-link" target="_blank" rel="noopener">
-                                <i class="fas fa-eye"></i>
-                                求職者からの見え方を確認
-                            </a>
-                        </div>
 
                         <section aria-labelledby="job-sec-salary">
                             <h2 id="job-sec-salary" class="job-edit-v2__sec-title"><i class="fas fa-wallet"></i> 給与・ボーナス</h2>
@@ -986,13 +1019,6 @@
                         </div>
                     </div>
 
-                    <div class="job-edit-v2__preview-row">
-                        <a href="{{ route('shop.recruits.show') }}" class="job-edit-v2__preview-link" target="_blank" rel="noopener">
-                            <i class="fas fa-eye"></i>
-                            求職者からの見え方を確認
-                        </a>
-                    </div>
-
                     <section aria-labelledby="job-sec-salary-s">
                         <h2 id="job-sec-salary-s" class="job-edit-v2__sec-title"><i class="fas fa-wallet"></i> 給与・ボーナス</h2>
                         <input type="hidden" name="recruit_job_kind" value="fulltime">
@@ -1248,6 +1274,44 @@ document.addEventListener('DOMContentLoaded', function () {
             }, 2000);
         });
     }
+
+    // Random auto-fill for catchcopy / manager message
+    var suggestEndpoint = @json(route('shop.recruits.suggest', ['category' => '__CATEGORY__']));
+    document.querySelectorAll('[data-suggest-target][data-suggest-category]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var target = document.querySelector(btn.getAttribute('data-suggest-target'));
+            var category = btn.getAttribute('data-suggest-category');
+            if (!target || !category) return;
+            if (target.value && target.value.trim() !== '') {
+                if (!window.confirm('入力内容を候補で置き換えますか？（現在の内容は失われます）')) return;
+            }
+            btn.disabled = true;
+            var origHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 取得中...';
+            fetch(suggestEndpoint.replace('__CATEGORY__', encodeURIComponent(category)), {
+                headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin'
+            })
+                .then(function (res) { return res.ok ? res.json() : null; })
+                .then(function (json) {
+                    if (json && json.ok && json.body) {
+                        target.value = json.body;
+                        target.dispatchEvent(new Event('input', { bubbles: true }));
+                        target.dispatchEvent(new Event('change', { bubbles: true }));
+                        if (window.appToast) window.appToast('候補を挿入しました', 'success');
+                    } else {
+                        if (window.appToast) window.appToast('候補が見つかりませんでした', 'info');
+                    }
+                })
+                .catch(function () {
+                    if (window.appToast) window.appToast('取得に失敗しました', 'error');
+                })
+                .finally(function () {
+                    btn.disabled = false;
+                    btn.innerHTML = origHtml;
+                });
+        });
+    });
 });
 </script>
 @endpush

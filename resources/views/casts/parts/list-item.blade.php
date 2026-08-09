@@ -23,6 +23,11 @@
                     <span class="tl-row__industry-inline">{{ $item['industry_label'] }}</span>
                 @endif
                 @if(!empty($item['is_excellent'])) <x-ui.premium-badge size="sm" />@endif
+                @if(!empty($item['available_active']))
+                    <span class="shop-avail-tag" aria-label="本日すぐ入れます" style="margin-left:4px;">
+                        <i class="fas fa-bolt" aria-hidden="true"></i> 本日OK
+                    </span>
+                @endif
             </h3>
 
             {{-- 2行目：評価レビュー → 最寄り駅 → 距離 --}}

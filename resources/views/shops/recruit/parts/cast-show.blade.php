@@ -95,6 +95,17 @@
                 </div>
                 <x-ui.view-count :count="$viewCount" class="shrink-0 text-[13px] text-text-main" />
             </div>
+
+            @php
+                $shopAvailActive = !empty($shop['available_active']);
+            @endphp
+            @if($shopAvailActive)
+                <div class="mb-1">
+                    <span class="shop-avail-tag" aria-label="本日すぐ入れます">
+                        <i class="fas fa-bolt" aria-hidden="true"></i> 本日すぐ入れます
+                    </span>
+                </div>
+            @endif
             <div class="flex items-center gap-1.5 text-text-sub text-[12px] flex-wrap">
                 @if($reviewCount > 0)
                     {{-- レビュー：タップで明細（SHOP タブ内 REVIEWS）へ --}}

@@ -508,6 +508,33 @@ class RecruitmentController extends Controller
     }
 
     /**
+     * Random auto-fill suggestion for the recruit editor.
+     * Returns a single random enabled template body for the given category.
+     * Category is constrained to catch_copy / manager_message via the route pattern.
+     */
+    public function randomSuggestion(string $category)
+    {
+        if (!Schema::hasTable('ai_suggestion_templates')) {
+            return response()->json(['ok' => false, 'body' => ''], 404);
+        }
+        $row = DB::table('ai_suggestion_templates')
+            ->where('category', $category)
+            ->where('is_enabled', 1)
+            ->inRandomOrder()
+            ->select('id', 'body')
+            ->first();
+        if (!$row) {
+            return response()->json(['ok' => false, 'body' => '']);
+        }
+
+        return response()->json([
+            'ok' => true,
+            'id' => (int) $row->id,
+            'body' => (string) $row->body,
+        ]);
+    }
+
+    /**
      * 求人情報編集
      */
     public function edit()

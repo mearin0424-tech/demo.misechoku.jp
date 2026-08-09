@@ -97,7 +97,9 @@
       "Bash(bash *)",
       "Bash(python3 -c \"import io; open\\('a'\\).read\\(\\)\")",
       "Bash(python3 -c \"print\\('hi'\\)\")",
-      "Bash(python3 -c \"print\\('hi'\\); import sys; sys.exit\\(0\\)\")"
+      "Bash(python3 -c \"print\\('hi'\\); import sys; sys.exit\\(0\\)\")",
+      "Bash(chcp 65001)",
+      "Bash(php -l app/Http/Controllers/Shops/RecruitmentController.php app/Http/Controllers/Shops/MypageController.php app/Http/Controllers/Casts/RecruitmentController.php app/Http/Controllers/Common/DiscoveryController.php app/Http/Controllers/Casts/SearchController.php)"
     ]
   }
 }

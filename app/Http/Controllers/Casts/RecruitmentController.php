@@ -407,6 +407,7 @@ class RecruitmentController extends Controller
             'industry_name' => $industryName,
             'nearest_station' => $this->resolveNearestStation($shopId, $row->station1 ?? null),
             'tag_groups' => $shopTagGroups,
+            'available_active' => $this->resolveShopAvailableActive($shopId),
         ];
 
         return [
@@ -897,8 +898,30 @@ class RecruitmentController extends Controller
                     $row->close_time ?? null
                 ),
                 'tag_groups' => $shopTagGroups,
+                'available_active' => $this->resolveShopAvailableActive($shopId),
             ],
         ];
+    }
+
+    /**
+     * Return true if the shop's "本日すぐ入れます" declaration is still active.
+     */
+    private function resolveShopAvailableActive(string $shopId): bool
+    {
+        if (!Schema::hasColumn('shop_profiles', 'available_until')) {
+            return false;
+        }
+        $until = DB::table('shop_profiles')
+            ->where('shop_id', $shopId)
+            ->value('available_until');
+        if (empty($until)) {
+            return false;
+        }
+        try {
+            return \Carbon\Carbon::parse($until)->isFuture();
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     private function resolveNearestStation(string $shopId, ?string $legacyStation): string

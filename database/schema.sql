@@ -248,11 +248,14 @@ CREATE TABLE IF NOT EXISTS `shop_profiles` (
   `close_time` time DEFAULT NULL COMMENT '閉店時刻',
   `latitude` decimal(10,7) DEFAULT NULL,
   `longitude` decimal(10,7) DEFAULT NULL,
+  `available_until` timestamp NULL DEFAULT NULL COMMENT '「本日すぐ入れます」宣言の有効期限。NULL または過去なら宣言なし',
+  `available_declared_at` timestamp NULL DEFAULT NULL COMMENT '直近の available_until を宣言した時刻',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_shop_profiles_shop_id` (`shop_id`),
-  KEY `fk_shop_profiles_industry` (`industry_id`)
+  KEY `fk_shop_profiles_industry` (`industry_id`),
+  KEY `idx_shop_profiles_available_until` (`available_until`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -----------------------------------------------------------------------------
@@ -1327,6 +1330,24 @@ CREATE TABLE IF NOT EXISTS `shop_plan_subscriptions` (
   PRIMARY KEY (`id`),
   KEY `sps_shop_status_idx` (`shop_id`,`status`),
   KEY `sps_status_due_idx` (`status`,`payment_due_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------------------------
+-- ai_suggestion_templates : ランダム自動補完テンプレート
+--   - shop recruit editor uses this table for the "ランダム" auto-fill button
+--     on catchcopy and manager-message fields
+--   - category: 'catch_copy' or 'manager_message'
+--   - operations can add / remove entries from admin (out of scope here)
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `ai_suggestion_templates` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `category` varchar(40) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'catch_copy / manager_message',
+  `body` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `is_enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ast_category_enabled_idx` (`category`,`is_enabled`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET foreign_key_checks = 1;

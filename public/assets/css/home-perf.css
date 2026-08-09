@@ -277,3 +277,22 @@ body.page-home {
 body.page-home .main-swiper.swiper-css-mode .swiper-wrapper {
     transition-timing-function: initial !important;
 }
+
+/* 「本日すぐ入れます」タグ（スワイプカード内） */
+.shop-avail-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #1a1a1a;
+    box-shadow: 0 2px 6px rgba(251, 191, 36, 0.35);
+    line-height: 1.4;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+.shop-avail-tag i { font-size: 0.72em; }

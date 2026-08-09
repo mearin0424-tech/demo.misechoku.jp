@@ -132,6 +132,11 @@ class SearchController extends BaseSearchController
             $jobSelect[] = 'shop_jobs.pr as shop_job_pr';
         }
 
+        // 「本日すぐ入れます」宣言（列があるときのみ include）
+        if (Schema::hasColumn('shop_profiles', 'available_until')) {
+            $jobSelect[] = 'shop_profiles.available_until';
+        }
+
         $rows = $rows->select(array_merge(
             [
                 'shops.id',
@@ -227,6 +232,15 @@ class SearchController extends BaseSearchController
                     }
                 }
 
+                $availActive = false;
+                if (!empty($row->available_until ?? null)) {
+                    try {
+                        $availActive = Carbon::parse($row->available_until)->isFuture();
+                    } catch (\Throwable) {
+                        $availActive = false;
+                    }
+                }
+
                 return [
                     'id'                  => $row->id,
                     'shop_name'           => (string) ($row->shop_name ?: 'ショップ'),
@@ -235,6 +249,7 @@ class SearchController extends BaseSearchController
                     'catch'               => (string) ($row->shop_post_body ?? ''),
                     'overview'            => '',
                     'main_img'            => $this->getShopImages((string) $row->id)[0] ?? asset('assets/images/common/no-image.png'),
+                    'available_active'    => $availActive,
                     'hitokoto'            => $hitokotoBody,
                     'hitokoto_updated_at' => $hitokotoUpdatedAt?->locale('ja')->diffForHumans(),
                     'hitokoto_ts'         => $hitokotoUpdatedAt?->getTimestamp(),

@@ -798,6 +798,24 @@
         border-color: rgba(168, 85, 247, 0.5);
         color: #c4b5fd;
     }
+
+    /* 「本日すぐ入れます」タグ（プロフィール／検索一覧／スワイプ共通） */
+    .shop-avail-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: #1a1a1a;
+        box-shadow: 0 2px 6px rgba(251, 191, 36, 0.35);
+        line-height: 1.4;
+        white-space: nowrap;
+    }
+    .shop-avail-tag i { font-size: 0.72rem; }
 </style>
 @endpush
 
