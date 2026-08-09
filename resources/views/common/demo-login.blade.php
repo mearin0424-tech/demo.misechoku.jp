@@ -17,6 +17,44 @@
 @section('title', 'ログイン（デモ）')
 @section('body-class', 'page-demo-login')
 
+@push('styles')
+<style>
+    /* ロール選択チップ：立体感を排したフラット表現（2026-08-09）。
+       Tailwind の shadow-badge-3d / shadow-input-dark と bg-gradient を撤去し、
+       ボーダーとアクセント淡色のみで active/inactive を区別する。 */
+    .demo-role-chip {
+        background: transparent;
+        border: 1px solid rgba(168, 85, 247, 0.30);
+        color: rgba(255, 255, 255, 0.60);
+        box-shadow: none;
+    }
+    .demo-role-chip:hover {
+        border-color: rgba(168, 85, 247, 0.55);
+        color: rgba(255, 255, 255, 0.85);
+    }
+    .demo-role-chip[data-active="true"] {
+        background: rgba(168, 85, 247, 0.14);
+        border-color: rgba(168, 85, 247, 0.75);
+        color: #d8b4fe;
+        box-shadow: none;
+    }
+    /* ライトテーマ時の色調も揃える */
+    body.theme-light .demo-role-chip {
+        border-color: rgba(124, 58, 237, 0.30);
+        color: rgba(36, 31, 51, 0.55);
+    }
+    body.theme-light .demo-role-chip:hover {
+        border-color: rgba(124, 58, 237, 0.55);
+        color: rgba(36, 31, 51, 0.90);
+    }
+    body.theme-light .demo-role-chip[data-active="true"] {
+        background: rgba(196, 181, 253, 0.18);
+        border-color: rgba(124, 58, 237, 0.60);
+        color: #7c3aed;
+    }
+</style>
+@endpush
+
 @section('content')
 <div data-theme="amethyst" class="bg-base flex flex-col justify-center items-center min-h-[100dvh] relative overflow-hidden">
 
@@ -82,13 +120,13 @@
                     <div class="grid grid-cols-3 gap-2" role="tablist" aria-label="ログインロール切り替え">
                         @foreach ($roleGroups as $group)
                             @php $active = $selectedRole === $group['key']; @endphp
+                            {{-- Flat role chip: no shadow / no gradient (2026-08-09).
+                                 Active state = accent border + accent tinted background. Inactive = plain border. --}}
                             <button type="button"
                                     data-role-tab="{{ $group['key'] }}"
                                     data-demo-email="{{ $demoEmails[$group['key']] ?? 'demo@misechoku.jp' }}"
                                     data-role-label="{{ $group['label'] }}"
-                                    class="role-chip relative inline-flex items-center justify-center min-h-[42px] px-3 rounded-panel text-[12px] font-bold tracking-wider transition-all duration-200
-                                           data-[active=true]:bg-gradient-to-br data-[active=true]:from-line data-[active=true]:to-base data-[active=true]:border data-[active=true]:border-line-accent/40 data-[active=true]:text-accent-text data-[active=true]:shadow-badge-3d
-                                           data-[active=false]:bg-base data-[active=false]:border data-[active=false]:border-line/40 data-[active=false]:text-text-sub data-[active=false]:shadow-input-dark data-[active=false]:hover:text-text-main"
+                                    class="demo-role-chip relative inline-flex items-center justify-center min-h-[42px] px-3 rounded-panel text-[12px] font-bold tracking-wider transition-colors duration-150"
                                     data-active="{{ $active ? 'true' : 'false' }}">
                                 {{ $group['label'] }}
                             </button>
