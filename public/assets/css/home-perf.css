@@ -134,11 +134,16 @@ body.page-home .photo-swiper.photo-swiper--single .swiper-slide {
 }
 
 /* 10. 大量に敷かれた背景グラデ／::before スクリムのレイヤー分離を明示
-       （スワイプ中の再合成をラスタキャッシュに寄せる） */
+       （スワイプ中の再合成をラスタキャッシュに寄せる）
+
+   2026-08-09 rev.2: これらの ::before は静的な黒グラデで animation しないため
+   will-change を張るとレイヤー予約だけで GPU メモリを 10 枚分食う（1 レイヤー
+   ~3MB × カード数）。profile 側は display:none で完全に無効化済み。両方とも
+   will-change/translateZ を撤回する。 */
 body.page-home .cast-card--recruit::before,
 body.page-home .cast-card--profile::before {
-    will-change: opacity;
-    transform: translateZ(0);
+    will-change: auto;
+    transform: none;
 }
 
 
@@ -296,3 +301,27 @@ body.page-home .main-swiper.swiper-css-mode .swiper-wrapper {
     vertical-align: middle;
 }
 .shop-avail-tag i { font-size: 0.72em; }
+
+
+/* ============================================================================
+   SWIPE 中のフレーム落ち対策：常時表示チップの backdrop-filter を剥がす
+   (2026-08-09)
+
+   home.css に 21 個の backdrop-filter が散在していて、そのうち以下の 3 種類は
+   カード上に常時表示されるため、スワイプ中に毎フレーム再ぼかしされて
+   モバイル GPU がフレーム落ちを起こしていた。見た目は半透明色で維持できるので
+   ブラーだけ剥がす（背景色は home.css の指定をそのまま活かす）。
+
+   対象:
+     ・.tag-pill              — カード最下段のタグ帯（1-2 行）
+     ・.card-location,
+       .cast-card--recruit .rc-meta  — 位置情報チップ
+     ・.discovery-swipe-guide — 中央下部の "SWIPE" ピル
+   ============================================================================ */
+body.page-home .tag-pill,
+body.page-home .card-location,
+body.page-home .cast-card--recruit .rc-meta,
+body.page-home .discovery-swipe-guide {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}

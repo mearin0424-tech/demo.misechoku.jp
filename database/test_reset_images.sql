@@ -28,23 +28,23 @@ TRUNCATE TABLE `shop_images`;
 -- Cast portrait images (female-only via randomuser.me / picsum.photos)
 -- Change the numeric index in the URL to swap the person.
 -- ------------------------------------------------------------------
-INSERT INTO `cast_images` (`cast_id`, `image_path`, `type`, `status`, `is_main`, `main_order`, `created_at`, `updated_at`) VALUES
+INSERT INTO `cast_images` (`cast_id`, `image_path`, `status`, `is_main`, `main_order`, `created_at`, `updated_at`) VALUES
 -- c001 with a main + 2 sub photos (exercises the horizontal photo swiper)
-('c00000001', 'https://randomuser.me/api/portraits/women/25.jpg', 1, 0, 1, 0, NOW(), NOW()),
-('c00000001', 'https://picsum.photos/seed/misaki2/400/500', 1, 0, 0, 1, NOW(), NOW()),
-('c00000001', 'https://picsum.photos/seed/misaki3/400/500', 1, 0, 0, 2, NOW(), NOW()),
+('c00000001', 'https://randomuser.me/api/portraits/women/25.jpg', 0, 1, 0, NOW(), NOW()),
+('c00000001', 'https://picsum.photos/seed/misaki2/400/500', 0, 0, 1, NOW(), NOW()),
+('c00000001', 'https://picsum.photos/seed/misaki3/400/500', 0, 0, 2, NOW(), NOW()),
 -- c002 with a main + 1 sub
-('c00000002', 'https://randomuser.me/api/portraits/women/32.jpg', 1, 0, 1, 0, NOW(), NOW()),
-('c00000002', 'https://picsum.photos/seed/yui2/400/500', 1, 0, 0, 1, NOW(), NOW()),
+('c00000002', 'https://randomuser.me/api/portraits/women/32.jpg', 0, 1, 0, NOW(), NOW()),
+('c00000002', 'https://picsum.photos/seed/yui2/400/500', 0, 0, 1, NOW(), NOW()),
 -- c003 - c010 main only
-('c00000003', 'https://randomuser.me/api/portraits/women/47.jpg', 1, 0, 1, 0, NOW(), NOW()),
-('c00000004', 'https://randomuser.me/api/portraits/women/58.jpg', 1, 0, 1, 0, NOW(), NOW()),
-('c00000005', 'https://randomuser.me/api/portraits/women/12.jpg', 1, 0, 1, 0, NOW(), NOW()),
-('c00000006', 'https://randomuser.me/api/portraits/women/68.jpg', 1, 0, 1, 0, NOW(), NOW()),
-('c00000007', 'https://randomuser.me/api/portraits/women/71.jpg', 1, 0, 1, 0, NOW(), NOW()),
-('c00000008', 'https://randomuser.me/api/portraits/women/89.jpg', 1, 0, 1, 0, NOW(), NOW()),
-('c00000009', 'https://randomuser.me/api/portraits/women/44.jpg', 1, 0, 1, 0, NOW(), NOW()),
-('c00000010', 'https://randomuser.me/api/portraits/women/55.jpg', 1, 0, 1, 0, NOW(), NOW());
+('c00000003', 'https://randomuser.me/api/portraits/women/47.jpg', 0, 1, 0, NOW(), NOW()),
+('c00000004', 'https://randomuser.me/api/portraits/women/58.jpg', 0, 1, 0, NOW(), NOW()),
+('c00000005', 'https://randomuser.me/api/portraits/women/12.jpg', 0, 1, 0, NOW(), NOW()),
+('c00000006', 'https://randomuser.me/api/portraits/women/68.jpg', 0, 1, 0, NOW(), NOW()),
+('c00000007', 'https://randomuser.me/api/portraits/women/71.jpg', 0, 1, 0, NOW(), NOW()),
+('c00000008', 'https://randomuser.me/api/portraits/women/89.jpg', 0, 1, 0, NOW(), NOW()),
+('c00000009', 'https://randomuser.me/api/portraits/women/44.jpg', 0, 1, 0, NOW(), NOW()),
+('c00000010', 'https://randomuser.me/api/portraits/women/55.jpg', 0, 1, 0, NOW(), NOW());
 
 -- ------------------------------------------------------------------
 -- Shop images (nightclub / bar / lounge / cafe / snack themes via loremflickr)

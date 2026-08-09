@@ -66,9 +66,12 @@ document.addEventListener('DOMContentLoaded', function() {
         loopAdditionalSlides: 1,
 
         // なめらか設定：遷移速度と抵抗を控えめに、スワイプは軽く反応
-        speed: 320,
+        // 2026-08-09 rev: 体感 sluggish 対策
+        //   speed 320→220     : 1 カード遷移を Tinder 相当（~220ms）に
+        //   touchAngle 55→40  : 縦許容角を狭め、22°〜55° の photo/main デッドゾーンを縮小
+        speed: 220,
         threshold: 6,
-        touchAngle: 55,
+        touchAngle: 40,
         touchRatio: 1,
         followFinger: true,
         resistance: true,
@@ -79,7 +82,10 @@ document.addEventListener('DOMContentLoaded', function() {
         shortSwipes: true,
 
         // ★ 遷移中のタッチ/クリックは無視 → 「途中でタップして挙動が飛ぶ」を封じる
-        preventInteractionOnTransition: true,
+        // 2026-08-09 rev: true だと 220ms 完全ロックで連続フリックが引っかかるため false に。
+        //   JS モードでは cssMode 時のような「タップで飛ぶ」バグは起きにくいが、
+        //   もし再発したら preventClicks/preventClicksPropagation で個別に抑える。
+        preventInteractionOnTransition: false,
         // ネスト写真スワイパーとの競合を避けるため、クリックの propagation を切る
         preventClicks: true,
         preventClicksPropagation: true,
@@ -154,6 +160,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const photoSwipers = [];
     document.querySelectorAll('.photo-swiper').forEach((el) => {
+        // 2026-08-09 rev: loop クローンスライド内では init を skip。
+        //   Swiper の loop:true は前後 1 枚ずつ複製 (.swiper-slide-duplicate) を
+        //   DOM に足す。クローンは遷移中の 220ms しか見えず、着地時に本物へ
+        //   silently swap される。ここに nested Swiper を張ると:
+        //     ・インスタンス数 2 倍（10 枚のフィードで +20〜30 の click listener）
+        //     ・切替時に本物 / クローン間で active photo index が同期されずズレる
+        //   静的な img としてだけ描画すれば十分。
+        const parentMainSlide = el.closest('.main-swiper > .swiper-wrapper > .swiper-slide');
+        if (parentMainSlide && parentMainSlide.classList.contains('swiper-slide-duplicate')) {
+            return;
+        }
+
         const paginationEl = el.querySelector('.photo-pagination');
         const photoSlideCount = el.querySelectorAll(':scope > .swiper-wrapper > .swiper-slide').length;
 
@@ -270,20 +288,32 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // リサイズ・ビューポート変化時に Swiper を更新（モバイルのアドレスバー表示切替など）
+    // 2026-08-09 rev: rAF debounce + swiping guard を追加。
+    //   iOS Safari のアドレスバー折りたたみで visualViewport.resize が連発し、
+    //   スワイプの transform 計算とバッティングして遷移中カードが飛んでいた。
+    //   1 フレーム 1 回に coalesce + アニメーション中は次フレームへ延期する。
     function updateAllPhotoSwipers() {
         photoSwipers.forEach(function (ps) {
             if (ps && typeof ps.update === 'function') ps.update();
         });
     }
-    window.addEventListener('resize', function () {
-        if (mainSwiper) mainSwiper.update();
-        updateAllPhotoSwipers();
-    });
-    if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', function () {
+    var swiperUpdateRafId = 0;
+    function scheduleSwiperUpdate() {
+        if (swiperUpdateRafId) return;
+        swiperUpdateRafId = requestAnimationFrame(function tick() {
+            // スワイプ・遷移中は update() を後回し（現在位置が壊れるのを防ぐ）
+            if (mainSwiper && (mainSwiper.animating || mainSwiper.touches && mainSwiper.touches.diff)) {
+                swiperUpdateRafId = requestAnimationFrame(tick);
+                return;
+            }
+            swiperUpdateRafId = 0;
             if (mainSwiper) mainSwiper.update();
             updateAllPhotoSwipers();
         });
+    }
+    window.addEventListener('resize', scheduleSwiperUpdate);
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', scheduleSwiperUpdate);
     }
 
     // 3. クリックイベントの伝播停止 (ボタン類)

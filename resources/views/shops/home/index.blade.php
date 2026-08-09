@@ -6,7 +6,7 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260809-profile-split">
 {{-- Perf / tier-chip / cssMode overrides live in a separate file; load AFTER home.css. --}}
-<link rel="stylesheet" href="{{ asset('assets/css/home-perf.css') }}?v=20260809-avail-tag">
+<link rel="stylesheet" href="{{ asset('assets/css/home-perf.css') }}?v=20260809-perf-bundle">
 @endpush
 
 @php
@@ -301,7 +301,7 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/home.js') }}?v=20260802-cssmode"></script>
+<script src="{{ asset('assets/js/home.js') }}?v=20260809-swipe-perf"></script>
 {{-- LIKE / KEEP の共通トグル（全画面この1本に統一） --}}
 <script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260720-keep-confirm"></script>
 @endpush

@@ -378,10 +378,6 @@ class RecruitmentController extends Controller
 
         $shopPost = DB::table('shop_posts')
             ->where('shop_id', $shopId)
-            ->when(
-                Schema::hasColumn('shop_posts', 'type'),
-                fn ($q) => $q->where('type', 2)
-            )
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->first();
@@ -862,10 +858,6 @@ class RecruitmentController extends Controller
 
         $shopPost = DB::table('shop_posts')
             ->where('shop_id', $shopId)
-            ->when(
-                Schema::hasColumn('shop_posts', 'type'),
-                fn ($q) => $q->where('type', 2)
-            )
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->first();

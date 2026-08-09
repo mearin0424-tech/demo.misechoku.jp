@@ -88,14 +88,9 @@ class SearchController extends BaseSearchController
         ];
 
         // 各ショップごとに「ひとこと」の最新行（id 最大）を 1 件だけ参照する。
-        // shop_posts は (shop_id, type=2) の組み合わせで updateOrInsert されているので
-        // 実質ユニークだが、安全のため MAX(id) でサブクエリ化している。
+        // shop_posts.shop_id は UNIQUE 制約ありだが、安全のため MAX(id) でサブクエリ化。
         $latestShopPost = DB::table('shop_posts')
             ->select('shop_id', DB::raw('MAX(id) as latest_id'))
-            ->when(
-                Schema::hasColumn('shop_posts', 'type'),
-                fn ($q) => $q->where('type', 2)
-            )
             ->whereNotNull('body')
             ->where('body', '<>', '')
             ->groupBy('shop_id');

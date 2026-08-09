@@ -874,10 +874,6 @@ class DiscoveryController extends Controller
     {
         $latestPostSub = DB::table('shop_posts')
             ->select('shop_id', DB::raw('MAX(id) as latest_id'))
-            ->when(
-                Schema::hasColumn('shop_posts', 'type'),
-                fn ($q) => $q->where('type', 2)
-            )
             ->groupBy('shop_id');
 
         $rows = DB::table('shops')

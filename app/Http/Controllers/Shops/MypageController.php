@@ -107,10 +107,6 @@ class MypageController extends Controller
 
         $shopPost = DB::table('shop_posts')
             ->where('shop_id', $shopId)
-            ->when(
-                Schema::hasColumn('shop_posts', 'type'),
-                fn ($q) => $q->where('type', 2)
-            )
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->first();
@@ -339,12 +335,8 @@ class MypageController extends Controller
         $word = is_string($word) ? trim($word) : '';
 
         $now = Carbon::now();
-        $matchKey = ['shop_id' => $shopId];
-        if (Schema::hasColumn('shop_posts', 'type')) {
-            $matchKey['type'] = 2;
-        }
         DB::table('shop_posts')->updateOrInsert(
-            $matchKey,
+            ['shop_id' => $shopId],
             [
                 'body'       => $word,
                 'updated_at' => $now,

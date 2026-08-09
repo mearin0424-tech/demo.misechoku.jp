@@ -176,8 +176,6 @@ CREATE TABLE `cast_images` (
   `id` bigint UNSIGNED NOT NULL,
   `cast_id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `image_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `type` tinyint NOT NULL DEFAULT '0' COMMENT '1:アバター, 2:身分証等',
-  `front_and_back` tinyint NOT NULL DEFAULT '0' COMMENT '1:表, 2:裏',
   `status` tinyint NOT NULL DEFAULT '0',
   `is_main` tinyint(1) NOT NULL DEFAULT '0',
   `main_order` int DEFAULT NULL,
@@ -189,19 +187,19 @@ CREATE TABLE `cast_images` (
 -- テーブルのデータのダンプ `cast_images`
 --
 
-INSERT INTO `cast_images` (`id`, `cast_id`, `image_path`, `type`, `front_and_back`, `status`, `is_main`, `main_order`, `created_at`, `updated_at`) VALUES
-(6, 'c00000002', 'uploads/casts/gallery/Iu3pJkIIuubRr1yH4nYUueQNHVkp1lt5shbHcwRt.png', 1, 0, 0, 1, 0, '2026-03-13 07:20:18', '2026-05-04 08:42:53'),
-(19, 'c00000003', 'uploads/casts/gallery/3ZqsZxHB2C6JrbkCzXJnk9y3L8gVoy7zEcTxZqfn.jpg', 1, 0, 0, 1, 0, '2026-05-04 08:03:57', '2026-05-04 08:06:52'),
-(21, 'c00000003', 'uploads/casts/gallery/OLfZr4zHbtSjgYwOjD0IszG7hPexDAPH10kIE3pC.jpg', 1, 0, 0, 0, 1, '2026-05-04 08:06:03', '2026-05-04 08:06:52'),
-(22, 'c00000003', 'uploads/casts/gallery/N0p2CcUJcbVE8vCd8M37KmJTEqb3eTHMEXwCyvLz.jpg', 1, 0, 0, 0, 2, '2026-05-04 08:06:52', '2026-05-04 08:06:52'),
-(24, 'c00000001', 'uploads/casts/gallery/mUsEhOGZxgjhS8x8xs9bucuxiEXl10SevNQsxUzB.jpg', 1, 0, 0, 0, 1, '2026-05-04 08:42:06', '2026-05-16 15:13:12'),
-(25, 'c00000001', 'uploads/casts/gallery/Bo2WsVwXhydS0eUJJObjrVPrxu9ytRY7qzCZISfE.jpg', 1, 0, 0, 0, 3, '2026-05-04 08:42:19', '2026-05-16 15:13:12'),
-(26, 'c00000002', 'uploads/casts/gallery/HSyTRaSjRF0JuXbA1gakOdzvZfXgAHUAFsexywcx.jpg', 1, 0, 0, 0, 1, '2026-05-04 08:42:53', '2026-05-04 08:42:53'),
-(28, 'c00000004', 'uploads/casts/gallery/iB7FCvX1L26xsjiE0JYlwO8J28vORZFE2Kx6jFyj.jpg', 1, 0, 0, 0, 1, '2026-05-10 13:38:39', '2026-05-10 13:38:59'),
-(29, 'c00000004', 'uploads/casts/gallery/SnzSjGOsCRaR60btz4cLCtS4mcfuAmc3mQxbeEft.jpg', 1, 0, 0, 1, 0, '2026-05-10 13:38:57', '2026-05-10 13:38:59'),
-(30, 'c00000005', 'uploads/casts/gallery/UO5TPAl5uAYKtek8NvndlzZ8AZpBZoffq7sxAk5s.jpg', 1, 0, 0, 1, 0, '2026-05-10 13:47:29', '2026-05-10 13:47:29'),
-(31, 'c00000001', 'uploads/casts/gallery/zTzpkWgd31Zvy0xYInW5nNOtWR0Jj4g2l1fXZgrn.jpg', 1, 0, 0, 1, 0, '2026-05-10 14:25:52', '2026-05-16 15:13:12'),
-(32, 'c00000001', 'uploads/casts/gallery/UewCSGB4xAQMhiXBu5SoCgqSH4NrKzEN1h3ep0XQ.jpg', 1, 0, 0, 0, 2, '2026-05-10 14:26:05', '2026-05-16 15:13:12');
+INSERT INTO `cast_images` (`id`, `cast_id`, `image_path`, `status`, `is_main`, `main_order`, `created_at`, `updated_at`) VALUES
+(6, 'c00000002', 'uploads/casts/gallery/Iu3pJkIIuubRr1yH4nYUueQNHVkp1lt5shbHcwRt.png', 0, 1, 0, '2026-03-13 07:20:18', '2026-05-04 08:42:53'),
+(19, 'c00000003', 'uploads/casts/gallery/3ZqsZxHB2C6JrbkCzXJnk9y3L8gVoy7zEcTxZqfn.jpg', 0, 1, 0, '2026-05-04 08:03:57', '2026-05-04 08:06:52'),
+(21, 'c00000003', 'uploads/casts/gallery/OLfZr4zHbtSjgYwOjD0IszG7hPexDAPH10kIE3pC.jpg', 0, 0, 1, '2026-05-04 08:06:03', '2026-05-04 08:06:52'),
+(22, 'c00000003', 'uploads/casts/gallery/N0p2CcUJcbVE8vCd8M37KmJTEqb3eTHMEXwCyvLz.jpg', 0, 0, 2, '2026-05-04 08:06:52', '2026-05-04 08:06:52'),
+(24, 'c00000001', 'uploads/casts/gallery/mUsEhOGZxgjhS8x8xs9bucuxiEXl10SevNQsxUzB.jpg', 0, 0, 1, '2026-05-04 08:42:06', '2026-05-16 15:13:12'),
+(25, 'c00000001', 'uploads/casts/gallery/Bo2WsVwXhydS0eUJJObjrVPrxu9ytRY7qzCZISfE.jpg', 0, 0, 3, '2026-05-04 08:42:19', '2026-05-16 15:13:12'),
+(26, 'c00000002', 'uploads/casts/gallery/HSyTRaSjRF0JuXbA1gakOdzvZfXgAHUAFsexywcx.jpg', 0, 0, 1, '2026-05-04 08:42:53', '2026-05-04 08:42:53'),
+(28, 'c00000004', 'uploads/casts/gallery/iB7FCvX1L26xsjiE0JYlwO8J28vORZFE2Kx6jFyj.jpg', 0, 0, 1, '2026-05-10 13:38:39', '2026-05-10 13:38:59'),
+(29, 'c00000004', 'uploads/casts/gallery/SnzSjGOsCRaR60btz4cLCtS4mcfuAmc3mQxbeEft.jpg', 0, 1, 0, '2026-05-10 13:38:57', '2026-05-10 13:38:59'),
+(30, 'c00000005', 'uploads/casts/gallery/UO5TPAl5uAYKtek8NvndlzZ8AZpBZoffq7sxAk5s.jpg', 0, 1, 0, '2026-05-10 13:47:29', '2026-05-10 13:47:29'),
+(31, 'c00000001', 'uploads/casts/gallery/zTzpkWgd31Zvy0xYInW5nNOtWR0Jj4g2l1fXZgrn.jpg', 0, 1, 0, '2026-05-10 14:25:52', '2026-05-16 15:13:12'),
+(32, 'c00000001', 'uploads/casts/gallery/UewCSGB4xAQMhiXBu5SoCgqSH4NrKzEN1h3ep0XQ.jpg', 0, 0, 2, '2026-05-10 14:26:05', '2026-05-16 15:13:12');
 
 -- --------------------------------------------------------
 

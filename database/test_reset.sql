@@ -399,23 +399,23 @@ INSERT INTO `review_details` (`review_id`, `val`, `score`, `created_at`, `update
 --   assetPathForStored() の empty 分岐(no-image.png)に任せてください。
 -- =============================================================================
 
-INSERT INTO `cast_images` (`cast_id`, `image_path`, `type`, `status`, `is_main`, `main_order`, `created_at`, `updated_at`) VALUES
+INSERT INTO `cast_images` (`cast_id`, `image_path`, `status`, `is_main`, `main_order`, `created_at`, `updated_at`) VALUES
 -- c001 みさき（メイン + サブ2枚：写真スライド動作確認用）
-('c00000001', 'https://randomuser.me/api/portraits/women/25.jpg', 1, 0, 1, 0, NOW(), NOW()),
-('c00000001', 'https://picsum.photos/seed/misaki2/400/500', 1, 0, 0, 1, NOW(), NOW()),
-('c00000001', 'https://picsum.photos/seed/misaki3/400/500', 1, 0, 0, 2, NOW(), NOW()),
+('c00000001', 'https://randomuser.me/api/portraits/women/25.jpg', 0, 1, 0, NOW(), NOW()),
+('c00000001', 'https://picsum.photos/seed/misaki2/400/500', 0, 0, 1, NOW(), NOW()),
+('c00000001', 'https://picsum.photos/seed/misaki3/400/500', 0, 0, 2, NOW(), NOW()),
 -- c002 ゆい（メイン + サブ1枚）
-('c00000002', 'https://randomuser.me/api/portraits/women/32.jpg', 1, 0, 1, 0, NOW(), NOW()),
-('c00000002', 'https://picsum.photos/seed/yui2/400/500', 1, 0, 0, 1, NOW(), NOW()),
+('c00000002', 'https://randomuser.me/api/portraits/women/32.jpg', 0, 1, 0, NOW(), NOW()),
+('c00000002', 'https://picsum.photos/seed/yui2/400/500', 0, 0, 1, NOW(), NOW()),
 -- c003〜c010（メインのみ）女性写真は index を全員別番号で指定
-('c00000003', 'https://randomuser.me/api/portraits/women/47.jpg', 1, 0, 1, 0, NOW(), NOW()),
-('c00000004', 'https://randomuser.me/api/portraits/women/58.jpg', 1, 0, 1, 0, NOW(), NOW()),
-('c00000005', 'https://randomuser.me/api/portraits/women/12.jpg', 1, 0, 1, 0, NOW(), NOW()),
-('c00000006', 'https://randomuser.me/api/portraits/women/68.jpg', 1, 0, 1, 0, NOW(), NOW()),
-('c00000007', 'https://randomuser.me/api/portraits/women/71.jpg', 1, 0, 1, 0, NOW(), NOW()),
-('c00000008', 'https://randomuser.me/api/portraits/women/89.jpg', 1, 0, 1, 0, NOW(), NOW()),
-('c00000009', 'https://randomuser.me/api/portraits/women/44.jpg', 1, 0, 1, 0, NOW(), NOW()),
-('c00000010', 'https://randomuser.me/api/portraits/women/55.jpg', 1, 0, 1, 0, NOW(), NOW());
+('c00000003', 'https://randomuser.me/api/portraits/women/47.jpg', 0, 1, 0, NOW(), NOW()),
+('c00000004', 'https://randomuser.me/api/portraits/women/58.jpg', 0, 1, 0, NOW(), NOW()),
+('c00000005', 'https://randomuser.me/api/portraits/women/12.jpg', 0, 1, 0, NOW(), NOW()),
+('c00000006', 'https://randomuser.me/api/portraits/women/68.jpg', 0, 1, 0, NOW(), NOW()),
+('c00000007', 'https://randomuser.me/api/portraits/women/71.jpg', 0, 1, 0, NOW(), NOW()),
+('c00000008', 'https://randomuser.me/api/portraits/women/89.jpg', 0, 1, 0, NOW(), NOW()),
+('c00000009', 'https://randomuser.me/api/portraits/women/44.jpg', 0, 1, 0, NOW(), NOW()),
+('c00000010', 'https://randomuser.me/api/portraits/women/55.jpg', 0, 1, 0, NOW(), NOW());
 
 -- 店舗はナイトワーク系のキーワードで loremflickr から取得。1 店舗あたり 4〜5 枚を
 -- 別 lock 番号 + キーワードのバリエーションで生成することで写真スライド動作もカバーする。

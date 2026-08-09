@@ -262,16 +262,12 @@ class RegistrationController extends Controller
             $this->syncShopIndustries($shopId, $industryIds);
 
             if (Schema::hasTable('shop_posts') && $request->filled('word')) {
-                $shopPostRow = [
+                DB::table('shop_posts')->insert([
                     'shop_id'    => $shopId,
                     'body'       => (string) $request->input('word'),
                     'created_at' => now(),
                     'updated_at' => now(),
-                ];
-                if (Schema::hasColumn('shop_posts', 'type')) {
-                    $shopPostRow['type'] = 2;
-                }
-                DB::table('shop_posts')->insert($shopPostRow);
+                ]);
             }
 
             DB::table('shop_managers')->insert([
