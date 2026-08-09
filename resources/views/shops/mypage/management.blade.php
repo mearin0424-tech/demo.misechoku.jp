@@ -352,7 +352,7 @@
         <h2 class="mypage-stage-heading"><i class="fas fa-comments"></i> 選考中・やり取り中</h2>
         <ul class="mypage-mini-list">
             @foreach($ongoingApplications as $app)
-                <a href="{{ !empty($app['cast_id']) ? route('shop.talk.room', $app['cast_id']) : '#' }}" class="mypage-mini-row">
+                <a href="{{ !empty($app['cast_id']) ? route('shop.talk.room', ['id' => $app['cast_id'], 'talk_topic' => 'other', 'initiate' => 1]) : '#' }}" class="mypage-mini-row">
                     @if(!empty($app['cast_avatar_url']))
                         <img src="{{ $app['cast_avatar_url'] }}" alt="" class="mypage-mini-row__avatar">
                     @else
@@ -377,7 +377,7 @@
         <h2 class="mypage-stage-heading"><i class="fas fa-times-circle"></i> 不採用となった応募</h2>
         <ul class="mypage-mini-list">
             @foreach($rejectedApplications as $app)
-                <a href="{{ !empty($app['cast_id']) ? route('shop.talk.room', $app['cast_id']) : '#' }}" class="mypage-mini-row">
+                <a href="{{ !empty($app['cast_id']) ? route('shop.talk.room', ['id' => $app['cast_id'], 'talk_topic' => 'other', 'initiate' => 1]) : '#' }}" class="mypage-mini-row">
                     @if(!empty($app['cast_avatar_url']))
                         <img src="{{ $app['cast_avatar_url'] }}" alt="" class="mypage-mini-row__avatar">
                     @else

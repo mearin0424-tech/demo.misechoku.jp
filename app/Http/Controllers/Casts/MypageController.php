@@ -246,7 +246,7 @@ class MypageController extends Controller
                     'applied_at' => !empty($row->result_date)
                         ? Carbon::parse($row->result_date)->format('Y-m-d')
                         : null,
-                    'link' => route('cast.talk.room', $row->shop_id),
+                    'link' => route('cast.talk.room', ['id' => $row->shop_id, 'talk_topic' => 'other', 'initiate' => 1]),
                     'bonus_at_apply_lines' => $bonusLines,
                     'hired_hourly_wage_display' => $hiredWage,
                 ];

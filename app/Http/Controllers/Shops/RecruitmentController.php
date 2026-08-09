@@ -175,7 +175,7 @@ class RecruitmentController extends Controller
             'hired_at'       => $app['result_date'] ?? null,
             'real_start_date' => $app['real_start_date'] ?? null,
             'hired_hourly_wage_display' => $app['hired_regular_hourly_wage'] ?? null,
-            'talk_link'      => !empty($app['cast_id']) ? route('shop.talk.room', $app['cast_id']) : null,
+            'talk_link'      => !empty($app['cast_id']) ? route('shop.talk.room', ['id' => $app['cast_id'], 'talk_topic' => 'other', 'initiate' => 1]) : null,
 
             // パイプライン
             'stages'         => $stages,

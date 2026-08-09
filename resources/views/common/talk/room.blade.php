@@ -423,7 +423,7 @@
     window.talkAllQuickReplies = @json($allQuickReplySuggestions ?? []);
     window.talkNgPayload = @json($ngWordPayload ?? ['patterns' => [], 'words' => []]);
 </script>
-<script src="{{ asset('assets/js/talk-room.js') }}?v=20260808-no-refocus"></script>
+<script src="{{ asset('assets/js/talk-room.js') }}?v=20260809-initiate-fix"></script>
 @endpush
 
 @section('content')
@@ -799,7 +799,7 @@
     {{-- 入力エリア --}}
     @if(!empty($canSend))
         <div class="chat-input-area">
-            <form id="chat-form" data-url="{{ $sendUrl }}" data-action-url="{{ $actionUrl }}" data-partner-id="{{ $partnerId }}">
+            <form id="chat-form" data-url="{{ $sendUrl }}" data-action-url="{{ $actionUrl }}" data-partner-id="{{ $partnerId }}" data-initiate="{{ request()->boolean('initiate') ? '1' : '0' }}">
                 @csrf
                 <div class="chat-input-row">
                     @if($isCast)

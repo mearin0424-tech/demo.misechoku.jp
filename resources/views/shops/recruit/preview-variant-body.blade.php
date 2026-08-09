@@ -137,8 +137,8 @@
         $talkShopId = $shop['id'] ?? $shop['shop_id'] ?? $rv['id'] ?? $rv['shop_id'] ?? null;
     @endphp
     @if(!empty($talkShopId))
-        <a href="{{ route('cast.talk.room', ['id' => $talkShopId, 'job_kind' => $applyTalkJobKind, 'talk_topic' => $applyTalkTopic]) }}" class="recruit-cta-btn"><i class="fas fa-paper-plane"></i> 応募する</a>
-        <a href="{{ route('cast.talk.room', ['id' => $talkShopId, 'talk_topic' => 'other']) }}" class="recruit-cta-btn" style="margin-top:8px; opacity:.88;"><i class="fas fa-comment-dots"></i> 質問・相談</a>
+        <a href="{{ route('cast.talk.room', ['id' => $talkShopId, 'job_kind' => $applyTalkJobKind, 'talk_topic' => $applyTalkTopic, 'initiate' => 1]) }}" class="recruit-cta-btn"><i class="fas fa-paper-plane"></i> 応募する</a>
+        <a href="{{ route('cast.talk.room', ['id' => $talkShopId, 'talk_topic' => 'other', 'initiate' => 1]) }}" class="recruit-cta-btn" style="margin-top:8px; opacity:.88;"><i class="fas fa-comment-dots"></i> 質問・相談</a>
     @endif
 </div>
 @endif

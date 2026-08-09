@@ -228,6 +228,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         payload.talk_job_kind = talkJobKindField.value;
                     }
                 }
+                // Room access itself is already gated server-side by canAccessTalkRoom().
+                // If the user could load this room at all, they are allowed to send —
+                // so always include initiate:1 for the first message regardless of which
+                // entry point brought them here (search, profile, viewers list, etc.).
+                if (!hasTalkMessages) {
+                    payload.initiate = 1;
+                }
                 const result = await postJson(url, token, payload);
                 if (!result.success) {
                     throw new Error('Failed');

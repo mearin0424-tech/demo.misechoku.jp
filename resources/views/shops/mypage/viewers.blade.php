@@ -91,7 +91,7 @@
                                 </span>
                             </span>
                             <span class="viewer-row__count"><strong>{{ number_format($v['view_count']) }}</strong>回閲覧</span>
-                            <span class="viewer-row__talk" onclick="event.preventDefault(); event.stopPropagation(); window.location.href='{{ route('shop.talk.room', $v['cast_id']) }}';">
+                            <span class="viewer-row__talk" onclick="event.preventDefault(); event.stopPropagation(); window.location.href='{{ route('shop.talk.room', ['id' => $v['cast_id'], 'talk_topic' => 'other', 'initiate' => 1]) }}';">
                                 <i class="fas fa-comment-dots"></i> トーク
                             </span>
                         </a>

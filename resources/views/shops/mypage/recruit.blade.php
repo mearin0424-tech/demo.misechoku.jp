@@ -62,7 +62,7 @@
 
     @forelse($matchingList as $item)
     <div class="status-card">
-        <a href="{{ route('shop.talk.room', $item['id']) }}" class="status-item">
+        <a href="{{ route('shop.talk.room', ['id' => $item['id'], 'talk_topic' => 'other', 'initiate' => 1]) }}" class="status-item">
             <img loading="lazy" decoding="async" src="{{ $item['img'] ?? asset('assets/images/common/no-image.png') }}" class="cast-thumb-sm" onerror="this.src='{{ asset('assets/images/common/user-default.svg') }}'">
             <div class="status-info">
                 <div class="name-row">
