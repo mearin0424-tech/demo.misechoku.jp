@@ -37,7 +37,6 @@ class CharacterGuideService
         // 店舗向け
         'shop.home'                       => ['label' => '店舗：ホーム',                     'group' => 'shop',   'default_enabled' => false],
         'shop.search.index'               => ['label' => '店舗：キャスト検索',               'group' => 'shop',   'default_enabled' => false],
-        'shop.recruits.show'              => ['label' => '店舗：求人プレビュー（プロフィール）', 'group' => 'shop', 'default_enabled' => false],
         'shop.recruits.edit'              => ['label' => '店舗：求人票編集',                 'group' => 'shop',   'default_enabled' => false],
         'shop.mypage.index'               => ['label' => '店舗：マイページ',                 'group' => 'shop',   'default_enabled' => false],
         'shop.mypage.management'          => ['label' => '店舗：採用・入金管理',             'group' => 'shop',   'default_enabled' => false],

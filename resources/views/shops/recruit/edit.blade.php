@@ -1175,7 +1175,7 @@
 
         <div class="job-edit-v2__footer">
             <div class="job-edit-v2__footer-inner">
-                <a href="{{ route('shop.recruits.show') }}" class="job-edit-v2__btn-cancel">キャンセル</a>
+                <a href="{{ route('shop.mypage.index') }}" class="job-edit-v2__btn-cancel">キャンセル</a>
                 <button type="submit" form="recruit-form" class="job-edit-v2__btn-save">
                     <i class="fas fa-check"></i> 保存する
                 </button>

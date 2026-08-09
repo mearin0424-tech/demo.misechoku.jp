@@ -5350,39 +5350,38 @@ body.page-home .cast-card--profile {
     cursor: pointer;
 }
 
-/* 画像→情報の境目に敷く黒グラデ（可読性確保）
-   2026-08-09 rev.2: 前版で開始位置を 42% まで引き上げたら顔ゾーンが暗く
-   潰れ、写真が「きれいに表示されない」状態になった。求人カード（52% / 88px）
-   と同じ緩やかなカーブに戻し、情報側は下部で自然に読めるよう調整する。 */
+/* 2026-08-09 rev.3: 画像=上65% / 情報=下35% を !important で強制できたので、
+   両者は重ならない。旧 rev では ::before の巨大黒グラデで画像の下半分を潰して
+   いたが、境目のフェードは画像内側の .rc-img-gradient に任せる方が自然なので
+   この pseudo は無効化する。 */
 body.page-home .cast-card--profile::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    /* 求人カードと同じ 52% スタート。情報行が多いカードでも画像を暗く潰さない */
-    top: min(56%, calc(65% - 96px));
-    bottom: var(--home-cta-bottom, 85px);
-    background: linear-gradient(
-        to bottom,
-        rgba(5, 5, 5, 0) 0%,
-        rgba(5, 5, 5, 0.50) 34%,
-        rgba(5, 5, 5, 0.86) 72%,
-        rgba(5, 5, 5, 0.98) 100%
-    );
-    pointer-events: none;
-    z-index: 5;
+    content: none !important;
+    display: none !important;
 }
 
-/* 画像エリア：上部65%に固定（求人カードと同じ） */
+/* 画像エリア：上部65%に固定（求人カードと同じ）
+   ── 重要 ──
+   上部のフルブリードルール（.home-photo-wrap { inset:0 !important; height:100% !important }
+   line 2188-2198）が同じ要素に当たっているため、全プロパティを !important で
+   打ち消さないと画像がカード全面を占有してしまう（＝下部の情報帯と重なる）。
+   inset の 4 方向すべてを明示リセットしてから top:0 / height:65% を確定させる。 */
+body.page-home .cast-card--profile .rc-img-wrap.home-photo-wrap,
 body.page-home .cast-card--profile .rc-img-wrap {
     position: absolute !important;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 65%;
+    inset: auto !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    /* 情報スタック（Tier / 名前 / メタ / 距離 / タグ / CTA + gap × 5）が
+       約 220px あるため、フッター(75)+セーフエリア分を確保しつつ画像は
+       62% までに抑える。60% だと画像が窮屈、65% だと情報が食い込む。 */
+    height: 62% !important;
+    max-height: 62% !important;
     flex: none !important;
-    overflow: hidden;
-    border-radius: var(--home-card-radius) var(--home-card-radius) 0 0;
+    overflow: hidden !important;
+    border-radius: 0 !important;
     cursor: pointer;
 }
 
@@ -5401,17 +5400,24 @@ body.page-home .cast-card--profile .photo-swiper .swiper-slide img {
     background-color: var(--color-main);
 }
 
-/* 情報エリア：トークCTAをグローバルフッター直上に。
-   （求人カード .rc-bottom-bar と同じレイアウト） */
+/* 情報エリア：下部 35% を占有し、フッター直上に貼り付ける。
+   ── 重要 ──
+   グローバルルール（line 2220-2234）が `padding-bottom: calc(75+110)=185px !important`
+   を全 .rc-bottom-bar に強制していて、bottom:85px と合わせると内容が底から 270px
+   浮いてしまい、キャスト顔ゾーンに情報スタックが被る主原因になっていた。
+   ここで padding を明示 !important で上書きして下端まで詰める。 */
 body.page-home .cast-card--profile .rc-bottom-bar {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: var(--home-cta-bottom, 85px);
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    bottom: var(--home-cta-bottom, 85px) !important;
     z-index: 11;
-    padding: 0 14px 0;
+    padding: 8px 14px 0 !important;
     box-sizing: border-box;
     pointer-events: none;
+    /* 情報帯が黒背景の上に来るので背景グラデは不要 */
+    background: transparent !important;
 }
 body.page-home .cast-card--profile .rc-bottom-bar__stack {
     display: flex;

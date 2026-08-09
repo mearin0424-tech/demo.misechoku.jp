@@ -572,7 +572,6 @@ Route::prefix('shop')->name('shop.')->middleware('shop.auth')->group(function ()
     //   - edit / update / toggle-status：オーナー専用（給与・ボーナス・公開設定は経営判断）
     Route::prefix('recruits')->name('recruits.')->group(function () {
         Route::post('/application/hired-wage', [ShopRecruit::class, 'updateApplicationHiredWage'])->name('application-hired-wage');
-        Route::get('/show/{id?}', [ShopRecruit::class, 'show'])->name('show');
         Route::middleware('shop.owner')->group(function () {
             Route::get('/edit', [ShopRecruit::class, 'edit'])->name('edit');
             Route::put('/update', [ShopRecruit::class, 'update'])->name('update');

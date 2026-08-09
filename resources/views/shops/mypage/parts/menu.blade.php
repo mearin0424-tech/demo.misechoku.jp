@@ -8,7 +8,7 @@
 @endphp
 <div class="cast-mypage-menu-section {{ $fullWidth ? 'cast-mypage-menu-section--full-width' : '' }}">
     <div class="mypage-section mypage-quick-actions cast-mypage-menu-buttons">
-        <a href="{{ route('shop.recruits.show') }}" class="menu-btn job {{ $current === 'jobdescription' ? 'is-current' : '' }}">
+        <a href="{{ route('shop.recruits.edit') }}" class="menu-btn job {{ $current === 'jobdescription' ? 'is-current' : '' }}">
             <div class="menu-btn-shine"></div>
             <div class="menu-btn-content">
                 <div class="menu-btn-icon">

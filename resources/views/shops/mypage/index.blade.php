@@ -115,7 +115,7 @@
                 @if(!$licenseApproved)
                     <a href="{{ route('shop.mypage.documents.index') }}" class="mypage-alert__btn">許可証を登録する</a>
                 @else
-                    <a href="{{ route('shop.recruits.show') }}" class="mypage-alert__btn">公開設定へ</a>
+                    <a href="{{ route('shop.recruits.edit') }}" class="mypage-alert__btn">公開設定へ</a>
                 @endif
             </div>
         @endunless
@@ -253,7 +253,7 @@
                                 <i class="fas {{ ($js['is_published'] ?? false) ? 'fa-circle-check' : 'fa-pause' }} text-[10px]"></i>
                                 {{ $js['status_label'] ?? '未設定' }}
                             </span>
-                            <a href="{{ route('shop.recruits.show') }}" class="text-[11px] font-bold text-accent-text underline">ステータス管理</a>
+                            <a href="{{ route('shop.recruits.edit') }}" class="text-[11px] font-bold text-accent-text underline">ステータス管理</a>
                         </div>
                         <div class="flex items-center gap-4 text-[11px]">
                             <span><span class="text-text-sub">応募</span> <strong class="text-text-main">{{ number_format($js['applicant_count'] ?? 0) }}</strong></span>

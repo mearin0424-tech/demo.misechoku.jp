@@ -4,7 +4,7 @@
 @section('body-class', 'no-scroll page-home')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260809-profile-relayout">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}?v=20260809-profile-split">
 {{-- Perf / tier-chip / cssMode overrides live in a separate file; load AFTER home.css. --}}
 <link rel="stylesheet" href="{{ asset('assets/css/home-perf.css') }}?v=20260809-avail-tag">
 @endpush

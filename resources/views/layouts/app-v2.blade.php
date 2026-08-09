@@ -108,7 +108,6 @@
             'shop.mypage.index',
             'cast.shopprofile.show',      // キャスト → 店舗プロフィール
             'shop.castprofileview.show',  // 店舗 → キャストプロフィール
-            'shop.recruits.show'          // 店舗 → 自求人プレビュー（実質プロフィール画面）
         );
 
         // premium-white 対象ページは theme-light と競合しないよう除外（premium-white が優先）
@@ -787,7 +786,7 @@
             {{-- 面談リマインダー（24h 以内の面談確定案件があれば表示） --}}
             @include('layouts.parts.interview-reminder-banner')
 
-            @if(request()->routeIs('cast.shopprofile.show', 'shop.castprofileview.show', 'cast.mypage.index', 'shop.mypage.index', 'shop.recruits.show', 'share.cast.show', 'share.recruit.show'))
+            @if(request()->routeIs('cast.shopprofile.show', 'shop.castprofileview.show', 'cast.mypage.index', 'shop.mypage.index', 'share.cast.show', 'share.recruit.show'))
                 @yield('content')
             @else
                 <div class="content-wrapper animate-fadeIn">

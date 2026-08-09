@@ -101,7 +101,8 @@
       "Bash(chcp 65001)",
       "Bash(php -l app/Http/Controllers/Shops/RecruitmentController.php app/Http/Controllers/Shops/MypageController.php app/Http/Controllers/Casts/RecruitmentController.php app/Http/Controllers/Common/DiscoveryController.php app/Http/Controllers/Casts/SearchController.php)",
       "Bash(php -l routes/web.php)",
-      "Bash(php -l resources/views/shops/mypage/index.blade.php resources/views/shops/recruit/edit.blade.php resources/views/shops/home/index.blade.php resources/views/common/talk/room.blade.php)"
+      "Bash(php -l resources/views/shops/mypage/index.blade.php resources/views/shops/recruit/edit.blade.php resources/views/shops/home/index.blade.php resources/views/common/talk/room.blade.php)",
+      "Bash(php -l app/Http/Controllers/Shops/RecruitmentController.php app/Services/CharacterGuideService.php routes/web.php)"
     ]
   }
 }

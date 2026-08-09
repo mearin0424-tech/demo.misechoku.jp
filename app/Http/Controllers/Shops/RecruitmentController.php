@@ -476,38 +476,6 @@ class RecruitmentController extends Controller
     }
 
     /**
-     * 求人情報詳細（プレビュー）
-     */
-    public function show($id = null)
-    {
-        $shopId = $id ? $this->normalizeShopId($id) : $this->currentShopId();
-        $recruitData = $this->getRecruitData($shopId);
-        $isKeptByCurrentCast = $this->isKeptByCurrentCast($shopId);
-        $recruitData['recruit']['is_kept'] = $isKeptByCurrentCast;
-        $recruitData['recruit_trial']['is_kept'] = $isKeptByCurrentCast;
-        $recruitData['recruit_help']['is_kept'] = $isKeptByCurrentCast;
-        $shareText = trim((string) ($recruitData['recruit']['catch_copy'] ?? ''));
-        if ($shareText === '') {
-            $shareText = trim((string) ($recruitData['recruit']['message'] ?? ''));
-        }
-        $numericShopId = $this->toNumericShopId($shopId);
-
-        return view('shops.recruit.show', [
-            'pageId' => 'job_info',
-            'recruit' => $recruitData['recruit'],
-            'recruit_trial' => $recruitData['recruit_trial'],
-            'recruit_help' => $recruitData['recruit_help'],
-            'usesJobTypes' => $this->shopJobsUseMultipleTypes(),
-            'horizontalShopJobs' => $this->shopJobsHorizontalSchema(),
-            'shop'   => $recruitData['shop'],
-            'shareUrl' => $numericShopId ? route('share.recruit.show', ['id' => $numericShopId]) : null,
-            'shareTitle' => (($recruitData['shop']['name'] ?? null) ?: ($recruitData['recruit']['store_name'] ?? '店舗')) . 'の求人情報',
-            'shareText' => $shareText !== '' ? mb_strimwidth($shareText, 0, 80, '…') : 'ミセチョクの求人情報です。',
-            'isPublicShare' => false,
-        ]);
-    }
-
-    /**
      * Random auto-fill suggestion for the recruit editor.
      * Returns a single random enabled template body for the given category.
      * Category is constrained to catch_copy / manager_message via the route pattern.
