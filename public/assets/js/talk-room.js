@@ -278,7 +278,11 @@ document.addEventListener('DOMContentLoaded', function() {
             } finally {
                 isSubmitting = false;
                 submitBtn.disabled = false;
-                messageInput.focus();
+                // NOTE: 送信ボタンタップで input からフォーカスが外れると
+                // モバイルではキーボードが閉じる → 100dvh レイアウトが元に戻り、
+                // ヘッダー・定型文パネルなどの再フローで一瞬 "画面が消える" ように見えていた。
+                // ここで再フォーカスすると即キーボードが戻り、レイアウトが 2 回フリップして
+                // 逆に体感が悪化する。Instagram DM 同様、キーボードは自然に閉じたままにする。
                 evaluateNgState();
             }
         });

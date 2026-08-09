@@ -43,38 +43,46 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ================================================================
-    // メインの上下スワイプ：cssMode で iOS/Android のネイティブ慣性に乗せる
-    // (2026-08-02 rev.2 - 最大ぬるぬる化)
+    // メインの上下スワイプ：Swiper 標準 JS モード（cssMode オフ）。
     // ----------------------------------------------------------------
-    // 【今回の要】cssMode: true
-    //   Swiper 8+ が持つ「CSS Scroll Snap ベース」の動作モード。
-    //   .swiper-wrapper を native スクロール container にして、
-    //   スワイプ・慣性・スナップを全て browser 側に委譲する。
-    //   → JS の requestAnimationFrame ループ / touch handler / speed 補間が
-    //     全て bypass されるため、モバイル GPU が持つ 60fps 以上の native scroll に
-    //     直接乗る。iOS Safari では 120Hz ProMotion にも自動追従。
+    // 【方針】(2026-08-08 rev.3)
+    //   以前は cssMode: true（CSS Scroll Snap 委譲）で 120Hz を狙っていたが、
+    //   ・loop + cssMode の組み合わせで最後のカードから 1 枚目へ回り込む挙動が壊れる
+    //   ・遷移途中にタップされると snap 位置が飛んで別カードへ着地する
+    //   の 2 症状を実機で確認したため、Swiper 標準の JS エンジンへ戻す。
     //
-    // cssMode で無効化される Swiper option（→ 影響なし）:
-    //   resistance / resistanceRatio / followFinger / longSwipes*/ shortSwipes /
-    //   touchAngle / threshold / touchRatio / speed（native scroll 速度が使われる）
-    //
-    // 引き続き使えるもの: loop / direction / slidesPerView / mousewheel / keyboard /
-    //   on.init / on.slideChange
-    //
-    // 【注意】cssMode + nested Swiper（写真の横スワイパー）は独立して動く。
-    //   ・写真スワイパーは JS のまま（cssMode は入れ子で不安定なため）
-    //   ・写真領域の touch-action: pan-x が縦スワイプを親に通すガードになる
+    //   JS モードでは preventInteractionOnTransition が使えるので、
+    //   「スワイプ中にタップして飛ぶ」問題は根本ブロックできる。
+    //   loop も Swiper 標準の複製スライド方式で確実にラップする。
     // ================================================================
     const mainSwiper = new Swiper('.main-swiper', {
         direction: 'vertical',
         slidesPerView: 1,
         slidesPerGroup: 1,
         centeredSlides: true,
+        // 2 枚以上あるなら常にループ（最後まで到達したら 1 枚目に戻る = 無限回転）
         loop: slideCount >= 2,
         rewind: false,
+        loopAdditionalSlides: 1,
 
-        // ★★ 最強設定：ネイティブ CSS Scroll Snap へ委譲 ★★
-        cssMode: true,
+        // なめらか設定：遷移速度と抵抗を控えめに、スワイプは軽く反応
+        speed: 320,
+        threshold: 6,
+        touchAngle: 55,
+        touchRatio: 1,
+        followFinger: true,
+        resistance: true,
+        resistanceRatio: 0.85,
+        longSwipes: true,
+        longSwipesRatio: 0.20,
+        longSwipesMs: 260,
+        shortSwipes: true,
+
+        // ★ 遷移中のタッチ/クリックは無視 → 「途中でタップして挙動が飛ぶ」を封じる
+        preventInteractionOnTransition: true,
+        // ネスト写真スワイパーとの競合を避けるため、クリックの propagation を切る
+        preventClicks: true,
+        preventClicksPropagation: true,
 
         mousewheel: {
             enabled: true,

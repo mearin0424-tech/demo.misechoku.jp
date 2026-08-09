@@ -423,7 +423,7 @@
     window.talkAllQuickReplies = @json($allQuickReplySuggestions ?? []);
     window.talkNgPayload = @json($ngWordPayload ?? ['patterns' => [], 'words' => []]);
 </script>
-<script src="{{ asset('assets/js/talk-room.js') }}?v=20260802-tpl-help"></script>
+<script src="{{ asset('assets/js/talk-room.js') }}?v=20260808-no-refocus"></script>
 @endpush
 
 @section('content')
