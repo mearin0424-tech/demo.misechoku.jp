@@ -54,6 +54,45 @@
             </div>
         </div>
 
+        {{-- ===== 「本日すぐ入れます」宣言（キャスト側と挙動 / 配置を統一） =====
+             設定した「その日中（本日 23:59 まで）」有効。
+             キャスト MyPage と同じく、アイコン+ひとことの直下・店舗名の上に配置。 --}}
+        @php
+            $shopAvail = $shopAvailable ?? ['active' => false, 'until_iso' => null];
+        @endphp
+        <div id="shop-availability-card"
+             class="shop-avail-card {{ $shopAvail['active'] ? 'is-on' : '' }} mb-4"
+             data-availability-declare-url="{{ route('shop.mypage.availability.declare') }}"
+             data-availability-clear-url="{{ route('shop.mypage.availability.clear') }}"
+             data-availability-until="{{ $shopAvail['until_iso'] ?? '' }}">
+            <div class="shop-avail-card__row">
+                <span class="shop-avail-card__badge" aria-hidden="true"><i class="fas fa-bolt"></i></span>
+                <div class="shop-avail-card__text">
+                    <p class="shop-avail-card__title" data-avail-title>
+                        {{ $shopAvail['active'] ? '本日すぐ入れます：宣言中' : '本日すぐ入れます' }}
+                    </p>
+                    <p class="shop-avail-card__lead" data-avail-lead>
+                        @if($shopAvail['active'])
+                            本日 23:59 まで、スワイプ・検索・プロフィールで優先表示されます。
+                        @else
+                            本日中、スワイプ・検索・プロフィールで優先表示されます。
+                        @endif
+                    </p>
+                </div>
+                <div class="shop-avail-card__actions" data-avail-actions>
+                    @if($shopAvail['active'])
+                        <button type="button" class="shop-avail-card__btn shop-avail-card__btn--danger" data-availability-clear>
+                            <i class="fas fa-xmark"></i> OFF
+                        </button>
+                    @else
+                        <button type="button" class="shop-avail-card__btn shop-avail-card__btn--primary" data-availability-declare>
+                            <i class="fas fa-bolt"></i> 本日 ON
+                        </button>
+                    @endif
+                </div>
+            </div>
+        </div>
+
         {{-- ===== 店舗名 + 控えめバッヂ行 =====
              旧: 優良店/レビューの大型2カラムカード → 目立ちすぎのため
              店舗名の下の小型チップに格下げ（情報は維持、占有面積を1/4に） --}}
@@ -139,44 +178,6 @@
             </a>
         </div>
 
-        {{-- ===== 「本日すぐ入れます」宣言（キャスト側と挙動を統一） =====
-             設定した「その日中（本日 23:59 まで）」有効。
-             ボタンは控えめ配置（コンパクト・アウトライン系）。 --}}
-        @php
-            $shopAvail = $shopAvailable ?? ['active' => false, 'until_iso' => null];
-        @endphp
-        <div id="shop-availability-card"
-             class="shop-avail-card {{ $shopAvail['active'] ? 'is-on' : '' }} mb-3"
-             data-availability-declare-url="{{ route('shop.mypage.availability.declare') }}"
-             data-availability-clear-url="{{ route('shop.mypage.availability.clear') }}"
-             data-availability-until="{{ $shopAvail['until_iso'] ?? '' }}">
-            <div class="shop-avail-card__row">
-                <span class="shop-avail-card__badge" aria-hidden="true"><i class="fas fa-bolt"></i></span>
-                <div class="shop-avail-card__text">
-                    <p class="shop-avail-card__title" data-avail-title>
-                        {{ $shopAvail['active'] ? '本日すぐ入れます：宣言中' : '本日すぐ入れます' }}
-                    </p>
-                    <p class="shop-avail-card__lead" data-avail-lead>
-                        @if($shopAvail['active'])
-                            本日 23:59 まで、スワイプ・検索・プロフィールで優先表示されます。
-                        @else
-                            本日中、スワイプ・検索・プロフィールで優先表示されます。
-                        @endif
-                    </p>
-                </div>
-                <div class="shop-avail-card__actions" data-avail-actions>
-                    @if($shopAvail['active'])
-                        <button type="button" class="shop-avail-card__btn shop-avail-card__btn--danger" data-availability-clear>
-                            <i class="fas fa-xmark"></i> OFF
-                        </button>
-                    @else
-                        <button type="button" class="shop-avail-card__btn shop-avail-card__btn--primary" data-availability-declare>
-                            <i class="fas fa-bolt"></i> 本日 ON
-                        </button>
-                    @endif
-                </div>
-            </div>
-        </div>
     </div>
 
     {{-- ===== Tabs：GALLERY / JOB / PROFILE の3タブ構成（キャスト MyPage とデザイン・名称を統一） ===== --}}

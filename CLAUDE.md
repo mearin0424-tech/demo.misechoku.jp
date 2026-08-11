@@ -158,7 +158,7 @@ database/
 - `dashboard.view`
 - `operations.invoices` / `operations.deposits` / `operations.verification` / `operations.inquiries`
 - `content.notices` / `content.columns`
-- `master.ngwords` / `master.masters` / `master.notification_spec` / `master.character_guide`
+- `master.ngwords` / `master.masters` / `master.notification_spec` / `master.character_guide` / `master.talk_quick_replies`
 - `analytics.sales`
 - `accounts.shops.view|manage|private` / `accounts.casts.view|manage|private` / `accounts.admins`
 - `policies.manage`
@@ -311,6 +311,7 @@ database/
 - **店舗スタッフ**: `shop_managers` で 1 店舗に複数ログインアカウントを持たせられる。オーナー（`role=owner`）は 1 店舗 1 名で制約。オーナー限定操作は `shop.owner` ミドルウェアで防御（求人編集・給与・書類提出・入金確認・振込・銀行口座・スタッフ CRUD など）。
 - **書類審査**: `DocumentReviewService` がキャスト本人確認（`cast_identity_documents`）と店舗許可証（`shop_license_documents`、風営 / 深夜酒類）の審査を担当。運営が `/admin/verification` から承認 / 差戻し。原本ファイルは private disk からストリーム配信のみ（Web 直アクセス禁止）。
 - **オコジョガイド**: `character_guide_settings`（route_name UNIQUE）に画面別 ON/OFF・メッセージを保存。ページ内説明文の正本。`CharacterGuideService::CATALOG` にカタログ定義。
+- **トーククイック定型文**: `talk_quick_reply_templates`（owner_type × status_code × sort_order）に候補文を保存。`TalkQuickReplyCatalog` が読み込み、DB 未登録／未整備時は `DEFAULT_TEMPLATES` にフォールバック。運営は `/admin/talk-quick-replies`（`master.talk_quick_replies` 権限）から編集。
 - **通報 / 問合せ / お知らせ / 規約**: `user_reports` / `support_inquiries` / `notices` / `notifications` / `policy_documents` + `policy_chapters` + `policy_revisions`
 - **通知**: `notifications` テーブル + `NotificationService`。Web Push は `push_subscriptions` + `PushNotificationService`。`/api/push/subscribe` で購読、テスト送信はヘッダーのベルポップから。
 - **退会**: `POST /setting/account/withdraw` は PII 匿名化 + 最後のオーナー保護 + パスワード再入力必須。
@@ -334,6 +335,7 @@ database/
 | —      | /admin/verification | 本人確認・書類審査 |
 | —      | /admin/masters | マスタメンテナンス |
 | —      | /admin/character-guide | オコジョガイド設定 |
+| —      | /admin/talk-quick-replies | トーククイック定型文マスタ（状況×役割） |
 | —      | /subscription | Premium プラン申込・請求書 / 領収書 DL（店舗） |
 | —      | /shop/mypage/viewers | 閲覧キャスト一覧（Premium 限定） |
 | —      | /shop/mypage/management | 店舗：採用・入金管理 |

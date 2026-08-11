@@ -232,37 +232,6 @@
         color: #6d28d9; font-size: 0.82rem; line-height: 1.5;
     }
 
-    /* フローティング CTA（ライト画面用の白バー） */
-    .deposit-cta-bar {
-        position: fixed; left: 50%; transform: translateX(-50%);
-        bottom: var(--footer-height, 60px); z-index: 90;
-        width: min(100vw, var(--max-content-width, 430px)); max-width: 100%;
-        padding: 10px var(--content-padding-x, 16px) calc(10px + env(safe-area-inset-bottom, 0));
-        background: rgba(255, 255, 255, 0.97);
-        border-top: 1px solid var(--color-line, #e6e0f3);
-        box-shadow: 0 -8px 24px rgba(76, 29, 149, 0.15);
-        animation: deposit-cta-slide-up 0.3s ease;
-    }
-    @keyframes deposit-cta-slide-up {
-        from { transform: translate(-50%, 100%); opacity: 0; }
-        to { transform: translate(-50%, 0); opacity: 1; }
-    }
-    .deposit-cta-bar__inner { display: flex; align-items: center; gap: 12px; }
-    .deposit-cta-bar__info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-    .deposit-cta-bar__amount { display: inline-flex; align-items: baseline; gap: 4px; color: #6d28d9; font-weight: 800; }
-    .deposit-cta-bar__amount strong { font-size: 1.05rem; font-weight: 900; color: #241f33; overflow: hidden; text-overflow: ellipsis; max-width: 50vw; white-space: nowrap; }
-    .deposit-cta-bar__amount i { font-size: 0.9rem; color: #7c3aed; }
-    .deposit-cta-bar__label { font-size: 0.7rem; color: #5f5876; font-weight: 600; }
-    .deposit-cta-bar__btn {
-        flex: 0 0 auto; margin-left: auto; padding: 12px 18px; border-radius: 999px;
-        background: linear-gradient(135deg, #c4b5fd, #a78bfa 48%, #7c3aed);
-        color: #1a0814; border: 0; font-weight: 900; font-size: 0.92rem; cursor: pointer;
-        box-shadow: 0 6px 16px rgba(168, 85, 247, 0.45);
-        display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
-    }
-    .deposit-cta-bar__btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(168, 85, 247, 0.55); }
-    body:has(.deposit-cta-bar) .shop-management-shell { padding-bottom: calc(var(--footer-height, 60px) + 80px) !important; }
-
     /* モーダル（承認・入金処理共通）：ライト画面に追従して白パネル */
     .shop-action-modal { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; background: rgba(20, 10, 35, 0.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); padding: 0; }
     .shop-action-modal[hidden] { display: none; }
@@ -308,10 +277,13 @@
         $hiredCases = $hiredCases ?? [];
         $ongoingApplications = $ongoingApplications ?? [];
         $rejectedApplications = $rejectedApplications ?? [];
-        $activeCases = collect($hiredCases)->filter(fn ($c) => empty($c['is_completed']))->values();
+        // Actionable cases first, preserve original relative order otherwise (stable sort via sortBy).
+        $activeCases = collect($hiredCases)
+            ->filter(fn ($c) => empty($c['is_completed']))
+            ->sortBy(fn ($c) => empty($c['actionable']) ? 1 : 0)
+            ->values();
         $completedCases = collect($hiredCases)->filter(fn ($c) => !empty($c['is_completed']))->values();
         $actionableCount = $activeCases->filter(fn ($c) => !empty($c['actionable']))->count();
-        $primaryActionable = $activeCases->filter(fn ($c) => !empty($c['actionable']))->first();
     @endphp
 
     {{-- 絞り込みチップ（要対応/待ち/完了） --}}
@@ -403,27 +375,6 @@
         </div>
     @endif
 </div>
-
-@if($primaryActionable)
-    <div class="deposit-cta-bar" id="deposit-cta-bar"
-         data-application-id="{{ $primaryActionable['application_id'] }}"
-         data-deposit-id="{{ $primaryActionable['deposit']['id'] ?? '' }}"
-         data-action="{{ $primaryActionable['actionable'] }}">
-        <div class="deposit-cta-bar__inner">
-            <div class="deposit-cta-bar__info">
-                <span class="deposit-cta-bar__amount">
-                    <i class="fas fa-user"></i>
-                    <strong>{{ $primaryActionable['cast_name'] }}</strong>
-                </span>
-                <span class="deposit-cta-bar__label">{{ $primaryActionable['actionable_label'] }}</span>
-            </div>
-            <button type="button" class="deposit-cta-bar__btn" id="deposit-cta-bar-submit">
-                <i class="fas {{ $primaryActionable['actionable'] === 'approve' ? 'fa-check-circle' : 'fa-yen-sign' }}"></i>
-                {{ $primaryActionable['actionable_label'] }}
-            </button>
-        </div>
-    </div>
-@endif
 
 {{-- 承認モーダル --}}
 <div id="shop-approve-modal" class="shop-action-modal" role="dialog" aria-labelledby="shop-approve-modal-title" aria-modal="true" hidden>
@@ -599,20 +550,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // フローティング CTA
-    var ctaBar = document.getElementById('deposit-cta-bar');
-    var ctaBtn = document.getElementById('deposit-cta-bar-submit');
-    if (ctaBar && ctaBtn) {
-        ctaBtn.addEventListener('click', function () {
-            var action = ctaBar.getAttribute('data-action');
-            var appId = ctaBar.getAttribute('data-application-id');
-            if (action === 'approve') {
-                openApproveForCase(appId);
-            } else if (action === 'pay') {
-                openPayForCase('');
-            }
-        });
-    }
 });
 </script>
 @endpush

@@ -453,14 +453,21 @@
 .msg-left { justify-content: flex-start; }
 .msg-right { justify-content: flex-end; }
 
-/* 共通レイアウト（.content-wrapper / main 等）の flex で子が伸びないよう、トークルーム内で明示 */
+/* 吹き出しは「アバター＋時刻の余白」を除いた残り幅いっぱいに広げる。
+   .message-block は行の残り幅を占有し、内側の .message-inline / .message-bubble
+   がそれに追従する。 */
 #talk-room-container .message-row .message-block {
-    flex: 0 0 auto;
-    width: max-content;
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
 }
 #talk-room-container .message-inline {
-    align-self: flex-start;
-    width: max-content;
+    align-self: stretch;
+    width: 100%;
+}
+#talk-room-container .message-inline > .message-bubble {
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 /* 相手メッセージ用：吹き出し左端のアイコン */
@@ -478,30 +485,29 @@
     display: block;
 }
 
-/* 吹き出し＋メタのブロック（参考: max-w-[75%] で幅上限、内容で幅が決まる） */
+/* 吹き出し＋メタのブロック：行の残り幅いっぱいに広がる */
 .message-block {
-    display: inline-flex;
+    display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    max-width: 75%;
-    width: max-content;
+    align-items: stretch;
+    width: 100%;
+    max-width: 100%;
     min-width: 0;
 }
 .msg-left .message-block {
-    align-items: flex-start;
-    max-width: calc(100% - 42px);
+    align-items: stretch;
 }
 .msg-right .message-block {
     box-sizing: border-box;
 }
 
-/* 時刻・既読（bubble 横配置）・内容幅に収める */
+/* 時刻・既読は吹き出し横に並べ、吹き出し側が残り幅を吸収する */
 .message-inline {
     display: flex;
     align-items: center;
     gap: 8px;
+    width: 100%;
     max-width: 100%;
-    width: max-content;
     min-width: 0; /* flexで幅が縮むようにする */
 }
 

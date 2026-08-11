@@ -41,6 +41,7 @@ use App\Http\Controllers\Admin\BankController as AdminBank;
 use App\Http\Controllers\Admin\PolicyController as AdminPolicy;
 use App\Http\Controllers\Admin\NotificationSpecController as AdminNotificationSpec;
 use App\Http\Controllers\Admin\CharacterGuideController as AdminCharacterGuide;
+use App\Http\Controllers\Admin\TalkQuickReplyController as AdminTalkQuickReply;
 
 // 蠎苓・蛛ｴ
 use App\Http\Controllers\Common\DiscoveryController as DiscoveryHome;
@@ -245,6 +246,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::middleware('admin.permission:master.character_guide')->group(function () {
             Route::get('/character-guide', [AdminCharacterGuide::class, 'index'])->name('character-guide.index');
             Route::put('/character-guide', [AdminCharacterGuide::class, 'update'])->name('character-guide.update');
+        });
+
+        // トーククイック定型文マスタ (状況x役割ごとの候補文)
+        Route::middleware('admin.permission:master.talk_quick_replies')->group(function () {
+            Route::get('/talk-quick-replies', [AdminTalkQuickReply::class, 'index'])->name('talk-quick-replies.index');
+            Route::put('/talk-quick-replies', [AdminTalkQuickReply::class, 'update'])->name('talk-quick-replies.update');
+            Route::post('/talk-quick-replies/reset', [AdminTalkQuickReply::class, 'reset'])->name('talk-quick-replies.reset');
         });
 
         // 縺顔衍繧峨○邂｡逅・

@@ -79,7 +79,7 @@
 ### 2.3 応募・トーク・面談
 
 1. キャストが求人に応募 → `shop_job_applications` レコード作成 + トークルーム発生
-2. トーク（`/(cast|shop)/talk`）で会話。定型文は `/setting/talk-templates/*`
+2. トーク（`/(cast|shop)/talk`）で会話。定型文は `/setting/talk-templates/*`（ユーザー個別 4 スロット）+ `talk_quick_reply_templates` テーブル（運営が状況×役割ごとに管理する候補文、`/admin/talk-quick-replies`）
 3. 店舗が `interview_offer`（候補日提示）→ キャストが `interview_confirm`（受諾）
 4. 面談後、店舗が `hired` / `rejected`（両方 shop-only）
 5. 双方の取消: 店舗発 `interview_cancel_request` → キャスト受諾 `interview_cancel_accept`
@@ -198,6 +198,7 @@
 | `/admin/notices`, `/admin/columns` | — | コンテンツ管理 |
 | `/admin/inquiries`, `/admin/support-inquiries`, `/admin/user-reports` | — | 問合せ・通報管理 |
 | `/admin/character-guide` | — | オコジョガイド設定 |
+| `/admin/talk-quick-replies` | — | トーククイック定型文マスタ（状況×役割） |
 | `/admin/notification-spec` | — | 通知・タスク仕様 |
 | `/admin/policies/{about,terms,privacy}` | — | 規約管理 |
 | `/admin/bank`, `/admin/admin-accounts` | — | 運営口座・アカウント |
@@ -250,6 +251,7 @@
 - `admin_operation_logs` / `admin_notification_settings` / `admin_role_permissions`
 - `policy_documents` / `policy_chapters` / `policy_revisions`
 - `character_guide_settings`
+- `talk_quick_reply_templates`（トークルームのステータス×役割別クイック定型文マスタ）
 - `support_inquiries` / `user_reports`
 
 **Laravel 標準**
@@ -288,7 +290,7 @@
 - ダッシュボード: `dashboard.view`
 - オペレーション: `operations.invoices` / `operations.deposits` / `operations.verification` / `operations.inquiries`
 - コンテンツ: `content.notices` / `content.columns`
-- マスタ: `master.ngwords` / `master.masters` / `master.notification_spec` / `master.character_guide`
+- マスタ: `master.ngwords` / `master.masters` / `master.notification_spec` / `master.character_guide` / `master.talk_quick_replies`
 - アナリティクス: `analytics.sales`
 - アカウント: `accounts.{shops,casts}.{view,manage,private}` / `accounts.admins`
 - 規約: `policies.manage`

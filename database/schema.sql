@@ -1280,6 +1280,26 @@ CREATE TABLE IF NOT EXISTS `user_talk_templates` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -----------------------------------------------------------------------------
+-- talk_quick_reply_templates : 運営が管理するステータス別クイック定型文（マスタ）
+--   - トークルーム下部のクイック定型文パネルに、応募ステータス x 役割で出し分ける
+--   - TalkQuickReplyCatalog がこのテーブルを読み、無ければハードコード配列にフォールバック
+--   - 運営は /admin/talk-quick-replies から編集
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `talk_quick_reply_templates` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `owner_type` varchar(16) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'cast (キャスト -> 店舗) / shop (店舗 -> キャスト)',
+  `status_code` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'chatting / interview_pending / interview_fixed / hired / rejected',
+  `category` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT 'thanks / schedule / question / status / intro / help',
+  `body` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sort_order` int NOT NULL DEFAULT '0',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `tqrt_lookup_idx` (`owner_type`,`status_code`,`is_active`,`sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------------------------
 -- support_inquiries : サポート問い合わせフォーム送信内容
 --   - キャスト / 店舗 / 未ログイン（ゲスト）からの問い合わせを保存
 --   - 運営は admin 画面で確認 → 対応ステータスを更新

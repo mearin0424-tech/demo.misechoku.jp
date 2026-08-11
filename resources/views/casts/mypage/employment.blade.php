@@ -347,7 +347,11 @@
                 $hiredCases = $hiredCases ?? [];
                 $ongoingApplications = $ongoingApplications ?? [];
                 $rejectedApplications = $rejectedApplications ?? [];
-                $activeCases = collect($hiredCases)->filter(fn ($c) => empty($c['is_completed']))->values();
+                // Actionable cases first, preserve original relative order otherwise (stable sort via sortBy).
+                $activeCases = collect($hiredCases)
+                    ->filter(fn ($c) => empty($c['is_completed']))
+                    ->sortBy(fn ($c) => empty($c['actionable']) ? 1 : 0)
+                    ->values();
                 $completedCases = collect($hiredCases)->filter(fn ($c) => !empty($c['is_completed']))->values();
                 $actionableCount = $activeCases->filter(fn ($c) => !empty($c['actionable']))->count();
                 $bonusTotal = $bonusTotal ?? 0;

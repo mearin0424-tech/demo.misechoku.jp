@@ -29,6 +29,7 @@
                 ['label' => 'マスタメンテナンス', 'route' => 'admin.masters.index', 'icon' => 'fa-database', 'badge' => null, 'badge_class' => '', 'permission' => 'master.masters'],
                 ['label' => '通知・タスク仕様', 'route' => 'admin.notification-spec.index', 'icon' => 'fa-bell', 'badge' => null, 'badge_class' => '', 'permission' => 'master.notification_spec'],
                 ['label' => 'オコジョガイド設定', 'route' => 'admin.character-guide.index', 'icon' => 'fa-comment-dots', 'badge' => null, 'badge_class' => '', 'permission' => 'master.character_guide'],
+                ['label' => 'トーク定型文マスタ', 'route' => 'admin.talk-quick-replies.index', 'icon' => 'fa-bolt', 'badge' => null, 'badge_class' => '', 'permission' => 'master.talk_quick_replies'],
             ],
         ],
         [
@@ -98,6 +99,7 @@
         'admin.masters.*' => 'マスタ設定',
         'admin.notification-spec.*' => 'マスタ設定',
         'admin.character-guide.*' => 'マスタ設定',
+        'admin.talk-quick-replies.*' => 'マスタ設定',
         'admin.sales.*' => 'アナリティクス',
         'admin.shops.*' => 'アカウント管理',
         'admin.casts.*' => 'アカウント管理',

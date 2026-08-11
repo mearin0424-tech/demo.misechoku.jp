@@ -1787,6 +1787,93 @@ CREATE TABLE `user_talk_templates` (
 -- --------------------------------------------------------
 
 --
+-- テーブルの構造 `talk_quick_reply_templates`
+-- 運営管理のステータス別クイック定型文マスタ (owner_type x status_code)
+--
+
+CREATE TABLE `talk_quick_reply_templates` (
+  `id` bigint UNSIGNED NOT NULL,
+  `owner_type` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'cast / shop',
+  `status_code` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'chatting / interview_pending / interview_fixed / hired / rejected',
+  `category` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT 'thanks / schedule / question / status / intro / help',
+  `body` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sort_order` int NOT NULL DEFAULT '0',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- テーブルのデータのダンプ `talk_quick_reply_templates`
+--   SPEC.md §2.3-2.4 のフローに沿ってステータス別に配置
+--
+
+INSERT INTO `talk_quick_reply_templates` (`id`, `owner_type`, `status_code`, `category`, `body`, `sort_order`, `is_active`, `created_at`, `updated_at`) VALUES
+(1, 'cast', 'chatting', 'intro', 'はじめまして。求人を拝見してご連絡いたしました。ぜひ詳しくお伺いできますと幸いです。', 1, 1, NOW(), NOW()),
+(2, 'cast', 'chatting', 'intro', 'プロフィールをご覧いただきありがとうございます。前向きに検討したく、ご連絡いたしました。', 2, 1, NOW(), NOW()),
+(3, 'cast', 'chatting', 'question', 'お店の雰囲気やお客様層について教えてください。', 3, 1, NOW(), NOW()),
+(4, 'cast', 'chatting', 'question', '時給・バック率・体入時の条件について詳しく知りたいです。', 4, 1, NOW(), NOW()),
+(5, 'cast', 'chatting', 'question', '出勤可能なシフトや最低出勤本数はどれくらいでしょうか？', 5, 1, NOW(), NOW()),
+(6, 'cast', 'chatting', 'question', '未経験ですが、安心して働ける環境でしょうか？', 6, 1, NOW(), NOW()),
+(7, 'cast', 'chatting', 'schedule', 'ぜひ一度、体入または面談をお願いしたいです。ご都合はいかがでしょうか？', 7, 1, NOW(), NOW()),
+(8, 'cast', 'interview_pending', 'thanks', '面談候補日をお送りいただきありがとうございます。確認してすぐご返信いたします。', 1, 1, NOW(), NOW()),
+(9, 'cast', 'interview_pending', 'schedule', 'ご提示いただいた第一希望の日程で問題ございません。当日よろしくお願いいたします。', 2, 1, NOW(), NOW()),
+(10, 'cast', 'interview_pending', 'schedule', '申し訳ございません、いただいた日程は都合が合わないため、別日をご提案いただけますでしょうか。', 3, 1, NOW(), NOW()),
+(11, 'cast', 'interview_pending', 'question', '面談はどれくらいのお時間を予定していますか？', 4, 1, NOW(), NOW()),
+(12, 'cast', 'interview_pending', 'question', '面談は対面／オンラインどちらをご希望でしょうか？', 5, 1, NOW(), NOW()),
+(13, 'cast', 'interview_pending', 'question', '当日の持ち物や服装の指定があれば事前に教えてください。', 6, 1, NOW(), NOW()),
+(14, 'cast', 'interview_fixed', 'thanks', '面談当日、よろしくお願いいたします！', 1, 1, NOW(), NOW()),
+(15, 'cast', 'interview_fixed', 'question', '当日の持ち物・服装の指定があれば教えてください。', 2, 1, NOW(), NOW()),
+(16, 'cast', 'interview_fixed', 'question', '店舗までの詳しいアクセスを教えていただけますでしょうか。', 3, 1, NOW(), NOW()),
+(17, 'cast', 'interview_fixed', 'question', '当日はどなたをお訪ねすればよいですか？', 4, 1, NOW(), NOW()),
+(18, 'cast', 'interview_fixed', 'status', '大変申し訳ございません、少し遅れそうです。到着次第ご連絡いたします。', 5, 1, NOW(), NOW()),
+(19, 'cast', 'interview_fixed', 'status', '到着いたしました。入口はどちらでしょうか？', 6, 1, NOW(), NOW()),
+(20, 'cast', 'interview_fixed', 'schedule', '大変恐縮ですが、体調不良のため面談日程を再調整させていただけますでしょうか。', 7, 1, NOW(), NOW()),
+(21, 'cast', 'hired', 'thanks', 'この度は採用いただきありがとうございます！精一杯頑張ります。', 1, 1, NOW(), NOW()),
+(22, 'cast', 'hired', 'schedule', '初出勤日についてご相談させてください。', 2, 1, NOW(), NOW()),
+(23, 'cast', 'hired', 'question', '初出勤当日の集合時間・持ち物・服装を教えてください。', 3, 1, NOW(), NOW()),
+(24, 'cast', 'hired', 'question', '入店時の手続きで必要な書類はありますか？', 4, 1, NOW(), NOW()),
+(25, 'cast', 'hired', 'status', '本日勤務完了いたしました。ありがとうございました。', 5, 1, NOW(), NOW()),
+(26, 'cast', 'hired', 'schedule', 'ぜひ本入店で継続させていただきたいです。ご検討いただけますでしょうか。', 6, 1, NOW(), NOW()),
+(27, 'cast', 'hired', 'schedule', 'ボーナス条件を達成いたしましたので、ご確認とご承認をお願いいたします。', 7, 1, NOW(), NOW()),
+(28, 'cast', 'hired', 'thanks', 'ご入金の確認が取れました。この度はありがとうございました。', 8, 1, NOW(), NOW()),
+(29, 'cast', 'rejected', 'thanks', 'この度はご連絡いただきありがとうございました。', 1, 1, NOW(), NOW()),
+(30, 'cast', 'rejected', 'thanks', 'またご縁がありましたら、ぜひよろしくお願いいたします。', 2, 1, NOW(), NOW()),
+(31, 'shop', 'chatting', 'thanks', 'この度はご応募（お問い合わせ）ありがとうございます。当店にご興味を持っていただき嬉しく思います。', 1, 1, NOW(), NOW()),
+(32, 'shop', 'chatting', 'intro', 'ご返信ありがとうございます。ご不明な点があればお気軽にご質問くださいませ。', 2, 1, NOW(), NOW()),
+(33, 'shop', 'chatting', 'question', '差し支えなければ、勤務開始のご希望時期や週の出勤可能日数を教えていただけますか？', 3, 1, NOW(), NOW()),
+(34, 'shop', 'chatting', 'question', 'これまでのご経験や現在の在籍状況について教えていただけますでしょうか。', 4, 1, NOW(), NOW()),
+(35, 'shop', 'chatting', 'schedule', 'ぜひ一度、面談または体入にお越しいただきたく思います。候補日をお送りしましょうか？', 5, 1, NOW(), NOW()),
+(36, 'shop', 'chatting', 'intro', 'プロフィール拝見しました。ぜひ一度お話しできれば嬉しいです。', 6, 1, NOW(), NOW()),
+(37, 'shop', 'chatting', 'help', '「今すぐ入れる」宣言を拝見しました。本日◯時から◯時まで、ヘルプでお願いできませんか？', 7, 1, NOW(), NOW()),
+(38, 'shop', 'chatting', 'help', '急遽ピンチヒッターを探しております。ご対応可能でしたら折り返しお願いいたします！', 8, 1, NOW(), NOW()),
+(39, 'shop', 'interview_pending', 'schedule', '面談の候補日をお送りしました。ご都合はいかがでしょうか？', 1, 1, NOW(), NOW()),
+(40, 'shop', 'interview_pending', 'schedule', 'ご都合の良い日程があれば追加でお気軽にお知らせください。', 2, 1, NOW(), NOW()),
+(41, 'shop', 'interview_pending', 'schedule', '日程が合わない場合は改めて候補日をお送りいたします。', 3, 1, NOW(), NOW()),
+(42, 'shop', 'interview_pending', 'question', '面談は対面／オンラインどちらをご希望ですか？', 4, 1, NOW(), NOW()),
+(43, 'shop', 'interview_pending', 'question', '当日の所要時間は30分〜1時間程度を予定しております。', 5, 1, NOW(), NOW()),
+(44, 'shop', 'interview_pending', 'question', 'ご不明点があればお気軽にご質問ください。', 6, 1, NOW(), NOW()),
+(45, 'shop', 'interview_fixed', 'status', '面談当日、お待ちしております！', 1, 1, NOW(), NOW()),
+(46, 'shop', 'interview_fixed', 'status', 'お気をつけてお越しくださいませ。', 2, 1, NOW(), NOW()),
+(47, 'shop', 'interview_fixed', 'status', '当日は私服でお越しいただいて大丈夫です。', 3, 1, NOW(), NOW()),
+(48, 'shop', 'interview_fixed', 'status', '到着されましたらこのトークでお知らせください。', 4, 1, NOW(), NOW()),
+(49, 'shop', 'interview_fixed', 'question', '当日は身分証（顔写真付き）と印鑑をお持ちください。', 5, 1, NOW(), NOW()),
+(50, 'shop', 'interview_fixed', 'question', '店舗までのアクセス情報をお送りします。ご不明な点があればご連絡ください。', 6, 1, NOW(), NOW()),
+(51, 'shop', 'interview_fixed', 'schedule', '大変申し訳ございません、店舗都合により日程の再調整をお願いできますでしょうか。', 7, 1, NOW(), NOW()),
+(52, 'shop', 'hired', 'thanks', 'この度は採用となりました！おめでとうございます。これからよろしくお願いいたします。', 1, 1, NOW(), NOW()),
+(53, 'shop', 'hired', 'schedule', '初出勤日について改めてご案内いたします。ご都合の良い日程を教えてください。', 2, 1, NOW(), NOW()),
+(54, 'shop', 'hired', 'question', '当日の集合時間・持ち物・服装のご案内です。ご確認をお願いします。', 3, 1, NOW(), NOW()),
+(55, 'shop', 'hired', 'status', '本日はお疲れさまでした！ありがとうございました。', 4, 1, NOW(), NOW()),
+(56, 'shop', 'hired', 'thanks', 'ボーナス達成条件の確認が取れました。承認処理を進めさせていただきます。', 5, 1, NOW(), NOW()),
+(57, 'shop', 'hired', 'status', 'ご請求内容を確認しました。承認いたしましたので、運営からの請求書発行をお待ちください。', 6, 1, NOW(), NOW()),
+(58, 'shop', 'hired', 'schedule', 'ぜひ本入店で継続をご検討いただけますと嬉しいです。', 7, 1, NOW(), NOW()),
+(59, 'shop', 'hired', 'status', 'ご不明点があればいつでもご連絡ください。', 8, 1, NOW(), NOW()),
+(60, 'shop', 'rejected', 'thanks', 'この度はご応募いただきありがとうございました。', 1, 1, NOW(), NOW()),
+(61, 'shop', 'rejected', 'thanks', 'またのご縁がありましたら、ぜひよろしくお願いいたします。', 2, 1, NOW(), NOW());
+
+-- --------------------------------------------------------
+
+--
 -- テーブルの構造 `support_inquiries`
 -- サポート問い合わせフォーム送信内容
 --
@@ -2228,6 +2315,13 @@ ALTER TABLE `user_talk_templates`
   ADD KEY `user_talk_templates_owner_idx` (`owner_type`,`owner_id`,`sort_order`);
 
 --
+-- テーブルのインデックス `talk_quick_reply_templates`
+--
+ALTER TABLE `talk_quick_reply_templates`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `tqrt_lookup_idx` (`owner_type`,`status_code`,`is_active`,`sort_order`);
+
+--
 -- テーブルのインデックス `support_inquiries`
 --
 ALTER TABLE `support_inquiries`
@@ -2533,6 +2627,12 @@ ALTER TABLE `talk_blocks`
 --
 ALTER TABLE `user_talk_templates`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- テーブルの AUTO_INCREMENT `talk_quick_reply_templates`
+--
+ALTER TABLE `talk_quick_reply_templates`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
 
 --
 -- テーブルの AUTO_INCREMENT `support_inquiries`

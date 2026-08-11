@@ -113,7 +113,8 @@
       "Bash(php -l app/Http/Controllers/Api/PushController.php)",
       "Bash(php -l config/demo.php)",
       "Bash(php -l app/Http/Controllers/Casts/MypageController.php)",
-      "Bash(php -l app/Http/Controllers/Shops/MypageController.php)"
+      "Bash(php -l app/Http/Controllers/Shops/MypageController.php)",
+      "Bash(php *)"
     ]
   }
 }

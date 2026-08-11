@@ -52,6 +52,7 @@ class AdminPermissionService
                 ['key' => 'master.masters', 'label' => 'マスタメンテナンス', 'description' => 'カタログ・選択肢のメンテナンス'],
                 ['key' => 'master.notification_spec', 'label' => '通知・タスク仕様の確認／変更', 'description' => '通知のON/OFFと文章、リマインダーの日数と文章、未済タスクの仕様確認'],
                 ['key' => 'master.character_guide', 'label' => 'オコジョガイド設定', 'description' => '画面ごとのオコジョガイドの表示／非表示とセリフを設定'],
+                ['key' => 'master.talk_quick_replies', 'label' => 'トーククイック定型文マスタ', 'description' => 'トークルームのクイック定型文（ステータス×役割）の候補文を編集'],
             ],
             'アナリティクス' => [
                 ['key' => 'analytics.sales', 'label' => '売上・ユーザー分析', 'description' => '売上推移・ユーザー数増減の閲覧'],
