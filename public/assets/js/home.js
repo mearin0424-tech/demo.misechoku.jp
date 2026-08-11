@@ -309,21 +309,45 @@ document.addEventListener('DOMContentLoaded', function() {
         window.visualViewport.addEventListener('resize', scheduleSwiperUpdate);
     }
 
-    // 2026-08-09 rev: bfcache 復元 / タブ再表示時のレイアウト崩れ対策。
-    //   別画面へ遷移 → 戻る（back button / gesture）で bfcache 復元されると
-    //   DOMContentLoaded は発火せず、Swiper はキャッシュした translate と
-    //   寸法のまま。iOS Safari のアドレスバー状態が違うと dvh 実測が変わり、
-    //   カード / 画像 62% / 情報帯の位置が全部ズレる。
-    //   → pageshow(persisted) と visibilitychange で強制再測定させる。
-    //   1 フレーム待ってから update() すると viewport 反映後の実測が入る。
+    // 2026-08-11 rev: bfcache 復元 + フォワード遷移両対応のレイアウト崩れ対策。
+    //   別画面 → グローバルフッター経由でスワイプ画面に戻ると、
+    //   ・iOS Safari / Android Chrome のアドレスバー表示状態が初回計測時と異なり、
+    //     100dvh の実測値が変わって aspect-ratio 4/5 のカード寸法が別サイズになる
+    //   ・Swiper の translateY は前回のカード位置基準のままで、
+    //     新しいカード寸法にスナップし直されないため、画像/情報の 65:35 帯が
+    //     見た目上ズレる
+    //   → update() だけでなく updateSize/updateSlides の後に
+    //     slideTo(activeIndex, 0, false) で現在カードに再スナップさせる。
+    //   → pageshow は persisted の有無を問わず呼び、非 bfcache のフォワード
+    //     遷移直後（初回 layout が address bar と一致していないケース）にも効かせる。
+    //   → window.load でフォント / 画像確定後にもう一度計測する。
+    //   2 rAF 待ってから測るのは、iOS Safari のアドレスバー折りたたみ完了と
+    //   dvh 反映を 1 フレーム空けて確実に拾うため。
     function forceSwiperRelayout() {
         requestAnimationFrame(function () {
-            if (mainSwiper) mainSwiper.update();
-            updateAllPhotoSwipers();
+            requestAnimationFrame(function () {
+                if (mainSwiper && !mainSwiper.destroyed) {
+                    mainSwiper.updateSize();
+                    mainSwiper.updateSlides();
+                    mainSwiper.updateSlidesClasses();
+                    mainSwiper.update();
+                    mainSwiper.slideTo(mainSwiper.activeIndex, 0, false);
+                }
+                photoSwipers.forEach(function (ps) {
+                    if (!ps || ps.destroyed) return;
+                    if (typeof ps.updateSize === 'function') ps.updateSize();
+                    if (typeof ps.updateSlides === 'function') ps.updateSlides();
+                    if (typeof ps.update === 'function') ps.update();
+                    if (typeof ps.slideTo === 'function') ps.slideTo(ps.activeIndex, 0, false);
+                });
+            });
         });
     }
-    window.addEventListener('pageshow', function (e) {
-        if (e.persisted) forceSwiperRelayout();
+    window.addEventListener('pageshow', function () {
+        forceSwiperRelayout();
+    });
+    window.addEventListener('load', function () {
+        forceSwiperRelayout();
     });
     document.addEventListener('visibilitychange', function () {
         if (document.visibilityState === 'visible') forceSwiperRelayout();
