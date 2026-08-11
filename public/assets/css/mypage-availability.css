@@ -1,88 +1,111 @@
 /* ==========================================================================
-   キャストマイページ「今すぐ入れる」宣言カード
-   関連 view: resources/views/casts/mypage/index.blade.php (#availability-card)
+   Cast MyPage "Available Today" declaration card
+   Related view: resources/views/casts/mypage/index.blade.php (#availability-card)
+   Compact, low-emphasis layout: 1-row bar with a small OK/OFF pill button.
    ========================================================================== */
 
 .cast-avail {
-    margin: 0 0 14px;
-    padding: 14px 14px 12px;
-    border-radius: 16px;
-    background: linear-gradient(180deg, rgba(197,160,89,0.10), rgba(197,160,89,0.02));
-    border: 1px solid rgba(197,160,89,0.35);
-    box-shadow: 0 4px 14px rgba(0,0,0,0.24);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    margin: 0 0 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(197, 160, 89, 0.22);
 }
 .cast-avail.is-active {
-    background: linear-gradient(180deg, rgba(74,222,128,0.14), rgba(74,222,128,0.02));
-    border-color: rgba(74,222,128,0.5);
-    box-shadow: 0 4px 14px rgba(74,222,128,0.15);
+    background: rgba(74, 222, 128, 0.06);
+    border-color: rgba(74, 222, 128, 0.35);
 }
-.cast-avail__head { display: flex; align-items: flex-start; gap: 10px; }
+
+.cast-avail__row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .cast-avail__icon {
     flex: 0 0 auto;
-    width: 36px; height: 36px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
-    display: inline-flex; align-items: center; justify-content: center;
-    background: rgba(197,160,89,0.20);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(197, 160, 89, 0.14);
     color: var(--gold-light, #f0c46b);
-    font-size: 1rem;
+    font-size: 0.78rem;
 }
 .cast-avail.is-active .cast-avail__icon {
-    background: rgba(74,222,128,0.20);
+    background: rgba(74, 222, 128, 0.16);
     color: #4ade80;
 }
-.cast-avail__title-block { flex: 1; min-width: 0; }
+
+.cast-avail__title-block { flex: 1 1 auto; min-width: 0; }
 .cast-avail__title {
-    margin: 0 0 3px;
-    font-size: 0.95rem;
-    font-weight: 800;
-    color: var(--color-text-header, #fff);
-    letter-spacing: 0.01em;
-    line-height: 1.3;
-}
-.cast-avail__lead {
     margin: 0;
     font-size: 0.78rem;
-    color: var(--color-text, #d4d4d4);
-    line-height: 1.55;
+    font-weight: 700;
+    color: var(--color-text-header, #fff);
+    line-height: 1.25;
 }
-.cast-avail__actions {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
+.cast-avail__lead {
+    margin: 1px 0 0;
+    font-size: 0.68rem;
+    color: var(--color-text-muted, #9ca3af);
+    line-height: 1.35;
 }
+
+.cast-avail__actions { flex: 0 0 auto; }
+
 .cast-avail__btn {
-    flex: 1 1 auto;
-    min-height: 42px;
-    padding: 10px 14px;
-    border-radius: 10px;
-    font-size: 0.86rem;
+    min-height: 28px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
     font-weight: 700;
     border: 1px solid transparent;
     cursor: pointer;
-    transition: transform 0.12s ease, background 0.15s ease;
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    transition: background 0.15s ease, transform 0.12s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
 }
-.cast-avail__btn:active { transform: scale(0.97); }
+.cast-avail__btn:active { transform: scale(0.96); }
 .cast-avail__btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
 .cast-avail__btn--primary {
-    background: linear-gradient(135deg, #f0c46b, #c5a059);
-    color: #1a1206;
-    border-color: rgba(255,255,255,0.15);
-    box-shadow: 0 3px 10px rgba(197,160,89,0.30);
+    background: transparent;
+    color: var(--gold-light, #f0c46b);
+    border-color: rgba(197, 160, 89, 0.55);
+}
+.cast-avail__btn--primary:hover {
+    background: rgba(197, 160, 89, 0.10);
 }
 .cast-avail__btn--danger {
-    background: rgba(220, 38, 38, 0.14);
+    background: transparent;
     color: #f87171;
-    border-color: rgba(248,113,113,0.45);
+    border-color: rgba(248, 113, 113, 0.45);
 }
-.cast-avail__note {
-    margin: 0;
-    font-size: 0.7rem;
-    color: var(--color-text-muted, #9ca3af);
-    line-height: 1.5;
-    display: flex; align-items: flex-start; gap: 6px;
+.cast-avail__btn--danger:hover {
+    background: rgba(248, 113, 113, 0.10);
 }
-.cast-avail__note i { color: var(--gold, #c5a059); margin-top: 2px; }
+
+/* Light theme override */
+body.theme-light .cast-avail {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.22);
+}
+body.theme-light .cast-avail.is-active {
+    background: rgba(34, 197, 94, 0.06);
+    border-color: rgba(34, 197, 94, 0.35);
+}
+body.theme-light .cast-avail__title { color: #1e1a30; }
+body.theme-light .cast-avail__lead { color: #6b6482; }
+body.theme-light .cast-avail__btn--primary {
+    color: #7c3aed;
+    border-color: rgba(124, 58, 237, 0.45);
+}
+body.theme-light .cast-avail__btn--primary:hover {
+    background: rgba(124, 58, 237, 0.08);
+}
+body.theme-light .cast-avail__btn--danger { color: #b91c1c; }

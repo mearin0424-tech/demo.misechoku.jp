@@ -139,7 +139,9 @@
             </a>
         </div>
 
-        {{-- ===== 「本日すぐ入れます」宣言（キャストの Availability と対称） ===== --}}
+        {{-- ===== 「本日すぐ入れます」宣言（キャスト側と挙動を統一） =====
+             設定した「その日中（本日 23:59 まで）」有効。
+             ボタンは控えめ配置（コンパクト・アウトライン系）。 --}}
         @php
             $shopAvail = $shopAvailable ?? ['active' => false, 'until_iso' => null];
         @endphp
@@ -148,7 +150,7 @@
              data-availability-declare-url="{{ route('shop.mypage.availability.declare') }}"
              data-availability-clear-url="{{ route('shop.mypage.availability.clear') }}"
              data-availability-until="{{ $shopAvail['until_iso'] ?? '' }}">
-            <div class="shop-avail-card__body">
+            <div class="shop-avail-card__row">
                 <span class="shop-avail-card__badge" aria-hidden="true"><i class="fas fa-bolt"></i></span>
                 <div class="shop-avail-card__text">
                     <p class="shop-avail-card__title" data-avail-title>
@@ -156,23 +158,23 @@
                     </p>
                     <p class="shop-avail-card__lead" data-avail-lead>
                         @if($shopAvail['active'])
-                            24時間以内、スワイプ・検索・プロフィールに「本日すぐ入れます」タグが表示されます。
+                            本日 23:59 まで、スワイプ・検索・プロフィールで優先表示されます。
                         @else
-                            即日でキャストを受け入れたいときに ON にしてください。24時間後に自動でOFFに戻ります。
+                            本日中、スワイプ・検索・プロフィールで優先表示されます。
                         @endif
                     </p>
                 </div>
-            </div>
-            <div class="shop-avail-card__actions" data-avail-actions>
-                @if($shopAvail['active'])
-                    <button type="button" class="shop-avail-card__btn shop-avail-card__btn--danger" data-availability-clear>
-                        <i class="fas fa-xmark"></i> 宣言を取り消す
-                    </button>
-                @else
-                    <button type="button" class="shop-avail-card__btn shop-avail-card__btn--primary" data-availability-declare>
-                        <i class="fas fa-bolt"></i> 24時間 ONにする
-                    </button>
-                @endif
+                <div class="shop-avail-card__actions" data-avail-actions>
+                    @if($shopAvail['active'])
+                        <button type="button" class="shop-avail-card__btn shop-avail-card__btn--danger" data-availability-clear>
+                            <i class="fas fa-xmark"></i> OFF
+                        </button>
+                    @else
+                        <button type="button" class="shop-avail-card__btn shop-avail-card__btn--primary" data-availability-declare>
+                            <i class="fas fa-bolt"></i> 本日 ON
+                        </button>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
@@ -693,94 +695,98 @@
         color: var(--color-accent-text) !important;
     }
 
-    /* 「本日すぐ入れます」宣言カード */
+    /* "Available today" declaration card: compact, low-emphasis 1-row layout */
     .shop-avail-card {
-        border-radius: 14px;
-        padding: 12px 14px;
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(168, 85, 247, 0.25);
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
+        border-radius: 10px;
+        padding: 8px 10px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(168, 85, 247, 0.22);
     }
     .shop-avail-card.is-on {
-        background: linear-gradient(135deg, rgba(251, 191, 36, 0.14), rgba(251, 146, 60, 0.10));
-        border-color: rgba(251, 191, 36, 0.55);
-        box-shadow: 0 4px 14px rgba(251, 191, 36, 0.12);
+        background: rgba(251, 191, 36, 0.06);
+        border-color: rgba(251, 191, 36, 0.40);
     }
-    .shop-avail-card__body { display: flex; align-items: center; gap: 12px; }
+    .shop-avail-card__row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
     .shop-avail-card__badge {
         flex: 0 0 auto;
-        width: 40px;
-        height: 40px;
+        width: 26px;
+        height: 26px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border-radius: 12px;
-        background: rgba(251, 191, 36, 0.16);
+        border-radius: 50%;
+        background: rgba(251, 191, 36, 0.14);
         color: #fbbf24;
-        font-size: 1.1rem;
+        font-size: 0.78rem;
     }
     .shop-avail-card.is-on .shop-avail-card__badge {
-        background: linear-gradient(135deg, #fbbf24, #f59e0b);
-        color: #1a1a1a;
-        box-shadow: 0 2px 6px rgba(251, 191, 36, 0.4);
+        background: rgba(251, 191, 36, 0.22);
+        color: #f59e0b;
     }
+    .shop-avail-card__text { flex: 1 1 auto; min-width: 0; }
     .shop-avail-card__title {
         margin: 0;
-        font-size: 0.86rem;
-        font-weight: 800;
+        font-size: 0.78rem;
+        font-weight: 700;
         color: var(--color-text-header, #f5f5f5);
-        letter-spacing: 0.02em;
+        line-height: 1.25;
     }
     .shop-avail-card__lead {
-        margin: 2px 0 0;
-        font-size: 0.72rem;
-        line-height: 1.5;
-        color: var(--color-text-sub, #a1a1aa);
+        margin: 1px 0 0;
+        font-size: 0.68rem;
+        line-height: 1.35;
+        color: var(--color-text-muted, #9ca3af);
     }
-    .shop-avail-card__actions { display: flex; gap: 8px; }
+    .shop-avail-card__actions { flex: 0 0 auto; }
     .shop-avail-card__btn {
-        flex: 1;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 6px;
-        min-height: 40px;
-        padding: 8px 14px;
-        border-radius: 10px;
-        font-size: 0.82rem;
-        font-weight: 800;
+        gap: 4px;
+        min-height: 28px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 700;
         cursor: pointer;
         border: 1px solid transparent;
-        transition: transform 0.12s ease, background 0.15s ease, box-shadow 0.15s ease;
+        transition: background 0.15s ease, transform 0.12s ease;
     }
-    .shop-avail-card__btn:active { transform: scale(0.97); }
-    .shop-avail-card__btn:disabled { opacity: 0.6; cursor: wait; }
+    .shop-avail-card__btn:active { transform: scale(0.96); }
+    .shop-avail-card__btn:disabled { opacity: 0.5; cursor: wait; }
     .shop-avail-card__btn--primary {
-        background: linear-gradient(135deg, #fbbf24, #f59e0b);
-        color: #1a1a1a;
-        box-shadow: 0 4px 12px rgba(251, 191, 36, 0.32);
-    }
-    .shop-avail-card__btn--primary:hover { box-shadow: 0 6px 16px rgba(251, 191, 36, 0.4); }
-    .shop-avail-card__btn--danger {
-        background: rgba(220, 38, 38, 0.14);
-        border-color: rgba(220, 38, 38, 0.45);
-        color: #fca5a5;
-    }
-    .shop-avail-card__btn--danger:hover { background: rgba(220, 38, 38, 0.20); }
-
-    /* ライトモードでの調整 */
-    body.theme-light .shop-avail-card {
-        background: #ffffff;
-        border-color: rgba(124, 58, 237, 0.25);
-    }
-    body.theme-light .shop-avail-card.is-on {
-        background: linear-gradient(135deg, rgba(251, 191, 36, 0.14), rgba(255, 251, 235, 0.9));
+        background: transparent;
+        color: #fbbf24;
         border-color: rgba(251, 191, 36, 0.55);
     }
+    .shop-avail-card__btn--primary:hover { background: rgba(251, 191, 36, 0.10); }
+    .shop-avail-card__btn--danger {
+        background: transparent;
+        color: #f87171;
+        border-color: rgba(248, 113, 113, 0.45);
+    }
+    .shop-avail-card__btn--danger:hover { background: rgba(248, 113, 113, 0.10); }
+
+    /* Light theme override */
+    body.theme-light .shop-avail-card {
+        background: #ffffff;
+        border-color: rgba(124, 58, 237, 0.22);
+    }
+    body.theme-light .shop-avail-card.is-on {
+        background: rgba(251, 191, 36, 0.06);
+        border-color: rgba(251, 191, 36, 0.40);
+    }
     body.theme-light .shop-avail-card__title { color: #1e1a30; }
-    body.theme-light .shop-avail-card__lead { color: #5f5876; }
+    body.theme-light .shop-avail-card__lead { color: #6b6482; }
+    body.theme-light .shop-avail-card__btn--primary {
+        color: #b45309;
+        border-color: rgba(180, 83, 9, 0.45);
+    }
+    body.theme-light .shop-avail-card__btn--primary:hover { background: rgba(180, 83, 9, 0.08); }
     body.theme-light .shop-avail-card__btn--danger { color: #b91c1c; }
 </style>
 @endpush
@@ -947,12 +953,12 @@ window.MYPAGE_GALLERY_CONFIG = {
         card.classList.toggle('is-on', !!active);
         if (title) title.textContent = active ? '本日すぐ入れます：宣言中' : '本日すぐ入れます';
         if (lead) lead.textContent = active
-            ? '24時間以内、スワイプ・検索・プロフィールに「本日すぐ入れます」タグが表示されます。'
-            : '即日でキャストを受け入れたいときに ON にしてください。24時間後に自動でOFFに戻ります。';
+            ? '本日 23:59 まで、スワイプ・検索・プロフィールで優先表示されます。'
+            : '本日中、スワイプ・検索・プロフィールで優先表示されます。';
         if (actions) {
             actions.innerHTML = active
-                ? '<button type="button" class="shop-avail-card__btn shop-avail-card__btn--danger" data-availability-clear><i class="fas fa-xmark"></i> 宣言を取り消す</button>'
-                : '<button type="button" class="shop-avail-card__btn shop-avail-card__btn--primary" data-availability-declare><i class="fas fa-bolt"></i> 24時間 ONにする</button>';
+                ? '<button type="button" class="shop-avail-card__btn shop-avail-card__btn--danger" data-availability-clear><i class="fas fa-xmark"></i> OFF</button>'
+                : '<button type="button" class="shop-avail-card__btn shop-avail-card__btn--primary" data-availability-declare><i class="fas fa-bolt"></i> 本日 ON</button>';
         }
     }
 
@@ -975,7 +981,7 @@ window.MYPAGE_GALLERY_CONFIG = {
                 .then(function (json) {
                     if (json && json.success) {
                         render(true);
-                        if (window.appToast) window.appToast('「本日すぐ入れます」を24時間 ONにしました', 'success');
+                        if (window.appToast) window.appToast('「本日すぐ入れます」を本日 ON にしました', 'success');
                     }
                 })
                 .catch(function () {

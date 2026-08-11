@@ -352,7 +352,7 @@ class MypageController extends Controller
 
     /**
      * 「本日すぐ入れます」宣言
-     *   - available_until = NOW() + 24h（固定）
+     *   - available_until = 本日 23:59:59（「その日中」で固定）
      *   - available_declared_at = NOW()
      * 呼び出し例: POST /shop/mypage/availability
      */
@@ -364,7 +364,7 @@ class MypageController extends Controller
 
         $shopId = $this->currentShopId();
         $now = Carbon::now();
-        $until = (clone $now)->addHours(24);
+        $until = (clone $now)->endOfDay();
 
         DB::table('shop_profiles')
             ->where('shop_id', $shopId)
@@ -378,7 +378,7 @@ class MypageController extends Controller
             'success' => true,
             'available_until'       => $until->toIso8601String(),
             'available_declared_at' => $now->toIso8601String(),
-            'remaining_label'       => '24時間',
+            'remaining_label'       => '本日中',
         ]);
     }
 

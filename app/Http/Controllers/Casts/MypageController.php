@@ -129,20 +129,16 @@ class MypageController extends Controller
     }
 
     /**
-     * 「今すぐ入れる」宣言（Tier A 判定用）
-     *   - hours: 2 / 4 / 8 のいずれか。available_until = NOW() + hours 時間
+     * 「今から入れる」宣言（Tier A 判定用）
+     *   - available_until = 本日 23:59:59（「その日中」で固定。店舗側と同じ挙動）
      *   - available_declared_at = NOW()（宣言時刻・タイブレーク用）
-     * 呼び出し例: POST /cast/mypage/availability { hours: 2 }
+     * 呼び出し例: POST /cast/mypage/availability
      */
     public function declareAvailability(Request $request)
     {
-        $data = $request->validate([
-            'hours' => ['required', 'integer', 'in:2,4,8'],
-        ]);
-
         $castId = $this->currentCastId();
         $now = Carbon::now();
-        $until = (clone $now)->addHours((int) $data['hours']);
+        $until = (clone $now)->endOfDay();
 
         DB::table('cast_profiles')
             ->where('cast_id', $castId)
@@ -156,7 +152,7 @@ class MypageController extends Controller
             'success' => true,
             'available_until'       => $until->toIso8601String(),
             'available_declared_at' => $now->toIso8601String(),
-            'remaining_label'       => $data['hours'] . '時間',
+            'remaining_label'       => '本日中',
         ]);
     }
 
