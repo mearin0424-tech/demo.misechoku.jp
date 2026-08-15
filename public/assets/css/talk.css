@@ -385,6 +385,13 @@
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
+    /* Keep the scroll chain inside the messages column so iOS rubber-band
+       and address-bar toggles do not steal subsequent touches, and hint
+       vertical panning explicitly for consistent behavior after DOM churn
+       (bug: after sending several messages, swipe/scroll would freeze). */
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
     padding: 14px 12px 90px;
     display: flex;
     flex-direction: column;
@@ -977,12 +984,19 @@
     background: rgba(0, 0, 0, 0.7);
     opacity: 0;
     visibility: hidden;
+    /* pointer-events must switch immediately on aria-hidden change: without it,
+       the overlay keeps capturing touches during the 0.25s fade because CSS
+       transitions the `visibility` property as a step (element remains
+       hit-testable while opacity animates to 0). That left an invisible layer
+       covering TALK after any modal close. */
+    pointer-events: none;
     transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
 .interview-modal-overlay[aria-hidden="false"] {
     opacity: 1;
     visibility: visible;
+    pointer-events: auto;
 }
 
 .interview-modal-overlay-sheet {
@@ -1608,12 +1622,16 @@ body.theme-light .talk-pin-btn[aria-pressed="true"] {
     background: rgba(0, 0, 0, 0.6);
     opacity: 0;
     visibility: hidden;
+    /* See .interview-modal-overlay: pointer-events must flip immediately or
+       the closed overlay swallows touches during the fade transition. */
+    pointer-events: none;
     transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
 .reject-confirm-overlay.is-open {
     opacity: 1;
     visibility: visible;
+    pointer-events: auto;
 }
 
 .reject-confirm-modal {

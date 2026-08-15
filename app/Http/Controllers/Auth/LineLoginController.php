@@ -196,7 +196,7 @@ class LineLoginController extends Controller
 
         auth()->guard('member')->login($cast);
         $request->session()->regenerate();
-        $cast->update(['last_login_at' => now()]);
+        // last_login_at is updated centrally by App\Listeners\UpdateLastLoginAt.
 
         return redirect()
             ->route('cast.home')
@@ -217,7 +217,7 @@ class LineLoginController extends Controller
 
         auth()->guard('shop')->login($manager);
         $request->session()->regenerate();
-        $manager->update(['last_login_at' => now()]);
+        // last_login_at is updated centrally by App\Listeners\UpdateLastLoginAt.
 
         return redirect()
             ->route('shop.home')

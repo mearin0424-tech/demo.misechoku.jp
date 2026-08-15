@@ -203,27 +203,26 @@ document.addEventListener('DOMContentLoaded', function() {
             if (item && item.classList.contains('is-unread')) {
                 var id = item.getAttribute('data-notif-id');
                 if (id) {
-                    // beacon があれば優先（離脱前送信）
-                    var body = new FormData();
-                    body.append('_token', csrf());
-                    if (navigator.sendBeacon) {
-                        navigator.sendBeacon('/notifications/' + id + '/read', body);
-                    } else {
+                    // Anchor items go through /notifications/{id}/visit which marks read
+                    // server-side before redirecting. For non-anchor items (no navigation)
+                    // we still need to POST the read API explicitly.
+                    var isAnchor = item.tagName === 'A' && item.hasAttribute('href');
+                    if (!isAnchor) {
                         fetch('/notifications/' + id + '/read', {
                             method: 'POST',
                             credentials: 'same-origin',
                             headers: {
                                 'X-CSRF-TOKEN': csrf(),
                                 'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json',
                             },
-                            keepalive: true,
                         }).catch(function () {});
                     }
                     item.classList.remove('is-unread');
                     item.setAttribute('data-notif-unread', '0');
                     var dot = item.querySelector('.notif-popup__item-dot');
                     if (dot) dot.remove();
-                    // カウンタをローカル反映
+                    // カウンタをローカル反映（サーバは遷移先で確定させる）
                     var cur = parseInt(notiPopup.getAttribute('data-unread-count') || '0', 10);
                     updateBellBadge(Math.max(0, cur - 1));
                 }

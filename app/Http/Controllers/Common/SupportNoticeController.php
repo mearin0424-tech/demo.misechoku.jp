@@ -11,21 +11,19 @@ class SupportNoticeController extends Controller
 {
     public function index(Request $request): View
     {
-        $isGuest = $request->routeIs('pages.support.notices');
-        $isCast = $request->is('cast/*');
-        $isShop = $request->is('shop/*');
+        [$isCast, $isShop, $isGuest] = $this->resolveAudience();
 
         $query = Notice::query()
             ->published()
             ->orderByDesc('published_at')
             ->orderByDesc('id');
 
-        if ($isGuest) {
-            $query->forGuest();
-        } elseif ($isCast) {
+        if ($isCast) {
             $query->forCast();
         } elseif ($isShop) {
             $query->forShop();
+        } else {
+            $query->forGuest();
         }
 
         $notices = $query->paginate(12)->withQueryString();
@@ -40,20 +38,18 @@ class SupportNoticeController extends Controller
 
     public function show(Request $request, string $slug): View
     {
-        $isGuest = $request->routeIs('pages.support.notices.show');
-        $isCast = $request->is('cast/*');
-        $isShop = $request->is('shop/*');
+        [$isCast, $isShop, $isGuest] = $this->resolveAudience();
 
         $query = Notice::query()
             ->published()
             ->where('slug', $slug);
 
-        if ($isGuest) {
-            $query->forGuest();
-        } elseif ($isCast) {
+        if ($isCast) {
             $query->forCast();
         } elseif ($isShop) {
             $query->forShop();
+        } else {
+            $query->forGuest();
         }
 
         $notice = $query->firstOrFail();
@@ -64,5 +60,17 @@ class SupportNoticeController extends Controller
             'isShop' => $isShop,
             'isGuest' => $isGuest,
         ]);
+    }
+
+    /**
+     * @return array{0:bool,1:bool,2:bool} [$isCast, $isShop, $isGuest]
+     */
+    private function resolveAudience(): array
+    {
+        $isCast = auth()->guard('member')->check();
+        $isShop = auth()->guard('shop')->check();
+        $isGuest = !$isCast && !$isShop;
+
+        return [$isCast, $isShop, $isGuest];
     }
 }

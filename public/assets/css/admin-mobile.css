@@ -517,3 +517,59 @@
         padding: 8px 10px !important;
     }
 }
+
+/* --------------------------------------------------------------------------
+   §18 ページタイトル横「この画面でできること」ポップオーバー：
+       admin-detail.css §admin-info-* は position:absolute + left:0 +
+       width:min(420px, 100vw - 32px) のため、ボタンが行の右寄りにある
+       スマホでは右端が画面外にはみ出す。<= 640px では画面幅に対して
+       固定シート化し、左右余白 8px で確実に収める。
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+    /* タイトル行そのものが親幅を超えないよう保険 */
+    .admin-title-row {
+        max-width: 100%;
+        min-width: 0;
+    }
+    .admin-info-btn {
+        flex: 0 0 auto;
+    }
+
+    .admin-info-popover {
+        position: fixed !important;
+        top: 72px !important;             /* admin header の下 */
+        left: 8px !important;
+        right: 8px !important;
+        bottom: auto;
+        width: auto !important;
+        max-width: none !important;
+        max-height: min(70vh, 480px);
+        overflow-y: auto;
+        z-index: 1000;                    /* ヘッダーより前面 */
+    }
+    /* 三角ノッチはボタン位置と揃わなくなるため非表示 */
+    .admin-info-popover::before {
+        display: none !important;
+    }
+    /* 本文の長い行や URL がはみ出さないように */
+    .admin-info-popover__body {
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   §19 追加の横漏れ防止：admin-main の overflow は §1 で clip 済みだが、
+       ここでは共通コンテナに対しても保険をかけ、絶対配置要素が
+       意図せず横スクロールバーを発生させないようにする。
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+    html, body {
+        overflow-x: clip;
+    }
+    .admin-page-header,
+    .admin-page-toolbar {
+        max-width: 100%;
+        min-width: 0;
+    }
+}

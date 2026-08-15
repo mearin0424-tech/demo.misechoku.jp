@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Listeners\UpdateLastLoginAt;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -17,6 +19,12 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+        ],
+        // Update casts.last_login_at / shop_managers.last_login_at on any
+        // successful login across every entry point (standard, LINE, mock LINE,
+        // demo). Login is dispatched only when auth actually succeeds.
+        Login::class => [
+            UpdateLastLoginAt::class,
         ],
         \SocialiteProviders\Manager\SocialiteWasCalled::class => [
             \SocialiteProviders\Line\LineExtendSocialite::class.'@handle',

@@ -132,7 +132,7 @@
     {{-- Detail-page + role-UI styles (extracted 2026-08-02); load AFTER admin.css --}}
     <link rel="stylesheet" href="{{ asset('assets/css/admin-detail.css') }}?v=20260802-split">
     {{-- モバイル最適化（admin.css の後に読み込んで上書き） --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/admin-mobile.css') }}?v=20260720-admin-mobile-v3">
+    <link rel="stylesheet" href="{{ asset('assets/css/admin-mobile.css') }}?v=20260815-admin-mobile-v4">
     @stack('admin-styles')
     {{-- 入力コンポーネントの全画面統一（文字列/文章/数値/日付/選択） --}}
     <link rel="stylesheet" href="{{ asset('assets/css/form-controls.css') }}?v=20260719-light-all">

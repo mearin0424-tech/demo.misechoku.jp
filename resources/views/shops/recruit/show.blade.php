@@ -891,6 +891,14 @@
     }
     .lightbox-overlay.is-open { display: flex; }
     .lightbox-image { max-width: 100%; max-height: 90vh; object-fit: contain; border-radius: 12px; }
+    /* Swiper container inside the lightbox overlay (multi-image gallery) */
+    .lightbox-swiper { width: 100%; max-width: 900px; height: 90vh; }
+    .lightbox-swiper .swiper-slide { display: flex; align-items: center; justify-content: center; }
+    .lightbox-swiper .swiper-slide img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 12px; }
+    .lightbox-swiper .swiper-button-prev,
+    .lightbox-swiper .swiper-button-next { color: #fff; }
+    .lightbox-swiper .swiper-pagination-bullet { background: rgba(255,255,255,0.55); opacity: 1; }
+    .lightbox-swiper .swiper-pagination-bullet-active { background: #fff; }
     .lightbox-close {
         position: fixed; top: 20px; right: 20px;
         background: rgba(0, 0, 0, 0.5); color: #fff;
@@ -1089,27 +1097,46 @@
 <script>
 (function () {
     'use strict';
+    // ライトボックスは Swiper 化：クリックしたサムネの index を initial slide として開く。
     var overlay = document.getElementById('lightbox-overlay');
-    var img = document.getElementById('lightbox-image');
-    function openLightbox(src) {
-        if (!overlay || !img || !src) return;
-        img.src = src;
+    if (!overlay) return;
+    var swiperEl = overlay.querySelector('.lightbox-swiper');
+    var slideCount = swiperEl ? swiperEl.querySelectorAll('.swiper-slide').length : 0;
+    var swiperInstance = null;
+    function ensureSwiper() {
+        if (swiperInstance || !swiperEl || typeof window.Swiper !== 'function') return;
+        swiperInstance = new window.Swiper(swiperEl, {
+            loop: false,
+            navigation: slideCount > 1 ? {
+                nextEl: swiperEl.querySelector('.swiper-button-next'),
+                prevEl: swiperEl.querySelector('.swiper-button-prev')
+            } : false,
+            pagination: slideCount > 1 ? {
+                el: swiperEl.querySelector('.swiper-pagination'),
+                clickable: true
+            } : false,
+            keyboard: { enabled: true }
+        });
+    }
+    function openLightbox(index) {
         overlay.classList.add('is-open');
         document.body.style.overflow = 'hidden';
+        ensureSwiper();
+        if (swiperInstance) {
+            swiperInstance.update();
+            swiperInstance.slideTo(index, 0);
+        }
     }
     window.closeLightbox = function (e) {
         if (e && e.target && !e.target.classList.contains('lightbox-overlay') && !e.target.closest('.lightbox-close')) return;
-        if (!overlay || !img) return;
         overlay.classList.remove('is-open');
-        img.src = '';
         document.body.style.overflow = '';
     };
     document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('#profile-gallery-list .js-lightbox-target').forEach(function (el) {
+        document.querySelectorAll('#profile-gallery-list .js-lightbox-target').forEach(function (el, i) {
             el.addEventListener('click', function (ev) {
                 ev.preventDefault();
-                var src = el.getAttribute('data-image-url') || (el.querySelector('img') && el.querySelector('img').currentSrc) || '';
-                openLightbox(src);
+                openLightbox(i);
             });
         });
     });

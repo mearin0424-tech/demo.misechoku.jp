@@ -8,7 +8,7 @@
         $metaDescription = trim($__env->yieldContent('meta_description')) ?: 'ミセチョクのデモサイトです。';
         $metaImage = trim($__env->yieldContent('meta_image')) ?: asset('assets/images/pwa/icon-512.png');
         $canonicalUrl = trim($__env->yieldContent('canonical')) ?: url()->current();
-        $assetVersion = '20260802-phase3';
+        $assetVersion = '20260815-notif-visit';
         $resolvedTitle = $metaTitle !== ''
             ? $metaTitle
             : ($pageTitle !== '' ? $pageTitle . ' | ' . config('app.name', 'ミセチョク') : config('app.name', 'ミセチョク'));
@@ -27,35 +27,82 @@
         $showBackButton = !$isMainPage && !$isLoginPage;
         $isTalkRoomPage = request()->routeIs('cast.talk.room', 'shop.talk.room');
 
-        // ===== 戻る導線（2026-07-20）=====
-        // ブラウザ履歴（history.back）ではなく、画面階層上の「親画面」へ確実に戻す。
+        // ===== Back link (2026-07-20 / 2026-08-15 route-based) =====
+        // Never use history.back(); resolve the parent screen from the route name so the
+        // back button always lands on an existing route. The previous fallback that
+        // trimmed the last URL segment could synthesise non-existent URLs such as
+        // /shop/htu -> /shop or /shop/recruits/edit -> /shop/recruits/status and 404.
+        // Rules below match by route name only and fall back to the current role's home.
         $backRoleTop = auth()->guard('member')->check() ? 'cast' : 'shop';
         $backUrl = null;
         if ($showBackButton) {
+            // 1) Talk room -> talk list (same role)
             if ($isTalkRoomPage) {
                 $backUrl = route($backRoleTop . '.talk.index');
-            } elseif (request()->is('cast/shopprofiles/*')) {
+            }
+            // 2) Profile detail -> the search list they came from
+            elseif (request()->routeIs('cast.shopprofile.show', 'cast.shopprofileview.show')) {
                 $backUrl = route('cast.search.index', ['tab' => 'list']);
-            } elseif (request()->is('shop/castprofileview/*')) {
+            } elseif (request()->routeIs('shop.castprofileview.show')) {
                 $backUrl = route('shop.search.index');
-            } elseif (request()->is('shop/recruits/*') && !request()->is('shop/recruits/status')) {
-                $backUrl = url('/shop/recruits/status');
-            } elseif (request()->is('shop/recruits/status')) {
-                $backUrl = route('shop.mypage.index');
-            } elseif (request()->is('cast/mypage/*')) {
+            }
+            // 3) Shop recruit editor -> shop management (owner-only screen family)
+            elseif (request()->routeIs('shop.recruits.edit')) {
+                $backUrl = route('shop.mypage.management');
+            }
+            // 4) MyPage sub-pages -> MyPage top (per role)
+            elseif (request()->routeIs('cast.mypage.*')) {
                 $backUrl = route('cast.mypage.index');
-            } elseif (request()->is('shop/mypage/*')) {
+            } elseif (request()->routeIs('shop.mypage.*')) {
                 $backUrl = route('shop.mypage.index');
-            } elseif (request()->is('setting/*') || request()->is('subscription*')) {
+            }
+            // 5) Profile editors -> MyPage top (per role)
+            elseif (request()->routeIs('cast.profile.*')) {
+                $backUrl = route('cast.mypage.index');
+            } elseif (request()->routeIs('shop.profile.*')) {
+                $backUrl = route('shop.mypage.index');
+            }
+            // 6) Interaction (KEEP) sub-pages -> interaction top
+            elseif (request()->routeIs('cast.interaction.*')) {
+                $backUrl = route('cast.interaction.index');
+            } elseif (request()->routeIs('shop.interaction.*')) {
+                $backUrl = route('shop.interaction.index');
+            }
+            // 7) Settings (notification/account/talk-templates/location/line) -> current role MyPage
+            //    Subscription (Premium plan) is a shop-owner flow launched from MyPage.
+            elseif (request()->routeIs('setting.*')
+                 || request()->routeIs('subscription', 'subscription.*')) {
                 $backUrl = route($backRoleTop . '.mypage.index');
-            } else {
-                // 汎用：URL を1階層上へ（例: /cast/column/xxx → /cast/column）。
-                // 1階層しかない場合はロールのホームへ。
-                $pathSegs = explode('/', trim(request()->path(), '/'));
-                array_pop($pathSegs);
-                $backUrl = count($pathSegs) > 0
-                    ? url(implode('/', $pathSegs))
-                    : route($backRoleTop . '.home');
+            }
+            // 8) Column article detail -> column index (role-aware)
+            elseif (request()->routeIs('cast.column.show')) {
+                $backUrl = route('cast.column.index');
+            } elseif (request()->routeIs('shop.column.show')) {
+                $backUrl = route('shop.column.index');
+            } elseif (request()->routeIs('pages.support.column.show')) {
+                $backUrl = route('pages.support.column');
+            }
+            // 9) Notice detail -> notice list
+            elseif (request()->routeIs('pages.support.notices.show')) {
+                $backUrl = route('pages.support.notices');
+            }
+            // 10) Standalone pages opened from the side menu -> current role's home
+            //     Column list / How To Use / Contact form / Notices /
+            //     About / Terms / Privacy
+            elseif (request()->routeIs(
+                'cast.column.index', 'shop.column.index', 'pages.support.column',
+                'cast.htu', 'shop.htu',
+                'pages.support.form', 'pages.support.notices',
+                'pages.official.about', 'pages.official.terms', 'pages.official.privacy'
+            )) {
+                $backUrl = route($backRoleTop . '.home');
+            }
+            // 11) Tutorial and any other page without a defined parent -> role home.
+            //     URL-segment slicing is intentionally not used here: it produced
+            //     non-existent URLs (e.g. /shop/htu -> /shop, /shop/recruits/edit ->
+            //     /shop/recruits/status) that returned 404. Safe fallback only.
+            else {
+                $backUrl = route($backRoleTop . '.home');
             }
         }
 
@@ -115,14 +162,9 @@
         $naturalLightTheme = !$isDarkPage
             && !$naturalPremiumWhite;
 
-        // ===== テーマ切替（ヘッダーのライト/ダークトグル 2026-07-20）=====
-        // Cookie: theme_mode = 'dark' → 全画面を SWIPE/プロフィール同様のダークベースへ強制。
-        // 'light'/未設定 → 通常のページ別テーマ（ライトベース）。
-        // 全 CSS はダークネイティブ + body.theme-light で上書きする構造のため、
-        // ダーク強制は body クラスを外すだけで成立する（リロード無しのライブ切替可）。
-        $isForcedDark = request()->cookie('theme_mode') === 'dark';
-        $isPremiumWhite = $naturalPremiumWhite && !$isForcedDark;
-        $isLightTheme = $naturalLightTheme && !$isForcedDark;
+        // ページ標準テーマをそのまま適用する（ユーザーによるライト/ダーク切替は廃止）。
+        $isPremiumWhite = $naturalPremiumWhite;
+        $isLightTheme = $naturalLightTheme;
 
         // ===== ボトムナビ：アクティブ判定（旧 layouts.parts.footer と同一ロジック） =====
         $navPrefix       = request()->is('cast/*') ? 'cast' : 'shop';
@@ -761,9 +803,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600;700;900&family=Cinzel:wght@600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/css/premium-white.css') }}?v=20260720-pwhite-09">
 </head>
-<body class="@yield('body-class') {{ $isLightTheme ? 'theme-light' : '' }} {{ $isPremiumWhite ? 'theme-premium-white' : '' }} {{ $isForcedDark ? 'mode-dark' : 'mode-light' }} bg-base text-text-main"
-      data-natural-light="{{ $naturalLightTheme ? '1' : '0' }}"
-      data-natural-pwhite="{{ $naturalPremiumWhite ? '1' : '0' }}"
+<body class="@yield('body-class') {{ $isLightTheme ? 'theme-light' : '' }} {{ $isPremiumWhite ? 'theme-premium-white' : '' }} bg-base text-text-main"
       data-notification-badge="{{ isset($unreadNewsCount) ? (int) $unreadNewsCount : 0 }}">
 
     {{-- サイドメニュー開閉用オーバーレイ（app.js が #menu-overlay を操作） --}}
@@ -881,48 +921,6 @@
                     window.openImageLightbox(el.currentSrc || el.src);
                 });
             });
-        });
-    })();
-    </script>
-
-    {{-- テーマ切替（ライト/ダーク）: ヘッダーのトグルボタン。
-         Cookie theme_mode を切り替え、body クラスをその場で付け替える（リロード不要）。
-         'dark'  → theme-light / theme-premium-white を外して全画面ダークベース
-         'light' → data-natural-* に基づきページ本来のテーマへ戻す --}}
-    <script>
-    (function () {
-        var btn = document.getElementById('btn-theme-toggle');
-        if (!btn) return;
-        var icon = btn.querySelector('i');
-
-        function applyMode(mode) {
-            var b = document.body;
-            if (mode === 'dark') {
-                b.classList.remove('theme-light', 'theme-premium-white');
-            } else {
-                if (b.getAttribute('data-natural-light') === '1') b.classList.add('theme-light');
-                if (b.getAttribute('data-natural-pwhite') === '1') b.classList.add('theme-premium-white');
-            }
-            // SWIPE 等の "テーマクラス非対象" 画面用のモードクラス（下部グラデ・キャッチコピー配色に使用）
-            b.classList.toggle('mode-dark', mode === 'dark');
-            b.classList.toggle('mode-light', mode !== 'dark');
-            btn.setAttribute('data-theme-mode', mode);
-            var label = mode === 'dark' ? 'ライトモードに切り替え' : 'ダークモードに切り替え';
-            btn.setAttribute('aria-label', label);
-            btn.setAttribute('title', label);
-            if (icon) {
-                icon.classList.toggle('fa-sun', mode === 'dark');
-                icon.classList.toggle('fa-moon', mode !== 'dark');
-            }
-            var labelEl = document.getElementById('theme-toggle-label');
-            if (labelEl) labelEl.textContent = label;
-        }
-
-        btn.addEventListener('click', function () {
-            var next = btn.getAttribute('data-theme-mode') === 'dark' ? 'light' : 'dark';
-            // 1年間保持・全パス
-            document.cookie = 'theme_mode=' + next + '; path=/; max-age=31536000; SameSite=Lax';
-            applyMode(next);
         });
     })();
     </script>

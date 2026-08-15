@@ -112,7 +112,7 @@ class SendInterviewDeadlineReminders extends Command
                 $this->line("[DRY] shop {$row->manager_id} due {$slot} deposit={$row->deposit_id}");
             } else {
                 if ($shopPref['push_enabled']) {
-                    $push->sendToUser('shop_manager', (string) $row->manager_id, '支払期限リマインド', $text, url('/shop/payment'));
+                    $push->sendToUser('shop_manager', (string) $row->manager_id, '支払期限リマインド', $text, route('shop.mypage.management'));
                 }
             }
             $count++;

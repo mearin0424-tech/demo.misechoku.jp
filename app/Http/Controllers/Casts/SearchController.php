@@ -73,6 +73,8 @@ class SearchController extends BaseSearchController
         $normalizedKeyword = $this->normalizeSearchText($keyword);
         $industries = $request->query('industry', []);
         $industries = is_array($industries) ? array_values(array_filter($industries, 'is_string')) : (is_string($industries) ? [$industries] : []);
+        // Detail search modal posts industry_ids[] (master IDs). Prefer these over legacy industry[] (names).
+        $industryIds = $this->normalizeIdFilters($request->query('industry_ids', []));
         $areas = $request->query('area', []);
         $areas = is_array($areas) ? array_values(array_filter($areas, 'is_string')) : (is_string($areas) ? [$areas] : []);
         $hourlyWage = (int) $request->query('hourly_wage', 0);
@@ -153,7 +155,9 @@ class SearchController extends BaseSearchController
 
         $this->applySort($rows, $sort);
 
-        if (!empty($industries)) {
+        if (!empty($industryIds)) {
+            $rows->whereIn('shop_profiles.industry_id', $industryIds);
+        } elseif (!empty($industries)) {
             $rows->join('industries', 'shop_profiles.industry_id', '=', 'industries.id')
                 ->whereIn('industries.name', $industries);
         }

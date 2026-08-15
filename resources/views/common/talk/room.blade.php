@@ -10,7 +10,7 @@
 @section('body-class', 'page-talk page-talk-room')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260808-line-style">
+<link rel="stylesheet" href="{{ asset('assets/css/talk.css') }}?v=20260815-scroll-fix">
 <link rel="stylesheet" href="{{ asset('assets/css/talk-light.css') }}?v=20260802-split">
 @if($isCast)
 <link rel="stylesheet" href="{{ asset('assets/css/mypage.css') }}">
@@ -1243,26 +1243,42 @@
     //   - #talk-room-container は 100dvh でキーボード表示中は自動で縮む（レイアウト側）
     //   - JS では visualViewport の状態変化を .is-kbd-open クラスで反映し、
     //     padding など補助的な調整だけ行う（overlap を防ぐ）
+    //
+    //  BUG FIX: 以前は resize / scroll 両方で applyKbd を呼び、キーボード表示中は
+    //  問答無用で messages.scrollTop = scrollHeight を実行していた。
+    //  ・visualViewport.scroll は iOS Safari で pinch-zoom やアドレスバー変動、
+    //    メッセージ列内のバウンススクロールでも発火する
+    //  ・その度に「最下部にスナップ」してしまうため、ユーザーが履歴を遡ろうと
+    //    しても即座に下へ引き戻され「スクロール不能」に見えていた
+    //  対策:
+    //    - scroll イベントの購読を撤去（キーボード開閉は resize だけで足りる）
+    //    - スナップは「送信直後のように、ユーザーが元々最下部近くに居た時」
+    //      に限定する（履歴を読んでいる時は現在位置を維持）
     // ------------------------------------------------------------------
     if (inputArea && 'visualViewport' in window) {
         var vv = window.visualViewport;
+        var nearBottomForKbd = function () {
+            if (!messages) return true;
+            return messages.scrollHeight - messages.scrollTop - messages.clientHeight < 120;
+        };
         var applyKbd = function () {
             var kbdH = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
             // 40px 以下はアドレスバー変動等のノイズとして無視
             inputArea.classList.toggle('is-kbd-open', kbdH > 40);
             // メッセージエリアの余白を再計算（コンポーザ高さの変化を即反映）
+            var wasNearBottom = nearBottomForKbd();
             if (messages && inputArea) {
                 messages.style.setProperty('--talk-composer-h', inputArea.offsetHeight + 'px');
             }
-            // キーボード表示中は最下部までスクロールして「入力欄すぐ上」を維持
-            if (kbdH > 40 && messages) {
+            // キーボード出現時のみ「入力欄すぐ上」を維持。ただしユーザーが遡って
+            // 履歴を見ている最中は追従しない（スクロールを奪わない）。
+            if (kbdH > 40 && messages && wasNearBottom) {
                 requestAnimationFrame(function () {
                     messages.scrollTop = messages.scrollHeight;
                 });
             }
         };
         vv.addEventListener('resize', applyKbd);
-        vv.addEventListener('scroll', applyKbd);
         applyKbd();
     }
 })();

@@ -78,16 +78,6 @@
                          オーナーのみに制限。 --}}
                     <li><a href="{{ route('shop.mypage.staff.index') }}"><i class="fas fa-id-badge"></i> スタッフ管理</a></li>
                 @endif
-                @php $isThemeForcedDark = request()->cookie('theme_mode') === 'dark'; @endphp
-                <li>
-                    <button type="button" id="btn-theme-toggle"
-                            class="sidebar-theme-toggle"
-                            data-theme-mode="{{ $isThemeForcedDark ? 'dark' : 'light' }}"
-                            aria-label="{{ $isThemeForcedDark ? 'ライトモードに切り替え' : 'ダークモードに切り替え' }}">
-                        <i class="fas {{ $isThemeForcedDark ? 'fa-sun' : 'fa-moon' }}" aria-hidden="true"></i>
-                        <span id="theme-toggle-label">{{ $isThemeForcedDark ? 'ライトモードに切り替え' : 'ダークモードに切り替え' }}</span>
-                    </button>
-                </li>
             </ul>
         </div>
 

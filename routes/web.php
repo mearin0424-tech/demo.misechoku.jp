@@ -434,6 +434,10 @@ Route::prefix('notifications')->name('notifications.')->group(function () {
     Route::post('/{id}/read', [CommonNotification::class, 'markRead'])
         ->whereNumber('id')
         ->name('read');
+    // Server-side mark-read + redirect for anchor clicks (ensures read_at is written before navigation).
+    Route::get('/{id}/visit', [CommonNotification::class, 'visit'])
+        ->whereNumber('id')
+        ->name('visit');
     Route::post('/read-all', [CommonNotification::class, 'markAllRead'])->name('read-all');
 });
 

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth\Cast;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class LoginController extends Controller
@@ -41,9 +40,8 @@ class LoginController extends Controller
         }
 
         $request->session()->regenerate();
-        DB::table('casts')
-            ->where('id', auth()->guard('member')->id())
-            ->update(['last_login_at' => now(), 'updated_at' => now()]);
+        // last_login_at is updated centrally by App\Listeners\UpdateLastLoginAt
+        // via the Illuminate\Auth\Events\Login event fired by attempt().
 
         return redirect()
             ->route('cast.home')

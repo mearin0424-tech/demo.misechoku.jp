@@ -266,13 +266,26 @@
 
 </div>
 
-{{-- ライトボックス（共通） --}}
+{{-- ライトボックス：Swiper で複数画像の左右スワイプ／矢印切替に対応 --}}
+@if(count($profileImages) > 0)
 <div id="lightbox-overlay" class="lightbox-overlay" onclick="closeLightbox(event)">
-    <img id="lightbox-image" src="" alt="" class="lightbox-image">
+    <div class="swiper lightbox-swiper" onclick="event.stopPropagation()">
+        <div class="swiper-wrapper">
+            @foreach($profileImages as $i => $img)
+                <div class="swiper-slide"><img src="{{ $img }}" alt="" class="lightbox-image"></div>
+            @endforeach
+        </div>
+        @if(count($profileImages) > 1)
+            <div class="swiper-button-prev" aria-label="前の写真"></div>
+            <div class="swiper-button-next" aria-label="次の写真"></div>
+            <div class="swiper-pagination"></div>
+        @endif
+    </div>
     <button type="button" class="lightbox-close" aria-label="閉じる" onclick="closeLightbox(event)">
         <i class="fas fa-times"></i>
     </button>
 </div>
+@endif
 
 {{-- 画面下部固定の「トークする」バー（店舗→キャスト） --}}
 @php $fixedTalkCastId = (string) ($cast['id'] ?? $cast['cast_id'] ?? ''); @endphp

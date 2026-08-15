@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Common;
 use App\Http\Controllers\Controller;
 use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -30,6 +31,61 @@ class NotificationController extends Controller
             'success' => $ok,
             'unread_count' => $this->notifications->unreadCount($type, $userId),
         ]);
+    }
+
+    /**
+     * Mark a single notification as read then redirect to its destination URL.
+     * Guarantees notifications.read_at is updated before navigation completes,
+     * avoiding races caused by client-side sendBeacon on link click.
+     */
+    public function visit(Request $request, int $id): RedirectResponse
+    {
+        [$type, $userId] = $this->resolve();
+        if ($type === null) {
+            return redirect('/');
+        }
+
+        $notification = \App\Models\Notification::query()
+            ->forUser($type, $userId)
+            ->whereKey($id)
+            ->first();
+
+        if (!$notification) {
+            return redirect('/');
+        }
+
+        if ($notification->isUnread()) {
+            $notification->markRead();
+        }
+
+        return redirect($this->safeRedirectTarget($notification->url));
+    }
+
+    /**
+     * Restrict redirect target to same-origin URLs (relative path or matching host)
+     * to prevent open redirect via crafted notification.url values.
+     */
+    private function safeRedirectTarget(?string $url): string
+    {
+        $url = is_string($url) ? trim($url) : '';
+        if ($url === '') {
+            return '/';
+        }
+        if (str_starts_with($url, '/') && !str_starts_with($url, '//')) {
+            return $url;
+        }
+        $parsed = parse_url($url);
+        if (!is_array($parsed) || empty($parsed['host'])) {
+            return '/';
+        }
+        $appHost = parse_url(config('app.url', ''), PHP_URL_HOST);
+        if ($appHost && strcasecmp($parsed['host'], $appHost) === 0) {
+            return $url;
+        }
+        if (strcasecmp($parsed['host'], (string) request()->getHost()) === 0) {
+            return $url;
+        }
+        return '/';
     }
 
     /**

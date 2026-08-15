@@ -121,9 +121,16 @@
                             $color    = $item['color'] ?? 'muted';
                             $catLabel = $item['category_label'] ?? '';
                             $tag = $url ? 'a' : 'div';
+                            // Route unread anchor clicks through the server-side visit endpoint so
+                            // notifications.read_at is guaranteed to be written before navigation
+                            // (avoids sendBeacon races that leave rows unread).
+                            $hrefUrl = $url;
+                            if ($url && $itemId !== '' && $unread && Route::has('notifications.visit')) {
+                                $hrefUrl = route('notifications.visit', ['id' => $itemId]);
+                            }
                         @endphp
                         <{{ $tag }}
-                            @if($url) href="{{ $url }}" @endif
+                            @if($url) href="{{ $hrefUrl }}" @endif
                             class="notif-popup__item notif-popup__item--{{ $color }} {{ $unread ? 'is-unread' : '' }}"
                             data-notif-item
                             data-notif-id="{{ $itemId }}"

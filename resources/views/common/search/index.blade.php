@@ -7,6 +7,15 @@
 <link rel="stylesheet" href="{{ asset('assets/css/search.css') }}?v=20260802-split">
 <link rel="stylesheet" href="{{ asset('assets/css/search-location-bar.css') }}?v=20260808-footer-clear">
 <link rel="stylesheet" href="{{ asset('assets/css/sub-header.css') }}">
+<style>
+    /* SEARCH のタブ（検索 / 保存済み）：ラベル前のアイコン。文字と同じ色に追従させ、
+       僅かな右マージンだけ入れて、フォントサイズは 1em 相当で自然に馴染ませる */
+    .sub-header-wrapper .sub-header-tabs .tab-item .tab-item__icon {
+        margin-right: 6px;
+        font-size: 0.9em;
+        opacity: 0.95;
+    }
+</style>
 @endpush
 
 @section('content')
@@ -18,18 +27,19 @@
     $activeTab = $activeTab ?? 'pane-list';
     $searchTab = $searchTab ?? 'list';
 
-    // タブ：cast / shop とも「検索／キープ」。
+    // タブ：cast / shop とも「検索／保存済み（旧キープ）」。
     // AIコンシェルジュはサブヘッダーから外し、右下のオコジョ（character-guide）から遷移する。
     // キープリストは旧 KEEPS（フッターメニュー）から SEARCH 内へ移設。
+    // ラベルは「保存済み」に統一し、ブックマークアイコンを添えて保存物置き場だと直感的に伝える。
     if ($showAiTab) {
         $tabsForHeader = [
-            ['id' => 'pane-list', 'label' => '検索', 'url' => route('cast.search.index', ['tab' => 'list']), 'active' => $activeTab === 'pane-list'],
-            ['id' => 'pane-keep', 'label' => 'キープ', 'url' => route('cast.search.index', ['tab' => 'keep']), 'active' => $activeTab === 'pane-keep'],
+            ['id' => 'pane-list', 'label' => '検索', 'icon' => 'fas fa-magnifying-glass', 'url' => route('cast.search.index', ['tab' => 'list']), 'active' => $activeTab === 'pane-list'],
+            ['id' => 'pane-keep', 'label' => '保存済み', 'icon' => 'fas fa-bookmark', 'url' => route('cast.search.index', ['tab' => 'keep']), 'active' => $activeTab === 'pane-keep'],
         ];
     } else {
         $tabsForHeader = [
-            ['id' => 'pane-list', 'label' => '検索', 'url' => route('shop.search.index'), 'active' => $activeTab === 'pane-list'],
-            ['id' => 'pane-keep', 'label' => 'キープ', 'url' => route('shop.search.index', ['tab' => 'keep']), 'active' => $activeTab === 'pane-keep'],
+            ['id' => 'pane-list', 'label' => '検索', 'icon' => 'fas fa-magnifying-glass', 'url' => route('shop.search.index'), 'active' => $activeTab === 'pane-list'],
+            ['id' => 'pane-keep', 'label' => '保存済み', 'icon' => 'fas fa-bookmark', 'url' => route('shop.search.index', ['tab' => 'keep']), 'active' => $activeTab === 'pane-keep'],
         ];
     }
 
@@ -133,7 +143,7 @@
 @push('scripts')
 <script src="{{ asset('assets/js/sub-header.js') }}"></script>
 <script src="{{ asset('assets/js/search-detail.js') }}?v=20260720-range-fix"></script>
-<script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260720-keep-confirm"></script>
+<script src="{{ asset('assets/js/favorite-quick.js') }}?v=20260815-saved-copy"></script>
 <script>
 {{-- 上部検索バーの開閉：デフォルトは閉じ（HTML初期状態）→ タップで開閉するだけ。
      localStorage 保存はやめて、SEARCH を開くたびに常に閉じた状態からスタートさせる --}}
