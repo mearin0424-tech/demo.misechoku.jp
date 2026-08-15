@@ -2,32 +2,33 @@
 /**
  * config/const.php
  * サイト共通定数・設定ファイル
+ *
+ * Laravel's config loader re-includes every file under config/ on each
+ * application boot. Under PHPUnit multiple boots happen in one process,
+ * so bare define() would throw "Constant X already defined" on the
+ * second and later boots. Guard each define() with defined() to make
+ * the file idempotent. Behavior is unchanged in production (single boot).
  */
 
-// 開発・営業用モックモード (true: モック画像を使用, false: 本番画像を使用)
-define('MOCK_MODE', true);
+defined('MOCK_MODE') || define('MOCK_MODE', true);
 
-// サイト基本情報
-define('SITE_NAME', 'Shop Portal Site');
+defined('SITE_NAME') || define('SITE_NAME', 'Shop Portal Site');
 
-// 職種カテゴリ
-define('JOB_CATEGORIES', [
+defined('JOB_CATEGORIES') || define('JOB_CATEGORIES', [
     'waitress' => 'ウェイトレス',
     'kitchen'  => 'キッチン',
     'manager'  => 'マネージャー',
     'hall'     => 'ホールスタッフ'
 ]);
 
-// こだわり条件
-define('SHOP_FEATURES', [
+defined('SHOP_FEATURES') || define('SHOP_FEATURES', [
     'wifi'      => 'Wi-Fi完備',
     'smoking'   => '喫煙可',
     'card'      => 'カード決済OK',
     'parking'   => '駐車場あり'
 ]);
 
-// キャストタグ
-define('CAST_TAGS', [
+defined('CAST_TAGS') || define('CAST_TAGS', [
     'new'       => '新人',
     'experience'=> '経験者優遇',
     'weekend'   => '週末のみOK',

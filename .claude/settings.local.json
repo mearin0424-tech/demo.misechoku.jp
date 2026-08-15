@@ -115,7 +115,28 @@
       "Bash(php -l app/Http/Controllers/Casts/MypageController.php)",
       "Bash(php -l app/Http/Controllers/Shops/MypageController.php)",
       "Bash(php *)",
-      "Bash(Select-String -Pattern \"Compiled|INFO\")"
+      "Bash(Select-String -Pattern \"Compiled|INFO\")",
+      "Bash(composer test:prepare)",
+      "Bash(where composer *)",
+      "Read(//c/Users/Lenovo/**)",
+      "Read(//c/ProgramData/ComposerSetup/**)",
+      "Bash(\"/c/Users/Lenovo/.config/herd/bin/composer.bat\" --version)",
+      "Bash(\"/c/Users/Lenovo/.config/herd/bin/php.bat\" --version)",
+      "Bash(\"/c/Users/Lenovo/.config/herd/bin/php.bat\" -m)",
+      "Bash(\"/c/Users/Lenovo/.config/herd/bin/composer.bat\" install *)",
+      "Bash(\"/c/Users/Lenovo/.config/herd/bin/composer.bat\" update *)",
+      "Bash(\"/c/Users/Lenovo/.config/herd/bin/composer.bat\" config *)",
+      "Bash(\"/c/Users/Lenovo/.config/herd/bin/php.bat\" artisan *)",
+      "PowerShell(& \"C:\\\\Users\\\\Lenovo\\\\.config\\\\herd\\\\bin\\\\php.bat\" artisan package:discover --ansi 2>&1 | Select-Object -Last 20)",
+      "PowerShell(& \"C:\\\\Users\\\\Lenovo\\\\.config\\\\herd\\\\bin\\\\php.bat\" -r \"var_dump\\(is_writable\\('C:\\\\Users\\\\Lenovo\\\\OneDrive\\\\デスクトップ\\\\mearin0424-tech\\\\demo.misechoku.jp\\\\bootstrap\\\\cache'\\)\\);\")",
+      "PowerShell(& \"C:\\\\Users\\\\Lenovo\\\\.config\\\\herd\\\\bin\\\\php.bat\" -r \"var_dump\\(file_put_contents\\('C:\\\\Users\\\\Lenovo\\\\OneDrive\\\\デスクトップ\\\\mearin0424-tech\\\\demo.misechoku.jp\\\\bootstrap\\\\cache\\\\test_write.txt', 'test'\\)\\);\")",
+      "PowerShell(& \"C:\\\\Users\\\\Lenovo\\\\.config\\\\herd\\\\bin\\\\composer.bat\" test:prepare 2>&1 | Select-Object -Last 5)",
+      "PowerShell(& \"C:\\\\Users\\\\Lenovo\\\\.config\\\\herd\\\\bin\\\\php.bat\" vendor\\\\phpunit\\\\phpunit\\\\phpunit tests\\\\Feature\\\\Auth\\\\LastLoginAtTest.php --colors=never 2>&1 | Select-Object -Last 80)",
+      "PowerShell(& \"C:\\\\Users\\\\Lenovo\\\\.config\\\\herd\\\\bin\\\\php.bat\" vendor\\\\phpunit\\\\phpunit\\\\phpunit tests\\\\Feature\\\\Setting\\\\WithdrawFlowTest.php --colors=never 2>&1 | Select-Object -Last 30)",
+      "PowerShell(& \"C:\\\\Users\\\\Lenovo\\\\.config\\\\herd\\\\bin\\\\php.bat\" vendor\\\\phpunit\\\\phpunit\\\\phpunit tests\\\\Feature\\\\Setting\\\\WithdrawFlowTest.php --colors=never 2>&1 | Select-Object -First 50)",
+      "PowerShell(& \"C:\\\\Users\\\\Lenovo\\\\.config\\\\herd\\\\bin\\\\php.bat\" vendor\\\\phpunit\\\\phpunit\\\\phpunit tests\\\\Feature\\\\Auth\\\\LastLoginAtTest.php --colors=never 2>&1 | Select-Object -Last 60)",
+      "PowerShell(& \"C:\\\\Users\\\\Lenovo\\\\.config\\\\herd\\\\bin\\\\php.bat\" vendor\\\\phpunit\\\\phpunit\\\\phpunit tests\\\\Feature\\\\Auth\\\\LastLoginAtTest.php --colors=never 2>&1 | Select-Object -Last 20)",
+      "PowerShell(& \"C:\\\\Users\\\\Lenovo\\\\.config\\\\herd\\\\bin\\\\php.bat\" vendor\\\\phpunit\\\\phpunit\\\\phpunit tests\\\\Feature\\\\Auth\\\\LastLoginAtTest.php --colors=never --testdox 2>&1 | Select-Object -Last 30)"
     ]
   }
 }

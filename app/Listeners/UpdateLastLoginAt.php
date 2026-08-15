@@ -3,9 +3,9 @@
 namespace App\Listeners;
 
 use Illuminate\Auth\Events\Login;
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 /**
  * Update last_login_at on any successful authentication.
@@ -35,31 +35,38 @@ class UpdateLastLoginAt
 
     public function handle(Login $event): void
     {
-        $table = self::GUARD_TABLE_MAP[$event->guard] ?? null;
-        if ($table === null) {
-            return;
-        }
-
-        $userId = $event->user?->getAuthIdentifier();
-        if ($userId === null || $userId === '') {
-            return;
-        }
-
+        // The Login event is dispatched synchronously from SessionGuard::login(),
+        // so anything thrown here would bubble into the login flow and break
+        // authentication. Wrap the entire body in try/Throwable to guarantee
+        // that a failed audit write never blocks a successful login.
         try {
+            $table = self::GUARD_TABLE_MAP[$event->guard] ?? null;
+            if ($table === null) {
+                return;
+            }
+
+            $userId = $event->user?->getAuthIdentifier();
+            if ($userId === null || $userId === '') {
+                return;
+            }
+
             DB::table($table)
                 ->where('id', $userId)
                 ->update([
                     'last_login_at' => now(),
                     'updated_at'    => now(),
                 ]);
-        } catch (QueryException $e) {
-            // Do not block login on a timestamp write failure. Log and move on.
-            Log::warning('UpdateLastLoginAt failed', [
-                'guard' => $event->guard,
-                'table' => $table,
-                'user_id' => $userId,
-                'error' => $e->getMessage(),
-            ]);
+        } catch (Throwable $e) {
+            // Best-effort logging. Even Log::warning failures must not escape.
+            try {
+                Log::warning('UpdateLastLoginAt failed', [
+                    'guard'   => $event->guard ?? null,
+                    'user_id' => $event->user?->getAuthIdentifier(),
+                    'error'   => $e->getMessage(),
+                ]);
+            } catch (Throwable) {
+                // Swallow. Auth flow integrity outranks audit logging.
+            }
         }
     }
 }
